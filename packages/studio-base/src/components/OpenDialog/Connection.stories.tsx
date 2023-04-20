@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -61,23 +63,30 @@ const playerSelection: PlayerSelection = {
 
 const defaultProps: OpenDialogProps = { activeView: "connection", backdropAnimation: false };
 
-export const Light = (): JSX.Element => (
-  <PlayerSelectionContext.Provider value={playerSelection}>
-    <OpenDialog {...defaultProps} />
-  </PlayerSelectionContext.Provider>
-);
-Light.storyName = "Default (light)";
-Light.parameters = { colorScheme: "light" };
+export const Light: StoryObj = {
+  render: () => (
+    <PlayerSelectionContext.Provider value={playerSelection}>
+      <OpenDialog {...defaultProps} />
+    </PlayerSelectionContext.Provider>
+  ),
 
-export const LightChinese = Object.assign(Light.bind(undefined), {
-  storyName: "Default Chinese",
+  name: "Default (light)",
+  parameters: { colorScheme: "light" },
+};
+
+export const LightChinese: StoryObj = {
+  ...Light,
+  name: "Default Chinese",
   parameters: { forceLanguage: "zh" },
-});
+};
 
-export const Dark = (): JSX.Element => (
-  <PlayerSelectionContext.Provider value={playerSelection}>
-    <OpenDialog {...defaultProps} />
-  </PlayerSelectionContext.Provider>
-);
-Dark.storyName = "Default (dark)";
-Dark.parameters = { colorScheme: "dark" };
+export const Dark: StoryObj = {
+  render: () => (
+    <PlayerSelectionContext.Provider value={playerSelection}>
+      <OpenDialog {...defaultProps} />
+    </PlayerSelectionContext.Provider>
+  ),
+
+  name: "Default (dark)",
+  parameters: { colorScheme: "dark" },
+};

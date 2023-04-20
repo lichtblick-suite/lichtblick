@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story, StoryContext } from "@storybook/react";
+import { StoryFn, StoryContext, StoryObj } from "@storybook/react";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
@@ -12,7 +12,7 @@ export default {
   title: "panels/IndicatorLight",
   component: Indicator,
   decorators: [
-    (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
+    (StoryComponent: StoryFn, { parameters }: StoryContext): JSX.Element => {
       return (
         <PanelSetup fixture={parameters.panelSetup?.fixture}>
           <StoryComponent />
@@ -37,42 +37,48 @@ function makeFixture(value: boolean | number | bigint | string) {
   };
 }
 
-export const EmptyState = (): JSX.Element => {
-  return <Indicator />;
+export const EmptyState: StoryObj = {
+  render: () => {
+    return <Indicator />;
+  },
 };
 
-export const MissingValue = (): JSX.Element => {
-  return (
-    <Indicator
-      overrideConfig={{
-        path: "/data.value",
-        style: "bulb",
-        rules: [
-          { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
-          { operator: "=", rawValue: "true", color: "#dd00dd", label: "False" },
-        ],
-        fallbackColor: "#dddd00",
-        fallbackLabel: "Fallback",
-      }}
-    />
-  );
+export const MissingValue: StoryObj = {
+  render: () => {
+    return (
+      <Indicator
+        overrideConfig={{
+          path: "/data.value",
+          style: "bulb",
+          rules: [
+            { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
+            { operator: "=", rawValue: "true", color: "#dd00dd", label: "False" },
+          ],
+          fallbackColor: "#dddd00",
+          fallbackLabel: "Fallback",
+        }}
+      />
+    );
+  },
 };
 
-export const BackgroundStyle = (): JSX.Element => {
-  return (
-    <Indicator
-      overrideConfig={{
-        path: "/data.value",
-        style: "background",
-        rules: [
-          { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
-          { operator: "=", rawValue: "true", color: "#dd00dd", label: "False" },
-        ],
-        fallbackColor: "#dddd00",
-        fallbackLabel: "Fallback",
-      }}
-    />
-  );
+export const BackgroundStyle: StoryObj = {
+  render: () => {
+    return (
+      <Indicator
+        overrideConfig={{
+          path: "/data.value",
+          style: "background",
+          rules: [
+            { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
+            { operator: "=", rawValue: "true", color: "#dd00dd", label: "False" },
+          ],
+          fallbackColor: "#dddd00",
+          fallbackLabel: "Fallback",
+        }}
+      />
+    );
+  },
 };
 
 const BooleanStory = (): JSX.Element => {
@@ -91,25 +97,34 @@ const BooleanStory = (): JSX.Element => {
     />
   );
 };
-export const BooleanTrue = (): JSX.Element => <BooleanStory />;
-BooleanTrue.parameters = { panelSetup: { fixture: makeFixture(true) } };
-export const BooleanFalse = (): JSX.Element => <BooleanStory />;
-BooleanFalse.parameters = { panelSetup: { fixture: makeFixture(false) } };
 
-export const String = (): JSX.Element => {
-  return (
-    <Indicator
-      overrideConfig={{
-        path: "/data.value",
-        style: "bulb",
-        rules: [{ operator: "=", rawValue: "hello", color: "#00dd00", label: "Hello" }],
-        fallbackColor: "#dddd00",
-        fallbackLabel: "Fallback",
-      }}
-    />
-  );
+export const BooleanTrue: StoryObj = {
+  render: () => <BooleanStory />,
+  parameters: { panelSetup: { fixture: makeFixture(true) } },
 };
-String.parameters = { panelSetup: { fixture: makeFixture("hello") } };
+
+export const BooleanFalse: StoryObj = {
+  render: () => <BooleanStory />,
+  parameters: { panelSetup: { fixture: makeFixture(false) } },
+};
+
+export const String: StoryObj = {
+  render: function Story() {
+    return (
+      <Indicator
+        overrideConfig={{
+          path: "/data.value",
+          style: "bulb",
+          rules: [{ operator: "=", rawValue: "hello", color: "#00dd00", label: "Hello" }],
+          fallbackColor: "#dddd00",
+          fallbackLabel: "Fallback",
+        }}
+      />
+    );
+  },
+
+  parameters: { panelSetup: { fixture: makeFixture("hello") } },
+};
 
 const NumberStory = (): JSX.Element => {
   return (
@@ -128,51 +143,63 @@ const NumberStory = (): JSX.Element => {
     />
   );
 };
-export const NumberNegative = (): JSX.Element => <NumberStory />;
-NumberNegative.parameters = { panelSetup: { fixture: makeFixture(-1) } };
-export const NumberZero = (): JSX.Element => <NumberStory />;
-NumberZero.parameters = { panelSetup: { fixture: makeFixture(0) } };
-export const NumberPositive = (): JSX.Element => <NumberStory />;
-NumberPositive.parameters = { panelSetup: { fixture: makeFixture(1) } };
 
-export const MessagePathWithFilter = (): JSX.Element => {
-  return (
-    <Indicator
-      overrideConfig={{
-        path: `/data{id=="b"}.value`,
-        style: "bulb",
-        rules: [
-          { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
-          { operator: "=", rawValue: "false", color: "#dd00dd", label: "False" },
-        ],
-        fallbackColor: "#dddd00",
-        fallbackLabel: "Fallback",
-      }}
-    />
-  );
+export const NumberNegative: StoryObj = {
+  render: () => <NumberStory />,
+  parameters: { panelSetup: { fixture: makeFixture(-1) } },
 };
-MessagePathWithFilter.parameters = {
-  panelSetup: {
-    fixture: {
-      topics: [{ name: "/data", datatype: "foo_msgs/Bar" }],
-      frame: {
-        "/data": [
-          {
-            topic: "/data",
-            receiveTime: { sec: 123, nsec: 456 },
-            message: { id: "a", value: false },
-          },
-          {
-            topic: "/data",
-            receiveTime: { sec: 123, nsec: 456 },
-            message: { id: "b", value: true },
-          },
-          {
-            topic: "/data",
-            receiveTime: { sec: 123, nsec: 456 },
-            message: { id: "c", value: false },
-          },
-        ],
+
+export const NumberZero: StoryObj = {
+  render: () => <NumberStory />,
+  parameters: { panelSetup: { fixture: makeFixture(0) } },
+};
+
+export const NumberPositive: StoryObj = {
+  render: () => <NumberStory />,
+  parameters: { panelSetup: { fixture: makeFixture(1) } },
+};
+
+export const MessagePathWithFilter: StoryObj = {
+  render: function Story() {
+    return (
+      <Indicator
+        overrideConfig={{
+          path: `/data{id=="b"}.value`,
+          style: "bulb",
+          rules: [
+            { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
+            { operator: "=", rawValue: "false", color: "#dd00dd", label: "False" },
+          ],
+          fallbackColor: "#dddd00",
+          fallbackLabel: "Fallback",
+        }}
+      />
+    );
+  },
+
+  parameters: {
+    panelSetup: {
+      fixture: {
+        topics: [{ name: "/data", datatype: "foo_msgs/Bar" }],
+        frame: {
+          "/data": [
+            {
+              topic: "/data",
+              receiveTime: { sec: 123, nsec: 456 },
+              message: { id: "a", value: false },
+            },
+            {
+              topic: "/data",
+              receiveTime: { sec: 123, nsec: 456 },
+              message: { id: "b", value: true },
+            },
+            {
+              topic: "/data",
+              receiveTime: { sec: 123, nsec: 456 },
+              message: { id: "c", value: false },
+            },
+          ],
+        },
       },
     },
   },

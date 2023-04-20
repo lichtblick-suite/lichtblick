@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
 import * as THREE from "three";
 import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry";
@@ -319,114 +320,117 @@ function makeStoryScene({
   };
 }
 
-BasicEntities.parameters = { colorScheme: "light", chromatic: { delay: 100 } };
-export function BasicEntities(): JSX.Element {
-  const topics: Topic[] = [
-    { name: "transforms", schemaName: "foxglove.FrameTransform" },
-    { name: "scene1", schemaName: "foxglove.SceneUpdate" },
-    { name: "scene2", schemaName: "foxglove.SceneUpdate" },
-    { name: "scene3", schemaName: "foxglove.SceneUpdate" },
-  ];
+export const BasicEntities: StoryObj = {
+  render: function Story() {
+    const topics: Topic[] = [
+      { name: "transforms", schemaName: "foxglove.FrameTransform" },
+      { name: "scene1", schemaName: "foxglove.SceneUpdate" },
+      { name: "scene2", schemaName: "foxglove.SceneUpdate" },
+      { name: "scene3", schemaName: "foxglove.SceneUpdate" },
+    ];
 
-  const scene1 = makeStoryScene({ topic: "scene1", frameId: "frame1" });
-  const scene2 = makeStoryScene({ topic: "scene2", frameId: "frame2" });
-  const scene3 = makeStoryScene({ topic: "scene3", frameId: "frame3" });
+    const scene1 = makeStoryScene({ topic: "scene1", frameId: "frame1" });
+    const scene2 = makeStoryScene({ topic: "scene2", frameId: "frame2" });
+    const scene3 = makeStoryScene({ topic: "scene3", frameId: "frame3" });
 
-  const tf1: MessageEvent<FrameTransform> = {
-    topic: "transforms",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      timestamp: { sec: 0, nsec: 0 },
-      parent_frame_id: "map",
-      child_frame_id: "root",
-      translation: { x: 1e7, y: 0, z: 0 },
-      rotation: QUAT_IDENTITY,
-    },
-    schemaName: "foxglove.FrameTransform",
-    sizeInBytes: 0,
-  };
-  const tf2: MessageEvent<FrameTransform> = {
-    topic: "transforms",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      timestamp: { sec: 0, nsec: 0 },
-      parent_frame_id: "root",
-      child_frame_id: "frame1",
-      translation: { x: -5, y: -4, z: 0 },
-      rotation: QUAT_IDENTITY,
-    },
-    schemaName: "foxglove.FrameTransform",
-    sizeInBytes: 0,
-  };
-  const tf3: MessageEvent<FrameTransform> = {
-    topic: "transforms",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      timestamp: { sec: -1, nsec: 0 },
-      parent_frame_id: "root",
-      child_frame_id: "frame2",
-      translation: { x: -1, y: -4, z: 0 },
-      rotation: QUAT_IDENTITY,
-    },
-    schemaName: "foxglove.FrameTransform",
-    sizeInBytes: 0,
-  };
-  const tf4: MessageEvent<FrameTransform> = {
-    topic: "transforms",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      timestamp: { sec: -1, nsec: 0 },
-      parent_frame_id: "root",
-      child_frame_id: "frame3",
-      translation: { x: 3, y: -4, z: 0 },
-      rotation: QUAT_IDENTITY,
-    },
-    schemaName: "foxglove.FrameTransform",
-    sizeInBytes: 0,
-  };
+    const tf1: MessageEvent<FrameTransform> = {
+      topic: "transforms",
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 0, nsec: 0 },
+        parent_frame_id: "map",
+        child_frame_id: "root",
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+      schemaName: "foxglove.FrameTransform",
+      sizeInBytes: 0,
+    };
+    const tf2: MessageEvent<FrameTransform> = {
+      topic: "transforms",
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 0, nsec: 0 },
+        parent_frame_id: "root",
+        child_frame_id: "frame1",
+        translation: { x: -5, y: -4, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+      schemaName: "foxglove.FrameTransform",
+      sizeInBytes: 0,
+    };
+    const tf3: MessageEvent<FrameTransform> = {
+      topic: "transforms",
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: -1, nsec: 0 },
+        parent_frame_id: "root",
+        child_frame_id: "frame2",
+        translation: { x: -1, y: -4, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+      schemaName: "foxglove.FrameTransform",
+      sizeInBytes: 0,
+    };
+    const tf4: MessageEvent<FrameTransform> = {
+      topic: "transforms",
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: -1, nsec: 0 },
+        parent_frame_id: "root",
+        child_frame_id: "frame3",
+        translation: { x: 3, y: -4, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+      schemaName: "foxglove.FrameTransform",
+      sizeInBytes: 0,
+    };
 
-  const fixture = {
-    topics,
-    frame: {
-      transforms: [tf1, tf2, tf3, tf4],
-      scene1: [scene1],
-      scene2: [scene2],
-      scene3: [scene3],
-    },
-    capabilities: [],
-    activeData: {
-      currentTime: { sec: 0, nsec: 0 },
-    },
-  };
+    const fixture = {
+      topics,
+      frame: {
+        transforms: [tf1, tf2, tf3, tf4],
+        scene1: [scene1],
+        scene2: [scene2],
+        scene3: [scene3],
+      },
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    };
 
-  return (
-    <PanelSetup fixture={fixture}>
-      <ThreeDeePanel
-        overrideConfig={{
-          ...ThreeDeePanel.defaultConfig,
-          followTf: "root",
-          layers: {
-            grid: { layerId: "foxglove.Grid" },
-          },
-          cameraState: {
-            distance: 14,
-            perspective: true,
-            phi: 40,
-            targetOffset: [0, 0, 0],
-            thetaOffset: rad2deg(-0.25),
-            fovy: 45,
-            near: 0.01,
-            far: 5000,
-            target: [0, 0, 0],
-            targetOrientation: [0, 0, 0, 1],
-          },
-          topics: {
-            scene1: { visible: true },
-            scene2: { visible: true, color: "#6324c7ff" },
-            scene3: { visible: true, showOutlines: false },
-          },
-        }}
-      />
-    </PanelSetup>
-  );
-}
+    return (
+      <PanelSetup fixture={fixture}>
+        <ThreeDeePanel
+          overrideConfig={{
+            ...ThreeDeePanel.defaultConfig,
+            followTf: "root",
+            layers: {
+              grid: { layerId: "foxglove.Grid" },
+            },
+            cameraState: {
+              distance: 14,
+              perspective: true,
+              phi: 40,
+              targetOffset: [0, 0, 0],
+              thetaOffset: rad2deg(-0.25),
+              fovy: 45,
+              near: 0.01,
+              far: 5000,
+              target: [0, 0, 0],
+              targetOrientation: [0, 0, 0, 1],
+            },
+            topics: {
+              scene1: { visible: true },
+              scene2: { visible: true, color: "#6324c7ff" },
+              scene3: { visible: true, showOutlines: false },
+            },
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+
+  parameters: { colorScheme: "light", chromatic: { delay: 100 } },
+};

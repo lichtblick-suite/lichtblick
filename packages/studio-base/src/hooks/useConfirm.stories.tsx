@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { StoryObj } from "@storybook/react";
 import { useLayoutEffect } from "react";
 
 import { useConfirm } from "./useConfirm";
@@ -20,49 +21,55 @@ export default {
   parameters: { colorScheme: "dark" },
 };
 
-export const Defaults = (): unknown => {
-  const [confirm, confirmModal] = useConfirm();
+export const Defaults: StoryObj = {
+  render: function Story() {
+    const [confirm, confirmModal] = useConfirm();
 
-  useLayoutEffect(() => {
-    void confirm({
-      title: "Example title",
-    });
-  }, [confirm]);
+    useLayoutEffect(() => {
+      void confirm({
+        title: "Example title",
+      });
+    }, [confirm]);
 
-  return <>{confirmModal}</>;
+    return <>{confirmModal}</>;
+  },
 };
 
-export const Primary = (): unknown => {
-  const [confirm, confirmModal] = useConfirm();
+export const Primary: StoryObj = {
+  render: function Story() {
+    const [confirm, confirmModal] = useConfirm();
 
-  useLayoutEffect(() => {
-    void confirm({
-      title: "Example title",
-      prompt: "Example prompt",
-      variant: "primary",
-      ok: "Custom OK",
-      cancel: "Continue anyway",
-    });
-  }, [confirm]);
+    useLayoutEffect(() => {
+      void confirm({
+        title: "Example title",
+        prompt: "Example prompt",
+        variant: "primary",
+        ok: "Custom OK",
+        cancel: "Continue anyway",
+      });
+    }, [confirm]);
 
-  return <>{confirmModal}</>;
+    return <>{confirmModal}</>;
+  },
 };
-export const PrimaryLight = Primary.bind(undefined);
-(PrimaryLight as any).parameters = { colorScheme: "light" };
 
-export const Danger = (): unknown => {
-  const [confirm, confirmModal] = useConfirm();
+export const PrimaryLight: StoryObj = { ...Primary, parameters: { colorScheme: "light" } };
 
-  useLayoutEffect(() => {
-    void confirm({
-      title: "Example title",
-      prompt: "Example prompt",
-      variant: "danger",
-      ok: "Destroy",
-    });
-  }, [confirm]);
+export const Danger: StoryObj = {
+  render: function Story() {
+    const [confirm, confirmModal] = useConfirm();
 
-  return <>{confirmModal}</>;
+    useLayoutEffect(() => {
+      void confirm({
+        title: "Example title",
+        prompt: "Example prompt",
+        variant: "danger",
+        ok: "Destroy",
+      });
+    }, [confirm]);
+
+    return <>{confirmModal}</>;
+  },
 };
-export const DangerLight = Danger.bind(undefined);
-(DangerLight as any).parameters = { colorScheme: "light" };
+
+export const DangerLight: StoryObj = { ...Danger, parameters: { colorScheme: "light" } };

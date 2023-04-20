@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import { HelpMenu } from "./HelpMenu";
 import { StorybookDecorator } from "./StorybookDecorator.stories";
 
@@ -11,18 +13,20 @@ export default {
   decorators: [StorybookDecorator],
 };
 
-export function Default(): JSX.Element {
-  return (
-    <>
-      <HelpMenu
-        open
-        anchorReference="anchorPosition"
-        anchorPosition={{ left: 0, top: 0 }}
-        disablePortal
-        handleClose={() => {
-          // no-op
-        }}
-      />
-    </>
-  );
-}
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <>
+        <HelpMenu
+          open
+          anchorReference="anchorPosition"
+          anchorPosition={{ left: 0, top: 0 }}
+          disablePortal
+          handleClose={() => {
+            // no-op
+          }}
+        />
+      </>
+    );
+  },
+};

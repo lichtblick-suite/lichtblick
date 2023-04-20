@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { action } from "@storybook/addon-actions";
+import { StoryObj } from "@storybook/react";
 
 import { UnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
@@ -31,49 +32,62 @@ const dummyLayout: Layout = {
   syncInfo: undefined,
 };
 
-export function Default(): JSX.Element {
-  return <UnsavedChangesPrompt isOnline layout={dummyLayout} onComplete={action("onComplete")} />;
-}
-export const DefaultLight = Object.assign(Default.bind(undefined), {
-  parameters: { colorScheme: "light" },
-});
+export const Default: StoryObj = {
+  render: () => {
+    return <UnsavedChangesPrompt isOnline layout={dummyLayout} onComplete={action("onComplete")} />;
+  },
+};
 
-export function Offline(): JSX.Element {
-  return (
-    <UnsavedChangesPrompt isOnline={false} layout={dummyLayout} onComplete={action("onComplete")} />
-  );
-}
+export const DefaultLight: StoryObj = { ...Default, parameters: { colorScheme: "light" } };
 
-export function Overwrite(): JSX.Element {
-  return (
-    <UnsavedChangesPrompt
-      isOnline
-      layout={dummyLayout}
-      onComplete={action("onComplete")}
-      defaultSelectedKey="overwrite"
-    />
-  );
-}
+export const Offline: StoryObj = {
+  render: () => {
+    return (
+      <UnsavedChangesPrompt
+        isOnline={false}
+        layout={dummyLayout}
+        onComplete={action("onComplete")}
+      />
+    );
+  },
+};
 
-export function MakePersonal(): JSX.Element {
-  return (
-    <UnsavedChangesPrompt
-      isOnline
-      layout={dummyLayout}
-      onComplete={action("onComplete")}
-      defaultSelectedKey="makePersonal"
-    />
-  );
-}
+export const Overwrite: StoryObj = {
+  render: () => {
+    return (
+      <UnsavedChangesPrompt
+        isOnline
+        layout={dummyLayout}
+        onComplete={action("onComplete")}
+        defaultSelectedKey="overwrite"
+      />
+    );
+  },
+};
 
-export function MakePersonalWithEmptyField(): JSX.Element {
-  return (
-    <UnsavedChangesPrompt
-      isOnline
-      layout={dummyLayout}
-      onComplete={action("onComplete")}
-      defaultSelectedKey="makePersonal"
-      defaultPersonalCopyName=""
-    />
-  );
-}
+export const MakePersonal: StoryObj = {
+  render: () => {
+    return (
+      <UnsavedChangesPrompt
+        isOnline
+        layout={dummyLayout}
+        onComplete={action("onComplete")}
+        defaultSelectedKey="makePersonal"
+      />
+    );
+  },
+};
+
+export const MakePersonalWithEmptyField: StoryObj = {
+  render: () => {
+    return (
+      <UnsavedChangesPrompt
+        isOnline
+        layout={dummyLayout}
+        onComplete={action("onComplete")}
+        defaultSelectedKey="makePersonal"
+        defaultPersonalCopyName=""
+      />
+    );
+  },
+};

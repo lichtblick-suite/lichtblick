@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { action } from "@storybook/addon-actions";
+import { StoryObj } from "@storybook/react";
 
 import DirectionalPad from "./DirectionalPad";
 
@@ -11,10 +12,14 @@ export default {
   component: DirectionalPad,
 };
 
-export const Basic = (): JSX.Element => {
-  return <DirectionalPad onAction={action("click")} />;
+export const Basic: StoryObj = {
+  render: () => {
+    return <DirectionalPad onAction={action("click")} />;
+  },
 };
 
-export const Disabled = (): JSX.Element => {
-  return <DirectionalPad disabled onAction={action("click")} />;
+export const Disabled: StoryObj = {
+  render: () => {
+    return <DirectionalPad disabled onAction={action("click")} />;
+  },
 };

@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -96,15 +97,27 @@ function Story({
   );
 }
 
-export const Unselected = (): JSX.Element => <Story />;
-export const ASelected = (): JSX.Element => <Story defaultSelectedKey="a" />;
-export const BSelected = (): JSX.Element => <Story defaultSelectedKey="b" />;
+export const Unselected: StoryObj = {
+  render: () => <Story />,
+};
 
-export const ClickToSelect = (): JSX.Element => <Story clickKey="a" />;
-ClickToSelect.parameters = { colorScheme: "dark" };
-export const ClickToDeselect = (): JSX.Element => <Story defaultSelectedKey="a" clickKey="a" />;
-ClickToDeselect.parameters = { colorScheme: "dark" };
+export const ASelected: StoryObj = { render: () => <Story defaultSelectedKey="a" /> };
+export const BSelected: StoryObj = { render: () => <Story defaultSelectedKey="b" /> };
 
-export const OverflowUnselected = (): JSX.Element => <Story height={200} />;
-export const OverflowCSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="c" />;
-export const OverflowBSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="b" />;
+export const ClickToSelect: StoryObj = {
+  render: () => <Story clickKey="a" />,
+  parameters: { colorScheme: "dark" },
+};
+
+export const ClickToDeselect: StoryObj = {
+  render: () => <Story defaultSelectedKey="a" clickKey="a" />,
+  parameters: { colorScheme: "dark" },
+};
+
+export const OverflowUnselected: StoryObj = { render: () => <Story height={200} /> };
+export const OverflowCSelected: StoryObj = {
+  render: () => <Story height={200} defaultSelectedKey="c" />,
+};
+export const OverflowBSelected: StoryObj = {
+  render: () => <Story height={200} defaultSelectedKey="b" />,
+};

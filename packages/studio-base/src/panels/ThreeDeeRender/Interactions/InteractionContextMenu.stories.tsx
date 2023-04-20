@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Box } from "@mui/material";
+import { StoryObj } from "@storybook/react";
 
 import { InteractionContextMenu } from "./InteractionContextMenu";
 
@@ -65,22 +66,26 @@ export default {
   component: InteractionContextMenu,
 };
 
-export function Light(): JSX.Element {
-  return (
-    <Box height="100vh" width="100vh" bgcolor="background.default">
-      <InteractionContextMenu onClose={() => {}} {...sharedProps} />
-    </Box>
-  );
-}
+export const Light: StoryObj = {
+  render: function Story() {
+    return (
+      <Box height="100vh" width="100vh" bgcolor="background.default">
+        <InteractionContextMenu onClose={() => {}} {...sharedProps} />
+      </Box>
+    );
+  },
 
-Light.parameters = { colorScheme: "light" };
+  parameters: { colorScheme: "light" },
+};
 
-export function Dark(): JSX.Element {
-  return (
-    <Box height="100vh" width="100vh" bgcolor="background.default">
-      <InteractionContextMenu onClose={() => {}} {...sharedProps} />
-    </Box>
-  );
-}
+export const Dark: StoryObj = {
+  render: function Story() {
+    return (
+      <Box height="100vh" width="100vh" bgcolor="background.default">
+        <InteractionContextMenu onClose={() => {}} {...sharedProps} />
+      </Box>
+    );
+  },
 
-Dark.parameters = { colorScheme: "dark" };
+  parameters: { colorScheme: "dark" },
+};

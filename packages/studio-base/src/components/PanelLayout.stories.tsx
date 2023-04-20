@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Story } from "@storybook/react";
+import { StoryFn, StoryObj } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -27,12 +27,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import PanelLayout from "./PanelLayout";
 
-async function openPanelMenu() {
+async function openPanelMenu(): Promise<void> {
   const buttons = await screen.findAllByTestId("panel-menu");
   fireEvent.click(buttons[0]!);
 }
 
-async function goFullScreen() {
+async function goFullScreen(): Promise<void> {
   await openPanelMenu();
   fireEvent.click(screen.getAllByTestId("panel-menu-fullscreen")[0]!);
 }
@@ -90,13 +90,13 @@ class MockPanelCatalog implements PanelCatalog {
 export default {
   title: "components/PanelLayout",
   decorators: [
-    (StoryFn: Story): JSX.Element => {
+    (Wrapped: StoryFn): JSX.Element => {
       const storage = new MockLayoutStorage(LayoutManager.LOCAL_STORAGE_NAMESPACE, []);
 
       return (
         <LayoutStorageContext.Provider value={storage}>
           <LayoutManagerProvider>
-            <StoryFn />
+            <Wrapped />
           </LayoutManagerProvider>
         </LayoutStorageContext.Provider>
       );
@@ -104,114 +104,136 @@ export default {
   ],
 };
 
-export const PanelNotFound = (): JSX.Element => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelSetup
-        fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
-        omitDragAndDrop
-      >
-        <PanelLayout />
-      </PanelSetup>
-    </DndProvider>
-  );
-};
-PanelNotFound.parameters = { colorScheme: "dark" };
-PanelNotFound.play = openPanelMenu;
+export const PanelNotFound: StoryObj = {
+  render: function Story() {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelSetup
+          fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
+          omitDragAndDrop
+        >
+          <PanelLayout />
+        </PanelSetup>
+      </DndProvider>
+    );
+  },
 
-export const PanelNotFoundLight = Object.assign(PanelNotFound.bind(undefined), {
+  parameters: { colorScheme: "dark" },
+  play: openPanelMenu,
+};
+
+export const PanelNotFoundLight: StoryObj = {
+  ...PanelNotFound,
   parameters: { colorScheme: "light" },
-});
-PanelNotFoundLight.play = openPanelMenu;
+  play: openPanelMenu,
+};
 
-export const PanelWithError = (): JSX.Element => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelSetup
-        panelCatalog={new MockPanelCatalog()}
-        fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
-        omitDragAndDrop
-      >
+export const PanelWithError: StoryObj = {
+  render: () => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelSetup
+          panelCatalog={new MockPanelCatalog()}
+          fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
+          omitDragAndDrop
+        >
+          <PanelLayout />
+        </PanelSetup>
+      </DndProvider>
+    );
+  },
+};
+
+export const RemoveUnknownPanel: StoryObj = {
+  render: function Story() {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelSetup
+          fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
+          omitDragAndDrop
+        >
+          <PanelLayout />
+        </PanelSetup>
+      </DndProvider>
+    );
+  },
+
+  play: async () => {
+    (await screen.findAllByTestId("panel-menu")).forEach((button) => fireEvent.click(button));
+    (await screen.findAllByTestId("panel-menu-remove")).forEach((button) =>
+      fireEvent.click(button),
+    );
+  },
+};
+
+export const EmptyLayout: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={{ layout: undefined }}>
         <PanelLayout />
       </PanelSetup>
-    </DndProvider>
-  );
+    );
+  },
 };
 
-export const RemoveUnknownPanel = (): JSX.Element => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelSetup
-        fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
-        omitDragAndDrop
-      >
+export const EmptyLayoutChinese: StoryObj = {
+  render: function Story() {
+    return (
+      <PanelSetup fixture={{ layout: undefined }}>
         <PanelLayout />
       </PanelSetup>
-    </DndProvider>
-  );
-};
-RemoveUnknownPanel.play = async () => {
-  (await screen.findAllByTestId("panel-menu")).forEach((button) => fireEvent.click(button));
-  (await screen.findAllByTestId("panel-menu-remove")).forEach((button) => fireEvent.click(button));
+    );
+  },
+
+  parameters: { forceLanguage: "zh" },
 };
 
-export const EmptyLayout = (): JSX.Element => {
-  return (
-    <PanelSetup fixture={{ layout: undefined }}>
-      <PanelLayout />
-    </PanelSetup>
-  );
+export const PanelLoading: StoryObj = {
+  render: () => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelSetup
+          panelCatalog={new MockPanelCatalog()}
+          fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample1!4co6n9d" }}
+          omitDragAndDrop
+        >
+          <PanelLayout />
+        </PanelSetup>
+      </DndProvider>
+    );
+  },
 };
 
-export const EmptyLayoutChinese = (): JSX.Element => {
-  return (
-    <PanelSetup fixture={{ layout: undefined }}>
-      <PanelLayout />
-    </PanelSetup>
-  );
-};
-EmptyLayoutChinese.parameters = { forceLanguage: "zh" };
+export const FullScreen: StoryObj = {
+  render: function Story() {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelSetup
+          panelCatalog={new MockPanelCatalog()}
+          fixture={{
+            topics: [],
+            datatypes: new Map(),
+            frame: {},
+            layout: { first: "Sample3!a", second: "Sample3!b", direction: "row" },
+            savedProps: {
+              "Sample3!a": { x: 1 },
+              "Sample3!b": { x: 2 },
+            },
+          }}
+          omitDragAndDrop
+        >
+          <PanelLayout />
+        </PanelSetup>
+      </DndProvider>
+    );
+  },
 
-export const PanelLoading = (): JSX.Element => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelSetup
-        panelCatalog={new MockPanelCatalog()}
-        fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample1!4co6n9d" }}
-        omitDragAndDrop
-      >
-        <PanelLayout />
-      </PanelSetup>
-    </DndProvider>
-  );
+  parameters: { colorScheme: "dark" },
+  play: goFullScreen,
 };
 
-export const FullScreen = (): JSX.Element => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelSetup
-        panelCatalog={new MockPanelCatalog()}
-        fixture={{
-          topics: [],
-          datatypes: new Map(),
-          frame: {},
-          layout: { first: "Sample3!a", second: "Sample3!b", direction: "row" },
-          savedProps: {
-            "Sample3!a": { x: 1 },
-            "Sample3!b": { x: 2 },
-          },
-        }}
-        omitDragAndDrop
-      >
-        <PanelLayout />
-      </PanelSetup>
-    </DndProvider>
-  );
-};
-FullScreen.parameters = { colorScheme: "dark" };
-FullScreen.play = goFullScreen;
-
-export const FullScreenLight = Object.assign(FullScreen.bind(undefined), {
+export const FullScreenLight: StoryObj = {
+  ...FullScreen,
   parameters: { colorScheme: "light" },
-});
-FullScreenLight.play = goFullScreen;
+  play: goFullScreen,
+};

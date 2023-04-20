@@ -2749,6 +2749,7 @@ __metadata:
     "@mui/icons-material": 5.11.16
     "@mui/material": 5.12.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
+    "@storybook/react": 7.0.4
     "@types/copy-webpack-plugin": 10.1.0
     clean-webpack-plugin: 4.0.0
     copy-webpack-plugin: 11.0.0
@@ -4496,12 +4497,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/client-logger@npm:7.0.4, @storybook/client-logger@npm:^7.0.0-beta.0 || ^7.0.0-rc.0 || ^7.0.0":
+"@storybook/client-logger@npm:7.0.4":
   version: 7.0.4
   resolution: "@storybook/client-logger@npm:7.0.4"
   dependencies:
     "@storybook/global": ^5.0.0
   checksum: 608d9aa75509fcd5780103681acca88c7808ab8c435a1685a99f9465c1ec7ac1f3a94d4403392a8bfa5e574a3d4e7e71d48e26e69b070e2c1262e8c0c6c9b054
+  languageName: node
+  linkType: hard
+
+"@storybook/client-logger@npm:^7.0.0-beta.0 || ^7.0.0-rc.0 || ^7.0.0":
+  version: 7.0.6
+  resolution: "@storybook/client-logger@npm:7.0.6"
+  dependencies:
+    "@storybook/global": ^5.0.0
+  checksum: 44aba82da1281cab536d6d75497f0fd775fda40175c1acdca6ab446412147462298d9834e20aa485c40d02ec5ac5e93dde213d906ac8e2194bf334bf5affe01a
   languageName: node
   linkType: hard
 

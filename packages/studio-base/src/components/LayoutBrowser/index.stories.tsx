@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story, StoryContext, StoryFn } from "@storybook/react";
+import { StoryObj, StoryContext, StoryFn } from "@storybook/react";
 import { fireEvent, screen, userEvent, within } from "@storybook/testing-library";
 import { useMemo } from "react";
 
@@ -105,7 +105,7 @@ async function selectAllAction() {
   layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
 }
 
-function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
+function WithSetup(Child: StoryFn, ctx: StoryContext): JSX.Element {
   const storage = useMemo(
     () =>
       new MockLayoutStorage(
@@ -146,247 +146,316 @@ export default {
   decorators: [WithSetup],
 };
 
-export function Empty(): JSX.Element {
-  return <LayoutBrowser />;
-}
-Empty.parameters = { mockLayouts: [] };
+export const Empty: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
 
-export function LayoutList(): JSX.Element {
-  return <LayoutBrowser />;
-}
-
-export const MultiSelect: StoryFn = (): JSX.Element => {
-  return <LayoutBrowser />;
-};
-MultiSelect.parameters = {
-  colorScheme: "dark",
-  mockLayouts: Array(8)
-    .fill(undefined)
-    .map((_, idx) => ({
-      id: `layout-${idx + 1}`,
-      name: `Layout ${idx + 1}`,
-      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
-    })),
-};
-MultiSelect.play = async ({ canvasElement }) => {
-  const layouts = await within(canvasElement).findAllByTestId("layout-list-item");
-
-  userEvent.click(layouts[0]!);
-
-  userEvent.click(layouts[1]!, { metaKey: true });
-  userEvent.click(layouts[3]!, { metaKey: true });
-
-  userEvent.click(layouts[6]!, { shiftKey: true });
-
-  userEvent.click(layouts[4]!, { metaKey: true });
+  parameters: { mockLayouts: [] },
 };
 
-export function MultiDelete(): JSX.Element {
-  return <LayoutBrowser />;
-}
-MultiDelete.parameters = { colorScheme: "dark" };
-MultiDelete.play = async () => {
-  await doMultiAction("Delete");
-
-  const confirmButton = await screen.findByText("Delete");
-  fireEvent.click(confirmButton);
+export const LayoutList: StoryObj = {
+  render: () => {
+    return <LayoutBrowser />;
+  },
 };
 
-export function MultiDuplicate(): JSX.Element {
-  return <LayoutBrowser />;
-}
-MultiDuplicate.parameters = {
-  colorScheme: "dark",
-  mockLayouts: [exampleCurrentLayout, makeUnsavedLayout(1), shortLayout],
-};
-MultiDuplicate.play = async () => {
-  await doMultiAction("Duplicate");
+export const MultiSelect: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: {
+    colorScheme: "dark",
+    mockLayouts: Array(8)
+      .fill(undefined)
+      .map((_, idx) => ({
+        id: `layout-${idx + 1}`,
+        name: `Layout ${idx + 1}`,
+        baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
+      })),
+  },
+
+  play: async ({ canvasElement }) => {
+    const layouts = await within(canvasElement).findAllByTestId("layout-list-item");
+
+    userEvent.click(layouts[0]!);
+
+    userEvent.click(layouts[1]!, { metaKey: true });
+    userEvent.click(layouts[3]!, { metaKey: true });
+
+    userEvent.click(layouts[6]!, { shiftKey: true });
+
+    userEvent.click(layouts[4]!, { metaKey: true });
+  },
 };
 
-export function MultiRevert(): JSX.Element {
-  return <LayoutBrowser />;
-}
-MultiRevert.parameters = {
-  colorScheme: "dark",
-  mockLayouts: [makeUnsavedLayout(1), makeUnsavedLayout(2), makeUnsavedLayout(3)],
-};
-MultiRevert.play = async () => {
-  await doMultiAction("Revert");
+export const MultiDelete: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
 
-  const revertButton = await screen.findByText("Discard changes");
-  fireEvent.click(revertButton);
-};
+  parameters: { colorScheme: "dark" },
 
-export function MultiSave(): JSX.Element {
-  return <LayoutBrowser />;
-}
-MultiSave.parameters = {
-  colorScheme: "dark",
-  mockLayouts: [makeUnsavedLayout(1), makeUnsavedLayout(2), makeUnsavedLayout(3)],
-};
-MultiSave.play = async () => {
-  await doMultiAction("Save changes");
+  play: async () => {
+    await doMultiAction("Delete");
+
+    const confirmButton = await screen.findByText("Delete");
+    fireEvent.click(confirmButton);
+  },
 };
 
-TruncatedLayoutName.parameters = {
-  mockLayouts: [
-    {
-      id: "not-current",
-      name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
-    },
-  ],
-};
-export function TruncatedLayoutName(): JSX.Element {
-  return <LayoutBrowser />;
-}
+export const MultiDuplicate: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
 
-TruncatedLayoutNameSelected.parameters = {
-  mockLayouts: [
-    {
-      id: "test-id",
-      name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
-    },
-  ],
-};
-export function TruncatedLayoutNameSelected(): JSX.Element {
-  return <LayoutBrowser />;
-}
+  parameters: {
+    colorScheme: "dark",
+    mockLayouts: [exampleCurrentLayout, makeUnsavedLayout(1), shortLayout],
+  },
 
-export function AddLayout(_args: unknown): JSX.Element {
-  return (
-    <LayoutBrowser
-      currentDateForStorybook={useMemo(() => new Date("2021-06-16T04:28:33.549Z"), [])}
-    />
-  );
-}
-AddLayout.parameters = { colorScheme: "dark" };
-AddLayout.play = async () => {
-  const button = await screen.findByTestId("add-layout");
-  fireEvent.click(button);
+  play: async () => {
+    await doMultiAction("Duplicate");
+  },
 };
 
-export function MenuOpen(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-MenuOpen.parameters = { colorScheme: "dark" };
-MenuOpen.play = async () => {
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[1]) {
-    fireEvent.click(actions[1]);
-  }
+export const MultiRevert: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: {
+    colorScheme: "dark",
+    mockLayouts: [makeUnsavedLayout(1), makeUnsavedLayout(2), makeUnsavedLayout(3)],
+  },
+
+  play: async () => {
+    await doMultiAction("Revert");
+
+    const revertButton = await screen.findByText("Discard changes");
+    fireEvent.click(revertButton);
+  },
 };
 
-export const MenuOpenLight = MenuOpen.bind(undefined);
-MenuOpenLight.parameters = { colorScheme: "light" };
-MenuOpenLight.play = async () => {
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[1]) {
-    fireEvent.click(actions[1]);
-  }
+export const MultiSave: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: {
+    colorScheme: "dark",
+    mockLayouts: [makeUnsavedLayout(1), makeUnsavedLayout(2), makeUnsavedLayout(3)],
+  },
+
+  play: async () => {
+    await doMultiAction("Save changes");
+  },
 };
 
-export function EditingName(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-EditingName.parameters = { colorScheme: "dark" };
-EditingName.play = async () => {
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[1]) {
-    fireEvent.click(actions[1]);
-  }
-  const button = await screen.findByText("Rename");
-  fireEvent.click(button);
+export const TruncatedLayoutName: StoryObj = {
+  render: () => {
+    return <LayoutBrowser />;
+  },
+  parameters: {
+    mockLayouts: [
+      {
+        id: "not-current",
+        name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
+      },
+    ],
+  },
 };
 
-export function CancelRenameWithEscape(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-CancelRenameWithEscape.parameters = { colorScheme: "dark" };
-CancelRenameWithEscape.play = async () => {
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[1]) {
-    fireEvent.click(actions[1]);
-  }
-  const button = await screen.findByText("Rename");
-  fireEvent.click(button);
-  fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+export const TruncatedLayoutNameSelected: StoryObj = {
+  render: () => {
+    return <LayoutBrowser />;
+  },
+  parameters: {
+    mockLayouts: [
+      {
+        id: "test-id",
+        name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
+      },
+    ],
+  },
 };
 
-export function CommitRenameWithTab(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-CommitRenameWithTab.parameters = { colorScheme: "dark" };
-CommitRenameWithTab.play = async () => {
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[1]) {
-    fireEvent.click(actions[1]);
-  }
-  const button = await screen.findByText("Rename");
-  fireEvent.click(button);
-  fireEvent.change(document.activeElement!, { target: { value: "New name" } });
-  fireEvent.focusOut(document.activeElement!);
+export const AddLayout: StoryObj = {
+  render: function Story() {
+    return (
+      <LayoutBrowser
+        currentDateForStorybook={useMemo(() => new Date("2021-06-16T04:28:33.549Z"), [])}
+      />
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const button = await screen.findByTestId("add-layout");
+    fireEvent.click(button);
+  },
 };
 
-export function Duplicate(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-Duplicate.parameters = { colorScheme: "dark" };
-Duplicate.play = async () => {
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[1]) {
-    fireEvent.click(actions[1]);
-  }
-  const button = await screen.findByText("Duplicate");
-  fireEvent.click(button);
+export const MenuOpen: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const actions = await screen.findAllByTestId("layout-actions");
+    if (actions[1]) {
+      fireEvent.click(actions[1]);
+    }
+  },
 };
 
-export function DeleteLayout(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-DeleteLayout.parameters = { colorScheme: "dark" };
-DeleteLayout.play = async () => await deleteLayoutInteraction(0);
-
-export function DeleteSelectedLayout(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-DeleteSelectedLayout.play = async () => {
-  const layouts = await screen.findAllByTestId("layout-list-item");
-  if (layouts[1]) {
-    fireEvent.click(layouts[1]);
-  }
-  await deleteLayoutInteraction(1);
-  if (layouts[0]) {
-    fireEvent.click(layouts[0]);
-  }
+export const MenuOpenLight: StoryObj = {
+  ...MenuOpen,
+  parameters: { colorScheme: "light" },
+  play: async () => {
+    const actions = await screen.findAllByTestId("layout-actions");
+    if (actions[1]) {
+      fireEvent.click(actions[1]);
+    }
+  },
 };
-DeleteSelectedLayout.parameters = { colorScheme: "dark" };
 
-export function DeleteLastLayout(_args: unknown): JSX.Element {
-  return <LayoutBrowser />;
-}
-DeleteLastLayout.parameters = {
-  mockLayouts: [exampleCurrentLayout],
-  colorScheme: "dark",
+export const EditingName: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const actions = await screen.findAllByTestId("layout-actions");
+    if (actions[1]) {
+      fireEvent.click(actions[1]);
+    }
+    const button = await screen.findByText("Rename");
+    fireEvent.click(button);
+  },
 };
-DeleteLastLayout.play = async () => await deleteLayoutInteraction(0);
 
-export function SignInPrompt(_args: unknown): JSX.Element {
-  return (
-    <CurrentUserContext.Provider
-      value={{
-        currentUser: undefined,
-        signIn: () => undefined,
-        signOut: async () => undefined,
-      }}
-    >
-      <WorkspaceContextProvider>
-        <LayoutBrowser />
-      </WorkspaceContextProvider>
-    </CurrentUserContext.Provider>
-  );
-}
-SignInPrompt.parameters = {
-  colorScheme: "light",
+export const CancelRenameWithEscape: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const actions = await screen.findAllByTestId("layout-actions");
+    if (actions[1]) {
+      fireEvent.click(actions[1]);
+    }
+    const button = await screen.findByText("Rename");
+    fireEvent.click(button);
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+  },
+};
+
+export const CommitRenameWithTab: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const actions = await screen.findAllByTestId("layout-actions");
+    if (actions[1]) {
+      fireEvent.click(actions[1]);
+    }
+    const button = await screen.findByText("Rename");
+    fireEvent.click(button);
+    fireEvent.change(document.activeElement!, { target: { value: "New name" } });
+    fireEvent.focusOut(document.activeElement!);
+  },
+};
+
+export const Duplicate: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const actions = await screen.findAllByTestId("layout-actions");
+    if (actions[1]) {
+      fireEvent.click(actions[1]);
+    }
+    const button = await screen.findByText("Duplicate");
+    fireEvent.click(button);
+  },
+};
+
+export const DeleteLayout: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: { colorScheme: "dark" },
+  play: async () => await deleteLayoutInteraction(0),
+};
+
+export const DeleteSelectedLayout: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  play: async () => {
+    const layouts = await screen.findAllByTestId("layout-list-item");
+    if (layouts[1]) {
+      fireEvent.click(layouts[1]);
+    }
+    await deleteLayoutInteraction(1);
+    if (layouts[0]) {
+      fireEvent.click(layouts[0]);
+    }
+  },
+
+  parameters: { colorScheme: "dark" },
+};
+
+export const DeleteLastLayout: StoryObj = {
+  render: function Story() {
+    return <LayoutBrowser />;
+  },
+
+  parameters: {
+    mockLayouts: [exampleCurrentLayout],
+    colorScheme: "dark",
+  },
+
+  play: async () => await deleteLayoutInteraction(0),
+};
+
+export const SignInPrompt: StoryObj = {
+  render: function Story() {
+    return (
+      <CurrentUserContext.Provider
+        value={{
+          currentUser: undefined,
+          signIn: () => undefined,
+          signOut: async () => undefined,
+        }}
+      >
+        <WorkspaceContextProvider>
+          <LayoutBrowser />
+        </WorkspaceContextProvider>
+      </CurrentUserContext.Provider>
+    );
+  },
+
+  parameters: {
+    colorScheme: "light",
+  },
 };

@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import DiagnosticSummary from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary";
 import {
   DiagnosticStatusArrayMsg,
@@ -49,126 +51,144 @@ const fixture: Fixture = {
   },
 };
 
-export function Empty(): JSX.Element {
-  return (
-    <PanelSetup fixture={{ ...fixture, frame: {} }}>
-      <DiagnosticSummary />
-    </PanelSetup>
-  );
-}
+export const Empty: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={{ ...fixture, frame: {} }}>
+        <DiagnosticSummary />
+      </PanelSetup>
+    );
+  },
+};
 
-export function Basic(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary />
-    </PanelSetup>
-  );
-}
+export const Basic: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary />
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithSettings(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture} includeSettings>
-      <DiagnosticSummary />
-    </PanelSetup>
-  );
-}
+export const WithSettings: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture} includeSettings>
+        <DiagnosticSummary />
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithPinnedNodes(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary
-        overrideConfig={{
-          minLevel: 0,
-          pinnedIds: [
-            getDiagnosticId("hardware_id1", "name1"),
-            getDiagnosticId("hardware_id3/filter", "name3"),
-          ],
-          topicToRender: "/diagnostics",
-          hardwareIdFilter: "",
-        }}
-      />
-    </PanelSetup>
-  );
-}
+export const WithPinnedNodes: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 0,
+            pinnedIds: [
+              getDiagnosticId("hardware_id1", "name1"),
+              getDiagnosticId("hardware_id3/filter", "name3"),
+            ],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "",
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithPinnedNodesAndFilter(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary
-        overrideConfig={{
-          minLevel: 2,
-          pinnedIds: [
-            getDiagnosticId("hardware_id1", "name1"),
-            getDiagnosticId("hardware_id3/filter", "name3"),
-          ],
-          topicToRender: "/diagnostics",
-          hardwareIdFilter: "",
-        }}
-      />
-    </PanelSetup>
-  );
-}
+export const WithPinnedNodesAndFilter: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 2,
+            pinnedIds: [
+              getDiagnosticId("hardware_id1", "name1"),
+              getDiagnosticId("hardware_id3/filter", "name3"),
+            ],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "",
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithoutSorting(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary
-        overrideConfig={{
-          minLevel: 0,
-          pinnedIds: [],
-          topicToRender: "/diagnostics",
-          hardwareIdFilter: "",
-          sortByLevel: false,
-        }}
-      />
-    </PanelSetup>
-  );
-}
+export const WithoutSorting: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 0,
+            pinnedIds: [],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "",
+            sortByLevel: false,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
 
-export function FilteredByHardwareId(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary
-        overrideConfig={{
-          minLevel: 0,
-          pinnedIds: [],
-          topicToRender: "/diagnostics",
-          hardwareIdFilter: "filter",
-          sortByLevel: false,
-        }}
-      />
-    </PanelSetup>
-  );
-}
+export const FilteredByHardwareId: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 0,
+            pinnedIds: [],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "filter",
+            sortByLevel: false,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
 
-export function FilteredByLevel(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary
-        overrideConfig={{
-          minLevel: 2,
-          pinnedIds: [],
-          topicToRender: "/diagnostics",
-          hardwareIdFilter: "",
-          sortByLevel: false,
-        }}
-      />
-    </PanelSetup>
-  );
-}
+export const FilteredByLevel: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 2,
+            pinnedIds: [],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "",
+            sortByLevel: false,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
 
-export function FilteredByHardwareIdAndLevel(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <DiagnosticSummary
-        overrideConfig={{
-          minLevel: 2,
-          pinnedIds: [],
-          topicToRender: "/diagnostics",
-          hardwareIdFilter: "filter",
-          sortByLevel: false,
-        }}
-      />
-    </PanelSetup>
-  );
-}
+export const FilteredByHardwareIdAndLevel: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 2,
+            pinnedIds: [],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "filter",
+            sortByLevel: false,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};

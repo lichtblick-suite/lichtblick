@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import { ParameterValue } from "@foxglove/studio";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
@@ -50,26 +52,32 @@ export default {
   component: Parameters,
 };
 
-export function Default(): JSX.Element {
-  return (
-    <PanelSetup fixture={getFixture({ getParameters: false, setParameters: false })}>
-      <Parameters />
-    </PanelSetup>
-  );
-}
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={getFixture({ getParameters: false, setParameters: false })}>
+        <Parameters />
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithParameters(): JSX.Element {
-  return (
-    <PanelSetup fixture={getFixture({ getParameters: true, setParameters: false })}>
-      <Parameters />
-    </PanelSetup>
-  );
-}
+export const WithParameters: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={getFixture({ getParameters: true, setParameters: false })}>
+        <Parameters />
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithEditableParameters(): JSX.Element {
-  return (
-    <PanelSetup fixture={getFixture({ getParameters: true, setParameters: true })}>
-      <Parameters />
-    </PanelSetup>
-  );
-}
+export const WithEditableParameters: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={getFixture({ getParameters: true, setParameters: true })}>
+        <Parameters />
+      </PanelSetup>
+    );
+  },
+};

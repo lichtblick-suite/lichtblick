@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
-import { Story } from "@storybook/react";
+import { StoryObj, StoryFn } from "@storybook/react";
 import { useEffect } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -11,7 +11,7 @@ import { PlaybackControlsTooltipContent } from "@foxglove/studio-base/components
 import { useTimelineInteractionState } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 
-function Wrapper(StoryFn: Story): JSX.Element {
+function Wrapper(Wrapped: StoryFn): JSX.Element {
   const theme = useTheme();
   return (
     <TimelineInteractionStateProvider>
@@ -23,7 +23,7 @@ function Wrapper(StoryFn: Story): JSX.Element {
             backgroundColor: theme.palette.background.paper,
           }}
         >
-          <StoryFn />
+          <Wrapped />
         </div>
       </MockMessagePipelineProvider>
     </TimelineInteractionStateProvider>
@@ -36,40 +36,44 @@ export default {
   decorators: [Wrapper],
 };
 
-export function Default(): JSX.Element {
-  return <PlaybackControlsTooltipContent stamp={{ sec: 1, nsec: 1 }} />;
-}
+export const Default: StoryObj = {
+  render: () => {
+    return <PlaybackControlsTooltipContent stamp={{ sec: 1, nsec: 1 }} />;
+  },
+};
 
-export function WithEvents(): JSX.Element {
-  const setEvents = useTimelineInteractionState((store) => store.setEventsAtHoverValue);
+export const WithEvents: StoryObj = {
+  render: function Story() {
+    const setEvents = useTimelineInteractionState((store) => store.setEventsAtHoverValue);
 
-  useEffect(() => {
-    setEvents([
-      {
-        event: {
-          createdAt: "1",
-          id: "1",
-          deviceId: "dev1",
-          durationNanos: "1",
-          endTime: { sec: 1, nsec: 1 },
-          endTimeInSeconds: 1,
-          metadata: {
-            "meta 1": "value 1",
-            "meta 2": "value 2",
-            "long event metadata key that might overflow":
-              "long event metadata value that might also overflow",
+    useEffect(() => {
+      setEvents([
+        {
+          event: {
+            createdAt: "1",
+            id: "1",
+            deviceId: "dev1",
+            durationNanos: "1",
+            endTime: { sec: 1, nsec: 1 },
+            endTimeInSeconds: 1,
+            metadata: {
+              "meta 1": "value 1",
+              "meta 2": "value 2",
+              "long event metadata key that might overflow":
+                "long event metadata value that might also overflow",
+            },
+            startTime: { sec: 0, nsec: 0 },
+            startTimeInSeconds: 1,
+            timestampNanos: "1",
+            updatedAt: "1",
           },
-          startTime: { sec: 0, nsec: 0 },
-          startTimeInSeconds: 1,
-          timestampNanos: "1",
-          updatedAt: "1",
+          startPosition: 0,
+          endPosition: 0.1,
+          secondsSinceStart: 0,
         },
-        startPosition: 0,
-        endPosition: 0.1,
-        secondsSinceStart: 0,
-      },
-    ]);
-  }, [setEvents]);
+      ]);
+    }, [setEvents]);
 
-  return <PlaybackControlsTooltipContent stamp={{ sec: 1, nsec: 1 }} />;
-}
+    return <PlaybackControlsTooltipContent stamp={{ sec: 1, nsec: 1 }} />;
+  },
+};

@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Tooltip } from "@mui/material";
+import { StoryObj } from "@storybook/react";
 
 import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
 
@@ -22,150 +23,164 @@ export default {
   component: TimeBasedChartTooltipContent,
 };
 
-export function SingleItemSingleDataset(): JSX.Element {
-  const data: TimeBasedChartTooltipData = {
-    x: 0,
-    y: 0,
-    path: "/some/topic.path",
-    value: 3,
-    constantName: "ACTIVE",
-  };
-  return (
-    <Tooltip
-      open
-      title={<TimeBasedChartTooltipContent multiDataset={false} content={[data]} />}
-      placement="top"
-      arrow
-      PopperProps={{
-        anchorEl: {
-          getBoundingClientRect: () => {
-            return new DOMRect(200, 100, 0, 0);
-          },
-        },
-      }}
-    >
-      <div style={{ width: "100%", height: "100%" }} />
-    </Tooltip>
-  );
-}
-SingleItemSingleDataset.parameters = { colorScheme: "dark" };
-
-export const SingleItemSingleDatasetLight = Object.assign(SingleItemSingleDataset.bind(undefined), {
-  parameters: { colorScheme: "light" },
-});
-
-export function SingleItemMultiDataset(): JSX.Element {
-  const data: TimeBasedChartTooltipData = {
-    x: 0,
-    y: 0,
-    path: "/some/topic.path",
-    value: 3,
-    constantName: "ACTIVE",
-  };
-  return (
-    <Tooltip
-      open
-      title={<TimeBasedChartTooltipContent multiDataset={true} content={[data]} />}
-      placement="top"
-      arrow
-      PopperProps={{
-        anchorEl: {
-          getBoundingClientRect: () => {
-            return new DOMRect(200, 100, 0, 0);
-          },
-        },
-      }}
-    >
-      <div style={{ width: "100%", height: "100%" }} />
-    </Tooltip>
-  );
-}
-SingleItemMultiDataset.parameters = { colorScheme: "dark" };
-
-export const SingleItemMultiDatasetLight = Object.assign(SingleItemMultiDataset.bind(undefined), {
-  parameters: { colorScheme: "light" },
-});
-
-export function MultipleItemsSingleDataset(): JSX.Element {
-  const data: TimeBasedChartTooltipData = {
-    x: 0,
-    y: 0,
-    path: "/some/topic.path",
-    value: 3,
-    constantName: "ACTIVE",
-  };
-  return (
-    <Tooltip
-      open
-      title={<TimeBasedChartTooltipContent multiDataset={false} content={[data, data]} />}
-      placement="top"
-      arrow
-      PopperProps={{
-        anchorEl: {
-          getBoundingClientRect: () => {
-            return new DOMRect(200, 100, 0, 0);
-          },
-        },
-      }}
-    >
-      <div style={{ width: "100%", height: "100%" }} />
-    </Tooltip>
-  );
-}
-MultipleItemsSingleDataset.parameters = { colorScheme: "dark" };
-
-export const MultipleItemsSingleDatasetLight = Object.assign(
-  MultipleItemsSingleDataset.bind(undefined),
-  { parameters: { colorScheme: "light" } },
-);
-
-export function MultipleItemsMultipleDataset(): JSX.Element {
-  const data: TimeBasedChartTooltipData[] = [
-    {
-      datasetIndex: 0,
+export const SingleItemSingleDataset: StoryObj = {
+  render: function Story() {
+    const data: TimeBasedChartTooltipData = {
       x: 0,
       y: 0,
       path: "/some/topic.path",
       value: 3,
       constantName: "ACTIVE",
-    },
-    {
-      datasetIndex: 1,
+    };
+    return (
+      <Tooltip
+        open
+        title={<TimeBasedChartTooltipContent multiDataset={false} content={[data]} />}
+        placement="top"
+        arrow
+        PopperProps={{
+          anchorEl: {
+            getBoundingClientRect: () => {
+              return new DOMRect(200, 100, 0, 0);
+            },
+          },
+        }}
+      >
+        <div style={{ width: "100%", height: "100%" }} />
+      </Tooltip>
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+};
+
+export const SingleItemSingleDatasetLight: StoryObj = {
+  ...SingleItemSingleDataset,
+  parameters: { colorScheme: "light" },
+};
+
+export const SingleItemMultiDataset: StoryObj = {
+  render: function Story() {
+    const data: TimeBasedChartTooltipData = {
       x: 0,
       y: 0,
-      path: "/other/topic.path",
-      value: 4,
+      path: "/some/topic.path",
+      value: 3,
       constantName: "ACTIVE",
-    },
-  ];
-  return (
-    <Tooltip
-      open
-      title={
-        <TimeBasedChartTooltipContent
-          multiDataset={true}
-          content={data}
-          colorsByDatasetIndex={{ "0": "chartreuse", "1": "yellow" }}
-          labelsByDatasetIndex={{ "1": "-*- Custom Label -*-" }}
-        />
-      }
-      placement="top"
-      arrow
-      PopperProps={{
-        anchorEl: {
-          getBoundingClientRect: () => {
-            return new DOMRect(200, 100, 0, 0);
+    };
+    return (
+      <Tooltip
+        open
+        title={<TimeBasedChartTooltipContent multiDataset={true} content={[data]} />}
+        placement="top"
+        arrow
+        PopperProps={{
+          anchorEl: {
+            getBoundingClientRect: () => {
+              return new DOMRect(200, 100, 0, 0);
+            },
           },
-        },
-      }}
-    >
-      <div style={{ width: "100%", height: "100%" }} />
-    </Tooltip>
-  );
-}
-MultipleItemsMultipleDataset.parameters = { colorScheme: "dark" };
+        }}
+      >
+        <div style={{ width: "100%", height: "100%" }} />
+      </Tooltip>
+    );
+  },
 
-export const MultipleItemsMultiDatasetLight = Object.assign(
-  MultipleItemsMultipleDataset.bind(undefined),
-  { parameters: { colorScheme: "light" } },
-);
+  parameters: { colorScheme: "dark" },
+};
+
+export const SingleItemMultiDatasetLight: StoryObj = {
+  ...SingleItemMultiDataset,
+  parameters: { colorScheme: "light" },
+};
+
+export const MultipleItemsSingleDataset: StoryObj = {
+  render: function Story() {
+    const data: TimeBasedChartTooltipData = {
+      x: 0,
+      y: 0,
+      path: "/some/topic.path",
+      value: 3,
+      constantName: "ACTIVE",
+    };
+    return (
+      <Tooltip
+        open
+        title={<TimeBasedChartTooltipContent multiDataset={false} content={[data, data]} />}
+        placement="top"
+        arrow
+        PopperProps={{
+          anchorEl: {
+            getBoundingClientRect: () => {
+              return new DOMRect(200, 100, 0, 0);
+            },
+          },
+        }}
+      >
+        <div style={{ width: "100%", height: "100%" }} />
+      </Tooltip>
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+};
+
+export const MultipleItemsSingleDatasetLight: StoryObj = {
+  ...MultipleItemsSingleDataset,
+  parameters: { colorScheme: "light" },
+};
+
+export const MultipleItemsMultipleDataset: StoryObj = {
+  render: function Story() {
+    const data: TimeBasedChartTooltipData[] = [
+      {
+        datasetIndex: 0,
+        x: 0,
+        y: 0,
+        path: "/some/topic.path",
+        value: 3,
+        constantName: "ACTIVE",
+      },
+      {
+        datasetIndex: 1,
+        x: 0,
+        y: 0,
+        path: "/other/topic.path",
+        value: 4,
+        constantName: "ACTIVE",
+      },
+    ];
+    return (
+      <Tooltip
+        open
+        title={
+          <TimeBasedChartTooltipContent
+            multiDataset={true}
+            content={data}
+            colorsByDatasetIndex={{ "0": "chartreuse", "1": "yellow" }}
+            labelsByDatasetIndex={{ "1": "-*- Custom Label -*-" }}
+          />
+        }
+        placement="top"
+        arrow
+        PopperProps={{
+          anchorEl: {
+            getBoundingClientRect: () => {
+              return new DOMRect(200, 100, 0, 0);
+            },
+          },
+        }}
+      >
+        <div style={{ width: "100%", height: "100%" }} />
+      </Tooltip>
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+};
+
+export const MultipleItemsMultiDatasetLight: StoryObj = {
+  ...MultipleItemsMultipleDataset,
+  parameters: { colorScheme: "light" },
+};

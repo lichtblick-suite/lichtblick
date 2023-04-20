@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryFn } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 
 import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Sparkline";
 
@@ -34,22 +34,26 @@ export default {
   title: "components/Sparkline",
 };
 
-export const Standard: StoryFn = () => {
-  return (
-    <div style={{ padding: 8 }}>
-      <Sparkline {...props} />
-    </div>
-  );
+export const Standard: StoryObj = {
+  render: () => {
+    return (
+      <div style={{ padding: 8 }}>
+        <Sparkline {...props} />
+      </div>
+    );
+  },
+
+  name: "standard",
 };
 
-Standard.storyName = "standard";
+export const WithExplicitMaximumOf200: StoryObj = {
+  render: () => {
+    return (
+      <div style={{ padding: 8 }}>
+        <Sparkline {...props} maximum={200} />
+      </div>
+    );
+  },
 
-export const WithExplicitMaximumOf200: StoryFn = () => {
-  return (
-    <div style={{ padding: 8 }}>
-      <Sparkline {...props} maximum={200} />
-    </div>
-  );
+  name: "with explicit maximum of 200",
 };
-
-WithExplicitMaximumOf200.storyName = "with explicit maximum of 200";

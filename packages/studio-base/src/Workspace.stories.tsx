@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { StoryObj, StoryFn } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
@@ -29,13 +29,13 @@ export default {
     colorScheme: "light",
   },
   decorators: [
-    (StoryFn: Story): JSX.Element => {
+    (Wrapped: StoryFn): JSX.Element => {
       const storage = new MockLayoutStorage(LayoutManager.LOCAL_STORAGE_NAMESPACE, []);
 
       return (
         <LayoutStorageContext.Provider value={storage}>
           <LayoutManagerProvider>
-            <StoryFn />
+            <Wrapped />
           </LayoutManagerProvider>
         </LayoutStorageContext.Provider>
       );
@@ -71,26 +71,28 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-export function Basic(): JSX.Element {
-  const providers = [
-    /* eslint-disable react/jsx-key */
-    <PanelSetup>{undefined}</PanelSetup>,
-    <EventsProvider />,
-    <PanelCatalogContext.Provider value={new MockPanelCatalog()} />,
-    <MockCurrentLayoutProvider initialState={{ layout: "Fake" }} />,
-    /* eslint-enable react/jsx-key */
-  ];
-  return (
-    <MultiProvider providers={providers}>
-      <Workspace />
-    </MultiProvider>
-  );
-}
+export const Basic: StoryObj = {
+  render: () => {
+    const providers = [
+      /* eslint-disable react/jsx-key */
+      <PanelSetup>{undefined}</PanelSetup>,
+      <EventsProvider />,
+      <PanelCatalogContext.Provider value={new MockPanelCatalog()} />,
+      <MockCurrentLayoutProvider initialState={{ layout: "Fake" }} />,
+      /* eslint-enable react/jsx-key */
+    ];
+    return (
+      <MultiProvider providers={providers}>
+        <Workspace />
+      </MultiProvider>
+    );
+  },
+};
 
-export const FullscreenPanel = Basic.bind({});
-Object.assign(FullscreenPanel, {
+export const FullscreenPanel: StoryObj = {
+  ...Basic,
   play: async () => {
     fireEvent.click(await screen.findByTestId("panel-menu"));
     fireEvent.click(await screen.findByTestId("panel-menu-fullscreen"));
   },
-});
+};

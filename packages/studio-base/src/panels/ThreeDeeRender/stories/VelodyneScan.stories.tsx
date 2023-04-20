@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { VelodyneScan } from "@foxglove/studio-base/types/Messages";
@@ -1289,59 +1291,63 @@ const velodyneScan: VelodyneScan = {
   ],
 };
 
-export function VelodyneScan_Intensity(): JSX.Element {
-  const topics: Topic[] = [{ name: "/velodyne_packets", schemaName: "velodyne_msgs/VelodyneScan" }];
+export const VelodyneScan_Intensity: StoryObj = {
+  render: function Story() {
+    const topics: Topic[] = [
+      { name: "/velodyne_packets", schemaName: "velodyne_msgs/VelodyneScan" },
+    ];
 
-  const fixture = useDelayedFixture({
-    topics,
-    frame: {
-      "/velodyne_packets": [
-        {
-          topic: "/velodyne_packets",
-          schemaName: "velodyne_msgs/VelodyneScan",
-          message: velodyneScan,
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-        },
-      ],
-    },
-    capabilities: [],
-    activeData: {
-      currentTime: { sec: 0, nsec: 0 },
-    },
-  });
+    const fixture = useDelayedFixture({
+      topics,
+      frame: {
+        "/velodyne_packets": [
+          {
+            topic: "/velodyne_packets",
+            schemaName: "velodyne_msgs/VelodyneScan",
+            message: velodyneScan,
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+          },
+        ],
+      },
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    });
 
-  return (
-    <PanelSetup fixture={fixture}>
-      <ThreeDeePanel
-        overrideConfig={{
-          followTf: velodyneScan.header.frame_id,
-          topics: {
-            "/velodyne_packets": {
-              visible: true,
-              pointSize: 5,
-              colorMode: "colormap",
-              colorMap: "turbo",
-              colorField: "intensity",
+    return (
+      <PanelSetup fixture={fixture}>
+        <ThreeDeePanel
+          overrideConfig={{
+            followTf: velodyneScan.header.frame_id,
+            topics: {
+              "/velodyne_packets": {
+                visible: true,
+                pointSize: 5,
+                colorMode: "colormap",
+                colorMap: "turbo",
+                colorField: "intensity",
+              },
             },
-          },
-          layers: {
-            grid: { layerId: "foxglove.Grid" },
-          },
-          cameraState: {
-            distance: 13.5,
-            perspective: true,
-            phi: rad2deg(1.22),
-            targetOffset: [0.25, -0.5, 0],
-            thetaOffset: rad2deg(-0.33),
-            fovy: rad2deg(0.75),
-            near: 0.01,
-            far: 5000,
-            target: [0, 0, 0],
-            targetOrientation: [0, 0, 0, 1],
-          },
-        }}
-      />
-    </PanelSetup>
-  );
-}
+            layers: {
+              grid: { layerId: "foxglove.Grid" },
+            },
+            cameraState: {
+              distance: 13.5,
+              perspective: true,
+              phi: rad2deg(1.22),
+              targetOffset: [0.25, -0.5, 0],
+              thetaOffset: rad2deg(-0.33),
+              fovy: rad2deg(0.75),
+              near: 0.01,
+              far: 5000,
+              target: [0, 0, 0],
+              targetOrientation: [0, 0, 0, 1],
+            },
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};

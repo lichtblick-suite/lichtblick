@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
@@ -87,16 +88,18 @@ const MockExtensionMarketplace: ExtensionMarketplace = {
 Mock markdown rendering for URL [${url}](${url}).`,
 };
 
-export function Sidebar(): JSX.Element {
-  const [config] = useState(() => makeMockAppConfiguration());
+export const Sidebar: StoryObj = {
+  render: function Story() {
+    const [config] = useState(() => makeMockAppConfiguration());
 
-  return (
-    <AppConfigurationContext.Provider value={config}>
-      <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
-        <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
-          <ExtensionsSettings />
-        </ExtensionMarketplaceContext.Provider>
-      </ExtensionCatalogProvider>
-    </AppConfigurationContext.Provider>
-  );
-}
+    return (
+      <AppConfigurationContext.Provider value={config}>
+        <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
+          <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
+            <ExtensionsSettings />
+          </ExtensionMarketplaceContext.Provider>
+        </ExtensionCatalogProvider>
+      </AppConfigurationContext.Provider>
+    );
+  },
+};

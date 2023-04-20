@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Box } from "@mui/material";
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 
 import { ProgressPlot } from "./ProgressPlot";
 
@@ -12,38 +12,42 @@ export default {
   component: ProgressPlot,
 };
 
-export const DisjointRanges: Story = () => {
-  return (
-    <Box bgcolor="background.paper" width="100%" height="100%" padding={2}>
-      <Box bgcolor="action.focus" height={40}>
-        <ProgressPlot
-          loading={false}
-          availableRanges={[
-            { start: 0, end: 0.2 },
-            { start: 0.8, end: 1 },
-          ]}
-        />
+export const DisjointRanges: StoryObj = {
+  render: () => {
+    return (
+      <Box bgcolor="background.paper" width="100%" height="100%" padding={2}>
+        <Box bgcolor="action.focus" height={40}>
+          <ProgressPlot
+            loading={false}
+            availableRanges={[
+              { start: 0, end: 0.2 },
+              { start: 0.8, end: 1 },
+            ]}
+          />
+        </Box>
       </Box>
-    </Box>
-  );
+    );
+  },
+
+  parameters: { colorScheme: "both-column" },
 };
 
-DisjointRanges.parameters = { colorScheme: "both-column" };
-
-export const Loading: Story = () => {
-  return (
-    <Box bgcolor="background.paper" width="100%" height="100%" padding={2}>
-      <Box bgcolor="action.focus" height={40}>
-        <ProgressPlot
-          loading={true}
-          availableRanges={[
-            { start: 0, end: 0.2 },
-            { start: 0.8, end: 1 },
-          ]}
-        />
+export const Loading: StoryObj = {
+  render: () => {
+    return (
+      <Box bgcolor="background.paper" width="100%" height="100%" padding={2}>
+        <Box bgcolor="action.focus" height={40}>
+          <ProgressPlot
+            loading={true}
+            availableRanges={[
+              { start: 0, end: 0.2 },
+              { start: 0.8, end: 1 },
+            ]}
+          />
+        </Box>
       </Box>
-    </Box>
-  );
-};
+    );
+  },
 
-Loading.parameters = { colorScheme: "both-column" };
+  parameters: { colorScheme: "both-column" },
+};

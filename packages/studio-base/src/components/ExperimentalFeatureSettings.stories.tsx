@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactElement, useState } from "react";
+import { StoryObj } from "@storybook/react";
+import { useState } from "react";
 
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
@@ -22,12 +23,14 @@ export default {
   component: ExperimentalFeatureSettings,
 };
 
-export function Basic(): ReactElement {
-  const [config] = useState(() => makeMockAppConfiguration());
+export const Basic: StoryObj = {
+  render: function Story() {
+    const [config] = useState(() => makeMockAppConfiguration());
 
-  return (
-    <AppConfigurationContext.Provider value={config}>
-      <ExperimentalFeatureSettings />
-    </AppConfigurationContext.Provider>
-  );
-}
+    return (
+      <AppConfigurationContext.Provider value={config}>
+        <ExperimentalFeatureSettings />
+      </AppConfigurationContext.Provider>
+    );
+  },
+};

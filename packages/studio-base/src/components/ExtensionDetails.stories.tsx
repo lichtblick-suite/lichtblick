@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
@@ -66,16 +67,18 @@ const extension: ExtensionMarketplaceDetail = {
   },
 };
 
-export function Details(): JSX.Element {
-  const [config] = useState(() => makeMockAppConfiguration());
+export const Details: StoryObj = {
+  render: function Story() {
+    const [config] = useState(() => makeMockAppConfiguration());
 
-  return (
-    <AppConfigurationContext.Provider value={config}>
-      <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
-        <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
-          <ExtensionDetails extension={extension} onClose={() => {}} installed={false} />
-        </ExtensionMarketplaceContext.Provider>
-      </ExtensionCatalogProvider>
-    </AppConfigurationContext.Provider>
-  );
-}
+    return (
+      <AppConfigurationContext.Provider value={config}>
+        <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
+          <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
+            <ExtensionDetails extension={extension} onClose={() => {}} installed={false} />
+          </ExtensionMarketplaceContext.Provider>
+        </ExtensionCatalogProvider>
+      </AppConfigurationContext.Provider>
+    );
+  },
+};

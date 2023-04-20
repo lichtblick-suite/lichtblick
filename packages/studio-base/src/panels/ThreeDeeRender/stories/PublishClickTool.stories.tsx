@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
 import { screen } from "@storybook/testing-library";
 
 import { MessageEvent } from "@foxglove/studio";
@@ -20,7 +21,8 @@ export default {
   component: ThreeDeePanel,
 };
 
-export const Point = Object.assign(PublishClickToolTemplate.bind({}), {
+export const Point: StoryObj<{ type: PublishClickType }> = {
+  render: PublishClickToolTemplate,
   parameters: { colorScheme: "dark" },
   args: { type: "point" },
   play: async () => {
@@ -34,9 +36,10 @@ export const Point = Object.assign(PublishClickToolTemplate.bind({}), {
     await delay(10);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   },
-});
+};
 
-export const PosePosition = Object.assign(PublishClickToolTemplate.bind({}), {
+export const PosePosition: StoryObj<{ type: PublishClickType }> = {
+  render: PublishClickToolTemplate,
   parameters: { colorScheme: "dark" },
   args: { type: "pose" },
   play: async () => {
@@ -50,9 +53,10 @@ export const PosePosition = Object.assign(PublishClickToolTemplate.bind({}), {
     await delay(10);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   },
-});
+};
 
-export const PoseComplete = Object.assign(PublishClickToolTemplate.bind({}), {
+export const PoseComplete: StoryObj<{ type: PublishClickType }> = {
+  render: PublishClickToolTemplate,
   parameters: { colorScheme: "dark" },
   args: { type: "pose" },
   play: async () => {
@@ -72,9 +76,10 @@ export const PoseComplete = Object.assign(PublishClickToolTemplate.bind({}), {
     await delay(100);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   },
-});
+};
 
-export const PoseEstimatePosition = Object.assign(PublishClickToolTemplate.bind({}), {
+export const PoseEstimatePosition: StoryObj<{ type: PublishClickType }> = {
+  render: PublishClickToolTemplate,
   parameters: { colorScheme: "dark" },
   args: { type: "pose_estimate" },
   play: async () => {
@@ -88,9 +93,10 @@ export const PoseEstimatePosition = Object.assign(PublishClickToolTemplate.bind(
     await delay(100);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   },
-});
+};
 
-export const PoseEstimateComplete = Object.assign(PublishClickToolTemplate.bind({}), {
+export const PoseEstimateComplete: StoryObj<{ type: PublishClickType }> = {
+  render: PublishClickToolTemplate,
   parameters: { colorScheme: "dark" },
   args: { type: "pose_estimate" },
   play: async () => {
@@ -110,7 +116,7 @@ export const PoseEstimateComplete = Object.assign(PublishClickToolTemplate.bind(
     await delay(100);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   },
-});
+};
 
 function PublishClickToolTemplate({ type }: { type: PublishClickType }): JSX.Element {
   const topics: Topic[] = [{ name: "/tf", schemaName: "geometry_msgs/TransformStamped" }];

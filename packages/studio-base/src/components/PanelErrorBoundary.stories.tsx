@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { action } from "@storybook/addon-actions";
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -26,30 +26,34 @@ export default {
   title: "components/PanelErrorBoundary",
 };
 
-export const Default: Story = () => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelErrorBoundary
-        onRemovePanel={action("onRemovePanel")}
-        onResetPanel={action("onResetPanel")}
-      >
-        <Broken />
-      </PanelErrorBoundary>
-    </DndProvider>
-  );
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelErrorBoundary
+          onRemovePanel={action("onRemovePanel")}
+          onResetPanel={action("onResetPanel")}
+        >
+          <Broken />
+        </PanelErrorBoundary>
+      </DndProvider>
+    );
+  },
 };
 
-export const ShowingDetails: Story = () => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelErrorBoundary
-        showErrorDetails
-        hideErrorSourceLocations
-        onRemovePanel={action("onRemovePanel")}
-        onResetPanel={action("onResetPanel")}
-      >
-        <Broken />
-      </PanelErrorBoundary>
-    </DndProvider>
-  );
+export const ShowingDetails: StoryObj = {
+  render: () => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <PanelErrorBoundary
+          showErrorDetails
+          hideErrorSourceLocations
+          onRemovePanel={action("onRemovePanel")}
+          onResetPanel={action("onResetPanel")}
+        >
+          <Broken />
+        </PanelErrorBoundary>
+      </DndProvider>
+    );
+  },
 };

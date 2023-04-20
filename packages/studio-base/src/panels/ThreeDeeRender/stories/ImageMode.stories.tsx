@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 
 import { CompressedImage, RawImage } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
@@ -179,10 +179,15 @@ const ImageModeRosImage = ({ imageType }: { imageType: "raw" | "png" }) => {
   );
 };
 
-export const ImageModeRosRawImage: Story = () => <ImageModeRosImage imageType="raw" />;
-ImageModeRosRawImage.parameters = { colorScheme: "light" };
-export const ImageModeRosPngImage: Story = () => <ImageModeRosImage imageType="png" />;
-ImageModeRosPngImage.parameters = { colorScheme: "light" };
+export const ImageModeRosRawImage: StoryObj = {
+  render: () => <ImageModeRosImage imageType="raw" />,
+  parameters: { colorScheme: "light" },
+};
+
+export const ImageModeRosPngImage: StoryObj = {
+  render: () => <ImageModeRosImage imageType="png" />,
+  parameters: { colorScheme: "light" },
+};
 
 const ImageModeFoxgloveImage = ({ imageType }: { imageType: "raw" | "png" }) => {
   const topics: Topic[] = [
@@ -342,19 +347,27 @@ const ImageModeFoxgloveImage = ({ imageType }: { imageType: "raw" | "png" }) => 
   );
 };
 
-export const ImageModeFoxgloveRawImage: Story = () => <ImageModeFoxgloveImage imageType="raw" />;
-ImageModeFoxgloveRawImage.parameters = { colorScheme: "light" };
-export const ImageModeFoxglovePngImage: Story = () => <ImageModeFoxgloveImage imageType="png" />;
-ImageModeFoxglovePngImage.parameters = { colorScheme: "light" };
+export const ImageModeFoxgloveRawImage: StoryObj = {
+  render: () => <ImageModeFoxgloveImage imageType="raw" />,
+  parameters: { colorScheme: "light" },
+};
 
-export const ImageModeResizeHandled: Story = () => <ImageModeFoxgloveImage imageType="raw" />;
-ImageModeResizeHandled.parameters = { colorScheme: "light" };
-ImageModeResizeHandled.play = async () => {
-  const canvas = document.querySelector("canvas")!;
-  // Input attaches resize listener to parent element, so we need to resize that.
-  const parentEl = canvas.parentElement!;
-  await delay(30);
-  parentEl.style.width = "50%";
-  canvas.dispatchEvent(new Event("resize"));
-  await delay(30);
+export const ImageModeFoxglovePngImage: StoryObj = {
+  render: () => <ImageModeFoxgloveImage imageType="png" />,
+  parameters: { colorScheme: "light" },
+};
+
+export const ImageModeResizeHandled: StoryObj = {
+  render: () => <ImageModeFoxgloveImage imageType="raw" />,
+  parameters: { colorScheme: "light" },
+
+  play: async () => {
+    const canvas = document.querySelector("canvas")!;
+    // Input attaches resize listener to parent element, so we need to resize that.
+    const parentEl = canvas.parentElement!;
+    await delay(30);
+    parentEl.style.width = "50%";
+    canvas.dispatchEvent(new Event("resize"));
+    await delay(30);
+  },
 };

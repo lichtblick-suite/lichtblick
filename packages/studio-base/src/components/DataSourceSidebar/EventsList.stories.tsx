@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { StoryObj, StoryFn } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { useEffect } from "react";
 
@@ -13,7 +13,7 @@ import { makeMockEvents } from "@foxglove/studio-base/test/mocks/makeMockEvents"
 
 import { EventsList } from "./EventsList";
 
-function Wrapper(Child: Story): JSX.Element {
+function Wrapper(Child: StoryFn): JSX.Element {
   return (
     <MockMessagePipelineProvider>
       <EventsProvider>
@@ -29,49 +29,59 @@ export default {
   decorators: [Wrapper],
 };
 
-export function Default(): JSX.Element {
-  const setEvents = useEvents((store) => store.setEvents);
-  useEffect(() => {
-    setEvents({ loading: false, value: makeMockEvents(20) });
-  }, [setEvents]);
+export const Default: StoryObj = {
+  render: function Story() {
+    const setEvents = useEvents((store) => store.setEvents);
+    useEffect(() => {
+      setEvents({ loading: false, value: makeMockEvents(20) });
+    }, [setEvents]);
 
-  return <EventsList />;
-}
-
-export function Selected(): JSX.Element {
-  const setEvents = useEvents((store) => store.setEvents);
-  const selectEvent = useEvents((store) => store.selectEvent);
-
-  useEffect(() => {
-    const events = makeMockEvents(20);
-
-    setEvents({ loading: false, value: events });
-  }, [selectEvent, setEvents]);
-
-  return <EventsList />;
-}
-Selected.play = async () => {
-  const events = await screen.findAllByTestId("sidebar-event");
-  userEvent.click(events[1]!);
-};
-Selected.parameters = {
-  colorScheme: "light",
+    return <EventsList />;
+  },
 };
 
-export function WithError(): JSX.Element {
-  const setEvents = useEvents((store) => store.setEvents);
-  useEffect(() => {
-    setEvents({ loading: false, error: new Error("Error loading events") });
-  }, [setEvents]);
+export const Selected: StoryObj = {
+  render: function Story() {
+    const setEvents = useEvents((store) => store.setEvents);
+    const selectEvent = useEvents((store) => store.selectEvent);
 
-  return <EventsList />;
-}
+    useEffect(() => {
+      const events = makeMockEvents(20);
 
-export function Loading(): JSX.Element {
-  const setEvents = useEvents((store) => store.setEvents);
-  useEffect(() => {
-    setEvents({ loading: true });
-  }, [setEvents]);
+      setEvents({ loading: false, value: events });
+    }, [selectEvent, setEvents]);
 
-  return <EventsList />;
-}
+    return <EventsList />;
+  },
+
+  play: async () => {
+    const events = await screen.findAllByTestId("sidebar-event");
+    userEvent.click(events[1]!);
+  },
+
+  parameters: {
+    colorScheme: "light",
+  },
+};
+
+export const WithError: StoryObj = {
+  render: function Story() {
+    const setEvents = useEvents((store) => store.setEvents);
+    useEffect(() => {
+      setEvents({ loading: false, error: new Error("Error loading events") });
+    }, [setEvents]);
+
+    return <EventsList />;
+  },
+};
+
+export const Loading: StoryObj = {
+  render: function Story() {
+    const setEvents = useEvents((store) => store.setEvents);
+    useEffect(() => {
+      setEvents({ loading: true });
+    }, [setEvents]);
+
+    return <EventsList />;
+  },
+};

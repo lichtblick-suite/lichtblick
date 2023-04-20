@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback, ComponentProps, useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
@@ -124,75 +124,87 @@ export default {
   },
 };
 
-export const Basic: Story = (_args) => {
-  const readySignal = useReadySignal();
+export const Basic: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
 
-  return (
-    <div style={divStyle}>
-      <ChartComponent {...props} onFinishRender={readySignal} />
-    </div>
-  );
-};
-Basic.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-Basic.parameters = {
-  useReadySignal: true,
-};
-
-export const WithDatalabels: Story = (_args) => {
-  const readySignal = useReadySignal();
-
-  return (
-    <div style={divStyle}>
-      <ChartComponent {...propsWithDatalabels} onFinishRender={readySignal} />
-    </div>
-  );
-};
-WithDatalabels.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-WithDatalabels.parameters = {
-  useReadySignal: true,
-};
-
-export const AllowsClickingOnDatalabels: Story = (_args) => {
-  const [clickedDatalabel, setClickedDatalabel] = useState<unknown>(undefined);
-  const readySignal = useReadySignal();
-
-  const doClick = useCallback(() => {
-    if (clickedDatalabel == undefined) {
-      const [canvas] = document.getElementsByTagName("canvas");
-      TestUtils.Simulate.click(canvas!.parentElement!, { clientX: 304, clientY: 378 });
-    }
-  }, [clickedDatalabel]);
-
-  const onClick = useCallback((ev: OnClickArg) => {
-    setClickedDatalabel(ev.datalabel);
-  }, []);
-
-  useEffect(() => {
-    if (clickedDatalabel != undefined) {
-      readySignal();
-    }
-  }, [clickedDatalabel, readySignal]);
-
-  return (
-    <div style={divStyle}>
-      <div style={{ padding: 6, fontSize: 16 }}>
-        {clickedDatalabel != undefined
-          ? `Clicked datalabel with selection id: ${String(
-              (clickedDatalabel as Record<string, unknown>).selectionObj,
-            )}`
-          : "Have not clicked datalabel"}
+    return (
+      <div style={divStyle}>
+        <ChartComponent {...props} onFinishRender={readySignal} />
       </div>
-      <ChartComponent {...propsWithDatalabels} onFinishRender={doClick} onClick={onClick} />
-    </div>
-  );
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: {
+    useReadySignal: true,
+  },
 };
-AllowsClickingOnDatalabels.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+
+export const WithDatalabels: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
+
+    return (
+      <div style={divStyle}>
+        <ChartComponent {...propsWithDatalabels} onFinishRender={readySignal} />
+      </div>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: {
+    useReadySignal: true,
+  },
 };
-AllowsClickingOnDatalabels.parameters = {
-  useReadySignal: true,
+
+export const AllowsClickingOnDatalabels: StoryObj = {
+  render: function Story() {
+    const [clickedDatalabel, setClickedDatalabel] = useState<unknown>(undefined);
+    const readySignal = useReadySignal();
+
+    const doClick = useCallback(() => {
+      if (clickedDatalabel == undefined) {
+        const [canvas] = document.getElementsByTagName("canvas");
+        TestUtils.Simulate.click(canvas!.parentElement!, { clientX: 304, clientY: 378 });
+      }
+    }, [clickedDatalabel]);
+
+    const onClick = useCallback((ev: OnClickArg) => {
+      setClickedDatalabel(ev.datalabel);
+    }, []);
+
+    useEffect(() => {
+      if (clickedDatalabel != undefined) {
+        readySignal();
+      }
+    }, [clickedDatalabel, readySignal]);
+
+    return (
+      <div style={divStyle}>
+        <div style={{ padding: 6, fontSize: 16 }}>
+          {clickedDatalabel != undefined
+            ? `Clicked datalabel with selection id: ${String(
+                (clickedDatalabel as Record<string, unknown>).selectionObj,
+              )}`
+            : "Have not clicked datalabel"}
+        </div>
+        <ChartComponent {...propsWithDatalabels} onFinishRender={doClick} onClick={onClick} />
+      </div>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: {
+    useReadySignal: true,
+  },
 };

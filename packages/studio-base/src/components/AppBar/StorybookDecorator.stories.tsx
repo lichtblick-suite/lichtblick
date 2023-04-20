@@ -4,7 +4,7 @@
 
 /* eslint-disable storybook/story-exports */
 
-import { Story } from "@storybook/react";
+import { StoryFn } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -65,14 +65,14 @@ export default {
   excludeStories: ["StorybookDecorator"],
 };
 
-export function StorybookDecorator(StoryFn: Story): JSX.Element {
+export function StorybookDecorator(Wrapped: StoryFn): JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
       <WorkspaceContextProvider>
         <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
           <MockCurrentLayoutProvider>
             <MockMessagePipelineProvider>
-              <StoryFn />
+              <Wrapped />
             </MockMessagePipelineProvider>
           </MockCurrentLayoutProvider>
         </PanelCatalogContext.Provider>

@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
+import { StoryObj } from "@storybook/react";
 import { PropsWithChildren } from "react";
 
 import Stack, { StackProps } from "./Stack";
@@ -34,57 +35,59 @@ function Box({ children }: PropsWithChildren<StackProps>): JSX.Element {
   );
 }
 
-export function Default(): JSX.Element {
-  return (
-    <Stack data-testid padding={2} gap={2} fullHeight>
-      <Stack direction="row" gap={2}>
-        {ITEMS.map((_, index) => (
-          <Stack flex="auto" key={index}>
-            <Box>{`Row item ${index + 1}`}</Box>
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <Stack data-testid padding={2} gap={2} fullHeight>
+        <Stack direction="row" gap={2}>
+          {ITEMS.map((_, index) => (
+            <Stack flex="auto" key={index}>
+              <Box>{`Row item ${index + 1}`}</Box>
+            </Stack>
+          ))}
+        </Stack>
+        <Stack flexGrow={2} justifyContent="space-between" gap={2}>
+          <Stack direction="row" gap={2} justifyContent="flex-start">
+            {ITEMS.map((_, index) => (
+              <Box key={index}>{`Row item ${index + 1}`}</Box>
+            ))}
           </Stack>
-        ))}
-      </Stack>
-      <Stack flexGrow={2} justifyContent="space-between" gap={2}>
-        <Stack direction="row" gap={2} justifyContent="flex-start">
-          {ITEMS.map((_, index) => (
-            <Box key={index}>{`Row item ${index + 1}`}</Box>
-          ))}
-        </Stack>
-        <Stack direction="row" justifyContent="center" gap={2} alignSelf="center">
-          {ITEMS.map((_, index) => (
-            <Box key={index}>{`Row item ${index + 1}`}</Box>
-          ))}
-        </Stack>
-        <Stack direction="row" justifyContent="flex-end" gap={2} alignSelf="flex-end">
-          {ITEMS.map((_, index) => (
-            <Box key={index}>{`Row item ${index + 1}`}</Box>
-          ))}
-        </Stack>
-      </Stack>
-      <Stack gap={2} justifyContent="space-between">
-        {ITEMS.map((_, index) => (
-          <Stack flex="auto" key={index}>
-            <Box>{`Col item ${index + 1}`}</Box>
+          <Stack direction="row" justifyContent="center" gap={2} alignSelf="center">
+            {ITEMS.map((_, index) => (
+              <Box key={index}>{`Row item ${index + 1}`}</Box>
+            ))}
           </Stack>
-        ))}
+          <Stack direction="row" justifyContent="flex-end" gap={2} alignSelf="flex-end">
+            {ITEMS.map((_, index) => (
+              <Box key={index}>{`Row item ${index + 1}`}</Box>
+            ))}
+          </Stack>
+        </Stack>
+        <Stack gap={2} justifyContent="space-between">
+          {ITEMS.map((_, index) => (
+            <Stack flex="auto" key={index}>
+              <Box>{`Col item ${index + 1}`}</Box>
+            </Stack>
+          ))}
+        </Stack>
+        <Stack flex="auto" gap={2} justifyContent="space-between">
+          <Stack gap={2} alignSelf="flex-start">
+            {ITEMS.map((_, index) => (
+              <Box key={index}>{`Col item ${index + 1}`}</Box>
+            ))}
+          </Stack>
+          <Stack gap={2} alignSelf="center">
+            {ITEMS.map((_, index) => (
+              <Box key={index}>{`Col item ${index + 1}`}</Box>
+            ))}
+          </Stack>
+          <Stack gap={2} alignSelf="flex-end">
+            {ITEMS.map((_, index) => (
+              <Box key={index}>{`Col item ${index + 1}`}</Box>
+            ))}
+          </Stack>
+        </Stack>
       </Stack>
-      <Stack flex="auto" gap={2} justifyContent="space-between">
-        <Stack gap={2} alignSelf="flex-start">
-          {ITEMS.map((_, index) => (
-            <Box key={index}>{`Col item ${index + 1}`}</Box>
-          ))}
-        </Stack>
-        <Stack gap={2} alignSelf="center">
-          {ITEMS.map((_, index) => (
-            <Box key={index}>{`Col item ${index + 1}`}</Box>
-          ))}
-        </Stack>
-        <Stack gap={2} alignSelf="flex-end">
-          {ITEMS.map((_, index) => (
-            <Box key={index}>{`Col item ${index + 1}`}</Box>
-          ))}
-        </Stack>
-      </Stack>
-    </Stack>
-  );
-}
+    );
+  },
+};

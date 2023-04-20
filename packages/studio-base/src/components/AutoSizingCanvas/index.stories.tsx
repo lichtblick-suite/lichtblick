@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryFn } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { useState, useEffect } from "react";
 
 import AutoSizingCanvas from ".";
@@ -69,18 +69,22 @@ export default {
   title: "components/AutoSizingCanvas",
 };
 
-export const Static: StoryFn = () => <Example />;
+export const Static: StoryObj = {
+  render: () => <Example />,
+  name: "static",
+};
 
-Static.storyName = "static";
+export const ChangingSize: StoryObj = {
+  render: () => <Example changeSize />,
+  name: "changing size",
+};
 
-export const ChangingSize: StoryFn = () => <Example changeSize />;
+export const PixelRatio2: StoryObj = {
+  render: () => <Example devicePixelRatio={2} />,
+  name: "pixel ratio 2",
+};
 
-ChangingSize.storyName = "changing size";
-
-export const PixelRatio2: StoryFn = () => <Example devicePixelRatio={2} />;
-
-PixelRatio2.storyName = "pixel ratio 2";
-
-export const ChangingPixelRatio: StoryFn = () => <Example changePixelRatio />;
-
-ChangingPixelRatio.storyName = "changing pixel ratio";
+export const ChangingPixelRatio: StoryObj = {
+  render: () => <Example changePixelRatio />,
+  name: "changing pixel ratio",
+};

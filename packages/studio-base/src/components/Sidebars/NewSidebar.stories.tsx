@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -106,66 +107,95 @@ function Story({
   );
 }
 
-// Left
-export const LeftOpen = (): JSX.Element => <Story defaultLeftKey="a" />;
-LeftOpen.storyName = "Left";
-
-export const LeftLongText = (): JSX.Element => <Story defaultLeftKey="c" />;
-LeftLongText.storyName = "Left (with text overflow)";
-
-export const LeftClicked = (): JSX.Element => <Story defaultLeftKey="a" />;
-LeftClicked.storyName = "Left (tab click interaction)";
-LeftClicked.parameters = { colorScheme: "dark" };
-LeftClicked.play = async () => {
-  const leftTab = await screen.findByTestId("b-left");
-  userEvent.click(leftTab);
-};
-export const LeftClosed = (): JSX.Element => (
-  <Story defaultLeftKey="b" defaultRightKey="y" label="Left sidebar should be closed" />
-);
-LeftClosed.storyName = "Left (closed by interaction)";
-LeftClosed.parameters = { colorScheme: "dark" };
-LeftClosed.play = async () => {
-  const leftClose = await screen.findByTestId("sidebar-close-left");
-  userEvent.click(leftClose);
+export const LeftOpen: StoryObj = {
+  render: () => <Story defaultLeftKey="a" />,
+  name: "Left",
 };
 
-// Right
-export const RightOpen = (): JSX.Element => <Story defaultRightKey="x" />;
-RightOpen.storyName = "Right";
-
-export const RightLongText = (): JSX.Element => <Story defaultRightKey="z" />;
-RightLongText.storyName = "Right (with text overflow)";
-
-export const RightClicked = (): JSX.Element => <Story defaultRightKey="x" />;
-RightClicked.storyName = "Right (tab click interaction)";
-RightClicked.parameters = { colorScheme: "dark" };
-RightClicked.play = async () => {
-  const rightTab = await screen.findByTestId("y-right");
-  userEvent.click(rightTab);
-};
-export const RightClosed = (): JSX.Element => (
-  <Story defaultLeftKey="b" defaultRightKey="y" label="Right sidebar should be closed" />
-);
-RightClosed.storyName = "Right (closed by interaction)";
-RightClosed.parameters = { colorScheme: "dark" };
-RightClosed.play = async () => {
-  const rightClose = await screen.findByTestId("sidebar-close-right");
-  userEvent.click(rightClose);
+export const LeftLongText: StoryObj = {
+  render: () => <Story defaultLeftKey="c" />,
+  name: "Left (with text overflow)",
 };
 
-// Both
-export const Default = (): JSX.Element => <Story label="Both sidebars should be closed" />;
-export const BothOpen = (): JSX.Element => <Story defaultLeftKey="a" defaultRightKey="x" />;
-BothOpen.storyName = "Both (opened)";
+export const LeftClicked: StoryObj = {
+  render: () => <Story defaultLeftKey="a" />,
+  name: "Left (tab click interaction)",
+  parameters: { colorScheme: "dark" },
 
-export const BothClicked = (): JSX.Element => <Story defaultLeftKey="a" defaultRightKey="x" />;
-BothClicked.storyName = "Both (tab click interaction)";
-BothClicked.parameters = { colorScheme: "dark" };
-BothClicked.play = async () => {
-  const leftTab = await screen.findByTestId("b-left");
-  userEvent.click(leftTab);
+  play: async () => {
+    const leftTab = await screen.findByTestId("b-left");
+    userEvent.click(leftTab);
+  },
+};
 
-  const rightTab = await screen.findByTestId("y-right");
-  userEvent.click(rightTab);
+export const LeftClosed: StoryObj = {
+  render: () => (
+    <Story defaultLeftKey="b" defaultRightKey="y" label="Left sidebar should be closed" />
+  ),
+
+  name: "Left (closed by interaction)",
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const leftClose = await screen.findByTestId("sidebar-close-left");
+    userEvent.click(leftClose);
+  },
+};
+
+export const RightOpen: StoryObj = {
+  render: () => <Story defaultRightKey="x" />,
+  name: "Right",
+};
+
+export const RightLongText: StoryObj = {
+  render: () => <Story defaultRightKey="z" />,
+  name: "Right (with text overflow)",
+};
+
+export const RightClicked: StoryObj = {
+  render: () => <Story defaultRightKey="x" />,
+  name: "Right (tab click interaction)",
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const rightTab = await screen.findByTestId("y-right");
+    userEvent.click(rightTab);
+  },
+};
+
+export const RightClosed: StoryObj = {
+  render: () => (
+    <Story defaultLeftKey="b" defaultRightKey="y" label="Right sidebar should be closed" />
+  ),
+
+  name: "Right (closed by interaction)",
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const rightClose = await screen.findByTestId("sidebar-close-right");
+    userEvent.click(rightClose);
+  },
+};
+
+export const Default: StoryObj = {
+  render: () => <Story label="Both sidebars should be closed" />,
+};
+
+export const BothOpen: StoryObj = {
+  render: () => <Story defaultLeftKey="a" defaultRightKey="x" />,
+  name: "Both (opened)",
+};
+
+export const BothClicked: StoryObj = {
+  render: () => <Story defaultLeftKey="a" defaultRightKey="x" />,
+  name: "Both (tab click interaction)",
+  parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const leftTab = await screen.findByTestId("b-left");
+    userEvent.click(leftTab);
+
+    const rightTab = await screen.findByTestId("y-right");
+    userEvent.click(rightTab);
+  },
 };

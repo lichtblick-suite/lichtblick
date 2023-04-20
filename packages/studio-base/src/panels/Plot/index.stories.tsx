@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { shuffle } from "lodash";
 import { useCallback, useRef } from "react";
@@ -373,112 +373,143 @@ export default {
   excludeStories: ["paths", "fixture"],
 };
 
-export const LineGraph: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} />;
-};
-LineGraph.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-LineGraph.storyName = "line graph";
-LineGraph.parameters = {
-  useReadySignal: true,
+export const LineGraph: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} />;
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  name: "line graph",
+
+  parameters: {
+    useReadySignal: true,
+  },
 };
 
-export const LineGraphWithXMinMax: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{ ...exampleConfig, minXValue: 1, maxXValue: 2 }}
-    />
-  );
-};
-LineGraphWithXMinMax.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-LineGraphWithXMinMax.storyName = "line graph with x min & max";
-LineGraphWithXMinMax.parameters = {
-  colorScheme: "light",
-  useReadySignal: true,
+export const LineGraphWithXMinMax: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{ ...exampleConfig, minXValue: 1, maxXValue: 2 }}
+      />
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  name: "line graph with x min & max",
+
+  parameters: {
+    colorScheme: "light",
+    useReadySignal: true,
+  },
 };
 
-export const LineGraphWithXRange: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{ ...exampleConfig, followingViewWidth: 3 }}
-      includeSettings
-    />
-  );
-};
-LineGraphWithXRange.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-LineGraphWithXRange.parameters = {
-  colorScheme: "light",
-  useReadySignal: true,
-};
-LineGraphWithXRange.storyName = "line graph with x range";
+export const LineGraphWithXRange: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{ ...exampleConfig, followingViewWidth: 3 }}
+        includeSettings
+      />
+    );
+  },
 
-export const LineGraphWithNoTitle: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, title: undefined }} />;
-};
-LineGraphWithNoTitle.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-LineGraphWithNoTitle.storyName = "line graph with no title";
-LineGraphWithNoTitle.parameters = {
-  useReadySignal: true,
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: {
+    colorScheme: "light",
+    useReadySignal: true,
+  },
+
+  name: "line graph with x range",
 };
 
-export const LineGraphWithSettings: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{ ...exampleConfig, minYValue: -1, maxYValue: 1, minXValue: 0, maxXValue: 3 }}
-      includeSettings
-    />
-  );
-};
-LineGraphWithSettings.parameters = {
-  colorScheme: "light",
-  useReadySignal: true,
-};
-LineGraphWithSettings.storyName = "line graph with settings";
-LineGraphWithSettings.play = async (ctx) => {
-  const label = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
-  userEvent.click(label);
-  await ctx.parameters.storyReady;
+export const LineGraphWithNoTitle: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, title: undefined }} />;
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  name: "line graph with no title",
+
+  parameters: {
+    useReadySignal: true,
+  },
 };
 
-export const LineGraphWithSettingsChinese = Object.assign(LineGraphWithSettings.bind(undefined), {
+export const LineGraphWithSettings: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{ ...exampleConfig, minYValue: -1, maxYValue: 1, minXValue: 0, maxXValue: 3 }}
+        includeSettings
+      />
+    );
+  },
+
+  parameters: {
+    colorScheme: "light",
+    useReadySignal: true,
+  },
+
+  name: "line graph with settings",
+
+  play: async (ctx) => {
+    const label = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
+    userEvent.click(label);
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const LineGraphWithSettingsChinese: StoryObj = {
+  ...LineGraphWithSettings,
   play: LineGraphWithSettings.play,
   parameters: {
     ...LineGraphWithSettings.parameters,
     forceLanguage: "zh",
   },
-});
+};
 
-export const LineGraphWithLegendsHidden: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, showLegend: false }} />;
-};
-LineGraphWithLegendsHidden.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
-LineGraphWithLegendsHidden.parameters = {
-  useReadySignal: true,
+export const LineGraphWithLegendsHidden: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, showLegend: false }} />;
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  name: "line graph with legends hidden",
+
+  parameters: {
+    useReadySignal: true,
+  },
 };
 
 const useStyles = makeStyles()(() => ({
@@ -491,17 +522,186 @@ const useStyles = makeStyles()(() => ({
   },
 }));
 
-export const InALineGraphWithMultiplePlotsXAxesAreSynced: Story = () => {
-  const readySignal = useReadySignal({ count: 6 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  const { classes } = useStyles();
+export const InALineGraphWithMultiplePlotsXAxesAreSynced: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 6 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+    const { classes } = useStyles();
 
-  return (
-    <PanelSetup fixture={fixture} pauseFrame={pauseFrame} className={classes.PanelSetup}>
-      <Plot
-        overrideConfig={{
+    return (
+      <PanelSetup fixture={fixture} pauseFrame={pauseFrame} className={classes.PanelSetup}>
+        <Plot
+          overrideConfig={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location.pose.acceleration",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
+        />
+        <Plot
+          overrideConfig={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location_subset.pose.velocity",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+
+  name: "in a line graph with multiple plots, x-axes are synced",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const LineGraphAfterZoom: StoryObj = {
+  render: function Story() {
+    const pauseState = useRef<"init" | "zoom" | "ready">("init");
+    const readyState = useReadySignal();
+
+    const doZoom = useCallback(() => {
+      const canvasEl = document.querySelector("canvas");
+      // Zoom is a continuous event, so we need to simulate wheel multiple times
+      if (canvasEl) {
+        for (let i = 0; i < 5; i++) {
+          triggerWheel(canvasEl.parentElement!, 1);
+        }
+      }
+
+      // indicate our next render completion should mark the scene ready
+      pauseState.current = "ready";
+    }, []);
+
+    const pauseFrame = useCallback(() => {
+      return () => {
+        switch (pauseState.current) {
+          case "init":
+            pauseState.current = "zoom";
+            break;
+          case "zoom":
+            doZoom();
+            break;
+          default:
+            readyState();
+            break;
+        }
+      };
+    }, [doZoom, readyState]);
+
+    return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} />;
+  },
+
+  name: "line graph after zoom",
+
+  parameters: {
+    useReadySignal: true,
+    colorScheme: "dark",
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const TimestampMethodHeaderStamp: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
           ...exampleConfig,
           paths: [
+            {
+              value: "/some_topic/location_shuffled.pose.velocity",
+              enabled: true,
+              timestampMethod: "headerStamp",
+            },
+            { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "timestampMethod: headerStamp",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const LongPath: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        style={{ maxWidth: 250 }}
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "long path",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const DisabledPath: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: false,
+              timestampMethod: "receiveTime",
+            },
             {
               value: "/some_topic/location.pose.acceleration",
               enabled: true,
@@ -510,830 +710,788 @@ export const InALineGraphWithMultiplePlotsXAxesAreSynced: Story = () => {
           ],
         }}
       />
-      <Plot
-        overrideConfig={{
+    );
+  },
+
+  name: "disabled path",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const ReferenceLine: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            { value: "0", enabled: true, timestampMethod: "receiveTime" }, // Test typing a period for decimal values. value: "1.", enabled: true, timestampMethod: "receiveTime",
+            { value: "1.", enabled: true, timestampMethod: "receiveTime" },
+            { value: "1.5", enabled: true, timestampMethod: "receiveTime" },
+            { value: "1", enabled: false, timestampMethod: "receiveTime" },
+          ],
+          minYValue: "-1",
+          maxYValue: "2",
+        }}
+      />
+    );
+  },
+
+  name: "reference line",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const WithMinAndMaxYValues: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        includeSettings
+        pauseFrame={pauseFrame}
+        config={{
           ...exampleConfig,
           paths: [
             {
-              value: "/some_topic/location_subset.pose.velocity",
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "1",
+          maxYValue: "2.8",
+        }}
+      />
+    );
+  },
+
+  parameters: {
+    colorScheme: "light",
+    useReadySignal: true,
+  },
+
+  name: "with min and max Y values",
+
+  play: async () => {
+    const label = await screen.findByText("Y Axis");
+    userEvent.click(label);
+  },
+};
+
+export const WithJustMinYValueLessThanMinimumValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "1",
+        }}
+      />
+    );
+  },
+
+  name: "with just min Y value less than minimum value",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const WithJustMinYValueMoreThanMinimumValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "1.4",
+        }}
+      />
+    );
+  },
+
+  name: "with just min Y value more than minimum value",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const WithJustMinYValueMoreThanMaximumValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "5",
+        }}
+      />
+    );
+  },
+
+  name: "with just min Y value more than maximum value",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const WithJustMaxYValueLessThanMaximumValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          maxYValue: "1.8",
+        }}
+      />
+    );
+  },
+
+  name: "with just max Y value less than maximum value",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const WithJustMaxYValueMoreThanMaximumValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          maxYValue: "2.8",
+        }}
+      />
+    );
+  },
+
+  name: "with just max Y value more than maximum value",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const WithJustMaxYValueLessThanMinimumValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          maxYValue: "1",
+        }}
+      />
+    );
+  },
+
+  name: "with just max Y value less than minimum value",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const ScatterPlotPlusLineGraphPlusReferenceLine: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/state.items[:].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            { value: "3", enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "scatter plot plus line graph plus reference line",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const IndexBasedXAxisForArray: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          xAxisVal: "index",
+          paths: [
+            {
+              value: "/some_topic/state.items[:].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            }, // Should show up only in the legend: For now index plots always use playback data, and ignore preloaded data.
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "index-based x-axis for array",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const CustomXAxisTopic: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          paths: [
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+        }}
+      />
+    );
+  },
+
+  name: "custom x-axis topic",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const CustomXAxisTopicWithXLimits: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          minXValue: 1.3,
+          maxXValue: 1.8,
+          paths: [
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+        }}
+      />
+    );
+  },
+
+  parameters: {
+    colorScheme: "light",
+    useReadySignal: true,
+  },
+
+  name: "custom x-axis topic with x limits",
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const CurrentCustomXAxisTopic: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    // As above, but just shows a single point instead of the whole line.
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          xAxisVal: "currentCustom",
+          paths: [
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+        }}
+      />
+    );
+  },
+
+  name: "current custom x-axis topic",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const CustomXAxisTopicWithMismatchedDataLengths: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          paths: [
+            // Extra items in y-axis
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            }, // Same number of items
+            {
+              value: "/some_topic/location_subset.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            }, // Fewer items in y-axis
+            {
+              value: "/some_topic/state.items[:].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location_subset.pose.velocity", enabled: true },
+        }}
+      />
+    );
+  },
+
+  name: "custom x-axis topic with mismatched data lengths",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const SuperCloseValues: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        fixture={{
+          datatypes: new Map(
+            Object.entries({
+              "std_msgs/Float32": {
+                definitions: [{ name: "data", type: "float32", isArray: false }],
+              },
+            }),
+          ),
+          topics: [{ name: "/some_number", schemaName: "std_msgs/Float32" }],
+          activeData: {
+            startTime: { sec: 0, nsec: 0 },
+            endTime: { sec: 10, nsec: 0 },
+            isPlaying: false,
+            speed: 0.2,
+          },
+          frame: {
+            "/some_number": [
+              {
+                topic: "/some_number",
+                receiveTime: { sec: 0, nsec: 0 },
+                message: { data: 1.8548483304974972 },
+                schemaName: "std_msgs/Float32",
+                sizeInBytes: 0,
+              },
+              {
+                topic: "/some_number",
+                receiveTime: { sec: 1, nsec: 0 },
+                message: { data: 1.8548483304974974 },
+                schemaName: "std_msgs/Float32",
+                sizeInBytes: 0,
+              },
+            ],
+          },
+        }}
+        config={{
+          ...exampleConfig,
+          paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
+        }}
+      />
+    );
+  },
+
+  name: "super close values",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const TimeValues: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.header.stamp", enabled: true },
+        }}
+      />
+    );
+  },
+
+  name: "time values",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const PreloadedDataInBinaryBlocks: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
+        config={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "preloaded data in binary blocks",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const MixedStreamedAndPreloadedData: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/state.items[0].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "mixed streamed and preloaded data",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+export const PreloadedDataAndItsDerivative: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
+        config={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data.@derivative",
               enabled: true,
               timestampMethod: "receiveTime",
             },
           ],
         }}
       />
-    </PanelSetup>
-  );
-};
-InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
-  "in a line graph with multiple plots, x-axes are synced";
-InALineGraphWithMultiplePlotsXAxesAreSynced.parameters = {
-  useReadySignal: true,
-};
-InALineGraphWithMultiplePlotsXAxesAreSynced.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+    );
+  },
+
+  name: "preloaded data and its derivative",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
 };
 
-export const LineGraphAfterZoom: Story = () => {
-  const pauseState = useRef<"init" | "zoom" | "ready">("init");
-  const readyState = useReadySignal();
+export const PreloadedDataAndItsNegative: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
-  const doZoom = useCallback(() => {
-    const canvasEl = document.querySelector("canvas");
-    // Zoom is a continuous event, so we need to simulate wheel multiple times
-    if (canvasEl) {
-      for (let i = 0; i < 5; i++) {
-        triggerWheel(canvasEl.parentElement!, 1);
-      }
-    }
-
-    // indicate our next render completion should mark the scene ready
-    pauseState.current = "ready";
-  }, []);
-
-  const pauseFrame = useCallback(() => {
-    return () => {
-      switch (pauseState.current) {
-        case "init":
-          pauseState.current = "zoom";
-          break;
-        case "zoom":
-          doZoom();
-          break;
-        default:
-          readyState();
-          break;
-      }
-    };
-  }, [doZoom, readyState]);
-
-  return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} />;
-};
-LineGraphAfterZoom.storyName = "line graph after zoom";
-LineGraphAfterZoom.parameters = {
-  useReadySignal: true,
-  colorScheme: "dark",
-};
-LineGraphAfterZoom.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const TimestampMethodHeaderStamp: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location_shuffled.pose.velocity",
-            enabled: true,
-            timestampMethod: "headerStamp",
-          },
-          { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
-        ],
-      }}
-    />
-  );
-};
-TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
-TimestampMethodHeaderStamp.parameters = {
-  useReadySignal: true,
-};
-TimestampMethodHeaderStamp.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const LongPath: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      style={{ maxWidth: 250 }}
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-      }}
-    />
-  );
-};
-LongPath.storyName = "long path";
-LongPath.parameters = {
-  useReadySignal: true,
-};
-LongPath.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const DisabledPath: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: false,
-            timestampMethod: "receiveTime",
-          },
-          {
-            value: "/some_topic/location.pose.acceleration",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-      }}
-    />
-  );
-};
-DisabledPath.storyName = "disabled path";
-DisabledPath.parameters = {
-  useReadySignal: true,
-};
-DisabledPath.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const ReferenceLine: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          { value: "0", enabled: true, timestampMethod: "receiveTime" }, // Test typing a period for decimal values. value: "1.", enabled: true, timestampMethod: "receiveTime",
-          { value: "1.", enabled: true, timestampMethod: "receiveTime" },
-          { value: "1.5", enabled: true, timestampMethod: "receiveTime" },
-          { value: "1", enabled: false, timestampMethod: "receiveTime" },
-        ],
-        minYValue: "-1",
-        maxYValue: "2",
-      }}
-    />
-  );
-};
-ReferenceLine.storyName = "reference line";
-ReferenceLine.parameters = {
-  useReadySignal: true,
-};
-ReferenceLine.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const WithMinAndMaxYValues: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      includeSettings
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        minYValue: "1",
-        maxYValue: "2.8",
-      }}
-    />
-  );
-};
-WithMinAndMaxYValues.parameters = {
-  colorScheme: "light",
-  useReadySignal: true,
-};
-WithMinAndMaxYValues.storyName = "with min and max Y values";
-WithMinAndMaxYValues.play = async () => {
-  const label = await screen.findByText("Y Axis");
-  userEvent.click(label);
-};
-
-export const WithJustMinYValueLessThanMinimumValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        minYValue: "1",
-      }}
-    />
-  );
-};
-WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
-WithJustMinYValueLessThanMinimumValue.parameters = {
-  useReadySignal: true,
-};
-WithJustMinYValueLessThanMinimumValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const WithJustMinYValueMoreThanMinimumValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        minYValue: "1.4",
-      }}
-    />
-  );
-};
-WithJustMinYValueMoreThanMinimumValue.storyName = "with just min Y value more than minimum value";
-WithJustMinYValueMoreThanMinimumValue.parameters = {
-  useReadySignal: true,
-};
-WithJustMinYValueMoreThanMinimumValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const WithJustMinYValueMoreThanMaximumValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        minYValue: "5",
-      }}
-    />
-  );
-};
-WithJustMinYValueMoreThanMaximumValue.storyName = "with just min Y value more than maximum value";
-WithJustMinYValueMoreThanMaximumValue.parameters = {
-  useReadySignal: true,
-};
-WithJustMinYValueMoreThanMaximumValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const WithJustMaxYValueLessThanMaximumValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        maxYValue: "1.8",
-      }}
-    />
-  );
-};
-WithJustMaxYValueLessThanMaximumValue.storyName = "with just max Y value less than maximum value";
-WithJustMaxYValueLessThanMaximumValue.parameters = {
-  useReadySignal: true,
-};
-WithJustMaxYValueLessThanMaximumValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const WithJustMaxYValueMoreThanMaximumValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        maxYValue: "2.8",
-      }}
-    />
-  );
-};
-WithJustMaxYValueMoreThanMaximumValue.storyName = "with just max Y value more than maximum value";
-WithJustMaxYValueMoreThanMaximumValue.parameters = {
-  useReadySignal: true,
-};
-WithJustMaxYValueMoreThanMaximumValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const WithJustMaxYValueLessThanMinimumValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        maxYValue: "1",
-      }}
-    />
-  );
-};
-WithJustMaxYValueLessThanMinimumValue.storyName = "with just max Y value less than minimum value";
-WithJustMaxYValueLessThanMinimumValue.parameters = {
-  useReadySignal: true,
-};
-WithJustMaxYValueLessThanMinimumValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const ScatterPlotPlusLineGraphPlusReferenceLine: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/state.items[:].speed",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-          { value: "3", enabled: true, timestampMethod: "receiveTime" },
-        ],
-      }}
-    />
-  );
-};
-ScatterPlotPlusLineGraphPlusReferenceLine.storyName =
-  "scatter plot plus line graph plus reference line";
-ScatterPlotPlusLineGraphPlusReferenceLine.parameters = {
-  useReadySignal: true,
-};
-ScatterPlotPlusLineGraphPlusReferenceLine.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const IndexBasedXAxisForArray: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        xAxisVal: "index",
-        paths: [
-          {
-            value: "/some_topic/state.items[:].speed",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          }, // Should show up only in the legend: For now index plots always use playback data, and ignore preloaded data.
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-        ],
-      }}
-    />
-  );
-};
-IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
-IndexBasedXAxisForArray.parameters = {
-  useReadySignal: true,
-};
-IndexBasedXAxisForArray.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const CustomXAxisTopic: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        xAxisVal: "custom",
-        paths: [
-          {
-            value: "/some_topic/location.pose.acceleration",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
-      }}
-    />
-  );
-};
-CustomXAxisTopic.storyName = "custom x-axis topic";
-CustomXAxisTopic.parameters = {
-  useReadySignal: true,
-};
-CustomXAxisTopic.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const CustomXAxisTopicWithXLimits: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        xAxisVal: "custom",
-        minXValue: 1.3,
-        maxXValue: 1.8,
-        paths: [
-          {
-            value: "/some_topic/location.pose.acceleration",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
-      }}
-    />
-  );
-};
-CustomXAxisTopicWithXLimits.parameters = {
-  colorScheme: "light",
-  useReadySignal: true,
-};
-CustomXAxisTopicWithXLimits.storyName = "custom x-axis topic with x limits";
-CustomXAxisTopicWithXLimits.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const CurrentCustomXAxisTopic: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  // As above, but just shows a single point instead of the whole line.
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        xAxisVal: "currentCustom",
-        paths: [
-          {
-            value: "/some_topic/location.pose.acceleration",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
-      }}
-    />
-  );
-};
-CurrentCustomXAxisTopic.storyName = "current custom x-axis topic";
-CurrentCustomXAxisTopic.parameters = {
-  useReadySignal: true,
-};
-CurrentCustomXAxisTopic.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const CustomXAxisTopicWithMismatchedDataLengths: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        xAxisVal: "custom",
-        paths: [
-          // Extra items in y-axis
-          {
-            value: "/some_topic/location.pose.acceleration",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          }, // Same number of items
-          {
-            value: "/some_topic/location_subset.pose.acceleration",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          }, // Fewer items in y-axis
-          {
-            value: "/some_topic/state.items[:].speed",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        xAxisPath: { value: "/some_topic/location_subset.pose.velocity", enabled: true },
-      }}
-    />
-  );
-};
-CustomXAxisTopicWithMismatchedDataLengths.storyName =
-  "custom x-axis topic with mismatched data lengths";
-CustomXAxisTopicWithMismatchedDataLengths.parameters = {
-  useReadySignal: true,
-};
-CustomXAxisTopicWithMismatchedDataLengths.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const SuperCloseValues: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      fixture={{
-        datatypes: new Map(
-          Object.entries({
-            "std_msgs/Float32": {
-              definitions: [{ name: "data", type: "float32", isArray: false }],
-            },
-          }),
-        ),
-        topics: [{ name: "/some_number", schemaName: "std_msgs/Float32" }],
-        activeData: {
-          startTime: { sec: 0, nsec: 0 },
-          endTime: { sec: 10, nsec: 0 },
-          isPlaying: false,
-          speed: 0.2,
-        },
-        frame: {
-          "/some_number": [
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
+        config={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
             {
-              topic: "/some_number",
-              receiveTime: { sec: 0, nsec: 0 },
-              message: { data: 1.8548483304974972 },
-              schemaName: "std_msgs/Float32",
-              sizeInBytes: 0,
-            },
-            {
-              topic: "/some_number",
-              receiveTime: { sec: 1, nsec: 0 },
-              message: { data: 1.8548483304974974 },
-              schemaName: "std_msgs/Float32",
-              sizeInBytes: 0,
+              value: "/preloaded_topic.data.@negative",
+              enabled: true,
+              timestampMethod: "receiveTime",
             },
           ],
-        },
-      }}
-      config={{
-        ...exampleConfig,
-        paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
-      }}
-    />
-  );
-};
-SuperCloseValues.storyName = "super close values";
-SuperCloseValues.parameters = {
-  useReadySignal: true,
-};
-SuperCloseValues.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+        }}
+      />
+    );
+  },
+
+  name: "preloaded data and its negative",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
 };
 
-export const TimeValues: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
+export const PreloadedDataAndItsAbsoluteValue: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      config={{
-        ...exampleConfig,
-        xAxisVal: "custom",
-        paths: [
-          {
-            value: "/some_topic/location.pose.velocity",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-        xAxisPath: { value: "/some_topic/location.header.stamp", enabled: true },
-      }}
-    />
-  );
-};
-TimeValues.storyName = "time values";
-TimeValues.parameters = {
-  useReadySignal: true,
-};
-TimeValues.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
+        config={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data.@abs",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    );
+  },
 
-export const PreloadedDataInBinaryBlocks: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
+  name: "preloaded data and its absolute value",
 
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
-      config={{
-        ...exampleConfig,
-        paths: [
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
-        ],
-      }}
-    />
-  );
-};
-PreloadedDataInBinaryBlocks.storyName = "preloaded data in binary blocks";
-PreloadedDataInBinaryBlocks.parameters = {
-  useReadySignal: true,
-};
-PreloadedDataInBinaryBlocks.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
+  parameters: {
+    useReadySignal: true,
+  },
 
-export const MixedStreamedAndPreloadedData: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}
-      config={{
-        ...exampleConfig,
-        paths: [
-          {
-            value: "/some_topic/state.items[0].speed",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-        ],
-      }}
-    />
-  );
-};
-MixedStreamedAndPreloadedData.storyName = "mixed streamed and preloaded data";
-MixedStreamedAndPreloadedData.parameters = {
-  useReadySignal: true,
-};
-MixedStreamedAndPreloadedData.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const PreloadedDataAndItsDerivative: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
-      config={{
-        ...exampleConfig,
-        paths: [
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-          {
-            value: "/preloaded_topic.data.@derivative",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-      }}
-    />
-  );
-};
-PreloadedDataAndItsDerivative.storyName = "preloaded data and its derivative";
-PreloadedDataAndItsDerivative.parameters = {
-  useReadySignal: true,
-};
-PreloadedDataAndItsDerivative.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const PreloadedDataAndItsNegative: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
-      config={{
-        ...exampleConfig,
-        paths: [
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-          {
-            value: "/preloaded_topic.data.@negative",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-      }}
-    />
-  );
-};
-PreloadedDataAndItsNegative.storyName = "preloaded data and its negative";
-PreloadedDataAndItsNegative.parameters = {
-  useReadySignal: true,
-};
-PreloadedDataAndItsNegative.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-
-export const PreloadedDataAndItsAbsoluteValue: Story = () => {
-  const readySignal = useReadySignal({ count: 3 });
-  const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
-  return (
-    <PlotWrapper
-      pauseFrame={pauseFrame}
-      fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}
-      config={{
-        ...exampleConfig,
-        paths: [
-          { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-          {
-            value: "/preloaded_topic.data.@abs",
-            enabled: true,
-            timestampMethod: "receiveTime",
-          },
-        ],
-      }}
-    />
-  );
-};
-PreloadedDataAndItsAbsoluteValue.storyName = "preloaded data and its absolute value";
-PreloadedDataAndItsAbsoluteValue.parameters = {
-  useReadySignal: true,
-};
-PreloadedDataAndItsAbsoluteValue.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
 };

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
@@ -21,10 +21,12 @@ export default {
   title: "panels/PlaybackPerformance",
 };
 
-export const SimpleExample: Story = () => {
-  return (
-    <PanelSetup>
-      <PlaybackPerformance />
-    </PanelSetup>
-  );
+export const SimpleExample: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup>
+        <PlaybackPerformance />
+      </PanelSetup>
+    );
+  },
 };

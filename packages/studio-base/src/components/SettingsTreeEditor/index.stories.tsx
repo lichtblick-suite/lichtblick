@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Box } from "@mui/material";
+import { StoryObj } from "@storybook/react";
 import { fireEvent, userEvent } from "@storybook/testing-library";
 import produce from "immer";
 import { last } from "lodash";
@@ -873,176 +874,220 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
   );
 }
 
-export function Basics(): JSX.Element {
-  return <Wrapper nodes={BasicSettings} />;
-}
+export const Basics: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={BasicSettings} />;
+  },
 
-Basics.play = () => {
-  Array.from(document.querySelectorAll("[data-testid=node-actions-menu-button]"))
-    .slice(0, 1)
-    .forEach((node) => fireEvent.click(node));
+  play: () => {
+    Array.from(document.querySelectorAll("[data-testid=node-actions-menu-button]"))
+      .slice(0, 1)
+      .forEach((node) => fireEvent.click(node));
+  },
 };
 
-export const BasicsChinese = Object.assign(Basics.bind(undefined), {
+export const BasicsChinese: StoryObj = {
+  ...Basics,
   play: Basics.play,
   parameters: { forceLanguage: "zh" },
-});
+};
 
-export function DisabledFields(): JSX.Element {
-  return <Wrapper nodes={DisabledSettings} />;
-}
+export const DisabledFields: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={DisabledSettings} />;
+  },
+};
 
-export function ReadonlyFields(): JSX.Element {
-  return <Wrapper nodes={ReadonlySettings} />;
-}
+export const ReadonlyFields: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={ReadonlySettings} />;
+  },
+};
 
-export function PanelExamples(): JSX.Element {
-  return <Wrapper nodes={PanelExamplesSettings} />;
-}
+export const PanelExamples: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={PanelExamplesSettings} />;
+  },
 
-PanelExamples.play = () => {
-  Array.from(document.querySelectorAll("[data-node-function=edit-label]"))
-    .slice(0, 1)
-    .forEach((node) => {
+  play: () => {
+    Array.from(document.querySelectorAll("[data-node-function=edit-label]"))
+      .slice(0, 1)
+      .forEach((node) => {
+        fireEvent.click(node);
+        fireEvent.change(document.activeElement!, { target: { value: "Renamed Node" } });
+        fireEvent.keyDown(document.activeElement!, { key: "Enter" });
+      });
+  },
+};
+
+export const IconExamples: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={IconExamplesSettings} />;
+  },
+};
+
+export const Topics: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={TopicSettings} />;
+  },
+};
+
+export const Filter: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={FilterSettings} />;
+  },
+
+  play: () => {
+    const node = document.querySelector("[data-testid=settings-filter-field] input");
+    if (node) {
       fireEvent.click(node);
-      fireEvent.change(document.activeElement!, { target: { value: "Renamed Node" } });
-      fireEvent.keyDown(document.activeElement!, { key: "Enter" });
-    });
+      fireEvent.change(node, { target: { value: "matcha" } });
+    }
+  },
 };
 
-export function IconExamples(): JSX.Element {
-  return <Wrapper nodes={IconExamplesSettings} />;
-}
-
-export function Topics(): JSX.Element {
-  return <Wrapper nodes={TopicSettings} />;
-}
-
-export function Filter(): JSX.Element {
-  return <Wrapper nodes={FilterSettings} />;
-}
-Filter.play = () => {
-  const node = document.querySelector("[data-testid=settings-filter-field] input");
-  if (node) {
-    fireEvent.click(node);
-    fireEvent.change(node, { target: { value: "matcha" } });
-  }
+export const Colors: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={ColorSettings} />;
+  },
 };
 
-export function Colors(): JSX.Element {
-  return <Wrapper nodes={ColorSettings} />;
-}
+export const EmptyValue: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={ColorSettings} />;
+  },
+};
 
-export function EmptyValue(): JSX.Element {
-  return <Wrapper nodes={ColorSettings} />;
-}
+export const SetHiddenValueToTrue: StoryObj = {
+  render: () => {
+    return <Wrapper nodes={ColorSettings} />;
+  },
+};
 
-export function SetHiddenValueToTrue(): JSX.Element {
-  return <Wrapper nodes={ColorSettings} />;
-}
-
-export function Vec2(): JSX.Element {
-  const settings: SettingsTreeNodes = {
-    fields: {
+export const Vec2: StoryObj = {
+  render: () => {
+    const settings: SettingsTreeNodes = {
       fields: {
-        basic: {
-          label: "Basic",
-          input: "vec2",
-        },
-        labels: {
-          label: "Custom Labels",
-          input: "vec2",
-          labels: ["A", "B"],
-        },
-        values: {
-          label: "Values",
-          input: "vec2",
-          value: [1.1111, 2.2222],
-        },
-        someValues: {
-          label: "Some values",
-          input: "vec2",
-          value: [1.1111, undefined],
-        },
-        placeholder: {
-          label: "Placeholder",
-          input: "vec2",
-          placeholder: ["foo", "bar"],
-          value: [1.1111, undefined],
+        fields: {
+          basic: {
+            label: "Basic",
+            input: "vec2",
+          },
+          labels: {
+            label: "Custom Labels",
+            input: "vec2",
+            labels: ["A", "B"],
+          },
+          values: {
+            label: "Values",
+            input: "vec2",
+            value: [1.1111, 2.2222],
+          },
+          someValues: {
+            label: "Some values",
+            input: "vec2",
+            value: [1.1111, undefined],
+          },
+          placeholder: {
+            label: "Placeholder",
+            input: "vec2",
+            placeholder: ["foo", "bar"],
+            value: [1.1111, undefined],
+          },
         },
       },
-    },
-  };
+    };
 
-  return <Wrapper nodes={settings} />;
-}
+    return <Wrapper nodes={settings} />;
+  },
+};
 
-export function Vec3(): JSX.Element {
-  const settings: SettingsTreeNodes = {
-    fields: {
+export const Vec3: StoryObj = {
+  render: () => {
+    const settings: SettingsTreeNodes = {
       fields: {
-        basic: {
-          label: "Basic",
-          input: "vec3",
-        },
-        labels: {
-          label: "Custom Labels",
-          input: "vec3",
-          labels: ["A", "B", "C"],
-        },
-        values: {
-          label: "Values",
-          input: "vec3",
-          value: [1.1111, 2.2222, 3.333],
-        },
-        someValues: {
-          label: "Some values",
-          input: "vec3",
-          value: [1.1111, undefined, 2.222],
-        },
-        placeholder: {
-          label: "Placeholder",
-          input: "vec3",
-          placeholder: ["foo", "bar", "baz"],
-          value: [1.1111, undefined, undefined],
+        fields: {
+          basic: {
+            label: "Basic",
+            input: "vec3",
+          },
+          labels: {
+            label: "Custom Labels",
+            input: "vec3",
+            labels: ["A", "B", "C"],
+          },
+          values: {
+            label: "Values",
+            input: "vec3",
+            value: [1.1111, 2.2222, 3.333],
+          },
+          someValues: {
+            label: "Some values",
+            input: "vec3",
+            value: [1.1111, undefined, 2.222],
+          },
+          placeholder: {
+            label: "Placeholder",
+            input: "vec3",
+            placeholder: ["foo", "bar", "baz"],
+            value: [1.1111, undefined, undefined],
+          },
         },
       },
-    },
-  };
+    };
 
-  return <Wrapper nodes={settings} />;
-}
+    return <Wrapper nodes={settings} />;
+  },
+};
 
-async function clickSelect() {
+async function clickSelect(): Promise<void> {
   userEvent.click(document.querySelector(".MuiSelect-select")!);
 }
 
-export function SelectInvalidWithUndefined(): JSX.Element {
-  return <Wrapper nodes={SelectInvalidWithUndefinedSettings} />;
-}
-SelectInvalidWithUndefined.play = clickSelect;
+export const SelectInvalidWithUndefined: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={SelectInvalidWithUndefinedSettings} />;
+  },
 
-export function SelectInvalidWithoutUndefined(): JSX.Element {
-  return <Wrapper nodes={SelectInvalidWithoutUndefinedSettings} />;
-}
-SelectInvalidWithoutUndefined.play = clickSelect;
+  play: clickSelect,
+};
 
-export function SelectValidWithUndefined(): JSX.Element {
-  return <Wrapper nodes={SelectValidWithUndefinedSettings} />;
-}
-SelectValidWithUndefined.play = clickSelect;
+export const SelectInvalidWithoutUndefined: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={SelectInvalidWithoutUndefinedSettings} />;
+  },
 
-export function SelectValidWithEmptyString(): JSX.Element {
-  return <Wrapper nodes={SelectValidWithEmptyStringSettings} />;
-}
-SelectValidWithEmptyString.play = clickSelect;
+  play: clickSelect,
+};
 
-export function SelectEmpty(): JSX.Element {
-  return <Wrapper nodes={SelectEmptySettings} />;
-}
-SelectEmpty.play = clickSelect;
+export const SelectValidWithUndefined: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={SelectValidWithUndefinedSettings} />;
+  },
 
-export function SelectEmptyInvalid(): JSX.Element {
-  return <Wrapper nodes={SelectEmptyInvalidSettings} />;
-}
-SelectEmptyInvalid.play = clickSelect;
+  play: clickSelect,
+};
+
+export const SelectValidWithEmptyString: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={SelectValidWithEmptyStringSettings} />;
+  },
+
+  play: clickSelect,
+};
+
+export const SelectEmpty: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={SelectEmptySettings} />;
+  },
+
+  play: clickSelect,
+};
+
+export const SelectEmptyInvalid: StoryObj = {
+  render: function Story() {
+    return <Wrapper nodes={SelectEmptyInvalidSettings} />;
+  },
+
+  play: clickSelect,
+};

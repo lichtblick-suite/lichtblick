@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
 
 const fakeError = () => {
@@ -25,124 +27,151 @@ export default {
   title: "components/NotificationModal",
 };
 
-export const ErrorNoSubtextWithDetails = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Error 1",
-        details: fakeError(),
-        created: new Date(),
-        severity: "error",
-      }}
-    />
-  );
-};
-ErrorNoSubtextWithDetails.parameters = { colorScheme: "light" };
-export const ErrorNoSubtextWithDetailsDark = ErrorNoSubtextWithDetails.bind(undefined);
-ErrorNoSubtextWithDetailsDark.parameters = { colorScheme: "dark" };
+export const ErrorNoSubtextWithDetails: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Error 1",
+          details: fakeError(),
+          created: new Date(),
+          severity: "error",
+        }}
+      />
+    );
+  },
 
-export const ErrorWithSubtextAndDetails = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Error 1",
-        details: fakeError(),
-        created: new Date(),
-        severity: "error",
-        subText: "This error has a subtext.",
-      }}
-    />
-  );
+  parameters: { colorScheme: "light" },
 };
-ErrorWithSubtextAndDetails.parameters = { colorScheme: "light" };
 
-export const ErrorWithSubtextNoDetails = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Error 1",
-        details: undefined,
-        created: new Date(),
-        severity: "error",
-        subText: "This error has a subtext.",
-      }}
-    />
-  );
+export const ErrorNoSubtextWithDetailsDark: StoryObj = {
+  ...ErrorNoSubtextWithDetails,
+  parameters: { colorScheme: "dark" },
 };
-ErrorWithSubtextNoDetails.parameters = { colorScheme: "light" };
 
-export const Warning = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Warning 1",
-        details: "Some error details",
-        created: new Date(),
-        severity: "warn",
-      }}
-    />
-  );
-};
-Warning.parameters = { colorScheme: "dark" };
+export const ErrorWithSubtextAndDetails: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Error 1",
+          details: fakeError(),
+          created: new Date(),
+          severity: "error",
+          subText: "This error has a subtext.",
+        }}
+      />
+    );
+  },
 
-export const ErrorNoDetailsOrSubtext = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Error 1",
-        details: undefined,
-        created: new Date(),
-        severity: "error",
-      }}
-    />
-  );
+  parameters: { colorScheme: "light" },
 };
-ErrorNoDetailsOrSubtext.parameters = { colorScheme: "dark" };
 
-export const ErrorWithJsxElementDetails = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Error 1",
-        details: (
-          <p>
-            This is <b style={{ color: "red" }}>customized</b> error detail.
-          </p>
-        ),
-        created: new Date(),
-        severity: "error",
-      }}
-    />
-  );
-};
-ErrorWithJsxElementDetails.parameters = { colorScheme: "light" };
-export const ErrorWithJsxElementDetailsDark = ErrorWithJsxElementDetails.bind(undefined);
-ErrorWithJsxElementDetailsDark.parameters = { colorScheme: "dark" };
+export const ErrorWithSubtextNoDetails: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Error 1",
+          details: undefined,
+          created: new Date(),
+          severity: "error",
+          subText: "This error has a subtext.",
+        }}
+      />
+    );
+  },
 
-export const ErrorWithNewlineDetails = (): JSX.Element => {
-  return (
-    <NotificationModal
-      onRequestClose={() => {}}
-      notification={{
-        id: "1",
-        message: "Error 1",
-        details: "Some details.\n\nWith a newline.",
-        created: new Date(),
-        severity: "error",
-      }}
-    />
-  );
+  parameters: { colorScheme: "light" },
 };
-ErrorWithNewlineDetails.parameters = { colorScheme: "dark" };
+
+export const Warning: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Warning 1",
+          details: "Some error details",
+          created: new Date(),
+          severity: "warn",
+        }}
+      />
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+};
+
+export const ErrorNoDetailsOrSubtext: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Error 1",
+          details: undefined,
+          created: new Date(),
+          severity: "error",
+        }}
+      />
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+};
+
+export const ErrorWithJsxElementDetails: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Error 1",
+          details: (
+            <p>
+              This is <b style={{ color: "red" }}>customized</b> error detail.
+            </p>
+          ),
+          created: new Date(),
+          severity: "error",
+        }}
+      />
+    );
+  },
+
+  parameters: { colorScheme: "light" },
+};
+
+export const ErrorWithJsxElementDetailsDark: StoryObj = {
+  ...ErrorWithJsxElementDetails,
+  parameters: { colorScheme: "dark" },
+};
+
+export const ErrorWithNewlineDetails: StoryObj = {
+  render: function Story() {
+    return (
+      <NotificationModal
+        onRequestClose={() => {}}
+        notification={{
+          id: "1",
+          message: "Error 1",
+          details: "Some details.\n\nWith a newline.",
+          created: new Date(),
+          severity: "error",
+        }}
+      />
+    );
+  },
+
+  parameters: { colorScheme: "dark" },
+};

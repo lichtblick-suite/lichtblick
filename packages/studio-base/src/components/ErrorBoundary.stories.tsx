@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -35,22 +35,26 @@ export default {
   title: "components/ErrorBoundary",
 };
 
-export const Default: Story = () => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <ErrorBoundary>
-        <Broken />
-      </ErrorBoundary>
-    </DndProvider>
-  );
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <ErrorBoundary>
+          <Broken />
+        </ErrorBoundary>
+      </DndProvider>
+    );
+  },
 };
 
-export const ShowingDetails: Story = () => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <ErrorBoundary showErrorDetails hideErrorSourceLocations>
-        <Broken />
-      </ErrorBoundary>
-    </DndProvider>
-  );
+export const ShowingDetails: StoryObj = {
+  render: () => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <ErrorBoundary showErrorDetails hideErrorSourceLocations>
+          <Broken />
+        </ErrorBoundary>
+      </DndProvider>
+    );
+  },
 };

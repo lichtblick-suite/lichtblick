@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
+
 import { Grid, NumericType } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
 import { LayerSettingsFoxgloveGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
@@ -664,13 +666,27 @@ function Row_Stride_Grid(): JSX.Element {
     </PanelSetup>
   );
 }
-export const Foxglove_Grid_Uint8_Values = (): JSX.Element => <Foxglove_Grid_Uint8 />;
-export const Foxglove_Grid_Uint8_Values_Clamped = (): JSX.Element => (
-  <Foxglove_Grid_Uint8 minValue={30} maxValue={80} />
-);
-export const Foxglove_Grid_RGBA_Values = (): JSX.Element => <Foxglove_Grid_RGBA />;
-export const Foxglove_Grid_Float_Values = (): JSX.Element => <Foxglove_Grid_Float />;
-export const Foxglove_Grid_Float_Values_Clamped = (): JSX.Element => (
-  <Foxglove_Grid_Float minValue={0.05} maxValue={0.1} />
-);
-export const Foxglove_Grid_Padded_Row = (): JSX.Element => <Row_Stride_Grid />;
+
+export const Foxglove_Grid_Uint8_Values: StoryObj = {
+  render: () => <Foxglove_Grid_Uint8 />,
+};
+
+export const Foxglove_Grid_Uint8_Values_Clamped: StoryObj = {
+  render: () => <Foxglove_Grid_Uint8 minValue={30} maxValue={80} />,
+};
+
+export const Foxglove_Grid_RGBA_Values: StoryObj = {
+  render: () => <Foxglove_Grid_RGBA />,
+};
+
+export const Foxglove_Grid_Float_Values: StoryObj = {
+  render: () => <Foxglove_Grid_Float />,
+};
+
+export const Foxglove_Grid_Float_Values_Clamped: StoryObj = {
+  render: () => <Foxglove_Grid_Float minValue={0.05} maxValue={0.1} />,
+};
+
+export const Foxglove_Grid_Padded_Row: StoryObj = {
+  render: () => <Row_Stride_Grid />,
+};

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { fireEvent } from "@storybook/testing-library";
 import { v4 as uuid } from "uuid";
 
@@ -55,17 +55,19 @@ const Dummy = Panel(
   }),
 );
 
-export const Default: Story = () => {
-  return (
-    <PanelSetup>
-      <Dummy></Dummy>
-    </PanelSetup>
-  );
-};
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup>
+        <Dummy></Dummy>
+      </PanelSetup>
+    );
+  },
 
-Default.play = () => {
-  Array.from(document.getElementsByClassName(DUMMY_CLASS)).forEach((el) => {
-    const rect = el.getBoundingClientRect();
-    fireEvent.contextMenu(el, { clientX: rect.x + 100, clientY: rect.y + 100 });
-  });
+  play: () => {
+    Array.from(document.getElementsByClassName(DUMMY_CLASS)).forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      fireEvent.contextMenu(el, { clientX: rect.x + 100, clientY: rect.y + 100 });
+    });
+  },
 };

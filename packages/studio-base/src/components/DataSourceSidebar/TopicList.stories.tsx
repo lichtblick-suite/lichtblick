@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { StoryObj, StoryFn } from "@storybook/react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
 
 import { TopicList } from "./TopicList";
 
-function Wrapper(StoryFn: Story): JSX.Element {
+function Wrapper(Wrapped: StoryFn): JSX.Element {
   return (
     <MockMessagePipelineProvider
       capabilities={[PlayerCapabilities.playbackControl]}
@@ -44,7 +44,7 @@ function Wrapper(StoryFn: Story): JSX.Element {
         ])
       }
     >
-      <StoryFn />
+      <Wrapped />
     </MockMessagePipelineProvider>
   );
 }
@@ -55,6 +55,8 @@ export default {
   decorators: [Wrapper],
 };
 
-export function Default(): JSX.Element {
-  return <TopicList />;
-}
+export const Default: StoryObj = {
+  render: () => {
+    return <TopicList />;
+  },
+};

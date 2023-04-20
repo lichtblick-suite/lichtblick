@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StoryObj } from "@storybook/react";
 import { ReactNode } from "react";
 
 import CurrentUserContext, {
@@ -105,75 +106,95 @@ function CurrentUserWrapper(props: { children: ReactNode; user?: User | undefine
 
 const defaultProps: OpenDialogProps = { backdropAnimation: false };
 
-export const DefaultLight = (): JSX.Element => <OpenDialog {...defaultProps} />;
-DefaultLight.storyName = "Default (light)";
-DefaultLight.parameters = { colorScheme: "light" };
+export const DefaultLight: StoryObj = {
+  render: () => <OpenDialog {...defaultProps} />,
+  name: "Default (light)",
+  parameters: { colorScheme: "light" },
+};
 
-export const DefaultDark = (): JSX.Element => <OpenDialog {...defaultProps} />;
-DefaultDark.storyName = "Default (dark)";
+export const DefaultDark: StoryObj = {
+  render: () => <OpenDialog {...defaultProps} />,
+  name: "Default (dark)",
+};
 
-export function UserNoAuth(): JSX.Element {
-  return (
-    <PlayerSelectionContext.Provider value={playerSelection}>
-      <OpenDialog {...defaultProps} />
-    </PlayerSelectionContext.Provider>
-  );
-}
-UserNoAuth.storyName = "User not authenticated";
-
-export const UserNoAuthChinese = Object.assign(UserNoAuth.bind(undefined), {
-  storyName: "User not authenticated Chinese",
-  parameters: { forceLanguage: "zh" },
-});
-
-export function UserPrivate(): JSX.Element {
-  return (
-    <CurrentUserWrapper>
+export const UserNoAuth: StoryObj = {
+  render: function Story() {
+    return (
       <PlayerSelectionContext.Provider value={playerSelection}>
         <OpenDialog {...defaultProps} />
       </PlayerSelectionContext.Provider>
-    </CurrentUserWrapper>
-  );
-}
-UserPrivate.storyName = "User not authenticated (private)";
+    );
+  },
 
-export const UserPrivateChinese = Object.assign(UserPrivate.bind(undefined), {
-  storyName: "User not authenticated (private) Chinese",
+  name: "User not authenticated",
+};
+
+export const UserNoAuthChinese: StoryObj = {
+  ...UserNoAuth,
+  name: "User not authenticated Chinese",
   parameters: { forceLanguage: "zh" },
-});
+};
 
-export function UserAuthedFree(): JSX.Element {
-  const freeUser = fakeUser("free");
+export const UserPrivate: StoryObj = {
+  render: function Story() {
+    return (
+      <CurrentUserWrapper>
+        <PlayerSelectionContext.Provider value={playerSelection}>
+          <OpenDialog {...defaultProps} />
+        </PlayerSelectionContext.Provider>
+      </CurrentUserWrapper>
+    );
+  },
 
-  return (
-    <CurrentUserWrapper user={freeUser}>
-      <PlayerSelectionContext.Provider value={playerSelection}>
-        <OpenDialog {...defaultProps} />
-      </PlayerSelectionContext.Provider>
-    </CurrentUserWrapper>
-  );
-}
-UserAuthedFree.storyName = "User Authenticated with Free Account";
+  name: "User not authenticated (private)",
+};
 
-export const UserAuthedFreeChinese = Object.assign(UserAuthedFree.bind(undefined), {
-  storyName: "User Authenticated with Free Account Chinese",
+export const UserPrivateChinese: StoryObj = {
+  ...UserPrivate,
+  name: "User not authenticated (private) Chinese",
   parameters: { forceLanguage: "zh" },
-});
+};
 
-export function UserAuthedPaid(): JSX.Element {
-  const freeUser = fakeUser("paid");
+export const UserAuthedFree: StoryObj = {
+  render: function Story() {
+    const freeUser = fakeUser("free");
 
-  return (
-    <CurrentUserWrapper user={freeUser}>
-      <PlayerSelectionContext.Provider value={playerSelection}>
-        <OpenDialog {...defaultProps} />
-      </PlayerSelectionContext.Provider>
-    </CurrentUserWrapper>
-  );
-}
-UserAuthedPaid.storyName = "User Authenticated with Paid Account";
+    return (
+      <CurrentUserWrapper user={freeUser}>
+        <PlayerSelectionContext.Provider value={playerSelection}>
+          <OpenDialog {...defaultProps} />
+        </PlayerSelectionContext.Provider>
+      </CurrentUserWrapper>
+    );
+  },
 
-export const UserAuthedPaidChinese = Object.assign(UserAuthedPaid.bind(undefined), {
-  storyName: "User Authenticated with Paid Account Chinese",
+  name: "User Authenticated with Free Account",
+};
+
+export const UserAuthedFreeChinese: StoryObj = {
+  ...UserAuthedFree,
+  name: "User Authenticated with Free Account Chinese",
   parameters: { forceLanguage: "zh" },
-});
+};
+
+export const UserAuthedPaid: StoryObj = {
+  render: function Story() {
+    const freeUser = fakeUser("paid");
+
+    return (
+      <CurrentUserWrapper user={freeUser}>
+        <PlayerSelectionContext.Provider value={playerSelection}>
+          <OpenDialog {...defaultProps} />
+        </PlayerSelectionContext.Provider>
+      </CurrentUserWrapper>
+    );
+  },
+
+  name: "User Authenticated with Paid Account",
+};
+
+export const UserAuthedPaidChinese: StoryObj = {
+  ...UserAuthedPaid,
+  name: "User Authenticated with Paid Account Chinese",
+  parameters: { forceLanguage: "zh" },
+};

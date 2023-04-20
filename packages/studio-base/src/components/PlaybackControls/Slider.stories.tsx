@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Box } from "@mui/material";
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -41,55 +41,59 @@ export default {
   title: "components/PlaybackControls/Slider",
 };
 
-export const Examples: Story = () => {
-  const [value, setValue] = useState(0.5);
-  const [draggableValue, setDraggableValue] = useState(0.25);
-  return (
-    <Box padding={4}>
-      <p>standard (clickable)</p>
-      <Box bgcolor="error.light" height={30} width={300}>
-        <Slider onChange={(v) => setValue(v)} fraction={value} />
+export const Examples: StoryObj = {
+  render: function Story() {
+    const [value, setValue] = useState(0.5);
+    const [draggableValue, setDraggableValue] = useState(0.25);
+    return (
+      <Box padding={4}>
+        <p>standard (clickable)</p>
+        <Box bgcolor="error.light" height={30} width={300}>
+          <Slider onChange={(v) => setValue(v)} fraction={value} />
+        </Box>
+        <p>disabled (not clickable)</p>
+        <Box bgcolor="error.light" height={30} width={300}>
+          <Slider disabled onChange={(v) => setValue(v)} fraction={value} />
+        </Box>
+        <p>no value</p>
+        <Box bgcolor="error.light" height={30} width={300}>
+          <Slider
+            onChange={() => {
+              // no-op
+            }}
+            fraction={undefined}
+          />
+        </Box>
+        <p>draggable</p>
+        <Box bgcolor="info.main" height={20} width={500}>
+          <Slider onChange={(v) => setDraggableValue(v)} fraction={draggableValue} />
+        </Box>
       </Box>
-      <p>disabled (not clickable)</p>
-      <Box bgcolor="error.light" height={30} width={300}>
-        <Slider disabled onChange={(v) => setValue(v)} fraction={value} />
-      </Box>
-      <p>no value</p>
-      <Box bgcolor="error.light" height={30} width={300}>
-        <Slider
-          onChange={() => {
-            // no-op
-          }}
-          fraction={undefined}
-        />
-      </Box>
-      <p>draggable</p>
-      <Box bgcolor="info.main" height={20} width={500}>
-        <Slider onChange={(v) => setDraggableValue(v)} fraction={draggableValue} />
-      </Box>
-    </Box>
-  );
+    );
+  },
 };
 
-export const CustomRenderer: Story = () => {
-  const { classes } = useStyles();
-  const [draggableValue, setDraggableValue] = useState(0.25);
+export const CustomRenderer: StoryObj = {
+  render: function Story() {
+    const { classes } = useStyles();
+    const [draggableValue, setDraggableValue] = useState(0.25);
 
-  return (
-    <Box padding={4}>
-      <p>Customize slider UI using renderSlider</p>
-      <Box bgcolor="info.main" height={20} width={500}>
-        <Slider
-          onChange={(v) => setDraggableValue(v)}
-          fraction={draggableValue}
-          renderSlider={(width) => (
-            <>
-              <div className={classes.customRange} style={{ width: `${(width ?? 0) * 100}%` }} />
-              <div className={classes.customMarker} style={{ left: `${(width ?? 0) * 100}%` }} />
-            </>
-          )}
-        />
+    return (
+      <Box padding={4}>
+        <p>Customize slider UI using renderSlider</p>
+        <Box bgcolor="info.main" height={20} width={500}>
+          <Slider
+            onChange={(v) => setDraggableValue(v)}
+            fraction={draggableValue}
+            renderSlider={(width) => (
+              <>
+                <div className={classes.customRange} style={{ width: `${(width ?? 0) * 100}%` }} />
+                <div className={classes.customMarker} style={{ left: `${(width ?? 0) * 100}%` }} />
+              </>
+            )}
+          />
+        </Box>
       </Box>
-    </Box>
-  );
+    );
+  },
 };

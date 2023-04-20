@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryFn } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 
 import Table from "@foxglove/studio-base/panels/Table";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -53,205 +53,239 @@ export default {
   title: "panels/Table",
 };
 
-export const NoTopicPath: StoryFn = () => {
-  return (
-    <PanelSetup fixture={{ frame: {}, topics: [] }}>
-      <Table overrideConfig={{ topicPath: "" }} />
-    </PanelSetup>
-  );
+export const NoTopicPath: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={{ frame: {}, topics: [] }}>
+        <Table overrideConfig={{ topicPath: "" }} />
+      </PanelSetup>
+    );
+  },
+
+  name: "no topic path",
 };
 
-NoTopicPath.storyName = "no topic path";
+export const NoData: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={{ frame: {}, topics: [] }}>
+        <Table overrideConfig={{ topicPath: "/unknown" }} />
+      </PanelSetup>
+    );
+  },
 
-export const NoData: StoryFn = () => {
-  return (
-    <PanelSetup fixture={{ frame: {}, topics: [] }}>
-      <Table overrideConfig={{ topicPath: "/unknown" }} />
-    </PanelSetup>
-  );
+  name: "no data",
 };
 
-NoData.storyName = "no data";
+export const Arrays: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
 
-export const Arrays: StoryFn = () => {
-  return (
-    <PanelSetup fixture={fixture}>
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
+  name: "arrays",
 };
 
-Arrays.storyName = "arrays";
+export const ExpandRows: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={() => {
+          setImmediate(() => {
+            (
+              document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
+            ).click();
+          });
+        }}
+      >
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
 
-export const ExpandRows: StoryFn = () => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        setImmediate(() => {
-          (
-            document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
-          ).click();
-        });
-      }}
-    >
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
+  name: "expand rows",
+  parameters: { colorScheme: "dark" },
 };
 
-ExpandRows.storyName = "expand rows";
-ExpandRows.parameters = { colorScheme: "dark" };
+export const ExpandCellsWithNestedObjects: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={() => {
+          setImmediate(() => {
+            (
+              document.querySelectorAll(
+                "[data-testid=expand-cell-obj-0]",
+              )[0] as HTMLTableCellElement
+            ).click();
+          });
+        }}
+      >
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
 
-export const ExpandCellsWithNestedObjects: StoryFn = () => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        setImmediate(() => {
-          (
-            document.querySelectorAll("[data-testid=expand-cell-obj-0]")[0] as HTMLTableCellElement
-          ).click();
-        });
-      }}
-    >
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
+  name: "expand cells with nested objects",
+  parameters: { colorScheme: "dark" },
 };
 
-ExpandCellsWithNestedObjects.storyName = "expand cells with nested objects";
-ExpandCellsWithNestedObjects.parameters = { colorScheme: "dark" };
+export const ExpandCellsWithNestedArrays: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={() => {
+          setImmediate(() => {
+            (
+              document.querySelectorAll(
+                "[data-testid=expand-cell-arr-0]",
+              )[0] as HTMLTableCellElement
+            ).click();
+          });
+        }}
+      >
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
 
-export const ExpandCellsWithNestedArrays: StoryFn = () => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        setImmediate(() => {
-          (
-            document.querySelectorAll("[data-testid=expand-cell-arr-0]")[0] as HTMLTableCellElement
-          ).click();
-        });
-      }}
-    >
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
+  name: "expand cells with nested arrays",
+  parameters: { colorScheme: "dark" },
 };
 
-ExpandCellsWithNestedArrays.storyName = "expand cells with nested arrays";
-ExpandCellsWithNestedArrays.parameters = { colorScheme: "dark" };
+export const ExpandNestedCells: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={() => {
+          setImmediate(() => {
+            (
+              document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
+            ).click();
+            (
+              document.querySelectorAll(
+                "[data-testid=expand-cell-arr-obj-0]",
+              )[0] as HTMLTableCellElement
+            ).click();
+          });
+        }}
+      >
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
 
-export const ExpandNestedCells: StoryFn = () => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        setImmediate(() => {
-          (
-            document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
-          ).click();
-          (
-            document.querySelectorAll(
-              "[data-testid=expand-cell-arr-obj-0]",
-            )[0] as HTMLTableCellElement
-          ).click();
-        });
-      }}
-    >
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
+  name: "expand nested cells",
+  parameters: { colorScheme: "dark" },
 };
 
-ExpandNestedCells.storyName = "expand nested cells";
-ExpandNestedCells.parameters = { colorScheme: "dark" };
+export const ExpandMultipleRows: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={() => {
+          setImmediate(() => {
+            (
+              document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
+            ).click();
+            (
+              document.querySelectorAll("[data-testid=expand-row-1]")[0] as HTMLTableCellElement
+            ).click();
+          });
+        }}
+      >
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
 
-export const ExpandMultipleRows: StoryFn = () => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        setImmediate(() => {
-          (
-            document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
-          ).click();
-          (
-            document.querySelectorAll("[data-testid=expand-row-1]")[0] as HTMLTableCellElement
-          ).click();
-        });
-      }}
-    >
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
+  name: "expand multiple rows",
+  parameters: { colorScheme: "dark" },
 };
 
-ExpandMultipleRows.storyName = "expand multiple rows";
-ExpandMultipleRows.parameters = { colorScheme: "dark" };
-
-export const Filtering: StoryFn = () => {
-  return (
-    <PanelSetup fixture={fixture}>
-      <Table overrideConfig={{ topicPath: "/my_arr.array[:]{val==3}" }} />
-    </PanelSetup>
-  );
-};
-
-Filtering.storyName = "filtering";
-
-export const Sorting: StoryFn = () => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        setImmediate(() => {
-          (
-            document.querySelectorAll("[data-testid=column-header-val]")[0] as HTMLTableCellElement
-          ).click();
-          (
-            document.querySelectorAll("[data-testid=column-header-val]")[0] as HTMLTableCellElement
-          ).click();
-        });
-      }}
-    >
-      <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
-    </PanelSetup>
-  );
-};
-
-Sorting.storyName = "sorting";
-Sorting.parameters = { colorScheme: "dark" };
-
-export const HandlesPrimitives: StoryFn = () => {
-  return (
-    <PanelSetup fixture={fixture}>
-      <Table overrideConfig={{ topicPath: "/my_arr.array[:].val" }} />
-    </PanelSetup>
-  );
-};
-
-HandlesPrimitives.storyName = "handles primitives";
-
-export const HandlesArraysOfPrimitives: StoryFn = () => {
-  return (
-    <PanelSetup fixture={fixture}>
-      <Table overrideConfig={{ topicPath: "/my_arr.array[:].primitiveArray" }} />
-    </PanelSetup>
-  );
-};
-
-HandlesArraysOfPrimitives.storyName = "handles arrays of primitives";
-
-export const ConstrainedWidth: StoryFn = () => {
-  return (
-    <PanelSetup fixture={fixture}>
-      <div style={{ width: "100px" }}>
+export const Filtering: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
         <Table overrideConfig={{ topicPath: "/my_arr.array[:]{val==3}" }} />
-      </div>
-    </PanelSetup>
-  );
+      </PanelSetup>
+    );
+  },
+
+  name: "filtering",
 };
 
-ConstrainedWidth.storyName = "constrained width";
+export const Sorting: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={() => {
+          setImmediate(() => {
+            (
+              document.querySelectorAll(
+                "[data-testid=column-header-val]",
+              )[0] as HTMLTableCellElement
+            ).click();
+            (
+              document.querySelectorAll(
+                "[data-testid=column-header-val]",
+              )[0] as HTMLTableCellElement
+            ).click();
+          });
+        }}
+      >
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
+      </PanelSetup>
+    );
+  },
+
+  name: "sorting",
+  parameters: { colorScheme: "dark" },
+};
+
+export const HandlesPrimitives: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <Table overrideConfig={{ topicPath: "/my_arr.array[:].val" }} />
+      </PanelSetup>
+    );
+  },
+
+  name: "handles primitives",
+};
+
+export const HandlesArraysOfPrimitives: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <Table overrideConfig={{ topicPath: "/my_arr.array[:].primitiveArray" }} />
+      </PanelSetup>
+    );
+  },
+
+  name: "handles arrays of primitives",
+};
+
+export const ConstrainedWidth: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <div style={{ width: "100px" }}>
+          <Table overrideConfig={{ topicPath: "/my_arr.array[:]{val==3}" }} />
+        </div>
+      </PanelSetup>
+    );
+  },
+
+  name: "constrained width",
+};

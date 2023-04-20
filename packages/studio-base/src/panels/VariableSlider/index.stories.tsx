@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { StoryObj } from "@storybook/react";
+
 import VariableSliderPanel from "@foxglove/studio-base/panels/VariableSlider/index";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
@@ -31,31 +33,38 @@ export default {
   component: VariableSliderPanel,
 };
 
-export function Example(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <VariableSliderPanel />
-    </PanelSetup>
-  );
-}
-
-export function NarrowLayout(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture}>
-      <div style={{ width: 400 }}>
+export const Example: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
         <VariableSliderPanel />
-      </div>
-    </PanelSetup>
-  );
-}
+      </PanelSetup>
+    );
+  },
+};
 
-export function WithSettings(): JSX.Element {
-  return (
-    <PanelSetup fixture={fixture} includeSettings>
-      <VariableSliderPanel />
-    </PanelSetup>
-  );
-}
-WithSettings.parameters = {
-  colorScheme: "light",
+export const NarrowLayout: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <div style={{ width: 400 }}>
+          <VariableSliderPanel />
+        </div>
+      </PanelSetup>
+    );
+  },
+};
+
+export const WithSettings: StoryObj = {
+  render: function Story() {
+    return (
+      <PanelSetup fixture={fixture} includeSettings>
+        <VariableSliderPanel />
+      </PanelSetup>
+    );
+  },
+
+  parameters: {
+    colorScheme: "light",
+  },
 };

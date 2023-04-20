@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { StoryObj, StoryFn } from "@storybook/react";
 import { useCallback } from "react";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -44,13 +44,13 @@ const exampleConfig: PlotConfig = {
   maxXValue: 3,
 };
 
-function Wrapper(StoryFn: Story): JSX.Element {
+function Wrapper(Wrapped: StoryFn): JSX.Element {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
-      <StoryFn />
+      <Wrapped />
     </PanelSetup>
   );
 }
@@ -108,34 +108,49 @@ function Default() {
   );
 }
 
-export const Light: Story = () => {
-  return <Default />;
-};
-Light.storyName = "Plot Legend (Light)";
-Light.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-Light.parameters = { useReadySignal: true, colorScheme: "light" };
+export const Light: StoryObj = {
+  render: () => {
+    return <Default />;
+  },
 
-export const Dark: Story = () => {
-  return <Default />;
-};
-Dark.storyName = "Plot Legend (Dark)";
-Dark.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-Dark.parameters = { useReadySignal: true, colorScheme: "dark" };
+  name: "Plot Legend (Light)",
 
-export function LimitWidth(): JSX.Element {
-  return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
-    >
-      <Plot overrideConfig={{ ...exampleConfig, legendDisplay: "left", sidebarDimension: 4096 }} />
-    </div>
-  );
-}
-LimitWidth.parameters = { useReadySignal: true, colorScheme: "light" };
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "light" },
+};
+
+export const Dark: StoryObj = {
+  render: () => {
+    return <Default />;
+  },
+
+  name: "Plot Legend (Dark)",
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "dark" },
+};
+
+export const LimitWidth: StoryObj = {
+  render: function Story() {
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+        }}
+      >
+        <Plot
+          overrideConfig={{ ...exampleConfig, legendDisplay: "left", sidebarDimension: 4096 }}
+        />
+      </div>
+    );
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "light" },
+};

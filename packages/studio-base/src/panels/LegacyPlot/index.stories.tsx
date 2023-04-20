@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Story } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { useCallback, useRef, useEffect } from "react";
 
 import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
@@ -134,112 +134,130 @@ export default {
   },
 };
 
-export const Basic: Story = () => {
-  const readySignal = useReadySignal();
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot
-        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onFinishRender={readySignal}
-      />
-    </PanelSetup>
-  );
-};
-Basic.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-Basic.parameters = { useReadySignal: true };
-
-export const CustomMinMaxWindow: Story = () => {
-  const readySignal = useReadySignal();
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot
-        overrideConfig={{
-          path: { value: "/plot_a.versions[0]" },
-          minXVal: "0.5",
-          maxXVal: "6.5",
-          minYVal: "0.5",
-          maxYVal: "4.5",
-        }}
-        onFinishRender={readySignal}
-      />
-    </PanelSetup>
-  );
-};
-CustomMinMaxWindow.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-CustomMinMaxWindow.parameters = { useReadySignal: true };
-
-export const CustomMinMaxVal: Story = () => {
-  const readySignal = useReadySignal();
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot
-        overrideConfig={{ path: { value: "/plot_a.versions[0]" }, maxYVal: "10" }}
-        onFinishRender={readySignal}
-      />
-    </PanelSetup>
-  );
-};
-CustomMinMaxVal.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-CustomMinMaxVal.parameters = { useReadySignal: true };
-
-export const EmptyTopic: Story = () => {
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_b" } }} />
-    </PanelSetup>
-  );
-};
-
-export const WithTooltip: Story = () => {
-  const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const readySignal = useReadySignal();
-
-  useEffect(() => {
-    return () => {
-      if (timeOutID.current != undefined) {
-        clearTimeout(timeOutID.current);
-      }
-    };
-  }, []);
-
-  return (
-    <div
-      style={{ width: 300, height: 300 }}
-      ref={() => {
-        timeOutID.current = setTimeout(() => {
-          const [canvas] = document.getElementsByTagName("canvas");
-          const x = 105;
-          const y = 190;
-          canvas?.dispatchEvent(
-            new MouseEvent("mousemove", {
-              pageX: x,
-              pageY: y,
-              clientX: x,
-              clientY: y,
-            } as MouseEventInit),
-          );
-        }, 100);
-      }}
-    >
+export const Basic: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
+    return (
       <PanelSetup fixture={fixture}>
         <TwoDimensionalPlot
           overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
           onFinishRender={readySignal}
         />
       </PanelSetup>
-    </div>
-  );
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true },
 };
-WithTooltip.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+
+export const CustomMinMaxWindow: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
+    return (
+      <PanelSetup fixture={fixture}>
+        <TwoDimensionalPlot
+          overrideConfig={{
+            path: { value: "/plot_a.versions[0]" },
+            minXVal: "0.5",
+            maxXVal: "6.5",
+            minYVal: "0.5",
+            maxYVal: "4.5",
+          }}
+          onFinishRender={readySignal}
+        />
+      </PanelSetup>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true },
 };
-WithTooltip.parameters = { useReadySignal: true, colorScheme: "dark" };
+
+export const CustomMinMaxVal: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
+    return (
+      <PanelSetup fixture={fixture}>
+        <TwoDimensionalPlot
+          overrideConfig={{ path: { value: "/plot_a.versions[0]" }, maxYVal: "10" }}
+          onFinishRender={readySignal}
+        />
+      </PanelSetup>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true },
+};
+
+export const EmptyTopic: StoryObj = {
+  render: function Story() {
+    return (
+      <PanelSetup fixture={fixture}>
+        <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_b" } }} />
+      </PanelSetup>
+    );
+  },
+};
+
+export const WithTooltip: StoryObj = {
+  render: function Story() {
+    const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const readySignal = useReadySignal();
+
+    useEffect(() => {
+      return () => {
+        if (timeOutID.current != undefined) {
+          clearTimeout(timeOutID.current);
+        }
+      };
+    }, []);
+
+    return (
+      <div
+        style={{ width: 300, height: 300 }}
+        ref={() => {
+          timeOutID.current = setTimeout(() => {
+            const [canvas] = document.getElementsByTagName("canvas");
+            const x = 105;
+            const y = 190;
+            canvas?.dispatchEvent(
+              new MouseEvent("mousemove", {
+                pageX: x,
+                pageY: y,
+                clientX: x,
+                clientY: y,
+              } as MouseEventInit),
+            );
+          }, 100);
+        }}
+      >
+        <PanelSetup fixture={fixture}>
+          <TwoDimensionalPlot
+            overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+            onFinishRender={readySignal}
+          />
+        </PanelSetup>
+      </div>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "dark" },
+};
 
 type StepFn = () => void;
 function useStepSequence(...steps: StepFn[]): () => void {
@@ -254,100 +272,118 @@ function useStepSequence(...steps: StepFn[]): () => void {
   }, []);
 }
 
-export const ShowResetAfterHorizontalZoom: Story = () => {
-  const readySignal = useReadySignal();
+export const ShowResetAfterHorizontalZoom: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
 
-  const step = useStepSequence(zoomOut, readySignal);
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot
-        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onFinishRender={step}
-      />
-    </PanelSetup>
-  );
+    const step = useStepSequence(zoomOut, readySignal);
+    return (
+      <PanelSetup fixture={fixture}>
+        <TwoDimensionalPlot
+          overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+          onFinishRender={step}
+        />
+      </PanelSetup>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "dark" },
 };
-ShowResetAfterHorizontalZoom.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+
+export const ShowResetAfterVerticalZoom: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 2 });
+    const step = useStepSequence(
+      useCallback(() => {
+        zoomOut({ key: "v", code: "KeyV", keyCode: 86, ctrlKey: false, metaKey: false });
+      }, []),
+      readySignal,
+      readySignal,
+    );
+
+    return (
+      <PanelSetup fixture={fixture}>
+        <TwoDimensionalPlot
+          overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+          onFinishRender={step}
+        />
+      </PanelSetup>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "dark" },
 };
-ShowResetAfterHorizontalZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
 
-export const ShowResetAfterVerticalZoom: Story = () => {
-  const readySignal = useReadySignal({ count: 2 });
-  const step = useStepSequence(
-    useCallback(() => {
-      zoomOut({ key: "v", code: "KeyV", keyCode: 86, ctrlKey: false, metaKey: false });
-    }, []),
-    readySignal,
-    readySignal,
-  );
+export const ShowResetZoom: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 2 });
+    const step = useStepSequence(
+      useCallback(() => {
+        zoomOut({ key: "b", code: "KeyB", keyCode: 66, ctrlKey: false, metaKey: false });
+      }, []),
+      readySignal,
+      readySignal,
+    );
 
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot
-        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onFinishRender={step}
-      />
-    </PanelSetup>
-  );
+    return (
+      <PanelSetup fixture={fixture}>
+        <TwoDimensionalPlot
+          overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+          onFinishRender={step}
+        />
+      </PanelSetup>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "dark" },
 };
-ShowResetAfterVerticalZoom.play = async (ctx) => {
-  await ctx.parameters.storyReady;
+
+export const ResetZoom: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal();
+
+    const elRef = useRef<HTMLDivElement | ReactNull>();
+
+    const step = useStepSequence(
+      zoomOut,
+      useCallback(() => {
+        elRef.current
+          ?.querySelector<HTMLButtonElement>("button[data-testid='reset-zoom']")
+          ?.click();
+      }, []),
+      readySignal,
+    );
+
+    return (
+      <PanelSetup
+        fixture={fixture}
+        onMount={(el) => {
+          elRef.current = el;
+        }}
+      >
+        <TwoDimensionalPlot
+          overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+          onFinishRender={step}
+        />
+      </PanelSetup>
+    );
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  parameters: { useReadySignal: true, colorScheme: "dark" },
 };
-ShowResetAfterVerticalZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
-
-export const ShowResetZoom: Story = () => {
-  const readySignal = useReadySignal({ count: 2 });
-  const step = useStepSequence(
-    useCallback(() => {
-      zoomOut({ key: "b", code: "KeyB", keyCode: 66, ctrlKey: false, metaKey: false });
-    }, []),
-    readySignal,
-    readySignal,
-  );
-
-  return (
-    <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot
-        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onFinishRender={step}
-      />
-    </PanelSetup>
-  );
-};
-ShowResetZoom.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-ShowResetZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
-
-export const ResetZoom: Story = () => {
-  const readySignal = useReadySignal();
-
-  const elRef = useRef<HTMLDivElement | ReactNull>();
-
-  const step = useStepSequence(
-    zoomOut,
-    useCallback(() => {
-      elRef.current?.querySelector<HTMLButtonElement>("button[data-testid='reset-zoom']")?.click();
-    }, []),
-    readySignal,
-  );
-
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={(el) => {
-        elRef.current = el;
-      }}
-    >
-      <TwoDimensionalPlot
-        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onFinishRender={step}
-      />
-    </PanelSetup>
-  );
-};
-ResetZoom.play = async (ctx) => {
-  await ctx.parameters.storyReady;
-};
-ResetZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
