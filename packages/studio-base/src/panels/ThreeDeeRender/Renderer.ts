@@ -59,7 +59,7 @@ import { CameraStateSettings } from "./renderables/CameraStateSettings";
 import { Cameras } from "./renderables/Cameras";
 import { FrameAxes } from "./renderables/FrameAxes";
 import { Grids } from "./renderables/Grids";
-import { ImageMode } from "./renderables/ImageMode";
+import { ImageMode } from "./renderables/ImageMode/ImageMode";
 import { Images } from "./renderables/Images";
 import { LaserScans } from "./renderables/LaserScans";
 import { Markers } from "./renderables/Markers";
