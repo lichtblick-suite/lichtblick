@@ -15,7 +15,6 @@ export const panels = {
   imageDescription: "Display annotated images.",
   indicator: "Indicator",
   indicatorDescription: "Display a colored and/or textual indicator based on a threshold value.",
-  legacyPlot: "Legacy Plot",
   log: "Log",
   logDescription: "Display logs by node and severity level.",
   map: "Map",

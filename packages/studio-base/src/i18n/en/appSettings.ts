@@ -29,8 +29,6 @@ export const appSettings = {
   noExperimentalFeatures: "Currently there are no experimental features.",
   studioDebugPanels: "Studio debug panels",
   studioDebugPanelsDescription: "Show Foxglove Studio debug panels in the “Add panel” list.",
-  legacyPlotPanel: "Legacy Plot panel",
-  legacyPlotPanelDescription: "Enable the Legacy Plot panel.",
   memoryUseIndicator: "Memory use indicator",
   memoryUseIndicatorDescription: "Show the app memory use in the sidebar.",
   newNavigation: "New navigation",

@@ -28,8 +28,6 @@ export const appSettings: TypeOptions["resources"]["appSettings"] = {
   experimentalFeaturesDescription: "这些功能不稳定，不建议日常使用。",
   studioDebugPanels: "Studio 调试面板",
   studioDebugPanelsDescription: "在“添加面板”列表中显示 Foxglove Studio 调试面板。",
-  legacyPlotPanel: "旧版绘图面板",
-  legacyPlotPanelDescription: "启用旧版绘图面板.",
   memoryUseIndicator: "内存使用指示器",
   memoryUseIndicatorDescription: "在侧边栏显示应用程序的内存使用情况。",
   newNavigation: "新版导航栏",

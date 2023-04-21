@@ -51,11 +51,6 @@ function useFeatures(): Feature[] {
       description: <>{t("studioDebugPanelsDescription")}</>,
     },
     {
-      key: AppSetting.ENABLE_LEGACY_PLOT_PANEL,
-      name: t("legacyPlotPanel"),
-      description: <>{t("legacyPlotPanelDescription")}</>,
-    },
-    {
       key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
       name: t("memoryUseIndicator"),
       description: <>{t("memoryUseIndicatorDescription")}</>,

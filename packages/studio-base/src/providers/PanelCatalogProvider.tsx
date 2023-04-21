@@ -26,9 +26,6 @@ export default function PanelCatalogProvider(
   props: PropsWithChildren<unknown>,
 ): React.ReactElement {
   const [showDebugPanels = false] = useAppConfigurationValue<boolean>(AppSetting.SHOW_DEBUG_PANELS);
-  const [enableLegacyPlotPanel = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_LEGACY_PLOT_PANEL,
-  );
   const [enableNewImagePanel = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_NEW_IMAGE_PANEL,
   );
@@ -67,7 +64,6 @@ export default function PanelCatalogProvider(
     return {
       builtin: panels.getBuiltin(t),
       debug: panels.getDebug(t),
-      legacyPlot: panels.getLegacyPlot(t),
       newImage: panels.getNewImage(t),
     };
   }, [t]);
@@ -77,7 +73,6 @@ export default function PanelCatalogProvider(
       ...allPanelsInfo.builtin,
       ...allPanelsInfo.debug,
       allPanelsInfo.newImage,
-      allPanelsInfo.legacyPlot,
       ...wrappedExtensionPanels,
     ];
   }, [wrappedExtensionPanels, allPanelsInfo]);
@@ -87,21 +82,12 @@ export default function PanelCatalogProvider(
     if (showDebugPanels) {
       panelList.push(...allPanelsInfo.debug);
     }
-    if (enableLegacyPlotPanel) {
-      panelList.push(allPanelsInfo.legacyPlot);
-    }
     if (enableNewImagePanel) {
       panelList.push(allPanelsInfo.newImage);
     }
     panelList.push(...wrappedExtensionPanels);
     return panelList;
-  }, [
-    enableLegacyPlotPanel,
-    enableNewImagePanel,
-    showDebugPanels,
-    wrappedExtensionPanels,
-    allPanelsInfo,
-  ]);
+  }, [enableNewImagePanel, showDebugPanels, wrappedExtensionPanels, allPanelsInfo]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();

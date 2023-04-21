@@ -118,7 +118,7 @@ function setNativeValue(element: unknown, value: unknown) {
 }
 
 export function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
-  const allPanels = [...panels.getBuiltin(t), ...panels.getDebug(t), panels.getLegacyPlot(t)];
+  const allPanels = [...panels.getBuiltin(t), ...panels.getDebug(t)];
 
   const visiblePanels = [...panels.getBuiltin(t)];
 

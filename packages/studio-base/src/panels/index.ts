@@ -186,12 +186,6 @@ export const getDebug: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   },
 ];
 
-export const getLegacyPlot: (t: TFunction<"panels">) => PanelInfo = (t) => ({
-  title: t("legacyPlot"),
-  type: "LegacyPlot",
-  module: async () => await import("./LegacyPlot"),
-});
-
 export const getNewImage: (t: TFunction<"panels">) => PanelInfo = (t) => ({
   title: t("newImage"),
   type: "Image",

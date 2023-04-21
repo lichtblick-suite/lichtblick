@@ -20,7 +20,6 @@ export enum AppSetting {
 
   // Experimental features
   SHOW_DEBUG_PANELS = "showDebugPanels",
-  ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
   ENABLE_NEW_TOPNAV = "enableNewTopNav",
   ENABLE_ROS2_NATIVE_DATA_SOURCE = "enableRos2NativeDataSource",
   ENABLE_NEW_IMAGE_PANEL = "enableNewImagePanel",
