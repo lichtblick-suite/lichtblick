@@ -150,7 +150,7 @@ function ExtensionsSidebar() {
 }
 
 type WorkspaceProps = CustomWindowControlsProps & {
-  deepLinks?: string[];
+  deepLinks?: string[]; // eslint-disable-line react/no-unused-prop-types
   appBarLeftInset?: number;
   onAppBarDoubleClick?: () => void;
 };
@@ -179,7 +179,8 @@ const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.rightSidebarOpen;
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.rightSidebarSize;
 
-function WorkspaceContent(props: WorkspaceProps): JSX.Element {
+type WorkspaceContentProps = WorkspaceProps & { showSignInForm: boolean };
+function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
@@ -225,8 +226,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   const { currentUser, signIn } = useCurrentUser();
   const supportsAccountSettings = signIn != undefined;
 
-  const { currentUserRequired } = useInitialDeepLinkState(props.deepLinks ?? DEFAULT_DEEPLINKS);
-
   useDefaultWebLaunchPreference();
 
   const [enableStudioLogsSidebar = false] = useAppConfigurationValue<boolean>(
@@ -240,8 +239,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
 
   const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
   const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
-
-  const showSignInForm = currentUserRequired && currentUser == undefined;
 
   // When a player is activated, hide the open dialog.
   useLayoutEffect(() => {
@@ -605,7 +602,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
         /* eslint-enable react/jsx-key */
       ]}
     >
-      {showSignInForm && <SignInFormModal />}
+      {props.showSignInForm && <SignInFormModal />}
       {dataSourceDialog.open && <DataSourceDialog />}
       <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
       <SyncAdapters />
@@ -690,7 +687,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   return (
     <WorkspaceContextProvider initialState={initialState}>
-      <WorkspaceContent {...props} />
+      <WorkspaceContent showSignInForm={showSignInForm} {...props} />
     </WorkspaceContextProvider>
   );
 }
