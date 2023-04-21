@@ -1,9 +1,11 @@
 # Foxglove Studio Benchmarking
 
-The benchmark runner is a customized build of Studio that runs a pre-configured workload while taking timing measurements to provide summary statistics from a repeatable process. Currently, a hardcoded layout is loaded and the user is expected to open a specific MCAP file from their local disk to start the benchmark. Playback automatically starts, and summary results are printed to the developer console when playback has completed. This process can be repeated several times to average the results and measure variance.
+Benchmarks are specific combinations of layout and synthetic data playback. When a benchmark is opened, playback automatically starts and summary results are printed to the developer console.
 
 ## Instructions
 
-`yarn benchmark:serve` to start the benchmark app in development mode. For production builds, use `yarn benchmark:build:prod` followed by `npx serve -p 8080 benchmark/.webpack`.
+Run a dev or prod build and open a benchmark URL from `benchmarks.txt`.
 
-See benchmarks.txt for a list of available benchmarks.
+`yarn benchmark:serve` to start the benchmark dev build.
+
+`yarn benchmark:build:prod` followed by `npx serve -p 8080 benchmark/.webpack`.
