@@ -6,16 +6,10 @@ import ErrorIcon from "@mui/icons-material/Error";
 import HelpIcon from "@mui/icons-material/Help";
 import InfoIcon from "@mui/icons-material/Info";
 import WarningIcon from "@mui/icons-material/Warning";
-import {
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  styled as muiStyled,
-} from "@mui/material";
+import { List, ListItem, ListItemIcon, ListItemText, Typography } from "@mui/material";
 import { invert } from "lodash";
 import { ReactElement } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Diagnostic, DiagnosticSeverity } from "@foxglove/studio-base/players/UserNodePlayer/types";
@@ -31,21 +25,27 @@ type Props = {
   diagnostics: readonly Diagnostic[];
 };
 
-const StyledListItem = muiStyled(ListItem)(({ theme }) => ({
-  paddingTop: 0,
-  paddingBottom: 0,
-
-  ".MuiListItemText-root": {
+const useStyles = makeStyles()((theme) => ({
+  listItem: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    marginBlock: theme.spacing(0.5),
+  },
+  listItemText: {
     display: "flex",
     flexDirection: "row",
+    margin: 0,
     gap: theme.spacing(1),
   },
-  ".MuiListItemIcon-root": {
+  listItemIcon: {
+    alignSelf: "flex-start",
     minWidth: theme.spacing(3),
   },
 }));
 
 const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
+  const { classes } = useStyles();
+
   if (diagnostics.length === 0) {
     return (
       <Stack gap={0.5} padding={2}>
@@ -70,20 +70,19 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
             : "";
 
         return (
-          <StyledListItem key={`${message}_${i}`}>
-            <ListItemIcon>{severityIcons[severityLabel]}</ListItemIcon>
+          <ListItem key={`${message}_${i}`} className={classes.listItem}>
+            <ListItemIcon className={classes.listItemIcon}>
+              {severityIcons[severityLabel]}
+            </ListItemIcon>
             <ListItemText
+              className={classes.listItemText}
               primary={message}
-              primaryTypographyProps={{
-                noWrap: true,
-              }}
               secondary={`${source} ${errorLoc}`}
               secondaryTypographyProps={{
                 color: "text.secondary",
-                noWrap: true,
               }}
             />
-          </StyledListItem>
+          </ListItem>
         );
       })}
     </List>

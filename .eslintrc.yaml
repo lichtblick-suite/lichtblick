@@ -168,7 +168,6 @@ overrides:
       - "packages/studio-base/src/components/TextHighlight.tsx"
       - "packages/studio-base/src/panels/Image/components/Toolbar.tsx"
       - "packages/studio-base/src/panels/Image/components/ZoomMenu.tsx"
-      - "packages/studio-base/src/panels/NodePlayground/BottomBar/DiagnosticsSection.tsx"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/index.tsx"
       - "packages/studio-base/src/panels/NodePlayground/Sidebar.tsx"
       - "packages/studio-base/src/panels/NodePlayground/index.tsx"

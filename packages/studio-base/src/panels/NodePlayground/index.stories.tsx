@@ -499,6 +499,16 @@ export const BottomBarErrorsOpen: StoryObj = {
         userNodeDiagnostics: {
           nodeId1: [
             {
+              message: Array(10).fill("Long error that might wrap.").join(" "),
+              severity: 8,
+              source: "Typescript",
+              startLineNumber: 0,
+              startColumn: 6,
+              endLineNumber: 72,
+              endColumn: 20,
+              code: 2304,
+            },
+            {
               message: `Type '"bad number"' is not assignable to type 'number[]'.`,
               severity: 8,
               source: "Typescript",
