@@ -213,9 +213,10 @@ export default function Connection(): JSX.Element {
         <Stack className={classes.form} key={selectedSource?.id} flex="1 0">
           <form onSubmit={onSubmit}>
             <Stack className={classes.formInner} gap={2}>
-              {selectedSource?.disabledReason == undefined && selectedSource?.warning && (
-                <Alert severity="warning">{selectedSource.warning}</Alert>
-              )}
+              {selectedSource?.disabledReason == undefined &&
+                selectedSource?.warning != undefined && (
+                  <Alert severity="warning">{selectedSource.warning}</Alert>
+                )}
               {selectedSource?.disabledReason != undefined && (
                 <Alert severity="warning">{selectedSource.disabledReason}</Alert>
               )}
