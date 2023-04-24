@@ -2783,10 +2783,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/tsconfig@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@foxglove/tsconfig@npm:1.1.0"
-  checksum: 18070d0f6a5bf540c04c5cab3c8ba223aee259d2ca628c78616d37c84e3d193069842901944019caf49fced1943b97cb6772aa7d9b6fe246842ce146386b85a6
+"@foxglove/tsconfig@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@foxglove/tsconfig@npm:2.0.0"
+  checksum: c6d581ff4e6e75e4c22d909a51f377b6f9b296805234009ca6950f86c76bbefc5f4f95eef92e24ede3134cb411c0d08e73d484a30c448d8e248414dcc98c1400
   languageName: node
   linkType: hard
 
@@ -11599,7 +11599,7 @@ __metadata:
     "@babel/preset-typescript": 7.21.4
     "@foxglove/eslint-plugin": 0.21.2
     "@foxglove/eslint-plugin-studio": "workspace:*"
-    "@foxglove/tsconfig": 1.1.0
+    "@foxglove/tsconfig": 2.0.0
     "@octokit/rest": 19.0.7
     "@storybook/addon-actions": 7.0.4
     "@storybook/addon-essentials": 7.0.4

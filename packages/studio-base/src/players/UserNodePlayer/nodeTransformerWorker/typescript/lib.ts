@@ -47,6 +47,19 @@ import lib_es2020_promise from "typescript/lib/lib.es2020.promise.d.ts?raw";
 import lib_es2020_sharedmemory from "typescript/lib/lib.es2020.sharedmemory.d.ts?raw";
 import lib_es2020_string from "typescript/lib/lib.es2020.string.d.ts?raw";
 import lib_es2020_symbol_wellknown from "typescript/lib/lib.es2020.symbol.wellknown.d.ts?raw";
+import lib_es2021_dts from "typescript/lib/lib.es2021.d.ts?raw";
+import lib_es2021_intl from "typescript/lib/lib.es2021.intl.d.ts?raw";
+import lib_es2021_promise from "typescript/lib/lib.es2021.promise.d.ts?raw";
+import lib_es2021_string from "typescript/lib/lib.es2021.string.d.ts?raw";
+import lib_es2021_weakref from "typescript/lib/lib.es2021.weakref.d.ts?raw";
+import lib_es2022_array from "typescript/lib/lib.es2022.array.d.ts?raw";
+import lib_es2022_dts from "typescript/lib/lib.es2022.d.ts?raw";
+import lib_es2022_error from "typescript/lib/lib.es2022.error.d.ts?raw";
+import lib_es2022_intl from "typescript/lib/lib.es2022.intl.d.ts?raw";
+import lib_es2022_object from "typescript/lib/lib.es2022.object.d.ts?raw";
+import lib_es2022_regexp from "typescript/lib/lib.es2022.regexp.d.ts?raw";
+import lib_es2022_sharedmemory from "typescript/lib/lib.es2022.sharedmemory.d.ts?raw";
+import lib_es2022_string from "typescript/lib/lib.es2022.string.d.ts?raw";
 import lib_es5_dts from "typescript/lib/lib.es5.d.ts?raw";
 
 export const lib_filename = "lib.d.ts";
@@ -66,6 +79,9 @@ const libDts = new Map(
     es2017: lib_es2017_dts,
     es2018: lib_es2018_dts,
     es2019: lib_es2019_dts,
+    es2020: lib_es2020_dts,
+    es2021: lib_es2021_dts,
+    es2022: lib_es2022_dts,
 
     "es2015.core": lib_es2015_core,
     "es2015.collection": lib_es2015_collection,
@@ -97,9 +113,25 @@ const libDts = new Map(
     "es2020.string": lib_es2020_string,
     "es2020.symbol.wellknown": lib_es2020_symbol_wellknown,
     "es2020.intl": lib_es2020_intl,
+    "es2021.intl": lib_es2021_intl,
+    "es2021.promise": lib_es2021_promise,
+    "es2021.string": lib_es2021_string,
+    "es2021.weakref": lib_es2021_weakref,
+    "es2022.array": lib_es2022_array,
+    "es2022.error": lib_es2022_error,
+    "es2022.intl": lib_es2022_intl,
+    "es2022.object": lib_es2022_object,
+    "es2022.regexp": lib_es2022_regexp,
+    "es2022.sharedmemory": lib_es2022_sharedmemory,
+    "es2022.string": lib_es2022_string,
   }),
 );
 
+/**
+ * Each top-level type definition file (such as lib.es2022.d.ts) is a lightweight wrapper that
+ * references other .d.ts files. To produce the complete definitions we manually resolve these
+ * references.
+ */
 function resolveReferences(originalSrc: string): string {
   return originalSrc.replace(/\/\/\/ <reference lib="(.+)" \/>/g, (_, name: string) => {
     const src = libDts.get(name);
@@ -115,5 +147,5 @@ function resolveReferences(originalSrc: string): string {
   });
 }
 
-const resolvedDts = resolveReferences(lib_es2020_dts);
+const resolvedDts = resolveReferences(lib_es2022_dts);
 export const lib_dts = `${resolvedDts}\n\n${lib_logger}`;

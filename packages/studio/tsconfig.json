@@ -7,6 +7,6 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "noEmit": true,
-    "lib": ["es2020"]
+    "lib": ["es2022"]
   }
 }

@@ -4,6 +4,6 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist",
-    "lib": ["DOM", "ES2020"]
+    "lib": ["DOM", "es2022"]
   }
 }

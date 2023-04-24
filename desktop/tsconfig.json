@@ -2,7 +2,7 @@
   "extends": "@foxglove/tsconfig/base",
   "include": ["*.ts", "common/**/*", "integration-test/**/*.ts", "../package.json"],
   "compilerOptions": {
-    "lib": ["dom", "es2020"],
+    "lib": ["dom", "es2022"],
     "module": "commonjs",
     "noEmit": true
   }

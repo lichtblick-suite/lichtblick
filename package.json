@@ -77,7 +77,7 @@
     "@babel/preset-typescript": "7.21.4",
     "@foxglove/eslint-plugin": "0.21.2",
     "@foxglove/eslint-plugin-studio": "workspace:*",
-    "@foxglove/tsconfig": "1.1.0",
+    "@foxglove/tsconfig": "2.0.0",
     "@octokit/rest": "19.0.7",
     "@storybook/addon-actions": "7.0.4",
     "@storybook/addon-essentials": "7.0.4",

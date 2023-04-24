@@ -89,6 +89,6 @@ function flattenDiagnosticMessageText(
 // https://www.typescriptlang.org/docs/handbook/compiler-options.html
 export const baseCompilerOptions = {
   strict: true,
-  target: ts.ScriptTarget.ES2020,
+  target: ts.ScriptTarget.ES2022,
   module: ts.ModuleKind.CommonJS,
 };
