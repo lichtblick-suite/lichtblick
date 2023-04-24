@@ -110,14 +110,6 @@ export type LegacyImageConfig = {
   zoomPercentage: number;
 };
 
-/** Settings pertaining to Image mode */
-export type ImageModeConfig = {
-  /** Image topic to display */
-  imageTopic?: string;
-  /** Topic containing CameraCalibration or CameraInfo */
-  calibrationTopic?: string;
-};
-
 /** Menu item entry and callback for the "Custom Layers" menu */
 export type CustomLayerAction = {
   action: SettingsTreeNodeActionItem;
@@ -355,7 +347,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const aspect = renderSize.width / renderSize.height;
     switch (interfaceMode) {
       case "image":
-        this.cameraHandler = new ImageMode(this, aspect);
+        this.cameraHandler = new ImageMode(this, this.input.canvasSize);
         this.addSceneExtension(this.cameraHandler);
         break;
       case "3d":
@@ -1000,11 +992,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   private resizeHandler = (size: THREE.Vector2): void => {
     this.gl.setPixelRatio(window.devicePixelRatio);
     this.gl.setSize(size.width, size.height);
+    this.cameraHandler.handleResize(size.width, size.height);
 
-    // renderSize points to `tempVec2` so we don't want to pass it anywhere that might store it
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
-    this.cameraHandler.handleResize(renderSize.width, renderSize.height);
-
     log.debug(`Resized renderer to ${renderSize.width}x${renderSize.height}`);
     this.animationFrame();
   };
@@ -1318,6 +1308,9 @@ function deselectObject(object: THREE.Object3D) {
 function baseSettingsTree(interfaceMode: InterfaceMode): SettingsTreeNodes {
   const keys: string[] = [];
   keys.push(interfaceMode === "image" ? "imageMode" : "general", "scene");
+  if (interfaceMode === "image") {
+    keys.push("imageAnnotations");
+  }
   if (interfaceMode === "3d") {
     keys.push("cameraState");
   }

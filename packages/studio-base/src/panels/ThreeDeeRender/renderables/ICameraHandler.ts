@@ -23,8 +23,8 @@ export interface ICameraHandler extends SceneExtension {
   getCameraState(): CameraState | undefined;
   /**
    * Used to update the aspect ratio of the camera when necessary
-   * @param width - The width of the render canvas
-   * @param width - The height of the render canvas
+   * @param width - The width of the render canvas in CSS pixels
+   * @param height - The height of the render canvas in CSS pixels
    */
   handleResize(width: number, height: number): void;
 }

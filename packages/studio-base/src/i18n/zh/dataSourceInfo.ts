@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const dataSourceInfo: TypeOptions["resources"]["dataSourceInfo"] = {
+export const dataSourceInfo: Partial<TypeOptions["resources"]["dataSourceInfo"]> = {
   dataSource: "数据源",
   currentSource: "当前源",
   waitingForConnection: "等待连接……",

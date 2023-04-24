@@ -139,7 +139,7 @@ export * from "./myComponent";
 
 ```ts
 // i18n/zh/myComponent.ts
-export const myComponent: TypeOptions["resources"]["myComponent"] = {
+export const myComponent: Partial<TypeOptions["resources"]["myComponent"]> = {
   hello: "你好！",
 };
 

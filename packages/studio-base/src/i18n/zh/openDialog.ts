@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const openDialog: TypeOptions["resources"]["openDialog"] = {
+export const openDialog: Partial<TypeOptions["resources"]["openDialog"]> = {
   // Start
   newToFoxgloveStudio: "第一次使用 Foxglove Studio？",
   newToFoxgloveStudioDescription: "从探索一个样本数据集开始，或查看我们的文档。",

@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const appSettings: TypeOptions["resources"]["appSettings"] = {
+export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   settings: "设置",
   colorScheme: "配色方案",
   dark: "暗色",

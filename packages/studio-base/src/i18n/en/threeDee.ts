@@ -71,4 +71,7 @@ export const threeDee = {
   grid: "Grid",
   delete: "Delete",
   addGrid: "Add Grid",
+
+  // Image annotations
+  imageAnnotations: "Image annotations",
 };

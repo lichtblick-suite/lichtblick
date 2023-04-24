@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const panelSettings: TypeOptions["resources"]["panelSettings"] = {
+export const panelSettings: Partial<TypeOptions["resources"]["panelSettings"]> = {
   importOrExportSettings: "导入/导出设置",
   importOrExportSettingsWithEllipsis: "导入/导出设置……",
   panelSettings: "面板设置",

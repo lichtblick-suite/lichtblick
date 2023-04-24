@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const plot: TypeOptions["resources"]["plot"] = {
+export const plot: Partial<TypeOptions["resources"]["plot"]> = {
   deleteSeries: "删除数据系列",
   messagePath: "消息地址",
   label: "标签",

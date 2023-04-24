@@ -4,6 +4,6 @@
 
 import { TypeOptions } from "i18next";
 
-export const appBar: TypeOptions["resources"]["appBar"] = {
+export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
   openDataSource: "打开数据源……",
 };

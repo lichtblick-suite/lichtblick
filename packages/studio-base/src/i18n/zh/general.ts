@@ -5,7 +5,7 @@
 import { TypeOptions } from "i18next";
 
 // Generic global translation
-export const general: TypeOptions["resources"]["general"] = {
+export const general: Partial<TypeOptions["resources"]["general"]> = {
   foxglove: "Foxglove",
   learnMore: "了解更多",
 };

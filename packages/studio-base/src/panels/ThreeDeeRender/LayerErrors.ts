@@ -113,9 +113,19 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
 
   public clearPath(path: Path): void {
     const node = this._getNode(path);
-    if (node) {
-      node.children?.clear();
-      node.errorsById?.clear();
+    if (!node) {
+      return;
+    }
+    let cleared = false;
+    if (node.children && node.children.size > 0) {
+      node.children.clear();
+      cleared = true;
+    }
+    if (node.errorsById && node.errorsById.size > 0) {
+      node.errorsById.clear();
+      cleared = true;
+    }
+    if (cleared) {
       this.emit("clear", path);
     }
   }

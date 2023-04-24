@@ -48,11 +48,12 @@ import type {
   FollowMode,
   RendererEvents,
   IRenderer,
+  ImageModeConfig,
 } from "./IRenderer";
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
 import { Renderable, SELECTED_ID_VARIABLE } from "./Renderable";
-import { ImageModeConfig, LegacyImageConfig, Renderer } from "./Renderer";
+import { LegacyImageConfig, Renderer } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
@@ -416,6 +417,9 @@ export function ThreeDeeRender(props: {
     const imageMode: ImageModeConfig = {
       imageTopic: legacyImageConfig?.cameraTopic,
       ...partialConfig?.imageMode,
+      annotations: partialConfig?.imageMode?.annotations as
+        | ImageModeConfig["annotations"]
+        | undefined,
     };
 
     return {
@@ -669,15 +673,30 @@ export function ThreeDeeRender(props: {
     const newSubscriptions: Subscription[] = [];
 
     const addSubscription = (
-      topic: string,
+      topic: Topic,
       rendererSubscription: RendererSubscription,
       convertTo?: string,
     ) => {
-      const shouldSubscribe =
-        rendererSubscription.shouldSubscribe ?? ((t) => config.topics[t]?.visible === true);
-      if (shouldSubscribe(topic)) {
+      let shouldSubscribe = rendererSubscription.shouldSubscribe?.(topic.name);
+      if (shouldSubscribe == undefined) {
+        if (config.topics[topic.name]?.visible === true) {
+          shouldSubscribe = true;
+        } else if (
+          config.imageMode.annotations?.some(
+            (sub) =>
+              sub.topic === topic.name &&
+              sub.schemaName === (convertTo ?? topic.schemaName) &&
+              sub.settings.visible,
+          ) === true
+        ) {
+          shouldSubscribe = true;
+        } else {
+          shouldSubscribe = false;
+        }
+      }
+      if (shouldSubscribe) {
         newSubscriptions.push({
-          topic,
+          topic: topic.name,
           preload: rendererSubscription.preload,
           convertTo,
         });
@@ -686,14 +705,14 @@ export function ThreeDeeRender(props: {
 
     for (const topic of topics) {
       for (const rendererSubscription of topicHandlers.get(topic.name) ?? []) {
-        addSubscription(topic.name, rendererSubscription);
+        addSubscription(topic, rendererSubscription);
       }
       for (const rendererSubscription of schemaHandlers.get(topic.schemaName) ?? []) {
-        addSubscription(topic.name, rendererSubscription);
+        addSubscription(topic, rendererSubscription);
       }
       for (const schemaName of topic.convertibleTo ?? []) {
         for (const rendererSubscription of schemaHandlers.get(schemaName) ?? []) {
-          addSubscription(topic.name, rendererSubscription, schemaName);
+          addSubscription(topic, rendererSubscription, schemaName);
         }
       }
     }
@@ -701,7 +720,7 @@ export function ThreeDeeRender(props: {
     // Sort the list to make comparisons stable
     newSubscriptions.sort((a, b) => a.topic.localeCompare(b.topic));
     setTopicsToSubscribe((prev) => (isEqual(prev, newSubscriptions) ? prev : newSubscriptions));
-  }, [topics, config.topics, schemaHandlers, topicHandlers]);
+  }, [topics, config.topics, schemaHandlers, topicHandlers, config.imageMode.annotations]);
 
   // Notify the extension context when our subscription list changes
   useEffect(() => {

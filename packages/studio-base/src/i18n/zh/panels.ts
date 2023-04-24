@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const panels: TypeOptions["resources"]["panels"] = {
+export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   "3D": "三维",
   newImage: "🚧图像",
   "3DPanelDescription": "在三维场景中显示标记、相机图像、网格、URDF 和其他内容。",

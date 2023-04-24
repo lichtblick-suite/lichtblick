@@ -39,6 +39,7 @@ export type InputEvents = {
 
 export class Input extends EventEmitter<InputEvents> {
   private readonly canvas: HTMLCanvasElement;
+  /** Size in CSS pixels */
   public canvasSize: THREE.Vector2;
   private resizeObserver: ResizeObserver;
   private startClientPos?: THREE.Vector2;
@@ -55,7 +56,8 @@ export class Input extends EventEmitter<InputEvents> {
     }
 
     this.canvas = canvas;
-    this.canvasSize = new THREE.Vector2(canvas.width, canvas.height);
+    this.canvasSize = new THREE.Vector2();
+    this.onResize([]);
 
     this.resizeObserver = new ResizeObserver(this.onResize);
     this.resizeObserver.observe(parentEl);

@@ -341,6 +341,13 @@ addRosDataType(POLYGON_STAMPED_DATATYPES, "geometry_msgs/PolygonStamped");
 export const JOINTSTATE_DATATYPES = new Set<string>();
 addRosDataType(JOINTSTATE_DATATYPES, "sensor_msgs/JointState");
 
+export const IMAGE_MARKER_DATATYPES = new Set<string>();
+addRosDataType(IMAGE_MARKER_DATATYPES, "visualization_msgs/ImageMarker");
+
+/** Not a real type offered by ROS, but historically Studio has supported it */
+export const IMAGE_MARKER_ARRAY_DATATYPES = new Set<string>();
+addRosDataType(IMAGE_MARKER_ARRAY_DATATYPES, "visualization_msgs/ImageMarkerArray");
+
 // Expand a single ROS1 dataType into variations for ROS2 and protobufs,
 // then add them to the given output set
 function addRosDataType(output: Set<string>, dataType: string): Set<string> {

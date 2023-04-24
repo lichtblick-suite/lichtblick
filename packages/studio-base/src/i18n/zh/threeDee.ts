@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const threeDee: TypeOptions["resources"]["threeDee"] = {
+export const threeDee: Partial<TypeOptions["resources"]["threeDee"]> = {
   frame: "参考系",
   reset: "重置",
   color: "颜色",

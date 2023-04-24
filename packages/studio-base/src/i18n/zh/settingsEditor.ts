@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const settingsEditor: TypeOptions["resources"]["settingsEditor"] = {
+export const settingsEditor: Partial<TypeOptions["resources"]["settingsEditor"]> = {
   searchPanelSettings: "搜索面板设置……",
   title: "标题",
   clearSearch: "清空搜索",

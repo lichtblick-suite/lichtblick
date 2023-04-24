@@ -16,6 +16,7 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
 
 import { ImageModelCamera } from "./ImageModelCamera";
+import { ImageAnnotations } from "./annotations/ImageAnnotations";
 import type { IRenderer } from "../../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
 import { SettingsTreeEntry } from "../../SettingsManager";
@@ -61,7 +62,12 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
   private cameraInfoByTopic: Map<string, CameraInfo> = new Map();
   private cameraImageByTopic: Map<string, AnyImage> = new Map();
 
-  public constructor(renderer: IRenderer, aspect: number) {
+  #annotations: ImageAnnotations;
+
+  /**
+   * @param canvasSize Canvas size in CSS pixels
+   */
+  public constructor(renderer: IRenderer, canvasSize: THREE.Vector2) {
     super("foxglove.ImageMode", renderer);
 
     this.camera = new ImageModelCamera();
@@ -72,7 +78,7 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
      * To correct this we rotate the camera 180 degrees around the x axis.
      */
     this.camera.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI);
-    this.camera.setRendererAspect(aspect);
+    this.camera.setCanvasSize(canvasSize.width, canvasSize.height);
 
     renderer.settings.errors.on("update", this.handleErrorChange);
     renderer.settings.errors.on("clear", this.handleErrorChange);
@@ -87,13 +93,37 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
       handler: this.handleCameraInfo,
       shouldSubscribe: this.cameraInfoShouldSubscribe,
     });
+
+    this.#annotations = new ImageAnnotations({
+      initialScale: this.camera.getEffectiveScale(),
+      initialCanvasWidth: canvasSize.width,
+      initialCanvasHeight: canvasSize.height,
+      topics: () => renderer.topics ?? [],
+      config: () => renderer.config.imageMode,
+      updateConfig: (updateHandler) => {
+        renderer.updateConfig((draft) => updateHandler(draft.imageMode));
+      },
+      updateSettingsTree: () => {
+        this.updateSettingsTree();
+      },
+      addSchemaSubscriptions: (schemaNames, handler) => {
+        renderer.addSchemaSubscriptions(schemaNames, handler);
+      },
+    });
+    this.add(this.#annotations);
   }
 
   public override dispose(): void {
     this.renderer.settings.errors.off("update", this.handleErrorChange);
     this.renderer.settings.errors.off("clear", this.handleErrorChange);
     this.renderer.settings.errors.off("remove", this.handleErrorChange);
+    this.#annotations.dispose();
     super.dispose();
+  }
+
+  public override removeAllRenderables(): void {
+    this.#annotations.removeAllRenderables();
+    super.removeAllRenderables();
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -246,6 +276,7 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
           },
         },
       },
+      ...this.#annotations.settingsNodes(),
     ];
   }
 
@@ -350,6 +381,11 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
     this.updateCameraModel(possibleNewCameraInfo);
     if (this.cameraModel?.model) {
       this.camera.updateCamera(this.cameraModel.model);
+      this.#annotations.updateScale(
+        this.camera.getEffectiveScale(),
+        this.renderer.input.canvasSize.width,
+        this.renderer.input.canvasSize.height,
+      );
     }
   }
 
@@ -370,6 +406,7 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
         model,
         info: newCameraInfo,
       };
+      this.#annotations.updateCameraModel(model);
     }
   }
 
@@ -396,7 +433,8 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
   }
 
   public handleResize(width: number, height: number): void {
-    this.camera.setRendererAspect(width / height);
+    this.camera.setCanvasSize(width, height);
+    this.#annotations.updateScale(this.camera.getEffectiveScale(), width, height);
   }
 
   public setCameraState(): void {

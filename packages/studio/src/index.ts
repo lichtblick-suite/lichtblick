@@ -65,7 +65,7 @@ export type Subscription = {
   topic: string;
 
   /**
-   * If a topic as additional schema names, specifying a schema name will convert messages on that
+   * If a topic has additional schema names, specifying a schema name will convert messages on that
    * topic to the convertTo schema using a registered message converter. MessageEvents for the
    * subscription will contain the converted message and an originalMessageEvent field with the
    * original message event.

@@ -4,7 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-export const log: TypeOptions["resources"]["log"] = {
+export const log: Partial<TypeOptions["resources"]["log"]> = {
   topicError: "话题 {{topic}} 不可用",
   topic: "话题",
 };

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { TypeOptions } from "i18next";
 
-export const addPanel: TypeOptions["resources"]["addPanel"] = {
+export const addPanel: Partial<TypeOptions["resources"]["addPanel"]> = {
   addPanel: "添加面板",
   noLayoutSelected: "<selectLayoutLink>选择一个布局</selectLayoutLink>来开始使用!",
   noPanelsMatchSearchCriteria: "没有符合搜索条件的面板。",
