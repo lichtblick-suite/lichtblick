@@ -45,6 +45,9 @@ export type WorkspaceContextStore = DeepReadonly<{
   leftSidebarSize: undefined | number;
   rightSidebarItem: undefined | RightSidebarItemKey;
   rightSidebarSize: undefined | number;
+  playbackControls: {
+    repeat: boolean;
+  };
   prefsDialogState: {
     initialTab: undefined | AppSettingsTab;
     open: boolean;
@@ -86,6 +89,9 @@ export type WorkspaceActions = {
   openAccountSettings: () => void;
   openPanelSettings: () => void;
   openLayoutBrowser: () => void;
+  playbackControlActions: {
+    setRepeat: Dispatch<SetStateAction<boolean>>;
+  };
   prefsDialogActions: {
     close: () => void;
     open: (initialTab?: AppSettingsTab) => void;
@@ -151,6 +157,15 @@ export function useWorkspaceActions(): WorkspaceActions {
           : set({ sidebarItem: "panel-settings" }),
 
       openLayoutBrowser: () => set({ sidebarItem: "layouts" }),
+
+      playbackControlActions: {
+        setRepeat: (setter: SetStateAction<boolean>) => {
+          set((oldValue) => {
+            const repeat = setterValue(setter, oldValue.playbackControls.repeat);
+            return { playbackControls: { repeat } };
+          });
+        },
+      },
 
       prefsDialogActions: {
         close: () => set({ prefsDialogState: { open: false, initialTab: undefined } }),

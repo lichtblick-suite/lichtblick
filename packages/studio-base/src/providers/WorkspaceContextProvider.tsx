@@ -26,6 +26,9 @@ function createWorkspaceContextStore(
           leftSidebarItem: "panel-settings",
           leftSidebarOpen: true,
           leftSidebarSize: undefined,
+          playbackControls: {
+            repeat: false,
+          },
           prefsDialogState: {
             initialTab: undefined,
             open: false,

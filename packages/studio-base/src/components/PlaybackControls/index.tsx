@@ -43,6 +43,11 @@ import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpee
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
+import {
+  useWorkspaceActions,
+  useWorkspaceStore,
+  WorkspaceContextStore,
+} from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 
@@ -70,6 +75,7 @@ const useStyles = makeStyles()((theme) => ({
 
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
+const selectPlaybackRepeat = (store: WorkspaceContextStore) => store.playbackControls.repeat;
 
 export default function PlaybackControls(props: {
   play: NonNullable<Player["startPlayback"]>;
@@ -84,14 +90,18 @@ export default function PlaybackControls(props: {
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   const { classes } = useStyles();
-  const [repeat, setRepeat] = useState(false);
+  const repeat = useWorkspaceStore(selectPlaybackRepeat);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const { currentUser } = useCurrentUser();
   const eventsSupported = useEvents(selectEventsSupported);
 
+  const {
+    playbackControlActions: { setRepeat },
+  } = useWorkspaceActions();
+
   const toggleRepeat = useCallback(() => {
     setRepeat((old) => !old);
-  }, []);
+  }, [setRepeat]);
 
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
