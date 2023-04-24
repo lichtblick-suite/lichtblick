@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
+import { initI18n } from "@foxglove/studio-base";
 
 const log = Logger.getLogger(__filename);
 log.debug("initializing");
@@ -32,6 +33,8 @@ async function main() {
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
+
+  await initI18n();
 
   const { Root } = await import("./Root");
 
