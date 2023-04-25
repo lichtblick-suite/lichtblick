@@ -53,13 +53,13 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: ${{ runner.os }}-yarn-
 
+      - run: yarn constraints --fix
       - run: yarn install --mode skip-build
         env:
           # yarn runs in immutable mode "by default" in CI -- turning this off requires an
           # undocumented env var
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
-      - run: yarn constraints --fix
       - run: yarn dedupe
 
       - name: Commit yarn.lock
