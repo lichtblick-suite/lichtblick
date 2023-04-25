@@ -2680,7 +2680,7 @@ __metadata:
     tss-react: 4.8.2
     typescript: 5.0.3
     url-search-params: 1.1.0
-    use-debounce: 9.0.3
+    use-debounce: 9.0.4
     use-immer: 0.8.1
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
@@ -20810,12 +20810,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:9.0.3":
-  version: 9.0.3
-  resolution: "use-debounce@npm:9.0.3"
+"use-debounce@npm:9.0.4":
+  version: 9.0.4
+  resolution: "use-debounce@npm:9.0.4"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: e9aa3b89abe28bd746cfb5e7edc281d786788b6afe4063cfd8e34c4fff58af212809f13bffa16ff291bead199abb497325330e66d1e772d1843853edbd4646ba
+  checksum: 37da4ecbe4e10a6230580cac03a8cae1788ea3e417dfdd92fcf654325458cf1b4567fd57bebf888edab62701a6abe47059a585008fd04228784f223f94d66ce4
   languageName: node
   linkType: hard
 
