@@ -59,6 +59,7 @@ jobs:
           # undocumented env var
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
+      - run: yarn constraints --fix
       - run: yarn dedupe
 
       - name: Commit yarn.lock

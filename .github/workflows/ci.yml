@@ -22,6 +22,7 @@ jobs:
             command: |
               # lint steps
               set -x
+              yarn constraints
               yarn license-check
               yarn dedupe --check
               yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
