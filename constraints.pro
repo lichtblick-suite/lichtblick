@@ -40,24 +40,24 @@ semver_max([First|Rest], Result) :-
 has_prefix(Prefix, Atom) :-
   atom_concat(Prefix, _, Atom).
 
-% Find all unique dependency versions across all workspaces that have a given Prefix, excluding any
-% dependencies in Excludes.
-all_versions_with_prefix(Prefix, Excludes, Result) :-
+% Find all unique dependency versions across all workspaces that have a given Prefix, or are in
+% Includes, excluding any dependencies in Excludes.
+all_matching_versions(Prefix, Includes, Excludes, Result) :-
   findall(
     Range,
     (
       workspace_has_dependency(_, Dep, Range, _),
       \+member(Dep, Excludes),
-      has_prefix(Prefix, Dep)
+      (has_prefix(Prefix, Dep); member(Dep, Includes))
     ),
     ResultList
   ),
   list_to_set(ResultList, Result).
 
 % These dependencies are released from monorepos, so we want each package to have the same version.
-% Arguments: requires_matching_versions(Prefix, Excludes)
-requires_matching_versions('@storybook/', ['@storybook/testing-library']).
-requires_matching_versions('@typescript-eslint/', []).
+% Arguments: requires_matching_versions(Prefix, Includes, Excludes)
+requires_matching_versions('@storybook/', ['storybook'], ['@storybook/testing-library']).
+requires_matching_versions('@typescript-eslint/', [], []).
 
 % Enforce the requirements defined in requires_matching_versions above.
 gen_enforced_dependency(WorkspaceCwd, DependencyIdent, DependencyRange, DependencyType) :-
@@ -65,13 +65,13 @@ gen_enforced_dependency(WorkspaceCwd, DependencyIdent, DependencyRange, Dependen
   % For each existing package dependency...
   workspace_has_dependency(WorkspaceCwd, DependencyIdent, _, DependencyType),
   % For each monorepo that we have requirements for...
-  requires_matching_versions(Prefix, Excludes),
-  % If the package matches Prefix and is not one of the corresponding Excludes...
-  has_prefix(Prefix, DependencyIdent),
+  requires_matching_versions(Prefix, Includes, Excludes),
+  % If the package matches Prefix or Includes and is not one of the corresponding Excludes...
+  (has_prefix(Prefix, DependencyIdent); member(DependencyIdent, Includes)),
   \+member(DependencyIdent, Excludes),
   % Find the maximum version for dependencies with this Prefix across all workspaces & packages, and
   % require this package to have that version.
-  all_versions_with_prefix(Prefix, Excludes, Versions),
+  all_matching_versions(Prefix, Includes, Excludes, Versions),
   semver_max(Versions, MaxVersion),
   write('Applying maximum '), write(Prefix),write(' package version '), write(MaxVersion), write(' to '), write(DependencyIdent), nl,
   DependencyRange = MaxVersion.
