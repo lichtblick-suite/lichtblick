@@ -3,6 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { CompressedImage, RawImage } from "@foxglove/schemas";
 
-import { Image as RosImage, CompressedImage as RosCompressedImage } from "../ros";
+import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
 
 export type AnyImage = RosImage | RosCompressedImage | RawImage | CompressedImage;

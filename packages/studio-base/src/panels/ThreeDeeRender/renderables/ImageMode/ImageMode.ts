@@ -9,7 +9,7 @@ import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { CameraCalibration } from "@foxglove/schemas";
 import { SettingsTreeAction } from "@foxglove/studio";
-import { AnyImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageTypes";
+import { AnyImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
