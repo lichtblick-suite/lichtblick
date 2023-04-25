@@ -37,7 +37,6 @@ import {
   fieldLineWidth,
   fieldScaleVec3,
   fieldSize,
-  PRECISION_DISTANCE,
 } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose, Pose } from "../transforms";
@@ -173,7 +172,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       };
       switch (displayType) {
         case "axis":
-          fields["axisScale"] = fieldSize("Scale", axisScale, PRECISION_DISTANCE);
+          fields["axisScale"] = fieldSize("Scale", axisScale, DEFAULT_AXIS_SCALE);
           break;
         case "arrow":
           fields["arrowScale"] = fieldScaleVec3("Scale", arrowScale);
