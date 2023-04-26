@@ -113,7 +113,7 @@
     "license-checker": "25.0.1",
     "prettier": "2.8.8",
     "rimraf": "5.0.0",
-    "semver": "7.4.0",
+    "semver": "7.5.0",
     "storybook": "7.0.7",
     "ts-node": "10.9.1",
     "ts-prune": "0.10.3",
