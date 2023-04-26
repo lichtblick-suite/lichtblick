@@ -116,9 +116,6 @@ export type CustomLayerAction = {
   handler: (instanceId: string) => void;
 };
 
-// Enable this to render the hitmap to the screen after clicking
-const DEBUG_PICKING: boolean = false;
-
 // Maximum number of objects to present as selection options in a single click
 const MAX_SELECTIONS = 10;
 
@@ -175,6 +172,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   private canvas: HTMLCanvasElement;
   public readonly gl: THREE.WebGLRenderer;
   public maxLod = DetailLevel.High;
+  public debugPicking = false;
   public config: Immutable<RendererConfig>;
   public settings: SettingsManager;
   // [{ name, datatype }]
@@ -307,7 +305,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.input.on("resize", (size) => this.resizeHandler(size));
     this.input.on("click", (cursorCoords) => this.clickHandler(cursorCoords));
 
-    this.picker = new Picker(this.gl, this.scene, { debug: DEBUG_PICKING });
+    this.picker = new Picker(this.gl, this.scene);
 
     this.selectionBackdrop = new ScreenOverlay(this);
     this.selectionBackdrop.visible = false;
@@ -803,7 +801,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.emit("selectedRenderable", selection, this);
 
-    if (!DEBUG_PICKING) {
+    if (!this.debugPicking) {
       this.animationFrame();
     }
   }
@@ -1032,7 +1030,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     for (const selection of selections) {
       selection.renderable.visible = true;
     }
-    if (!DEBUG_PICKING) {
+    if (!this.debugPicking) {
       this.animationFrame();
     }
 
@@ -1138,6 +1136,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       cursorCoords.x,
       cursorCoords.y,
       this.cameraHandler.getActiveCamera(),
+      { debug: this.debugPicking },
     );
     if (objectId === -1) {
       return undefined;
@@ -1170,6 +1169,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         cursorCoords.y,
         this.cameraHandler.getActiveCamera(),
         renderable,
+        { debug: this.debugPicking },
       );
       instanceIndex = instanceIndex === -1 ? undefined : instanceIndex;
     }

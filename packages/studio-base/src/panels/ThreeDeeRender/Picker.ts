@@ -19,7 +19,6 @@ const PIXEL_WIDTH = 31;
 
 const WHITE_COLOR = new THREE.Color(0xffffff);
 
-const AlwaysPickObject = (_obj: THREE.Object3D) => true;
 // This works around an incorrect method definition, where passing null is valid
 const NullScene = ReactNull as unknown as THREE.Scene;
 
@@ -47,20 +46,16 @@ export class Picker {
   private gl: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private camera?: Camera;
-  private shouldPickObjectCB: (object: THREE.Object3D) => boolean;
   private materialCache = new Map<number, THREE.ShaderMaterial>();
   private emptyScene: THREE.Scene;
   private pixelBuffer: Uint8Array;
   private currClearColor = new THREE.Color();
   private pickingTarget: THREE.WebGLRenderTarget;
-  private debug: boolean;
   private isDebugPass = false;
 
-  public constructor(gl: THREE.WebGLRenderer, scene: THREE.Scene, options: PickerOptions = {}) {
+  public constructor(gl: THREE.WebGLRenderer, scene: THREE.Scene) {
     this.gl = gl;
     this.scene = scene;
-    this.shouldPickObjectCB = AlwaysPickObject;
-    this.debug = options.debug ?? false;
 
     // This is the PIXEL_WIDTH x PIXEL_WIDTH render target we use to do the picking
     this.pickingTarget = new THREE.WebGLRenderTarget(PIXEL_WIDTH, PIXEL_WIDTH, {
@@ -88,12 +83,11 @@ export class Picker {
     x: number,
     y: number,
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
-    shouldPickObject = AlwaysPickObject,
+    options: PickerOptions = {},
   ): number {
     // Use the onAfterRender callback to actually render geometry for picking
     this.emptyScene.onAfterRender = this.handleAfterRender;
     this.camera = camera;
-    this.shouldPickObjectCB = shouldPickObject;
     const hw = (PIXEL_WIDTH / 2) | 0;
     const pixelRatio = this.gl.getPixelRatio();
     const xi = Math.max(0, x * pixelRatio - hw);
@@ -120,7 +114,7 @@ export class Picker {
       (this.pixelBuffer[2]! << 8) +
       this.pixelBuffer[3]!;
 
-    if (this.debug) {
+    if (options.debug === true) {
       this.pickDebugRender(camera);
     }
 
@@ -132,6 +126,7 @@ export class Picker {
     y: number,
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
     renderable: Renderable,
+    options: PickerOptions = {},
   ): number {
     this.emptyScene.onAfterRender = this.makeHandleInstanceAfterRender(renderable);
     this.camera = camera;
@@ -156,7 +151,7 @@ export class Picker {
     this.gl.setClearColor(this.currClearColor, currAlpha);
     camera.clearViewOffset();
 
-    if (this.debug) {
+    if (options.debug === true) {
       this.pickInstanceDebugRender(camera, renderable);
     }
 
@@ -240,8 +235,7 @@ export class Picker {
     const geometry = renderItem.geometry;
     if (
       !geometry || // Skip if geometry is not defined
-      renderItem.object.userData.picking === false || // Skip if object is marked no picking
-      !this.shouldPickObjectCB(object) // Skip if user callback returns false
+      renderItem.object.userData.picking === false // Skip if object is marked no picking
     ) {
       return;
     }

@@ -5,7 +5,7 @@
 import { t } from "i18next";
 import { set } from "lodash";
 
-import { SettingsTreeAction } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
 import type { IRenderer } from "../IRenderer";
 import { DEFAULT_MESH_UP_AXIS } from "../ModelCache";
@@ -30,60 +30,70 @@ export class SceneSettings extends SceneExtension {
     const config = this.renderer.config;
     const handler = this.handleSettingsAction;
 
+    const fields: SettingsTreeFields = {
+      enableStats: {
+        label: t("threeDee:renderStats"),
+        input: "boolean",
+        value: config.scene.enableStats,
+      },
+      debugPicking: {
+        label: t("threeDee:debugPicking"),
+        input: "boolean",
+        value: this.renderer.debugPicking,
+      },
+      backgroundColor: {
+        label: t("threeDee:background"),
+        input: "rgb",
+        value: config.scene.backgroundColor,
+      },
+      labelScaleFactor: {
+        label: t("threeDee:labelScale"),
+        help: t("threeDee:labelScaleHelp"),
+        input: "number",
+        min: 0,
+        step: 0.1,
+        precision: 2,
+        value: config.scene.labelScaleFactor,
+        placeholder: String(DEFAULT_LABEL_SCALE_FACTOR),
+      },
+      ignoreColladaUpAxis: {
+        label: t("threeDee:ignoreColladaUpAxis"),
+        help: t("threeDee:ignoreColladaUpAxisHelp"),
+        input: "boolean",
+        value: config.scene.ignoreColladaUpAxis,
+        error:
+          (config.scene.ignoreColladaUpAxis ?? false) !==
+          this.renderer.modelCache.options.ignoreColladaUpAxis
+            ? t("threeDee:takeEffectAfterReboot")
+            : undefined,
+      },
+      meshUpAxis: {
+        label: t("threeDee:meshUpAxis"),
+        help: t("threeDee:meshUpAxisHelp"),
+        input: "select",
+        value: config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS,
+        options: [
+          { label: t("threeDee:YUp"), value: "y_up" },
+          { label: t("threeDee:ZUp"), value: "z_up" },
+        ],
+        error:
+          (config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS) !==
+          this.renderer.modelCache.options.meshUpAxis
+            ? t("threeDee:takeEffectAfterReboot")
+            : undefined,
+      },
+    };
+
+    if (process.env.NODE_ENV === "production") {
+      delete fields.debugPicking;
+    }
     return [
       {
         path: ["scene"],
         node: {
           label: t("threeDee:scene"),
           actions: [{ type: "action", id: "reset-scene", label: t("threeDee:reset") }],
-          fields: {
-            enableStats: {
-              label: t("threeDee:renderStats"),
-              input: "boolean",
-              value: config.scene.enableStats,
-            },
-            backgroundColor: {
-              label: t("threeDee:background"),
-              input: "rgb",
-              value: config.scene.backgroundColor,
-            },
-            labelScaleFactor: {
-              label: t("threeDee:labelScale"),
-              help: t("threeDee:labelScaleHelp"),
-              input: "number",
-              min: 0,
-              step: 0.1,
-              precision: 2,
-              value: config.scene.labelScaleFactor,
-              placeholder: String(DEFAULT_LABEL_SCALE_FACTOR),
-            },
-            ignoreColladaUpAxis: {
-              label: t("threeDee:ignoreColladaUpAxis"),
-              help: t("threeDee:ignoreColladaUpAxisHelp"),
-              input: "boolean",
-              value: config.scene.ignoreColladaUpAxis,
-              error:
-                (config.scene.ignoreColladaUpAxis ?? false) !==
-                this.renderer.modelCache.options.ignoreColladaUpAxis
-                  ? t("threeDee:takeEffectAfterReboot")
-                  : undefined,
-            },
-            meshUpAxis: {
-              label: t("threeDee:meshUpAxis"),
-              help: t("threeDee:meshUpAxisHelp"),
-              input: "select",
-              value: config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS,
-              options: [
-                { label: t("threeDee:YUp"), value: "y_up" },
-                { label: t("threeDee:ZUp"), value: "z_up" },
-              ],
-              error:
-                (config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS) !==
-                this.renderer.modelCache.options.meshUpAxis
-                  ? t("threeDee:takeEffectAfterReboot")
-                  : undefined,
-            },
-          },
+          fields,
           defaultExpansionState: "collapsed",
           handler,
         },
@@ -108,6 +118,11 @@ export class SceneSettings extends SceneExtension {
     const category = path[0]!;
     const value = action.payload.value;
     if (category === "scene") {
+      if (path[1] === "debugPicking") {
+        this.renderer.debugPicking = (value as boolean | undefined) ?? false;
+        this.updateSettingsTree();
+        return;
+      }
       // Update the configuration
       this.renderer.updateConfig((draft) => set(draft, path, value));
 

@@ -170,6 +170,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   maxLod: DetailLevel;
   config: Immutable<RendererConfig>;
   settings: SettingsManager;
+  debugPicking: boolean;
   // [{ name, datatype }]
   topics: ReadonlyArray<Topic> | undefined;
   // topicName -> { name, datatype }
