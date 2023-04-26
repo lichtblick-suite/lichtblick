@@ -76,6 +76,8 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   // set when material or texture changes
   #materialNeedsUpdate = true;
 
+  #renderBehindScene: boolean = false;
+
   public override dispose(): void {
     this.userData.texture?.dispose();
     this.userData.material?.dispose();
@@ -100,6 +102,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
   public override details(): Record<string, RosValue> {
     return { image: this.userData.image, camera_info: this.userData.cameraInfo };
+  }
+
+  public setRenderBehindScene(): void {
+    this.#renderBehindScene = true;
+    this.#materialNeedsUpdate = true;
   }
 
   // Renderable should only need to care about the model
@@ -219,10 +226,10 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   }
 
   private addTopicError(key: string, errorMessage: string) {
-    this.renderer.settings.errors.addToTopic(this.userData.topic, key, errorMessage);
+    this.renderer.settings.errors.add(this.userData.settingsPath, key, errorMessage);
   }
   private removeTopicError(key: string) {
-    this.renderer.settings.errors.removeFromTopic(this.userData.topic, key);
+    this.renderer.settings.errors.remove(this.userData.settingsPath, key);
   }
   private updateMaterial(): void {
     if (!this.userData.material) {
@@ -243,6 +250,15 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     material.opacity = tempColor.a;
     material.transparent = transparent;
     material.depthWrite = !transparent;
+
+    if (this.#renderBehindScene) {
+      material.depthWrite = false;
+      material.depthTest = false;
+      this.renderOrder = -1 * Number.MAX_SAFE_INTEGER;
+    } else {
+      material.depthTest = true;
+      this.renderOrder = 0;
+    }
 
     material.needsUpdate = true;
   }

@@ -2,18 +2,29 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { set } from "lodash";
 import * as THREE from "three";
 
 import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
-import { CameraCalibration } from "@foxglove/schemas";
+import { toNanoSec } from "@foxglove/rostime";
+import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction } from "@foxglove/studio";
+import {
+  IMAGE_RENDERABLE_DEFAULT_SETTINGS,
+  ImageRenderable,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
 import { AnyImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import {
+  normalizeCompressedImage,
+  normalizeRawImage,
+  normalizeRosCompressedImage,
+  normalizeRosImage,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/imageNormalizers";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
+import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 
 import { ImageModelCamera } from "./ImageModelCamera";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
@@ -29,6 +40,8 @@ import {
   IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
   CAMERA_INFO_DATATYPES,
+  CompressedImage as RosCompressedImage,
+  Image as RosImage,
   CameraInfo,
 } from "../../ros";
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
@@ -44,7 +57,7 @@ const IMAGE_TOPIC_DIFFERENT_FRAME = "IMAGE_TOPIC_DIFFERENT_FRAME";
 
 const CAMERA_MODEL = "CameraModel";
 
-export class ImageMode extends SceneExtension implements ICameraHandler {
+export class ImageMode extends SceneExtension<ImageRenderable> implements ICameraHandler {
   private camera: ImageModelCamera;
   private cameraModel:
     | {
@@ -52,17 +65,10 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
         info: CameraInfo;
       }
     | undefined;
-  /**
-   * We keep more than just the last message event on the selected camera info topic because
-   * backfill won't happen when this scene extension selected a camera info topic that was
-   * already being used by the Image scene extension because it wouldn't trigger a
-   * subscription change. This lets us store them if one isn't selected in this
-   * panel but is being subscribed to elsewhere so we wouldn't need to rely on the backfill.
-   */
-  private cameraInfoByTopic: Map<string, CameraInfo> = new Map();
-  private cameraImageByTopic: Map<string, AnyImage> = new Map();
 
   #annotations: ImageAnnotations;
+
+  #imageRenderable: ImageRenderable | undefined;
 
   /**
    * @param canvasSize Canvas size in CSS pixels
@@ -88,10 +94,27 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
       handler: this.handleCameraInfo,
       shouldSubscribe: this.cameraInfoShouldSubscribe,
     });
-
     renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, {
       handler: this.handleCameraInfo,
       shouldSubscribe: this.cameraInfoShouldSubscribe,
+    });
+
+    renderer.addSchemaSubscriptions(ROS_IMAGE_DATATYPES, {
+      handler: this.handleRosRawImage,
+      shouldSubscribe: this.imageShouldSubscribe,
+    });
+    renderer.addSchemaSubscriptions(ROS_COMPRESSED_IMAGE_DATATYPES, {
+      handler: this.handleRosCompressedImage,
+      shouldSubscribe: this.imageShouldSubscribe,
+    });
+
+    renderer.addSchemaSubscriptions(RAW_IMAGE_DATATYPES, {
+      handler: this.handleRawImage,
+      shouldSubscribe: this.imageShouldSubscribe,
+    });
+    renderer.addSchemaSubscriptions(COMPRESSED_IMAGE_DATATYPES, {
+      handler: this.handleCompressedImage,
+      shouldSubscribe: this.imageShouldSubscribe,
     });
 
     this.#annotations = new ImageAnnotations({
@@ -290,8 +313,8 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
     const category = path[0]!;
     const value = action.payload.value;
     if (category === "imageMode") {
-      this.renderer.updateConfig((draft) => set(draft, path, value));
-      this.updateView();
+      this.saveSetting(path, value);
+      this.updateViewAndRenderables();
     } else {
       return;
     }
@@ -304,6 +327,10 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
     return this.getImageModeSettings().calibrationTopic === topic;
   };
 
+  private imageShouldSubscribe = (topic: string): boolean => {
+    return this.getImageModeSettings().imageTopic === topic;
+  };
+
   /** Processes camera info messages and updates state */
   private handleCameraInfo = (
     messageEvent: PartialMessageEvent<CameraInfo> & PartialMessageEvent<CameraCalibration>,
@@ -311,9 +338,80 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
     // Store the last camera info on each topic, when processing an image message we'll look up
     // the camera info by the info topic configured for the image
     const cameraInfo = normalizeCameraInfo(messageEvent.message);
-    this.cameraInfoByTopic.set(messageEvent.topic, cameraInfo);
-    this.updateView();
+    this.updateCameraModel(cameraInfo);
+    this.updateViewAndRenderables();
   };
+
+  private handleRosRawImage = (messageEvent: PartialMessageEvent<RosImage>): void => {
+    this.handleImage(messageEvent, normalizeRosImage(messageEvent.message));
+  };
+
+  private handleRosCompressedImage = (
+    messageEvent: PartialMessageEvent<RosCompressedImage>,
+  ): void => {
+    this.handleImage(messageEvent, normalizeRosCompressedImage(messageEvent.message));
+  };
+
+  private handleRawImage = (messageEvent: PartialMessageEvent<RawImage>): void => {
+    this.handleImage(messageEvent, normalizeRawImage(messageEvent.message));
+  };
+
+  private handleCompressedImage = (messageEvent: PartialMessageEvent<CompressedImage>): void => {
+    this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
+  };
+
+  private handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
+    const topic = messageEvent.topic;
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+    const frameId = "header" in image ? image.header.frame_id : image.frame_id;
+
+    const renderable = this.#getImageRenderable(topic, receiveTime, image, frameId);
+
+    if (this.cameraModel) {
+      renderable.userData.cameraInfo = this.cameraModel.info;
+      renderable.setCameraModel(this.cameraModel.model);
+    }
+    renderable.setImage(image);
+    renderable.update();
+  };
+
+  #getImageRenderable(
+    topicName: string,
+    receiveTime: bigint,
+    image: AnyImage | undefined,
+    frameId: string,
+  ): ImageRenderable {
+    let renderable = this.#imageRenderable;
+    if (renderable) {
+      return renderable;
+    }
+
+    // we don't have settings for images yet
+    const userSettings = { ...IMAGE_RENDERABLE_DEFAULT_SETTINGS };
+
+    renderable = new ImageRenderable("imageMode-image", this.renderer, {
+      receiveTime,
+      messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
+      frameId: this.renderer.normalizeFrameId(frameId),
+      pose: makePose(),
+      settingsPath: IMAGE_TOPIC_PATH,
+      topic: topicName,
+      settings: userSettings,
+      cameraInfo: undefined,
+      cameraModel: undefined,
+      image,
+      texture: undefined,
+      material: undefined,
+      geometry: undefined,
+      mesh: undefined,
+    });
+
+    this.add(renderable);
+    this.#imageRenderable = renderable;
+    renderable.setRenderBehindScene();
+    renderable.visible = true;
+    return renderable;
+  }
 
   /** Gets frame from active info or image message if info does not have one*/
   private getCurrentFrameId(): string | undefined {
@@ -324,8 +422,8 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
       return undefined;
     }
 
-    const selectedCameraInfo = this.cameraInfoByTopic.get(calibrationTopic ?? "");
-    const selectedImage = this.cameraImageByTopic.get(imageTopic ?? "");
+    const selectedCameraInfo = this.cameraModel?.info;
+    const selectedImage = this.#imageRenderable?.userData.image;
 
     const cameraInfoFrameId = selectedCameraInfo?.header.frame_id;
 
@@ -358,15 +456,11 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
   }
 
   /**
-   * Updates model, frame, and camera to be in sync with current message and topic
+   * Updates renderable, frame, and camera to be in sync with current camera model
    */
-  private updateView(): void {
-    const { calibrationTopic } = this.getImageModeSettings();
-    if (!calibrationTopic) {
-      return;
-    }
-    const possibleNewCameraInfo = this.cameraInfoByTopic.get(calibrationTopic);
-    if (!possibleNewCameraInfo) {
+  private updateViewAndRenderables(): void {
+    const cameraInfo = this.cameraModel?.info;
+    if (!cameraInfo) {
       this.renderer.settings.errors.add(
         CALIBRATION_TOPIC_PATH,
         MISSING_CAMERA_INFO,
@@ -379,7 +473,6 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
 
     // set the render frame id to the camera info's frame id
     this.renderer.followFrameId = this.getCurrentFrameId();
-    this.updateCameraModel(possibleNewCameraInfo);
     if (this.cameraModel?.model) {
       this.camera.updateCamera(this.cameraModel.model);
       this.#annotations.updateScale(
@@ -388,6 +481,12 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
         this.renderer.input.canvasSize.height,
         this.renderer.getPixelRatio(),
       );
+      const imageRenderable = this.#imageRenderable;
+      if (imageRenderable) {
+        imageRenderable.userData.cameraInfo = this.cameraModel.info;
+        imageRenderable.setCameraModel(this.cameraModel.model);
+        imageRenderable.update();
+      }
     }
   }
 
@@ -440,7 +539,7 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
   }
 
   public setCameraState(): void {
-    this.updateView();
+    this.updateViewAndRenderables();
   }
 
   public getCameraState(): undefined {

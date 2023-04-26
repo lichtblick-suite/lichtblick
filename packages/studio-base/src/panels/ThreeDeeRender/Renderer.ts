@@ -352,14 +352,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         this.cameraHandler = new CameraStateSettings(this, this.canvas, aspect);
         this.addSceneExtension(this.cameraHandler);
         this.addSceneExtension(new PublishSettings(this));
+        this.addSceneExtension(new Images(this));
+        this.addSceneExtension(new Cameras(this));
         break;
     }
 
     this.addSceneExtension(new SceneSettings(this));
-    this.addSceneExtension(new Cameras(this));
     this.addSceneExtension(new FrameAxes(this, { visible: interfaceMode === "3d" }));
     this.addSceneExtension(new Grids(this));
-    this.addSceneExtension(new Images(this));
     this.addSceneExtension(new Markers(this));
     this.addSceneExtension(new FoxgloveSceneEntities(this));
     this.addSceneExtension(new FoxgloveGrid(this));

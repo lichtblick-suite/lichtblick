@@ -155,24 +155,6 @@ const ImageModeRosImage = ({ imageType }: { imageType: "raw" | "png" }) => {
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
           },
-          topics: {
-            "/cam1/info": {
-              visible: false,
-              color: "rgba(0, 255, 255, 1)",
-            },
-            "/cam1/png": {
-              visible: imageType === "png",
-              color: "rgba(255, 255, 255, 0.75)",
-            },
-            "/cam2/info": {
-              visible: false,
-              color: "rgba(0, 255, 255, 1)",
-            },
-            "/cam2/raw": {
-              visible: imageType === "raw",
-              color: "rgba(255, 255, 255, 0.75)",
-            },
-          },
         }}
       />
     </PanelSetup>
@@ -324,22 +306,6 @@ const ImageModeFoxgloveImage = ({ imageType }: { imageType: "raw" | "png" }) => 
             far: 5000,
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
-          },
-          topics: {
-            "/cam1/info": {
-              visible: false,
-            },
-            "/cam1/png": {
-              visible: imageType === "png",
-              color: "rgba(255, 255, 255, .75)",
-            },
-            "/cam2/info": {
-              visible: false,
-            },
-            "/cam2/raw": {
-              visible: imageType === "raw",
-              color: "rgba(255, 255, 255, .75)",
-            },
           },
         }}
       />
