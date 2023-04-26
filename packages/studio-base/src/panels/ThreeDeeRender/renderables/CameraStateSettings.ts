@@ -431,7 +431,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       : this.orthographicCamera;
   }
 
-  public handleResize(width: number, height: number): void {
+  public handleResize(width: number, height: number, _pixelRatio: number): void {
     this.aspect = width / height;
     this.setCameraState(this.renderer.config.cameraState);
   }

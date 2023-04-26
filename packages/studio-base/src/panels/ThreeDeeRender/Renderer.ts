@@ -990,7 +990,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   private resizeHandler = (size: THREE.Vector2): void => {
     this.gl.setPixelRatio(window.devicePixelRatio);
     this.gl.setSize(size.width, size.height);
-    this.cameraHandler.handleResize(size.width, size.height);
+    this.cameraHandler.handleResize(size.width, size.height, window.devicePixelRatio);
 
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
     log.debug(`Resized renderer to ${renderSize.width}x${renderSize.height}`);

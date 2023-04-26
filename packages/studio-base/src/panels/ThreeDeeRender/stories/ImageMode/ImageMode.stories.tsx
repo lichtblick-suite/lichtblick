@@ -10,9 +10,9 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import delay from "@foxglove/studio-base/util/delay";
 
-import { PNG_TEST_IMAGE, rad2deg, SENSOR_FRAME_ID } from "./common";
-import { ImagePanel, ThreeDeePanel } from "../index";
-import { CameraInfo, CompressedImage as RosCompressedImage, Image as RosRawImage } from "../ros";
+import { ImagePanel, ThreeDeePanel } from "../../index";
+import { CameraInfo, CompressedImage as RosCompressedImage, Image as RosRawImage } from "../../ros";
+import { PNG_TEST_IMAGE, rad2deg, SENSOR_FRAME_ID } from "../common";
 
 export default {
   title: "panels/ThreeDeeRender/Images",

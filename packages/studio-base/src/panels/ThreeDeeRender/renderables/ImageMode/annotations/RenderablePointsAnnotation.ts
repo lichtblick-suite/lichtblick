@@ -13,6 +13,25 @@ import { SRGBToLinear } from "../../../color";
 
 const tempVec3 = new THREE.Vector3();
 
+class PickingMaterial extends THREE.ShaderMaterial {
+  public constructor() {
+    super({
+      vertexShader: THREE.ShaderChunk.points_vert,
+      fragmentShader: /* glsl */ `
+        uniform vec4 objectId;
+        void main() {
+          gl_FragColor = objectId;
+        }
+      `,
+      uniforms: {
+        ...THREE.UniformsLib.points,
+        ...THREE.UniformsLib.fog,
+        objectId: { value: [NaN, NaN, NaN, NaN] },
+      },
+    });
+  }
+}
+
 /**
  * 2D points annotation with style=points (points rendered as dots).
  */
@@ -20,8 +39,10 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
   #geometry: DynamicBufferGeometry;
   #points: THREE.Points;
   #pointsMaterial: THREE.PointsMaterial;
+  #pickingMaterial: PickingMaterial;
 
   #scale = 0;
+  #pixelRatio = 0;
   #scaleNeedsUpdate = false;
 
   #annotation?: NormalizedPointsAnnotation & { style: "points" };
@@ -48,19 +69,28 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
       sizeAttenuation: false,
       vertexColors: true,
     });
+    this.#pickingMaterial = new PickingMaterial();
     this.#points = new THREE.Points(this.#geometry, this.#pointsMaterial);
+    this.#points.userData.pickingMaterial = this.#pickingMaterial;
     this.add(this.#points);
   }
 
   public override dispose(): void {
     this.#geometry.dispose();
     this.#pointsMaterial.dispose();
+    this.#pickingMaterial.dispose();
     super.dispose();
   }
 
-  public setScale(scale: number, _canvasWidth: number, _canvasHeight: number): void {
-    this.#scaleNeedsUpdate ||= scale !== this.#scale;
+  public setScale(
+    scale: number,
+    _canvasWidth: number,
+    _canvasHeight: number,
+    pixelRatio: number,
+  ): void {
+    this.#scaleNeedsUpdate ||= scale !== this.#scale || pixelRatio !== this.#pixelRatio;
     this.#scale = scale;
+    this.#pixelRatio = pixelRatio;
   }
 
   public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
@@ -85,6 +115,10 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
       const { thickness } = this.#annotation;
       // thickness specifies radius, PointsMaterial.size specifies diameter
       this.#pointsMaterial.size = thickness * 2 * this.#scale;
+      this.#pointsMaterial.needsUpdate = true;
+      // PointsMaterial automatically adjusts for pixel ratio, ShaderMaterial does not
+      this.#pickingMaterial.uniforms.size!.value = thickness * 2 * this.#scale * this.#pixelRatio;
+      this.#pickingMaterial.needsUpdate = true;
     }
 
     if (this.#annotationNeedsUpdate || this.#cameraModelNeedsUpdate) {

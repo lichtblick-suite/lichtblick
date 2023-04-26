@@ -15,12 +15,36 @@ import { SRGBToLinear } from "../../../color";
 
 const tempVec3 = new THREE.Vector3();
 
+class PickingMaterial extends LineMaterial {
+  public constructor() {
+    super({
+      worldUnits: false,
+      vertexColors: false,
+      linewidth: 0,
+      transparent: false,
+      depthWrite: true,
+    });
+    this.uniforms.objectId = { value: [NaN, NaN, NaN, NaN] };
+  }
+
+  public override onBeforeCompile(shader: THREE.Shader, renderer: THREE.WebGLRenderer): void {
+    super.onBeforeCompile(shader, renderer);
+    shader.fragmentShader = /* glsl */ `
+      uniform vec4 objectId;
+      void main() {
+        gl_FragColor = objectId;
+      }
+    `;
+  }
+}
+
 export class RenderableLineListAnnotation extends Renderable<
   BaseUserData,
   /*TRenderer=*/ undefined
 > {
   #geometry?: LineSegmentsGeometry;
   #lineSegments: LineSegments2;
+  #pickingMaterial: PickingMaterial;
   #material: LineMaterial;
   #capacity?: number;
   #positionBuffer = new Float32Array();
@@ -56,16 +80,23 @@ export class RenderableLineListAnnotation extends Renderable<
       depthWrite: true,
     });
     this.#lineSegments = new LineSegments2(this.#geometry, this.#material);
+    this.#lineSegments.userData.pickingMaterial = this.#pickingMaterial = new PickingMaterial();
     this.add(this.#lineSegments);
   }
 
   public override dispose(): void {
     this.#geometry?.dispose();
     this.#material.dispose();
+    this.#pickingMaterial.dispose();
     super.dispose();
   }
 
-  public setScale(scale: number, canvasWidth: number, canvasHeight: number): void {
+  public setScale(
+    scale: number,
+    canvasWidth: number,
+    canvasHeight: number,
+    _pixelRatio: number,
+  ): void {
     this.#scaleNeedsUpdate ||=
       scale !== this.#scale ||
       canvasWidth !== this.#canvasWidth ||
@@ -103,6 +134,9 @@ export class RenderableLineListAnnotation extends Renderable<
       this.#material.resolution.set(this.#canvasWidth, this.#canvasHeight);
       this.#material.linewidth = thickness * this.#scale;
       this.#material.needsUpdate = true;
+      this.#pickingMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
+      this.#pickingMaterial.linewidth = thickness * this.#scale;
+      this.#pickingMaterial.needsUpdate = true;
       this.#scaleNeedsUpdate = false;
     }
 

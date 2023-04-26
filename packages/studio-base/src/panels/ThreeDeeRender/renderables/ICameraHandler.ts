@@ -25,6 +25,7 @@ export interface ICameraHandler extends SceneExtension {
    * Used to update the aspect ratio of the camera when necessary
    * @param width - The width of the render canvas in CSS pixels
    * @param height - The height of the render canvas in CSS pixels
+   * @param pixelRatio - The device pixel ratio (device pixels per CSS pixel)
    */
-  handleResize(width: number, height: number): void;
+  handleResize(width: number, height: number, pixelRatio: number): void;
 }

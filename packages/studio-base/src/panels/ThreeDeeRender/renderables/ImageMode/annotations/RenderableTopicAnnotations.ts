@@ -20,6 +20,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
   #scale = 0;
   #canvasWidth = 0;
   #canvasHeight = 0;
+  #pixelRatio = 0;
   #scaleNeedsUpdate = false;
 
   #annotations: NormalizedAnnotation[] = [];
@@ -37,11 +38,17 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     }
   }
 
-  public setScale(scale: number, canvasWidth: number, canvasHeight: number): void {
+  public setScale(
+    scale: number,
+    canvasWidth: number,
+    canvasHeight: number,
+    pixelRatio: number,
+  ): void {
     this.#scaleNeedsUpdate ||= this.#scale !== scale;
     this.#scale = scale;
     this.#canvasWidth = canvasWidth;
     this.#canvasHeight = canvasHeight;
+    this.#pixelRatio = pixelRatio;
   }
 
   public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
@@ -58,10 +65,10 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     if (this.#scaleNeedsUpdate) {
       this.#scaleNeedsUpdate = false;
       for (const points of this.#points) {
-        points.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight);
+        points.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       }
       for (const lineList of this.#lineLists) {
-        lineList.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight);
+        lineList.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       }
     }
 
@@ -108,7 +115,12 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
               let points = unusedPoints.pop();
               if (!points) {
                 points = new RenderablePointsAnnotation();
-                points.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight);
+                points.setScale(
+                  this.#scale,
+                  this.#canvasWidth,
+                  this.#canvasHeight,
+                  this.#pixelRatio,
+                );
                 points.setCameraModel(this.#cameraModel);
                 this.add(points);
               }
@@ -131,7 +143,12 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
               let lineList = unusedLineLists.pop();
               if (!lineList) {
                 lineList = new RenderableLineListAnnotation();
-                lineList.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight);
+                lineList.setScale(
+                  this.#scale,
+                  this.#canvasWidth,
+                  this.#canvasHeight,
+                  this.#pixelRatio,
+                );
                 lineList.setCameraModel(this.#cameraModel);
                 this.add(lineList);
               }

@@ -26,6 +26,7 @@ interface ImageAnnotationsContext {
   initialScale: number;
   initialCanvasWidth: number;
   initialCanvasHeight: number;
+  initialPixelRatio: number;
   topics(): readonly Topic[];
   config(): Immutable<ImageModeConfig>;
   updateConfig(updateHandler: (draft: ImageModeConfig) => void): void;
@@ -49,6 +50,7 @@ export class ImageAnnotations extends THREE.Object3D {
   #scale: number;
   #canvasWidth: number;
   #canvasHeight: number;
+  #pixelRatio: number;
 
   public constructor(context: ImageAnnotationsContext) {
     super();
@@ -56,6 +58,7 @@ export class ImageAnnotations extends THREE.Object3D {
     this.#scale = context.initialScale;
     this.#canvasWidth = context.initialCanvasWidth;
     this.#canvasHeight = context.initialCanvasHeight;
+    this.#pixelRatio = context.initialPixelRatio;
 
     this.#context.addSchemaSubscriptions(
       IMAGE_ANNOTATIONS_DATATYPES,
@@ -85,12 +88,18 @@ export class ImageAnnotations extends THREE.Object3D {
     this.#renderablesByTopic.clear();
   }
 
-  public updateScale(scale: number, canvasWidth: number, canvasHeight: number): void {
+  public updateScale(
+    scale: number,
+    canvasWidth: number,
+    canvasHeight: number,
+    pixelRatio: number,
+  ): void {
     this.#scale = scale;
     this.#canvasWidth = canvasWidth;
     this.#canvasHeight = canvasHeight;
+    this.#pixelRatio = pixelRatio;
     for (const renderable of this.#renderablesByTopic.values()) {
-      renderable.setScale(scale, canvasWidth, canvasHeight);
+      renderable.setScale(scale, canvasWidth, canvasHeight, pixelRatio);
       renderable.update();
     }
   }
@@ -114,7 +123,7 @@ export class ImageAnnotations extends THREE.Object3D {
     let renderable = this.#renderablesByTopic.get(messageEvent.topic);
     if (!renderable) {
       renderable = new RenderableTopicAnnotations();
-      renderable.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight);
+      renderable.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       renderable.setCameraModel(this.#cameraModel);
       this.#renderablesByTopic.set(messageEvent.topic, renderable);
       this.add(renderable);

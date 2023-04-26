@@ -98,6 +98,7 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
       initialScale: this.camera.getEffectiveScale(),
       initialCanvasWidth: canvasSize.width,
       initialCanvasHeight: canvasSize.height,
+      initialPixelRatio: renderer.getPixelRatio(),
       topics: () => renderer.topics ?? [],
       config: () => renderer.config.imageMode,
       updateConfig: (updateHandler) => {
@@ -385,6 +386,7 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
         this.camera.getEffectiveScale(),
         this.renderer.input.canvasSize.width,
         this.renderer.input.canvasSize.height,
+        this.renderer.getPixelRatio(),
       );
     }
   }
@@ -432,9 +434,9 @@ export class ImageMode extends SceneExtension implements ICameraHandler {
     return this.camera;
   }
 
-  public handleResize(width: number, height: number): void {
+  public handleResize(width: number, height: number, pixelRatio: number): void {
     this.camera.setCanvasSize(width, height);
-    this.#annotations.updateScale(this.camera.getEffectiveScale(), width, height);
+    this.#annotations.updateScale(this.camera.getEffectiveScale(), width, height, pixelRatio);
   }
 
   public setCameraState(): void {
