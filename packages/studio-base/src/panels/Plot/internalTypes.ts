@@ -40,7 +40,6 @@ export type Datum = {
   y: number;
   receiveTime: Time;
   headerStamp?: Time;
-  path: string;
   value: number | bigint | boolean | string;
   constantName?: string;
 };

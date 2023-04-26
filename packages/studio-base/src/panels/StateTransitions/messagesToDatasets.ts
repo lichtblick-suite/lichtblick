@@ -106,7 +106,6 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
         datasetIndex,
         x,
         y,
-        path: path.value,
         value,
         constantName,
       };

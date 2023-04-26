@@ -64,7 +64,7 @@ function getDatumsForMessagePathItem(
   const data: Datum[] = [];
   const elapsedTime = toSec(subtract(timestamp, startTime));
   for (const entry of yItem.queriedData.entries()) {
-    const [innerIdx, { value, path: queriedPath, constantName }] = entry;
+    const [innerIdx, { value, constantName }] = entry;
     if (
       typeof value === "number" ||
       typeof value === "boolean" ||
@@ -79,7 +79,6 @@ function getDatumsForMessagePathItem(
         data.push({
           x: Number(x),
           y: Number(y),
-          path: queriedPath,
           value,
           constantName,
           receiveTime: yItem.receiveTime,
@@ -93,7 +92,6 @@ function getDatumsForMessagePathItem(
       data.push({
         x: Number(x),
         y,
-        path: queriedPath,
         receiveTime: yItem.receiveTime,
         headerStamp: yItem.headerStamp,
         value: `${format(value)} (${formatTimeRaw(value)})`,
@@ -207,7 +205,6 @@ function getDatasetsFromMessagePlotPath({
         y: NaN,
         receiveTime: { sec: 0, nsec: 0 },
         value: "",
-        path: path.value,
       });
     }
     for (const datum of rangeData) {

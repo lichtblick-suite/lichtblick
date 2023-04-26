@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Square24Filled } from "@fluentui/react-icons";
-import { sortBy, take } from "lodash";
+import { sortBy } from "lodash";
 import { Fragment, PropsWithChildren, useMemo } from "react";
 import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
@@ -24,7 +24,6 @@ export type TimeBasedChartTooltipData = {
   datasetIndex?: number;
   x: number | bigint;
   y: number | bigint;
-  path: string;
   value: number | bigint | boolean | string;
   constantName?: string;
 };
@@ -90,89 +89,90 @@ export default function TimeBasedChartTooltipContent(
   const { colorsByDatasetIndex, content, labelsByDatasetIndex, multiDataset } = props;
   const { classes, cx } = useStyles();
 
-  const itemsByPath = useMemo(() => {
-    const out = new Map<string, TimeBasedChartTooltipData[]>();
-    const overflow = new Set<string>();
+  // Compute whether there are multiple items for the dataset so we can show the user
+  // a message informing them about the multiple items.
+  //
+  // We do not actually show all the items to keep the tooltip size sane.
+  const sortedItems = useMemo(() => {
     // for single dataset plots we don't care about grouping by path - there is only one path
     if (!multiDataset) {
-      return { out, overflow };
+      return [];
     }
+
+    const out = new Map<
+      number,
+      { tooltip: TimeBasedChartTooltipData; hasMultipleValues: boolean }
+    >();
+
     // group items by path
     for (const item of content) {
-      const existing = out.get(item.path) ?? [];
-      existing.push(item);
-      out.set(item.path, existing);
-
-      if (existing.length > 1) {
-        overflow.add(item.path);
+      const datasetIndex = item.datasetIndex ?? 0;
+      const existing = out.get(datasetIndex);
+      if (existing) {
+        existing.hasMultipleValues = true;
+        continue;
       }
+
+      out.set(datasetIndex, {
+        tooltip: item,
+        hasMultipleValues: false,
+      });
     }
 
-    return { out, overflow };
+    // Sort by datasetIndex to keep the displayed values in the same order as the settings
+    return sortBy([...out.entries()], ([_, items]) => items.tooltip.datasetIndex ?? 0);
   }, [content, multiDataset]);
 
   // If the chart contains only one dataset, we don't need to render the dataset label - saving space
+  //
   // We cannot detect this from the content since content is only what is actively hovered which may
   // not include all datasets
   if (!multiDataset) {
+    const tooltip = content[0];
+    if (!tooltip) {
+      return <></>;
+    }
+
+    const value =
+      typeof tooltip.value === "string"
+        ? tooltip.value
+        : typeof tooltip.value === "bigint"
+        ? tooltip.value.toString()
+        : JSON.stringify(tooltip.value);
+
     return (
       <Stack className={classes.root} data-testid="TimeBasedChartTooltipContent">
-        {take(content, 1).map((item, idx) => {
-          const value =
-            typeof item.value === "string"
-              ? item.value
-              : typeof item.value === "bigint"
-              ? item.value.toString()
-              : JSON.stringify(item.value);
-          return (
-            <div key={idx}>
-              {value}
-              {item.constantName != undefined ? ` (${item.constantName})` : ""}
-            </div>
-          );
-        })}
+        <div>
+          {value}
+          {tooltip.constantName != undefined ? ` (${tooltip.constantName})` : ""}
+        </div>
         {content.length > 1 && <OverflowMessage />}
       </Stack>
     );
   }
 
-  // Sort items by their dataset index to maintain the same ordering as the series in the legend.
-  const sortedItems = sortBy(
-    [...itemsByPath.out.entries()],
-    ([_, items]) => items[0]?.datasetIndex ?? 0,
-  );
-
   return (
     <div className={cx(classes.root, classes.grid)} data-testid="TimeBasedChartTooltipContent">
-      {sortedItems.map(([path, items], idx) => {
-        const firstItem = items[0];
-        const color =
-          firstItem?.datasetIndex != undefined
-            ? colorsByDatasetIndex?.[firstItem.datasetIndex]
-            : "auto";
-        const label =
-          firstItem?.datasetIndex != undefined
-            ? labelsByDatasetIndex?.[firstItem.datasetIndex]
-            : undefined;
+      {sortedItems.map(([datasetIndex, item], idx) => {
+        const color = colorsByDatasetIndex?.[datasetIndex] ?? "auto";
+        const label = labelsByDatasetIndex?.[datasetIndex];
+        const tooltip = item.tooltip;
+        const value =
+          typeof tooltip.value === "string"
+            ? tooltip.value
+            : typeof tooltip.value === "bigint"
+            ? tooltip.value.toString()
+            : JSON.stringify(tooltip.value);
+
         return (
           <Fragment key={idx}>
             <Square24Filled className={classes.icon} primaryFill={color} />
-            <div className={classes.path}>{label ?? path}</div>
-            {take(items, 1).map((item, itemIdx) => {
-              const value =
-                typeof item.value === "string"
-                  ? item.value
-                  : typeof item.value === "bigint"
-                  ? item.value.toString()
-                  : JSON.stringify(item.value);
-              return (
-                <div className={classes.value} key={itemIdx}>
-                  {value}
-                  {item.constantName != undefined ? ` (${item.constantName})` : ""}
-                </div>
-              );
-            })}
-            {itemsByPath.overflow.has(path) && <OverflowMessage />}
+            <div className={classes.path}>{label ?? ""}</div>
+            <div className={classes.value}>
+              {value}
+              {tooltip.constantName != undefined ? ` (${tooltip.constantName})` : ""}
+            </div>
+            {item.hasMultipleValues && <OverflowMessage />}
           </Fragment>
         );
       })}

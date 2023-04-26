@@ -28,7 +28,6 @@ export const SingleItemSingleDataset: StoryObj = {
     const data: TimeBasedChartTooltipData = {
       x: 0,
       y: 0,
-      path: "/some/topic.path",
       value: 3,
       constantName: "ACTIVE",
     };
@@ -62,16 +61,22 @@ export const SingleItemSingleDatasetLight: StoryObj = {
 export const SingleItemMultiDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
+      datasetIndex: 0,
       x: 0,
       y: 0,
-      path: "/some/topic.path",
       value: 3,
       constantName: "ACTIVE",
     };
     return (
       <Tooltip
         open
-        title={<TimeBasedChartTooltipContent multiDataset={true} content={[data]} />}
+        title={
+          <TimeBasedChartTooltipContent
+            multiDataset={true}
+            content={[data]}
+            labelsByDatasetIndex={{ "0": "/some/topic.path", "1": "Series B" }}
+          />
+        }
         placement="top"
         arrow
         PopperProps={{
@@ -100,7 +105,6 @@ export const MultipleItemsSingleDataset: StoryObj = {
     const data: TimeBasedChartTooltipData = {
       x: 0,
       y: 0,
-      path: "/some/topic.path",
       value: 3,
       constantName: "ACTIVE",
     };
@@ -138,7 +142,6 @@ export const MultipleItemsMultipleDataset: StoryObj = {
         datasetIndex: 0,
         x: 0,
         y: 0,
-        path: "/some/topic.path",
         value: 3,
         constantName: "ACTIVE",
       },
@@ -146,7 +149,6 @@ export const MultipleItemsMultipleDataset: StoryObj = {
         datasetIndex: 1,
         x: 0,
         y: 0,
-        path: "/other/topic.path",
         value: 4,
         constantName: "ACTIVE",
       },
@@ -159,7 +161,7 @@ export const MultipleItemsMultipleDataset: StoryObj = {
             multiDataset={true}
             content={data}
             colorsByDatasetIndex={{ "0": "chartreuse", "1": "yellow" }}
-            labelsByDatasetIndex={{ "1": "-*- Custom Label -*-" }}
+            labelsByDatasetIndex={{ "0": "Series A", "1": "Series B" }}
           />
         }
         placement="top"

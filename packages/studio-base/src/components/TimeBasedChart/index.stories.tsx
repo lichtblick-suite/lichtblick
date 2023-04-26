@@ -32,7 +32,6 @@ const tooltipData = new Map<string, TimeBasedChartTooltipData>([
     {
       x: dataX,
       y: dataY,
-      path: "/turtle1/pose.x",
       value: 5.544444561004639,
     },
   ],
