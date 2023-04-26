@@ -497,3 +497,60 @@ export const MultipleMessagesWithTopLevelFilter: StoryObj = {
 
   name: "multiple messages with top-level filter",
 };
+
+export const KeyValueObjects: StoryObj = {
+  render: () => {
+    const namesFixture = {
+      datatypes: new Map(
+        Object.entries({
+          baz: {
+            definitions: [
+              { name: "obj", type: "obj", isComplex: true },
+              { name: "kv", type: "kv", isComplex: true },
+              { name: "kv_arr", type: "kv", isArray: true, isComplex: true },
+            ],
+          },
+          obj: {
+            definitions: [
+              { name: "key", type: "int32" },
+              { name: "field", type: "string" },
+            ],
+          },
+          kv: {
+            definitions: [
+              { name: "key", type: "string" },
+              { name: "value", type: "string" },
+            ],
+          },
+        }),
+      ),
+      topics: [{ name: "/baz", schemaName: "baz" }],
+      frame: {
+        "/baz": [
+          {
+            topic: "/baz",
+            receiveTime: { sec: 123, nsec: 456789012 },
+            message: {
+              obj: { key: 1, field: "foo" },
+              kv: { key: "foo", value: "bar" },
+              kv_arr: [
+                { key: "foo", value: "bar" },
+                { key: "baz", value: "qux" },
+              ],
+            },
+            schemaName: "baz",
+            sizeInBytes: 0,
+          },
+        ],
+      },
+    };
+
+    return (
+      <PanelSetup fixture={namesFixture}>
+        <RawMessages overrideConfig={{ topicPath: "/baz", ...noDiffConfig } as any} />
+      </PanelSetup>
+    );
+  },
+
+  name: "display key/value objects",
+};

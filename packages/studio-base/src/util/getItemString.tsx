@@ -54,6 +54,16 @@ export function getItemString(
         </span>
       );
     }
+
+    const { key, value } = data as { key?: unknown; value?: unknown };
+    if (
+      key != undefined &&
+      value != undefined &&
+      PRIMITIVE_TYPES.includes(typeof key) &&
+      PRIMITIVE_TYPES.includes(typeof value)
+    ) {
+      return `${key}: ${value}`;
+    }
   } else if (keys.length === 3) {
     const { x, y, z } = data as { x?: unknown; y?: unknown; z?: unknown };
     if (typeof x === "number" && typeof y === "number" && typeof z === "number") {
