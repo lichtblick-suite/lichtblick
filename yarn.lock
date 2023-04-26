@@ -2614,7 +2614,7 @@ __metadata:
     fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 7.3.0
     fuzzysort: 2.0.4
-    fzf: 0.5.1
+    fzf: 0.5.2
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
     i18next: 22.4.15
@@ -11820,10 +11820,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fzf@npm:0.5.1":
-  version: 0.5.1
-  resolution: "fzf@npm:0.5.1"
-  checksum: 5c5f56ec9fdd83c7edba58425aa3fadd587aeb9d18b013b8a0f14c80f8eef6b068249786b2e3707be9306fe877f21107f9dce5b4aabb58ee7f488de32191e62a
+"fzf@npm:0.5.2":
+  version: 0.5.2
+  resolution: "fzf@npm:0.5.2"
+  checksum: d7064ea9a2482b656c2852e65af49c3fc86e3cd866d64e8eb3940ca1f193db769b7c2e77c5df0583af4af8875f63ee6aa3cd49d42d0af786a6bd7d92ec929619
   languageName: node
   linkType: hard
 
