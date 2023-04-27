@@ -2594,7 +2594,7 @@ __metadata:
     "@types/tinycolor2": 1.4.3
     "@types/url-search-params": 1.1.0
     "@types/uuid": 9.0.1
-    "@types/wicg-file-system-access": 2020.9.5
+    "@types/wicg-file-system-access": 2020.9.6
     "@uiw/react-textarea-code-editor": 2.1.1
     babel-jest: 29.5.0
     babel-plugin-transform-import-meta: 2.2.0
@@ -6294,10 +6294,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/wicg-file-system-access@npm:2020.9.5":
-  version: 2020.9.5
-  resolution: "@types/wicg-file-system-access@npm:2020.9.5"
-  checksum: 56243705df43fd3b18049adcf5cb639dfbec5a033a33991f4050d0f6e09ebc94a70f426fde1926b7b0fb493d75ea7064eba95e06852eccd8d9cff4b1fde47e35
+"@types/wicg-file-system-access@npm:2020.9.6":
+  version: 2020.9.6
+  resolution: "@types/wicg-file-system-access@npm:2020.9.6"
+  checksum: 2dbf33ee55684d4ed0607ae4b470e0147806b15ec047563c59d94e6ac13be7bed904cc7eece5e4be7c0d58a4de0b0635089f7cd5b7738372e436c760b0719241
   languageName: node
   linkType: hard
 
