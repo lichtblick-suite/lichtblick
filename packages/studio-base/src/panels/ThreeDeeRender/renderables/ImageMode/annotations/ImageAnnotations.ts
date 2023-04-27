@@ -38,6 +38,11 @@ interface ImageAnnotationsContext {
 }
 
 /**
+ * Match everything up to the last `/` in a topic name, e.g. match `/a/b` in `/a/b/c`.
+ */
+const TOPIC_PREFIX_REGEX = /^.+\/(?=.)/;
+
+/**
  * This class handles settings and rendering for ImageAnnotations/ImageMarkers.
  */
 export class ImageAnnotations extends THREE.Object3D {
@@ -185,17 +190,30 @@ export class ImageAnnotations extends THREE.Object3D {
       },
     });
     const config = this.#context.config();
-    let i = 0;
-    for (const topic of this.#context.topics()) {
-      if (
-        !(
+
+    const annotationTopics = this.#context
+      .topics()
+      .filter(
+        (topic) =>
           topicIsConvertibleToSchema(topic, IMAGE_ANNOTATIONS_DATATYPES) ||
           topicIsConvertibleToSchema(topic, IMAGE_MARKER_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, IMAGE_MARKER_ARRAY_DATATYPES)
-        )
-      ) {
-        continue;
+          topicIsConvertibleToSchema(topic, IMAGE_MARKER_ARRAY_DATATYPES),
+      );
+
+    // Sort annotation topics with prefixes matching the image topic to the top.
+    if (config.imageTopic) {
+      const imagePrefix = TOPIC_PREFIX_REGEX.exec(config.imageTopic)?.[0];
+      if (imagePrefix != undefined) {
+        annotationTopics.sort((topicA, topicB) => {
+          const matchesA = topicA.name.startsWith(imagePrefix);
+          const matchesB = topicB.name.startsWith(imagePrefix);
+          return matchesA === matchesB ? 0 : matchesA ? -1 : 1;
+        });
       }
+    }
+
+    let i = 0;
+    for (const topic of annotationTopics) {
       // FG-3065: support topic.convertTo
       const settings = config.annotations?.find(
         (sub) => sub.topic === topic.name && sub.schemaName === topic.schemaName,
