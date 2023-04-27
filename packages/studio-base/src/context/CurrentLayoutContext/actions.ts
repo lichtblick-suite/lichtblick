@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
 import { MosaicNode, MosaicPath } from "react-mosaic-component";
 
 import { VariableValue } from "@foxglove/studio";
@@ -24,14 +25,19 @@ import {
 } from "@foxglove/studio-base/types/panels";
 
 export type LayoutData = {
-  layout?: MosaicNode<string>;
   // We store config for each panel in an object keyed by the panel id.
   configById: SavedProps;
+  layout?: MosaicNode<string>;
+  globalVariables: GlobalVariables;
+  playbackConfig: PlaybackConfig;
+  userNodes: UserNodes;
   /** @deprecated renamed to configById */
   savedProps?: SavedProps;
-  globalVariables: GlobalVariables;
-  userNodes: UserNodes;
-  playbackConfig: PlaybackConfig;
+  /**
+   * Optional version number. Set this to prevent older incompatible versions of
+   * studio trying to load and possibly corrupt the layout.
+   */
+  version?: number;
 };
 
 export type ConfigsPayload = {

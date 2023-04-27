@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
 import { difference, isEqual } from "lodash";
 import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -43,9 +44,13 @@ import { PanelConfig, UserNodes, PlaybackConfig } from "@foxglove/studio-base/ty
 import { windowAppURLState } from "@foxglove/studio-base/util/appURLState";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
+import { IncompatibleLayoutVersionAlert } from "./IncompatibleLayoutVersionAlert";
+
 const log = Logger.getLogger(__filename);
 
 const SAVE_INTERVAL_MS = 1000;
+
+export const MAX_SUPPORTED_LAYOUT_VERSION = 1;
 
 /**
  * Concrete implementation of CurrentLayoutContext.Provider which handles automatically saving and
@@ -74,6 +79,7 @@ export default function CurrentLayoutProvider({
     selectedLayout: undefined,
   });
   const layoutStateRef = useRef(layoutState);
+  const [incompatibleLayoutVersionError, setIncompatibleLayoutVersionError] = useState(false);
   const setLayoutState = useCallback((newState: LayoutState) => {
     setLayoutStateInternal(newState);
 
@@ -120,9 +126,16 @@ export default function CurrentLayoutProvider({
       try {
         setLayoutState({ selectedLayout: { id, loading: true, data: undefined } });
         const layout = await layoutManager.getLayout(id);
+        const layoutVersion = layout?.baseline.data.version;
+        if (layoutVersion != undefined && layoutVersion > MAX_SUPPORTED_LAYOUT_VERSION) {
+          setIncompatibleLayoutVersionError(true);
+          setLayoutState({ selectedLayout: undefined });
+          return;
+        }
         if (!isMounted()) {
           return;
         }
+        setIncompatibleLayoutVersionError(false);
         if (layout == undefined) {
           setLayoutState({ selectedLayout: undefined });
         } else {
@@ -148,6 +161,7 @@ export default function CurrentLayoutProvider({
         enqueueSnackbar(`The layout could not be loaded. ${error.toString()}`, {
           variant: "error",
         });
+        setIncompatibleLayoutVersionError(false);
         setLayoutState({ selectedLayout: undefined });
       }
     },
@@ -368,5 +382,12 @@ export default function CurrentLayoutProvider({
     actions,
   });
 
-  return <CurrentLayoutContext.Provider value={value}>{children}</CurrentLayoutContext.Provider>;
+  return (
+    <CurrentLayoutContext.Provider value={value}>
+      {children}
+      {incompatibleLayoutVersionError && (
+        <IncompatibleLayoutVersionAlert onClose={() => setIncompatibleLayoutVersionError(false)} />
+      )}
+    </CurrentLayoutContext.Provider>
+  );
 }

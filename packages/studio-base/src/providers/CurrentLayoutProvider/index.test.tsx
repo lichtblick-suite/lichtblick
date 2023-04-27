@@ -20,7 +20,9 @@ import {
   UserProfileStorage,
   UserProfileStorageContext,
 } from "@foxglove/studio-base/context/UserProfileStorageContext";
-import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
+import CurrentLayoutProvider, {
+  MAX_SUPPORTED_LAYOUT_VERSION,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { ILayoutManager } from "@foxglove/studio-base/services/ILayoutManager";
 import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
@@ -149,6 +151,43 @@ describe("CurrentLayoutProvider", () => {
           name: "Example layout",
         },
       },
+    ]);
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("refuses to load an incompatible layout", async () => {
+    const expectedState: LayoutData = {
+      configById: { "Foo!bar": { setting: 1 } },
+      globalVariables: { var: "hello" },
+      layout: "Foo!bar",
+      playbackConfig: { speed: 0.1 },
+      userNodes: { node1: { name: "node", sourceCode: "node()" } },
+      version: MAX_SUPPORTED_LAYOUT_VERSION + 1,
+    };
+
+    const condvar = new Condvar();
+    const layoutStorageGetCalledWait = condvar.wait();
+    const mockLayoutManager = makeMockLayoutManager();
+    mockLayoutManager.getLayout.mockImplementation(async () => {
+      condvar.notifyAll();
+      return {
+        id: "example",
+        name: "Example layout",
+        baseline: { updatedAt: new Date(10).toISOString(), data: expectedState },
+      };
+    });
+
+    const mockUserProfile = makeMockUserProfile();
+    mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
+
+    const { all } = renderTest({ mockLayoutManager, mockUserProfile });
+    await act(async () => await layoutStorageGetCalledWait);
+
+    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
+    expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
+      { selectedLayout: undefined },
+      { selectedLayout: { loading: true, id: "example", data: undefined } },
+      { selectedLayout: undefined },
     ]);
     (console.warn as jest.Mock).mockClear();
   });
