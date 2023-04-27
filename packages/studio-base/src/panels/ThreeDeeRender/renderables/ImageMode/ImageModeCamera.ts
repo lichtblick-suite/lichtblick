@@ -11,7 +11,7 @@ const DEFAULT_CAMERA_STATE = {
   far: 1000,
 };
 
-export class ImageModelCamera extends THREE.PerspectiveCamera {
+export class ImageModeCamera extends THREE.PerspectiveCamera {
   private model?: PinholeCameraModel;
   private cameraState = DEFAULT_CAMERA_STATE;
 

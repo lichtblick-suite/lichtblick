@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
 
 import { CompressedImage, RawImage } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
@@ -334,6 +335,20 @@ export const ImageModeResizeHandled: StoryObj = {
     await delay(30);
     parentEl.style.width = "50%";
     canvas.dispatchEvent(new Event("resize"));
+    await delay(30);
+  },
+};
+
+export const ImageModePick: StoryObj = {
+  render: () => <ImageModeFoxgloveImage imageType="raw" />,
+  parameters: { colorScheme: "light" },
+
+  play: async () => {
+    const canvas = document.querySelector("canvas")!;
+    const inspectObjects = screen.getByRole("button", { name: /inspect objects/i });
+    userEvent.click(inspectObjects);
+    await delay(30);
+    userEvent.click(canvas, { clientX: 500, clientY: 500 });
     await delay(30);
   },
 };

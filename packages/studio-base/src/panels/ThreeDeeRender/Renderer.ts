@@ -1136,7 +1136,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       cursorCoords.x,
       cursorCoords.y,
       this.cameraHandler.getActiveCamera(),
-      { debug: this.debugPicking },
+      { debug: this.debugPicking, disableSetViewOffset: this.interfaceMode === "image" },
     );
     if (objectId === -1) {
       return undefined;
@@ -1169,7 +1169,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         cursorCoords.y,
         this.cameraHandler.getActiveCamera(),
         renderable,
-        { debug: this.debugPicking },
+        { debug: this.debugPicking, disableSetViewOffset: this.interfaceMode === "image" },
       );
       instanceIndex = instanceIndex === -1 ? undefined : instanceIndex;
     }
