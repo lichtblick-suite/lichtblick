@@ -32,7 +32,7 @@
     "electron-updater": "5.3.0",
     "esbuild-loader": "2.21.0",
     "eventemitter3": "5.0.0",
-    "fork-ts-checker-webpack-plugin": "7.3.0",
+    "fork-ts-checker-webpack-plugin": "8.0.0",
     "html-webpack-plugin": "5.5.0",
     "jszip": "3.10.1",
     "path-browserify": "1.0.1",

@@ -2612,7 +2612,7 @@ __metadata:
     eventemitter3: 5.0.0
     fake-indexeddb: 4.0.1
     fetch-mock: 9.11.0
-    fork-ts-checker-webpack-plugin: 7.3.0
+    fork-ts-checker-webpack-plugin: 8.0.0
     fuzzysort: 2.0.4
     fzf: 0.5.2
     gl-matrix: 3.4.3
@@ -2720,7 +2720,7 @@ __metadata:
     electron-updater: 5.3.0
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.0
-    fork-ts-checker-webpack-plugin: 7.3.0
+    fork-ts-checker-webpack-plugin: 8.0.0
     html-webpack-plugin: 5.5.0
     jszip: 3.10.1
     path-browserify: 1.0.1
@@ -11561,7 +11561,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fork-ts-checker-webpack-plugin@npm:7.3.0, fork-ts-checker-webpack-plugin@npm:^7.2.8":
+"fork-ts-checker-webpack-plugin@npm:8.0.0":
+  version: 8.0.0
+  resolution: "fork-ts-checker-webpack-plugin@npm:8.0.0"
+  dependencies:
+    "@babel/code-frame": ^7.16.7
+    chalk: ^4.1.2
+    chokidar: ^3.5.3
+    cosmiconfig: ^7.0.1
+    deepmerge: ^4.2.2
+    fs-extra: ^10.0.0
+    memfs: ^3.4.1
+    minimatch: ^3.0.4
+    node-abort-controller: ^3.0.1
+    schema-utils: ^3.1.1
+    semver: ^7.3.5
+    tapable: ^2.2.1
+  peerDependencies:
+    typescript: ">3.6.0"
+    webpack: ^5.11.0
+  checksum: aad4cbc5b802e6281a2700a379837697c93ad95288468f9595219d91d9c26674736d37852bb4c4341e9122f26181e9e05fc1a362e8d029fdd88e99de7816037b
+  languageName: node
+  linkType: hard
+
+"fork-ts-checker-webpack-plugin@npm:^7.2.8":
   version: 7.3.0
   resolution: "fork-ts-checker-webpack-plugin@npm:7.3.0"
   dependencies:
