@@ -2655,7 +2655,7 @@ __metadata:
     react-monaco-editor: 0.52.0
     react-mosaic-component: 5.3.0
     react-refresh-typescript: 2.0.8
-    react-resize-detector: 8.0.5
+    react-resize-detector: 9.1.0
     react-table: 7.8.0
     react-transition-group: 4.4.5
     react-use: 17.4.0
@@ -17754,15 +17754,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resize-detector@npm:8.0.5":
-  version: 8.0.5
-  resolution: "react-resize-detector@npm:8.0.5"
+"react-resize-detector@npm:9.1.0":
+  version: 9.1.0
+  resolution: "react-resize-detector@npm:9.1.0"
   dependencies:
     lodash: ^4.17.21
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: e89b32f95054a3d52535385e5067e0483ede31792b10fcd1c5a5576165d990927a06c9b3ed959230bad18c41b182d3e137c52972e8396b14db85e616a077f841
+  checksum: 05b263e141fd428eea433e399f88c3e1a379b4a2293958f59b5a5c75dd86c621ce60583724257cc3dc1f5c120a664666ff3fa53d41e6c283687676dc55afa02b
   languageName: node
   linkType: hard
 
