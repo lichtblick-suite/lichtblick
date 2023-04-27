@@ -60,14 +60,6 @@ function foxglovePointTypeToStyle(
 function normalizeFoxgloveImageAnnotations(
   message: Partial<ImageAnnotations>,
 ): Annotation[] | undefined {
-  if (!message.circles && !message.points) {
-    return undefined;
-  }
-
-  if (message.circles?.length === 0 && message.points?.length === 0) {
-    return undefined;
-  }
-
   const annotations: Annotation[] = [];
 
   for (const circle of message.circles ?? []) {
@@ -113,7 +105,7 @@ function normalizeFoxgloveImageAnnotations(
     });
   }
 
-  return annotations;
+  return annotations.length === 0 ? undefined : annotations;
 }
 
 function normalizeTimestamp(stamp: Time | bigint): Time {
