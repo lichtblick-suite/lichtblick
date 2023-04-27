@@ -152,7 +152,7 @@
     "react-transition-group": "4.4.5",
     "react-use": "17.4.0",
     "react-virtualized": "9.22.3",
-    "react-window": "1.8.8",
+    "react-window": "1.8.9",
     "readable-stream": "4.3.0",
     "rehype-raw": "6.1.1",
     "reselect": "4.1.8",
