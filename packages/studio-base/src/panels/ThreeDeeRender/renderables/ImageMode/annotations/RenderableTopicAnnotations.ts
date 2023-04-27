@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { Annotation as NormalizedAnnotation } from "@foxglove/studio-base/panels/Image/types";
 
-import { RenderableLineListAnnotation } from "./RenderableLineListAnnotation";
+import { RenderableLineAnnotation } from "./RenderableLineAnnotation";
 import { RenderablePointsAnnotation } from "./RenderablePointsAnnotation";
 
 /**
@@ -15,7 +15,7 @@ import { RenderablePointsAnnotation } from "./RenderablePointsAnnotation";
  */
 export class RenderableTopicAnnotations extends THREE.Object3D {
   #points: RenderablePointsAnnotation[] = [];
-  #lineLists: RenderableLineListAnnotation[] = [];
+  #lines: RenderableLineAnnotation[] = [];
 
   #scale = 0;
   #canvasWidth = 0;
@@ -33,7 +33,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     for (const points of this.#points) {
       points.dispose();
     }
-    for (const lineList of this.#lineLists) {
+    for (const lineList of this.#lines) {
       lineList.dispose();
     }
   }
@@ -67,7 +67,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       for (const points of this.#points) {
         points.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       }
-      for (const lineList of this.#lineLists) {
+      for (const lineList of this.#lines) {
         lineList.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       }
     }
@@ -77,7 +77,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       for (const points of this.#points) {
         points.setCameraModel(this.#cameraModel);
       }
-      for (const lineList of this.#lineLists) {
+      for (const lineList of this.#lines) {
         lineList.setCameraModel(this.#cameraModel);
       }
     }
@@ -86,7 +86,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       for (const points of this.#points) {
         points.update();
       }
-      for (const lineList of this.#lineLists) {
+      for (const lineList of this.#lines) {
         lineList.update();
       }
     };
@@ -100,8 +100,8 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
 
     const unusedPoints = this.#points;
     this.#points = [];
-    const unusedLineLists = this.#lineLists;
-    this.#lineLists = [];
+    const unusedLines = this.#lines;
+    this.#lines = [];
 
     for (const annotation of this.#annotations) {
       switch (annotation.type) {
@@ -132,28 +132,17 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
             }
 
             case "polygon":
-              // not yet implemented
-              break;
-
             case "line_strip":
-              // not yet implemented
-              break;
-
             case "line_list": {
-              let lineList = unusedLineLists.pop();
-              if (!lineList) {
-                lineList = new RenderableLineListAnnotation();
-                lineList.setScale(
-                  this.#scale,
-                  this.#canvasWidth,
-                  this.#canvasHeight,
-                  this.#pixelRatio,
-                );
-                lineList.setCameraModel(this.#cameraModel);
-                this.add(lineList);
+              let line = unusedLines.pop();
+              if (!line) {
+                line = new RenderableLineAnnotation();
+                line.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
+                line.setCameraModel(this.#cameraModel);
+                this.add(line);
               }
-              this.#lineLists.push(lineList);
-              lineList.setAnnotation(
+              this.#lines.push(line);
+              line.setAnnotation(
                 annotation as typeof annotation & { style: typeof annotation.style },
               );
               break;
@@ -173,7 +162,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       points.removeFromParent();
       points.dispose();
     }
-    for (const lineList of unusedLineLists) {
+    for (const lineList of unusedLines) {
       lineList.removeFromParent();
       lineList.dispose();
     }

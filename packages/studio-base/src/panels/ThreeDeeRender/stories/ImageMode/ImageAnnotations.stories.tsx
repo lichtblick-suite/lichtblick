@@ -100,10 +100,10 @@ export const Annotations: StoryObj = {
             timestamp: { sec: 0, nsec: 0 },
             type: PointsAnnotationType.POINTS,
             points: [
-              { x: 10, y: 0 },
-              { x: 10, y: 8 },
-              { x: 12, y: 6 },
-              { x: 15, y: 2 },
+              { x: 10 + 0, y: 0 },
+              { x: 10 + 0, y: 8 },
+              { x: 10 + 2, y: 6 },
+              { x: 10 + 5, y: 2 },
             ],
             outline_color: { r: 0, g: 0, b: 0, a: 1 },
             outline_colors: [
@@ -119,10 +119,10 @@ export const Annotations: StoryObj = {
             timestamp: { sec: 0, nsec: 0 },
             type: PointsAnnotationType.LINE_LIST,
             points: [
-              { x: 0, y: 10 },
-              { x: 0, y: 18 },
-              { x: 2, y: 16 },
-              { x: 5, y: 12 },
+              { x: 0, y: 10 + 0 },
+              { x: 0, y: 10 + 8 },
+              { x: 2, y: 10 + 6 },
+              { x: 5, y: 10 + 2 },
             ],
             outline_color: { r: 1, g: 0, b: 0, a: 1 },
             outline_colors: [],
@@ -133,13 +133,14 @@ export const Annotations: StoryObj = {
             timestamp: { sec: 0, nsec: 0 },
             type: PointsAnnotationType.LINE_LIST,
             points: [
-              { x: 10, y: 10 },
-              { x: 10, y: 18 },
-              { x: 12, y: 16 },
-              { x: 15, y: 12 },
+              { x: 10 + 0, y: 10 + 0 },
+              { x: 10 + 0, y: 10 + 8 },
+              { x: 10 + 2, y: 10 + 6 },
+              { x: 10 + 5, y: 10 + 2 },
             ],
             outline_color: { r: 0, g: 0, b: 0, a: 1 },
             outline_colors: [
+              // 1 color per point
               { r: 1, g: 0, b: 0, a: 1 },
               { r: 0, g: 1, b: 0, a: 1 },
               { r: 0, g: 0, b: 1, a: 1 },
@@ -147,6 +148,80 @@ export const Annotations: StoryObj = {
             ],
             fill_color: { r: 0, g: 0, b: 0, a: 0 },
             thickness: 2,
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LIST,
+            points: [
+              { x: 20 + 0, y: 10 + 0 },
+              { x: 20 + 0, y: 10 + 8 },
+              { x: 20 + 2, y: 10 + 6 },
+              { x: 20 + 5, y: 10 + 2 },
+            ],
+            outline_color: { r: 0, g: 0, b: 0, a: 1 },
+            outline_colors: [
+              // 1 color per line
+              { r: 1, g: 0, b: 0, a: 1 },
+              { r: 0, g: 1, b: 0, a: 1 },
+            ],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 2,
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_STRIP,
+            points: [
+              { x: 0, y: 20 + 0 },
+              { x: 0, y: 20 + 8 },
+              { x: 2, y: 20 + 6 },
+              { x: 5, y: 20 + 2 },
+            ],
+            outline_color: { r: 1, g: 0, b: 0, a: 1 },
+            outline_colors: [],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 1,
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_STRIP,
+            points: [
+              { x: 10 + 0, y: 20 + 0 },
+              { x: 10 + 0, y: 20 + 8 },
+              { x: 10 + 2, y: 20 + 6 },
+              { x: 10 + 5, y: 20 + 2 },
+            ],
+            outline_color: { r: 1, g: 1, b: 0, a: 1 },
+            outline_colors: [],
+            fill_color: { r: 1, g: 0, b: 1, a: 1 },
+            thickness: 0.5,
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LOOP,
+            points: [
+              { x: 0, y: 30 + 0 },
+              { x: 0, y: 30 + 8 },
+              { x: 2, y: 30 + 6 },
+              { x: 5, y: 30 + 2 },
+            ],
+            outline_color: { r: 1, g: 0, b: 0, a: 1 },
+            outline_colors: [],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 1,
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LOOP,
+            points: [
+              { x: 10 + 0, y: 30 + 0 },
+              { x: 10 + 0, y: 30 + 8 },
+              { x: 10 + 2, y: 30 + 6 },
+              { x: 10 + 5, y: 30 + 2 },
+            ],
+            outline_color: { r: 1, g: 1, b: 0, a: 1 },
+            outline_colors: [],
+            fill_color: { r: 1, g: 0, b: 1, a: 1 },
+            thickness: 0.5,
           },
         ],
       },
@@ -178,10 +253,13 @@ export const Annotations: StoryObj = {
             imageMode: {
               calibrationTopic: "calibration",
               imageTopic: "camera",
-            },
-            topics: {
-              calibration: { visible: false },
-              camera: { visible: true, color: "rgba(255, 255, 255, 0.25)" },
+              annotations: [
+                {
+                  topic: "annotations",
+                  schemaName: "foxglove.ImageAnnotations",
+                  settings: { visible: true },
+                },
+              ],
             },
           }}
         />
