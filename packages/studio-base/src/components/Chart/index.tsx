@@ -8,7 +8,7 @@
 /// <reference types="chartjs-plugin-datalabels" />
 /// <reference types="@foxglove/chartjs-plugin-zoom" />
 
-import { ChartData as ChartJsChartData, ChartOptions, ScatterDataPoint } from "chart.js";
+import { ChartOptions } from "chart.js";
 import Hammer from "hammerjs";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useMountedState } from "react-use";
@@ -17,13 +17,14 @@ import { v4 as uuidv4 } from "uuid";
 
 import { type ZoomPluginOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import Logger from "@foxglove/log";
-import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import ChartJsMux, {
   ChartUpdateMessage,
 } from "@foxglove/studio-base/components/Chart/worker/ChartJsMux";
 import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
+
+import { ChartData, RpcElement, RpcScales } from "./types";
 
 const log = Logger.getLogger(__filename);
 
@@ -39,11 +40,6 @@ export type OnClickArg = {
   // y-value in scale
   y: number | undefined;
 };
-
-// Chartjs typings use _null_ to indicate _gaps_ in the dataset
-// eslint-disable-next-line no-restricted-syntax
-const ChartNull = null;
-export type ChartData = ChartJsChartData<"scatter", (ScatterDataPoint | typeof ChartNull)[]>;
 
 type Props = {
   data: ChartData;

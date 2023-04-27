@@ -14,9 +14,9 @@
 import { Tooltip } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 
-import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
-
-import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
+import TimeBasedChartTooltipContent, {
+  TimeBasedChartTooltipData,
+} from "./TimeBasedChartTooltipContent";
 
 export default {
   title: "components/TimeBasedChart/TimeBasedChartTooltipContent",
@@ -26,8 +26,7 @@ export default {
 export const SingleItemSingleDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
-      x: 0,
-      y: 0,
+      datasetIndex: 0,
       value: 3,
       constantName: "ACTIVE",
     };
@@ -62,8 +61,6 @@ export const SingleItemMultiDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
       datasetIndex: 0,
-      x: 0,
-      y: 0,
       value: 3,
       constantName: "ACTIVE",
     };
@@ -103,8 +100,7 @@ export const SingleItemMultiDatasetLight: StoryObj = {
 export const MultipleItemsSingleDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
-      x: 0,
-      y: 0,
+      datasetIndex: 0,
       value: 3,
       constantName: "ACTIVE",
     };
@@ -140,15 +136,11 @@ export const MultipleItemsMultipleDataset: StoryObj = {
     const data: TimeBasedChartTooltipData[] = [
       {
         datasetIndex: 0,
-        x: 0,
-        y: 0,
         value: 3,
         constantName: "ACTIVE",
       },
       {
         datasetIndex: 1,
-        x: 0,
-        y: 0,
         value: 4,
         constantName: "ACTIVE",
       },

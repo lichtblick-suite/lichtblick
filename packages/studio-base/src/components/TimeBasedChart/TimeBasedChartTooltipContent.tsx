@@ -21,9 +21,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export type TimeBasedChartTooltipData = {
-  datasetIndex?: number;
-  x: number | bigint;
-  y: number | bigint;
+  datasetIndex: number;
   value: number | bigint | boolean | string;
   constantName?: string;
 };
@@ -106,7 +104,7 @@ export default function TimeBasedChartTooltipContent(
 
     // group items by path
     for (const item of content) {
-      const datasetIndex = item.datasetIndex ?? 0;
+      const datasetIndex = item.datasetIndex;
       const existing = out.get(datasetIndex);
       if (existing) {
         existing.hasMultipleValues = true;
@@ -120,7 +118,7 @@ export default function TimeBasedChartTooltipContent(
     }
 
     // Sort by datasetIndex to keep the displayed values in the same order as the settings
-    return sortBy([...out.entries()], ([_, items]) => items.tooltip.datasetIndex ?? 0);
+    return sortBy([...out.entries()], ([_, items]) => items.tooltip.datasetIndex);
   }, [content, multiDataset]);
 
   // If the chart contains only one dataset, we don't need to render the dataset label - saving space

@@ -2,13 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ChartData, ScatterDataPoint } from "chart.js";
-
-// Chartjs typings use _null_ to indicate _gaps_ in the dataset
-// eslint-disable-next-line no-restricted-syntax
-type ChartNull = null;
-type Data = ChartData<"scatter", (ScatterDataPoint | ChartNull)[]>;
-type DataSet = Data["datasets"][0];
+import type { ChartDataset, ChartDatum } from "./types";
 
 type DownsampleBounds = {
   width: number;
@@ -39,7 +33,10 @@ type DownsampleBounds = {
  * dataset, and the interval connects to the next interval with the same slope line as the original
  * data. The min/max entries preserve spikes within the data.
  */
-export function downsampleTimeseries(dataset: DataSet, bounds: DownsampleBounds): DataSet {
+export function downsampleTimeseries(
+  dataset: ChartDataset,
+  bounds: DownsampleBounds,
+): ChartDataset {
   // datasets of length 1 don't need downsampling
   if (dataset.data.length <= 1) {
     return dataset;
@@ -48,9 +45,9 @@ export function downsampleTimeseries(dataset: DataSet, bounds: DownsampleBounds)
   const pixelPerXValue = bounds.width / (bounds.x.max - bounds.x.min);
   const pixelPerYValue = bounds.height / (bounds.y.max - bounds.y.min);
 
-  const downsampled: ScatterDataPoint[] = [];
+  const downsampled: ChartDatum[] = [];
 
-  type IntervalItem = { xPixel: number; yPixel: number; datum: ScatterDataPoint };
+  type IntervalItem = { xPixel: number; yPixel: number; datum: ChartDatum };
 
   let intFirst: IntervalItem | undefined;
   let intLast: IntervalItem | undefined;
@@ -152,7 +149,7 @@ export function downsampleTimeseries(dataset: DataSet, bounds: DownsampleBounds)
   return { ...dataset, data: downsampled };
 }
 
-export function downsampleScatter(dataset: DataSet, bounds: DownsampleBounds): DataSet {
+export function downsampleScatter(dataset: ChartDataset, bounds: DownsampleBounds): ChartDataset {
   // datasets of length 1 don't need downsampling
   if (dataset.data.length <= 1) {
     return dataset;
@@ -162,7 +159,7 @@ export function downsampleScatter(dataset: DataSet, bounds: DownsampleBounds): D
   const pixelPerYValue = bounds.height / (bounds.y.max - bounds.y.min);
   const pixelPerRow = bounds.width;
 
-  const downsampled: ScatterDataPoint[] = [];
+  const downsampled: ChartDatum[] = [];
 
   // downsampling tracks a sparse array of x/y locations
   const sparse: boolean[] = [];

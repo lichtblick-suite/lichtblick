@@ -52,8 +52,6 @@ import TimeBasedChartTooltipContent, {
 import { VerticalBarWrapper } from "./VerticalBarWrapper";
 import { downsampleScatter, downsampleTimeseries } from "./downsample";
 
-export type { TimeBasedChartTooltipData };
-
 const log = Logger.getLogger(__filename);
 
 const useStyles = makeStyles()((theme) => ({
@@ -131,7 +129,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     height,
     data,
     isSynced = false,
-    tooltips,
     yAxes,
     xAxes,
     defaultView,
@@ -290,47 +287,49 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     y: number;
     data: TimeBasedChartTooltipData[];
   }>();
-  const updateTooltip = useCallback(
-    (elements: RpcElement[]) => {
-      if (elements.length === 0 || mouseYRef.current == undefined) {
-        return setActiveTooltip(undefined);
+
+  const updateTooltip = useCallback((elements: RpcElement[]) => {
+    if (elements.length === 0 || mouseYRef.current == undefined) {
+      return setActiveTooltip(undefined);
+    }
+
+    const tooltipItems: { item: TimeBasedChartTooltipData; element: RpcElement }[] = [];
+
+    for (const element of elements) {
+      if (!element.data) {
+        continue;
       }
 
-      const tooltipItems: { item: TimeBasedChartTooltipData; element: RpcElement }[] = [];
-
-      for (const element of elements) {
-        if (!element.data) {
-          continue;
-        }
-        const key = `${element.data.x}:${element.data.y}:${element.datasetIndex}`;
-        const foundTooltip = tooltips?.get(key);
-        if (!foundTooltip) {
-          continue;
-        }
-
-        tooltipItems.push({
-          item: { ...foundTooltip, datasetIndex: element.datasetIndex },
-          element,
-        });
+      const datum = element.data;
+      if (datum.value == undefined) {
+        continue;
       }
 
-      if (tooltipItems.length === 0) {
-        return setActiveTooltip(undefined);
-      }
+      tooltipItems.push({
+        item: {
+          datasetIndex: element.datasetIndex,
+          value: datum.value,
+          constantName: datum.constantName,
+        },
+        element,
+      });
+    }
 
-      const element = tooltipItems[0]!.element;
+    if (tooltipItems.length === 0) {
+      return setActiveTooltip(undefined);
+    }
 
-      const canvasRect = canvasContainer.current?.getBoundingClientRect();
-      if (canvasRect) {
-        setActiveTooltip({
-          x: canvasRect.left + element.view.x,
-          y: canvasRect.top + mouseYRef.current,
-          data: tooltipItems.map((item) => item.item),
-        });
-      }
-    },
-    [tooltips],
-  );
+    const element = tooltipItems[0]!.element;
+
+    const canvasRect = canvasContainer.current?.getBoundingClientRect();
+    if (canvasRect) {
+      setActiveTooltip({
+        x: canvasRect.left + element.view.x,
+        y: canvasRect.top + mouseYRef.current,
+        data: tooltipItems.map((item) => item.item),
+      });
+    }
+  }, []);
 
   const setHoverValue = useSetHoverValue();
   const clearHoverValue = useClearHoverValue();
@@ -597,7 +596,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         // NaN item values create gaps in the line
         const undefinedToNanData = downsampled.data.map((item) => {
           if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
-            return { x: NaN, y: NaN };
+            return { x: NaN, y: NaN, value: NaN };
           }
           return item;
         });

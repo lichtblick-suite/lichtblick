@@ -21,7 +21,6 @@ import { filterMap } from "@foxglove/den/collection";
 import TimeBasedChart, {
   Props as TimeBasedChartProps,
   ChartDefaultView,
-  TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
@@ -62,7 +61,6 @@ type PlotChartProps = {
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
-  tooltips: Map<string, TimeBasedChartTooltipData>;
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
   defaultView?: ChartDefaultView;
@@ -81,7 +79,6 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
     datasets,
     onClick,
     isSynced,
-    tooltips,
     xAxisVal,
   } = props;
 
@@ -128,7 +125,6 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
         width={width ?? 0}
         height={height ?? 0}
         data={data}
-        tooltips={tooltips}
         annotations={annotations}
         type="scatter"
         yAxes={yAxes}

@@ -24,6 +24,7 @@ const dataPoint = {
   y: 5.544444561004639,
   selectionObj: 1,
   label: "datalabel with selection id 1",
+  value: 5.544444561004639,
 };
 
 const props: ComponentProps<typeof ChartComponent> = {

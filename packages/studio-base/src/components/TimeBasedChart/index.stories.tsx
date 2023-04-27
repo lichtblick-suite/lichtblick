@@ -21,21 +21,11 @@ import { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import delay from "@foxglove/studio-base/util/delay";
 
-import TimeBasedChart, { TimeBasedChartTooltipData } from "./index";
+import TimeBasedChart from "./index";
 import type { Props } from "./index";
 
 const dataX = 0.000057603000000000004;
 const dataY = 5.544444561004639;
-const tooltipData = new Map<string, TimeBasedChartTooltipData>([
-  [
-    `${dataX}:${dataY}:0`,
-    {
-      x: dataX,
-      y: dataY,
-      value: 5.544444561004639,
-    },
-  ],
-]);
 
 const commonProps: Props = {
   isSynced: true,
@@ -58,6 +48,7 @@ const commonProps: Props = {
           {
             x: dataX,
             y: dataY,
+            value: dataY,
           },
         ],
       },
@@ -74,7 +65,6 @@ const commonProps: Props = {
       },
     ],
   },
-  tooltips: tooltipData,
   annotations: [],
   type: "scatter",
   xAxes: {

@@ -294,6 +294,7 @@ export default class ChartJSManager {
       out.push({
         data,
         datasetIndex: element.datasetIndex,
+        index: element.index,
         view: {
           x: element.element.x,
           y: element.element.y,

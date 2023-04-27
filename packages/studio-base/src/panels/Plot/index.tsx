@@ -34,10 +34,7 @@ import PanelToolbar, {
 } from "@foxglove/studio-base/components/PanelToolbar";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  ChartDefaultView,
-  TimeBasedChartTooltipData,
-} from "@foxglove/studio-base/components/TimeBasedChart";
+import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
 import { usePlotPanelMessageData } from "@foxglove/studio-base/panels/Plot/usePlotPanelMessageData";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -47,7 +44,6 @@ import PlotChart from "./PlotChart";
 import { PlotLegend } from "./PlotLegend";
 import { downloadCSV } from "./csv";
 import { getDatasets } from "./datasets";
-import { DataSet } from "./internalTypes";
 import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
 
@@ -77,20 +73,6 @@ type Props = {
 };
 
 const ZERO_TIME = { sec: 0, nsec: 0 };
-
-/**
- * Builds a lookup map of a compound x:y:index key to a datum, used to map hovered positions
- * on screen to a data point for tooltip display.
- */
-function buildTooltipLookupMap(datasets: DataSet[]): Map<string, TimeBasedChartTooltipData> {
-  const lookup = new Map<string, TimeBasedChartTooltipData>();
-  for (const [index, dataset] of datasets.entries()) {
-    for (const datum of dataset.data) {
-      lookup.set(`${datum.x}:${datum.y}:${index}`, datum);
-    }
-  }
-  return lookup;
-}
 
 function selectStartTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.startTime;
@@ -214,13 +196,6 @@ function Plot(props: Props) {
     });
   }, [yAxisPaths, combinedPlotData, startTime, xAxisVal, xAxisPath, theme.palette.mode]);
 
-  const tooltips = useMemo(() => {
-    if (showLegend && showPlotValuesInLegend) {
-      return new Map();
-    }
-    return buildTooltipLookupMap(datasets);
-  }, [datasets, showLegend, showPlotValuesInLegend]);
-
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
     ({ x: seekSeconds }: OnChartClickArgs) => {
@@ -295,7 +270,6 @@ function Plot(props: Props) {
             showXAxisLabels={showXAxisLabels}
             showYAxisLabels={showYAxisLabels}
             datasets={datasets}
-            tooltips={tooltips}
             xAxisVal={xAxisVal}
             currentTime={currentTimeSinceStart}
             onClick={onClick}

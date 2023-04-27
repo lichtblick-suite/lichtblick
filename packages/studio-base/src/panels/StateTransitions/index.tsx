@@ -36,15 +36,11 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
-import TimeBasedChart, {
-  TimeBasedChartTooltipData,
-} from "@foxglove/studio-base/components/TimeBasedChart";
+import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
+import { ChartData, ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
-import {
-  ChartData,
-  OnClickArg as OnChartClickArgs,
-} from "@foxglove/studio-base/src/components/Chart";
+import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -211,20 +207,17 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     };
   }, [paths.length]);
 
-  const { datasets, tooltips, minY } = useMemo(() => {
-    let outMinY: number | undefined;
-
-    let outTooltips: TimeBasedChartTooltipData[] = [];
-    let outDatasets: ChartData["datasets"] = [];
-
+  const { datasets, minY } = useMemo(() => {
     // ignore all data when we don't have a start time
     if (!startTime) {
       return {
-        datasets: outDatasets,
-        tooltips: outTooltips,
-        minY: outMinY,
+        datasets: [],
+        minY: undefined,
       };
     }
+
+    let outMinY: number | undefined;
+    let outDatasets: ChartDatasets = [];
 
     paths.forEach((path, pathIndex) => {
       // y axis values are set based on the path we are rendering
@@ -235,7 +228,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       const blocksForPath = decodedBlocks.map((decodedBlock) => decodedBlock[path.value]);
 
       {
-        const { datasets: newDataSets, tooltips: newTooltips } = messagesToDatasets({
+        const newDataSets = messagesToDatasets({
           path,
           startTime,
           y,
@@ -244,7 +237,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         });
 
         outDatasets = outDatasets.concat(newDataSets);
-        outTooltips = outTooltips.concat(newTooltips);
       }
 
       // If we have have messages in blocks for this path, we ignore streamed messages and only
@@ -256,7 +248,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
       const items = itemsByPath[path.value];
       if (items) {
-        const { datasets: newDataSets, tooltips: newTooltips } = messagesToDatasets({
+        const newDataSets = messagesToDatasets({
           path,
           startTime,
           y,
@@ -264,13 +256,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
           blocks: [items],
         });
         outDatasets = outDatasets.concat(newDataSets);
-        outTooltips = outTooltips.concat(newTooltips);
       }
     });
 
     return {
       datasets: outDatasets,
-      tooltips: outTooltips,
       minY: outMinY,
     };
   }, [itemsByPath, decodedBlocks, paths, startTime]);
@@ -349,14 +339,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   useStateTransitionsPanelSettings(config, saveConfig, focusedPath);
 
-  const pointToDatumTooltipMap = useMemo(() => {
-    const lookup = new Map<string, TimeBasedChartTooltipData>();
-    for (const tip of tooltips) {
-      lookup.set(`${tip.x}:${tip.y}:${tip.datasetIndex}`, tip);
-    }
-    return lookup;
-  }, [tooltips]);
-
   return (
     <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
       <PanelToolbar />
@@ -374,7 +356,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             xAxisIsPlaybackTime
             yAxes={yScale}
             plugins={plugins}
-            tooltips={pointToDatumTooltipMap}
             onClick={onClick}
             currentTime={currentTimeSinceStart}
           />

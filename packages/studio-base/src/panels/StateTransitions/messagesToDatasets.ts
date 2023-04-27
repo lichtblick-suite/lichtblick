@@ -2,27 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ScatterDataPoint } from "chart.js";
 import stringHash from "string-hash";
 
 import { Time, toSec, subtract as subtractTimes } from "@foxglove/rostime";
-import { ChartData } from "@foxglove/studio-base/components/Chart";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
+import {
+  ChartDataset,
+  ChartDatasets,
+  ChartDatum,
+} from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { darkColor, expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 import { getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import positiveModulo from "./positiveModulo";
 import { StateTransitionPath } from "./types";
-
-type DatasetInfo = {
-  datasets: ChartData["datasets"];
-  tooltips: TimeBasedChartTooltipData[];
-};
-
-type Dataset = ChartData["datasets"][number];
-type DatasetData = ChartData["datasets"][number]["data"];
 
 const baseColors = [grey, ...expandedLineColors];
 
@@ -34,16 +28,13 @@ type Args = {
   blocks: readonly (readonly MessageAndData[] | undefined)[];
 };
 
-export default function messagesToDatasets(args: Args): DatasetInfo {
+export default function messagesToDatasets(args: Args): ChartDatasets {
   const { path, pathIndex, startTime, y, blocks } = args;
 
-  const info: DatasetInfo = {
-    datasets: [],
-    tooltips: [],
-  };
+  const datasets = [];
 
   let previousTimestamp: Time | undefined;
-  let currentData: DatasetData = [];
+  let currentData: ChartDatum[] = [];
 
   const datasetIndexMap = new Map<unknown, number>();
   let lastDatasetIndex: undefined | number = undefined;
@@ -102,15 +93,6 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
 
       const x = toSec(subtractTimes(timestamp, startTime));
 
-      const tooltip: TimeBasedChartTooltipData = {
-        datasetIndex,
-        x,
-        y,
-        value,
-        constantName,
-      };
-      info.tooltips.unshift(tooltip);
-
       // If the value maps to a different dataset than the last value, close the previous segment
       // and insert a gap.
       const newSegment = datasetIndex !== lastDatasetIndex;
@@ -121,17 +103,19 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
       const label =
         constantName != undefined ? `${constantName} (${String(value)})` : String(value);
       if (datasetIndex == undefined) {
-        datasetIndexMap.set(value, info.datasets.length);
+        datasetIndexMap.set(value, datasets.length);
         const elementWithLabel = {
           x,
           y,
           label,
           labelColor: color,
+          value,
+          constantName,
         };
 
         // new data starts with our current point, the current point
         currentData = [elementWithLabel];
-        const dataset: Dataset = {
+        const dataset: ChartDataset = {
           borderWidth: 10,
           borderColor: color,
           data: currentData,
@@ -147,19 +131,26 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
           },
         };
 
-        lastDatasetIndex = info.datasets.length;
-        info.datasets.push(dataset);
+        lastDatasetIndex = datasets.length;
+        datasets.push(dataset);
       } else {
-        currentData = info.datasets[datasetIndex]?.data ?? [];
+        currentData = datasets[datasetIndex]?.data ?? [];
         if (newSegment) {
-          currentData.push({ x, y, label, labelColor: color } as ScatterDataPoint);
+          currentData.push({
+            x,
+            y,
+            label,
+            labelColor: color,
+            value,
+            constantName,
+          });
         } else {
-          currentData.push({ x, y });
+          currentData.push({ x, y, value, constantName });
         }
         lastDatasetIndex = datasetIndex;
       }
     }
   }
 
-  return info;
+  return datasets;
 }

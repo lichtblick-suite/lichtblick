@@ -11,22 +11,22 @@ describe("downsampleTimeseries", () => {
     const result = downsampleTimeseries(
       {
         data: [
-          { x: 0, y: 0 },
-          { x: 10, y: 0 },
-          { x: 20, y: 0 },
-          { x: 20, y: 1 },
-          { x: 20, y: 10 },
-          { x: 20, y: 20 },
+          { x: 0, y: 0, value: 0 },
+          { x: 10, y: 0, value: 0 },
+          { x: 20, y: 0, value: 0 },
+          { x: 20, y: 1, value: 1 },
+          { x: 20, y: 10, value: 10 },
+          { x: 20, y: 20, value: 20 },
         ],
       },
       bounds,
     );
     expect(result).toEqual({
       data: [
-        { x: 0, y: 0 },
-        { x: 10, y: 0 },
-        { x: 20, y: 0 },
-        { x: 20, y: 20 },
+        { x: 0, y: 0, value: 0 },
+        { x: 10, y: 0, value: 0 },
+        { x: 20, y: 0, value: 0 },
+        { x: 20, y: 20, value: 20 },
       ],
     });
   });
@@ -35,20 +35,20 @@ describe("downsampleTimeseries", () => {
     const result = downsampleTimeseries(
       {
         data: [
-          { x: 0, y: 0 },
-          { x: 0, y: 100 },
-          { x: 0, y: -20 },
-          { x: 0, y: 4 },
+          { x: 0, y: 0, value: 0 },
+          { x: 0, y: 100, value: 100 },
+          { x: 0, y: -20, value: -20 },
+          { x: 0, y: 4, value: 4 },
         ],
       },
       bounds,
     );
     expect(result).toEqual({
       data: [
-        { x: 0, y: 0 },
-        { x: 0, y: -20 },
-        { x: 0, y: 100 },
-        { x: 0, y: 4 },
+        { x: 0, y: 0, value: 0 },
+        { x: 0, y: -20, value: -20 },
+        { x: 0, y: 100, value: 100 },
+        { x: 0, y: 4, value: 4 },
       ],
     });
   });
@@ -57,22 +57,22 @@ describe("downsampleTimeseries", () => {
     const result = downsampleTimeseries(
       {
         data: [
-          { x: 0, y: 0 },
-          { x: 1, y: 0 },
-          { x: 1, y: 100 },
-          { x: 1, y: 4 },
-          { x: 2, y: 5 },
+          { x: 0, y: 0, value: 0 },
+          { x: 1, y: 0, value: 0 },
+          { x: 1, y: 100, value: 100 },
+          { x: 1, y: 4, value: 4 },
+          { x: 2, y: 5, value: 5 },
         ],
       },
       bounds,
     );
     expect(result).toEqual({
       data: [
-        { x: 0, y: 0 },
-        { x: 1, y: 0 },
-        { x: 1, y: 100 },
-        { x: 1, y: 4 },
-        { x: 2, y: 5 },
+        { x: 0, y: 0, value: 0 },
+        { x: 1, y: 0, value: 0 },
+        { x: 1, y: 100, value: 100 },
+        { x: 1, y: 4, value: 4 },
+        { x: 2, y: 5, value: 5 },
       ],
     });
   });
@@ -85,18 +85,18 @@ describe("downsampleScatter", () => {
     const result = downsampleScatter(
       {
         data: [
-          { x: -1, y: 0 },
-          { x: 0, y: -1 },
-          { x: 200, y: 0 },
-          { x: 0, y: 200 },
+          { x: -1, y: 0, value: 0 },
+          { x: 0, y: -1, value: -1 },
+          { x: 200, y: 0, value: 0 },
+          { x: 0, y: 200, value: 200 },
         ],
       },
       bounds,
     );
     expect(result).toEqual({
       data: [
-        { x: 0, y: -1 },
-        { x: 0, y: 200 },
+        { x: 0, y: -1, value: -1 },
+        { x: 0, y: 200, value: 200 },
       ],
     });
   });
@@ -105,18 +105,18 @@ describe("downsampleScatter", () => {
     const result = downsampleScatter(
       {
         data: [
-          { x: 0, y: 0 },
-          { x: 0, y: 0.4 },
-          { x: 0, y: 0.8 },
-          { x: 0, y: 1 },
+          { x: 0, y: 0, value: 0 },
+          { x: 0, y: 0.4, value: 0.4 },
+          { x: 0, y: 0.8, value: 0.8 },
+          { x: 0, y: 1, value: 1 },
         ],
       },
       bounds,
     );
     expect(result).toEqual({
       data: [
-        { x: 0, y: 0 },
-        { x: 0, y: 0.8 },
+        { x: 0, y: 0, value: 0 },
+        { x: 0, y: 0.8, value: 0.8 },
       ],
     });
   });

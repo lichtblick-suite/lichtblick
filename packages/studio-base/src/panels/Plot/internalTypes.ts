@@ -15,6 +15,7 @@ import { ChartDataset } from "chart.js";
 
 import { Time } from "@foxglove/rostime";
 import { MessagePathDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import type { ChartDatum } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 export type BasePlotPath = {
@@ -35,13 +36,11 @@ export type PlotXAxisVal =
   | "custom" // Message path data. Preloaded.
   | "currentCustom"; // Message path data. One "current" message at playback time.
 
-export type Datum = {
-  x: number;
-  y: number;
+// In addition to the base datum, we also add receiveTime and optionally header stamp to our datums
+// These are used in the csv export.
+export type Datum = ChartDatum & {
   receiveTime: Time;
   headerStamp?: Time;
-  value: number | bigint | boolean | string;
-  constantName?: string;
 };
 
 export type DataSet = ChartDataset<"scatter", Datum[]>;
