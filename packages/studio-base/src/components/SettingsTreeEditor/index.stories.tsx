@@ -5,7 +5,7 @@
 import { Box } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, userEvent } from "@storybook/testing-library";
-import produce from "immer";
+import { produce } from "immer";
 import { last } from "lodash";
 import { useCallback, useMemo, useState, useEffect } from "react";
 

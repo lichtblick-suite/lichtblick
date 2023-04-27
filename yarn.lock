@@ -2621,7 +2621,7 @@ __metadata:
     i18next-browser-languagedetector: 7.0.1
     idb: 7.1.1
     idb-keyval: 6.2.0
-    immer: 9.0.19
+    immer: 10.0.1
     intervals-fn: 3.0.3
     jest-canvas-mock: 2.5.0
     jest-diff: 29.5.0
@@ -2680,7 +2680,7 @@ __metadata:
     typescript: 5.0.3
     url-search-params: 1.1.0
     use-debounce: 9.0.4
-    use-immer: 0.8.1
+    use-immer: 0.9.0
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
     webpack: 5.79.0
@@ -12876,10 +12876,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:9.0.19":
-  version: 9.0.19
-  resolution: "immer@npm:9.0.19"
-  checksum: f02ee53989989c287cd548a3d817fccf0bfe56db919755ee94a72ea3ae78a00363fba93ee6c010fe54a664380c29c53d44ed4091c6a86cae60957ad2cfabc010
+"immer@npm:10.0.1":
+  version: 10.0.1
+  resolution: "immer@npm:10.0.1"
+  checksum: 24ab640e9d928385047f6f31bc77966117087236faf1a1f52b6b9a0159f78d543f648fecbf04d5e8c782a6f6cddd6eeb9e09c3b616a104632e701c7a22735654
   languageName: node
   linkType: hard
 
@@ -20831,13 +20831,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-immer@npm:0.8.1":
-  version: 0.8.1
-  resolution: "use-immer@npm:0.8.1"
+"use-immer@npm:0.9.0":
+  version: 0.9.0
+  resolution: "use-immer@npm:0.9.0"
   peerDependencies:
     immer: ">=2.0.0"
     react: ^16.8.0 || ^17.0.1 || ^18.0.0
-  checksum: 9ffc1a201a92b6b026c420718e6a00e72ba48b62420bb515927b379bb1d791b5b4766b57c755b4851c0e1f80000e639bc1cf8e73424e44466741c159391d35dd
+  checksum: 3f02e31d38f354125e6cffaaed0a08d9bf122b9df261aa7b38a25246813b3bd8b22bf97b192099d4e84adcfbbb07e69e14ba29520e0ac8d93f3991ef3a3652b4
   languageName: node
   linkType: hard
 

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Button, Typography, styled as muiStyled, OutlinedInput } from "@mui/material";
-import produce from "immer";
+import { produce } from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 

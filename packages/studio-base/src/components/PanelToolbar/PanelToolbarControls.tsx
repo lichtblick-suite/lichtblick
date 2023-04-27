@@ -14,7 +14,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { IconButton, Tooltip } from "@mui/material";
-import produce from "immer";
+import { produce } from "immer";
 import { forwardRef, useCallback, useContext, useEffect, useMemo } from "react";
 import { useAsyncFn } from "react-use";
 import { makeStyles } from "tss-react/mui";

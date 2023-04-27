@@ -22,7 +22,7 @@ import {
   InputBase,
   IconButton,
 } from "@mui/material";
-import produce from "immer";
+import { produce } from "immer";
 import { compact, set, uniq } from "lodash";
 import { useCallback, useEffect, useMemo } from "react";
 import { List, AutoSizer, ListRowProps } from "react-virtualized";

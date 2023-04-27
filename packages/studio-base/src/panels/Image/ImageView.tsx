@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Typography } from "@mui/material";
-import produce from "immer";
+import { produce } from "immer";
 import { difference, keyBy, set, union } from "lodash";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
