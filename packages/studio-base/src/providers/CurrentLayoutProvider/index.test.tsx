@@ -8,6 +8,7 @@ import { SnackbarProvider } from "notistack";
 import { useEffect } from "react";
 
 import { Condvar } from "@foxglove/den/async";
+import { CurrentLayoutSyncAdapter } from "@foxglove/studio-base/components/CurrentLayoutSyncAdapter";
 import {
   CurrentLayoutActions,
   LayoutState,
@@ -101,7 +102,10 @@ function renderTest({
           <SnackbarProvider>
             <LayoutManagerContext.Provider value={mockLayoutManager}>
               <UserProfileStorageContext.Provider value={mockUserProfile}>
-                <CurrentLayoutProvider>{children}</CurrentLayoutProvider>
+                <CurrentLayoutProvider>
+                  {children}
+                  <CurrentLayoutSyncAdapter />
+                </CurrentLayoutProvider>
               </UserProfileStorageContext.Provider>
             </LayoutManagerContext.Provider>
           </SnackbarProvider>
@@ -288,13 +292,21 @@ describe("CurrentLayoutProvider", () => {
     };
 
     expect(mockLayoutManager.updateLayout.mock.calls).toEqual([
-      [{ id: "example", data: newState, name: "Test layout" }],
+      [{ id: "example", data: newState, name: "Test layout", edited: true, loading: false }],
     ]);
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT, name: "Test layout" } },
-      { selectedLayout: { loading: false, id: "example", data: newState, name: "Test layout" } },
+      {
+        selectedLayout: {
+          loading: false,
+          id: "example",
+          data: newState,
+          name: "Test layout",
+          edited: true,
+        },
+      },
     ]);
     (console.warn as jest.Mock).mockClear();
   });
