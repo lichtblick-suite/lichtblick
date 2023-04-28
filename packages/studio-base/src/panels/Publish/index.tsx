@@ -15,6 +15,7 @@ import { Button, Typography, styled as muiStyled, OutlinedInput } from "@mui/mat
 import { produce } from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useDebounce } from "use-debounce";
 
 import { useRethrow } from "@foxglove/hooks";
 import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
@@ -137,9 +138,11 @@ function Publish(props: Props) {
     saveConfig,
   } = props;
 
+  const [debouncedTopicName] = useDebounce(topicName, 500);
+
   const publish = usePublisher({
     name: "Publish",
-    topic: topicName,
+    topic: debouncedTopicName,
     schemaName: datatype,
     datatypes,
   });
