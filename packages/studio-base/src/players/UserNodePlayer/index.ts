@@ -425,7 +425,13 @@ export default class UserNodePlayer implements Player {
     const { inputTopics, outputTopic, transpiledCode, projectCode, outputDatatype } = nodeData;
 
     let rpc: Rpc | undefined;
-    const terminateCondvar = new Condvar();
+
+    // This signals that we have terminated the node registration and we should bail any message
+    // processing that is in-flight.
+    //
+    // These are lazily created in the first message we process and cleared on terminate.
+    let terminateCondvar: Condvar | undefined;
+    let terminateSignal: Promise<void> | undefined;
 
     // problemKey is a unique identifier for each userspace node so we can manage problems from
     // a specific node. A node may have a problem that may later clear. Using the key we can add/remove
@@ -433,8 +439,6 @@ export default class UserNodePlayer implements Player {
     const problemKey = `node-id-${nodeId}`;
     const buildMessageProcessor = (): NodeRegistration["processMessage"] => {
       return async (msgEvent: MessageEvent<unknown>, globalVariables: GlobalVariables) => {
-        const terminateSignal = terminateCondvar.wait();
-
         // Register the node within a web worker to be executed.
         if (!rpc) {
           rpc = this._unusedNodeRuntimeWorkers.pop();
@@ -501,6 +505,13 @@ export default class UserNodePlayer implements Player {
             return;
           }
           this._addUserNodeLogs(nodeId, userNodeLogs);
+        }
+
+        // This signals that we have terminated the node registration and we should bail any message
+        // processing that is in-flight.
+        if (!terminateCondvar) {
+          terminateCondvar = new Condvar();
+          terminateSignal = terminateCondvar.wait();
         }
 
         // To send the message over RPC we invoke maybePlainObject which calls toJSON on the message
@@ -575,7 +586,13 @@ export default class UserNodePlayer implements Player {
 
     const terminate = () => {
       this._problemStore.delete(problemKey);
-      terminateCondvar.notifyAll();
+
+      // Signal any pending in-flight message processing to terminate and clear the state so we can
+      // re-initialize when the next message is processed.
+      terminateCondvar?.notifyAll();
+      terminateCondvar = undefined;
+      terminateSignal = undefined;
+
       if (rpc) {
         this._unusedNodeRuntimeWorkers.push(rpc);
         rpc = undefined;
@@ -659,9 +676,11 @@ export default class UserNodePlayer implements Player {
       return;
     }
 
+    // teardown and cleanup any existing node registrations
     for (const nodeRegistration of state.nodeRegistrations) {
       nodeRegistration.terminate();
     }
+    state.nodeRegistrations = [];
 
     const rosLib = await this._getRosLib(state);
     const typesLib = await this._getTypesLib(state);
