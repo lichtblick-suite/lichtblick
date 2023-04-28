@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CloseIcon from "@mui/icons-material/Close";
-import { Divider, IconButton, Tab, Tabs } from "@mui/material";
+import { Badge, BadgeProps, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -12,6 +12,21 @@ const useStyles = makeStyles()((theme) => ({
   root: {
     boxSizing: "content-box",
     backgroundColor: theme.palette.background.paper,
+  },
+  badgeRoot: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: theme.spacing(1),
+  },
+  badge: {
+    fontSize: theme.typography.caption.fontSize,
+    padding: theme.spacing(0.125, 0.75),
+    borderRadius: 8,
+    transform: "none",
+    position: "relative",
+  },
+  badgeInvisible: {
+    display: "none",
   },
   anchorRight: {
     borderLeft: `1px solid ${theme.palette.divider}`,
@@ -59,6 +74,10 @@ const useStyles = makeStyles()((theme) => ({
 export type NewSidebarItem = {
   title: string;
   component: React.ComponentType;
+  badge?: {
+    color: BadgeProps["color"];
+    count: number;
+  };
 };
 
 function Noop(): ReactNull {
@@ -103,7 +122,25 @@ export function NewSidebar<K extends string>({
           }}
         >
           {Array.from(items.entries(), ([key, item]) => (
-            <Tab key={key} label={item.title} value={key} data-testid={`${key}-${anchor}`} />
+            <Tab
+              key={key}
+              label={
+                <Badge
+                  invisible={item.badge == undefined}
+                  badgeContent={item.badge?.count}
+                  color={item.badge?.color}
+                  classes={{
+                    root: classes.badgeRoot,
+                    badge: classes.badge,
+                    invisible: classes.badgeInvisible,
+                  }}
+                >
+                  {item.title}
+                </Badge>
+              }
+              value={key}
+              data-testid={`${key}-${anchor}`}
+            />
           ))}
         </Tabs>
 

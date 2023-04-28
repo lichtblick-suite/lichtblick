@@ -43,6 +43,7 @@ import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
+import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Sidebars, { SidebarItem } from "@foxglove/studio-base/components/Sidebars";
@@ -551,9 +552,23 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
     const items = new Map<LeftSidebarItemKey, NewSidebarItem>([
       ["panel-settings", { title: "Panel", component: PanelSettingsSidebar }],
       ["topics", { title: "Topics", component: TopicList }],
+      [
+        "problems",
+        {
+          title: "Problems",
+          component: ProblemsList,
+          badge:
+            playerProblems && playerProblems.length > 0
+              ? {
+                  count: playerProblems.length,
+                  color: "error",
+                }
+              : undefined,
+        },
+      ],
     ]);
     return items;
-  }, [PanelSettingsSidebar]);
+  }, [PanelSettingsSidebar, playerProblems]);
 
   const rightSidebarItems = useMemo(() => {
     const items = new Map<RightSidebarItemKey, NewSidebarItem>([

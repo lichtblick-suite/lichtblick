@@ -30,9 +30,9 @@ import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceCont
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
-import { ProblemsList } from "./ProblemsList";
 import { TopicList } from "./TopicList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
+import { ProblemsList } from "../ProblemsList";
 
 type Props = {
   disableToolbar?: boolean;
@@ -179,7 +179,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
               )}
               {activeTab === "problems" && (
                 <div className={classes.tabContent}>
-                  <ProblemsList problems={playerProblems} />
+                  <ProblemsList />
                 </div>
               )}
             </Stack>
