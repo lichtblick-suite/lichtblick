@@ -48,7 +48,7 @@
     "package:e2e": "yarn && yarn clean && yarn desktop:build:prod && yarn package",
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
     "storybook": "storybook dev --port 9009 --config-dir .storybook",
-    "storybook:build": "storybook build --config-dir .storybook",
+    "storybook:build": "storybook build --config-dir .storybook --webpack-stats-json",
     "version:all": "yarn workspaces foreach version"
   },
   "workspaces": {

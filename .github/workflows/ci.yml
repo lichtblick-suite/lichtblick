@@ -105,6 +105,7 @@ jobs:
           storybookBuildDir: storybook-static
           autoAcceptChanges: main
           exitOnceUploaded: true
+          onlyChanged: true
 
   integration:
     runs-on: ${{ matrix.os }}
