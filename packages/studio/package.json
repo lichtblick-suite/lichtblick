@@ -19,6 +19,6 @@
     "prepack": "tsc -b tsconfig.json"
   },
   "devDependencies": {
-    "typescript": "5.0.3"
+    "typescript": "5.0.4"
   }
 }
