@@ -12,7 +12,6 @@ import { selectWithUnstableIdentityWarning } from "@foxglove/studio-base/hooks/s
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import toggleSelectedPanel from "@foxglove/studio-base/providers/CurrentLayoutProvider/toggleSelectedPanel";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import { PanelConfig, PlaybackConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 
 import {
@@ -29,6 +28,8 @@ import {
   StartDragPayload,
   SwapPanelPayload,
 } from "./actions";
+
+export type LayoutID = string & { __brand: "LayoutID" };
 
 export type LayoutState = Readonly<{
   selectedLayout:

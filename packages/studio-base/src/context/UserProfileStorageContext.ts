@@ -4,7 +4,7 @@
 
 import { createContext, useContext } from "react";
 
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 export type UserProfile = {
   /** The id of the layout the user is currently working with. */

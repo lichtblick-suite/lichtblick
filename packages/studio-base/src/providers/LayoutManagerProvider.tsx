@@ -8,13 +8,14 @@ import { useNetworkState } from "react-use";
 import { useShallowMemo, useVisibilityState } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerContext";
 import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
-import { ISO8601Timestamp, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { ISO8601Timestamp } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import delay from "@foxglove/studio-base/util/delay";
 

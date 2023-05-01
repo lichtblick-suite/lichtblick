@@ -11,6 +11,7 @@ import { Condvar } from "@foxglove/den/async";
 import { CurrentLayoutSyncAdapter } from "@foxglove/studio-base/components/CurrentLayoutSyncAdapter";
 import {
   CurrentLayoutActions,
+  LayoutID,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -25,7 +26,6 @@ import CurrentLayoutProvider, {
   MAX_SUPPORTED_LAYOUT_VERSION,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { ILayoutManager } from "@foxglove/studio-base/services/ILayoutManager";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 const TEST_LAYOUT: LayoutData = {
   layout: "ExamplePanel!1",

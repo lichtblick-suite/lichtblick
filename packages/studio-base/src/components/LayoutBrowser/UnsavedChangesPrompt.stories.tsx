@@ -6,8 +6,9 @@ import { action } from "@storybook/addon-actions";
 import { StoryObj } from "@storybook/react";
 
 import { UnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { Layout, LayoutID, ISO8601Timestamp } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout, ISO8601Timestamp } from "@foxglove/studio-base/services/ILayoutStorage";
 
 export default {
   title: "components/LayoutBrowser/UnsavedChangesPrompt",

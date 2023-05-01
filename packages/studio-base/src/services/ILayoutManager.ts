@@ -4,8 +4,9 @@
 
 import EventEmitter from "eventemitter3";
 
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { Layout, LayoutID, LayoutPermission } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout, LayoutPermission } from "@foxglove/studio-base/services/ILayoutStorage";
 
 export type LayoutManagerChangeEvent =
   | { type: "delete"; updatedLayout?: undefined; layoutId: LayoutID }

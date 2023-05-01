@@ -2,12 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import {
-  ISO8601Timestamp,
-  LayoutID,
-  LayoutPermission,
-} from "@foxglove/studio-base/services/ILayoutStorage";
+import { ISO8601Timestamp, LayoutPermission } from "@foxglove/studio-base/services/ILayoutStorage";
 
 /**
  * A panel layout stored on a remote server.

@@ -4,7 +4,7 @@
 
 import { createContext } from "react";
 
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 type ILayoutStorageDebugging = {
   syncNow: () => Promise<void>;

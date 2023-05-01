@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@foxglove/log";
-import { ILayoutStorage, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { ILayoutStorage, Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 const log = Logger.getLogger(__filename);
 

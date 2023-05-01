@@ -7,6 +7,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useShallowMemo } from "@foxglove/hooks";
 import CurrentLayoutContext, {
   ICurrentLayout,
+  LayoutID,
   LayoutState,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
@@ -14,7 +15,6 @@ import {
   LayoutData,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import panelsReducer from "./reducers";
 

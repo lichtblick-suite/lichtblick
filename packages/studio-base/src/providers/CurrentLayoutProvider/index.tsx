@@ -16,6 +16,7 @@ import { VariableValue } from "@foxglove/studio";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import CurrentLayoutContext, {
   ICurrentLayout,
+  LayoutID,
   LayoutState,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
@@ -38,7 +39,6 @@ import { defaultLayout } from "@foxglove/studio-base/providers/CurrentLayoutProv
 import panelsReducer from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { LayoutManagerEventTypes } from "@foxglove/studio-base/services/ILayoutManager";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import { PanelConfig, PlaybackConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 import { windowAppURLState } from "@foxglove/studio-base/util/appURLState";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";

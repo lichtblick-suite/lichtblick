@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
 // We use "brand" tags to prevent confusion between string types with distinct meanings
 // https://github.com/microsoft/TypeScript/issues/4895
-export type LayoutID = string & { __brand: "LayoutID" };
 export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 
 export type LayoutPermission = "CREATOR_WRITE" | "ORG_READ" | "ORG_WRITE";

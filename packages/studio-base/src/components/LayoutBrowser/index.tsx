@@ -35,6 +35,7 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
+  LayoutID,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -49,7 +50,7 @@ import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { Layout, LayoutID, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 

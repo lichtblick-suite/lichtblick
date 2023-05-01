@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { LazilyInitialized } from "@foxglove/den/async";
-import { ILayoutStorage, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { ILayoutStorage, Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 /**
  * A view of ILayoutCache which only calls the underlying list() once per namespace, and implements

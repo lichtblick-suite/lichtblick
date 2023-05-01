@@ -6,6 +6,7 @@ import { StoryObj, StoryContext, StoryFn } from "@storybook/react";
 import { fireEvent, screen, userEvent, within } from "@storybook/testing-library";
 import { useMemo } from "react";
 
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import CurrentUserContext from "@foxglove/studio-base/context/CurrentUserContext";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
@@ -14,7 +15,7 @@ import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayout
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import { ISO8601Timestamp, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { ISO8601Timestamp, Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 

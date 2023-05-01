@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@foxglove/den/async";
 import Logger from "@foxglove/log";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import {
   ILayoutManager,
@@ -18,7 +19,6 @@ import {
   ILayoutStorage,
   Layout,
   layoutAppearsDeleted,
-  LayoutID,
   layoutIsShared,
   LayoutPermission,
   layoutPermissionIsShared,
