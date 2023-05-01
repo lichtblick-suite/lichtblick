@@ -68,7 +68,7 @@ const VersionBanner = function ({
   const [showBanner, setShowBanner] = useState(true);
   const { i18n } = useTranslation();
   const muiTheme = useMemo(
-    () => createMuiTheme("dark", i18n.language as Language),
+    () => createMuiTheme("dark", i18n.language as Language | undefined),
     [i18n.language],
   );
 

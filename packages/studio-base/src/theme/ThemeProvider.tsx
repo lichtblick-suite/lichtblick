@@ -32,7 +32,7 @@ export default function ThemeProvider({
 
   const { i18n } = useTranslation();
   const muiTheme = useMemo(
-    () => createMuiTheme(isDark ? "dark" : "light", i18n.language as Language),
+    () => createMuiTheme(isDark ? "dark" : "light", i18n.language as Language | undefined),
     [i18n.language, isDark],
   );
 

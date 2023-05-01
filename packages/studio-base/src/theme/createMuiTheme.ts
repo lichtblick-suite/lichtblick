@@ -14,7 +14,7 @@ type ThemePreference = "dark" | "light";
 
 export function createMuiTheme(
   themePreference: ThemePreference,
-  locale: Language,
+  locale: Language | undefined,
 ): Theme & { name: ThemePreference } {
   const theme = createTheme({
     palette: palette[themePreference],
