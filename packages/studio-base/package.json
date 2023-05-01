@@ -141,7 +141,7 @@
     "react-dnd-html5-backend": "14.0.2",
     "react-dom": "17.0.2",
     "react-hover-observer": "2.1.1",
-    "react-i18next": "12.2.0",
+    "react-i18next": "12.2.2",
     "react-json-tree": "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch",
     "react-markdown": "8.0.7",
     "react-monaco-editor": "0.52.0",
