@@ -74,12 +74,16 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
   const restore = useCallback(
     (previous?: TaggedPlotDataByPath): TaggedPlotDataByPath => {
       if (!previous) {
-        return { tag: new Date().toISOString(), data: {} };
+        // If we're showing single frames, we don't want to accumulate chunks of messages
+        // across multiple frames, so we put everything into a single restore tag and
+        // each new frame replaces the old one.
+        const tag = showSingleCurrentMessage ? "single" : new Date().toISOString();
+        return { tag, data: {} };
       }
 
       return { ...previous, data: pick(previous.data, allPaths) };
     },
-    [allPaths],
+    [allPaths, showSingleCurrentMessage],
   );
 
   const addMessages = useCallback(
