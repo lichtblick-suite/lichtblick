@@ -48,11 +48,11 @@ class MockRosClient {
     workerInstance = this;
   }
 
-  private _topics: string[] = [];
-  private _types: string[] = [];
-  private _typedefs_full_text: string[] = [];
-  private _connectCallback?: () => void;
-  private _messages: any[] = [];
+  #topics: string[] = [];
+  #types: string[] = [];
+  #typedefs_full_text: string[] = [];
+  #connectCallback?: () => void;
+  #messages: any[] = [];
 
   public setup({
     topics = [],
@@ -65,17 +65,17 @@ class MockRosClient {
     typedefs?: string[];
     messages?: any[];
   }) {
-    this._topics = topics;
-    this._types = types;
-    this._typedefs_full_text = typedefs;
-    this._messages = messages;
+    this.#topics = topics;
+    this.#types = types;
+    this.#typedefs_full_text = typedefs;
+    this.#messages = messages;
 
-    this._connectCallback?.();
+    this.#connectCallback?.();
   }
 
   public on(op: string, callback: () => void) {
     if (op === "connection") {
-      this._connectCallback = callback;
+      this.#connectCallback = callback;
     }
   }
 
@@ -85,14 +85,14 @@ class MockRosClient {
 
   public getTopicsAndRawTypes(callback: (...args: unknown[]) => void) {
     callback({
-      topics: this._topics,
-      types: this._types,
-      typedefs_full_text: this._typedefs_full_text,
+      topics: this.#topics,
+      types: this.#types,
+      typedefs_full_text: this.#typedefs_full_text,
     });
   }
 
   public getMessagesByTopicName(topicName: string): { message: unknown }[] {
-    return this._messages.filter(({ topic }) => topic === topicName);
+    return this.#messages.filter(({ topic }) => topic === topicName);
   }
 
   public getNodes(callback: (nodes: string[]) => void, _errCb: (error: Error) => void) {
@@ -109,14 +109,14 @@ class MockRosClient {
 }
 
 class MockRosTopic {
-  private _name: string = "";
+  #name: string = "";
 
   public constructor({ name }: { name: string }) {
-    this._name = name;
+    this.#name = name;
   }
 
   public subscribe(callback: (arg: unknown) => void) {
-    workerInstance.getMessagesByTopicName(this._name).forEach(({ message }) => callback(message));
+    workerInstance.getMessagesByTopicName(this.#name).forEach(({ message }) => callback(message));
   }
 }
 

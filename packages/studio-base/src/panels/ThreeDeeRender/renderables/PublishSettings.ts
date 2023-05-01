@@ -27,14 +27,14 @@ export class PublishSettings extends SceneExtension {
 
     renderer.publishClickTool.addEventListener(
       "foxglove.publish-type-change",
-      this.handlePublishToolChange,
+      this.#handlePublishToolChange,
     );
   }
 
   public override dispose(): void {
     this.renderer.publishClickTool.removeEventListener(
       "foxglove.publish-type-change",
-      this.handlePublishToolChange,
+      this.#handlePublishToolChange,
     );
     super.dispose();
   }
@@ -148,7 +148,7 @@ export class PublishSettings extends SceneExtension {
     this.updateSettingsTree();
   };
 
-  private handlePublishToolChange = (): void => {
+  #handlePublishToolChange = (): void => {
     this.renderer.updateConfig((draft) => {
       draft.publish.type = this.renderer.publishClickTool.publishClickType;
       return draft;

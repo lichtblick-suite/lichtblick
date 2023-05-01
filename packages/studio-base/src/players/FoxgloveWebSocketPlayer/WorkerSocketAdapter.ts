@@ -7,8 +7,8 @@ import { IWebSocket } from "@foxglove/ws-protocol";
 import { FromWorkerMessage, ToWorkerMessage } from "./worker";
 
 export default class WorkerSocketAdapter implements IWebSocket {
-  private worker: Worker;
-  private connectionClosed: boolean = false;
+  #worker: Worker;
+  #connectionClosed: boolean = false;
   public binaryType: string = "";
   public protocol: string = "";
   public onerror: ((event: unknown) => void) | undefined = undefined;
@@ -18,16 +18,16 @@ export default class WorkerSocketAdapter implements IWebSocket {
 
   public constructor(wsUrl: string, protocols?: string[] | string) {
     // foxglove-depcheck-used: babel-plugin-transform-import-meta
-    this.worker = new Worker(new URL("./worker", import.meta.url));
-    this.sendToWorker({ type: "open", data: { wsUrl, protocols } });
+    this.#worker = new Worker(new URL("./worker", import.meta.url));
+    this.#sendToWorker({ type: "open", data: { wsUrl, protocols } });
 
-    this.worker.onerror = (ev) => {
+    this.#worker.onerror = (ev) => {
       if (this.onerror) {
         this.onerror(ev);
       }
     };
 
-    this.worker.onmessage = (event: MessageEvent<FromWorkerMessage>) => {
+    this.#worker.onmessage = (event: MessageEvent<FromWorkerMessage>) => {
       switch (event.data.type) {
         case "open":
           if (this.onopen) {
@@ -37,8 +37,8 @@ export default class WorkerSocketAdapter implements IWebSocket {
           break;
         case "close":
           // websocket connection got closed, we can terminate the worker
-          this.connectionClosed = true;
-          this.worker.terminate();
+          this.#connectionClosed = true;
+          this.#worker.terminate();
 
           if (this.onclose) {
             this.onclose(event.data);
@@ -59,8 +59,8 @@ export default class WorkerSocketAdapter implements IWebSocket {
   }
 
   public close(): void {
-    if (!this.connectionClosed) {
-      this.sendToWorker({
+    if (!this.#connectionClosed) {
+      this.#sendToWorker({
         type: "close",
         data: undefined,
       });
@@ -68,13 +68,13 @@ export default class WorkerSocketAdapter implements IWebSocket {
   }
 
   public send(data: string | ArrayBuffer | ArrayBufferView): void {
-    this.sendToWorker({ type: "data", data });
+    this.#sendToWorker({ type: "data", data });
   }
 
-  private sendToWorker(msg: ToWorkerMessage): void {
-    if (this.connectionClosed) {
+  #sendToWorker(msg: ToWorkerMessage): void {
+    if (this.#connectionClosed) {
       throw Error("Can't send message over closed websocket connection");
     }
-    this.worker.postMessage(msg);
+    this.#worker.postMessage(msg);
   }
 }

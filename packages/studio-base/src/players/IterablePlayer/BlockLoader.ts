@@ -49,53 +49,53 @@ type LoadArgs = {
  * BlockLoader manages loading blocks from a source. Blocks are fixed time span containers for messages.
  */
 export class BlockLoader {
-  private source: IIterableSource;
-  private blocks: Blocks = [];
-  private start: Time;
-  private end: Time;
-  private blockDurationNanos: number;
-  private topics: Set<string> = new Set();
-  private maxCacheSize: number = 0;
-  private problemManager: PlayerProblemManager;
-  private stopped: boolean = false;
-  private activeChangeCondvar: Condvar = new Condvar();
-  private abortController: AbortController;
+  #source: IIterableSource;
+  #blocks: Blocks = [];
+  #start: Time;
+  #end: Time;
+  #blockDurationNanos: number;
+  #topics: Set<string> = new Set();
+  #maxCacheSize: number = 0;
+  #problemManager: PlayerProblemManager;
+  #stopped: boolean = false;
+  #activeChangeCondvar: Condvar = new Condvar();
+  #abortController: AbortController;
 
   public constructor(args: BlockLoaderArgs) {
-    this.source = args.source;
-    this.start = args.start;
-    this.end = args.end;
-    this.maxCacheSize = args.cacheSizeBytes;
-    this.problemManager = args.problemManager;
-    this.abortController = new AbortController();
+    this.#source = args.source;
+    this.#start = args.start;
+    this.#end = args.end;
+    this.#maxCacheSize = args.cacheSizeBytes;
+    this.#problemManager = args.problemManager;
+    this.#abortController = new AbortController();
 
-    const totalNs = Number(toNanoSec(subtractTimes(this.end, this.start))) + 1; // +1 since times are inclusive.
+    const totalNs = Number(toNanoSec(subtractTimes(this.#end, this.#start))) + 1; // +1 since times are inclusive.
     if (totalNs > Number.MAX_SAFE_INTEGER * 0.9) {
       throw new Error("Time range is too long to be supported");
     }
 
-    this.blockDurationNanos = Math.ceil(
+    this.#blockDurationNanos = Math.ceil(
       Math.max(args.minBlockDurationNs, totalNs / args.maxBlocks),
     );
 
-    const blockCount = Math.ceil(totalNs / this.blockDurationNanos);
+    const blockCount = Math.ceil(totalNs / this.#blockDurationNanos);
 
     log.debug(`Block count: ${blockCount}`);
-    this.blocks = Array.from({ length: blockCount });
+    this.#blocks = Array.from({ length: blockCount });
   }
 
   public setTopics(topics: Set<string>): void {
-    if (isEqual(topics, this.topics)) {
+    if (isEqual(topics, this.#topics)) {
       return;
     }
 
-    this.abortController.abort();
-    this.topics = topics;
-    this.activeChangeCondvar.notifyAll();
+    this.#abortController.abort();
+    this.#topics = topics;
+    this.#activeChangeCondvar.notifyAll();
     log.debug(`Preloaded topics: ${[...topics].join(", ")}`);
 
     // Update all the blocks with any missing topics
-    for (const block of this.blocks) {
+    for (const block of this.#blocks) {
       if (block) {
         const blockTopics = Object.keys(block.messagesByTopic);
         const needTopics = new Set(topics);
@@ -110,11 +110,11 @@ export class BlockLoader {
   /**
    * Remove topics that are no longer requested to be preloaded from blocks to free up space
    */
-  private _removeUnusedBlockTopics(): number {
-    const topics = this.topics;
+  #removeUnusedBlockTopics(): number {
+    const topics = this.#topics;
     let totalBytesRemoved = 0;
-    for (let i = 0; i < this.blocks.length; i++) {
-      const block = this.blocks[i];
+    for (let i = 0; i < this.#blocks.length; i++) {
+      const block = this.#blocks[i];
       if (block) {
         let blockBytesRemoved = 0;
         const newMessagesByTopic: Record<string, MessageEvent<unknown>[]> = {
@@ -131,7 +131,7 @@ export class BlockLoader {
           }
         }
         if (blockBytesRemoved > 0) {
-          this.blocks[i] = {
+          this.#blocks[i] = {
             ...block,
             messagesByTopic: newMessagesByTopic,
             sizeInBytes: block.sizeInBytes - blockBytesRemoved,
@@ -145,53 +145,53 @@ export class BlockLoader {
 
   public async stopLoading(): Promise<void> {
     log.debug("Stop loading blocks");
-    this.stopped = true;
-    this.activeChangeCondvar.notifyAll();
+    this.#stopped = true;
+    this.#activeChangeCondvar.notifyAll();
   }
 
   public async startLoading(args: LoadArgs): Promise<void> {
     log.debug("Start loading process");
-    this.stopped = false;
+    this.#stopped = false;
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (!this.stopped) {
-      this.abortController = new AbortController();
+    while (!this.#stopped) {
+      this.#abortController = new AbortController();
 
-      const topics = this.topics;
+      const topics = this.#topics;
 
-      await this.load({ progress: args.progress });
+      await this.#load({ progress: args.progress });
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (this.stopped) {
+      if (this.#stopped) {
         break;
       }
 
       // Wait for topics to possibly change.
-      if (this.topics === topics) {
-        await this.activeChangeCondvar.wait();
+      if (this.#topics === topics) {
+        await this.#activeChangeCondvar.wait();
       }
     }
   }
 
-  private async load(args: { progress: LoadArgs["progress"] }): Promise<void> {
-    const topics = this.topics;
+  async #load(args: { progress: LoadArgs["progress"] }): Promise<void> {
+    const topics = this.#topics;
 
     // Ignore changing the blocks if the topic list is empty
     if (topics.size === 0) {
-      args.progress(this.calculateProgress(topics));
+      args.progress(this.#calculateProgress(topics));
       return;
     }
 
-    if (this.blocks.length === 0) {
+    if (this.#blocks.length === 0) {
       return;
     }
 
     log.debug("loading blocks", { topics });
     const beginBlockId = 0;
-    const lastBlockId = this.blocks.length;
+    const lastBlockId = this.#blocks.length;
 
     const { progress } = args;
-    let totalBlockSizeBytes = this.cacheSize();
+    let totalBlockSizeBytes = this.#cacheSize();
 
     for (let blockId = beginBlockId; blockId < lastBlockId; ++blockId) {
       // Topics we will fetch for this range
@@ -199,7 +199,7 @@ export class BlockLoader {
 
       // Keep looking for a block that needs loading
       {
-        const existingBlock = this.blocks[blockId];
+        const existingBlock = this.#blocks[blockId];
 
         // The current block has everything, so we can move to the next block
         if (existingBlock?.needTopics.size === 0) {
@@ -214,8 +214,8 @@ export class BlockLoader {
       // Now we look for the last block. We do this by finding blocks that need the same topics to fetch.
       // This creates a continuous span of the same topics to fetch
       let endBlockId = blockId;
-      for (let endIdx = blockId + 1; endIdx < this.blocks.length; ++endIdx) {
-        const nextBlock = this.blocks[endIdx];
+      for (let endIdx = blockId + 1; endIdx < this.#blocks.length; ++endIdx) {
+        const nextBlock = this.#blocks[endIdx];
 
         const needTopics = nextBlock?.needTopics ?? topics;
 
@@ -229,8 +229,8 @@ export class BlockLoader {
         endBlockId = endIdx;
       }
 
-      const cursorStartTime = this.blockIdToStartTime(blockId);
-      const cursorEndTime = clampTime(this.blockIdToEndTime(endBlockId), this.start, this.end);
+      const cursorStartTime = this.#blockIdToStartTime(blockId);
+      const cursorEndTime = clampTime(this.#blockIdToEndTime(endBlockId), this.#start, this.#end);
 
       const iteratorArgs: MessageIteratorArgs = {
         topics: Array.from(topicsToFetch),
@@ -242,11 +242,14 @@ export class BlockLoader {
       // If the source provides a message cursor we use its message cursor, otherwise we make one
       // using the source's message iterator.
       const cursor =
-        this.source.getMessageCursor?.({ ...iteratorArgs, abort: this.abortController.signal }) ??
-        new IteratorCursor(this.source.messageIterator(iteratorArgs), this.abortController.signal);
+        this.#source.getMessageCursor?.({ ...iteratorArgs, abort: this.#abortController.signal }) ??
+        new IteratorCursor(
+          this.#source.messageIterator(iteratorArgs),
+          this.#abortController.signal,
+        );
 
       for (let currentBlockId = blockId; currentBlockId <= endBlockId; ++currentBlockId) {
-        const untilTime = clampTime(this.blockIdToEndTime(currentBlockId), this.start, this.end);
+        const untilTime = clampTime(this.#blockIdToEndTime(currentBlockId), this.#start, this.#end);
 
         const results = await cursor.readUntil(untilTime);
         // No results means cursor aborted or eof
@@ -265,8 +268,8 @@ export class BlockLoader {
 
         // Empty result set does not require further processing and does not change the size
         if (results.length === 0) {
-          const existingBlock = this.blocks[currentBlockId];
-          this.blocks[currentBlockId] = {
+          const existingBlock = this.#blocks[currentBlockId];
+          this.#blocks[currentBlockId] = {
             needTopics: new Set(),
             messagesByTopic: {
               ...existingBlock?.messagesByTopic,
@@ -281,7 +284,10 @@ export class BlockLoader {
         let sizeInBytes = 0;
         for (const iterResult of results) {
           if (iterResult.type === "problem") {
-            this.problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+            this.#problemManager.addProblem(
+              `connid-${iterResult.connectionId}`,
+              iterResult.problem,
+            );
             continue;
           }
 
@@ -296,14 +302,14 @@ export class BlockLoader {
           // topic in our results. If we don't, thats a problem.
           const problemKey = `unexpected-topic-${msgTopic}`;
           if (!arr) {
-            this.problemManager.addProblem(problemKey, {
+            this.#problemManager.addProblem(problemKey, {
               severity: "error",
               message: `Received a message on an unexpected topic: ${msgTopic}.`,
             });
 
             continue;
           }
-          this.problemManager.removeProblem(problemKey);
+          this.#problemManager.removeProblem(problemKey);
 
           const messageSizeInBytes = iterResult.msgEvent.sizeInBytes;
           totalBlockSizeBytes += messageSizeInBytes;
@@ -311,27 +317,27 @@ export class BlockLoader {
 
           sizeInBytes += messageSizeInBytes;
 
-          if (totalBlockSizeBytes < this.maxCacheSize) {
-            this.problemManager.removeProblem("cache-full");
+          if (totalBlockSizeBytes < this.#maxCacheSize) {
+            this.#problemManager.removeProblem("cache-full");
             continue;
           }
           // cache over capacity, try removing unused topics
-          const removedSize = this._removeUnusedBlockTopics();
+          const removedSize = this.#removeUnusedBlockTopics();
           totalBlockSizeBytes -= removedSize;
-          if (totalBlockSizeBytes > this.maxCacheSize) {
-            this.problemManager.addProblem("cache-full", {
+          if (totalBlockSizeBytes > this.#maxCacheSize) {
+            this.#problemManager.addProblem("cache-full", {
               severity: "error",
               message: `Cache is full. Preloading for topics [${Array.from(topicsToFetch).join(
                 ", ",
-              )}] has stopped on block ${currentBlockId + 1}/${this.blocks.length}.`,
+              )}] has stopped on block ${currentBlockId + 1}/${this.#blocks.length}.`,
               tip: "Try reducing the number of topics that require preloading at a given time (e.g. in plots), or try to reduce the time range of the file.",
             });
             return;
           }
         }
 
-        const existingBlock = this.blocks[currentBlockId];
-        this.blocks[currentBlockId] = {
+        const existingBlock = this.#blocks[currentBlockId];
+        this.#blocks[currentBlockId] = {
           needTopics: new Set(),
           messagesByTopic: {
             ...existingBlock?.messagesByTopic,
@@ -341,7 +347,7 @@ export class BlockLoader {
           sizeInBytes: (existingBlock?.sizeInBytes ?? 0) + sizeInBytes,
         };
 
-        progress(this.calculateProgress(topics));
+        progress(this.#calculateProgress(topics));
       }
 
       await cursor.end();
@@ -349,9 +355,9 @@ export class BlockLoader {
     }
   }
 
-  private calculateProgress(topics: Set<string>): Progress {
+  #calculateProgress(topics: Set<string>): Progress {
     const fullyLoadedFractionRanges = simplify(
-      filterMap(this.blocks, (thisBlock, blockIndex) => {
+      filterMap(this.#blocks, (thisBlock, blockIndex) => {
         if (!thisBlock) {
           return;
         }
@@ -372,18 +378,18 @@ export class BlockLoader {
     return {
       fullyLoadedFractionRanges: fullyLoadedFractionRanges.map((range) => ({
         // Convert block ranges into fractions.
-        start: range.start / this.blocks.length,
-        end: range.end / this.blocks.length,
+        start: range.start / this.#blocks.length,
+        end: range.end / this.#blocks.length,
       })),
       messageCache: {
-        blocks: this.blocks.slice(),
-        startTime: this.start,
+        blocks: this.#blocks.slice(),
+        startTime: this.#start,
       },
     };
   }
 
-  private cacheSize(): number {
-    return this.blocks.reduce((prev, block) => {
+  #cacheSize(): number {
+    return this.#blocks.reduce((prev, block) => {
       if (!block) {
         return prev;
       }
@@ -392,12 +398,12 @@ export class BlockLoader {
     }, 0);
   }
 
-  private blockIdToStartTime(id: number): Time {
-    return add(this.start, fromNanoSec(BigInt(id) * BigInt(this.blockDurationNanos)));
+  #blockIdToStartTime(id: number): Time {
+    return add(this.#start, fromNanoSec(BigInt(id) * BigInt(this.#blockDurationNanos)));
   }
 
   // The end time of a block is the start time of the next block minus 1 nanosecond
-  private blockIdToEndTime(id: number): Time {
-    return add(this.start, fromNanoSec(BigInt(id + 1) * BigInt(this.blockDurationNanos) - 1n));
+  #blockIdToEndTime(id: number): Time {
+    return add(this.#start, fromNanoSec(BigInt(id + 1) * BigInt(this.#blockDurationNanos) - 1n));
   }
 }

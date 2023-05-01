@@ -66,78 +66,78 @@ export type PublishClickEvent =
   | { type: "foxglove.publish-submit"; publishClickType: "pose" | "pose_estimate"; pose: Pose };
 
 export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, PublishClickEvent> {
-  private sphere: RenderableSphere;
-  private arrow: RenderableArrow;
+  #sphere: RenderableSphere;
+  #arrow: RenderableArrow;
 
   public publishClickType: PublishClickType = "point";
   public state: PublishClickState = "idle";
 
-  private point1?: THREE.Vector3;
-  private point2?: THREE.Vector3;
+  #point1?: THREE.Vector3;
+  #point2?: THREE.Vector3;
 
   public constructor(renderer: IRenderer) {
     super("foxglove.PublishClickTool", renderer);
 
-    this.sphere = new RenderableSphere("", makeSphereMarker(), undefined, this.renderer);
-    this.arrow = new RenderableArrow(
+    this.#sphere = new RenderableSphere("", makeSphereMarker(), undefined, this.renderer);
+    this.#arrow = new RenderableArrow(
       "",
       makeArrowMarker(this.publishClickType),
       undefined,
       this.renderer,
     );
-    this.sphere.visible = false;
-    this.sphere.mesh.userData.picking = false;
-    this.arrow.visible = false;
-    this.arrow.shaftMesh.userData.picking = false;
-    this.arrow.headMesh.userData.picking = false;
-    this.add(this.sphere);
-    this.add(this.arrow);
-    this._setState("idle");
+    this.#sphere.visible = false;
+    this.#sphere.mesh.userData.picking = false;
+    this.#arrow.visible = false;
+    this.#arrow.shaftMesh.userData.picking = false;
+    this.#arrow.headMesh.userData.picking = false;
+    this.add(this.#sphere);
+    this.add(this.#arrow);
+    this.#setState("idle");
   }
 
   public override dispose(): void {
     super.dispose();
-    this.arrow.dispose();
-    this.sphere.dispose();
-    this.renderer.input.removeListener("click", this._handleClick);
-    this.renderer.input.removeListener("mousemove", this._handleMouseMove);
+    this.#arrow.dispose();
+    this.#sphere.dispose();
+    this.renderer.input.removeListener("click", this.#handleClick);
+    this.renderer.input.removeListener("mousemove", this.#handleMouseMove);
   }
 
   public setPublishClickType(type: PublishClickType): void {
     this.publishClickType = type;
-    this.arrow.update(makeArrowMarker(this.publishClickType), undefined);
+    this.#arrow.update(makeArrowMarker(this.publishClickType), undefined);
     this.dispatchEvent({ type: "foxglove.publish-type-change" });
   }
 
   public start(): void {
-    this._setState("place-first-point");
+    this.#setState("place-first-point");
   }
 
   public stop(): void {
-    this._setState("idle");
+    this.#setState("idle");
   }
 
-  private _setState(state: PublishClickState): void {
+  #setState(state: PublishClickState): void {
     this.state = state;
     switch (state) {
       case "idle":
-        this.point1 = this.point2 = undefined;
-        this.renderer.input.removeListener("click", this._handleClick);
-        this.renderer.input.removeListener("mousemove", this._handleMouseMove);
+        this.#point1 = this.#point2 = undefined;
+        this.renderer.input.removeListener("click", this.#handleClick);
+        this.renderer.input.removeListener("mousemove", this.#handleMouseMove);
         this.dispatchEvent({ type: "foxglove.publish-end" });
         break;
       case "place-first-point":
-        this.renderer.input.addListener("click", this._handleClick);
-        this.renderer.input.addListener("mousemove", this._handleMouseMove);
+        this.renderer.input.addListener("click", this.#handleClick);
+        this.renderer.input.addListener("mousemove", this.#handleMouseMove);
         this.dispatchEvent({ type: "foxglove.publish-start" });
         break;
       case "place-second-point":
         break;
     }
-    this._render();
+    this.#render();
   }
 
-  private _handleMouseMove = (
+  #handleMouseMove = (
     _cursorCoords: THREE.Vector2,
     worldSpaceCursorCoords: THREE.Vector3 | undefined,
     _event: MouseEvent,
@@ -149,16 +149,16 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
       case "idle":
         break;
       case "place-first-point":
-        (this.point1 ??= new THREE.Vector3()).copy(worldSpaceCursorCoords);
+        (this.#point1 ??= new THREE.Vector3()).copy(worldSpaceCursorCoords);
         break;
       case "place-second-point":
-        (this.point2 ??= new THREE.Vector3()).copy(worldSpaceCursorCoords);
+        (this.#point2 ??= new THREE.Vector3()).copy(worldSpaceCursorCoords);
         break;
     }
-    this._render();
+    this.#render();
   };
 
-  private _handleClick = (
+  #handleClick = (
     _cursorCoords: THREE.Vector2,
     worldSpaceCursorCoords: THREE.Vector3 | undefined,
     _event: MouseEvent,
@@ -171,25 +171,25 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
       case "idle":
         break;
       case "place-first-point":
-        this.point1 = worldSpaceCursorCoords.clone();
+        this.#point1 = worldSpaceCursorCoords.clone();
         if (this.publishClickType === "point") {
           this.dispatchEvent({
             type: "foxglove.publish-submit",
             publishClickType: this.publishClickType,
-            point: { x: this.point1.x, y: this.point1.y, z: this.point1.z },
+            point: { x: this.#point1.x, y: this.#point1.y, z: this.#point1.z },
           });
-          this._setState("idle");
+          this.#setState("idle");
         } else {
-          this._setState("place-second-point");
+          this.#setState("place-second-point");
         }
         break;
       case "place-second-point":
-        this.point2 = worldSpaceCursorCoords.clone();
-        if (this.point1 && this.publishClickType !== "point") {
-          const p = this.point1.clone();
+        this.#point2 = worldSpaceCursorCoords.clone();
+        if (this.#point1 && this.publishClickType !== "point") {
+          const p = this.#point1.clone();
           const q = new THREE.Quaternion().setFromUnitVectors(
             UNIT_X,
-            tempVec3.subVectors(this.point2, this.point1).normalize(),
+            tempVec3.subVectors(this.#point2, this.#point1).normalize(),
           );
           this.dispatchEvent({
             type: "foxglove.publish-submit",
@@ -200,37 +200,37 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
             },
           });
         }
-        this._setState("idle");
+        this.#setState("idle");
         break;
     }
-    this._render();
+    this.#render();
   };
 
-  private _render() {
+  #render() {
     if (this.publishClickType === "point") {
-      this.arrow.visible = false;
-      if (this.point1) {
-        this.sphere.visible = true;
-        this.sphere.position.copy(this.point1);
+      this.#arrow.visible = false;
+      if (this.#point1) {
+        this.#sphere.visible = true;
+        this.#sphere.position.copy(this.#point1);
       } else {
-        this.sphere.visible = false;
+        this.#sphere.visible = false;
       }
     } else {
-      this.sphere.visible = false;
-      if (this.point1) {
-        this.arrow.visible = true;
+      this.#sphere.visible = false;
+      if (this.#point1) {
+        this.#arrow.visible = true;
 
-        this.arrow.position.copy(this.point1);
-        if (this.point2) {
-          this.arrow.quaternion.setFromUnitVectors(
+        this.#arrow.position.copy(this.#point1);
+        if (this.#point2) {
+          this.#arrow.quaternion.setFromUnitVectors(
             UNIT_X,
-            tempVec3.subVectors(this.point2, this.point1).normalize(),
+            tempVec3.subVectors(this.#point2, this.#point1).normalize(),
           );
         } else {
-          this.arrow.quaternion.set(0, 0, 0, 1);
+          this.#arrow.quaternion.set(0, 0, 0, 1);
         }
       } else {
-        this.arrow.visible = false;
+        this.#arrow.visible = false;
       }
     }
 

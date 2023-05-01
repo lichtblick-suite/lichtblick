@@ -30,19 +30,19 @@ const TRANSFORMS_PER_TICK = 50;
 const CAPABILITIES: string[] = [];
 
 class TransformPlayer implements Player {
-  private name: string = "transform";
-  private listener?: (state: PlayerState) => Promise<void>;
-  private datatypes: RosDatatypes = new Map();
+  #name: string = "transform";
+  #listener?: (state: PlayerState) => Promise<void>;
+  #datatypes: RosDatatypes = new Map();
 
   public constructor() {
-    this.datatypes.set("Time", {
+    this.#datatypes.set("Time", {
       definitions: [
         { name: "sec", type: "uint32" },
         { name: "nsec", type: "uint32" },
       ],
     });
 
-    this.datatypes.set("foxglove.FrameTransform", {
+    this.#datatypes.set("foxglove.FrameTransform", {
       name: "foxglove.FrameTransform",
       definitions: [
         { name: "timestamp", type: "Time", isComplex: true },
@@ -55,8 +55,8 @@ class TransformPlayer implements Player {
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.listener = listener;
-    void this.run();
+    this.#listener = listener;
+    void this.#run();
   }
   public close(): void {
     // no-op
@@ -78,8 +78,8 @@ class TransformPlayer implements Player {
     throw new Error("Method not implemented.");
   }
 
-  private async run() {
-    const listener = this.listener;
+  async #run() {
+    const listener = this.#listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
@@ -89,12 +89,12 @@ class TransformPlayer implements Player {
     await listener({
       profile: undefined,
       presence: PlayerPresence.PRESENT,
-      name: this.name,
-      playerId: this.name,
+      name: this.#name,
+      playerId: this.#name,
       capabilities: CAPABILITIES,
       progress: {},
       urlState: {
-        sourceId: this.name,
+        sourceId: this.#name,
       },
     });
 
@@ -156,8 +156,8 @@ class TransformPlayer implements Player {
       await listener({
         profile: undefined,
         presence: PlayerPresence.PRESENT,
-        name: this.name,
-        playerId: this.name,
+        name: this.#name,
+        playerId: this.#name,
         capabilities: CAPABILITIES,
         progress: {},
         activeData: {
@@ -171,7 +171,7 @@ class TransformPlayer implements Player {
           endTime: timestamp,
           topics,
           topicStats,
-          datatypes: this.datatypes,
+          datatypes: this.#datatypes,
         },
       });
 

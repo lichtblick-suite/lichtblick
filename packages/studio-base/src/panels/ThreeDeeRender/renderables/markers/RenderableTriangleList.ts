@@ -19,9 +19,9 @@ const EMPTY_FLOAT32 = new Float32Array();
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
 export class RenderableTriangleList extends RenderableMarker {
-  private mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  private vertices: Float32Array;
-  private colors: Float32Array;
+  #mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  #vertices: Float32Array;
+  #colors: Float32Array;
 
   public constructor(
     topic: string,
@@ -31,22 +31,25 @@ export class RenderableTriangleList extends RenderableMarker {
   ) {
     super(topic, marker, receiveTime, renderer);
 
-    this.vertices = new Float32Array(marker.points.length * 3);
-    this.colors = new Float32Array(marker.colors.length * 4);
+    this.#vertices = new Float32Array(marker.points.length * 3);
+    this.#colors = new Float32Array(marker.colors.length * 4);
 
-    this.mesh = new THREE.Mesh(new THREE.BufferGeometry(), makeStandardVertexColorMaterial(marker));
-    this.mesh.castShadow = true;
-    this.mesh.receiveShadow = true;
-    this.add(this.mesh);
+    this.#mesh = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      makeStandardVertexColorMaterial(marker),
+    );
+    this.#mesh.castShadow = true;
+    this.#mesh.receiveShadow = true;
+    this.add(this.#mesh);
 
     this.update(marker, receiveTime);
   }
 
   public override dispose(): void {
-    this.mesh.material.dispose();
-    this.mesh.geometry.dispose();
-    this.vertices = new Float32Array();
-    this.colors = new Float32Array();
+    this.#mesh.material.dispose();
+    this.#mesh.geometry.dispose();
+    this.#vertices = new Float32Array();
+    this.#colors = new Float32Array();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
@@ -61,7 +64,7 @@ export class RenderableTriangleList extends RenderableMarker {
         EMPTY_ERR,
         `TRIANGLE_LIST: points is empty`,
       );
-      this.mesh.geometry.setAttribute("position", new THREE.BufferAttribute(EMPTY_FLOAT32, 3));
+      this.#mesh.geometry.setAttribute("position", new THREE.BufferAttribute(EMPTY_FLOAT32, 3));
       return;
     }
     if (vertexCount % 3 !== 0) {
@@ -85,23 +88,24 @@ export class RenderableTriangleList extends RenderableMarker {
 
     const transparent = markerHasTransparency(marker);
     if (transparent !== markerHasTransparency(prevMarker)) {
-      this.mesh.material.transparent = transparent;
-      this.mesh.material.depthWrite = !transparent;
-      this.mesh.material.needsUpdate = true;
+      this.#mesh.material.transparent = transparent;
+      this.#mesh.material.depthWrite = !transparent;
+      this.#mesh.material.needsUpdate = true;
     }
 
     let dataChanged = false;
 
     const count = vertexCount * 3;
-    if (count !== this.vertices.length) {
-      this.vertices = new Float32Array(count);
+    if (count !== this.#vertices.length) {
+      this.#vertices = new Float32Array(count);
       dataChanged = true;
     }
-    if (vertexCount * 4 !== this.colors.length) {
-      this.colors = new Float32Array(vertexCount * 4);
+    if (vertexCount * 4 !== this.#colors.length) {
+      this.#colors = new Float32Array(vertexCount * 4);
       dataChanged = true;
     }
-    const { vertices, colors } = this;
+    const vertices = this.#vertices;
+    const colors = this.#colors;
 
     // Update position/color buffers with the new marker data
     for (let i = 0; i < vertexCount; i++) {
@@ -137,7 +141,7 @@ export class RenderableTriangleList extends RenderableMarker {
     }
 
     if (dataChanged) {
-      const geometry = this.mesh.geometry;
+      const geometry = this.#mesh.geometry;
       geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
       // Explicitly tell three.js to send position and color buffers to the GPU

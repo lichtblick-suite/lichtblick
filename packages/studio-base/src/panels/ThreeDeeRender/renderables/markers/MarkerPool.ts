@@ -37,7 +37,7 @@ const CONSTRUCTORS = {
  * An object pool for RenderableMarker subclass objects.
  */
 export class MarkerPool {
-  private renderablesByType = new Map<MarkerType, RenderableMarker[]>();
+  #renderablesByType = new Map<MarkerType, RenderableMarker[]>();
 
   public constructor(private renderer: Renderer) {}
 
@@ -47,7 +47,7 @@ export class MarkerPool {
     marker: Marker,
     receiveTime: bigint | undefined,
   ): RenderableMarker {
-    const renderables = this.renderablesByType.get(type);
+    const renderables = this.#renderablesByType.get(type);
     if (renderables) {
       const renderable = renderables.pop();
       if (renderable) {
@@ -65,20 +65,20 @@ export class MarkerPool {
 
   public release(renderable: RenderableMarker): void {
     const type = renderable.userData.marker.type as MarkerType;
-    const renderables = this.renderablesByType.get(type);
+    const renderables = this.#renderablesByType.get(type);
     if (!renderables) {
-      this.renderablesByType.set(type, [renderable]);
+      this.#renderablesByType.set(type, [renderable]);
     } else {
       renderables.push(renderable);
     }
   }
 
   public dispose(): void {
-    for (const renderables of this.renderablesByType.values()) {
+    for (const renderables of this.#renderablesByType.values()) {
       for (const renderable of renderables) {
         renderable.dispose();
       }
     }
-    this.renderablesByType.clear();
+    this.#renderablesByType.clear();
   }
 }

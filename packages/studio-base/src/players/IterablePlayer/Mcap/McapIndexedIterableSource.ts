@@ -21,22 +21,22 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 const log = Logger.getLogger(__filename);
 
 export class McapIndexedIterableSource implements IIterableSource {
-  private reader: McapIndexedReader;
-  private channelInfoById = new Map<
+  #reader: McapIndexedReader;
+  #channelInfoById = new Map<
     number,
     { channel: McapTypes.Channel; parsedChannel: ParsedChannel; schemaName: string | undefined }
   >();
-  private start?: Time;
-  private end?: Time;
+  #start?: Time;
+  #end?: Time;
 
   public constructor(reader: McapIndexedReader) {
-    this.reader = reader;
+    this.#reader = reader;
   }
 
   public async initialize(): Promise<Initalization> {
     let startTime: bigint | undefined;
     let endTime: bigint | undefined;
-    for (const chunk of this.reader.chunkIndexes) {
+    for (const chunk of this.#reader.chunkIndexes) {
       if (startTime == undefined || chunk.messageStartTime < startTime) {
         startTime = chunk.messageStartTime;
       }
@@ -51,8 +51,8 @@ export class McapIndexedIterableSource implements IIterableSource {
     const problems: PlayerProblem[] = [];
     const publishersByTopic = new Map<string, Set<string>>();
 
-    for (const channel of this.reader.channelsById.values()) {
-      const schema = this.reader.schemasById.get(channel.schemaId);
+    for (const channel of this.#reader.channelsById.values()) {
+      const schema = this.#reader.schemasById.get(channel.schemaId);
       if (channel.schemaId !== 0 && schema == undefined) {
         problems.push({
           severity: "error",
@@ -72,14 +72,14 @@ export class McapIndexedIterableSource implements IIterableSource {
         });
         continue;
       }
-      this.channelInfoById.set(channel.id, { channel, parsedChannel, schemaName: schema?.name });
+      this.#channelInfoById.set(channel.id, { channel, parsedChannel, schemaName: schema?.name });
 
       let topic = topicsByName.get(channel.topic);
       if (!topic) {
         topic = { name: channel.topic, schemaName: schema?.name };
         topicsByName.set(channel.topic, topic);
 
-        const numMessages = this.reader.statistics?.channelMessageCounts.get(channel.id);
+        const numMessages = this.#reader.statistics?.channelMessageCounts.get(channel.id);
         if (numMessages != undefined) {
           topicStats.set(channel.topic, { numMessages: Number(numMessages) });
         }
@@ -102,15 +102,15 @@ export class McapIndexedIterableSource implements IIterableSource {
       }
     }
 
-    this.start = fromNanoSec(startTime ?? 0n);
-    this.end = fromNanoSec(endTime ?? startTime ?? 0n);
+    this.#start = fromNanoSec(startTime ?? 0n);
+    this.#end = fromNanoSec(endTime ?? startTime ?? 0n);
 
     return {
-      start: this.start,
-      end: this.end,
+      start: this.#start,
+      end: this.#end,
       topics: [...topicsByName.values()],
       datatypes,
-      profile: this.reader.header.profile,
+      profile: this.#reader.header.profile,
       problems,
       publishersByTopic,
       topicStats,
@@ -121,19 +121,19 @@ export class McapIndexedIterableSource implements IIterableSource {
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     const topics = args.topics;
-    const start = args.start ?? this.start;
-    const end = args.end ?? this.end;
+    const start = args.start ?? this.#start;
+    const end = args.end ?? this.#end;
 
     if (topics.length === 0 || !start || !end) {
       return;
     }
 
-    for await (const message of this.reader.readMessages({
+    for await (const message of this.#reader.readMessages({
       startTime: toNanoSec(start),
       endTime: toNanoSec(end),
       topics,
     })) {
-      const channelInfo = this.channelInfoById.get(message.channelId);
+      const channelInfo = this.#channelInfoById.get(message.channelId);
       if (!channelInfo) {
         yield {
           type: "problem",
@@ -179,12 +179,12 @@ export class McapIndexedIterableSource implements IIterableSource {
       // NOTE: An iterator is made for each topic to get the latest message on that topic.
       // An single iterator for all the topics could result in iterating through many
       // irrelevant messages to get to an older message on a topic.
-      for await (const message of this.reader.readMessages({
+      for await (const message of this.#reader.readMessages({
         endTime: toNanoSec(time),
         topics: [topic],
         reverse: true,
       })) {
-        const channelInfo = this.channelInfoById.get(message.channelId);
+        const channelInfo = this.#channelInfoById.get(message.channelId);
         if (!channelInfo) {
           log.error(`Missing channel info for channel: ${message.channelId} on topic: ${topic}`);
           continue;

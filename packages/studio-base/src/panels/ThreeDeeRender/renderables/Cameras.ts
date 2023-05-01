@@ -84,8 +84,8 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
   public constructor(renderer: IRenderer) {
     super("foxglove.Cameras", renderer);
 
-    renderer.addSchemaSubscriptions(ROS_CAMERA_INFO_DATATYPES, this.handleCameraInfo);
-    renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, this.handleCameraInfo);
+    renderer.addSchemaSubscriptions(ROS_CAMERA_INFO_DATATYPES, this.#handleCameraInfo);
+    renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, this.#handleCameraInfo);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -142,7 +142,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
         const settings = this.renderer.config.topics[topicName] as
           | Partial<LayerSettingsCameraInfo>
           | undefined;
-        this._updateCameraInfoRenderable(
+        this.#updateCameraInfoRenderable(
           renderable,
           cameraInfo,
           originalMessage,
@@ -153,7 +153,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     }
   };
 
-  private handleCameraInfo = (
+  #handleCameraInfo = (
     messageEvent: PartialMessageEvent<IncomingCameraInfo | CameraCalibration>,
   ): void => {
     const topic = messageEvent.topic;
@@ -189,7 +189,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
       this.renderables.set(topic, renderable);
     }
 
-    this._updateCameraInfoRenderable(
+    this.#updateCameraInfoRenderable(
       renderable,
       cameraInfo,
       messageEvent.message,
@@ -198,7 +198,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     );
   };
 
-  private _updateCameraInfoRenderable(
+  #updateCameraInfoRenderable(
     renderable: CameraInfoRenderable,
     cameraInfo: CameraInfo,
     originalMessage: Record<string, RosValue> | undefined,

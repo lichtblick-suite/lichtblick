@@ -37,7 +37,7 @@ const tempEuler = new THREE.Euler();
 const FOLLOW_TF_PATH = ["general", "followTf"];
 export class CameraStateSettings extends SceneExtension implements ICameraHandler {
   // The frameId's of the fixed and render frames used to create the current unfollowPoseSnapshot
-  private unfollowSnapshotFrameIds:
+  #unfollowSnapshotFrameIds:
     | {
         render: UserFrameId;
         fixed: UserFrameId;
@@ -48,77 +48,77 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
   // This is used to position and orient the camera from the fixed frame in the render frame
   public unfollowPoseSnapshot: Pose | undefined;
 
-  private controls: OrbitControls;
-  private isUpdatingCameraState = false;
-  private canvas: HTMLCanvasElement;
+  #controls: OrbitControls;
+  #isUpdatingCameraState = false;
+  #canvas: HTMLCanvasElement;
 
   // This group is used to transform the cameras based on the Frame follow mode
   // quaternion is affected in stationary and position-only follow modes
   // both position and quaternion of the group are affected in stationary mode
-  private cameraGroup: THREE.Group;
-  private perspectiveCamera: THREE.PerspectiveCamera;
-  private orthographicCamera: THREE.OrthographicCamera;
-  private aspect: number;
+  #cameraGroup: THREE.Group;
+  #perspectiveCamera: THREE.PerspectiveCamera;
+  #orthographicCamera: THREE.OrthographicCamera;
+  #aspect: number;
 
   public constructor(renderer: IRenderer, canvas: HTMLCanvasElement, aspect: number) {
     super("foxglove.CameraStateSettings", renderer);
 
     // for Frame settings, we need to listen to the transform tree to update settings when new possible display frames are present
-    renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
+    renderer.on("transformTreeUpdated", this.#handleTransformTreeUpdated);
 
-    renderer.on("cameraMove", this.handleCameraMove);
+    renderer.on("cameraMove", this.#handleCameraMove);
 
-    renderer.settings.errors.on("update", this.handleErrorChange);
-    renderer.settings.errors.on("clear", this.handleErrorChange);
-    renderer.settings.errors.on("remove", this.handleErrorChange);
+    renderer.settings.errors.on("update", this.#handleErrorChange);
+    renderer.settings.errors.on("clear", this.#handleErrorChange);
+    renderer.settings.errors.on("remove", this.#handleErrorChange);
 
-    this.canvas = canvas;
-    this.perspectiveCamera = new THREE.PerspectiveCamera();
-    this.orthographicCamera = new THREE.OrthographicCamera();
-    this.cameraGroup = new THREE.Group();
+    this.#canvas = canvas;
+    this.#perspectiveCamera = new THREE.PerspectiveCamera();
+    this.#orthographicCamera = new THREE.OrthographicCamera();
+    this.#cameraGroup = new THREE.Group();
 
-    this.cameraGroup.add(this.perspectiveCamera);
-    this.cameraGroup.add(this.orthographicCamera);
-    this.add(this.cameraGroup);
+    this.#cameraGroup.add(this.#perspectiveCamera);
+    this.#cameraGroup.add(this.#orthographicCamera);
+    this.add(this.#cameraGroup);
 
-    this.controls = new OrbitControls(this.perspectiveCamera, this.canvas);
-    this.controls.screenSpacePanning = false; // only allow panning in the XY plane
-    this.controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-    this.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-    this.controls.touches.ONE = THREE.TOUCH.PAN;
-    this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
-    this.controls.addEventListener("change", () => {
-      if (!this.isUpdatingCameraState) {
+    this.#controls = new OrbitControls(this.#perspectiveCamera, this.#canvas);
+    this.#controls.screenSpacePanning = false; // only allow panning in the XY plane
+    this.#controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    this.#controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
+    this.#controls.touches.ONE = THREE.TOUCH.PAN;
+    this.#controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+    this.#controls.addEventListener("change", () => {
+      if (!this.#isUpdatingCameraState) {
         renderer.emit("cameraMove", renderer);
       }
     });
 
     // Make the canvas able to receive keyboard events and setup WASD controls
     canvas.tabIndex = 1000;
-    this.aspect = aspect;
-    this.controls.keys = { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" };
-    this.controls.listenToKeyEvents(canvas);
+    this.#aspect = aspect;
+    this.#controls.keys = { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" };
+    this.#controls.listenToKeyEvents(canvas);
   }
 
   public override dispose(): void {
     // for camera settings
-    this.renderer.off("cameraMove", this.handleCameraMove);
+    this.renderer.off("cameraMove", this.#handleCameraMove);
 
     // for frame settings
-    this.renderer.off("transformTreeUpdated", this.handleTransformTreeUpdated);
+    this.renderer.off("transformTreeUpdated", this.#handleTransformTreeUpdated);
 
-    this.renderer.settings.errors.off("update", this.handleErrorChange);
-    this.renderer.settings.errors.off("clear", this.handleErrorChange);
-    this.renderer.settings.errors.off("remove", this.handleErrorChange);
+    this.renderer.settings.errors.off("update", this.#handleErrorChange);
+    this.renderer.settings.errors.off("clear", this.#handleErrorChange);
+    this.renderer.settings.errors.off("remove", this.#handleErrorChange);
 
     super.dispose();
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    return [this.cameraSettingsNode(), this.frameSettingsNode()];
+    return [this.#cameraSettingsNode(), this.#frameSettingsNode()];
   }
 
-  private cameraSettingsNode(): SettingsTreeEntry {
+  #cameraSettingsNode(): SettingsTreeEntry {
     const config = this.renderer.config;
     const { cameraState: camera } = config;
     const handler = this.handleSettingsAction;
@@ -198,7 +198,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     };
   }
 
-  private frameSettingsNode(): SettingsTreeEntry {
+  #frameSettingsNode(): SettingsTreeEntry {
     const config = this.renderer.config;
     const handler = this.handleSettingsAction;
 
@@ -330,14 +330,14 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       fixedFrameId === CoordinateFrame.FALLBACK_FRAME_ID ||
       renderFrameId === CoordinateFrame.FALLBACK_FRAME_ID
     ) {
-      this.unfollowSnapshotFrameIds = undefined;
+      this.#unfollowSnapshotFrameIds = undefined;
       this.unfollowPoseSnapshot = undefined;
-      this.cameraGroup.position.set(0, 0, 0);
-      this.cameraGroup.quaternion.set(0, 0, 0, 1);
+      this.#cameraGroup.position.set(0, 0, 0);
+      this.#cameraGroup.quaternion.set(0, 0, 0, 1);
       return;
     }
 
-    const poseSnapshot = this.getUnfollowPoseSnapshot(fixedFrameId, renderFrameId, currentTime);
+    const poseSnapshot = this.#getUnfollowPoseSnapshot(fixedFrameId, renderFrameId, currentTime);
 
     const transformTree = this.renderer.transformTree;
 
@@ -367,16 +367,16 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       if (followMode === "follow-position") {
         // only make orientation static/stationary in this mode
         // the position still follows the frame
-        this.cameraGroup.position.set(0, 0, 0);
+        this.#cameraGroup.position.set(0, 0, 0);
       } else {
-        this.cameraGroup.position.set(
+        this.#cameraGroup.position.set(
           snapshotInRenderFrame.position.x,
           snapshotInRenderFrame.position.y,
           snapshotInRenderFrame.position.z,
         );
       }
       // this negates the rotation of the changes in renderFrame
-      this.cameraGroup.quaternion.set(
+      this.#cameraGroup.quaternion.set(
         snapshotInRenderFrame.orientation.x,
         snapshotInRenderFrame.orientation.y,
         snapshotInRenderFrame.orientation.z,
@@ -385,26 +385,22 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     }
   }
 
-  private handleCameraMove = (): void => {
+  #handleCameraMove = (): void => {
     this.updateSettingsTree();
   };
-  private handleTransformTreeUpdated = (): void => {
+  #handleTransformTreeUpdated = (): void => {
     this.updateSettingsTree();
   };
-  private handleErrorChange = (): void => {
+  #handleErrorChange = (): void => {
     this.updateSettingsTree();
   };
 
   // Redefine follow pose snapshot whenever renderFrame or fixedFrame changes
-  private getUnfollowPoseSnapshot(
-    fixedFrameId: string,
-    renderFrameId: string,
-    currentTime: bigint,
-  ) {
+  #getUnfollowPoseSnapshot(fixedFrameId: string, renderFrameId: string, currentTime: bigint) {
     const transformTree = this.renderer.transformTree;
     if (
-      this.unfollowSnapshotFrameIds?.fixed !== fixedFrameId ||
-      this.unfollowSnapshotFrameIds.render !== renderFrameId
+      this.#unfollowSnapshotFrameIds?.fixed !== fixedFrameId ||
+      this.#unfollowSnapshotFrameIds.render !== renderFrameId
     ) {
       this.unfollowPoseSnapshot = makePose();
       // record the pose of the center of the render frame in fixed frame into the snapshot
@@ -417,7 +413,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
         currentTime,
         currentTime,
       );
-      this.unfollowSnapshotFrameIds = {
+      this.#unfollowSnapshotFrameIds = {
         fixed: fixedFrameId,
         render: renderFrameId,
       };
@@ -427,12 +423,12 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
 
   public getActiveCamera(): THREE.PerspectiveCamera | THREE.OrthographicCamera {
     return this.renderer.config.cameraState.perspective
-      ? this.perspectiveCamera
-      : this.orthographicCamera;
+      ? this.#perspectiveCamera
+      : this.#orthographicCamera;
   }
 
   public handleResize(width: number, height: number, _pixelRatio: number): void {
-    this.aspect = width / height;
+    this.#aspect = width / height;
     this.setCameraState(this.renderer.config.cameraState);
   }
 
@@ -440,10 +436,10 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     const config = this.renderer.config;
     return {
       perspective: config.cameraState.perspective,
-      distance: this.controls.getDistance(),
-      phi: THREE.MathUtils.radToDeg(this.controls.getPolarAngle()),
-      thetaOffset: THREE.MathUtils.radToDeg(-this.controls.getAzimuthalAngle()),
-      targetOffset: [this.controls.target.x, this.controls.target.y, this.controls.target.z],
+      distance: this.#controls.getDistance(),
+      phi: THREE.MathUtils.radToDeg(this.#controls.getPolarAngle()),
+      thetaOffset: THREE.MathUtils.radToDeg(-this.#controls.getAzimuthalAngle()),
+      targetOffset: [this.#controls.target.x, this.#controls.target.y, this.#controls.target.z],
       target: config.cameraState.target,
       targetOrientation: config.cameraState.targetOrientation,
       fovy: config.cameraState.fovy,
@@ -453,18 +449,18 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
   }
 
   public setCameraState(cameraState: CameraState): void {
-    this.isUpdatingCameraState = true;
-    this._updateCameras(cameraState);
+    this.#isUpdatingCameraState = true;
+    this.#updateCameras(cameraState);
     // only active for follow pose mode because it introduces strange behavior into the other modes
     // due to the fact that they are manipulating the camera after update with the `cameraGroup`
     if (this.renderer.config.followMode === "follow-pose") {
-      this.controls.update();
+      this.#controls.update();
     }
-    this.isUpdatingCameraState = false;
+    this.#isUpdatingCameraState = false;
   }
 
   /** Translate a CameraState to the three.js coordinate system */
-  private _updateCameras(cameraState: CameraState): void {
+  #updateCameras(cameraState: CameraState): void {
     const targetOffset = tempVec3;
     const config = this.renderer.config;
     targetOffset.fromArray(cameraState.targetOffset);
@@ -478,37 +474,37 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
 
     // Convert the camera spherical coordinates (radius, phi, theta) to Cartesian (X, Y, Z)
     tempSpherical.set(cameraState.distance, phi, theta);
-    this.perspectiveCamera.position.setFromSpherical(tempSpherical).applyAxisAngle(UNIT_X, PI_2);
-    this.perspectiveCamera.position.add(targetOffset);
+    this.#perspectiveCamera.position.setFromSpherical(tempSpherical).applyAxisAngle(UNIT_X, PI_2);
+    this.#perspectiveCamera.position.add(targetOffset);
 
     // Convert the camera spherical coordinates (phi, theta) to a quaternion rotation
-    this.perspectiveCamera.quaternion.setFromEuler(tempEuler.set(phi, 0, theta, "ZYX"));
-    this.perspectiveCamera.fov = cameraState.fovy;
-    this.perspectiveCamera.near = cameraState.near;
-    this.perspectiveCamera.far = cameraState.far;
-    this.perspectiveCamera.aspect = this.aspect;
-    this.perspectiveCamera.updateProjectionMatrix();
+    this.#perspectiveCamera.quaternion.setFromEuler(tempEuler.set(phi, 0, theta, "ZYX"));
+    this.#perspectiveCamera.fov = cameraState.fovy;
+    this.#perspectiveCamera.near = cameraState.near;
+    this.#perspectiveCamera.far = cameraState.far;
+    this.#perspectiveCamera.aspect = this.#aspect;
+    this.#perspectiveCamera.updateProjectionMatrix();
 
-    this.controls.target.copy(targetOffset);
+    this.#controls.target.copy(targetOffset);
 
     if (cameraState.perspective) {
       // Unlock the polar angle (pitch axis)
-      this.controls.minPolarAngle = 0;
-      this.controls.maxPolarAngle = Math.PI;
+      this.#controls.minPolarAngle = 0;
+      this.#controls.maxPolarAngle = Math.PI;
     } else {
       // Lock the polar angle during 2D mode
       const curPolarAngle = THREE.MathUtils.degToRad(config.cameraState.phi);
-      this.controls.minPolarAngle = this.controls.maxPolarAngle = curPolarAngle;
+      this.#controls.minPolarAngle = this.#controls.maxPolarAngle = curPolarAngle;
 
-      this.orthographicCamera.position.set(targetOffset.x, targetOffset.y, cameraState.far / 2);
-      this.orthographicCamera.quaternion.setFromAxisAngle(UNIT_Z, theta);
-      this.orthographicCamera.left = (-cameraState.distance / 2) * this.aspect;
-      this.orthographicCamera.right = (cameraState.distance / 2) * this.aspect;
-      this.orthographicCamera.top = cameraState.distance / 2;
-      this.orthographicCamera.bottom = -cameraState.distance / 2;
-      this.orthographicCamera.near = cameraState.near;
-      this.orthographicCamera.far = cameraState.far;
-      this.orthographicCamera.updateProjectionMatrix();
+      this.#orthographicCamera.position.set(targetOffset.x, targetOffset.y, cameraState.far / 2);
+      this.#orthographicCamera.quaternion.setFromAxisAngle(UNIT_Z, theta);
+      this.#orthographicCamera.left = (-cameraState.distance / 2) * this.#aspect;
+      this.#orthographicCamera.right = (cameraState.distance / 2) * this.#aspect;
+      this.#orthographicCamera.top = cameraState.distance / 2;
+      this.#orthographicCamera.bottom = -cameraState.distance / 2;
+      this.#orthographicCamera.near = cameraState.near;
+      this.#orthographicCamera.far = cameraState.far;
+      this.#orthographicCamera.updateProjectionMatrix();
     }
   }
 }

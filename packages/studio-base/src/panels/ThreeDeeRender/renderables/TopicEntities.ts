@@ -52,7 +52,7 @@ const PRIMITIVE_KEYS = {
 
 export class TopicEntities extends Renderable<EntityTopicUserData> {
   public override pickable = false;
-  private renderablesById = new Map<string, EntityRenderables>();
+  #renderablesById = new Map<string, EntityRenderables>();
 
   public constructor(
     name: string,
@@ -65,12 +65,12 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
 
   public override dispose(): void {
     this.children.length = 0;
-    this._deleteAllEntities();
+    this.#deleteAllEntities();
   }
 
   public updateSettings(): void {
     // Updates each individual primitive renderable using the current topic settings
-    for (const renderables of this.renderablesById.values()) {
+    for (const renderables of this.#renderablesById.values()) {
       for (const renderable of Object.values(renderables)) {
         renderable.updateSettings(this.userData.settings);
       }
@@ -78,7 +78,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
   }
 
   public setColorScheme(colorScheme: "dark" | "light"): void {
-    for (const renderables of this.renderablesById.values()) {
+    for (const renderables of this.#renderablesById.values()) {
       for (const renderable of Object.values(renderables)) {
         renderable.setColorScheme(colorScheme);
       }
@@ -92,7 +92,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
       return;
     }
 
-    for (const renderables of this.renderablesById.values()) {
+    for (const renderables of this.#renderablesById.values()) {
       for (const renderable of Object.values(renderables)) {
         const entity = renderable.userData.entity;
         if (!entity) {
@@ -102,7 +102,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
         // Check if this entity has expired
         const expiresAt = renderable.userData.expiresAt;
         if (expiresAt != undefined && currentTime > expiresAt) {
-          this._deleteEntity(entity.id);
+          this.#deleteEntity(entity.id);
           break;
         }
 
@@ -130,10 +130,10 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
   }
 
   public addOrUpdateEntity(entity: SceneEntity, receiveTime: bigint): void {
-    let renderables = this.renderablesById.get(entity.id);
+    let renderables = this.#renderablesById.get(entity.id);
     if (!renderables) {
       renderables = {};
-      this.renderablesById.set(entity.id, renderables);
+      this.#renderablesById.set(entity.id, renderables);
     }
 
     for (const primitiveType of ALL_PRIMITIVE_TYPES) {
@@ -161,10 +161,10 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
   public deleteEntities(deletion: SceneEntityDeletion): void {
     switch (deletion.type) {
       case SceneEntityDeletionType.MATCHING_ID:
-        this._deleteEntity(deletion.id);
+        this.#deleteEntity(deletion.id);
         break;
       case SceneEntityDeletionType.ALL:
-        this._deleteAllEntities();
+        this.#deleteAllEntities();
         break;
       default:
         // Unknown action
@@ -176,7 +176,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
     }
   }
 
-  private _removeRenderables(renderables: EntityRenderables): void {
+  #removeRenderables(renderables: EntityRenderables): void {
     for (const [primitiveType, primitive] of Object.entries(renderables) as [
       PrimitiveType,
       EntityRenderables[PrimitiveType],
@@ -188,18 +188,18 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
     }
   }
 
-  private _deleteEntity(id: string) {
-    const renderables = this.renderablesById.get(id);
+  #deleteEntity(id: string) {
+    const renderables = this.#renderablesById.get(id);
     if (renderables) {
-      this._removeRenderables(renderables);
+      this.#removeRenderables(renderables);
     }
-    this.renderablesById.delete(id);
+    this.#renderablesById.delete(id);
   }
 
-  private _deleteAllEntities() {
-    for (const renderables of this.renderablesById.values()) {
-      this._removeRenderables(renderables);
+  #deleteAllEntities() {
+    for (const renderables of this.#renderablesById.values()) {
+      this.#removeRenderables(renderables);
     }
-    this.renderablesById.clear();
+    this.#renderablesById.clear();
   }
 }

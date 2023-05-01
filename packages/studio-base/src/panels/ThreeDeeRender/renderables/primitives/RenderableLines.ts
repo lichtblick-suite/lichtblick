@@ -20,20 +20,20 @@ import { LayerSettingsEntity } from "../../settings";
 const tempRgba = makeRgba();
 
 export class RenderableLines extends RenderablePrimitive {
-  private _lines: LineSegments2[] = [];
+  #lines: LineSegments2[] = [];
   public constructor(renderer: IRenderer) {
     super("", renderer);
   }
 
-  private _updateLines(lines: LinePrimitive[]) {
+  #updateLines(lines: LinePrimitive[]) {
     this.clear();
-    this._lines.length = 0;
+    this.#lines.length = 0;
 
     for (const primitive of lines) {
       if (primitive.points.length === 0) {
         continue;
       }
-      const line = this._makeLine(primitive);
+      const line = this.#makeLine(primitive);
       const group = new THREE.Group().add(line);
       group.position.set(
         primitive.pose.position.x,
@@ -47,11 +47,11 @@ export class RenderableLines extends RenderablePrimitive {
         primitive.pose.orientation.w,
       );
       this.add(group);
-      this._lines.push(line);
+      this.#lines.push(line);
     }
   }
 
-  private _makeLine(primitive: LinePrimitive) {
+  #makeLine(primitive: LinePrimitive) {
     let geometry: LineSegmentsGeometry;
     const isSegments = primitive.type === LineType.LINE_LIST;
     const isLoop = primitive.type === LineType.LINE_LOOP;
@@ -154,7 +154,7 @@ export class RenderableLines extends RenderablePrimitive {
   }
 
   public override dispose(): void {
-    for (const line of this._lines) {
+    for (const line of this.#lines) {
       line.geometry.dispose();
       line.material.dispose();
       line.userData.pickingMaterial.dispose();
@@ -171,7 +171,7 @@ export class RenderableLines extends RenderablePrimitive {
     if (entity) {
       const lifetimeNs = toNanoSec(entity.lifetime);
       this.userData.expiresAt = lifetimeNs === 0n ? undefined : receiveTime + lifetimeNs;
-      this._updateLines(entity.lines);
+      this.#updateLines(entity.lines);
     }
   }
 

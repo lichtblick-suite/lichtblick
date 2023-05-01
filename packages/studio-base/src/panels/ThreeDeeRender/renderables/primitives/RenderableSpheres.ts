@@ -21,10 +21,10 @@ const tempQuat = new THREE.Quaternion();
 const tempRgba = makeRgba();
 
 export class RenderableSpheres extends RenderablePrimitive {
-  private geometry: THREE.SphereGeometry;
-  private mesh: THREE.InstancedMesh<THREE.SphereGeometry, MeshStandardMaterialWithInstanceOpacity>;
-  private instanceOpacity: THREE.InstancedBufferAttribute;
-  private material = new MeshStandardMaterialWithInstanceOpacity({
+  #geometry: THREE.SphereGeometry;
+  #mesh: THREE.InstancedMesh<THREE.SphereGeometry, MeshStandardMaterialWithInstanceOpacity>;
+  #instanceOpacity: THREE.InstancedBufferAttribute;
+  #material = new MeshStandardMaterialWithInstanceOpacity({
     metalness: 0,
     roughness: 1,
     dithering: true,
@@ -34,47 +34,47 @@ export class RenderableSpheres extends RenderablePrimitive {
    * The initial count passed to `mesh`'s constructor, i.e. the maximum number of instances it can
    * render before we need to create a new mesh object
    */
-  private maxInstances: number;
+  #maxInstances: number;
 
   public constructor(renderer: IRenderer) {
     super("", renderer);
 
     // Sphere mesh
-    this.geometry = renderer.sharedGeometry
+    this.#geometry = renderer.sharedGeometry
       .getGeometry(this.constructor.name, createGeometry)
       .clone() as THREE.SphereGeometry;
-    this.maxInstances = 16;
-    this.mesh = new THREE.InstancedMesh(this.geometry, this.material, this.maxInstances);
-    this.instanceOpacity = new THREE.InstancedBufferAttribute(
-      new Float32Array(this.maxInstances),
+    this.#maxInstances = 16;
+    this.#mesh = new THREE.InstancedMesh(this.#geometry, this.#material, this.#maxInstances);
+    this.#instanceOpacity = new THREE.InstancedBufferAttribute(
+      new Float32Array(this.#maxInstances),
       1,
     );
-    this.geometry.setAttribute("instanceOpacity", this.instanceOpacity);
-    this.mesh.count = 0;
-    this.add(this.mesh);
+    this.#geometry.setAttribute("instanceOpacity", this.#instanceOpacity);
+    this.#mesh.count = 0;
+    this.add(this.#mesh);
   }
 
-  private _ensureCapacity(numInstances: number) {
-    if (numInstances > this.maxInstances) {
+  #ensureCapacity(numInstances: number) {
+    if (numInstances > this.#maxInstances) {
       const newCapacity = Math.trunc(numInstances * 1.5) + 16;
-      this.maxInstances = newCapacity;
+      this.#maxInstances = newCapacity;
 
-      this.mesh.removeFromParent();
-      this.mesh.dispose();
-      this.mesh = new THREE.InstancedMesh(this.mesh.geometry, this.material, this.maxInstances);
-      this.instanceOpacity = new THREE.InstancedBufferAttribute(
-        new Float32Array(this.maxInstances),
+      this.#mesh.removeFromParent();
+      this.#mesh.dispose();
+      this.#mesh = new THREE.InstancedMesh(this.#mesh.geometry, this.#material, this.#maxInstances);
+      this.#instanceOpacity = new THREE.InstancedBufferAttribute(
+        new Float32Array(this.#maxInstances),
         1,
       );
-      this.geometry.setAttribute("instanceOpacity", this.instanceOpacity);
-      this.add(this.mesh);
+      this.#geometry.setAttribute("instanceOpacity", this.#instanceOpacity);
+      this.add(this.#mesh);
     }
   }
 
-  private _updateMesh(spheres: SpherePrimitive[]) {
+  #updateMesh(spheres: SpherePrimitive[]) {
     let isTransparent = false;
 
-    this._ensureCapacity(spheres.length);
+    this.#ensureCapacity(spheres.length);
 
     const overrideColor = this.userData.settings.color
       ? stringToRgba(tempRgba, this.userData.settings.color)
@@ -86,9 +86,9 @@ export class RenderableSpheres extends RenderablePrimitive {
       if (color.a < 1) {
         isTransparent = true;
       }
-      this.mesh.setColorAt(i, rgbToThreeColor(tempColor, color));
-      this.instanceOpacity.setX(i, color.a);
-      this.mesh.setMatrixAt(
+      this.#mesh.setColorAt(i, rgbToThreeColor(tempColor, color));
+      this.#instanceOpacity.setX(i, color.a);
+      this.#mesh.setMatrixAt(
         i,
         tempMat4.compose(
           tempVec3.set(sphere.pose.position.x, sphere.pose.position.y, sphere.pose.position.z),
@@ -104,30 +104,30 @@ export class RenderableSpheres extends RenderablePrimitive {
       i++;
     }
 
-    if (this.material.transparent !== isTransparent) {
-      this.material.transparent = isTransparent;
-      this.material.depthWrite = !isTransparent;
-      this.material.needsUpdate = true;
+    if (this.#material.transparent !== isTransparent) {
+      this.#material.transparent = isTransparent;
+      this.#material.depthWrite = !isTransparent;
+      this.#material.needsUpdate = true;
     }
 
-    if (this.mesh.count === 0 && spheres.length > 0) {
+    if (this.#mesh.count === 0 && spheres.length > 0) {
       // needed to make colors work: https://discourse.threejs.org/t/instancedmesh-color-doesnt-work-when-initial-count-is-0/41355
-      this.material.needsUpdate = true;
+      this.#material.needsUpdate = true;
     }
-    this.mesh.count = spheres.length;
-    this.mesh.instanceMatrix.needsUpdate = true;
-    this.instanceOpacity.needsUpdate = true;
+    this.#mesh.count = spheres.length;
+    this.#mesh.instanceMatrix.needsUpdate = true;
+    this.#instanceOpacity.needsUpdate = true;
 
     // may be null if we were initialized with count 0 and still have 0 spheres
-    if (this.mesh.instanceColor) {
-      this.mesh.instanceColor.needsUpdate = true;
+    if (this.#mesh.instanceColor) {
+      this.#mesh.instanceColor.needsUpdate = true;
     }
   }
 
   public override dispose(): void {
-    this.mesh.dispose();
-    this.geometry.dispose();
-    this.material.dispose();
+    this.#mesh.dispose();
+    this.#geometry.dispose();
+    this.#material.dispose();
   }
 
   public override update(
@@ -140,7 +140,7 @@ export class RenderableSpheres extends RenderablePrimitive {
     if (entity) {
       const lifetimeNs = toNanoSec(entity.lifetime);
       this.userData.expiresAt = lifetimeNs === 0n ? undefined : receiveTime + lifetimeNs;
-      this._updateMesh(entity.spheres);
+      this.#updateMesh(entity.spheres);
     }
   }
 

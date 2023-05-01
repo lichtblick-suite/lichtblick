@@ -12,8 +12,8 @@ import { cylinderSubdivisions, DetailLevel } from "../../lod";
 import { Marker } from "../../ros";
 
 export class RenderableCylinder extends RenderableMarker {
-  private mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
-  private outline: THREE.LineSegments;
+  #mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
+  #outline: THREE.LineSegments;
 
   public constructor(
     topic: string,
@@ -29,25 +29,25 @@ export class RenderableCylinder extends RenderableMarker {
       `${this.constructor.name}-cylinder-${renderer.maxLod}`,
       () => createGeometry(renderer.maxLod),
     );
-    this.mesh = new THREE.Mesh(cylinderGeometry, material);
-    this.mesh.castShadow = true;
-    this.mesh.receiveShadow = true;
-    this.add(this.mesh);
+    this.#mesh = new THREE.Mesh(cylinderGeometry, material);
+    this.#mesh.castShadow = true;
+    this.#mesh.receiveShadow = true;
+    this.add(this.#mesh);
 
     // Cylinder outline
     const edgesGeometry = renderer.sharedGeometry.getGeometry(
       `${this.constructor.name}-edges-${renderer.maxLod}`,
       () => createEdgesGeometry(cylinderGeometry),
     );
-    this.outline = new THREE.LineSegments(edgesGeometry, renderer.outlineMaterial);
-    this.outline.userData.picking = false;
-    this.mesh.add(this.outline);
+    this.#outline = new THREE.LineSegments(edgesGeometry, renderer.outlineMaterial);
+    this.#outline.userData.picking = false;
+    this.#mesh.add(this.#outline);
 
     this.update(marker, receiveTime);
   }
 
   public override dispose(): void {
-    this.mesh.material.dispose();
+    this.#mesh.material.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
@@ -55,16 +55,16 @@ export class RenderableCylinder extends RenderableMarker {
     const marker = this.userData.marker;
 
     const transparent = marker.color.a < 1;
-    if (transparent !== this.mesh.material.transparent) {
-      this.mesh.material.transparent = transparent;
-      this.mesh.material.depthWrite = !transparent;
-      this.mesh.material.needsUpdate = true;
+    if (transparent !== this.#mesh.material.transparent) {
+      this.#mesh.material.transparent = transparent;
+      this.#mesh.material.depthWrite = !transparent;
+      this.#mesh.material.needsUpdate = true;
     }
 
-    this.outline.visible = this.getSettings()?.showOutlines ?? true;
+    this.#outline.visible = this.getSettings()?.showOutlines ?? true;
 
-    rgbToThreeColor(this.mesh.material.color, marker.color);
-    this.mesh.material.opacity = marker.color.a;
+    rgbToThreeColor(this.#mesh.material.color, marker.color);
+    this.#mesh.material.opacity = marker.color.a;
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }

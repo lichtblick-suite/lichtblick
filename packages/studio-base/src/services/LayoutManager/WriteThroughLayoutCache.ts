@@ -12,12 +12,12 @@ import { ILayoutStorage, Layout, LayoutID } from "@foxglove/studio-base/services
  * For this to be useful, we must assume nothing else is accessing the same underlying storage.
  */
 export default class WriteThroughLayoutCache implements ILayoutStorage {
-  private cacheByNamespace = new Map<string, LazilyInitialized<Map<string, Layout>>>();
+  #cacheByNamespace = new Map<string, LazilyInitialized<Map<string, Layout>>>();
 
   public constructor(private storage: ILayoutStorage) {}
 
-  private getOrCreateCache(namespace: string): LazilyInitialized<Map<string, Layout>> {
-    let cache = this.cacheByNamespace.get(namespace);
+  #getOrCreateCache(namespace: string): LazilyInitialized<Map<string, Layout>> {
+    let cache = this.#cacheByNamespace.get(namespace);
     if (!cache) {
       cache = new LazilyInitialized(
         async () =>
@@ -25,7 +25,7 @@ export default class WriteThroughLayoutCache implements ILayoutStorage {
             .list(namespace)
             .then((layouts) => new Map(layouts.map((layout) => [layout.id, layout]))),
       );
-      this.cacheByNamespace.set(namespace, cache);
+      this.#cacheByNamespace.set(namespace, cache);
     }
     return cache;
   }
@@ -42,21 +42,21 @@ export default class WriteThroughLayoutCache implements ILayoutStorage {
   }
 
   public async list(namespace: string): Promise<readonly Layout[]> {
-    return Array.from((await this.getOrCreateCache(namespace).get()).values());
+    return Array.from((await this.#getOrCreateCache(namespace).get()).values());
   }
 
   public async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
-    return (await this.getOrCreateCache(namespace).get()).get(id);
+    return (await this.#getOrCreateCache(namespace).get()).get(id);
   }
 
   public async put(namespace: string, layout: Layout): Promise<Layout> {
     const result = await this.storage.put(namespace, layout);
-    (await this.getOrCreateCache(namespace).get()).set(result.id, result);
+    (await this.#getOrCreateCache(namespace).get()).set(result.id, result);
     return result;
   }
 
   public async delete(namespace: string, id: LayoutID): Promise<void> {
     await this.storage.delete(namespace, id);
-    (await this.getOrCreateCache(namespace).get()).delete(id);
+    (await this.#getOrCreateCache(namespace).get()).delete(id);
   }
 }

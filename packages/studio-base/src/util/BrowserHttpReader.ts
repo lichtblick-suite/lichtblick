@@ -17,10 +17,10 @@ import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 // A file reader that reads from a remote HTTP URL, for usage in the browser (not for node.js).
 export default class BrowserHttpReader implements FileReader {
-  private _url: string;
+  #url: string;
 
   public constructor(url: string) {
-    this._url = url;
+    this.#url = url;
   }
 
   public async open(): Promise<{ size: number; identifier?: string }> {
@@ -36,7 +36,7 @@ export default class BrowserHttpReader implements FileReader {
       // it may add a `range` header to the request, which causes some servers to omit the
       // `accept-ranges` header in the response.
       const controller = new AbortController();
-      response = await fetch(this._url, { signal: controller.signal, cache: "no-store" });
+      response = await fetch(this.#url, { signal: controller.signal, cache: "no-store" });
       controller.abort();
     } catch (error) {
       let errMsg = `Fetching remote file failed. ${error}`;
@@ -50,7 +50,7 @@ export default class BrowserHttpReader implements FileReader {
     }
     if (!response.ok) {
       throw new Error(
-        `Fetching remote file failed. <${this._url}> Status code: ${response.status}.`,
+        `Fetching remote file failed. <${this.#url}> Status code: ${response.status}.`,
       );
     }
     if (response.headers.get("accept-ranges") !== "bytes") {
@@ -66,7 +66,7 @@ export default class BrowserHttpReader implements FileReader {
     }
     const size = response.headers.get("content-length");
     if (size == undefined) {
-      throw new Error(`Remote file is missing file size. <${this._url}>`);
+      throw new Error(`Remote file is missing file size. <${this.#url}>`);
     }
     return {
       size: parseInt(size),
@@ -77,7 +77,7 @@ export default class BrowserHttpReader implements FileReader {
 
   public fetch(offset: number, length: number): FileStream {
     const headers = new Headers({ range: `bytes=${offset}-${offset + (length - 1)}` });
-    const reader = new FetchReader(this._url, { headers });
+    const reader = new FetchReader(this.#url, { headers });
     reader.read();
     return reader;
   }

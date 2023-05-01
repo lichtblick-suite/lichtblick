@@ -8,18 +8,18 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
   private static KEY_PREFIX = "studio.app-configuration.";
 
   /** Default values for app configuration items which have never been set by a user */
-  private defaults?: { [key: string]: AppConfigurationValue };
+  #defaults?: { [key: string]: AppConfigurationValue };
 
-  private changeListeners = new Map<string, Set<ChangeHandler>>();
+  #changeListeners = new Map<string, Set<ChangeHandler>>();
 
   public constructor({ defaults }: { defaults?: { [key: string]: AppConfigurationValue } }) {
-    this.defaults = defaults;
+    this.#defaults = defaults;
   }
 
   public get(key: string): AppConfigurationValue {
     const value = localStorage.getItem(LocalStorageAppConfiguration.KEY_PREFIX + key);
     try {
-      return value == undefined ? this.defaults?.[key] : JSON.parse(value);
+      return value == undefined ? this.#defaults?.[key] : JSON.parse(value);
     } catch {
       return undefined;
     }
@@ -33,7 +33,7 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
         JSON.stringify(value) ?? "",
       );
     }
-    const listeners = this.changeListeners.get(key);
+    const listeners = this.#changeListeners.get(key);
     if (listeners) {
       // Copy the list of listeners to protect against mutation during iteration
       [...listeners].forEach((listener) => listener(value));
@@ -41,16 +41,16 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
   }
 
   public addChangeListener(key: string, cb: ChangeHandler): void {
-    let listeners = this.changeListeners.get(key);
+    let listeners = this.#changeListeners.get(key);
     if (!listeners) {
       listeners = new Set();
-      this.changeListeners.set(key, listeners);
+      this.#changeListeners.set(key, listeners);
     }
     listeners.add(cb);
   }
 
   public removeChangeListener(key: string, cb: ChangeHandler): void {
-    const listeners = this.changeListeners.get(key);
+    const listeners = this.#changeListeners.get(key);
     if (listeners) {
       listeners.delete(cb);
     }

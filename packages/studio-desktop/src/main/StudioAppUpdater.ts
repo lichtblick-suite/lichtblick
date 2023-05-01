@@ -33,13 +33,13 @@ type EventTypes = {
 };
 
 class StudioAppUpdater extends EventEmitter<EventTypes> {
-  private started: boolean = false;
+  #started: boolean = false;
   // Seconds to wait after app startup to check and download updates.
   // This gives the user time to disable app updates for new installations
-  private initialUpdateDelaySec = 60 * 10;
+  #initialUpdateDelaySec = 60 * 10;
 
   // Seconds to wait after an update check completes before starting a new check
-  private updateCheckIntervalSec = 60 * 60;
+  #updateCheckIntervalSec = 60 * 60;
 
   public canCheckForUpdates(): boolean {
     // Updates are disabled by default in dev mode
@@ -50,16 +50,16 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
    * Start the update process.
    */
   public start(): void {
-    if (this.started) {
+    if (this.#started) {
       log.info(`StudioAppUpdater already running`);
       return;
     }
-    this.started = true;
+    this.#started = true;
 
     log.info(`Starting update loop`);
     setTimeout(() => {
-      void this.maybeCheckForUpdates();
-    }, this.initialUpdateDelaySec * 1000);
+      void this.#maybeCheckForUpdates();
+    }, this.#initialUpdateDelaySec * 1000);
   }
 
   public async checkNow(): Promise<void> {
@@ -96,7 +96,7 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
   // Check for updates and download.
   //
   // When using the "default" update mode, the app will continue to check for updates periodically
-  private async maybeCheckForUpdates(): Promise<void> {
+  async #maybeCheckForUpdates(): Promise<void> {
     try {
       // The user may have changed the app update setting so we load it again
       const appUpdatesEnabled = getAppSetting<boolean>(AppSetting.UPDATES_ENABLED);
@@ -113,8 +113,8 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
       }
     } finally {
       setTimeout(() => {
-        void this.maybeCheckForUpdates();
-      }, this.updateCheckIntervalSec * 1000);
+        void this.#maybeCheckForUpdates();
+      }, this.#updateCheckIntervalSec * 1000);
     }
   }
 

@@ -118,14 +118,14 @@ function fixTicks(args: RpcUpdateEvent): RpcUpdateEvent {
 // Since we use a capped number of web-workers, a single web-worker may be running multiple chartjs instances
 // The ChartJsWorkerMux forwards an rpc request for a specific chartjs instance id to the appropriate instance
 export default class ChartJsMux {
-  private readonly _rpc: Rpc;
-  private readonly _managers = new Map<string, ChartJSManager>();
+  readonly #rpc: Rpc;
+  readonly #managers = new Map<string, ChartJSManager>();
 
   public constructor(rpc: Rpc) {
-    this._rpc = rpc;
+    this.#rpc = rpc;
 
     if (typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope) {
-      setupWorker(this._rpc);
+      setupWorker(this.#rpc);
     }
 
     // create a new chartjs instance
@@ -133,47 +133,47 @@ export default class ChartJsMux {
     rpc.receive("initialize", (args: InitOpts) => {
       args.fontLoaded = fontLoaded;
       const manager = new ChartJSManager(args);
-      this._managers.set(args.id, manager);
+      this.#managers.set(args.id, manager);
       return manager.getScales();
     });
-    rpc.receive("wheel", (args: RpcEvent<WheelEvent>) => this._getChart(args.id).wheel(args.event));
+    rpc.receive("wheel", (args: RpcEvent<WheelEvent>) => this.#getChart(args.id).wheel(args.event));
     rpc.receive("mousedown", (args: RpcEvent<MouseEvent>) =>
-      this._getChart(args.id).mousedown(args.event),
+      this.#getChart(args.id).mousedown(args.event),
     );
     rpc.receive("mousemove", (args: RpcEvent<MouseEvent>) =>
-      this._getChart(args.id).mousemove(args.event),
+      this.#getChart(args.id).mousemove(args.event),
     );
     rpc.receive("mouseup", (args: RpcEvent<MouseEvent>) =>
-      this._getChart(args.id).mouseup(args.event),
+      this.#getChart(args.id).mouseup(args.event),
     );
     rpc.receive("panstart", (args: RpcEvent<HammerInput>) =>
-      this._getChart(args.id).panstart(args.event),
+      this.#getChart(args.id).panstart(args.event),
     );
     rpc.receive("panend", (args: RpcEvent<HammerInput>) =>
-      this._getChart(args.id).panend(args.event),
+      this.#getChart(args.id).panend(args.event),
     );
     rpc.receive("panmove", (args: RpcEvent<HammerInput>) =>
-      this._getChart(args.id).panmove(args.event),
+      this.#getChart(args.id).panmove(args.event),
     );
 
-    rpc.receive("update", (args: RpcUpdateEvent) => this._getChart(args.id).update(fixTicks(args)));
+    rpc.receive("update", (args: RpcUpdateEvent) => this.#getChart(args.id).update(fixTicks(args)));
     rpc.receive("destroy", (args: RpcEvent<void>) => {
-      const manager = this._managers.get(args.id);
+      const manager = this.#managers.get(args.id);
       if (manager) {
         manager.destroy();
-        this._managers.delete(args.id);
+        this.#managers.delete(args.id);
       }
     });
     rpc.receive("getElementsAtEvent", (args: RpcEvent<MouseEvent>) =>
-      this._getChart(args.id).getElementsAtEvent(args),
+      this.#getChart(args.id).getElementsAtEvent(args),
     );
     rpc.receive("getDatalabelAtEvent", (args: RpcEvent<Event>) =>
-      this._getChart(args.id).getDatalabelAtEvent(args),
+      this.#getChart(args.id).getDatalabelAtEvent(args),
     );
   }
 
-  private _getChart(id: string): ChartJSManager {
-    const chart = this._managers.get(id);
+  #getChart(id: string): ChartJSManager {
+    const chart = this.#managers.get(id);
     if (!chart) {
       throw new Error(`Could not find chart with id ${id}`);
     }

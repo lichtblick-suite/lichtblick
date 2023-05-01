@@ -18,13 +18,13 @@ type LibGeneratorFn = (args: Args) => Promise<string>;
  * generated value from `fn` is returned.
  */
 class MemoizedLibGenerator {
-  private datatypes?: RosDatatypes;
-  private topics?: Topic[];
-  private fn: LibGeneratorFn;
-  private cached?: string;
+  #datatypes?: RosDatatypes;
+  #topics?: Topic[];
+  #fn: LibGeneratorFn;
+  #cached?: string;
 
   public constructor(fn: LibGeneratorFn) {
-    this.fn = fn;
+    this.#fn = fn;
   }
 
   /**
@@ -35,17 +35,17 @@ class MemoizedLibGenerator {
    */
   public async update(args: Args): Promise<{ didUpdate: boolean; lib: string }> {
     if (
-      args.topics === this.topics &&
-      args.datatypes === this.datatypes &&
-      this.cached != undefined
+      args.topics === this.#topics &&
+      args.datatypes === this.#datatypes &&
+      this.#cached != undefined
     ) {
-      return { didUpdate: false, lib: this.cached };
+      return { didUpdate: false, lib: this.#cached };
     }
 
-    const lib = await this.fn(args);
-    this.topics = args.topics;
-    this.datatypes = args.datatypes;
-    this.cached = lib;
+    const lib = await this.#fn(args);
+    this.#topics = args.topics;
+    this.#datatypes = args.datatypes;
+    this.#cached = lib;
     return { didUpdate: true, lib };
   }
 }

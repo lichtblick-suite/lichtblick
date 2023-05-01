@@ -10,15 +10,15 @@ import { Desktop } from "../../common/types";
 const log = Logger.getLogger(__filename);
 
 export class DesktopExtensionLoader implements ExtensionLoader {
-  private bridge?: Desktop;
+  #bridge?: Desktop;
   public readonly namespace: ExtensionNamespace = "local";
 
   public constructor(bridge: Desktop) {
-    this.bridge = bridge;
+    this.#bridge = bridge;
   }
 
   public async getExtensions(): Promise<ExtensionInfo[]> {
-    const extensionList = (await this.bridge?.getExtensions()) ?? [];
+    const extensionList = (await this.#bridge?.getExtensions()) ?? [];
     log.debug(`Loaded ${extensionList.length} extension(s)`);
 
     const extensions = extensionList.map<ExtensionInfo>((item) => {
@@ -43,14 +43,14 @@ export class DesktopExtensionLoader implements ExtensionLoader {
   }
 
   public async loadExtension(id: string): Promise<string> {
-    return (await this.bridge?.loadExtension(id)) ?? "";
+    return (await this.#bridge?.loadExtension(id)) ?? "";
   }
 
   public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
-    if (this.bridge == undefined) {
+    if (this.#bridge == undefined) {
       throw new Error(`Cannot install extension without a desktopBridge`);
     }
-    const detail = await this.bridge.installExtension(foxeFileData);
+    const detail = await this.#bridge.installExtension(foxeFileData);
 
     const pkgInfo = detail.packageJson as ExtensionInfo;
 
@@ -71,6 +71,6 @@ export class DesktopExtensionLoader implements ExtensionLoader {
   }
 
   public async uninstallExtension(id: string): Promise<void> {
-    await this.bridge?.uninstallExtension(id);
+    await this.#bridge?.uninstallExtension(id);
   }
 }

@@ -26,13 +26,13 @@ type RenderState = {
 };
 
 class ImageCanvasWorker {
-  private readonly _renderStates: Record<string, RenderState> = {};
+  readonly #renderStates: Record<string, RenderState> = {};
 
   public constructor(rpc: Rpc) {
     setupWorker(rpc);
 
     rpc.receive("initialize", async ({ id, canvas }: { id: string; canvas: OffscreenCanvas }) => {
-      this._renderStates[id] = {
+      this.#renderStates[id] = {
         canvas,
         hitmap: new OffscreenCanvas(canvas.width, canvas.height),
         markers: [],
@@ -40,7 +40,7 @@ class ImageCanvasWorker {
     });
 
     rpc.receive("mouseMove", async ({ id, x, y }: { id: string; x: number; y: number }) => {
-      const state = this._renderStates[id];
+      const state = this.#renderStates[id];
       if (!state) {
         return undefined;
       }
@@ -70,7 +70,7 @@ class ImageCanvasWorker {
       (args: RenderArgs & { id: string }): Promise<RenderDimensions | undefined> => {
         const { id, geometry, imageMessage, rawMarkerData, options } = args;
 
-        const render = this._renderStates[id];
+        const render = this.#renderStates[id];
         if (!render) {
           return Promise.resolve(undefined);
         }

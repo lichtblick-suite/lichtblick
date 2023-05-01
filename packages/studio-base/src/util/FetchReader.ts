@@ -21,30 +21,30 @@ type EventTypes = {
 // An event-emitting wrapper for the Streams API:
 // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API
 export default class FetchReader extends EventEmitter<EventTypes> {
-  private _response: Promise<Response>;
-  private _reader?: ReadableStreamDefaultReader<Uint8Array>;
-  private _controller: AbortController;
-  private _aborted: boolean = false;
-  private _url: string;
+  #response: Promise<Response>;
+  #reader?: ReadableStreamDefaultReader<Uint8Array>;
+  #controller: AbortController;
+  #aborted: boolean = false;
+  #url: string;
 
   public constructor(url: string, options?: RequestInit) {
     super();
-    this._url = url;
-    this._controller = new AbortController();
-    this._response = fetch(url, { ...options, signal: this._controller.signal });
+    this.#url = url;
+    this.#controller = new AbortController();
+    this.#response = fetch(url, { ...options, signal: this.#controller.signal });
   }
 
   // you can only call getReader once on a response body
   // so keep a local copy of the reader and return it after the first call to get a reader
-  private async _getReader(): Promise<ReadableStreamDefaultReader<Uint8Array> | undefined> {
-    if (this._reader) {
-      return this._reader;
+  async #getReader(): Promise<ReadableStreamDefaultReader<Uint8Array> | undefined> {
+    if (this.#reader) {
+      return this.#reader;
     }
     let data: Response;
     try {
-      data = await this._response;
+      data = await this.#response;
     } catch (err) {
-      this.emit("error", new Error(`GET <${this._url}> failed: ${err}`));
+      this.emit("error", new Error(`GET <${this.#url}> failed: ${err}`));
       return undefined;
     }
     if (!data.ok) {
@@ -52,14 +52,14 @@ export default class FetchReader extends EventEmitter<EventTypes> {
       this.emit(
         "error",
         new Error(
-          `GET <$${this._url}> failed with status ${data.status}${errMsg ? ` (${errMsg})` : ``}`,
+          `GET <$${this.#url}> failed with status ${data.status}${errMsg ? ` (${errMsg})` : ``}`,
         ),
       );
       return undefined;
     }
 
     if (!data.body) {
-      this.emit("error", new Error(`GET <${this._url}> succeeded, but returned no data`));
+      this.emit("error", new Error(`GET <${this.#url}> succeeded, but returned no data`));
       return undefined;
     }
 
@@ -68,17 +68,17 @@ export default class FetchReader extends EventEmitter<EventTypes> {
       // When a stream is closed or errors, any reader it is locked to is released.
       // If the getReader method is called on an already locked stream, an exception will be thrown.
       // This is caused by server-side errors, but we should catch it anyway.
-      this._reader = data.body.getReader();
+      this.#reader = data.body.getReader();
     } catch (err) {
-      this.emit("error", new Error(`GET <${this._url}> succeeded, but failed to stream`));
+      this.emit("error", new Error(`GET <${this.#url}> succeeded, but failed to stream`));
       return undefined;
     }
 
-    return this._reader;
+    return this.#reader;
   }
 
   public read(): void {
-    this._getReader()
+    this.#getReader()
       .then((reader) => {
         // if no reader is returned then we've encountered an error
         if (!reader) {
@@ -97,7 +97,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
           })
           .catch((unk) => {
             // canceling the xhr request causes the promise to reject
-            if (this._aborted) {
+            if (this.#aborted) {
               this.emit("end");
               return;
             }
@@ -112,7 +112,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
   }
 
   public destroy(): void {
-    this._aborted = true;
-    this._controller.abort();
+    this.#aborted = true;
+    this.#controller.abort();
   }
 }

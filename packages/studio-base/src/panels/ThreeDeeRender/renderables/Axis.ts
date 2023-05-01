@@ -27,45 +27,45 @@ const tempMat4 = new THREE.Matrix4();
 const tempVec = new THREE.Vector3();
 
 export class Axis extends THREE.Object3D {
-  private readonly renderer: IRenderer;
-  private shaftMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  private headMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  readonly #renderer: IRenderer;
+  #shaftMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  #headMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
 
   public constructor(name: string, renderer: IRenderer) {
     super();
     this.name = name;
-    this.renderer = renderer;
+    this.#renderer = renderer;
 
     // Create three arrow shafts
-    const shaftGeometry = this.renderer.sharedGeometry.getGeometry(
-      `${this.constructor.name}-shaft-${this.renderer.maxLod}`,
-      () => createShaftGeometry(this.renderer.maxLod),
+    const shaftGeometry = this.#renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-shaft-${this.#renderer.maxLod}`,
+      () => createShaftGeometry(this.#renderer.maxLod),
     );
-    this.shaftMesh = new THREE.InstancedMesh(shaftGeometry, standardMaterial(COLOR_WHITE), 3);
-    this.shaftMesh.castShadow = true;
-    this.shaftMesh.receiveShadow = true;
+    this.#shaftMesh = new THREE.InstancedMesh(shaftGeometry, standardMaterial(COLOR_WHITE), 3);
+    this.#shaftMesh.castShadow = true;
+    this.#shaftMesh.receiveShadow = true;
 
     // Create three arrow heads
-    const headGeometry = this.renderer.sharedGeometry.getGeometry(
-      `${this.constructor.name}-head-${this.renderer.maxLod}`,
-      () => createHeadGeometry(this.renderer.maxLod),
+    const headGeometry = this.#renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-head-${this.#renderer.maxLod}`,
+      () => createHeadGeometry(this.#renderer.maxLod),
     );
 
-    this.headMesh = new THREE.InstancedMesh(headGeometry, standardMaterial(COLOR_WHITE), 3);
-    this.headMesh.castShadow = true;
-    this.headMesh.receiveShadow = true;
+    this.#headMesh = new THREE.InstancedMesh(headGeometry, standardMaterial(COLOR_WHITE), 3);
+    this.#headMesh.castShadow = true;
+    this.#headMesh.receiveShadow = true;
 
-    Axis.UpdateInstances(this.shaftMesh, this.headMesh, 0);
+    Axis.UpdateInstances(this.#shaftMesh, this.#headMesh, 0);
 
-    this.add(this.shaftMesh);
-    this.add(this.headMesh);
+    this.add(this.#shaftMesh);
+    this.add(this.#headMesh);
   }
 
   public dispose(): void {
-    this.shaftMesh.material.dispose();
-    this.shaftMesh.dispose();
-    this.headMesh.material.dispose();
-    this.headMesh.dispose();
+    this.#shaftMesh.material.dispose();
+    this.#shaftMesh.dispose();
+    this.#headMesh.material.dispose();
+    this.#headMesh.dispose();
   }
 
   private static UpdateInstances(

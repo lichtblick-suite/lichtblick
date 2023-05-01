@@ -78,7 +78,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     this.userData.messageTime = toNanoSec(marker.header.stamp);
     this.userData.frameId = this.renderer.normalizeFrameId(marker.header.frame_id);
     this.userData.pose = marker.pose;
-    this.userData.marker = this._renderMarker(marker);
+    this.userData.marker = this.#renderMarker(marker);
     this.userData.originalMarker = marker;
     this.userData.expiresIn = hasLifetime ? toNanoSec(marker.lifetime) : undefined;
   }
@@ -112,7 +112,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     }
   }
 
-  private _renderMarker(marker: Marker): Marker {
+  #renderMarker(marker: Marker): Marker {
     const topicName = this.userData.topic;
     const settings = this.renderer.config.topics[topicName] as
       | Partial<LayerSettingsMarker>

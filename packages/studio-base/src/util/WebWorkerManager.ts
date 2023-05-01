@@ -23,44 +23,44 @@ import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtil
 type WorkerListenerState<W> = { rpc: Rpc; worker: W; listenerIds: string[] };
 
 export default class WebWorkerManager<W extends Channel> {
-  private _createWorker: () => W;
-  private _maxWorkerCount: number;
-  private _workerStates: (WorkerListenerState<W> | undefined)[];
-  private _allListeners: Set<string>;
+  #createWorker: () => W;
+  #maxWorkerCount: number;
+  #workerStates: (WorkerListenerState<W> | undefined)[];
+  #allListeners: Set<string>;
 
   public constructor(createWorker: () => W, maxWorkerCount: number) {
-    this._createWorker = createWorker;
-    this._maxWorkerCount = maxWorkerCount;
-    this._workerStates = new Array(maxWorkerCount);
-    this._allListeners = new Set();
+    this.#createWorker = createWorker;
+    this.#maxWorkerCount = maxWorkerCount;
+    this.#workerStates = new Array(maxWorkerCount);
+    this.#allListeners = new Set();
   }
 
   public testing_workerCount(): number {
-    return this._workerStates.filter(Boolean).length;
+    return this.#workerStates.filter(Boolean).length;
   }
 
   public testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {
-    return this._workerStates.find((workerState) => workerState?.listenerIds.includes(id));
+    return this.#workerStates.find((workerState) => workerState?.listenerIds.includes(id));
   }
 
   public registerWorkerListener(id: string): Rpc {
-    if (this._allListeners.has(id)) {
+    if (this.#allListeners.has(id)) {
       throw new Error("cannot register the same listener id twice");
     }
-    this._allListeners.add(id);
+    this.#allListeners.add(id);
 
-    const currentWorkerCount = this._workerStates.filter(Boolean).length;
-    if (currentWorkerCount < this._maxWorkerCount) {
-      const worker = this._createWorker();
+    const currentWorkerCount = this.#workerStates.filter(Boolean).length;
+    if (currentWorkerCount < this.#maxWorkerCount) {
+      const worker = this.#createWorker();
       const rpc = new Rpc(worker);
       setupMainThreadRpc(rpc);
 
-      const emptyIndex = findIndex(this._workerStates, (x) => !x);
-      this._workerStates[emptyIndex] = { worker, rpc, listenerIds: [id] };
+      const emptyIndex = findIndex(this.#workerStates, (x) => !x);
+      this.#workerStates[emptyIndex] = { worker, rpc, listenerIds: [id] };
       return rpc;
     }
     const workerStateByListenerCount = sortBy(
-      this._workerStates.filter(Boolean),
+      this.#workerStates.filter(Boolean),
       (workerState) => workerState?.listenerIds.length,
     );
     const workerState = workerStateByListenerCount[0];
@@ -72,22 +72,22 @@ export default class WebWorkerManager<W extends Channel> {
   }
 
   public unregisterWorkerListener(id: string): void {
-    if (!this._allListeners.has(id)) {
+    if (!this.#allListeners.has(id)) {
       throw new Error("Cannot find listener to unregister");
     }
-    this._allListeners.delete(id);
+    this.#allListeners.delete(id);
 
-    const workerStateIndex = findIndex(this._workerStates, (workerState) => {
+    const workerStateIndex = findIndex(this.#workerStates, (workerState) => {
       if (!workerState) {
         return false;
       }
       return workerState.listenerIds.includes(id);
     });
-    const workerState = this._workerStates[workerStateIndex];
+    const workerState = this.#workerStates[workerStateIndex];
     if (workerStateIndex >= 0 && workerState) {
       workerState.listenerIds = workerState.listenerIds.filter((_id) => _id !== id);
       if (workerState.listenerIds.length === 0) {
-        this._workerStates[workerStateIndex] = undefined;
+        this.#workerStates[workerStateIndex] = undefined;
         workerState.worker.terminate();
         workerState.rpc.terminate();
       }

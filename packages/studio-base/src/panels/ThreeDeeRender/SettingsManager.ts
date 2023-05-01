@@ -22,22 +22,22 @@ export type SettingsManagerEvents = {
 export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   public errors = new LayerErrors();
 
-  private _nodesByKey = new Map<string, SettingsTreeEntry[]>();
-  private _root: SettingsTreeNodeWithActionHandler = { children: {} };
+  #nodesByKey = new Map<string, SettingsTreeEntry[]>();
+  #root: SettingsTreeNodeWithActionHandler = { children: {} };
 
   public constructor(baseTree: SettingsTreeNodes) {
     super();
 
-    this._root = { children: baseTree };
+    this.#root = { children: baseTree };
     this.errors.on("update", this.handleErrorUpdate);
     this.errors.on("remove", this.handleErrorUpdate);
     this.errors.on("clear", this.handleErrorUpdate);
   }
 
   public setNodesForKey(key: string, nodes: SettingsTreeEntry[]): void {
-    this._root = produce(this._root, (draft) => {
+    this.#root = produce(this.#root, (draft) => {
       // Delete all previous nodes for this key
-      const prevNodes = this._nodesByKey.get(key);
+      const prevNodes = this.#nodesByKey.get(key);
       if (prevNodes) {
         for (const { path } of prevNodes) {
           removeNodeAtPath(draft, path);
@@ -54,13 +54,13 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     });
 
     // Update the map of nodes by key
-    this._nodesByKey.set(key, nodes);
+    this.#nodesByKey.set(key, nodes);
 
     this.emit("update");
   }
 
   public setLabel(path: Path, label: string): void {
-    this._root = produce(this._root, (draft) => {
+    this.#root = produce(this.#root, (draft) => {
       setLabelAtPath(draft, path, label);
     });
 
@@ -68,7 +68,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   }
 
   public clearChildren(path: Path): void {
-    this._root = produce(this._root, (draft) => {
+    this.#root = produce(this.#root, (draft) => {
       clearChildren(draft, path);
     });
 
@@ -76,7 +76,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   }
 
   public tree(): SettingsTreeNodes {
-    return this._root.children!;
+    return this.#root.children!;
   }
 
   public handleAction = (action: SettingsTreeAction): void => {
@@ -84,7 +84,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
 
     // Walk the settings tree down to the end of the path, firing any action
     // handlers along the way
-    let curNode = this._root;
+    let curNode = this.#root;
     curNode.handler?.(action);
     for (const segment of path) {
       const nextNode: SettingsTreeNodeWithActionHandler | undefined = curNode.children?.[segment];
@@ -97,7 +97,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   };
 
   public handleErrorUpdate = (path: Path): void => {
-    this._root = produce(this._root, (draft) => {
+    this.#root = produce(this.#root, (draft) => {
       if (path.length === 0) {
         return { ...draft };
       }

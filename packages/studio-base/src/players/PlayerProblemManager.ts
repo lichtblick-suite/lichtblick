@@ -10,52 +10,52 @@ import { PlayerProblem } from "@foxglove/studio-base/players/types";
  * needs to re-process player problems.
  */
 export default class PlayerProblemManager {
-  private _problemsById = new Map<string, PlayerProblem>();
-  private _problems?: PlayerProblem[];
+  #problemsById = new Map<string, PlayerProblem>();
+  #problems?: PlayerProblem[];
 
   /**
    * Returns the current set of problems. Subsequent calls will return the same object as long as
    * problems have not been added/removed.
    */
   public problems(): PlayerProblem[] {
-    return (this._problems ??= Array.from(this._problemsById.values()));
+    return (this.#problems ??= Array.from(this.#problemsById.values()));
   }
 
   public addProblem(id: string, problem: PlayerProblem): void {
     console[problem.severity].call(console, "Player problem", id, problem);
-    this._problemsById.set(id, problem);
-    this._problems = undefined;
+    this.#problemsById.set(id, problem);
+    this.#problems = undefined;
   }
 
   public hasProblem(id: string): boolean {
-    return this._problemsById.has(id);
+    return this.#problemsById.has(id);
   }
 
   public removeProblem(id: string): boolean {
-    const changed = this._problemsById.delete(id);
+    const changed = this.#problemsById.delete(id);
     if (changed) {
-      this._problems = undefined;
+      this.#problems = undefined;
     }
     return changed;
   }
 
   public removeProblems(predicate: (id: string, problem: PlayerProblem) => boolean): boolean {
     let changed = false;
-    for (const [id, problem] of this._problemsById) {
+    for (const [id, problem] of this.#problemsById) {
       if (predicate(id, problem)) {
-        if (this._problemsById.delete(id)) {
+        if (this.#problemsById.delete(id)) {
           changed = true;
         }
       }
     }
     if (changed) {
-      this._problems = undefined;
+      this.#problems = undefined;
     }
     return changed;
   }
 
   public clear(): void {
-    this._problemsById.clear();
-    this._problems = undefined;
+    this.#problemsById.clear();
+    this.#problems = undefined;
   }
 }

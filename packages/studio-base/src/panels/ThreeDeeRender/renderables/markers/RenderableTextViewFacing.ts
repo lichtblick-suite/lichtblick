@@ -10,7 +10,7 @@ import { getLuminance, SRGBToLinear } from "../../color";
 import { Marker } from "../../ros";
 
 export class RenderableTextViewFacing extends RenderableMarker {
-  private label: Label;
+  #label: Label;
 
   public constructor(
     topic: string,
@@ -20,23 +20,23 @@ export class RenderableTextViewFacing extends RenderableMarker {
   ) {
     super(topic, marker, receiveTime, renderer);
 
-    this.label = renderer.labelPool.acquire();
-    this.label.setBillboard(true);
+    this.#label = renderer.labelPool.acquire();
+    this.#label.setBillboard(true);
 
-    this.add(this.label);
+    this.add(this.#label);
     this.update(marker, receiveTime);
   }
 
   public override dispose(): void {
-    this.renderer.labelPool.release(this.label);
+    this.renderer.labelPool.release(this.#label);
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
     super.update(newMarker, receiveTime);
     const marker = this.userData.marker;
 
-    this.label.setText(marker.text);
-    this.label.setColor(
+    this.#label.setText(marker.text);
+    this.#label.setColor(
       SRGBToLinear(marker.color.r),
       SRGBToLinear(marker.color.g),
       SRGBToLinear(marker.color.b),
@@ -44,12 +44,12 @@ export class RenderableTextViewFacing extends RenderableMarker {
 
     const foregroundIsDark = getLuminance(marker.color.r, marker.color.g, marker.color.b) < 0.5;
     if (foregroundIsDark) {
-      this.label.setBackgroundColor(1, 1, 1);
+      this.#label.setBackgroundColor(1, 1, 1);
     } else {
-      this.label.setBackgroundColor(0, 0, 0);
+      this.#label.setBackgroundColor(0, 0, 0);
     }
-    this.label.setOpacity(marker.color.a);
-    this.label.setLineHeight(marker.scale.z);
-    this.label.userData.pose = marker.pose;
+    this.#label.setOpacity(marker.color.a);
+    this.#label.setLineHeight(marker.scale.z);
+    this.#label.userData.pose = marker.pose;
   }
 }

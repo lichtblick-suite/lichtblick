@@ -19,13 +19,13 @@ export class DynamicInstancedMesh<
   TMaterial extends THREE.Material | THREE.Material[] = THREE.Material | THREE.Material[],
 > extends THREE.InstancedMesh<TGeometry, TMaterial> {
   // Total size of the buffer attributes, which can be larger than .count (instances in use)
-  private _capacity: number;
+  #capacity: number;
 
   public constructor(geometry: TGeometry, material: TMaterial, initialCapacity = INITIAL_CAPACITY) {
     super(geometry, material, 0);
 
-    this._capacity = initialCapacity;
-    this._resize();
+    this.#capacity = initialCapacity;
+    this.#resize();
   }
 
   public set(
@@ -35,7 +35,7 @@ export class DynamicInstancedMesh<
     defaultColor: ColorRGBA,
   ): void {
     const count = points.length;
-    this._setCount(count);
+    this.#setCount(count);
 
     const colorArray = this.instanceColor!.array as Uint8ClampedArray;
     for (let i = 0; i < count; i++) {
@@ -56,26 +56,26 @@ export class DynamicInstancedMesh<
     }
   }
 
-  private _setCount(count: number) {
-    while (count >= this._capacity) {
-      this._expand();
+  #setCount(count: number) {
+    while (count >= this.#capacity) {
+      this.#expand();
     }
     this.count = count;
     this.instanceMatrix.count = count;
     this.instanceColor!.count = count;
   }
 
-  private _expand() {
-    this._capacity = this._capacity + Math.trunc(this._capacity / 2) + 16;
-    this._resize();
+  #expand() {
+    this.#capacity = this.#capacity + Math.trunc(this.#capacity / 2) + 16;
+    this.#resize();
   }
 
-  private _resize() {
+  #resize() {
     const oldMatrixArray = this.instanceMatrix.array as Float32Array;
     const oldColorArray = this.instanceColor?.array as Uint8ClampedArray | undefined;
 
-    const newMatrixArray = new Float32Array(this._capacity * 16);
-    const newColorArray = new Uint8ClampedArray(this._capacity * 3);
+    const newMatrixArray = new Float32Array(this.#capacity * 16);
+    const newColorArray = new Uint8ClampedArray(this.#capacity * 3);
 
     if (oldMatrixArray.length > 0) {
       newMatrixArray.set(oldMatrixArray);

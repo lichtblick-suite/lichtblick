@@ -109,13 +109,13 @@ function makePointCloud(stamp: rostime.Time): FoxglovePointCloud {
 }
 
 class PointcloudPlayer implements Player {
-  private name: string = "pointcloud";
-  private startTime: Time = rostime.fromDate(new Date());
-  private listener?: (state: PlayerState) => Promise<void>;
-  private datatypes: RosDatatypes = new Map();
+  #name: string = "pointcloud";
+  #startTime: Time = rostime.fromDate(new Date());
+  #listener?: (state: PlayerState) => Promise<void>;
+  #datatypes: RosDatatypes = new Map();
 
   public constructor() {
-    this.datatypes.set("Time", {
+    this.#datatypes.set("Time", {
       definitions: [
         {
           name: "sec",
@@ -128,7 +128,7 @@ class PointcloudPlayer implements Player {
       ],
     });
 
-    this.datatypes.set("foxglove.PointCloud", {
+    this.#datatypes.set("foxglove.PointCloud", {
       name: "foxglove.PointCloud",
       definitions: [
         {
@@ -150,8 +150,8 @@ class PointcloudPlayer implements Player {
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.listener = listener;
-    void this.run();
+    this.#listener = listener;
+    void this.#run();
   }
   public close(): void {
     // no-op
@@ -173,8 +173,8 @@ class PointcloudPlayer implements Player {
     throw new Error("Method not implemented.");
   }
 
-  private async run() {
-    const listener = this.listener;
+  async #run() {
+    const listener = this.#listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
@@ -184,8 +184,8 @@ class PointcloudPlayer implements Player {
     await listener({
       profile: undefined,
       presence: PlayerPresence.PRESENT,
-      name: this.name,
-      playerId: this.name,
+      name: this.#name,
+      playerId: this.#name,
       capabilities: CAPABILITIES,
       progress: {},
       urlState: {
@@ -237,22 +237,22 @@ class PointcloudPlayer implements Player {
       await listener({
         profile: undefined,
         presence: PlayerPresence.PRESENT,
-        name: this.name,
-        playerId: this.name,
+        name: this.#name,
+        playerId: this.#name,
         capabilities: CAPABILITIES,
         progress: {},
         activeData: {
           messages,
           totalBytesReceived: 0,
           currentTime: now,
-          startTime: this.startTime,
+          startTime: this.#startTime,
           isPlaying: true,
           speed: 1,
           lastSeekTime: 1,
           endTime: now,
           topics,
           topicStats,
-          datatypes: this.datatypes,
+          datatypes: this.#datatypes,
         },
       });
 

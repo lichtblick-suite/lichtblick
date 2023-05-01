@@ -8,20 +8,20 @@
  * key as an existing entry is a replacement operation.
  */
 export class ArrayMap<K, V> {
-  private _list: [K, V][] = [];
+  #list: [K, V][] = [];
 
   // eslint-disable-next-line no-restricted-syntax
   public get size(): number {
-    return this._list.length;
+    return this.#list.length;
   }
 
   public clear(): void {
-    this._list.length = 0;
+    this.#list.length = 0;
   }
 
   /** Retrieve the key/value tuple at the given index, if it exists. */
   public at(index: number): [K, V] | undefined {
-    return this._list[index];
+    return this.#list[index];
   }
 
   /**
@@ -31,33 +31,33 @@ export class ArrayMap<K, V> {
   public set(key: K, value: V): void {
     const index = this.binarySearch(key);
     if (index >= 0) {
-      this._list[index]![1] = value;
+      this.#list[index]![1] = value;
     } else {
       const greaterThanIndex = ~index;
       const newEntry: [K, V] = [key, value];
-      if (greaterThanIndex >= this._list.length) {
-        this._list.push(newEntry);
+      if (greaterThanIndex >= this.#list.length) {
+        this.#list.push(newEntry);
       } else {
-        this._list.splice(greaterThanIndex, 0, newEntry);
+        this.#list.splice(greaterThanIndex, 0, newEntry);
       }
     }
   }
 
   /** Removes the first element and returns it, if available. */
   public shift(): [K, V] | undefined {
-    return this._list.shift();
+    return this.#list.shift();
   }
 
   /** Removes the last element and returns it, if available. */
   public pop(): [K, V] | undefined {
-    return this._list.pop();
+    return this.#list.pop();
   }
 
   /** Removes the element with the given key, if it exists */
   public remove(key: K): void {
     const index = this.binarySearch(key);
     if (index >= 0) {
-      this._list.splice(index, 1);
+      this.#list.splice(index, 1);
     }
   }
 
@@ -65,34 +65,34 @@ export class ArrayMap<K, V> {
   public removeAfter(key: K): void {
     const index = this.binarySearch(key);
     const greaterThanIndex = index >= 0 ? index + 1 : ~index;
-    this._list.length = greaterThanIndex;
+    this.#list.length = greaterThanIndex;
   }
 
   /** Removes all elements with keys less than the given key. */
   public removeBefore(key: K): void {
     const index = this.binarySearch(key);
     const lessThanIndex = index >= 0 ? index : ~index;
-    this._list.splice(0, lessThanIndex);
+    this.#list.splice(0, lessThanIndex);
   }
 
   /** Access the first key/value tuple in the list, without modifying the list. */
   public minEntry(): [K, V] | undefined {
-    return this._list[0];
+    return this.#list[0];
   }
 
   /** Access the last key/value tuple in the list, without modifying the list. */
   public maxEntry(): [K, V] | undefined {
-    return this._list[this._list.length - 1];
+    return this.#list[this.#list.length - 1];
   }
 
   /** Access the first key in the list, without modifying the list. */
   public minKey(): K | undefined {
-    return this._list[0]?.[0];
+    return this.#list[0]?.[0];
   }
 
   /** Access the last key in the list, without modifying the list. */
   public maxKey(): K | undefined {
-    return this._list[this._list.length - 1]?.[0];
+    return this.#list[this.#list.length - 1]?.[0];
   }
 
   /**
@@ -108,7 +108,7 @@ export class ArrayMap<K, V> {
    * plus 1.
    */
   public binarySearch(key: K): number {
-    const list = this._list;
+    const list = this.#list;
     if (list.length === 0) {
       return -1;
     }

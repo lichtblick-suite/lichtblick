@@ -78,7 +78,7 @@ function createLaserScanGeometry(topic: string, usage: THREE.Usage): DynamicBuff
 
 class LaserScanRenderable extends Renderable<LaserScanUserData> {
   public override pickableInstances = true;
-  private pointsHistory: RenderObjectHistory<LaserScanRenderable>;
+  #pointsHistory: RenderObjectHistory<LaserScanRenderable>;
 
   public constructor(topic: string, renderer: IRenderer, userData: LaserScanUserData) {
     super(topic, renderer, userData);
@@ -98,7 +98,7 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
       userData.instancePickingMaterial,
     );
 
-    this.pointsHistory = new RenderObjectHistory({
+    this.#pointsHistory = new RenderObjectHistory({
       initial: {
         messageTime: userData.receiveTime,
         receiveTime: userData.receiveTime,
@@ -114,7 +114,7 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
     this.userData.material.dispose();
     this.userData.pickingMaterial.dispose();
     this.userData.instancePickingMaterial.dispose();
-    this.pointsHistory.dispose();
+    this.#pointsHistory.dispose();
     super.dispose();
   }
 
@@ -167,7 +167,7 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
     const pickingMaterial = this.userData.pickingMaterial;
 
     const topic = this.userData.topic;
-    const pointsHistory = this.pointsHistory;
+    const pointsHistory = this.#pointsHistory;
     const isDecay = settings.decayTime > 0;
     if (isDecay) {
       // Push a new (empty) entry to the history of points
@@ -263,18 +263,18 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
   }
 
   public invalidateLastEntry() {
-    const lastEntry = this.pointsHistory.latest();
+    const lastEntry = this.#pointsHistory.latest();
     lastEntry?.object3d.geometry.resize(0);
   }
 
   public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
     if (!this.userData.settings.visible) {
       this.renderer.settings.errors.clearPath(this.userData.settingsPath);
-      this.pointsHistory.clearHistory();
+      this.#pointsHistory.clearHistory();
       return;
     }
-    this.pointsHistory.updateHistoryFromCurrentTime(currentTime);
-    this.pointsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
+    this.#pointsHistory.updateHistoryFromCurrentTime(currentTime);
+    this.#pointsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
     this.updateUniforms();
   }
 }
@@ -283,8 +283,8 @@ export class LaserScans extends SceneExtension<LaserScanRenderable> {
   public constructor(renderer: IRenderer) {
     super("foxglove.LaserScans", renderer);
 
-    renderer.addSchemaSubscriptions(ROS_LASERSCAN_DATATYPES, this.handleLaserScan);
-    renderer.addSchemaSubscriptions(FOXGLOVE_LASERSCAN_DATATYPES, this.handleLaserScan);
+    renderer.addSchemaSubscriptions(ROS_LASERSCAN_DATATYPES, this.#handleLaserScan);
+    renderer.addSchemaSubscriptions(FOXGLOVE_LASERSCAN_DATATYPES, this.#handleLaserScan);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -352,7 +352,7 @@ export class LaserScans extends SceneExtension<LaserScanRenderable> {
     }
   };
 
-  private handleLaserScan = (
+  #handleLaserScan = (
     messageEvent: PartialMessageEvent<RosLaserScan | FoxgloveLaserScan>,
   ): void => {
     const topic = messageEvent.topic;

@@ -75,21 +75,21 @@ export class Grids extends SceneExtension<GridRenderable> {
       layerId: LAYER_ID,
       label: t("threeDee:addGrid"),
       icon: "Grid",
-      handler: this.handleAddGrid,
+      handler: this.#handleAddGrid,
     });
 
-    renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
+    renderer.on("transformTreeUpdated", this.#handleTransformTreeUpdated);
 
     // Load existing grid layers from the config
     for (const [instanceId, entry] of Object.entries(renderer.config.layers)) {
       if (entry?.layerId === LAYER_ID) {
-        this._updateGrid(instanceId, entry as Partial<LayerSettingsGrid>);
+        this.#updateGrid(instanceId, entry as Partial<LayerSettingsGrid>);
       }
     }
   }
 
   public override dispose(): void {
-    this.renderer.off("transformTreeUpdated", this.handleTransformTreeUpdated);
+    this.renderer.off("transformTreeUpdated", this.#handleTransformTreeUpdated);
     super.dispose();
   }
 
@@ -137,7 +137,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
       // Create renderables for new grid layers
       if (!this.renderables.has(instanceId)) {
-        this._updateGrid(instanceId, config);
+        this.#updateGrid(instanceId, config);
       }
     }
     return entries;
@@ -169,7 +169,7 @@ export class Grids extends SceneExtension<GridRenderable> {
         });
 
         // Remove the renderable
-        this._updateGrid(instanceId, undefined);
+        this.#updateGrid(instanceId, undefined);
 
         // Update the settings tree
         this.updateSettingsTree();
@@ -188,10 +188,10 @@ export class Grids extends SceneExtension<GridRenderable> {
     const settings = this.renderer.config.layers[instanceId] as
       | Partial<LayerSettingsGrid>
       | undefined;
-    this._updateGrid(instanceId, settings);
+    this.#updateGrid(instanceId, settings);
   };
 
-  private handleAddGrid = (instanceId: string): void => {
+  #handleAddGrid = (instanceId: string): void => {
     log.info(`Creating ${LAYER_ID} layer ${instanceId}`);
 
     const config: LayerSettingsGrid = { ...DEFAULT_SETTINGS, instanceId };
@@ -204,17 +204,17 @@ export class Grids extends SceneExtension<GridRenderable> {
     });
 
     // Add a renderable
-    this._updateGrid(instanceId, config);
+    this.#updateGrid(instanceId, config);
 
     // Update the settings tree
     this.updateSettingsTree();
   };
 
-  private handleTransformTreeUpdated = (): void => {
+  #handleTransformTreeUpdated = (): void => {
     this.updateSettingsTree();
   };
 
-  private _updateGrid(instanceId: string, settings: Partial<LayerSettingsGrid> | undefined): void {
+  #updateGrid(instanceId: string, settings: Partial<LayerSettingsGrid> | undefined): void {
     let renderable = this.renderables.get(instanceId);
 
     // Handle deletes
@@ -229,7 +229,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
     const newSettings = { ...DEFAULT_SETTINGS, ...settings };
     if (!renderable) {
-      renderable = this._createRenderable(instanceId, newSettings);
+      renderable = this.#createRenderable(instanceId, newSettings);
       renderable.userData.pose = xyzrpyToPose(newSettings.position, newSettings.rotation);
     }
 
@@ -258,7 +258,7 @@ export class Grids extends SceneExtension<GridRenderable> {
     }
   }
 
-  private _createRenderable(instanceId: string, settings: LayerSettingsGrid): GridRenderable {
+  #createRenderable(instanceId: string, settings: LayerSettingsGrid): GridRenderable {
     const marker = createMarker(settings);
     const lineListId = `${instanceId}:LINE_LIST`;
     const lineList = new RenderableLineList(

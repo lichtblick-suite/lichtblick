@@ -28,6 +28,7 @@ settings:
 rules:
   "@foxglove/license-header": error
   "@foxglove/studio/link-target": error
+  "@foxglove/studio/prefer-hash-private": error
 
   tss-unused-classes/unused-classes: error
 

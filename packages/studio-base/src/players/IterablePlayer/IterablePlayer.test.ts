@@ -53,9 +53,9 @@ type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
 class PlayerStateStore {
   public done: Promise<PlayerStateWithoutPlayerId[]>;
 
-  private playerStates: PlayerStateWithoutPlayerId[] = [];
-  private expected: number;
-  private resolve: (arg0: PlayerStateWithoutPlayerId[]) => void = () => {
+  #playerStates: PlayerStateWithoutPlayerId[] = [];
+  #expected: number;
+  #resolve: (arg0: PlayerStateWithoutPlayerId[]) => void = () => {
     // no-op
   };
 
@@ -63,9 +63,9 @@ class PlayerStateStore {
    * @param expected - number of state transitions to be listened to before done is resolved
    */
   public constructor(expected: number) {
-    this.expected = expected;
+    this.#expected = expected;
     this.done = new Promise((resolve) => {
-      this.resolve = resolve;
+      this.#resolve = resolve;
     });
   }
 
@@ -74,13 +74,13 @@ class PlayerStateStore {
   // if it exceeds it will throw an error and break the test
   public async add(state: PlayerState): Promise<void> {
     const { playerId: _playerId, ...rest } = state;
-    this.playerStates.push(rest);
-    if (this.playerStates.length === this.expected) {
-      this.resolve(this.playerStates);
+    this.#playerStates.push(rest);
+    if (this.#playerStates.length === this.#expected) {
+      this.#resolve(this.#playerStates);
     }
-    if (this.playerStates.length > this.expected) {
+    if (this.#playerStates.length > this.#expected) {
       const error = new Error(
-        `Expected: ${this.expected} messages, received: ${this.playerStates.length}`,
+        `Expected: ${this.#expected} messages, received: ${this.#playerStates.length}`,
       );
       this.done = Promise.reject(error);
       throw error;
@@ -92,10 +92,10 @@ class PlayerStateStore {
    * @param expected - number of state transitions to be listened to before done is resolved
    */
   public reset(expected: number): void {
-    this.expected = expected;
-    this.playerStates = [];
+    this.#expected = expected;
+    this.#playerStates = [];
     this.done = new Promise((resolve) => {
-      this.resolve = resolve;
+      this.#resolve = resolve;
     });
   }
 }

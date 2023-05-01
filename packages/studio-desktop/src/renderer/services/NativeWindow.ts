@@ -9,39 +9,39 @@ import { Desktop } from "../../common/types";
 type Handler = () => void;
 
 export class NativeWindow implements INativeWindow {
-  private bridge?: Desktop;
+  #bridge?: Desktop;
 
   public constructor(bridge: Desktop) {
-    this.bridge = bridge;
+    this.#bridge = bridge;
   }
 
   public async setRepresentedFilename(path: string | undefined): Promise<void> {
-    await this.bridge?.setRepresentedFilename(path);
+    await this.#bridge?.setRepresentedFilename(path);
   }
   public on(name: NativeWindowEvent, listener: Handler): void {
-    this.bridge?.addIpcEventListener(name, listener);
+    this.#bridge?.addIpcEventListener(name, listener);
   }
   public off(name: NativeWindowEvent, listener: Handler): void {
-    this.bridge?.removeIpcEventListener(name, listener);
+    this.#bridge?.removeIpcEventListener(name, listener);
   }
 
   public handleTitleBarDoubleClick(): void {
-    this.bridge?.handleTitleBarDoubleClick();
+    this.#bridge?.handleTitleBarDoubleClick();
   }
 
   public isMaximized(): boolean {
-    return this.bridge?.isMaximized() ?? false;
+    return this.#bridge?.isMaximized() ?? false;
   }
   public minimize(): void {
-    this.bridge?.minimizeWindow();
+    this.#bridge?.minimizeWindow();
   }
   public maximize(): void {
-    this.bridge?.maximizeWindow();
+    this.#bridge?.maximizeWindow();
   }
   public unmaximize(): void {
-    this.bridge?.unmaximizeWindow();
+    this.#bridge?.unmaximizeWindow();
   }
   public close(): void {
-    this.bridge?.closeWindow();
+    this.#bridge?.closeWindow();
   }
 }

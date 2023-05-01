@@ -9,27 +9,27 @@ import { indexToIDColor } from "./util";
  * to a separate hitmap context.
  */
 export class HitmapRenderContext {
-  private _currentMarkerIndex: number = 0;
-  private readonly _hctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | undefined;
+  #currentMarkerIndex: number = 0;
+  readonly #hctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | undefined;
 
   public constructor(
     private readonly _ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
     private readonly _hitmapCanvas: HTMLCanvasElement | OffscreenCanvas | undefined,
   ) {
-    this._hctx = this._hitmapCanvas?.getContext("2d") ?? undefined;
-    if (this._hctx) {
-      this._hctx.imageSmoothingEnabled = false;
-      this._hctx.clearRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
+    this.#hctx = this._hitmapCanvas?.getContext("2d") ?? undefined;
+    if (this.#hctx) {
+      this.#hctx.imageSmoothingEnabled = false;
+      this.#hctx.clearRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
     }
   }
 
   public startMarker(): void {
-    if (this._hctx) {
-      const colorString = indexToIDColor(this._currentMarkerIndex);
-      this._hctx.fillStyle = `#${colorString}ff`;
-      this._hctx.strokeStyle = `#${colorString}ff`;
+    if (this.#hctx) {
+      const colorString = indexToIDColor(this.#currentMarkerIndex);
+      this.#hctx.fillStyle = `#${colorString}ff`;
+      this.#hctx.strokeStyle = `#${colorString}ff`;
     }
-    this._currentMarkerIndex++;
+    this.#currentMarkerIndex++;
   }
 
   // eslint-disable-next-line no-restricted-syntax
@@ -40,8 +40,8 @@ export class HitmapRenderContext {
   // eslint-disable-next-line no-restricted-syntax
   public set lineWidth(width: number) {
     this._ctx.lineWidth = width;
-    if (this._hctx) {
-      this._hctx.lineWidth = width;
+    if (this.#hctx) {
+      this.#hctx.lineWidth = width;
     }
   }
 
@@ -63,8 +63,8 @@ export class HitmapRenderContext {
   // eslint-disable-next-line no-restricted-syntax
   public set font(font: string) {
     this._ctx.font = font;
-    if (this._hctx) {
-      this._hctx.font = font;
+    if (this.#hctx) {
+      this.#hctx.font = font;
     }
   }
 
@@ -86,8 +86,8 @@ export class HitmapRenderContext {
   // eslint-disable-next-line no-restricted-syntax
   public set textBaseline(baseline: CanvasRenderingContext2D["textBaseline"]) {
     this._ctx.textBaseline = baseline;
-    if (this._hctx) {
-      this._hctx.textBaseline = baseline;
+    if (this.#hctx) {
+      this.#hctx.textBaseline = baseline;
     }
   }
 
@@ -101,22 +101,22 @@ export class HitmapRenderContext {
     counterclockwise?: boolean,
   ): void {
     this._ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise);
-    this._hctx?.arc(x, y, radius, startAngle, endAngle, counterclockwise);
+    this.#hctx?.arc(x, y, radius, startAngle, endAngle, counterclockwise);
   }
 
   public beginPath(): void {
     this._ctx.beginPath();
-    this._hctx?.beginPath();
+    this.#hctx?.beginPath();
   }
 
   public clearRect(x: number, y: number, w: number, h: number): void {
     this._ctx.clearRect(x, y, w, h);
-    this._hctx?.clearRect(x, y, w, h);
+    this.#hctx?.clearRect(x, y, w, h);
   }
 
   public closePath(): void {
     this._ctx.closePath();
-    this._hctx?.closePath();
+    this.#hctx?.closePath();
   }
 
   public drawImage(image: CanvasImageSource, dx: number, dy: number): void {
@@ -126,17 +126,17 @@ export class HitmapRenderContext {
 
   public fill(): void {
     this._ctx.fill();
-    this._hctx?.fill();
+    this.#hctx?.fill();
   }
 
   public fillRect(x: number, y: number, w: number, h: number): void {
     this._ctx.fillRect(x, y, w, h);
-    this._hctx?.fillRect(x, y, w, h);
+    this.#hctx?.fillRect(x, y, w, h);
   }
 
   public fillText(text: string, x: number, y: number): void {
     this._ctx.fillText(text, x, y);
-    this._hctx?.fillText(text, x, y);
+    this.#hctx?.fillText(text, x, y);
   }
 
   public getTransform(): DOMMatrix {
@@ -145,7 +145,7 @@ export class HitmapRenderContext {
 
   public lineTo(x: number, y: number): void {
     this._ctx.lineTo(x, y);
-    this._hctx?.lineTo(x, y);
+    this.#hctx?.lineTo(x, y);
   }
 
   public measureText(text: string): TextMetrics {
@@ -154,42 +154,42 @@ export class HitmapRenderContext {
 
   public moveTo(x: number, y: number): void {
     this._ctx.moveTo(x, y);
-    this._hctx?.moveTo(x, y);
+    this.#hctx?.moveTo(x, y);
   }
 
   public restore(): void {
     this._ctx.restore();
-    this._hctx?.restore();
+    this.#hctx?.restore();
   }
 
   public rotate(angle: number): void {
     const rads = (angle * Math.PI) / 180;
     this._ctx.rotate(rads);
-    this._hctx?.rotate(rads);
+    this.#hctx?.rotate(rads);
   }
 
   public save(): void {
     this._ctx.save();
-    this._hctx?.save();
+    this.#hctx?.save();
   }
 
   public scale(x: number, y: number): void {
     this._ctx.scale(x, y);
-    this._hctx?.scale(x, y);
+    this.#hctx?.scale(x, y);
   }
 
   public stroke(): void {
     this._ctx.stroke();
-    this._hctx?.stroke();
+    this.#hctx?.stroke();
   }
 
   public strokeRect(x: number, y: number, w: number, h: number): void {
     this._ctx.strokeRect(x, y, w, h);
-    this._hctx?.strokeRect(x, y, w, h);
+    this.#hctx?.strokeRect(x, y, w, h);
   }
 
   public translate(x: number, y: number): void {
     this._ctx.translate(x, y);
-    this._hctx?.translate(x, y);
+    this.#hctx?.translate(x, y);
   }
 }

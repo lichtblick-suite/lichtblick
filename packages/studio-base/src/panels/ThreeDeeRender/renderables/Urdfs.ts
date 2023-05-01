@@ -147,30 +147,30 @@ export class UrdfRenderable extends Renderable<UrdfUserData> {
 }
 
 export class Urdfs extends SceneExtension<UrdfRenderable> {
-  private framesByInstanceId = new Map<string, string[]>();
-  private transformsByInstanceId = new Map<string, TransformData[]>();
-  private jointStates = new Map<string, JointPosition>();
+  #framesByInstanceId = new Map<string, string[]>();
+  #transformsByInstanceId = new Map<string, TransformData[]>();
+  #jointStates = new Map<string, JointPosition>();
 
   public constructor(renderer: IRenderer) {
     super("foxglove.Urdfs", renderer);
 
-    renderer.addTopicSubscription(TOPIC_NAME, this.handleRobotDescription);
+    renderer.addTopicSubscription(TOPIC_NAME, this.#handleRobotDescription);
     // Note that this subscription will never happen because it does not appear as a topic in the
     // topic list that can have its visibility toggled on. The ThreeDeeRender subscription logic
     // needs to become more flexible to make this possible
-    renderer.addSchemaSubscriptions(JOINTSTATE_DATATYPES, this.handleJointState);
-    renderer.on("parametersChange", this.handleParametersChange);
+    renderer.addSchemaSubscriptions(JOINTSTATE_DATATYPES, this.#handleJointState);
+    renderer.on("parametersChange", this.#handleParametersChange);
     renderer.addCustomLayerAction({
       layerId: LAYER_ID,
       label: i18next.t("threeDee:addURDF"),
       icon: "PrecisionManufacturing",
-      handler: this.handleAddUrdf,
+      handler: this.#handleAddUrdf,
     });
 
     // Load existing URDF layers from the config
     for (const [instanceId, entry] of Object.entries(renderer.config.layers)) {
       if (entry?.layerId === LAYER_ID) {
-        this._loadUrdf(instanceId, undefined);
+        this.#loadUrdf(instanceId, undefined);
       }
     }
   }
@@ -188,11 +188,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           label: TOPIC_NAME,
           icon: "PrecisionManufacturing",
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
-          handler: this.handleTopicSettingsAction,
+          handler: this.#handleTopicSettingsAction,
           children: urdfChildren(
-            this.transformsByInstanceId.get(TOPIC_NAME),
+            this.#transformsByInstanceId.get(TOPIC_NAME),
             this.renderer.transformTree,
-            this.jointStates,
+            this.#jointStates,
           ),
         },
       });
@@ -212,11 +212,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           icon: "PrecisionManufacturing",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
-          handler: this.handleTopicSettingsAction,
+          handler: this.#handleTopicSettingsAction,
           children: urdfChildren(
-            this.transformsByInstanceId.get(PARAM_KEY),
+            this.#transformsByInstanceId.get(PARAM_KEY),
             this.renderer.transformTree,
-            this.jointStates,
+            this.#jointStates,
           ),
         },
       });
@@ -244,11 +244,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
             visible: config.visible ?? DEFAULT_CUSTOM_SETTINGS.visible,
             actions: [{ type: "action", id: "delete", label: "Delete" }],
             order: layerConfig.order,
-            handler: this.handleLayerSettingsAction,
+            handler: this.#handleLayerSettingsAction,
             children: urdfChildren(
-              this.transformsByInstanceId.get(instanceId),
+              this.#transformsByInstanceId.get(instanceId),
               this.renderer.transformTree,
-              this.jointStates,
+              this.#jointStates,
             ),
           },
         });
@@ -260,18 +260,18 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
   public override removeAllRenderables(): void {
     // Re-add coordinate frames and transforms since the scene has been cleared
-    this._refreshTransforms();
+    this.#refreshTransforms();
   }
 
   /**
    * Re-add coordinate frames and transforms corresponding to existing custom URDFs
    */
-  private _refreshTransforms() {
-    for (const [instanceId, frames] of this.framesByInstanceId) {
-      this._loadFrames(instanceId, frames);
+  #refreshTransforms() {
+    for (const [instanceId, frames] of this.#framesByInstanceId) {
+      this.#loadFrames(instanceId, frames);
     }
-    for (const [instanceId, transforms] of this.transformsByInstanceId) {
-      this._loadTransforms(instanceId, transforms);
+    for (const [instanceId, transforms] of this.#transformsByInstanceId) {
+      this.#loadTransforms(instanceId, transforms);
     }
   }
 
@@ -317,14 +317,14 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     }
   }
 
-  private handleTopicSettingsAction = (action: SettingsTreeAction): void => {
+  #handleTopicSettingsAction = (action: SettingsTreeAction): void => {
     if (action.action === "update") {
-      this.handleSettingsUpdate(action);
+      this.#handleSettingsUpdate(action);
       return;
     }
   };
 
-  private handleLayerSettingsAction = (action: SettingsTreeAction): void => {
+  #handleLayerSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
 
     // Handle menu actions (delete)
@@ -346,17 +346,17 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         }
 
         // Remove transforms from the TF tree
-        const transforms = this.transformsByInstanceId.get(instanceId);
+        const transforms = this.#transformsByInstanceId.get(instanceId);
         if (transforms) {
           for (const { parent, child } of transforms) {
             this.renderer.removeTransform(child, parent, 0n);
           }
         }
-        this.framesByInstanceId.delete(instanceId);
-        this.transformsByInstanceId.delete(instanceId);
+        this.#framesByInstanceId.delete(instanceId);
+        this.#transformsByInstanceId.delete(instanceId);
 
         // Re-add coordinate frames in case the deleted URDF shared frame names with other URDFs
-        this._refreshTransforms();
+        this.#refreshTransforms();
 
         // Update the settings tree
         this.updateSettingsTree();
@@ -364,18 +364,18 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       }
       return;
     } /* if (action.action === "update") */ else {
-      this.handleSettingsUpdate(action);
+      this.#handleSettingsUpdate(action);
     }
   };
 
-  private handleSettingsUpdate = (action: { action: "update" } & SettingsTreeAction): void => {
+  #handleSettingsUpdate = (action: { action: "update" } & SettingsTreeAction): void => {
     const path = action.payload.path;
 
     if (path.length === 5 && path[2] === "joints") {
       // ["layers", instanceId, "joints", jointName, "manual"]
       const instanceId = path[1]!;
       const jointName = path[3]!;
-      const transforms = this.transformsByInstanceId.get(instanceId);
+      const transforms = this.#transformsByInstanceId.get(instanceId);
       if (!transforms) {
         return;
       }
@@ -408,22 +408,22 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       this.saveSetting(path, action.payload.value);
       const instanceId = path[1]!;
       if (path[1] === PARAM_KEY) {
-        this._loadUrdf(instanceId, this.renderer.parameters?.get(PARAM_NAME) as string | undefined);
+        this.#loadUrdf(instanceId, this.renderer.parameters?.get(PARAM_NAME) as string | undefined);
       } else {
-        this._loadUrdf(instanceId, undefined);
+        this.#loadUrdf(instanceId, undefined);
       }
     }
   };
 
-  private handleRobotDescription = (messageEvent: PartialMessageEvent<{ data: string }>): void => {
+  #handleRobotDescription = (messageEvent: PartialMessageEvent<{ data: string }>): void => {
     const robotDescription = messageEvent.message.data;
     if (typeof robotDescription !== "string") {
       return;
     }
-    this._loadUrdf(TOPIC_NAME, robotDescription);
+    this.#loadUrdf(TOPIC_NAME, robotDescription);
   };
 
-  private handleJointState = (messageEvent: PartialMessageEvent<JointState>): void => {
+  #handleJointState = (messageEvent: PartialMessageEvent<JointState>): void => {
     const msg = messageEvent.message;
     const names = msg.name ?? [];
     const positions = msg.position ?? [];
@@ -433,22 +433,22 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       const name = names[i]!;
       const position = positions[i] ?? 0;
 
-      const prevTimestamp = this.jointStates.get(name)?.timestamp;
+      const prevTimestamp = this.#jointStates.get(name)?.timestamp;
       if (prevTimestamp == undefined || timestamp >= prevTimestamp) {
-        this.jointStates.set(name, { timestamp, position });
+        this.#jointStates.set(name, { timestamp, position });
       }
     }
   };
 
-  private handleParametersChange = (parameters: ReadonlyMap<string, unknown> | undefined): void => {
+  #handleParametersChange = (parameters: ReadonlyMap<string, unknown> | undefined): void => {
     const robotDescription = parameters?.get(PARAM_NAME);
     if (typeof robotDescription !== "string") {
       return;
     }
-    this._loadUrdf(PARAM_KEY, robotDescription);
+    this.#loadUrdf(PARAM_KEY, robotDescription);
   };
 
-  private handleAddUrdf = (instanceId: string): void => {
+  #handleAddUrdf = (instanceId: string): void => {
     log.info(`Creating ${LAYER_ID} layer ${instanceId}`);
 
     const config: LayerSettingsCustomUrdf = { ...DEFAULT_CUSTOM_SETTINGS, instanceId };
@@ -461,13 +461,13 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     });
 
     // Add the URDF renderable
-    this._loadUrdf(instanceId, undefined);
+    this.#loadUrdf(instanceId, undefined);
 
     // Update the settings tree
     this.updateSettingsTree();
   };
 
-  private _fetchUrdf(instanceId: string, url: string): void {
+  #fetchUrdf(instanceId: string, url: string): void {
     const renderable = this.renderables.get(instanceId);
     if (!renderable) {
       throw new Error(`_fetchUrdf() should only be called for existing renderables`);
@@ -504,7 +504,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       .then((urdf) => {
         log.debug(`Fetched ${urdf.length} byte URDF from ${url}`);
         this.renderer.settings.errors.remove(["layers", instanceId], FETCH_URDF_ERR);
-        this._loadUrdf(instanceId, urdf);
+        this.#loadUrdf(instanceId, urdf);
       })
       .catch((unknown) => {
         const err = unknown as Error;
@@ -514,7 +514,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       });
   }
 
-  private _getCurrentSettings(instanceId: string) {
+  #getCurrentSettings(instanceId: string) {
     const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
     const baseSettings = isTopicOrParam ? DEFAULT_SETTINGS : DEFAULT_CUSTOM_SETTINGS;
     const userSettings = isTopicOrParam
@@ -524,23 +524,23 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     return settings;
   }
 
-  private _loadUrdf(instanceId: string, urdf: string | undefined): void {
+  #loadUrdf(instanceId: string, urdf: string | undefined): void {
     let renderable = this.renderables.get(instanceId);
     if (renderable && urdf != undefined && renderable.userData.urdf === urdf) {
-      const settings = this._getCurrentSettings(instanceId);
+      const settings = this.#getCurrentSettings(instanceId);
       renderable.userData.settings = settings;
       return;
     }
 
     // Clear any previous parsed data for this instanceId
-    this.transformsByInstanceId.delete(instanceId);
-    this.framesByInstanceId.delete(instanceId);
+    this.#transformsByInstanceId.delete(instanceId);
+    this.#framesByInstanceId.delete(instanceId);
     this.updateSettingsTree();
 
     const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
     const frameId = this.renderer.fixedFrameId ?? ""; // Unused
     const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
-    const settings = this._getCurrentSettings(instanceId);
+    const settings = this.#getCurrentSettings(instanceId);
     const url = (settings as Partial<LayerSettingsCustomUrdf>).url;
 
     // Create a UrdfRenderable if it does not already exist
@@ -571,7 +571,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
       // Fetch the URDF from the URL if we have one
       if (url != undefined) {
-        this._fetchUrdf(instanceId, url);
+        this.#fetchUrdf(instanceId, url);
       }
       return;
     }
@@ -580,7 +580,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     const loadedRenderable = renderable;
     parseUrdf(urdf)
       .then((parsed) => {
-        this._loadRobot(loadedRenderable, parsed);
+        this.#loadRobot(loadedRenderable, parsed);
         // the frame from the settings update is called before the robot is loaded
         // need to queue another animation frame after robot has been loaded
         this.renderer.queueAnimationFrame();
@@ -596,12 +596,12 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       });
   }
 
-  private _loadRobot(renderable: UrdfRenderable, { robot, frames, transforms }: ParsedUrdf): void {
+  #loadRobot(renderable: UrdfRenderable, { robot, frames, transforms }: ParsedUrdf): void {
     const renderer = this.renderer;
     const instanceId = renderable.userData.settings.instanceId;
 
-    this._loadFrames(instanceId, frames);
-    this._loadTransforms(instanceId, transforms);
+    this.#loadFrames(instanceId, frames);
+    this.#loadTransforms(instanceId, transforms);
     this.updateSettingsTree();
 
     // Dispose any existing renderables
@@ -633,8 +633,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     }
   }
 
-  private _loadFrames(instanceId: string, frames: string[]): void {
-    this.framesByInstanceId.set(instanceId, frames);
+  #loadFrames(instanceId: string, frames: string[]): void {
+    this.#framesByInstanceId.set(instanceId, frames);
 
     // Import all coordinate frames from the URDF into the scene
     for (const frameId of frames) {
@@ -642,8 +642,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     }
   }
 
-  private _loadTransforms(instanceId: string, transforms: TransformData[]): void {
-    this.transformsByInstanceId.set(instanceId, transforms);
+  #loadTransforms(instanceId: string, transforms: TransformData[]): void {
+    this.#transformsByInstanceId.set(instanceId, transforms);
 
     // Import all transforms from the URDF into the scene
     const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;

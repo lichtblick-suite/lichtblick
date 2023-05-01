@@ -60,89 +60,89 @@ type Options = {
  * cached when read.
  */
 class CachingIterableSource implements IIterableSource {
-  private source: IIterableSource;
+  #source: IIterableSource;
 
   // Stores which topics we have been caching. See notes at usage site for why we store this.
-  private cachedTopics: string[] = [];
+  #cachedTopics: string[] = [];
 
   // The producer loads results into the cache and the consumer reads from the cache.
-  private cache: CacheBlock[] = [];
+  #cache: CacheBlock[] = [];
 
   // Cache of loaded ranges. Ranges correspond to the cache blocks and are normalized in [0, 1];
-  private loadedRangesCache: Range[] = [{ start: 0, end: 0 }];
+  #loadedRangesCache: Range[] = [{ start: 0, end: 0 }];
 
-  private initResult?: Initalization;
+  #initResult?: Initalization;
 
-  private totalSizeBytes: number = 0;
+  #totalSizeBytes: number = 0;
 
   // Maximum total cache size
-  private maxTotalSizeBytes: number;
+  #maxTotalSizeBytes: number;
 
   // Maximum size per block
-  private maxBlockSizeBytes: number;
+  #maxBlockSizeBytes: number;
 
   public constructor(source: IIterableSource, opt?: Options) {
-    this.source = source;
-    this.maxTotalSizeBytes = opt?.maxTotalSize ?? 1073741824; // 1GB
-    this.maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
+    this.#source = source;
+    this.#maxTotalSizeBytes = opt?.maxTotalSize ?? 1073741824; // 1GB
+    this.#maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
   }
 
   public async initialize(): Promise<Initalization> {
-    this.initResult = await this.source.initialize();
-    return this.initResult;
+    this.#initResult = await this.#source.initialize();
+    return this.#initResult;
   }
 
   public async terminate(): Promise<void> {
-    this.cache.length = 0;
-    this.cachedTopics.length = 0;
+    this.#cache.length = 0;
+    this.#cachedTopics.length = 0;
   }
 
   public loadedRanges(): Range[] {
-    return this.loadedRangesCache;
+    return this.#loadedRangesCache;
   }
 
   public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
-    if (!this.initResult) {
+    if (!this.#initResult) {
       throw new Error("Invariant: uninitialized");
     }
 
-    const maxEnd = args.end ?? this.initResult.end;
+    const maxEnd = args.end ?? this.#initResult.end;
     const maxEndNanos = toNanoSec(maxEnd);
 
     const newTopics = [...args.topics].sort();
 
     // When the list of topics we want changes we purge the entire cache and start again.
     // This is heavy-handed but avoids dealing with how to handle disjoint cached ranges across topics.
-    if (!isEqual(newTopics, this.cachedTopics)) {
+    if (!isEqual(newTopics, this.#cachedTopics)) {
       log.debug("topics changed - clearing cache, resetting range");
-      this.cachedTopics = newTopics;
-      this.cache.length = 0;
-      this.totalSizeBytes = 0;
-      this.recomputeLoadedRangeCache();
+      this.#cachedTopics = newTopics;
+      this.#cache.length = 0;
+      this.#totalSizeBytes = 0;
+      this.#recomputeLoadedRangeCache();
     }
 
     // Where we want to read messages from. As we move through blocks and messages, the read head
     // moves forward to track the next place we should be reading.
-    let readHead = args.start ?? this.initResult.start;
+    let readHead = args.start ?? this.#initResult.start;
 
     for (;;) {
       if (compare(readHead, maxEnd) > 0) {
         break;
       }
 
-      const cacheBlockIndex = this.cache.findIndex((item) => {
+      const cacheBlockIndex = this.#cache.findIndex((item) => {
         return compare(item.start, readHead) <= 0 && compare(item.end, readHead) >= 0;
       });
 
-      let block = this.cache[cacheBlockIndex];
+      let block = this.#cache[cacheBlockIndex];
 
       // if the block start === end and done is false, then it could have been a new block we started but never
       // got around to adding any messages into, we remove it.
       if (block && compare(block.start, block.end) === 0 && block.items.length === 0) {
         block = undefined;
-        this.cache.splice(cacheBlockIndex, 1);
+        this.#cache.splice(cacheBlockIndex, 1);
         continue;
       }
 
@@ -187,14 +187,14 @@ class CachingIterableSource implements IIterableSource {
       const sourceReadStart = readHead;
 
       // Look for the block that comes after our read head
-      const nextBlockIndex = this.cache.findIndex((item) => {
+      const nextBlockIndex = this.#cache.findIndex((item) => {
         // Find the first index where readHead is less than an existing start
         return compare(readHead, item.start) < 0;
       });
 
       // If we have a next block (this is the block ours would come before), then we only need
       // to read up to that block.
-      const nextBlock = this.cache[nextBlockIndex];
+      const nextBlock = this.#cache[nextBlockIndex];
 
       let sourceReadEnd = nextBlock ? subtract(nextBlock.start, { sec: 0, nsec: 1 }) : maxEnd;
 
@@ -208,8 +208,8 @@ class CachingIterableSource implements IIterableSource {
         sourceReadEnd = maxEnd;
       }
 
-      const sourceMessageIterator = this.source.messageIterator({
-        topics: this.cachedTopics,
+      const sourceMessageIterator = this.#source.messageIterator({
+        topics: this.#cachedTopics,
         start: sourceReadStart,
         end: sourceReadEnd,
         consumptionType: args.consumptionType,
@@ -235,11 +235,11 @@ class CachingIterableSource implements IIterableSource {
 
           // Find where we need to insert our new block.
           // It should come before any blocks with a start time > than new block start time.
-          const insertIndex = sortedIndexBy(this.cache, newBlock, (item) => toNanoSec(item.start));
-          this.cache.splice(insertIndex, 0, newBlock);
+          const insertIndex = sortedIndexBy(this.#cache, newBlock, (item) => toNanoSec(item.start));
+          this.#cache.splice(insertIndex, 0, newBlock);
 
           block = newBlock;
-          this.recomputeLoadedRangeCache();
+          this.#recomputeLoadedRangeCache();
         }
 
         // When receiving a message event or stamp, we update our known time on the block to the
@@ -271,12 +271,12 @@ class CachingIterableSource implements IIterableSource {
             block.end = subtract(receiveTime, { sec: 0, nsec: 1 });
 
             lastTime = receiveTimeNs;
-            this.recomputeLoadedRangeCache();
+            this.#recomputeLoadedRangeCache();
           }
         }
 
         // Block is too big so we close it and will start a new one next loop
-        if (block.size >= this.maxBlockSizeBytes) {
+        if (block.size >= this.#maxBlockSizeBytes) {
           // The new block starts right after our previous one
           readHead = add(block.end, { sec: 0, nsec: 1 });
 
@@ -286,12 +286,12 @@ class CachingIterableSource implements IIterableSource {
 
         const sizeInBytes =
           iterResult.type === "message-event" ? iterResult.msgEvent.sizeInBytes : 0;
-        if (this.maybePurgeCache({ activeBlock: block, sizeInBytes })) {
-          this.recomputeLoadedRangeCache();
+        if (this.#maybePurgeCache({ activeBlock: block, sizeInBytes })) {
+          this.#recomputeLoadedRangeCache();
         }
 
         // As we add items to pending we also consider them as part of the total size
-        this.totalSizeBytes += sizeInBytes;
+        this.#totalSizeBytes += sizeInBytes;
 
         // Store the latest message in pending results and flush to the block when time moves forward
         pendingIterResults.push([lastTime, iterResult]);
@@ -314,7 +314,7 @@ class CachingIterableSource implements IIterableSource {
           block.size += pendingSizeInBytes;
         }
 
-        this.recomputeLoadedRangeCache();
+        this.#recomputeLoadedRangeCache();
       } else {
         // We don't have a block after finishing our source. This can happen if the last
         // thing we read in the source made our block be over size and we cycled to a new block.
@@ -338,10 +338,10 @@ class CachingIterableSource implements IIterableSource {
 
         // Find where we need to insert our new block.
         // It should come before any blocks with a start time > than new block start time.
-        const insertIndex = sortedIndexBy(this.cache, newBlock, (item) => toNanoSec(item.start));
-        this.cache.splice(insertIndex, 0, newBlock);
+        const insertIndex = sortedIndexBy(this.#cache, newBlock, (item) => toNanoSec(item.start));
+        this.#cache.splice(insertIndex, 0, newBlock);
 
-        this.recomputeLoadedRangeCache();
+        this.#recomputeLoadedRangeCache();
       }
 
       // We've read everything there was to read for this source, so our next read will be after
@@ -353,14 +353,14 @@ class CachingIterableSource implements IIterableSource {
   public async getBackfillMessages(
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<unknown>[]> {
-    if (!this.initResult) {
+    if (!this.#initResult) {
       throw new Error("Invariant: uninitialized");
     }
 
     // Find a block that contains args.time. We must find a block that contains args.time rather
     // than one that occurs anytime before args.time to correctly get the last message before
     // args.time rather than any message that occurs before args.time.
-    const cacheBlockIndex = this.cache.findIndex((item) => {
+    const cacheBlockIndex = this.#cache.findIndex((item) => {
       return compare(item.start, args.time) <= 0 && compare(item.end, args.time) >= 0;
     });
 
@@ -374,7 +374,7 @@ class CachingIterableSource implements IIterableSource {
     // We must stop going backwards when we have a gap because we can no longer know if the source
     // actually does have messages in the gap.
     for (let idx = cacheBlockIndex; idx >= 0 && needsTopics.size > 0; --idx) {
-      const cacheBlock = this.cache[idx];
+      const cacheBlock = this.#cache[idx];
       if (!cacheBlock) {
         break;
       }
@@ -416,7 +416,7 @@ class CachingIterableSource implements IIterableSource {
         }
       }
 
-      const prevBlock = this.cache[idx - 1];
+      const prevBlock = this.#cache[idx - 1];
       // If we have a gap between the start of our block and the previous block, then we must stop
       // trying to read from the block cache
       if (prevBlock && compare(add(prevBlock.end, { sec: 0, nsec: 1 }), cacheBlock.start) !== 0) {
@@ -430,7 +430,7 @@ class CachingIterableSource implements IIterableSource {
     }
 
     // fallback to the source for any topics we weren't able to load
-    const sourceBackfill = await this.source.getBackfillMessages({
+    const sourceBackfill = await this.#source.getBackfillMessages({
       ...args,
       topics: Array.from(needsTopics),
     });
@@ -441,22 +441,22 @@ class CachingIterableSource implements IIterableSource {
     return out;
   }
 
-  private recomputeLoadedRangeCache(): void {
-    if (!this.initResult) {
+  #recomputeLoadedRangeCache(): void {
+    if (!this.#initResult) {
       throw new Error("Invariant: uninitialized");
     }
 
     // The nanosecond time of the start of the source
-    const sourceStartNs = toNanoSec(this.initResult.start);
+    const sourceStartNs = toNanoSec(this.#initResult.start);
 
-    const rangeNs = Number(toNanoSec(subtract(this.initResult.end, this.initResult.start)));
+    const rangeNs = Number(toNanoSec(subtract(this.#initResult.end, this.#initResult.start)));
     if (rangeNs === 0) {
-      this.loadedRangesCache = [{ start: 0, end: 1 }];
+      this.#loadedRangesCache = [{ start: 0, end: 1 }];
       return;
     }
 
-    if (this.cache.length === 0) {
-      this.loadedRangesCache = [{ start: 0, end: 0 }];
+    if (this.#cache.length === 0) {
+      this.#loadedRangesCache = [{ start: 0, end: 0 }];
       return;
     }
 
@@ -465,7 +465,7 @@ class CachingIterableSource implements IIterableSource {
     // continuous ranges for continuous spans
     const ranges: { start: number; end: number }[] = [];
     let prevRange: { start: bigint; end: bigint } | undefined;
-    for (const block of this.cache) {
+    for (const block of this.#cache) {
       const range = {
         start: toNanoSec(block.start),
         end: toNanoSec(block.end),
@@ -489,31 +489,31 @@ class CachingIterableSource implements IIterableSource {
       });
     }
 
-    this.loadedRangesCache = ranges;
+    this.#loadedRangesCache = ranges;
   }
 
   // Purge the oldest cache block if adding sizeInBytes to the cache would exceed the maxTotalSizeBytes
   // @return true if a block was purged
   //
   // Throws if the cache block we want to purge is the active block.
-  private maybePurgeCache(opt: { activeBlock?: CacheBlock; sizeInBytes: number }): boolean {
+  #maybePurgeCache(opt: { activeBlock?: CacheBlock; sizeInBytes: number }): boolean {
     const { activeBlock, sizeInBytes } = opt;
 
     // Determine if our total size would exceed max and purge the oldest block
-    if (this.totalSizeBytes + sizeInBytes <= this.maxTotalSizeBytes) {
+    if (this.#totalSizeBytes + sizeInBytes <= this.#maxTotalSizeBytes) {
       return false;
     }
 
     // Find the oldest cache item
-    const oldestIdx = minIndexBy(this.cache, (a, b) => a.lastAccess - b.lastAccess);
+    const oldestIdx = minIndexBy(this.#cache, (a, b) => a.lastAccess - b.lastAccess);
 
-    const oldestBlock = this.cache[oldestIdx];
+    const oldestBlock = this.#cache[oldestIdx];
     if (oldestBlock) {
       if (oldestBlock === activeBlock) {
         throw new Error("Cannot evict the active cache block.");
       }
-      this.totalSizeBytes -= oldestBlock.size;
-      this.cache.splice(oldestIdx, 1);
+      this.#totalSizeBytes -= oldestBlock.size;
+      this.#cache.splice(oldestIdx, 1);
       return true;
     }
 

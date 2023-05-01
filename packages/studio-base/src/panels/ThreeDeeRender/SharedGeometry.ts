@@ -10,7 +10,7 @@ import * as THREE from "three";
  * singleton geometry.
  */
 export class SharedGeometry {
-  private _geometryMap = new Map<string, THREE.BufferGeometry>();
+  #geometryMap = new Map<string, THREE.BufferGeometry>();
 
   /**
    * Get a geometry from the map, or create it if it doesn't exist.
@@ -20,18 +20,18 @@ export class SharedGeometry {
    * @returns - created geometry if it doesn't exist or the existing geometry from the map
    */
   public getGeometry<T extends THREE.BufferGeometry>(key: string, createGeometry: () => T): T {
-    let geometry = this._geometryMap.get(key);
+    let geometry = this.#geometryMap.get(key);
     if (!geometry) {
       geometry = createGeometry();
-      this._geometryMap.set(key, geometry);
+      this.#geometryMap.set(key, geometry);
     }
     return geometry as T;
   }
   // disposes of all geometries and clears the map
   public dispose(): void {
-    for (const geometry of this._geometryMap.values()) {
+    for (const geometry of this.#geometryMap.values()) {
       geometry.dispose();
     }
-    this._geometryMap.clear();
+    this.#geometryMap.clear();
   }
 }

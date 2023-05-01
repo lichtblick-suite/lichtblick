@@ -59,7 +59,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
         label: "Remote file URL",
         placeholder: "https://example.com/file.bag",
         validate: (newValue: string): Error | undefined => {
-          return this.validateUrl(newValue);
+          return this.#validateUrl(newValue);
         },
       },
     ],
@@ -99,7 +99,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
     });
   }
 
-  private validateUrl(newValue: string): Error | undefined {
+  #validateUrl(newValue: string): Error | undefined {
     try {
       const url = new URL(newValue);
       const extension = path.extname(url.pathname);

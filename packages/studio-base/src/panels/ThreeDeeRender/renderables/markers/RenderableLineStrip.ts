@@ -18,9 +18,9 @@ import { LineMaterial } from "../../LineMaterial";
 import { Marker } from "../../ros";
 
 export class RenderableLineStrip extends RenderableMarker {
-  private geometry: LineGeometry;
-  private linePrepass: Line2;
-  private line: Line2;
+  #geometry: LineGeometry;
+  #linePrepass: Line2;
+  #line: Line2;
 
   public constructor(
     topic: string,
@@ -30,7 +30,7 @@ export class RenderableLineStrip extends RenderableMarker {
   ) {
     super(topic, marker, receiveTime, renderer);
 
-    this.geometry = new LineGeometry();
+    this.#geometry = new LineGeometry();
 
     const options = { resolution: renderer.input.canvasSize, worldUnits: true };
 
@@ -42,29 +42,29 @@ export class RenderableLineStrip extends RenderableMarker {
 
     // Depth pass 1
     const matLinePrepass = makeLinePrepassMaterial(marker, options);
-    this.linePrepass = new Line2(this.geometry, matLinePrepass);
-    this.linePrepass.renderOrder = 1;
-    this.linePrepass.userData.picking = false;
-    this.add(this.linePrepass);
+    this.#linePrepass = new Line2(this.#geometry, matLinePrepass);
+    this.#linePrepass.renderOrder = 1;
+    this.#linePrepass.userData.picking = false;
+    this.add(this.#linePrepass);
 
     // Color pass 2
     const matLine = makeLineMaterial(marker, options);
-    this.line = new Line2(this.geometry, matLine);
-    this.line.renderOrder = 2;
+    this.#line = new Line2(this.#geometry, matLine);
+    this.#line.renderOrder = 2;
     const pickingLineWidth = marker.scale.x * 1.2;
-    this.line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, options);
-    this.add(this.line);
+    this.#line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, options);
+    this.add(this.#line);
 
     this.update(marker, receiveTime);
   }
 
   public override dispose(): void {
-    this.linePrepass.material.dispose();
-    this.line.material.dispose();
+    this.#linePrepass.material.dispose();
+    this.#line.material.dispose();
 
-    const pickingMaterial = this.line.userData.pickingMaterial as THREE.ShaderMaterial;
+    const pickingMaterial = this.#line.userData.pickingMaterial as THREE.ShaderMaterial;
     pickingMaterial.dispose();
-    this.line.userData.pickingMaterial = undefined;
+    this.#line.userData.pickingMaterial = undefined;
 
     super.dispose();
   }
@@ -81,44 +81,44 @@ export class RenderableLineStrip extends RenderableMarker {
     if (pointsLength === 0) {
       // THREE.LineGeometry.setPositions crashes when given an empty array:
       // https://github.com/foxglove/studio/issues/3954
-      this.linePrepass.visible = false;
-      this.line.visible = false;
+      this.#linePrepass.visible = false;
+      this.#line.visible = false;
       return;
     } else {
-      this.linePrepass.visible = true;
-      this.line.visible = true;
+      this.#linePrepass.visible = true;
+      this.#line.visible = true;
     }
 
     if (transparent !== markerHasTransparency(prevMarker)) {
-      this.linePrepass.material.transparent = transparent;
-      this.linePrepass.material.depthWrite = !transparent;
-      this.linePrepass.material.needsUpdate = true;
-      this.line.material.transparent = transparent;
-      this.line.material.depthWrite = !transparent;
-      this.line.material.needsUpdate = true;
+      this.#linePrepass.material.transparent = transparent;
+      this.#linePrepass.material.depthWrite = !transparent;
+      this.#linePrepass.material.needsUpdate = true;
+      this.#line.material.transparent = transparent;
+      this.#line.material.depthWrite = !transparent;
+      this.#line.material.needsUpdate = true;
     }
 
-    const matLinePrepass = this.linePrepass.material as LineMaterial;
+    const matLinePrepass = this.#linePrepass.material as LineMaterial;
     matLinePrepass.lineWidth = lineWidth;
-    const matLine = this.line.material as LineMaterial;
+    const matLine = this.#line.material as LineMaterial;
     matLine.lineWidth = lineWidth;
 
-    const prevPointsLength = (this.geometry.attributes.instanceStart?.count ?? 0) * 2;
+    const prevPointsLength = (this.#geometry.attributes.instanceStart?.count ?? 0) * 2;
     if (pointsLength !== prevPointsLength) {
-      this.geometry.dispose();
-      this.geometry = new LineGeometry();
-      this.linePrepass.geometry = this.geometry;
-      this.line.geometry = this.geometry;
+      this.#geometry.dispose();
+      this.#geometry = new LineGeometry();
+      this.#linePrepass.geometry = this.#geometry;
+      this.#line.geometry = this.#geometry;
     }
 
-    this._setPositions(marker, pointsLength);
-    this._setColors(marker, pointsLength);
+    this.#setPositions(marker, pointsLength);
+    this.#setColors(marker, pointsLength);
 
-    this.linePrepass.computeLineDistances();
-    this.line.computeLineDistances();
+    this.#linePrepass.computeLineDistances();
+    this.#line.computeLineDistances();
   }
 
-  private _setPositions(marker: Marker, pointsLength: number): void {
+  #setPositions(marker: Marker, pointsLength: number): void {
     const linePositions = new Float32Array(3 * pointsLength);
     for (let i = 0; i < pointsLength; i++) {
       const point = marker.points[i]!;
@@ -128,10 +128,10 @@ export class RenderableLineStrip extends RenderableMarker {
       linePositions[offset + 2] = point.z;
     }
 
-    this.geometry.setPositions(linePositions);
+    this.#geometry.setPositions(linePositions);
   }
 
-  private _setColors(marker: Marker, pointsLength: number): void {
+  #setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to pairs format in a flattened typed array
     const rgbaData = new Float32Array(8 * pointsLength);
     const color1: THREE.Vector4Tuple = [0, 0, 0, 0];
@@ -158,11 +158,11 @@ export class RenderableLineStrip extends RenderableMarker {
 
     // [rgba, rgba]
     const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(rgbaData, 8, 1);
-    this.geometry.setAttribute(
+    this.#geometry.setAttribute(
       "instanceColorStart",
       new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0),
     );
-    this.geometry.setAttribute(
+    this.#geometry.setAttribute(
       "instanceColorEnd",
       new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4),
     );

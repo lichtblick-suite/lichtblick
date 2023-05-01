@@ -9,12 +9,12 @@ import type { IRenderer } from "./IRenderer";
 type vec4 = [number, number, number, number];
 
 export class ScreenOverlay extends THREE.Object3D {
-  private material: THREE.ShaderMaterial;
+  #material: THREE.ShaderMaterial;
 
   public constructor(renderer: IRenderer) {
     super();
 
-    this.material = new THREE.ShaderMaterial({
+    this.#material = new THREE.ShaderMaterial({
       transparent: true,
       uniforms: { color: { value: [1, 0, 1, 1] } },
       vertexShader: /* glsl */ `
@@ -30,13 +30,13 @@ export class ScreenOverlay extends THREE.Object3D {
     });
 
     const geometry = renderer.sharedGeometry.getGeometry(this.constructor.name, createGeometry);
-    const mesh = new THREE.Mesh(geometry, this.material);
+    const mesh = new THREE.Mesh(geometry, this.#material);
     mesh.frustumCulled = false;
     this.add(mesh);
   }
 
   public setColor(color: THREE.Color, opacity: number): void {
-    const colorUniform = this.material.uniforms.color!.value as vec4;
+    const colorUniform = this.#material.uniforms.color!.value as vec4;
     colorUniform[0] = color.r;
     colorUniform[1] = color.g;
     colorUniform[2] = color.b;

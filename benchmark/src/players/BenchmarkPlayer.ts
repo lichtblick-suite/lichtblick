@@ -30,27 +30,27 @@ const MAX_BLOCKS = 400;
 const CAPABILITIES: string[] = [PlayerCapabilities.playbackControl];
 
 class BenchmarkPlayer implements Player {
-  private source: IIterableSource;
-  private name: string;
-  private listener?: (state: PlayerState) => Promise<void>;
-  private subscriptions: SubscribePayload[] = [];
-  private _blockLoader?: BlockLoader;
-  private _problemManager = new PlayerProblemManager();
+  #source: IIterableSource;
+  #name: string;
+  #listener?: (state: PlayerState) => Promise<void>;
+  #subscriptions: SubscribePayload[] = [];
+  #blockLoader?: BlockLoader;
+  #problemManager = new PlayerProblemManager();
 
-  public constructor(name: string, source: BenchmarkPlayer["source"]) {
-    this.name = name;
-    this.source = source;
+  public constructor(name: string, source: IIterableSource) {
+    this.#name = name;
+    this.#source = source;
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.listener = listener;
-    void this.run();
+    this.#listener = listener;
+    void this.#run();
   }
   public close(): void {
     //throw new Error("Method not implemented.");
   }
   public setSubscriptions(subscriptions: SubscribePayload[]): void {
-    this.subscriptions = subscriptions;
+    this.#subscriptions = subscriptions;
   }
   public setPublishers(_publishers: AdvertiseOptions[]): void {
     //throw new Error("Method not implemented.");
@@ -68,8 +68,8 @@ class BenchmarkPlayer implements Player {
     throw new Error("Method not implemented.");
   }
 
-  private async run() {
-    const listener = this.listener;
+  async #run() {
+    const listener = this.#listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
@@ -79,14 +79,14 @@ class BenchmarkPlayer implements Player {
     await listener({
       profile: undefined,
       presence: PlayerPresence.INITIALIZING,
-      name: this.name + "\ninitializing source",
-      playerId: this.name,
+      name: this.#name + "\ninitializing source",
+      playerId: this.#name,
       capabilities: CAPABILITIES,
       progress: {},
     });
 
     // initialize
-    const result = await this.source.initialize();
+    const result = await this.#source.initialize();
 
     const { start: startTime, end: endTime, topicStats, datatypes, topics } = result;
 
@@ -104,8 +104,8 @@ class BenchmarkPlayer implements Player {
       await listener({
         profile: undefined,
         presence: PlayerPresence.INITIALIZING,
-        name: this.name + "\ngetting messages",
-        playerId: this.name,
+        name: this.#name + "\ngetting messages",
+        playerId: this.#name,
         capabilities: CAPABILITIES,
         progress: {},
         activeData: {
@@ -122,25 +122,25 @@ class BenchmarkPlayer implements Player {
           datatypes,
         },
       });
-    } while (this.subscriptions.length === 0);
+    } while (this.#subscriptions.length === 0);
 
     // Get all messages for our subscriptions
-    const subscribeTopics = this.subscriptions.map((sub) => sub.topic);
+    const subscribeTopics = this.#subscriptions.map((sub) => sub.topic);
     const topicsForPreload = new Set(
-      filterMap(this.subscriptions, (sub) => (sub.preloadType === "full" ? sub.topic : undefined)),
+      filterMap(this.#subscriptions, (sub) => (sub.preloadType === "full" ? sub.topic : undefined)),
     );
-    const iterator = this.source.messageIterator({
+    const iterator = this.#source.messageIterator({
       topics: subscribeTopics,
     });
     try {
-      this._blockLoader = new BlockLoader({
+      this.#blockLoader = new BlockLoader({
         cacheSizeBytes: DEFAULT_CACHE_SIZE_BYTES,
-        source: this.source,
+        source: this.#source,
         start: startTime,
         end: endTime,
         maxBlocks: MAX_BLOCKS,
         minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
-        problemManager: this._problemManager,
+        problemManager: this.#problemManager,
       });
     } catch (err) {
       log.error(err);
@@ -148,14 +148,14 @@ class BenchmarkPlayer implements Player {
       const startStr = toRFC3339String(startTime);
       const endStr = toRFC3339String(endTime);
 
-      this._problemManager.addProblem("block-loader", {
+      this.#problemManager.addProblem("block-loader", {
         severity: "warn",
         message: "Failed to initialize message preloading",
         tip: `The start (${startStr}) and end (${endStr}) of your data is too far apart.`,
         error: err,
       });
     }
-    this._blockLoader?.setTopics(topicsForPreload);
+    this.#blockLoader?.setTopics(topicsForPreload);
 
     const msgEvents: MessageEvent<unknown>[] = [];
     const frameMs: number[] = [];
@@ -175,14 +175,14 @@ class BenchmarkPlayer implements Player {
 
     log.info("Preloading messages");
     performance.mark("preloading-start");
-    await this._blockLoader?.startLoading({
+    await this.#blockLoader?.startLoading({
       progress: (progress: Progress) => {
         progressForListener = progress;
         if (
           progress.fullyLoadedFractionRanges?.length === 1 &&
           progress.fullyLoadedFractionRanges[0]!.end === 1
         ) {
-          void this._blockLoader?.stopLoading();
+          void this.#blockLoader?.stopLoading();
         }
       },
     });
@@ -201,8 +201,8 @@ class BenchmarkPlayer implements Player {
       await listener({
         profile: undefined,
         presence: PlayerPresence.PRESENT,
-        name: this.name,
-        playerId: this.name,
+        name: this.#name,
+        playerId: this.#name,
         capabilities: CAPABILITIES,
         progress: progressForListener,
         activeData: {
@@ -250,8 +250,8 @@ class BenchmarkPlayer implements Player {
         await listener({
           profile: undefined,
           presence: PlayerPresence.PRESENT,
-          name: this.name,
-          playerId: this.name,
+          name: this.#name,
+          playerId: this.#name,
           capabilities: CAPABILITIES,
           progress: progressForListener,
           activeData: {

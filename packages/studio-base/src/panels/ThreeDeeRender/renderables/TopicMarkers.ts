@@ -72,13 +72,13 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     switch (marker.action) {
       case MarkerAction.ADD:
       case MarkerAction.MODIFY:
-        this._addOrUpdateMarker(marker, receiveTime);
+        this.#addOrUpdateMarker(marker, receiveTime);
         break;
       case MarkerAction.DELETE:
-        this._deleteMarker(marker.ns, marker.id);
+        this.#deleteMarker(marker.ns, marker.id);
         break;
       case MarkerAction.DELETEALL: {
-        this._deleteAllMarkers(marker.ns);
+        this.#deleteAllMarkers(marker.ns);
         break;
       }
       default:
@@ -122,7 +122,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
         // Check if this marker has expired
         if (expiresIn != undefined) {
           if (currentTime > receiveTime + expiresIn) {
-            this._deleteMarker(ns.namespace, marker.id);
+            this.#deleteMarker(ns.namespace, marker.id);
             continue;
           }
         }
@@ -150,7 +150,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     }
   }
 
-  private _addOrUpdateMarker(marker: Marker, receiveTime: bigint): void {
+  #addOrUpdateMarker(marker: Marker, receiveTime: bigint): void {
     let ns = this.namespaces.get(marker.ns);
     if (!ns) {
       ns = new MarkersNamespace(this.topic, marker.ns, this.renderer);
@@ -161,12 +161,12 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
 
     // Check if the marker with this id changed type
     if (renderable && renderable.userData.marker.type !== marker.type) {
-      this._deleteMarker(marker.ns, marker.id);
+      this.#deleteMarker(marker.ns, marker.id);
       renderable = undefined;
     }
 
     if (!renderable) {
-      renderable = this._createMarkerRenderable(marker, receiveTime);
+      renderable = this.#createMarkerRenderable(marker, receiveTime);
       if (!renderable) {
         return;
       }
@@ -177,7 +177,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     renderable.update(marker, receiveTime);
   }
 
-  private _deleteMarker(ns: string, id: number): boolean {
+  #deleteMarker(ns: string, id: number): boolean {
     const namespace = this.namespaces.get(ns);
     if (namespace) {
       const renderable = namespace.markersById.get(id);
@@ -191,7 +191,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     return false;
   }
 
-  private _deleteAllMarkers(ns: string): void {
+  #deleteAllMarkers(ns: string): void {
     const clearNamespace = (namespace: MarkersNamespace): void => {
       for (const renderable of namespace.markersById.values()) {
         this.remove(renderable);
@@ -214,10 +214,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     }
   }
 
-  private _createMarkerRenderable(
-    marker: Marker,
-    receiveTime: bigint,
-  ): RenderableMarker | undefined {
+  #createMarkerRenderable(marker: Marker, receiveTime: bigint): RenderableMarker | undefined {
     const pool = this.renderer.markerPool;
     switch (marker.type) {
       case MarkerType.ARROW:

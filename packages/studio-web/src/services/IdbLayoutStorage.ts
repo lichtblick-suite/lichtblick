@@ -30,7 +30,7 @@ interface LayoutsDB extends IDB.DBSchema {
  * being the tuple of [namespace, id].
  */
 export class IdbLayoutStorage implements ILayoutStorage {
-  private _db = IDB.openDB<LayoutsDB>(DATABASE_NAME, 1, {
+  #db = IDB.openDB<LayoutsDB>(DATABASE_NAME, 1, {
     upgrade(db) {
       const store = db.createObjectStore(OBJECT_STORE_NAME, {
         keyPath: ["namespace", "layout.id"],
@@ -42,7 +42,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
   public async list(namespace: string): Promise<readonly Layout[]> {
     const results: Layout[] = [];
     const records = await (
-      await this._db
+      await this.#db
     ).getAllFromIndex(OBJECT_STORE_NAME, "namespace", namespace);
     for (const record of records) {
       try {
@@ -55,17 +55,17 @@ export class IdbLayoutStorage implements ILayoutStorage {
   }
 
   public async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
-    const record = await (await this._db).get(OBJECT_STORE_NAME, [namespace, id]);
+    const record = await (await this.#db).get(OBJECT_STORE_NAME, [namespace, id]);
     return record == undefined ? undefined : migrateLayout(record.layout);
   }
 
   public async put(namespace: string, layout: Layout): Promise<Layout> {
-    await (await this._db).put(OBJECT_STORE_NAME, { namespace, layout });
+    await (await this.#db).put(OBJECT_STORE_NAME, { namespace, layout });
     return layout;
   }
 
   public async delete(namespace: string, id: LayoutID): Promise<void> {
-    await (await this._db).delete(OBJECT_STORE_NAME, [namespace, id]);
+    await (await this.#db).delete(OBJECT_STORE_NAME, [namespace, id]);
   }
 
   public async importLayouts({
@@ -75,7 +75,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
     fromNamespace: string;
     toNamespace: string;
   }): Promise<void> {
-    const tx = (await this._db).transaction("layouts", "readwrite");
+    const tx = (await this.#db).transaction("layouts", "readwrite");
     const store = tx.objectStore("layouts");
 
     try {
@@ -90,7 +90,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
   }
 
   public async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
-    await this._migrateFromLocalStorage();
+    await this.#migrateFromLocalStorage();
 
     // At the time IdbLayoutStorage was created, all layouts were already namespaced, so there are
     // no un-namespaced layouts to migrate.
@@ -102,7 +102,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
    * prefix. This approach was abandoned due to small capacity constraints on localStorage.
    * https://github.com/foxglove/studio/issues/3100
    */
-  private async _migrateFromLocalStorage() {
+  async #migrateFromLocalStorage() {
     const legacyLocalStorageKeyPrefix = "studio.layouts";
     const keysToMigrate: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -125,7 +125,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
           continue;
         }
         // use a separate transaction per item so we can be sure it is safe to delete from localStorage
-        await (await this._db).put("layouts", { namespace, layout });
+        await (await this.#db).put("layouts", { namespace, layout });
         localStorage.removeItem(key);
       } catch (err) {
         log.error(err);

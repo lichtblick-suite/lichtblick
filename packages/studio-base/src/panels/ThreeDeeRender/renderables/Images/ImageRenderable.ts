@@ -152,26 +152,26 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.updateHeaderInfo();
 
     if (this.#geometryNeedsUpdate) {
-      this.rebuildGeometry();
+      this.#rebuildGeometry();
       this.#geometryNeedsUpdate = false;
     }
 
     if (this.#textureNeedsUpdate) {
-      this.updateTexture();
+      this.#updateTexture();
       this.#textureNeedsUpdate = false;
     }
     if (this.#materialNeedsUpdate) {
-      this.updateMaterial();
+      this.#updateMaterial();
       this.#materialNeedsUpdate = false;
     }
 
     if (this.#meshNeedsUpdate && this.userData.texture) {
-      this.updateMesh();
+      this.#updateMesh();
       this.#meshNeedsUpdate = false;
     }
   }
 
-  private rebuildGeometry() {
+  #rebuildGeometry() {
     assert(this.userData.cameraModel, "Camera model must be set before geometry can be updated");
     // Dispose of the current geometry if the settings have changed
     this.userData.geometry?.dispose();
@@ -181,7 +181,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.#meshNeedsUpdate = true;
   }
 
-  private updateTexture(): void {
+  #updateTexture(): void {
     assert(this.userData.image, "Image must be set before texture can be updated or created");
     const image = this.userData.image;
     // Create or update the bitmap texture
@@ -198,13 +198,13 @@ export class ImageRenderable extends Renderable<ImageUserData> {
             this.userData.texture.needsUpdate = true;
           }
 
-          this.removeTopicError(CREATE_BITMAP_ERR);
+          this.#removeTopicError(CREATE_BITMAP_ERR);
           this.#materialNeedsUpdate = true;
           this.update();
           this.renderer.queueAnimationFrame();
         })
         .catch((err) => {
-          this.addTopicError(CREATE_BITMAP_ERR, `createBitmap failed: ${err.message}`);
+          this.#addTopicError(CREATE_BITMAP_ERR, `createBitmap failed: ${err.message}`);
         });
     } else {
       const { width, height } = image;
@@ -225,15 +225,15 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.#materialNeedsUpdate = true;
   }
 
-  private addTopicError(key: string, errorMessage: string) {
+  #addTopicError(key: string, errorMessage: string) {
     this.renderer.settings.errors.add(this.userData.settingsPath, key, errorMessage);
   }
-  private removeTopicError(key: string) {
+  #removeTopicError(key: string) {
     this.renderer.settings.errors.remove(this.userData.settingsPath, key);
   }
-  private updateMaterial(): void {
+  #updateMaterial(): void {
     if (!this.userData.material) {
-      this.initMaterial();
+      this.#initMaterial();
       this.#meshNeedsUpdate = true;
     }
     const material = this.userData.material!;
@@ -263,7 +263,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     material.needsUpdate = true;
   }
 
-  private initMaterial(): void {
+  #initMaterial(): void {
     stringToRgba(tempColor, this.userData.settings.color);
     const transparent = tempColor.a < 1;
     const color = new THREE.Color(tempColor.r, tempColor.g, tempColor.b);
@@ -277,7 +277,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     });
   }
 
-  private updateMesh(): void {
+  #updateMesh(): void {
     assert(this.userData.geometry, "Geometry must be set before mesh can be updated or created");
     assert(this.userData.material, "Material must be set before mesh can be updated or created");
     if (!this.userData.mesh) {

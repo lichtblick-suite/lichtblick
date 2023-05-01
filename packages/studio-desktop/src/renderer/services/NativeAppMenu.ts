@@ -9,21 +9,21 @@ import { NativeMenuBridge } from "../../common/types";
 type Handler = () => void;
 
 export class NativeAppMenu implements INativeAppMenu {
-  private bridge?: NativeMenuBridge;
+  #bridge?: NativeMenuBridge;
 
   public constructor(bridge?: NativeMenuBridge) {
-    this.bridge = bridge;
+    this.#bridge = bridge;
   }
   public addFileEntry(name: string, handler: Handler): void {
-    void this.bridge?.menuAddInputSource(name, handler);
+    void this.#bridge?.menuAddInputSource(name, handler);
   }
   public removeFileEntry(name: string): void {
-    void this.bridge?.menuRemoveInputSource(name);
+    void this.#bridge?.menuRemoveInputSource(name);
   }
   public on(name: NativeAppMenuEvent, listener: Handler): void {
-    this.bridge?.addIpcEventListener(name, listener);
+    this.#bridge?.addIpcEventListener(name, listener);
   }
   public off(name: NativeAppMenuEvent, listener: Handler): void {
-    this.bridge?.removeIpcEventListener(name, listener);
+    this.#bridge?.removeIpcEventListener(name, listener);
   }
 }

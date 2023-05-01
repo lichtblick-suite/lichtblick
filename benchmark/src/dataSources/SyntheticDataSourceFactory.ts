@@ -18,15 +18,15 @@ class SyntheticDataSourceFactory implements IDataSourceFactory {
   public displayName = "Synthetic";
   public iconName: IDataSourceFactory["iconName"] = "FileASPX";
 
-  private newFn: PlayerConstructor;
+  #newFn: PlayerConstructor;
 
   public constructor(id: string, newFn: PlayerConstructor) {
     this.id = id;
-    this.newFn = newFn;
+    this.#newFn = newFn;
   }
 
   public initialize(_args: DataSourceFactoryInitializeArgs): Player | undefined {
-    return new this.newFn();
+    return new this.#newFn();
   }
 }
 

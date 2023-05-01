@@ -29,16 +29,16 @@ const CONSTRUCTORS = {
  * An object pool for RenderablePrimitive subclass objects.
  */
 export class PrimitivePool {
-  private primitivesByType = new Map<PrimitiveType, RenderablePrimitive[]>();
-  private disposed = false;
+  #primitivesByType = new Map<PrimitiveType, RenderablePrimitive[]>();
+  #disposed = false;
 
   public constructor(private renderer: IRenderer) {}
 
   public acquire<T extends PrimitiveType>(type: T): InstanceType<(typeof CONSTRUCTORS)[T]> {
-    if (this.disposed) {
+    if (this.#disposed) {
       throw new Error(`Attempt to acquire PrimitiveType.${type} after PrimitivePool was disposed`);
     }
-    const primitive = this.primitivesByType.get(type)?.pop();
+    const primitive = this.#primitivesByType.get(type)?.pop();
     if (primitive) {
       primitive.prepareForReuse();
       return primitive as InstanceType<(typeof CONSTRUCTORS)[T]>;
@@ -51,30 +51,30 @@ export class PrimitivePool {
     type: T,
     primitive: InstanceType<(typeof CONSTRUCTORS)[T]>,
   ): void {
-    if (this.disposed) {
+    if (this.#disposed) {
       primitive.dispose();
       return;
     }
-    const primitives = this.primitivesByType.get(type);
+    const primitives = this.#primitivesByType.get(type);
     if (!primitives) {
-      this.primitivesByType.set(type, [primitive]);
+      this.#primitivesByType.set(type, [primitive]);
     } else {
       primitives.push(primitive);
     }
   }
 
   public dispose(): void {
-    for (const primitives of this.primitivesByType.values()) {
+    for (const primitives of this.#primitivesByType.values()) {
       for (const primitive of primitives) {
         primitive.dispose();
       }
     }
-    this.primitivesByType.clear();
-    this.disposed = true;
+    this.#primitivesByType.clear();
+    this.#disposed = true;
   }
 
   public setColorScheme(colorScheme: "dark" | "light"): void {
-    for (const primitives of this.primitivesByType.values()) {
+    for (const primitives of this.#primitivesByType.values()) {
       for (const primitive of primitives) {
         primitive.setColorScheme(colorScheme);
       }

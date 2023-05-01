@@ -12,22 +12,22 @@ const DEFAULT_CAMERA_STATE = {
 };
 
 export class ImageModeCamera extends THREE.PerspectiveCamera {
-  private model?: PinholeCameraModel;
-  private cameraState = DEFAULT_CAMERA_STATE;
+  #model?: PinholeCameraModel;
+  #cameraState = DEFAULT_CAMERA_STATE;
 
   /** x/y zoom factors derived from image and window aspect ratios */
-  private aspectZoom = new THREE.Vector2();
-  private canvasSize = new THREE.Vector2();
+  #aspectZoom = new THREE.Vector2();
+  #canvasSize = new THREE.Vector2();
 
   public updateCamera(cameraModel: PinholeCameraModel): void {
-    this.model = cameraModel;
-    this.updateProjection();
+    this.#model = cameraModel;
+    this.#updateProjection();
   }
 
-  private updateProjection(): void {
-    this.updateAspectScaledZoom();
+  #updateProjection(): void {
+    this.#updateAspectScaledZoom();
 
-    const projection = this.getProjection();
+    const projection = this.#getProjection();
 
     if (projection) {
       this.projectionMatrix.copy(projection);
@@ -39,8 +39,8 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
    * Get Perspective projection matrix from this.cameraModel.model
    * @returns the projection matrix for the current camera model, or undefined if no camera model is available
    */
-  private getProjection(): THREE.Matrix4 | undefined {
-    const model = this.model;
+  #getProjection(): THREE.Matrix4 | undefined {
+    const model = this.#model;
     if (!model?.P) {
       return;
     }
@@ -55,11 +55,11 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
     const cy = model.P[6];
     const { width, height } = model;
 
-    const zoom = this.aspectZoom;
+    const zoom = this.#aspectZoom;
     const zoomX = zoom.x;
     const zoomY = zoom.y;
-    const near = this.cameraState.near;
-    const far = this.cameraState.far;
+    const near = this.#cameraState.near;
+    const far = this.#cameraState.far;
 
     // prettier-ignore
     const matrix = new THREE.Matrix4()
@@ -75,43 +75,43 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
 
   /** Set canvas size in CSS pixels */
   public setCanvasSize(width: number, height: number): void {
-    this.canvasSize.set(width, height);
-    this.updateProjection();
+    this.#canvasSize.set(width, height);
+    this.#updateProjection();
   }
 
   /** @returns The ratio of CSS pixels per image pixel */
   public getEffectiveScale(): number {
-    if (!this.model) {
+    if (!this.#model) {
       return 1;
     }
     return Math.min(
-      (this.canvasSize.width / this.model.width) * this.aspectZoom.x,
-      (this.canvasSize.height / this.model.height) * this.aspectZoom.y,
+      (this.#canvasSize.width / this.#model.width) * this.#aspectZoom.x,
+      (this.#canvasSize.height / this.#model.height) * this.#aspectZoom.y,
     );
   }
 
   /**
    * Uses the camera model to compute the zoom factors to preserve the aspect ratio of the image.
    */
-  private updateAspectScaledZoom(): void {
-    const model = this.model;
+  #updateAspectScaledZoom(): void {
+    const model = this.#model;
     if (!model?.P) {
       return;
     }
     // Adapted from https://github.com/ros2/rviz/blob/ee44ccde8a7049073fd1901dd36c1fb69110f726/rviz_default_plugins/src/rviz_default_plugins/displays/camera/camera_display.cpp#L568
-    this.aspectZoom.set(1.0, 1.0);
+    this.#aspectZoom.set(1.0, 1.0);
 
     const { width: imgWidth, height: imgHeight } = model;
 
     const fx = model.P[0]!;
     const fy = model.P[5]!;
-    const rendererAspect = this.canvasSize.width / this.canvasSize.height;
+    const rendererAspect = this.#canvasSize.width / this.#canvasSize.height;
     const imageAspect = imgWidth / fx / (imgHeight / fy);
     // preserve the aspect ratio
     if (imageAspect > rendererAspect) {
-      this.aspectZoom.y = (this.aspectZoom.y / imageAspect) * rendererAspect;
+      this.#aspectZoom.y = (this.#aspectZoom.y / imageAspect) * rendererAspect;
     } else {
-      this.aspectZoom.x = (this.aspectZoom.x / rendererAspect) * imageAspect;
+      this.#aspectZoom.x = (this.#aspectZoom.x / rendererAspect) * imageAspect;
     }
   }
 }

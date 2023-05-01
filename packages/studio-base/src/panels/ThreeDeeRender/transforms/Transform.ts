@@ -12,48 +12,48 @@ import { Pose, getRotationNoScaling, mat4Identity, quatIdentity, vec3Identity } 
  * are automatically kept in sync.
  */
 export class Transform {
-  private _position: vec3;
-  private _rotation: quat;
-  private _matrix: mat4;
+  #position: vec3;
+  #rotation: quat;
+  #matrix: mat4;
 
   public constructor(matrixOrPosition: mat4 | vec3, rotation?: quat) {
     if (matrixOrPosition.length === 16) {
-      this._matrix = matrixOrPosition;
-      this._position = [0, 0, 0];
-      this._rotation = [0, 0, 0, 1];
-      mat4.getTranslation(this._position, this._matrix);
-      getRotationNoScaling(this._rotation, this._matrix);
+      this.#matrix = matrixOrPosition;
+      this.#position = [0, 0, 0];
+      this.#rotation = [0, 0, 0, 1];
+      mat4.getTranslation(this.#position, this.#matrix);
+      getRotationNoScaling(this.#rotation, this.#matrix);
     } else if (matrixOrPosition.length === 3 && rotation != undefined) {
-      this._position = matrixOrPosition;
-      this._rotation = rotation;
-      quat.normalize(this._rotation, this._rotation);
-      this._matrix = mat4.fromRotationTranslation(mat4Identity(), this._rotation, this._position);
+      this.#position = matrixOrPosition;
+      this.#rotation = rotation;
+      quat.normalize(this.#rotation, this.#rotation);
+      this.#matrix = mat4.fromRotationTranslation(mat4Identity(), this.#rotation, this.#position);
     } else {
       throw new Error(`new Transform() expected either mat4 or vec3 + quat`);
     }
   }
 
   public position(): ReadonlyVec3 {
-    return this._position;
+    return this.#position;
   }
 
   public rotation(): ReadonlyQuat {
-    return this._rotation;
+    return this.#rotation;
   }
 
   public matrix(): ReadonlyMat4 {
-    return this._matrix;
+    return this.#matrix;
   }
 
   public setPosition(position: ReadonlyVec3): this {
-    vec3.copy(this._position, position);
-    mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
+    vec3.copy(this.#position, position);
+    mat4.fromRotationTranslation(this.#matrix, this.#rotation, this.#position);
     return this;
   }
 
   public setRotation(rotation: ReadonlyQuat): this {
-    quat.normalize(this._rotation, rotation);
-    mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
+    quat.normalize(this.#rotation, rotation);
+    mat4.fromRotationTranslation(this.#matrix, this.#rotation, this.#position);
     return this;
   }
 
@@ -63,9 +63,9 @@ export class Transform {
    * update the matrix once
    */
   public setPositionRotation(position: ReadonlyVec3, rotation: ReadonlyQuat): this {
-    vec3.copy(this._position, position);
-    quat.normalize(this._rotation, rotation);
-    mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
+    vec3.copy(this.#position, position);
+    quat.normalize(this.#rotation, rotation);
+    mat4.fromRotationTranslation(this.#matrix, this.#rotation, this.#position);
     return this;
   }
 
@@ -73,16 +73,16 @@ export class Transform {
    * Update position and rotation from a Pose object
    */
   public setPose(pose: Readonly<Pose>): this {
-    vec3.set(this._position, pose.position.x, pose.position.y, pose.position.z);
+    vec3.set(this.#position, pose.position.x, pose.position.y, pose.position.z);
     quat.set(
-      this._rotation,
+      this.#rotation,
       pose.orientation.x,
       pose.orientation.y,
       pose.orientation.z,
       pose.orientation.w,
     );
-    quat.normalize(this._rotation, this._rotation);
-    mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
+    quat.normalize(this.#rotation, this.#rotation);
+    mat4.fromRotationTranslation(this.#matrix, this.#rotation, this.#position);
     return this;
   }
 
@@ -90,9 +90,9 @@ export class Transform {
    * Update position and rotation from a matrix with unit scale
    */
   public setMatrixUnscaled(matrix: ReadonlyMat4): this {
-    mat4.copy(this._matrix, matrix);
-    mat4.getTranslation(this._position, matrix);
-    getRotationNoScaling(this._rotation, matrix); // A faster mat4.getRotation when there is no scaling
+    mat4.copy(this.#matrix, matrix);
+    mat4.getTranslation(this.#position, matrix);
+    getRotationNoScaling(this.#rotation, matrix); // A faster mat4.getRotation when there is no scaling
     return this;
   }
 
@@ -100,23 +100,20 @@ export class Transform {
    * Copy the values in another transform into this one
    */
   public copy(other: Transform): this {
-    // eslint-disable-next-line no-underscore-dangle
-    vec3.copy(this._position, other._position);
-    // eslint-disable-next-line no-underscore-dangle
-    quat.copy(this._rotation, other._rotation);
-    // eslint-disable-next-line no-underscore-dangle
-    mat4.copy(this._matrix, other._matrix);
+    vec3.copy(this.#position, other.#position);
+    quat.copy(this.#rotation, other.#rotation);
+    mat4.copy(this.#matrix, other.#matrix);
     return this;
   }
 
   public toPose(out: Pose): void {
-    out.position.x = this._position[0];
-    out.position.y = this._position[1];
-    out.position.z = this._position[2];
-    out.orientation.x = this._rotation[0];
-    out.orientation.y = this._rotation[1];
-    out.orientation.z = this._rotation[2];
-    out.orientation.w = this._rotation[3];
+    out.position.x = this.#position[0];
+    out.position.y = this.#position[1];
+    out.position.z = this.#position[2];
+    out.orientation.x = this.#rotation[0];
+    out.orientation.y = this.#rotation[1];
+    out.orientation.z = this.#rotation[2];
+    out.orientation.w = this.#rotation[3];
   }
 
   public static Identity(): Transform {
@@ -135,12 +132,9 @@ export class Transform {
    * @returns A reference to `out`
    */
   public static Interpolate(out: Transform, a: Transform, b: Transform, t: number): Transform {
-    // eslint-disable-next-line no-underscore-dangle
-    vec3.lerp(out._position, a.position(), b.position(), t);
-    // eslint-disable-next-line no-underscore-dangle
-    quat.slerp(out._rotation, a.rotation(), b.rotation(), t);
-    // eslint-disable-next-line no-underscore-dangle
-    out.setPositionRotation(out._position, out._rotation);
+    vec3.lerp(out.#position, a.position(), b.position(), t);
+    quat.slerp(out.#rotation, a.rotation(), b.rotation(), t);
+    out.setPositionRotation(out.#position, out.#rotation);
     return out;
   }
 }

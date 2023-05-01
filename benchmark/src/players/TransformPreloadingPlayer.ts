@@ -29,23 +29,23 @@ const log = Log.getLogger(__filename);
 const CAPABILITIES: string[] = [PlayerCapabilities.playbackControl];
 
 class TransformPreloadingPlayer implements Player {
-  private name: string = "transformpreloading";
-  private listener?: (state: PlayerState) => Promise<void>;
-  private datatypes: RosDatatypes = new Map();
-  private startTime: Time;
-  private endTime: Time;
-  private topicStats: Map<string, TopicStats>;
-  private topics: Topic[];
+  #name: string = "transformpreloading";
+  #listener?: (state: PlayerState) => Promise<void>;
+  #datatypes: RosDatatypes = new Map();
+  #startTime: Time;
+  #endTime: Time;
+  #topicStats: Map<string, TopicStats>;
+  #topics: Topic[];
 
   public constructor() {
-    this.datatypes.set("Time", {
+    this.#datatypes.set("Time", {
       definitions: [
         { name: "sec", type: "uint32" },
         { name: "nsec", type: "uint32" },
       ],
     });
 
-    this.datatypes.set("foxglove.FrameTransform", {
+    this.#datatypes.set("foxglove.FrameTransform", {
       name: "foxglove.FrameTransform",
       definitions: [
         { name: "timestamp", type: "Time", isComplex: true },
@@ -55,10 +55,10 @@ class TransformPreloadingPlayer implements Player {
         { name: "rotation", type: "Quaternion", isComplex: true },
       ],
     });
-    this.startTime = { sec: 0, nsec: 0 };
-    this.endTime = { sec: 600, nsec: 0 };
+    this.#startTime = { sec: 0, nsec: 0 };
+    this.#endTime = { sec: 600, nsec: 0 };
 
-    this.topicStats = new Map([
+    this.#topicStats = new Map([
       [
         "/100hz",
         {
@@ -77,7 +77,7 @@ class TransformPreloadingPlayer implements Player {
       ],
     ]);
 
-    this.topics = [
+    this.#topics = [
       {
         name: "/100hz",
         schemaName: "foxglove.FrameTransform",
@@ -90,8 +90,8 @@ class TransformPreloadingPlayer implements Player {
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.listener = listener;
-    void this.run();
+    this.#listener = listener;
+    void this.#run();
   }
   public close(): void {
     // no-op
@@ -115,8 +115,8 @@ class TransformPreloadingPlayer implements Player {
     throw new Error("Method not implemented.");
   }
 
-  private async run() {
-    const listener = this.listener;
+  async #run() {
+    const listener = this.#listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
@@ -126,34 +126,34 @@ class TransformPreloadingPlayer implements Player {
     await listener({
       profile: undefined,
       presence: PlayerPresence.PRESENT,
-      name: this.name,
-      playerId: this.name,
+      name: this.#name,
+      playerId: this.#name,
       capabilities: CAPABILITIES,
       progress: {},
       urlState: {
-        sourceId: this.name,
+        sourceId: this.#name,
       },
     });
 
     await listener({
       profile: undefined,
       presence: PlayerPresence.INITIALIZING,
-      name: this.name + "\ngetting messages",
-      playerId: this.name,
+      name: this.#name + "\ngetting messages",
+      playerId: this.#name,
       capabilities: CAPABILITIES,
       progress: {},
       activeData: {
         messages: [],
         totalBytesReceived: 0,
-        currentTime: this.startTime,
-        startTime: this.startTime,
+        currentTime: this.#startTime,
+        startTime: this.#startTime,
         isPlaying: false,
         speed: 1,
         lastSeekTime: 1,
-        endTime: this.endTime,
-        topics: this.topics,
-        topicStats: this.topicStats,
-        datatypes: this.datatypes,
+        endTime: this.#endTime,
+        topics: this.#topics,
+        topicStats: this.#topicStats,
+        datatypes: this.#datatypes,
       },
     });
 
@@ -162,7 +162,7 @@ class TransformPreloadingPlayer implements Player {
     const msgs100Hz = getTfMessages({
       topic: "/100hz",
       startSeconds: 0,
-      endSeconds: this.endTime.sec,
+      endSeconds: this.#endTime.sec,
       tfParams: {
         axis: "x",
         parent: "base_link",
@@ -173,7 +173,7 @@ class TransformPreloadingPlayer implements Player {
     const msgs150Hz = getTfMessages({
       topic: "/150hz",
       startSeconds: 0,
-      endSeconds: this.endTime.sec,
+      endSeconds: this.#endTime.sec,
       tfParams: { axis: "z", parent: "100hz", frequencyHz: 150, translation: { x: 0, y: 0, z: 1 } },
     });
 
@@ -225,22 +225,22 @@ class TransformPreloadingPlayer implements Player {
         await listener({
           profile: undefined,
           presence: PlayerPresence.PRESENT,
-          name: this.name,
-          playerId: this.name,
+          name: this.#name,
+          playerId: this.#name,
           capabilities: CAPABILITIES,
           progress: progressForListener,
           activeData: {
             messages: [seekToMessage],
             totalBytesReceived: 1,
-            startTime: this.startTime,
-            endTime: this.endTime,
+            startTime: this.#startTime,
+            endTime: this.#endTime,
             currentTime: seekToMessage.receiveTime,
             isPlaying: false,
             speed: 1,
             lastSeekTime: Date.now(),
-            topics: this.topics,
-            topicStats: this.topicStats,
-            datatypes: this.datatypes,
+            topics: this.#topics,
+            topicStats: this.#topicStats,
+            datatypes: this.#datatypes,
           },
         });
         const endFrame = performance.now();
@@ -269,22 +269,22 @@ class TransformPreloadingPlayer implements Player {
         await listener({
           profile: undefined,
           presence: PlayerPresence.PRESENT,
-          name: this.name,
-          playerId: this.name,
+          name: this.#name,
+          playerId: this.#name,
           capabilities: CAPABILITIES,
           progress: progressForListener,
           activeData: {
             messages: [seekToMessage],
             totalBytesReceived: 1,
-            startTime: this.startTime,
-            endTime: this.endTime,
+            startTime: this.#startTime,
+            endTime: this.#endTime,
             currentTime: seekToMessage.receiveTime,
             isPlaying: false,
             speed: 1,
             lastSeekTime: Date.now(),
-            topics: this.topics,
-            topicStats: this.topicStats,
-            datatypes: this.datatypes,
+            topics: this.#topics,
+            topicStats: this.#topicStats,
+            datatypes: this.#datatypes,
           },
         });
         const endFrame = performance.now();

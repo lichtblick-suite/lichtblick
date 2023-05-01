@@ -24,13 +24,13 @@ import {
 } from "../IIterableSource";
 
 export class RosDb3IterableSource implements IIterableSource {
-  private files: File[];
-  private bag?: Rosbag2;
-  private start: Time = { sec: 0, nsec: 0 };
-  private end: Time = { sec: 0, nsec: 0 };
+  #files: File[];
+  #bag?: Rosbag2;
+  #start: Time = { sec: 0, nsec: 0 };
+  #end: Time = { sec: 0, nsec: 0 };
 
   public constructor(files: File[]) {
-    this.files = files;
+    this.#files = files;
   }
 
   public async initialize(): Promise<Initalization> {
@@ -41,14 +41,14 @@ export class RosDb3IterableSource implements IIterableSource {
     const sqlWasm = await (await res.blob()).arrayBuffer();
     await SqliteSqljs.Initialize({ wasmBinary: sqlWasm });
 
-    const dbs = this.files.map((file) => new SqliteSqljs(file));
+    const dbs = this.#files.map((file) => new SqliteSqljs(file));
     const bag = new Rosbag2(dbs);
     await bag.open();
-    this.bag = bag;
+    this.#bag = bag;
 
-    const [start, end] = await this.bag.timeRange();
-    const topicDefs = await this.bag.readTopics();
-    const messageCounts = await this.bag.messageCounts();
+    const [start, end] = await this.#bag.timeRange();
+    const topicDefs = await this.#bag.readTopics();
+    const messageCounts = await this.#bag.messageCounts();
     let hasAnyMessages = false;
     for (const count of messageCounts.values()) {
       if (count > 0) {
@@ -92,8 +92,8 @@ export class RosDb3IterableSource implements IIterableSource {
       parsedMessageDefinitionsByTopic[topicDef.name] = fullParsedMessageDefinitions;
     }
 
-    this.start = start;
-    this.end = end;
+    this.#start = start;
+    this.#end = end;
 
     return {
       topics: Array.from(topics.values()),
@@ -110,7 +110,7 @@ export class RosDb3IterableSource implements IIterableSource {
   public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
-    if (this.bag == undefined) {
+    if (this.#bag == undefined) {
       throw new Error(`Rosbag2DataProvider is not initialized`);
     }
 
@@ -119,13 +119,13 @@ export class RosDb3IterableSource implements IIterableSource {
       return;
     }
 
-    const start = opt.start ?? this.start;
-    const end = opt.end ?? this.end;
+    const start = opt.start ?? this.#start;
+    const end = opt.end ?? this.#end;
 
     // Add 1 nsec to the end time because rosbag2 treats the time range as non-inclusive
     // of the exact end time.
     const inclusiveEndTime = addTime(end, { sec: 0, nsec: 1 });
-    const msgIterator = this.bag.readMessages({
+    const msgIterator = this.#bag.readMessages({
       startTime: start,
       endTime: inclusiveEndTime,
       topics,

@@ -11,24 +11,24 @@ import { IAppConfiguration, ChangeHandler, AppConfigurationValue } from "@foxglo
  * Configuration does not survive any reload nor is it persisted.
  */
 export class MemoryAppConfiguration implements IAppConfiguration {
-  private values = new Map<string, AppConfigurationValue>();
+  #values = new Map<string, AppConfigurationValue>();
 
-  private changeListeners = new Map<string, Set<ChangeHandler>>();
+  #changeListeners = new Map<string, Set<ChangeHandler>>();
 
   public constructor({ defaults }: { defaults?: { [key: string]: AppConfigurationValue } }) {
     if (defaults) {
       for (const [key, value] of Object.entries(defaults)) {
-        this.values.set(key, value);
+        this.#values.set(key, value);
       }
     }
   }
 
   public get(key: string): AppConfigurationValue {
-    return this.values.get(key);
+    return this.#values.get(key);
   }
   public async set(key: string, value: AppConfigurationValue): Promise<void> {
-    this.values.set(key, value);
-    const listeners = this.changeListeners.get(key);
+    this.#values.set(key, value);
+    const listeners = this.#changeListeners.get(key);
     if (listeners) {
       // Copy the list of listeners to protect against mutation during iteration
       [...listeners].forEach((listener) => listener(value));
@@ -36,16 +36,16 @@ export class MemoryAppConfiguration implements IAppConfiguration {
   }
 
   public addChangeListener(key: string, cb: ChangeHandler): void {
-    let listeners = this.changeListeners.get(key);
+    let listeners = this.#changeListeners.get(key);
     if (!listeners) {
       listeners = new Set();
-      this.changeListeners.set(key, listeners);
+      this.#changeListeners.set(key, listeners);
     }
     listeners.add(cb);
   }
 
   public removeChangeListener(key: string, cb: ChangeHandler): void {
-    const listeners = this.changeListeners.get(key);
+    const listeners = this.#changeListeners.get(key);
     listeners?.delete(cb);
   }
 }

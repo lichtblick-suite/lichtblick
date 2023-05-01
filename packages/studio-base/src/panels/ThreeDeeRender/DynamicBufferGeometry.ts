@@ -22,17 +22,17 @@ interface ArrayConstructor {
 export class DynamicBufferGeometry extends THREE.BufferGeometry {
   public override attributes: { [name: string]: THREE.BufferAttribute } = {};
 
-  private _attributeConstructors = new Map<string, ArrayConstructor>();
-  private _usage: THREE.Usage;
-  private _itemCapacity = 0;
+  #attributeConstructors = new Map<string, ArrayConstructor>();
+  #usage: THREE.Usage;
+  #itemCapacity = 0;
 
   public constructor(usage: THREE.Usage = THREE.DynamicDrawUsage) {
     super();
-    this._usage = usage;
+    this.#usage = usage;
   }
 
   public setUsage(usage: THREE.Usage): void {
-    this._usage = usage;
+    this.#usage = usage;
     for (const attribute of Object.values(this.attributes)) {
       attribute.setUsage(usage);
     }
@@ -45,17 +45,17 @@ export class DynamicBufferGeometry extends THREE.BufferGeometry {
     // eslint-disable-next-line @foxglove/no-boolean-parameters
     normalized?: boolean,
   ): THREE.BufferGeometry {
-    const data = new arrayConstructor(this._itemCapacity * itemSize);
+    const data = new arrayConstructor(this.#itemCapacity * itemSize);
     const attribute = new THREE.BufferAttribute(data, itemSize, normalized);
-    attribute.setUsage(this._usage);
-    this._attributeConstructors.set(name, arrayConstructor);
+    attribute.setUsage(this.#usage);
+    this.#attributeConstructors.set(name, arrayConstructor);
     return this.setAttribute(name, attribute);
   }
 
   public resize(itemCount: number): void {
     this.setDrawRange(0, itemCount);
 
-    if (itemCount <= this._itemCapacity) {
+    if (itemCount <= this.#itemCapacity) {
       for (const attribute of Object.values(this.attributes)) {
         attribute.count = itemCount;
       }
@@ -63,7 +63,7 @@ export class DynamicBufferGeometry extends THREE.BufferGeometry {
     }
 
     for (const [attributeName, attribute] of Object.entries(this.attributes)) {
-      const dataConstructor = this._attributeConstructors.get(attributeName);
+      const dataConstructor = this.#attributeConstructors.get(attributeName);
       if (!dataConstructor) {
         throw new Error(
           `DynamicBufferGeometry resize(${itemCount}) failed, missing data constructor for attribute "${attributeName}". Attributes must be created using createAttribute().`,
@@ -71,10 +71,10 @@ export class DynamicBufferGeometry extends THREE.BufferGeometry {
       }
       const data = new dataConstructor(itemCount * attribute.itemSize);
       const newAttrib = new THREE.BufferAttribute(data, attribute.itemSize, attribute.normalized);
-      newAttrib.setUsage(this._usage);
+      newAttrib.setUsage(this.#usage);
       this.setAttribute(attributeName, newAttrib);
     }
 
-    this._itemCapacity = itemCount;
+    this.#itemCapacity = itemCount;
   }
 }

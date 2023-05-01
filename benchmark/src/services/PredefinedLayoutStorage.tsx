@@ -9,22 +9,22 @@ import { Layout, LayoutID, ILayoutStorage } from "@foxglove/studio-base";
  * catalog of layouts. Adding, updating, or removing layouts is not supported.
  */
 class PredefinedLayoutStorage implements ILayoutStorage {
-  private layouts: Map<string, Layout>;
+  #layouts: Map<string, Layout>;
 
   public constructor(layouts: Map<string, Layout>) {
-    this.layouts = layouts;
+    this.#layouts = layouts;
   }
 
   public async list(_namespace: string): Promise<readonly Layout[]> {
-    return Array.from(this.layouts.values());
+    return Array.from(this.#layouts.values());
   }
 
   public async get(_namespace: string, id: LayoutID): Promise<Layout | undefined> {
-    return this.layouts.get(id);
+    return this.#layouts.get(id);
   }
 
   public async put(_namespace: string, layout: Layout): Promise<Layout> {
-    if (!this.layouts.get(layout.id)) {
+    if (!this.#layouts.get(layout.id)) {
       throw new Error("Benchmark app only allows updating existing layouts.");
     }
     return layout;

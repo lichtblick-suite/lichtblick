@@ -12,7 +12,7 @@
  * See: https://en.wikipedia.org/wiki/Monitor_(synchronization)#Condition_variables_2
  */
 class Condvar {
-  private waitQueue: Array<() => void> = [];
+  #waitQueue: Array<() => void> = [];
 
   /**
    * Wait on a notification.
@@ -25,7 +25,7 @@ class Condvar {
    */
   public async wait(): Promise<void> {
     await new Promise<void>((resolve) => {
-      this.waitQueue.push(resolve);
+      this.#waitQueue.push(resolve);
     });
   }
 
@@ -33,7 +33,7 @@ class Condvar {
    * Notify one wait.
    */
   public notifyOne(): void {
-    const item = this.waitQueue.shift();
+    const item = this.#waitQueue.shift();
     item?.();
   }
 
@@ -41,10 +41,10 @@ class Condvar {
    * Notify all waiting.
    */
   public notifyAll(): void {
-    for (const item of this.waitQueue) {
+    for (const item of this.#waitQueue) {
       item();
     }
-    this.waitQueue.length = 0;
+    this.#waitQueue.length = 0;
   }
 }
 

@@ -14,10 +14,10 @@ import type { Storage, StorageContent } from "../common/types";
 const log = Logger.getLogger(__filename);
 
 export default class LocalFileStorage implements Storage {
-  private _userDataPath = ipcRenderer.invoke("getUserDataPath") as Promise<string>;
+  #userDataPath = ipcRenderer.invoke("getUserDataPath") as Promise<string>;
 
   public async list(datastore: string): Promise<string[]> {
-    const datastoreDir = await this.ensureDatastorePath(datastore);
+    const datastoreDir = await this.#ensureDatastorePath(datastore);
     const result = new Array<string>();
 
     const entries = await fs.readdir(datastoreDir);
@@ -29,7 +29,7 @@ export default class LocalFileStorage implements Storage {
   }
 
   public async all(datastore: string): Promise<Uint8Array[]> {
-    const datastoreDir = await this.ensureDatastorePath(datastore);
+    const datastoreDir = await this.#ensureDatastorePath(datastore);
     const result = new Array<Uint8Array>();
 
     try {
@@ -62,7 +62,7 @@ export default class LocalFileStorage implements Storage {
     key: string,
     options?: { encoding?: "utf8" },
   ): Promise<StorageContent | undefined> {
-    const filePath = await this.makeFilePath(datastore, key);
+    const filePath = await this.#makeFilePath(datastore, key);
     return await fs.readFile(filePath, options).catch((err) => {
       if (err.code !== "ENOENT") {
         throw err;
@@ -72,18 +72,18 @@ export default class LocalFileStorage implements Storage {
   }
 
   public async put(datastore: string, key: string, value: StorageContent): Promise<void> {
-    const filePath = await this.makeFilePath(datastore, key);
+    const filePath = await this.#makeFilePath(datastore, key);
     log.debug(`Writing ${key} to ${filePath}`);
     await fs.writeFile(filePath, value);
   }
 
   public async delete(datastore: string, key: string): Promise<void> {
-    const filePath = await this.makeFilePath(datastore, key);
+    const filePath = await this.#makeFilePath(datastore, key);
     await fs.unlink(filePath);
   }
 
-  private async makeFilePath(datastore: string, key: string): Promise<string> {
-    const datastoreDir = await this.ensureDatastorePath(datastore);
+  async #makeFilePath(datastore: string, key: string): Promise<string> {
+    const datastoreDir = await this.#ensureDatastorePath(datastore);
     // check that datastore matches regex [a-z]*
     // since keys becomes paths under our datastore, we use this to sanitize
     if (!/[a-z-]/.test(key)) {
@@ -93,8 +93,8 @@ export default class LocalFileStorage implements Storage {
     return path.join(datastoreDir, key);
   }
 
-  private async ensureDatastorePath(datastore: string): Promise<string> {
-    const basePath = await this._userDataPath;
+  async #ensureDatastorePath(datastore: string): Promise<string> {
+    const basePath = await this.#userDataPath;
     // check that datastore matches regex [a-z]*
     // since datastore becomes a path under our userDataPath, we use this to sanitize
     if (!/[a-z-]/.test(datastore)) {

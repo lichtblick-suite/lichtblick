@@ -12,17 +12,17 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
   private static STORE_NAME = SETTINGS_DATASTORE_NAME;
   private static STORE_KEY = SETTINGS_JSON_DATASTORE_KEY;
 
-  private readonly _ctx: Storage;
-  private _listeners = new Map<string, Set<ChangeHandler>>();
+  readonly #ctx: Storage;
+  #listeners = new Map<string, Set<ChangeHandler>>();
 
   // Protect access to currentValue to avoid read-modify-write races between multiple set() calls.
-  private _mutex = new Mutex();
-  private _currentValue: unknown;
+  #mutex = new Mutex();
+  #currentValue: unknown;
 
   // Use OsContextAppConfiguration.initialize to create a new instance
   private constructor(ctx: Storage, initialValue?: unknown) {
-    this._ctx = ctx;
-    this._currentValue = initialValue;
+    this.#ctx = ctx;
+    this.#currentValue = initialValue;
   }
 
   // create a new OsContextAppConfiguration
@@ -43,12 +43,12 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
   }
 
   public get(key: string): AppConfigurationValue | undefined {
-    return (this._currentValue as Record<string, AppConfigurationValue>)[key];
+    return (this.#currentValue as Record<string, AppConfigurationValue>)[key];
   }
 
   public async set(key: string, value: AppConfigurationValue): Promise<void> {
-    await this._mutex.runExclusive(async () => {
-      const currentConfig = await this._ctx.get(
+    await this.#mutex.runExclusive(async () => {
+      const currentConfig = await this.#ctx.get(
         NativeStorageAppConfiguration.STORE_NAME,
         NativeStorageAppConfiguration.STORE_KEY,
         { encoding: "utf8" },
@@ -56,14 +56,14 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
 
       const newConfig: unknown = { ...JSON.parse(currentConfig ?? "{}"), [key]: value };
 
-      await this._ctx.put(
+      await this.#ctx.put(
         NativeStorageAppConfiguration.STORE_NAME,
         NativeStorageAppConfiguration.STORE_KEY,
         JSON.stringify(newConfig) ?? "",
       );
-      this._currentValue = newConfig;
+      this.#currentValue = newConfig;
     });
-    const listeners = this._listeners.get(key);
+    const listeners = this.#listeners.get(key);
     if (listeners) {
       // Copy the list of listeners to protect against mutation during iteration
       [...listeners].forEach((listener) => listener(value));
@@ -71,16 +71,16 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
   }
 
   public addChangeListener(key: string, cb: ChangeHandler): void {
-    let listeners = this._listeners.get(key);
+    let listeners = this.#listeners.get(key);
     if (!listeners) {
       listeners = new Set();
-      this._listeners.set(key, listeners);
+      this.#listeners.set(key, listeners);
     }
     listeners.add(cb);
   }
 
   public removeChangeListener(key: string, cb: ChangeHandler): void {
-    const listeners = this._listeners.get(key);
+    const listeners = this.#listeners.get(key);
     if (listeners) {
       listeners.delete(cb);
     }

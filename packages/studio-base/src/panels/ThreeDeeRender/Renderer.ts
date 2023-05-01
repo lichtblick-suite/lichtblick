@@ -169,7 +169,7 @@ Object.defineProperty(LabelMaterial.prototype, "fragmentShaderKey", {
  */
 export class Renderer extends EventEmitter<RendererEvents> implements IRenderer {
   public readonly interfaceMode: InterfaceMode;
-  private canvas: HTMLCanvasElement;
+  #canvas: HTMLCanvasElement;
   public readonly gl: THREE.WebGLRenderer;
   public maxLod = DetailLevel.High;
   public debugPicking = false;
@@ -190,10 +190,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   // topicName -> RendererSubscription[]
   public topicHandlers = new Map<string, RendererSubscription[]>();
   // layerId -> { action, handler }
-  private customLayerActions = new Map<string, CustomLayerAction>();
-  private scene: THREE.Scene;
-  private dirLight: THREE.DirectionalLight;
-  private hemiLight: THREE.HemisphereLight;
+  #customLayerActions = new Map<string, CustomLayerAction>();
+  #scene: THREE.Scene;
+  #dirLight: THREE.DirectionalLight;
+  #hemiLight: THREE.HemisphereLight;
   public input: Input;
   public readonly outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
   public readonly instancedOutlineMaterial = new InstancedLineMaterial({ dithering: true });
@@ -208,9 +208,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
   public ros = false;
 
-  private picker: Picker;
-  private selectionBackdrop: ScreenOverlay;
-  private selectedRenderable: PickedRenderable | undefined;
+  #picker: Picker;
+  #selectionBackdrop: ScreenOverlay;
+  #selectedRenderable: PickedRenderable | undefined;
   public colorScheme: "dark" | "light" = "light";
   public modelCache: ModelCache;
   public transformTree = new TransformTree();
@@ -224,11 +224,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public markerPool = new MarkerPool(this);
   public sharedGeometry = new SharedGeometry();
 
-  private _prevResolution = new THREE.Vector2();
-  private _pickingEnabled = false;
-  private _animationFrame?: number;
-  private _cameraSyncError: undefined | string;
-  private _devicePixelRatioMediaQuery?: MediaQueryList;
+  #prevResolution = new THREE.Vector2();
+  #pickingEnabled = false;
+  #animationFrame?: number;
+  #cameraSyncError: undefined | string;
+  #devicePixelRatioMediaQuery?: MediaQueryList;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -240,7 +240,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
 
     this.interfaceMode = interfaceMode;
-    this.canvas = canvas;
+    this.#canvas = canvas;
     this.config = config;
 
     this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode));
@@ -282,34 +282,34 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       edgeMaterial: this.outlineMaterial,
     });
 
-    this.scene = new THREE.Scene();
+    this.#scene = new THREE.Scene();
 
-    this.dirLight = new THREE.DirectionalLight();
-    this.dirLight.position.set(1, 1, 1);
-    this.dirLight.castShadow = true;
-    this.dirLight.layers.enableAll();
+    this.#dirLight = new THREE.DirectionalLight();
+    this.#dirLight.position.set(1, 1, 1);
+    this.#dirLight.castShadow = true;
+    this.#dirLight.layers.enableAll();
 
-    this.dirLight.shadow.mapSize.width = 2048;
-    this.dirLight.shadow.mapSize.height = 2048;
-    this.dirLight.shadow.camera.near = 0.5;
-    this.dirLight.shadow.camera.far = 500;
-    this.dirLight.shadow.bias = -0.00001;
+    this.#dirLight.shadow.mapSize.width = 2048;
+    this.#dirLight.shadow.mapSize.height = 2048;
+    this.#dirLight.shadow.camera.near = 0.5;
+    this.#dirLight.shadow.camera.far = 500;
+    this.#dirLight.shadow.bias = -0.00001;
 
-    this.hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
-    this.hemiLight.layers.enableAll();
+    this.#hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
+    this.#hemiLight.layers.enableAll();
 
-    this.scene.add(this.dirLight);
-    this.scene.add(this.hemiLight);
+    this.#scene.add(this.#dirLight);
+    this.#scene.add(this.#hemiLight);
 
     this.input = new Input(canvas, () => this.cameraHandler.getActiveCamera());
-    this.input.on("resize", (size) => this.resizeHandler(size));
-    this.input.on("click", (cursorCoords) => this.clickHandler(cursorCoords));
+    this.input.on("resize", (size) => this.#resizeHandler(size));
+    this.input.on("click", (cursorCoords) => this.#clickHandler(cursorCoords));
 
-    this.picker = new Picker(this.gl, this.scene);
+    this.#picker = new Picker(this.gl, this.#scene);
 
-    this.selectionBackdrop = new ScreenOverlay(this);
-    this.selectionBackdrop.visible = false;
-    this.scene.add(this.selectionBackdrop);
+    this.#selectionBackdrop = new ScreenOverlay(this);
+    this.#selectionBackdrop.visible = false;
+    this.#scene.add(this.#selectionBackdrop);
 
     this.followFrameId = config.followTf;
 
@@ -322,22 +322,22 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     // Internal handlers for TF messages to update the transform tree
     this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
-      handler: this.handleFrameTransform,
+      handler: this.#handleFrameTransform,
       shouldSubscribe: () => true,
       preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addSchemaSubscriptions(FRAME_TRANSFORMS_DATATYPES, {
-      handler: this.handleFrameTransforms,
+      handler: this.#handleFrameTransforms,
       shouldSubscribe: () => true,
       preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addSchemaSubscriptions(TF_DATATYPES, {
-      handler: this.handleTFMessage,
+      handler: this.#handleTFMessage,
       shouldSubscribe: () => true,
       preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
-      handler: this.handleTransformStamped,
+      handler: this.#handleTransformStamped,
       shouldSubscribe: () => true,
       preload: config.scene.transforms?.enablePreloading ?? true,
     });
@@ -346,58 +346,58 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     switch (interfaceMode) {
       case "image":
         this.cameraHandler = new ImageMode(this, this.input.canvasSize);
-        this.addSceneExtension(this.cameraHandler);
+        this.#addSceneExtension(this.cameraHandler);
         break;
       case "3d":
-        this.cameraHandler = new CameraStateSettings(this, this.canvas, aspect);
-        this.addSceneExtension(this.cameraHandler);
-        this.addSceneExtension(new PublishSettings(this));
-        this.addSceneExtension(new Images(this));
-        this.addSceneExtension(new Cameras(this));
+        this.cameraHandler = new CameraStateSettings(this, this.#canvas, aspect);
+        this.#addSceneExtension(this.cameraHandler);
+        this.#addSceneExtension(new PublishSettings(this));
+        this.#addSceneExtension(new Images(this));
+        this.#addSceneExtension(new Cameras(this));
         break;
     }
 
-    this.addSceneExtension(new SceneSettings(this));
-    this.addSceneExtension(new FrameAxes(this, { visible: interfaceMode === "3d" }));
-    this.addSceneExtension(new Grids(this));
-    this.addSceneExtension(new Markers(this));
-    this.addSceneExtension(new FoxgloveSceneEntities(this));
-    this.addSceneExtension(new FoxgloveGrid(this));
-    this.addSceneExtension(new LaserScans(this));
-    this.addSceneExtension(new OccupancyGrids(this));
-    this.addSceneExtension(new PointClouds(this));
-    this.addSceneExtension(new Polygons(this));
-    this.addSceneExtension(new Poses(this));
-    this.addSceneExtension(new PoseArrays(this));
-    this.addSceneExtension(new Urdfs(this));
-    this.addSceneExtension(new VelodyneScans(this));
-    this.addSceneExtension(this.measurementTool);
-    this.addSceneExtension(this.publishClickTool);
+    this.#addSceneExtension(new SceneSettings(this));
+    this.#addSceneExtension(new FrameAxes(this, { visible: interfaceMode === "3d" }));
+    this.#addSceneExtension(new Grids(this));
+    this.#addSceneExtension(new Markers(this));
+    this.#addSceneExtension(new FoxgloveSceneEntities(this));
+    this.#addSceneExtension(new FoxgloveGrid(this));
+    this.#addSceneExtension(new LaserScans(this));
+    this.#addSceneExtension(new OccupancyGrids(this));
+    this.#addSceneExtension(new PointClouds(this));
+    this.#addSceneExtension(new Polygons(this));
+    this.#addSceneExtension(new Poses(this));
+    this.#addSceneExtension(new PoseArrays(this));
+    this.#addSceneExtension(new Urdfs(this));
+    this.#addSceneExtension(new VelodyneScans(this));
+    this.#addSceneExtension(this.measurementTool);
+    this.#addSceneExtension(this.publishClickTool);
 
-    this._watchDevicePixelRatio();
+    this.#watchDevicePixelRatio();
 
     this.setCameraState(config.cameraState);
     this.animationFrame();
   }
 
-  private _onDevicePixelRatioChange = () => {
+  #onDevicePixelRatioChange = () => {
     log.debug(`devicePixelRatio changed to ${window.devicePixelRatio}`);
-    this.resizeHandler(this.input.canvasSize);
-    this._watchDevicePixelRatio();
+    this.#resizeHandler(this.input.canvasSize);
+    this.#watchDevicePixelRatio();
   };
 
-  private _watchDevicePixelRatio() {
-    this._devicePixelRatioMediaQuery = window.matchMedia(
+  #watchDevicePixelRatio() {
+    this.#devicePixelRatioMediaQuery = window.matchMedia(
       `(resolution: ${window.devicePixelRatio}dppx)`,
     );
-    this._devicePixelRatioMediaQuery.addEventListener("change", this._onDevicePixelRatioChange, {
+    this.#devicePixelRatioMediaQuery.addEventListener("change", this.#onDevicePixelRatioChange, {
       once: true,
     });
   }
 
   public dispose(): void {
     log.warn(`Disposing renderer`);
-    this._devicePixelRatioMediaQuery?.removeEventListener("change", this._onDevicePixelRatioChange);
+    this.#devicePixelRatioMediaQuery?.removeEventListener("change", this.#onDevicePixelRatioChange);
     this.removeAllListeners();
 
     this.settings.removeAllListeners();
@@ -412,17 +412,17 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.labelPool.dispose();
     this.markerPool.dispose();
-    this.picker.dispose();
+    this.#picker.dispose();
     this.input.dispose();
     this.gl.dispose();
   }
 
   public cameraSyncError(): undefined | string {
-    return this._cameraSyncError;
+    return this.#cameraSyncError;
   }
 
   public setCameraSyncError(error: undefined | string): void {
-    this._cameraSyncError = error;
+    this.#cameraSyncError = error;
     // Updates the settings tree for camera state settings to account for any changes in the config.
     this.cameraHandler.updateSettingsTree();
   }
@@ -473,7 +473,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.transformTree.clear();
     }
     if (resetAllFramesCursor === true) {
-      this._resetAllFramesCursor();
+      this.#resetAllFramesCursor();
     }
     this.settings.errors.clear();
 
@@ -482,7 +482,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  private _allFramesCursor: {
+  #allFramesCursor: {
     // index represents where the last read message is in allFrames
     index: number;
     cursorTimeReached?: Time;
@@ -491,8 +491,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     cursorTimeReached: undefined,
   };
 
-  private _resetAllFramesCursor() {
-    this._allFramesCursor = {
+  #resetAllFramesCursor() {
+    this.#allFramesCursor = {
       index: -1,
       cursorTimeReached: undefined,
     };
@@ -505,7 +505,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
    */
   public handleAllFramesMessages(allFrames?: readonly MessageEvent<unknown>[]): boolean {
     const currentTime = fromNanoSec(this.currentTime);
-    const allFramesCursor = this._allFramesCursor;
+    const allFramesCursor = this.#allFramesCursor;
     // index always indicates last read-in message
     let cursor = allFramesCursor.index;
     let cursorTimeReached = allFramesCursor.cursorTimeReached;
@@ -513,7 +513,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     if (!allFrames || allFrames.length === 0) {
       // when tf preloading is disabled
       if (cursor > -1) {
-        this._resetAllFramesCursor();
+        this.#resetAllFramesCursor();
       }
       return false;
     }
@@ -557,16 +557,16 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       return false;
     }
 
-    this._allFramesCursor = { index: cursor, cursorTimeReached };
+    this.#allFramesCursor = { index: cursor, cursorTimeReached };
     return true;
   }
 
-  private addSceneExtension(extension: SceneExtension): void {
+  #addSceneExtension(extension: SceneExtension): void {
     if (this.sceneExtensions.has(extension.extensionId)) {
       throw new Error(`Attempted to add duplicate extensionId "${extension.extensionId}"`);
     }
     this.sceneExtensions.set(extension.extensionId, extension);
-    this.scene.add(extension);
+    this.#scene.add(extension);
   }
 
   public updateConfig(updateHandler: (draft: RendererConfig) => void): void {
@@ -630,7 +630,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       label: options.label,
       icon: options.icon,
     };
-    this.customLayerActions.set(options.layerId, { action, handler });
+    this.#customLayerActions.set(options.layerId, { action, handler });
 
     // "Topics" settings tree node
     const topics: SettingsTreeEntry = {
@@ -644,7 +644,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           { id: "hide-all", type: "action", label: i18next.t("threeDee:hideAll") },
         ],
         children: this.settings.tree()["topics"]?.children,
-        handler: this.handleTopicsAction,
+        handler: this.#handleTopicsAction,
       },
     };
 
@@ -655,15 +655,15 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       node: {
         label: `${i18next.t("threeDee:customLayers")}${layerCount > 0 ? ` (${layerCount})` : ""}`,
         children: this.settings.tree()["layers"]?.children,
-        actions: Array.from(this.customLayerActions.values()).map((entry) => entry.action),
-        handler: this.handleCustomLayersAction,
+        actions: Array.from(this.#customLayerActions.values()).map((entry) => entry.action),
+        handler: this.#handleCustomLayersAction,
       },
     };
 
     this.settings.setNodesForKey(RENDERER_ID, [topics, customLayers]);
   }
 
-  private defaultFrameId(): string | undefined {
+  #defaultFrameId(): string | undefined {
     const allFrames = this.transformTree.frames();
     if (allFrames.size === 0) {
       return undefined;
@@ -698,7 +698,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   /** Enable or disable object selection mode */
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   public setPickingEnabled(enabled: boolean): void {
-    this._pickingEnabled = enabled;
+    this.#pickingEnabled = enabled;
     if (!enabled) {
       this.setSelectedRenderable(undefined);
     }
@@ -720,14 +720,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.outlineMaterial.needsUpdate = true;
       this.instancedOutlineMaterial.color.set(DARK_OUTLINE);
       this.instancedOutlineMaterial.needsUpdate = true;
-      this.selectionBackdrop.setColor(DARK_BACKDROP, 0.8);
+      this.#selectionBackdrop.setColor(DARK_BACKDROP, 0.8);
     } else {
       this.gl.setClearColor(bgColor ?? LIGHT_BACKDROP);
       this.outlineMaterial.color.set(LIGHT_OUTLINE);
       this.outlineMaterial.needsUpdate = true;
       this.instancedOutlineMaterial.color.set(LIGHT_OUTLINE);
       this.instancedOutlineMaterial.needsUpdate = true;
-      this.selectionBackdrop.setColor(LIGHT_BACKDROP, 0.8);
+      this.#selectionBackdrop.setColor(LIGHT_BACKDROP, 0.8);
     }
   }
 
@@ -778,18 +778,18 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   public setSelectedRenderable(selection: PickedRenderable | undefined): void {
-    if (this.selectedRenderable === selection) {
+    if (this.#selectedRenderable === selection) {
       return;
     }
 
-    const prevSelected = this.selectedRenderable;
+    const prevSelected = this.#selectedRenderable;
     if (prevSelected) {
       // Deselect the previously selected renderable
       deselectObject(prevSelected.renderable);
       log.debug(`Deselected ${prevSelected.renderable.id} (${prevSelected.renderable.name})`);
     }
 
-    this.selectedRenderable = selection;
+    this.#selectedRenderable = selection;
 
     if (selection) {
       // Select the newly selected renderable
@@ -867,7 +867,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  private addFrameTransform(transform: FrameTransform): void {
+  #addFrameTransform(transform: FrameTransform): void {
     const parentId = transform.parent_frame_id;
     const childId = transform.child_frame_id;
     const stamp = toNanoSec(transform.timestamp);
@@ -877,7 +877,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.addTransform(parentId, childId, stamp, t, q);
   }
 
-  private addTransformMessage(tf: TransformStamped): void {
+  #addTransformMessage(tf: TransformStamped): void {
     const normalizedParentId = this.normalizeFrameId(tf.header.frame_id);
     const normalizedChildId = this.normalizeFrameId(tf.child_frame_id);
     const stamp = toNanoSec(tf.header.stamp);
@@ -943,27 +943,27 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   // Callback handlers
 
   public animationFrame = (): void => {
-    this._animationFrame = undefined;
-    this.frameHandler(this.currentTime);
+    this.#animationFrame = undefined;
+    this.#frameHandler(this.currentTime);
   };
 
   public queueAnimationFrame(): void {
-    if (this._animationFrame == undefined) {
-      this._animationFrame = requestAnimationFrame(this.animationFrame);
+    if (this.#animationFrame == undefined) {
+      this.#animationFrame = requestAnimationFrame(this.animationFrame);
     }
   }
 
-  private frameHandler = (currentTime: bigint): void => {
+  #frameHandler = (currentTime: bigint): void => {
     this.currentTime = currentTime;
-    this._updateFrames();
-    this._updateResolution();
+    this.#updateFrames();
+    this.#updateResolution();
 
     this.gl.clear();
     this.emit("startFrame", currentTime, this);
 
     const camera = this.cameraHandler.getActiveCamera();
     camera.layers.set(LAYER_DEFAULT);
-    this.selectionBackdrop.visible = this.selectedRenderable != undefined;
+    this.#selectionBackdrop.visible = this.#selectedRenderable != undefined;
 
     // use the FALLBACK_FRAME_ID if renderFrame is undefined and there are no options for transforms
     const renderFrameId = this.renderFrameId ?? CoordinateFrame.FALLBACK_FRAME_ID;
@@ -973,13 +973,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       sceneExtension.startFrame(currentTime, renderFrameId, fixedFrameId);
     }
 
-    this.gl.render(this.scene, camera);
+    this.gl.render(this.#scene, camera);
 
-    if (this.selectedRenderable) {
+    if (this.#selectedRenderable) {
       this.gl.clearDepth();
       camera.layers.set(LAYER_SELECTED);
-      this.selectionBackdrop.visible = false;
-      this.gl.render(this.scene, camera);
+      this.#selectionBackdrop.visible = false;
+      this.gl.render(this.#scene, camera);
     }
 
     this.emit("endFrame", currentTime, this);
@@ -987,7 +987,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.gl.info.reset();
   };
 
-  private resizeHandler = (size: THREE.Vector2): void => {
+  #resizeHandler = (size: THREE.Vector2): void => {
     this.gl.setPixelRatio(window.devicePixelRatio);
     this.gl.setSize(size.width, size.height);
     this.cameraHandler.handleResize(size.width, size.height, window.devicePixelRatio);
@@ -997,8 +997,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.animationFrame();
   };
 
-  private clickHandler = (cursorCoords: THREE.Vector2): void => {
-    if (!this._pickingEnabled) {
+  #clickHandler = (cursorCoords: THREE.Vector2): void => {
+    if (!this.#pickingEnabled) {
       this.setSelectedRenderable(undefined);
       return;
     }
@@ -1018,12 +1018,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const selections: PickedRenderable[] = [];
     let curSelection: PickedRenderable | undefined;
     while (
-      (curSelection = this._pickSingleObject(cursorCoords)) &&
+      (curSelection = this.#pickSingleObject(cursorCoords)) &&
       selections.length < MAX_SELECTIONS
     ) {
       selections.push(curSelection);
       curSelection.renderable.visible = false;
-      this.gl.render(this.scene, camera);
+      this.gl.render(this.#scene, camera);
     }
 
     // Put everything back to normal and render one last frame
@@ -1038,39 +1038,35 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.emit("renderablesClicked", selections, cursorCoords, this);
   };
 
-  private handleFrameTransform = ({ message }: MessageEvent<DeepPartial<FrameTransform>>): void => {
+  #handleFrameTransform = ({ message }: MessageEvent<DeepPartial<FrameTransform>>): void => {
     // foxglove.FrameTransform - Ingest this single transform into our TF tree
     const transform = normalizeFrameTransform(message);
-    this.addFrameTransform(transform);
+    this.#addFrameTransform(transform);
   };
 
-  private handleFrameTransforms = ({
-    message,
-  }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
+  #handleFrameTransforms = ({ message }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
     // foxglove.FrameTransforms - Ingest the list of transforms into our TF tree
     const frameTransforms = normalizeFrameTransforms(message);
     for (const transform of frameTransforms.transforms) {
-      this.addFrameTransform(transform);
+      this.#addFrameTransform(transform);
     }
   };
 
-  private handleTFMessage = ({ message }: MessageEvent<DeepPartial<TFMessage>>): void => {
+  #handleTFMessage = ({ message }: MessageEvent<DeepPartial<TFMessage>>): void => {
     // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
     const tfMessage = normalizeTFMessage(message);
     for (const tf of tfMessage.transforms) {
-      this.addTransformMessage(tf);
+      this.#addTransformMessage(tf);
     }
   };
 
-  private handleTransformStamped = ({
-    message,
-  }: MessageEvent<DeepPartial<TransformStamped>>): void => {
+  #handleTransformStamped = ({ message }: MessageEvent<DeepPartial<TransformStamped>>): void => {
     // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
     const tf = normalizeTransformStamped(message);
-    this.addTransformMessage(tf);
+    this.#addTransformMessage(tf);
   };
 
-  private handleTopicsAction = (action: SettingsTreeAction): void => {
+  #handleTopicsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "perform-node-action" || path.length !== 1 || path[0] !== "topics") {
       return;
@@ -1100,7 +1096,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   };
 
-  private handleCustomLayersAction = (action: SettingsTreeAction): void => {
+  #handleCustomLayersAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "perform-node-action" || path.length !== 1 || path[0] !== "layers") {
       return;
@@ -1112,7 +1108,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const layerId = actionId.slice(0, -37);
     const instanceId = actionId.slice(-36);
 
-    const entry = this.customLayerActions.get(layerId);
+    const entry = this.#customLayerActions.get(layerId);
     if (!entry) {
       throw new Error(`No custom layer action found for "${layerId}"`);
     }
@@ -1129,10 +1125,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.updateCustomLayersCount();
   };
 
-  private _pickSingleObject(cursorCoords: THREE.Vector2): PickedRenderable | undefined {
+  #pickSingleObject(cursorCoords: THREE.Vector2): PickedRenderable | undefined {
     // Render a single pixel using a fragment shader that writes object IDs as
     // colors, then read the value of that single pixel back
-    const objectId = this.picker.pick(
+    const objectId = this.#picker.pick(
       cursorCoords.x,
       cursorCoords.y,
       this.cameraHandler.getActiveCamera(),
@@ -1143,7 +1139,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
 
     // Traverse the scene looking for this objectId
-    const pickedObject = this.scene.getObjectById(objectId);
+    const pickedObject = this.#scene.getObjectById(objectId);
 
     // Find the highest ancestor of the picked object that is a Renderable
     let renderable: Renderable | undefined;
@@ -1164,7 +1160,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     let instanceIndex: number | undefined;
     if (renderable.pickableInstances) {
-      instanceIndex = this.picker.pickInstance(
+      instanceIndex = this.#picker.pickInstance(
         cursorCoords.x,
         cursorCoords.y,
         this.cameraHandler.getActiveCamera(),
@@ -1178,9 +1174,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   /** Tracks the number of frames so we can recompute the defaultFrameId when frames are added. */
-  private _lastTransformFrameCount = 0;
+  #lastTransformFrameCount = 0;
 
-  private _updateFrames(): void {
+  #updateFrames(): void {
     if (
       this.followFrameId != undefined &&
       this.renderFrameId !== this.followFrameId &&
@@ -1190,13 +1186,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.renderFrameId = this.followFrameId;
     } else if (
       this.renderFrameId == undefined ||
-      this.transformTree.frames().size !== this._lastTransformFrameCount ||
+      this.transformTree.frames().size !== this.#lastTransformFrameCount ||
       !this.transformTree.hasFrame(this.renderFrameId)
     ) {
       // No valid renderFrameId set, or new frames have been added, fall back to selecting the
       // heuristically most valid frame (if any frames are present)
-      this.renderFrameId = this.defaultFrameId();
-      this._lastTransformFrameCount = this.transformTree.frames().size;
+      this.renderFrameId = this.#defaultFrameId();
+      this.#lastTransformFrameCount = this.transformTree.frames().size;
 
       if (this.renderFrameId == undefined) {
         if (this.followFrameId != undefined) {
@@ -1252,14 +1248,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.settings.errors.clearPath(FOLLOW_TF_PATH);
   }
 
-  private _updateResolution(): void {
+  #updateResolution(): void {
     const resolution = this.input.canvasSize;
-    if (this._prevResolution.equals(resolution)) {
+    if (this.#prevResolution.equals(resolution)) {
       return;
     }
-    this._prevResolution.copy(resolution);
+    this.#prevResolution.copy(resolution);
 
-    this.scene.traverse((object) => {
+    this.#scene.traverse((object) => {
       if ((object as Partial<THREE.Mesh>).material) {
         const mesh = object as THREE.Mesh;
         const material = mesh.material as Partial<LineMaterial>;

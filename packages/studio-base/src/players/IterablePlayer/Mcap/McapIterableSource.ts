@@ -40,15 +40,15 @@ async function tryCreateIndexedReader(readable: McapTypes.IReadable) {
 }
 
 export class McapIterableSource implements IIterableSource {
-  private _source: McapSource;
-  private _sourceImpl: IIterableSource | undefined;
+  #source: McapSource;
+  #sourceImpl: IIterableSource | undefined;
 
   public constructor(source: McapSource) {
-    this._source = source;
+    this.#source = source;
   }
 
   public async initialize(): Promise<Initalization> {
-    const source = this._source;
+    const source = this.#source;
 
     switch (source.type) {
       case "file": {
@@ -60,9 +60,9 @@ export class McapIterableSource implements IIterableSource {
         const readable = new FileReadable(source.file);
         const reader = await tryCreateIndexedReader(readable);
         if (reader) {
-          this._sourceImpl = new McapIndexedIterableSource(reader);
+          this.#sourceImpl = new McapIndexedIterableSource(reader);
         } else {
-          this._sourceImpl = new McapUnindexedIterableSource({
+          this.#sourceImpl = new McapUnindexedIterableSource({
             size: source.file.size,
             stream: source.file.stream(),
           });
@@ -74,7 +74,7 @@ export class McapIterableSource implements IIterableSource {
         await readable.open();
         const reader = await tryCreateIndexedReader(readable);
         if (reader) {
-          this._sourceImpl = new McapIndexedIterableSource(reader);
+          this.#sourceImpl = new McapIndexedIterableSource(reader);
         } else {
           const response = await fetch(source.url);
           if (!response.body) {
@@ -85,7 +85,7 @@ export class McapIterableSource implements IIterableSource {
             throw new Error(`Remote file is missing Content-Length header. <${source.url}>`);
           }
 
-          this._sourceImpl = new McapUnindexedIterableSource({
+          this.#sourceImpl = new McapUnindexedIterableSource({
             size: parseInt(size),
             stream: response.body,
           });
@@ -94,26 +94,26 @@ export class McapIterableSource implements IIterableSource {
       }
     }
 
-    return await this._sourceImpl.initialize();
+    return await this.#sourceImpl.initialize();
   }
 
   public messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
-    if (!this._sourceImpl) {
+    if (!this.#sourceImpl) {
       throw new Error("Invariant: uninitialized");
     }
 
-    return this._sourceImpl.messageIterator(opt);
+    return this.#sourceImpl.messageIterator(opt);
   }
 
   public async getBackfillMessages(
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<unknown>[]> {
-    if (!this._sourceImpl) {
+    if (!this.#sourceImpl) {
       throw new Error("Invariant: uninitialized");
     }
 
-    return await this._sourceImpl.getBackfillMessages(args);
+    return await this.#sourceImpl.getBackfillMessages(args);
   }
 }

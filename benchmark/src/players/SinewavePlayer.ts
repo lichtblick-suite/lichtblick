@@ -26,13 +26,13 @@ const log = Log.getLogger(__filename);
 const CAPABILITIES: string[] = [];
 
 class SinewavePlayer implements Player {
-  private name: string = "sinewave";
-  private startTime: Time = rostime.fromDate(new Date());
-  private listener?: (state: PlayerState) => Promise<void>;
-  private datatypes: RosDatatypes = new Map();
+  #name: string = "sinewave";
+  #startTime: Time = rostime.fromDate(new Date());
+  #listener?: (state: PlayerState) => Promise<void>;
+  #datatypes: RosDatatypes = new Map();
 
   public constructor() {
-    this.datatypes.set("Sinewave", {
+    this.#datatypes.set("Sinewave", {
       name: "Sinewave",
       definitions: [
         {
@@ -44,8 +44,8 @@ class SinewavePlayer implements Player {
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.listener = listener;
-    void this.run();
+    this.#listener = listener;
+    void this.#run();
   }
   public close(): void {
     // no-op
@@ -67,8 +67,8 @@ class SinewavePlayer implements Player {
     throw new Error("Method not implemented.");
   }
 
-  private async run() {
-    const listener = this.listener;
+  async #run() {
+    const listener = this.#listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
@@ -78,8 +78,8 @@ class SinewavePlayer implements Player {
     await listener({
       profile: undefined,
       presence: PlayerPresence.PRESENT,
-      name: this.name,
-      playerId: this.name,
+      name: this.#name,
+      playerId: this.#name,
       capabilities: CAPABILITIES,
       progress: {},
       urlState: {
@@ -131,22 +131,22 @@ class SinewavePlayer implements Player {
       await listener({
         profile: undefined,
         presence: PlayerPresence.PRESENT,
-        name: this.name,
-        playerId: this.name,
+        name: this.#name,
+        playerId: this.#name,
         capabilities: CAPABILITIES,
         progress: {},
         activeData: {
           messages,
           totalBytesReceived: 0,
           currentTime: now,
-          startTime: this.startTime,
+          startTime: this.#startTime,
           isPlaying: true,
           speed: 1,
           lastSeekTime: 1,
           endTime: now,
           topics,
           topicStats,
-          datatypes: this.datatypes,
+          datatypes: this.#datatypes,
         },
       });
 

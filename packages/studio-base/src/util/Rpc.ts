@@ -67,36 +67,36 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 // Check out the tests for more examples.
 export default class Rpc {
   public static transferables = "$$TRANSFERABLES";
-  private _channel: Omit<Channel, "terminate">;
-  private _messageId: number = 0;
-  private _pendingCallbacks: {
+  #channel: Omit<Channel, "terminate">;
+  #messageId: number = 0;
+  #pendingCallbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: number]: (arg0: any) => void;
   } = {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _receivers: Map<string, (arg0: any) => any> = new Map();
+  #receivers: Map<string, (arg0: any) => any> = new Map();
 
   public constructor(channel: Omit<Channel, "terminate">) {
-    this._channel = channel;
-    if (this._channel.onmessage) {
+    this.#channel = channel;
+    if (this.#channel.onmessage) {
       throw new Error(
         "channel.onmessage is already set. Can only use one Rpc instance per channel.",
       );
     }
-    this._channel.onmessage = this._onChannelMessage;
+    this.#channel.onmessage = this.#onChannelMessage;
   }
 
-  private _onChannelMessage = (ev: MessageEvent): void => {
+  #onChannelMessage = (ev: MessageEvent): void => {
     const { id, topic, data } = ev.data;
     if (topic === RESPONSE) {
-      this._pendingCallbacks[id]?.(ev.data);
-      delete this._pendingCallbacks[id];
+      this.#pendingCallbacks[id]?.(ev.data);
+      delete this.#pendingCallbacks[id];
       return;
     }
     // invoke the receive handler in a promise so if it throws synchronously we can reject
     new Promise<Record<string, Transferable[] | undefined> | undefined>((resolve) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const handler = this._receivers.get(topic);
+      const handler = this.#receivers.get(topic);
       if (!handler) {
         throw new Error(`no receiver registered for ${topic}`);
       }
@@ -106,7 +106,7 @@ export default class Rpc {
     })
       .then((result) => {
         if (!result) {
-          return this._channel.postMessage({ topic: RESPONSE, id });
+          return this.#channel.postMessage({ topic: RESPONSE, id });
         }
         const transferables = result[Rpc.transferables];
         delete result[Rpc.transferables];
@@ -115,7 +115,7 @@ export default class Rpc {
           id,
           data: result,
         };
-        this._channel.postMessage(message, transferables);
+        this.#channel.postMessage(message, transferables);
       })
       .catch((err) => {
         const message = {
@@ -128,13 +128,13 @@ export default class Rpc {
             stack: err.stack,
           },
         };
-        this._channel.postMessage(message);
+        this.#channel.postMessage(message);
       });
   };
 
   /** Call this when the channel has been terminated to reject any outstanding send callbacks. */
   public terminate(): void {
-    for (const [id, callback] of Object.entries(this._pendingCallbacks)) {
+    for (const [id, callback] of Object.entries(this.#pendingCallbacks)) {
       callback({
         topic: RESPONSE,
         id,
@@ -156,10 +156,10 @@ export default class Rpc {
     data?: TData,
     transfer?: Transferable[],
   ): Promise<TResult> {
-    const id = this._messageId++;
+    const id = this.#messageId++;
     const message = { topic, id, data };
     const result = new Promise<TResult>((resolve, reject) => {
-      this._pendingCallbacks[id] = (info) => {
+      this.#pendingCallbacks[id] = (info) => {
         if (info.data?.[ERROR] != undefined) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           const error = new Error(info.data.message);
@@ -172,7 +172,7 @@ export default class Rpc {
         }
       };
     });
-    this._channel.postMessage(message, transfer);
+    this.#channel.postMessage(message, transfer);
     return await result;
   }
 
@@ -180,9 +180,9 @@ export default class Rpc {
   // only one receiver can be registered per topic and currently
   // 'deregistering' a receiver is not supported since this is not common
   public receive<T, TOut>(topic: string, handler: (arg0: T) => TOut): void {
-    if (this._receivers.has(topic)) {
+    if (this.#receivers.has(topic)) {
       throw new Error(`Receiver already registered for topic: ${topic}`);
     }
-    this._receivers.set(topic, handler);
+    this.#receivers.set(topic, handler);
   }
 }

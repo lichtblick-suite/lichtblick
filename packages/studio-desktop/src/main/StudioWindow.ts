@@ -450,15 +450,15 @@ class StudioWindow {
   // BrowserWindow.id is not as available
   private static windowsByContentId = new Map<number, StudioWindow>();
 
-  private _window: BrowserWindow;
-  private _menu: Menu;
+  #browserWindow: BrowserWindow;
+  #menu: Menu;
 
-  private _inputSources = new Set<string>();
+  #inputSources = new Set<string>();
 
   public constructor(deepLinks: string[] = []) {
     const browserWindow = newStudioWindow(deepLinks);
-    this._window = browserWindow;
-    this._menu = buildMenu(browserWindow);
+    this.#browserWindow = browserWindow;
+    this.#menu = buildMenu(browserWindow);
 
     const id = browserWindow.webContents.id;
 
@@ -467,7 +467,7 @@ class StudioWindow {
 
     // when a window closes and it is the current application menu, clear the input sources
     browserWindow.once("close", () => {
-      if (Menu.getApplicationMenu() === this._menu) {
+      if (Menu.getApplicationMenu() === this.#menu) {
         const existingMenu = Menu.getApplicationMenu();
         const fileMenu = existingMenu?.getMenuItemById("fileMenu");
         // https://github.com/electron/electron/issues/8598
@@ -499,7 +499,7 @@ class StudioWindow {
   public load(): void {
     // load after setting windowsById so any ipc handlers with id lookup work
     log.info(`window.loadURL(${rendererPath})`);
-    this._window
+    this.#browserWindow
       .loadURL(rendererPath)
       .then(() => {
         log.info("window URL loaded");
@@ -517,9 +517,9 @@ class StudioWindow {
       return;
     }
 
-    this._inputSources.add(name);
+    this.#inputSources.add(name);
 
-    const fileMenu = this._menu.getMenuItemById("fileMenu");
+    const fileMenu = this.#menu.getMenuItemById("fileMenu");
     if (!fileMenu) {
       return;
     }
@@ -533,37 +533,37 @@ class StudioWindow {
     }
 
     // build new file menu
-    this.rebuildFileMenu(fileMenu);
+    this.#rebuildFileMenu(fileMenu);
 
-    this._window.setMenu(this._menu);
+    this.#browserWindow.setMenu(this.#menu);
   }
 
   public removeInputSource(name: string): void {
-    this._inputSources.delete(name);
+    this.#inputSources.delete(name);
 
-    const fileMenu = this._menu.getMenuItemById("fileMenu");
+    const fileMenu = this.#menu.getMenuItemById("fileMenu");
     if (!fileMenu) {
       return;
     }
 
-    this.rebuildFileMenu(fileMenu);
-    this._window.setMenu(this._menu);
+    this.#rebuildFileMenu(fileMenu);
+    this.#browserWindow.setMenu(this.#menu);
   }
 
   public getBrowserWindow(): BrowserWindow {
-    return this._window;
+    return this.#browserWindow;
   }
 
   public getMenu(): Menu {
-    return this._menu;
+    return this.#menu;
   }
 
   public static fromWebContentsId(id: number): StudioWindow | undefined {
     return StudioWindow.windowsByContentId.get(id);
   }
 
-  private rebuildFileMenu(fileMenu: MenuItem): void {
-    const browserWindow = this._window;
+  #rebuildFileMenu(fileMenu: MenuItem): void {
+    const browserWindow = this.#browserWindow;
 
     // https://github.com/electron/electron/issues/8598
     (fileMenu.submenu as ClearableMenu).clear();
@@ -607,7 +607,7 @@ class StudioWindow {
     fileMenu.submenu?.append(
       new MenuItem({
         label: "Open Connection",
-        submenu: Array.from(this._inputSources).map((name) => ({
+        submenu: Array.from(this.#inputSources).map((name) => ({
           // Electron menus require a preceding & to escape the & char
           label: name.replace(/&/g, "&&"),
           click: async () => {

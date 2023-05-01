@@ -162,7 +162,7 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
     pickingMaterial.needsUpdate = true;
   }
 
-  private _getRgbaFieldReaders(out: RgbaFieldReaders, foxgloveGrid: Grid) {
+  #getRgbaFieldReaders(out: RgbaFieldReaders, foxgloveGrid: Grid) {
     const { cell_stride } = foxgloveGrid;
     for (const field of foxgloveGrid.fields) {
       const { name } = field;
@@ -178,7 +178,7 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
     }
   }
 
-  private _getColorByFieldReader(
+  #getColorByFieldReader(
     foxgloveGrid: Grid,
     settings: LayerSettingsFoxgloveGrid,
   ): FieldReader | undefined {
@@ -276,7 +276,7 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
 
   public updateTexture(foxgloveGrid: Grid, settings: LayerSettingsFoxgloveGrid): void {
     let texture = this.userData.texture;
-    const fieldReader = this._getColorByFieldReader(foxgloveGrid, settings);
+    const fieldReader = this.#getColorByFieldReader(foxgloveGrid, settings);
     if (!fieldReader) {
       return;
     }
@@ -327,7 +327,7 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
       const rgba = texture.image.data;
       let hasTransparency = false;
       if (settings.colorMode === "rgba-fields") {
-        this._getRgbaFieldReaders(tempRgbaFieldReaders, foxgloveGrid);
+        this.#getRgbaFieldReaders(tempRgbaFieldReaders, foxgloveGrid);
         const { redReader, greenReader, blueReader, alphaReader } = tempRgbaFieldReaders;
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
@@ -385,12 +385,12 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
 }
 
 export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
-  private fieldsByTopic = new Map<string, string[]>();
+  #fieldsByTopic = new Map<string, string[]>();
 
   public constructor(renderer: IRenderer) {
     super("foxglove.Grid", renderer);
 
-    renderer.addSchemaSubscriptions(GRID_DATATYPES, this.handleFoxgloveGrid);
+    renderer.addSchemaSubscriptions(GRID_DATATYPES, this.#handleFoxgloveGrid);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -404,7 +404,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsFoxgloveGrid>;
 
       const node = baseColorModeSettingsNode(
-        this.fieldsByTopic.get(topic.name) ?? [],
+        this.#fieldsByTopic.get(topic.name) ?? [],
         config,
         topic,
         DEFAULT_SETTINGS,
@@ -457,14 +457,14 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     }
   };
 
-  private handleFoxgloveGrid = (messageEvent: PartialMessageEvent<Grid>): void => {
+  #handleFoxgloveGrid = (messageEvent: PartialMessageEvent<Grid>): void => {
     const topic = messageEvent.topic;
     const foxgloveGrid = normalizeFoxgloveGrid(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
     let renderable = this.renderables.get(topic);
 
-    if (!this._validateFoxgloveGrid(foxgloveGrid, messageEvent.topic)) {
+    if (!this.#validateFoxgloveGrid(foxgloveGrid, messageEvent.topic)) {
       if (renderable) {
         renderable.visible = false;
       }
@@ -480,7 +480,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       // only want to autoselect if it's in flatcolor mode (without colorfield) and previously didn't have fields
-      if (settings.colorField == undefined && this.fieldsByTopic.get(topic) == undefined) {
+      if (settings.colorField == undefined && this.#fieldsByTopic.get(topic) == undefined) {
         autoSelectColorField(settings, foxgloveGrid.fields, { supportsPackedRgbModes: false });
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {
@@ -523,14 +523,14 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       this.renderables.set(topic, renderable);
     }
 
-    let fields = this.fieldsByTopic.get(topic);
+    let fields = this.#fieldsByTopic.get(topic);
     if (!fields || fields.length !== foxgloveGrid.fields.length) {
       fields = foxgloveGrid.fields.map((field) => field.name);
-      this.fieldsByTopic.set(topic, fields);
+      this.#fieldsByTopic.set(topic, fields);
       this.updateSettingsTree();
     }
 
-    this._updateFoxgloveGridRenderable(
+    this.#updateFoxgloveGridRenderable(
       renderable,
       foxgloveGrid,
       receiveTime,
@@ -538,7 +538,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     );
   };
 
-  private _validateFoxgloveGrid(foxgloveGrid: Grid, topic: string): boolean {
+  #validateFoxgloveGrid(foxgloveGrid: Grid, topic: string): boolean {
     const { cell_stride, row_stride, column_count: cols } = foxgloveGrid;
     const rows = foxgloveGrid.data.byteLength / row_stride;
 
@@ -591,7 +591,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
   }
 
   /** @param foxgloveGrid must be validated already */
-  private _updateFoxgloveGridRenderable(
+  #updateFoxgloveGridRenderable(
     renderable: FoxgloveGridRenderable,
     foxgloveGrid: Grid,
     receiveTime: bigint,

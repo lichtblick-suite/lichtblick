@@ -72,21 +72,21 @@ interface ILogger {
 }
 
 export default class CachedFilelike implements Filelike {
-  private _fileReader: FileReader;
-  private _cacheSizeInBytes: number = Infinity;
-  private _fileSize?: number;
-  private _virtualBuffer: VirtualLRUBuffer;
-  private _log: ILogger;
-  private _closed: boolean = false;
+  #fileReader: FileReader;
+  #cacheSizeInBytes: number = Infinity;
+  #fileSize?: number;
+  #virtualBuffer: VirtualLRUBuffer;
+  #log: ILogger;
+  #closed: boolean = false;
   // eslint-disable-next-line @foxglove/no-boolean-parameters
-  private _keepReconnectingCallback?: (reconnecting: boolean) => void;
+  #keepReconnectingCallback?: (reconnecting: boolean) => void;
 
   // The current active connection, if there is one. `remainingRange.start` gets updated whenever
   // we receive new data, so it truly is the remaining range that it is going to download.
-  private _currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
+  #currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
 
   // A list of read requests and associated ranges for all read requests, in order.
-  private _readRequests: {
+  #readRequests: {
     range: Range;
     resolve: (_: Uint8Array) => void;
     reject: (_: Error) => void;
@@ -94,10 +94,10 @@ export default class CachedFilelike implements Filelike {
   }[] = [];
 
   // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
-  private _lastResolvedCallbackEnd?: number;
+  #lastResolvedCallbackEnd?: number;
 
   // The last time we've encountered an error;
-  private _lastErrorTime?: number;
+  #lastErrorTime?: number;
 
   public constructor(options: {
     fileReader: FileReader;
@@ -106,42 +106,42 @@ export default class CachedFilelike implements Filelike {
     // eslint-disable-next-line @foxglove/no-boolean-parameters
     keepReconnectingCallback?: (reconnecting: boolean) => void;
   }) {
-    this._fileReader = options.fileReader;
-    this._cacheSizeInBytes = options.cacheSizeInBytes ?? this._cacheSizeInBytes;
-    this._keepReconnectingCallback = options.keepReconnectingCallback;
-    this._log = options.log ?? log;
-    this._virtualBuffer = new VirtualLRUBuffer({ size: 0 });
+    this.#fileReader = options.fileReader;
+    this.#cacheSizeInBytes = options.cacheSizeInBytes ?? this.#cacheSizeInBytes;
+    this.#keepReconnectingCallback = options.keepReconnectingCallback;
+    this.#log = options.log ?? log;
+    this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
   }
 
   public async open(): Promise<void> {
-    if (this._fileSize != undefined) {
+    if (this.#fileSize != undefined) {
       return;
     }
-    const { size } = await this._fileReader.open();
-    this._fileSize = size;
-    if (this._cacheSizeInBytes >= size) {
+    const { size } = await this.#fileReader.open();
+    this.#fileSize = size;
+    if (this.#cacheSizeInBytes >= size) {
       // If we have a cache limit that exceeds the file size, then we don't need to limit ourselves
       // to small blocks. This way `VirtualLRUBuffer#slice` will be faster since we'll almost always
       // not need to copy from multiple blocks into a new `Buffer` instance.
-      this._virtualBuffer = new VirtualLRUBuffer({ size });
+      this.#virtualBuffer = new VirtualLRUBuffer({ size });
     } else {
-      this._virtualBuffer = new VirtualLRUBuffer({
+      this.#virtualBuffer = new VirtualLRUBuffer({
         size,
         blockSize: CACHE_BLOCK_SIZE,
         // Rather create too many blocks than too few (Math.ceil), and always add one block,
         // to allow for a read range not starting or ending perfectly at a block boundary.
-        numberOfBlocks: Math.ceil(this._cacheSizeInBytes / CACHE_BLOCK_SIZE) + 2,
+        numberOfBlocks: Math.ceil(this.#cacheSizeInBytes / CACHE_BLOCK_SIZE) + 2,
       });
     }
-    this._log.info(`Opening file with size ${bytesToMiB(this._fileSize)}MiB`);
+    this.#log.info(`Opening file with size ${bytesToMiB(this.#fileSize)}MiB`);
   }
 
   // Get the file size. Requires a call to `open()` or `read()` first.
   public size(): number {
-    if (this._fileSize == undefined) {
+    if (this.#fileSize == undefined) {
       throw new Error("CachedFilelike has not been opened");
     }
-    return this._fileSize;
+    return this.#fileSize;
   }
 
   // Potentially performance-sensitive; await can be expensive
@@ -156,8 +156,8 @@ export default class CachedFilelike implements Filelike {
     if (offset < 0 || length < 0) {
       throw new Error("CachedFilelike#read invalid input");
     }
-    if (length > this._cacheSizeInBytes) {
-      throw new Error(`Requested more data than cache size: ${length} > ${this._cacheSizeInBytes}`);
+    if (length > this.#cacheSizeInBytes) {
+      throw new Error(`Requested more data than cache size: ${length} > ${this.#cacheSizeInBytes}`);
     }
 
     // Potentially performance-sensitive; await can be expensive
@@ -170,8 +170,8 @@ export default class CachedFilelike implements Filelike {
             return;
           }
 
-          this._readRequests.push({ range, resolve, reject, requestTime: Date.now() });
-          this._updateState();
+          this.#readRequests.push({ range, resolve, reject, requestTime: Date.now() });
+          this.#updateState();
         })
         .catch((err) => {
           reject(err);
@@ -180,19 +180,19 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Gets called any time our connection or read requests change.
-  private _updateState(): void {
-    if (this._closed) {
+  #updateState(): void {
+    if (this.#closed) {
       return;
     }
 
     // First, see if there are any read requests that we can resolve now.
-    this._readRequests = this._readRequests.filter(({ range, resolve }) => {
-      if (!this._virtualBuffer.hasData(range.start, range.end)) {
+    this.#readRequests = this.#readRequests.filter(({ range, resolve }) => {
+      if (!this.#virtualBuffer.hasData(range.start, range.end)) {
         return true;
       }
 
-      this._lastResolvedCallbackEnd = range.end;
-      const buffer = this._virtualBuffer.slice(range.start, range.end);
+      this.#lastResolvedCallbackEnd = range.end;
+      const buffer = this.#virtualBuffer.slice(range.start, range.end);
 
       resolve(buffer);
       return false;
@@ -202,63 +202,63 @@ export default class CachedFilelike implements Filelike {
 
     // Then see if we need to set a new connection based on the new connection and read requests state.
     const newConnection = getNewConnection({
-      currentRemainingRange: this._currentConnection
-        ? this._currentConnection.remainingRange
+      currentRemainingRange: this.#currentConnection
+        ? this.#currentConnection.remainingRange
         : undefined,
-      readRequestRange: this._readRequests[0] ? this._readRequests[0].range : undefined,
-      downloadedRanges: this._virtualBuffer.getRangesWithData(),
-      lastResolvedCallbackEnd: this._lastResolvedCallbackEnd,
-      maxRequestSize: this._cacheSizeInBytes,
+      readRequestRange: this.#readRequests[0] ? this.#readRequests[0].range : undefined,
+      downloadedRanges: this.#virtualBuffer.getRangesWithData(),
+      lastResolvedCallbackEnd: this.#lastResolvedCallbackEnd,
+      maxRequestSize: this.#cacheSizeInBytes,
       fileSize: size,
       continueDownloadingThreshold: CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION,
     });
     if (newConnection) {
-      this._setConnection(newConnection);
+      this.#setConnection(newConnection);
     }
   }
 
   // Replace the current connection with a new one, spanning a certain range.
-  private _setConnection(range: Range): void {
-    this._log.debug(`Setting new connection @ ${rangeToString(range)}`);
+  #setConnection(range: Range): void {
+    this.#log.debug(`Setting new connection @ ${rangeToString(range)}`);
 
-    if (this._currentConnection) {
+    if (this.#currentConnection) {
       // Destroy the current connection if there is one.
-      const currentConnection = this._currentConnection;
+      const currentConnection = this.#currentConnection;
       currentConnection.stream.destroy();
-      this._log.debug(
+      this.#log.debug(
         `Destroyed current connection @ ${rangeToString(currentConnection.remainingRange)}`,
       );
     }
 
     // Start the stream, and update the current connection state.
-    const stream = this._fileReader.fetch(range.start, range.end - range.start);
-    this._currentConnection = { stream, remainingRange: range };
+    const stream = this.#fileReader.fetch(range.start, range.end - range.start);
+    this.#currentConnection = { stream, remainingRange: range };
 
     stream.on("error", (error: Error) => {
-      const currentConnection = this._currentConnection;
+      const currentConnection = this.#currentConnection;
       if (!currentConnection || stream !== currentConnection.stream) {
         return; // Ignore errors from old streams.
       }
 
-      if (this._keepReconnectingCallback) {
+      if (this.#keepReconnectingCallback) {
         // If this callback is set, just keep retrying.
-        if (this._lastErrorTime == undefined) {
+        if (this.#lastErrorTime == undefined) {
           // And if this is the first error, let the callback know.
-          this._keepReconnectingCallback(true);
+          this.#keepReconnectingCallback(true);
         }
       } else {
         // Otherwise, if we get two errors in a short timespan (100ms) then there is probably a
         // serious error, we resolve all remaining callbacks with errors and close out.
-        const lastErrorTime = this._lastErrorTime;
+        const lastErrorTime = this.#lastErrorTime;
         if (lastErrorTime != undefined && Date.now() - lastErrorTime < 100) {
-          this._log.error(
+          this.#log.error(
             `Connection @ ${rangeToString(
               range,
             )} threw another error; closing: ${error.toString()}`,
           );
 
-          this._closed = true;
-          for (const request of this._readRequests) {
+          this.#closed = true;
+          for (const request of this.#readRequests) {
             request.reject(error);
           }
           return;
@@ -267,13 +267,13 @@ export default class CachedFilelike implements Filelike {
 
       // When we encounter an error there is usually a bad connection or timeout or so, so just
       // mark the current connection as destroyed, and try again.
-      this._log.info(
+      this.#log.info(
         `Connection @ ${rangeToString(range)} threw error; trying to continue: ${error.toString()}`,
       );
-      this._lastErrorTime = Date.now();
+      this.#lastErrorTime = Date.now();
       currentConnection.stream.destroy();
-      delete this._currentConnection;
-      this._updateState();
+      this.#currentConnection = undefined;
+      this.#updateState();
     });
 
     // Handle the data stream.
@@ -281,22 +281,22 @@ export default class CachedFilelike implements Filelike {
     let bytesRead = 0;
     let lastReportedBytesRead = 0;
     stream.on("data", (chunk: Uint8Array) => {
-      const currentConnection = this._currentConnection;
+      const currentConnection = this.#currentConnection;
       if (!currentConnection || stream !== currentConnection.stream) {
         return; // Ignore data from old streams.
       }
 
-      if (this._lastErrorTime != undefined) {
+      if (this.#lastErrorTime != undefined) {
         // If we had an error before, then that has clearly been resolved since we received some data.
-        this._lastErrorTime = undefined;
-        if (this._keepReconnectingCallback) {
+        this.#lastErrorTime = undefined;
+        if (this.#keepReconnectingCallback) {
           // And if we had a callback, let it know that the issue has been resolved.
-          this._keepReconnectingCallback(false);
+          this.#keepReconnectingCallback(false);
         }
       }
 
       // Copy the data into the VirtualLRUBuffer.
-      this._virtualBuffer.copyFrom(chunk, currentConnection.remainingRange.start);
+      this.#virtualBuffer.copyFrom(chunk, currentConnection.remainingRange.start);
       bytesRead += chunk.byteLength;
 
       // Every now and then, do some logging of the current download speed.
@@ -306,28 +306,28 @@ export default class CachedFilelike implements Filelike {
 
         const mibibytes = bytesToMiB(bytesRead);
         const speed = round(mibibytes / sec, 2);
-        this._log.debug(
+        this.#log.debug(
           `Connection @ ${rangeToString(
             currentConnection.remainingRange,
           )} downloading at ${speed} MiB/s`,
         );
       }
 
-      if (this._virtualBuffer.hasData(range.start, range.end)) {
+      if (this.#virtualBuffer.hasData(range.start, range.end)) {
         // If the requested range has been downloaded, we're done!
-        this._log.info(`Connection @ ${rangeToString(currentConnection.remainingRange)} finished!`);
+        this.#log.info(`Connection @ ${rangeToString(currentConnection.remainingRange)} finished!`);
         stream.destroy();
-        delete this._currentConnection;
+        this.#currentConnection = undefined;
       } else {
         // Otherwise, update `remainingRange`.
-        this._currentConnection = {
+        this.#currentConnection = {
           stream,
           remainingRange: { start: range.start + bytesRead, end: range.end },
         };
       }
 
       // Always call `_updateState` so it can decide to create new connections, resolve callbacks, etc.
-      this._updateState();
+      this.#updateState();
     });
   }
 }

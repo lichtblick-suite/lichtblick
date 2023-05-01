@@ -12,7 +12,7 @@ import type { Renderer } from "../../Renderer";
 import { Marker } from "../../ros";
 
 export class RenderableSphereList extends RenderableMarker {
-  private mesh: DynamicInstancedMesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
+  #mesh: DynamicInstancedMesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
 
   public constructor(
     topic: string,
@@ -28,16 +28,16 @@ export class RenderableSphereList extends RenderableMarker {
       () => createSphereGeometry(renderer.maxLod),
     );
     const material = makeStandardInstancedMaterial(marker);
-    this.mesh = new DynamicInstancedMesh(geometry, material, marker.points.length);
-    this.mesh.castShadow = true;
-    this.mesh.receiveShadow = true;
-    this.add(this.mesh);
+    this.#mesh = new DynamicInstancedMesh(geometry, material, marker.points.length);
+    this.#mesh.castShadow = true;
+    this.#mesh.receiveShadow = true;
+    this.add(this.#mesh);
 
     this.update(marker, receiveTime);
   }
 
   public override dispose(): void {
-    this.mesh.material.dispose();
+    this.#mesh.material.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
@@ -47,11 +47,11 @@ export class RenderableSphereList extends RenderableMarker {
 
     const transparent = markerHasTransparency(marker);
     if (transparent !== markerHasTransparency(prevMarker)) {
-      this.mesh.material.transparent = transparent;
-      this.mesh.material.depthWrite = !transparent;
-      this.mesh.material.needsUpdate = true;
+      this.#mesh.material.transparent = transparent;
+      this.#mesh.material.depthWrite = !transparent;
+      this.#mesh.material.needsUpdate = true;
     }
 
-    this.mesh.set(marker.points, marker.scale, marker.colors, marker.color);
+    this.#mesh.set(marker.points, marker.scale, marker.colors, marker.color);
   }
 }

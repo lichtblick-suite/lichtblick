@@ -29,8 +29,8 @@ const tempDirection = new THREE.Vector3();
 export class RenderableArrow extends RenderableMarker {
   public shaftMesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
   public headMesh: THREE.Mesh<THREE.ConeGeometry, THREE.MeshStandardMaterial>;
-  private shaftOutline: THREE.LineSegments;
-  private headOutline: THREE.LineSegments;
+  #shaftOutline: THREE.LineSegments;
+  #headOutline: THREE.LineSegments;
 
   public constructor(
     topic: string,
@@ -69,14 +69,14 @@ export class RenderableArrow extends RenderableMarker {
     this.add(this.headMesh);
 
     // Shaft outline
-    this.shaftOutline = new THREE.LineSegments(shaftEdgesGeometry, renderer.outlineMaterial);
-    this.shaftOutline.userData.picking = false;
-    this.shaftMesh.add(this.shaftOutline);
+    this.#shaftOutline = new THREE.LineSegments(shaftEdgesGeometry, renderer.outlineMaterial);
+    this.#shaftOutline.userData.picking = false;
+    this.shaftMesh.add(this.#shaftOutline);
 
     // Head outline
-    this.headOutline = new THREE.LineSegments(headEdgesGeometry, renderer.outlineMaterial);
-    this.headOutline.userData.picking = false;
-    this.headMesh.add(this.headOutline);
+    this.#headOutline = new THREE.LineSegments(headEdgesGeometry, renderer.outlineMaterial);
+    this.#headOutline.userData.picking = false;
+    this.headMesh.add(this.#headOutline);
 
     this.update(marker, receiveTime);
   }
@@ -108,8 +108,8 @@ export class RenderableArrow extends RenderableMarker {
 
     const settings = this.getSettings();
 
-    this.shaftOutline.visible = settings?.showOutlines ?? true;
-    this.headOutline.visible = settings?.showOutlines ?? true;
+    this.#shaftOutline.visible = settings?.showOutlines ?? true;
+    this.#headOutline.visible = settings?.showOutlines ?? true;
 
     // Adapted from <https://github.com/ros-visualization/rviz/blob/noetic-devel/src/rviz/default_plugin/markers/arrow_marker.cpp
     if (marker.points.length === 2) {

@@ -29,5 +29,18 @@
 // @ts-expect-error unused function
 function useEffectOnce() {} // eslint-disable-line id-denylist, @typescript-eslint/no-unused-vars
 
+class Foo {
+  private bar = 1; // eslint-disable-line @foxglove/studio/prefer-hash-private
+  // eslint-disable-next-line @foxglove/studio/prefer-hash-private
+  private foo() {
+    this.bar = 2;
+  }
+  public asdf() {
+    this.foo();
+    void this.bar;
+  }
+}
+void Foo;
+
 // keep isolatedModules happy
 export default {};

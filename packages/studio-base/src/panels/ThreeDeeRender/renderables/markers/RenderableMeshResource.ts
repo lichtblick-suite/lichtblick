@@ -17,11 +17,11 @@ import { removeLights, replaceMaterials } from "../models";
 const MESH_FETCH_FAILED = "MESH_FETCH_FAILED";
 
 export class RenderableMeshResource extends RenderableMarker {
-  private mesh: THREE.Group | THREE.Scene | undefined;
-  private material: THREE.MeshStandardMaterial;
+  #mesh: THREE.Group | THREE.Scene | undefined;
+  #material: THREE.MeshStandardMaterial;
 
   /** Track updates to avoid race conditions when asynchronously loading models */
-  private updateId = 0;
+  #updateId = 0;
 
   public constructor(
     topic: string,
@@ -31,15 +31,15 @@ export class RenderableMeshResource extends RenderableMarker {
   ) {
     super(topic, marker, receiveTime, renderer);
 
-    this.material = makeStandardMaterial(marker.color);
+    this.#material = makeStandardMaterial(marker.color);
     this.update(marker, receiveTime, true);
   }
 
   public override dispose(): void {
-    if (this.mesh) {
-      disposeMeshesRecursive(this.mesh);
+    if (this.#mesh) {
+      disposeMeshesRecursive(this.#mesh);
     }
-    this.material.dispose();
+    this.#material.dispose();
   }
 
   public override update(
@@ -53,38 +53,38 @@ export class RenderableMeshResource extends RenderableMarker {
     const marker = this.userData.marker;
 
     const transparent = marker.color.a < 1;
-    if (transparent !== this.material.transparent) {
-      this.material.transparent = transparent;
-      this.material.depthWrite = !transparent;
-      this.material.needsUpdate = true;
+    if (transparent !== this.#material.transparent) {
+      this.#material.transparent = transparent;
+      this.#material.depthWrite = !transparent;
+      this.#material.needsUpdate = true;
     }
 
-    rgbToThreeColor(this.material.color, marker.color);
-    this.material.opacity = marker.color.a;
+    rgbToThreeColor(this.#material.color, marker.color);
+    this.#material.opacity = marker.color.a;
 
     if (forceLoad === true || marker.mesh_resource !== prevMarker.mesh_resource) {
-      const curUpdateId = ++this.updateId;
+      const curUpdateId = ++this.#updateId;
 
       const opts = { useEmbeddedMaterials: marker.mesh_use_embedded_materials };
       const errors = this.renderer.settings.errors;
-      if (this.mesh) {
-        this.remove(this.mesh);
-        disposeMeshesRecursive(this.mesh);
-        this.mesh = undefined;
+      if (this.#mesh) {
+        this.remove(this.#mesh);
+        disposeMeshesRecursive(this.#mesh);
+        this.#mesh = undefined;
       }
-      this._loadModel(marker.mesh_resource, opts)
+      this.#loadModel(marker.mesh_resource, opts)
         .then((mesh) => {
           if (!mesh) {
             return;
           }
-          if (this.updateId !== curUpdateId) {
+          if (this.#updateId !== curUpdateId) {
             // another update has started
             disposeMeshesRecursive(mesh);
             return;
           }
-          this.mesh = mesh;
+          this.#mesh = mesh;
           this.add(mesh);
-          this.updateOutlineVisibility();
+          this.#updateOutlineVisibility();
 
           // Remove any mesh fetch error message since loading was successful
           this.renderer.settings.errors.remove(this.userData.settingsPath, MESH_FETCH_FAILED);
@@ -99,12 +99,12 @@ export class RenderableMeshResource extends RenderableMarker {
           );
         });
     }
-    this.updateOutlineVisibility();
+    this.#updateOutlineVisibility();
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
 
-  private updateOutlineVisibility(): void {
+  #updateOutlineVisibility(): void {
     const showOutlines = this.getSettings()?.showOutlines ?? true;
     this.traverse((lineSegments) => {
       // Want to avoid picking up the LineSegments from the model itself
@@ -118,7 +118,7 @@ export class RenderableMeshResource extends RenderableMarker {
     });
   }
 
-  private async _loadModel(
+  async #loadModel(
     url: string,
     opts: { useEmbeddedMaterials: boolean },
   ): Promise<THREE.Group | THREE.Scene | undefined> {
@@ -144,7 +144,7 @@ export class RenderableMeshResource extends RenderableMarker {
     const mesh = cachedModel.clone(true);
     removeLights(mesh);
     if (!opts.useEmbeddedMaterials) {
-      replaceMaterials(mesh, this.material);
+      replaceMaterials(mesh, this.#material);
     }
 
     return mesh;

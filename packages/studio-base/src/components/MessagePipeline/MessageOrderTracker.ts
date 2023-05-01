@@ -28,21 +28,21 @@ const log = Logger.getLogger(__filename);
 // This is to ensure that other mechanisms that we have in place for either discarding old messages
 // or forcing an update of `player.lastSeekTime` are working properly.
 class MessageOrderTracker {
-  private lastMessages: readonly MessageEvent<unknown>[] = [];
-  private lastCurrentTime?: Time;
-  private lastMessageTime?: Time;
-  private lastMessageTopic?: string;
-  private lastLastSeekTime?: number;
-  private warningTimeout?: ReturnType<typeof setTimeout>;
+  #lastMessages: readonly MessageEvent<unknown>[] = [];
+  #lastCurrentTime?: Time;
+  #lastMessageTime?: Time;
+  #lastMessageTopic?: string;
+  #lastLastSeekTime?: number;
+  #warningTimeout?: ReturnType<typeof setTimeout>;
 
   /**
    * Set this to `true` to debug out-of-order messages. It is disabled by default in production
    * because logging messages to the console prevents them from getting garbage-collected as long as
    * the console is not cleared.
    */
-  private trackIncorrectMessages = false;
+  #trackIncorrectMessages = false;
 
-  private incorrectMessages: MessageEvent<unknown>[] = [];
+  #incorrectMessages: MessageEvent<unknown>[] = [];
 
   public update(playerState: PlayerState): PlayerProblem[] {
     if (!playerState.activeData) {
@@ -54,20 +54,20 @@ class MessageOrderTracker {
     const { messages, currentTime, lastSeekTime } = playerState.activeData;
     let didSeek = false;
 
-    if (this.lastLastSeekTime !== lastSeekTime) {
-      this.lastLastSeekTime = lastSeekTime;
-      if (this.warningTimeout) {
-        clearTimeout(this.warningTimeout);
-        this.warningTimeout = undefined;
-        this.incorrectMessages = [];
+    if (this.#lastLastSeekTime !== lastSeekTime) {
+      this.#lastLastSeekTime = lastSeekTime;
+      if (this.#warningTimeout) {
+        clearTimeout(this.#warningTimeout);
+        this.#warningTimeout = undefined;
+        this.#incorrectMessages = [];
       }
-      this.warningTimeout = this.lastMessageTime = this.lastCurrentTime = undefined;
-      this.lastMessages = [];
+      this.#warningTimeout = this.#lastMessageTime = this.#lastCurrentTime = undefined;
+      this.#lastMessages = [];
       didSeek = true;
     }
-    if (this.lastMessages !== messages || this.lastCurrentTime !== currentTime) {
-      this.lastMessages = messages;
-      this.lastCurrentTime = currentTime;
+    if (this.#lastMessages !== messages || this.#lastCurrentTime !== currentTime) {
+      this.#lastMessages = messages;
+      this.#lastCurrentTime = currentTime;
       for (const message of messages) {
         const messageTime = message.receiveTime;
 
@@ -76,13 +76,13 @@ class MessageOrderTracker {
         if (!didSeek) {
           const currentTimeDrift = Math.abs(toSec(subtractTimes(messageTime, currentTime)));
           if (currentTimeDrift > DRIFT_THRESHOLD_SEC) {
-            if (this.trackIncorrectMessages) {
-              this.incorrectMessages.push(message);
+            if (this.#trackIncorrectMessages) {
+              this.#incorrectMessages.push(message);
             }
-            if (!this.warningTimeout) {
-              this.warningTimeout = setTimeout(() => {
+            if (!this.#warningTimeout) {
+              this.#warningTimeout = setTimeout(() => {
                 // timeout has fired, we need to clear so a new timeout registers if there are more messages
-                this.warningTimeout = undefined;
+                this.#warningTimeout = undefined;
                 // reset incorrect message queue before posting warning so we never keep
                 // incorrectMessages around. The browser console will keep messages in memory when
                 // logged, so disable logging of messages unless explicitly enabled.
@@ -90,11 +90,11 @@ class MessageOrderTracker {
                   currentTime,
                   lastSeekTime,
                   messageTime,
-                  incorrectMessages: this.trackIncorrectMessages
-                    ? this.incorrectMessages
+                  incorrectMessages: this.#trackIncorrectMessages
+                    ? this.#incorrectMessages
                     : "not being tracked",
                 };
-                this.incorrectMessages = [];
+                this.#incorrectMessages = [];
                 log.warn(
                   `Message receiveTime very different from player.currentTime; without updating lastSeekTime`,
                   info,
@@ -105,15 +105,15 @@ class MessageOrderTracker {
         }
 
         if (
-          this.lastMessageTime &&
-          this.lastMessageTopic != undefined &&
-          isLessThan(messageTime, this.lastMessageTime)
+          this.#lastMessageTime &&
+          this.#lastMessageTopic != undefined &&
+          isLessThan(messageTime, this.#lastMessageTime)
         ) {
           const formattedTime = formatFrame(messageTime);
-          const lastMessageTime = formatFrame(this.lastMessageTime);
+          const lastMessageTime = formatFrame(this.#lastMessageTime);
           const errorMessage =
             `Processed a message on ${message.topic} at ${formattedTime} which is earlier than ` +
-            `last processed message on ${this.lastMessageTopic} at ${lastMessageTime}.`;
+            `last processed message on ${this.#lastMessageTopic} at ${lastMessageTime}.`;
 
           problems.push({
             severity: "warn",
@@ -121,8 +121,8 @@ class MessageOrderTracker {
             error: new Error(errorMessage),
           });
         }
-        this.lastMessageTopic = message.topic;
-        this.lastMessageTime = messageTime;
+        this.#lastMessageTopic = message.topic;
+        this.#lastMessageTime = messageTime;
       }
     }
 

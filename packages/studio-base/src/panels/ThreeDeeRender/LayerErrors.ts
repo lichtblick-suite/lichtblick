@@ -94,12 +94,12 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
   }
 
   public hasError(path: Path, errorId: string): boolean {
-    const node = this._getNode(path);
+    const node = this.#getNode(path);
     return node?.errorsById?.has(errorId) === true;
   }
 
   public remove(path: Path, errorId: string): void {
-    const node = this._getNode(path);
+    const node = this.#getNode(path);
     if (node?.errorsById?.has(errorId) === true) {
       node.errorsById.delete(errorId);
       this.emit("remove", path, errorId);
@@ -112,7 +112,7 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
   }
 
   public clearPath(path: Path): void {
-    const node = this._getNode(path);
+    const node = this.#getNode(path);
     if (!node) {
       return;
     }
@@ -139,7 +139,7 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     this.clearPath([]);
   }
 
-  private _getNode(path: Path): NodeError | undefined {
+  #getNode(path: Path): NodeError | undefined {
     let node: NodeError | undefined = this.errors;
     for (const segment of path) {
       node = node.children?.get(segment);

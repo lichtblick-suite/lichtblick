@@ -5,5 +5,6 @@
 module.exports = {
   rules: {
     "link-target": require("./link-target"),
+    "prefer-hash-private": require("./prefer-hash-private"),
   },
 };

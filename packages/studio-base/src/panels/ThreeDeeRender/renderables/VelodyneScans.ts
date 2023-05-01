@@ -69,7 +69,7 @@ export function pointFieldDataTypeToNumericType(type: PointFieldDataType): Numer
 // objects which are an amalgamation of VelodyneScan and PointCloud2 ROS
 // messages plus marker-like SceneBuilder annotations
 class VelodyneCloudConverter {
-  private _transformers = new Map<Model, Transformer>();
+  #transformers = new Map<Model, Transformer>();
 
   public decode(scan: VelodyneScan): FoxglovePointCloud | undefined {
     if (scan.packets.length === 0) {
@@ -112,25 +112,25 @@ class VelodyneCloudConverter {
   }
 
   public getTransformer(model: Model): Transformer {
-    let transformer = this._transformers.get(model);
+    let transformer = this.#transformers.get(model);
     if (transformer != undefined) {
       return transformer;
     }
 
     transformer = new Transformer(new Calibration(model));
-    this._transformers.set(model, transformer);
+    this.#transformers.set(model, transformer);
     return transformer;
   }
 }
 
 export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
-  private _pointCloudFieldsByTopic = new Map<string, string[]>();
-  private _velodyneCloudConverter = new VelodyneCloudConverter();
+  #pointCloudFieldsByTopic = new Map<string, string[]>();
+  #velodyneCloudConverter = new VelodyneCloudConverter();
 
   public constructor(renderer: IRenderer) {
     super("foxglove.VelodyneScans", renderer);
 
-    renderer.addSchemaSubscriptions(VELODYNE_SCAN_DATATYPES, this.handleVelodyneScan);
+    renderer.addSchemaSubscriptions(VELODYNE_SCAN_DATATYPES, this.#handleVelodyneScan);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -143,7 +143,7 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
       }
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsVelodyneScans>;
       const messageFields =
-        this._pointCloudFieldsByTopic.get(topic.name) ?? POINT_CLOUD_REQUIRED_FIELDS;
+        this.#pointCloudFieldsByTopic.get(topic.name) ?? POINT_CLOUD_REQUIRED_FIELDS;
       const node: SettingsTreeNodeWithActionHandler = pointSettingsNode(
         topic,
         messageFields,
@@ -201,10 +201,10 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
     }
   }
 
-  private handleVelodyneScan = (messageEvent: MessageEvent<VelodyneScan>): void => {
+  #handleVelodyneScan = (messageEvent: MessageEvent<VelodyneScan>): void => {
     const { topic } = messageEvent;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    const pointCloud = this._velodyneCloudConverter.decode(messageEvent.message);
+    const pointCloud = this.#velodyneCloudConverter.decode(messageEvent.message);
     if (!pointCloud) {
       return;
     }
@@ -256,10 +256,10 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
     }
 
     // Update the mapping of topic to point cloud field names if necessary
-    let fields = this._pointCloudFieldsByTopic.get(messageEvent.topic);
+    let fields = this.#pointCloudFieldsByTopic.get(messageEvent.topic);
     if (!fields || fields.length !== pointCloud.fields.length) {
       fields = pointCloud.fields.map((field) => field.name);
-      this._pointCloudFieldsByTopic.set(messageEvent.topic, fields);
+      this.#pointCloudFieldsByTopic.set(messageEvent.topic, fields);
       this.updateSettingsTree();
     }
 

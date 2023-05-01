@@ -37,8 +37,8 @@ export class Markers extends SceneExtension<TopicMarkers> {
   public constructor(renderer: IRenderer) {
     super("foxglove.Markers", renderer);
 
-    renderer.addSchemaSubscriptions(MARKER_ARRAY_DATATYPES, this.handleMarkerArray);
-    renderer.addSchemaSubscriptions(MARKER_DATATYPES, this.handleMarker);
+    renderer.addSchemaSubscriptions(MARKER_ARRAY_DATATYPES, this.#handleMarkerArray);
+    renderer.addSchemaSubscriptions(MARKER_DATATYPES, this.#handleMarker);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -87,7 +87,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
             icon: "Shapes",
             visible: ns.settings.visible,
             defaultExpansionState: namespaces.length > 1 ? "collapsed" : "expanded",
-            handler: this.handleSettingsActionNamespace,
+            handler: this.#handleSettingsActionNamespace,
           };
           node.children[`ns:${ns.namespace}`] = child;
         }
@@ -130,7 +130,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     }
   };
 
-  private handleSettingsActionNamespace = (action: SettingsTreeAction): void => {
+  #handleSettingsActionNamespace = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 4) {
       return;
@@ -169,7 +169,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     this.updateSettingsTree();
   };
 
-  private handleMarkerArray = (messageEvent: PartialMessageEvent<MarkerArray>): void => {
+  #handleMarkerArray = (messageEvent: PartialMessageEvent<MarkerArray>): void => {
     const topic = messageEvent.topic;
     const markerArray = messageEvent.message;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
@@ -177,21 +177,21 @@ export class Markers extends SceneExtension<TopicMarkers> {
     for (const markerMsg of markerArray.markers ?? []) {
       if (markerMsg) {
         const marker = normalizeMarker(markerMsg);
-        this.addMarker(topic, marker, receiveTime);
+        this.#addMarker(topic, marker, receiveTime);
       }
     }
   };
 
-  private handleMarker = (messageEvent: PartialMessageEvent<Marker>): void => {
+  #handleMarker = (messageEvent: PartialMessageEvent<Marker>): void => {
     const topic = messageEvent.topic;
     const marker = normalizeMarker(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
-    this.addMarker(topic, marker, receiveTime);
+    this.#addMarker(topic, marker, receiveTime);
   };
 
-  private addMarker(topic: string, marker: Marker, receiveTime: bigint): void {
-    const topicMarkers = this._getTopicMarkers(topic, marker, receiveTime);
+  #addMarker(topic: string, marker: Marker, receiveTime: bigint): void {
+    const topicMarkers = this.#getTopicMarkers(topic, marker, receiveTime);
     const prevNsCount = topicMarkers.namespaces.size;
     topicMarkers.addMarkerMessage(marker, receiveTime);
 
@@ -207,7 +207,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
       return;
     }
 
-    const topicMarkers = this._getTopicMarkers(topic, firstMarker, receiveTime);
+    const topicMarkers = this.#getTopicMarkers(topic, firstMarker, receiveTime);
     const prevNsCount = topicMarkers.namespaces.size;
     for (const marker of markerArray) {
       topicMarkers.addMarkerMessage(marker, receiveTime);
@@ -219,7 +219,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     }
   }
 
-  private _getTopicMarkers(topic: string, marker: Marker, receiveTime: bigint): TopicMarkers {
+  #getTopicMarkers(topic: string, marker: Marker, receiveTime: bigint): TopicMarkers {
     let topicMarkers = this.renderables.get(topic);
     if (!topicMarkers) {
       const userSettings = this.renderer.config.topics[topic] as

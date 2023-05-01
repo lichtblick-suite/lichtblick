@@ -34,24 +34,24 @@ type Options = { size: number; stream: ReadableStream<Uint8Array> };
 
 /** Only efficient for small files */
 export class McapUnindexedIterableSource implements IIterableSource {
-  private options: Options;
-  private msgEventsByChannel?: Map<number, MessageEvent<unknown>[]>;
-  private start?: Time;
-  private end?: Time;
+  #options: Options;
+  #msgEventsByChannel?: Map<number, MessageEvent<unknown>[]>;
+  #start?: Time;
+  #end?: Time;
 
   public constructor(options: Options) {
-    this.options = options;
+    this.#options = options;
   }
 
   public async initialize(): Promise<Initalization> {
-    if (this.options.size > 1024 * 1024 * 1024) {
+    if (this.#options.size > 1024 * 1024 * 1024) {
       // This provider uses a simple approach of loading everything into memory up front, so we
       // can't handle large files
       throw new Error("Unable to stream MCAP file; too large");
     }
     const decompressHandlers = await loadDecompressHandlers();
 
-    const streamReader = this.options.stream.getReader();
+    const streamReader = this.#options.stream.getReader();
 
     const problems: PlayerProblem[] = [];
     const channelIdsWithErrors = new Set<number>();
@@ -163,7 +163,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
       }
     }
 
-    this.msgEventsByChannel = messagesByChannel;
+    this.#msgEventsByChannel = messagesByChannel;
 
     const topics: Topic[] = [];
     const topicStats = new Map<string, TopicStats>();
@@ -194,13 +194,13 @@ export class McapUnindexedIterableSource implements IIterableSource {
       }
     }
 
-    this.start = startTime ?? { sec: 0, nsec: 0 };
-    this.end = endTime ?? { sec: 0, nsec: 0 };
+    this.#start = startTime ?? { sec: 0, nsec: 0 };
+    this.#end = endTime ?? { sec: 0, nsec: 0 };
 
-    const fileDuration = toSec(subtract(this.end, this.start));
+    const fileDuration = toSec(subtract(this.#end, this.#start));
     if (fileDuration > DURATION_YEAR_SEC) {
-      const startRfc = toRFC3339String(this.start);
-      const endRfc = toRFC3339String(this.end);
+      const startRfc = toRFC3339String(this.#start);
+      const endRfc = toRFC3339String(this.#end);
 
       problems.push({
         message: "This file has an abnormally long duration.",
@@ -216,8 +216,8 @@ export class McapUnindexedIterableSource implements IIterableSource {
     });
 
     return {
-      start: this.start,
-      end: this.end,
+      start: this.#start,
+      end: this.#end,
       topics,
       datatypes,
       profile,
@@ -230,13 +230,13 @@ export class McapUnindexedIterableSource implements IIterableSource {
   public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
-    if (!this.msgEventsByChannel) {
+    if (!this.#msgEventsByChannel) {
       throw new Error("initialization not completed");
     }
 
     const topics = args.topics;
-    const start = args.start ?? this.start;
-    const end = args.end ?? this.end;
+    const start = args.start ?? this.#start;
+    const end = args.end ?? this.#end;
 
     if (topics.length === 0 || !start || !end) {
       return;
@@ -245,7 +245,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
     const topicsSet = new Set(topics);
     const resultMessages = [];
 
-    for (const [channelId, msgEvents] of this.msgEventsByChannel) {
+    for (const [channelId, msgEvents] of this.#msgEventsByChannel) {
       for (const msgEvent of msgEvents) {
         if (
           isTimeInRangeInclusive(msgEvent.receiveTime, start, end) &&
@@ -269,13 +269,13 @@ export class McapUnindexedIterableSource implements IIterableSource {
   public async getBackfillMessages(
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<unknown>[]> {
-    if (!this.msgEventsByChannel) {
+    if (!this.#msgEventsByChannel) {
       throw new Error("initialization not completed");
     }
 
     const needTopics = args.topics;
     const msgEventsByTopic = new Map<string, MessageEvent<unknown>>();
-    for (const [_, msgEvents] of this.msgEventsByChannel) {
+    for (const [_, msgEvents] of this.#msgEventsByChannel) {
       for (const msgEvent of msgEvents) {
         if (compare(msgEvent.receiveTime, args.time) <= 0 && needTopics.includes(msgEvent.topic)) {
           msgEventsByTopic.set(msgEvent.topic, msgEvent);

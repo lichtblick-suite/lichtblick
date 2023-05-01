@@ -47,12 +47,12 @@ const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
 };
 
 export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
-  private primitivePool = new PrimitivePool(this.renderer);
+  #primitivePool = new PrimitivePool(this.renderer);
 
   public constructor(renderer: IRenderer) {
     super("foxglove.SceneEntities", renderer);
 
-    renderer.addSchemaSubscriptions(SCENE_UPDATE_DATATYPES, this.handleSceneUpdate);
+    renderer.addSchemaSubscriptions(SCENE_UPDATE_DATATYPES, this.#handleSceneUpdate);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -133,21 +133,21 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
     }
   };
 
-  private handleSceneUpdate = (messageEvent: PartialMessageEvent<SceneUpdate>): void => {
+  #handleSceneUpdate = (messageEvent: PartialMessageEvent<SceneUpdate>): void => {
     const topic = messageEvent.topic;
     const sceneUpdates = messageEvent.message;
 
     for (const deletionMsg of sceneUpdates.deletions ?? []) {
       if (deletionMsg) {
         const deletion = normalizeSceneEntityDeletion(deletionMsg);
-        this._getTopicEntities(topic).deleteEntities(deletion);
+        this.#getTopicEntities(topic).deleteEntities(deletion);
       }
     }
 
     for (const entityMsg of sceneUpdates.entities ?? []) {
       if (entityMsg) {
         const entity = normalizeSceneEntity(entityMsg);
-        this._getTopicEntities(topic).addOrUpdateEntity(
+        this.#getTopicEntities(topic).addOrUpdateEntity(
           entity,
           toNanoSec(messageEvent.receiveTime),
         );
@@ -155,14 +155,14 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
     }
   };
 
-  private _getTopicEntities(topic: string): TopicEntities {
+  #getTopicEntities(topic: string): TopicEntities {
     let topicEntities = this.renderables.get(topic);
     if (!topicEntities) {
       const userSettings = this.renderer.config.topics[topic] as
         | Partial<LayerSettingsEntity>
         | undefined;
 
-      topicEntities = new TopicEntities(topic, this.primitivePool, this.renderer, {
+      topicEntities = new TopicEntities(topic, this.#primitivePool, this.renderer, {
         receiveTime: -1n,
         messageTime: -1n,
         frameId: "",
@@ -179,7 +179,7 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
 
   public override dispose(): void {
     super.dispose();
-    this.primitivePool.dispose();
+    this.#primitivePool.dispose();
   }
 }
 
