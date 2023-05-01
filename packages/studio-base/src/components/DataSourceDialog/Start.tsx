@@ -416,7 +416,7 @@ function SidebarItems(props: {
             {item.text}
           </Typography>
           {item.actions != undefined && (
-            <Stack direction="row" alignItems="center" gap={1} paddingTop={1.5}>
+            <Stack direction="row" flexWrap="wrap" alignItems="center" gap={1} paddingTop={1.5}>
               {item.actions}
             </Stack>
           )}

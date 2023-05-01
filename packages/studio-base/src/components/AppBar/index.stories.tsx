@@ -40,6 +40,7 @@ export const Default: StoryObj = {
 };
 
 export const DefaultChinese: StoryObj = { ...Default, parameters: { forceLanguage: "zh" } };
+export const DefaultJapanese: StoryObj = { ...Default, parameters: { forceLanguage: "ja" } };
 
 export const CustomWindowControls: StoryObj = {
   render: () => {
@@ -134,6 +135,10 @@ export const SignInStatesChinese: StoryObj = {
   ...SignInStates,
   parameters: { forceLanguage: "zh" },
 };
+export const SignInStatesJapanese: StoryObj = {
+  ...SignInStates,
+  parameters: { forceLanguage: "ja" },
+};
 
 export const PlayerStates: StoryObj = {
   render: function Story() {
@@ -197,6 +202,10 @@ export const PlayerStates: StoryObj = {
 export const PlayerStatesChinese: StoryObj = {
   ...PlayerStates,
   parameters: { colorScheme: "light", forceLanguage: "zh" },
+};
+export const PlayerStatesJapanese: StoryObj = {
+  ...PlayerStates,
+  parameters: { colorScheme: "light", forceLanguage: "ja" },
 };
 
 export const DataSources: StoryObj = {
@@ -267,4 +276,8 @@ export const DataSources: StoryObj = {
 export const DataSourcesChinese: StoryObj = {
   ...DataSources,
   parameters: { colorScheme: "light", forceLanguage: "zh" },
+};
+export const DataSourcesJapanese: StoryObj = {
+  ...DataSources,
+  parameters: { colorScheme: "light", forceLanguage: "ja" },
 };

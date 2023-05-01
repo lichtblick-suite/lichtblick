@@ -106,6 +106,10 @@ export const PlayerNotPresentChinese: StoryObj = {
   ...PlayerNotPresent,
   parameters: { forceLanguage: "zh" },
 };
+export const PlayerNotPresentJapanese: StoryObj = {
+  ...PlayerNotPresent,
+  parameters: { forceLanguage: "ja" },
+};
 
 export const PlayerIntializing: StoryObj = {
   render: function Story() {
@@ -125,6 +129,10 @@ export const PlayerIntializing: StoryObj = {
 export const PlayerIntializingChinese: StoryObj = {
   ...PlayerIntializing,
   parameters: { forceLanguage: "zh" },
+};
+export const PlayerIntializingJapanese: StoryObj = {
+  ...PlayerIntializing,
+  parameters: { forceLanguage: "ja" },
 };
 
 export const PlayerReconnecting: StoryObj = {
@@ -155,6 +163,10 @@ export const PlayerReconnectingChinese: StoryObj = {
   ...PlayerReconnecting,
   parameters: { forceLanguage: "zh" },
 };
+export const PlayerReconnectingJapanese: StoryObj = {
+  ...PlayerReconnecting,
+  parameters: { forceLanguage: "ja" },
+};
 
 export const PlayerPresent: StoryObj = {
   render: function Story() {
@@ -176,6 +188,10 @@ export const PlayerPresent: StoryObj = {
 export const PlayerPresentChinese: StoryObj = {
   ...PlayerPresent,
   parameters: { forceLanguage: "zh" },
+};
+export const PlayerPresentJapanese: StoryObj = {
+  ...PlayerPresent,
+  parameters: { forceLanguage: "ja" },
 };
 
 export const PlayerPresentWithCustomTimezone: StoryObj = {
@@ -203,6 +219,10 @@ export const PlayerPresentWithCustomTimezone: StoryObj = {
 export const PlayerPresentWithCustomTimezoneChinese: StoryObj = {
   ...PlayerPresentWithCustomTimezone,
   parameters: { forceLanguage: "zh" },
+};
+export const PlayerPresentWithCustomTimezoneJapanese: StoryObj = {
+  ...PlayerPresentWithCustomTimezone,
+  parameters: { forceLanguage: "ja" },
 };
 
 export const WithEvents: StoryObj = {
@@ -235,6 +255,7 @@ export const WithEvents: StoryObj = {
   },
 };
 export const WithEventsChinese: StoryObj = { ...WithEvents, parameters: { forceLanguage: "zh" } };
+export const WithEventsJapanese: StoryObj = { ...WithEvents, parameters: { forceLanguage: "ja" } };
 
 export const PlayerWithError: StoryObj = {
   render: function Story() {
@@ -279,4 +300,8 @@ export const PlayerWithError: StoryObj = {
 export const PlayerWithErrorChinese: StoryObj = {
   ...PlayerWithError,
   parameters: { forceLanguage: "zh" },
+};
+export const PlayerWithErrorJapanese: StoryObj = {
+  ...PlayerWithError,
+  parameters: { forceLanguage: "ja" },
 };

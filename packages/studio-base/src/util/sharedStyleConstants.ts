@@ -14,6 +14,6 @@ export const fonts = {
 
   // enable font features https://rsms.me/inter/lab
   SANS_SERIF_FEATURE_SETTINGS: "'cv08', 'cv10', 'tnum'",
-  // contextual alternates create undesired changes in Chinese
-  SANS_SERIF_FEATURE_SETTINGS_ZH: "'tnum'",
+  // contextual alternates create undesired changes in Chinese/Japanese
+  SANS_SERIF_FEATURE_SETTINGS_CJK: "'tnum'",
 };

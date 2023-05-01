@@ -93,6 +93,12 @@ export const LightChinese: StoryObj = {
   parameters: { forceLanguage: "zh", colorScheme: "light" },
 };
 
+export const LightJapanese: StoryObj = {
+  ...Light,
+  name: "Default Japanese",
+  parameters: { forceLanguage: "ja", colorScheme: "light" },
+};
+
 export const Dark: StoryObj = {
   render: () => <DataSourceDialog backdropAnimation={false} />,
   name: "Default (dark)",

@@ -177,15 +177,12 @@ export const EmptyLayout: StoryObj = {
 };
 
 export const EmptyLayoutChinese: StoryObj = {
-  render: function Story() {
-    return (
-      <PanelSetup fixture={{ layout: undefined }}>
-        <PanelLayout />
-      </PanelSetup>
-    );
-  },
-
+  ...EmptyLayout,
   parameters: { forceLanguage: "zh" },
+};
+export const EmptyLayoutJapanese: StoryObj = {
+  ...EmptyLayout,
+  parameters: { forceLanguage: "ja" },
 };
 
 export const PanelLoading: StoryObj = {

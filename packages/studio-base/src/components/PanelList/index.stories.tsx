@@ -246,6 +246,10 @@ export const PanelListChinese: StoryObj = {
 
   parameters: { forceLanguage: "zh" },
 };
+export const PanelListJapanese: StoryObj = {
+  ...PanelListChinese,
+  parameters: { forceLanguage: "ja" },
+};
 
 export const NoResultsChinese: StoryObj = {
   render: function Story() {
@@ -253,4 +257,8 @@ export const NoResultsChinese: StoryObj = {
   },
 
   parameters: { forceLanguage: "zh" },
+};
+export const NoResultsJapanese: StoryObj = {
+  ...NoResultsChinese,
+  parameters: { forceLanguage: "ja" },
 };

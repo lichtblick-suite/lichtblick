@@ -174,3 +174,7 @@ export const OccupancyGridCostmapWithSettingsChinese: StoryObj = {
   ...Occupancy_Grid_Costmap_With_Settings,
   parameters: { forceLanguage: "zh" },
 };
+export const OccupancyGridCostmapWithSettingsJapanese: StoryObj = {
+  ...Occupancy_Grid_Costmap_With_Settings,
+  parameters: { forceLanguage: "ja" },
+};

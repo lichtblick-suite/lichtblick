@@ -17,8 +17,16 @@ declare module "@mui/material/styles/createTypography" {
 }
 
 export function muiTypography({ locale }: { locale: Language }): MuiThemeOptions["typography"] {
-  const fontFeatureSettings =
-    locale === "zh" ? fonts.SANS_SERIF_FEATURE_SETTINGS_ZH : fonts.SANS_SERIF_FEATURE_SETTINGS;
+  let fontFeatureSettings: string;
+  switch (locale) {
+    case "en":
+      fontFeatureSettings = fonts.SANS_SERIF_FEATURE_SETTINGS;
+      break;
+    case "zh":
+    case "ja":
+      fontFeatureSettings = fonts.SANS_SERIF_FEATURE_SETTINGS_CJK;
+      break;
+  }
   const baseFontStyles: TypographyStyle = {
     fontFeatureSettings,
   };

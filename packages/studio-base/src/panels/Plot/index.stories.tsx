@@ -487,10 +487,16 @@ export const LineGraphWithSettings: StoryObj = {
 
 export const LineGraphWithSettingsChinese: StoryObj = {
   ...LineGraphWithSettings,
-  play: LineGraphWithSettings.play,
   parameters: {
     ...LineGraphWithSettings.parameters,
     forceLanguage: "zh",
+  },
+};
+export const LineGraphWithSettingsJapanese: StoryObj = {
+  ...LineGraphWithSettings,
+  parameters: {
+    ...LineGraphWithSettings.parameters,
+    forceLanguage: "ja",
   },
 };
 

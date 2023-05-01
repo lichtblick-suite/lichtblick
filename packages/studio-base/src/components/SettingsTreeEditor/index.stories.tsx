@@ -888,8 +888,11 @@ export const Basics: StoryObj = {
 
 export const BasicsChinese: StoryObj = {
   ...Basics,
-  play: Basics.play,
   parameters: { forceLanguage: "zh" },
+};
+export const BasicsJapanese: StoryObj = {
+  ...Basics,
+  parameters: { forceLanguage: "ja" },
 };
 
 export const DisabledFields: StoryObj = {
