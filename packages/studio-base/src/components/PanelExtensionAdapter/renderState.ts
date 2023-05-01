@@ -28,7 +28,7 @@ type BuilderRenderStateInput = {
   currentFrame: MessageEvent<unknown>[] | undefined;
   globalVariables: GlobalVariables;
   hoverValue: HoverValue | undefined;
-  messageConverters?: RegisterMessageConverterArgs<unknown>[];
+  messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
   playerState: PlayerState | undefined;
   sharedPanelState: Record<string, unknown> | undefined;
   sortedTopics: readonly PlayerTopic[];

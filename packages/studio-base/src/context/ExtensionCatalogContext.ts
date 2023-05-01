@@ -26,7 +26,7 @@ export type ExtensionCatalog = {
 
   installedExtensions: undefined | ExtensionInfo[];
   installedPanels: undefined | Record<string, RegisteredPanel>;
-  installedMessageConverters: undefined | RegisterMessageConverterArgs<unknown>[];
+  installedMessageConverters: undefined | readonly RegisterMessageConverterArgs<unknown>[];
 };
 
 export const ExtensionCatalogContext = createContext<undefined | StoreApi<ExtensionCatalog>>(

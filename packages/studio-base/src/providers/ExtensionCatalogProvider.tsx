@@ -95,6 +95,7 @@ function activateExtension(
 
 export function createExtensionRegistryStore(
   loaders: readonly ExtensionLoader[],
+  mockMessageConverters: readonly RegisterMessageConverterArgs<unknown>[] | undefined,
 ): StoreApi<ExtensionCatalog> {
   return createStore((set, get) => ({
     downloadExtension: async (url: string) => {
@@ -149,7 +150,7 @@ export function createExtensionRegistryStore(
 
     installedPanels: {},
 
-    installedMessageConverters: [],
+    installedMessageConverters: mockMessageConverters ?? [],
 
     uninstallExtension: async (namespace: ExtensionNamespace, id: string) => {
       const namespacedLoader = loaders.find((loader) => loader.namespace === namespace);
@@ -165,8 +166,12 @@ export function createExtensionRegistryStore(
 export default function ExtensionCatalogProvider({
   children,
   loaders,
-}: PropsWithChildren<{ loaders: readonly ExtensionLoader[] }>): JSX.Element {
-  const [store] = useState(createExtensionRegistryStore(loaders));
+  mockMessageConverters,
+}: PropsWithChildren<{
+  loaders: readonly ExtensionLoader[];
+  mockMessageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
+}>): JSX.Element {
+  const [store] = useState(createExtensionRegistryStore(loaders, mockMessageConverters));
 
   // Request an initial refresh on first mount
   const refreshExtensions = store.getState().refreshExtensions;

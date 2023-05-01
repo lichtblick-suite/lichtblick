@@ -8,3 +8,4 @@ export * from "./binarySearch";
 export * from "./minIndexBy";
 export * from "./MultiMap";
 export * from "./VecQueue";
+export * from "./TwoKeyMap";

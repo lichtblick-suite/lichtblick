@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
 import { useShallowMemo } from "@foxglove/hooks";
-import { MessageEvent, SettingsTree } from "@foxglove/studio";
+import { MessageEvent, RegisterMessageConverterArgs, SettingsTree } from "@foxglove/studio";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
@@ -86,6 +86,7 @@ export type Fixture = {
   publish?: (request: PublishPayload) => void;
   setPublishers?: (publisherId: string, advertisements: AdvertiseOptions[]) => void;
   setSubscriptions?: ComponentProps<typeof MockMessagePipelineProvider>["setSubscriptions"];
+  messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
 };
 
 type UnconnectedProps = {
@@ -190,7 +191,11 @@ function PanelWrapper({
 
   return (
     <>
-      {includeSettings && <SettingsTreeEditor settings={settings} />}
+      {includeSettings && (
+        <div style={{ overflow: "auto" }}>
+          <SettingsTreeEditor settings={settings} />
+        </div>
+      )}
       {children}
     </>
   );
@@ -352,7 +357,10 @@ export default function PanelSetup(props: Props): JSX.Element {
         <TimelineInteractionStateProvider>
           <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
             <PanelStateContextProvider>
-              <ExtensionCatalogProvider loaders={[]}>
+              <ExtensionCatalogProvider
+                loaders={[]}
+                mockMessageConverters={props.fixture?.messageConverters}
+              >
                 <ThemeProvider isDark={theme.palette.mode === "dark"}>
                   <UnconnectedPanelSetup {...props} />
                 </ThemeProvider>

@@ -6,6 +6,7 @@ import { t } from "i18next";
 import { Immutable } from "immer";
 import * as THREE from "three";
 
+import { TwoKeyMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { ImageAnnotations as FoxgloveImageAnnotations } from "@foxglove/schemas";
 import { MessageEvent, SettingsTreeAction, Topic } from "@foxglove/studio";
@@ -16,11 +17,14 @@ import {
 } from "@foxglove/studio-base/types/Messages";
 
 import { RenderableTopicAnnotations } from "./RenderableTopicAnnotations";
-import { ImageModeConfig } from "../../../IRenderer";
+import { ImageAnnotationSubscription, ImageModeConfig } from "../../../IRenderer";
 import { SettingsTreeEntry } from "../../../SettingsManager";
 import { IMAGE_ANNOTATIONS_DATATYPES } from "../../../foxglove";
 import { IMAGE_MARKER_ARRAY_DATATYPES, IMAGE_MARKER_DATATYPES } from "../../../ros";
 import { topicIsConvertibleToSchema } from "../../../topicIsConvertibleToSchema";
+
+type TopicName = string & { __brand: "TopicName" };
+type SchemaName = string & { __brand: "SchemaName" };
 
 interface ImageAnnotationsContext {
   initialScale: number;
@@ -37,10 +41,30 @@ interface ImageAnnotationsContext {
   ): void;
 }
 
+const ALL_SUPPORTED_SCHEMAS = new Set([
+  ...IMAGE_ANNOTATIONS_DATATYPES,
+  ...IMAGE_MARKER_DATATYPES,
+  ...IMAGE_MARKER_ARRAY_DATATYPES,
+]);
+
 /**
  * Match everything up to the last `/` in a topic name, e.g. match `/a/b` in `/a/b/c`.
  */
 const TOPIC_PREFIX_REGEX = /^.+\/(?=.)/;
+
+/**
+ * Determine whether `subscription`, an entry in {@link ImageModeConfig.annotations}, is the entry
+ * that should correspond to `topic` with conversion to `convertTo`.
+ */
+function subscriptionMatches(
+  topic: Topic,
+  subscription: ImageAnnotationSubscription,
+  convertTo: string | undefined,
+): boolean {
+  return (
+    subscription.topic === topic.name && subscription.schemaName === (convertTo ?? topic.schemaName)
+  );
+}
 
 /**
  * This class handles settings and rendering for ImageAnnotations/ImageMarkers.
@@ -48,8 +72,11 @@ const TOPIC_PREFIX_REGEX = /^.+\/(?=.)/;
 export class ImageAnnotations extends THREE.Object3D {
   #context: ImageAnnotationsContext;
 
-  /** FG-3065: support multiple converters per message */
-  #renderablesByTopic = new Map<string, RenderableTopicAnnotations>();
+  #renderablesByTopicAndSchemaName = new TwoKeyMap<
+    TopicName,
+    SchemaName,
+    RenderableTopicAnnotations
+  >();
   #cameraModel?: PinholeCameraModel;
 
   #scale: number;
@@ -65,32 +92,24 @@ export class ImageAnnotations extends THREE.Object3D {
     this.#canvasHeight = context.initialCanvasHeight;
     this.#pixelRatio = context.initialPixelRatio;
 
-    this.#context.addSchemaSubscriptions(
-      IMAGE_ANNOTATIONS_DATATYPES,
-      this.#handleMessage.bind(this),
-    );
-    this.#context.addSchemaSubscriptions(IMAGE_MARKER_DATATYPES, this.#handleMessage.bind(this));
-    this.#context.addSchemaSubscriptions(
-      IMAGE_MARKER_ARRAY_DATATYPES,
-      this.#handleMessage.bind(this),
-    );
+    this.#context.addSchemaSubscriptions(ALL_SUPPORTED_SCHEMAS, this.#handleMessage.bind(this));
   }
 
   public dispose(): void {
-    for (const renderable of this.#renderablesByTopic.values()) {
+    for (const renderable of this.#renderablesByTopicAndSchemaName.values()) {
       renderable.dispose();
     }
     this.children.length = 0;
-    this.#renderablesByTopic.clear();
+    this.#renderablesByTopicAndSchemaName.clear();
   }
 
   /** Called when seeking or a new data source is loaded.  */
   public removeAllRenderables(): void {
-    for (const renderable of this.#renderablesByTopic.values()) {
+    for (const renderable of this.#renderablesByTopicAndSchemaName.values()) {
       renderable.dispose();
       this.remove(renderable);
     }
-    this.#renderablesByTopic.clear();
+    this.#renderablesByTopicAndSchemaName.clear();
   }
 
   public updateScale(
@@ -103,7 +122,7 @@ export class ImageAnnotations extends THREE.Object3D {
     this.#canvasWidth = canvasWidth;
     this.#canvasHeight = canvasHeight;
     this.#pixelRatio = pixelRatio;
-    for (const renderable of this.#renderablesByTopic.values()) {
+    for (const renderable of this.#renderablesByTopicAndSchemaName.values()) {
       renderable.setScale(scale, canvasWidth, canvasHeight, pixelRatio);
       renderable.update();
     }
@@ -111,7 +130,7 @@ export class ImageAnnotations extends THREE.Object3D {
 
   public updateCameraModel(cameraModel: PinholeCameraModel): void {
     this.#cameraModel = cameraModel;
-    for (const renderable of this.#renderablesByTopic.values()) {
+    for (const renderable of this.#renderablesByTopicAndSchemaName.values()) {
       renderable.setCameraModel(cameraModel);
       renderable.update();
     }
@@ -125,12 +144,19 @@ export class ImageAnnotations extends THREE.Object3D {
       return;
     }
 
-    let renderable = this.#renderablesByTopic.get(messageEvent.topic);
+    let renderable = this.#renderablesByTopicAndSchemaName.get(
+      messageEvent.topic as TopicName,
+      messageEvent.schemaName as SchemaName,
+    );
     if (!renderable) {
       renderable = new RenderableTopicAnnotations();
       renderable.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       renderable.setCameraModel(this.#cameraModel);
-      this.#renderablesByTopic.set(messageEvent.topic, renderable);
+      this.#renderablesByTopicAndSchemaName.set(
+        messageEvent.topic as TopicName,
+        messageEvent.schemaName as SchemaName,
+        renderable,
+      );
       this.add(renderable);
     }
 
@@ -138,7 +164,11 @@ export class ImageAnnotations extends THREE.Object3D {
     renderable.update();
   }
 
-  #handleSettingsAction(topic: Topic, action: SettingsTreeAction): void {
+  #handleSettingsAction(
+    topic: Topic,
+    convertTo: string | undefined,
+    action: SettingsTreeAction,
+  ): void {
     if (action.action !== "update" || action.payload.path.length < 2) {
       return;
     }
@@ -148,31 +178,36 @@ export class ImageAnnotations extends THREE.Object3D {
       action.payload.path[2] === "visible" &&
       typeof value === "boolean"
     ) {
-      this.#handleTopicVisibilityChange(topic, value);
+      this.#handleTopicVisibilityChange(topic, convertTo, value);
     }
     this.#context.updateSettingsTree();
   }
 
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  #handleTopicVisibilityChange(topic: Topic, visible: boolean): void {
+  #handleTopicVisibilityChange(
+    topic: Topic,
+    convertTo: string | undefined,
+    visible: boolean, // eslint-disable-line @foxglove/no-boolean-parameters
+  ): void {
     this.#context.updateConfig((draft) => {
       draft.annotations ??= [];
-      // FG-3065: support topic.convertTo
-      let subscription = draft.annotations.find(
-        (sub) => sub.topic === topic.name && sub.schemaName === topic.schemaName,
+      let subscription = draft.annotations.find((sub) =>
+        subscriptionMatches(topic, sub, convertTo),
       );
       if (subscription) {
         subscription.settings.visible = visible;
       } else {
         subscription = {
           topic: topic.name,
-          schemaName: topic.schemaName,
+          schemaName: convertTo ?? topic.schemaName,
           settings: { visible },
         };
         draft.annotations.push(subscription);
       }
     });
-    const renderable = this.#renderablesByTopic.get(topic.name);
+    const renderable = this.#renderablesByTopicAndSchemaName.get(
+      topic.name as TopicName,
+      (convertTo ?? topic.schemaName) as SchemaName,
+    );
     if (renderable) {
       renderable.visible = visible;
     }
@@ -193,12 +228,7 @@ export class ImageAnnotations extends THREE.Object3D {
 
     const annotationTopics = this.#context
       .topics()
-      .filter(
-        (topic) =>
-          topicIsConvertibleToSchema(topic, IMAGE_ANNOTATIONS_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, IMAGE_MARKER_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, IMAGE_MARKER_ARRAY_DATATYPES),
-      );
+      .filter((topic) => topicIsConvertibleToSchema(topic, ALL_SUPPORTED_SCHEMAS));
 
     // Sort annotation topics with prefixes matching the image topic to the top.
     if (config.imageTopic) {
@@ -213,22 +243,31 @@ export class ImageAnnotations extends THREE.Object3D {
     }
 
     let i = 0;
-    for (const topic of annotationTopics) {
-      // FG-3065: support topic.convertTo
-      const settings = config.annotations?.find(
-        (sub) => sub.topic === topic.name && sub.schemaName === topic.schemaName,
+    const addEntry = (topic: Topic, convertTo: string | undefined) => {
+      const schemaName = convertTo ?? topic.schemaName;
+      if (!ALL_SUPPORTED_SCHEMAS.has(schemaName)) {
+        return;
+      }
+      const settings = config.annotations?.find((sub) =>
+        subscriptionMatches(topic, sub, convertTo),
       )?.settings;
       entries.push({
         // When building the tree, we just use a numeric index in the path. Inside the handler, this
-        // part of the path is ignored, and instead we pass in the `topic` directly so the handler
-        // knows which value to update in the config.
+        // part of the path is ignored, and instead we pass in the `topic` and `convertTo` directly
+        // so the handler knows which value to update in the config.
         path: ["imageAnnotations", `${i++}`],
         node: {
           label: topic.name,
           visible: settings?.visible ?? false,
-          handler: this.#handleSettingsAction.bind(this, topic),
+          handler: this.#handleSettingsAction.bind(this, topic, convertTo),
         },
       });
+    };
+    for (const topic of annotationTopics) {
+      addEntry(topic, undefined);
+      for (const convertTo of topic.convertibleTo ?? []) {
+        addEntry(topic, convertTo);
+      }
     }
     return entries;
   }
