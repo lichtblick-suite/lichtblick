@@ -8,6 +8,7 @@ import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
@@ -15,6 +16,7 @@ import {
   useCurrentUserType,
 } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
@@ -45,6 +47,7 @@ export function UserMenu({
 }: UserMenuProps): JSX.Element {
   const { classes } = useStyles();
   const { currentUser, signIn, signOut } = useCurrentUser();
+  const [_, setEnableNewTopNav] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
   const { enqueueSnackbar } = useSnackbar();
@@ -132,6 +135,7 @@ export function UserMenu({
         <MenuItem onClick={() => onSettingsClick()}>Settings</MenuItem>
         <MenuItem onClick={() => onSettingsClick("extensions")}>Extensions</MenuItem>
         {currentUser && <MenuItem onClick={onProfileClick}>User profile</MenuItem>}
+        <MenuItem onClick={async () => await setEnableNewTopNav(false)}>Revert to old UI</MenuItem>
         <Divider variant="middle" />
         <MenuItem onClick={onDocsClick}>Documentation</MenuItem>
         <MenuItem onClick={onSlackClick}>Join Slack community</MenuItem>
