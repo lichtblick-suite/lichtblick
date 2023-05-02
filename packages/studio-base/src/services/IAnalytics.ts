@@ -13,6 +13,9 @@ enum AppEvent {
   // App Bar events
   APP_BAR_CLICK_CTA = "Studio: App Bar CTA CLicked",
 
+  // App Menu events
+  APP_MENU_CLICK = "Studio: App Menu Clicked",
+
   // Help Menu events
   HELP_MENU_CLICK_CTA = "Studio: Help Menu CTA Clicked",
 

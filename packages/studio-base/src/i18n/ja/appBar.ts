@@ -5,5 +5,14 @@
 import { TypeOptions } from "i18next";
 
 export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
+  about: "情報",
+  openLocalFile: "ローカルファイルを開く",
+  openConnection: "接続を開く",
   openDataSource: "データソースを開く…",
+  joinOurSlack: "Slackに参加する",
+  recentDataSources: "最近のデータソース",
+  viewOurDocs: "ドキュメンテーションを見る",
+  file: "ファイル",
+  view: "表示",
+  help: "ヘルプ",
 };
