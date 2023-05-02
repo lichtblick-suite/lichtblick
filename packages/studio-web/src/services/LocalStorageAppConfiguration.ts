@@ -5,7 +5,7 @@
 import { IAppConfiguration, ChangeHandler, AppConfigurationValue } from "@foxglove/studio-base";
 
 export default class LocalStorageAppConfiguration implements IAppConfiguration {
-  private static KEY_PREFIX = "studio.app-configuration.";
+  static #KEY_PREFIX = "studio.app-configuration.";
 
   /** Default values for app configuration items which have never been set by a user */
   #defaults?: { [key: string]: AppConfigurationValue };
@@ -17,7 +17,7 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
   }
 
   public get(key: string): AppConfigurationValue {
-    const value = localStorage.getItem(LocalStorageAppConfiguration.KEY_PREFIX + key);
+    const value = localStorage.getItem(LocalStorageAppConfiguration.#KEY_PREFIX + key);
     try {
       return value == undefined ? this.#defaults?.[key] : JSON.parse(value);
     } catch {
@@ -26,10 +26,10 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
   }
   public async set(key: string, value: AppConfigurationValue): Promise<void> {
     if (value == undefined) {
-      localStorage.removeItem(LocalStorageAppConfiguration.KEY_PREFIX + key);
+      localStorage.removeItem(LocalStorageAppConfiguration.#KEY_PREFIX + key);
     } else {
       localStorage.setItem(
-        LocalStorageAppConfiguration.KEY_PREFIX + key,
+        LocalStorageAppConfiguration.#KEY_PREFIX + key,
         JSON.stringify(value) ?? "",
       );
     }

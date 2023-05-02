@@ -448,7 +448,7 @@ class StudioWindow {
   // track windows by the web-contents id
   // The web contents id is most broadly available across IPC events and app handlers
   // BrowserWindow.id is not as available
-  private static windowsByContentId = new Map<number, StudioWindow>();
+  static #windowsByContentId = new Map<number, StudioWindow>();
 
   #browserWindow: BrowserWindow;
   #menu: Menu;
@@ -463,7 +463,7 @@ class StudioWindow {
     const id = browserWindow.webContents.id;
 
     log.info(`New Foxglove Studio window ${id}`);
-    StudioWindow.windowsByContentId.set(id, this);
+    StudioWindow.#windowsByContentId.set(id, this);
 
     // when a window closes and it is the current application menu, clear the input sources
     browserWindow.once("close", () => {
@@ -492,7 +492,7 @@ class StudioWindow {
       }
     });
     browserWindow.once("closed", () => {
-      StudioWindow.windowsByContentId.delete(id);
+      StudioWindow.#windowsByContentId.delete(id);
     });
   }
 
@@ -559,7 +559,7 @@ class StudioWindow {
   }
 
   public static fromWebContentsId(id: number): StudioWindow | undefined {
-    return StudioWindow.windowsByContentId.get(id);
+    return StudioWindow.#windowsByContentId.get(id);
   }
 
   #rebuildFileMenu(fileMenu: MenuItem): void {

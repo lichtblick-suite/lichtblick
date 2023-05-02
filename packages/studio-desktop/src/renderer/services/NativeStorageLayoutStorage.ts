@@ -21,8 +21,8 @@ function parseAndMigrateLayout(item: string | Uint8Array): Layout {
 
 // Implement a LayoutStorage interface over OsContext
 export default class NativeStorageLayoutStorage implements ILayoutStorage {
-  private static STORE_PREFIX = "layouts-";
-  private static LEGACY_STORE_NAME = "layouts";
+  static #STORE_PREFIX = "layouts-";
+  static #LEGACY_STORE_NAME = "layouts";
 
   #ctx: Storage;
 
@@ -31,7 +31,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
   }
 
   public async list(namespace: string): Promise<readonly Layout[]> {
-    const items = await this.#ctx.all(NativeStorageLayoutStorage.STORE_PREFIX + namespace);
+    const items = await this.#ctx.all(NativeStorageLayoutStorage.#STORE_PREFIX + namespace);
 
     const layouts: Layout[] = [];
     for (const item of items) {
@@ -46,7 +46,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
   }
 
   public async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
-    const item = await this.#ctx.get(NativeStorageLayoutStorage.STORE_PREFIX + namespace, id);
+    const item = await this.#ctx.get(NativeStorageLayoutStorage.#STORE_PREFIX + namespace, id);
     if (item == undefined) {
       return undefined;
     }
@@ -55,12 +55,12 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
 
   public async put(namespace: string, layout: Layout): Promise<Layout> {
     const content = JSON.stringify(layout) ?? "";
-    await this.#ctx.put(NativeStorageLayoutStorage.STORE_PREFIX + namespace, layout.id, content);
+    await this.#ctx.put(NativeStorageLayoutStorage.#STORE_PREFIX + namespace, layout.id, content);
     return layout;
   }
 
   public async delete(namespace: string, id: LayoutID): Promise<void> {
-    return await this.#ctx.delete(NativeStorageLayoutStorage.STORE_PREFIX + namespace, id);
+    return await this.#ctx.delete(NativeStorageLayoutStorage.#STORE_PREFIX + namespace, id);
   }
 
   public async importLayouts({
@@ -70,11 +70,11 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
     fromNamespace: string;
     toNamespace: string;
   }): Promise<void> {
-    const keys = await this.#ctx.list(NativeStorageLayoutStorage.STORE_PREFIX + fromNamespace);
+    const keys = await this.#ctx.list(NativeStorageLayoutStorage.#STORE_PREFIX + fromNamespace);
     for (const key of keys) {
       try {
         const item = await this.#ctx.get(
-          NativeStorageLayoutStorage.STORE_PREFIX + fromNamespace,
+          NativeStorageLayoutStorage.#STORE_PREFIX + fromNamespace,
           key,
         );
         if (item == undefined) {
@@ -82,7 +82,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
         }
         const layout = parseAndMigrateLayout(item);
         await this.put(toNamespace, layout);
-        await this.#ctx.delete(NativeStorageLayoutStorage.STORE_PREFIX + fromNamespace, key);
+        await this.#ctx.delete(NativeStorageLayoutStorage.#STORE_PREFIX + fromNamespace, key);
       } catch (error) {
         log.error(error);
       }
@@ -91,7 +91,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
 
   public async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
     // Layouts were previously stored in a single un-namespaced store named "layouts".
-    const items = await this.#ctx.all(NativeStorageLayoutStorage.LEGACY_STORE_NAME);
+    const items = await this.#ctx.all(NativeStorageLayoutStorage.#LEGACY_STORE_NAME);
     for (const item of items) {
       if (!(item instanceof Uint8Array)) {
         continue;
@@ -102,11 +102,11 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
         const parsed = JSON.parse(str);
         const layout = migrateLayout(parsed);
         await this.#ctx.put(
-          NativeStorageLayoutStorage.STORE_PREFIX + namespace,
+          NativeStorageLayoutStorage.#STORE_PREFIX + namespace,
           layout.id,
           JSON.stringify(layout) ?? "",
         );
-        await this.#ctx.delete(NativeStorageLayoutStorage.LEGACY_STORE_NAME, layout.id);
+        await this.#ctx.delete(NativeStorageLayoutStorage.#LEGACY_STORE_NAME, layout.id);
       } catch (err) {
         log.error(err);
       }

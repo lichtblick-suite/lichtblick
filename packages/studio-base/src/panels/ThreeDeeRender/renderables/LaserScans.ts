@@ -421,7 +421,7 @@ export class LaserScans extends SceneExtension<LaserScanRenderable> {
 }
 
 export class LaserScanMaterial extends THREE.RawShaderMaterial {
-  private static MIN_PICKING_POINT_SIZE = 8;
+  static #MIN_PICKING_POINT_SIZE = 8;
 
   public constructor({ picking = false }: { picking?: boolean } = {}) {
     super({
@@ -449,7 +449,7 @@ export class LaserScanMaterial extends THREE.RawShaderMaterial {
           gl_Position = projectionMatrix * modelViewMatrix * pos;
           ${
             picking
-              ? /* glsl */ `gl_PointSize = pixelRatio * max(pointSize, ${LaserScanMaterial.MIN_PICKING_POINT_SIZE.toFixed(
+              ? /* glsl */ `gl_PointSize = pixelRatio * max(pointSize, ${LaserScanMaterial.#MIN_PICKING_POINT_SIZE.toFixed(
                   1,
                 )});`
               : "gl_PointSize = pixelRatio * pointSize;"
@@ -513,10 +513,10 @@ export class LaserScanMaterial extends THREE.RawShaderMaterial {
 }
 
 class LaserScanInstancePickingMaterial extends THREE.RawShaderMaterial {
-  private static MIN_PICKING_POINT_SIZE = 8;
+  static #MIN_PICKING_POINT_SIZE = 8;
 
   public constructor() {
-    const minPointSize = LaserScanInstancePickingMaterial.MIN_PICKING_POINT_SIZE.toFixed(1);
+    const minPointSize = LaserScanInstancePickingMaterial.#MIN_PICKING_POINT_SIZE.toFixed(1);
     super({
       vertexShader: /* glsl */ `\
         #version 300 es

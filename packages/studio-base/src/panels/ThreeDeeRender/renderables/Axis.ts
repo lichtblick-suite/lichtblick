@@ -55,7 +55,7 @@ export class Axis extends THREE.Object3D {
     this.#headMesh.castShadow = true;
     this.#headMesh.receiveShadow = true;
 
-    Axis.UpdateInstances(this.#shaftMesh, this.#headMesh, 0);
+    Axis.#UpdateInstances(this.#shaftMesh, this.#headMesh, 0);
 
     this.add(this.#shaftMesh);
     this.add(this.#headMesh);
@@ -68,7 +68,7 @@ export class Axis extends THREE.Object3D {
     this.#headMesh.dispose();
   }
 
-  private static UpdateInstances(
+  static #UpdateInstances(
     shaft: THREE.InstancedMesh,
     head: THREE.InstancedMesh,
     axisIndex: number,

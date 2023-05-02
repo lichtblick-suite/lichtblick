@@ -15,7 +15,7 @@ type Sample = {
 type RecordFrameTimesFn = (frameTimes: Sample[]) => void;
 
 class BenchmarkStats {
-  private static instance: BenchmarkStats | undefined;
+  static #instance: BenchmarkStats | undefined;
 
   #frameTimesMs: Sample[] = [];
 
@@ -50,8 +50,8 @@ class BenchmarkStats {
 
   /** Return an instance of BenchmarkStats */
   public static Instance(): BenchmarkStats {
-    BenchmarkStats.instance = BenchmarkStats.instance ?? new BenchmarkStats();
-    return BenchmarkStats.instance;
+    BenchmarkStats.#instance = BenchmarkStats.#instance ?? new BenchmarkStats();
+    return BenchmarkStats.#instance;
   }
 }
 

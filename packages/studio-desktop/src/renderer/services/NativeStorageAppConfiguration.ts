@@ -9,8 +9,8 @@ import { SETTINGS_DATASTORE_NAME, SETTINGS_JSON_DATASTORE_KEY } from "../../comm
 import { Storage } from "../../common/types";
 
 export default class NativeStorageAppConfiguration implements IAppConfiguration {
-  private static STORE_NAME = SETTINGS_DATASTORE_NAME;
-  private static STORE_KEY = SETTINGS_JSON_DATASTORE_KEY;
+  static #STORE_NAME = SETTINGS_DATASTORE_NAME;
+  static #STORE_KEY = SETTINGS_JSON_DATASTORE_KEY;
 
   readonly #ctx: Storage;
   #listeners = new Map<string, Set<ChangeHandler>>();
@@ -32,8 +32,8 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
   ): Promise<NativeStorageAppConfiguration> {
     const { defaults } = options;
     const value = await ctx.get(
-      NativeStorageAppConfiguration.STORE_NAME,
-      NativeStorageAppConfiguration.STORE_KEY,
+      NativeStorageAppConfiguration.#STORE_NAME,
+      NativeStorageAppConfiguration.#STORE_KEY,
       { encoding: "utf8" },
     );
     const currentValue = JSON.parse(value ?? "{}");
@@ -49,16 +49,16 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
   public async set(key: string, value: AppConfigurationValue): Promise<void> {
     await this.#mutex.runExclusive(async () => {
       const currentConfig = await this.#ctx.get(
-        NativeStorageAppConfiguration.STORE_NAME,
-        NativeStorageAppConfiguration.STORE_KEY,
+        NativeStorageAppConfiguration.#STORE_NAME,
+        NativeStorageAppConfiguration.#STORE_KEY,
         { encoding: "utf8" },
       );
 
       const newConfig: unknown = { ...JSON.parse(currentConfig ?? "{}"), [key]: value };
 
       await this.#ctx.put(
-        NativeStorageAppConfiguration.STORE_NAME,
-        NativeStorageAppConfiguration.STORE_KEY,
+        NativeStorageAppConfiguration.#STORE_NAME,
+        NativeStorageAppConfiguration.#STORE_KEY,
         JSON.stringify(newConfig) ?? "",
       );
       this.#currentValue = newConfig;

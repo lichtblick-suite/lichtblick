@@ -82,7 +82,7 @@ export default class LayoutManager implements ILayoutManager {
    * A decorator to emit busy events before and after an async operation so the UI can show that the
    * operation is in progress.
    */
-  private static withBusyStatus<Args extends unknown[], Ret>(
+  static #withBusyStatus<Args extends unknown[], Ret>(
     _prototype: typeof LayoutManager.prototype,
     _propertyKey: string,
     descriptor: TypedPropertyDescriptor<(this: LayoutManager, ...args: Args) => Promise<Ret>>,
@@ -215,7 +215,7 @@ export default class LayoutManager implements ILayoutManager {
     });
   }
 
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async saveNewLayout({
     name,
     data: unmigratedData,
@@ -270,7 +270,7 @@ export default class LayoutManager implements ILayoutManager {
     return newLayout;
   }
 
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async updateLayout({
     id,
     name,
@@ -341,7 +341,7 @@ export default class LayoutManager implements ILayoutManager {
     }
   }
 
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async deleteLayout({ id }: { id: LayoutID }): Promise<void> {
     const localLayout = await this.#local.runExclusive(async (local) => await local.get(id));
     if (!localLayout) {
@@ -379,7 +379,7 @@ export default class LayoutManager implements ILayoutManager {
     this.#notifyChangeListeners({ type: "delete", layoutId: id });
   }
 
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async overwriteLayout({ id }: { id: LayoutID }): Promise<Layout> {
     const localLayout = await this.#local.runExclusive(async (local) => await local.get(id));
     if (!localLayout) {
@@ -430,7 +430,7 @@ export default class LayoutManager implements ILayoutManager {
     }
   }
 
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async revertLayout({ id }: { id: LayoutID }): Promise<Layout> {
     const result = await this.#local.runExclusive(async (local) => {
       const layout = await local.get(id);
@@ -446,7 +446,7 @@ export default class LayoutManager implements ILayoutManager {
     return result;
   }
 
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async makePersonalCopy({ id, name }: { id: LayoutID; name: string }): Promise<Layout> {
     const now = new Date().toISOString() as ISO8601Timestamp;
     const result = await this.#local.runExclusive(async (local) => {
@@ -477,7 +477,7 @@ export default class LayoutManager implements ILayoutManager {
    * the cached and remote layout lists; it may also involve modifications to the cache, remote
    * storage, or both.
    */
-  @LayoutManager.withBusyStatus
+  @LayoutManager.#withBusyStatus
   public async syncWithRemote(abortSignal: AbortSignal): Promise<void> {
     if (this.#currentSync) {
       log.debug("Layout sync is already in progress");

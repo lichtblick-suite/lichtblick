@@ -148,7 +148,7 @@ class CachingIterableSource implements IIterableSource {
 
       // We've found a block containing our readHead, try reading items from the block
       if (block) {
-        const cacheIndex = CachingIterableSource.FindStartCacheItemIndex(
+        const cacheIndex = CachingIterableSource.#FindStartCacheItemIndex(
           block.items,
           toNanoSec(readHead),
         );
@@ -520,7 +520,7 @@ class CachingIterableSource implements IIterableSource {
     return false;
   }
 
-  private static FindStartCacheItemIndex(items: [bigint, IteratorResult][], key: bigint) {
+  static #FindStartCacheItemIndex(items: [bigint, IteratorResult][], key: bigint) {
     // A common case is to access consecutive blocks during playback. In that case, we expect to
     // read from the first item in the block. We check this special case first to avoid a binary
     // search if we are able to find the key in the first item.

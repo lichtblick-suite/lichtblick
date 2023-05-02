@@ -145,7 +145,7 @@ export default class UserNodePlayer implements Player {
   });
 
   // exposed as a static to allow testing to mock/replace
-  private static CreateNodeTransformWorker = (): SharedWorker => {
+  public static CreateNodeTransformWorker = (): SharedWorker => {
     // foxglove-depcheck-used: babel-plugin-transform-import-meta
     return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url), {
       // Although we are using SharedWorkers, we do not actually want to share worker instances
@@ -155,7 +155,7 @@ export default class UserNodePlayer implements Player {
   };
 
   // exposed as a static to allow testing to mock/replace
-  private static CreateNodeRuntimeWorker = (): SharedWorker => {
+  public static CreateNodeRuntimeWorker = (): SharedWorker => {
     // foxglove-depcheck-used: babel-plugin-transform-import-meta
     return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url), {
       // Although we are using SharedWorkers, we do not actually want to share worker instances
