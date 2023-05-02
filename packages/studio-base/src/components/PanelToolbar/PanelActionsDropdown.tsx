@@ -147,16 +147,16 @@ export function PanelActionsDropdown({ isUnknownPanel }: Props): JSX.Element {
     if (!isUnknownPanel) {
       items.push(
         {
-          key: "hsplit",
-          text: "Split horizontal",
-          icon: <SplitHorizontal20Regular />,
-          onClick: () => split(panelContext?.id, "column"),
-        },
-        {
           key: "vsplit",
-          text: "Split vertical",
+          text: "Split right",
           icon: <SplitVertical20Regular />,
           onClick: () => split(panelContext?.id, "row"),
+        },
+        {
+          key: "hsplit",
+          text: "Split down",
+          icon: <SplitHorizontal20Regular />,
+          onClick: () => split(panelContext?.id, "column"),
         },
       );
     }
