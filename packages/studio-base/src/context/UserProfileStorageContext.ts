@@ -9,6 +9,16 @@ import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 export type UserProfile = {
   /** The id of the layout the user is currently working with. */
   currentLayoutId?: LayoutID;
+
+  /** Timestamp of the first time the user loaded the app. */
+  firstSeenTime?: string;
+
+  /**
+   * True if the at the time we assigned firstSeenTime it appeared to be the
+   * user's first load of the app.
+   */
+  firstSeenTimeIsFirstLoad?: boolean;
+
   /** Onboarding flow status */
   onboarding?: {
     /** List of panel types for which the settings tooltip has been shown */

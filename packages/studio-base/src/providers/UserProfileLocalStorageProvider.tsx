@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { merge } from "lodash";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import {
@@ -24,6 +24,7 @@ export default function UserProfileLocalStorageProvider({
     const item = localStorage.getItem(LOCAL_STORAGE_KEY);
     return item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
   }, []);
+
   const setUserProfile = useCallback(
     async (value: UserProfile | ((prev: UserProfile) => UserProfile)) => {
       const item = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -33,10 +34,23 @@ export default function UserProfileLocalStorageProvider({
     },
     [],
   );
+
+  // On first load stamp firstSeenTime timestamp. We consider the time at which
+  // we stamp firstTime as the first time the user has opened the app if at that
+  // time there is no currentLayoutId already set in the profile.
+  useEffect(() => {
+    setUserProfile((old) => ({
+      ...old,
+      firstSeenTime: old.firstSeenTime ?? new Date().toISOString(),
+      firstSeenTimeIsFirstLoad: old.firstSeenTimeIsFirstLoad ?? old.currentLayoutId == undefined,
+    })).catch(console.error);
+  }, [setUserProfile]);
+
   const storage = useShallowMemo({
     getUserProfile,
     setUserProfile,
   });
+
   return (
     <UserProfileStorageContext.Provider value={storage}>
       {children}
