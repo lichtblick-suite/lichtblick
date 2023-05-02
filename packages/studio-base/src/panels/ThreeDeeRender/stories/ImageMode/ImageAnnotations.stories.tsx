@@ -87,6 +87,32 @@ export const Annotations: StoryObj = {
       topic: "annotations",
       receiveTime: { sec: 10, nsec: 0 },
       message: {
+        circles: [
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            position: { x: 20, y: 5 },
+            diameter: 4,
+            thickness: 1,
+            fill_color: { r: 1, g: 0, b: 1, a: 1 },
+            outline_color: { r: 1, g: 1, b: 0, a: 1 },
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            position: { x: 25, y: 5 },
+            diameter: 4,
+            thickness: 1,
+            fill_color: { r: 1, g: 0, b: 1, a: 0.5 },
+            outline_color: { r: 0, g: 0, b: 0, a: 0 },
+          },
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            position: { x: 30, y: 5 },
+            diameter: 4,
+            thickness: 0.5,
+            fill_color: { r: 1, g: 1, b: 0, a: 0 },
+            outline_color: { r: 0, g: 1, b: 1, a: 0.5 },
+          },
+        ],
         points: [
           {
             timestamp: { sec: 0, nsec: 0 },

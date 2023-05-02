@@ -105,9 +105,18 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
 
     for (const annotation of this.#annotations) {
       switch (annotation.type) {
-        case "circle":
-          // not yet implemented
+        case "circle": {
+          let line = unusedLines.pop();
+          if (!line) {
+            line = new RenderableLineAnnotation();
+            line.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
+            line.setCameraModel(this.#cameraModel);
+            this.add(line);
+          }
+          this.#lines.push(line);
+          line.setAnnotationFromCircle(annotation);
           break;
+        }
 
         case "points":
           switch (annotation.style) {

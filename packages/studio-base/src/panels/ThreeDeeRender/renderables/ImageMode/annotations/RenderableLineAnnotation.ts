@@ -9,7 +9,11 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
-import { PointsAnnotation as NormalizedPointsAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import { Color } from "@foxglove/schemas";
+import {
+  PointsAnnotation as NormalizedPointsAnnotation,
+  CircleAnnotation as NormalizedCircleAnnotation,
+} from "@foxglove/studio-base/panels/Image/types";
 
 import { BaseUserData, Renderable } from "../../../Renderable";
 import { SRGBToLinear } from "../../../color";
@@ -46,6 +50,8 @@ enum RenderOrder {
   FILL = 1,
   LINE = 2,
 }
+
+const FALLBACK_COLOR: Color = { r: 0, g: 0, b: 0, a: 0 };
 
 /**
  * Handles rendering of 2D annotations (line list, line strip, and line loop/polygon).
@@ -135,6 +141,10 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     this.#annotation = annotation;
   }
 
+  public setAnnotationFromCircle(annotation: NormalizedCircleAnnotation): void {
+    this.setAnnotation(makePointsAnnotationFromCircle(annotation));
+  }
+
   public update(): void {
     if (!this.#annotation || !this.#cameraModel) {
       this.visible = false;
@@ -143,7 +153,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
 
     const { points, outlineColor, outlineColors, thickness, style, fillColor } = this.#annotation;
     const pointsLength = points.length;
-    if (!outlineColor || outlineColor.a <= 0 || thickness <= 0 || pointsLength < 2) {
+    if (pointsLength < 2) {
       this.visible = false;
       return;
     }
@@ -221,7 +231,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
           if (useVertexColors) {
             const color = hasExactColors
               ? outlineColors[i >>> 1]!
-              : outlineColors[i] ?? outlineColor;
+              : outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR;
             colors[i * 4 + 0] = SRGBToLinear(color.r) * 255;
             colors[i * 4 + 1] = SRGBToLinear(color.g) * 255;
             colors[i * 4 + 2] = SRGBToLinear(color.b) * 255;
@@ -286,12 +296,11 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       if (useVertexColors) {
         this.#lineMaterial.vertexColors = true;
       } else {
+        const color = outlineColor ?? FALLBACK_COLOR;
         this.#lineMaterial.vertexColors = false;
-        this.#lineMaterial.color
-          .setRGB(outlineColor.r, outlineColor.g, outlineColor.b)
-          .convertSRGBToLinear();
-        this.#lineMaterial.opacity = outlineColor.a;
-        hasTransparency = outlineColor.a < 1;
+        this.#lineMaterial.color.setRGB(color.r, color.g, color.b).convertSRGBToLinear();
+        this.#lineMaterial.opacity = color.a;
+        hasTransparency = color.a < 1;
       }
       this.#lineMaterial.transparent = hasTransparency;
       this.#lineMaterial.depthWrite = !hasTransparency;
@@ -323,4 +332,30 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       );
     }
   }
+}
+
+function makePointsAnnotationFromCircle(
+  circle: NormalizedCircleAnnotation,
+): NormalizedPointsAnnotation & { style: LineStyle } {
+  const segments = 32;
+  const {
+    position: { x: cx, y: cy },
+    radius,
+  } = circle;
+  return {
+    type: "points",
+    stamp: circle.stamp,
+    style: "polygon",
+    points: new Array(segments).fill(undefined).map((_, index) => {
+      const angle = (2 * Math.PI * index) / segments;
+      return {
+        x: cx + radius * Math.cos(angle),
+        y: cy + radius * Math.sin(angle),
+      };
+    }),
+    outlineColors: [],
+    outlineColor: circle.outlineColor,
+    thickness: circle.thickness,
+    fillColor: circle.fillColor,
+  };
 }
