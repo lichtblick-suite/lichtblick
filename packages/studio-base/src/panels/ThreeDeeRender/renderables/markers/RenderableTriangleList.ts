@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makeStandardVertexColorMaterial } from "./materials";
+import { DynamicBufferGeometry } from "../../DynamicBufferGeometry";
 import type { Renderer } from "../../Renderer";
 import { rgbaToLinear } from "../../color";
 import { Marker, Vector3 } from "../../ros";
@@ -14,14 +15,11 @@ const NOT_DIVISIBLE_ERR = "NOT_DIVISIBLE";
 const EMPTY_ERR = "EMPTY";
 const COLORS_MISMATCH_ERR = "COLORS_MISMATCH";
 const INVALID_POINT_ERR = "INVALID_POINT";
-const EMPTY_FLOAT32 = new Float32Array();
 
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
 export class RenderableTriangleList extends RenderableMarker {
-  #mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  #vertices: Float32Array;
-  #colors: Float32Array;
+  #mesh: THREE.Mesh<DynamicBufferGeometry, THREE.MeshStandardMaterial>;
 
   public constructor(
     topic: string,
@@ -31,11 +29,8 @@ export class RenderableTriangleList extends RenderableMarker {
   ) {
     super(topic, marker, receiveTime, renderer);
 
-    this.#vertices = new Float32Array(marker.points.length * 3);
-    this.#colors = new Float32Array(marker.colors.length * 4);
-
     this.#mesh = new THREE.Mesh(
-      new THREE.BufferGeometry(),
+      new DynamicBufferGeometry(),
       makeStandardVertexColorMaterial(marker),
     );
     this.#mesh.castShadow = true;
@@ -48,8 +43,6 @@ export class RenderableTriangleList extends RenderableMarker {
   public override dispose(): void {
     this.#mesh.material.dispose();
     this.#mesh.geometry.dispose();
-    this.#vertices = new Float32Array();
-    this.#colors = new Float32Array();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
@@ -64,7 +57,7 @@ export class RenderableTriangleList extends RenderableMarker {
         EMPTY_ERR,
         `TRIANGLE_LIST: points is empty`,
       );
-      this.#mesh.geometry.setAttribute("position", new THREE.BufferAttribute(EMPTY_FLOAT32, 3));
+      this.#mesh.geometry.resize(0);
       return;
     }
     if (vertexCount % 3 !== 0) {
@@ -93,21 +86,23 @@ export class RenderableTriangleList extends RenderableMarker {
       this.#mesh.material.needsUpdate = true;
     }
 
-    let dataChanged = false;
+    const geometry = this.#mesh.geometry;
+    geometry.resize(vertexCount);
+    if (!geometry.attributes.position) {
+      geometry.createAttribute("position", Float32Array, 3);
+    }
+    if (!geometry.attributes.normal) {
+      geometry.createAttribute("normal", Float32Array, 3);
+    }
+    if (!geometry.attributes.color) {
+      geometry.createAttribute("color", Uint8Array, 4, true);
+    }
 
-    const count = vertexCount * 3;
-    if (count !== this.#vertices.length) {
-      this.#vertices = new Float32Array(count);
-      dataChanged = true;
-    }
-    if (vertexCount * 4 !== this.#colors.length) {
-      this.#colors = new Float32Array(vertexCount * 4);
-      dataChanged = true;
-    }
-    const vertices = this.#vertices;
-    const colors = this.#colors;
+    const vertices = geometry.attributes.position!;
+    const colors = geometry.attributes.color!;
 
     // Update position/color buffers with the new marker data
+    let dataChanged = false;
     for (let i = 0; i < vertexCount; i++) {
       const point = marker.points[i]!;
       if (!isPointValid(point)) {
@@ -120,33 +115,25 @@ export class RenderableTriangleList extends RenderableMarker {
       }
       dataChanged =
         dataChanged ||
-        vertices[i * 3] !== point.x ||
-        vertices[i * 3 + 1] !== point.y ||
-        vertices[i * 3 + 2] !== point.z;
-      vertices[i * 3] = point.x;
-      vertices[i * 3 + 1] = point.y;
-      vertices[i * 3 + 2] = point.z;
+        vertices.getX(i) !== point.x ||
+        vertices.getY(i) !== point.y ||
+        vertices.getZ(i) !== point.z;
+      vertices.setXYZ(i, point.x, point.y, point.z);
 
       rgbaToLinear(tempColor, marker.colors[i] ?? marker.color);
       dataChanged =
         dataChanged ||
-        colors[i * 4] !== tempColor.r ||
-        colors[i * 4 + 1] !== tempColor.g ||
-        colors[i * 4 + 2] !== tempColor.b ||
-        colors[i * 4 + 3] !== tempColor.a;
-      colors[i * 4] = tempColor.r;
-      colors[i * 4 + 1] = tempColor.g;
-      colors[i * 4 + 2] = tempColor.b;
-      colors[i * 4 + 3] = tempColor.a;
+        colors.getX(i) !== tempColor.r ||
+        colors.getY(i) !== tempColor.g ||
+        colors.getZ(i) !== tempColor.b ||
+        colors.getW(i) !== tempColor.a;
+      colors.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
     }
 
     if (dataChanged) {
-      const geometry = this.#mesh.geometry;
-      geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
       // Explicitly tell three.js to send position and color buffers to the GPU
-      geometry.attributes.position!.needsUpdate = true;
-      geometry.attributes.color!.needsUpdate = true;
+      vertices.needsUpdate = true;
+      colors.needsUpdate = true;
       // Build the vertex normal attribute from the position buffer (averaging face normals)
       geometry.computeVertexNormals();
       geometry.computeBoundingSphere();
