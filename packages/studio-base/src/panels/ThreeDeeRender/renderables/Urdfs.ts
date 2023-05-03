@@ -725,8 +725,10 @@ function createRenderable(
       return new RenderableSphere(name, marker, undefined, renderer);
     }
     case "mesh": {
-      // Use embedded materials only when no override material is defined in the URDF
-      const embedded = !visual.material ? EmbeddedMaterialUsage.Use : EmbeddedMaterialUsage.Ignore;
+      const isCollada = visual.geometry.filename.toLowerCase().endsWith(".dae");
+      // Use embedded materials if the mesh is a Collada file or if no material is defined in the URDF
+      const embedded =
+        isCollada || !visual.material ? EmbeddedMaterialUsage.Use : EmbeddedMaterialUsage.Ignore;
       const marker = createMeshMarker(frameId, pose, embedded, visual.geometry, baseUrl, color);
       return new RenderableMeshResource(name, marker, undefined, renderer);
     }
