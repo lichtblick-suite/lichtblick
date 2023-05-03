@@ -6,16 +6,20 @@ import * as THREE from "three";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { Annotation as NormalizedAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import { LabelPool } from "@foxglove/three-text";
 
 import { RenderableLineAnnotation } from "./RenderableLineAnnotation";
 import { RenderablePointsAnnotation } from "./RenderablePointsAnnotation";
+import { RenderableTextAnnotation } from "./RenderableTextAnnotation";
 
 /**
  * Holds renderables for all the 2D image annotations on a single topic.
  */
 export class RenderableTopicAnnotations extends THREE.Object3D {
+  #labelPool: LabelPool;
   #points: RenderablePointsAnnotation[] = [];
   #lines: RenderableLineAnnotation[] = [];
+  #texts: RenderableTextAnnotation[] = [];
 
   #scale = 0;
   #canvasWidth = 0;
@@ -28,6 +32,11 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
 
   #cameraModel?: PinholeCameraModel;
   #cameraModelNeedsUpdate = false;
+
+  public constructor(labelPool: LabelPool) {
+    super();
+    this.#labelPool = labelPool;
+  }
 
   public dispose(): void {
     for (const points of this.#points) {
@@ -70,6 +79,9 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       for (const lineList of this.#lines) {
         lineList.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       }
+      for (const text of this.#texts) {
+        text.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
+      }
     }
 
     if (this.#cameraModelNeedsUpdate) {
@@ -80,6 +92,9 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       for (const lineList of this.#lines) {
         lineList.setCameraModel(this.#cameraModel);
       }
+      for (const text of this.#texts) {
+        text.setCameraModel(this.#cameraModel);
+      }
     }
 
     const updateRenderables = () => {
@@ -88,6 +103,9 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
       }
       for (const lineList of this.#lines) {
         lineList.update();
+      }
+      for (const text of this.#texts) {
+        text.update();
       }
     };
 
@@ -102,6 +120,8 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     this.#points = [];
     const unusedLines = this.#lines;
     this.#lines = [];
+    const unusedTexts = this.#texts;
+    this.#texts = [];
 
     for (const annotation of this.#annotations) {
       switch (annotation.type) {
@@ -159,9 +179,18 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
           }
           break;
 
-        case "text":
-          // not yet implemented
+        case "text": {
+          let text = unusedTexts.pop();
+          if (!text) {
+            text = new RenderableTextAnnotation(this.#labelPool);
+            text.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
+            text.setCameraModel(this.#cameraModel);
+            this.add(text);
+          }
+          this.#texts.push(text);
+          text.setAnnotation(annotation);
           break;
+        }
       }
     }
 
@@ -174,6 +203,10 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     for (const lineList of unusedLines) {
       lineList.removeFromParent();
       lineList.dispose();
+    }
+    for (const text of unusedTexts) {
+      text.removeFromParent();
+      text.dispose();
     }
   }
 }

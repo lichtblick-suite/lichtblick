@@ -15,6 +15,7 @@ import {
   ImageMarker as RosImageMarker,
   ImageMarkerArray as RosImageMarkerArray,
 } from "@foxglove/studio-base/types/Messages";
+import { LabelPool } from "@foxglove/three-text";
 
 import { RenderableTopicAnnotations } from "./RenderableTopicAnnotations";
 import { ImageAnnotationSubscription, ImageModeConfig } from "../../../IRenderer";
@@ -39,6 +40,7 @@ interface ImageAnnotationsContext {
     schemaNames: Set<string>,
     handler: (messageEvent: MessageEvent<T>) => void,
   ): void;
+  labelPool: LabelPool;
 }
 
 const ALL_SUPPORTED_SCHEMAS = new Set([
@@ -149,7 +151,7 @@ export class ImageAnnotations extends THREE.Object3D {
       messageEvent.schemaName as SchemaName,
     );
     if (!renderable) {
-      renderable = new RenderableTopicAnnotations();
+      renderable = new RenderableTopicAnnotations(this.#context.labelPool);
       renderable.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       renderable.setCameraModel(this.#cameraModel);
       this.#renderablesByTopicAndSchemaName.set(

@@ -84,7 +84,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
   #cameraModelNeedsUpdate = false;
 
   public constructor() {
-    super("foxglove.ImageAnnotations.LineList", undefined, {
+    super("foxglove.ImageAnnotations.Line", undefined, {
       receiveTime: 0n,
       messageTime: 0n,
       frameId: "",
@@ -274,7 +274,6 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
           this.#fill.renderOrder = RenderOrder.FILL;
           this.add(this.#fill);
         }
-        // Position the fill on the focal plane so the Shape's coordinates correspond to pixel coordinates
         this.#fill.position.set(0, 0, 1);
         this.#fillMaterial.color
           .setRGB(shapeFillColor.r, shapeFillColor.g, shapeFillColor.b)
