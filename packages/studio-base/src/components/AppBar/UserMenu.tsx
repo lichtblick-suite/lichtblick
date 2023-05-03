@@ -135,6 +135,7 @@ export function UserMenu({
         <MenuItem onClick={() => onSettingsClick()}>Settings</MenuItem>
         <MenuItem onClick={() => onSettingsClick("extensions")}>Extensions</MenuItem>
         {currentUser && <MenuItem onClick={onProfileClick}>User profile</MenuItem>}
+        <Divider variant="middle" />
         <MenuItem onClick={async () => await setEnableNewTopNav(false)}>Revert to old UI</MenuItem>
         <Divider variant="middle" />
         <MenuItem onClick={onDocsClick}>Documentation</MenuItem>
