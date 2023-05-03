@@ -46,6 +46,7 @@ function IndicatorLightPanelAdapter(props: Props) {
       config={props.config}
       saveConfig={props.saveConfig}
       initPanel={boundInitPanel}
+      highestSupportedConfigVersion={1}
     />
   );
 }

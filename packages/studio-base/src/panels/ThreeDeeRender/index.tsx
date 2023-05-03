@@ -48,6 +48,7 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   return (
     <PanelExtensionAdapter
       config={props.config}
+      highestSupportedConfigVersion={1}
       saveConfig={props.saveConfig}
       initPanel={boundInitPanel}
     />

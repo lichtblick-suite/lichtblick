@@ -11,6 +11,7 @@ export * from "./incompatibleLayoutVersion";
 export * from "./log";
 export * from "./openDialog";
 export * from "./panels";
+export * from "./panelConfigVersionGuard";
 export * from "./panelSettings";
 export * from "./plot";
 export * from "./settingsEditor";

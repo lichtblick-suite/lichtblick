@@ -12,7 +12,7 @@ import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import PanelExtensionAdapter from "./PanelExtensionAdapter";
+import PanelExtensionAdapter, { VERSION_CONFIG_KEY } from "./PanelExtensionAdapter";
 
 export default {
   title: "PanelExtensionAdapter",
@@ -108,6 +108,27 @@ export const SimplePanelRender: StoryObj = {
       >
         <MockPanelContextProvider>
           <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+        </MockPanelContextProvider>
+      </PanelSetup>
+    );
+  },
+};
+
+export const ConfigTooNew: StoryObj = {
+  render: (): ReactElement => {
+    function initPanel() {
+      throw new Error("Should not be called");
+    }
+
+    return (
+      <PanelSetup>
+        <MockPanelContextProvider>
+          <PanelExtensionAdapter
+            highestSupportedConfigVersion={1}
+            config={{ [VERSION_CONFIG_KEY]: 2 }}
+            saveConfig={() => {}}
+            initPanel={initPanel}
+          />
         </MockPanelContextProvider>
       </PanelSetup>
     );
