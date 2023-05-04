@@ -24,8 +24,9 @@ import {
 } from "@mui/material";
 import { produce } from "immer";
 import { compact, set, uniq } from "lodash";
-import { useCallback, useEffect, useMemo } from "react";
-import { List, AutoSizer, ListRowProps } from "react-virtualized";
+import { CSSProperties, useCallback, useEffect, useMemo } from "react";
+import { AutoSizer } from "react-virtualized";
+import { FixedSizeList as List } from "react-window";
 
 import { filterMap } from "@foxglove/den/collection";
 import { SettingsTreeAction } from "@foxglove/studio";
@@ -131,6 +132,7 @@ const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
           secondaryTypographyProps={{
             color: MESSAGE_COLORS[levelName ?? "stale"],
           }}
+          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         />
       </StyledListItemButton>
     </ListItem>
@@ -180,16 +182,18 @@ function DiagnosticSummary(props: Props): JSX.Element {
   );
 
   const renderRow = useCallback(
-    // eslint-disable-next-line react/no-unused-prop-types
-    ({ item, key }: ListRowProps & { item: DiagnosticInfo }) => {
+    (renderProps: { data: DiagnosticInfo[]; index: number; style: CSSProperties }) => {
+      const item = renderProps.data[renderProps.index]!;
       return (
-        <NodeRow
-          key={key}
-          info={item}
-          isPinned={pinnedIds.includes(item.id)}
-          onClick={showDetails}
-          onClickPin={togglePinned}
-        />
+        <div style={{ ...renderProps.style }}>
+          <NodeRow
+            key={item.id}
+            info={item}
+            isPinned={pinnedIds.includes(item.id)}
+            onClick={showDetails}
+            onClickPin={togglePinned}
+          />
+        </div>
       );
     },
     [pinnedIds, showDetails, togglePinned],
@@ -258,11 +262,13 @@ function DiagnosticSummary(props: Props): JSX.Element {
             width={width}
             height={height}
             style={{ outline: "none" }}
-            rowHeight={30}
-            rowRenderer={(rowProps) => renderRow({ ...rowProps, item: nodes[rowProps.index]! })}
-            rowCount={nodes.length}
-            overscanRowCount={10}
-          />
+            itemSize={30}
+            itemData={nodes}
+            itemCount={nodes.length}
+            overscanCount={10}
+          >
+            {renderRow}
+          </List>
         )}
       </AutoSizer>
     );
