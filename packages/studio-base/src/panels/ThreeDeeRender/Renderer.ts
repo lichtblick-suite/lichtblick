@@ -6,7 +6,7 @@ import EventEmitter from "eventemitter3";
 import i18next from "i18next";
 import { Immutable, produce } from "immer";
 import * as THREE from "three";
-import { DeepPartial } from "ts-essentials";
+import { DeepPartial, assert } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
@@ -201,6 +201,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   /** only public for testing - prefer to use `getCameraState` instead */
   public cameraHandler: ICameraHandler;
 
+  #imageModeExtension?: ImageMode;
+
   public measurementTool: MeasurementTool;
   public publishClickTool: PublishClickTool;
 
@@ -320,32 +322,21 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.measurementTool = new MeasurementTool(this);
     this.publishClickTool = new PublishClickTool(this);
 
-    // Internal handlers for TF messages to update the transform tree
-    this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
-      handler: this.#handleFrameTransform,
-      shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
-    });
-    this.addSchemaSubscriptions(FRAME_TRANSFORMS_DATATYPES, {
-      handler: this.#handleFrameTransforms,
-      shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
-    });
-    this.addSchemaSubscriptions(TF_DATATYPES, {
-      handler: this.#handleTFMessage,
-      shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
-    });
-    this.addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
-      handler: this.#handleTransformStamped,
-      shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
-    });
-
     const aspect = renderSize.width / renderSize.height;
     switch (interfaceMode) {
       case "image":
-        this.cameraHandler = new ImageMode(this, this.input.canvasSize);
+        this.#imageModeExtension = new ImageMode(this, {
+          canvasSize: this.input.canvasSize,
+          // eslint-disable-next-line @foxglove/no-boolean-parameters
+          setHasCalibrationTopic: (hasCameraCalibrationTopic: boolean) => {
+            if (hasCameraCalibrationTopic) {
+              this.#disableImageOnlySubscriptionMode();
+            } else {
+              this.#enableImageOnlySubscriptionMode();
+            }
+          },
+        });
+        this.cameraHandler = this.#imageModeExtension;
         this.#addSceneExtension(this.cameraHandler);
         break;
       case "3d":
@@ -373,6 +364,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#addSceneExtension(new VelodyneScans(this));
     this.#addSceneExtension(this.measurementTool);
     this.#addSceneExtension(this.publishClickTool);
+    if (interfaceMode === "image" && config.imageMode.calibrationTopic == undefined) {
+      this.#enableImageOnlySubscriptionMode();
+    } else {
+      this.#addTransformSubscriptions();
+      this.#addSubscriptionsFromSceneExtensions();
+    }
 
     this.#watchDevicePixelRatio();
 
@@ -574,6 +571,49 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.emit("configChange", this);
   }
 
+  #addTransformSubscriptions(): void {
+    const config = this.config;
+    // Internal handlers for TF messages to update the transform tree
+    this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
+      handler: this.#handleFrameTransform,
+      shouldSubscribe: () => true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
+    });
+    this.addSchemaSubscriptions(FRAME_TRANSFORMS_DATATYPES, {
+      handler: this.#handleFrameTransforms,
+      shouldSubscribe: () => true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
+    });
+    this.addSchemaSubscriptions(TF_DATATYPES, {
+      handler: this.#handleTFMessage,
+      shouldSubscribe: () => true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
+    });
+    this.addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
+      handler: this.#handleTransformStamped,
+      shouldSubscribe: () => true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
+    });
+  }
+
+  // Call on scene extensions to add subscriptions to the renderer
+  #addSubscriptionsFromSceneExtensions(filterFn?: (extension: SceneExtension) => boolean): void {
+    const filteredExtensions = filterFn
+      ? Array.from(this.sceneExtensions.values()).filter(filterFn)
+      : this.sceneExtensions.values();
+    for (const extension of filteredExtensions) {
+      extension.addSubscriptionsToRenderer();
+    }
+  }
+
+  // Clear topic and schema subscriptions and emit change events for both
+  #clearSubscriptions(): void {
+    this.topicHandlers.clear();
+    this.schemaHandlers.clear();
+    this.emit("topicHandlersChanged", this);
+    this.emit("schemaHandlersChanged", this);
+  }
+
   public addSchemaSubscriptions<T>(
     schemaNames: Iterable<string>,
     subscription: RendererSubscription<T> | MessageHandler<T>,
@@ -613,6 +653,30 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
     this.emit("topicHandlersChanged", this);
   }
+
+  /**
+   * Image Only mode disables all subscriptions for non-ImageMode scene extensions and clears all transform subscriptions.
+   * This mode should only be enabled in ImageMode when there is no calibration topic selected. Disabling these subscriptions
+   * prevents the 3D aspects of the scene from being rendered from an insufficient camera info.
+   */
+  #enableImageOnlySubscriptionMode = (): void => {
+    assert(
+      this.#imageModeExtension,
+      "Image mode extension should be defined when calling enable Image only mode",
+    );
+    this.clear({ clearTransforms: true, resetAllFramesCursor: true });
+    this.#clearSubscriptions();
+    this.#addSubscriptionsFromSceneExtensions(
+      (extension) => extension === this.#imageModeExtension,
+    );
+  };
+
+  #disableImageOnlySubscriptionMode = (): void => {
+    this.clear({ clearTransforms: true, resetAllFramesCursor: true });
+    this.#clearSubscriptions();
+    this.#addSubscriptionsFromSceneExtensions();
+    this.#addTransformSubscriptions();
+  };
 
   public addCustomLayerAction(options: {
     layerId: string;
@@ -664,6 +728,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   #defaultFrameId(): string | undefined {
+    if (this.interfaceMode === "image") {
+      return undefined;
+    }
     const allFrames = this.transformTree.frames();
     if (allFrames.size === 0) {
       return undefined;

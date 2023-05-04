@@ -10,6 +10,7 @@ import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction } from "@foxglove/studio";
 import {
+  CREATE_BITMAP_ERR_KEY,
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
@@ -46,16 +47,22 @@ import {
 } from "../../ros";
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
+import { decodeCompressedImageToBitmap } from "../Images/decodeCompressedImageToBitmap";
 
 const IMAGE_TOPIC_PATH = ["imageMode", "imageTopic"];
 const CALIBRATION_TOPIC_PATH = ["imageMode", "calibrationTopic"];
 
 const IMAGE_TOPIC_UNAVAILABLE = "IMAGE_TOPIC_UNAVAILABLE";
 const CALIBRATION_TOPIC_UNAVAILABLE = "CALIBRATION_TOPIC_UNAVAILABLE";
+const FALLBACK_CALIBRATION_ACTIVE_ALERT_KEY = "FALLBACK_CALIBRATION_ACTIVE";
+
 const MISSING_CAMERA_INFO = "MISSING_CAMERA_INFO";
 const IMAGE_TOPIC_DIFFERENT_FRAME = "IMAGE_TOPIC_DIFFERENT_FRAME";
 
 const CAMERA_MODEL = "CameraModel";
+
+const DEFAULT_FOCAL_LENGTH = 500;
+const DEFAULT_IMAGE_WIDTH = 512;
 
 export class ImageMode extends SceneExtension<ImageRenderable> implements ICameraHandler {
   #camera: ImageModeCamera;
@@ -70,11 +77,27 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
 
   #imageRenderable: ImageRenderable | undefined;
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  #setHasCalibrationTopic: (hasCalibrationTopic: boolean) => void;
+
   /**
    * @param canvasSize Canvas size in CSS pixels
    */
-  public constructor(renderer: IRenderer, canvasSize: THREE.Vector2) {
+  public constructor(
+    renderer: IRenderer,
+    {
+      canvasSize,
+      setHasCalibrationTopic,
+    }: {
+      canvasSize: THREE.Vector2;
+
+      // eslint-disable-next-line @foxglove/no-boolean-parameters
+      setHasCalibrationTopic: (hasCalibrationTopic: boolean) => void;
+    },
+  ) {
     super("foxglove.ImageMode", renderer);
+
+    this.#setHasCalibrationTopic = setHasCalibrationTopic;
 
     this.#camera = new ImageModeCamera();
 
@@ -89,7 +112,29 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
     renderer.settings.errors.on("update", this.#handleErrorChange);
     renderer.settings.errors.on("clear", this.#handleErrorChange);
     renderer.settings.errors.on("remove", this.#handleErrorChange);
+    this.#annotations = new ImageAnnotations({
+      initialScale: this.#camera.getEffectiveScale(),
+      initialCanvasWidth: canvasSize.width,
+      initialCanvasHeight: canvasSize.height,
+      initialPixelRatio: renderer.getPixelRatio(),
+      topics: () => renderer.topics ?? [],
+      config: () => renderer.config.imageMode,
+      updateConfig: (updateHandler) => {
+        renderer.updateConfig((draft) => updateHandler(draft.imageMode));
+      },
+      updateSettingsTree: () => {
+        this.updateSettingsTree();
+      },
+      addSchemaSubscriptions: (schemaNames, handler) => {
+        renderer.addSchemaSubscriptions(schemaNames, handler);
+      },
+      labelPool: renderer.labelPool,
+    });
+    this.add(this.#annotations);
+  }
 
+  public override addSubscriptionsToRenderer(): void {
+    const renderer = this.renderer;
     renderer.addSchemaSubscriptions(CAMERA_INFO_DATATYPES, {
       handler: this.#handleCameraInfo,
       shouldSubscribe: this.#cameraInfoShouldSubscribe,
@@ -116,26 +161,7 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
       handler: this.#handleCompressedImage,
       shouldSubscribe: this.#imageShouldSubscribe,
     });
-
-    this.#annotations = new ImageAnnotations({
-      initialScale: this.#camera.getEffectiveScale(),
-      initialCanvasWidth: canvasSize.width,
-      initialCanvasHeight: canvasSize.height,
-      initialPixelRatio: renderer.getPixelRatio(),
-      topics: () => renderer.topics ?? [],
-      config: () => renderer.config.imageMode,
-      updateConfig: (updateHandler) => {
-        renderer.updateConfig((draft) => updateHandler(draft.imageMode));
-      },
-      updateSettingsTree: () => {
-        this.updateSettingsTree();
-      },
-      addSchemaSubscriptions: (schemaNames, handler) => {
-        renderer.addSchemaSubscriptions(schemaNames, handler);
-      },
-      labelPool: renderer.labelPool,
-    });
-    this.add(this.#annotations);
+    this.#annotations.addSubscriptions();
   }
 
   public override dispose(): void {
@@ -143,11 +169,16 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
     this.renderer.settings.errors.off("clear", this.#handleErrorChange);
     this.renderer.settings.errors.off("remove", this.#handleErrorChange);
     this.#annotations.dispose();
+    this.#imageRenderable?.dispose();
     super.dispose();
   }
 
   public override removeAllRenderables(): void {
     this.#annotations.removeAllRenderables();
+    this.#imageRenderable?.dispose();
+    this.#imageRenderable?.removeFromParent();
+    this.#imageRenderable = undefined;
+    this.#clearCameraModel();
     super.removeAllRenderables();
   }
 
@@ -171,17 +202,23 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
       return { label: topic.name, value: topic.name };
     });
 
-    const calibrationTopics = filterMap(this.renderer.topics ?? [], (topic) => {
-      if (
-        !(
-          topicIsConvertibleToSchema(topic, CAMERA_INFO_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
-        )
-      ) {
-        return;
-      }
-      return { label: topic.name, value: topic.name };
-    });
+    const calibrationTopics: { label: string; value: string | undefined }[] = filterMap(
+      this.renderer.topics ?? [],
+      (topic) => {
+        if (
+          !(
+            topicIsConvertibleToSchema(topic, CAMERA_INFO_DATATYPES) ||
+            topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
+          )
+        ) {
+          return;
+        }
+        return { label: topic.name, value: topic.name };
+      },
+    );
+
+    // add unselected camera calibration option
+    calibrationTopics.unshift({ label: "None", value: undefined });
 
     if (imageTopic && !imageTopics.some((topic) => topic.value === imageTopic)) {
       this.renderer.settings.errors.add(
@@ -203,6 +240,18 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CALIBRATION_TOPIC_UNAVAILABLE);
     }
 
+    if (this.#fallbackCameraModelActive()) {
+      this.renderer.settings.errors.add(
+        CALIBRATION_TOPIC_PATH,
+        FALLBACK_CALIBRATION_ACTIVE_ALERT_KEY,
+        `This mode uses a fallback camera model based on the image. 3D Topics and transforms will not be available.`,
+      );
+    } else {
+      this.renderer.settings.errors.remove(
+        CALIBRATION_TOPIC_PATH,
+        FALLBACK_CALIBRATION_ACTIVE_ALERT_KEY,
+      );
+    }
     const imageTopicError = this.renderer.settings.errors.errors.errorAtPath(IMAGE_TOPIC_PATH);
     const calibrationTopicError =
       this.renderer.settings.errors.errors.errorAtPath(CALIBRATION_TOPIC_PATH);
@@ -314,7 +363,23 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
     const category = path[0]!;
     const value = action.payload.value;
     if (category === "imageMode") {
+      const prevImageModeConfig = this.#getImageModeSettings();
       this.saveSetting(path, value);
+      const config = this.#getImageModeSettings();
+      const calibrationTopicChanged =
+        config.calibrationTopic !== prevImageModeConfig.calibrationTopic;
+      if (calibrationTopicChanged) {
+        const changingToUnselectedCalibration = config.calibrationTopic == undefined;
+        if (changingToUnselectedCalibration) {
+          this.#setHasCalibrationTopic(false);
+        }
+
+        const changingFromUnselectedCalibration = prevImageModeConfig.calibrationTopic == undefined;
+        if (changingFromUnselectedCalibration) {
+          this.#setHasCalibrationTopic(true);
+        }
+      }
+
       this.#updateViewAndRenderables();
     } else {
       return;
@@ -370,9 +435,74 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
       renderable.userData.cameraInfo = this.#cameraModel.info;
       renderable.setCameraModel(this.#cameraModel.model);
     }
+
     renderable.name = topic;
     renderable.setImage(image);
-    renderable.update();
+    const isCompressedImage = "format" in image;
+
+    if (!isCompressedImage) {
+      // Raw Images don't need to be decoded asynchronously
+      if (this.#fallbackCameraModelActive()) {
+        this.#updateFallbackCameraModel(image, getFrameIdFromImage(image));
+      }
+      renderable.update();
+      return;
+    }
+
+    const resizeBitmapWidth = !this.#fallbackCameraModelActive() ? DEFAULT_IMAGE_WIDTH : undefined;
+    decodeCompressedImageToBitmap(image, resizeBitmapWidth)
+      .then((maybeBitmap) => {
+        const prevRenderable = renderable;
+        const currentRenderable = this.#imageRenderable;
+        // prevent setting and updating disposed renderables
+        if (currentRenderable !== prevRenderable) {
+          return;
+        }
+        this.renderer.settings.errors.removeFromTopic(topic, CREATE_BITMAP_ERR_KEY);
+        renderable.setBitmap(maybeBitmap);
+        if (this.#fallbackCameraModelActive()) {
+          this.#updateFallbackCameraModel(maybeBitmap, getFrameIdFromImage(image));
+        }
+
+        renderable.update();
+        this.renderer.queueAnimationFrame();
+      })
+      .catch((err) => {
+        const prevRenderable = renderable;
+        const currentRenderable = this.#imageRenderable;
+        if (currentRenderable !== prevRenderable) {
+          return;
+        }
+        this.renderer.settings.errors.addToTopic(
+          topic,
+          CREATE_BITMAP_ERR_KEY,
+          `Error creating bitmap: ${err.message}`,
+        );
+      });
+  };
+
+  #updateFallbackCameraModel = (
+    image: { width: number; height: number },
+    frameId: string,
+  ): void => {
+    const cameraInfo = createFallbackCameraInfoForImage({
+      frameId,
+      height: image.height,
+      width: image.width,
+      focalLength: DEFAULT_FOCAL_LENGTH,
+    });
+    this.#updateCameraModel(cameraInfo);
+    this.#updateViewAndRenderables();
+  };
+
+  #fallbackCameraModelActive = (): boolean => {
+    return this.#getImageModeSettings().calibrationTopic == undefined;
+  };
+
+  #clearCameraModel = (): void => {
+    this.#cameraModel = undefined;
+    this.#camera.updateCamera(undefined);
+    this.#camera.updateProjectionMatrix();
   };
 
   #getImageRenderable(
@@ -427,10 +557,7 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
 
     const cameraInfoFrameId = selectedCameraInfo?.header.frame_id;
 
-    const imageFrameId =
-      selectedImage && "header" in selectedImage
-        ? selectedImage.header.frame_id
-        : selectedImage?.frame_id;
+    const imageFrameId = selectedImage && getFrameIdFromImage(selectedImage);
 
     if (imageFrameId != undefined) {
       if (imageFrameId !== cameraInfoFrameId) {
@@ -444,7 +571,6 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
       }
     }
 
-    // use camera info's frame id if available, otherwise use image topic's frame id
     return cameraInfoFrameId ?? imageFrameId;
   }
 
@@ -550,3 +676,46 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
     this.updateSettingsTree();
   };
 }
+
+function getFrameIdFromImage(image: AnyImage) {
+  if ("header" in image) {
+    return image.header.frame_id;
+  } else {
+    return image.frame_id;
+  }
+}
+
+const createFallbackCameraInfoForImage = (options: {
+  // should be over ~50 for a fallback at least, otherwise warping can occur in the center
+  focalLength: number;
+  frameId: string;
+  width: number;
+  height: number;
+}): CameraInfo => {
+  const { width, height, focalLength, frameId } = options;
+  const cx = width / 2;
+  const cy = height / 2;
+  const fx = focalLength;
+  const fy = focalLength;
+  const cameraInfo = normalizeCameraInfo({
+    header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: frameId },
+    height,
+    width,
+    distortion_model: "",
+    R: [1, 0, 0, 0, 1, 0, 0, 0, 1],
+    D: [],
+    // prettier-ignore
+    K: [
+      fx, 0, cx,
+      0, fy, cy,
+      0, 0, 1,
+    ],
+    // prettier-ignore
+    P: [
+      fx, 0, cx, 0,
+      0, fy, cy, 0,
+      0, 0, 1, 0,
+    ],
+  });
+  return cameraInfo;
+};

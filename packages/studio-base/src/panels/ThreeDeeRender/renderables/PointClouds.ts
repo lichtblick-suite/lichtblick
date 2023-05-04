@@ -652,7 +652,10 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
 
   public constructor(renderer: IRenderer) {
     super("foxglove.PointClouds", renderer);
+  }
 
+  public override addSubscriptionsToRenderer(): void {
+    const renderer = this.renderer;
     renderer.addSchemaSubscriptions(ROS_POINTCLOUD_DATATYPES, this.#handleRosPointCloud);
     renderer.addSchemaSubscriptions(FOXGLOVE_POINTCLOUD_DATATYPES, this.#handleFoxglovePointCloud);
   }

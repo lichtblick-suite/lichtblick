@@ -282,7 +282,10 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
 export class LaserScans extends SceneExtension<LaserScanRenderable> {
   public constructor(renderer: IRenderer) {
     super("foxglove.LaserScans", renderer);
+  }
 
+  public override addSubscriptionsToRenderer(): void {
+    const renderer = this.renderer;
     renderer.addSchemaSubscriptions(ROS_LASERSCAN_DATATYPES, this.#handleLaserScan);
     renderer.addSchemaSubscriptions(FOXGLOVE_LASERSCAN_DATATYPES, this.#handleLaserScan);
   }

@@ -11,10 +11,14 @@ import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
 import {
+  CREATE_BITMAP_ERR_KEY,
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
-import { AnyImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import {
+  ALL_CAMERA_INFO_SCHEMAS,
+  AnyImage,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
 import {
   normalizeCompressedImage,
   normalizeRawImage,
@@ -22,6 +26,7 @@ import {
   normalizeRosImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/imageNormalizers";
 
+import { decodeCompressedImageToBitmap } from "./Images/decodeCompressedImageToBitmap";
 import { cameraInfosEqual, normalizeCameraInfo } from "./projections";
 import type { IRenderer } from "../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -53,6 +58,7 @@ export type LayerSettingsImage = BaseSettings & {
   color: string;
 };
 
+const DEFAULT_BITMAP_WIDTH = 512;
 const NO_CAMERA_INFO_ERR = "NoCameraInfo";
 const CAMERA_MODEL = "CameraModel";
 
@@ -78,22 +84,22 @@ export class Images extends SceneExtension<ImageRenderable> {
 
   public constructor(renderer: IRenderer) {
     super("foxglove.Images", renderer);
+    this.#updateCameraInfoTopics();
+  }
+
+  public override addSubscriptionsToRenderer(): void {
+    const renderer = this.renderer;
+
+    renderer.addSchemaSubscriptions(ALL_CAMERA_INFO_SCHEMAS, {
+      handler: this.#handleCameraInfo,
+      shouldSubscribe: this.#cameraInfoShouldSubscribe,
+    });
 
     renderer.addSchemaSubscriptions(ROS_IMAGE_DATATYPES, this.#handleRosRawImage);
     renderer.addSchemaSubscriptions(ROS_COMPRESSED_IMAGE_DATATYPES, this.#handleRosCompressedImage);
-    renderer.addSchemaSubscriptions(CAMERA_INFO_DATATYPES, {
-      handler: this.#handleCameraInfo,
-      shouldSubscribe: this.#cameraInfoShouldSubscribe,
-    });
 
     renderer.addSchemaSubscriptions(RAW_IMAGE_DATATYPES, this.#handleRawImage);
     renderer.addSchemaSubscriptions(COMPRESSED_IMAGE_DATATYPES, this.#handleCompressedImage);
-    renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, {
-      handler: this.#handleCameraInfo,
-      shouldSubscribe: this.#cameraInfoShouldSubscribe,
-    });
-
-    this.#updateCameraInfoTopics();
   }
 
   /**
@@ -268,8 +274,39 @@ export class Images extends SceneExtension<ImageRenderable> {
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
 
     const renderable = this.#getImageRenderable(imageTopic, receiveTime, image, frameId);
-
     renderable.setImage(image);
+
+    const isCompressedImage = "format" in image;
+
+    if (isCompressedImage) {
+      decodeCompressedImageToBitmap(image, DEFAULT_BITMAP_WIDTH)
+        .then((maybeBitmap) => {
+          const prevRenderable = renderable;
+          const currentRenderable = this.renderables.get(imageTopic);
+          if (currentRenderable !== prevRenderable) {
+            return;
+          }
+          this.renderer.settings.errors.removeFromTopic(imageTopic, CREATE_BITMAP_ERR_KEY);
+          if (maybeBitmap instanceof ImageBitmap) {
+            renderable.setBitmap(maybeBitmap);
+          }
+          renderable.update();
+          this.renderer.queueAnimationFrame();
+        })
+        .catch((err) => {
+          const prevRenderable = renderable;
+          const currentRenderable = this.renderables.get(imageTopic);
+          if (currentRenderable !== prevRenderable) {
+            return;
+          }
+          this.renderer.settings.errors.addToTopic(
+            imageTopic,
+            CREATE_BITMAP_ERR_KEY,
+            `Error creating bitmap: ${err.message}`,
+          );
+        });
+    }
+
     renderable.userData.receiveTime = receiveTime;
     // Auto-select settings.cameraInfoTopic if it's not already set
     const settings = renderable.userData.settings;
@@ -313,11 +350,14 @@ export class Images extends SceneExtension<ImageRenderable> {
         NO_CAMERA_INFO_ERR,
         `No CameraInfo received on ${settings.cameraInfoTopic}`,
       );
-      return;
+    } else {
+      this.#recomputeCameraModel(renderable, cameraInfo);
     }
 
-    this.#recomputeCameraModel(renderable, cameraInfo);
-    renderable.update();
+    // Compressed images handle their own update after loading the bitmap
+    if (!isCompressedImage) {
+      renderable.update();
+    }
   };
 
   #handleCameraInfo = (

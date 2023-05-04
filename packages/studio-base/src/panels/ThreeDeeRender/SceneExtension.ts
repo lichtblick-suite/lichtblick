@@ -35,8 +35,8 @@ export type PartialMessageEvent<T> = MessageEvent<DeepPartial<T>>;
  * - Override `startFrame()` to execute code at the start of each frame. Call `super.startFrame()`
  *   to run `updatePose()` on each entry in `this.renderables`.
  * - Override `settingsNodes()` to add entries to the settings sidebar.
- * - Message subscriptions are added with `renderer.addDatatypeSubscriptions()` or
- *   `renderer.addTopicSubscription()`.
+ * - Message subscriptions are added with `renderer.addSchemaSubscriptions()` or
+ *   `renderer.addTopicSubscription()` in `this.addSubscriptionsToRenderer()`.
  * - Custom layer actions are added with `renderer.addCustomLayerAction()`.
  */
 export class SceneExtension<
@@ -79,6 +79,13 @@ export class SceneExtension<
     this.children.length = 0;
     this.renderables.clear();
   }
+
+  /**
+   * Will add subscriptions from this scene extension to the renderer
+   * This will be called by the renderer when building topic and schema subscriptions on
+   * initialization and when imageOnlyMode becomes enabled
+   */
+  public addSubscriptionsToRenderer(): void {}
 
   /**
    * Called when seeking or a new data source is loaded. The base class implementation removes all

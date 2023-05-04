@@ -103,7 +103,10 @@ export class PoseRenderable extends Renderable<PoseUserData> {
 export class Poses extends SceneExtension<PoseRenderable> {
   public constructor(renderer: IRenderer) {
     super("foxglove.Poses", renderer);
+  }
 
+  public override addSubscriptionsToRenderer(): void {
+    const renderer = this.renderer;
     renderer.addSchemaSubscriptions(POSE_STAMPED_DATATYPES, this.#handlePoseStamped);
     renderer.addSchemaSubscriptions(POSE_IN_FRAME_DATATYPES, this.#handlePoseInFrame);
     renderer.addSchemaSubscriptions(

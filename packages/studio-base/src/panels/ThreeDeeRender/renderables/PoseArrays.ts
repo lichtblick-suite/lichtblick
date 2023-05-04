@@ -141,7 +141,10 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
 export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   public constructor(renderer: IRenderer) {
     super("foxglove.PoseArrays", renderer);
+  }
 
+  public override addSubscriptionsToRenderer(): void {
+    const renderer = this.renderer;
     renderer.addSchemaSubscriptions(POSE_ARRAY_DATATYPES, this.#handlePoseArray);
     renderer.addSchemaSubscriptions(POSES_IN_FRAME_DATATYPES, this.#handlePosesInFrame);
     renderer.addSchemaSubscriptions(NAV_PATH_DATATYPES, this.#handleNavPath);

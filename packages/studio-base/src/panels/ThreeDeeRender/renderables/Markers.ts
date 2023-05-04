@@ -36,9 +36,10 @@ const DEFAULT_SETTINGS: LayerSettingsMarker = {
 export class Markers extends SceneExtension<TopicMarkers> {
   public constructor(renderer: IRenderer) {
     super("foxglove.Markers", renderer);
-
-    renderer.addSchemaSubscriptions(MARKER_ARRAY_DATATYPES, this.#handleMarkerArray);
-    renderer.addSchemaSubscriptions(MARKER_DATATYPES, this.#handleMarker);
+  }
+  public override addSubscriptionsToRenderer(): void {
+    this.renderer.addSchemaSubscriptions(MARKER_ARRAY_DATATYPES, this.#handleMarkerArray);
+    this.renderer.addSchemaSubscriptions(MARKER_DATATYPES, this.#handleMarker);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

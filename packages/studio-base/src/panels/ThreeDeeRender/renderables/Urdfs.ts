@@ -154,11 +154,6 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   public constructor(renderer: IRenderer) {
     super("foxglove.Urdfs", renderer);
 
-    renderer.addTopicSubscription(TOPIC_NAME, this.#handleRobotDescription);
-    // Note that this subscription will never happen because it does not appear as a topic in the
-    // topic list that can have its visibility toggled on. The ThreeDeeRender subscription logic
-    // needs to become more flexible to make this possible
-    renderer.addSchemaSubscriptions(JOINTSTATE_DATATYPES, this.#handleJointState);
     renderer.on("parametersChange", this.#handleParametersChange);
     renderer.addCustomLayerAction({
       layerId: LAYER_ID,
@@ -173,6 +168,14 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this.#loadUrdf(instanceId, undefined);
       }
     }
+  }
+
+  public override addSubscriptionsToRenderer(): void {
+    this.renderer.addTopicSubscription(TOPIC_NAME, this.#handleRobotDescription);
+    // Note that this subscription will never happen because it does not appear as a topic in the
+    // topic list that can have its visibility toggled on. The ThreeDeeRender subscription logic
+    // needs to become more flexible to make this possible
+    this.renderer.addSchemaSubscriptions(JOINTSTATE_DATATYPES, this.#handleJointState);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

@@ -129,8 +129,10 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
 
   public constructor(renderer: IRenderer) {
     super("foxglove.VelodyneScans", renderer);
+  }
 
-    renderer.addSchemaSubscriptions(VELODYNE_SCAN_DATATYPES, this.#handleVelodyneScan);
+  public override addSubscriptionsToRenderer(): void {
+    this.renderer.addSchemaSubscriptions(VELODYNE_SCAN_DATATYPES, this.#handleVelodyneScan);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
