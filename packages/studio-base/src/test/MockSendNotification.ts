@@ -26,11 +26,7 @@ let currentHandler: NotificationHandler | undefined = undefined;
 const mockSendNotification = jest.fn<
   void,
   [string, DetailsType, NotificationType, NotificationSeverity]
->((...args) => {
-  if (currentHandler) {
-    currentHandler(...args);
-  }
-});
+>();
 
 const mockSetNotificationHandler = (handler?: NotificationHandler): void => {
   currentHandler = handler;
@@ -50,4 +46,12 @@ const mockSetNotificationHandler = (handler?: NotificationHandler): void => {
     mockSetNotificationHandler();
   };
 
-export { mockSendNotification, mockSetNotificationHandler };
+function setupMockSendNotification(): void {
+  mockSendNotification.mockImplementation((...args) => {
+    if (currentHandler) {
+      currentHandler(...args);
+    }
+  });
+}
+
+export { mockSendNotification, mockSetNotificationHandler, setupMockSendNotification };

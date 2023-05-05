@@ -124,8 +124,12 @@ jest.mock("@foxglove/roslibjs", () => {
   return {
     __esModule: true,
     default: {
-      Ros: jest.fn(() => new MockRosClient()),
-      Topic: jest.fn((arg: { name: string }) => new MockRosTopic(arg)),
+      Ros: function Ros() {
+        return new MockRosClient();
+      },
+      Topic: function Topic(arg: { name: string }) {
+        return new MockRosTopic(arg);
+      },
     },
   };
 });

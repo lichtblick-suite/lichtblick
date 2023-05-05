@@ -16,6 +16,7 @@ import { isEqual } from "lodash";
 
 import { initI18n } from "@foxglove/studio-base/i18n";
 import {
+  setupMockSendNotification,
   mockSendNotification,
   mockSetNotificationHandler,
 } from "@foxglove/studio-base/test/MockSendNotification";
@@ -27,6 +28,9 @@ jest.mock("@foxglove/studio-base/util/sendNotification", () => {
     default: mockSendNotification,
     setNotificationHandler: mockSetNotificationHandler,
   };
+});
+beforeEach(() => {
+  setupMockSendNotification();
 });
 
 // intercept console.error and console.warn calls to fail tests if they are called

@@ -39,11 +39,11 @@ describe("IdbExtensionLoader", () => {
 
   const mockDBGetAll = jest.fn();
 
-  const mockTransaction = jest.fn().mockReturnValue({ db: { put: mockDBPut } });
-
-  (openDB as jest.Mock).mockReturnValue({
-    transaction: mockTransaction,
-    getAll: mockDBGetAll,
+  beforeEach(() => {
+    (openDB as jest.Mock).mockReturnValue({
+      transaction: jest.fn().mockReturnValue({ db: { put: mockDBPut } }),
+      getAll: mockDBGetAll,
+    });
   });
 
   describe("loading extensions", () => {

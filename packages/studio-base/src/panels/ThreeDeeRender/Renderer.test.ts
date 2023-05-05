@@ -3,6 +3,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { setupJestCanvasMock } from "jest-canvas-mock";
+
 import { fromNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
@@ -22,42 +24,46 @@ jest.mock("three", () => {
   const THREE = jest.requireActual("three");
   return {
     ...THREE,
-    WebGLRenderer: jest.fn().mockReturnValue({
-      capabilities: {
-        isWebGL2: true,
-      },
+    WebGLRenderer: function WebGLRenderer() {
+      return {
+        capabilities: {
+          isWebGL2: true,
+        },
 
-      setPixelRatio: jest.fn(),
-      setSize: jest.fn(),
-      render: jest.fn(),
-      clear: jest.fn(),
-      setClearColor: jest.fn(),
-      readRenderTargetPixels: jest.fn(),
-      info: {
-        reset: jest.fn(),
-      },
-      shadowMap: {},
-      dispose: jest.fn(),
-      clearDepth: jest.fn(),
-      getDrawingBufferSize: jest.fn().mockReturnValue({ width: 100, height: 100 }),
-    }),
+        setPixelRatio: jest.fn(),
+        setSize: jest.fn(),
+        render: jest.fn(),
+        clear: jest.fn(),
+        setClearColor: jest.fn(),
+        readRenderTargetPixels: jest.fn(),
+        info: {
+          reset: jest.fn(),
+        },
+        shadowMap: {},
+        dispose: jest.fn(),
+        clearDepth: jest.fn(),
+        getDrawingBufferSize: () => ({ width: 100, height: 100 }),
+      };
+    },
   };
 });
 
-// Copied from: https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
-// mock matchMedia for `Renderer` class in ThreeDeeRender
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: ReactNull,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+beforeEach(() => {
+  // Copied from: https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
+  // mock matchMedia for `Renderer` class in ThreeDeeRender
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: ReactNull,
+      addListener: jest.fn(), // deprecated
+      removeListener: jest.fn(), // deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 });
 
 const defaultRendererConfig: RendererConfig = {
@@ -108,6 +114,7 @@ describe("3D Renderer", () => {
   let parent = document.createElement("div");
   beforeEach(() => {
     jest.clearAllMocks();
+    setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
     parent.appendChild(canvas);
@@ -518,6 +525,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
   let parent = document.createElement("div");
   beforeEach(() => {
     jest.clearAllMocks();
+    setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
     parent.appendChild(canvas);
