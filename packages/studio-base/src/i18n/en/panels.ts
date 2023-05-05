@@ -4,7 +4,7 @@
 
 export const panels = {
   "3D": "3D",
-  newImage: "🚧 Image",
+  newImage: "Image (Beta)",
   "3DPanelDescription": "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
   "3DPanelSettingsOnboardingTooltip": "Open settings to configure topics and layers.",
   dataSourceInfo: "Data Source Info",

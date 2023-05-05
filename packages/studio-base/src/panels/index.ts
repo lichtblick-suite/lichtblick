@@ -53,6 +53,13 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     hasCustomToolbar: true,
   },
   {
+    title: t("newImage"),
+    type: "Image",
+    description: t("imageDescription"),
+    thumbnail: imageViewThumbnail,
+    module: async () => ({ default: (await import("./ThreeDeeRender")).ImagePanel }),
+  },
+  {
     title: t("image"),
     type: "ImageViewPanel",
     description: t("imageDescription"),
@@ -185,9 +192,3 @@ export const getDebug: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     module: async () => await import("./PlaybackPerformance"),
   },
 ];
-
-export const getNewImage: (t: TFunction<"panels">) => PanelInfo = (t) => ({
-  title: t("newImage"),
-  type: "Image",
-  module: async () => ({ default: (await import("./ThreeDeeRender")).ImagePanel }),
-});

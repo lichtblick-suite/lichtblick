@@ -6,7 +6,7 @@ import { TypeOptions } from "i18next";
 
 export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   "3D": "3D",
-  newImage: "🚧 画像",
+  newImage: "画像 (Beta)",
   "3DPanelDescription": "マーカーやカメラ映像、メッシュ、URDFなどを3Dシーンで表示します。",
   "3DPanelSettingsOnboardingTooltip": "設定を開いてトピックやレイヤーを構成します。",
   dataSourceInfo: "データソース情報",

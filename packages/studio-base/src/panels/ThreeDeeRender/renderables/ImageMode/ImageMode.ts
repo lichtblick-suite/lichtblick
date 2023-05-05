@@ -8,7 +8,7 @@ import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
-import { SettingsTreeAction } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import {
   CREATE_BITMAP_ERR_KEY,
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
@@ -306,15 +306,89 @@ export class ImageMode
       this.renderer.settings.errors.errors.errorAtPath(CALIBRATION_TOPIC_PATH);
 
     // Not yet implemented
-    const transformMarkers: boolean = false;
-    const synchronize: boolean = false;
-    const smooth: boolean = false;
-    const flipHorizontal: boolean = false;
-    const flipVertical: boolean = false;
-    const rotation = 0;
-    const minValue: number | undefined = undefined;
-    const maxValue: number | undefined = undefined;
+    // const transformMarkers: boolean = false;
+    // const synchronize: boolean = false;
+    // const smooth: boolean = false;
+    // const flipHorizontal: boolean = false;
+    // const flipVertical: boolean = false;
+    // const rotation = 0;
+    // const minValue: number | undefined = undefined;
+    // const maxValue: number | undefined = undefined;
 
+    const fields: SettingsTreeFields = {};
+    fields.imageTopic = {
+      label: "Topic",
+      input: "select",
+      value: imageTopic,
+      options: imageTopics,
+      error: imageTopicError,
+    };
+    fields.calibrationTopic = {
+      label: "Calibration",
+      input: "select",
+      value: config.imageMode.calibrationTopic,
+      options: calibrationTopics,
+      error: calibrationTopicError,
+    };
+    // fields.TODO_transformMarkers = {
+    //   readonly: true,
+    //   input: "boolean",
+    //   label: "🚧 Transform markers",
+    //   value: transformMarkers,
+    //   help: (transformMarkers as boolean)
+    //     ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
+    //     : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`,
+    // };
+    // fields.TODO_synchronize = {
+    //   readonly: true,
+    //   input: "boolean",
+    //   label: "🚧 Synchronize timestamps",
+    //   value: synchronize,
+    // };
+    // fields.TODO_smooth = {
+    //   readonly: true,
+    //   input: "boolean",
+    //   label: "🚧 Bilinear smoothing",
+    //   value: smooth,
+    // };
+    // fields.TODO_flipHorizontal = {
+    //   readonly: true,
+    //   input: "boolean",
+    //   label: "🚧 Flip horizontal",
+    //   value: flipHorizontal,
+    // };
+    // fields.TODO_flipVertical = {
+    //   readonly: true,
+    //   input: "boolean",
+    //   label: "🚧 Flip vertical",
+    //   value: flipVertical,
+    // };
+    // fields.TODO_rotation = {
+    //   readonly: true,
+    //   input: "select",
+    //   label: "🚧 Rotation",
+    //   value: rotation,
+    //   options: [
+    //     { label: "0°", value: 0 },
+    //     { label: "90°", value: 90 },
+    //     { label: "180°", value: 180 },
+    //     { label: "270°", value: 270 },
+    //   ],
+    // };
+    // fields.TODO_minValue = {
+    //   readonly: true,
+    //   input: "number",
+    //   label: "🚧 Min (depth images)",
+    //   placeholder: "0",
+    //   value: minValue,
+    // };
+    // fields.TODO_maxValue = {
+    //   readonly: true,
+    //   input: "number",
+    //   label: "🚧 Max (depth images)",
+    //   placeholder: "10000",
+    //   value: maxValue,
+    // };
     return [
       {
         path: ["imageMode"],
@@ -322,81 +396,7 @@ export class ImageMode
           label: "General",
           defaultExpansionState: "expanded",
           handler,
-          fields: {
-            imageTopic: {
-              label: "Topic",
-              input: "select",
-              value: imageTopic,
-              options: imageTopics,
-              error: imageTopicError,
-            },
-            calibrationTopic: {
-              label: "Calibration",
-              input: "select",
-              value: config.imageMode.calibrationTopic,
-              options: calibrationTopics,
-              error: calibrationTopicError,
-            },
-            TODO_transformMarkers: {
-              readonly: true, // not yet implemented
-              input: "boolean",
-              label: "🚧 Transform markers",
-              value: transformMarkers,
-              help: (transformMarkers as boolean)
-                ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
-                : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`,
-            },
-            TODO_synchronize: {
-              readonly: true, // not yet implemented
-              input: "boolean",
-              label: "🚧 Synchronize timestamps",
-              value: synchronize,
-            },
-            TODO_smooth: {
-              readonly: true, // not yet implemented
-              input: "boolean",
-              label: "🚧 Bilinear smoothing",
-              value: smooth,
-            },
-            TODO_flipHorizontal: {
-              readonly: true, // not yet implemented
-              input: "boolean",
-              label: "🚧 Flip horizontal",
-              value: flipHorizontal,
-            },
-            TODO_flipVertical: {
-              readonly: true, // not yet implemented
-              input: "boolean",
-              label: "🚧 Flip vertical",
-              value: flipVertical,
-            },
-            TODO_rotation: {
-              readonly: true, // not yet implemented
-              input: "select",
-              label: "🚧 Rotation",
-              value: rotation,
-              options: [
-                { label: "0°", value: 0 },
-                { label: "90°", value: 90 },
-                { label: "180°", value: 180 },
-                { label: "270°", value: 270 },
-              ],
-            },
-            TODO_minValue: {
-              readonly: true, // not yet implemented
-              input: "number",
-              label: "🚧 Min (depth images)",
-              placeholder: "0",
-              value: minValue,
-            },
-            TODO_maxValue: {
-              readonly: true, // not yet implemented
-              input: "number",
-              label: "🚧 Max (depth images)",
-              placeholder: "10000",
-              value: maxValue,
-            },
-          },
+          fields,
         },
       },
       ...this.#annotations.settingsNodes(),

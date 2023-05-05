@@ -40,6 +40,4 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   noExperimentalFeatures: "目前没有实验性的功能。",
   ros2NativeConnection: "ROS 2 的本地连接",
   ros2NativeConnectionDescription: "启用已废弃的 ROS 2 本地连接器",
-  newImagePanel: "新图像面板",
-  newImagePanelDescription: "启用实验性图像面板。",
 };

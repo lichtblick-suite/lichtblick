@@ -41,6 +41,4 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   layoutDebugging: "レイアウトデバッグ",
   layoutDebuggingDescription:
     "レイアウトストレージの開発およびデバッグ用の追加コントロールを表示する。",
-  newImagePanel: "新しいImageパネル",
-  newImagePanelDescription: "実験的なImageパネルを有効にする。",
 };
