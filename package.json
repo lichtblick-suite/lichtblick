@@ -121,7 +121,7 @@
     "typescript": "5.0.4",
     "webpack": "5.79.0",
     "webpack-cli": "5.0.2",
-    "webpack-dev-server": "4.13.2",
+    "webpack-dev-server": "4.13.3",
     "webpack-hot-middleware": "2.25.3"
   },
   "packageManager": "yarn@3.3.1"
