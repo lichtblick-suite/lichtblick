@@ -3,10 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { pick, uniq } from "lodash";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import { createSelector, createSelectorCreator, defaultMemoize } from "reselect";
 import { DeepReadonly } from "ts-essentials";
-import { createStore, StoreApi } from "zustand";
+import { StoreApi, createStore } from "zustand";
 
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@foxglove/studio-base/context/PanelStateContext";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
-function createPanelStateStore(): StoreApi<PanelStateStore> {
+function createPanelStateStore(initialState?: Partial<PanelStateStore>): StoreApi<PanelStateStore> {
   return createStore((set) => {
     return {
       sequenceNumbers: {},
@@ -57,6 +57,8 @@ function createPanelStateStore(): StoreApi<PanelStateStore> {
       updateSharedPanelState: (type: string, data: SharedPanelState) => {
         set((old) => ({ sharedPanelState: { ...old.sharedPanelState, [type]: data } }));
       },
+
+      ...initialState,
     };
   });
 }
@@ -196,8 +198,14 @@ const selectPanelTypesInUse = createSelector(selectLayoutConfigById, (config) =>
   return uniq(Object.keys(config ?? {}).map(getPanelTypeFromId));
 });
 
-export function PanelStateContextProvider({ children }: { children?: ReactNode }): JSX.Element {
-  const [store] = useState(createPanelStateStore());
+type Props = PropsWithChildren<{
+  initialState?: Partial<PanelStateStore>;
+}>;
+
+export function PanelStateContextProvider(props: Props): JSX.Element {
+  const { children, initialState } = props;
+
+  const [store] = useState(() => createPanelStateStore(initialState));
 
   // discared shared panel state for panel types that are no longer in the layout
   const panelTypesInUse = useCurrentLayoutSelector(selectPanelTypesInUse);

@@ -35,7 +35,10 @@ import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContex
 import PanelCatalogContext, {
   PanelCatalog,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { usePanelStateStore } from "@foxglove/studio-base/context/PanelStateContext";
+import {
+  PanelStateStore,
+  usePanelStateStore,
+} from "@foxglove/studio-base/context/PanelStateContext";
 import {
   UserNodeStateProvider,
   useUserNodeState,
@@ -87,6 +90,7 @@ export type Fixture = {
   setPublishers?: (publisherId: string, advertisements: AdvertiseOptions[]) => void;
   setSubscriptions?: ComponentProps<typeof MockMessagePipelineProvider>["setSubscriptions"];
   messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
+  panelState?: Partial<PanelStateStore>;
 };
 
 type UnconnectedProps = {
@@ -356,7 +360,7 @@ export default function PanelSetup(props: Props): JSX.Element {
       <UserNodeStateProvider>
         <TimelineInteractionStateProvider>
           <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
-            <PanelStateContextProvider>
+            <PanelStateContextProvider initialState={props.fixture?.panelState}>
               <ExtensionCatalogProvider
                 loaders={[]}
                 mockMessageConverters={props.fixture?.messageConverters}

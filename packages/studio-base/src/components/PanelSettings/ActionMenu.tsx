@@ -3,18 +3,29 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { IconButton, Menu, MenuItem } from "@mui/material";
+import { IconButton, Menu, MenuItem, SvgIconProps } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
+
+const useStyles = makeStyles()((theme) => ({
+  iconButtonSmall: {
+    padding: theme.spacing(0.91125), // round out the overall height to 30px
+    borderRadius: 0,
+  },
+}));
 
 export function ActionMenu({
   allowShare,
   onReset,
   onShare,
+  fontSize = "medium",
 }: {
   allowShare: boolean;
   onReset: () => void;
   onShare: () => void;
+  fontSize?: SvgIconProps["fontSize"];
 }): JSX.Element {
+  const { classes, cx } = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>();
   const { t } = useTranslation("panelSettings");
   const open = Boolean(anchorEl);
@@ -28,13 +39,14 @@ export function ActionMenu({
   return (
     <div>
       <IconButton
+        className={cx({ [classes.iconButtonSmall]: fontSize === "small" })}
         id="basic-button"
         aria-controls={open ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
       >
-        <MoreVertIcon />
+        <MoreVertIcon fontSize={fontSize} />
       </IconButton>
       <Menu
         id="basic-menu"

@@ -15,9 +15,13 @@ import { StoryObj } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { SettingsTreeNodes } from "@foxglove/studio";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import PanelSettings from ".";
 
@@ -70,6 +74,55 @@ export const PanelSelected: StoryObj = {
               omitDragAndDrop
             >
               <PanelSettings selectedPanelIdsForTests={selectedPanelIds} />
+            </PanelSetup>
+          </MockCurrentLayoutProvider>
+        </DndProvider>
+      </div>
+    );
+  },
+};
+
+export const PanelSelectedWithAppBar: StoryObj = {
+  render: () => {
+    const panelId = "Sample1!abc";
+    const nodes: SettingsTreeNodes = {
+      general: {
+        fields: {
+          numberWithPlaceholder: {
+            input: "number",
+            label: "Number with placeholder",
+            step: 10,
+            placeholder: "3",
+          },
+        },
+      },
+    };
+
+    return (
+      <div style={{ margin: 30, height: 400 }}>
+        <DndProvider backend={HTML5Backend}>
+          <MockCurrentLayoutProvider>
+            <PanelSetup
+              panelCatalog={new MockPanelCatalog()}
+              fixture={{
+                ...fixture,
+                savedProps: { [panelId]: { someKey: "someVal" } },
+                panelState: {
+                  settingsTrees: {
+                    [panelId]: {
+                      actionHandler: () => {},
+                      nodes,
+                    },
+                  },
+                },
+              }}
+              omitDragAndDrop
+            >
+              <AppConfigurationContext.Provider
+                value={makeMockAppConfiguration([[AppSetting.ENABLE_NEW_TOPNAV, true]])}
+              >
+                <PanelSettings selectedPanelIdsForTests={selectedPanelIds} disableToolbar />
+              </AppConfigurationContext.Provider>
             </PanelSetup>
           </MockCurrentLayoutProvider>
         </DndProvider>

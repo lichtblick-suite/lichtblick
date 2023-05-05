@@ -26,6 +26,7 @@ import { filterTreeNodes, prepareSettingsNodes } from "./utils";
 const useStyles = makeStyles()((theme) => ({
   appBar: {
     top: 0,
+    marginRight: 1,
     zIndex: theme.zIndex.appBar,
     padding: theme.spacing(0.5),
     position: "sticky",

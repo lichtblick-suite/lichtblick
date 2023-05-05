@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link, Typography } from "@mui/material";
+import { Divider, Link, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import { useUnmount } from "react-use";
@@ -204,9 +204,24 @@ export default function PanelSettings({
       <Stack gap={2} justifyContent="flex-start" flex="auto">
         <Stack flex="auto">
           {settingsTree && enableNewTopNav && (
-            <Stack padding={0.75}>
-              <Typography variant="subtitle2">{t("panelName", { title })}</Typography>
-            </Stack>
+            <>
+              <Stack
+                paddingLeft={0.75}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Typography variant="subtitle2">{t("panelName", { title })}</Typography>
+                <ActionMenu
+                  key={1}
+                  fontSize="small"
+                  allowShare={panelType !== TAB_PANEL_TYPE}
+                  onReset={resetToDefaults}
+                  onShare={() => setShowShareModal(true)}
+                />
+              </Stack>
+              <Divider />
+            </>
           )}
           {settingsTree || showTitleField ? (
             <SettingsTreeEditor
