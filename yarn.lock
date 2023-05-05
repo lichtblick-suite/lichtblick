@@ -2600,7 +2600,7 @@ __metadata:
     babel-jest: 29.5.0
     babel-plugin-transform-import-meta: 2.2.0
     browserify-zlib: 0.2.0
-    chart.js: 4.2.1
+    chart.js: 4.3.0
     chartjs-plugin-annotation: 2.2.1
     chartjs-plugin-datalabels: 2.2.0
     chromatic: 6.17.3
@@ -8403,21 +8403,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:4.2.1":
-  version: 4.2.1
-  resolution: "chart.js@npm:4.2.1"
+"chart.js@npm:4.3.0":
+  version: 4.3.0
+  resolution: "chart.js@npm:4.3.0"
   dependencies:
     "@kurkle/color": ^0.3.0
-  checksum: 7319fdfd1e29812e87bbc07737e8c9072ff659bbc09ade8dd262f83424cd7e48f89afe5220e11e002c9f236883fae3f3adb8adc16acb4682b0ddcc0b661c3af9
-  languageName: node
-  linkType: hard
-
-"chart.js@patch:chart.js@npm%3A4.2.1#./patches/chart.js-npm-4.2.1-97512b9a29.patch::locator=foxglove-studio%40workspace%3A.":
-  version: 4.2.1
-  resolution: "chart.js@patch:chart.js@npm%3A4.2.1#./patches/chart.js-npm-4.2.1-97512b9a29.patch::version=4.2.1&hash=319ec7&locator=foxglove-studio%40workspace%3A."
-  dependencies:
-    "@kurkle/color": ^0.3.0
-  checksum: 55581fbde48e77269bac8569dd0ef34a297e1559cb35c574e6e1408be29755a89650025c8af96acd2b1a6ca2146964fe24ef66b66cb533300401f6caa07f6f3a
+  checksum: 157ceaa3815665163cb30ccc221a5af40834dca940faa6ec02cb95406bf3e83c15c5f36ad950a1716c9d199e87f7b9be953227c4d9d445d593536175b47bbab8
   languageName: node
   linkType: hard
 

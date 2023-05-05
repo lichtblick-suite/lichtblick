@@ -64,8 +64,7 @@
     "@types/node": "15.3.0",
     "react-dnd": "14.0.2",
     "react-dom": "patch:react-dom@npm:17.0.2#./patches/react-dom.patch",
-    "react-use": "patch:react-use@17.4.0#./patches/react-use.patch",
-    "chart.js@4.2.1": "patch:chart.js@npm%3A4.2.1#./patches/chart.js-npm-4.2.1-97512b9a29.patch"
+    "react-use": "patch:react-use@17.4.0#./patches/react-use.patch"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
