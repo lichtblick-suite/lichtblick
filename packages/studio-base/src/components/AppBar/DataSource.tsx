@@ -116,7 +116,7 @@ export function DataSource(): JSX.Element {
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
     return (
       <ButtonBase className={classes.sourceName} color="inherit" onClick={openDataSourceDialog}>
-        {t("openDataSource")}
+        {t("noDataSource")}
       </ButtonBase>
     );
   }

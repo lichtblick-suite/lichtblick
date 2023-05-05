@@ -7,7 +7,7 @@ import { TypeOptions } from "i18next";
 export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
   about: "关于",
   openConnection: "打开连接……",
-  openDataSource: "打开数据源……",
+  noDataSource: undefined,
   openLocalFile: "打开本地文件……",
   joinOurSlack: "加入我们的 Slack",
   recentDataSources: "最近使用的数据源",

@@ -6,7 +6,7 @@ export const appBar = {
   about: "About",
   openLocalFile: "Open local file…",
   openConnection: "Open connection…",
-  openDataSource: "Open data source…",
+  noDataSource: "No data source",
   joinOurSlack: "Join our Slack",
   recentDataSources: "Recent data sources",
   hideLeftSidebar: "Hide left sidebar",
