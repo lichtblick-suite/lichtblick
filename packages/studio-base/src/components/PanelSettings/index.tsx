@@ -10,6 +10,7 @@ import { useUnmount } from "react-use";
 import { SettingsTree } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { ActionMenu } from "@foxglove/studio-base/components/PanelSettings/ActionMenu";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
@@ -45,6 +46,23 @@ const EMPTY_SETTINGS_TREE: SettingsTree = Object.freeze({
   actionHandler: () => undefined,
   nodes: {},
 });
+
+const EmptyWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { t } = useTranslation("panelSettings");
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+
+  if (enableNewTopNav) {
+    return <EmptyState>{children}</EmptyState>;
+  }
+
+  return (
+    <SidebarContent title={t("panelSettings")}>
+      <Typography variant="body2" color="text.secondary">
+        {children}
+      </Typography>
+    </SidebarContent>
+  );
+};
 
 export default function PanelSettings({
   disableToolbar = false,
@@ -143,34 +161,24 @@ export default function PanelSettings({
 
   if (selectedLayoutId == undefined) {
     return (
-      <SidebarContent disableToolbar={disableToolbar} title={t("panelSettings")}>
-        <Typography color="text.secondary">
-          <Trans
-            t={t}
-            i18nKey="noLayoutSelected"
-            components={{
-              selectLayoutLink: <Link onClick={openLayoutBrowser} />,
-            }}
-          />
-        </Typography>
-      </SidebarContent>
+      <EmptyWrapper>
+        <Trans
+          t={t}
+          i18nKey="noLayoutSelected"
+          components={{
+            selectLayoutLink: <Link variant="inherit" onClick={openLayoutBrowser} />,
+          }}
+        />
+      </EmptyWrapper>
     );
   }
 
   if (selectedPanelId == undefined) {
-    return (
-      <SidebarContent disableToolbar={disableToolbar} title={t("panelSettings")}>
-        <Typography color="text.secondary">{t("selectAPanelToEditItsSettings")}</Typography>
-      </SidebarContent>
-    );
+    return <EmptyWrapper>{t("selectAPanelToEditItsSettings")}</EmptyWrapper>;
   }
 
   if (!config) {
-    return (
-      <SidebarContent disableToolbar={disableToolbar} title={t("panelSettings")}>
-        <Typography color="text.secondary">{t("loadingPanelSettings")}</Typography>
-      </SidebarContent>
-    );
+    return <EmptyWrapper>{t("loadingPanelSettings")}</EmptyWrapper>;
   }
 
   const isSettingsTree = settingsTree != undefined;

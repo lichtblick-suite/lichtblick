@@ -26,6 +26,7 @@ import {
   styled as muiStyled,
 } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
 import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
@@ -89,6 +90,12 @@ type Props = {
   saveConfig: SaveConfig<Config>;
 };
 
+const useStyles = makeStyles()((theme) => ({
+  emptyState: {
+    backgroundColor: theme.palette.background.default,
+  },
+}));
+
 const UnsavedDot = muiStyled("div", {
   shouldForwardProp: (prop) => prop !== "isSaved",
 })<{
@@ -128,8 +135,9 @@ function buildSettingsTree(config: Config): SettingsTreeNodes {
 }
 
 const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) => {
+  const { classes } = useStyles();
   return (
-    <EmptyState>
+    <EmptyState className={classes.emptyState}>
       <Container maxWidth="xs">
         <Stack justifyContent="center" alignItems="center" gap={1} fullHeight>
           <Typography variant="inherit" gutterBottom>

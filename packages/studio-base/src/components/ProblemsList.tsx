@@ -16,6 +16,7 @@ import {
 import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -137,13 +138,7 @@ export function ProblemsList(): JSX.Element {
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
 
   if (playerProblems.length === 0) {
-    return (
-      <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
-        <Typography align="center" color="text.secondary">
-          No problems found
-        </Typography>
-      </Stack>
-    );
+    return <EmptyState>No problems found</EmptyState>;
   }
 
   return (

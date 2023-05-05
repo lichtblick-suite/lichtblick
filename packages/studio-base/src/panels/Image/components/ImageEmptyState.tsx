@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Typography } from "@mui/material";
+import { makeStyles } from "tss-react/mui";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Stack from "@foxglove/studio-base/components/Stack";
 
 type Props = {
   cameraTopic: string;
@@ -13,36 +13,41 @@ type Props = {
   shouldSynchronize: boolean;
 };
 
+const useStyles = makeStyles()({
+  root: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+});
+
 export function ImageEmptyState(props: Props): JSX.Element {
   const { cameraTopic, markerTopics, shouldSynchronize } = props;
+  const { classes } = useStyles();
 
   if (cameraTopic === "") {
-    return (
-      <Stack fullHeight fullWidth justifyContent="center" alignItems="center" position="absolute">
-        <EmptyState>Select a topic to view images</EmptyState>
-      </Stack>
-    );
+    return <EmptyState className={classes.root}>Select a topic to view images</EmptyState>;
   }
   return (
-    <Stack fullHeight fullWidth justifyContent="center" alignItems="center" position="absolute">
-      <EmptyState>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Waiting for images {markerTopics.length > 0 && "and markers"} on:
+    <EmptyState className={classes.root}>
+      <Typography variant="inherit" gutterBottom>
+        Waiting for images {markerTopics.length > 0 && "and markers"} on:
+      </Typography>
+      <Typography component="code" variant="inherit" display="block">
+        {cameraTopic}
+      </Typography>
+      {[...markerTopics].sort().map((topic) => (
+        <Typography key={topic} component="code" variant="inherit" display="block">
+          {topic}
         </Typography>
-        <Typography component="code" variant="inherit" display="block">
-          {cameraTopic}
+      ))}
+      {shouldSynchronize && (
+        <Typography variant="inherit">
+          Synchronization is enabled, so all messages must have the same timestamp.
         </Typography>
-        {[...markerTopics].sort().map((topic) => (
-          <Typography key={topic} component="code" variant="inherit" display="block">
-            {topic}
-          </Typography>
-        ))}
-        {shouldSynchronize && (
-          <Typography variant="body2" color="text.secondary">
-            Synchronization is enabled, so all messages must have the same timestamp.
-          </Typography>
-        )}
-      </EmptyState>
-    </Stack>
+      )}
+    </EmptyState>
   );
 }
