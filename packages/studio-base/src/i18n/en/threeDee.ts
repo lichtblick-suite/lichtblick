@@ -75,4 +75,5 @@ export const threeDee = {
 
   // Image annotations
   imageAnnotations: "Image annotations",
+  resetView: "Reset view",
 };

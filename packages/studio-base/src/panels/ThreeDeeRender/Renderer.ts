@@ -337,6 +337,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           },
         });
         this.cameraHandler = this.#imageModeExtension;
+        this.#imageModeExtension.addEventListener("hasModifiedViewChanged", () => {
+          this.emit("resetViewChanged", this);
+        });
         this.#addSceneExtension(this.cameraHandler);
         break;
       case "3d":
@@ -842,6 +845,15 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   public getCameraState(): CameraState | undefined {
     return this.cameraHandler.getCameraState();
+  }
+
+  public canResetView(): boolean {
+    return this.#imageModeExtension?.hasModifiedView() ?? false;
+  }
+
+  public resetView(): void {
+    this.#imageModeExtension?.resetViewModifications();
+    this.queueAnimationFrame();
   }
 
   public setSelectedRenderable(selection: PickedRenderable | undefined): void {

@@ -35,6 +35,11 @@ export type InputEvents = {
     worldSpaceCursorCoords: THREE.Vector3 | undefined,
     event: MouseEvent,
   ) => void;
+  wheel: (
+    cursorCoords: THREE.Vector2,
+    worldSpaceCursorCoords: THREE.Vector3 | undefined,
+    event: WheelEvent,
+  ) => void;
   keydown: (key: Key, event: KeyboardEvent) => void;
 };
 
@@ -70,6 +75,7 @@ export class Input extends EventEmitter<InputEvents> {
     canvas.addEventListener("mousemove", this.#onMouseMove);
     canvas.addEventListener("mouseup", this.#onMouseUp);
     canvas.addEventListener("click", this.#onClick);
+    canvas.addEventListener("wheel", this.#onWheel);
     canvas.addEventListener("touchstart", this.#onTouchStart, { passive: false });
     canvas.addEventListener("touchend", this.#onTouchEnd, { passive: false });
     canvas.addEventListener("touchmove", this.#onTouchMove, { passive: false });
@@ -86,10 +92,31 @@ export class Input extends EventEmitter<InputEvents> {
     canvas.removeEventListener("mousemove", this.#onMouseMove);
     canvas.removeEventListener("mouseup", this.#onMouseUp);
     canvas.removeEventListener("click", this.#onClick);
+    canvas.removeEventListener("wheel", this.#onWheel);
     canvas.removeEventListener("touchstart", this.#onTouchStart);
     canvas.removeEventListener("touchend", this.#onTouchEnd);
     canvas.removeEventListener("touchmove", this.#onTouchMove);
     canvas.removeEventListener("touchcancel", this.#onTouchCancel);
+  }
+
+  /**
+   * Call this from mousedown to activate event tracking for a drag. mousemove events will be
+   * handled on the window and `onUpdate()` will be called until mouseup occurs.
+   */
+  public trackDrag(onUpdate: (cursorCoords: THREE.Vector2) => void): void {
+    const listener = (event: MouseEvent) => {
+      event.preventDefault();
+      this.#updateCursorCoords(event);
+      onUpdate(this.#cursorCoords);
+    };
+    window.addEventListener("mousemove", listener);
+    window.addEventListener(
+      "mouseup",
+      () => {
+        window.removeEventListener("mousemove", listener);
+      },
+      { once: true },
+    );
   }
 
   #onResize = (_entries: ResizeObserverEntry[]): void => {
@@ -138,6 +165,11 @@ export class Input extends EventEmitter<InputEvents> {
     this.emit("click", this.#cursorCoords, this.#worldSpaceCursorCoords, event);
   };
 
+  #onWheel = (event: WheelEvent): void => {
+    this.#updateCursorCoords(event);
+    this.emit("wheel", this.#cursorCoords, this.#worldSpaceCursorCoords, event);
+  };
+
   #onTouchStart = (event: TouchEvent): void => {
     const touch = event.touches[0];
     if (touch) {
@@ -159,14 +191,18 @@ export class Input extends EventEmitter<InputEvents> {
   };
 
   #updateCursorCoords(event: MouseEvent): void {
-    this.#cursorCoords.x = event.offsetX;
-    this.#cursorCoords.y = event.offsetY;
+    const canvasRect = this.#canvas.getBoundingClientRect();
+    const offsetX = event.clientX - canvasRect.left;
+    const offsetY = event.clientY - canvasRect.top;
+
+    this.#cursorCoords.x = offsetX;
+    this.#cursorCoords.y = offsetY;
 
     this.#raycaster.setFromCamera(
       // Cursor position in NDC
       tempVec2.set(
-        (event.offsetX / this.canvasSize.width) * 2 - 1,
-        -((event.offsetY / this.canvasSize.height) * 2 - 1),
+        (offsetX / this.canvasSize.width) * 2 - 1,
+        -((offsetY / this.canvasSize.height) * 2 - 1),
       ),
       this.getCamera(),
     );

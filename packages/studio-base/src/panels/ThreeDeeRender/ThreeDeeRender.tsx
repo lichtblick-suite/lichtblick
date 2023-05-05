@@ -2,23 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Ruler24Filled } from "@fluentui/react-icons";
-import {
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Paper,
-  useTheme,
-} from "@mui/material";
 import { Immutable } from "immer";
 import { cloneDeep, isEqual, merge } from "lodash";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { useLatest, useLongPress } from "react-use";
+import { useLatest } from "react-use";
 import { DeepPartial } from "ts-essentials";
-import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
@@ -36,11 +25,7 @@ import {
   VariableValue,
 } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import PublishGoalIcon from "@foxglove/studio-base/components/PublishGoalIcon";
-import PublishPointIcon from "@foxglove/studio-base/components/PublishPointIcon";
-import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPoseEstimateIcon";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import type {
   RendererConfig,
@@ -50,13 +35,12 @@ import type {
   IRenderer,
   ImageModeConfig,
 } from "./IRenderer";
-import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
-import { Renderable, SELECTED_ID_VARIABLE } from "./Renderable";
+import { SELECTED_ID_VARIABLE } from "./Renderable";
 import { LegacyImageConfig, Renderer } from "./Renderer";
-import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
-import { Stats } from "./Stats";
-import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
+import { RendererContext, useRendererEvent } from "./RendererContext";
+import { RendererOverlay } from "./RendererOverlay";
+import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
 import {
   makePointMessage,
   makePoseEstimateMessage,
@@ -65,7 +49,7 @@ import {
   PublishRos2Datatypes,
 } from "./publish";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
-import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
+import { PublishClickEvent } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
 import { InterfaceMode } from "./types";
 
@@ -83,286 +67,6 @@ const PANEL_STYLE: React.CSSProperties = {
   display: "flex",
   position: "relative",
 };
-
-const PublishClickIcons: Record<PublishClickType, React.ReactNode> = {
-  pose: <PublishGoalIcon fontSize="inherit" />,
-  point: <PublishPointIcon fontSize="inherit" />,
-  pose_estimate: <PublishPoseEstimateIcon fontSize="inherit" />,
-};
-
-const useStyles = makeStyles()((theme) => ({
-  iconButton: {
-    position: "relative",
-    fontSize: "1rem !important",
-    pointerEvents: "auto",
-    aspectRatio: "1",
-
-    "& svg:not(.MuiSvgIcon-root)": {
-      fontSize: "1rem !important",
-    },
-  },
-  rulerIcon: {
-    transform: "rotate(45deg)",
-  },
-  threeDeeButton: {
-    fontFamily: fonts.MONOSPACE,
-    fontFeatureSettings: theme.typography.caption.fontFeatureSettings,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: theme.typography.fontWeightBold,
-    lineHeight: "1em",
-  },
-}));
-
-/**
- * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
- */
-function RendererOverlay(props: {
-  interfaceMode: InterfaceMode;
-  canvas: HTMLCanvasElement | ReactNull;
-  addPanel: LayoutActions["addPanel"];
-  enableStats: boolean;
-  perspective: boolean;
-  onTogglePerspective: () => void;
-  measureActive: boolean;
-  onClickMeasure: () => void;
-  canPublish: boolean;
-  publishActive: boolean;
-  publishClickType: PublishClickType;
-  onChangePublishClickType: (_: PublishClickType) => void;
-  onClickPublish: () => void;
-  timezone: string | undefined;
-}): JSX.Element {
-  const { classes } = useStyles();
-  const [clickedPosition, setClickedPosition] = useState<{ clientX: number; clientY: number }>({
-    clientX: 0,
-    clientY: 0,
-  });
-  const [selectedRenderables, setSelectedRenderables] = useState<PickedRenderable[]>([]);
-  const [selectedRenderable, setSelectedRenderable] = useState<PickedRenderable | undefined>(
-    undefined,
-  );
-  const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
-  const renderer = useRenderer();
-
-  // Toggle object selection mode on/off in the renderer
-  useEffect(() => {
-    if (renderer) {
-      renderer.setPickingEnabled(interactionsTabType != undefined);
-    }
-  }, [interactionsTabType, renderer]);
-
-  useRendererEvent("renderablesClicked", (selections, cursorCoords) => {
-    const rect = props.canvas!.getBoundingClientRect();
-    setClickedPosition({ clientX: rect.left + cursorCoords.x, clientY: rect.top + cursorCoords.y });
-    setSelectedRenderables(selections);
-    setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
-  });
-
-  const stats = props.enableStats ? (
-    <div id="stats" style={{ position: "absolute", top: "10px", left: "10px" }}>
-      <Stats />
-    </div>
-  ) : undefined;
-
-  // Convert the list of selected renderables (if any) into MouseEventObjects
-  // that can be passed to <InteractionContextMenu>, which shows a context menu
-  // of candidate objects to select
-  const clickedObjects = useMemo<MouseEventObject[]>(
-    () =>
-      selectedRenderables.map((selection) => ({
-        object: {
-          pose: selection.renderable.pose,
-          scale: selection.renderable.scale,
-          color: undefined,
-          interactionData: {
-            topic: selection.renderable.name,
-            highlighted: undefined,
-            renderable: selection.renderable,
-          },
-        },
-        instanceIndex: selection.instanceIndex,
-      })),
-    [selectedRenderables],
-  );
-
-  // Once a single renderable is selected, convert it to the SelectionObject
-  // format to populate the object inspection dialog (<Interactions>)
-  const selectedObject = useMemo<SelectionObject | undefined>(
-    () =>
-      selectedRenderable
-        ? {
-            object: {
-              pose: selectedRenderable.renderable.pose,
-              interactionData: {
-                topic: selectedRenderable.renderable.topic,
-                highlighted: true,
-                originalMessage: selectedRenderable.renderable.details(),
-                instanceDetails:
-                  selectedRenderable.instanceIndex != undefined
-                    ? selectedRenderable.renderable.instanceDetails(
-                        selectedRenderable.instanceIndex,
-                      )
-                    : undefined,
-              },
-            },
-            instanceIndex: selectedRenderable.instanceIndex,
-          }
-        : undefined,
-    [selectedRenderable],
-  );
-
-  // Inform the Renderer when a renderable is selected
-  useEffect(() => {
-    renderer?.setSelectedRenderable(selectedRenderable);
-  }, [renderer, selectedRenderable]);
-
-  const publickClickButtonRef = useRef<HTMLButtonElement>(ReactNull);
-  const [publishMenuExpanded, setPublishMenuExpanded] = useState(false);
-  const selectedPublishClickIcon = PublishClickIcons[props.publishClickType];
-
-  const onLongPressPublish = useCallback(() => {
-    setPublishMenuExpanded(true);
-  }, []);
-  const longPressPublishEvent = useLongPress(onLongPressPublish);
-
-  const theme = useTheme();
-
-  // Publish control is only available if the canPublish prop is true and we have a fixed frame in the renderer
-  const showPublishControl =
-    props.interfaceMode === "3d" && props.canPublish && renderer?.fixedFrameId != undefined;
-  const publishControls = showPublishControl && (
-    <>
-      <IconButton
-        {...longPressPublishEvent}
-        color={props.publishActive ? "info" : "inherit"}
-        title={props.publishActive ? "Click to cancel" : "Click to publish"}
-        ref={publickClickButtonRef}
-        onClick={props.onClickPublish}
-        data-testid="publish-button"
-        style={{ fontSize: "1rem", pointerEvents: "auto" }}
-      >
-        {selectedPublishClickIcon}
-        <div
-          style={{
-            borderBottom: "6px solid currentColor",
-            borderRight: "6px solid transparent",
-            bottom: 0,
-            left: 0,
-            height: 0,
-            width: 0,
-            margin: theme.spacing(0.25),
-            position: "absolute",
-          }}
-        />
-      </IconButton>
-      <Menu
-        id="publish-menu"
-        anchorEl={publickClickButtonRef.current}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        open={publishMenuExpanded}
-        onClose={() => setPublishMenuExpanded(false)}
-      >
-        <MenuItem
-          selected={props.publishClickType === "pose_estimate"}
-          onClick={() => {
-            props.onChangePublishClickType("pose_estimate");
-            setPublishMenuExpanded(false);
-          }}
-        >
-          <ListItemIcon>{PublishClickIcons.pose_estimate}</ListItemIcon>
-          <ListItemText>Publish pose estimate</ListItemText>
-        </MenuItem>
-        <MenuItem
-          selected={props.publishClickType === "pose"}
-          onClick={() => {
-            props.onChangePublishClickType("pose");
-            setPublishMenuExpanded(false);
-          }}
-        >
-          <ListItemIcon>{PublishClickIcons.pose}</ListItemIcon>
-          <ListItemText>Publish pose</ListItemText>
-        </MenuItem>
-        <MenuItem
-          selected={props.publishClickType === "point"}
-          onClick={() => {
-            props.onChangePublishClickType("point");
-            setPublishMenuExpanded(false);
-          }}
-        >
-          <ListItemIcon>{PublishClickIcons.point}</ListItemIcon>
-          <ListItemText>Publish point</ListItemText>
-        </MenuItem>
-      </Menu>
-    </>
-  );
-
-  return (
-    <React.Fragment>
-      <div
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: 10,
-          pointerEvents: "none",
-        }}
-      >
-        <Interactions
-          addPanel={props.addPanel}
-          selectedObject={selectedObject}
-          interactionsTabType={interactionsTabType}
-          setInteractionsTabType={setInteractionsTabType}
-          timezone={props.timezone}
-        />
-        {props.interfaceMode === "3d" && (
-          <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
-            <IconButton
-              className={classes.iconButton}
-              color={props.perspective ? "info" : "inherit"}
-              title={props.perspective ? "Switch to 2D camera" : "Switch to 3D camera"}
-              onClick={props.onTogglePerspective}
-            >
-              <span className={classes.threeDeeButton}>3D</span>
-            </IconButton>
-            <IconButton
-              data-testid="measure-button"
-              className={classes.iconButton}
-              color={props.measureActive ? "info" : "inherit"}
-              title={props.measureActive ? "Cancel measuring" : "Measure distance"}
-              onClick={props.onClickMeasure}
-            >
-              <Ruler24Filled className={classes.rulerIcon} />
-            </IconButton>
-
-            {publishControls}
-          </Paper>
-        )}
-      </div>
-      {clickedObjects.length > 1 && !selectedObject && (
-        <InteractionContextMenu
-          onClose={() => setSelectedRenderables([])}
-          clickedPosition={clickedPosition}
-          clickedObjects={clickedObjects}
-          selectObject={(selection) => {
-            if (selection) {
-              const renderable = (
-                selection.object as unknown as { interactionData: { renderable: Renderable } }
-              ).interactionData.renderable;
-              const instanceIndex = selection.instanceIndex;
-              setSelectedRenderables([]);
-              setSelectedRenderable({ renderable, instanceIndex });
-            }
-          }}
-        />
-      )}
-      {stats}
-    </React.Fragment>
-  );
-}
 
 function useRendererProperty<K extends keyof IRenderer>(
   renderer: IRenderer | undefined,

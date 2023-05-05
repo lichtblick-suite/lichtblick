@@ -19,8 +19,42 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
   #aspectZoom = new THREE.Vector2();
   #canvasSize = new THREE.Vector2();
 
+  /** Amount the user has panned, measured in screen pixels */
+  #panOffset = new THREE.Vector2(0, 0);
+  /** Amount the user has zoomed with the scroll wheel */
+  #userZoom = 1;
+
   public updateCamera(cameraModel: PinholeCameraModel | undefined): void {
     this.#model = cameraModel;
+    this.#updateProjection();
+  }
+
+  public setPanOffset(offset: THREE.Vector2): void {
+    this.#panOffset.copy(offset);
+    this.#updateProjection();
+  }
+
+  public getPanOffset(out: THREE.Vector2): void {
+    out.copy(this.#panOffset);
+  }
+
+  public resetModifications(): void {
+    this.#panOffset.set(0, 0);
+    this.#userZoom = 1;
+    this.#updateProjection();
+  }
+
+  public updateZoomFromWheel(ratio: number, cursorCoords: THREE.Vector2): void {
+    const newZoom = THREE.MathUtils.clamp(this.#userZoom * ratio, 0.5, 50);
+    const finalRatio = newZoom / this.#userZoom;
+    const halfWidth = this.#canvasSize.width / 2;
+    const halfHeight = this.#canvasSize.height / 2;
+    // Adjust pan offset so the zoom is centered around the mouse location
+    this.#panOffset.set(
+      (halfWidth + this.#panOffset.x - cursorCoords.x) * finalRatio - halfWidth + cursorCoords.x,
+      (halfHeight + this.#panOffset.y - cursorCoords.y) * finalRatio - halfHeight + cursorCoords.y,
+    );
+    this.#userZoom = newZoom;
     this.#updateProjection();
   }
 
@@ -53,8 +87,9 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
     const fy = model.P[5];
     // (cx, cy) image center in pixel coordinates
     // for panning we can take offsets from this in pixel coordinates
-    const cx = model.P[2];
-    const cy = model.P[6];
+    const scale = this.getEffectiveScale();
+    const cx = model.P[2] + this.#panOffset.x / scale;
+    const cy = model.P[6] + this.#panOffset.y / scale;
     const { width, height } = model;
 
     const zoom = this.#aspectZoom;
@@ -101,7 +136,7 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
       return;
     }
     // Adapted from https://github.com/ros2/rviz/blob/ee44ccde8a7049073fd1901dd36c1fb69110f726/rviz_default_plugins/src/rviz_default_plugins/displays/camera/camera_display.cpp#L568
-    this.#aspectZoom.set(1.0, 1.0);
+    this.#aspectZoom.set(this.#userZoom, this.#userZoom);
 
     const { width: imgWidth, height: imgHeight } = model;
 

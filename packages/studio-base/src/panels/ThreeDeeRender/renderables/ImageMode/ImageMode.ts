@@ -64,7 +64,12 @@ const CAMERA_MODEL = "CameraModel";
 const DEFAULT_FOCAL_LENGTH = 500;
 const DEFAULT_IMAGE_WIDTH = 512;
 
-export class ImageMode extends SceneExtension<ImageRenderable> implements ICameraHandler {
+type ImageModeEvent = { type: "hasModifiedViewChanged" };
+
+export class ImageMode
+  extends SceneExtension<ImageRenderable, ImageModeEvent>
+  implements ICameraHandler
+{
   #camera: ImageModeCamera;
   #cameraModel:
     | {
@@ -76,6 +81,10 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
   #annotations: ImageAnnotations;
 
   #imageRenderable: ImageRenderable | undefined;
+
+  #dragStartPanOffset = new THREE.Vector2();
+  #dragStartMouseCoords = new THREE.Vector2();
+  #hasModifiedView = false;
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   #setHasCalibrationTopic: (hasCalibrationTopic: boolean) => void;
@@ -131,6 +140,46 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
       labelPool: renderer.labelPool,
     });
     this.add(this.#annotations);
+
+    renderer.input.on("mousedown", (mouseDownCursorCoords) => {
+      this.#camera.getPanOffset(this.#dragStartPanOffset);
+      this.#dragStartMouseCoords.copy(mouseDownCursorCoords);
+
+      renderer.input.trackDrag((mouseMoveCursorCoords) => {
+        this.#camera.setPanOffset(
+          mouseMoveCursorCoords
+            .clone()
+            .sub(this.#dragStartMouseCoords)
+            .add(this.#dragStartPanOffset),
+        );
+        this.#hasModifiedView = true;
+        this.dispatchEvent({ type: "hasModifiedViewChanged" });
+        this.renderer.queueAnimationFrame();
+      });
+    });
+
+    renderer.input.on("wheel", (cursorCoords, _worldSpaceCursorCoords, event) => {
+      this.#camera.updateZoomFromWheel(
+        // Clamp wheel deltas which can vary wildly across different operating systems, browsers, and input devices.
+        1 - 0.01 * THREE.MathUtils.clamp(event.deltaY, -30, 30),
+        cursorCoords,
+      );
+      this.#updateAnnotationsScale();
+      this.#hasModifiedView = true;
+      this.dispatchEvent({ type: "hasModifiedViewChanged" });
+      this.renderer.queueAnimationFrame();
+    });
+  }
+
+  public hasModifiedView(): boolean {
+    return this.#hasModifiedView;
+  }
+
+  public resetViewModifications(): void {
+    this.#hasModifiedView = false;
+    this.#camera.resetModifications();
+    this.#updateAnnotationsScale();
+    this.dispatchEvent({ type: "hasModifiedViewChanged" });
   }
 
   public override addSubscriptionsToRenderer(): void {
@@ -601,12 +650,7 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
     this.renderer.followFrameId = this.#getCurrentFrameId();
     if (this.#cameraModel?.model) {
       this.#camera.updateCamera(this.#cameraModel.model);
-      this.#annotations.updateScale(
-        this.#camera.getEffectiveScale(),
-        this.renderer.input.canvasSize.width,
-        this.renderer.input.canvasSize.height,
-        this.renderer.getPixelRatio(),
-      );
+      this.#updateAnnotationsScale();
       const imageRenderable = this.#imageRenderable;
       if (imageRenderable) {
         imageRenderable.userData.cameraInfo = this.#cameraModel.info;
@@ -659,9 +703,18 @@ export class ImageMode extends SceneExtension<ImageRenderable> implements ICamer
     return this.#camera;
   }
 
-  public handleResize(width: number, height: number, pixelRatio: number): void {
+  public handleResize(width: number, height: number, _pixelRatio: number): void {
     this.#camera.setCanvasSize(width, height);
-    this.#annotations.updateScale(this.#camera.getEffectiveScale(), width, height, pixelRatio);
+    this.#updateAnnotationsScale();
+  }
+
+  #updateAnnotationsScale(): void {
+    this.#annotations.updateScale(
+      this.#camera.getEffectiveScale(),
+      this.renderer.input.canvasSize.width,
+      this.renderer.input.canvasSize.height,
+      this.renderer.getPixelRatio(),
+    );
   }
 
   public setCameraState(): void {
