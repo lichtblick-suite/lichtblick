@@ -4,10 +4,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { render, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import Panel from "@foxglove/studio-base/components/Panel";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
@@ -15,6 +17,7 @@ import PanelCatalogContext, {
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import { UnconnectedPanelLayout } from "./PanelLayout";
 
@@ -63,16 +66,20 @@ describe("UnconnectedPanelLayout", () => {
       />,
       {
         wrapper: function Wrapper({ children }: React.PropsWithChildren<unknown>) {
+          const [config] = useState(() => makeMockAppConfiguration());
+
           return (
             <DndProvider backend={HTML5Backend}>
               <WorkspaceContextProvider>
-                <MockCurrentLayoutProvider>
-                  <PanelStateContextProvider>
-                    <PanelCatalogContext.Provider value={panelCatalog}>
-                      {children}
-                    </PanelCatalogContext.Provider>
-                  </PanelStateContextProvider>
-                </MockCurrentLayoutProvider>
+                <AppConfigurationContext.Provider value={config}>
+                  <MockCurrentLayoutProvider>
+                    <PanelStateContextProvider>
+                      <PanelCatalogContext.Provider value={panelCatalog}>
+                        {children}
+                      </PanelCatalogContext.Provider>
+                    </PanelStateContextProvider>
+                  </MockCurrentLayoutProvider>
+                </AppConfigurationContext.Provider>
               </WorkspaceContextProvider>
             </DndProvider>
           );
