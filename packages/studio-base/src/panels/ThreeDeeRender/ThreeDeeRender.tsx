@@ -603,6 +603,13 @@ export function ThreeDeeRender(props: {
   );
   useEffect(() => throttledSave(config), [config, throttledSave]);
 
+  // Keep default panel title up to date with selected image topic in image mode
+  useEffect(() => {
+    if (interfaceMode === "image") {
+      context.setDefaultPanelTitle(config.imageMode.imageTopic);
+    }
+  }, [interfaceMode, context, config.imageMode.imageTopic]);
+
   // Establish a connection to the message pipeline with context.watch and context.onRender
   useLayoutEffect(() => {
     context.onRender = (renderState: RenderState, done) => {
