@@ -101,7 +101,7 @@
     "cytoscape": "3.24.0",
     "cytoscape-dagre": "2.5.0",
     "esbuild-loader": "2.21.0",
-    "eventemitter3": "5.0.0",
+    "eventemitter3": "5.0.1",
     "fake-indexeddb": "4.0.1",
     "fetch-mock": "9.11.0",
     "fork-ts-checker-webpack-plugin": "8.0.0",
