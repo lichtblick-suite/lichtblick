@@ -1706,16 +1706,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/cache@npm:*, @emotion/cache@npm:11.10.7, @emotion/cache@npm:^11.10.5, @emotion/cache@npm:^11.10.7":
-  version: 11.10.7
-  resolution: "@emotion/cache@npm:11.10.7"
+"@emotion/cache@npm:*, @emotion/cache@npm:11.10.8, @emotion/cache@npm:^11.10.5, @emotion/cache@npm:^11.10.7":
+  version: 11.10.8
+  resolution: "@emotion/cache@npm:11.10.8"
   dependencies:
     "@emotion/memoize": ^0.8.0
     "@emotion/sheet": ^1.2.1
     "@emotion/utils": ^1.2.0
     "@emotion/weak-memoize": ^0.3.0
-    stylis: 4.1.3
-  checksum: 6b1efed2dffc93dac419409d91f6d57a200d858ec5ffa4b7c30080fdbd93db431ff86bb779c5b8830b8373f3c5dd754d9beb386604ed2667c7d55608ff653dfc
+    stylis: 4.1.4
+  checksum: a67751db54077813ee3a011f255ee5c79eb375284cec8404866d44da904d69b037566047ca52549772b8038f8cd00ebd092c628ddc764fe89d6932c16afd71e3
   languageName: node
   linkType: hard
 
@@ -2523,7 +2523,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-base@workspace:packages/studio-base"
   dependencies:
-    "@emotion/cache": 11.10.7
+    "@emotion/cache": 11.10.8
     "@emotion/react": 11.10.6
     "@emotion/styled": 11.10.6
     "@fluentui/react-icons": 2.0.201
@@ -19683,10 +19683,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stylis@npm:4.1.3, stylis@npm:^4.0.13, stylis@npm:^4.0.6":
+"stylis@npm:4.1.3":
   version: 4.1.3
   resolution: "stylis@npm:4.1.3"
   checksum: d04dbffcb9bf2c5ca8d8dc09534203c75df3bf711d33973ea22038a99cc475412a350b661ebd99cbc01daa50d7eedcf0d130d121800eb7318759a197023442a6
+  languageName: node
+  linkType: hard
+
+"stylis@npm:4.1.4, stylis@npm:^4.0.13, stylis@npm:^4.0.6":
+  version: 4.1.4
+  resolution: "stylis@npm:4.1.4"
+  checksum: cd929bd89709def13b47e6c16b11317bf996a09b4e987fc45a235549c3adf49d41531e017d7df511daa095bc9468c923ae9094a934fe9c62440b7351874dafb7
   languageName: node
   linkType: hard
 
