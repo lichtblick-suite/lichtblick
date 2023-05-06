@@ -2685,7 +2685,7 @@ __metadata:
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
     webpack: 5.79.0
-    zustand: 4.3.7
+    zustand: 4.3.8
   languageName: unknown
   linkType: soft
 
@@ -21729,9 +21729,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:4.3.7":
-  version: 4.3.7
-  resolution: "zustand@npm:4.3.7"
+"zustand@npm:4.3.8":
+  version: 4.3.8
+  resolution: "zustand@npm:4.3.8"
   dependencies:
     use-sync-external-store: 1.2.0
   peerDependencies:
@@ -21742,7 +21742,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 355b414ba4830b6106bcb888077c5f90f40ed649e4127e337eff4fb4ea90e88bf5cccf32344711d743cb92a676a0643a6ab3674ddc60ed49f17ea1bc8e3f58e2
+  checksum: 24db6bf063ce1fc8b2ee238f13211a88f43236541a716e5f6f706f613c671a45332465f9ed06d694f8c353da3d24c53ea668e5712a86aceda9ad74f6c433e8c0
   languageName: node
   linkType: hard
 

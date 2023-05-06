@@ -176,6 +176,6 @@
     "use-pan-and-zoom": "0.6.5",
     "uuid": "9.0.0",
     "webpack": "5.79.0",
-    "zustand": "4.3.7"
+    "zustand": "4.3.8"
   }
 }
