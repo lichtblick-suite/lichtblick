@@ -2603,7 +2603,7 @@ __metadata:
     chart.js: 4.3.0
     chartjs-plugin-annotation: 2.2.1
     chartjs-plugin-datalabels: 2.2.0
-    chromatic: 6.17.3
+    chromatic: 6.17.4
     comlink: 4.4.1
     crypto-browserify: 3.12.0
     css-loader: 6.7.3
@@ -7932,7 +7932,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"braces@npm:^3.0.1, braces@npm:~3.0.2":
+"braces@npm:^3.0.2, braces@npm:~3.0.2":
   version: 3.0.2
   resolution: "braces@npm:3.0.2"
   dependencies:
@@ -8463,18 +8463,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.17.3":
-  version: 6.17.3
-  resolution: "chromatic@npm:6.17.3"
+"chromatic@npm:6.17.4":
+  version: 6.17.4
+  resolution: "chromatic@npm:6.17.4"
   dependencies:
     "@discoveryjs/json-ext": ^0.5.7
     "@types/webpack-env": ^1.17.0
-    snyk-nodejs-lockfile-parser: ^1.47.4
+    snyk-nodejs-lockfile-parser: ^1.49.0
   bin:
     chroma: bin/main.cjs
     chromatic: bin/main.cjs
     chromatic-cli: bin/main.cjs
-  checksum: 4ac84633a15993302c1d82a49d76adb7622f79c76ed2282960816a99f82263c115ffb4a7c86d61047f07b5d4d252515a3433481732b0e87af4be6c33e29f381f
+  checksum: d49ebcc17f2f3010e95d06b5084b7802d293a4ad3cd571dc5b744f5e90763a19b643729fc3dcfe86beb44b6f542800378c7a4c1478b963d3adbdc58a1bfa9988
   languageName: node
   linkType: hard
 
@@ -15386,13 +15386,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"micromatch@npm:^4.0.0, micromatch@npm:^4.0.2, micromatch@npm:^4.0.4":
-  version: 4.0.4
-  resolution: "micromatch@npm:4.0.4"
+"micromatch@npm:^4.0.0, micromatch@npm:^4.0.2, micromatch@npm:^4.0.4, micromatch@npm:^4.0.5":
+  version: 4.0.5
+  resolution: "micromatch@npm:4.0.5"
   dependencies:
-    braces: ^3.0.1
-    picomatch: ^2.2.3
-  checksum: ef3d1c88e79e0a68b0e94a03137676f3324ac18a908c245a9e5936f838079fcc108ac7170a5fadc265a9c2596963462e402841406bda1a4bb7b68805601d631c
+    braces: ^3.0.2
+    picomatch: ^2.3.1
+  checksum: 02a17b671c06e8fefeeb6ef996119c1e597c942e632a21ef589154f23898c9c6a9858526246abb14f8bca6e77734aa9dcf65476fca47cedfb80d9577d52843fc
   languageName: node
   linkType: hard
 
@@ -16735,10 +16735,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"picomatch@npm:^2.0.4, picomatch@npm:^2.2.1, picomatch@npm:^2.2.3, picomatch@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "picomatch@npm:2.3.0"
-  checksum: 16818720ea7c5872b6af110760dee856c8e4cd79aed1c7a006d076b1cc09eff3ae41ca5019966694c33fbd2e1cc6ea617ab10e4adac6df06556168f13be3fca2
+"picomatch@npm:^2.0.4, picomatch@npm:^2.2.1, picomatch@npm:^2.2.3, picomatch@npm:^2.3.0, picomatch@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "picomatch@npm:2.3.1"
+  checksum: 050c865ce81119c4822c45d3c84f1ced46f93a0126febae20737bd05ca20589c564d6e9226977df859ed5e03dc73f02584a2b0faad36e896936238238b0446cf
   languageName: node
   linkType: hard
 
@@ -19090,9 +19090,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"snyk-nodejs-lockfile-parser@npm:^1.47.4":
-  version: 1.47.5
-  resolution: "snyk-nodejs-lockfile-parser@npm:1.47.5"
+"snyk-nodejs-lockfile-parser@npm:^1.49.0":
+  version: 1.49.0
+  resolution: "snyk-nodejs-lockfile-parser@npm:1.49.0"
   dependencies:
     "@snyk/dep-graph": ^2.3.0
     "@snyk/graphlib": 2.1.9-patch.3
@@ -19104,13 +19104,15 @@ __metadata:
     lodash.flatmap: ^4.5.0
     lodash.isempty: ^4.4.0
     lodash.topairs: ^4.3.0
+    micromatch: ^4.0.5
+    p-map: ^4.0.0
     semver: ^7.3.5
     snyk-config: ^5.0.0
     tslib: ^1.9.3
     uuid: ^8.3.0
   bin:
     parse-nodejs-lockfile: bin/index.js
-  checksum: d156d7e2b3955e97f2bd3fee7675293ac5eb20d7c12a3ae66383e688cfbcac7681b2a35846add64f319e5effb92dbfa475701f4c915dd9203411a0382a5ce142
+  checksum: 8e41273dccc71fadde6923723abe61714a199a54f11de98c82bd0ed0bbf5fa749ca9b85372d52f4d30d27feecbb58c6f739bcc71ef02bb4d374823b2a41a75c4
   languageName: node
   linkType: hard
 
