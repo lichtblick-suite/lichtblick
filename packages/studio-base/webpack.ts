@@ -15,7 +15,7 @@ import { createTssReactNameTransformer } from "@foxglove/typescript-transformers
 
 import { WebpackArgv } from "./WebpackArgv";
 
-if (monacoPkg.version !== "0.30.1") {
+if (monacoPkg.version !== "0.38.0") {
   throw new Error(`
     It looks like you are trying to change the version of Monaco.
 
