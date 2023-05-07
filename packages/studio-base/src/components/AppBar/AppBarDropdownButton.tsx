@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ChevronDown12Filled } from "@fluentui/react-icons";
-import { ButtonBase, Typography } from "@mui/material";
+import { ButtonBase, ButtonBaseProps, Typography } from "@mui/material";
 import { forwardRef } from "react";
 import tinycolor2 from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
@@ -49,13 +49,13 @@ type Props = {
   subheader?: string;
   selected: boolean;
   onClick: () => void;
-};
+} & ButtonBaseProps;
 
 /**
  * A button that can be used in the app bar to open a dropdown menu.
  */
 const AppBarDropdownButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { title, subheader, onClick, selected } = props;
+  const { title, subheader, onClick, selected, ...rest } = props;
   const { classes, cx } = useStyles();
 
   return (
@@ -64,6 +64,7 @@ const AppBarDropdownButton = forwardRef<HTMLButtonElement, Props>((props, ref) =
       aria-haspopup="true"
       onClick={onClick}
       ref={ref}
+      {...rest}
     >
       <Stack alignItems="flex-start">
         {subheader && (

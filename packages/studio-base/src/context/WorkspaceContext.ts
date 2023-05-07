@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext, Dispatch, SetStateAction, useMemo, useState } from "react";
+import { union } from "lodash";
+import { Dispatch, SetStateAction, createContext, useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
@@ -15,17 +16,20 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
-export type SidebarItemKey =
-  | "account"
-  | "add-panel"
-  | "connection"
-  | "extensions"
-  | "help"
-  | "layouts"
-  | "panel-settings"
-  | "app-settings"
-  | "studio-logs-settings"
-  | "variables";
+export const SidebarItemKeys = [
+  "account",
+  "add-panel",
+  "app-bar-tour",
+  "connection",
+  "extensions",
+  "help",
+  "layouts",
+  "panel-settings",
+  "app-settings",
+  "studio-logs-settings",
+  "variables",
+] as const;
+export type SidebarItemKey = (typeof SidebarItemKeys)[number];
 
 const LeftSidebarItemKeys = ["panel-settings", "topics", "problems"] as const;
 export type LeftSidebarItemKey = (typeof LeftSidebarItemKeys)[number];
@@ -38,6 +42,10 @@ export type WorkspaceContextStore = DeepReadonly<{
     activeDataSource: undefined | IDataSourceFactory;
     item: undefined | DataSourceDialogItem;
     open: boolean;
+  };
+  featureTours: {
+    active: undefined | string;
+    shown: string[];
   };
   leftSidebarOpen: boolean;
   rightSidebarOpen: boolean;
@@ -85,6 +93,10 @@ export type WorkspaceActions = {
   dataSourceDialogActions: {
     close: () => void;
     open: (item: DataSourceDialogItem, dataSource?: IDataSourceFactory) => void;
+  };
+  featureTourActions: {
+    startTour: (tour: string) => void;
+    finishTour: (tour: string) => void;
   };
   openAccountSettings: () => void;
   openPanelSettings: () => void;
@@ -149,6 +161,25 @@ export function useWorkspaceActions(): WorkspaceActions {
         },
       },
 
+      featureTourActions: {
+        startTour: (tour: string) => {
+          set((old) => ({
+            featureTours: {
+              active: tour,
+              shown: old.featureTours.shown,
+            },
+          }));
+        },
+        finishTour: (tour: string) => {
+          set((old) => ({
+            featureTours: {
+              active: undefined,
+              shown: union(old.featureTours.shown, [tour]),
+            },
+          }));
+        },
+      },
+
       openAccountSettings: () => supportsAccountSettings && set({ sidebarItem: "account" }),
 
       openPanelSettings: () =>
@@ -177,6 +208,8 @@ export function useWorkspaceActions(): WorkspaceActions {
       selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) => {
         if (selectedSidebarItem === "app-settings") {
           set({ prefsDialogState: { open: true, initialTab: undefined } });
+        } else if (selectedSidebarItem === "app-bar-tour") {
+          set((old) => ({ featureTours: { ...old.featureTours, active: "appBar" } }));
         } else {
           set({ sidebarItem: selectedSidebarItem });
         }

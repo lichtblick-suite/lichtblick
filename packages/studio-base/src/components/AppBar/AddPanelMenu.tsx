@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Menu, PopoverPosition, PopoverReference } from "@mui/material";
+import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import PanelList from "@foxglove/studio-base/components/PanelList";
@@ -50,6 +50,11 @@ export function AddPanelMenu(props: AddPanelProps): JSX.Element {
         vertical: "top",
         horizontal: "left",
       }}
+      PaperProps={
+        {
+          "data-tourid": "add-panel-menu",
+        } as Partial<PaperProps & { "data-tourid"?: string }>
+      }
     >
       <PanelList
         // Close when a drag starts so the modal menu doesn't block the drop targets

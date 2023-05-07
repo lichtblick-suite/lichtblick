@@ -256,6 +256,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         color="inherit"
         elevation={0}
         onDoubleClick={handleDoubleClick}
+        data-tourid="app-bar"
       >
         <div className={classes.toolbar}>
           <div className={classes.start}>
@@ -263,11 +264,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
               <IconButton
                 className={cx(classes.logo, { "Mui-selected": appMenuOpen })}
                 color="inherit"
-                id="menu-button"
+                id="app-menu-button"
                 title="Menu"
                 aria-controls={appMenuOpen ? "app-menu" : undefined}
                 aria-haspopup="true"
                 aria-expanded={appMenuOpen ? "true" : undefined}
+                data-tourid="app-menu-button"
                 onClick={(event) => {
                   setAppMenuEl(event.currentTarget);
                 }}
@@ -288,6 +290,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 color="inherit"
                 disabled={currentLayoutId == undefined}
                 id="add-panel-button"
+                data-tourid="add-panel-button"
                 title="Add panel"
                 aria-label="Add panel button"
                 aria-controls={panelMenuOpen ? "add-panel-menu" : undefined}
@@ -332,6 +335,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   }
                   aria-label={`${rightSidebarOpen ? "Hide" : "Show"} right sidebar`}
                   onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+                  data-tourid="right-sidebar-button"
                 >
                   {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
                 </AppBarIconButton>
@@ -363,6 +367,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   aria-label="User profile menu button"
                   color="inherit"
                   id="user-profile-button"
+                  data-tourid="user-profile-button"
                   aria-controls={userMenuOpen ? "user-profile-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={userMenuOpen ? "true" : undefined}

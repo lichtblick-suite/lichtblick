@@ -57,6 +57,7 @@ import {
 import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
 import VariablesList from "@foxglove/studio-base/components/VariablesList";
 import { WorkspaceDialogs } from "@foxglove/studio-base/components/WorkspaceDialogs";
+import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
   LayoutState,
   useCurrentLayoutSelector,
@@ -70,6 +71,7 @@ import {
   LeftSidebarItemKey,
   RightSidebarItemKey,
   SidebarItemKey,
+  SidebarItemKeys,
   WorkspaceContextStore,
   useWorkspaceActions,
   useWorkspaceStore,
@@ -83,6 +85,7 @@ import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuE
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+import ICONS from "@foxglove/studio-base/theme/icons";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
@@ -106,6 +109,17 @@ function activeElementIsInput() {
   return (
     document.activeElement instanceof HTMLInputElement ||
     document.activeElement instanceof HTMLTextAreaElement
+  );
+}
+
+type InjectedSidebarItem = [SidebarItemKey, SidebarItem];
+function isInjectedSidebarItem(
+  item: [string, { iconName?: string; title: string }],
+): item is InjectedSidebarItem {
+  return (
+    SidebarItemKeys.some((itemKey) => itemKey === item[0]) &&
+    item[1].iconName != undefined &&
+    Object.keys(ICONS).includes(item[1].iconName)
   );
 }
 
@@ -181,6 +195,7 @@ const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.rightSidebarSize;
 
 type WorkspaceContentProps = WorkspaceProps & { showSignInForm: boolean };
+
 function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
@@ -240,6 +255,8 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
 
   const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
   const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
+
+  const { sidebarItems: appContextSidebarItems, workspaceExtensions } = useAppContext();
 
   // When a player is activated, hide the open dialog.
   useLayoutEffect(() => {
@@ -529,6 +546,12 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
         });
       }
 
+      for (const item of appContextSidebarItems ?? []) {
+        if (isInjectedSidebarItem(item)) {
+          bottomItems.set(item[0], item[1]);
+        }
+      }
+
       bottomItems.set("app-settings", {
         iconName: "Settings",
         title: "Settings",
@@ -537,12 +560,13 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
 
     return [topItems, bottomItems];
   }, [
-    DataSourceSidebarItem,
-    playerProblems,
-    enableStudioLogsSidebar,
-    enableNewTopNav,
-    supportsAccountSettings,
+    appContextSidebarItems,
     currentUser,
+    DataSourceSidebarItem,
+    enableNewTopNav,
+    enableStudioLogsSidebar,
+    playerProblems,
+    supportsAccountSettings,
   ]);
 
   const eventsSupported = useEvents(selectEventsSupported);
@@ -671,6 +695,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
           </div>
         )}
       </div>
+      {!props.showSignInForm && workspaceExtensions}
       <WorkspaceDialogs />
     </MultiProvider>
   );

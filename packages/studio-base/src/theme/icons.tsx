@@ -18,6 +18,7 @@ import {
   GridDots24Filled,
   Settings20Regular,
   SlideAdd24Regular,
+  Sparkle24Regular,
   TextBulletListLtr24Regular,
 } from "@fluentui/react-icons";
 
@@ -52,6 +53,7 @@ const icons: {
   PanelSettings: <PanelSettings />,
   RectangularClipping: <SlideAdd24Regular />,
   Settings: <Settings20Regular />,
+  Sparkle: <Sparkle24Regular />,
   Variable2: <BracesVariable24Regular />,
   ROS: <GridDots24Filled />,
 };

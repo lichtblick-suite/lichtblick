@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { pick } from "lodash";
 import { ReactNode, useState } from "react";
-import { createStore, StoreApi } from "zustand";
+import { StoreApi, createStore } from "zustand";
 import { persist } from "zustand/middleware";
 
 import {
@@ -22,6 +23,10 @@ function createWorkspaceContextStore(
             activeDataSource: undefined,
             item: undefined,
             open: false,
+          },
+          featureTours: {
+            active: undefined,
+            shown: [],
           },
           leftSidebarItem: "panel-settings",
           leftSidebarOpen: true,
@@ -44,8 +49,19 @@ function createWorkspaceContextStore(
       {
         name: "fox.workspace",
         partialize: (value) => {
-          const { dataSourceDialog: _, ...rest } = value;
-          return rest;
+          // Note that this is a list of keys from the store that we include and restore
+          // when persisting to and from localStorage.
+          return pick(value, [
+            "featureTours",
+            "leftSidebarItem",
+            "leftSidebarOpen",
+            "leftSidebarSize",
+            "playbackControls",
+            "rightSidebarItem",
+            "rightSidebarOpen",
+            "rightSidebarSize",
+            "sidebarItem",
+          ]);
         },
       },
     ),

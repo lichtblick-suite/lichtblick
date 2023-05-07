@@ -105,9 +105,10 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
       if (panelType && userProfileStorage) {
         await userProfileStorage.setUserProfile((profile) =>
           produce(profile, (draft) => {
-            draft.onboarding ??= { settingsTooltipShownForPanelTypes: [] };
-            if (draft.onboarding.settingsTooltipShownForPanelTypes?.includes(panelType) !== true) {
-              draft.onboarding.settingsTooltipShownForPanelTypes?.push(panelType);
+            const onboarding = (draft.onboarding ??= {});
+            const shownTypes = (onboarding.settingsTooltipShownForPanelTypes ??= []);
+            if (!shownTypes.includes(panelType)) {
+              shownTypes.push(panelType);
             }
           }),
         );

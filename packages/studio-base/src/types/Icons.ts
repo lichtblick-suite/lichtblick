@@ -22,6 +22,7 @@ export type RegisteredIconNames =
   | "PanelSettings"
   | "RectangularClipping"
   | "Settings"
+  | "Sparkle"
   | "Variable2"
   | "ROS"
   | never; // never has no effect here other than keeping the semicolon on a separate line for easier conflict resolution
