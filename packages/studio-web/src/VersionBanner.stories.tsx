@@ -22,3 +22,13 @@ export const UnsupportedBrowser: StoryObj = {
     return <VersionBanner isChrome={false} currentVersion={42} isDismissable />;
   },
 };
+
+export const Undismissable: StoryObj = {
+  render: () => {
+    return (
+      <div style={{ height: "100vh" }}>
+        <VersionBanner isChrome={false} currentVersion={42} isDismissable={false} />
+      </div>
+    );
+  },
+};

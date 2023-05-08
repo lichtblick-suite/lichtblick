@@ -2744,9 +2744,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-web@workspace:packages/studio-web"
   dependencies:
+    "@fluentui/react-icons": 2.0.201
     "@foxglove/log": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
-    "@mui/icons-material": 5.11.16
     "@mui/material": 5.12.3
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@storybook/react": 7.0.9
