@@ -19,7 +19,7 @@ import {
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 const ICON_SIZE = 18;
@@ -98,8 +98,7 @@ export function DataSource(): JSX.Element {
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
-  const { dataSourceDialogActions, selectLeftSidebarItem, setLeftSidebarOpen } =
-    useWorkspaceActions();
+  const { dialogActions, sidebarActions } = useWorkspaceActions();
 
   const reconnecting = playerPresence === PlayerPresence.RECONNECTING;
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
@@ -111,7 +110,7 @@ export function DataSource(): JSX.Element {
   const playerDisplayName =
     initializing && playerName == undefined ? "Initializing..." : playerName;
 
-  const openDataSourceDialog = () => dataSourceDialogActions.open("start");
+  const openDataSourceDialog = () => dialogActions.dataSource.open("start");
 
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
     return (
@@ -144,8 +143,8 @@ export function DataSource(): JSX.Element {
               color="inherit"
               className={cx(classes.iconButton, classes.errorIconButton)}
               onClick={() => {
-                setLeftSidebarOpen(true);
-                selectLeftSidebarItem("problems");
+                sidebarActions.left.setOpen(true);
+                sidebarActions.left.selectItem("problems");
               }}
             >
               <ErrorCircle20Filled />

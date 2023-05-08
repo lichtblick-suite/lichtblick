@@ -20,10 +20,16 @@ const Wrapper = (Story: StoryFn): JSX.Element => {
   return (
     <WorkspaceContextProvider
       initialState={{
-        dataSourceDialog: {
-          activeDataSource: undefined,
-          item: "start",
-          open: true,
+        dialogs: {
+          dataSource: {
+            activeDataSource: undefined,
+            item: "start",
+            open: true,
+          },
+          preferences: {
+            initialTab: undefined,
+            open: false,
+          },
         },
       }}
     >

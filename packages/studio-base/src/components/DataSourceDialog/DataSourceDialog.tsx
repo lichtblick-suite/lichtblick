@@ -14,9 +14,9 @@ import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
-  useWorkspaceActions,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import Connection from "./Connection";
@@ -42,13 +42,13 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dataSourceDialog;
+const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 
 export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
   const { backdropAnimation } = props;
   const { classes } = useStyles();
   const { availableSources, selectSource } = usePlayerSelection();
-  const { dataSourceDialogActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
   const { activeDataSource, item: activeView } = useWorkspaceStore(selectDataSourceDialog);
 
   const isMounted = useMountedState();
@@ -63,8 +63,8 @@ export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
 
   const onModalClose = useCallback(() => {
     void analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
-    dataSourceDialogActions.close();
-  }, [dataSourceDialogActions, analytics, activeDataSource]);
+    dialogActions.dataSource.close();
+  }, [analytics, activeDataSource, dialogActions.dataSource]);
 
   useLayoutEffect(() => {
     if (activeView === "file") {
@@ -75,13 +75,13 @@ export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
         .finally(() => {
           // set the view back to start so the user can click to open file again
           if (isMounted()) {
-            dataSourceDialogActions.open("start");
+            dialogActions.dataSource.open("start");
           }
         });
     } else if (activeView === "demo" && firstSampleSource) {
       selectSource(firstSampleSource.id);
     }
-  }, [activeView, dataSourceDialogActions, firstSampleSource, isMounted, openFile, selectSource]);
+  }, [activeView, dialogActions.dataSource, firstSampleSource, isMounted, openFile, selectSource]);
 
   const backdrop = useMemo(() => {
     const now = new Date();

@@ -8,7 +8,7 @@ import { PropsWithChildren } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 
 type ViewProps = {
   onOpen?: () => void;
@@ -29,7 +29,7 @@ const useStyles = makeStyles()((theme) => ({
 export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
   const { onOpen } = props;
   const { classes } = useStyles();
-  const { dataSourceDialogActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
 
   return (
     <>
@@ -44,7 +44,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
       >
         <Button
           startIcon={<ChevronLeftIcon fontSize="large" />}
-          onClick={() => dataSourceDialogActions.open("start")}
+          onClick={() => dialogActions.dataSource.open("start")}
           size="large"
         >
           Back
@@ -55,7 +55,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
             size="large"
             color="inherit"
             variant="outlined"
-            onClick={() => dataSourceDialogActions.close()}
+            onClick={() => dialogActions.dataSource.close()}
           >
             Cancel
           </Button>

@@ -22,7 +22,7 @@ import {
   useCurrentUser,
   useCurrentUserType,
 } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
@@ -60,7 +60,7 @@ export function UserMenu({
   const { enqueueSnackbar } = useSnackbar();
   const [confirm, confirmModal] = useConfirm();
 
-  const { prefsDialogActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
 
   const beginSignOut = useCallback(async () => {
     try {
@@ -96,9 +96,9 @@ export function UserMenu({
         user: currentUserType,
         cta: "app-settings-dialog",
       });
-      prefsDialogActions.open(tab);
+      dialogActions.preferences.open(tab);
     },
-    [analytics, currentUserType, prefsDialogActions],
+    [analytics, currentUserType, dialogActions.preferences],
   );
 
   const onProfileClick = useCallback(() => {

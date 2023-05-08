@@ -26,7 +26,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
@@ -89,7 +89,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
   const { classes } = useStyles();
   const { t } = useTranslation("dataSourceInfo");
-  const { dataSourceDialogActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
 
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
@@ -127,7 +127,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
           key="add-connection"
           color="primary"
           title="New connection"
-          onClick={() => dataSourceDialogActions.open("start")}
+          onClick={() => dialogActions.dataSource.open("start")}
         >
           <AddIcon />
         </IconButton>,

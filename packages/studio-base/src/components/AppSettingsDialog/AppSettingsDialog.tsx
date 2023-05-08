@@ -35,7 +35,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import {
   useWorkspaceStore,
   WorkspaceContextStore,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
@@ -183,7 +183,7 @@ export type AppSettingsTab =
   | "about";
 
 const selectWorkspaceInitialActiveTab = (store: WorkspaceContextStore) =>
-  store.prefsDialogState.initialTab;
+  store.dialogs.preferences.initialTab;
 
 export function AppSettingsDialog(
   props: DialogProps & { activeTab?: AppSettingsTab },

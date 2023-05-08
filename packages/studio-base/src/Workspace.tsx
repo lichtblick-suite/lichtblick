@@ -73,9 +73,8 @@ import {
   SidebarItemKey,
   SidebarItemKeys,
   WorkspaceContextStore,
-  useWorkspaceActions,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import { useDefaultWebLaunchPreference } from "@foxglove/studio-base/hooks/useDefaultWebLaunchPreference";
@@ -87,6 +86,8 @@ import { PanelStateContextProvider } from "@foxglove/studio-base/providers/Panel
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 import ICONS from "@foxglove/studio-base/theme/icons";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+
+import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 
 const log = Logger.getLogger(__filename);
 
@@ -185,14 +186,14 @@ const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
 const selectPlayerId = (ctx: MessagePipelineContext) => ctx.playerState.playerId;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 
-const selectWorkspaceDataSourceDialog = (store: WorkspaceContextStore) => store.dataSourceDialog;
-const selectWorkspaceSidebarItem = (store: WorkspaceContextStore) => store.sidebarItem;
-const selectWorkspaceLeftSidebarItem = (store: WorkspaceContextStore) => store.leftSidebarItem;
-const selectWorkspaceLeftSidebarOpen = (store: WorkspaceContextStore) => store.leftSidebarOpen;
-const selectWorkspaceLeftSidebarSize = (store: WorkspaceContextStore) => store.leftSidebarSize;
-const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.rightSidebarItem;
-const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.rightSidebarOpen;
-const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.rightSidebarSize;
+const selectWorkspaceDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
+const selectWorkspaceSidebarItem = (store: WorkspaceContextStore) => store.sidebars.legacy.item;
+const selectWorkspaceLeftSidebarItem = (store: WorkspaceContextStore) => store.sidebars.left.item;
+const selectWorkspaceLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
+const selectWorkspaceLeftSidebarSize = (store: WorkspaceContextStore) => store.sidebars.left.size;
+const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.sidebars.right.item;
+const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
+const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
 
 type WorkspaceContentProps = WorkspaceProps & { showSignInForm: boolean };
 
@@ -212,17 +213,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
   const rightSidebarOpen = useWorkspaceStore(selectWorkspaceRightSidebarOpen);
   const rightSidebarSize = useWorkspaceStore(selectWorkspaceRightSidebarSize);
 
-  const {
-    dataSourceDialogActions,
-    prefsDialogActions,
-    selectLeftSidebarItem,
-    selectRightSidebarItem,
-    selectSidebarItem,
-    setLeftSidebarOpen,
-    setLeftSidebarSize,
-    setRightSidebarOpen,
-    setRightSidebarSize,
-  } = useWorkspaceActions();
+  const { dialogActions, sidebarActions } = useWorkspaceActions();
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
@@ -264,9 +255,9 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
       playerPresence === PlayerPresence.PRESENT ||
       playerPresence === PlayerPresence.INITIALIZING
     ) {
-      dataSourceDialogActions.close();
+      dialogActions.dataSource.close();
     }
-  }, [playerPresence, dataSourceDialogActions]);
+  }, [dialogActions.dataSource, playerPresence]);
 
   useEffect(() => {
     // Focus on page load to enable keyboard interaction.
@@ -278,65 +269,65 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
   useNativeAppMenuEvent(
     "open-layouts",
     useCallback(() => {
-      selectSidebarItem("layouts");
-    }, [selectSidebarItem]),
+      sidebarActions.legacy.selectItem("layouts");
+    }, [sidebarActions.legacy]),
   );
 
   useNativeAppMenuEvent(
     "open-add-panel",
     useCallback(() => {
-      selectSidebarItem("add-panel");
-    }, [selectSidebarItem]),
+      sidebarActions.legacy.selectItem("add-panel");
+    }, [sidebarActions.legacy]),
   );
 
   useNativeAppMenuEvent(
     "open-panel-settings",
     useCallback(() => {
-      selectSidebarItem("panel-settings");
-    }, [selectSidebarItem]),
+      sidebarActions.legacy.selectItem("panel-settings");
+    }, [sidebarActions.legacy]),
   );
 
   useNativeAppMenuEvent(
     "open-variables",
     useCallback(() => {
-      selectSidebarItem("variables");
-    }, [selectSidebarItem]),
+      sidebarActions.legacy.selectItem("variables");
+    }, [sidebarActions.legacy]),
   );
 
   useNativeAppMenuEvent(
     "open-extensions",
     useCallback(() => {
-      selectSidebarItem("extensions");
-    }, [selectSidebarItem]),
+      sidebarActions.legacy.selectItem("extensions");
+    }, [sidebarActions.legacy]),
   );
 
   useNativeAppMenuEvent(
     "open-account",
     useCallback(() => {
-      selectSidebarItem("account");
-    }, [selectSidebarItem]),
+      sidebarActions.legacy.selectItem("account");
+    }, [sidebarActions.legacy]),
   );
 
   useNativeAppMenuEvent(
     "open-app-settings",
     useCallback(() => {
-      prefsDialogActions.open();
-    }, [prefsDialogActions]),
+      dialogActions.preferences.open();
+    }, [dialogActions.preferences]),
   );
 
   useNativeAppMenuEvent(
     "open-file",
-    useCallback(() => dataSourceDialogActions.open("file"), [dataSourceDialogActions]),
+    useCallback(() => dialogActions.dataSource.open("file"), [dialogActions.dataSource]),
   );
 
   useNativeAppMenuEvent(
     "open-remote-file",
-    useCallback(() => dataSourceDialogActions.open("remote"), [dataSourceDialogActions]),
+    useCallback(() => dialogActions.dataSource.open("remote"), [dialogActions.dataSource]),
   );
 
   useNativeAppMenuEvent(
     "open-sample-data",
-    useCallback(() => dataSourceDialogActions.open("demo"), [dataSourceDialogActions]),
+    useCallback(() => dialogActions.dataSource.open("demo"), [dialogActions.dataSource]),
   );
 
   const nativeAppMenu = useNativeAppMenu();
@@ -352,7 +343,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
 
     for (const item of connectionSources) {
       nativeAppMenu.addFileEntry(item.displayName, () => {
-        dataSourceDialogActions.open("connection", item);
+        dialogActions.dataSource.open("connection", item);
       });
     }
 
@@ -361,7 +352,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
         nativeAppMenu.removeFileEntry(item.displayName);
       }
     };
-  }, [connectionSources, dataSourceDialogActions, nativeAppMenu]);
+  }, [connectionSources, dialogActions.dataSource, nativeAppMenu]);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -615,12 +606,12 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
         }
 
         ev.preventDefault();
-        selectSidebarItem(undefined);
+        sidebarActions.legacy.selectItem(undefined);
       },
-      "[": () => setLeftSidebarOpen((oldValue) => !oldValue),
-      "]": () => setRightSidebarOpen((oldValue) => !oldValue),
+      "[": () => sidebarActions.left.setOpen((oldValue) => !oldValue),
+      "]": () => sidebarActions.right.setOpen((oldValue) => !oldValue),
     };
-  }, [sidebarItem, setLeftSidebarOpen, setRightSidebarOpen, selectSidebarItem]);
+  }, [sidebarActions.left, sidebarActions.legacy, sidebarActions.right, sidebarItem]);
 
   const play = useMessagePipeline(selectPlay);
   const playUntil = useMessagePipeline(selectPlayUntil);
@@ -663,17 +654,17 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
           items={sidebarItems}
           bottomItems={sidebarBottomItems}
           selectedKey={sidebarItem}
-          onSelectKey={selectSidebarItem}
+          onSelectKey={sidebarActions.legacy.selectItem}
           leftItems={leftSidebarItems}
           selectedLeftKey={leftSidebarOpen ? leftSidebarItem : undefined}
-          onSelectLeftKey={selectLeftSidebarItem}
+          onSelectLeftKey={sidebarActions.left.selectItem}
           leftSidebarSize={leftSidebarSize}
-          setLeftSidebarSize={setLeftSidebarSize}
+          setLeftSidebarSize={sidebarActions.left.setSize}
           rightItems={rightSidebarItems}
           selectedRightKey={rightSidebarOpen ? rightSidebarItem : undefined}
-          onSelectRightKey={selectRightSidebarItem}
+          onSelectRightKey={sidebarActions.right.selectItem}
           rightSidebarSize={rightSidebarSize}
-          setRightSidebarSize={setRightSidebarSize}
+          setRightSidebarSize={sidebarActions.right.setSize}
         >
           {/* To ensure no stale player state remains, we unmount all panels when players change */}
           <RemountOnValueChange value={playerId}>
@@ -717,11 +708,17 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const initialItem: undefined | DataSourceDialogItem =
     isPlayerPresent || !showOpenDialogOnStartup || showSignInForm ? undefined : "start";
 
-  const initialState: Pick<WorkspaceContextStore, "dataSourceDialog"> = {
-    dataSourceDialog: {
-      activeDataSource: undefined,
-      open: initialItem != undefined,
-      item: initialItem,
+  const initialState: Pick<WorkspaceContextStore, "dialogs"> = {
+    dialogs: {
+      dataSource: {
+        activeDataSource: undefined,
+        open: initialItem != undefined,
+        item: initialItem,
+      },
+      preferences: {
+        initialTab: undefined,
+        open: false,
+      },
     },
   };
 

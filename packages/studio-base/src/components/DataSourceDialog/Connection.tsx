@@ -12,9 +12,9 @@ import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
-  useWorkspaceActions,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import { FormField } from "./FormField";
@@ -81,7 +81,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dataSourceDialog;
+const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 
 export default function Connection(): JSX.Element {
   const { classes } = useStyles();
@@ -89,7 +89,7 @@ export default function Connection(): JSX.Element {
   const mdUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const { activeDataSource } = useWorkspaceStore(selectDataSourceDialog);
-  const { dataSourceDialogActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
 
   const { availableSources, selectSource } = usePlayerSelection();
   const analytics = useAnalytics();
@@ -150,14 +150,14 @@ export default function Connection(): JSX.Element {
     }
     selectSource(selectedSource.id, { type: "connection", params: fieldValues });
     void analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
-    dataSourceDialogActions.close();
+    dialogActions.dataSource.close();
   }, [
     selectedSource,
     selectSource,
     fieldValues,
     analytics,
     activeDataSource,
-    dataSourceDialogActions,
+    dialogActions.dataSource,
   ]);
 
   const disableOpen = selectedSource?.disabledReason != undefined || fieldErrors.size > 0;

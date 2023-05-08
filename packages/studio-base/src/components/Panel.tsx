@@ -56,7 +56,7 @@ import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogConte
 import {
   useWorkspaceStore,
   WorkspaceStoreSelectors,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";

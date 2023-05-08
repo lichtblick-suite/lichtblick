@@ -14,9 +14,9 @@ import { useCurrentUserType } from "@foxglove/studio-base/context/CurrentUserCon
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
-  useWorkspaceActions,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import { NestedMenuItem, MenuItem } from "./NestedMenuItem";
@@ -53,9 +53,13 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
   const analytics = useAnalytics();
 
   const { recentSources, selectRecent } = usePlayerSelection();
-  const { leftSidebarOpen, rightSidebarOpen } = useWorkspaceStore(selectWorkspace, shallow);
-  const { setRightSidebarOpen, setLeftSidebarOpen, dataSourceDialogActions, prefsDialogActions } =
-    useWorkspaceActions();
+  const {
+    sidebars: {
+      left: { open: leftSidebarOpen },
+      right: { open: rightSidebarOpen },
+    },
+  } = useWorkspaceStore(selectWorkspace, shallow);
+  const { sidebarActions, dialogActions } = useWorkspaceActions();
 
   const handleNestedMenuClose = useCallback(() => {
     setNestedMenu(undefined);
@@ -85,7 +89,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         label: t("openLocalFile"),
         key: "open-file",
         onClick: () => {
-          dataSourceDialogActions.open("file");
+          dialogActions.dataSource.open("file");
           handleAnalytics("open-file");
           handleNestedMenuClose();
         },
@@ -95,7 +99,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         label: t("openConnection"),
         key: "open-connection",
         onClick: () => {
-          dataSourceDialogActions.open("connection");
+          dialogActions.dataSource.open("connection");
           handleAnalytics("open-connection");
           handleNestedMenuClose();
         },
@@ -120,7 +124,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     return items;
   }, [
     classes.truncate,
-    dataSourceDialogActions,
+    dialogActions.dataSource,
     handleAnalytics,
     handleNestedMenuClose,
     recentSources,
@@ -138,7 +142,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         key: "left-sidebar",
         shortcut: "[",
         onClick: () => {
-          setLeftSidebarOpen(!leftSidebarOpen);
+          sidebarActions.left.setOpen(!leftSidebarOpen);
           handleNestedMenuClose();
         },
       },
@@ -148,7 +152,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         key: "right-sidebar",
         shortcut: "]",
         onClick: () => {
-          setRightSidebarOpen(!rightSidebarOpen);
+          sidebarActions.right.setOpen(!rightSidebarOpen);
           handleNestedMenuClose();
         },
       },
@@ -157,8 +161,8 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
       handleNestedMenuClose,
       leftSidebarOpen,
       rightSidebarOpen,
-      setLeftSidebarOpen,
-      setRightSidebarOpen,
+      sidebarActions.left,
+      sidebarActions.right,
       t,
     ],
   );
@@ -166,10 +170,10 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
   // HELP
 
   const onAboutClick = useCallback(() => {
-    prefsDialogActions.open("about");
+    dialogActions.preferences.open("about");
     handleAnalytics("about");
     handleNestedMenuClose();
-  }, [handleAnalytics, handleNestedMenuClose, prefsDialogActions]);
+  }, [dialogActions.preferences, handleAnalytics, handleNestedMenuClose]);
 
   const onDocsClick = useCallback(() => {
     handleAnalytics("docs");

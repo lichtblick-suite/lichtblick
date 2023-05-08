@@ -4,20 +4,21 @@
 
 import { AppSettingsDialog } from "@foxglove/studio-base/components/AppSettingsDialog";
 import {
-  useWorkspaceActions,
   useWorkspaceStore,
   WorkspaceContextStore,
-} from "@foxglove/studio-base/context/WorkspaceContext";
+} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+
+import { useWorkspaceActions } from "../context/Workspace/useWorkspaceActions";
 
 const selectWorkspacePrefsDialogOpen = (store: WorkspaceContextStore) =>
-  store.prefsDialogState.open;
+  store.dialogs.preferences.open;
 
 /**
  * Encapsulates dialogs shown and controlled at workspace level.
  */
 export function WorkspaceDialogs(): JSX.Element {
   const prefsDialogOpen = useWorkspaceStore(selectWorkspacePrefsDialogOpen);
-  const { prefsDialogActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
 
   return (
     <>
@@ -25,7 +26,7 @@ export function WorkspaceDialogs(): JSX.Element {
         <AppSettingsDialog
           id="app-settings-dialog"
           open
-          onClose={() => prefsDialogActions.close()}
+          onClose={() => dialogActions.preferences.close()}
         />
       )}
     </>
