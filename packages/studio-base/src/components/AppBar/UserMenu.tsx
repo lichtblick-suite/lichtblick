@@ -2,14 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Divider,
-  Menu,
-  MenuItem,
-  PaperProps,
-  PopoverPosition,
-  PopoverReference,
-} from "@mui/material";
+import { Divider, Menu, MenuItem, PopoverPosition, PopoverReference } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -26,6 +19,7 @@ import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/use
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
 
@@ -61,6 +55,8 @@ export function UserMenu({
   const [confirm, confirmModal] = useConfirm();
 
   const { dialogActions } = useWorkspaceActions();
+
+  const isDesktop = isDesktopApp();
 
   const beginSignOut = useCallback(async () => {
     try {
@@ -125,6 +121,19 @@ export function UserMenu({
     window.open("https://foxglove.dev/slack", "_blank");
   }, [analytics, currentUserType]);
 
+  const revertToOldUI = useCallback(async () => {
+    if (isDesktop) {
+      await confirm({
+        title: "Please restart the app to finish reverting to the old UI.",
+        ok: "OK",
+        cancel: false,
+      });
+      await setEnableNewTopNav(false);
+    } else {
+      await setEnableNewTopNav(false);
+    }
+  }, [confirm, isDesktop, setEnableNewTopNav]);
+
   return (
     <>
       <Menu
@@ -137,18 +146,13 @@ export function UserMenu({
         onClose={handleClose}
         onClick={handleClose}
         MenuListProps={{ className: classes.menuList, dense: true }}
-        PaperProps={
-          {
-            "data-tourid": "account-menu",
-          } as Partial<PaperProps & { "data-tourid"?: string }>
-        }
       >
         {currentUser && <MenuItem disabled>{currentUser.email}</MenuItem>}
         <MenuItem onClick={() => onSettingsClick()}>Settings</MenuItem>
         <MenuItem onClick={() => onSettingsClick("extensions")}>Extensions</MenuItem>
         {currentUser && <MenuItem onClick={onProfileClick}>User profile</MenuItem>}
         <Divider variant="middle" />
-        <MenuItem onClick={async () => await setEnableNewTopNav(false)}>Revert to old UI</MenuItem>
+        <MenuItem onClick={revertToOldUI}>Revert to old UI</MenuItem>
         <Divider variant="middle" />
         <MenuItem onClick={onDocsClick}>Documentation</MenuItem>
         <MenuItem onClick={onSlackClick}>Join Slack community</MenuItem>
