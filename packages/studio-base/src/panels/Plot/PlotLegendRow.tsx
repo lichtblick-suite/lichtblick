@@ -55,6 +55,7 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
   showPlotValue: {
     [`.${classes.plotName}`]: {
       gridColumn: "span 1",
+      padding: theme.spacing(0, 1.5, 0, 0.5),
     },
   },
   listIcon: {
@@ -80,7 +81,7 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
     display: "flex",
     alignItems: "center",
     height: ROW_HEIGHT,
-    padding: theme.spacing(0, 1.5, 0, 0.5),
+    padding: theme.spacing(0, 2.5, 0, 0.5),
     gridColumn: "span 2",
     fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
 
