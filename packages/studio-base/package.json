@@ -14,9 +14,9 @@
   "homepage": "https://foxglove.dev/",
   "main": "src/index",
   "devDependencies": {
-    "@emotion/cache": "11.10.8",
-    "@emotion/react": "11.10.6",
-    "@emotion/styled": "11.10.6",
+    "@emotion/cache": "11.11.0",
+    "@emotion/react": "11.11.0",
+    "@emotion/styled": "11.11.0",
     "@fluentui/react-icons": "2.0.201",
     "@foxglove/avl": "1.0.0",
     "@foxglove/chartjs-plugin-zoom": "2.0.4",
