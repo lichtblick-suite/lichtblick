@@ -318,7 +318,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
             <div className={classes.endInner}>
               {enableMemoryUseIndicator && <MemoryUseIndicator />}
               {appBarLayoutButton}
-              <Stack direction="row" alignItems="center">
+              <Stack direction="row" alignItems="center" data-tourid="sidebar-button-group">
                 <AppBarIconButton
                   title={
                     <>
@@ -328,6 +328,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   }
                   aria-label={`${leftSidebarOpen ? "Hide" : "Show"} left sidebar`}
                   onClick={() => sidebarActions.left.setOpen(!leftSidebarOpen)}
+                  data-tourid="left-sidebar-button"
                 >
                   {leftSidebarOpen ? <PanelLeft24Filled /> : <PanelLeft24Regular />}
                 </AppBarIconButton>
