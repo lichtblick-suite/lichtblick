@@ -59,6 +59,8 @@ version_group(Dep, storybook) :-
   has_prefix('@storybook/', Dep), Dep \= '@storybook/testing-library'.
 version_group(Dep, typescript_eslint) :-
   has_prefix('@typescript-eslint/', Dep).
+version_group(Dep, emotion) :-
+  has_prefix('@emotion/', Dep).
 
 % Enforce the requirements defined on version groups above.
 gen_enforced_dependency(WorkspaceCwd, DependencyIdent, DependencyRange, DependencyType) :-
