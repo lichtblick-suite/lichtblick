@@ -497,7 +497,13 @@ export type SettingsTreeFieldValue =
       hideClearButton?: boolean;
     }
   | { input: "gradient"; value?: [string, string] }
-  | { input: "messagepath"; value?: string; validTypes?: string[] }
+  | {
+      input: "messagepath";
+      value?: string;
+      validTypes?: string[];
+      /** True if the input should allow math modifiers like @abs. */
+      supportsMathModifiers?: boolean;
+    }
   | {
       input: "number";
       value?: number;

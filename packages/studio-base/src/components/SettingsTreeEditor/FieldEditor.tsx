@@ -287,6 +287,7 @@ function FieldInput({
             path={field.value ?? ""}
             disabled={field.disabled}
             readOnly={field.readonly}
+            supportsMathModifiers={field.supportsMathModifiers}
             onChange={(value) =>
               actionHandler({
                 action: "update",

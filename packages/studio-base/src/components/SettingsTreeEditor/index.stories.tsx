@@ -79,6 +79,8 @@ const BasicSettings: SettingsTreeNodes = {
       messagepath: {
         label: "Message Path",
         input: "messagepath",
+        value: "/some_topic/state.foo_id.@abs",
+        supportsMathModifiers: true,
       },
       topic: {
         label: "Topic",
