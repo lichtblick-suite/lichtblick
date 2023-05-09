@@ -50,6 +50,7 @@ export type RendererEvents = {
   configChange: (renderer: IRenderer) => void;
   schemaHandlersChanged: (renderer: IRenderer) => void;
   topicHandlersChanged: (renderer: IRenderer) => void;
+  topicsChanged: (renderer: IRenderer) => void;
   resetViewChanged: (renderer: IRenderer) => void;
 };
 

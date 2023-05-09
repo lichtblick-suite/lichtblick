@@ -8,7 +8,7 @@ import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
 import {
   CREATE_BITMAP_ERR_KEY,
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
@@ -48,6 +48,7 @@ import {
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
 import { decodeCompressedImageToBitmap } from "../Images/decodeCompressedImageToBitmap";
+import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "../Images/topicPrefixMatching";
 
 const IMAGE_TOPIC_PATH = ["imageMode", "imageTopic"];
 const CALIBRATION_TOPIC_PATH = ["imageMode", "calibrationTopic"];
@@ -65,6 +66,18 @@ const DEFAULT_FOCAL_LENGTH = 500;
 const DEFAULT_IMAGE_WIDTH = 512;
 
 type ImageModeEvent = { type: "hasModifiedViewChanged" };
+
+const ALL_SUPPORTED_IMAGE_SCHEMAS = new Set([
+  ...ROS_IMAGE_DATATYPES,
+  ...ROS_COMPRESSED_IMAGE_DATATYPES,
+  ...RAW_IMAGE_DATATYPES,
+  ...COMPRESSED_IMAGE_DATATYPES,
+]);
+
+const ALL_SUPPORTED_CALIBRATION_SCHEMAS = new Set([
+  ...CAMERA_INFO_DATATYPES,
+  ...CAMERA_CALIBRATION_DATATYPES,
+]);
 
 export class ImageMode
   extends SceneExtension<ImageRenderable, ImageModeEvent>
@@ -169,6 +182,9 @@ export class ImageMode
       this.dispatchEvent({ type: "hasModifiedViewChanged" });
       this.renderer.queueAnimationFrame();
     });
+
+    this.renderer.on("topicsChanged", this.#handleTopicsChanged);
+    this.#handleTopicsChanged();
   }
 
   public hasModifiedView(): boolean {
@@ -184,11 +200,7 @@ export class ImageMode
 
   public override addSubscriptionsToRenderer(): void {
     const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(CAMERA_INFO_DATATYPES, {
-      handler: this.#handleCameraInfo,
-      shouldSubscribe: this.#cameraInfoShouldSubscribe,
-    });
-    renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, {
+    renderer.addSchemaSubscriptions(ALL_SUPPORTED_CALIBRATION_SCHEMAS, {
       handler: this.#handleCameraInfo,
       shouldSubscribe: this.#cameraInfoShouldSubscribe,
     });
@@ -217,6 +229,7 @@ export class ImageMode
     this.renderer.settings.errors.off("update", this.#handleErrorChange);
     this.renderer.settings.errors.off("clear", this.#handleErrorChange);
     this.renderer.settings.errors.off("remove", this.#handleErrorChange);
+    this.renderer.off("topicsChanged", this.#handleTopicsChanged);
     this.#annotations.dispose();
     this.#imageRenderable?.dispose();
     super.dispose();
@@ -231,6 +244,45 @@ export class ImageMode
     super.removeAllRenderables();
   }
 
+  /**
+   * If no image topic is selected, automatically select the first available one from `renderer.topics`.
+   * Also auto-select a new calibration topic to match the new image topic.
+   */
+  #handleTopicsChanged = () => {
+    if (this.#getImageModeSettings().imageTopic != undefined) {
+      return;
+    }
+
+    const imageTopic = this.renderer.topics?.find((topic) =>
+      topicIsConvertibleToSchema(topic, ALL_SUPPORTED_IMAGE_SCHEMAS),
+    );
+    if (imageTopic == undefined) {
+      return;
+    }
+
+    const matchingCalibrationTopic = this.#getMatchingCalibrationTopic(imageTopic.name);
+
+    this.renderer.updateConfig((draft) => {
+      draft.imageMode.imageTopic = imageTopic.name;
+      if (matchingCalibrationTopic != undefined) {
+        draft.imageMode.calibrationTopic = matchingCalibrationTopic.name;
+      }
+    });
+  };
+
+  /** Choose a calibration topic that best matches the given `imageTopic`. */
+  #getMatchingCalibrationTopic(imageTopic: string): Topic | undefined {
+    const prefix = getTopicMatchPrefix(imageTopic);
+    if (prefix == undefined) {
+      return undefined;
+    }
+    return this.renderer.topics?.find(
+      (topic) =>
+        topicIsConvertibleToSchema(topic, ALL_SUPPORTED_CALIBRATION_SCHEMAS) &&
+        topic.name.startsWith(prefix),
+    );
+  }
+
   public override settingsNodes(): SettingsTreeEntry[] {
     const config = this.renderer.config;
     const handler = this.handleSettingsAction;
@@ -238,14 +290,7 @@ export class ImageMode
     const { imageTopic, calibrationTopic } = config.imageMode;
 
     const imageTopics = filterMap(this.renderer.topics ?? [], (topic) => {
-      if (
-        !(
-          topicIsConvertibleToSchema(topic, ROS_IMAGE_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, ROS_COMPRESSED_IMAGE_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, RAW_IMAGE_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, COMPRESSED_IMAGE_DATATYPES)
-        )
-      ) {
+      if (!topicIsConvertibleToSchema(topic, ALL_SUPPORTED_IMAGE_SCHEMAS)) {
         return;
       }
       return { label: topic.name, value: topic.name };
@@ -254,17 +299,17 @@ export class ImageMode
     const calibrationTopics: { label: string; value: string | undefined }[] = filterMap(
       this.renderer.topics ?? [],
       (topic) => {
-        if (
-          !(
-            topicIsConvertibleToSchema(topic, CAMERA_INFO_DATATYPES) ||
-            topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
-          )
-        ) {
+        if (!topicIsConvertibleToSchema(topic, ALL_SUPPORTED_CALIBRATION_SCHEMAS)) {
           return;
         }
         return { label: topic.name, value: topic.name };
       },
     );
+
+    // Sort calibration topics with prefixes matching the image topic to the top.
+    if (imageTopic) {
+      sortPrefixMatchesToFront(calibrationTopics, imageTopic, (option) => option.label);
+    }
 
     // add unselected camera calibration option
     calibrationTopics.unshift({ label: "None", value: undefined });
@@ -426,6 +471,15 @@ export class ImageMode
         const changingFromUnselectedCalibration = prevImageModeConfig.calibrationTopic == undefined;
         if (changingFromUnselectedCalibration) {
           this.#setHasCalibrationTopic(true);
+        }
+      }
+      const imageTopicChanged = config.imageTopic !== prevImageModeConfig.imageTopic;
+      if (imageTopicChanged && config.imageTopic != undefined) {
+        const calibrationTopic = this.#getMatchingCalibrationTopic(config.imageTopic);
+        if (calibrationTopic) {
+          this.renderer.updateConfig((draft) => {
+            draft.imageMode.calibrationTopic = calibrationTopic.name;
+          });
         }
       }
 
