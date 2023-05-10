@@ -22,6 +22,25 @@ const initialState = {
   },
 };
 
+const bigVariableInitialState = {
+  globalVariables: {
+    big: {
+      cameraState: {
+        distance: 20,
+        perspective: true,
+        phi: 60,
+        target: [0, 0, 0],
+        targetOffset: [0, 0, 0],
+        targetOrientation: [0, 0, 0, 1],
+        thetaOffset: 45,
+        fovy: 45,
+        near: 0.5,
+        far: 5000,
+      },
+    },
+  },
+};
+
 export const Default: StoryObj = {
   render: () => {
     return (
@@ -65,6 +84,20 @@ export const Interactive: StoryObj = {
 
     const deleteButton = await screen.findByText("Delete variable");
     fireEvent.click(deleteButton);
+  },
+
+  parameters: { colorScheme: "light" },
+};
+
+export const WithBigVariable: StoryObj = {
+  render: function Story() {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <MockCurrentLayoutProvider initialState={bigVariableInitialState}>
+          <VariablesList />
+        </MockCurrentLayoutProvider>
+      </DndProvider>
+    );
   },
 
   parameters: { colorScheme: "light" },
