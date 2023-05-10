@@ -156,7 +156,6 @@ overrides:
       - "packages/studio-base/src/components/ExtensionDetails.tsx"
       - "packages/studio-base/src/components/ExtensionsSettings/index.tsx"
       - "packages/studio-base/src/components/LayoutBrowser/LayoutRow.tsx"
-      - "packages/studio-base/src/components/Panel.tsx"
       - "packages/studio-base/src/components/PanelLayout.tsx"
       - "packages/studio-base/src/components/PanelToolbar/ToolbarIconButton.tsx"
       - "packages/studio-base/src/components/PanelToolbar/index.tsx"
