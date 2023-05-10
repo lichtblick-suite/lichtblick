@@ -2,34 +2,35 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Checkbox,
-  CheckboxProps,
-  SvgIcon,
-  styled as muiStyled,
-  IconButtonProps,
-} from "@mui/material";
+import { Checkbox, CheckboxProps, SvgIcon, IconButtonProps } from "@mui/material";
+import { makeStyles } from "tss-react/mui";
 
-const StyledCheckbox = muiStyled(Checkbox, {
-  shouldForwardProp: (prop) => prop !== "size",
-})<{ size: IconButtonProps["size"] }>(({ theme, size = "medium" }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(1),
+const useStyles = makeStyles()((theme) => ({
+  checkbox: {
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(1),
 
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
   },
-  ...(size === "small" && {
+  checkboxSizeSmall: {
     padding: theme.spacing(0.625),
-  }),
+  },
 }));
 
 export function VisibilityToggle(
   props: CheckboxProps & { size: IconButtonProps["size"] },
 ): JSX.Element {
+  const { className, ...rest } = props;
+  const { classes, cx } = useStyles();
+
   return (
-    <StyledCheckbox
-      {...props}
+    <Checkbox
+      className={cx(className, classes.checkbox, {
+        [classes.checkboxSizeSmall]: props.size === "small",
+      })}
+      {...rest}
       title="Toggle visibility"
       icon={
         <SvgIcon fontSize="small" viewBox="0 0 16 16" color="disabled">
