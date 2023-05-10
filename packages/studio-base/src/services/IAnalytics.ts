@@ -13,6 +13,14 @@ enum AppEvent {
   // App Bar events
   APP_BAR_CLICK_CTA = "Studio: App Bar CTA CLicked",
 
+  // Tour events
+  TOUR_PROMPT_SHOWN = "Studio: New UI Tour prompt shown",
+  TOUR_STARTED = "Studio: New UI Tour started",
+  TOUR_BACK = "Studio: New UI Tour step back",
+  TOUR_NEXT = "Studio: New UI Tour step next",
+  TOUR_COMPLETED = "Studio: New UI Tour completed",
+  TOUR_DISMISSED = "Studio: New UI Tour dismissed",
+
   // App Menu events
   APP_MENU_CLICK = "Studio: App Menu Clicked",
 
