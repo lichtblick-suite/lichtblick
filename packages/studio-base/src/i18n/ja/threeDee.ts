@@ -21,7 +21,7 @@ export const threeDee: Partial<TypeOptions["resources"]["threeDee"]> = {
     "再生中のカメラの動作を変更し、表示フレームをフォローするかどうかを選択できます。",
   pose: "ポーズ",
   fixed: "固定",
-  frameNotFound: "フレーム {{followFrameId}} が見つかりません",
+  frameNotFound: "フレーム {{frameId}} が見つかりません",
   noCoordinateFramesFound: "座標フレームが見つかりません",
   enablePreloading: "事前の読み込みを有効にする",
   lineColor: "ラインの色",

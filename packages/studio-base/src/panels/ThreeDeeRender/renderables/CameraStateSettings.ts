@@ -21,7 +21,9 @@ import type { FollowMode, IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { CameraState, DEFAULT_CAMERA_STATE } from "../camera";
-import { PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
+import { PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
+
+const DISPLAY_FRAME_NOT_FOUND = "DISPLAY_FRAME_NOT_FOUND";
 
 const UNIT_X = new THREE.Vector3(1, 0, 0);
 const UNIT_Z = new THREE.Vector3(0, 0, 1);
@@ -206,17 +208,18 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     // anyways. A settings node error will be displayed
     let followTfOptions = this.renderer.coordinateFrameList;
     const followFrameId = this.renderer.followFrameId;
-    if (followFrameId != undefined && !this.renderer.transformTree.hasFrame(followFrameId)) {
+
+    this.#updateFollowTfError();
+
+    // always show current config value if it exists
+    const followTfValue = config.followTf ?? followFrameId;
+    if (followTfValue != undefined && !this.renderer.transformTree.hasFrame(followTfValue)) {
       followTfOptions = [
-        { label: CoordinateFrame.DisplayName(followFrameId), value: followFrameId },
+        { label: CoordinateFrame.DisplayName(followTfValue), value: followTfValue },
         ...followTfOptions,
       ];
     }
 
-    const followTfValue = selectBest(
-      [this.renderer.followFrameId, config.followTf, this.renderer.renderFrameId],
-      followTfOptions,
-    );
     const followTfError = this.renderer.settings.errors.errors.errorAtPath(FOLLOW_TF_PATH);
 
     const followModeOptions = [
@@ -252,7 +255,6 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       },
     };
   }
-
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
     if (action.action === "perform-node-action" && action.payload.id === "reset-camera") {
       this.renderer.updateConfig((draft) => {
@@ -290,7 +292,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
           draft.followTf = followTf;
         });
 
-        this.renderer.followFrameId = followTf;
+        this.#updateFollowFrameId();
         this.renderer.settings.errors.clearPath(["general", "followTf"]);
       } else if (path[1] === "followMode") {
         const followMode = value as FollowMode;
@@ -388,9 +390,49 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
   #handleCameraMove = (): void => {
     this.updateSettingsTree();
   };
+
   #handleTransformTreeUpdated = (): void => {
+    this.#updateFollowFrameId();
     this.updateSettingsTree();
   };
+
+  #updateFollowFrameId() {
+    const { followTf } = this.renderer.config;
+    const { transformTree } = this.renderer;
+    this.#updateFollowTfError();
+
+    const followTfFrameExists = followTf != undefined && transformTree.hasFrame(followTf);
+    if (followTfFrameExists) {
+      this.renderer.setFollowFrameId(followTf);
+      return;
+    }
+
+    // No valid renderFrameId set, or new frames have been added, fall back to selecting the
+    // heuristically most valid frame (if any frames are present)
+    const followFrameId = transformTree.getDefaultFollowFrameId();
+    this.renderer.setFollowFrameId(followFrameId);
+  }
+
+  #updateFollowTfError = (): void => {
+    const { followTf } = this.renderer.config;
+    const { transformTree } = this.renderer;
+
+    if (followTf != undefined) {
+      const followTfFrameExists = transformTree.hasFrame(followTf);
+      if (followTfFrameExists) {
+        this.renderer.settings.errors.remove(FOLLOW_TF_PATH, DISPLAY_FRAME_NOT_FOUND);
+      } else {
+        this.renderer.settings.errors.add(
+          FOLLOW_TF_PATH,
+          DISPLAY_FRAME_NOT_FOUND,
+          t("threeDee:frameNotFound", {
+            frameId: followTf,
+          }),
+        );
+      }
+    }
+  };
+
   #handleErrorChange = (): void => {
     this.updateSettingsTree();
   };
@@ -507,14 +549,4 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       this.#orthographicCamera.updateProjectionMatrix();
     }
   }
-}
-
-function selectBest(
-  choices: ReadonlyArray<string | undefined>,
-  validEntries: ReadonlyArray<SelectEntry>,
-): string | undefined {
-  const validChoices = choices.filter((choice) =>
-    validEntries.some((entry) => entry.value === choice),
-  );
-  return validChoices[0];
 }

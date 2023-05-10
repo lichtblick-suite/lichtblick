@@ -19,7 +19,7 @@ export const threeDee: Partial<TypeOptions["resources"]["threeDee"]> = {
   followModeHelp: "更改回放期间相机的行为，是否跟踪显示坐标系。",
   pose: "姿态",
   fixed: "固定",
-  frameNotFound: "未找到参考系 {{followFrameId}}",
+  frameNotFound: "未找到参考系 {{frameId}}",
   noCoordinateFramesFound: "未找到坐标系",
   enablePreloading: "启用预加载",
   lineColor: "线颜色",

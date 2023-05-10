@@ -128,14 +128,11 @@ const DARK_BACKDROP = new THREE.Color(dark.background?.default);
 const LAYER_DEFAULT = 0;
 const LAYER_SELECTED = 1;
 
-// Coordinate frames named in [REP-105](https://www.ros.org/reps/rep-0105.html)
-const DEFAULT_FRAME_IDS = ["base_link", "odom", "map", "earth"];
-
 const FOLLOW_TF_PATH = ["general", "followTf"];
 const NO_FRAME_SELECTED = "NO_FRAME_SELECTED";
-const FRAME_NOT_FOUND = "FRAME_NOT_FOUND";
 const TF_OVERFLOW = "TF_OVERFLOW";
 const CYCLE_DETECTED = "CYCLE_DETECTED";
+const FOLLOW_FRAME_NOT_FOUND = "FOLLOW_FRAME_NOT_FOUND";
 
 // An extensionId for creating the top-level settings nodes such as "Topics" and
 // "Custom Layers"
@@ -219,7 +216,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public coordinateFrameList: SelectEntry[] = [];
   public currentTime = 0n;
   public fixedFrameId: string | undefined;
-  public renderFrameId: string | undefined;
   public followFrameId: string | undefined;
 
   public labelPool = new LabelPool({ fontFamily: fonts.MONOSPACE });
@@ -312,8 +308,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#selectionBackdrop = new ScreenOverlay(this);
     this.#selectionBackdrop.visible = false;
     this.#scene.add(this.#selectionBackdrop);
-
-    this.followFrameId = config.followTf;
 
     const samples = msaaSamples(this.gl.capabilities);
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
@@ -730,42 +724,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.settings.setNodesForKey(RENDERER_ID, [topics, customLayers]);
   }
-
-  #defaultFrameId(): string | undefined {
-    if (this.interfaceMode === "image") {
-      return undefined;
-    }
-    const allFrames = this.transformTree.frames();
-    if (allFrames.size === 0) {
-      return undefined;
-    }
-
-    // Top priority is the followFrameId
-    if (this.followFrameId != undefined) {
-      return this.transformTree.hasFrame(this.followFrameId) ? this.followFrameId : undefined;
-    }
-
-    // Prefer frames from [REP-105](https://www.ros.org/reps/rep-0105.html)
-    for (const frameId of DEFAULT_FRAME_IDS) {
-      const frame = this.transformTree.frame(frameId);
-      if (frame) {
-        return frame.id;
-      }
-    }
-
-    // Choose the root frame with the most children
-    const rootsToCounts = new Map<string, number>();
-    for (const frame of allFrames.values()) {
-      const root = frame.root();
-      const rootId = root.id;
-
-      rootsToCounts.set(rootId, (rootsToCounts.get(rootId) ?? 0) + 1);
-    }
-    const rootsArray = Array.from(rootsToCounts.entries());
-    const rootId = rootsArray.sort((a, b) => b[1] - a[1])[0]?.[0];
-    return rootId;
-  }
-
   /** Enable or disable object selection mode */
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   public setPickingEnabled(enabled: boolean): void {
@@ -1036,9 +994,15 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
+  public setFollowFrameId(frameId: string | undefined): void {
+    this.followFrameId = frameId;
+    log.debug(`Setting followFrameId to ${frameId}`);
+  }
+
   #frameHandler = (currentTime: bigint): void => {
     this.currentTime = currentTime;
-    this.#updateFrames();
+    this.#updateFrameErrors();
+    this.#updateFixedFrameId();
     this.#updateResolution();
 
     this.gl.clear();
@@ -1049,7 +1013,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#selectionBackdrop.visible = this.#selectedRenderable != undefined;
 
     // use the FALLBACK_FRAME_ID if renderFrame is undefined and there are no options for transforms
-    const renderFrameId = this.renderFrameId ?? CoordinateFrame.FALLBACK_FRAME_ID;
+    const renderFrameId =
+      this.followFrameId && this.transformTree.frame(this.followFrameId)
+        ? this.followFrameId
+        : CoordinateFrame.FALLBACK_FRAME_ID;
     const fixedFrameId = this.fixedFrameId ?? CoordinateFrame.FALLBACK_FRAME_ID;
 
     for (const sceneExtension of this.sceneExtensions.values()) {
@@ -1069,6 +1036,26 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.gl.info.reset();
   };
+
+  #updateFixedFrameId(): void {
+    const frame =
+      this.followFrameId != undefined ? this.transformTree.frame(this.followFrameId) : undefined;
+
+    if (frame == undefined) {
+      this.fixedFrameId = undefined;
+      return;
+    }
+    const fixedFrame = frame.root();
+    const fixedFrameId = fixedFrame.id;
+    if (this.fixedFrameId !== fixedFrameId) {
+      if (this.fixedFrameId == undefined) {
+        log.debug(`Setting fixed frame to ${fixedFrameId}`);
+      } else {
+        log.debug(`Changing fixed frame from "${this.fixedFrameId}" to "${fixedFrameId}"`);
+      }
+      this.fixedFrameId = fixedFrameId;
+    }
+  }
 
   #resizeHandler = (size: THREE.Vector2): void => {
     this.gl.setPixelRatio(window.devicePixelRatio);
@@ -1256,79 +1243,36 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     return { renderable, instanceIndex };
   }
 
-  /** Tracks the number of frames so we can recompute the defaultFrameId when frames are added. */
-  #lastTransformFrameCount = 0;
-
-  #updateFrames(): void {
-    if (
-      this.followFrameId != undefined &&
-      this.renderFrameId !== this.followFrameId &&
-      this.transformTree.hasFrame(this.followFrameId)
-    ) {
-      // followFrameId is set and is a valid frame, use it
-      this.renderFrameId = this.followFrameId;
-    } else if (
-      this.renderFrameId == undefined ||
-      this.transformTree.frames().size !== this.#lastTransformFrameCount ||
-      !this.transformTree.hasFrame(this.renderFrameId)
-    ) {
-      // No valid renderFrameId set, or new frames have been added, fall back to selecting the
-      // heuristically most valid frame (if any frames are present)
-      this.renderFrameId = this.#defaultFrameId();
-      this.#lastTransformFrameCount = this.transformTree.frames().size;
-
-      if (this.renderFrameId == undefined) {
-        if (this.followFrameId != undefined) {
-          this.settings.errors.add(
-            FOLLOW_TF_PATH,
-            FRAME_NOT_FOUND,
-            i18next.t("threeDee:frameNotFound", {
-              followFrameId: this.followFrameId,
-            }),
-          );
-        } else {
-          this.settings.errors.add(
-            FOLLOW_TF_PATH,
-            NO_FRAME_SELECTED,
-            i18next.t("threeDee:noCoordinateFramesFound"),
-          );
-        }
-        this.fixedFrameId = undefined;
-        return;
-      } else {
-        log.debug(`Setting render frame to ${this.renderFrameId}`);
-        this.settings.errors.remove(FOLLOW_TF_PATH, NO_FRAME_SELECTED);
-      }
-    }
-
-    const frame = this.transformTree.frame(this.renderFrameId);
-    if (!frame) {
-      this.renderFrameId = undefined;
-      this.fixedFrameId = undefined;
+  #updateFrameErrors(): void {
+    if (this.followFrameId == undefined) {
+      // No frames available
       this.settings.errors.add(
         FOLLOW_TF_PATH,
-        FRAME_NOT_FOUND,
+        NO_FRAME_SELECTED,
+        i18next.t("threeDee:noCoordinateFramesFound"),
+      );
+      return;
+    }
+
+    this.settings.errors.remove(FOLLOW_TF_PATH, NO_FRAME_SELECTED);
+
+    const frame = this.transformTree.frame(this.followFrameId);
+
+    // The follow frame id should be chosen from a frameId that exists, but
+    // we still need to watch out for the case that the transform tree was
+    // cleared before that could be updated
+    if (!frame) {
+      this.settings.errors.add(
+        FOLLOW_TF_PATH,
+        FOLLOW_FRAME_NOT_FOUND,
         i18next.t("threeDee:frameNotFound", {
-          followFrameId: this.renderFrameId,
+          frameId: this.followFrameId,
         }),
       );
       return;
-    } else {
-      this.settings.errors.remove(FOLLOW_TF_PATH, FRAME_NOT_FOUND);
     }
 
-    const fixedFrame = frame.root();
-    const fixedFrameId = fixedFrame.id;
-    if (this.fixedFrameId !== fixedFrameId) {
-      if (this.fixedFrameId == undefined) {
-        log.debug(`Setting fixed frame to ${fixedFrameId}`);
-      } else {
-        log.debug(`Changing fixed frame from "${this.fixedFrameId}" to "${fixedFrameId}"`);
-      }
-      this.fixedFrameId = fixedFrameId;
-    }
-
-    this.settings.errors.clearPath(FOLLOW_TF_PATH);
+    this.settings.errors.remove(FOLLOW_TF_PATH, FOLLOW_FRAME_NOT_FOUND);
   }
 
   #updateResolution(): void {

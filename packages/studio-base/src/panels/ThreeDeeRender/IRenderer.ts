@@ -45,6 +45,7 @@ export type RendererEvents = {
     variables: ReadonlyMap<string, VariableValue> | undefined,
     renderer: IRenderer,
   ) => void;
+  /** Fired when the structure of the transform tree changes ie: new frame added/removed or frame assigned new parent */
   transformTreeUpdated: (renderer: IRenderer) => void;
   settingsTreeChange: (renderer: IRenderer) => void;
   configChange: (renderer: IRenderer) => void;
@@ -207,9 +208,12 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   transformTree: TransformTree;
   coordinateFrameList: SelectEntry[];
   currentTime: bigint;
+  /** Coordinate frame that transforms are applied through to the follow frame. Should be unchanging. */
   fixedFrameId: string | undefined;
-  renderFrameId: string | undefined;
-  followFrameId: string | undefined;
+  /**
+   * The frameId that we _want_ to follow and render in if it exists.
+   */
+  readonly followFrameId: string | undefined;
 
   labelPool: LabelPool;
   markerPool: MarkerPool;
@@ -300,6 +304,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   setSelectedRenderable(selection: PickedRenderable | undefined): void;
 
   addMessageEvent(messageEvent: Readonly<MessageEvent<unknown>>): void;
+
+  /**  Set desired render/display frame, will render using fallback if id is undefined or frame does not exist */
+  setFollowFrameId(frameId: string | undefined): void;
 
   /** Match the behavior of `tf::Transformer` by stripping leading slashes from
    * frame_ids. This preserves compatibility with earlier versions of ROS while

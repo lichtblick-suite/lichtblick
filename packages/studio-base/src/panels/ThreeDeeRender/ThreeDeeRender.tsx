@@ -186,9 +186,6 @@ export function ThreeDeeRender(props: {
     () => new Map(),
   );
 
-  // The frame we care about for syncing purposes can be either of these.
-  const effectiveRendererFrameId = renderer?.followFrameId ?? renderer?.renderFrameId;
-
   // Config cameraState
   useEffect(() => {
     const listener = () => {
@@ -206,14 +203,14 @@ export function ThreeDeeRender(props: {
           context.setSharedPanelState({
             cameraState: newCameraState,
             followMode: config.followMode,
-            followTf: effectiveRendererFrameId,
+            followTf: renderer.followFrameId,
           });
         }
       }
     };
     renderer?.addListener("cameraMove", listener);
     return () => void renderer?.removeListener("cameraMove", listener);
-  }, [config.scene.syncCamera, config.followMode, context, effectiveRendererFrameId, renderer]);
+  }, [config.scene.syncCamera, config.followMode, context, renderer?.followFrameId, renderer]);
 
   // Handle user changes in the settings sidebar
   const actionHandler = useCallback(
@@ -542,7 +539,7 @@ export function ThreeDeeRender(props: {
       renderer.setCameraSyncError(
         `Follow mode must be ${sharedPanelState.followMode} to sync camera.`,
       );
-    } else if (sharedPanelState.followTf !== effectiveRendererFrameId) {
+    } else if (sharedPanelState.followTf !== renderer.followFrameId) {
       renderer.setCameraSyncError(
         `Display frame must be ${sharedPanelState.followTf} to sync camera.`,
       );
@@ -559,8 +556,8 @@ export function ThreeDeeRender(props: {
   }, [
     config.scene.syncCamera,
     config.followMode,
-    effectiveRendererFrameId,
     renderer,
+    renderer?.followFrameId,
     sharedPanelState,
   ]);
 
@@ -643,7 +640,7 @@ export function ThreeDeeRender(props: {
   useEffect(() => {
     const onStart = () => setPublishActive(true);
     const onSubmit = (event: PublishClickEvent & { type: "foxglove.publish-submit" }) => {
-      const frameId = renderer?.renderFrameId;
+      const frameId = renderer?.followFrameId;
       if (frameId == undefined) {
         log.warn("Unable to publish, renderFrameId is not set");
         return;
@@ -698,7 +695,7 @@ export function ThreeDeeRender(props: {
     context,
     latestPublishConfig,
     publishTopics,
-    renderer?.renderFrameId,
+    renderer?.followFrameId,
     renderer?.publishClickTool,
   ]);
 

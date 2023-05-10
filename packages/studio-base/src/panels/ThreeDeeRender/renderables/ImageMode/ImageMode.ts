@@ -701,7 +701,7 @@ export class ImageMode
     }
 
     // set the render frame id to the camera info's frame id
-    this.renderer.followFrameId = this.#getCurrentFrameId();
+    this.renderer.setFollowFrameId(this.#getCurrentFrameId());
     if (this.#cameraModel?.model) {
       this.#camera.updateCamera(this.#cameraModel.model);
       this.#updateAnnotationsScale();

@@ -15,6 +15,9 @@ export enum AddTransformResult {
   CYCLE_DETECTED,
 }
 
+// Coordinate frames named in [REP-105](https://www.ros.org/reps/rep-0105.html)
+const DEFAULT_FRAME_IDS = ["base_link", "odom", "map", "earth"];
+
 /**
  * TransformTree is a collection of coordinate frames with convenience methods
  * for getting and creating frames and adding transforms between frames.
@@ -245,6 +248,35 @@ export class TransformTree {
 
     return output;
   }
+
+  /** Get heuristically most valid follow frame Id */
+  public getDefaultFollowFrameId(): string | undefined {
+    const allFrames = this.frames();
+    if (allFrames.size === 0) {
+      return undefined;
+    }
+
+    // Prefer frames from [REP-105](https://www.ros.org/reps/rep-0105.html)
+    for (const frameId of DEFAULT_FRAME_IDS) {
+      const frame = this.frame(frameId);
+      if (frame) {
+        return frame.id;
+      }
+    }
+
+    // Choose the root frame with the most children
+    const rootsToCounts = new Map<string, number>();
+    for (const frame of allFrames.values()) {
+      const root = frame.root();
+      const rootId = root.id;
+
+      rootsToCounts.set(rootId, (rootsToCounts.get(rootId) ?? 0) + 1);
+    }
+    const rootsArray = Array.from(rootsToCounts.entries());
+    const rootId = rootsArray.sort((a, b) => b[1] - a[1])[0]?.[0];
+    return rootId;
+  }
+
   #checkParentForCycle(frameId: string, parentFrameId: string): boolean {
     if (frameId === parentFrameId) {
       return true;
