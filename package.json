@@ -93,7 +93,7 @@
     "cross-env": "7.0.3",
     "depcheck": "1.4.3",
     "electron": "24.1.2",
-    "electron-builder": "24.3.0",
+    "electron-builder": "24.4.0",
     "eslint": "8.40.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-import-resolver-webpack": "0.13.2",
