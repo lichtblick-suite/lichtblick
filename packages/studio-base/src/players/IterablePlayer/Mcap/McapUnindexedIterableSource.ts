@@ -47,7 +47,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
     if (this.#options.size > 1024 * 1024 * 1024) {
       // This provider uses a simple approach of loading everything into memory up front, so we
       // can't handle large files
-      throw new Error("Unable to stream MCAP file; too large");
+      throw new Error("Unable to open unindexed MCAP file; unindexed files are limited to 1GB");
     }
     const decompressHandlers = await loadDecompressHandlers();
 
