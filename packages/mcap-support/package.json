@@ -35,7 +35,7 @@
     "@foxglove/wasm-zstd": "1.0.1",
     "@mcap/core": "1.2.1",
     "@protobufjs/base64": "1.1.2",
-    "flatbuffers": "23.3.3",
+    "flatbuffers": "23.5.8",
     "flatbuffers_reflection": "0.0.4",
     "protobufjs": "patch:protobufjs@7.2.3#../../patches/protobufjs.patch"
   }
