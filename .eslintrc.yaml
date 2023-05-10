@@ -151,7 +151,6 @@ overrides:
     files:
       # Ignore existing implementations of @mui/styled
       - "packages/studio-base/src/components/DataSourceSidebar/DataSourceSidebar.tsx"
-      - "packages/studio-base/src/components/EmptyPanelLayout.tsx"
       - "packages/studio-base/src/components/ExpandingToolbar.tsx"
       - "packages/studio-base/src/components/ExtensionDetails.tsx"
       - "packages/studio-base/src/components/ExtensionsSettings/index.tsx"
