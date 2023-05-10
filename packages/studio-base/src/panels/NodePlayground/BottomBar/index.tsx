@@ -18,11 +18,13 @@ import {
   Paper,
   Tab,
   Tabs,
-  styled as muiStyled,
   Divider,
   Collapse,
+  tabClasses,
+  badgeClasses,
 } from "@mui/material";
 import { useState, useRef, useEffect, ReactElement } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
@@ -42,38 +44,40 @@ type BottomBarModes = "logs" | "diagnostics" | "closed";
 
 const TAB_HEIGHT = 36;
 
-const StyledTab = muiStyled(Tab)(({ theme }) => ({
-  minHeight: "auto",
-  minWidth: theme.spacing(8),
-  padding: theme.spacing(1.5, 2),
-  color: theme.palette.text.secondary,
+const useStyles = makeStyles()((theme) => ({
+  badge: {
+    alignItems: "center",
 
-  "&.Mui-selected": {
-    color: theme.palette.text.primary,
+    [`.${badgeClasses.badge}`]: {
+      margin: theme.spacing(-0.25, 0, -0.25, 1),
+      position: "relative",
+      transform: "none",
+
+      [`&.${badgeClasses.invisible}`]: {
+        display: "none",
+      },
+    },
   },
-}));
-
-const StyledTabs = muiStyled(Tabs)({
-  minHeight: TAB_HEIGHT,
-  position: "relative",
-  bottom: -1,
-});
-
-const StyledBadge = muiStyled(Badge)(({ theme }) => ({
-  alignItems: "center",
-
-  ".MuiBadge-badge": {
-    margin: theme.spacing(-0.25, 0, -0.25, 1),
+  tabs: {
+    minHeight: TAB_HEIGHT,
     position: "relative",
-    transform: "none",
+    bottom: -1,
 
-    "&.MuiBadge-invisible": {
-      display: "none",
+    [`.${tabClasses.root}`]: {
+      minHeight: "auto",
+      minWidth: theme.spacing(8),
+      padding: theme.spacing(1.5, 2),
+      color: theme.palette.text.secondary,
+
+      "&.Mui-selected": {
+        color: theme.palette.text.primary,
+      },
     },
   },
 }));
 
 const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactElement => {
+  const { classes } = useStyles();
   const [bottomBarDisplay, setBottomBarDisplay] = useState<BottomBarModes>("closed");
   const [autoScroll, setAutoScroll] = useState(true);
 
@@ -109,36 +113,43 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
           gap={1}
           paddingRight={1}
         >
-          <StyledTabs
+          <Tabs
+            className={classes.tabs}
             textColor="inherit"
             value={bottomBarDisplay !== "closed" ? bottomBarDisplay : false}
             onChange={handleChange}
           >
-            <StyledTab
+            <Tab
               label={
-                <StyledBadge
+                <Badge
                   color="error"
                   badgeContent={diagnostics.length}
                   invisible={diagnostics.length === 0}
+                  className={classes.badge}
                 >
                   Problems
-                </StyledBadge>
+                </Badge>
               }
               value="diagnostics"
               data-testid="np-errors"
               onClick={() => handleClick("diagnostics")}
             />
-            <StyledTab
+            <Tab
               label={
-                <StyledBadge color="error" badgeContent={logs.length} invisible={logs.length === 0}>
+                <Badge
+                  color="error"
+                  className={classes.badge}
+                  badgeContent={logs.length}
+                  invisible={logs.length === 0}
+                >
                   Logs
-                </StyledBadge>
+                </Badge>
               }
               value="logs"
               data-testid="np-logs"
               onClick={() => handleClick("logs")}
             />
-          </StyledTabs>
+          </Tabs>
           <Stack direction="row" alignItems="center" gap={0.5}>
             {bottomBarDisplay === "logs" && (
               <Button

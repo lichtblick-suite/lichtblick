@@ -22,8 +22,8 @@ import {
   Input,
   Link,
   Typography,
+  inputClasses,
   useTheme,
-  styled as muiStyled,
 } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -94,27 +94,20 @@ const useStyles = makeStyles()((theme) => ({
   emptyState: {
     backgroundColor: theme.palette.background.default,
   },
-}));
-
-const UnsavedDot = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "isSaved",
-})<{
-  isSaved: boolean;
-}>(({ isSaved, theme }) => ({
-  display: isSaved ? "none" : "initial",
-  width: 6,
-  height: 6,
-  borderRadius: "50%",
-  top: "50%",
-  position: "absolute",
-  right: theme.spacing(1),
-  transform: "translateY(-50%)",
-  backgroundColor: theme.palette.text.secondary,
-}));
-
-const StyledInput = muiStyled(Input)(({ theme }) => ({
-  ".MuiInput-input": {
-    padding: theme.spacing(1),
+  unsavedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+    top: "50%",
+    position: "absolute",
+    right: theme.spacing(1),
+    transform: "translateY(-50%)",
+    backgroundColor: theme.palette.text.secondary,
+  },
+  input: {
+    [`.${inputClasses.input}`]: {
+      padding: theme.spacing(1),
+    },
   },
 }));
 
@@ -175,6 +168,7 @@ const userNodeSelector = (state: LayoutState) =>
 
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
+  const { classes } = useStyles();
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
@@ -366,7 +360,8 @@ function NodePlayground(props: Props) {
             )}
             {selectedNodeId != undefined && selectedNode && (
               <div style={{ position: "relative" }}>
-                <StyledInput
+                <Input
+                  className={classes.input}
                   size="small"
                   disableUnderline
                   placeholder="script name"
@@ -382,7 +377,7 @@ function NodePlayground(props: Props) {
                   }}
                   inputProps={{ spellCheck: false, style: inputStyle }}
                 />
-                <UnsavedDot isSaved={isNodeSaved} />
+                {!isNodeSaved && <div className={classes.unsavedDot} />}
               </div>
             )}
             <IconButton
