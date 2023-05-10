@@ -169,6 +169,4 @@ overrides:
       - "packages/studio-base/src/panels/Image/components/ZoomMenu.tsx"
       - "packages/studio-base/src/panels/Publish/index.tsx"
       - "packages/studio-base/src/panels/RawMessages/DiffSpan.tsx"
-      - "packages/studio-base/src/panels/diagnostics/DiagnosticStatus.tsx"
-      - "packages/studio-base/src/panels/diagnostics/DiagnosticSummary.tsx"
       - "packages/studio-base/src/stories/storyHelpers.tsx"

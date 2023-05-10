@@ -21,12 +21,14 @@ import {
   TableRow,
   IconButton,
   Typography,
-  styled as muiStyled,
+  tableRowClasses,
+  iconButtonClasses,
 } from "@mui/material";
 import { clamp } from "lodash";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
+import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
@@ -82,6 +84,56 @@ const allowedTags = [
   "H6",
 ];
 
+const useStyles = makeStyles()((theme) => ({
+  resizeHandle: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 12,
+    marginLeft: -6,
+    cursor: "col-resize",
+
+    "&:hover, &:active, &:focus": {
+      outline: "none",
+
+      "&::after": {
+        content: '""',
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 6,
+        marginLeft: -2,
+        width: 4,
+        backgroundColor: theme.palette.action.focus,
+      },
+    },
+  },
+  table: {
+    "@media (pointer: fine)": {
+      [`.${tableRowClasses.root} .${iconButtonClasses.root}`]: { visibility: "hidden" },
+      [`.${tableRowClasses.root}:hover .${iconButtonClasses.root}`]: { visibility: "visible" },
+    },
+  },
+  tableHeaderRow: {
+    backgroundColor: theme.palette.background.paper,
+  },
+  htmlTableCell: {
+    "h1, h2, h3, h4, h5, h6": {
+      fontFamily: theme.typography.subtitle2.fontFamily,
+      fontSize: theme.typography.subtitle2.fontSize,
+      lineHeight: theme.typography.subtitle2.lineHeight,
+      letterSpacing: theme.typography.subtitle2.letterSpacing,
+      fontWeight: 800,
+      margin: 0,
+    },
+  },
+  iconButton: {
+    "&:hover, &:active, &:focus": {
+      backgroundColor: "transparent",
+    },
+  },
+}));
+
 function sanitize(value: string): { __html: string } {
   return {
     __html: sanitizeHtml(value, {
@@ -94,58 +146,6 @@ function sanitize(value: string): { __html: string } {
     }),
   };
 }
-
-const ResizeHandle = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "splitFraction",
-})<{ splitFraction: number }>(({ theme, splitFraction }) => ({
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  width: 12,
-  marginLeft: -6,
-  cursor: "col-resize",
-  left: `${100 * splitFraction}%`,
-
-  "&:hover, &:active, &:focus": {
-    outline: "none",
-
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      top: 0,
-      bottom: 0,
-      left: 6,
-      marginLeft: -2,
-      width: 4,
-      backgroundColor: theme.palette.action.focus,
-    },
-  },
-}));
-
-const StyledTable = muiStyled(Table)({
-  "@media (pointer: fine)": {
-    ".MuiTableRow-root .MuiIconButton-root": { visibility: "hidden" },
-    ".MuiTableRow-root:hover .MuiIconButton-root": { visibility: "visible" },
-  },
-});
-
-const HeaderTableRow = muiStyled(TableRow)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-}));
-
-const HTMLTableCell = muiStyled(TableCell)(({ theme }) => ({
-  "h1, h2, h3, h4, h5, h6": {
-    ...theme.typography.subtitle2,
-    fontWeight: 800,
-    margin: 0,
-  },
-}));
-
-const StyledIconButton = muiStyled(IconButton)({
-  "&:hover, &:active, &:focus": {
-    backgroundColor: "transparent",
-  },
-});
 
 // preliminary check to avoid expensive operations when there is no html
 const HAS_ANY_HTML = new RegExp(`<(${allowedTags.join("|")})`);
@@ -174,6 +174,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
     openSiblingPanel,
     splitFraction = 0.5,
   } = props;
+  const { classes } = useStyles();
   const tableRef = useRef<HTMLTableElement>(ReactNull);
 
   const resizeMouseDown = useCallback((event: React.MouseEvent<Element>) => {
@@ -219,7 +220,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
       openPlotPanelIconElem?: React.ReactNode,
     ): ReactElement => {
       if (html) {
-        return <HTMLTableCell dangerouslySetInnerHTML={html} />;
+        return <TableCell className={classes.htmlTableCell} dangerouslySetInnerHTML={html} />;
       }
 
       // Apply numeric precision to the value if requested and it can be parsed
@@ -246,7 +247,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
         </>
       );
     },
-    [numericPrecision],
+    [classes.htmlTableCell, numericPrecision],
   );
 
   const renderKeyValueSections = useCallback((): React.ReactNode => {
@@ -260,7 +261,8 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
       let openPlotPanelIconElem = undefined;
       if (value.length > 0) {
         openPlotPanelIconElem = !isNaN(Number(value)) ? (
-          <StyledIconButton
+          <IconButton
+            className={classes.iconButton}
             title="Open in Plot panel"
             color="inherit"
             size="small"
@@ -268,16 +270,17 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
             onClick={() => openSiblingPlotPanel(openSiblingPanel, valuePath)}
           >
             <ShowChartIcon fontSize="inherit" />
-          </StyledIconButton>
+          </IconButton>
         ) : (
-          <StyledIconButton
+          <IconButton
+            className={classes.iconButton}
             title="Open in State Transitions panel"
             color="inherit"
             size="small"
             onClick={() => openSiblingStateTransitionsPanel(openSiblingPanel, valuePath)}
           >
             <PowerInputIcon fontSize="inherit" />
-          </StyledIconButton>
+          </IconButton>
         );
       }
       return (
@@ -287,7 +290,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
         </TableRow>
       );
     });
-  }, [info.status, openSiblingPanel, renderKeyValueCell, topicToRender]);
+  }, [classes.iconButton, info.status, openSiblingPanel, renderKeyValueCell, topicToRender]);
 
   const STATUS_COLORS: Record<number, string> = {
     [LEVELS.OK]: "success.main",
@@ -298,12 +301,15 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
 
   return (
     <div>
-      <ResizeHandle
-        splitFraction={splitFraction}
+      <div
+        className={classes.resizeHandle}
+        style={{
+          left: `${100 * splitFraction}%`,
+        }}
         onMouseDown={resizeMouseDown}
         data-testid-resizehandle
       />
-      <StyledTable size="small" ref={tableRef}>
+      <Table className={classes.table} size="small" ref={tableRef}>
         <TableBody>
           {/* Use a dummy row to fix the column widths */}
           <TableRow style={{ height: 0 }}>
@@ -313,7 +319,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
             />
             <TableCell padding="none" style={{ borderLeft: "none" }} />
           </TableRow>
-          <HeaderTableRow>
+          <TableRow className={classes.tableHeaderRow}>
             <TableCell variant="head" data-testid="DiagnosticStatus-display-name" colSpan={2}>
               <Tooltip
                 arrow
@@ -337,7 +343,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
                 </Typography>
               </Tooltip>
             </TableCell>
-          </HeaderTableRow>
+          </TableRow>
           <TableRow hover>
             <TableCell colSpan={2} padding="checkbox">
               <Stack
@@ -356,7 +362,8 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
                   {info.status.message}
                 </Typography>
                 <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
-                  <StyledIconButton
+                  <IconButton
+                    className={classes.iconButton}
                     title="Open in State Transitions panel"
                     size="small"
                     onClick={() =>
@@ -367,14 +374,14 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
                     }
                   >
                     <PowerInputIcon fontSize="inherit" />
-                  </StyledIconButton>
+                  </IconButton>
                 </Stack>
               </Stack>
             </TableCell>
           </TableRow>
           {renderKeyValueSections()}
         </TableBody>
-      </StyledTable>
+      </Table>
     </div>
   );
 }

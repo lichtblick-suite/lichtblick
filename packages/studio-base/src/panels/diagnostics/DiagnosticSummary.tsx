@@ -15,18 +15,22 @@ import PushPinIcon from "@mui/icons-material/PushPin";
 import {
   ListItem,
   ListItemText,
-  styled as muiStyled,
   ListItemButton,
   MenuItem,
   Select,
   InputBase,
   IconButton,
+  iconButtonClasses,
+  listItemTextClasses,
+  selectClasses,
+  inputBaseClasses,
 } from "@mui/material";
 import { produce } from "immer";
 import { compact, set, uniq } from "lodash";
 import { CSSProperties, useCallback, useEffect, useMemo } from "react";
 import { AutoSizer } from "react-virtualized";
 import { FixedSizeList as List } from "react-window";
+import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
 import { SettingsTreeAction } from "@foxglove/studio";
@@ -66,43 +70,41 @@ const MESSAGE_COLORS: { [key: string]: string } = {
   stale: "text.secondary",
 };
 
-const StyledListItemButton = muiStyled(ListItemButton, {
-  shouldForwardProp: (prop) => prop !== "isPinned",
-})<{
-  isPinned: boolean;
-}>(({ isPinned, theme }) => ({
-  padding: 0,
+const useStyles = makeStyles()((theme) => ({
+  listItemButton: {
+    padding: 0,
 
-  ".MuiIconButton-root": {
-    visibility: isPinned ? "visibile" : "hidden",
+    [`.${iconButtonClasses.root}`]: {
+      visibility: "hidden",
 
-    "&:hover": {
-      backgroundColor: "transparent",
+      "&:hover": {
+        backgroundColor: "transparent",
+      },
+    },
+    [`.${listItemTextClasses.root}`]: {
+      gap: theme.spacing(1),
+      display: "flex",
+    },
+    [`&:hover .${iconButtonClasses.root}`]: {
+      visibility: "visible",
     },
   },
-  ".MuiListItemText-root": {
-    gap: theme.spacing(1),
-    display: "flex",
-  },
-  "&:hover .MuiIconButton-root": {
-    visibility: "visible",
-  },
-}));
-
-const StyledSelect = muiStyled(Select)(() => ({
-  ".MuiInputBase-input.MuiSelect-select.MuiInputBase-inputSizeSmall": {
-    paddingTop: 0,
-    paddingBottom: 0,
-    minWidth: 40,
-  },
-  ".MuiListItemText-root": {
-    marginTop: 0,
-    marginBottom: 0,
+  select: {
+    [`.${inputBaseClasses.input}.${selectClasses.select}.${inputBaseClasses.inputSizeSmall}`]: {
+      paddingTop: 0,
+      paddingBottom: 0,
+      minWidth: 40,
+    },
+    [`.${listItemTextClasses.root}`]: {
+      marginTop: 0,
+      marginBottom: 0,
+    },
   },
 }));
 
 const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
   const { info, isPinned, onClick, onClickPin } = props;
+  const { classes } = useStyles();
 
   const handleClick = useCallback(() => {
     onClick(info);
@@ -116,13 +118,14 @@ const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
 
   return (
     <ListItem dense disablePadding data-testid-diagnostic-row>
-      <StyledListItemButton disableGutters isPinned={isPinned} onClick={handleClick}>
+      <ListItemButton className={classes.listItemButton} disableGutters onClick={handleClick}>
         <IconButton
           size="small"
           onClick={(event) => {
             handleClickPin();
             event.stopPropagation();
           }}
+          style={isPinned ? { visibility: "visible" } : undefined}
         >
           <PushPinIcon fontSize="small" color={isPinned ? "inherit" : "disabled"} />
         </IconButton>
@@ -134,7 +137,7 @@ const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
           }}
           style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         />
-      </StyledListItemButton>
+      </ListItemButton>
     </ListItem>
   );
 });
@@ -152,6 +155,7 @@ const ALLOWED_DATATYPES: string[] = [
 
 function DiagnosticSummary(props: Props): JSX.Element {
   const { config, saveConfig } = props;
+  const { classes } = useStyles();
   const { topics } = useDataSourceInfo();
   const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
   const { openSiblingPanel } = usePanelContext();
@@ -297,7 +301,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
     <Stack flex="auto">
       <PanelToolbar>
         <Stack flex="auto" direction="row" gap={1}>
-          <StyledSelect
+          <Select
+            className={classes.select}
             value={minLevel}
             id="status-filter-menu"
             color="secondary"
@@ -316,7 +321,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
                 />
               </MenuItem>
             ))}
-          </StyledSelect>
+          </Select>
           <InputBase
             value={hardwareIdFilter}
             placeholder="Filter"
