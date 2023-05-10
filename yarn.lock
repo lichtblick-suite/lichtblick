@@ -2655,7 +2655,7 @@ __metadata:
     react-markdown: 8.0.7
     react-monaco-editor: 0.52.0
     react-mosaic-component: 5.3.0
-    react-refresh-typescript: 2.0.8
+    react-refresh-typescript: 2.0.9
     react-resize-detector: 9.1.0
     react-table: 7.8.0
     react-transition-group: 4.4.5
@@ -2730,7 +2730,7 @@ __metadata:
     quicklookjs: 0.0.3
     react: 17.0.2
     react-dom: 17.0.2
-    react-refresh-typescript: 2.0.8
+    react-refresh-typescript: 2.0.9
     react-use: 17.4.0
     tinycolor2: 1.6.0
     tss-react: 4.8.2
@@ -17733,13 +17733,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-refresh-typescript@npm:2.0.8":
-  version: 2.0.8
-  resolution: "react-refresh-typescript@npm:2.0.8"
+"react-refresh-typescript@npm:2.0.9":
+  version: 2.0.9
+  resolution: "react-refresh-typescript@npm:2.0.9"
   peerDependencies:
     react-refresh: 0.10.x || 0.11.x || 0.12.x || 0.13.x || 0.14.x
     typescript: ^4.8 || ^5.0
-  checksum: 6c08146e52b03616aa5597bbd03fdaaeddfee18e9edcd635e32704cf816300b4737ab77e5760a2fdc69a816e4827f1d1535fc9d852dba5b3965db6ba1aaa7646
+  checksum: 7690d8abe8c2886ced1e354d48c61323839a373cb55b51abb5669c41721e8f0b2d9332cd2290b4661faf551c0cbc95f142368fdfcbcd82b17f66bb97b4b8ac73
   languageName: node
   linkType: hard
 
