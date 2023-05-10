@@ -2621,7 +2621,7 @@ __metadata:
     i18next: 22.4.15
     i18next-browser-languagedetector: 7.0.1
     idb: 7.1.1
-    idb-keyval: 6.2.0
+    idb-keyval: 6.2.1
     immer: 10.0.1
     intervals-fn: 3.0.3
     jest-canvas-mock: 2.5.0
@@ -12831,12 +12831,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"idb-keyval@npm:6.2.0":
-  version: 6.2.0
-  resolution: "idb-keyval@npm:6.2.0"
-  dependencies:
-    safari-14-idb-fix: ^3.0.0
-  checksum: ddd58f95829ff734e3e83b29608709cdfba38e5795b1f6261ff1afc582ce48f475d0c827d7cf32aacbc5ea6b13d00c2d4a2f7240afccd5252565abeafbd7b990
+"idb-keyval@npm:6.2.1":
+  version: 6.2.1
+  resolution: "idb-keyval@npm:6.2.1"
+  checksum: 7c0836f832096086e99258167740181132a71dd2694c8b8454a4f5ec69114ba6d70983115153306f0b6de1c8d3bad04f67eed3dff8f50c96815b9985d6d78470
   languageName: node
   linkType: hard
 
@@ -18584,13 +18582,6 @@ __metadata:
   dependencies:
     mri: ^1.1.0
   checksum: 80a2c4ca086c25cdb62cb084a38a0cc72afc657ed4b1874d6e7b3fd0b7f748cf806567ece6d68f13e19d0ed1779cd226ca8c24d8fd7ae692bf09bff1e1966522
-  languageName: node
-  linkType: hard
-
-"safari-14-idb-fix@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "safari-14-idb-fix@npm:3.0.0"
-  checksum: 30d5baf3d9a17b52842b2c3fd3f0001fde7095a36191b6140ac78c19e8e1ff4b2607b9beb3b066c6bec107ccb5399c96e29748a6f5fcd592425f806f5e36f759
   languageName: node
   linkType: hard
 
