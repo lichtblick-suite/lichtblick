@@ -480,6 +480,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     for (const extension of this.sceneExtensions.values()) {
       extension.removeAllRenderables();
     }
+    this.queueAnimationFrame();
   }
 
   #allFramesCursor: {
