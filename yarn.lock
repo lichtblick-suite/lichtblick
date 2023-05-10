@@ -2622,7 +2622,7 @@ __metadata:
     i18next-browser-languagedetector: 7.0.1
     idb: 7.1.1
     idb-keyval: 6.2.1
-    immer: 10.0.1
+    immer: 10.0.2
     intervals-fn: 3.0.3
     jest-canvas-mock: 2.5.0
     jest-diff: 29.5.0
@@ -12866,10 +12866,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:10.0.1":
-  version: 10.0.1
-  resolution: "immer@npm:10.0.1"
-  checksum: 24ab640e9d928385047f6f31bc77966117087236faf1a1f52b6b9a0159f78d543f648fecbf04d5e8c782a6f6cddd6eeb9e09c3b616a104632e701c7a22735654
+"immer@npm:10.0.2":
+  version: 10.0.2
+  resolution: "immer@npm:10.0.2"
+  checksum: 525a3b14210d02ae420c3b9f6ca14f7e9bcf625611d1356e773e7739f14c7c8de50dac442e6c7de3a6e24a782f7b792b6b8666bc0b3f00269d21a95f8f68ca84
   languageName: node
   linkType: hard
 
