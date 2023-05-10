@@ -47,6 +47,6 @@
     "tss-react": "4.8.2",
     "utif": "3.1.0",
     "webpack": "5.82.0",
-    "webpack-dev-server": "4.13.3"
+    "webpack-dev-server": "4.15.0"
   }
 }
