@@ -72,7 +72,7 @@
     "@actions/tool-cache": "2.0.1",
     "@babel/core": "7.21.8",
     "@babel/preset-env": "7.21.5",
-    "@babel/preset-typescript": "7.21.4",
+    "@babel/preset-typescript": "7.21.5",
     "@foxglove/eslint-plugin": "0.22.1",
     "@foxglove/eslint-plugin-studio": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
