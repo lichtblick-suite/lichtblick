@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Dialog, DialogTitle, IconButton, Typography, useTheme } from "@mui/material";
+import { Dialog, DialogTitle, IconButton, Typography, useTheme } from "@mui/material";
 import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -18,7 +18,10 @@ const useStyles = makeStyles()((theme) => ({
     marginBlockEnd: theme.spacing(3),
     marginInline: theme.spacing(3),
   },
-  paper: { maxWidth: "700px", width: "70%" },
+  paper: {
+    maxWidth: 700,
+    width: "70%",
+  },
   text: {
     backgroundColor: theme.palette.background.default,
     color: theme.palette.text.primary,
@@ -27,6 +30,11 @@ const useStyles = makeStyles()((theme) => ({
     padding: theme.spacing(1),
     overflowY: "auto",
     whiteSpace: "pre-wrap",
+  },
+  iconButton: {
+    position: "absolute",
+    right: theme.spacing(1),
+    top: theme.spacing(1),
   },
 }));
 
@@ -48,7 +56,7 @@ export default function NotificationModal({
 
   const detailsElement = useMemo(() => {
     if (details instanceof Error) {
-      return <Box className={classes.text}>{details.stack}</Box>;
+      return <div className={classes.text}>{details.stack}</div>;
     } else if (details != undefined && details !== "") {
       return (
         <Typography style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
@@ -65,18 +73,14 @@ export default function NotificationModal({
   return (
     <Dialog classes={{ paper: classes.paper }} fullWidth open onClose={() => onRequestClose?.()}>
       <DialogTitle color={displayPropsBySeverity[severity]}>{message}</DialogTitle>
-      <Box className={classes.container}>
+      <div className={classes.container}>
         {subText && <Typography mb={3}>{subText}</Typography>}
         {detailsElement}
-      </Box>
+      </div>
       <IconButton
         aria-label="close"
         onClick={() => onRequestClose?.()}
-        style={{
-          position: "absolute",
-          right: 8,
-          top: 8,
-        }}
+        className={classes.iconButton}
       >
         <CloseIcon />
       </IconButton>

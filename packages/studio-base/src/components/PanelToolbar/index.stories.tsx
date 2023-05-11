@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Database20Filled } from "@fluentui/react-icons";
+// eslint-disable-next-line no-restricted-imports
 import { Box } from "@mui/material";
 import { StoryObj, DecoratorFn } from "@storybook/react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Box } from "@mui/material";
+import { useTheme } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, userEvent } from "@storybook/testing-library";
 import { produce } from "immer";
@@ -18,6 +18,7 @@ import {
 } from "@foxglove/studio";
 import { MessagePathInputStoryFixture } from "@foxglove/studio-base/components/MessagePathSyntax/fixture";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
+import Stack from "@foxglove/studio-base/components/Stack";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
@@ -692,36 +693,15 @@ const TopicSettings: SettingsTreeNodes = {
 const FilterSettings: SettingsTreeNodes = {
   matchA: {
     label: "MatchA",
-    children: {
-      childA: {
-        label: "ChildA",
-      },
-      matchA: {
-        label: "MatchA",
-      },
-    },
+    children: { childA: { label: "ChildA" }, matchA: { label: "MatchA" } },
   },
   matchB: {
     label: "MatchB",
-    children: {
-      childB: {
-        label: "ChildB",
-      },
-      matchA: {
-        label: "MatchA",
-      },
-    },
+    children: { childB: { label: "ChildB" }, matchA: { label: "MatchA" } },
   },
   matchC: {
     label: "MatchC",
-    children: {
-      childC: {
-        label: "ChildB",
-      },
-      matchA: {
-        label: "MatchC",
-      },
-    },
+    children: { childC: { label: "ChildB" }, matchA: { label: "MatchC" } },
   },
 };
 
@@ -804,6 +784,7 @@ function makeGridNode(index: number): SettingsTreeNode {
 }
 
 function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
+  const theme = useTheme();
   const [settingsNodes, setSettingsNodes] = useState({ ...nodes });
   const [dynamicNodes, setDynamicNodes] = useState<Record<string, SettingsTreeNode>>({});
 
@@ -863,15 +844,9 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
 
   return (
     <PanelSetup fixture={MessagePathInputStoryFixture}>
-      <Box
-        display="flex"
-        flexDirection="column"
-        width="100%"
-        bgcolor="background.paper"
-        overflow="auto"
-      >
+      <Stack fullWidth overflow="auto" style={{ background: theme.palette.background.paper }}>
         <SettingsTreeEditor settings={settingsTree} />
-      </Box>
+      </Stack>
     </PanelSetup>
   );
 }

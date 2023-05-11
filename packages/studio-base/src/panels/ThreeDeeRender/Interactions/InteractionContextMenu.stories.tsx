@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Box } from "@mui/material";
-import { StoryObj } from "@storybook/react";
+import { useTheme } from "@mui/material";
+import { StoryFn, StoryObj } from "@storybook/react";
 
 import { InteractionContextMenu } from "./InteractionContextMenu";
 
@@ -34,28 +34,31 @@ const sharedProps = {
   selectObject: () => {},
   clickedObjects: [
     {
+      instanceIndex: undefined,
       object: { ...selectedObject, interactionData: { topic: "/foo/bar" } },
-      instanceIndex: undefined,
     },
     {
+      instanceIndex: undefined,
       object: { ...selectedObject, interactionData: { topic: "/foo1/bar" }, id: undefined },
-      instanceIndex: undefined,
     },
-    { object: { ...selectedObject, interactionData: { topic: "/abc/xyz" } }, instanceIndex: 10 },
     {
+      instanceIndex: 10,
+      object: { ...selectedObject, interactionData: { topic: "/abc/xyz" } },
+    },
+    {
+      instanceIndex: 10,
       object: {
         ...selectedObject,
-        id: undefined,
         interactionData: { topic: "/some_topic_name/nested_name/with_very_very_very_longer_name/" },
+        id: undefined,
       },
-      instanceIndex: 10,
     },
     {
+      instanceIndex: 10,
       object: {
         ...selectedObject,
         interactionData: { topic: "/some_topic/with_slightly_longer_names" },
       },
-      instanceIndex: 10,
     },
   ],
   clickedPosition: { clientX: 100, clientY: 200 },
@@ -64,28 +67,27 @@ const sharedProps = {
 export default {
   title: "panels/ThreeDeeRender/Interactions/InteractionContextMenu",
   component: InteractionContextMenu,
+  decorators: [
+    (Story: StoryFn): JSX.Element => {
+      const theme = useTheme();
+
+      return (
+        <div
+          style={{ height: "100vh", width: "100vh", background: theme.palette.background.default }}
+        >
+          <Story />
+        </div>
+      );
+    },
+  ],
 };
 
 export const Light: StoryObj = {
-  render: function Story() {
-    return (
-      <Box height="100vh" width="100vh" bgcolor="background.default">
-        <InteractionContextMenu onClose={() => {}} {...sharedProps} />
-      </Box>
-    );
-  },
-
+  render: () => <InteractionContextMenu onClose={() => {}} {...sharedProps} />,
   parameters: { colorScheme: "light" },
 };
 
 export const Dark: StoryObj = {
-  render: function Story() {
-    return (
-      <Box height="100vh" width="100vh" bgcolor="background.default">
-        <InteractionContextMenu onClose={() => {}} {...sharedProps} />
-      </Box>
-    );
-  },
-
+  render: () => <InteractionContextMenu onClose={() => {}} {...sharedProps} />,
   parameters: { colorScheme: "dark" },
 };

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Box, Stack } from "@mui/material";
+import { makeStyles } from "tss-react/mui";
 
 import { useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -21,6 +21,7 @@ import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/par
 import { useCachedGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -29,12 +30,21 @@ import Table from "./Table";
 type Config = { topicPath: string };
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
+const useStyles = makeStyles()({
+  inputWrapper: {
+    width: "100%",
+    lineHeight: "20px",
+  },
+  monospace: {
+    fontFamily: fonts.MONOSPACE,
+  },
+});
+
 function TablePanel({ config, saveConfig }: Props) {
   const { topicPath } = config;
+  const { classes } = useStyles();
   const onTopicPathChange = React.useCallback(
-    (newTopicPath: string) => {
-      saveConfig({ topicPath: newTopicPath });
-    },
+    (newTopicPath: string) => saveConfig({ topicPath: newTopicPath }),
     [saveConfig],
   );
 
@@ -52,21 +62,21 @@ function TablePanel({ config, saveConfig }: Props) {
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
       <PanelToolbar>
-        <Box width="100%" lineHeight="20px">
+        <div className={classes.inputWrapper}>
           <MessagePathInput
             index={0}
             path={topicPath}
             onChange={onTopicPathChange}
             inputStyle={{ height: 20 }}
           />
-        </Box>
+        </div>
       </PanelToolbar>
       {topicPath.length === 0 && <EmptyState>No topic selected</EmptyState>}
       {topicPath.length !== 0 && cachedMessages.length === 0 && (
         <EmptyState>Waiting for next message</EmptyState>
       )}
       {topicPath.length !== 0 && firstCachedMessage && (
-        <Stack overflow="auto" fontFamily={fonts.MONOSPACE}>
+        <Stack overflow="auto" className={classes.monospace}>
           <Table value={firstCachedMessage.value} accessorPath="" />
         </Stack>
       )}

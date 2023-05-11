@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Box } from "@mui/material";
+import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
@@ -19,10 +19,13 @@ import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceC
 import DataSourceSidebar from "./DataSourceSidebar";
 
 function Wrapper(Story: StoryFn): JSX.Element {
+  const theme = useTheme();
   return (
     <WorkspaceContextProvider>
       <EventsProvider>
-        <Story />
+        <div style={{ height: "100%", backgroundColor: theme.palette.background.paper }}>
+          <Story />
+        </div>
       </EventsProvider>
     </WorkspaceContextProvider>
   );
@@ -95,9 +98,7 @@ export const PlayerNotPresent: StoryObj = {
   render: function Story() {
     return (
       <MockMessagePipelineProvider noActiveData presence={PlayerPresence.NOT_PRESENT}>
-        <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar />
-        </Box>
+        <DataSourceSidebar />
       </MockMessagePipelineProvider>
     );
   },
@@ -119,9 +120,7 @@ export const PlayerIntializing: StoryObj = {
         endTime={END_TIME}
         presence={PlayerPresence.INITIALIZING}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar />
-        </Box>
+        <DataSourceSidebar />
       </MockMessagePipelineProvider>
     );
   },
@@ -167,9 +166,7 @@ export const PlayerReconnecting: StoryObj = {
           },
         ]}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar />
-        </Box>
+        <DataSourceSidebar />
       </MockMessagePipelineProvider>
     );
   },
@@ -192,9 +189,7 @@ export const PlayerPresent: StoryObj = {
         topics={TOPICS}
         presence={PlayerPresence.PRESENT}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar />
-        </Box>
+        <DataSourceSidebar />
       </MockMessagePipelineProvider>
     );
   },
@@ -224,9 +219,7 @@ export const PlayerPresentWithCustomTimezone: StoryObj = {
         topics={TOPICS}
         presence={PlayerPresence.PRESENT}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar />
-        </Box>
+        <DataSourceSidebar />
       </MockMessagePipelineProvider>
     );
   },
@@ -261,9 +254,7 @@ export const WithEvents: StoryObj = {
         presence={PlayerPresence.PRESENT}
       >
         <CurrentUserContext.Provider value={userContextValue}>
-          <Box height="100%" bgcolor="background.paper">
-            <DataSourceSidebar />
-          </Box>
+          <DataSourceSidebar />
         </CurrentUserContext.Provider>
       </MockMessagePipelineProvider>
     );
@@ -305,9 +296,7 @@ export const PlayerWithError: StoryObj = {
           },
         ]}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar />
-        </Box>
+        <DataSourceSidebar />
       </MockMessagePipelineProvider>
     );
   },

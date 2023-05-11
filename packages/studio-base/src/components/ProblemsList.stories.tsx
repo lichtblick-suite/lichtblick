@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Box } from "@mui/material";
+import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
 
 import { fromDate } from "@foxglove/rostime";
@@ -15,11 +15,16 @@ export default {
   title: "components/ProblemsList",
   component: ProblemsList,
   decorators: [
-    (Story: StoryFn): JSX.Element => (
-      <WorkspaceContextProvider>
-        <Story />
-      </WorkspaceContextProvider>
-    ),
+    (Story: StoryFn): JSX.Element => {
+      const theme = useTheme();
+      return (
+        <WorkspaceContextProvider>
+          <div style={{ height: "100%", background: theme.palette.background.paper }}>
+            <Story />
+          </div>
+        </WorkspaceContextProvider>
+      );
+    },
   ],
 };
 
@@ -35,9 +40,7 @@ export const Default: StoryObj = {
         endTime={END_TIME}
         presence={PlayerPresence.INITIALIZING}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <ProblemsList />
-        </Box>
+        <ProblemsList />
       </MockMessagePipelineProvider>
     );
   },
@@ -86,9 +89,7 @@ export const WithErrors: StoryObj = {
           },
         ]}
       >
-        <Box height="100%" bgcolor="background.paper">
-          <ProblemsList />
-        </Box>
+        <ProblemsList />
       </MockMessagePipelineProvider>
     );
   },
