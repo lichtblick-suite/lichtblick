@@ -246,31 +246,27 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
         // and where outline_colors matches the length of points. Fall back to marker.outline_color
         // as needed
         const point = points[i]!;
-        if (this.#cameraModel.projectPixelTo3dPlane(tempVec3, point)) {
-          positions[i * 3 + 0] = tempVec3.x;
-          positions[i * 3 + 1] = tempVec3.y;
-          positions[i * 3 + 2] = tempVec3.z;
-          if (useVertexColors) {
-            const color = hasExactColors
-              ? outlineColors[i >>> 1]!
-              : outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR;
-            colors[i * 4 + 0] = SRGBToLinear(color.r) * 255;
-            colors[i * 4 + 1] = SRGBToLinear(color.g) * 255;
-            colors[i * 4 + 2] = SRGBToLinear(color.b) * 255;
-            colors[i * 4 + 3] = color.a * 255;
-            if (color.a < 1) {
-              hasTransparency = true;
-            }
+        this.#cameraModel.projectPixelTo3dPlane(tempVec3, point);
+
+        positions[i * 3 + 0] = tempVec3.x;
+        positions[i * 3 + 1] = tempVec3.y;
+        positions[i * 3 + 2] = tempVec3.z;
+        if (useVertexColors) {
+          const color = hasExactColors
+            ? outlineColors[i >>> 1]!
+            : outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR;
+          colors[i * 4 + 0] = SRGBToLinear(color.r) * 255;
+          colors[i * 4 + 1] = SRGBToLinear(color.g) * 255;
+          colors[i * 4 + 2] = SRGBToLinear(color.b) * 255;
+          colors[i * 4 + 3] = color.a * 255;
+          if (color.a < 1) {
+            hasTransparency = true;
           }
-          if (i === 0) {
-            shape?.moveTo(tempVec3.x, tempVec3.y);
-          } else {
-            shape?.lineTo(tempVec3.x, tempVec3.y);
-          }
+        }
+        if (i === 0) {
+          shape?.moveTo(tempVec3.x, tempVec3.y);
         } else {
-          positions[i * 3 + 0] = NaN;
-          positions[i * 3 + 1] = NaN;
-          positions[i * 3 + 2] = NaN;
+          shape?.lineTo(tempVec3.x, tempVec3.y);
         }
       }
 

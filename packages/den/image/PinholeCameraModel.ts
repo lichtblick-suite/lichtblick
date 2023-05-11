@@ -67,7 +67,7 @@ export class PinholeCameraModel {
    * ```
    * This holds for both images of a stereo pair.
    */
-  public P: Readonly<Matrix3x4> | undefined;
+  public P: Readonly<Matrix3x4>;
   /**
    * Rectification matrix (stereo cameras only). 3x3 row-major matrix.
    * A rotation matrix aligning the camera coordinate system to the ideal stereo image plane so
@@ -95,7 +95,7 @@ export class PinholeCameraModel {
     if (K.length !== 0 && K.length !== 9) {
       throw new Error(`K.length=${K.length}, expected 9`);
     }
-    if (P.length !== 0 && P.length !== 12) {
+    if (P.length !== 12) {
       throw new Error(`P.length=${K.length}, expected 12`);
     }
     if (R.length !== 0 && R.length !== 9) {
@@ -111,7 +111,7 @@ export class PinholeCameraModel {
     }
     this.D = D8 as Vec8;
     this.K = K.length === 9 ? (K as Matrix3) : [1, 0, 0, 0, 1, 0, 0, 0, 1];
-    this.P = P.length === 12 ? (P as Matrix3x4) : undefined;
+    this.P = P as Matrix3x4;
     this.R = R.length === 9 ? (R as Matrix3) : [1, 0, 0, 0, 1, 0, 0, 0, 1];
     this.width = width;
     this.height = height;
@@ -140,11 +140,8 @@ export class PinholeCameraModel {
    * @returns `true` if the projection was successful, or `false` if the camera
    *   projection matrix `P` is not set.
    */
-  public projectPixelTo3dPlane(out: Vector3, pixel: Readonly<Vector2>): boolean {
+  public projectPixelTo3dPlane(out: Vector3, pixel: Readonly<Vector2>): Vector3 {
     const P = this.P;
-    if (!P) {
-      return false;
-    }
 
     const fx = P[0];
     const fy = P[5];
@@ -157,7 +154,7 @@ export class PinholeCameraModel {
     out.y = (pixel.y - cy - ty) / fy;
     out.z = 1.0;
 
-    return true;
+    return out;
   }
 
   /**
@@ -170,10 +167,8 @@ export class PinholeCameraModel {
    * @returns `true` if the projection was successful, or `false` if the camera
    *   projection matrix `P` is not set.
    */
-  public projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): boolean {
-    if (!this.projectPixelTo3dPlane(out, pixel)) {
-      return false;
-    }
+  public projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): Vector3 {
+    this.projectPixelTo3dPlane(out, pixel);
 
     // Normalize the ray direction
     const invNorm = 1.0 / Math.sqrt(out.x * out.x + out.y * out.y + out.z * out.z);
@@ -181,7 +176,7 @@ export class PinholeCameraModel {
     out.y *= invNorm;
     out.z *= invNorm;
 
-    return true;
+    return out;
   }
 
   /**
@@ -193,12 +188,6 @@ export class PinholeCameraModel {
    * @returns The rectified pixel, a reference to `out`.
    */
   public rectifyPixel(out: Vector2, point: Readonly<Vector2>, iterations = 5): Vector2 {
-    if (!this.P) {
-      out.x = point.x;
-      out.y = point.y;
-      return out;
-    }
-
     const { P, D } = this;
     const [k1, k2, p1, p2, k3] = D;
 
@@ -260,11 +249,8 @@ export class PinholeCameraModel {
    * @returns The unrectified pixel, a reference to `out`
    */
   public unrectifyPixel(out: Vector2, point: Readonly<Vector2>): Vector2 {
-    if (!this.P) {
-      out.x = point.x;
-      out.y = point.y;
-      return out;
-    }
+    out.x = point.x;
+    out.y = point.y;
 
     const { P, R, D, K } = this;
     const fx = P[0];

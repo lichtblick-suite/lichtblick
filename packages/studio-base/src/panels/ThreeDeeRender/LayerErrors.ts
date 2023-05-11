@@ -22,7 +22,7 @@ export class NodeError {
   public errorMessage(): string | undefined {
     if (this.errorsById && this.errorsById.size > 0) {
       const errorMessages = Array.from(this.errorsById.values());
-      return errorMessages.join("\n");
+      return errorMessages.join(`, `);
     } else {
       return undefined;
     }

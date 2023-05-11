@@ -93,10 +93,10 @@ describe("PinholeCameraModel", () => {
     const model = new PinholeCameraModel(makeCameraInfo(640, 480, 90));
     const point = { x: 0, y: 0, z: 0 };
 
-    expect(model.projectPixelTo3dPlane(point, { x: 320, y: 240 })).toBe(true);
+    model.projectPixelTo3dPlane(point, { x: 320, y: 240 });
     expect(point).toEqual({ x: 0, y: 0, z: 1 });
 
-    expect(model.projectPixelTo3dPlane(point, { x: 100, y: 100 })).toBe(true);
+    model.projectPixelTo3dPlane(point, { x: 100, y: 100 });
     expect(point).toMatchObject({
       x: closeTo(-0.6875),
       y: closeTo(-0.4375),
@@ -108,10 +108,10 @@ describe("PinholeCameraModel", () => {
     let model = new PinholeCameraModel(makeCameraInfo(640, 480, 90));
     const ray = { x: 0, y: 0, z: 0 };
 
-    expect(model.projectPixelTo3dRay(ray, { x: 320, y: 240 })).toBe(true);
+    model.projectPixelTo3dRay(ray, { x: 320, y: 240 });
     expect(ray).toEqual({ x: 0, y: 0, z: 1 });
 
-    expect(model.projectPixelTo3dRay(ray, { x: 100, y: 100 })).toBe(true);
+    model.projectPixelTo3dRay(ray, { x: 100, y: 100 });
     expect(ray).toMatchObject({
       x: closeTo(-0.5329517414226601),
       y: closeTo(-0.33915110817805644),
@@ -119,7 +119,7 @@ describe("PinholeCameraModel", () => {
     });
 
     model = new PinholeCameraModel(makeCameraInfo(640, 480, 60));
-    expect(model.projectPixelTo3dRay(ray, { x: 0, y: 0 })).toBe(true);
+    model.projectPixelTo3dRay(ray, { x: 0, y: 0 });
     expect(ray).toMatchObject({
       x: closeTo(-0.4681645887845223),
       y: closeTo(-0.3511234415883917),

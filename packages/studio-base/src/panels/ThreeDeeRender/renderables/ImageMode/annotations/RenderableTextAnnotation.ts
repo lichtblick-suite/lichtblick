@@ -129,9 +129,7 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
     }
 
     if (this.#annotationNeedsUpdate || this.#cameraModelNeedsUpdate) {
-      if (!this.#cameraModel.projectPixelTo3dPlane(this.#label.position, position)) {
-        this.visible = false;
-      }
+      this.#cameraModel.projectPixelTo3dPlane(this.#label.position, position);
     }
 
     this.#annotationNeedsUpdate = false;

@@ -253,7 +253,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
     // If the CameraInfo message contents changed or the settings changed, redraw the wireframe
     if (
-      renderable.userData.cameraModel?.P != undefined &&
+      renderable.userData.cameraModel != undefined &&
       (!dataEqual || !settingsEqual || !renderable.userData.lines)
     ) {
       this.renderer.settings.errors.removeFromTopic(topic, CAMERA_MODEL);

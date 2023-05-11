@@ -77,7 +77,7 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
    */
   #getProjection(): THREE.Matrix4 | undefined {
     const model = this.#model;
-    if (!model?.P) {
+    if (!model) {
       return;
     }
 
@@ -132,7 +132,7 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
    */
   #updateAspectScaledZoom(): void {
     const model = this.#model;
-    if (!model?.P) {
+    if (!model) {
       return;
     }
     // Adapted from https://github.com/ros2/rviz/blob/ee44ccde8a7049073fd1901dd36c1fb69110f726/rviz_default_plugins/src/rviz_default_plugins/displays/camera/camera_display.cpp#L568

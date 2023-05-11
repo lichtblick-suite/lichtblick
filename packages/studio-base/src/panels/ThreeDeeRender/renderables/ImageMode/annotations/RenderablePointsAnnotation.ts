@@ -154,19 +154,16 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
       for (let i = 0; i < points.length; i++) {
         const color = outlineColors[i] ?? fallbackColor;
         const point = points[i]!;
-        if (this.#cameraModel.projectPixelTo3dPlane(tempVec3, point)) {
-          positions[i * 3 + 0] = tempVec3.x;
-          positions[i * 3 + 1] = tempVec3.y;
-          positions[i * 3 + 2] = tempVec3.z;
-          colors[i * 4 + 0] = SRGBToLinear(color?.r ?? 0) * 255;
-          colors[i * 4 + 1] = SRGBToLinear(color?.g ?? 0) * 255;
-          colors[i * 4 + 2] = SRGBToLinear(color?.b ?? 0) * 255;
-          colors[i * 4 + 3] = (color?.a ?? 0) * 255;
-        } else {
-          positions[i * 3 + 0] = NaN;
-          positions[i * 3 + 1] = NaN;
-          positions[i * 3 + 2] = NaN;
-        }
+
+        this.#cameraModel.projectPixelTo3dPlane(tempVec3, point);
+
+        positions[i * 3 + 0] = tempVec3.x;
+        positions[i * 3 + 1] = tempVec3.y;
+        positions[i * 3 + 2] = tempVec3.z;
+        colors[i * 4 + 0] = SRGBToLinear(color?.r ?? 0) * 255;
+        colors[i * 4 + 1] = SRGBToLinear(color?.g ?? 0) * 255;
+        colors[i * 4 + 2] = SRGBToLinear(color?.b ?? 0) * 255;
+        colors[i * 4 + 3] = (color?.a ?? 0) * 255;
       }
       positionAttribute.needsUpdate = true;
       colorAttribute.needsUpdate = true;
