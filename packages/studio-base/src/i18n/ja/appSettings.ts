@@ -36,8 +36,6 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   newNavigation: "新しいナビゲーション",
   newNavigationDescription: "新しいトップナビゲーションバー。",
   restartTheAppForChangesToTakeEffect: "変更を反映するには、アプリを再起動してください。",
-  ros2NativeConnection: "ROS 2ネイティブ接続",
-  ros2NativeConnectionDescription: "非推奨のROS 2ネイティブコネクタを有効にする。",
   layoutDebugging: "レイアウトデバッグ",
   layoutDebuggingDescription:
     "レイアウトストレージの開発およびデバッグ用の追加コントロールを表示する。",

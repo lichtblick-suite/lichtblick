@@ -38,6 +38,4 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   extensions: "扩展",
   about: "关于",
   noExperimentalFeatures: "目前没有实验性的功能。",
-  ros2NativeConnection: "ROS 2 的本地连接",
-  ros2NativeConnectionDescription: "启用已废弃的 ROS 2 本地连接器",
 };

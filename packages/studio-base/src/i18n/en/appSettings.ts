@@ -34,8 +34,6 @@ export const appSettings = {
   newNavigation: "New navigation",
   newNavigationDescription: "New top navigation bar.",
   restartTheAppForChangesToTakeEffect: " Restart the app for changes to take effect.",
-  ros2NativeConnection: "ROS 2 native connection",
-  ros2NativeConnectionDescription: "Enable the deprecated ROS 2 native connector.",
   layoutDebugging: "Layout debugging",
   layoutDebuggingDescription: "Show extra controls for developing and debugging layout storage.",
 };

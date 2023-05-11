@@ -67,18 +67,6 @@ function useFeatures(): Feature[] {
     },
   ];
 
-  if (isDesktopApp()) {
-    features.push({
-      key: AppSetting.ENABLE_ROS2_NATIVE_DATA_SOURCE,
-      name: t("ros2NativeConnection"),
-      description: (
-        <>
-          {t("ros2NativeConnectionDescription")} {t("restartTheAppForChangesToTakeEffect")}
-        </>
-      ),
-    });
-  }
-
   if (process.env.NODE_ENV === "development") {
     features.push({
       key: AppSetting.ENABLE_LAYOUT_DEBUGGING,
