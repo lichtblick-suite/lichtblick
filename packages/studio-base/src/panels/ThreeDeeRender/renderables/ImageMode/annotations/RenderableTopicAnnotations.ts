@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { Annotation as NormalizedAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import { RosObject } from "@foxglove/studio-base/players/types";
 import { LabelPool } from "@foxglove/three-text";
 
 import { RenderableLineAnnotation } from "./RenderableLineAnnotation";
@@ -33,9 +34,13 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
   #cameraModel?: PinholeCameraModel;
   #cameraModelNeedsUpdate = false;
 
-  public constructor(labelPool: LabelPool) {
+  #originalMessage?: RosObject;
+  #topicName: string;
+
+  public constructor(topicName: string, labelPool: LabelPool) {
     super();
     this.#labelPool = labelPool;
+    this.#topicName = topicName;
   }
 
   public dispose(): void {
@@ -58,6 +63,10 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     this.#canvasWidth = canvasWidth;
     this.#canvasHeight = canvasHeight;
     this.#pixelRatio = pixelRatio;
+  }
+
+  public setOriginalMessage(originalMessage: RosObject | undefined): void {
+    this.#originalMessage = originalMessage;
   }
 
   public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
@@ -128,13 +137,13 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
         case "circle": {
           let line = unusedLines.pop();
           if (!line) {
-            line = new RenderableLineAnnotation();
+            line = new RenderableLineAnnotation(this.#topicName);
             line.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
             line.setCameraModel(this.#cameraModel);
             this.add(line);
           }
           this.#lines.push(line);
-          line.setAnnotationFromCircle(annotation);
+          line.setAnnotationFromCircle(annotation, this.#originalMessage);
           break;
         }
 
@@ -143,7 +152,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
             case "points": {
               let points = unusedPoints.pop();
               if (!points) {
-                points = new RenderablePointsAnnotation();
+                points = new RenderablePointsAnnotation(this.#topicName);
                 points.setScale(
                   this.#scale,
                   this.#canvasWidth,
@@ -156,6 +165,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
               this.#points.push(points);
               points.setAnnotation(
                 annotation as typeof annotation & { style: typeof annotation.style },
+                this.#originalMessage,
               );
               break;
             }
@@ -165,7 +175,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
             case "line_list": {
               let line = unusedLines.pop();
               if (!line) {
-                line = new RenderableLineAnnotation();
+                line = new RenderableLineAnnotation(this.#topicName);
                 line.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
                 line.setCameraModel(this.#cameraModel);
                 this.add(line);
@@ -173,6 +183,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
               this.#lines.push(line);
               line.setAnnotation(
                 annotation as typeof annotation & { style: typeof annotation.style },
+                this.#originalMessage,
               );
               break;
             }
@@ -182,13 +193,13 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
         case "text": {
           let text = unusedTexts.pop();
           if (!text) {
-            text = new RenderableTextAnnotation(this.#labelPool);
+            text = new RenderableTextAnnotation(this.#topicName, this.#labelPool);
             text.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
             text.setCameraModel(this.#cameraModel);
             this.add(text);
           }
           this.#texts.push(text);
-          text.setAnnotation(annotation);
+          text.setAnnotation(annotation, this.#originalMessage);
           break;
         }
       }

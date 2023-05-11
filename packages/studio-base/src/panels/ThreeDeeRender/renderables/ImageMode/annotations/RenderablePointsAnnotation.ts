@@ -5,7 +5,9 @@
 import * as THREE from "three";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
+import { getAnnotationAtPath } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import { PointsAnnotation as NormalizedPointsAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
 import { DynamicBufferGeometry } from "../../../DynamicBufferGeometry";
 import { BaseUserData, Renderable } from "../../../Renderable";
@@ -45,20 +47,23 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
   #pixelRatio = 0;
   #scaleNeedsUpdate = false;
 
+  #originalMessage?: RosObject;
+
   #annotation?: NormalizedPointsAnnotation & { style: "points" };
   #annotationNeedsUpdate = false;
 
   #cameraModel?: PinholeCameraModel;
   #cameraModelNeedsUpdate = false;
 
-  public constructor() {
-    super("foxglove.ImageAnnotations.Points", undefined, {
+  public constructor(topicName: string) {
+    super(topicName, undefined, {
       receiveTime: 0n,
       messageTime: 0n,
       frameId: "",
       pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
       settingsPath: [],
       settings: { visible: true },
+      topic: topicName,
     });
 
     this.#geometry = new DynamicBufferGeometry();
@@ -82,6 +87,16 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
     super.dispose();
   }
 
+  public override details(): Record<string, RosValue> {
+    if (this.#originalMessage && this.#annotation) {
+      return {
+        annotation: getAnnotationAtPath(this.#originalMessage, this.#annotation.messagePath),
+        originalMessage: this.#originalMessage,
+      };
+    }
+    return {};
+  }
+
   public setScale(
     scale: number,
     _canvasWidth: number,
@@ -98,8 +113,12 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
     this.#cameraModel = cameraModel;
   }
 
-  public setAnnotation(annotation: NormalizedPointsAnnotation & { style: "points" }): void {
+  public setAnnotation(
+    annotation: NormalizedPointsAnnotation & { style: "points" },
+    originalMessage: RosObject | undefined,
+  ): void {
     this.#annotationNeedsUpdate ||= this.#annotation !== annotation;
+    this.#originalMessage = originalMessage;
     this.#annotation = annotation;
   }
 

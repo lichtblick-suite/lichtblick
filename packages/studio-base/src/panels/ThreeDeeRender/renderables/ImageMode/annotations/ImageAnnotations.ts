@@ -149,7 +149,7 @@ export class ImageAnnotations extends THREE.Object3D {
       messageEvent.schemaName as SchemaName,
     );
     if (!renderable) {
-      renderable = new RenderableTopicAnnotations(this.#context.labelPool);
+      renderable = new RenderableTopicAnnotations(messageEvent.topic, this.#context.labelPool);
       renderable.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       renderable.setCameraModel(this.#cameraModel);
       this.#renderablesByTopicAndSchemaName.set(
@@ -160,6 +160,7 @@ export class ImageAnnotations extends THREE.Object3D {
       this.add(renderable);
     }
 
+    renderable.setOriginalMessage(messageEvent.message);
     renderable.setAnnotations(annotations);
     renderable.update();
   }

@@ -110,6 +110,8 @@ export type MarkerData = {
   cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
 };
 
+export type PathKey = string | number;
+
 export type CircleAnnotation = {
   type: "circle";
   stamp: Time;
@@ -118,6 +120,7 @@ export type CircleAnnotation = {
   radius: number;
   thickness: number;
   position: Point2D;
+  messagePath: PathKey[];
 };
 
 export type PointsAnnotation = {
@@ -129,6 +132,7 @@ export type PointsAnnotation = {
   outlineColor?: Color;
   thickness: number;
   fillColor?: Color;
+  messagePath: PathKey[];
 };
 
 export type TextAnnotation = {
@@ -140,6 +144,7 @@ export type TextAnnotation = {
   backgroundColor?: Color;
   fontSize: number;
   padding: number;
+  messagePath: PathKey[];
 };
 
 export type Annotation = CircleAnnotation | PointsAnnotation | TextAnnotation;

@@ -32,6 +32,10 @@ describe("normalizeAnnotations", () => {
             "g": 0.6,
             "r": 0.5,
           },
+          "messagePath": [
+            "circles",
+            0,
+          ],
           "outlineColor": {
             "a": 1,
             "b": 0.9,
@@ -80,6 +84,10 @@ describe("normalizeAnnotations", () => {
             "g": 0.2,
             "r": 0.1,
           },
+          "messagePath": [
+            "points",
+            0,
+          ],
           "outlineColor": {
             "a": 1,
             "b": 0.9,
@@ -139,6 +147,10 @@ describe("normalizeAnnotations", () => {
             "r": 0.7,
           },
           "fontSize": 3,
+          "messagePath": [
+            "texts",
+            0,
+          ],
           "padding": 1,
           "position": {
             "x": 1,

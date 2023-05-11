@@ -3,7 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { PinholeCameraModel } from "@foxglove/den/image";
+import { getAnnotationAtPath } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import { TextAnnotation as NormalizedTextAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 import { Label, LabelPool } from "@foxglove/three-text";
 
 import { BaseUserData, Renderable } from "../../../Renderable";
@@ -19,20 +21,23 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
   #scale = 0;
   #scaleNeedsUpdate = false;
 
+  #originalMessage?: RosObject;
+
   #annotation?: NormalizedTextAnnotation;
   #annotationNeedsUpdate = false;
 
   #cameraModel?: PinholeCameraModel;
   #cameraModelNeedsUpdate = false;
 
-  public constructor(labelPool: LabelPool) {
-    super("foxglove.ImageAnnotations.Text", undefined, {
+  public constructor(topicName: string, labelPool: LabelPool) {
+    super(topicName, undefined, {
       receiveTime: 0n,
       messageTime: 0n,
       frameId: "",
       pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
       settingsPath: [],
       settings: { visible: true },
+      topic: topicName,
     });
 
     this.#labelPool = labelPool;
@@ -47,6 +52,16 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
   public override dispose(): void {
     this.#labelPool.release(this.#label);
     super.dispose();
+  }
+
+  public override details(): Record<string, RosValue> {
+    if (this.#originalMessage && this.#annotation) {
+      return {
+        annotation: getAnnotationAtPath(this.#originalMessage, this.#annotation.messagePath),
+        originalMessage: this.#originalMessage,
+      };
+    }
+    return {};
   }
 
   public setScale(
@@ -64,8 +79,12 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
     this.#cameraModel = cameraModel;
   }
 
-  public setAnnotation(annotation: NormalizedTextAnnotation): void {
+  public setAnnotation(
+    annotation: NormalizedTextAnnotation,
+    originalMessage: RosObject | undefined,
+  ): void {
     this.#annotationNeedsUpdate ||= this.#annotation !== annotation;
+    this.#originalMessage = originalMessage;
     this.#annotation = annotation;
   }
 

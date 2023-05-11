@@ -143,6 +143,7 @@ describe("ImageView", () => {
         radius: 1,
         thickness: 1,
         position: { x: 0, y: 0 },
+        messagePath: ["circles", 0],
       };
 
       expect(

@@ -10,10 +10,12 @@ import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeome
 
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { Color } from "@foxglove/schemas";
+import { getAnnotationAtPath } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import {
   PointsAnnotation as NormalizedPointsAnnotation,
   CircleAnnotation as NormalizedCircleAnnotation,
 } from "@foxglove/studio-base/panels/Image/types";
+import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
 import { BaseUserData, Renderable } from "../../../Renderable";
 import { SRGBToLinear } from "../../../color";
@@ -77,20 +79,23 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
   #canvasHeight = 0;
   #scaleNeedsUpdate = false;
 
+  #originalMessage?: RosObject;
+
   #annotation?: NormalizedPointsAnnotation & { style: LineStyle };
   #annotationNeedsUpdate = false;
 
   #cameraModel?: PinholeCameraModel;
   #cameraModelNeedsUpdate = false;
 
-  public constructor() {
-    super("foxglove.ImageAnnotations.Line", undefined, {
+  public constructor(topicName: string) {
+    super(topicName, undefined, {
       receiveTime: 0n,
       messageTime: 0n,
       frameId: "",
       pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
       settingsPath: [],
       settings: { visible: true },
+      topic: topicName,
     });
 
     this.#geometry = new LineSegmentsGeometry();
@@ -116,6 +121,16 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     super.dispose();
   }
 
+  public override details(): Record<string, RosValue> {
+    if (this.#originalMessage && this.#annotation) {
+      return {
+        annotation: getAnnotationAtPath(this.#originalMessage, this.#annotation.messagePath),
+        originalMessage: this.#originalMessage,
+      };
+    }
+    return {};
+  }
+
   public setScale(
     scale: number,
     canvasWidth: number,
@@ -136,13 +151,20 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     this.#cameraModel = cameraModel;
   }
 
-  public setAnnotation(annotation: NormalizedPointsAnnotation & { style: LineStyle }): void {
+  public setAnnotation(
+    annotation: NormalizedPointsAnnotation & { style: LineStyle },
+    originalMessage: RosObject | undefined,
+  ): void {
     this.#annotationNeedsUpdate ||= this.#annotation !== annotation;
+    this.#originalMessage = originalMessage;
     this.#annotation = annotation;
   }
 
-  public setAnnotationFromCircle(annotation: NormalizedCircleAnnotation): void {
-    this.setAnnotation(makePointsAnnotationFromCircle(annotation));
+  public setAnnotationFromCircle(
+    annotation: NormalizedCircleAnnotation,
+    originalMessage: RosObject | undefined,
+  ): void {
+    this.setAnnotation(makePointsAnnotationFromCircle(annotation), originalMessage);
   }
 
   public update(): void {
@@ -363,5 +385,6 @@ function makePointsAnnotationFromCircle(
     outlineColor: circle.outlineColor,
     thickness: circle.thickness,
     fillColor: circle.fillColor,
+    messagePath: circle.messagePath,
   };
 }
