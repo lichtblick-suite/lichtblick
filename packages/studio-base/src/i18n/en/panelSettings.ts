@@ -13,5 +13,4 @@ export const panelSettings = {
   panelName: "{{title}} panel",
   panelDoesNotHaveSettings: "This panel does not have any settings",
   unknown: "Unknown",
-  noLayoutSelected: "<selectLayoutLink>Select a layout</selectLayoutLink> to get started!",
 };

@@ -15,5 +15,4 @@ export const panelSettings: Partial<TypeOptions["resources"]["panelSettings"]> =
   panelDoesNotHaveSettings: "此面板没有任何设置",
   resetToDefaults: "重置为默认值",
   unknown: "未知",
-  noLayoutSelected: "<selectLayoutLink>选择一个布局</selectLayoutLink> 开始使用！",
 };

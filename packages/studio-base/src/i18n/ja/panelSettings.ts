@@ -15,5 +15,4 @@ export const panelSettings: Partial<TypeOptions["resources"]["panelSettings"]> =
   panelName: "{{title}}パネル",
   panelDoesNotHaveSettings: "このパネルには設定がありません。",
   unknown: "不明",
-  noLayoutSelected: "<selectLayoutLink>レイアウトを選択</selectLayoutLink>して開始してください！",
 };
