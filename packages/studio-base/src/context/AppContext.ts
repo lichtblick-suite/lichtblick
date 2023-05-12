@@ -16,6 +16,7 @@ interface IAppContext {
   syncAdapters?: readonly JSX.Element[];
   workspaceExtensions?: readonly JSX.Element[];
   layoutEmptyState?: JSX.Element;
+  layoutBrowser?: () => JSX.Element;
 }
 
 const AppContext = createContext<IAppContext>({});

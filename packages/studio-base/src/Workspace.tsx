@@ -473,6 +473,8 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
     };
   }, []);
 
+  const { layoutBrowser: AppContextLayoutBrowser } = useAppContext();
+
   const [sidebarItems, sidebarBottomItems] = useMemo(() => {
     const topItems = new Map<SidebarItemKey, SidebarItem>([
       [
@@ -493,7 +495,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
       topItems.set("layouts", {
         iconName: "FiveTileGrid",
         title: "Layouts",
-        component: LayoutBrowser,
+        component: AppContextLayoutBrowser ?? LayoutBrowser,
       });
       topItems.set("add-panel", {
         iconName: "RectangularClipping",
@@ -551,13 +553,14 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
 
     return [topItems, bottomItems];
   }, [
-    appContextSidebarItems,
-    currentUser,
     DataSourceSidebarItem,
+    playerProblems,
     enableNewTopNav,
     enableStudioLogsSidebar,
-    playerProblems,
+    AppContextLayoutBrowser,
     supportsAccountSettings,
+    currentUser,
+    appContextSidebarItems,
   ]);
 
   const eventsSupported = useEvents(selectEventsSupported);
