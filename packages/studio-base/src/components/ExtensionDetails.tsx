@@ -3,20 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import {
-  IconButton,
-  Button,
-  Link,
-  Tab,
-  Tabs,
-  Typography,
-  Divider,
-  styled as muiStyled,
-} from "@mui/material";
+import { IconButton, Button, Link, Tab, Tabs, Typography, Divider } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { DeepReadonly } from "ts-essentials";
+import { makeStyles } from "tss-react/mui";
 
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -36,9 +28,10 @@ type Props = {
   onClose: () => void;
 };
 
-const StyledButton = muiStyled(Button)({ minWidth: 100 });
+const useStyles = makeStyles()({ button: { minWidth: 100 } });
 
 export function ExtensionDetails({ extension, onClose, installed }: Props): React.ReactElement {
+  const { classes } = useStyles();
   const [isInstalled, setIsInstalled] = useState(installed);
   const [activeTab, setActiveTab] = useState<number>(0);
   const isMounted = useMountedState();
@@ -142,7 +135,8 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
           </Typography>
         </Stack>
         {isInstalled && canUninstall ? (
-          <StyledButton
+          <Button
+            className={classes.button}
             size="small"
             key="uninstall"
             color="inherit"
@@ -150,10 +144,11 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
             onClick={uninstall}
           >
             Uninstall
-          </StyledButton>
+          </Button>
         ) : (
           canInstall && (
-            <StyledButton
+            <Button
+              className={classes.button}
               size="small"
               key="install"
               color="inherit"
@@ -161,7 +156,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
               onClick={install}
             >
               Install
-            </StyledButton>
+            </Button>
           )
         )}
       </Stack>
