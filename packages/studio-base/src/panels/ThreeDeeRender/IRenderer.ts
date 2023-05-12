@@ -74,6 +74,8 @@ export type ImageModeConfig = {
   calibrationTopic?: string;
   /** Annotation topic settings, analogous to {@link RendererConfig.topics} */
   annotations?: ImageAnnotationSubscription[];
+  /** Zoom mode */
+  zoomMode?: "fit" | "fill";
 };
 
 export type RendererConfig = {
