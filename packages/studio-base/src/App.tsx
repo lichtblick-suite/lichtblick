@@ -78,11 +78,7 @@ export function App(props: AppProps): JSX.Element {
 
   const providers = [
     /* eslint-disable react/jsx-key */
-    <StudioLogsSettingsProvider />,
-    <StudioToastProvider />,
-    <LayoutStorageContext.Provider value={layoutStorage} />,
     <UserProfileLocalStorageProvider />,
-    <LayoutManagerProvider />,
     <TimelineInteractionStateProvider />,
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
@@ -103,7 +99,15 @@ export function App(props: AppProps): JSX.Element {
 
   if (extraProviders) {
     providers.unshift(...extraProviders);
+  } else {
+    // Extra providers have their own layout providers
+    providers.unshift(<LayoutManagerProvider />);
+    providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
   }
+
+  // The toast and logs provider comes first so they are available to all downstream providers
+  providers.unshift(<StudioToastProvider />);
+  providers.unshift(<StudioLogsSettingsProvider />);
 
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 
