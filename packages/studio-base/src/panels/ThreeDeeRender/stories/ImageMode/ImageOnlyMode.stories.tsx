@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
 import * as THREE from "three";
 import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry";
@@ -22,13 +23,20 @@ import { QUAT_IDENTITY, makeColor } from "../common";
 export default {
   title: "panels/ThreeDeeRender/Images",
   component: ThreeDeePanel,
+  parameters: { colorScheme: "light" },
 };
 
-const ImageWith3D = ({ imageOnlyMode }: { imageOnlyMode: boolean }) => {
+const ImageWith3D = ({
+  initialCalibrationTopic,
+  initialImageTopic,
+}: {
+  initialImageTopic: string | undefined;
+  initialCalibrationTopic: string | undefined;
+}): JSX.Element => {
   const topics: Topic[] = [
     { name: "annotations", schemaName: "foxglove.ImageAnnotations" },
-    { name: "calibration", schemaName: "foxglove.CameraCalibration" },
-    { name: "camera", schemaName: "foxglove.RawImage" },
+    { name: "camera/calibration", schemaName: "foxglove.CameraCalibration" },
+    { name: "camera/img", schemaName: "foxglove.RawImage" },
     { name: "tf", schemaName: "geometry_msgs/TransformStamped" },
     { name: "sceneUpdate", schemaName: "foxglove.SceneUpdate" },
   ];
@@ -220,8 +228,8 @@ const ImageWith3D = ({ imageOnlyMode }: { imageOnlyMode: boolean }) => {
     width,
     height,
     frameId: "cam",
-    imageTopic: "camera",
-    calibrationTopic: "calibration",
+    imageTopic: "camera/img",
+    calibrationTopic: "camera/calibration",
   });
 
   const sceneUpdateMessage = makeSceneUpdate({
@@ -261,8 +269,8 @@ const ImageWith3D = ({ imageOnlyMode }: { imageOnlyMode: boolean }) => {
             },
           },
           imageMode: {
-            calibrationTopic: imageOnlyMode ? undefined : "calibration",
-            imageTopic: "camera",
+            calibrationTopic: initialCalibrationTopic,
+            imageTopic: initialImageTopic,
             annotations: [
               {
                 topic: "annotations",
@@ -282,14 +290,32 @@ const ImageWith3D = ({ imageOnlyMode }: { imageOnlyMode: boolean }) => {
   );
 };
 
-export const ImageOnlyModeOff: StoryObj = {
-  render: () => <ImageWith3D imageOnlyMode={false} />,
-  parameters: { colorScheme: "light" },
+export const ImageOnlyModeOff: StoryObj<React.ComponentProps<typeof ImageWith3D>> = {
+  render: ImageWith3D,
+  args: { initialImageTopic: "camera/img", initialCalibrationTopic: "camera/calibration" },
 };
 
-export const ImageOnlyModeOn: StoryObj = {
-  render: () => <ImageWith3D imageOnlyMode={true} />,
-  parameters: { colorScheme: "light" },
+export const ImageOnlyModeOn: StoryObj<React.ComponentProps<typeof ImageWith3D>> = {
+  render: ImageWith3D,
+  args: { initialImageTopic: "camera/img", initialCalibrationTopic: undefined },
+};
+
+export const ImageOnlyModeOffWithAutoSelectedTopics: StoryObj<
+  React.ComponentProps<typeof ImageWith3D>
+> = {
+  render: ImageWith3D,
+  args: { initialImageTopic: undefined, initialCalibrationTopic: undefined },
+};
+
+export const ImageOnlyModeOffWithAutoSelectedCalibration: StoryObj<
+  React.ComponentProps<typeof ImageWith3D>
+> = {
+  render: ImageWith3D,
+  args: { initialImageTopic: "abc", initialCalibrationTopic: undefined },
+  play: async () => {
+    userEvent.click(await screen.findByText("abc", { selector: ".MuiSelect-select" }));
+    userEvent.click(await screen.findByText("camera/img"));
+  },
 };
 
 function makeSceneUpdate({

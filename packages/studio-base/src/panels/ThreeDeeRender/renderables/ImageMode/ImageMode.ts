@@ -269,6 +269,9 @@ export class ImageMode
         draft.imageMode.calibrationTopic = matchingCalibrationTopic.name;
       }
     });
+    if (matchingCalibrationTopic) {
+      this.#setHasCalibrationTopic(true);
+    }
   };
 
   /** Choose a calibration topic that best matches the given `imageTopic`. */
@@ -490,6 +493,7 @@ export class ImageMode
           this.renderer.updateConfig((draft) => {
             draft.imageMode.calibrationTopic = calibrationTopic.name;
           });
+          this.#setHasCalibrationTopic(true);
         }
       }
 
