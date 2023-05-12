@@ -13,7 +13,7 @@
 
 import { diffLabels, diffArrow } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 
-import DiffSpan from "./DiffSpan";
+import { DiffSpan } from "./DiffSpan";
 import MaybeCollapsedValue from "./MaybeCollapsedValue";
 
 type Props = {
