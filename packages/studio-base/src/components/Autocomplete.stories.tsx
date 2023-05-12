@@ -13,7 +13,6 @@
 
 import { StoryObj } from "@storybook/react";
 import { range } from "lodash";
-import { Component } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -36,47 +35,32 @@ export default {
 };
 
 export const FilteringToO: StoryObj = {
-  render: () => {
-    class Example extends Component {
-      public override render() {
-        return (
-          <div style={{ padding: 20 }} ref={focusInput}>
-            <Autocomplete
-              items={["one", "two", "three"]}
-              filterText="o"
-              value="o"
-              onSelect={() => {}}
-              hasError
-            />
-          </div>
-        );
-      }
-    }
-    return <Example />;
-  },
-
+  render: () => (
+    <div style={{ padding: 20 }} ref={focusInput}>
+      <Autocomplete
+        items={["one", "two", "three"]}
+        filterText="o"
+        value="o"
+        onSelect={() => {}}
+        hasError
+      />
+    </div>
+  ),
   name: "filtering to 'o'",
 };
 
 export const FilteringToOLight: StoryObj = {
-  render: () => {
-    class Example extends Component {
-      public override render() {
-        return (
-          <div style={{ padding: 20 }} ref={focusInput}>
-            <Autocomplete
-              items={["one", "two", "three"]}
-              filterText="o"
-              value="o"
-              onSelect={() => {}}
-              hasError
-            />
-          </div>
-        );
-      }
-    }
-    return <Example />;
-  },
+  render: () => (
+    <div style={{ padding: 20 }} ref={focusInput}>
+      <Autocomplete
+        items={["one", "two", "three"]}
+        filterText="o"
+        value="o"
+        onSelect={() => {}}
+        hasError
+      />
+    </div>
+  ),
 
   name: "filtering to 'o' light",
   parameters: { colorScheme: "light" },
@@ -215,23 +199,16 @@ export const SortWhenFilteringFalse: StoryObj = {
 };
 
 export const WithALongTruncatedPathAndAutoSize: StoryObj = {
-  render: () => {
-    class Example extends Component {
-      public override render() {
-        return (
-          <div style={{ maxWidth: 200 }} ref={focusInput}>
-            <Autocomplete
-              items={[]}
-              value="/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething"
-              onSelect={() => {}}
-              autoSize
-            />
-          </div>
-        );
-      }
-    }
-    return <Example />;
-  },
+  render: () => (
+    <div style={{ maxWidth: 200 }} ref={focusInput}>
+      <Autocomplete
+        items={[]}
+        value="/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething"
+        onSelect={() => {}}
+        autoSize
+      />
+    </div>
+  ),
 
   name: "with a long truncated path (and autoSize)",
 };
@@ -239,16 +216,12 @@ export const WithALongTruncatedPathAndAutoSize: StoryObj = {
 export const ManyItems: StoryObj = {
   render: () => {
     const items = range(1, 1000).map((i) => `item_${i}`);
-    class Example extends Component {
-      public override render() {
-        return (
-          <div style={{ maxWidth: 200 }} ref={focusInput}>
-            <Autocomplete items={items} onSelect={() => {}} autoSize />
-          </div>
-        );
-      }
-    }
-    return <Example />;
+
+    return (
+      <div style={{ maxWidth: 200 }} ref={focusInput}>
+        <Autocomplete items={items} onSelect={() => {}} autoSize />
+      </div>
+    );
   },
 
   name: "many items",

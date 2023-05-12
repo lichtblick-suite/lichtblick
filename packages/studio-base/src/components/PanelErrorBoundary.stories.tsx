@@ -9,17 +9,15 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import PanelErrorBoundary from "./PanelErrorBoundary";
 
-class Broken extends React.Component {
-  public override render() {
-    throw Object.assign(new Error("Hello!"), {
-      stack: `
+function Broken(): JSX.Element | ReactNull {
+  throw Object.assign(new Error("Hello!"), {
+    stack: `
   an error occurred
   it's caught by this component
   now the user sees
       `,
-    });
-    return ReactNull;
-  }
+  });
+  return ReactNull;
 }
 
 export default {
