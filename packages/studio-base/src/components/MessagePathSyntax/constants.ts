@@ -24,7 +24,6 @@ const RosPrimitives = {
   float32: undefined,
   float64: undefined,
   string: undefined,
-  json: undefined,
 };
 
 export type RosPrimitive = keyof typeof RosPrimitives;

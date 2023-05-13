@@ -25,19 +25,20 @@ const isObjectElement = (
   value: unknown,
   pathItem: string | number,
   structureItem: MessagePathStructureItem,
-): boolean =>
-  typeof pathItem === "string" &&
-  ((structureItem.structureType === "message" && typeof value === "object") ||
-    (structureItem.structureType === "primitive" && structureItem.primitiveType === "json"));
+): boolean => {
+  return (
+    typeof pathItem === "string" &&
+    structureItem.structureType === "message" &&
+    typeof value === "object"
+  );
+};
 
 const isArrayElement = (
   value: unknown,
   pathItem: string | number,
   structureItem: MessagePathStructureItem,
 ): boolean =>
-  typeof pathItem === "number" &&
-  ((structureItem.structureType === "array" && Array.isArray(value)) ||
-    (structureItem.structureType === "primitive" && structureItem.primitiveType === "json"));
+  typeof pathItem === "number" && structureItem.structureType === "array" && Array.isArray(value);
 
 // Given a root value (e.g. a message object), a root structureItem (e.g. a message definition),
 // and a key path to navigate down the value and strutureItem (e.g. ["items", 10, "speed"]), return
@@ -60,7 +61,7 @@ export function getValueActionForValue(
       structureItem =
         structureItem.structureType === "message" && typeof pathItem === "string"
           ? structureItem.nextByName[pathItem]
-          : { structureType: "primitive", primitiveType: "json", datatype: "" };
+          : undefined;
       value = (value as Record<string, unknown>)[pathItem];
       if (multiSlicePath.endsWith("[:]") && structureItem?.structureType === "primitive") {
         // We're just inside a message that is inside an array, so we might want to pivot on this new value.
@@ -76,16 +77,13 @@ export function getValueActionForValue(
       multiSlicePath += `.${pathItem}`;
     } else if (isArrayElement(value, pathItem, structureItem)) {
       value = (value as Record<string, unknown>)[pathItem];
-      structureItem =
-        structureItem.structureType === "array"
-          ? structureItem.next
-          : { structureType: "primitive", primitiveType: "json", datatype: "" };
+      structureItem = structureItem.structureType === "array" ? structureItem.next : undefined;
       multiSlicePath = `${singleSlicePath}[:]`;
 
       // Ideally show something like `/topic.object[:]{id=123}` for the singleSlicePath, but fall
       // back to `/topic.object[10]` if necessary.
       let typicalFilterName;
-      if (structureItem.structureType === "message") {
+      if (structureItem?.structureType === "message") {
         typicalFilterName = Object.entries(structureItem.nextByName).find(
           ([key, nextStructureItem]) =>
             nextStructureItem.structureType === "primitive" && isTypicalFilterName(key),

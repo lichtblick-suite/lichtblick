@@ -226,66 +226,6 @@ describe("getValueActionForValue", () => {
     });
   });
 
-  it("returns value when looking inside a 'json' primitive", () => {
-    const structureItem: MessagePathStructureItem = {
-      structureType: "primitive",
-      primitiveType: "json",
-      datatype: "",
-    };
-    expect(getValueActionForValue({ abc: 0, def: 0 }, structureItem, ["abc"])).toEqual({
-      filterPath: "",
-      multiSlicePath: ".abc",
-      primitiveType: "json",
-      singleSlicePath: ".abc",
-    });
-  });
-
-  it("returns single/multi slice paths when pointing at a value inside an array, nested inside a JSON field", () => {
-    const structureItem: MessagePathStructureItem = {
-      structureType: "array",
-      next: {
-        structureType: "message",
-        nextByName: {
-          outer_key: { structureType: "primitive", primitiveType: "json", datatype: "" },
-        },
-        datatype: "",
-      },
-      datatype: "",
-    };
-    expect(
-      getValueActionForValue([{ outer_key: { nested_key: 456 } }], structureItem, [
-        0,
-        "outer_key",
-        "nested_key",
-      ]),
-    ).toEqual({
-      filterPath: "",
-      singleSlicePath: "[0].outer_key.nested_key",
-      multiSlicePath: "[:].outer_key.nested_key",
-      primitiveType: "json",
-    });
-  });
-
-  it("returns slice paths for json", () => {
-    const structureItem: MessagePathStructureItem = {
-      structureType: "message",
-      nextByName: {
-        some_id: {
-          structureType: "primitive",
-          primitiveType: "json",
-          datatype: "",
-        },
-      },
-      datatype: "",
-    };
-    expect(getValueActionForValue({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
-      filterPath: "",
-      singleSlicePath: ".some_id",
-      multiSlicePath: ".some_id",
-      primitiveType: "json",
-    });
-  });
-
   it(`wraps string path filters with ""`, () => {
     const rootValue = {
       status: [

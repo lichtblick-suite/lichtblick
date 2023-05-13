@@ -266,25 +266,13 @@ export const traverseStructure = memoizeWeak(
       if (!structureItem) {
         return { valid: false, msgPathPart, structureItem };
       }
-      if ("primitiveType" in structureItem && structureItem.primitiveType === "json") {
-        // No need to continue validating if we're dealing with JSON. We
-        // essentially treat all nested values as valid.
-        continue;
-      } else if (msgPathPart.type === "name") {
+      if (msgPathPart.type === "name") {
         if (structureItem.structureType !== "message") {
           return { valid: false, msgPathPart, structureItem };
         }
         const next: MessagePathStructureItem | undefined =
           structureItem.nextByName[msgPathPart.name];
-        const nextStructureIsJson: boolean =
-          next != undefined && next.structureType === "primitive" && next.primitiveType === "json";
-        structureItem = !nextStructureIsJson
-          ? next
-          : {
-              structureType: "primitive",
-              primitiveType: "json",
-              datatype: next ? next.datatype : "",
-            };
+        structureItem = next;
       } else if (msgPathPart.type === "slice") {
         if (structureItem.structureType !== "array") {
           return { valid: false, msgPathPart, structureItem };

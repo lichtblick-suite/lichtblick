@@ -30,8 +30,16 @@ const makeArrayData = ({
 const fixture: Fixture = {
   datatypes: new Map(
     Object.entries({
+      arr_item: {
+        definitions: [
+          { type: "int32", name: "val", isConstant: false, isArray: false },
+          { type: "int32", name: "primitiveArray", isConstant: false, isArray: true },
+        ],
+      },
       my_arr: {
-        definitions: [{ type: "json", name: "array", isConstant: false, isArray: true }],
+        definitions: [
+          { type: "arr_item", name: "array", isConstant: false, isArray: true, isComplex: true },
+        ],
       },
     }),
   ),

@@ -59,7 +59,7 @@ const fixture: Fixture = {
           { type: "int8", name: "BOOTING", isConstant: true, value: 2 },
           { type: "int8", name: "ACTIVE", isConstant: true, value: 3 },
           { type: "int8", name: "state", isArray: false },
-          { type: "json", name: "data", isArray: false },
+          { type: "msgs/DataValue", name: "data", isArray: false, isComplex: true },
         ],
       },
       "std_msgs/Header": {
@@ -72,6 +72,9 @@ const fixture: Fixture = {
           },
           { name: "frame_id", type: "string", isArray: false },
         ],
+      },
+      "msgs/DataValue": {
+        definitions: [{ type: "string", name: "value", isArray: false, isComplex: false }],
       },
     }),
   ),
@@ -247,29 +250,6 @@ export const LongPath: StoryObj = {
         <StateTransitions
           overrideConfig={{
             paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
-            isSynced: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
-  },
-
-  parameters: { useReadySignal: true },
-};
-
-export const JsonPath: StoryObj = {
-  render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
-    const pauseFrame = useCallback(() => readySignal, [readySignal]);
-    return (
-      <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
-        <StateTransitions
-          overrideConfig={{
-            paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
             isSynced: true,
           }}
         />

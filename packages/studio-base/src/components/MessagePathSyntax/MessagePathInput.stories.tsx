@@ -260,14 +260,6 @@ export const AutocompleteWhenPrioritizedDatatypeIsAvailable: StoryObj = {
   name: "autocomplete when prioritized datatype is available",
 };
 
-export const AutocompleteForMessageWithJsonField: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_logs_topic." />;
-  },
-
-  name: "autocomplete for message with json field",
-};
-
 export const AutocompleteForPathWithExistingFilter: StoryObj = {
   render: function Story() {
     return <MessagePathInputStory path="/some_topic/state.items[:]{id==1}." />;
@@ -282,22 +274,6 @@ export const AutocompleteForPathWithExistingFilterUsingAGlobalVariable: StoryObj
   },
 
   name: "autocomplete for path with existing filter using a global variable",
-};
-
-export const PathForFieldInsideJsonObject: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_logs_topic.myJson" />;
-  },
-
-  name: "path for field inside json object",
-};
-
-export const PathForMultipleLevelsOfNestedFieldsInsideJsonObject: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_logs_topic.myJson.a.b.c" />;
-  },
-
-  name: "path for multiple levels of nested fields inside json object",
 };
 
 export const PerformanceTesting: StoryObj = {

@@ -257,8 +257,6 @@ export function getMessagePathDataItems(
     }
     const pathItem = filledInPath.messagePath[pathIndex];
     const nextPathItem = filledInPath.messagePath[pathIndex + 1];
-    const structureIsJson =
-      structureItem.structureType === "primitive" && structureItem.primitiveType === "json";
     if (!pathItem) {
       // If we're at the end of the `messagePath`, we're done! Just store the point.
       let constantName: string | undefined;
@@ -272,21 +270,12 @@ export function getMessagePathDataItems(
     } else if (pathItem.type === "name" && structureItem.structureType === "message") {
       // If the `pathItem` is a name, we're traversing down using that name.
       const next = structureItem.nextByName[pathItem.name];
-      const nextStructIsJson = next?.structureType === "primitive" && next.primitiveType === "json";
-
-      const actualNext: MessagePathStructureItem =
-        !nextStructIsJson && next
-          ? next
-          : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, actualNext);
-    } else if (
-      pathItem.type === "slice" &&
-      (structureItem.structureType === "array" || structureIsJson)
-    ) {
+      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, next);
+    } else if (pathItem.type === "slice" && structureItem.structureType === "array") {
       const { start, end } = pathItem;
       if (typeof start === "object" || typeof end === "object") {
         throw new Error(
-          "getMessagePathDataItems  only works on paths where global variables have been filled in",
+          "getMessagePathDataItems only works on paths where global variables have been filled in",
         );
       }
       const startIdx: number = start;
@@ -329,26 +318,12 @@ export function getMessagePathDataItems(
           // (otherwise they wouldn't have chosen a negative slice).
           newPath = `${path}[${i}]`;
         }
-        traverse(
-          arrayElement,
-          pathIndex + 1,
-          newPath,
-          !structureIsJson && structureItem.structureType === "array"
-            ? structureItem.next
-            : structureItem, // Structure is already JSON.
-        );
+        traverse(arrayElement, pathIndex + 1, newPath, structureItem.next);
       }
     } else if (pathItem.type === "filter") {
       if (filterMatches(pathItem, value)) {
         traverse(value, pathIndex + 1, `${path}{${pathItem.repr}}`, structureItem);
       }
-    } else if (structureIsJson && pathItem.type === "name") {
-      // Use getField just in case.
-      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, {
-        structureType: "primitive",
-        primitiveType: "json",
-        datatype: "",
-      });
     } else {
       console.warn(
         `Unknown pathItem.type ${pathItem.type} for structureType: ${structureItem.structureType}`,

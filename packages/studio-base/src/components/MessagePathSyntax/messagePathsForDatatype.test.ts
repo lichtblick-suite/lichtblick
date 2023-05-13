@@ -46,10 +46,7 @@ const datatypes: RosDatatypes = new Map(
       ],
     },
     "msgs/Log": {
-      definitions: [
-        { name: "id", type: "int32", isArray: false },
-        { name: "myJson", type: "json", isArray: false },
-      ],
+      definitions: [{ name: "id", type: "int32", isArray: false }],
     },
     "geometry_msgs/Transform": {
       definitions: [
@@ -295,7 +292,6 @@ describe("messagePathStructures", () => {
       "msgs/Log": {
         nextByName: {
           id: { primitiveType: "int32", structureType: "primitive", datatype: "msgs/Log" },
-          myJson: { structureType: "primitive", primitiveType: "json", datatype: "msgs/Log" },
         },
         structureType: "message",
         datatype: "msgs/Log",
@@ -455,7 +451,7 @@ describe("messagePathsForDatatype", () => {
       ".some_pose.header.stamp.sec",
       ".some_pose.x",
     ]);
-    expect(messagePathsForDatatype("msgs/Log", datatypes)).toEqual(["", ".id", ".myJson"]);
+    expect(messagePathsForDatatype("msgs/Log", datatypes)).toEqual(["", ".id"]);
 
     expect(messagePathsForDatatype("tf/tfMessage", datatypes)).toEqual([
       "",
@@ -549,7 +545,6 @@ describe("validTerminatingStructureItem", () => {
 describe("traverseStructure", () => {
   it("returns whether the path is valid for the structure, plus some metadata", () => {
     const structure = messagePathStructures(datatypes)["pose_msgs/PoseDebug"];
-    const structureJson = messagePathStructures(datatypes)["msgs/Log"];
 
     // Valid:
     expect(
@@ -601,46 +596,6 @@ describe("traverseStructure", () => {
       valid: true,
       msgPathPart: undefined,
       structureItem: structure?.nextByName.some_pose,
-    });
-    expect(
-      traverseStructure(structureJson, [{ type: "name", name: "myJson", repr: "myJson" }]),
-    ).toEqual({
-      msgPathPart: undefined,
-      structureItem: { structureType: "primitive", primitiveType: "json", datatype: "msgs/Log" },
-      valid: true,
-    });
-
-    expect(
-      traverseStructure(structureJson, [
-        { type: "name", name: "myJson", repr: "myJson" },
-        { type: "name", name: "fieldInsideMyJson", repr: "fieldInsideMyJson" },
-      ]),
-    ).toEqual({
-      msgPathPart: undefined,
-      structureItem: { datatype: "msgs/Log", structureType: "primitive", primitiveType: "json" },
-      valid: true,
-    });
-
-    expect(
-      traverseStructure(structureJson, [
-        { type: "name", name: "myJson", repr: "myJson" },
-        { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
-      ]),
-    ).toEqual({
-      msgPathPart: undefined,
-      structureItem: { datatype: "msgs/Log", structureType: "primitive", primitiveType: "json" },
-      valid: true,
-    });
-
-    expect(
-      traverseStructure(structureJson, [
-        { type: "name", name: "myJson", repr: "myJson" },
-        { type: "slice", start: 50, end: 100 },
-      ]),
-    ).toEqual({
-      msgPathPart: undefined,
-      structureItem: { datatype: "msgs/Log", structureType: "primitive", primitiveType: "json" },
-      valid: true,
     });
 
     expect(

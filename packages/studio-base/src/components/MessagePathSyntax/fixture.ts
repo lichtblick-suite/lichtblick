@@ -85,7 +85,6 @@ export const MessagePathInputStoryFixture: Fixture = {
       "msgs/Log": {
         definitions: [
           { name: "id", type: "int32", isArray: false },
-          { name: "myJson", type: "json", isArray: false },
           { name: "severity", type: "float32", isArray: false },
         ],
       },
