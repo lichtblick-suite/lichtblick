@@ -27,12 +27,12 @@ import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManager
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
+import { ExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import tick from "@foxglove/studio-base/util/tick";
 
 import Tab from "./index";
 
-const SamplePanel1 = function () {
+const SamplePanel1 = () => {
   return (
     <div>
       <PanelToolbar />
@@ -43,7 +43,7 @@ const SamplePanel1 = function () {
 SamplePanel1.panelType = "Sample1";
 SamplePanel1.defaultConfig = {};
 
-const SamplePanel2 = function () {
+const SamplePanel2 = () => {
   return (
     <div>
       <PanelToolbar />
@@ -395,7 +395,7 @@ export const ReorderTabsWithinTabPanelByDroppingOnTab: StoryObj = {
         }}
       >
         <PanelLayout />
-        <SExpectedResult>Expected result: #2, #3, #1, #4, #5</SExpectedResult>
+        <ExpectedResult>Expected result: #2, #3, #1, #4, #5</ExpectedResult>
       </PanelSetup>
     );
   },
@@ -431,8 +431,8 @@ export const MoveTabToDifferentTabPanel: StoryObj = {
         }}
       >
         <PanelLayout />
-        <SExpectedResult style={{ left: 0 }}>Should have only #2</SExpectedResult>
-        <SExpectedResult style={{ left: "50%" }}>Should have #1 and #3</SExpectedResult>
+        <ExpectedResult left={0}>Should have only #2</ExpectedResult>
+        <ExpectedResult left="50%">Should have #1 and #3</ExpectedResult>
       </PanelSetup>
     );
   },
@@ -467,10 +467,8 @@ export const PreventDraggingSelectedParentTabIntoChildTabPanel: StoryObj = {
         }}
       >
         <PanelLayout />
-        <SExpectedResult style={{ left: 0 }}>
-          the first tab should be hidden (we never dropped it)
-        </SExpectedResult>
-        <SExpectedResult style={{ top: "50px" }}>tab content should be hidden</SExpectedResult>
+        <ExpectedResult>the first tab should be hidden (we never dropped it)</ExpectedResult>
+        <ExpectedResult top={50}>tab content should be hidden</ExpectedResult>
       </PanelSetup>
     );
   },

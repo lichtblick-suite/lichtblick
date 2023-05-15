@@ -18,7 +18,7 @@ import NodePlayground from "@foxglove/studio-base/panels/NodePlayground";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
+import { ExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const userNodes = {
@@ -189,9 +189,9 @@ export const EditorShowsNewCodeWhenUserNodesChange: StoryObj = {
       }}
     >
       <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
-      <SExpectedResult style={{ left: "375px", top: "150px" }}>
+      <ExpectedResult left={375} top={150}>
         Should show function norm() code
-      </SExpectedResult>
+      </ExpectedResult>
     </PanelSetup>
   ),
   name: "Editor shows new code when userNodes change",
