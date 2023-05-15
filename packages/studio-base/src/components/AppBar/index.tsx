@@ -372,9 +372,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   className={cx(classes.iconButton, { "Mui-selected": userMenuOpen })}
                   aria-label="User profile menu button"
                   color="inherit"
-                  id="user-profile-button"
-                  data-tourid="user-profile-button"
-                  aria-controls={userMenuOpen ? "user-profile-menu" : undefined}
+                  id="user-button"
+                  data-tourid="user-button"
+                  aria-controls={userMenuOpen ? "user-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={userMenuOpen ? "true" : undefined}
                   onClick={(event) => setUserAnchorEl(event.currentTarget)}
