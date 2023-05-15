@@ -178,8 +178,6 @@ overrides:
       - "packages/studio-base/src/components/ExpandingToolbar.tsx"
       - "packages/studio-base/src/components/LayoutBrowser/LayoutRow.tsx"
       - "packages/studio-base/src/components/PanelLayout.tsx"
-      - "packages/studio-base/src/components/PlaybackControls/PlaybackTimeDisplayMethod.tsx"
-      - "packages/studio-base/src/components/PlaybackSpeedControls.tsx"
       - "packages/studio-base/src/components/ShareJsonModal.tsx"
       - "packages/studio-base/src/components/TextHighlight.tsx"
       - "packages/studio-base/src/panels/Image/components/Toolbar.tsx"
