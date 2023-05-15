@@ -53,6 +53,7 @@ import WorkerSocketAdapter from "./WorkerSocketAdapter";
 
 const log = Log.getLogger(__dirname);
 const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 
 /** Suppress warnings about messages on unknown subscriptions if the susbscription was recently canceled. */
 const SUBSCRIPTION_WARNING_SUPPRESSION_MS = 2000;
@@ -544,14 +545,23 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
 
     this.#client.on("parameterValues", ({ parameters, id }) => {
-      const newParameters = parameters.filter((param) => !this.#parameters.has(param.name));
+      const mappedParameters = parameters.map((param) => {
+        return param.type === "byte_array"
+          ? {
+              ...param,
+              value: Uint8Array.from(atob(param.value as string), (c) => c.charCodeAt(0)),
+            }
+          : param;
+      });
+
+      const newParameters = mappedParameters.filter((param) => !this.#parameters.has(param.name));
 
       if (id === GET_ALL_PARAMS_REQUEST_ID) {
         // Reset params
-        this.#parameters = new Map(parameters.map((param) => [param.name, param.value]));
+        this.#parameters = new Map(mappedParameters.map((param) => [param.name, param.value]));
       } else {
         // Update params
-        parameters.forEach((param) => this.#parameters.set(param.name, param.value));
+        mappedParameters.forEach((param) => this.#parameters.set(param.name, param.value));
       }
 
       this.#emitState();
@@ -860,7 +870,18 @@ export default class FoxgloveWebSocketPlayer implements Player {
     }
 
     log.debug(`FoxgloveWebSocketPlayer.setParameter(key=${key}, value=${value})`);
-    this.#client.setParameters([{ name: key, value: value as Parameter["value"] }], uuidv4());
+    const isByteArray = value instanceof Uint8Array;
+    const paramValueToSent = isByteArray ? btoa(textDecoder.decode(value)) : value;
+    this.#client.setParameters(
+      [
+        {
+          name: key,
+          value: paramValueToSent as Parameter["value"],
+          type: isByteArray ? "byte_array" : undefined,
+        },
+      ],
+      uuidv4(),
+    );
 
     // Pre-actively update our parameter map, such that a change is detected if our update failed
     this.#parameters.set(key, value);

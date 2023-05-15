@@ -87,8 +87,12 @@ const useStyles = makeStyles<void, "copyIcon">()((_theme, _params, classes) => (
  * Converts a parameter value into a value that can be edited in the JsonInput. Wraps
  * any value JsonInput can't handle in JSON.stringify.
  */
-function editableValue(value: unknown): string | number | boolean | unknown[] | object {
-  if (
+function editableValue(
+  value: unknown,
+): string | number | boolean | unknown[] | Uint8Array | object {
+  if (value instanceof Uint8Array) {
+    return Array.from(value);
+  } else if (
     typeof value === "string" ||
     typeof value === "number" ||
     typeof value === "boolean" ||
@@ -111,6 +115,8 @@ function displayableValue(value: unknown): string {
 
   if (value instanceof Date) {
     return value.toISOString();
+  } else if (value instanceof Uint8Array) {
+    return JSON.stringify(Array.from(value)) ?? "";
   }
 
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
@@ -134,9 +140,17 @@ function SubmittableJsonInput(props: {
           setValue(newVal);
         }}
       />
-      {!isEqual(value, props.value) && [
+      {!isEqual(editableValue(value), editableValue(props.value)) && [
         <Tooltip key="submit" title="Submit change">
-          <IconButton onClick={() => props.onSubmit(value)}>
+          <IconButton
+            onClick={() => {
+              if (props.value instanceof Uint8Array) {
+                props.onSubmit(new Uint8Array(value as number[]));
+              } else {
+                props.onSubmit(value);
+              }
+            }}
+          >
             <CheckIcon />
           </IconButton>
         </Tooltip>,
