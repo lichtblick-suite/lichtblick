@@ -22,12 +22,6 @@ export type PanelInfo = {
   hasCustomToolbar?: boolean;
 
   /**
-   * Tooltip to show on the settings button to help new users find the panel settings. Shown on
-   * panels of this type across the whole app until the settings button is clicked.
-   */
-  settingsOnboardingTooltip?: string;
-
-  /**
    * The panel module is a function to load the panel.
    * This is to support our lazy built-in panels
    */

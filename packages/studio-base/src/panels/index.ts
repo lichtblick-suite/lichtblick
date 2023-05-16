@@ -34,7 +34,6 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("3DPanelDescription"),
     thumbnail: threeDeeRenderThumbnail,
     module: async () => ({ default: (await import("./ThreeDeeRender")).ThreeDeePanel }),
-    settingsOnboardingTooltip: t("3DPanelSettingsOnboardingTooltip"),
   },
   {
     title: t("ROSDiagnosticsDetail"),

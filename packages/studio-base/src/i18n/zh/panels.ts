@@ -8,7 +8,6 @@ export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   "3D": "三维",
   newImage: "图像（Beta）",
   "3DPanelDescription": "在三维场景中显示标记、相机图像、网格、URDF 和其他内容。",
-  "3DPanelSettingsOnboardingTooltip": "打开设置以配置主题和层。",
   dataSourceInfo: "数据源信息",
   dataSourceInfoDescription: "查看当前数据源的主题和时间戳等详细信息。",
   gauge: "仪表",
