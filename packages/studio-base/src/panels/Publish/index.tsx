@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Button, Typography, styled as muiStyled, OutlinedInput } from "@mui/material";
+import { Button, Typography, OutlinedInput, inputBaseClasses } from "@mui/material";
 import { produce } from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
 import { useRethrow } from "@foxglove/hooks";
@@ -60,44 +61,42 @@ function buildSettingsTree(config: Config): SettingsTreeNodes {
   };
 }
 
-const StyledButton = muiStyled(Button, {
-  shouldForwardProp: (prop) => prop !== "buttonColor",
-})<{ buttonColor?: string }>(({ theme, buttonColor }) => {
-  if (buttonColor == undefined) {
-    return {};
-  }
-  const augmentedButtonColor = theme.palette.augmentColor({
-    color: { main: buttonColor },
-  });
+const useStyles = makeStyles<{ buttonColor?: string }>()((theme, { buttonColor }) => {
+  const augmentedButtonColor = buttonColor
+    ? theme.palette.augmentColor({
+        color: { main: buttonColor },
+      })
+    : undefined;
 
   return {
-    backgroundColor: augmentedButtonColor.main,
-    color: augmentedButtonColor.contrastText,
+    button: {
+      backgroundColor: augmentedButtonColor?.main,
+      color: augmentedButtonColor?.contrastText,
 
-    "&:hover": {
-      backgroundColor: augmentedButtonColor.dark,
+      "&:hover": {
+        backgroundColor: augmentedButtonColor?.dark,
+      },
+    },
+    textarea: {
+      width: "100%",
+      height: "100%",
+      textAlign: "left",
+      backgroundColor: theme.palette.background.paper,
+      overflow: "hidden",
+      padding: theme.spacing(1, 0.5),
+
+      [`.${inputBaseClasses.input}`]: {
+        height: "100% !important",
+        font: "inherit",
+        lineHeight: 1.4,
+        fontFamily: fonts.MONOSPACE,
+        fontSize: "100%",
+        overflow: "auto !important",
+        resize: "none",
+      },
     },
   };
 });
-
-const StyledTextarea = muiStyled(OutlinedInput)(({ theme }) => ({
-  width: "100%",
-  height: "100%",
-  textAlign: "left",
-  backgroundColor: theme.palette.background.paper,
-  overflow: "hidden",
-  padding: theme.spacing(1, 0.5),
-
-  ".MuiInputBase-input": {
-    height: "100% !important",
-    font: "inherit",
-    lineHeight: 1.4,
-    fontFamily: fonts.MONOSPACE,
-    fontSize: "100%",
-    overflow: "auto !important",
-    resize: "none",
-  },
-}));
 
 function getTopicName(topic: Topic): string {
   return topic.name;
@@ -137,7 +136,7 @@ function Publish(props: Props) {
     },
     saveConfig,
   } = props;
-
+  const { classes } = useStyles({ buttonColor });
   const [debouncedTopicName] = useDebounce(topicName, 500);
 
   const publish = usePublisher({
@@ -268,7 +267,8 @@ function Publish(props: Props) {
             </Stack>
           </div>
           <Stack flex="auto">
-            <StyledTextarea
+            <OutlinedInput
+              className={classes.textarea}
               multiline
               placeholder="Enter message content as JSON"
               value={value}
@@ -291,16 +291,16 @@ function Publish(props: Props) {
             </Typography>
           </Stack>
         )}
-        <StyledButton
+        <Button
+          className={classes.button}
           variant="contained"
           size="large"
-          buttonColor={buttonColor ? buttonColor : undefined}
           title={canPublish ? buttonTooltip : "Connect to ROS to publish data"}
           disabled={!canPublish || parsedObject == undefined}
           onClick={onPublishClicked}
         >
           {buttonText}
-        </StyledButton>
+        </Button>
       </Stack>
     </Stack>
   );
