@@ -142,12 +142,12 @@ function makeStoryScene({
               {
                 // non-indexed, single color
                 type,
-                pose: xyzrpyToPose([0, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                pose: xyzrpyToPose([-0.2 + typeIndex * 0.2, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
                 thickness: 0.05,
                 scale_invariant: false,
                 points: new Array(10).fill(0).map((_, i, { length }) => ({
-                  x: (0.8 * i) / (length - 1),
-                  y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
+                  x: 0.25 * Math.cos((2 * Math.PI * i) / length),
+                  y: 0.25 * Math.sin((2 * Math.PI * i) / length),
                   z: 0,
                 })),
                 color: makeColor("#7995fb", 0.8),
@@ -157,29 +157,30 @@ function makeStoryScene({
               {
                 // indexed, single color
                 type,
-                pose: xyzrpyToPose([0, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                pose: xyzrpyToPose([-0.2 + typeIndex * 0.2, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
                 thickness: 0.05,
                 scale_invariant: false,
                 points: rearrange(
                   new Array(10).fill(0).map((_, i, { length }) => ({
-                    x: (0.8 * i) / (length - 1),
-                    y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
+                    x: 0.25 * Math.cos((2 * Math.PI * i) / length),
+                    y: 0.25 * Math.sin((2 * Math.PI * i) / length),
                     z: 0,
                   })),
                 ),
                 color: makeColor("#7995fb", 0.8),
                 colors: [],
-                indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
+                // Should make a flat-pointed star, LINE_LOOP should have a line across it
+                indices: rearrange(new Array(14).fill(0).map((_, i) => (i * 3) % 10)),
               },
               {
                 // non-indexed, vertex colors
                 type,
-                pose: xyzrpyToPose([1, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                pose: xyzrpyToPose([0.8 + typeIndex * 0.2, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
                 thickness: 5,
                 scale_invariant: true,
                 points: new Array(10).fill(0).map((_, i, { length }) => ({
-                  x: (0.8 * i) / (length - 1),
-                  y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
+                  x: 0.25 * Math.cos((2 * Math.PI * i) / length),
+                  y: 0.25 * Math.sin((2 * Math.PI * i) / length),
                   z: 0,
                 })),
                 color: makeColor("#7995fb", 0.8),
@@ -194,13 +195,13 @@ function makeStoryScene({
               {
                 // indexed, vertex colors
                 type,
-                pose: xyzrpyToPose([1, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
-                thickness: 5,
+                pose: xyzrpyToPose([0.8 + typeIndex * 0.2, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                thickness: 4,
                 scale_invariant: true,
                 points: rearrange(
                   new Array(10).fill(0).map((_, i, { length }) => ({
-                    x: (0.8 * i) / (length - 1),
-                    y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
+                    x: 0.25 * Math.cos((2 * Math.PI * i) / length),
+                    y: 0.25 * Math.sin((2 * Math.PI * i) / length),
                     z: 0,
                   })),
                 ),
@@ -213,7 +214,8 @@ function makeStoryScene({
                     return { r: r / 255, g: g / 255, b: b / 255, a };
                   }),
                 ),
-                indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
+                // Should make a flat-pointed star, LINE_LOOP should have a line across it
+                indices: rearrange(new Array(14).fill(0).map((_, i) => (i * 3) % 10)),
               },
               {
                 // empty points
