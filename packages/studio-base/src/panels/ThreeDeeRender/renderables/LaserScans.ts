@@ -185,10 +185,6 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
     }
 
     const latestEntry = pointsHistory.latest();
-    if (!latestEntry) {
-      throw new Error(`pointsHistory is empty for ${topic}`);
-    }
-
     latestEntry.receiveTime = receiveTime;
     latestEntry.messageTime = messageTime;
     latestEntry.object3d.userData.pose = laserScan.pose;
@@ -264,15 +260,10 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
 
   public invalidateLastEntry() {
     const lastEntry = this.#pointsHistory.latest();
-    lastEntry?.object3d.geometry.resize(0);
+    lastEntry.object3d.geometry.resize(0);
   }
 
   public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
-    if (!this.userData.settings.visible) {
-      this.renderer.settings.errors.clearPath(this.userData.settingsPath);
-      this.#pointsHistory.clearHistory();
-      return;
-    }
     this.#pointsHistory.updateHistoryFromCurrentTime(currentTime);
     this.#pointsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
     this.updateUniforms();
@@ -323,7 +314,13 @@ export class LaserScans extends SceneExtension<LaserScanRenderable> {
     // update the pose of each THREE.Points object in the pointsHistory of each
     // renderable
 
-    for (const renderable of this.renderables.values()) {
+    for (const [topic, renderable] of this.renderables) {
+      if (!renderable.userData.settings.visible) {
+        renderable.removeFromParent();
+        renderable.dispose();
+        this.renderables.delete(topic);
+        continue;
+      }
       renderable.startFrame(currentTime, renderFrameId, fixedFrameId);
       renderable.updateUniforms();
     }

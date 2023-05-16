@@ -270,10 +270,6 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
     }
 
     const latestPointsEntry = pointsHistory.latest();
-    if (!latestPointsEntry) {
-      throw new Error(`pointsHistory is empty for ${topic}`);
-    }
-
     latestPointsEntry.receiveTime = receiveTime;
     latestPointsEntry.messageTime = messageTime;
     latestPointsEntry.object3d.userData.pose = getPose(pointCloud);
@@ -285,9 +281,6 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
     const colorAttribute = latestPoints.geometry.attributes.color!;
 
     const latestStixelEntry = stixelsHistory.latest();
-    if (!latestStixelEntry) {
-      throw new Error(`stixelsHistory is empty for ${topic}`);
-    }
 
     if (!isDecay && prevIsDecay !== isDecay) {
       latestPointsEntry.object3d.geometry.setUsage(THREE.DynamicDrawUsage);
@@ -318,17 +311,6 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
   }
 
   public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
-    // The PointCloud SceneExtension overrides startFrame which is responsible for setting the
-    // THREE.Object3D.visible flag on renderables so we set it here to synchronize the THREE
-    // visibility state with the settings state.
-    this.visible = this.userData.settings.visible;
-
-    if (!this.userData.settings.visible) {
-      this.renderer.settings.errors.clearPath(this.userData.settingsPath);
-      this.#pointsHistory.clearHistory();
-      this.#stixelsHistory.clearHistory();
-      return;
-    }
     this.#pointsHistory.updateHistoryFromCurrentTime(currentTime);
     this.#pointsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
     if (this.userData.settings.stixelsEnabled) {
@@ -340,7 +322,7 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
   #invalidError(message: string): void {
     this.renderer.settings.errors.addToTopic(this.userData.topic, INVALID_POINTCLOUD, message);
     const lastEntry = this.#pointsHistory.latest();
-    lastEntry?.object3d.geometry.resize(0);
+    lastEntry.object3d.geometry.resize(0);
   }
 
   #validatePointCloud(pointCloud: PointCloud | PointCloud2): boolean {
@@ -698,7 +680,13 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     // update the pose of each THREE.Points object in the pointsHistory of each
     // renderable
 
-    for (const renderable of this.renderables.values()) {
+    for (const [topic, renderable] of this.renderables) {
+      if (!renderable.userData.settings.visible) {
+        renderable.removeFromParent();
+        renderable.dispose();
+        this.renderables.delete(topic);
+        continue;
+      }
       renderable.startFrame(currentTime, renderFrameId, fixedFrameId);
     }
   }
