@@ -17,10 +17,14 @@ import type { IRenderer } from "../../IRenderer";
 import { LineMaterial } from "../../LineMaterial";
 import { Marker } from "../../ros";
 
+const tempTuple4: THREE.Vector4Tuple = [0, 0, 0, 0];
+
 export class RenderableLineStrip extends RenderableMarker {
   #geometry: LineGeometry;
   #linePrepass: Line2;
   #line: Line2;
+  #positionBuffer = new Float32Array();
+  #colorBuffer = new Uint8Array();
 
   public constructor(
     topic: string,
@@ -103,8 +107,8 @@ export class RenderableLineStrip extends RenderableMarker {
     const matLine = this.#line.material as LineMaterial;
     matLine.lineWidth = lineWidth;
 
-    const prevPointsLength = (this.#geometry.attributes.instanceStart?.count ?? 0) * 2;
-    if (pointsLength !== prevPointsLength) {
+    const prevPointsLength = this.#positionBuffer.length / 3;
+    if (pointsLength > prevPointsLength) {
       this.#geometry.dispose();
       this.#geometry = new LineGeometry();
       this.#linePrepass.geometry = this.#geometry;
@@ -119,22 +123,47 @@ export class RenderableLineStrip extends RenderableMarker {
   }
 
   #setPositions(marker: Marker, pointsLength: number): void {
-    const linePositions = new Float32Array(3 * pointsLength);
+    if (3 * pointsLength > this.#positionBuffer.length) {
+      this.#positionBuffer = new Float32Array(3 * pointsLength);
+    }
+    const positions = this.#positionBuffer;
     for (let i = 0; i < pointsLength; i++) {
       const point = marker.points[i]!;
       const offset = i * 3;
-      linePositions[offset + 0] = point.x;
-      linePositions[offset + 1] = point.y;
-      linePositions[offset + 2] = point.z;
+      positions[offset + 0] = point.x;
+      positions[offset + 1] = point.y;
+      positions[offset + 2] = point.z;
     }
 
-    this.#geometry.setPositions(linePositions);
+    this.#geometry.setPositions(positions);
+    this.#geometry.instanceCount = pointsLength - 1;
   }
 
   #setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to pairs format in a flattened typed array
-    const rgbaData = new Float32Array(8 * pointsLength);
-    const color1: THREE.Vector4Tuple = [0, 0, 0, 0];
+    if (8 * pointsLength > this.#colorBuffer.length) {
+      this.#colorBuffer = new Uint8Array(8 * pointsLength);
+      // [rgba, rgba]
+      const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(this.#colorBuffer, 8, 1);
+      this.#geometry.setAttribute(
+        "instanceColorStart",
+        new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0, true),
+      );
+      this.#geometry.setAttribute(
+        "instanceColorEnd",
+        new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4, true),
+      );
+    } else {
+      this.#geometry.getAttribute("instanceColorStart").needsUpdate = true;
+      this.#geometry.getAttribute("instanceColorEnd").needsUpdate = true;
+    }
+
+    const colorBuffer = this.#colorBuffer;
+    const color1: THREE.Vector4Tuple = tempTuple4;
+    color1[0] = 0;
+    color1[1] = 0;
+    color1[2] = 0;
+    color1[3] = 0;
     this._markerColorsToLinear(marker, pointsLength, (color2, ii) => {
       if (ii === 0) {
         copyTuple4(color2, color1);
@@ -143,29 +172,18 @@ export class RenderableLineStrip extends RenderableMarker {
       const i = ii - 1;
       const offset = i * 8;
 
-      rgbaData[offset + 0] = color1[0];
-      rgbaData[offset + 1] = color1[1];
-      rgbaData[offset + 2] = color1[2];
-      rgbaData[offset + 3] = color1[3];
+      colorBuffer[offset + 0] = Math.floor(255 * color1[0]);
+      colorBuffer[offset + 1] = Math.floor(255 * color1[1]);
+      colorBuffer[offset + 2] = Math.floor(255 * color1[2]);
+      colorBuffer[offset + 3] = Math.floor(255 * color1[3]);
 
-      rgbaData[offset + 4] = color2[0];
-      rgbaData[offset + 5] = color2[1];
-      rgbaData[offset + 6] = color2[2];
-      rgbaData[offset + 7] = color2[3];
+      colorBuffer[offset + 4] = Math.floor(255 * color2[0]);
+      colorBuffer[offset + 5] = Math.floor(255 * color2[1]);
+      colorBuffer[offset + 6] = Math.floor(255 * color2[2]);
+      colorBuffer[offset + 7] = Math.floor(255 * color2[3]);
 
       copyTuple4(color2, color1);
     });
-
-    // [rgba, rgba]
-    const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(rgbaData, 8, 1);
-    this.#geometry.setAttribute(
-      "instanceColorStart",
-      new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0),
-    );
-    this.#geometry.setAttribute(
-      "instanceColorEnd",
-      new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4),
-    );
   }
 }
 

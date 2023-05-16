@@ -21,6 +21,8 @@ export class RenderableLineList extends RenderableMarker {
   #geometry: LineSegmentsGeometry;
   #linePrepass: LineSegments2;
   #line: LineSegments2;
+  #positionBuffer = new Float32Array();
+  #colorBuffer = new Uint8Array();
 
   public constructor(
     topic: string,
@@ -97,8 +99,8 @@ export class RenderableLineList extends RenderableMarker {
     const matLine = this.#line.material as LineMaterial;
     matLine.lineWidth = lineWidth;
 
-    const prevPointsLength = (this.#geometry.attributes.instanceStart?.count ?? 0) * 2;
-    if (pointsLength !== prevPointsLength) {
+    const prevPointsLength = this.#positionBuffer.length / 3;
+    if (pointsLength > prevPointsLength) {
       this.#geometry.dispose();
       this.#geometry = new LineSegmentsGeometry();
       this.#linePrepass.geometry = this.#geometry;
@@ -114,38 +116,48 @@ export class RenderableLineList extends RenderableMarker {
   }
 
   #setPositions(marker: Marker, pointsLength: number): void {
-    const linePositions = new Float32Array(3 * pointsLength);
+    if (3 * pointsLength > this.#positionBuffer.length) {
+      this.#positionBuffer = new Float32Array(3 * pointsLength);
+    }
+    const positions = this.#positionBuffer;
     for (let i = 0; i < pointsLength; i++) {
       const point = marker.points[i]!;
       const offset = i * 3;
-      linePositions[offset + 0] = point.x;
-      linePositions[offset + 1] = point.y;
-      linePositions[offset + 2] = point.z;
+      positions[offset + 0] = point.x;
+      positions[offset + 1] = point.y;
+      positions[offset + 2] = point.z;
     }
 
-    this.#geometry.setPositions(linePositions);
+    this.#geometry.setPositions(positions);
+    this.#geometry.instanceCount = pointsLength >>> 1;
   }
 
   #setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to a flattened typed array
-    const rgbaData = new Float32Array(4 * pointsLength);
+    if (4 * pointsLength > this.#colorBuffer.length) {
+      this.#colorBuffer = new Uint8Array(4 * pointsLength);
+      // [rgba, rgba]
+      const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(this.#colorBuffer, 8, 1);
+      this.#geometry.setAttribute(
+        "instanceColorStart",
+        new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0, true),
+      );
+      this.#geometry.setAttribute(
+        "instanceColorEnd",
+        new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4, true),
+      );
+    } else {
+      this.#geometry.getAttribute("instanceColorStart").needsUpdate = true;
+      this.#geometry.getAttribute("instanceColorEnd").needsUpdate = true;
+    }
+
+    const colorBuffer = this.#colorBuffer;
     this._markerColorsToLinear(marker, pointsLength, (color, i) => {
       const offset = i * 4;
-      rgbaData[offset + 0] = color[0];
-      rgbaData[offset + 1] = color[1];
-      rgbaData[offset + 2] = color[2];
-      rgbaData[offset + 3] = color[3];
+      colorBuffer[offset + 0] = Math.floor(255 * color[0]);
+      colorBuffer[offset + 1] = Math.floor(255 * color[1]);
+      colorBuffer[offset + 2] = Math.floor(255 * color[2]);
+      colorBuffer[offset + 3] = Math.floor(255 * color[3]);
     });
-
-    // [rgba, rgba]
-    const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(rgbaData, 8, 1);
-    this.#geometry.setAttribute(
-      "instanceColorStart",
-      new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0),
-    );
-    this.#geometry.setAttribute(
-      "instanceColorEnd",
-      new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4),
-    );
   }
 }
