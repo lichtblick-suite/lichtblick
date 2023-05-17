@@ -534,6 +534,7 @@ class StudioWindow {
   }
 
   #reloadMainWindow(): void {
+    const windowWasMaximized = this.#browserWindow.isMaximized();
     this.#browserWindow.close();
     this.#browserWindow.destroy();
 
@@ -541,6 +542,10 @@ class StudioWindow {
     this.#browserWindow = newWindow;
     this.#menu = newMenu;
     this.load();
+
+    if (windowWasMaximized) {
+      this.#browserWindow.maximize();
+    }
   }
 
   #buildBrowserWindow(): [BrowserWindow, Menu] {
