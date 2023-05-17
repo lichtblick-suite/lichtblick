@@ -26,65 +26,22 @@ const markerObject = {
   ns: "",
   text: "hello\nthere",
   type: 0,
-  scale: {
-    x: 2,
-    y: 2,
-    z: 4,
-  },
-  orientation: {
-    x: 0,
-    y: 0,
-    z: Math.sin(Math.PI / 8),
-    w: Math.cos(Math.PI / 8),
-  },
-  color: {
-    r: 1,
-    g: 0.1,
-    b: 0,
-    a: 0.7,
-  },
+  scale: { x: 2, y: 2, z: 4 },
+  orientation: { x: 0, y: 0, z: Math.sin(Math.PI / 8), w: Math.cos(Math.PI / 8) },
+  color: { r: 1, g: 0.1, b: 0, a: 0.7 },
   pose: {
-    position: {
-      x: -1,
-      y: 1,
-      z: -5,
-    },
-    orientation: {
-      x: 0,
-      y: 0,
-      z: 0,
-      w: 1,
-    },
+    position: { x: -1, y: 1, z: -5 },
+    orientation: { x: 0, y: 0, z: 0, w: 1 },
   },
 };
 
 // ts-prune-ignore-next
 export const POINT_CLOUD_MESSAGE: PointCloud2 = {
   fields: [
-    {
-      name: "x",
-      offset: 0,
-      datatype: 7,
-      count: 1,
-    },
-    {
-      name: "y",
-      offset: 4,
-      datatype: 7,
-      count: 1,
-    },
-    {
-      name: "z",
-      offset: 8,
-      datatype: 7,
-      count: 1,
-    },
-    {
-      name: "rgb",
-      offset: 16,
-      datatype: 7,
-      count: 1,
-    },
+    { name: "x", offset: 0, datatype: 7, count: 1 },
+    { name: "y", offset: 4, datatype: 7, count: 1 },
+    { name: "z", offset: 8, datatype: 7, count: 1 },
+    { name: "rgb", offset: 16, datatype: 7, count: 1 },
   ],
   type: 102,
   pose: {
@@ -151,48 +108,13 @@ export const POINT_CLOUD_MESSAGE: PointCloud2 = {
 // ts-prune-ignore-next
 export const POINT_CLOUD_WITH_ADDITIONAL_FIELDS: PointCloud2 = {
   fields: [
-    {
-      name: "x",
-      offset: 0,
-      datatype: 7,
-      count: 1,
-    },
-    {
-      name: "y",
-      offset: 4,
-      datatype: 7,
-      count: 1,
-    },
-    {
-      name: "z",
-      offset: 8,
-      datatype: 7,
-      count: 1,
-    },
-    {
-      name: "foo",
-      offset: 12,
-      datatype: 2,
-      count: 1,
-    },
-    {
-      name: "bar",
-      offset: 13,
-      datatype: 4,
-      count: 1,
-    },
-    {
-      name: "baz",
-      offset: 15,
-      datatype: 5,
-      count: 1,
-    },
-    {
-      name: "foo16_some_really_really_long_name",
-      offset: 19,
-      datatype: 3,
-      count: 1,
-    },
+    { name: "x", offset: 0, datatype: 7, count: 1 },
+    { name: "y", offset: 4, datatype: 7, count: 1 },
+    { name: "z", offset: 8, datatype: 7, count: 1 },
+    { name: "foo", offset: 12, datatype: 2, count: 1 },
+    { name: "bar", offset: 13, datatype: 4, count: 1 },
+    { name: "baz", offset: 15, datatype: 5, count: 1 },
+    { name: "foo16_some_really_really_long_name", offset: 19, datatype: 3, count: 1 },
   ],
   type: 102,
   pose: {
@@ -317,11 +239,10 @@ function PanelSetupWithData({
 
 export default {
   title: "panels/ThreeDeeRender/Interactions/Interaction",
-
   parameters: {
     chromatic: { viewport: { width: 1001, height: 1101 } },
+    colorScheme: "both-column",
   },
-
   excludeStories: ["POINT_CLOUD_MESSAGE", "POINT_CLOUD_WITH_ADDITIONAL_FIELDS"],
 };
 
@@ -342,14 +263,6 @@ export const Default: StoryObj = {
       </Stack>
     );
   },
-  name: "default",
-  parameters: { colorScheme: "dark" },
-};
-
-export const DefaultLight: StoryObj = {
-  ...Default,
-  name: "default light",
-  parameters: { colorScheme: "light" },
 };
 
 export const PointCloud: StoryObj = {
@@ -394,6 +307,4 @@ export const PointCloud: StoryObj = {
       </Stack>
     );
   },
-
-  name: "PointCloud",
 };
