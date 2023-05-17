@@ -26,7 +26,6 @@ import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/use
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
 
@@ -62,8 +61,6 @@ export function UserMenu({
   const [confirm, confirmModal] = useConfirm();
 
   const { dialogActions } = useWorkspaceActions();
-
-  const isDesktop = isDesktopApp();
 
   const beginSignOut = useCallback(async () => {
     try {
@@ -129,17 +126,8 @@ export function UserMenu({
   }, [analytics, currentUserType]);
 
   const revertToOldUI = useCallback(async () => {
-    if (isDesktop) {
-      await confirm({
-        title: "Please restart the app to finish reverting to the old UI.",
-        ok: "OK",
-        cancel: false,
-      });
-      await setEnableNewTopNav(false);
-    } else {
-      await setEnableNewTopNav(false);
-    }
-  }, [confirm, isDesktop, setEnableNewTopNav]);
+    await setEnableNewTopNav(false);
+  }, [setEnableNewTopNav]);
 
   return (
     <>

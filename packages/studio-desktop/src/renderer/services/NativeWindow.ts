@@ -9,7 +9,7 @@ import { Desktop } from "../../common/types";
 type Handler = () => void;
 
 export class NativeWindow implements INativeWindow {
-  #bridge?: Desktop;
+  readonly #bridge?: Desktop;
 
   public constructor(bridge: Desktop) {
     this.#bridge = bridge;
@@ -43,5 +43,8 @@ export class NativeWindow implements INativeWindow {
   }
   public close(): void {
     this.#bridge?.closeWindow();
+  }
+  public reload(): void {
+    this.#bridge?.reloadWindow();
   }
 }

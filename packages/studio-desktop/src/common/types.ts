@@ -98,6 +98,7 @@ interface Desktop {
   maximizeWindow(): void;
   unmaximizeWindow(): void;
   closeWindow(): void;
+  reloadWindow(): void;
 }
 
 export type { NativeMenuBridge, Storage, StorageContent, Desktop, DesktopExtension };

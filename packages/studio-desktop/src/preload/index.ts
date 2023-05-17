@@ -147,6 +147,9 @@ export function main(): void {
     closeWindow() {
       ipcRenderer.send("closeWindow");
     },
+    reloadWindow() {
+      ipcRenderer.send("reloadMainWindow");
+    },
   };
 
   const storageBridge: Storage = {

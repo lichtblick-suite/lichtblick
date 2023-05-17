@@ -114,7 +114,7 @@ function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
   return {};
 }
 
-function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
+function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
   const enableNewTopNav = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
 
@@ -234,6 +234,10 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
         break;
       case "closeWindow":
         browserWindow.close();
+        break;
+      case "reloadMainWindow":
+        log.info("reloading main window");
+        reloadMainWindow();
         break;
       default:
         break;
@@ -449,51 +453,18 @@ class StudioWindow {
   // The web contents id is most broadly available across IPC events and app handlers
   // BrowserWindow.id is not as available
   static #windowsByContentId = new Map<number, StudioWindow>();
+  readonly #deepLinks: string[];
+  readonly #inputSources = new Set<string>();
 
   #browserWindow: BrowserWindow;
   #menu: Menu;
 
-  #inputSources = new Set<string>();
-
   public constructor(deepLinks: string[] = []) {
-    const browserWindow = newStudioWindow(deepLinks);
-    this.#browserWindow = browserWindow;
-    this.#menu = buildMenu(browserWindow);
+    this.#deepLinks = deepLinks;
 
-    const id = browserWindow.webContents.id;
-
-    log.info(`New Foxglove Studio window ${id}`);
-    StudioWindow.#windowsByContentId.set(id, this);
-
-    // when a window closes and it is the current application menu, clear the input sources
-    browserWindow.once("close", () => {
-      if (Menu.getApplicationMenu() === this.#menu) {
-        const existingMenu = Menu.getApplicationMenu();
-        const fileMenu = existingMenu?.getMenuItemById("fileMenu");
-        // https://github.com/electron/electron/issues/8598
-        (fileMenu?.submenu as undefined | ClearableMenu)?.clear();
-        fileMenu?.submenu?.append(
-          new MenuItem({
-            label: "New Window",
-            click: () => {
-              new StudioWindow().load();
-            },
-          }),
-        );
-
-        fileMenu?.submenu?.append(
-          new MenuItem({
-            type: "separator",
-          }),
-        );
-
-        fileMenu?.submenu?.append(new MenuItem(closeMenuItem));
-        Menu.setApplicationMenu(existingMenu);
-      }
-    });
-    browserWindow.once("closed", () => {
-      StudioWindow.#windowsByContentId.delete(id);
-    });
+    const [newWindow, newMenu] = this.#buildBrowserWindow();
+    this.#browserWindow = newWindow;
+    this.#menu = newMenu;
   }
 
   public load(): void {
@@ -560,6 +531,60 @@ class StudioWindow {
 
   public static fromWebContentsId(id: number): StudioWindow | undefined {
     return StudioWindow.#windowsByContentId.get(id);
+  }
+
+  #reloadMainWindow(): void {
+    this.#browserWindow.close();
+    this.#browserWindow.destroy();
+
+    const [newWindow, newMenu] = this.#buildBrowserWindow();
+    this.#browserWindow = newWindow;
+    this.#menu = newMenu;
+    this.load();
+  }
+
+  #buildBrowserWindow(): [BrowserWindow, Menu] {
+    const browserWindow = newStudioWindow(this.#deepLinks, () => {
+      this.#reloadMainWindow();
+    });
+    const newMenu = buildMenu(browserWindow);
+
+    const id = browserWindow.webContents.id;
+
+    log.info(`New Foxglove Studio window ${id}`);
+    StudioWindow.#windowsByContentId.set(id, this);
+
+    // when a window closes and it is the current application menu, clear the input sources
+    browserWindow.once("close", () => {
+      if (Menu.getApplicationMenu() === this.#menu) {
+        const existingMenu = Menu.getApplicationMenu();
+        const fileMenu = existingMenu?.getMenuItemById("fileMenu");
+        // https://github.com/electron/electron/issues/8598
+        (fileMenu?.submenu as undefined | ClearableMenu)?.clear();
+        fileMenu?.submenu?.append(
+          new MenuItem({
+            label: "New Window",
+            click: () => {
+              new StudioWindow().load();
+            },
+          }),
+        );
+
+        fileMenu?.submenu?.append(
+          new MenuItem({
+            type: "separator",
+          }),
+        );
+
+        fileMenu?.submenu?.append(new MenuItem(closeMenuItem));
+        Menu.setApplicationMenu(existingMenu);
+      }
+    });
+    browserWindow.once("closed", () => {
+      StudioWindow.#windowsByContentId.delete(id);
+    });
+
+    return [browserWindow, newMenu];
   }
 
   #rebuildFileMenu(fileMenu: MenuItem): void {

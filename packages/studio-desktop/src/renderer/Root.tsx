@@ -102,6 +102,7 @@ export default function Root(props: {
   const onMaximizeWindow = useCallback(() => nativeWindow.maximize(), [nativeWindow]);
   const onUnmaximizeWindow = useCallback(() => nativeWindow.unmaximize(), [nativeWindow]);
   const onCloseWindow = useCallback(() => nativeWindow.close(), [nativeWindow]);
+  const onReloadWindow = useCallback(() => nativeWindow.reload(), [nativeWindow]);
 
   useEffect(() => {
     const onEnterFullScreen = () => setFullScreen(true);
@@ -139,6 +140,7 @@ export default function Root(props: {
         onMaximizeWindow={onMaximizeWindow}
         onUnmaximizeWindow={onUnmaximizeWindow}
         onCloseWindow={onCloseWindow}
+        onReloadWindow={onReloadWindow}
         extraProviders={props.extraProviders}
       />
     </>
