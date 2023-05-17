@@ -13,7 +13,7 @@ import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { ActionMenu } from "@foxglove/studio-base/components/PanelSettings/ActionMenu";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
-import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
+import { ShareJsonModal } from "@foxglove/studio-base/components/ShareJsonModal";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
 import {

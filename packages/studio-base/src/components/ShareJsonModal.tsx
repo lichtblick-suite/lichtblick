@@ -13,9 +13,10 @@ import {
   DialogActions,
   TextField,
   Typography,
-  styled as muiStyled,
+  outlinedInputClasses,
 } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
@@ -23,29 +24,32 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-type Props = {
+export type ShareJsonModalProps = {
   onRequestClose: () => void;
   onChange: (value: unknown) => void;
   initialValue: unknown;
   title: string;
 };
 
-const StyledTextarea = muiStyled(TextField)(({ theme }) => ({
-  ".MuiOutlinedInput-root": {
-    backgroundColor: theme.palette.action.hover,
-    fontFamily: fonts.MONOSPACE,
-    maxHeight: "60vh",
-    overflowY: "auto",
-    padding: theme.spacing(0.25),
+const useStyles = makeStyles()((theme) => ({
+  textarea: {
+    [`.${outlinedInputClasses.root}`]: {
+      backgroundColor: theme.palette.action.hover,
+      fontFamily: fonts.MONOSPACE,
+      maxHeight: "60vh",
+      overflowY: "auto",
+      padding: theme.spacing(0.25),
+    },
   },
 }));
 
-export default function ShareJsonModal({
+export function ShareJsonModal({
   initialValue = {},
   onChange,
   onRequestClose,
   title,
-}: Props): JSX.Element {
+}: ShareJsonModalProps): JSX.Element {
+  const { classes } = useStyles();
   const [value, setValue] = useState(JSON.stringify(initialValue, undefined, 2) ?? "");
 
   const { decodedValue, error } = useMemo(() => {
@@ -87,7 +91,8 @@ export default function ShareJsonModal({
         </IconButton>
       </Stack>
       <DialogContent>
-        <StyledTextarea
+        <TextField
+          className={classes.textarea}
           fullWidth
           multiline
           rows={10}
@@ -98,6 +103,7 @@ export default function ShareJsonModal({
           helperText={
             error ? "The JSON provided is invalid." : " " // pass whitespace to prevent height from jumping
           }
+          inputProps={{ "data-testid": "share-json-input" }}
           FormHelperTextProps={{ variant: "standard" }}
           spellCheck={false}
         />
