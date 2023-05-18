@@ -11,17 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { styled as muiStyled } from "@mui/material";
 import fuzzySort from "fuzzysort";
+import { makeStyles } from "tss-react/mui";
 
-const STextHighlight = muiStyled("span")(
-  ({ theme }) => `
-  .TextHighlight-highlight {
-    color: ${theme.palette.primary.main};
-    font-weight: bold;
-  }
-`,
-);
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    ".TextHighlight-highlight": {
+      color: theme.palette.primary.main,
+      fontWeight: "bold",
+    },
+  },
+}));
 
 type Props = {
   targetStr: string;
@@ -29,23 +29,24 @@ type Props = {
 };
 
 export default function TextHighlight({ targetStr = "", searchText = "" }: Props): JSX.Element {
+  const { classes } = useStyles();
+
   if (searchText.length === 0) {
     return <>{targetStr}</>;
   }
 
   const match = fuzzySort.single(searchText, targetStr);
-
   const result = match
     ? fuzzySort.highlight(match, "<span class='TextHighlight-highlight'>", "</span>")
     : undefined;
 
   return (
-    <STextHighlight>
+    <span className={classes.root}>
       {result != undefined && result.length > 0 ? (
         <span dangerouslySetInnerHTML={{ __html: result }} />
       ) : (
         targetStr
       )}
-    </STextHighlight>
+    </span>
   );
 }
