@@ -3,15 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ErrorCircle20Filled } from "@fluentui/react-icons";
-import { ButtonBase, CircularProgress, IconButton } from "@mui/material";
+import { CircularProgress, IconButton } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-import {
-  APP_BAR_PRIMARY_COLOR,
-  APP_BAR_FOREGROUND_COLOR,
-} from "@foxglove/studio-base/components/AppBar/constants";
+import { APP_BAR_PRIMARY_COLOR } from "@foxglove/studio-base/components/AppBar/constants";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -24,7 +20,7 @@ import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 const ICON_SIZE = 18;
 
-const useStyles = makeStyles<void, "adornmentError" | "openIcon">()((theme, _params, classes) => ({
+const useStyles = makeStyles<void, "adornmentError">()((theme, _params, _classes) => ({
   sourceName: {
     font: "inherit",
     fontSize: theme.typography.body2.fontSize,
@@ -35,14 +31,6 @@ const useStyles = makeStyles<void, "adornmentError" | "openIcon">()((theme, _par
     paddingInlineEnd: theme.spacing(0.75),
     whiteSpace: "nowrap",
     minWidth: 0,
-
-    "&button:not(:hover)": {
-      color: tc(APP_BAR_FOREGROUND_COLOR).setAlpha(0.8).toString(),
-
-      [`.${classes.openIcon}`]: {
-        visibility: "hidden",
-      },
-    },
   },
   adornment: {
     display: "flex",
@@ -69,10 +57,6 @@ const useStyles = makeStyles<void, "adornmentError" | "openIcon">()((theme, _par
     maxWidth: "30vw",
     overflow: "hidden",
   },
-  openIcon: {
-    opacity: 0.6,
-    flex: "none",
-  },
   iconButton: {
     padding: 0,
 
@@ -98,7 +82,7 @@ export function DataSource(): JSX.Element {
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
-  const { dialogActions, sidebarActions } = useWorkspaceActions();
+  const { sidebarActions } = useWorkspaceActions();
 
   const reconnecting = playerPresence === PlayerPresence.RECONNECTING;
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
@@ -110,14 +94,8 @@ export function DataSource(): JSX.Element {
   const playerDisplayName =
     initializing && playerName == undefined ? "Initializing..." : playerName;
 
-  const openDataSourceDialog = () => dialogActions.dataSource.open("start");
-
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
-    return (
-      <ButtonBase className={classes.sourceName} color="inherit" onClick={openDataSourceDialog}>
-        {t("noDataSource")}
-      </ButtonBase>
-    );
+    return <div className={classes.sourceName}>{t("noDataSource")}</div>;
   }
 
   return (
