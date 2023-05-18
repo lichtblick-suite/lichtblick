@@ -176,6 +176,5 @@ overrides:
       # Ignore existing implementations of @mui/styled and @mui/Box
       - "packages/studio-base/src/components/DataSourceSidebar/DataSourceSidebar.tsx"
       - "packages/studio-base/src/components/LayoutBrowser/LayoutRow.tsx"
-      - "packages/studio-base/src/components/PanelLayout.tsx"
       - "packages/studio-base/src/panels/Image/components/Toolbar.tsx"
       - "packages/studio-base/src/panels/Image/components/ZoomMenu.tsx"
