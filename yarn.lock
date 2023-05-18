@@ -2547,7 +2547,7 @@ __metadata:
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
-    "@types/leaflet": 1.8.0
+    "@types/leaflet": 1.9.3
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.3
     "@types/nearley": 2.11.2
@@ -2601,7 +2601,7 @@ __metadata:
     jest-diff: 29.5.0
     jszip: 3.10.1
     just-diff: 6.0.2
-    leaflet: 1.8.0
+    leaflet: 1.9.4
     lodash: 4.17.21
     mathjs: 11.8.0
     memoize-weak: 1.0.2
@@ -5754,12 +5754,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@types/leaflet@npm:1.8.0"
+"@types/leaflet@npm:1.9.3":
+  version: 1.9.3
+  resolution: "@types/leaflet@npm:1.9.3"
   dependencies:
     "@types/geojson": "*"
-  checksum: a0190d48dfd49c7526a38c94490d9acdcb09de8b0338ebae8b33374b24f474330be82733007ab1c39008a61c4712b743ccf230909f203f0f35c9986b3a583ab6
+  checksum: d12042edc3a043d074b4fd3b4c4800f479dfb01db3980d8c1151edbc70b23ca9e84ab7da72ce0d1c36c040f89ba1421bd36d9d9796ec3704a0d3c942985a87ae
   languageName: node
   linkType: hard
 
@@ -14389,10 +14389,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet@npm:1.8.0":
-  version: 1.8.0
-  resolution: "leaflet@npm:1.8.0"
-  checksum: 4a27895d4253844f2f13f94cbc52a2030b10833cdf553085d931b834745236a8d2a38844a01eb968cc109eb43268bfadb97aad85b51deffb17b6ccd106542e00
+"leaflet@npm:1.9.4":
+  version: 1.9.4
+  resolution: "leaflet@npm:1.9.4"
+  checksum: bfc79f17a247b37b92d84b3c78702501603392d6589fde606de4a825d11f1609d90225388834f2e0709dac327e52dcd4b4b9cc9fd3d590060c5b1e53b84fa6c6
   languageName: node
   linkType: hard
 
