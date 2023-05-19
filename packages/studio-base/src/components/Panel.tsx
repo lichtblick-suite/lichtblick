@@ -161,7 +161,7 @@ export default function Panel<
   function ConnectedPanel(props: Props<Config>) {
     const { childId, overrideConfig, tabId, ...otherProps } = props;
     const theme = useTheme();
-    const { classes } = useStyles();
+    const { classes, cx } = useStyles();
     const isMounted = useMountedState();
 
     const { mosaicActions } = useContext(MosaicContext);
@@ -578,7 +578,7 @@ export default function Panel<
                 fullscreenState={fullscreenState}
                 sourceRect={fullscreenSourceRect}
                 selected={isSelected}
-                data-testid={`panel-mouseenter-container ${childId ?? ""}`}
+                data-testid={cx("panel-mouseenter-container", childId)}
                 ref={(el) => {
                   panelRootRef.current = el;
                   // disallow dragging the root panel in a layout
