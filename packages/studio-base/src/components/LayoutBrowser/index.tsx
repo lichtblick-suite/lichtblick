@@ -6,11 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
 import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
 import {
-  Button,
   IconButton,
-  Switch,
-  FormGroup,
-  FormControlLabel,
   CircularProgress,
   List,
   ListItem,
@@ -22,7 +18,7 @@ import { partition } from "lodash";
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import path from "path";
-import { MouseEvent, useCallback, useContext, useEffect, useLayoutEffect, useMemo } from "react";
+import { MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 import { makeStyles } from "tss-react/mui";
@@ -43,7 +39,6 @@ import {
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
@@ -62,21 +57,6 @@ const log = Logger.getLogger(__filename);
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
 const useStyles = makeStyles()((theme) => ({
-  debugBanner: {
-    bottom: 0,
-    left: 0,
-    right: 0,
-    background: theme.palette.background.paper,
-    borderWidth: 4,
-    borderStyle: "solid",
-    borderImage: `repeating-linear-gradient(${[
-      "-45deg",
-      theme.palette.warning.main,
-      `${theme.palette.warning.main} 6px`,
-      "#121217 6px",
-      "#121217 12px",
-    ].join(",")}) 4`,
-  },
   actionList: {
     paddingTop: theme.spacing(1),
   },
@@ -534,8 +514,6 @@ export default function LayoutBrowser({
     promptForUnsavedChanges,
   ]);
 
-  const layoutDebug = useContext(LayoutStorageDebuggingContext);
-
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
   const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
     AppSetting.HIDE_SIGN_IN_PROMPT,
@@ -653,40 +631,6 @@ export default function LayoutBrowser({
         )}
         {!enableNewTopNav && <Stack flexGrow={1} />}
         {showSignInPrompt && <SignInPrompt onDismiss={() => void setHideSignInPrompt(true)} />}
-        {layoutDebug && (
-          <Stack gap={0.5} padding={1} position="sticky" className={classes.debugBanner}>
-            <Stack direction="row" flex="auto" gap={1} alignItems="center">
-              <Button
-                size="small"
-                color="inherit"
-                onClick={async () => {
-                  await layoutDebug.syncNow();
-                  await reloadLayouts();
-                }}
-              >
-                Sync
-              </Button>
-
-              <Stack flex="auto" />
-
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      size="small"
-                      color="warning"
-                      checked={layoutManager.isOnline}
-                      onChange={(_, checked) => {
-                        layoutDebug.setOnline(checked);
-                      }}
-                    />
-                  }
-                  label={layoutManager.isOnline ? "Online" : "Offline"}
-                />
-              </FormGroup>
-            </Stack>
-          </Stack>
-        )}
       </Stack>
     </SidebarContent>
   );

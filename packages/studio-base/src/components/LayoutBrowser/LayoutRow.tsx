@@ -19,7 +19,6 @@ import {
 } from "@mui/material";
 import {
   useCallback,
-  useContext,
   useLayoutEffect,
   useMemo,
   useState,
@@ -30,7 +29,6 @@ import {
 import { useMountedState } from "react-use";
 
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 
@@ -148,7 +146,6 @@ export default React.memo(function LayoutRow({
 }): JSX.Element {
   const isMounted = useMountedState();
   const [confirm, confirmModal] = useConfirm();
-  const layoutDebug = useContext(LayoutStorageDebuggingContext);
   const layoutManager = useLayoutManager();
 
   const [editingName, setEditingName] = useState(false);
@@ -368,54 +365,6 @@ export default React.memo(function LayoutRow({
       },
       ...sectionItems,
       { key: "changes_divider", type: "divider" },
-    );
-  }
-
-  if (layoutDebug) {
-    menuItems.push(
-      { key: "debug_divider", type: "divider" },
-      {
-        type: "item",
-        key: "debug_id",
-        text: layout.id,
-        disabled: true,
-        debug: true,
-      },
-      {
-        type: "item",
-        key: "debug_updated_at",
-        text: `Saved at: ${layout.working?.savedAt ?? layout.baseline.savedAt}`,
-        disabled: true,
-        debug: true,
-      },
-      {
-        type: "item",
-        key: "debug_sync_status",
-        text: `Sync status: ${layout.syncInfo?.status}`,
-        disabled: true,
-        debug: true,
-      },
-      {
-        type: "item",
-        key: "debug_edit",
-        text: "Inject edit",
-        onClick: () => void layoutDebug.injectEdit(layout.id),
-        debug: true,
-      },
-      {
-        type: "item",
-        key: "debug_rename",
-        text: "Inject rename",
-        onClick: () => void layoutDebug.injectRename(layout.id),
-        debug: true,
-      },
-      {
-        type: "item",
-        key: "debug_delete",
-        text: "Inject delete",
-        onClick: () => void layoutDebug.injectDelete(layout.id),
-        debug: true,
-      },
     );
   }
 
