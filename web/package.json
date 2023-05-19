@@ -7,7 +7,7 @@
     "@types/serve-handler": "^6",
     "playwright": "1.33.0",
     "serve-handler": "6.1.5",
-    "webpack": "5.82.1",
+    "webpack": "5.83.1",
     "webpack-dev-server": "4.15.0"
   }
 }
