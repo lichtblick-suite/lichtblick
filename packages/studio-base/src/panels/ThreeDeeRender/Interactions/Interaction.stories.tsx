@@ -11,9 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
-import { StoryObj } from "@storybook/react";
+import { useTheme } from "@mui/material";
+import { StoryFn, StoryObj } from "@storybook/react";
+import { PropsWithChildren } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
@@ -196,19 +198,12 @@ const sharedProps = {
   },
 };
 
-function PanelSetupWithData({
-  children,
-  title,
-  onMount,
-}: {
-  children: React.ReactNode;
-  title: React.ReactNode;
-  onMount?: (el: HTMLDivElement) => void;
-}) {
+function PanelSetupWithData(props: PropsWithChildren<{ title: React.ReactNode }>) {
+  const { children, title } = props;
   return (
     <PanelSetup
       omitDragAndDrop
-      style={{ width: "auto", height: "auto", display: "inline-flex" }}
+      style={{ width: "auto", height: "auto" }}
       fixture={{
         topics: [],
         datatypes: new Map(),
@@ -220,18 +215,9 @@ function PanelSetupWithData({
         },
       }}
     >
-      <div
-        style={{ margin: 16 }}
-        ref={(el) => {
-          if (el && onMount) {
-            onMount(el);
-          }
-        }}
-      >
+      <div>
         <p>{title}</p>
-        <Stack direction="row" flex="auto">
-          {children}
-        </Stack>
+        {children}
       </div>
     </PanelSetup>
   );
@@ -244,25 +230,42 @@ export default {
     colorScheme: "both-column",
   },
   excludeStories: ["POINT_CLOUD_MESSAGE", "POINT_CLOUD_WITH_ADDITIONAL_FIELDS"],
+  decorators: [
+    (Story: StoryFn): JSX.Element => {
+      const theme = useTheme();
+
+      return (
+        <Stack
+          fullHeight
+          fullWidth
+          direction="row"
+          flexWrap="wrap"
+          gap={4}
+          padding={2}
+          style={{ background: theme.palette.background.paper }}
+        >
+          <Story />
+        </Stack>
+      );
+    },
+  ],
 };
 
 export const Default: StoryObj = {
-  render: () => {
-    return (
-      <Stack direction="row" flexWrap="wrap" height="100%" bgcolor="background.paper">
-        <PanelSetupWithData title="Default without clicked object">
-          <Interactions
-            {...(sharedProps as any)}
-            selectedObject={undefined}
-            interactionsTabType={OBJECT_TAB_TYPE}
-          />
-        </PanelSetupWithData>
-        <PanelSetupWithData title="With interactionData">
-          <Interactions {...(sharedProps as any)} />
-        </PanelSetupWithData>
-      </Stack>
-    );
-  },
+  render: () => (
+    <>
+      <PanelSetupWithData title="Default without clicked object">
+        <Interactions
+          {...(sharedProps as any)}
+          selectedObject={undefined}
+          interactionsTabType={OBJECT_TAB_TYPE}
+        />
+      </PanelSetupWithData>
+      <PanelSetupWithData title="With interactionData">
+        <Interactions {...(sharedProps as any)} />
+      </PanelSetupWithData>
+    </>
+  ),
 };
 
 export const PointCloud: StoryObj = {
@@ -274,7 +277,7 @@ export const PointCloud: StoryObj = {
     };
 
     return (
-      <Stack direction="row" flexWrap="wrap" height="100%" bgcolor="background.paper">
+      <>
         <PanelSetupWithData title="default with point color">
           <Interactions
             {...(sharedProps as any)}
@@ -304,7 +307,7 @@ export const PointCloud: StoryObj = {
             }}
           />
         </PanelSetupWithData>
-      </Stack>
+      </>
     );
   },
 };
