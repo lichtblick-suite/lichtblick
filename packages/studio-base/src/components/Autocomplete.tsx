@@ -303,6 +303,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
           {...params}
           variant="filled"
           inputRef={inputRef}
+          data-testid="autocomplete-textfield"
           placeholder={placeholder}
           className={cx({ [classes.inputError]: hasError })}
           size="small"
@@ -317,7 +318,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
             key={itemValue}
             component="span"
             data-highlighted={selected}
-            data-test-auto-item
+            data-testid="autocomplete-item"
             className={cx(classes.item, {
               [classes.itemHighlighted]: selected,
               [classes.itemSelected]:

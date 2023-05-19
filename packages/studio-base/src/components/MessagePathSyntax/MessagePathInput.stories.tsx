@@ -13,7 +13,8 @@
 
 import { Stack } from "@mui/material";
 import { StoryObj } from "@storybook/react";
-import { screen, waitFor, userEvent } from "@storybook/testing-library";
+import { screen, userEvent, waitFor, within } from "@storybook/testing-library";
+import { useState } from "react";
 
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -38,22 +39,21 @@ const heavyFixture: Fixture = {
   globalVariables: { global_var_1: 42, global_var_2: 10 },
 };
 
-const clickInput = (el: HTMLDivElement) => {
-  const firstInput = el.querySelector("input");
-  if (firstInput) {
-    firstInput.focus();
-  }
+const clickInput: StoryObj["play"] = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  userEvent.click(await canvas.findByTestId("autocomplete-textfield"));
 };
 
 function MessagePathInputStory(props: {
   path: string;
   prioritizedDatatype?: string;
   validTypes?: string[];
-}) {
-  const [path, setPath] = React.useState(props.path);
+  heavy?: boolean;
+}): JSX.Element {
+  const [path, setPath] = useState(props.path);
 
   return (
-    <PanelSetup fixture={MessagePathInputStoryFixture} onMount={clickInput}>
+    <PanelSetup fixture={props.heavy ?? false ? heavyFixture : MessagePathInputStoryFixture}>
       <Stack direction="row" flex="auto" margin={1.25}>
         <MessagePathInput
           autoSize={false}
@@ -67,219 +67,179 @@ function MessagePathInputStory(props: {
   );
 }
 
-function MessagePathPerformanceStory(props: { path: string; prioritizedDatatype?: string }) {
-  const [path, setPath] = React.useState(props.path);
-
-  return (
-    <PanelSetup fixture={heavyFixture} onMount={clickInput}>
-      <Stack direction="row" flex="auto" margin={1.25}>
-        <MessagePathInput
-          autoSize={false}
-          path={path}
-          prioritizedDatatype={props.prioritizedDatatype}
-          onChange={(newPath) => setPath(newPath)}
-        />
-      </Stack>
-    </PanelSetup>
-  );
-}
-
 export default {
   title: "components/MessagePathInput",
-
   parameters: {
     colorScheme: "dark",
   },
 };
 
-function makePathAndSelectionAction(path: undefined | string, item: number) {
-  return async () => {
-    if (path != undefined) {
-      const input = await screen.findByPlaceholderText("/some/topic.msgs[0].field");
-      userEvent.click(input);
-      userEvent.keyboard(path);
-    }
-    const options = await waitFor(() => document.querySelectorAll("[data-test-auto-item]"));
-    userEvent.click(options[item]!);
-  };
-}
+type MsgPathInputStoryObj = StoryObj<typeof MessagePathInputStory>;
 
-export const PathWithHeaderFields: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.header.stamp.sec" />;
-  },
-
-  name: "path with header fields",
+export const PathWithHeaderFields: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.header.stamp.sec" },
+  play: clickInput,
 };
 
-export const AutocompleteTopics: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/" />;
-  },
-
-  name: "autocomplete topics",
+export const AutocompleteTopics: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/" },
+  play: clickInput,
 };
 
-export const AutocompleteScalarFromTopicAndEmptyPath: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="" validTypes={["int32"]} />;
+export const AutocompleteScalarFromTopicAndEmptyPath: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "", validTypes: ["int32"] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    userEvent.click(await canvas.findByTestId("autocomplete-textfield"));
+    const options = await waitFor(() => screen.queryAllByTestId("autocomplete-item"));
+    userEvent.click(options[2]!);
   },
-
-  play: makePathAndSelectionAction(undefined, 2),
-  name: "autocomplete scalar from topic and empty path",
 };
 
-export const AutocompleteScalarFromTopic: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="" validTypes={["int32"]} />;
-  },
+export const AutocompleteScalarFromTopic: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "", validTypes: ["int32"] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = await canvas.findByTestId("autocomplete-textfield");
 
-  play: makePathAndSelectionAction("/some_logs_", 1),
-  name: "autocomplete scalar from topic",
+    userEvent.click(input);
+    userEvent.keyboard("/some_logs_");
+
+    const options = await waitFor(() => screen.queryAllByTestId("autocomplete-item"));
+    userEvent.click(options[1]!);
+  },
 };
 
-export const AutocompleteScalarFromFullTopic: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="" validTypes={["int32"]} />;
-  },
+export const AutocompleteScalarFromFullTopic: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "", validTypes: ["int32"] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = await canvas.findByTestId("autocomplete-textfield");
 
-  play: makePathAndSelectionAction("/some_logs_topic", 0),
-  name: "autocomplete scalar from full topic",
+    userEvent.click(input);
+    userEvent.keyboard("/some_logs_topic");
+
+    const options = await waitFor(() => screen.queryAllByTestId("autocomplete-item"));
+    userEvent.click(options[0]!);
+  },
 };
 
-export const AutocompleteMessagePath: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/location.po" />;
-  },
-
-  name: "autocomplete messagePath",
+export const AutocompleteMessagePath: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/location.po" },
+  name: "Autocomplete messagePath",
+  play: clickInput,
 };
 
-export const AutocompleteMessagePathLight: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/location.po" />;
-  },
-
-  name: "autocomplete messagePath light",
+export const AutocompleteMessagePathLight: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/location.po" },
+  name: "Autocomplete messagePath light",
   parameters: { colorScheme: "light" },
+  play: clickInput,
 };
 
-export const AutocompleteFilter: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:]{}" />;
-  },
-
-  name: "autocomplete filter",
+export const AutocompleteFilter: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:]{}" },
+  play: clickInput,
 };
 
-export const AutocompleteTopLevelFilter: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state{}" />;
-  },
-
-  name: "autocomplete top level filter",
+export const AutocompleteTopLevelFilter: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state{}" },
+  play: clickInput,
 };
 
-export const AutocompleteForGlobalVariablesVariables: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state{foo_id==0}.items[:]{id==$}" />;
-  },
-
-  name: "autocomplete for globalVariables variables",
+export const AutocompleteForGlobalVariablesVariables: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state{foo_id==0}.items[:]{id==$}" },
+  name: "Autocomplete for globalVariables variables",
+  play: clickInput,
 };
 
-export const PathWithValidGlobalVariablesVariable: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:]{id==$global_var_2}" />;
-  },
-
-  name: "path with valid globalVariables variable",
+export const PathWithValidGlobalVariablesVariable: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:]{id==$global_var_2}" },
+  name: "Path with valid globalVariables variable",
+  play: clickInput,
 };
 
-export const PathWithInvalidGlobalVariablesVariable: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:]{id==$global_var_3}" />;
-  },
-
-  name: "path with invalid globalVariables variable",
+export const PathWithInvalidGlobalVariablesVariable: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:]{id==$global_var_3}" },
+  name: "Path with invalid globalVariables variable",
+  play: clickInput,
 };
 
-export const PathWithIncorrectlyPrefixedGlobalVariablesVariable: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:]{id==global_var_2}" />;
-  },
-
-  name: "path with incorrectly prefixed globalVariables variable",
+export const PathWithIncorrectlyPrefixedGlobalVariablesVariable: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:]{id==global_var_2}" },
+  name: "Path with incorrectly prefixed globalVariables variable",
+  play: clickInput,
 };
 
-export const AutocompleteForPathWithGlobalVariablesVariableInSliceSingleIdx: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[$]" />;
-  },
+export const AutocompleteForPathWithGlobalVariablesVariableInSliceSingleIdx: MsgPathInputStoryObj =
+  {
+    render: MessagePathInputStory,
+    args: { path: "/some_topic/state.items[$]" },
+    name: "Autocomplete for path with globalVariables variable in slice (single idx)",
+    play: clickInput,
+  };
 
-  name: "autocomplete for path with globalVariables variable in slice (single idx)",
+export const AutocompleteForPathWithGlobalVariablesVariableInSliceStartIdx: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[$:]" },
+  name: "Autocomplete for path with globalVariables variable in slice (start idx)",
+  play: clickInput,
 };
 
-export const AutocompleteForPathWithGlobalVariablesVariableInSliceStartIdx: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[$:]" />;
-  },
-
-  name: "autocomplete for path with globalVariables variable in slice (start idx)",
+export const AutocompleteForPathWithGlobalVariablesVariableInSliceEndIdx: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:$]" },
+  name: "Autocomplete for path with globalVariables variable in slice (end idx)",
+  play: clickInput,
 };
 
-export const AutocompleteForPathWithGlobalVariablesVariableInSliceEndIdx: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:$]" />;
-  },
+export const AutocompleteForPathWithGlobalVariablesVariablesInSliceStartAndEndIdx: MsgPathInputStoryObj =
+  {
+    render: MessagePathInputStory,
+    args: { path: "/some_topic/state.items[$global_var_2:$]" },
+    name: "Autocomplete for path with globalVariables variables in slice (start and end idx)",
+    play: clickInput,
+  };
 
-  name: "autocomplete for path with globalVariables variable in slice (end idx)",
+export const PathWithInvalidMathModifier: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/location.pose.x.@negative" },
+  play: clickInput,
 };
 
-export const AutocompleteForPathWithGlobalVariablesVariablesInSliceStartAndEndIdx: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[$global_var_2:$]" />;
-  },
-
-  name: "autocomplete for path with globalVariables variables in slice (start and end idx)",
+export const AutocompleteWhenPrioritizedDatatypeIsAvailable: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/", prioritizedDatatype: "msgs/State" },
+  play: clickInput,
 };
 
-export const PathWithInvalidMathModifier: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/location.pose.x.@negative" />;
-  },
-
-  name: "path with invalid math modifier",
+export const AutocompleteForPathWithExistingFilter: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:]{id==1}." },
+  play: clickInput,
 };
 
-export const AutocompleteWhenPrioritizedDatatypeIsAvailable: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/" prioritizedDatatype="msgs/State" />;
-  },
-
-  name: "autocomplete when prioritized datatype is available",
+export const AutocompleteForPathWithExistingFilterUsingAGlobalVariable: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: "/some_topic/state.items[:]{id==$global_var_2}." },
+  play: clickInput,
 };
 
-export const AutocompleteForPathWithExistingFilter: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:]{id==1}." />;
-  },
-
-  name: "autocomplete for path with existing filter",
-};
-
-export const AutocompleteForPathWithExistingFilterUsingAGlobalVariable: StoryObj = {
-  render: function Story() {
-    return <MessagePathInputStory path="/some_topic/state.items[:]{id==$global_var_2}." />;
-  },
-
-  name: "autocomplete for path with existing filter using a global variable",
-};
-
-export const PerformanceTesting: StoryObj = {
-  render: function Story() {
-    return <MessagePathPerformanceStory path="." />;
-  },
-
-  name: "performance testing",
+export const PerformanceTesting: MsgPathInputStoryObj = {
+  render: MessagePathInputStory,
+  args: { path: ".", heavy: true },
+  play: clickInput,
 };
