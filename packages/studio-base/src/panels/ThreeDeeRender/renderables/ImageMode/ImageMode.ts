@@ -123,14 +123,9 @@ export class ImageMode
 
     this.#camera = new ImageModeCamera();
 
-    /**
-     * By default the camera is facing down the -y axis with -z up,
-     * where the image is on the +y axis with +z up.
-     * To correct this we rotate the camera 180 degrees around the x axis.
-     */
-    this.#camera.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI);
     this.#camera.setCanvasSize(canvasSize.width, canvasSize.height);
     this.#camera.setZoomMode(renderer.config.imageMode.zoomMode ?? "fit");
+    this.#camera.setRotation(renderer.config.imageMode.rotation ?? 0);
 
     renderer.settings.errors.on("update", this.#handleErrorChange);
     renderer.settings.errors.on("clear", this.#handleErrorChange);
@@ -421,18 +416,17 @@ export class ImageMode
     //   label: "🚧 Flip vertical",
     //   value: flipVertical,
     // };
-    // fields.TODO_rotation = {
-    //   readonly: true,
-    //   input: "select",
-    //   label: "🚧 Rotation",
-    //   value: rotation,
-    //   options: [
-    //     { label: "0°", value: 0 },
-    //     { label: "90°", value: 90 },
-    //     { label: "180°", value: 180 },
-    //     { label: "270°", value: 270 },
-    //   ],
-    // };
+    fields.rotation = {
+      input: "select",
+      label: "Rotation",
+      value: config.imageMode.rotation ?? 0,
+      options: [
+        { label: "0°", value: 0 },
+        { label: "90°", value: 90 },
+        { label: "180°", value: 180 },
+        { label: "270°", value: 270 },
+      ],
+    };
     // fields.TODO_minValue = {
     //   readonly: true,
     //   input: "number",
@@ -500,6 +494,10 @@ export class ImageMode
       if (config.zoomMode !== prevImageModeConfig.zoomMode) {
         this.#camera.setZoomMode(config.zoomMode ?? DEFAULT_ZOOM_MODE);
         this.resetViewModifications();
+      }
+
+      if (config.rotation !== prevImageModeConfig.rotation) {
+        this.#camera.setRotation(config.rotation ?? 0);
       }
 
       this.#updateViewAndRenderables();

@@ -180,11 +180,13 @@ export const ImageModeRosPngImage: StoryObj<React.ComponentProps<typeof ImageMod
 };
 
 const ImageModeFoxgloveImage = ({
-  imageType,
+  imageType = "raw",
   zoomMode = "fit",
+  rotation,
 }: {
-  imageType: "raw" | "png";
+  imageType?: "raw" | "png";
   zoomMode?: "fit" | "fill";
+  rotation?: 0 | 90 | 180 | 270;
 }): JSX.Element => {
   const topics: Topic[] = [
     { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
@@ -309,6 +311,7 @@ const ImageModeFoxgloveImage = ({
             calibrationTopic: imageType === "raw" ? "/cam2/info" : "/cam1/info",
             imageTopic: imageType === "raw" ? "/cam2/raw" : "/cam1/png",
             zoomMode,
+            rotation,
           },
           cameraState: {
             distance: 1.5,
@@ -370,13 +373,27 @@ export const ImageModeResizeHandledFill: StoryObj<
 
 export const ImageModePan: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   render: ImageModeFoxgloveImage,
-  args: { imageType: "raw" },
   play: async () => {
     const canvas = document.querySelector("canvas")!;
     fireEvent.mouseDown(canvas, { clientX: 200, clientY: 200 });
     fireEvent.mouseMove(canvas, { clientX: 400, clientY: 200 });
     fireEvent.mouseUp(canvas, { clientX: 400, clientY: 200 });
   },
+};
+
+export const ImageModePan90: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...ImageModePan,
+  args: { rotation: 90 },
+};
+
+export const ImageModePan180: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...ImageModePan,
+  args: { rotation: 180 },
+};
+
+export const ImageModePan270: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...ImageModePan,
+  args: { rotation: 270 },
 };
 
 export const ImageModePanFill: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
@@ -398,6 +415,25 @@ export const ImageModeZoomThenPan: StoryObj<React.ComponentProps<typeof ImageMod
     fireEvent.mouseMove(canvas, { clientX: 400, clientY: 200 });
     fireEvent.mouseUp(canvas, { clientX: 400, clientY: 200 });
   },
+};
+export const ImageModeZoomThenPan90: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =
+  {
+    ...ImageModeZoomThenPan,
+    args: { rotation: 90 },
+  };
+
+export const ImageModeZoomThenPan180: StoryObj<
+  React.ComponentProps<typeof ImageModeFoxgloveImage>
+> = {
+  ...ImageModeZoomThenPan,
+  args: { rotation: 180 },
+};
+
+export const ImageModeZoomThenPan270: StoryObj<
+  React.ComponentProps<typeof ImageModeFoxgloveImage>
+> = {
+  ...ImageModeZoomThenPan,
+  args: { rotation: 270 },
 };
 
 export const ImageModeZoomThenPanFill: StoryObj<
