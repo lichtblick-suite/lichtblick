@@ -433,7 +433,13 @@ function RawMessages(props: Props) {
       : {};
 
     return (
-      <Stack className={classes.topic} flex="auto" overflowX="hidden" paddingLeft={0.75}>
+      <Stack
+        className={classes.topic}
+        flex="auto"
+        overflowX="hidden"
+        paddingLeft={0.75}
+        data-testid="panel-scroll-container"
+      >
         <Metadata
           data={data}
           diffData={diffData}
