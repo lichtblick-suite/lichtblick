@@ -13,10 +13,9 @@
 
 import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
-import { useEffect, useRef } from "react";
+import { userEvent } from "@storybook/testing-library";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import TestUtils from "react-dom/test-utils";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelList from "@foxglove/studio-base/components/PanelList";
@@ -26,15 +25,11 @@ import PanelCatalogContext, {
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
-const SamplePanel1 = function () {
-  return <div></div>;
-};
+const SamplePanel1 = () => <div />;
 SamplePanel1.panelType = "sample";
 SamplePanel1.defaultConfig = {};
 
-const SamplePanel2 = function () {
-  return <div></div>;
-};
+const SamplePanel2 = () => <div />;
 SamplePanel2.panelType = "sample2";
 SamplePanel2.defaultConfig = {};
 
@@ -44,7 +39,6 @@ const MockPanel2 = Panel(SamplePanel2);
 const allPanels: PanelInfo[] = [
   { title: "Regular Panel BBB", type: "Sample1", module: async () => ({ default: MockPanel1 }) },
   { title: "Regular Panel AAA", type: "Sample2", module: async () => ({ default: MockPanel2 }) },
-
   {
     title: "Preconfigured Panel AAA",
     type: "Sample1",
@@ -69,70 +63,35 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-const PanelListWithInteractions = ({
-  mode,
-  inputValue,
-  events = [],
-}: {
+const PanelListStory: StoryObj<{
   mode?: "grid" | "list";
   inputValue?: string;
-  events?: TestUtils.SyntheticEventData[];
-}) => {
-  const theme = useTheme();
-  const ref = useRef<HTMLDivElement>(ReactNull);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) {
-      return;
+  events?: string[];
+}> = {
+  render: ({ mode }) => <PanelList mode={mode} onPanelSelect={() => {}} />,
+  play: async ({ args }) => {
+    if (args.inputValue) {
+      userEvent.keyboard(args.inputValue);
     }
-    const input: HTMLInputElement | undefined = el.querySelector("input") as any;
-    if (input) {
-      input.focus();
-      if (inputValue != undefined) {
-        input.value = inputValue;
-        TestUtils.Simulate.change(input);
-      }
-      setTimeout(() => {
-        events.forEach((event) => {
-          TestUtils.Simulate.keyDown(input, event);
-        });
-      }, 100);
-    }
-  }, [events, inputValue]);
-  return (
-    <div
-      style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}
-      ref={ref}
-    >
-      <PanelList
-        mode={mode}
-        onPanelSelect={() => {
-          // no-op
-        }}
-      />
-    </div>
-  );
+    args.events?.forEach((keypress) => userEvent.keyboard(keypress));
+  },
 };
-
-const arrowDown = { key: "ArrowDown", code: "ArrowDown", keyCode: 40 };
-const arrowUp = { key: "ArrowUp", code: "ArrowUp", keyCode: 91 };
 
 export default {
   title: "components/PanelList",
-  parameters: {
-    chromatic: {
-      // Wait for simulated key events
-      delay: 100,
-    },
-    colorScheme: "dark",
-  },
+  parameters: { colorScheme: "dark" },
   decorators: [
     (Wrapped: StoryFn): JSX.Element => {
+      const theme = useTheme();
       return (
         <DndProvider backend={HTML5Backend}>
           <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
             <MockCurrentLayoutProvider>
-              <Wrapped />
+              <div
+                style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}
+              >
+                <Wrapped />
+              </div>
             </MockCurrentLayoutProvider>
           </PanelCatalogContext.Provider>
         </DndProvider>
@@ -141,124 +100,95 @@ export default {
   ],
 };
 
-export const PanelListStory: StoryObj = {
-  render: function Story() {
-    const theme = useTheme();
-    return (
-      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}>
-        <PanelList onPanelSelect={() => {}} />
-      </div>
-    );
-  },
-
-  name: "panel list",
+export const List: StoryObj = {
+  ...PanelListStory,
+  name: "Panel list",
 };
 
 export const PanelGrid: StoryObj = {
-  render: function Story() {
-    const theme = useTheme();
-    return (
-      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}>
-        <PanelList mode="grid" onPanelSelect={() => {}} />
-      </div>
-    );
-  },
-
-  name: "panel grid",
+  ...PanelListStory,
+  args: { mode: "grid" },
 };
 
 export const FilteredPanelList: StoryObj = {
-  render: () => <PanelListWithInteractions inputValue="AAA" />,
-  name: "filtered panel list",
+  ...PanelListStory,
+  args: { inputValue: "AAA" },
 };
 
 export const FilteredPanelGrid: StoryObj = {
-  render: () => <PanelListWithInteractions mode="grid" inputValue="AAA" />,
-
-  name: "filtered panel grid",
+  ...PanelListStory,
+  args: { mode: "grid", inputValue: "AAA" },
 };
 
 export const FilteredPanelGridWithDescription: StoryObj = {
-  render: () => <PanelListWithInteractions mode="grid" inputValue="description" />,
-
-  name: "filtered panel grid with description",
+  ...PanelListStory,
+  args: { mode: "grid", inputValue: "description" },
 };
 
 export const FilteredPanelListLight: StoryObj = {
-  render: () => <PanelListWithInteractions inputValue="AAA" />,
-
-  name: "filtered panel list light",
-
-  parameters: {
-    colorScheme: "light",
-  },
+  ...PanelListStory,
+  args: { inputValue: "AAA" },
+  parameters: { colorScheme: "light" },
 };
 
 export const NavigatingArrows: StoryObj = {
-  render: () => <PanelListWithInteractions events={[arrowDown, arrowDown, arrowUp]} />,
-
-  name: "navigating panel list with arrow keys",
+  ...PanelListStory,
+  args: { events: ["[ArrowDown]", "[ArrowDown]", "[ArrowUp]"] },
+  name: "Navigating panel list with arrow keys",
 };
 
 export const NavigatingArrowsWrap: StoryObj = {
-  render: () => <PanelListWithInteractions events={[arrowUp]} />,
-
-  name: "navigating up from top of panel list will scroll to highlighted last item",
+  ...PanelListStory,
+  args: { events: ["[ArrowUp]"] },
+  name: "Navigating up from top of panel list will scroll to highlighted last item",
 };
 
 export const NoResultsFirst: StoryObj = {
-  render: () => <PanelListWithInteractions inputValue="regular" />,
-  name: "filtered panel list without results in 1st category",
+  ...PanelListStory,
+  args: { inputValue: "regular" },
+  name: "Filtered panel list without results in 1st category",
 };
 
 export const NoResultsLast: StoryObj = {
-  render: () => <PanelListWithInteractions inputValue="preconfigured" />,
-
-  name: "filtered panel list without results in last category",
+  ...PanelListStory,
+  args: { inputValue: "preconfigured" },
+  name: "Filtered panel list without results in last category",
 };
 
 export const NoResultsAnyList: StoryObj = {
-  render: () => <PanelListWithInteractions inputValue="WWW" />,
-  name: "filtered panel list without results in any category",
+  ...PanelListStory,
+  args: { inputValue: "WWW" },
+  name: "Filtered panel list without results in any category",
 };
 
 export const NoResultsAnyGrid: StoryObj = {
-  render: () => <PanelListWithInteractions mode="grid" inputValue="WWW" />,
-
-  name: "filtered panel grid without results in any category",
+  ...PanelListStory,
+  args: { mode: "grid", inputValue: "WWW" },
+  name: "Filtered panel grid without results in any category",
 };
 
 export const CaseInsensitiveFilter: StoryObj = {
-  render: () => <PanelListWithInteractions inputValue="pA" />,
-
-  name: "case-insensitive filtering and highlight submenu",
+  ...PanelListStory,
+  args: { inputValue: "pA" },
+  name: "Case-insensitive filtering and highlight submenu",
 };
 
 export const PanelListChinese: StoryObj = {
-  render: function Story() {
-    const theme = useTheme();
-    return (
-      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}>
-        <PanelList onPanelSelect={() => {}} />
-      </div>
-    );
-  },
-
+  ...PanelListStory,
   parameters: { forceLanguage: "zh" },
 };
+
 export const PanelListJapanese: StoryObj = {
-  ...PanelListChinese,
+  ...PanelListStory,
   parameters: { forceLanguage: "ja" },
 };
 
 export const NoResultsChinese: StoryObj = {
-  render: function Story() {
-    return <PanelListWithInteractions mode="grid" inputValue="WWW" />;
-  },
-
+  ...NoResultsAnyGrid,
   parameters: { forceLanguage: "zh" },
 };
+
 export const NoResultsJapanese: StoryObj = {
-  ...NoResultsChinese,
+  ...NoResultsAnyGrid,
   parameters: { forceLanguage: "ja" },
 };

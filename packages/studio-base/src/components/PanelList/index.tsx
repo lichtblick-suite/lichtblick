@@ -520,6 +520,7 @@ const PanelList = forwardRef<HTMLDivElement, Props>((props: Props, ref) => {
           onKeyDown={onKeyDown}
           onBlur={() => setHighlightedPanelIdx(undefined)}
           autoFocus
+          data-testid="panel-list-textfield"
           InputProps={{
             startAdornment: <SearchIcon fontSize="small" color="primary" />,
             endAdornment: searchQuery && (
