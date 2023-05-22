@@ -25,7 +25,7 @@ const EmptyParameters = new Map<string, ParameterValue>();
 type BuilderRenderStateInput = {
   appSettings: Map<string, AppSettingValue> | undefined;
   colorScheme: RenderState["colorScheme"] | undefined;
-  currentFrame: MessageEvent<unknown>[] | undefined;
+  currentFrame: MessageEvent[] | undefined;
   globalVariables: GlobalVariables;
   hoverValue: HoverValue | undefined;
   messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
@@ -259,7 +259,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         shouldRender = true;
 
         if (currentFrame) {
-          const postProcessedFrame: MessageEvent<unknown>[] = [];
+          const postProcessedFrame: MessageEvent[] = [];
 
           for (const messageEvent of currentFrame) {
             if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
@@ -298,7 +298,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       const newBlocks = playerState?.progress.messageCache?.blocks;
       if (newBlocks && prevBlocks !== newBlocks) {
         shouldRender = true;
-        const frames: MessageEvent<unknown>[] = (renderState.allFrames = []);
+        const frames: MessageEvent[] = (renderState.allFrames = []);
         // only populate allFrames with topics that the panel wants to preload
         const topicsToPreloadForPanel = Array.from(
           new Set<string>(

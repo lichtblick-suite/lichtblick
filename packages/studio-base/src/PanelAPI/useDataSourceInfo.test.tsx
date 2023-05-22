@@ -22,7 +22,7 @@ import * as PanelAPI from ".";
 
 describe("useDataSourceInfo", () => {
   const topics: Topic[] = [{ name: "/foo", schemaName: "Foo" }];
-  const messages: MessageEvent<unknown>[] = [
+  const messages: MessageEvent[] = [
     {
       topic: "/foo",
       receiveTime: { sec: 1, nsec: 2 },

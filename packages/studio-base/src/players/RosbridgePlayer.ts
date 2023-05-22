@@ -103,7 +103,7 @@ export default class RosbridgePlayer implements Player {
   // active subscriptions
   #topicSubscriptions = new Map<string, roslib.Topic>();
   #requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
-  #parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
+  #parsedMessages: MessageEvent[] = []; // Queue of messages that we'll send in next _emitState() call.
   #requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   // active publishers for the current connection
   #topicPublishers = new Map<string, roslib.Topic>();
@@ -521,7 +521,7 @@ export default class RosbridgePlayer implements Player {
           }
 
           if (this.#parsedTopics.has(topicName)) {
-            const msg: MessageEvent<unknown> = {
+            const msg: MessageEvent = {
               topic: topicName,
               receiveTime,
               message: innerMessage,

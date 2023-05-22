@@ -35,7 +35,7 @@ describe("useMessagesByTopic", () => {
   });
 
   it("add messages to their respective arrays", () => {
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
@@ -43,7 +43,7 @@ describe("useMessagesByTopic", () => {
       sizeInBytes: 0,
     };
 
-    const message2: MessageEvent<unknown> = {
+    const message2: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
@@ -68,7 +68,7 @@ describe("useMessagesByTopic", () => {
   });
 
   it("remembers messages when changing props (both topics and historySize)", () => {
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
@@ -76,7 +76,7 @@ describe("useMessagesByTopic", () => {
       sizeInBytes: 0,
     };
 
-    const message2: MessageEvent<unknown> = {
+    const message2: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },

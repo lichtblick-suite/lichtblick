@@ -51,7 +51,7 @@ const playerStateWithMessages = (messages: any): PlayerState => ({
 const message = (
   headerStampSeconds: number | undefined,
   receiveTimeSeconds: number | undefined,
-): MessageEvent<unknown> => ({
+): MessageEvent => ({
   topic: "/foo",
   receiveTime:
     receiveTimeSeconds == undefined ? undefined : ({ sec: receiveTimeSeconds, nsec: 1 } as any),

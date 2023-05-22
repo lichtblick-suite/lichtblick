@@ -48,7 +48,7 @@ type MapPanelProps = {
   context: PanelExtensionContext;
 };
 
-function isGeoJSONMessage(msgEvent: MessageEvent<unknown>): msgEvent is GeoJsonMessage {
+function isGeoJSONMessage(msgEvent: MessageEvent): msgEvent is GeoJsonMessage {
   const datatype = msgEvent.schemaName;
   return (
     datatype === "foxglove_msgs/GeoJSON" ||
@@ -61,7 +61,7 @@ function isGeoJSONMessage(msgEvent: MessageEvent<unknown>): msgEvent is GeoJsonM
  * Verify that the message is either a GeoJSON message or a NavSatFix message with a
  * position fix and finite latitude and longitude so we can actually display it.
  */
-function isValidMapMessage(msgEvent: MessageEvent<unknown>): msgEvent is MapPanelMessage {
+function isValidMapMessage(msgEvent: MessageEvent): msgEvent is MapPanelMessage {
   if (isGeoJSONMessage(msgEvent)) {
     return true;
   }
@@ -93,7 +93,7 @@ function isSupportedSchema(schemaName: string) {
   }
 }
 
-const memoizedFilterMessages = memoizeWeak((msgs: readonly MessageEvent<unknown>[]) =>
+const memoizedFilterMessages = memoizeWeak((msgs: readonly MessageEvent[]) =>
   msgs.filter(isValidMapMessage),
 );
 
@@ -450,7 +450,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   }, [config.center, config.zoomLevel, context]);
 
   const onHover = useCallback(
-    (messageEvent?: MessageEvent<unknown>) => {
+    (messageEvent?: MessageEvent) => {
       context.setPreviewTime(
         messageEvent == undefined ? undefined : toSec(messageEvent.receiveTime),
       );
@@ -459,7 +459,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   );
 
   const onClick = useCallback(
-    (messageEvent: MessageEvent<unknown>) => {
+    (messageEvent: MessageEvent) => {
       context.seekPlayback?.(toSec(messageEvent.receiveTime));
     },
     [context],
@@ -471,7 +471,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   const [filterBounds, setFilterBounds] = useState<LatLngBounds | undefined>();
 
   const addGeoFeatureEventHandlers = useCallback(
-    (feature: GeoJSONFeature, message: MessageEvent<unknown>, layer: Layer) => {
+    (feature: GeoJSONFeature, message: MessageEvent, layer: Layer) => {
       const featureName = feature.properties?.name;
       if (typeof featureName === "string" && featureName.length > 0) {
         layer.bindTooltip(featureName);

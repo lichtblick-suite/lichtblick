@@ -46,7 +46,7 @@ type MockMessagePipelineProps = {
   topics?: Topic[];
   topicStats?: Map<string, TopicStats>;
   datatypes?: RosDatatypes;
-  messages?: MessageEvent<unknown>[];
+  messages?: MessageEvent[];
   problems?: PlayerProblem[];
   publish?: (request: PublishPayload) => void;
   callService?: (service: string, request: unknown) => Promise<unknown>;
@@ -213,7 +213,7 @@ export default function MockMessagePipelineProvider(
             const messages = newState.public.playerState.activeData?.messages;
             if (action.type === "update-subscriber" && messages && messages.length !== 0) {
               let changed = false;
-              const messageEventsBySubscriberId = new Map<string, MessageEvent<unknown>[]>();
+              const messageEventsBySubscriberId = new Map<string, MessageEvent[]>();
               for (const [id, subs] of newState.subscriptionsById) {
                 const existingMsgs = newState.public.messageEventsBySubscriberId.get(id);
                 const newMsgs = messages.filter(

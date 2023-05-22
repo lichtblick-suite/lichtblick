@@ -183,9 +183,7 @@ export class UlogIterableSource implements IIterableSource {
     }
   }
 
-  public async getBackfillMessages(
-    _args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     return [];
   }
 }

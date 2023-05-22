@@ -104,13 +104,13 @@ export type NodeRegistration = {
   inputs: readonly string[];
   output: Topic;
   processBlockMessage: (
-    messageEvent: MessageEvent<unknown>,
+    messageEvent: MessageEvent,
     globalVariables: GlobalVariables,
-  ) => Promise<MessageEvent<unknown> | undefined>;
+  ) => Promise<MessageEvent | undefined>;
   processMessage: (
-    messageEvent: MessageEvent<unknown>,
+    messageEvent: MessageEvent,
     globalVariables: GlobalVariables,
-  ) => Promise<MessageEvent<unknown> | undefined>;
+  ) => Promise<MessageEvent | undefined>;
   terminate: () => void;
 };
 

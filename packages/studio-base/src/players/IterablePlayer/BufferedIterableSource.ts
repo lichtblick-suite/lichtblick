@@ -255,9 +255,7 @@ class BufferedIterableSource implements IIterableSource {
     })();
   }
 
-  public async getBackfillMessages(
-    args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     return await this.#source.getBackfillMessages(args);
   }
 }

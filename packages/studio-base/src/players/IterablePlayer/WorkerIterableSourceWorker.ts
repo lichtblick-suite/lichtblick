@@ -39,7 +39,7 @@ export class WorkerIterableSourceWorker implements IIterableSource {
     // abortSignal is a separate argument so it can be proxied by comlink since AbortSignal is not
     // clonable (and needs to signal across the worker boundary)
     abortSignal?: AbortSignal,
-  ): Promise<MessageEvent<unknown>[]> {
+  ): Promise<MessageEvent[]> {
     return await this._source.getBackfillMessages({
       ...args,
       abortSignal,

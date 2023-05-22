@@ -32,9 +32,7 @@ class TestSource implements IIterableSource {
     _args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {}
 
-  public async getBackfillMessages(
-    _args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     return [];
   }
 }
@@ -80,7 +78,7 @@ describe("BlockLoader", () => {
       problemManager: new PlayerProblemManager(),
     });
 
-    const msgEvents: MessageEvent<unknown>[] = [];
+    const msgEvents: MessageEvent[] = [];
     for (let i = 0; i < 10; i += 3) {
       msgEvents.push({
         topic: "a",
@@ -179,7 +177,7 @@ describe("BlockLoader", () => {
       problemManager: new PlayerProblemManager(),
     });
 
-    const msgEvents: MessageEvent<unknown>[] = [];
+    const msgEvents: MessageEvent[] = [];
     for (let i = 0; i < 10; i += 3) {
       msgEvents.push({
         topic: "a",
@@ -247,7 +245,7 @@ describe("BlockLoader", () => {
       problemManager: new PlayerProblemManager(),
     });
 
-    const msgEvents: MessageEvent<unknown>[] = [];
+    const msgEvents: MessageEvent[] = [];
     for (let i = 0; i < 4; ++i) {
       msgEvents.push({
         topic: "a",
@@ -375,7 +373,7 @@ describe("BlockLoader", () => {
       problemManager: new PlayerProblemManager(),
     });
 
-    const msgEvents: MessageEvent<unknown>[] = [];
+    const msgEvents: MessageEvent[] = [];
     for (let i = 0; i < 4; ++i) {
       msgEvents.push({
         topic: "a",

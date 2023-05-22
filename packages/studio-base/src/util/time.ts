@@ -39,7 +39,7 @@ export function formatFrame({ sec, nsec }: Time): string {
 }
 
 export function getTimestampForMessageEvent(
-  messageEvent: MessageEvent<unknown>,
+  messageEvent: MessageEvent,
   timestampMethod?: TimestampMethod,
 ): Time | undefined {
   return timestampMethod === "headerStamp"

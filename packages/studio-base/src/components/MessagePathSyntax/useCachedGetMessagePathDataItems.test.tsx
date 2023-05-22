@@ -29,7 +29,7 @@ import {
 } from "./useCachedGetMessagePathDataItems";
 
 function addValuesWithPathsToItems(
-  messages: MessageEvent<unknown>[],
+  messages: MessageEvent[],
   messagePath: string,
   providerTopics: Topic[],
   datatypes: RosDatatypes,
@@ -106,7 +106,7 @@ describe("useCachedGetMessagePathDataItems", () => {
   }
 
   it("clears the cache whenever any inputs to getMessagePathDataItems change", async () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
@@ -196,7 +196,7 @@ describe("useCachedGetMessagePathDataItems", () => {
   });
 
   it("clears the cache only when relevant global variables change", async () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
@@ -250,7 +250,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       },
     );
 
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { field: 0, self: { field: 1 } },
@@ -269,7 +269,7 @@ describe("useCachedGetMessagePathDataItems", () => {
 
   describe("getMessagePathDataItems", () => {
     it("traverses down the path for every item", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -342,7 +342,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("works with negative slices", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -369,7 +369,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("returns nothing for invalid topics", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -391,7 +391,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           "std_msgs/Header": { definitions: [{ name: "stamp", type: "time", isArray: false }] },
         }),
       );
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -406,7 +406,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("filters properly, and uses the filter name in the path", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -472,7 +472,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("filters entire messages", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -581,7 +581,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("returns matching constants", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -646,7 +646,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("filters correctly with bigints", () => {
-      const messages: MessageEvent<unknown>[] = [
+      const messages: MessageEvent[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -823,7 +823,7 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
       },
     });
 
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/topic1",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },

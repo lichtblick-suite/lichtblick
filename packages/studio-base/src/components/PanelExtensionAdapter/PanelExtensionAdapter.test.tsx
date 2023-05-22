@@ -76,7 +76,7 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "x",
       receiveTime: { sec: 0, nsec: 1 },
       sizeInBytes: 0,

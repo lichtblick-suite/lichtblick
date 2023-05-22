@@ -76,7 +76,7 @@ export default class Ros1Player implements Player {
   #clockTime?: Time; // The most recent published `/clock` time, if available
   #requestedPublishers: AdvertiseOptions[] = []; // Requested publishers by setPublishers()
   #requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
-  #parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
+  #parsedMessages: MessageEvent[] = []; // Queue of messages that we'll send in next _emitState() call.
   #requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   #hasReceivedMessage = false;
   #metricsCollector: PlayerMetricsCollectorInterface;
@@ -446,7 +446,7 @@ export default class Ros1Player implements Player {
       this.#metricsCollector.recordTimeToFirstMsgs();
     }
 
-    const msg: MessageEvent<unknown> = {
+    const msg: MessageEvent = {
       topic,
       receiveTime,
       message,
@@ -606,7 +606,7 @@ export default class Ros1Player implements Player {
     }
   }
 
-  #handleInternalMessage(msg: MessageEvent<unknown>): void {
+  #handleInternalMessage(msg: MessageEvent): void {
     const maybeClockMsg = msg.message as { clock?: Time };
     if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock.sec)) {
       const time = maybeClockMsg.clock;

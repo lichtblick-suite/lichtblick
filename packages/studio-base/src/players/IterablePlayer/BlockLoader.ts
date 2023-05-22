@@ -117,7 +117,7 @@ export class BlockLoader {
       const block = this.#blocks[i];
       if (block) {
         let blockBytesRemoved = 0;
-        const newMessagesByTopic: Record<string, MessageEvent<unknown>[]> = {
+        const newMessagesByTopic: Record<string, MessageEvent[]> = {
           ...block.messagesByTopic,
         };
         const blockTopics = Object.keys(newMessagesByTopic);
@@ -257,7 +257,7 @@ export class BlockLoader {
           return;
         }
 
-        const messagesByTopic: Record<string, MessageEvent<unknown>[]> = {};
+        const messagesByTopic: Record<string, MessageEvent[]> = {};
 
         // Set all topics to empty arrays. Since our cursor requested all the topicsToFetch we either will
         // have message on the topic or we don't have message on the topic. Either way the topic entry

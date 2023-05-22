@@ -28,7 +28,7 @@ const datatypes: RosDatatypes = new Map(
     },
   }),
 );
-const fixtureMessages: MessageEvent<unknown>[] = [
+const fixtureMessages: MessageEvent[] = [
   {
     topic: "/topic",
     receiveTime: { sec: 0, nsec: 0 },

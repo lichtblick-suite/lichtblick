@@ -46,7 +46,7 @@ export type MessagePathDataItem = {
 // reference, as long as topics/datatypes/global variables haven't changed in the meantime.
 export function useCachedGetMessagePathDataItems(
   paths: readonly string[],
-): (path: string, message: MessageEvent<unknown>) => MessagePathDataItem[] | undefined {
+): (path: string, message: MessageEvent) => MessagePathDataItem[] | undefined {
   const { topics: providerTopics, datatypes } = PanelAPI.useDataSourceInfo();
   const { globalVariables } = useGlobalVariables();
   const memoizedPaths = useShallowMemo(paths);
@@ -129,7 +129,7 @@ export function useCachedGetMessagePathDataItems(
   const cachesByPath = useRef<{
     [key: string]: {
       filledInPath: RosPath;
-      weakMap: WeakMap<MessageEvent<unknown>, MessagePathDataItem[] | undefined>;
+      weakMap: WeakMap<MessageEvent, MessagePathDataItem[] | undefined>;
     };
   }>({});
   if (useChangeDetector([relevantTopics, relevantDatatypes], { initiallyTrue: true })) {
@@ -148,7 +148,7 @@ export function useCachedGetMessagePathDataItems(
   }
 
   return useCallback(
-    (path: string, message: MessageEvent<unknown>): MessagePathDataItem[] | undefined => {
+    (path: string, message: MessageEvent): MessagePathDataItem[] | undefined => {
       if (!memoizedPaths.includes(path)) {
         throw new Error(`path (${path}) was not in the list of cached paths`);
       }
@@ -217,7 +217,7 @@ export function fillInGlobalVariablesInPath(
 // Get a new item that has `queriedData` set to the values and paths as queried by `rosPath`.
 // Exported just for tests.
 export function getMessagePathDataItems(
-  message: MessageEvent<unknown>,
+  message: MessageEvent,
   filledInPath: RosPath,
   providerTopics: readonly Topic[],
   datatypes: RosDatatypes,
@@ -342,7 +342,7 @@ export function getMessagePathDataItems(
 }
 
 export type MessageAndData = {
-  messageEvent: MessageEvent<unknown>;
+  messageEvent: MessageEvent;
   queriedData: MessagePathDataItem[];
 };
 
@@ -352,9 +352,7 @@ export type MessageDataItemsByPath = {
 
 export function useDecodeMessagePathsForMessagesByTopic(
   paths: readonly string[],
-): (messagesByTopic: {
-  [topicName: string]: readonly MessageEvent<unknown>[];
-}) => MessageDataItemsByPath {
+): (messagesByTopic: { [topicName: string]: readonly MessageEvent[] }) => MessageDataItemsByPath {
   const memoizedPaths = useShallowMemo(paths);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(memoizedPaths);
   // Note: Let callers define their own memoization scheme for messagesByTopic. For regular playback

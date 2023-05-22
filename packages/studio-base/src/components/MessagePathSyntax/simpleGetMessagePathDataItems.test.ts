@@ -9,7 +9,7 @@ import { simpleGetMessagePathDataItems } from "./simpleGetMessagePathDataItems";
 
 describe("simpleGetMessagePathDataItems", () => {
   it("returns root message if topic matches", () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
@@ -21,7 +21,7 @@ describe("simpleGetMessagePathDataItems", () => {
   });
 
   it("returns correct nested values", () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
@@ -55,7 +55,7 @@ describe("simpleGetMessagePathDataItems", () => {
   });
 
   it("returns nothing for missing fields", () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
@@ -66,7 +66,7 @@ describe("simpleGetMessagePathDataItems", () => {
   });
 
   it("throws for unsupported paths", () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,

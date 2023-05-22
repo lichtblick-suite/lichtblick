@@ -15,7 +15,7 @@ type UseAvailableDiagnosticResult = Map<string, DiagnosticNameSet>;
 
 function addMessages(
   previousAvailableDiagnostics: UseAvailableDiagnosticResult,
-  messages: readonly MessageEvent<unknown>[],
+  messages: readonly MessageEvent[],
 ): UseAvailableDiagnosticResult {
   // If we detect new hardware ids or names we need to create a new instance of available diagnostics
   // so downstream consumers know it changed by observing the object reference changing

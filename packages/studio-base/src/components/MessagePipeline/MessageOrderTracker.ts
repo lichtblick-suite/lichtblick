@@ -28,7 +28,7 @@ const log = Logger.getLogger(__filename);
 // This is to ensure that other mechanisms that we have in place for either discarding old messages
 // or forcing an update of `player.lastSeekTime` are working properly.
 class MessageOrderTracker {
-  #lastMessages: readonly MessageEvent<unknown>[] = [];
+  #lastMessages: readonly MessageEvent[] = [];
   #lastCurrentTime?: Time;
   #lastMessageTime?: Time;
   #lastMessageTopic?: string;
@@ -42,7 +42,7 @@ class MessageOrderTracker {
    */
   #trackIncorrectMessages = false;
 
-  #incorrectMessages: MessageEvent<unknown>[] = [];
+  #incorrectMessages: MessageEvent[] = [];
 
   public update(playerState: PlayerState): PlayerProblem[] {
     if (!playerState.activeData) {

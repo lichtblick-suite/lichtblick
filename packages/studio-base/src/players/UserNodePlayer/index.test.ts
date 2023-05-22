@@ -129,7 +129,7 @@ const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
   const signals = [...new Array(numPromises)].map(() =>
     signal<{
       topicNames: string[];
-      messages: readonly MessageEvent<unknown>[];
+      messages: readonly MessageEvent[];
       progress?: PlayerState["progress"];
       topics: Topic[] | undefined;
       datatypes: RosDatatypes | undefined;
@@ -510,7 +510,7 @@ describe("UserNodePlayer", () => {
 
       expect(
         newMessages.find(
-          (message: MessageEvent<unknown>) =>
+          (message: MessageEvent) =>
             (message.message as { custom_np_field?: string }).custom_np_field ===
             "COMPLETELY_DIFFERENT",
         ),

@@ -136,11 +136,11 @@ export class IterablePlayer implements Player {
 
   #progress: Progress = {};
   #id: string = uuidv4();
-  #messages: MessageEvent<unknown>[] = [];
+  #messages: MessageEvent[] = [];
   #receivedBytes: number = 0;
   #hasError = false;
   #lastRangeMillis?: number;
-  #lastMessageEvent?: MessageEvent<unknown>;
+  #lastMessageEvent?: MessageEvent;
   #lastStamp?: Time;
   #publishedTopics = new Map<string, Set<string>>();
   #seekTarget?: Time;
@@ -594,7 +594,7 @@ export class IterablePlayer implements Player {
     this.#lastMessageEvent = undefined;
     this.#messages = [];
 
-    const messageEvents: MessageEvent<unknown>[] = [];
+    const messageEvents: MessageEvent[] = [];
 
     // If we take too long to read the data, we set the player into a BUFFERING presence. This
     // indicates that the player is waiting to load more data.
@@ -840,7 +840,7 @@ export class IterablePlayer implements Player {
       this.#lastStamp = undefined;
     }
 
-    const msgEvents: MessageEvent<unknown>[] = [];
+    const msgEvents: MessageEvent[] = [];
 
     // When ending the previous tick, we might have already read a message from the iterator which
     // belongs to our tick. This logic brings that message into our current batch of message events.

@@ -89,7 +89,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #topics?: Topic[]; // Topics as published by the WebSocket.
   #topicsStats = new Map<string, TopicStats>(); // Topic names to topic statistics.
   #datatypes: RosDatatypes = new Map(); // Datatypes as published by the WebSocket.
-  #parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
+  #parsedMessages: MessageEvent[] = []; // Queue of messages that we'll send in next _emitState() call.
   #receivedBytes: number = 0;
   #metricsCollector: PlayerMetricsCollectorInterface;
   #hasReceivedMessage = false;

@@ -35,7 +35,7 @@ type Options = { size: number; stream: ReadableStream<Uint8Array> };
 /** Only efficient for small files */
 export class McapUnindexedIterableSource implements IIterableSource {
   #options: Options;
-  #msgEventsByChannel?: Map<number, MessageEvent<unknown>[]>;
+  #msgEventsByChannel?: Map<number, MessageEvent[]>;
   #start?: Time;
   #end?: Time;
 
@@ -56,7 +56,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
     const problems: PlayerProblem[] = [];
     const channelIdsWithErrors = new Set<number>();
 
-    const messagesByChannel = new Map<number, MessageEvent<unknown>[]>();
+    const messagesByChannel = new Map<number, MessageEvent[]>();
     const schemasById = new Map<number, McapTypes.TypedMcapRecords["Schema"]>();
     const channelInfoById = new Map<
       number,
@@ -266,15 +266,13 @@ export class McapUnindexedIterableSource implements IIterableSource {
     yield* resultMessages;
   }
 
-  public async getBackfillMessages(
-    args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     if (!this.#msgEventsByChannel) {
       throw new Error("initialization not completed");
     }
 
     const needTopics = args.topics;
-    const msgEventsByTopic = new Map<string, MessageEvent<unknown>>();
+    const msgEventsByTopic = new Map<string, MessageEvent>();
     for (const [_, msgEvents] of this.#msgEventsByChannel) {
       for (const msgEvent of msgEvents) {
         if (compare(msgEvent.receiveTime, args.time) <= 0 && needTopics.includes(msgEvent.topic)) {

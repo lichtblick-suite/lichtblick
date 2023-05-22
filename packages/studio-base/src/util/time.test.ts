@@ -38,7 +38,7 @@ describe("time.formatTimeRaw", () => {
 
 describe("time.getTimestampForMessageEvent", () => {
   it("uses headerStamp when available", () => {
-    const messageBase: Omit<MessageEvent<unknown>, "message"> = {
+    const messageBase: Omit<MessageEvent, "message"> = {
       topic: "/foo",
       receiveTime: { sec: 1000, nsec: 0 },
       sizeInBytes: 0,

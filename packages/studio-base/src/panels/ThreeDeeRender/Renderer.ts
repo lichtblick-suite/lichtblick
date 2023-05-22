@@ -498,7 +498,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
    * @param allFrames - array of all preloaded messages
    * @returns {boolean} - whether the allFramesCursor has been updated and new messages were read in
    */
-  public handleAllFramesMessages(allFrames?: readonly MessageEvent<unknown>[]): boolean {
+  public handleAllFramesMessages(allFrames?: readonly MessageEvent[]): boolean {
     const currentTime = fromNanoSec(this.currentTime);
     const allFramesCursor = this.#allFramesCursor;
     // index always indicates last read-in message
@@ -847,7 +847,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  public addMessageEvent(messageEvent: Readonly<MessageEvent<unknown>>): void {
+  public addMessageEvent(messageEvent: Readonly<MessageEvent>): void {
     const { message } = messageEvent;
 
     const maybeHasHeader = message as DeepPartial<{ header: Header }>;
@@ -1300,7 +1300,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 }
 
 function handleMessage(
-  messageEvent: Readonly<MessageEvent<unknown>>,
+  messageEvent: Readonly<MessageEvent>,
   subscriptions: RendererSubscription[] | undefined,
 ): void {
   if (subscriptions) {

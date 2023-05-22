@@ -84,7 +84,7 @@ export type Subscription = {
 /**
  * A message event frames message data with the topic and receive time
  */
-export type MessageEvent<T> = Readonly<{
+export type MessageEvent<T = unknown> = Readonly<{
   /** The topic name this message was received on, i.e. "/some/topic" */
   topic: string;
   /**
@@ -120,7 +120,7 @@ export type MessageEvent<T> = Readonly<{
    * contains the converted message and the originalMessageEvent field contains the original
    * un-converted message event.
    */
-  originalMessageEvent?: MessageEvent<unknown>;
+  originalMessageEvent?: MessageEvent;
 }>;
 
 export interface LayoutActions {
@@ -159,7 +159,7 @@ export interface RenderState {
   /**
    * The latest messages for the current render frame. These are new messages since the last render frame.
    */
-  currentFrame?: readonly MessageEvent<unknown>[];
+  currentFrame?: readonly MessageEvent[];
 
   /**
    * True if the data source performed a seek. This indicates that some data may have been skipped
@@ -171,7 +171,7 @@ export interface RenderState {
   /**
    * All available messages. Best-effort list of all available messages.
    */
-  allFrames?: readonly MessageEvent<unknown>[];
+  allFrames?: readonly MessageEvent[];
 
   /**
    * Map of current parameter values. Parameters are key/value pairs associated with the data

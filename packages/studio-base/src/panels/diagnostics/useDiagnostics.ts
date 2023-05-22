@@ -23,7 +23,7 @@ type UseDiagnosticsResult = Map<string, DiagnosticsById>;
 // Exported for tests
 export function addMessages(
   prevResult: UseDiagnosticsResult,
-  msgEvents: readonly MessageEvent<unknown>[],
+  msgEvents: readonly MessageEvent[],
 ): UseDiagnosticsResult {
   // Mutates the previous value since there might be many diagnostic messages
   let modified = false;

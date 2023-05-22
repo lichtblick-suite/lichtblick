@@ -350,9 +350,7 @@ class CachingIterableSource implements IIterableSource {
     }
   }
 
-  public async getBackfillMessages(
-    args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     if (!this.#initResult) {
       throw new Error("Invariant: uninitialized");
     }
@@ -364,7 +362,7 @@ class CachingIterableSource implements IIterableSource {
       return compare(item.start, args.time) <= 0 && compare(item.end, args.time) >= 0;
     });
 
-    const out: MessageEvent<unknown>[] = [];
+    const out: MessageEvent[] = [];
     const needsTopics = new Set(args.topics);
 
     // Starting at the block we found for args.time, work backwards through blocks until:

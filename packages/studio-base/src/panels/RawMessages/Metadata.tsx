@@ -44,8 +44,8 @@ type Props = {
   diffData: unknown;
   diff: unknown;
   datatype?: string;
-  message: MessageEvent<unknown>;
-  diffMessage?: MessageEvent<unknown>;
+  message: MessageEvent;
+  diffMessage?: MessageEvent;
 };
 
 export default function Metadata({

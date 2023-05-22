@@ -261,7 +261,7 @@ export const fixture: Fixture = {
   },
   frame: {
     "/some_topic/location": locationMessages.map(
-      (message): MessageEvent<unknown> => ({
+      (message): MessageEvent => ({
         topic: "/some_topic/location",
         receiveTime: message.header.stamp,
         message,
@@ -272,7 +272,7 @@ export const fixture: Fixture = {
     "/some_topic/location_subset": locationMessages
       .slice(locationMessages.length / 3, (locationMessages.length * 2) / 3)
       .map(
-        (message): MessageEvent<unknown> => ({
+        (message): MessageEvent => ({
           topic: "/some_topic/location_subset",
           receiveTime: message.header.stamp,
           message,
@@ -281,7 +281,7 @@ export const fixture: Fixture = {
         }),
       ),
     "/some_topic/state": otherStateMessages.map(
-      (message): MessageEvent<unknown> => ({
+      (message): MessageEvent => ({
         topic: "/some_topic/state",
         receiveTime: message.header.stamp,
         message,
@@ -303,7 +303,7 @@ export const fixture: Fixture = {
     // prior to rendering. If the dataset is not sorted properly, the plot is jumbled.
     "/some_topic/location_shuffled": shuffle(
       locationMessages.map(
-        (message): MessageEvent<unknown> => ({
+        (message): MessageEvent => ({
           topic: "/some_topic/location_shuffled",
           receiveTime: message.header.stamp,
           message,

@@ -30,8 +30,8 @@ import {
 
 const log = Log.getLogger(__filename);
 
-type MessageReducer<T> = (arg0: T, message: MessageEvent<unknown>) => T;
-type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent<unknown>[]) => T;
+type MessageReducer<T> = (arg0: T, message: MessageEvent) => T;
+type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent[]) => T;
 
 type Params<T> = {
   topics: readonly string[];

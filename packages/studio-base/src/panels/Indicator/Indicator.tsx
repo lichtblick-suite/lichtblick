@@ -47,14 +47,14 @@ const IndicatorBulb = withStyles("div", {
 type State = {
   path: string;
   parsedPath: RosPath | undefined;
-  latestMessage: MessageEvent<unknown> | undefined;
+  latestMessage: MessageEvent | undefined;
   latestMatchingQueriedData: unknown | undefined;
   error: Error | undefined;
   pathParseError: string | undefined;
 };
 
 type Action =
-  | { type: "frame"; messages: readonly MessageEvent<unknown>[] }
+  | { type: "frame"; messages: readonly MessageEvent[] }
   | { type: "path"; path: string }
   | { type: "seek" };
 

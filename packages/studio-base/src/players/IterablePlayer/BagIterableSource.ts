@@ -246,8 +246,8 @@ export class BagIterableSource implements IIterableSource {
   public async getBackfillMessages({
     topics,
     time,
-  }: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
-    const messages: MessageEvent<unknown>[] = [];
+  }: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
+    const messages: MessageEvent[] = [];
     for (const topic of topics) {
       // NOTE: An iterator is made for each topic to get the latest message on that topic.
       // An single iterator for all the topics could result in iterating through many

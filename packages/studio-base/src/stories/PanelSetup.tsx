@@ -72,7 +72,7 @@ import "react-mosaic-component/react-mosaic-component.css";
 function noop() {}
 
 type Frame = {
-  [topic: string]: MessageEvent<unknown>[];
+  [topic: string]: MessageEvent[];
 };
 
 export type Fixture = {

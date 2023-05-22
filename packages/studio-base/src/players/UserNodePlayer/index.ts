@@ -132,7 +132,7 @@ export default class UserNodePlayer implements Player {
   #problemStore = new Map<string, PlayerProblem>();
 
   // keep track of last message on all topics to recompute output topic messages when user nodes change
-  #lastMessageByInputTopic = new Map<string, MessageEvent<unknown>>();
+  #lastMessageByInputTopic = new Map<string, MessageEvent>();
   #userNodeIdsNeedUpdate = new Set<string>();
   #globalVariablesChanged = false;
 
@@ -228,22 +228,22 @@ export default class UserNodePlayer implements Player {
 
   // Basic memoization by remembering the last values passed to getMessages
   #lastGetMessagesInput: {
-    parsedMessages: readonly MessageEvent<unknown>[];
+    parsedMessages: readonly MessageEvent[];
     globalVariables: GlobalVariables;
     nodeRegistrations: readonly NodeRegistration[];
   } = { parsedMessages: [], globalVariables: {}, nodeRegistrations: [] };
-  #lastGetMessagesResult: { parsedMessages: readonly MessageEvent<unknown>[] } = {
+  #lastGetMessagesResult: { parsedMessages: readonly MessageEvent[] } = {
     parsedMessages: [],
   };
 
   // Processes input messages through nodes to create messages on output topics
   // Memoized to prevent reprocessing on same input
   async #getMessages(
-    parsedMessages: readonly MessageEvent<unknown>[],
+    parsedMessages: readonly MessageEvent[],
     globalVariables: GlobalVariables,
     nodeRegistrations: readonly NodeRegistration[],
   ): Promise<{
-    parsedMessages: readonly MessageEvent<unknown>[];
+    parsedMessages: readonly MessageEvent[];
   }> {
     // prevents from memoizing results for empty requests
     if (parsedMessages.length === 0) {
@@ -258,7 +258,7 @@ export default class UserNodePlayer implements Player {
     ) {
       return this.#lastGetMessagesResult;
     }
-    const parsedMessagesPromises: Promise<MessageEvent<unknown> | undefined>[] = [];
+    const parsedMessagesPromises: Promise<MessageEvent | undefined>[] = [];
     for (const message of parsedMessages) {
       const messagePromises = [];
       for (const nodeRegistration of nodeRegistrations) {
@@ -275,7 +275,7 @@ export default class UserNodePlayer implements Player {
     }
 
     const nodeParsedMessages = (await Promise.all(parsedMessagesPromises)).filter(
-      (value): value is MessageEvent<unknown> => value != undefined,
+      (value): value is MessageEvent => value != undefined,
     );
 
     const result = {
@@ -439,7 +439,7 @@ export default class UserNodePlayer implements Player {
     // problems for specific userspace nodes independently of other userspace nodes.
     const problemKey = `node-id-${nodeId}`;
     const buildMessageProcessor = (): NodeRegistration["processMessage"] => {
-      return async (msgEvent: MessageEvent<unknown>, globalVariables: GlobalVariables) => {
+      return async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
         // Register the node within a web worker to be executed.
         if (!rpc) {
           rpc = this.#unusedNodeRuntimeWorkers.pop();
@@ -905,7 +905,7 @@ export default class UserNodePlayer implements Player {
           }
         }
 
-        const messagesForRecompute: MessageEvent<unknown>[] = [];
+        const messagesForRecompute: MessageEvent[] = [];
         for (const topic of inputTopicsForRecompute) {
           const messageForRecompute = this.#lastMessageByInputTopic.get(topic);
           if (messageForRecompute) {

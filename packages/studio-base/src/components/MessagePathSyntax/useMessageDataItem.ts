@@ -31,7 +31,7 @@ type ReducedValue = {
   matches: MessageAndData[];
 
   // The latest set of message events recevied to addMessages
-  messageEvents: readonly Readonly<MessageEvent<unknown>>[];
+  messageEvents: readonly Readonly<MessageEvent>[];
 
   // The path used to match these messages.
   path: string;
@@ -52,7 +52,7 @@ export function useMessageDataItem(path: string, options?: Options): ReducedValu
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([path]);
 
   const addMessages = useCallback(
-    (prevValue: ReducedValue, messageEvents: Readonly<MessageEvent<unknown>[]>): ReducedValue => {
+    (prevValue: ReducedValue, messageEvents: Readonly<MessageEvent[]>): ReducedValue => {
       if (messageEvents.length === 0) {
         return prevValue;
       }

@@ -46,7 +46,7 @@ export type MessagePipelineInternalState = {
   allPublishers: AdvertiseOptions[];
   subscriberIdsByTopic: Map<string, string[]>;
   newTopicsBySubscriberId: Map<string, Set<string>>;
-  lastMessageEventByTopic: Map<string, MessageEvent<unknown>>;
+  lastMessageEventByTopic: Map<string, MessageEvent>;
   /** Function to call when react render has completed with the latest state */
   renderDone?: () => void;
 
@@ -206,7 +206,7 @@ function updatePlayerStateAction(
 
   // We need a new set of message arrays for each subscriber since downstream users rely
   // on object instance reference checks to determine if there are new messages
-  const messagesBySubscriberId = new Map<string, MessageEvent<unknown>[]>();
+  const messagesBySubscriberId = new Map<string, MessageEvent[]>();
 
   const subsById = prevState.subscriptionsById;
   const subscriberIdsByTopic = prevState.subscriberIdsByTopic;

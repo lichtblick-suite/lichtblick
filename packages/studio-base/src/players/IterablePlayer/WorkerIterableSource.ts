@@ -72,9 +72,7 @@ export class WorkerIterableSource implements IIterableSource {
     }
   }
 
-  public async getBackfillMessages(
-    args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     if (this.#worker == undefined) {
       throw new Error(`WorkerIterableSource is not initialized`);
     }

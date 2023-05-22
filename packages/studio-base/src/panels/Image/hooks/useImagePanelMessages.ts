@@ -39,7 +39,7 @@ const selectPublicState = (state: ImagePanelState): PublicState => ({
 
 function addMessages(
   state: ImagePanelState,
-  messageEvents: readonly MessageEvent<unknown>[],
+  messageEvents: readonly MessageEvent[],
 ): Partial<ImagePanelState> {
   if (state.synchronize && state.annotationTopics.length > 0) {
     return synchronizedAddMessages(state, messageEvents);

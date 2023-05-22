@@ -13,7 +13,7 @@ import type { Annotation, ImagePanelState, SynchronizationItem } from "../types"
 
 export function synchronizedAddMessages(
   state: Pick<ImagePanelState, "imageTopic" | "cameraInfoTopic" | "annotationTopics" | "tree">,
-  messageEvents: readonly MessageEvent<unknown>[],
+  messageEvents: readonly MessageEvent[],
 ): Partial<ImagePanelState> {
   let newState: Partial<ImagePanelState> | undefined;
 

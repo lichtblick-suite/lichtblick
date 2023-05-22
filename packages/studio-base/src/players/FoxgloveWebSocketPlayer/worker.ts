@@ -41,7 +41,7 @@ self.onmessage = (event: MessageEvent<ToWorkerMessage>) => {
         ws.onclose = (wsEvent) => {
           send({ type: "close", data: JSON.parse(JSON.stringify(wsEvent) ?? "{}") });
         };
-        ws.onmessage = (wsEvent: MessageEvent<unknown>) => {
+        ws.onmessage = (wsEvent: MessageEvent) => {
           send({
             type: "message",
             data: wsEvent.data,

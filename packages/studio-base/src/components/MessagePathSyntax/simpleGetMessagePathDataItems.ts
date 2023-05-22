@@ -11,7 +11,7 @@ import { filterMatches } from "./filterMatches";
  * Execute the given message path to extract item(s) from the message.
  */
 export function simpleGetMessagePathDataItems(
-  message: MessageEvent<unknown>,
+  message: MessageEvent,
   filledInPath: RosPath,
 ): unknown[] {
   // We don't care about messages that don't match the topic we're looking for.

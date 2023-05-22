@@ -27,7 +27,7 @@ import {
 } from "@foxglove/studio-base/players/types";
 
 export type MessageBlock = {
-  readonly [topicName: string]: readonly MessageEvent<unknown>[];
+  readonly [topicName: string]: readonly MessageEvent[];
 };
 
 // Memoization probably won't speed up the filtering appreciably, but preserves return identity.
@@ -41,7 +41,7 @@ const filterBlockByTopics = memoizeWeak(
       // to a MemoryCacheBlock with no per-topic arrays.
       return {};
     }
-    const ret: Record<string, readonly MessageEvent<unknown>[]> = {};
+    const ret: Record<string, readonly MessageEvent[]> = {};
     for (const topic of topics) {
       // Don't include an empty array when the data has not been cached for this topic for this
       // block. The missing entry means "we don't know the message for this topic in this block", as

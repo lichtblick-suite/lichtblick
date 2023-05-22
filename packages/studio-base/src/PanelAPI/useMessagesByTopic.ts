@@ -21,7 +21,7 @@ import concatAndTruncate from "@foxglove/studio-base/util/concatAndTruncate";
 import { useMessageReducer } from "./useMessageReducer";
 
 // Topic types that are not known at compile time
-type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent<unknown>[]>;
+type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent[]>;
 
 /**
  * useMessagesByTopic makes it easy to request some messages on some topics.
@@ -33,15 +33,12 @@ type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent<unknown>
 export function useMessagesByTopic(params: {
   topics: readonly string[];
   historySize: number;
-}): Record<string, readonly MessageEvent<unknown>[]> {
+}): Record<string, readonly MessageEvent[]> {
   const { historySize, topics } = params;
   const requestedTopics = useDeepMemo(topics);
 
   const addMessages = useCallback(
-    (
-      prevMessagesByTopic: UnknownMessageEventsByTopic,
-      messages: readonly MessageEvent<unknown>[],
-    ) => {
+    (prevMessagesByTopic: UnknownMessageEventsByTopic, messages: readonly MessageEvent[]) => {
       const newMessagesByTopic = groupBy(messages, "topic");
       const ret: UnknownMessageEventsByTopic = { ...prevMessagesByTopic };
       Object.entries(newMessagesByTopic).forEach(([topic, newMessages]) => {

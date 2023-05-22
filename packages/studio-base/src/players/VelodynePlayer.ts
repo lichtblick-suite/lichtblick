@@ -80,7 +80,7 @@ export default class VelodynePlayer implements Player {
   #topicStats = new Map<string, TopicStats>(); // Message count and timestamps for our single topic
   #start: Time; // The time at which we started playing
   #packets: RawPacket[] = []; // Queue of packets that will form the next parsed message
-  #parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call
+  #parsedMessages: MessageEvent[] = []; // Queue of messages that we'll send in next _emitState() call
   #metricsCollector: PlayerMetricsCollectorInterface;
   #presence: PlayerPresence = PlayerPresence.INITIALIZING;
   #emitTimer?: ReturnType<typeof setTimeout>;
@@ -169,7 +169,7 @@ export default class VelodynePlayer implements Player {
       };
 
       const sizeInBytes = this.#packets.reduce((acc, packet) => acc + packet.data.byteLength, 0);
-      const msg: MessageEvent<unknown> = {
+      const msg: MessageEvent = {
         topic: TOPIC_NAME,
         receiveTime,
         message,

@@ -157,7 +157,7 @@ class BenchmarkPlayer implements Player {
     }
     this.#blockLoader?.setTopics(topicsForPreload);
 
-    const msgEvents: MessageEvent<unknown>[] = [];
+    const msgEvents: MessageEvent[] = [];
     const frameMs: number[] = [];
 
     // Load all messages into memory

@@ -87,7 +87,7 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
   );
 
   const addMessages = useCallback(
-    (accumulated: TaggedPlotDataByPath, msgEvents: readonly MessageEvent<unknown>[]) => {
+    (accumulated: TaggedPlotDataByPath, msgEvents: readonly MessageEvent[]) => {
       const lastEventTime = msgEvents[msgEvents.length - 1]?.receiveTime;
       const isFollowing = followingView?.type === "following";
 

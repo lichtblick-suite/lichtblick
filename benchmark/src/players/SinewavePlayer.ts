@@ -107,7 +107,7 @@ class SinewavePlayer implements Player {
       const now = rostime.fromDate(new Date());
       const value = Math.sin(rostime.toSec(now));
 
-      const messages: MessageEvent<unknown>[] = [];
+      const messages: MessageEvent[] = [];
 
       for (let i = 0; i < sinewaveCount; ++i) {
         const topicName = `sinewave_${i}`;

@@ -75,7 +75,7 @@ describe("useMessageReducer", () => {
   });
 
   it("calls restore to initialize and addMessage for initial messages", async () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
@@ -105,7 +105,7 @@ describe("useMessageReducer", () => {
   });
 
   it("calls restore to initialize and addMessages for initial messages", async () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
@@ -137,14 +137,14 @@ describe("useMessageReducer", () => {
   });
 
   it("calls addMessage for messages added later", async () => {
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
       schemaName: "foo",
       sizeInBytes: 0,
     };
-    const message2: MessageEvent<unknown> = {
+    const message2: MessageEvent = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
@@ -197,21 +197,21 @@ describe("useMessageReducer", () => {
   });
 
   it("calls addMessages for messages added later", async () => {
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
       schemaName: "foo",
       sizeInBytes: 0,
     };
-    const message2: MessageEvent<unknown> = {
+    const message2: MessageEvent = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
       schemaName: "bar",
       sizeInBytes: 0,
     };
-    const message3: MessageEvent<unknown> = {
+    const message3: MessageEvent = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 4 },
@@ -310,7 +310,7 @@ describe("useMessageReducer", () => {
   });
 
   it("clears everything on seek", () => {
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
@@ -371,14 +371,14 @@ describe("useMessageReducer", () => {
     restore.mockReturnValue(0);
     addMessage.mockImplementation((_, msg) => msg.message.value);
 
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
       schemaName: "foo",
       sizeInBytes: 0,
     };
-    const message2: MessageEvent<unknown> = {
+    const message2: MessageEvent = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
@@ -484,7 +484,7 @@ describe("useMessageReducer", () => {
   });
 
   it("doesn't re-render when player topics or other playerState changes", async () => {
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
@@ -556,7 +556,7 @@ describe("useMessageReducer", () => {
   });
 
   it("restore called when addMessages changes", async () => {
-    const message1: MessageEvent<unknown> = {
+    const message1: MessageEvent = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },

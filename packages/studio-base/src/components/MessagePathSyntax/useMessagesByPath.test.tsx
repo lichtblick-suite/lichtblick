@@ -47,7 +47,7 @@ type TestProps = {
 
 type WrapperProps = {
   topics?: Topic[];
-  messages?: MessageEvent<unknown>[];
+  messages?: MessageEvent[];
   datatypes?: RosDatatypes;
   activeData?: Partial<PlayerStateActiveData>;
   globalVariables?: GlobalVariables;
@@ -353,7 +353,7 @@ describe("useMessagesByPath", () => {
       }),
     );
 
-    const message: MessageEvent<unknown> = {
+    const message: MessageEvent = {
       topic: "/some/topic",
       receiveTime: { sec: 100, nsec: 0 },
       message: {

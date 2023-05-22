@@ -212,7 +212,7 @@ class PointcloudPlayer implements Player {
 
       const now = rostime.fromDate(new Date());
 
-      const messages: MessageEvent<unknown>[] = [];
+      const messages: MessageEvent[] = [];
 
       for (let i = 0; i < pointcloudCount; ++i) {
         const topicName = `pointcloud_${i}`;

@@ -169,12 +169,10 @@ export class McapIndexedIterableSource implements IIterableSource {
     }
   }
 
-  public async getBackfillMessages(
-    args: GetBackfillMessagesArgs,
-  ): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
     const { topics, time } = args;
 
-    const messages: MessageEvent<unknown>[] = [];
+    const messages: MessageEvent[] = [];
     for (const topic of topics) {
       // NOTE: An iterator is made for each topic to get the latest message on that topic.
       // An single iterator for all the topics could result in iterating through many
