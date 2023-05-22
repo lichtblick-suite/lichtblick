@@ -17,6 +17,7 @@ import { Marker } from "@foxglove/studio-base/types/Messages";
 export type InteractionData = {
   readonly topic: string | undefined;
   readonly highlighted?: boolean;
+  readonly downloader: (() => Promise<{ blob: Blob; fileName: string } | undefined>) | undefined;
   readonly originalMessage: RosObject;
   readonly instanceDetails: RosObject | undefined;
 };

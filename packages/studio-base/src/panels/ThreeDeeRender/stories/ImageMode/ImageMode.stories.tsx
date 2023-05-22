@@ -4,6 +4,7 @@
 
 import { StoryObj } from "@storybook/react";
 import { fireEvent, screen, userEvent } from "@storybook/testing-library";
+import { useCallback, useState } from "react";
 
 import {
   CompressedImage,
@@ -12,6 +13,7 @@ import {
   RawImage,
 } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { makeImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -183,10 +185,12 @@ const ImageModeFoxgloveImage = ({
   imageType = "raw",
   zoomMode = "fit",
   rotation,
+  onDownload,
 }: {
   imageType?: "raw" | "png";
   zoomMode?: "fit" | "fill";
   rotation?: 0 | 90 | 180 | 270;
+  onDownload?: (blob: Blob, fileName: string) => void;
 }): JSX.Element => {
   const topics: Topic[] = [
     { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
@@ -298,6 +302,7 @@ const ImageModeFoxgloveImage = ({
   return (
     <PanelSetup fixture={fixture}>
       <ImagePanel
+        onDownload={onDownload}
         overrideConfig={{
           ...ImagePanel.defaultConfig,
           followTf: undefined,
@@ -343,6 +348,59 @@ export const ImageModeFoxglovePngImage: StoryObj<
 > = {
   render: ImageModeFoxgloveImage,
   args: { imageType: "png" },
+};
+
+export const DownloadRawImage: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  render: function Story(args) {
+    const [src, setSrc] = useState<string | undefined>();
+    const [filename, setFilename] = useState<string | undefined>();
+    const onDownload = useCallback((blob: Blob, fileName: string) => {
+      setSrc(URL.createObjectURL(blob));
+      setFilename(fileName);
+    }, []);
+    return (
+      <Stack direction="row" fullHeight>
+        <Stack style={{ width: "50%" }}>
+          <ImageModeFoxgloveImage {...args} onDownload={onDownload} />
+        </Stack>
+        <Stack style={{ width: "50%" }} zeroMinWidth>
+          <div>{filename == undefined ? "Not downloaded" : `Downloaded image: ${filename}`}</div>
+          <img src={src} style={{ imageRendering: "pixelated", border: "1px solid red" }} />
+        </Stack>
+      </Stack>
+    );
+  },
+  args: { imageType: "raw" },
+  play: async () => {
+    const canvas = document.querySelector("canvas")!;
+    const inspectObjects = screen.getByRole("button", { name: /inspect objects/i });
+    userEvent.click(inspectObjects);
+    await delay(1000);
+    const rect = canvas.getBoundingClientRect();
+    userEvent.click(canvas, { clientX: rect.width / 2, clientY: rect.height / 2 });
+    await delay(30);
+    userEvent.click(await screen.findByText("Download"));
+  },
+};
+
+export const DownloadPngImage: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...DownloadRawImage,
+  args: { imageType: "png" },
+};
+
+export const DownloadPngImage90: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...DownloadRawImage,
+  args: { imageType: "png", rotation: 90 },
+};
+
+export const DownloadPngImage180: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...DownloadRawImage,
+  args: { imageType: "png", rotation: 180 },
+};
+
+export const DownloadPngImage270: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...DownloadRawImage,
+  args: { imageType: "png", rotation: 270 },
 };
 
 export const ImageModeResizeHandled: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =

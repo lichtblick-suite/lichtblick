@@ -12,18 +12,24 @@
 //   You may not use this file except in compliance with the License.
 
 import { Cursor24Regular } from "@fluentui/react-icons";
-import { Typography } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
+import { Button, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
 
+import Logger from "@foxglove/log";
 import type { LayoutActions } from "@foxglove/studio";
 import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
 } from "@foxglove/studio-base/components/ExpandingToolbar";
+import { downloadFiles } from "@foxglove/studio-base/util/download";
 
 import ObjectDetails from "./ObjectDetails";
 import TopicLink from "./TopicLink";
 import { InteractionData } from "./types";
 import { Pose } from "../transforms";
+
+const log = Logger.getLogger(__filename);
 
 // ts-prune-ignore-next
 export const OBJECT_TAB_TYPE = "Selected object";
@@ -43,6 +49,8 @@ type Props = {
   addPanel: LayoutActions["addPanel"];
   selectedObject?: SelectionObject;
   timezone: string | undefined;
+  /** Override default downloading behavior, used for Storybook */
+  onDownload?: (blob: Blob, fileName: string) => void;
 };
 
 const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseComponent({
@@ -51,10 +59,13 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
   interactionsTabType,
   setInteractionsTabType,
   timezone,
+  onDownload,
 }: Props) {
   const selectedInteractionData = selectedObject?.object.interactionData;
   const originalMessage = selectedInteractionData?.originalMessage;
   const instanceDetails = selectedInteractionData?.instanceDetails;
+
+  const { enqueueSnackbar } = useSnackbar();
 
   return (
     <ExpandingToolbar
@@ -80,6 +91,32 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
                 interactionData={selectedInteractionData}
                 timezone={timezone}
               />
+              {selectedInteractionData.downloader && (
+                <Button
+                  variant="outlined"
+                  startIcon={<DownloadIcon />}
+                  onClick={() => {
+                    void selectedInteractionData
+                      .downloader?.()
+                      .then((result) => {
+                        if (!result) {
+                          return;
+                        }
+                        if (onDownload) {
+                          onDownload(result.blob, result.fileName);
+                        } else {
+                          downloadFiles([result]);
+                        }
+                      })
+                      .catch((err) => {
+                        enqueueSnackbar((err as Error).message, { variant: "error" });
+                        log.error(err);
+                      });
+                  }}
+                >
+                  Download
+                </Button>
+              )}
             </>
           ) : (
             <Typography variant="body2" color="text.disabled" gutterBottom>

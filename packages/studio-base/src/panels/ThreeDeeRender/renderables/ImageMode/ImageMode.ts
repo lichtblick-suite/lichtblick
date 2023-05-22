@@ -47,7 +47,7 @@ import {
 } from "../../ros";
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
-import { decodeCompressedImageToBitmap } from "../Images/decodeCompressedImageToBitmap";
+import { decodeCompressedImageToBitmap } from "../Images/decodeImage";
 import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "../Images/topicPrefixMatching";
 
 const IMAGE_TOPIC_PATH = ["imageMode", "imageTopic"];
@@ -497,6 +497,7 @@ export class ImageMode
       }
 
       if (config.rotation !== prevImageModeConfig.rotation) {
+        this.#imageRenderable?.setRotation(config.rotation ?? 0);
         this.#camera.setRotation(config.rotation ?? 0);
       }
 
@@ -650,6 +651,7 @@ export class ImageMode
       cameraInfo: undefined,
       cameraModel: undefined,
       image,
+      rotation: this.renderer.config.imageMode.rotation ?? 0,
       texture: undefined,
       material: undefined,
       geometry: undefined,

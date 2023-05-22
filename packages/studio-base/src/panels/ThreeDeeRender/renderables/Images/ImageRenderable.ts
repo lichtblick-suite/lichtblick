@@ -5,24 +5,8 @@
 import * as THREE from "three";
 import { assert } from "ts-essentials";
 
-import {
-  PinholeCameraModel,
-  decodeBGR8,
-  decodeBGRA8,
-  decodeBayerBGGR8,
-  decodeBayerGBRG8,
-  decodeBayerGRBG8,
-  decodeBayerRGGB8,
-  decodeFloat1c,
-  decodeMono16,
-  decodeMono8,
-  decodeRGB8,
-  decodeRGBA8,
-  decodeYUV,
-  decodeYUYV,
-} from "@foxglove/den/image";
+import { PinholeCameraModel } from "@foxglove/den/image";
 import { toNanoSec } from "@foxglove/rostime";
-import { RawImage } from "@foxglove/schemas";
 import { IRenderer } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderable";
 import { stringToRgba } from "@foxglove/studio-base/panels/ThreeDeeRender/color";
@@ -30,7 +14,8 @@ import { projectPixel } from "@foxglove/studio-base/panels/ThreeDeeRender/render
 import { RosValue } from "@foxglove/studio-base/players/types";
 
 import { AnyImage } from "./ImageTypes";
-import { Image as RosImage, CameraInfo } from "../../ros";
+import { decodeCompressedImageToBitmap, decodeRawImage } from "./decodeImage";
+import { CameraInfo } from "../../ros";
 
 export interface ImageRenderableSettings {
   visible: boolean;
@@ -59,6 +44,7 @@ export type ImageUserData = BaseUserData & {
   cameraInfo: CameraInfo | undefined;
   cameraModel: PinholeCameraModel | undefined;
   image: AnyImage | undefined;
+  rotation: 0 | 90 | 180 | 270;
   texture: THREE.Texture | undefined;
   material: THREE.MeshBasicMaterial | undefined;
   geometry: THREE.PlaneGeometry | undefined;
@@ -153,6 +139,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.#textureNeedsUpdate = true;
   }
 
+  /** Set the rotation (used only for downloading) */
+  public setRotation(rotation: 0 | 90 | 180 | 270): void {
+    this.userData.rotation = rotation;
+  }
+
   public setBitmap(bitmap: ImageBitmap): void {
     this.#bitmap = bitmap;
     this.#textureNeedsUpdate = true;
@@ -235,7 +226,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       }
 
       const texture = this.userData.texture as THREE.DataTexture;
-      rawImageToDataTexture(image, {}, texture);
+      decodeRawImage(image, {}, texture.image.data);
       texture.needsUpdate = true;
     }
     this.#materialNeedsUpdate = true;
@@ -302,12 +293,62 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.userData.mesh.renderOrder = 0;
     }
   }
-}
 
-type RawImageOptions = {
-  minValue?: number;
-  maxValue?: number;
-};
+  public override getDownloader():
+    | (() => Promise<{ blob: Blob; fileName: string } | undefined>)
+    | undefined {
+    // re-render the image onto a new canvas to download the original image
+    return async () => {
+      const { topic, image, rotation } = this.userData;
+      if (!image) {
+        return;
+      }
+      const stamp = "header" in image ? image.header.stamp : image.timestamp;
+      let bitmap: ImageBitmap;
+      if ("format" in image) {
+        bitmap = await decodeCompressedImageToBitmap(image);
+      } else {
+        const imageData = new ImageData(image.width, image.height);
+        decodeRawImage(image, {}, imageData.data);
+        bitmap = await createImageBitmap(imageData);
+      }
+
+      const width = rotation === 90 || rotation === 270 ? bitmap.height : bitmap.width;
+      const height = rotation === 90 || rotation === 270 ? bitmap.width : bitmap.height;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Unable to create rendering context for image download");
+      }
+
+      // Draw the image in the selected orientation so it aligns with the canvas viewport
+      ctx.translate(width / 2, height / 2);
+      ctx.rotate((rotation / 180) * Math.PI);
+      ctx.translate(-bitmap.width / 2, -bitmap.height / 2);
+      ctx.drawImage(bitmap, 0, 0);
+
+      // read the canvas data as an image (png)
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(`Failed to create an image from ${width}x${height} canvas`);
+          }
+        }, "image/png");
+      });
+      // name the image the same name as the topic
+      // note: the / characters in the file name will be replaced with _ by the browser
+      // remove any leading / so the image name doesn't start with _
+      const topicName = topic.replace(/^\/+/, "");
+      const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
+      return { blob, fileName };
+    };
+  }
+}
 
 let tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
@@ -399,67 +440,6 @@ function createGeometry(
   geometry.attributes.uv!.needsUpdate = true;
 
   return geometry;
-}
-
-function rawImageToDataTexture(
-  image: RosImage | RawImage,
-  options: RawImageOptions,
-  output: THREE.DataTexture,
-): void {
-  const { encoding, width, height } = image;
-  const is_bigendian = "is_bigendian" in image ? image.is_bigendian : false;
-  const rawData = image.data as Uint8Array;
-  switch (encoding) {
-    case "yuv422":
-      decodeYUV(image.data as Int8Array, width, height, output.image.data);
-      break;
-    // same thing as yuv422, but a distinct decoding from yuv422 and yuyv
-    case "uyuv":
-      decodeYUV(image.data as Int8Array, width, height, output.image.data);
-      break;
-    // change name in the future
-    case "yuyv":
-      decodeYUYV(image.data as Int8Array, width, height, output.image.data);
-      break;
-    case "rgb8":
-      decodeRGB8(rawData, width, height, output.image.data);
-      break;
-    case "rgba8":
-      decodeRGBA8(rawData, width, height, output.image.data);
-      break;
-    case "bgra8":
-      decodeBGRA8(rawData, width, height, output.image.data);
-      break;
-    case "bgr8":
-    case "8UC3":
-      decodeBGR8(rawData, width, height, output.image.data);
-      break;
-    case "32FC1":
-      decodeFloat1c(rawData, width, height, is_bigendian, output.image.data);
-      break;
-    case "bayer_rggb8":
-      decodeBayerRGGB8(rawData, width, height, output.image.data);
-      break;
-    case "bayer_bggr8":
-      decodeBayerBGGR8(rawData, width, height, output.image.data);
-      break;
-    case "bayer_gbrg8":
-      decodeBayerGBRG8(rawData, width, height, output.image.data);
-      break;
-    case "bayer_grbg8":
-      decodeBayerGRBG8(rawData, width, height, output.image.data);
-      break;
-    case "mono8":
-    case "8UC1":
-      decodeMono8(rawData, width, height, output.image.data);
-      break;
-    case "mono16":
-    case "16UC1":
-      decodeMono16(rawData, width, height, is_bigendian, output.image.data, options);
-      break;
-    default:
-      throw new Error(`Unsupported encoding ${encoding}`);
-  }
 }
 
 const bitmapDimensionsEqual = (a?: ImageBitmap, b?: ImageBitmap) =>

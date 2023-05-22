@@ -87,6 +87,8 @@ export function RendererOverlay(props: {
   onChangePublishClickType: (_: PublishClickType) => void;
   onClickPublish: () => void;
   timezone: string | undefined;
+  /** Override default downloading behavior, used for Storybook */
+  onDownload?: (blob: Blob, fileName: string) => void;
 }): JSX.Element {
   const { t } = useTranslation("threeDee");
   const { classes } = useStyles();
@@ -164,6 +166,7 @@ export function RendererOverlay(props: {
               interactionData: {
                 topic: selectedRenderable.renderable.topic,
                 highlighted: true,
+                downloader: selectedRenderable.renderable.getDownloader(),
                 originalMessage: selectedRenderable.renderable.details(),
                 instanceDetails:
                   selectedRenderable.instanceIndex != undefined
@@ -277,6 +280,8 @@ export function RendererOverlay(props: {
     </Button>
   );
 
+  const { onDownload } = props;
+
   return (
     <>
       <div
@@ -292,6 +297,7 @@ export function RendererOverlay(props: {
         }}
       >
         <Interactions
+          onDownload={onDownload}
           addPanel={props.addPanel}
           selectedObject={selectedObject}
           interactionsTabType={interactionsTabType}

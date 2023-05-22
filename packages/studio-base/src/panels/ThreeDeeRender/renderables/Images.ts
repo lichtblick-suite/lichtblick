@@ -17,7 +17,7 @@ import {
   ImageRenderable,
 } from "./Images/ImageRenderable";
 import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
-import { decodeCompressedImageToBitmap } from "./Images/decodeCompressedImageToBitmap";
+import { decodeCompressedImageToBitmap } from "./Images/decodeImage";
 import {
   normalizeCompressedImage,
   normalizeRawImage,
@@ -438,6 +438,7 @@ export class Images extends SceneExtension<ImageRenderable> {
       cameraInfo: undefined,
       cameraModel: undefined,
       image,
+      rotation: 0,
       texture: undefined,
       material: undefined,
       geometry: undefined,
