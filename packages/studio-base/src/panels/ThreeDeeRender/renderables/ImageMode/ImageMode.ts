@@ -27,7 +27,7 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
 import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 
-import { DEFAULT_ZOOM_MODE, ImageModeCamera } from "./ImageModeCamera";
+import { ImageModeCamera } from "./ImageModeCamera";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
 import type { IRenderer } from "../../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
@@ -124,7 +124,6 @@ export class ImageMode
     this.#camera = new ImageModeCamera();
 
     this.#camera.setCanvasSize(canvasSize.width, canvasSize.height);
-    this.#camera.setZoomMode(renderer.config.imageMode.zoomMode ?? "fit");
     this.#camera.setRotation(renderer.config.imageMode.rotation ?? 0);
     this.#camera.setFlipHorizontal(renderer.config.imageMode.flipHorizontal ?? false);
     this.#camera.setFlipVertical(renderer.config.imageMode.flipVertical ?? false);
@@ -373,15 +372,6 @@ export class ImageMode
       options: calibrationTopics,
       error: calibrationTopicError,
     };
-    fields.zoomMode = {
-      label: "Zoom mode",
-      input: "toggle",
-      value: config.imageMode.zoomMode ?? DEFAULT_ZOOM_MODE,
-      options: [
-        { label: "Fit", value: "fit" },
-        { label: "Fill", value: "fill" },
-      ],
-    };
     // fields.TODO_transformMarkers = {
     //   readonly: true,
     //   input: "boolean",
@@ -486,11 +476,6 @@ export class ImageMode
           });
           this.#setHasCalibrationTopic(true);
         }
-      }
-
-      if (config.zoomMode !== prevImageModeConfig.zoomMode) {
-        this.#camera.setZoomMode(config.zoomMode ?? DEFAULT_ZOOM_MODE);
-        this.resetViewModifications();
       }
 
       if (config.rotation !== prevImageModeConfig.rotation) {

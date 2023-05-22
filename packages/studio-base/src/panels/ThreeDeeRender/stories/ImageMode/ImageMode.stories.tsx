@@ -183,14 +183,12 @@ export const ImageModeRosPngImage: StoryObj<React.ComponentProps<typeof ImageMod
 
 const ImageModeFoxgloveImage = ({
   imageType = "raw",
-  zoomMode = "fit",
   rotation,
   onDownload,
   flipHorizontal = false,
   flipVertical = false,
 }: {
   imageType?: "raw" | "png";
-  zoomMode?: "fit" | "fill";
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;
   flipVertical?: boolean;
@@ -319,7 +317,6 @@ const ImageModeFoxgloveImage = ({
           imageMode: {
             calibrationTopic: imageType === "raw" ? "/cam2/info" : "/cam1/info",
             imageTopic: imageType === "raw" ? "/cam2/raw" : "/cam1/png",
-            zoomMode,
             rotation,
             flipHorizontal,
             flipVertical,
@@ -464,16 +461,6 @@ export const ImageModeResizeHandled: StoryObj<React.ComponentProps<typeof ImageM
     },
   };
 
-export const ImageModeResizeHandledFill: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  ...ImageModeResizeHandled,
-  args: {
-    ...ImageModeResizeHandled.args,
-    zoomMode: "fill",
-  },
-};
-
 export const ImageModePan: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   render: ImageModeFoxgloveImage,
   play: async () => {
@@ -497,14 +484,6 @@ export const ImageModePan180: StoryObj<React.ComponentProps<typeof ImageModeFoxg
 export const ImageModePan270: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   ...ImageModePan,
   args: { rotation: 270 },
-};
-
-export const ImageModePanFill: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  ...ImageModePan,
-  args: {
-    ...ImageModePan.args,
-    zoomMode: "fill",
-  },
 };
 
 export const ImageModeZoomThenPan: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
@@ -539,16 +518,6 @@ export const ImageModeZoomThenPan270: StoryObj<
   args: { rotation: 270 },
 };
 
-export const ImageModeZoomThenPanFill: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  ...ImageModeZoomThenPan,
-  args: {
-    ...ImageModeZoomThenPan.args,
-    zoomMode: "fill",
-  },
-};
-
 export const ImageModePanThenZoom: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   render: ImageModeFoxgloveImage,
   args: { imageType: "raw" },
@@ -562,16 +531,6 @@ export const ImageModePanThenZoom: StoryObj<React.ComponentProps<typeof ImageMod
   },
 };
 
-export const ImageModePanThenZoomFill: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  ...ImageModePanThenZoom,
-  args: {
-    ...ImageModePanThenZoom.args,
-    zoomMode: "fill",
-  },
-};
-
 export const ImageModePanThenZoomReset: StoryObj<
   React.ComponentProps<typeof ImageModeFoxgloveImage>
 > = {
@@ -580,16 +539,6 @@ export const ImageModePanThenZoomReset: StoryObj<
   play: async (ctx) => {
     await ImageModePanThenZoom.play?.(ctx);
     userEvent.click(await screen.findByTestId("reset-view"));
-  },
-};
-
-export const ImageModePanThenZoomResetFill: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  ...ImageModePanThenZoomReset,
-  args: {
-    ...ImageModePanThenZoomReset.args,
-    zoomMode: "fill",
   },
 };
 

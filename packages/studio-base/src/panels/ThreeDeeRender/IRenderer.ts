@@ -80,8 +80,6 @@ export type ImageModeConfig = {
   calibrationTopic?: string;
   /** Annotation topic settings, analogous to {@link RendererConfig.topics} */
   annotations?: ImageAnnotationSubscription[];
-  /** Zoom mode */
-  zoomMode?: "fit" | "fill";
   /** Rotation */
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;
