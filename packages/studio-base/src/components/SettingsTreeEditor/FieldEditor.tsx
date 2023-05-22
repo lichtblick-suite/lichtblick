@@ -84,6 +84,7 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
     styledToggleButtonGroup: {
       backgroundColor: theme.palette.action.hover,
       gap: theme.spacing(0.25),
+      overflowX: "auto",
 
       "& .MuiToggleButtonGroup-grouped": {
         margin: theme.spacing(0.55),
@@ -197,10 +198,10 @@ function FieldInput({
         >
           {field.options.map((opt) => (
             <ToggleButton
-              key={(typeof opt === "string" ? opt : opt.value) ?? UNDEFINED_SENTINEL_VALUE}
-              value={(typeof opt === "string" ? opt : opt.value) ?? UNDEFINED_SENTINEL_VALUE}
+              key={(typeof opt === "object" ? opt.value : opt) ?? UNDEFINED_SENTINEL_VALUE}
+              value={(typeof opt === "object" ? opt.value : opt) ?? UNDEFINED_SENTINEL_VALUE}
             >
-              {typeof opt === "string" ? opt : opt.label}
+              {typeof opt === "object" ? opt.label : opt}
             </ToggleButton>
           ))}
         </ToggleButtonGroup>

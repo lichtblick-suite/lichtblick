@@ -552,6 +552,11 @@ export type SettingsTreeFieldValue =
       options: string[] | Array<{ label: string; value: undefined | string }>;
     }
   | {
+      input: "toggle";
+      value?: number;
+      options: number[] | Array<{ label: string; value: undefined | number }>;
+    }
+  | {
       input: "vec3";
       value?: [undefined | number, undefined | number, undefined | number];
       placeholder?: [undefined | string, undefined | string, undefined | string];
