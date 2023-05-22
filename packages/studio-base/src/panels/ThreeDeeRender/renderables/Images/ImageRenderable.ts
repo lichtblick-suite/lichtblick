@@ -45,6 +45,8 @@ export type ImageUserData = BaseUserData & {
   cameraModel: PinholeCameraModel | undefined;
   image: AnyImage | undefined;
   rotation: 0 | 90 | 180 | 270;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
   texture: THREE.Texture | undefined;
   material: THREE.MeshBasicMaterial | undefined;
   geometry: THREE.PlaneGeometry | undefined;
@@ -142,6 +144,18 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   /** Set the rotation (used only for downloading) */
   public setRotation(rotation: 0 | 90 | 180 | 270): void {
     this.userData.rotation = rotation;
+  }
+
+  /** Set the horizontal flip (used only for downloading) */
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  public setFlipHorizontal(flipHorizontal: boolean): void {
+    this.userData.flipHorizontal = flipHorizontal;
+  }
+
+  /** Set the vertical flip (used only for downloading) */
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  public setFlipVertical(flipVertical: boolean): void {
+    this.userData.flipVertical = flipVertical;
   }
 
   public setBitmap(bitmap: ImageBitmap): void {
@@ -299,7 +313,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     | undefined {
     // re-render the image onto a new canvas to download the original image
     return async () => {
-      const { topic, image, rotation } = this.userData;
+      const { topic, image, rotation, flipHorizontal, flipVertical } = this.userData;
       if (!image) {
         return;
       }
@@ -326,6 +340,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
       // Draw the image in the selected orientation so it aligns with the canvas viewport
       ctx.translate(width / 2, height / 2);
+      ctx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
       ctx.rotate((rotation / 180) * Math.PI);
       ctx.translate(-bitmap.width / 2, -bitmap.height / 2);
       ctx.drawImage(bitmap, 0, 0);

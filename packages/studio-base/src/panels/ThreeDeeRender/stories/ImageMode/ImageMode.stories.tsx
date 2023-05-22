@@ -186,10 +186,14 @@ const ImageModeFoxgloveImage = ({
   zoomMode = "fit",
   rotation,
   onDownload,
+  flipHorizontal = false,
+  flipVertical = false,
 }: {
   imageType?: "raw" | "png";
   zoomMode?: "fit" | "fill";
   rotation?: 0 | 90 | 180 | 270;
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
   onDownload?: (blob: Blob, fileName: string) => void;
 }): JSX.Element => {
   const topics: Topic[] = [
@@ -317,6 +321,8 @@ const ImageModeFoxgloveImage = ({
             imageTopic: imageType === "raw" ? "/cam2/raw" : "/cam1/png",
             zoomMode,
             rotation,
+            flipHorizontal,
+            flipVertical,
           },
           cameraState: {
             distance: 1.5,
@@ -388,6 +394,24 @@ export const DownloadPngImage: StoryObj<React.ComponentProps<typeof ImageModeFox
   args: { imageType: "png" },
 };
 
+export const DownloadPngImageFlipH: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =
+  {
+    ...DownloadRawImage,
+    args: { imageType: "png", flipHorizontal: true },
+  };
+
+export const DownloadPngImageFlipV: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =
+  {
+    ...DownloadRawImage,
+    args: { imageType: "png", flipVertical: true },
+  };
+
+export const DownloadPngImageFlipHV: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =
+  {
+    ...DownloadRawImage,
+    args: { imageType: "png", flipHorizontal: true, flipVertical: true },
+  };
+
 export const DownloadPngImage90: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   ...DownloadRawImage,
   args: { imageType: "png", rotation: 90 },
@@ -401,6 +425,27 @@ export const DownloadPngImage180: StoryObj<React.ComponentProps<typeof ImageMode
 export const DownloadPngImage270: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   ...DownloadRawImage,
   args: { imageType: "png", rotation: 270 },
+};
+
+export const DownloadPngImage90FlipH: StoryObj<
+  React.ComponentProps<typeof ImageModeFoxgloveImage>
+> = {
+  ...DownloadRawImage,
+  args: { imageType: "png", rotation: 90, flipHorizontal: true },
+};
+
+export const DownloadPngImage90FlipV: StoryObj<
+  React.ComponentProps<typeof ImageModeFoxgloveImage>
+> = {
+  ...DownloadRawImage,
+  args: { imageType: "png", rotation: 90, flipVertical: true },
+};
+
+export const DownloadPngImage90FlipHV: StoryObj<
+  React.ComponentProps<typeof ImageModeFoxgloveImage>
+> = {
+  ...DownloadRawImage,
+  args: { imageType: "png", rotation: 90, flipHorizontal: true, flipVertical: true },
 };
 
 export const ImageModeResizeHandled: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =

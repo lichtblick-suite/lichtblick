@@ -126,6 +126,8 @@ export class ImageMode
     this.#camera.setCanvasSize(canvasSize.width, canvasSize.height);
     this.#camera.setZoomMode(renderer.config.imageMode.zoomMode ?? "fit");
     this.#camera.setRotation(renderer.config.imageMode.rotation ?? 0);
+    this.#camera.setFlipHorizontal(renderer.config.imageMode.flipHorizontal ?? false);
+    this.#camera.setFlipVertical(renderer.config.imageMode.flipVertical ?? false);
 
     renderer.settings.errors.on("update", this.#handleErrorChange);
     renderer.settings.errors.on("clear", this.#handleErrorChange);
@@ -353,9 +355,6 @@ export class ImageMode
     // const transformMarkers: boolean = false;
     // const synchronize: boolean = false;
     // const smooth: boolean = false;
-    // const flipHorizontal: boolean = false;
-    // const flipVertical: boolean = false;
-    // const rotation = 0;
     // const minValue: number | undefined = undefined;
     // const maxValue: number | undefined = undefined;
 
@@ -404,18 +403,16 @@ export class ImageMode
     //   label: "🚧 Bilinear smoothing",
     //   value: smooth,
     // };
-    // fields.TODO_flipHorizontal = {
-    //   readonly: true,
-    //   input: "boolean",
-    //   label: "🚧 Flip horizontal",
-    //   value: flipHorizontal,
-    // };
-    // fields.TODO_flipVertical = {
-    //   readonly: true,
-    //   input: "boolean",
-    //   label: "🚧 Flip vertical",
-    //   value: flipVertical,
-    // };
+    fields.flipHorizontal = {
+      input: "boolean",
+      label: "Flip horizontal",
+      value: config.imageMode.flipHorizontal ?? false,
+    };
+    fields.flipVertical = {
+      input: "boolean",
+      label: "Flip vertical",
+      value: config.imageMode.flipVertical ?? false,
+    };
     fields.rotation = {
       input: "select",
       label: "Rotation",
@@ -499,6 +496,16 @@ export class ImageMode
       if (config.rotation !== prevImageModeConfig.rotation) {
         this.#imageRenderable?.setRotation(config.rotation ?? 0);
         this.#camera.setRotation(config.rotation ?? 0);
+      }
+
+      if (config.flipHorizontal !== prevImageModeConfig.flipHorizontal) {
+        this.#imageRenderable?.setFlipHorizontal(config.flipHorizontal ?? false);
+        this.#camera.setFlipHorizontal(config.flipHorizontal ?? false);
+      }
+
+      if (config.flipVertical !== prevImageModeConfig.flipVertical) {
+        this.#imageRenderable?.setFlipVertical(config.flipVertical ?? false);
+        this.#camera.setFlipVertical(config.flipVertical ?? false);
       }
 
       this.#updateViewAndRenderables();
@@ -652,6 +659,8 @@ export class ImageMode
       cameraModel: undefined,
       image,
       rotation: this.renderer.config.imageMode.rotation ?? 0,
+      flipHorizontal: this.renderer.config.imageMode.flipHorizontal ?? false,
+      flipVertical: this.renderer.config.imageMode.flipVertical ?? false,
       texture: undefined,
       material: undefined,
       geometry: undefined,

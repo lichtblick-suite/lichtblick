@@ -20,6 +20,8 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
   readonly #cameraState = DEFAULT_CAMERA_STATE;
   #zoomMode: "fit" | "fill" | "custom" = DEFAULT_ZOOM_MODE;
   #rotation: 0 | 90 | 180 | 270 = 0;
+  #flipHorizontal = false;
+  #flipVertical = false;
 
   /** x/y zoom factors derived from image and window aspect ratios and zoom mode */
   readonly #aspectZoom = new THREE.Vector2();
@@ -77,6 +79,18 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
     this.resetModifications();
   }
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  public setFlipHorizontal(flipHorizontal: boolean): void {
+    this.#flipHorizontal = flipHorizontal;
+    this.resetModifications();
+  }
+
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  public setFlipVertical(flipVertical: boolean): void {
+    this.#flipVertical = flipVertical;
+    this.resetModifications();
+  }
+
   public updateZoomFromWheel(ratio: number, cursorCoords: THREE.Vector2): void {
     const newZoom = THREE.MathUtils.clamp(this.#userZoom * ratio, MIN_USER_ZOOM, MAX_USER_ZOOM);
     const finalRatio = newZoom / this.#userZoom;
@@ -119,23 +133,25 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
     // (cx, cy) image center in pixel coordinates
     // for panning we can take offsets from this in pixel coordinates
     const scale = this.getEffectiveScale();
+    const flipPanX = this.#flipHorizontal ? -1 : 1;
+    const flipPanY = this.#flipVertical ? -1 : 1;
     let panX, panY;
     switch (this.#rotation) {
       case 0:
-        panX = this.#panOffset.x * (fx / fy);
-        panY = this.#panOffset.y;
+        panX = this.#panOffset.x * (fx / fy) * flipPanX;
+        panY = this.#panOffset.y * flipPanY;
         break;
       case 90:
-        panX = this.#panOffset.y * (fx / fy);
-        panY = -this.#panOffset.x;
+        panX = this.#panOffset.y * (fx / fy) * flipPanY;
+        panY = -this.#panOffset.x * flipPanX;
         break;
       case 180:
-        panX = -this.#panOffset.x * (fx / fy);
-        panY = -this.#panOffset.y;
+        panX = -this.#panOffset.x * (fx / fy) * flipPanX;
+        panY = -this.#panOffset.y * flipPanY;
         break;
       case 270:
-        panX = -this.#panOffset.y * (fx / fy);
-        panY = this.#panOffset.x;
+        panX = -this.#panOffset.y * (fx / fy) * flipPanY;
+        panY = this.#panOffset.x * flipPanX;
         break;
     }
     const cx = model.P[2] + panX / scale;
@@ -179,6 +195,17 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
         top = right0;
         bottom = left0;
         break;
+    }
+
+    if (this.#flipHorizontal) {
+      const temp = left;
+      left = right;
+      right = temp;
+    }
+    if (this.#flipVertical) {
+      const temp = top;
+      top = bottom;
+      bottom = temp;
     }
 
     out.makePerspective(left, right, top, bottom, near, far);

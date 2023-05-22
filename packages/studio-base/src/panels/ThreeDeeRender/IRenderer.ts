@@ -78,6 +78,8 @@ export type ImageModeConfig = {
   zoomMode?: "fit" | "fill";
   /** Rotation */
   rotation?: 0 | 90 | 180 | 270;
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
 };
 
 export type RendererConfig = {
