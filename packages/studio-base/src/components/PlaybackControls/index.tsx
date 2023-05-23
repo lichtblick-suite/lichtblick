@@ -72,6 +72,9 @@ const useStyles = makeStyles()((theme) => ({
       margin: theme.spacing(0.5, 0.5, 0.75),
     },
   },
+  dataSourceInfoButton: {
+    cursor: "default",
+  },
 }));
 
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
@@ -202,6 +205,7 @@ export default function PlaybackControls(props: {
                 }
               >
                 <HoverableIconButton
+                  className={classes.dataSourceInfoButton}
                   disabled={presence !== PlayerPresence.PRESENT}
                   size="small"
                   icon={<Info24Regular />}
