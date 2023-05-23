@@ -19,7 +19,6 @@
     "prepack": "tsc -b tsconfig.json"
   },
   "devDependencies": {
-    "immer": "10.0.2",
     "typescript": "5.0.4"
   }
 }

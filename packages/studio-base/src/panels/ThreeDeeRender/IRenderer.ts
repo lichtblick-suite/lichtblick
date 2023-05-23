@@ -3,21 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import EventEmitter from "eventemitter3";
+import { Immutable } from "immer";
 import * as THREE from "three";
 
-import {
-  Immutable,
-  MessageEvent,
-  ParameterValue,
-  SettingsIcon,
-  Topic,
-  VariableValue,
-} from "@foxglove/studio";
+import { MessageEvent, ParameterValue, SettingsIcon, Topic, VariableValue } from "@foxglove/studio";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import { LabelPool } from "@foxglove/three-text";
 
 import { Input } from "./Input";
-import { MeshUpAxis, ModelCache } from "./ModelCache";
+import { ModelCache, MeshUpAxis } from "./ModelCache";
 import { PickedRenderable } from "./Picker";
 import { SceneExtension } from "./SceneExtension";
 import { SettingsManager } from "./SettingsManager";

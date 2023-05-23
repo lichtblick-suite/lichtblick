@@ -3,12 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { t } from "i18next";
+import { Immutable } from "immer";
 import * as THREE from "three";
 
 import { TwoKeyMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { ImageAnnotations as FoxgloveImageAnnotations } from "@foxglove/schemas";
-import { Immutable, MessageEvent, SettingsTreeAction, Topic } from "@foxglove/studio";
+import { MessageEvent, SettingsTreeAction, Topic } from "@foxglove/studio";
 import { normalizeAnnotations } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import {
   ImageMarker as RosImageMarker,

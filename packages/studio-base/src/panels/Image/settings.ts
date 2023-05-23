@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "immer";
 import { chain } from "lodash";
 import memoizeWeak from "memoize-weak";
 
-import { Immutable, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
+import { SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 
 import { Config } from "./types";
