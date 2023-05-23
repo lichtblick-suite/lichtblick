@@ -90,7 +90,7 @@
     "babel-plugin-transform-import-meta": "2.2.0",
     "browserify-zlib": "0.2.0",
     "chart.js": "4.3.0",
-    "chartjs-plugin-annotation": "3.0.0",
+    "chartjs-plugin-annotation": "3.0.1",
     "chartjs-plugin-datalabels": "2.2.0",
     "chromatic": "6.17.4",
     "comlink": "4.4.1",
