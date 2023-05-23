@@ -21,6 +21,8 @@ import {
   Previous20Filled,
   Previous20Regular,
   Info24Regular,
+  ArrowRepeatAll20Regular,
+  ArrowRepeatAllOff20Regular,
 } from "@fluentui/react-icons";
 import { Tooltip } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
@@ -34,7 +36,6 @@ import EventIcon from "@foxglove/studio-base/components/EventIcon";
 import EventOutlinedIcon from "@foxglove/studio-base/components/EventOutlinedIcon";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -241,8 +242,7 @@ export default function PlaybackControls(props: {
               title="Loop playback"
               color={repeat ? "primary" : "inherit"}
               onClick={toggleRepeat}
-              icon={repeat ? <LoopIcon strokeWidth={1.9375} /> : <LoopIcon strokeWidth={1.375} />}
-              activeIcon={<LoopIcon strokeWidth={1.875} />}
+              icon={repeat ? <ArrowRepeatAll20Regular /> : <ArrowRepeatAllOff20Regular />}
             />
             <PlaybackSpeedControls />
           </Stack>
