@@ -20,6 +20,22 @@ describe("simpleGetMessagePathDataItems", () => {
     expect(simpleGetMessagePathDataItems(message, parseRosPath("/bar")!)).toEqual([]);
   });
 
+  it("supports TypedArray messages", () => {
+    const message: MessageEvent = {
+      topic: "/foo",
+      receiveTime: { sec: 0, nsec: 0 },
+      sizeInBytes: 0,
+      schemaName: "datatype",
+      message: {
+        bar: new Uint32Array([3, 4, 5]),
+      },
+    };
+    expect(simpleGetMessagePathDataItems(message, parseRosPath("/foo.bar")!)).toEqual([
+      new Uint32Array([3, 4, 5]),
+    ]);
+    expect(simpleGetMessagePathDataItems(message, parseRosPath("/foo.bar[0]")!)).toEqual([3]);
+  });
+
   it("returns correct nested values", () => {
     const message: MessageEvent = {
       topic: "/foo",

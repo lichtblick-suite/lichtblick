@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { isTypedArray } from "@foxglove/studio-base/types/isTypedArray";
 
 import { RosPath } from "./constants";
 import { filterMatches } from "./filterMatches";
@@ -32,7 +33,7 @@ export function simpleGetMessagePathDataItems(
     }
     switch (pathPart.type) {
       case "slice": {
-        if (!Array.isArray(value)) {
+        if (!Array.isArray(value) && !isTypedArray(value)) {
           return;
         }
         if (typeof pathPart.start === "object" || typeof pathPart.end === "object") {
