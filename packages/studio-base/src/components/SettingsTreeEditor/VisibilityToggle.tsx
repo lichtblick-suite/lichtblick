@@ -22,14 +22,20 @@ const useStyles = makeStyles()((theme) => ({
 export function VisibilityToggle(
   props: CheckboxProps & { size: IconButtonProps["size"] },
 ): JSX.Element {
-  const { className, ...rest } = props;
+  const { className, onChange, ...rest } = props;
   const { classes, cx } = useStyles();
+
+  const handleChange: CheckboxProps["onChange"] = (event, checked) => {
+    onChange?.(event, checked);
+    event.currentTarget.blur();
+  };
 
   return (
     <Checkbox
       className={cx(className, classes.checkbox, {
         [classes.checkboxSizeSmall]: props.size === "small",
       })}
+      onChange={handleChange}
       {...rest}
       title="Toggle visibility"
       icon={
