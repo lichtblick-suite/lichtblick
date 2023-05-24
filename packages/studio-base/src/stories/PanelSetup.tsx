@@ -14,7 +14,7 @@
 import { useTheme } from "@mui/material";
 import { TFunction } from "i18next";
 import { flatten } from "lodash";
-import { ComponentProps, ReactNode, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ComponentProps, ReactNode, useLayoutEffect, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
@@ -30,12 +30,7 @@ import {
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import {
-  CurrentLayoutActions,
-  SelectedPanelActions,
-  useCurrentLayoutActions,
-  useSelectedPanels,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import PanelCatalogContext, {
   PanelCatalog,
@@ -107,12 +102,6 @@ type UnconnectedProps = {
   panelCatalog?: PanelCatalog;
   omitDragAndDrop?: boolean;
   pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
-  onMount?: (
-    arg0: HTMLDivElement,
-    actions: CurrentLayoutActions,
-    selectedPanelActions: SelectedPanelActions,
-  ) => void;
-  onFirstMount?: (arg0: HTMLDivElement) => void;
   style?: React.CSSProperties;
   // Needed for functionality not in React.CSSProperties, like child selectors: "& > *"
   className?: string;
@@ -229,10 +218,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     removeChangeListener() {},
   }));
 
-  const hasMounted = useRef(false);
-
   const actions = useCurrentLayoutActions();
-  const selectedPanels = useSelectedPanels();
   const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
   const userNodeActions = useShallowMemo({
     setUserNodeDiagnostics,
@@ -313,16 +299,6 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     <div
       style={{ width: "100%", height: "100%", display: "flex", ...props.style }}
       className={props.className}
-      ref={(el) => {
-        const { onFirstMount, onMount } = props;
-        if (el && onFirstMount && !hasMounted.current) {
-          hasMounted.current = true;
-          onFirstMount(el);
-        }
-        if (el && onMount) {
-          onMount(el, actions, selectedPanels);
-        }
-      }}
     >
       <MockMessagePipelineProvider
         capabilities={capabilities}

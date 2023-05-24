@@ -13,7 +13,9 @@
 
 import { StoryObj } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
+import { useCallback, useEffect } from "react";
 
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import NodePlayground from "@foxglove/studio-base/panels/NodePlayground";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
@@ -165,35 +167,42 @@ export const UtilsUsageInNode: StoryObj = {
 };
 
 export const EditorShowsNewCodeWhenUserNodesChange: StoryObj = {
-  render: () => (
-    <PanelSetup
-      fixture={{
-        ...fixture,
-        userNodes: {
-          nodeId1: {
-            name: "/studio_script/script",
-            sourceCode: sourceCodeWithUtils,
-          },
-        },
-        userNodeDiagnostics: { nodeId1: [] },
-        userNodeLogs: { nodeId1: [] },
-      }}
-      onMount={(_, actions) => {
-        // Change the userNodes to confirm the code in the Editor updates
+  render: function Story() {
+    const ChangeUserNodeOnMount = useCallback(function ChangeUserNodeOnMount(): JSX.Element {
+      const actions = useCurrentLayoutActions();
+      useEffect(() => {
         actions.setUserNodes({
           nodeId1: {
             name: "/studio_script/script",
             sourceCode: utilsSourceCode,
           },
         });
-      }}
-    >
-      <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
-      <ExpectedResult left={375} top={150}>
-        Should show function norm() code
-      </ExpectedResult>
-    </PanelSetup>
-  ),
+      }, [actions]);
+      return <></>;
+    }, []);
+
+    return (
+      <PanelSetup
+        fixture={{
+          ...fixture,
+          userNodes: {
+            nodeId1: {
+              name: "/studio_script/script",
+              sourceCode: sourceCodeWithUtils,
+            },
+          },
+          userNodeDiagnostics: { nodeId1: [] },
+          userNodeLogs: { nodeId1: [] },
+        }}
+      >
+        <ChangeUserNodeOnMount />
+        <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
+        <ExpectedResult left={375} top={150}>
+          Should show function norm() code
+        </ExpectedResult>
+      </PanelSetup>
+    );
+  },
   name: "Editor shows new code when userNodes change",
   play: async () => {
     const buttons = await screen.findAllByTestId("node-explorer");

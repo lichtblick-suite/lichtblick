@@ -30,6 +30,7 @@ import {
   Topic,
   PlayerURLState,
   TopicStats,
+  PlayerCapabilities,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -155,7 +156,8 @@ function getPublicState(
     startPlayback: props.startPlayback,
     playUntil: noop,
     pausePlayback: props.pausePlayback,
-    setPlaybackSpeed: noop,
+    setPlaybackSpeed:
+      props.capabilities?.includes(PlayerCapabilities.setSpeed) === true ? noop : undefined,
     seekPlayback: props.seekPlayback,
 
     pauseFrame: props.pauseFrame ?? (() => noop),
