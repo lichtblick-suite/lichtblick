@@ -7,7 +7,7 @@
     "@foxglove/studio-base": "workspace:*"
   },
   "devDependencies": {
-    "@fluentui/react-icons": "2.0.201",
+    "@fluentui/react-icons": "2.0.202",
     "@foxglove/log": "workspace:*",
     "@mui/material": "5.13.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
