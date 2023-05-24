@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { fireEvent, screen, userEvent } from "@storybook/testing-library";
+import { screen, userEvent } from "@storybook/testing-library";
 import { useCallback, useState } from "react";
 
 import {
@@ -460,87 +460,6 @@ export const ImageModeResizeHandled: StoryObj<React.ComponentProps<typeof ImageM
       await delay(30);
     },
   };
-
-export const ImageModePan: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  render: ImageModeFoxgloveImage,
-  play: async () => {
-    const canvas = document.querySelector("canvas")!;
-    fireEvent.mouseDown(canvas, { clientX: 200, clientY: 200 });
-    fireEvent.mouseMove(canvas, { clientX: 400, clientY: 200 });
-    fireEvent.mouseUp(canvas, { clientX: 400, clientY: 200 });
-  },
-};
-
-export const ImageModePan90: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  ...ImageModePan,
-  args: { rotation: 90 },
-};
-
-export const ImageModePan180: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  ...ImageModePan,
-  args: { rotation: 180 },
-};
-
-export const ImageModePan270: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  ...ImageModePan,
-  args: { rotation: 270 },
-};
-
-export const ImageModeZoomThenPan: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  render: ImageModeFoxgloveImage,
-  args: { imageType: "raw" },
-  play: async () => {
-    const canvas = document.querySelector("canvas")!;
-    fireEvent.wheel(canvas, { deltaY: -30, clientX: 400, clientY: 400 });
-    fireEvent.wheel(canvas, { deltaY: -30, clientX: 400, clientY: 400 });
-    fireEvent.mouseDown(canvas, { clientX: 200, clientY: 200 });
-    fireEvent.mouseMove(canvas, { clientX: 400, clientY: 200 });
-    fireEvent.mouseUp(canvas, { clientX: 400, clientY: 200 });
-  },
-};
-export const ImageModeZoomThenPan90: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =
-  {
-    ...ImageModeZoomThenPan,
-    args: { rotation: 90 },
-  };
-
-export const ImageModeZoomThenPan180: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  ...ImageModeZoomThenPan,
-  args: { rotation: 180 },
-};
-
-export const ImageModeZoomThenPan270: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  ...ImageModeZoomThenPan,
-  args: { rotation: 270 },
-};
-
-export const ImageModePanThenZoom: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  render: ImageModeFoxgloveImage,
-  args: { imageType: "raw" },
-  play: async () => {
-    const canvas = document.querySelector("canvas")!;
-    fireEvent.mouseDown(canvas, { clientX: 200, clientY: 200 });
-    fireEvent.mouseMove(canvas, { clientX: 400, clientY: 200 });
-    fireEvent.mouseUp(canvas, { clientX: 400, clientY: 200 });
-    fireEvent.wheel(canvas, { deltaY: -30, clientX: 400, clientY: 400 });
-    fireEvent.wheel(canvas, { deltaY: -30, clientX: 400, clientY: 400 });
-  },
-};
-
-export const ImageModePanThenZoomReset: StoryObj<
-  React.ComponentProps<typeof ImageModeFoxgloveImage>
-> = {
-  render: ImageModeFoxgloveImage,
-  args: { imageType: "raw" },
-  play: async (ctx) => {
-    await ImageModePanThenZoom.play?.(ctx);
-    userEvent.click(await screen.findByTestId("reset-view"));
-  },
-};
 
 export const ImageModePick: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
   render: ImageModeFoxgloveImage,

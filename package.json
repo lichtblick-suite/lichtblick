@@ -79,6 +79,7 @@
     "@octokit/rest": "19.0.8",
     "@storybook/addon-actions": "7.0.13",
     "@storybook/addon-essentials": "7.0.13",
+    "@storybook/addon-interactions": "7.0.13",
     "@storybook/react": "7.0.13",
     "@storybook/react-webpack5": "7.0.13",
     "@types/babel__core": "^7.20.0",

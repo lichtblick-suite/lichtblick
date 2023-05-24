@@ -12,13 +12,13 @@ export function makeImageAndCalibration(args: {
   frameId: string;
   imageTopic: string;
   calibrationTopic: string;
+  fx?: number;
+  fy?: number;
 }): {
   calibrationMessage: MessageEvent<Partial<CameraCalibration>>;
   cameraMessage: MessageEvent<Partial<RawImage>>;
 } {
-  const { width, height, frameId, imageTopic, calibrationTopic } = args;
-  const fx = 500;
-  const fy = 500;
+  const { width, height, frameId, imageTopic, calibrationTopic, fx = 500, fy = 500 } = args;
   const cx = width / 2;
   const cy = height / 2;
   const calibrationMessage: MessageEvent<Partial<CameraCalibration>> = {

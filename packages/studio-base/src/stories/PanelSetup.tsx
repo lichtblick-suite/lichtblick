@@ -103,6 +103,7 @@ type UnconnectedProps = {
   children: React.ReactNode;
   fixture?: Fixture;
   includeSettings?: boolean;
+  settingsWidth?: number;
   panelCatalog?: PanelCatalog;
   omitDragAndDrop?: boolean;
   pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
@@ -192,9 +193,11 @@ const EmptyTree: SettingsTree = {
 function PanelWrapper({
   children,
   includeSettings = false,
+  settingsWidth,
 }: {
   children?: ReactNode;
   includeSettings?: boolean;
+  settingsWidth?: number;
 }): JSX.Element {
   const settings =
     usePanelStateStore((store) => Object.values(store.settingsTrees)[0]) ?? EmptyTree;
@@ -202,7 +205,7 @@ function PanelWrapper({
   return (
     <>
       {includeSettings && (
-        <div style={{ overflow: "auto" }}>
+        <div style={{ overflow: "auto", width: settingsWidth }}>
           <SettingsTreeEditor settings={settings} />
         </div>
       )}
@@ -340,7 +343,12 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
       >
         <PanelCatalogContext.Provider value={mockPanelCatalog}>
           <AppConfigurationContext.Provider value={mockAppConfiguration}>
-            <PanelWrapper includeSettings={props.includeSettings}>{props.children}</PanelWrapper>
+            <PanelWrapper
+              includeSettings={props.includeSettings}
+              settingsWidth={props.settingsWidth}
+            >
+              {props.children}
+            </PanelWrapper>
           </AppConfigurationContext.Provider>
         </PanelCatalogContext.Provider>
       </MockMessagePipelineProvider>
@@ -358,6 +366,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
 
 type Props = UnconnectedProps & {
   includeSettings?: boolean;
+  settingsWidth?: number;
   onLayoutAction?: (action: PanelsActions) => void;
 };
 

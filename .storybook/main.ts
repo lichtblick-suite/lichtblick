@@ -13,7 +13,11 @@ import { makeConfig } from "@foxglove/studio-base/webpack";
 const storybookConfig: StorybookConfig = {
   // Workaround for https://github.com/storybookjs/storybook/issues/19446
   stories: ["../packages/**/!(node_modules)**/*.stories.tsx"],
-  addons: ["@storybook/addon-essentials", "@storybook/addon-actions"],
+  addons: [
+    "@storybook/addon-essentials",
+    "@storybook/addon-actions",
+    "@storybook/addon-interactions",
+  ],
   framework: {
     name: "@storybook/react-webpack5",
     options: {},
