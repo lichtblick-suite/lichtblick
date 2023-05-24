@@ -174,8 +174,7 @@ export const CleansUpTooltipOnUnmount: StoryObj = {
           clientY: 296 + top,
         });
         await delay(100);
-        tooltip =
-          document.querySelector("[data-testid~=TimeBasedChartTooltipContent]") ?? undefined;
+        tooltip = document.querySelector("[data-testid=TimeBasedChartTooltipContent]") ?? undefined;
       }
       if (tooltip == undefined) {
         throw new Error("could not find tooltip");

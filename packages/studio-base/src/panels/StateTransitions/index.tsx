@@ -71,7 +71,7 @@ const fontSize = 10;
 const fontWeight = "bold";
 const EMPTY_ITEMS_BY_PATH: MessageDataItemsByPath = {};
 
-const useStyles = makeStyles<void, "button">()((theme) => ({
+const useStyles = makeStyles()((theme) => ({
   chartWrapper: {
     position: "relative",
     marginTop: theme.spacing(0.5),
@@ -374,6 +374,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
                 <Button
                   size="small"
                   color="inherit"
+                  data-testid="edit-topic-button"
                   className={classes.button}
                   endIcon={<Edit16Filled />}
                   onClick={() => {

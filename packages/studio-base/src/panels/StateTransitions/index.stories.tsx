@@ -13,8 +13,8 @@
 
 import { StoryObj } from "@storybook/react";
 import { useCallback } from "react";
-import TestUtils from "react-dom/test-utils";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { BlockCache } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
@@ -115,28 +115,25 @@ export default {
   title: "panels/StateTransitions",
   component: StateTransitions,
   parameters: {
-    chromatic: {
-      delay: 100,
-    },
+    chromatic: { delay: 100 },
   },
 };
 
 export const ColorPalette: StoryObj = {
-  render: function Story() {
-    return (
-      <div style={{ width: "100%", padding: "1rem" }}>
-        {expandedLineColors.map((color) => (
-          <div key={color} style={{ backgroundColor: color, height: "1rem" }} />
-        ))}
-      </div>
-    );
-  },
+  render: () => (
+    <Stack padding={2} fullWidth>
+      {expandedLineColors.map((color) => (
+        <div key={color} style={{ backgroundColor: color, height: "1rem" }} />
+      ))}
+    </Stack>
+  ),
 };
 
 export const OnePath: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
     return (
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
         <StateTransitions
@@ -148,11 +145,9 @@ export const OnePath: StoryObj = {
       </PanelSetup>
     );
   },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
   },
-
   parameters: { useReadySignal: true },
 };
 
@@ -160,6 +155,7 @@ export const WithSettings: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
     return (
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame} includeSettings>
         <StateTransitions
@@ -171,11 +167,9 @@ export const WithSettings: StoryObj = {
       </PanelSetup>
     );
   },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
   },
-
   parameters: { useReadySignal: true },
 };
 
@@ -183,6 +177,7 @@ export const MultiplePaths: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
     return (
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
         <StateTransitions
@@ -197,47 +192,9 @@ export const MultiplePaths: StoryObj = {
       </PanelSetup>
     );
   },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
   },
-
-  parameters: { useReadySignal: true },
-};
-
-export const MultiplePathsWithHover: StoryObj = {
-  render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
-    const pauseFrame = useCallback(() => readySignal, [readySignal]);
-    return (
-      <PanelSetup
-        fixture={fixture}
-        pauseFrame={pauseFrame}
-        onMount={() => {
-          const mouseEnterContainer = document.querySelectorAll(
-            "[data-testid~=panel-mouseenter-container",
-          )[0]!;
-          TestUtils.Simulate.mouseEnter(mouseEnterContainer);
-        }}
-        style={{ width: 370 }}
-      >
-        <StateTransitions
-          overrideConfig={{
-            paths: new Array(5).fill({
-              value: "/some/topic/with/state.state",
-              timestampMethod: "receiveTime",
-            }),
-            isSynced: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
-  },
-
   parameters: { useReadySignal: true },
 };
 
@@ -245,6 +202,7 @@ export const LongPath: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
     return (
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ maxWidth: 100 }}>
         <StateTransitions
@@ -256,11 +214,9 @@ export const LongPath: StoryObj = {
       </PanelSetup>
     );
   },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
   },
-
   parameters: { useReadySignal: true },
 };
 
@@ -268,6 +224,7 @@ export const ColorClash: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
     return (
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
         <StateTransitions
@@ -281,11 +238,9 @@ export const ColorClash: StoryObj = {
       </PanelSetup>
     );
   },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
   },
-
   parameters: { useReadySignal: true },
 };
 
@@ -342,10 +297,8 @@ export const Blocks: StoryObj = {
     const readySignal = useReadySignal({ count: 3 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
-    const blockFixture = { ...fixture, progress: { messageCache } };
-
     return (
-      <PanelSetup fixture={blockFixture} pauseFrame={pauseFrame}>
+      <PanelSetup fixture={{ ...fixture, progress: { messageCache } }} pauseFrame={pauseFrame}>
         <StateTransitions
           overrideConfig={{
             paths: [
@@ -359,10 +312,8 @@ export const Blocks: StoryObj = {
       </PanelSetup>
     );
   },
-
-  play: async (ctx) => {
-    await ctx.parameters.storyReady;
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
   },
-
   parameters: { useReadySignal: true },
 };
