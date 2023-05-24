@@ -14,7 +14,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import { ButtonBase, useTheme } from "@mui/material";
 import { useEffect } from "react";
-import { useDrop } from "react-dnd";
+import { DropTargetMonitor, useDrop } from "react-dnd";
 import { makeStyles } from "tss-react/mui";
 
 import PanelToolbar, {
@@ -58,7 +58,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
 
   const [{ isOver, item }, dropRef] = useDrop({
     accept: TAB_DRAG_TYPE,
-    collect: (monitor) => ({
+    collect: (monitor: DropTargetMonitor<DraggingTabItem>) => ({
       item: monitor.getItem(),
       isOver: monitor.isOver(),
     }),
