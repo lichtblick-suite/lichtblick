@@ -10,13 +10,14 @@ import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
+import { Immutable } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Range } from "@foxglove/studio-base/util/ranges";
 
-type ProgressProps = {
+type ProgressProps = Immutable<{
   loading: boolean;
   availableRanges?: Range[];
-};
+}>;
 
 const STRIPE_WIDTH = 8;
 

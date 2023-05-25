@@ -8,17 +8,16 @@ import { IconButton, TextField } from "@mui/material";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
-import { SettingsTree, SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
+import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import { FieldEditor } from "@foxglove/studio-base/components/SettingsTreeEditor/FieldEditor";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { usePanelStateStore } from "@foxglove/studio-base/context/PanelStateContext";
-import { getPanelTypeFromId, PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
+import { PANEL_TITLE_CONFIG_KEY, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import { NodeEditor } from "./NodeEditor";
 import { filterTreeNodes, prepareSettingsNodes } from "./utils";
@@ -52,7 +51,7 @@ const makeStablePath = memoizeWeak((key: string) => [key]);
 export default function SettingsTreeEditor({
   settings,
 }: {
-  settings: DeepReadonly<SettingsTree>;
+  settings: Immutable<SettingsTree>;
 }): JSX.Element {
   const { classes } = useStyles();
   const { actionHandler, focusedPath } = settings;

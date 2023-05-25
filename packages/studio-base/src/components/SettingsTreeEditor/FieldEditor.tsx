@@ -6,25 +6,24 @@ import ClearIcon from "@mui/icons-material/Clear";
 import ErrorIcon from "@mui/icons-material/Error";
 import {
   Autocomplete,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
   List,
+  ListProps,
   MenuItem,
   Select,
-  Tooltip,
   TextField,
-  ListProps,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuid } from "uuid";
 
-import { SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
+import { Immutable, SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import Stack from "@foxglove/studio-base/components/Stack";
 
-import { ColorPickerInput, ColorGradientInput, NumberInput, Vec3Input, Vec2Input } from "./inputs";
+import { ColorGradientInput, ColorPickerInput, NumberInput, Vec2Input, Vec3Input } from "./inputs";
 
 /** Used to allow both undefined and empty string in select inputs. */
 const UNDEFINED_SENTINEL_VALUE = uuid();
@@ -119,7 +118,7 @@ function FieldInput({
   path,
 }: {
   actionHandler: (action: SettingsTreeAction) => void;
-  field: DeepReadonly<SettingsTreeField>;
+  field: Immutable<SettingsTreeField>;
   path: readonly string[];
 }): JSX.Element {
   const { classes, cx } = useStyles();
@@ -409,7 +408,7 @@ function FieldInput({
   }
 }
 
-function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.Element {
+function FieldLabel({ field }: { field: Immutable<SettingsTreeField> }): JSX.Element {
   const { classes } = useStyles();
 
   if (field.input === "vec2") {
@@ -493,7 +492,7 @@ function FieldEditorComponent({
   path,
 }: {
   actionHandler: (action: SettingsTreeAction) => void;
-  field: DeepReadonly<SettingsTreeField>;
+  field: Immutable<SettingsTreeField>;
   path: readonly string[];
 }): JSX.Element {
   const indent = Math.min(path.length, 4);

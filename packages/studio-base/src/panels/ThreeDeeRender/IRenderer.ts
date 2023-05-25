@@ -3,15 +3,21 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import EventEmitter from "eventemitter3";
-import { Immutable } from "immer";
 import * as THREE from "three";
 
-import { MessageEvent, ParameterValue, SettingsIcon, Topic, VariableValue } from "@foxglove/studio";
+import {
+  Immutable,
+  MessageEvent,
+  ParameterValue,
+  SettingsIcon,
+  Topic,
+  VariableValue,
+} from "@foxglove/studio";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import { LabelPool } from "@foxglove/three-text";
 
 import { Input } from "./Input";
-import { ModelCache, MeshUpAxis } from "./ModelCache";
+import { MeshUpAxis, ModelCache } from "./ModelCache";
 import { PickedRenderable } from "./Picker";
 import { SceneExtension } from "./SceneExtension";
 import { SettingsManager } from "./SettingsManager";
@@ -290,9 +296,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
    * of the topics list changes */
   setTopics(topics: ReadonlyArray<Topic> | undefined): void;
 
-  setParameters(parameters: ReadonlyMap<string, ParameterValue> | undefined): void;
+  setParameters(parameters: Immutable<Map<string, ParameterValue>> | undefined): void;
 
-  setVariables(variables: ReadonlyMap<string, VariableValue>): void;
+  setVariables(variables: Immutable<Map<string, VariableValue>>): void;
 
   updateCustomLayersCount(): void;
 

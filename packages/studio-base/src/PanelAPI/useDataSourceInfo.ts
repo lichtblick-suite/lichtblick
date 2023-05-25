@@ -13,10 +13,10 @@
 
 import { useMemo } from "react";
 
-import { Time } from "@foxglove/studio";
+import { Immutable, Time } from "@foxglove/studio";
 import {
-  useMessagePipeline,
   MessagePipelineContext,
+  useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -57,7 +57,7 @@ export type DataSourceInfo = {
  *
  * A data source might be a local file, a remote file, or a streaming source.
  */
-export function useDataSourceInfo(): DataSourceInfo {
+export function useDataSourceInfo(): Immutable<DataSourceInfo> {
   const datatypes = useMessagePipeline(selectDatatypes);
   const topics = useMessagePipeline(selectTopics);
   const startTime = useMessagePipeline(selectStartTime);
@@ -65,7 +65,7 @@ export function useDataSourceInfo(): DataSourceInfo {
   const playerId = useMessagePipeline(selectPlayerId);
 
   // we want the returned object to have a stable identity
-  return useMemo<DataSourceInfo>(() => {
+  return useMemo(() => {
     return {
       topics,
       datatypes,

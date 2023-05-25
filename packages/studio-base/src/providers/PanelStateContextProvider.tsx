@@ -5,9 +5,9 @@
 import { pick, uniq } from "lodash";
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import { createSelector, createSelectorCreator, defaultMemoize } from "reselect";
-import { DeepReadonly } from "ts-essentials";
 import { StoreApi, createStore } from "zustand";
 
+import { Immutable } from "@foxglove/studio";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import {
   LayoutState,
@@ -102,8 +102,8 @@ const updateDefaultTitleSelector = (store: PanelStateStore) => store.updateDefau
  * panel state.
  */
 export function useSharedPanelState(): [
-  DeepReadonly<SharedPanelState>,
-  (data: DeepReadonly<SharedPanelState>) => void,
+  Immutable<SharedPanelState>,
+  (data: Immutable<SharedPanelState>) => void,
 ] {
   const panelId = usePanelContext().id;
   const panelType = useMemo(() => getPanelTypeFromId(panelId), [panelId]);
@@ -118,7 +118,7 @@ export function useSharedPanelState(): [
   const updateSharedData = usePanelStateStore(updateSharedDataSelector);
   const sharedData = usePanelStateStore(selector);
   const update = useCallback(
-    (data: DeepReadonly<SharedPanelState>) => {
+    (data: Immutable<SharedPanelState>) => {
       updateSharedData(panelType, data);
     },
     [panelType, updateSharedData],

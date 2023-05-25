@@ -3,9 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { difference } from "lodash";
-import { DeepReadonly } from "ts-essentials";
 
-import { MessageEvent, RegisterMessageConverterArgs, Subscription } from "@foxglove/studio";
+import {
+  Immutable,
+  MessageEvent,
+  RegisterMessageConverterArgs,
+  Subscription,
+} from "@foxglove/studio";
 import { Topic as PlayerTopic } from "@foxglove/studio-base/players/types";
 
 // Branded string to ensure that users go through the `converterKey` function to compute a lookup key
@@ -29,8 +33,8 @@ function converterKey(topic: string, schema: string): ConverterKey {
  * convertedMessages in place for efficiency.
  */
 export function convertMessage(
-  messageEvent: DeepReadonly<MessageEvent<unknown>>,
-  converters: DeepReadonly<TopicSchemaConverterMap>,
+  messageEvent: Immutable<MessageEvent<unknown>>,
+  converters: Immutable<TopicSchemaConverterMap>,
   convertedMessages: MessageEvent<unknown>[],
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
@@ -159,9 +163,9 @@ export function collateTopicSchemaConversions(
  * @param forEach - callback to be executed on all items in the arrays to iterate over in sorted order across all arrays
  */
 export function forEachSortedArrays<Item>(
-  arrays: Item[][],
-  compareFn: (a: Item, b: Item) => number,
-  forEach: (item: Item) => void,
+  arrays: Immutable<Item[][]>,
+  compareFn: (a: Immutable<Item>, b: Immutable<Item>) => number,
+  forEach: (item: Immutable<Item>) => void,
 ): void {
   const cursors: number[] = Array(arrays.length).fill(0);
   if (arrays.length === 0) {

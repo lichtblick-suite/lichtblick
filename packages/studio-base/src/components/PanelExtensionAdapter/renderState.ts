@@ -3,11 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import memoizeWeak from "memoize-weak";
+import { Writable } from "ts-essentials";
 
 import { filterMap } from "@foxglove/den/collection";
 import { compare, toSec } from "@foxglove/rostime";
 import {
   AppSettingValue,
+  Immutable,
   MessageEvent,
   ParameterValue,
   RegisterMessageConverterArgs,
@@ -36,7 +38,7 @@ import {
 
 const EmptyParameters = new Map<string, ParameterValue>();
 
-export type BuilderRenderStateInput = {
+export type BuilderRenderStateInput = Immutable<{
   appSettings: Map<string, AppSettingValue> | undefined;
   colorScheme: RenderState["colorScheme"] | undefined;
   currentFrame: MessageEvent[] | undefined;
@@ -48,9 +50,9 @@ export type BuilderRenderStateInput = {
   sortedTopics: readonly PlayerTopic[];
   subscriptions: Subscription[];
   watchedFields: Set<string>;
-};
+}>;
 
-type BuildRenderStateFn = (input: BuilderRenderStateInput) => Readonly<RenderState> | undefined;
+type BuildRenderStateFn = (input: BuilderRenderStateInput) => Immutable<RenderState> | undefined;
 
 /**
  * initRenderStateBuilder creates a function that transforms render state input into a new
@@ -63,13 +65,13 @@ type BuildRenderStateFn = (input: BuilderRenderStateInput) => Readonly<RenderSta
  * undefined if there's no update for rendering
  */
 function initRenderStateBuilder(): BuildRenderStateFn {
-  let prevVariables: GlobalVariables = EMPTY_GLOBAL_VARIABLES;
-  let prevBlocks: undefined | readonly (undefined | MessageBlock)[];
+  let prevVariables: Immutable<GlobalVariables> = EMPTY_GLOBAL_VARIABLES;
+  let prevBlocks: undefined | Immutable<(undefined | MessageBlock)[]>;
   let prevSeekTime: number | undefined;
   let prevSortedTopics: BuilderRenderStateInput["sortedTopics"] | undefined;
   let prevMessageConverters: BuilderRenderStateInput["messageConverters"] | undefined;
   let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
-  let prevCurrentFrame: RenderState["currentFrame"];
+  let prevCurrentFrame: Immutable<RenderState["currentFrame"]>;
   let prevCollatedConversions: undefined | TopicSchemaConversions;
   const lastMessageByTopic: Map<string, MessageEvent> = new Map();
 
@@ -78,7 +80,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   const memoMapDifference = memoizeWeak(mapDifference);
   const memoCollateTopicSchemaConversions = memoizeWeak(collateTopicSchemaConversions);
 
-  const prevRenderState: RenderState = {};
+  const prevRenderState: Writable<Immutable<RenderState>> = {};
 
   return function buildRenderState(input: BuilderRenderStateInput) {
     const {
@@ -102,7 +104,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     const activeData = playerState?.activeData;
 
     // The render state starts with the previous render state and changes are applied as detected
-    const renderState: RenderState = prevRenderState;
+    const renderState = prevRenderState;
 
     const collatedConversions = memoCollateTopicSchemaConversions(
       subscriptions,

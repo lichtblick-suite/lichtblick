@@ -4,10 +4,10 @@
 
 import { createContext } from "react";
 import { AsyncState } from "react-use/lib/useAsyncFn";
-import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
 import { Time } from "@foxglove/rostime";
+import { Immutable } from "@foxglove/studio";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 
 /**
@@ -44,7 +44,7 @@ export type TimelinePositionedEvent = {
   secondsSinceStart: number;
 };
 
-export type EventsStore = DeepReadonly<{
+export type EventsStore = Immutable<{
   /** Used to signal event refreshes. */
   eventFetchCount: number;
 

@@ -14,6 +14,7 @@
 import { keyBy } from "lodash";
 import { createSelector } from "reselect";
 
+import { Immutable } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -30,9 +31,9 @@ export const getTopicsByTopicName = createSelector(
 
 // Only exported for tests
 export const constantsByDatatype = createSelector(
-  (datatypes: RosDatatypes) => datatypes,
+  (datatypes: Immutable<RosDatatypes>) => datatypes,
   (
-    datatypes: RosDatatypes,
+    datatypes,
   ): {
     [key: string]: {
       [key: string]: string;
@@ -72,9 +73,9 @@ export function extractTypeFromStudioEnumAnnotation(name: string): string | unde
 
 // returns a map of the form {datatype -> {field -> {value -> name}}}
 export const enumValuesByDatatypeAndField = createSelector(
-  (datatypes: RosDatatypes) => datatypes,
+  (datatypes: Immutable<RosDatatypes>) => datatypes,
   (
-    datatypes: RosDatatypes,
+    datatypes: Immutable<RosDatatypes>,
   ): { [datatype: string]: { [field: string]: { [value: string]: string } } } => {
     const results: { [datatype: string]: { [field: string]: { [value: string]: string } } } = {};
     for (const [datatype, value] of datatypes) {

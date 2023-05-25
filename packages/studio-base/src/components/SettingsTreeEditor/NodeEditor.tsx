@@ -22,13 +22,17 @@ import memoizeWeak from "memoize-weak";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import tinycolor from "tinycolor2";
-import { DeepReadonly } from "ts-essentials";
 import { keyframes } from "tss-react";
 import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
 
 import { filterMap } from "@foxglove/den/collection";
-import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodeActionItem } from "@foxglove/studio";
+import {
+  Immutable,
+  SettingsTreeAction,
+  SettingsTreeNode,
+  SettingsTreeNodeActionItem,
+} from "@foxglove/studio";
 import { HighlightedText } from "@foxglove/studio-base/components/HighlightedText";
 import Stack from "@foxglove/studio-base/components/Stack";
 
@@ -44,7 +48,7 @@ export type NodeEditorProps = {
   filter?: string;
   focusedPath?: readonly string[];
   path: readonly string[];
-  settings?: DeepReadonly<SettingsTreeNode>;
+  settings?: Immutable<SettingsTreeNode>;
 };
 
 export const NODE_HEADER_MIN_HEIGHT = 35;
@@ -174,11 +178,11 @@ const SelectVisibilityFilterOptions: (t: TFunction<"settingsEditor">) => {
   { label: t("listVisible"), value: "visible" },
   { label: t("listInvisible"), value: "invisible" },
 ];
-function showVisibleFilter(child: DeepReadonly<SettingsTreeNode>): boolean {
+function showVisibleFilter(child: Immutable<SettingsTreeNode>): boolean {
   // want to show children with undefined visibility
   return child.visible !== false;
 }
-function showInvisibleFilter(child: DeepReadonly<SettingsTreeNode>): boolean {
+function showInvisibleFilter(child: Immutable<SettingsTreeNode>): boolean {
   // want to show children with undefined visibility
   return child.visible !== true;
 }

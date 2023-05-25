@@ -7,9 +7,9 @@ import { IconButton, Button, Link, Tab, Tabs, Typography, Divider } from "@mui/m
 import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
-import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
+import { Immutable } from "@foxglove/studio";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
@@ -24,7 +24,7 @@ import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type Props = {
   installed: boolean;
-  extension: DeepReadonly<ExtensionMarketplaceDetail>;
+  extension: Immutable<ExtensionMarketplaceDetail>;
   onClose: () => void;
 };
 

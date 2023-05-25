@@ -14,6 +14,7 @@
 import { memoize } from "lodash";
 import memoizeWeak from "memoize-weak";
 
+import { Immutable } from "@foxglove/studio";
 import { MessagePathFilter } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import { quoteFieldNameIfNeeded } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
@@ -72,10 +73,10 @@ function structureItemIsIntegerPrimitive(item: MessagePathStructureItem) {
 //     }
 //   }
 // }
-let lastDatatypes: RosDatatypes | undefined;
+let lastDatatypes: Immutable<RosDatatypes> | undefined;
 let lastStructures: Record<string, MessagePathStructureItemMessage> | undefined;
 export function messagePathStructures(
-  datatypes: RosDatatypes,
+  datatypes: Immutable<RosDatatypes>,
 ): Record<string, MessagePathStructureItemMessage> {
   if (lastDatatypes === datatypes && lastStructures) {
     return lastStructures;
@@ -163,7 +164,7 @@ export function validTerminatingStructureItem(
 // list out all valid strings for the `messagePath` part of the path (sorted).
 export function messagePathsForDatatype(
   datatype: string,
-  datatypes: RosDatatypes,
+  datatypes: Immutable<RosDatatypes>,
   {
     validTypes,
     noMultiSlices,

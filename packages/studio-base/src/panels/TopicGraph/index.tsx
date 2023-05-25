@@ -162,7 +162,7 @@ const topicVisibilityToLabelMap: Record<TopicVisibility, string> = {
   "disconnected-sub": "Disconnected subscribed topics",
 };
 
-function unionInto<T>(dest: Set<T>, ...iterables: Set<T>[]): void {
+function unionInto<T>(dest: Set<T>, ...iterables: ReadonlySet<T>[]): void {
   for (const iterable of iterables) {
     for (const item of iterable) {
       dest.add(item);

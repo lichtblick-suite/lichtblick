@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { createContext, useCallback } from "react";
-import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
+import { Immutable } from "@foxglove/studio";
 import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import type { HoverValue } from "@foxglove/studio-base/types/hoverValue";
@@ -34,7 +34,7 @@ export type SyncBounds = {
  * The TimelineInteractionStateStore manages state related to dynamic user interactions with data in the app.
  * Things like the hovered time value and global bounds for plots are managed here.
  */
-export type TimelineInteractionStateStore = DeepReadonly<{
+export type TimelineInteractionStateStore = Immutable<{
   /** The events overlapping the current hover time, if any. */
   eventsAtHoverValue: Record<string, TimelinePositionedEvent>;
 

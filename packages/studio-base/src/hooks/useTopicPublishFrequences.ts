@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useMemo, useRef } from "react";
-import { DeepReadonly } from "ts-essentials";
 
 import { areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
+import { Immutable } from "@foxglove/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -82,7 +82,7 @@ const EMPTY_FREQUENCIES: FrequenciesByTopic = {};
  *
  * @property interval - the interval, in frames, between updates.
  */
-export function useTopicPublishFrequencies(): DeepReadonly<FrequenciesByTopic> {
+export function useTopicPublishFrequencies(): Immutable<FrequenciesByTopic> {
   const playerCurrentTime = useMessagePipeline(selectCurrentTime);
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);

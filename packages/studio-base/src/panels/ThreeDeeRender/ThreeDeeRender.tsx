@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable } from "immer";
 import { cloneDeep, isEqual, merge } from "lodash";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
@@ -13,6 +12,7 @@ import { useDebouncedCallback } from "use-debounce";
 import Logger from "@foxglove/log";
 import { Time, toNanoSec } from "@foxglove/rostime";
 import {
+  Immutable,
   LayoutActions,
   MessageEvent,
   PanelExtensionContext,
@@ -28,12 +28,12 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import type {
-  RendererConfig,
-  RendererSubscription,
   FollowMode,
-  RendererEvents,
   IRenderer,
   ImageModeConfig,
+  RendererConfig,
+  RendererEvents,
+  RendererSubscription,
 } from "./IRenderer";
 import type { PickedRenderable } from "./Picker";
 import { SELECTED_ID_VARIABLE } from "./Renderable";
@@ -42,11 +42,11 @@ import { RendererContext, useRendererEvent } from "./RendererContext";
 import { RendererOverlay } from "./RendererOverlay";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
 import {
+  PublishRos1Datatypes,
+  PublishRos2Datatypes,
   makePointMessage,
   makePoseEstimateMessage,
   makePoseMessage,
-  PublishRos1Datatypes,
-  PublishRos2Datatypes,
 } from "./publish";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEvent } from "./renderables/PublishClickTool";
@@ -160,8 +160,10 @@ export function ThreeDeeRender(props: {
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
   const [timezone, setTimezone] = useState<string | undefined>();
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
-  const [parameters, setParameters] = useState<ReadonlyMap<string, ParameterValue> | undefined>();
-  const [variables, setVariables] = useState<ReadonlyMap<string, VariableValue> | undefined>();
+  const [parameters, setParameters] = useState<
+    Immutable<Map<string, ParameterValue>> | undefined
+  >();
+  const [variables, setVariables] = useState<Immutable<Map<string, VariableValue>> | undefined>();
   const [currentFrameMessages, setCurrentFrameMessages] = useState<
     ReadonlyArray<MessageEvent> | undefined
   >();
@@ -313,7 +315,7 @@ export function ThreeDeeRender(props: {
 
   // Establish a connection to the message pipeline with context.watch and context.onRender
   useLayoutEffect(() => {
-    context.onRender = (renderState: RenderState, done) => {
+    context.onRender = (renderState: Immutable<RenderState>, done) => {
       ReactDOM.unstable_batchedUpdates(() => {
         if (renderState.currentTime) {
           setCurrentTime(renderState.currentTime);

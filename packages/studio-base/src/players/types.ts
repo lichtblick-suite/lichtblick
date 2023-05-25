@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DeepReadonly } from "ts-essentials";
-
 import { MessageDefinition } from "@foxglove/message-definition";
 import { Time } from "@foxglove/rostime";
 import type { MessageEvent, ParameterValue } from "@foxglove/studio";
+import { Immutable } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
@@ -46,7 +45,7 @@ export interface Player {
   close(): void;
   // Set a new set of subscriptions/advertisers. This might trigger fetching
   // new data, which might in turn trigger a backfill of messages.
-  setSubscriptions(subscriptions: SubscribePayload[]): void;
+  setSubscriptions(subscriptions: Immutable<SubscribePayload[]>): void;
   setPublishers(publishers: AdvertiseOptions[]): void;
   // Modify a remote parameter such as a rosparam.
   setParameter(key: string, value: ParameterValue): void;
@@ -86,7 +85,7 @@ export type PlayerProblem = {
   tip?: string;
 };
 
-export type PlayerURLState = DeepReadonly<{
+export type PlayerURLState = Immutable<{
   sourceId: string;
   parameters?: Record<string, string>;
 }>;

@@ -4,8 +4,8 @@
 
 import { Divider, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DeepReadonly } from "ts-essentials";
 
+import { Immutable } from "@foxglove/studio";
 import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
 
 /**
@@ -36,10 +36,7 @@ type PanelContextMenuProps = {
    * Function that returns a list of menu items, optionally dependent on the x,y
    * position of the click.
    */
-  itemsForClickPosition: (position: {
-    x: number;
-    y: number;
-  }) => DeepReadonly<PanelContextMenuItem[]>;
+  itemsForClickPosition: (position: { x: number; y: number }) => Immutable<PanelContextMenuItem[]>;
 };
 
 /**
@@ -55,7 +52,7 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
 
   const handleClose = useCallback(() => setPosition(undefined), []);
 
-  const [items, setItems] = useState<undefined | DeepReadonly<PanelContextMenuItem[]>>();
+  const [items, setItems] = useState<undefined | Immutable<PanelContextMenuItem[]>>();
 
   const listener = useCallback(
     (event: MouseEvent) => {

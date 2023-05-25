@@ -150,8 +150,10 @@ describe("renderState", () => {
     });
 
     // need to change something to force a new, defined state
-    initialState.watchedFields = new Set(["currentTime", "endTime", "startTime", "topics"]);
-    const secondRenderState = buildRenderState(initialState);
+    const secondRenderState = buildRenderState({
+      ...initialState,
+      watchedFields: new Set(["currentTime", "endTime", "startTime", "topics"]),
+    });
     expect(secondRenderState).toEqual({
       currentTime: { sec: 33, nsec: 1 },
       endTime: { sec: 100, nsec: 1 },

@@ -5,6 +5,7 @@
 import type { AVLTree } from "@foxglove/avl";
 import type { PinholeCameraModel } from "@foxglove/den/image";
 import type { Time } from "@foxglove/rostime";
+import { Immutable } from "@foxglove/studio";
 import type { RenderState } from "@foxglove/studio";
 import type { CameraInfo, Color, ImageMarker, Point2D } from "@foxglove/studio-base/types/Messages";
 
@@ -47,7 +48,7 @@ export type ImagePanelState = UseImagePanelMessagesParams & {
   tree: AVLTree<Time, SynchronizationItem>;
 
   actions: {
-    setCurrentFrame(currentFrame: NonNullable<RenderState["currentFrame"]>): void;
+    setCurrentFrame(currentFrame: NonNullable<Immutable<RenderState["currentFrame"]>>): void;
     clear(): void;
     setParams(newParams: UseImagePanelMessagesParams): void;
   };

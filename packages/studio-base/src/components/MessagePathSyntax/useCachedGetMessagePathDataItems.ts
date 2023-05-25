@@ -15,6 +15,7 @@ import { isEqual } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
+import { Immutable } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
@@ -34,6 +35,8 @@ import { filterMatches } from "./filterMatches";
 import { TypicalFilterNames } from "./isTypicalFilterName";
 import { messagePathStructures } from "./messagePathsForDatatype";
 import parseRosPath, { quoteTopicNameIfNeeded } from "./parseRosPath";
+
+type ValueInMapRecord<T> = T extends Map<unknown, infer I> ? I : never;
 
 export type MessagePathDataItem = {
   value: unknown; // The actual value.
@@ -95,7 +98,7 @@ export function useCachedGetMessagePathDataItems(
   const relevantTopics = useDeepMemo(unmemoizedRelevantTopics);
 
   const unmemoizedRelevantDatatypes = useMemo(() => {
-    const relevantDatatypes: RosDatatypes = new Map();
+    const relevantDatatypes = new Map<string, Immutable<ValueInMapRecord<RosDatatypes>>>();
     function addRelevantDatatype(datatypeName: string, seen: string[]) {
       if (seen.includes(datatypeName)) {
         return;
@@ -220,7 +223,7 @@ export function getMessagePathDataItems(
   message: MessageEvent,
   filledInPath: RosPath,
   providerTopics: readonly Topic[],
-  datatypes: RosDatatypes,
+  datatypes: Immutable<RosDatatypes>,
 ): MessagePathDataItem[] | undefined {
   const structures = messagePathStructures(datatypes);
   const topic = getTopicsByTopicName(providerTopics)[filledInPath.topicName];

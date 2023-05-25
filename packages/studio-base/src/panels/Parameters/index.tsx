@@ -188,7 +188,7 @@ function Parameters(): ReactElement {
 
   // Don't run the animation when the Table first renders
   const skipAnimation = useRef<boolean>(true);
-  const previousParametersRef = useRef<Map<string, unknown> | undefined>(parameters);
+  const previousParametersRef = useRef<ReadonlyMap<string, unknown> | undefined>(parameters);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => (skipAnimation.current = false), ANIMATION_RESET_DELAY_MS);

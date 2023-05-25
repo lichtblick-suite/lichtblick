@@ -11,7 +11,7 @@ import { act } from "react-dom/test-utils";
 
 import { Condvar, signal } from "@foxglove/den/async";
 import { Time } from "@foxglove/rostime";
-import { PanelExtensionContext, RenderState, MessageEvent } from "@foxglove/studio";
+import { PanelExtensionContext, RenderState, MessageEvent, Immutable } from "@foxglove/studio";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import { AdvertiseOptions, PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -61,7 +61,7 @@ describe("PanelExtensionAdapter", () => {
       .spyOn(window, "requestAnimationFrame")
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
 
-    const renderStates: RenderState[] = [];
+    const renderStates: Immutable<RenderState>[] = [];
 
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
@@ -537,7 +537,7 @@ describe("PanelExtensionAdapter", () => {
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
 
     let sequence = 0;
-    const renderStates: RenderState[] = [];
+    const renderStates: Immutable<RenderState>[] = [];
 
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("variables");
@@ -598,7 +598,7 @@ describe("PanelExtensionAdapter", () => {
   });
 
   it("should call pause frame with new frame and resume after rendering", async () => {
-    const renderStates: RenderState[] = [];
+    const renderStates: Immutable<RenderState>[] = [];
 
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("currentTime");

@@ -7,6 +7,7 @@ import { Dialog, IconButton, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { Immutable } from "@foxglove/studio";
 import { PlayerProblem } from "@foxglove/studio-base/players/types";
 
 import WssErrorModalScreenshot from "./WssErrorModal.png";
@@ -17,7 +18,9 @@ const useStyles = makeStyles()({
   },
 });
 
-export default function WssErrorModal(props: { playerProblems?: PlayerProblem[] }): JSX.Element {
+export default function WssErrorModal(
+  props: Immutable<{ playerProblems?: PlayerProblem[] }>,
+): JSX.Element {
   const { playerProblems } = props;
   const { classes } = useStyles();
 

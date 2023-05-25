@@ -16,6 +16,7 @@ import { flatten, flatMap, partition } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
 
 import { MessageDefinitionField } from "@foxglove/message-definition";
+import { Immutable } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import useGlobalVariables, {
@@ -54,8 +55,8 @@ import parseRosPath, { quoteFieldNameIfNeeded, quoteTopicNameIfNeeded } from "./
 
 // Get a list of Message Path strings for all of the fields (recursively) in a list of topics
 function getFieldPaths(
-  topics: readonly Topic[],
-  datatypes: RosDatatypes,
+  topics: Immutable<Topic[]>,
+  datatypes: Immutable<RosDatatypes>,
 ): Map<string, MessageDefinitionField> {
   const output = new Map<string, MessageDefinitionField>();
   for (const topic of topics) {
@@ -76,9 +77,9 @@ function getFieldPaths(
 function addFieldPathsForType(
   curPath: string,
   typeName: string,
-  datatypes: RosDatatypes,
+  datatypes: Immutable<RosDatatypes>,
   seenTypes: string[],
-  output: Map<string, MessageDefinitionField>,
+  output: Map<string, Immutable<MessageDefinitionField>>,
 ): void {
   const msgdef = datatypes.get(typeName);
   if (msgdef) {

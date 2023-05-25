@@ -14,9 +14,9 @@
 import { Square24Filled } from "@fluentui/react-icons";
 import { sortBy } from "lodash";
 import { Fragment, PropsWithChildren, useMemo } from "react";
-import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
+import { Immutable } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -26,7 +26,7 @@ export type TimeBasedChartTooltipData = {
   constantName?: string;
 };
 
-type Props = DeepReadonly<{
+type Props = Immutable<{
   colorsByDatasetIndex?: Record<string, undefined | string>;
   content: TimeBasedChartTooltipData[];
   labelsByDatasetIndex?: Record<string, undefined | string>;
