@@ -9,7 +9,7 @@ import MockMessagePipelineProvider from "@foxglove/studio-base/components/Messag
 import { useTopicPublishFrequencies } from "@foxglove/studio-base/hooks/useTopicPublishFrequences";
 import { PlayerCapabilities, PlayerState } from "@foxglove/studio-base/players/types";
 
-describe("useSynchronousMountedState", () => {
+describe("useTopicPublishFrequencies", () => {
   it("calculates frequences for a static source", () => {
     const activeData: Partial<PlayerState["activeData"]> = {
       currentTime: { sec: 2, nsec: 0 },

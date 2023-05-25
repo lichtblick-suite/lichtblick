@@ -14,9 +14,9 @@
 import { createContext, useCallback } from "react";
 import { StoreApi, useStore } from "zustand";
 
+import { useGuaranteedContext } from "@foxglove/hooks";
 import { Immutable } from "@foxglove/studio";
 import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
-import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import type { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 /**

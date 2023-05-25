@@ -4,13 +4,13 @@
 
 import { PropsWithChildren } from "react";
 
+import { useSessionStorageValue } from "@foxglove/hooks";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 import { LaunchPreferenceScreen } from "./LaunchPreferenceScreen";
 import { LaunchingInDesktopScreen } from "./LaunchingInDesktopScreen";
 import { AppSetting } from "../AppSetting";
 import { useAppConfigurationValue } from "../hooks";
-import { useSessionStorageValue } from "../hooks/useSessionStorageValue";
 
 export function LaunchPreference(props: PropsWithChildren<unknown>): JSX.Element {
   const [globalLaunchPreference] = useAppConfigurationValue<string>(AppSetting.LAUNCH_PREFERENCE);

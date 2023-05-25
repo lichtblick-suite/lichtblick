@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import tick from "@foxglove/studio-base/util/tick";
-
 function findCanvas(): HTMLCanvasElement {
   const canvas = document.querySelector("canvas");
   if (!canvas) {
@@ -33,7 +31,7 @@ export async function simulateDragClick(
       clientY,
     }),
   );
-  await tick();
+  await Promise.resolve();
   canvas.dispatchEvent(
     new MouseEvent("mouseup", {
       bubbles: true,

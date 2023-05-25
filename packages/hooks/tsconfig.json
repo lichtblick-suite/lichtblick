@@ -4,6 +4,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
+    "jsx": "react-jsx",
     "lib": ["dom", "es2022"]
   }
 }

@@ -6,9 +6,9 @@ import { createContext } from "react";
 import { AsyncState } from "react-use/lib/useAsyncFn";
 import { StoreApi, useStore } from "zustand";
 
+import { useGuaranteedContext } from "@foxglove/hooks";
 import { Time } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
-import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 
 /**
  * DataSourceEvent representings a single event within a data source.

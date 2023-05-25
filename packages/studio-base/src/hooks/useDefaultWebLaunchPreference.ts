@@ -4,12 +4,12 @@
 
 import { useEffect } from "react";
 
+import { useSessionStorageValue } from "@foxglove/hooks";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 

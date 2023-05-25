@@ -5,8 +5,8 @@
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
+import { useGuaranteedContext } from "@foxglove/hooks";
 import { LogLevel } from "@foxglove/log";
-import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 
 type StudioLogConfigChannel = { name: string; enabled: boolean };
 

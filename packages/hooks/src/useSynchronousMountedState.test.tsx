@@ -5,7 +5,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import { useSynchronousMountedState } from "@foxglove/studio-base/hooks/useSynchronousMountedState";
+import { useSynchronousMountedState } from "./useSynchronousMountedState";
 
 describe("useSynchronousMountedState", () => {
   it("tracks mounted state", () => {

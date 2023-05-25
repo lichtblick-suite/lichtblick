@@ -5,8 +5,8 @@
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
+import { useGuaranteedContext } from "@foxglove/hooks";
 import { Immutable, RenderState, SettingsTree } from "@foxglove/studio";
-import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 
 export type ImmutableSettingsTree = Immutable<SettingsTree>;
 

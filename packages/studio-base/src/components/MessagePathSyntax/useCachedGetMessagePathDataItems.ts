@@ -14,11 +14,9 @@
 import { isEqual } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
 
-import { useShallowMemo } from "@foxglove/hooks";
+import { useShallowMemo, useChangeDetector, useDeepMemo } from "@foxglove/hooks";
 import { Immutable } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
-import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";

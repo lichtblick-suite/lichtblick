@@ -106,6 +106,7 @@ export function getBlockItemsByPath(
     // this can easily result in many millions of points.
     if (count >= 1_000_000) {
       // if we have memory stats we can let the user have more points as long as memory is not under pressure
+      // foxglove-depcheck-used: @types/foxglove__web
       if (performance.memory) {
         const pct = performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit;
         if (isNaN(pct) || pct > 0.6) {

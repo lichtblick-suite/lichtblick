@@ -6,13 +6,13 @@ import { Draft, produce } from "immer";
 import { union } from "lodash";
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react";
 
+import { useGuaranteedContext } from "@foxglove/hooks";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import {

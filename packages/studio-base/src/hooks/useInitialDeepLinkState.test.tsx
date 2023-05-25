@@ -6,6 +6,7 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { PropsWithChildren } from "react";
 
+import { useSessionStorageValue } from "@foxglove/hooks";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
@@ -14,12 +15,14 @@ import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
-import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 import { Player } from "@foxglove/studio-base/players/types";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
-jest.mock("@foxglove/studio-base/hooks/useSessionStorageValue");
+jest.mock("@foxglove/hooks", () => ({
+  ...jest.requireActual("@foxglove/hooks"),
+  useSessionStorageValue: jest.fn(),
+}));
 jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
 
 type WrapperProps = {

@@ -5,8 +5,9 @@
 import { Tooltip, Typography } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
+import { useMemoryInfo } from "@foxglove/hooks";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { useAppConfigurationValue, useMemoryInfo } from "@foxglove/studio-base/hooks";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 const useStyles = makeStyles()((theme) => ({
   root: {

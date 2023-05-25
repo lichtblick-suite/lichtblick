@@ -14,10 +14,10 @@ import {
 import { ReactElement, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { useSessionStorageValue } from "@foxglove/hooks";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 const useStyles = makeStyles()((theme) => ({

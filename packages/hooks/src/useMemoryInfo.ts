@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// foxglove-depcheck-used: @types/foxglove__web
+
 import { useEffect, useState } from "react";
 
 import Logger from "@foxglove/log";
@@ -12,20 +14,18 @@ type UseMemoryInfoOptions = {
   refreshIntervalMs: number;
 };
 
-const performance = window.performance;
-
 export function useMemoryInfo(opt: UseMemoryInfoOptions): MemoryInfo | undefined {
   const { refreshIntervalMs } = opt;
-  const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | undefined>(performance.memory);
+  const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | undefined>(window.performance.memory);
 
   useEffect(() => {
-    if (!performance.memory) {
+    if (!window.performance.memory) {
       log.info("No memory information available");
       return;
     }
 
     const interval = setInterval(() => {
-      setMemoryInfo(performance.memory);
+      setMemoryInfo(window.performance.memory);
     }, refreshIntervalMs);
     return () => {
       clearInterval(interval);

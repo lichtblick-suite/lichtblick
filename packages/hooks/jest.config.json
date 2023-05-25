@@ -1,5 +1,6 @@
 {
   "testMatch": ["<rootDir>/src/**/*.test.ts(x)?"],
+  "setupFiles": ["<rootDir>/test/setup.ts"],
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
   },

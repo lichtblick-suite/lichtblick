@@ -2302,6 +2302,9 @@ __metadata:
   dependencies:
     "@foxglove/log": "workspace:*"
     "@testing-library/react-hooks": 8.0.1
+    "@types/foxglove__web": "workspace:*"
+    "@types/lodash": ^4
+    lodash: 4.17.21
     shallowequal: 1.1.0
     typescript: 5.0.4
   peerDependencies:
@@ -2545,6 +2548,7 @@ __metadata:
     "@types/base16": ^1.0.2
     "@types/cytoscape": ^3.19.9
     "@types/foxglove__roslibjs": "workspace:*"
+    "@types/foxglove__web": "workspace:*"
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
     "@types/leaflet": 1.9.3
@@ -5578,6 +5582,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@types/foxglove__web@workspace:*, @types/foxglove__web@workspace:packages/@types/foxglove__web":
+  version: 0.0.0-use.local
+  resolution: "@types/foxglove__web@workspace:packages/@types/foxglove__web"
+  languageName: unknown
+  linkType: soft
+
 "@types/fs-extra@npm:9.0.13, @types/fs-extra@npm:^9.0.11":
   version: 9.0.13
   resolution: "@types/fs-extra@npm:9.0.13"
@@ -5763,10 +5773,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.167, @types/lodash@npm:^4.14.176":
-  version: 4.14.182
-  resolution: "@types/lodash@npm:4.14.182"
-  checksum: 7dd137aa9dbabd632408bd37009d984655164fa1ecc3f2b6eb94afe35bf0a5852cbab6183148d883e9c73a958b7fec9a9bcf7c8e45d41195add6a18c34958209
+"@types/lodash@npm:^4, @types/lodash@npm:^4.14.167, @types/lodash@npm:^4.14.176":
+  version: 4.14.194
+  resolution: "@types/lodash@npm:4.14.194"
+  checksum: 113f34831c461469d91feca2dde737f88487732898b4d25e9eb23b087bb193985f864d1e1e0f3b777edc5022e460443588b6000a3b2348c966f72d17eedc35ea
   languageName: node
   linkType: hard
 

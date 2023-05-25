@@ -5,9 +5,9 @@
 import { Link, Typography } from "@mui/material";
 import { ReactElement, useEffect } from "react";
 
+import { useSessionStorageValue } from "@foxglove/hooks";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 export function LaunchingInDesktopScreen(): ReactElement {

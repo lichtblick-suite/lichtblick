@@ -14,7 +14,7 @@
 import { groupBy } from "lodash";
 import { useCallback } from "react";
 
-import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
+import { useDeepMemo } from "@foxglove/hooks";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import concatAndTruncate from "@foxglove/studio-base/util/concatAndTruncate";
 
