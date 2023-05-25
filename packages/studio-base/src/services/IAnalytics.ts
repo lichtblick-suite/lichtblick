@@ -57,6 +57,9 @@ enum AppEvent {
   VARIABLE_ADD = "Studio: Variable Added",
   VARIABLE_DELETE = "Studio: Variable Deleted",
 
+  // Image events
+  IMAGE_DOWNLOAD = "Studio: Image Downloaded",
+
   // Extension events
   EXTENSION_INSTALL = "Studio: Extension Installed",
   EXTENSION_UNINSTALL = "Studio: Extension Uninstalled",
