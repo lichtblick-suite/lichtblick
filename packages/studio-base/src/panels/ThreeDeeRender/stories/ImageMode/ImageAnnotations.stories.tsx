@@ -351,7 +351,7 @@ export const MessageConverterSupport: StoryObj = {
         {
           fromSchemaName: "foxglove.ImageAnnotations",
           toSchemaName: "foxglove_msgs/ImageAnnotations",
-          converter: (_msg): Partial<ImageAnnotations> => ({
+          converter: (_msg: unknown): Partial<ImageAnnotations> => ({
             points: [
               {
                 timestamp: { sec: 0, nsec: 0 },
@@ -374,7 +374,7 @@ export const MessageConverterSupport: StoryObj = {
         {
           fromSchemaName: "MyCustomSchema",
           toSchemaName: "foxglove_msgs/ImageAnnotations",
-          converter: (_msg): Partial<ImageAnnotations> => ({
+          converter: (_msg: unknown): Partial<ImageAnnotations> => ({
             points: [
               {
                 timestamp: { sec: 0, nsec: 0 },
@@ -402,7 +402,7 @@ export const MessageConverterSupport: StoryObj = {
         {
           fromSchemaName: "MyCustomSchema",
           toSchemaName: "foxglove_msgs/msg/ImageAnnotations",
-          converter: (_msg): Partial<ImageAnnotations> => ({
+          converter: (_msg: unknown): Partial<ImageAnnotations> => ({
             points: [
               {
                 timestamp: { sec: 0, nsec: 0 },
@@ -425,7 +425,7 @@ export const MessageConverterSupport: StoryObj = {
         {
           fromSchemaName: "MyCustomSchema",
           toSchemaName: "foxglove.SceneUpdate",
-          converter: (msg) => msg,
+          converter: (msg: unknown) => msg,
         },
       ],
     };

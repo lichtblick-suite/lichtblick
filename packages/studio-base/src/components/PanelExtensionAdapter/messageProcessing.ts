@@ -40,7 +40,7 @@ export function convertMessage(
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);
   for (const converter of matchedConverters ?? []) {
-    const convertedMessage = converter.converter(messageEvent.message);
+    const convertedMessage = converter.converter(messageEvent.message, messageEvent);
     convertedMessages.push({
       topic: messageEvent.topic,
       schemaName: converter.toSchemaName,

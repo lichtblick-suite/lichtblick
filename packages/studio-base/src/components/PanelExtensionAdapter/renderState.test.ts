@@ -535,6 +535,8 @@ describe("renderState", () => {
   // for two different converters.
   it("should run the correct converter", () => {
     const buildRenderState = initRenderStateBuilder();
+    const converter1 = jest.fn().mockImplementation(() => "srcschema-destschema");
+    const converter2 = jest.fn().mockImplementation(() => "srcschemade-stschema");
     const state = buildRenderState({
       watchedFields: new Set(["topics", "currentFrame"]),
       playerState: undefined,
@@ -545,7 +547,7 @@ describe("renderState", () => {
           schemaName: "srcschema",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 1,
-          message: {},
+          message: "raw-message",
         },
       ],
       colorScheme: undefined,
@@ -561,32 +563,26 @@ describe("renderState", () => {
         {
           fromSchemaName: "srcschema",
           toSchemaName: "destschema",
-          converter: () => {
-            return "srcschema-destschema";
-          },
+          converter: converter1,
         },
         {
           fromSchemaName: "srcschemade",
           toSchemaName: "stschema",
-          converter: () => {
-            return "srcschemade-stschema";
-          },
+          converter: converter2,
         },
       ],
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [
         {
           name: "another",
           schemaName: "srcschema",
-          datatype: "srcschema",
           convertibleTo: ["destschema"],
         },
         {
           name: "test",
           schemaName: "srcschemade",
-          datatype: "srcschemade",
           convertibleTo: ["stschema"],
         },
       ],
@@ -595,18 +591,23 @@ describe("renderState", () => {
           topic: "another",
           schemaName: "destschema",
           message: "srcschema-destschema",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 1,
           originalMessageEvent: {
             topic: "another",
             schemaName: "srcschema",
-            message: {},
-            receiveTime: { sec: 0, nsec: 0 },
-            sizeInBytes: 1,
           },
         },
       ],
     });
+
+    expect(converter1).toHaveBeenCalledWith(
+      "raw-message",
+      expect.objectContaining({
+        message: "raw-message",
+        schemaName: "srcschema",
+        topic: "another",
+      }),
+    );
+    expect(converter2).not.toHaveBeenCalled();
   });
 
   // It is valid to register multiple converters all sharing the same _from_ schema and having
