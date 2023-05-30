@@ -29,6 +29,7 @@ import PublishGoalIcon from "@foxglove/studio-base/components/PublishGoalIcon";
 import PublishPointIcon from "@foxglove/studio-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPoseEstimateIcon";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -370,10 +371,14 @@ export function RendererOverlay(props: {
     [doDownloadImage, renderer],
   );
 
+  const mousePresenceRef = useRef<HTMLDivElement>(ReactNull);
+  const mousePresent = usePanelMousePresence(mousePresenceRef);
+
   return (
     <>
       {props.interfaceMode === "image" && <PanelContextMenu getItems={getContextMenuItems} />}
       <div
+        ref={mousePresenceRef}
         style={{
           position: "absolute",
           top: "10px",
@@ -385,13 +390,18 @@ export function RendererOverlay(props: {
           pointerEvents: "none",
         }}
       >
-        <Interactions
-          addPanel={props.addPanel}
-          selectedObject={selectedObject}
-          interactionsTabType={interactionsTabType}
-          setInteractionsTabType={setInteractionsTabType}
-          timezone={props.timezone}
-        />
+        {
+          // Only show on hover for image panel
+          (props.interfaceMode === "3d" || mousePresent) && (
+            <Interactions
+              addPanel={props.addPanel}
+              selectedObject={selectedObject}
+              interactionsTabType={interactionsTabType}
+              setInteractionsTabType={setInteractionsTabType}
+              timezone={props.timezone}
+            />
+          )
+        }
         {props.interfaceMode === "3d" && (
           <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
             <IconButton

@@ -460,6 +460,7 @@ export const ImageModePick: StoryObj<React.ComponentProps<typeof ImageModeFoxglo
   args: { imageType: "raw" },
 
   play: async () => {
+    userEvent.hover(await screen.findByTestId("panel-mouseenter-container"));
     const canvas = document.querySelector("canvas")!;
     const inspectObjects = screen.getByRole("button", { name: /inspect objects/i });
     userEvent.click(inspectObjects);
