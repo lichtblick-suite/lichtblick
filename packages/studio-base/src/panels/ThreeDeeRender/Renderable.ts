@@ -113,13 +113,4 @@ export class Renderable<
     void instanceId;
     return undefined;
   }
-
-  /**
-   * @return A function that can be used to download a selected renderable, e.g. as an image file.
-   */
-  public getDownloader():
-    | (() => Promise<{ blob: Blob; fileName: string } | undefined>)
-    | undefined {
-    return undefined;
-  }
 }

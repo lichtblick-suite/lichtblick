@@ -32,11 +32,8 @@ export type PanelContextMenuItem =
     };
 
 type PanelContextMenuProps = {
-  /**
-   * Function that returns a list of menu items, optionally dependent on the x,y
-   * position of the click.
-   */
-  itemsForClickPosition: (position: { x: number; y: number }) => Immutable<PanelContextMenuItem[]>;
+  /** @returns List of menu items */
+  getItems: () => Immutable<PanelContextMenuItem[]>;
 };
 
 /**
@@ -44,7 +41,7 @@ type PanelContextMenuProps = {
  * must be a child of a Panel component to work.
  */
 export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
-  const { itemsForClickPosition } = props;
+  const { getItems } = props;
 
   const rootRef = useRef<HTMLDivElement>(ReactNull);
 
@@ -52,31 +49,47 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
 
   const handleClose = useCallback(() => setPosition(undefined), []);
 
-  const [items, setItems] = useState<undefined | Immutable<PanelContextMenuItem[]>>();
-
-  const listener = useCallback(
-    (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setPosition({ x: event.clientX, y: event.clientY });
-      setItems(itemsForClickPosition({ x: event.clientX, y: event.clientY }));
-    },
-    [itemsForClickPosition],
-  );
+  const [items, setItems] = useState<Immutable<PanelContextMenuItem[]>>([]);
 
   useEffect(() => {
-    const element = rootRef.current;
-    if (!element) {
+    const parent = rootRef.current?.closest<HTMLElement>(`.${PANEL_ROOT_CLASS_NAME}`);
+    if (!parent) {
       return;
     }
 
-    const parent: HTMLElement | ReactNull = element.closest(`.${PANEL_ROOT_CLASS_NAME}`);
-    parent?.addEventListener("contextmenu", listener);
-
-    return () => {
-      parent?.removeEventListener("contextmenu", listener);
+    // Trigger the menu when the right mouse button is released, but not if the mouse moved in
+    // between press & release
+    let rightClickState: "none" | "down" | "canceled" = "none";
+    const handleMouseUp = (event: MouseEvent) => {
+      if (event.button === 2 && rightClickState === "down") {
+        setPosition({ x: event.clientX, y: event.clientY });
+        setItems(getItems());
+        rightClickState = "none";
+      }
     };
-  }, [listener]);
+    const handleMouseMove = (_event: MouseEvent) => {
+      rightClickState = "canceled";
+    };
+    const handleMouseDown = (event: MouseEvent) => {
+      if (event.button === 2) {
+        rightClickState = "down";
+      }
+    };
+    const handleContextMenu = (event: MouseEvent) => {
+      event.preventDefault();
+    };
+
+    parent.addEventListener("mousedown", handleMouseDown);
+    parent.addEventListener("mousemove", handleMouseMove);
+    parent.addEventListener("mouseup", handleMouseUp);
+    parent.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      parent.removeEventListener("mousedown", handleMouseDown);
+      parent.removeEventListener("mousemove", handleMouseMove);
+      parent.removeEventListener("mouseup", handleMouseUp);
+      parent.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [getItems]);
 
   return (
     <div ref={rootRef} onContextMenu={(event) => event.preventDefault()}>
@@ -89,7 +102,7 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
           dense: true,
         }}
       >
-        {(items ?? []).map((item, index) => {
+        {items.map((item, index) => {
           if (item.type === "divider") {
             return <Divider variant="middle" key={`divider_${index}`} />;
           }

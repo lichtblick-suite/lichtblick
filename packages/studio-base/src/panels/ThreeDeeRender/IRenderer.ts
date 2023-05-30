@@ -25,6 +25,7 @@ import { SharedGeometry } from "./SharedGeometry";
 import { CameraState } from "./camera";
 import { DetailLevel } from "./lod";
 import { LayerSettingsTransform } from "./renderables/FrameAxes";
+import { DownloadImageInfo } from "./renderables/Images/ImageTypes";
 import { MeasurementTool } from "./renderables/MeasurementTool";
 import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTool";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
@@ -310,6 +311,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   canResetView(): boolean;
   /** Reset any manual view modifications (image mode only). */
   resetView(): void;
+
+  /** Return the currently displayed image (image mode only). */
+  getCurrentImage(): DownloadImageInfo | undefined;
 
   setSelectedRenderable(selection: PickedRenderable | undefined): void;
 

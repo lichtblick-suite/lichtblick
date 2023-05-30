@@ -184,7 +184,7 @@ export const ImageModeRosPngImage: StoryObj<React.ComponentProps<typeof ImageMod
 const ImageModeFoxgloveImage = ({
   imageType = "raw",
   rotation,
-  onDownload,
+  onDownloadImage,
   flipHorizontal = false,
   flipVertical = false,
 }: {
@@ -192,7 +192,7 @@ const ImageModeFoxgloveImage = ({
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;
   flipVertical?: boolean;
-  onDownload?: (blob: Blob, fileName: string) => void;
+  onDownloadImage?: (blob: Blob, fileName: string) => void;
 }): JSX.Element => {
   const topics: Topic[] = [
     { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
@@ -304,7 +304,7 @@ const ImageModeFoxgloveImage = ({
   return (
     <PanelSetup fixture={fixture}>
       <ImagePanel
-        onDownload={onDownload}
+        onDownloadImage={onDownloadImage}
         overrideConfig={{
           ...ImagePanel.defaultConfig,
           followTf: undefined,
@@ -357,14 +357,14 @@ export const DownloadRawImage: StoryObj<React.ComponentProps<typeof ImageModeFox
   render: function Story(args) {
     const [src, setSrc] = useState<string | undefined>();
     const [filename, setFilename] = useState<string | undefined>();
-    const onDownload = useCallback((blob: Blob, fileName: string) => {
+    const onDownloadImage = useCallback((blob: Blob, fileName: string) => {
       setSrc(URL.createObjectURL(blob));
       setFilename(fileName);
     }, []);
     return (
       <Stack direction="row" fullHeight>
         <Stack style={{ width: "50%" }}>
-          <ImageModeFoxgloveImage {...args} onDownload={onDownload} />
+          <ImageModeFoxgloveImage {...args} onDownloadImage={onDownloadImage} />
         </Stack>
         <Stack style={{ width: "50%" }} zeroMinWidth>
           <div>{filename == undefined ? "Not downloaded" : `Downloaded image: ${filename}`}</div>
@@ -375,14 +375,8 @@ export const DownloadRawImage: StoryObj<React.ComponentProps<typeof ImageModeFox
   },
   args: { imageType: "raw" },
   play: async () => {
-    const canvas = document.querySelector("canvas")!;
-    const inspectObjects = screen.getByRole("button", { name: /inspect objects/i });
-    userEvent.click(inspectObjects);
-    await delay(1000);
-    const rect = canvas.getBoundingClientRect();
-    userEvent.click(canvas, { clientX: rect.width / 2, clientY: rect.height / 2 });
-    await delay(30);
-    userEvent.click(await screen.findByText("Download"));
+    userEvent.click(document.querySelector("canvas")!, { button: 2 });
+    userEvent.click(await screen.findByText("Download image"));
   },
 };
 

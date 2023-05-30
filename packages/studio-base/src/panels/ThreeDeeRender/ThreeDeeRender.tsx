@@ -97,9 +97,9 @@ export function ThreeDeeRender(props: {
   context: PanelExtensionContext;
   interfaceMode: InterfaceMode;
   /** Override default downloading behavior, used for Storybook */
-  onDownload?: (blob: Blob, fileName: string) => void;
+  onDownloadImage?: (blob: Blob, fileName: string) => void;
 }): JSX.Element {
-  const { context, interfaceMode, onDownload } = props;
+  const { context, interfaceMode, onDownloadImage } = props;
   const { initialState, saveState } = context;
 
   // Load and save the persisted panel configuration
@@ -769,7 +769,7 @@ export function ThreeDeeRender(props: {
               renderer?.publishClickTool.start();
             }}
             timezone={timezone}
-            onDownload={onDownload}
+            onDownloadImage={onDownloadImage}
           />
         </RendererContext.Provider>
       </div>

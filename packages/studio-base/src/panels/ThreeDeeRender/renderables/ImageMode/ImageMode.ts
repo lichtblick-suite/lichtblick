@@ -14,7 +14,10 @@ import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
-import { AnyImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import {
+  AnyImage,
+  DownloadImageInfo,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
 import {
   normalizeCompressedImage,
   normalizeRawImage,
@@ -98,6 +101,9 @@ export class ImageMode
   #dragStartPanOffset = new THREE.Vector2();
   #dragStartMouseCoords = new THREE.Vector2();
   #hasModifiedView = false;
+
+  // Will need to change when synchronization is implemented (FG-2686)
+  #latestImage: { topic: string; image: AnyImage } | undefined;
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   #setHasCalibrationTopic: (hasCalibrationTopic: boolean) => void;
@@ -237,6 +243,7 @@ export class ImageMode
     this.#imageRenderable?.dispose();
     this.#imageRenderable?.removeFromParent();
     this.#imageRenderable = undefined;
+    this.#latestImage = undefined;
     this.#clearCameraModel();
     super.removeAllRenderables();
   }
@@ -479,7 +486,6 @@ export class ImageMode
       }
 
       if (config.rotation !== prevImageModeConfig.rotation) {
-        this.#imageRenderable?.setRotation(config.rotation ?? 0);
         this.#camera.setRotation(config.rotation ?? 0);
       }
 
@@ -543,6 +549,8 @@ export class ImageMode
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
 
     const renderable = this.#getImageRenderable(topic, receiveTime, image, frameId);
+
+    this.#latestImage = { topic: messageEvent.topic, image };
 
     if (this.#cameraModel) {
       renderable.userData.cameraInfo = this.#cameraModel.info;
@@ -792,6 +800,19 @@ export class ImageMode
   #handleErrorChange = (): void => {
     this.updateSettingsTree();
   };
+
+  public getLatestImage(): DownloadImageInfo | undefined {
+    if (!this.#latestImage) {
+      return undefined;
+    }
+    const settings = this.#getImageModeSettings();
+    return {
+      ...this.#latestImage,
+      rotation: settings.rotation ?? 0,
+      flipHorizontal: settings.flipHorizontal ?? false,
+      flipVertical: settings.flipVertical ?? false,
+    };
+  }
 }
 
 function getFrameIdFromImage(image: AnyImage) {

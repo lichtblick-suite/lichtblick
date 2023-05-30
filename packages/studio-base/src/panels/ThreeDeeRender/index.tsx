@@ -18,13 +18,17 @@ import { InterfaceMode } from "./types";
 function initPanel(
   crash: ReturnType<typeof useCrash>,
   interfaceMode: InterfaceMode,
-  onDownload: ((blob: Blob, fileName: string) => void) | undefined,
+  onDownloadImage: ((blob: Blob, fileName: string) => void) | undefined,
   context: PanelExtensionContext,
 ) {
   ReactDOM.render(
     <StrictMode>
       <CaptureErrorBoundary onError={crash}>
-        <ThreeDeeRender context={context} interfaceMode={interfaceMode} onDownload={onDownload} />
+        <ThreeDeeRender
+          context={context}
+          interfaceMode={interfaceMode}
+          onDownloadImage={onDownloadImage}
+        />
       </CaptureErrorBoundary>
     </StrictMode>,
     context.panelElement,
@@ -37,14 +41,14 @@ function initPanel(
 type Props = {
   config: Record<string, unknown>;
   saveConfig: SaveConfig<Record<string, unknown>>;
-  onDownload?: (blob: Blob, fileName: string) => void;
+  onDownloadImage?: (blob: Blob, fileName: string) => void;
 };
 
 function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
   const boundInitPanel = useMemo(
-    () => initPanel.bind(undefined, crash, interfaceMode, props.onDownload),
-    [crash, interfaceMode, props.onDownload],
+    () => initPanel.bind(undefined, crash, interfaceMode, props.onDownloadImage),
+    [crash, interfaceMode, props.onDownloadImage],
   );
 
   return (

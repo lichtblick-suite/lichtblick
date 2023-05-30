@@ -18,3 +18,12 @@ export const ALL_CAMERA_INFO_SCHEMAS = new Set([
 export type CompressedImageTypes = RosCompressedImage | CompressedImage;
 
 export type AnyImage = RosImage | RosCompressedImage | RawImage | CompressedImage;
+
+/** Data needed to download an image */
+export type DownloadImageInfo = {
+  topic: string;
+  image: AnyImage;
+  rotation: 0 | 90 | 180 | 270;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
+};
