@@ -369,8 +369,6 @@ export class ImageMode
       this.renderer.settings.errors.errors.errorAtPath(CALIBRATION_TOPIC_PATH);
 
     // Not yet implemented
-    // const transformMarkers: boolean = false;
-    // const smooth: boolean = false;
     // const minValue: number | undefined = undefined;
     // const maxValue: number | undefined = undefined;
 
@@ -389,26 +387,11 @@ export class ImageMode
       options: calibrationTopics,
       error: calibrationTopicError,
     };
-    // fields.TODO_transformMarkers = {
-    //   readonly: true,
-    //   input: "boolean",
-    //   label: "🚧 Transform markers",
-    //   value: transformMarkers,
-    //   help: (transformMarkers as boolean)
-    //     ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
-    //     : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`,
-    // };
     fields.synchronize = {
       input: "boolean",
       label: "Sync annotations",
       value: synchronize,
     };
-    // fields.TODO_smooth = {
-    //   readonly: true,
-    //   input: "boolean",
-    //   label: "🚧 Bilinear smoothing",
-    //   value: smooth,
-    // };
     fields.flipHorizontal = {
       input: "boolean",
       label: "Flip horizontal",
