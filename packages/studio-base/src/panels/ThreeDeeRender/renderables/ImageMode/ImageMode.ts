@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "immer";
 import * as THREE from "three";
 
 import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { toNanoSec } from "@foxglove/rostime";
-import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
 import {
   CREATE_BITMAP_ERR_KEY,
@@ -17,13 +17,8 @@ import {
 import {
   AnyImage,
   DownloadImageInfo,
+  getFrameIdFromImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
-import {
-  normalizeCompressedImage,
-  normalizeRawImage,
-  normalizeRosCompressedImage,
-  normalizeRosImage,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/imageNormalizers";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
@@ -31,8 +26,9 @@ import {
 import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 
 import { ImageModeCamera } from "./ImageModeCamera";
+import { MessageHandler, MessageRenderState } from "./MessageHandler";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
-import type { IRenderer } from "../../IRenderer";
+import type { IRenderer, ImageModeConfig } from "../../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
 import { SettingsTreeEntry } from "../../SettingsManager";
 import {
@@ -44,8 +40,6 @@ import {
   IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
   CAMERA_INFO_DATATYPES,
-  CompressedImage as RosCompressedImage,
-  Image as RosImage,
   CameraInfo,
 } from "../../ros";
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
@@ -82,6 +76,14 @@ const ALL_SUPPORTED_CALIBRATION_SCHEMAS = new Set([
   ...CAMERA_CALIBRATION_DATATYPES,
 ]);
 
+const DEFAULT_CONFIG = {
+  synchronize: false,
+  flipHorizontal: false,
+  flipVertical: false,
+  rotation: 0 as 0 | 90 | 180 | 270,
+};
+
+type ConfigWithDefaults = ImageModeConfig & typeof DEFAULT_CONFIG;
 export class ImageMode
   extends SceneExtension<ImageRenderable, ImageModeEvent>
   implements ICameraHandler
@@ -94,9 +96,11 @@ export class ImageMode
       }
     | undefined;
 
-  #annotations: ImageAnnotations;
+  readonly #annotations: ImageAnnotations;
 
   #imageRenderable: ImageRenderable | undefined;
+
+  readonly #messageHandler: MessageHandler;
 
   #dragStartPanOffset = new THREE.Vector2();
   #dragStartMouseCoords = new THREE.Vector2();
@@ -129,10 +133,15 @@ export class ImageMode
 
     this.#camera = new ImageModeCamera();
 
+    const config = this.#getImageModeSettings();
+
     this.#camera.setCanvasSize(canvasSize.width, canvasSize.height);
-    this.#camera.setRotation(renderer.config.imageMode.rotation ?? 0);
-    this.#camera.setFlipHorizontal(renderer.config.imageMode.flipHorizontal ?? false);
-    this.#camera.setFlipVertical(renderer.config.imageMode.flipVertical ?? false);
+    this.#camera.setRotation(config.rotation);
+    this.#camera.setFlipHorizontal(config.flipHorizontal);
+    this.#camera.setFlipVertical(config.flipVertical);
+
+    this.#messageHandler = new MessageHandler(config);
+    this.#messageHandler.addListener(this.#updateFromMessageState);
 
     renderer.settings.errors.on("update", this.#handleErrorChange);
     renderer.settings.errors.on("clear", this.#handleErrorChange);
@@ -143,7 +152,7 @@ export class ImageMode
       initialCanvasHeight: canvasSize.height,
       initialPixelRatio: renderer.getPixelRatio(),
       topics: () => renderer.topics ?? [],
-      config: () => renderer.config.imageMode,
+      config: () => this.#getImageModeSettings(),
       updateConfig: (updateHandler) => {
         renderer.updateConfig((draft) => updateHandler(draft.imageMode));
       },
@@ -154,6 +163,7 @@ export class ImageMode
         renderer.addSchemaSubscriptions(schemaNames, handler);
       },
       labelPool: renderer.labelPool,
+      messageHandler: this.#messageHandler,
     });
     this.add(this.#annotations);
 
@@ -204,25 +214,25 @@ export class ImageMode
   public override addSubscriptionsToRenderer(): void {
     const renderer = this.renderer;
     renderer.addSchemaSubscriptions(ALL_SUPPORTED_CALIBRATION_SCHEMAS, {
-      handler: this.#handleCameraInfo,
+      handler: this.#messageHandler.handleCameraInfo,
       shouldSubscribe: this.#cameraInfoShouldSubscribe,
     });
 
     renderer.addSchemaSubscriptions(ROS_IMAGE_DATATYPES, {
-      handler: this.#handleRosRawImage,
+      handler: this.#messageHandler.handleRosRawImage,
       shouldSubscribe: this.#imageShouldSubscribe,
     });
     renderer.addSchemaSubscriptions(ROS_COMPRESSED_IMAGE_DATATYPES, {
-      handler: this.#handleRosCompressedImage,
+      handler: this.#messageHandler.handleRosCompressedImage,
       shouldSubscribe: this.#imageShouldSubscribe,
     });
 
     renderer.addSchemaSubscriptions(RAW_IMAGE_DATATYPES, {
-      handler: this.#handleRawImage,
+      handler: this.#messageHandler.handleRawImage,
       shouldSubscribe: this.#imageShouldSubscribe,
     });
     renderer.addSchemaSubscriptions(COMPRESSED_IMAGE_DATATYPES, {
-      handler: this.#handleCompressedImage,
+      handler: this.#messageHandler.handleCompressedImage,
       shouldSubscribe: this.#imageShouldSubscribe,
     });
     this.#annotations.addSubscriptions();
@@ -243,6 +253,7 @@ export class ImageMode
     this.#imageRenderable?.dispose();
     this.#imageRenderable?.removeFromParent();
     this.#imageRenderable = undefined;
+    this.#messageHandler.clear();
     this.#latestImage = undefined;
     this.#clearCameraModel();
     super.removeAllRenderables();
@@ -291,10 +302,10 @@ export class ImageMode
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const config = this.renderer.config;
     const handler = this.handleSettingsAction;
 
-    const { imageTopic, calibrationTopic } = config.imageMode;
+    const { imageTopic, calibrationTopic, synchronize, flipHorizontal, flipVertical, rotation } =
+      this.#getImageModeSettings();
 
     const imageTopics = filterMap(this.renderer.topics ?? [], (topic) => {
       if (!topicIsConvertibleToSchema(topic, ALL_SUPPORTED_IMAGE_SCHEMAS)) {
@@ -359,7 +370,6 @@ export class ImageMode
 
     // Not yet implemented
     // const transformMarkers: boolean = false;
-    // const synchronize: boolean = false;
     // const smooth: boolean = false;
     // const minValue: number | undefined = undefined;
     // const maxValue: number | undefined = undefined;
@@ -375,7 +385,7 @@ export class ImageMode
     fields.calibrationTopic = {
       label: "Calibration",
       input: "select",
-      value: config.imageMode.calibrationTopic,
+      value: calibrationTopic,
       options: calibrationTopics,
       error: calibrationTopicError,
     };
@@ -388,12 +398,11 @@ export class ImageMode
     //     ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
     //     : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`,
     // };
-    // fields.TODO_synchronize = {
-    //   readonly: true,
-    //   input: "boolean",
-    //   label: "🚧 Synchronize timestamps",
-    //   value: synchronize,
-    // };
+    fields.synchronize = {
+      input: "boolean",
+      label: "Sync annotations",
+      value: synchronize,
+    };
     // fields.TODO_smooth = {
     //   readonly: true,
     //   input: "boolean",
@@ -403,17 +412,17 @@ export class ImageMode
     fields.flipHorizontal = {
       input: "boolean",
       label: "Flip horizontal",
-      value: config.imageMode.flipHorizontal ?? false,
+      value: flipHorizontal,
     };
     fields.flipVertical = {
       input: "boolean",
       label: "Flip vertical",
-      value: config.imageMode.flipVertical ?? false,
+      value: flipVertical,
     };
     fields.rotation = {
       input: "toggle",
       label: "Rotation",
-      value: config.imageMode.rotation ?? 0,
+      value: rotation,
       options: [
         { label: "0°", value: 0 },
         { label: "90°", value: 90 },
@@ -486,18 +495,23 @@ export class ImageMode
       }
 
       if (config.rotation !== prevImageModeConfig.rotation) {
-        this.#camera.setRotation(config.rotation ?? 0);
+        this.#imageRenderable?.setRotation(config.rotation);
+        this.#camera.setRotation(config.rotation);
       }
 
       if (config.flipHorizontal !== prevImageModeConfig.flipHorizontal) {
-        this.#imageRenderable?.setFlipHorizontal(config.flipHorizontal ?? false);
-        this.#camera.setFlipHorizontal(config.flipHorizontal ?? false);
+        this.#imageRenderable?.setFlipHorizontal(config.flipHorizontal);
+        this.#camera.setFlipHorizontal(config.flipHorizontal);
       }
 
       if (config.flipVertical !== prevImageModeConfig.flipVertical) {
-        this.#imageRenderable?.setFlipVertical(config.flipVertical ?? false);
-        this.#camera.setFlipVertical(config.flipVertical ?? false);
+        this.#imageRenderable?.setFlipVertical(config.flipVertical);
+        this.#camera.setFlipVertical(config.flipVertical);
       }
+      if (config.synchronize !== prevImageModeConfig.synchronize) {
+        this.removeAllRenderables();
+      }
+      this.#messageHandler.setConfig(config);
 
       this.#updateViewAndRenderables();
     } else {
@@ -516,34 +530,27 @@ export class ImageMode
     return this.#getImageModeSettings().imageTopic === topic;
   };
 
-  /** Processes camera info messages and updates state */
-  #handleCameraInfo = (
-    messageEvent: PartialMessageEvent<CameraInfo> & PartialMessageEvent<CameraCalibration>,
+  #updateFromMessageState = (
+    newState: MessageRenderState,
+    oldState: MessageRenderState | undefined,
   ): void => {
+    if (newState.image != undefined && newState.image !== oldState?.image) {
+      this.#handleImageChange(newState.image, newState.image.message);
+    }
+    if (newState.cameraInfo != undefined && newState.cameraInfo !== oldState?.cameraInfo) {
+      this.#handleCameraInfoChange(newState.cameraInfo);
+    }
+  };
+
+  /** Processes camera info messages and updates state */
+  #handleCameraInfoChange = (cameraInfo: CameraInfo): void => {
     // Store the last camera info on each topic, when processing an image message we'll look up
     // the camera info by the info topic configured for the image
-    const cameraInfo = normalizeCameraInfo(messageEvent.message);
     this.#updateCameraModel(cameraInfo);
     this.#updateViewAndRenderables();
   };
 
-  #handleRosRawImage = (messageEvent: PartialMessageEvent<RosImage>): void => {
-    this.#handleImage(messageEvent, normalizeRosImage(messageEvent.message));
-  };
-
-  #handleRosCompressedImage = (messageEvent: PartialMessageEvent<RosCompressedImage>): void => {
-    this.#handleImage(messageEvent, normalizeRosCompressedImage(messageEvent.message));
-  };
-
-  #handleRawImage = (messageEvent: PartialMessageEvent<RawImage>): void => {
-    this.#handleImage(messageEvent, normalizeRawImage(messageEvent.message));
-  };
-
-  #handleCompressedImage = (messageEvent: PartialMessageEvent<CompressedImage>): void => {
-    this.#handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
-  };
-
-  #handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
+  #handleImageChange = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
     const topic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
@@ -640,6 +647,7 @@ export class ImageMode
     // we don't have settings for images yet
     const userSettings = { ...IMAGE_RENDERABLE_DEFAULT_SETTINGS };
 
+    const config = this.#getImageModeSettings();
     renderable = new ImageRenderable(topicName, this.renderer, {
       receiveTime,
       messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
@@ -651,9 +659,9 @@ export class ImageMode
       cameraInfo: undefined,
       cameraModel: undefined,
       image,
-      rotation: this.renderer.config.imageMode.rotation ?? 0,
-      flipHorizontal: this.renderer.config.imageMode.flipHorizontal ?? false,
-      flipVertical: this.renderer.config.imageMode.flipVertical ?? false,
+      rotation: config.rotation,
+      flipHorizontal: config.flipHorizontal,
+      flipVertical: config.flipVertical,
       texture: undefined,
       material: undefined,
       geometry: undefined,
@@ -698,8 +706,14 @@ export class ImageMode
     return cameraInfoFrameId ?? imageFrameId;
   }
 
-  #getImageModeSettings() {
-    return this.renderer.config.imageMode;
+  #getImageModeSettings(): Immutable<ConfigWithDefaults> {
+    const config = { ...this.renderer.config.imageMode };
+    config.synchronize ??= DEFAULT_CONFIG.synchronize;
+    config.rotation ??= DEFAULT_CONFIG.rotation;
+    config.flipHorizontal ??= DEFAULT_CONFIG.flipHorizontal;
+    config.flipVertical ??= DEFAULT_CONFIG.flipVertical;
+
+    return config as ConfigWithDefaults;
   }
 
   /**
@@ -808,18 +822,10 @@ export class ImageMode
     const settings = this.#getImageModeSettings();
     return {
       ...this.#latestImage,
-      rotation: settings.rotation ?? 0,
-      flipHorizontal: settings.flipHorizontal ?? false,
-      flipVertical: settings.flipVertical ?? false,
+      rotation: settings.rotation,
+      flipHorizontal: settings.flipHorizontal,
+      flipVertical: settings.flipVertical,
     };
-  }
-}
-
-function getFrameIdFromImage(image: AnyImage) {
-  if ("header" in image) {
-    return image.header.frame_id;
-  } else {
-    return image.frame_id;
   }
 }
 

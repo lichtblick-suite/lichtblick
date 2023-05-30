@@ -81,6 +81,7 @@ export type ImageModeConfig = {
   calibrationTopic?: string;
   /** Annotation topic settings, analogous to {@link RendererConfig.topics} */
   annotations?: ImageAnnotationSubscription[];
+  synchronize?: boolean;
   /** Rotation */
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;

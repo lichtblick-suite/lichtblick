@@ -9,23 +9,27 @@ describe("TwoKeyMap", () => {
     const map = new TwoKeyMap<string, string, number>();
 
     map.set("a", "a", 1);
+    expect(map.size).toBe(1);
     expect(map.get("a", "a")).toBe(1);
     expect(map.get("a", "b")).toBe(undefined);
     expect(map.get("b", "a")).toBe(undefined);
     expect([...map.values()]).toEqual([1]);
 
     map.set("a", "b", 2);
+    expect(map.size).toBe(2);
     expect(map.get("a", "a")).toBe(1);
     expect(map.get("a", "b")).toBe(2);
     expect(map.get("a", "c")).toBe(undefined);
     expect([...map.values()]).toEqual([1, 2]);
 
     map.delete("a", "a");
+    expect(map.size).toBe(1);
     expect(map.get("a", "a")).toBe(undefined);
     expect(map.get("a", "b")).toBe(2);
     expect([...map.values()]).toEqual([2]);
 
     map.deleteAll("a");
+    expect(map.size).toBe(0);
     expect(map.get("a", "a")).toBe(undefined);
     expect(map.get("a", "b")).toBe(undefined);
     expect([...map.values()]).toEqual([]);
@@ -34,12 +38,15 @@ describe("TwoKeyMap", () => {
     map.set("a", "b", 2);
     map.set("x", "y", 3);
     map.set("x", "z", 4);
+    expect(map.size).toBe(4);
     expect([...map.values()]).toEqual([1, 2, 3, 4]);
 
     map.deleteAll("a");
+    expect(map.size).toBe(2);
     expect([...map.values()]).toEqual([3, 4]);
 
     map.clear();
+    expect(map.size).toBe(0);
     expect([...map.values()]).toEqual([]);
   });
 });
