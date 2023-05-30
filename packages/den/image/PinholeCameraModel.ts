@@ -180,14 +180,15 @@ export class PinholeCameraModel {
   }
 
   /**
-   * Rectifies the given pixel 2D coordinate.
+   * Undoes camera distortion to map a given pixel coordinate from a raw image to a rectified image.
+   * Similar to OpenCV `undistortPoints()`.
    *
    * @param out - The output rectified 2D pixel coordinate.
-   * @param point - The input unrectified 2D pixel to rectify.
+   * @param point - The input distorted/unrectified 2D pixel to rectify.
    * @param iterations - The number of iterations to use in the iterative optimization.
    * @returns The rectified pixel, a reference to `out`.
    */
-  public rectifyPixel(out: Vector2, point: Readonly<Vector2>, iterations = 5): Vector2 {
+  public undistortPixel(out: Vector2, point: Readonly<Vector2>, iterations = 5): Vector2 {
     const { P, D } = this;
     const [k1, k2, p1, p2, k3] = D;
 
@@ -242,13 +243,14 @@ export class PinholeCameraModel {
   }
 
   /**
-   * Unrectifies the given 2D pixel coordinate.
+   * Applies camera distortion parameters to a given 2D pixel coordinate on a rectified image,
+   * returning the corresponding pixel coordinate on the raw (distorted) image.
    *
-   * @param out - The output unrectified 2D pixel coordinate
-   * @param point - The input rectified 2D pixel coordinate
-   * @returns The unrectified pixel, a reference to `out`
+   * @param out - The output 2D pixel coordinate on the original (distorted/unrectified) image
+   * @param point - The input 2D pixel coordinate on a rectified image
+   * @returns The distorted pixel, a reference to `out`
    */
-  public unrectifyPixel(out: Vector2, point: Readonly<Vector2>): Vector2 {
+  public distortPixel(out: Vector2, point: Readonly<Vector2>): Vector2 {
     out.x = point.x;
     out.y = point.y;
 
@@ -260,7 +262,7 @@ export class PinholeCameraModel {
     const tx = P[3];
     const ty = P[7];
 
-    // Formulae from docs for cv::initUndistortRectifyMap,
+    // Formulae from:
     // <https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html>
 
     // x <- (u - c'x) / f'x

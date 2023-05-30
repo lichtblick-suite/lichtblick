@@ -127,52 +127,52 @@ describe("PinholeCameraModel", () => {
     });
   });
 
-  it("rectifyPixel - no distortion", () => {
+  it("undistortPixel - no distortion", () => {
     const model = new PinholeCameraModel(makeCameraInfo(640, 480, 45));
     const rectified = { x: 0, y: 0 };
 
-    model.rectifyPixel(rectified, { x: 320, y: 240 });
+    model.undistortPixel(rectified, { x: 320, y: 240 });
     expect(rectified).toEqual({ x: 320, y: 240 });
 
-    model.rectifyPixel(rectified, { x: 100, y: 100 });
+    model.undistortPixel(rectified, { x: 100, y: 100 });
     expect(rectified).toMatchObject({ x: closeTo(100), y: closeTo(100) });
   });
 
-  it("rectifyPixel - plumb_bob", () => {
+  it("undistortPixel - plumb_bob", () => {
     const model = new PinholeCameraModel(makeCameraInfo(640, 480, 60, "plumb_bob", D1));
     const rectified = { x: 0, y: 0 };
 
-    model.rectifyPixel(rectified, { x: 320, y: 240 });
+    model.undistortPixel(rectified, { x: 320, y: 240 });
     expect(rectified).toEqual({ x: 320, y: 240 });
 
-    model.rectifyPixel(rectified, { x: 0, y: 0 });
+    model.undistortPixel(rectified, { x: 0, y: 0 });
     expect(rectified).toMatchObject({
       x: closeTo(-72.45696739),
       y: closeTo(-54.4783923),
     });
   });
 
-  it("unrectifyPixel - no distortion", () => {
+  it("distortPixel - no distortion", () => {
     const model = new PinholeCameraModel(makeCameraInfo(640, 480, 45));
     const unrectified = { x: 0, y: 0 };
 
-    model.unrectifyPixel(unrectified, { x: 320, y: 240 });
+    model.distortPixel(unrectified, { x: 320, y: 240 });
     expect(unrectified).toEqual({ x: 320, y: 240 });
 
-    model.unrectifyPixel(unrectified, { x: 0, y: 0 });
+    model.distortPixel(unrectified, { x: 0, y: 0 });
     expect(unrectified).toMatchObject({
       x: closeTo(0),
       y: closeTo(0),
     });
   });
 
-  it("unrectifyPixel - plumb_bob", () => {
+  it("distortPixel - plumb_bob", () => {
     const model = new PinholeCameraModel(makeCameraInfo(640, 480, 60, "plumb_bob", D1));
     const rectified = { x: 0, y: 0 };
     const unrectified = { x: 0, y: 0 };
 
-    model.rectifyPixel(rectified, { x: 0, y: 0 });
-    model.unrectifyPixel(unrectified, rectified);
+    model.undistortPixel(rectified, { x: 0, y: 0 });
+    model.distortPixel(unrectified, rectified);
     expect(unrectified).toMatchObject({
       // low precision comparison since we're approximating a nonlinear function
       x: closeTo(0, 1),

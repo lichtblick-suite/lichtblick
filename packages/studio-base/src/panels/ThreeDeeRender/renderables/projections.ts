@@ -27,7 +27,7 @@ export function projectPixel(
   cameraModel: PinholeCameraModel,
   settings: { distance: number; planarProjectionFactor: number },
 ): Vector3 {
-  cameraModel.rectifyPixel(tempVec2, uv);
+  cameraModel.undistortPixel(tempVec2, uv);
 
   if (settings.planarProjectionFactor === 0) {
     cameraModel.projectPixelTo3dRay(out, tempVec2);

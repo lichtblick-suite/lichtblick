@@ -112,8 +112,8 @@ function toRGBA(color: Color) {
   return `rgba(${color.r * 255}, ${color.g * 255}, ${color.b * 255}, ${color.a})`;
 }
 
-function maybeUnrectifyPixel(cameraModel: PinholeCameraModel | undefined, point: Point2D): Point2D {
-  return cameraModel?.unrectifyPixel({ x: 0, y: 0 }, point) ?? point;
+function maybeDistortPixel(cameraModel: PinholeCameraModel | undefined, point: Point2D): Point2D {
+  return cameraModel?.distortPixel({ x: 0, y: 0 }, point) ?? point;
 }
 
 // Potentially performance-sensitive; await can be expensive
@@ -320,8 +320,8 @@ function paintLine(
     return;
   }
 
-  const { x: x1, y: y1 } = maybeUnrectifyPixel(cameraModel, pointA);
-  const { x: x2, y: y2 } = maybeUnrectifyPixel(cameraModel, pointB);
+  const { x: x1, y: y1 } = maybeDistortPixel(cameraModel, pointA);
+  const { x: x2, y: y2 } = maybeDistortPixel(cameraModel, pointB);
 
   ctx.beginPath();
   ctx.moveTo(x1, y1);
@@ -337,7 +337,7 @@ function paintTextAnnotation(
   annotation: TextAnnotation,
   cameraModel: PinholeCameraModel | undefined,
 ) {
-  const { x, y } = maybeUnrectifyPixel(cameraModel, annotation.position);
+  const { x, y } = maybeDistortPixel(cameraModel, annotation.position);
   const text = annotation.text;
   if (!text) {
     return;
@@ -375,7 +375,7 @@ function paintCircleAnnotation(
     return;
   }
 
-  const { x, y } = maybeUnrectifyPixel(cameraModel, position);
+  const { x, y } = maybeDistortPixel(cameraModel, position);
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI);
 
@@ -445,10 +445,10 @@ function paintPointsAnnotation(
         break;
       }
       ctx.beginPath();
-      const { x, y } = maybeUnrectifyPixel(cameraModel, annotation.points[0]!);
+      const { x, y } = maybeDistortPixel(cameraModel, annotation.points[0]!);
       ctx.moveTo(x, y);
       for (let i = 1; i < annotation.points.length; i++) {
-        const maybeUnrectifiedPoint = maybeUnrectifyPixel(cameraModel, annotation.points[i]!);
+        const maybeUnrectifiedPoint = maybeDistortPixel(cameraModel, annotation.points[i]!);
         ctx.lineTo(maybeUnrectifiedPoint.x, maybeUnrectifiedPoint.y);
       }
       if (annotation.style === "polygon") {
@@ -510,7 +510,7 @@ function paintCircle(
     return;
   }
 
-  const { x, y } = maybeUnrectifyPixel(cameraModel, point);
+  const { x, y } = maybeDistortPixel(cameraModel, point);
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI);
 
@@ -546,7 +546,7 @@ function paintFastPoint(
     return;
   }
 
-  const { x, y } = maybeUnrectifyPixel(cameraModel, point);
+  const { x, y } = maybeDistortPixel(cameraModel, point);
   const size = Math.round(radius * 2);
   const rx = Math.round(x - size / 2);
   const ry = Math.round(y - size / 2);
