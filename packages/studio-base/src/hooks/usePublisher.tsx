@@ -41,7 +41,7 @@ export default function usePublisher({
   const publish = useMessagePipeline((context) => context.publish);
   const setPublishers = useMessagePipeline((context) => context.setPublishers);
   useEffect(() => {
-    if (canPublish) {
+    if (canPublish && topic && schemaName) {
       setPublishers(id, [{ topic, schemaName, options: { datatypes } }]);
       return () => setPublishers(id, []);
     } else {

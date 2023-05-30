@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as base64 from "@protobufjs/base64";
-import { isEqual } from "lodash";
+import { isEqual, isMatch, uniqWith } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -73,6 +73,7 @@ type ResolvedService = {
   parsedResponse: ParsedChannel;
   requestMessageWriter: MessageWriter;
 };
+type MessageDefinitionMap = Map<string, MessageDefinition>;
 
 export default class FoxgloveWebSocketPlayer implements Player {
   readonly #sourceId: string;
@@ -295,12 +296,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
           ? CommonRosTypes.ros2galactic
           : CommonRosTypes.ros2humble;
 
+        const dataTypes: MessageDefinitionMap = new Map();
         for (const dataType in rosDataTypes) {
           const msgDef = (rosDataTypes as Record<string, MessageDefinition>)[dataType]!;
-          this.#datatypes.set(dataType, msgDef);
-          this.#datatypes.set(dataTypeToFullName(dataType), msgDef);
+          dataTypes.set(dataType, msgDef);
         }
-        this.#datatypes = new Map(this.#datatypes); // Signal that datatypes changed.
+        this.#updateDataTypes(dataTypes);
       }
 
       if (event.capabilities.includes(ServerCapability.clientPublish)) {
@@ -618,10 +619,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
           : new JsonMessageWriter();
 
         // Add type definitions for service response and request
-        for (const [name, types] of [...parsedRequest.datatypes, ...parsedResponse.datatypes]) {
-          this.#datatypes.set(name, types);
-        }
-        this.#datatypes = new Map(this.#datatypes); // Signal that datatypes changed.
+        this.#updateDataTypes(parsedRequest.datatypes);
+        this.#updateDataTypes(parsedResponse.datatypes);
 
         const resolvedService: ResolvedService = {
           service,
@@ -706,11 +705,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     // Update the _datatypes map;
     for (const { parsedChannel } of this.#channelsById.values()) {
-      for (const [name, types] of parsedChannel.datatypes) {
-        this.#datatypes.set(name, types);
-      }
+      this.#updateDataTypes(parsedChannel.datatypes);
     }
-    this.#datatypes = new Map(this.#datatypes); // Signal that datatypes changed.
+
     this.#emitState();
   }
 
@@ -854,14 +851,45 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {
-    // Since `setPublishers` is rarely called, we can get away with just unadvertising existing
-    // channels und re-advertising them again
-    for (const channel of this.#publicationsByTopic.values()) {
-      this.#client?.unadvertise(channel.id);
+    // Filter out duplicates.
+    const uniquePublications = uniqWith(publishers, isEqual);
+
+    // Save publications and return early if we are not connected.
+    if (!this.#client || this.#closed) {
+      this.#unresolvedPublications = uniquePublications;
+      return;
     }
-    this.#publicationsByTopic.clear();
-    this.#unresolvedPublications = publishers;
-    this.#setupPublishers();
+
+    // Determine new & removed publications.
+    const currentPublications = Array.from(this.#publicationsByTopic.values());
+    const removedPublications = currentPublications.filter((channel) => {
+      return (
+        uniquePublications.find(
+          ({ topic, schemaName }) => channel.topic === topic && channel.schemaName === schemaName,
+        ) == undefined
+      );
+    });
+    const newPublications = uniquePublications.filter(({ topic, schemaName }) => {
+      return (
+        currentPublications.find(
+          (publication) => publication.topic === topic && publication.schemaName === schemaName,
+        ) == undefined
+      );
+    });
+
+    // Unadvertise removed channels.
+    for (const channel of removedPublications) {
+      this.#unadvertiseChannel(channel);
+    }
+
+    // Advertise new channels.
+    for (const publication of newPublications) {
+      this.#advertiseChannel(publication);
+    }
+
+    if (removedPublications.length > 0 || newPublications.length > 0) {
+      this.#emitState();
+    }
   }
 
   public setParameter(key: string, value: ParameterValue): void {
@@ -988,58 +1016,89 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     this.#problems.removeProblems((id) => id.startsWith("pub:"));
 
-    const encoding = this.#supportedEncodings
-      ? this.#supportedEncodings.find((e) => SUPPORTED_PUBLICATION_ENCODINGS.includes(e))
-      : FALLBACK_PUBLICATION_ENCODING;
-
-    for (const { topic, schemaName, options } of this.#unresolvedPublications) {
-      const encodingProblemId = `pub:encoding:${topic}`;
-      const msgdefProblemId = `pub:msgdef:${topic}`;
-
-      if (!encoding) {
-        this.#problems.addProblem(encodingProblemId, {
-          severity: "warn",
-          message: `Cannot advertise topic '${topic}': Server does not support one of the following encodings for client-side publishing: ${SUPPORTED_PUBLICATION_ENCODINGS}`,
-        });
-        continue;
-      }
-
-      let messageWriter: Publication["messageWriter"] = undefined;
-      if (ROS_ENCODINGS.includes(encoding)) {
-        // Try to retrieve the ROS message definition for this topic
-        let msgdef: MessageDefinition[];
-        try {
-          const datatypes = options?.["datatypes"] as RosDatatypes | undefined;
-          if (!datatypes || !(datatypes instanceof Map)) {
-            throw new Error("The datatypes option is required for publishing");
-          }
-          msgdef = rosDatatypesToMessageDefinition(datatypes, schemaName);
-        } catch (error) {
-          log.debug(error);
-          this.#problems.addProblem(msgdefProblemId, {
-            severity: "warn",
-            message: `Unknown message definition for "${topic}"`,
-            tip: `Try subscribing to the topic "${topic}" before publishing to it`,
-          });
-          continue;
-        }
-
-        messageWriter =
-          encoding === "ros1" ? new Ros1MessageWriter(msgdef) : new Ros2MessageWriter(msgdef);
-      }
-
-      const channelId = this.#client.advertise(topic, encoding, schemaName);
-      this.#publicationsByTopic.set(topic, {
-        id: channelId,
-        topic,
-        encoding,
-        schemaName,
-        messageWriter,
-      });
+    for (const publication of this.#unresolvedPublications) {
+      this.#advertiseChannel(publication);
     }
 
     this.#unresolvedPublications = [];
     this.#emitState();
+  }
+
+  #advertiseChannel(publication: AdvertiseOptions) {
+    if (!this.#client) {
+      return;
+    }
+
+    const encoding = this.#supportedEncodings
+      ? this.#supportedEncodings.find((e) => SUPPORTED_PUBLICATION_ENCODINGS.includes(e))
+      : FALLBACK_PUBLICATION_ENCODING;
+
+    const { topic, schemaName, options } = publication;
+
+    const encodingProblemId = `pub:encoding:${topic}`;
+    const msgdefProblemId = `pub:msgdef:${topic}`;
+
+    if (!encoding) {
+      this.#problems.addProblem(encodingProblemId, {
+        severity: "warn",
+        message: `Cannot advertise topic '${topic}': Server does not support one of the following encodings for client-side publishing: ${SUPPORTED_PUBLICATION_ENCODINGS}`,
+      });
+      return;
+    }
+
+    let messageWriter: Publication["messageWriter"] = undefined;
+    if (ROS_ENCODINGS.includes(encoding)) {
+      // Try to retrieve the ROS message definition for this topic
+      let msgdef: MessageDefinition[];
+      try {
+        const datatypes = options?.["datatypes"] as RosDatatypes | undefined;
+        if (!datatypes || !(datatypes instanceof Map)) {
+          throw new Error("The datatypes option is required for publishing");
+        }
+        msgdef = rosDatatypesToMessageDefinition(datatypes, schemaName);
+      } catch (error) {
+        log.debug(error);
+        this.#problems.addProblem(msgdefProblemId, {
+          severity: "warn",
+          message: `Unknown message definition for "${topic}"`,
+          tip: `Try subscribing to the topic "${topic}" before publishing to it`,
+        });
+        return;
+      }
+
+      messageWriter =
+        encoding === "ros1" ? new Ros1MessageWriter(msgdef) : new Ros2MessageWriter(msgdef);
+    }
+
+    const channelId = this.#client.advertise(topic, encoding, schemaName);
+    this.#publicationsByTopic.set(topic, {
+      id: channelId,
+      topic,
+      encoding,
+      schemaName,
+      messageWriter,
+    });
+
+    for (const problemId of [encodingProblemId, msgdefProblemId]) {
+      if (this.#problems.hasProblem(problemId)) {
+        this.#problems.removeProblem(problemId);
+      }
+    }
+  }
+
+  #unadvertiseChannel(channel: Publication) {
+    if (!this.#client) {
+      return;
+    }
+
+    this.#client.unadvertise(channel.id);
+    this.#publicationsByTopic.delete(channel.topic);
+    const problemIds = [`pub:encoding:${channel.topic}`, `pub:msgdef:${channel.topic}`];
+    for (const problemId of problemIds) {
+      if (this.#problems.hasProblem(problemId)) {
+        this.#problems.removeProblem(problemId);
+      }
+    }
   }
 
   #resetSessionState(): void {
@@ -1052,6 +1111,36 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#hasReceivedMessage = false;
     this.#problems.clear();
     this.#parameters.clear();
+  }
+
+  #updateDataTypes(datatypes: MessageDefinitionMap): void {
+    let updatedDatatypes: RosDatatypes | undefined = undefined;
+    const maybeRos = ["ros1", "ros2"].includes(this.#profile ?? "");
+    for (const [name, types] of datatypes) {
+      const knownTypes = this.#datatypes.get(name);
+      if (knownTypes && !isMatch(types, knownTypes)) {
+        this.#problems.addProblem(`schema-changed-${name}`, {
+          message: `Definition of schema '${name}' has changed during the server's runtime`,
+          severity: "error",
+        });
+      } else {
+        if (updatedDatatypes == undefined) {
+          updatedDatatypes = new Map(this.#datatypes);
+        }
+        updatedDatatypes.set(name, types);
+
+        const fullTypeName = dataTypeToFullName(name);
+        if (maybeRos && fullTypeName !== name) {
+          updatedDatatypes.set(fullTypeName, {
+            ...types,
+            name: types.name ? dataTypeToFullName(types.name) : undefined,
+          });
+        }
+      }
+    }
+    if (updatedDatatypes != undefined) {
+      this.#datatypes = updatedDatatypes; // Signal that datatypes changed.
+    }
   }
 }
 
