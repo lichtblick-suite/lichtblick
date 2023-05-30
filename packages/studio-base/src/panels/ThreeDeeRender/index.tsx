@@ -8,6 +8,11 @@ import ReactDOM from "react-dom";
 import { useCrash } from "@foxglove/hooks";
 import { PanelExtensionContext } from "@foxglove/studio";
 import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
+import {
+  ForwardAnalyticsContextProvider,
+  ForwardedAnalytics,
+  useForwardAnalytics,
+} from "@foxglove/studio-base/components/ForwardAnalyticsContextProvider";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -17,6 +22,7 @@ import { InterfaceMode } from "./types";
 
 function initPanel(
   crash: ReturnType<typeof useCrash>,
+  forwardedAnalytics: ForwardedAnalytics,
   interfaceMode: InterfaceMode,
   onDownloadImage: ((blob: Blob, fileName: string) => void) | undefined,
   context: PanelExtensionContext,
@@ -24,11 +30,13 @@ function initPanel(
   ReactDOM.render(
     <StrictMode>
       <CaptureErrorBoundary onError={crash}>
-        <ThreeDeeRender
-          context={context}
-          interfaceMode={interfaceMode}
-          onDownloadImage={onDownloadImage}
-        />
+        <ForwardAnalyticsContextProvider forwardedAnalytics={forwardedAnalytics}>
+          <ThreeDeeRender
+            context={context}
+            interfaceMode={interfaceMode}
+            onDownloadImage={onDownloadImage}
+          />
+        </ForwardAnalyticsContextProvider>
       </CaptureErrorBoundary>
     </StrictMode>,
     context.panelElement,
@@ -46,9 +54,12 @@ type Props = {
 
 function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
+
+  const forwardedAnalytics = useForwardAnalytics();
   const boundInitPanel = useMemo(
-    () => initPanel.bind(undefined, crash, interfaceMode, props.onDownloadImage),
-    [crash, interfaceMode, props.onDownloadImage],
+    () =>
+      initPanel.bind(undefined, crash, forwardedAnalytics, interfaceMode, props.onDownloadImage),
+    [crash, forwardedAnalytics, interfaceMode, props.onDownloadImage],
   );
 
   return (
