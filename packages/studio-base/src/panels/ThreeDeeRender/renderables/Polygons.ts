@@ -7,7 +7,7 @@ import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
@@ -65,9 +65,14 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     super("foxglove.Polygons", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(POLYGON_STAMPED_DATATYPES, this.#handlePolygon);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: POLYGON_STAMPED_DATATYPES,
+        subscription: { handler: this.#handlePolygon },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

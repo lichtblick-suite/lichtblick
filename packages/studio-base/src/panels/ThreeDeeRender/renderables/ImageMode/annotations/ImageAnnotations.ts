@@ -17,7 +17,11 @@ import {
 import { LabelPool } from "@foxglove/three-text";
 
 import { RenderableTopicAnnotations } from "./RenderableTopicAnnotations";
-import { ImageAnnotationSubscription, ImageModeConfig } from "../../../IRenderer";
+import {
+  AnyRendererSubscription,
+  ImageAnnotationSubscription,
+  ImageModeConfig,
+} from "../../../IRenderer";
 import { SettingsTreeEntry } from "../../../SettingsManager";
 import { IMAGE_ANNOTATIONS_DATATYPES } from "../../../foxglove";
 import { IMAGE_MARKER_ARRAY_DATATYPES, IMAGE_MARKER_DATATYPES } from "../../../ros";
@@ -37,10 +41,6 @@ interface ImageAnnotationsContext {
   config(): Immutable<ImageModeConfig>;
   updateConfig(updateHandler: (draft: ImageModeConfig) => void): void;
   updateSettingsTree(): void;
-  addSchemaSubscriptions<T>(
-    schemaNames: Set<string>,
-    handler: (messageEvent: MessageEvent<T>) => void,
-  ): void;
   labelPool: LabelPool;
   messageHandler: MessageHandler;
 }
@@ -93,11 +93,14 @@ export class ImageAnnotations extends THREE.Object3D {
     context.messageHandler.addListener(this.#updateFromMessageState);
   }
 
-  public addSubscriptions(): void {
-    this.#context.addSchemaSubscriptions(
-      ALL_SUPPORTED_SCHEMAS,
-      this.#context.messageHandler.handleAnnotations,
-    );
+  public getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: ALL_SUPPORTED_SCHEMAS,
+        subscription: { handler: this.#context.messageHandler.handleAnnotations },
+      },
+    ];
   }
 
   public dispose(): void {

@@ -20,7 +20,7 @@ import {
   hasSeparateRgbaFields,
 } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
@@ -391,8 +391,14 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     super("foxglove.Grid", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    this.renderer.addSchemaSubscriptions(GRID_DATATYPES, this.#handleFoxgloveGrid);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: GRID_DATATYPES,
+        subscription: { handler: this.#handleFoxgloveGrid },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

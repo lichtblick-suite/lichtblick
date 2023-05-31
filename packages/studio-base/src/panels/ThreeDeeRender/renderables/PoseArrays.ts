@@ -13,7 +13,7 @@ import { Axis, AXIS_LENGTH } from "./Axis";
 import { createArrowMarker } from "./Poses";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
@@ -143,11 +143,24 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     super("foxglove.PoseArrays", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(POSE_ARRAY_DATATYPES, this.#handlePoseArray);
-    renderer.addSchemaSubscriptions(POSES_IN_FRAME_DATATYPES, this.#handlePosesInFrame);
-    renderer.addSchemaSubscriptions(NAV_PATH_DATATYPES, this.#handleNavPath);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: POSE_ARRAY_DATATYPES,
+        subscription: { handler: this.#handlePoseArray },
+      },
+      {
+        type: "schema",
+        schemaNames: POSES_IN_FRAME_DATATYPES,
+        subscription: { handler: this.#handlePosesInFrame },
+      },
+      {
+        type: "schema",
+        schemaNames: NAV_PATH_DATATYPES,
+        subscription: { handler: this.#handleNavPath },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

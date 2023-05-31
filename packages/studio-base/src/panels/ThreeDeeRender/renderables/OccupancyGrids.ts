@@ -8,7 +8,7 @@ import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
@@ -86,8 +86,14 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     super("foxglove.OccupancyGrids", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    this.renderer.addSchemaSubscriptions(OCCUPANCY_GRID_DATATYPES, this.#handleOccupancyGrid);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: OCCUPANCY_GRID_DATATYPES,
+        subscription: { handler: this.#handleOccupancyGrid },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

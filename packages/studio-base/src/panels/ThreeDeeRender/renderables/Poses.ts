@@ -12,7 +12,7 @@ import type { RosValue } from "@foxglove/studio-base/players/types";
 import { Axis, AXIS_LENGTH } from "./Axis";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
@@ -105,14 +105,24 @@ export class Poses extends SceneExtension<PoseRenderable> {
     super("foxglove.Poses", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(POSE_STAMPED_DATATYPES, this.#handlePoseStamped);
-    renderer.addSchemaSubscriptions(POSE_IN_FRAME_DATATYPES, this.#handlePoseInFrame);
-    renderer.addSchemaSubscriptions(
-      POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
-      this.#handlePoseWithCovariance,
-    );
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: POSE_STAMPED_DATATYPES,
+        subscription: { handler: this.#handlePoseStamped },
+      },
+      {
+        type: "schema",
+        schemaNames: POSE_IN_FRAME_DATATYPES,
+        subscription: { handler: this.#handlePoseInFrame },
+      },
+      {
+        type: "schema",
+        schemaNames: POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
+        subscription: { handler: this.#handlePoseWithCovariance },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

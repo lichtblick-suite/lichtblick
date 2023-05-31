@@ -8,7 +8,7 @@ import { DeepPartial } from "ts-essentials";
 
 import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
 
-import type { IRenderer } from "./IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "./IRenderer";
 import { Path } from "./LayerErrors";
 import { BaseUserData, Renderable } from "./Renderable";
 import type { SettingsTreeEntry } from "./SettingsManager";
@@ -35,8 +35,7 @@ export type PartialMessageEvent<T> = MessageEvent<DeepPartial<T>>;
  * - Override `startFrame()` to execute code at the start of each frame. Call `super.startFrame()`
  *   to run `updatePose()` on each entry in `this.renderables`.
  * - Override `settingsNodes()` to add entries to the settings sidebar.
- * - Message subscriptions are added with `renderer.addSchemaSubscriptions()` or
- *   `renderer.addTopicSubscription()` in `this.addSubscriptionsToRenderer()`.
+ * - Message subscriptions are created with `getSubscriptions()`.
  * - Custom layer actions are added with `renderer.addCustomLayerAction()`.
  */
 export class SceneExtension<
@@ -85,7 +84,9 @@ export class SceneExtension<
    * This will be called by the renderer when building topic and schema subscriptions on
    * initialization and when imageOnlyMode becomes enabled
    */
-  public addSubscriptionsToRenderer(): void {}
+  public getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [];
+  }
 
   /**
    * Called when seeking or a new data source is loaded. The base class implementation removes all

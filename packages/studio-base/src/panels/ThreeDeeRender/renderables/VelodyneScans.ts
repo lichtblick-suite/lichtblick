@@ -30,7 +30,7 @@ import {
   pointCloudMaterial,
   POINT_CLOUD_REQUIRED_FIELDS,
 } from "./pointExtensionUtils";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { VELODYNE_SCAN_DATATYPES } from "../ros";
@@ -131,8 +131,14 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
     super("foxglove.VelodyneScans", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    this.renderer.addSchemaSubscriptions(VELODYNE_SCAN_DATATYPES, this.#handleVelodyneScan);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: VELODYNE_SCAN_DATATYPES,
+        subscription: { handler: this.#handleVelodyneScan },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

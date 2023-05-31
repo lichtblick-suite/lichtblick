@@ -8,7 +8,7 @@ import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction } from "@foxglove/studio";
 
 import { LayerSettingsMarker, LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
@@ -37,9 +37,19 @@ export class Markers extends SceneExtension<TopicMarkers> {
   public constructor(renderer: IRenderer) {
     super("foxglove.Markers", renderer);
   }
-  public override addSubscriptionsToRenderer(): void {
-    this.renderer.addSchemaSubscriptions(MARKER_ARRAY_DATATYPES, this.#handleMarkerArray);
-    this.renderer.addSchemaSubscriptions(MARKER_DATATYPES, this.#handleMarker);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: MARKER_ARRAY_DATATYPES,
+        subscription: { handler: this.#handleMarkerArray },
+      },
+      {
+        type: "schema",
+        schemaNames: MARKER_DATATYPES,
+        subscription: { handler: this.#handleMarker },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

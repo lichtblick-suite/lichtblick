@@ -11,7 +11,7 @@ import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { RenderableLineList } from "./markers/RenderableLineList";
 import { cameraInfosEqual, normalizeCameraInfo, projectPixel } from "./projections";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
@@ -85,10 +85,19 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     super("foxglove.Cameras", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(ROS_CAMERA_INFO_DATATYPES, this.#handleCameraInfo);
-    renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, this.#handleCameraInfo);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: ROS_CAMERA_INFO_DATATYPES,
+        subscription: { handler: this.#handleCameraInfo },
+      },
+      {
+        type: "schema",
+        schemaNames: CAMERA_CALIBRATION_DATATYPES,
+        subscription: { handler: this.#handleCameraInfo },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

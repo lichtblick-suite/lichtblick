@@ -27,7 +27,7 @@ import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
 import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
 import { FieldReader, getReader, isSupportedField } from "./pointClouds/fieldReaders";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
@@ -636,10 +636,19 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     super("foxglove.PointClouds", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(ROS_POINTCLOUD_DATATYPES, this.#handleRosPointCloud);
-    renderer.addSchemaSubscriptions(FOXGLOVE_POINTCLOUD_DATATYPES, this.#handleFoxglovePointCloud);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: ROS_POINTCLOUD_DATATYPES,
+        subscription: { handler: this.#handleRosPointCloud },
+      },
+      {
+        type: "schema",
+        schemaNames: FOXGLOVE_POINTCLOUD_DATATYPES,
+        subscription: { handler: this.#handleFoxglovePointCloud },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

@@ -26,7 +26,7 @@ import {
 } from "./Images/imageNormalizers";
 import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "./Images/topicPrefixMatching";
 import { cameraInfosEqual, normalizeCameraInfo } from "./projections";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import {
@@ -89,19 +89,37 @@ export class Images extends SceneExtension<ImageRenderable> {
     super.dispose();
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-
-    renderer.addSchemaSubscriptions(ALL_CAMERA_INFO_SCHEMAS, {
-      handler: this.#handleCameraInfo,
-      shouldSubscribe: this.#cameraInfoShouldSubscribe,
-    });
-
-    renderer.addSchemaSubscriptions(ROS_IMAGE_DATATYPES, this.#handleRosRawImage);
-    renderer.addSchemaSubscriptions(ROS_COMPRESSED_IMAGE_DATATYPES, this.#handleRosCompressedImage);
-
-    renderer.addSchemaSubscriptions(RAW_IMAGE_DATATYPES, this.#handleRawImage);
-    renderer.addSchemaSubscriptions(COMPRESSED_IMAGE_DATATYPES, this.#handleCompressedImage);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: ALL_CAMERA_INFO_SCHEMAS,
+        subscription: {
+          handler: this.#handleCameraInfo,
+          shouldSubscribe: this.#cameraInfoShouldSubscribe,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: ROS_IMAGE_DATATYPES,
+        subscription: { handler: this.#handleRosRawImage },
+      },
+      {
+        type: "schema",
+        schemaNames: ROS_COMPRESSED_IMAGE_DATATYPES,
+        subscription: { handler: this.#handleRosCompressedImage },
+      },
+      {
+        type: "schema",
+        schemaNames: RAW_IMAGE_DATATYPES,
+        subscription: { handler: this.#handleRawImage },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_IMAGE_DATATYPES,
+        subscription: { handler: this.#handleCompressedImage },
+      },
+    ];
   }
 
   /**

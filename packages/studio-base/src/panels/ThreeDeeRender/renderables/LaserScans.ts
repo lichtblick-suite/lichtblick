@@ -19,7 +19,7 @@ import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
-import { IRenderer } from "../IRenderer";
+import { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
@@ -275,10 +275,19 @@ export class LaserScans extends SceneExtension<LaserScanRenderable> {
     super("foxglove.LaserScans", renderer);
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(ROS_LASERSCAN_DATATYPES, this.#handleLaserScan);
-    renderer.addSchemaSubscriptions(FOXGLOVE_LASERSCAN_DATATYPES, this.#handleLaserScan);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: ROS_LASERSCAN_DATATYPES,
+        subscription: { handler: this.#handleLaserScan },
+      },
+      {
+        type: "schema",
+        schemaNames: FOXGLOVE_LASERSCAN_DATATYPES,
+        subscription: { handler: this.#handleLaserScan },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

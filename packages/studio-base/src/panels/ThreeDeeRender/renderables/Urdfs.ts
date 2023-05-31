@@ -19,7 +19,7 @@ import { RenderableCylinder } from "./markers/RenderableCylinder";
 import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
@@ -170,12 +170,23 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     }
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    this.renderer.addTopicSubscription(TOPIC_NAME, this.#handleRobotDescription);
-    // Note that this subscription will never happen because it does not appear as a topic in the
-    // topic list that can have its visibility toggled on. The ThreeDeeRender subscription logic
-    // needs to become more flexible to make this possible
-    this.renderer.addSchemaSubscriptions(JOINTSTATE_DATATYPES, this.#handleJointState);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "topic",
+        topicName: TOPIC_NAME,
+        subscription: { handler: this.#handleRobotDescription },
+      },
+
+      // Note that this subscription will never happen because it does not appear as a topic in the
+      // topic list that can have its visibility toggled on. The ThreeDeeRender subscription logic
+      // needs to become more flexible to make this possible
+      {
+        type: "schema",
+        schemaNames: JOINTSTATE_DATATYPES,
+        subscription: { handler: this.#handleJointState },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

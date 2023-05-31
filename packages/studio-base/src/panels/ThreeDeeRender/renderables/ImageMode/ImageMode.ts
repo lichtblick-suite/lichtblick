@@ -28,7 +28,7 @@ import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms
 import { ImageModeCamera } from "./ImageModeCamera";
 import { MessageHandler, MessageRenderState } from "./MessageHandler";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
-import type { IRenderer, ImageModeConfig } from "../../IRenderer";
+import type { AnyRendererSubscription, IRenderer, ImageModeConfig } from "../../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
 import { SettingsTreeEntry } from "../../SettingsManager";
 import {
@@ -159,9 +159,6 @@ export class ImageMode
       updateSettingsTree: () => {
         this.updateSettingsTree();
       },
-      addSchemaSubscriptions: (schemaNames, handler) => {
-        renderer.addSchemaSubscriptions(schemaNames, handler);
-      },
       labelPool: renderer.labelPool,
       messageHandler: this.#messageHandler,
     });
@@ -211,31 +208,50 @@ export class ImageMode
     this.dispatchEvent({ type: "hasModifiedViewChanged" });
   }
 
-  public override addSubscriptionsToRenderer(): void {
-    const renderer = this.renderer;
-    renderer.addSchemaSubscriptions(ALL_SUPPORTED_CALIBRATION_SCHEMAS, {
-      handler: this.#messageHandler.handleCameraInfo,
-      shouldSubscribe: this.#cameraInfoShouldSubscribe,
-    });
-
-    renderer.addSchemaSubscriptions(ROS_IMAGE_DATATYPES, {
-      handler: this.#messageHandler.handleRosRawImage,
-      shouldSubscribe: this.#imageShouldSubscribe,
-    });
-    renderer.addSchemaSubscriptions(ROS_COMPRESSED_IMAGE_DATATYPES, {
-      handler: this.#messageHandler.handleRosCompressedImage,
-      shouldSubscribe: this.#imageShouldSubscribe,
-    });
-
-    renderer.addSchemaSubscriptions(RAW_IMAGE_DATATYPES, {
-      handler: this.#messageHandler.handleRawImage,
-      shouldSubscribe: this.#imageShouldSubscribe,
-    });
-    renderer.addSchemaSubscriptions(COMPRESSED_IMAGE_DATATYPES, {
-      handler: this.#messageHandler.handleCompressedImage,
-      shouldSubscribe: this.#imageShouldSubscribe,
-    });
-    this.#annotations.addSubscriptions();
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    const subscriptions: AnyRendererSubscription[] = [
+      {
+        type: "schema",
+        schemaNames: ALL_SUPPORTED_CALIBRATION_SCHEMAS,
+        subscription: {
+          handler: this.#messageHandler.handleCameraInfo,
+          shouldSubscribe: this.#cameraInfoShouldSubscribe,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: ROS_IMAGE_DATATYPES,
+        subscription: {
+          handler: this.#messageHandler.handleRosRawImage,
+          shouldSubscribe: this.#imageShouldSubscribe,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: ROS_COMPRESSED_IMAGE_DATATYPES,
+        subscription: {
+          handler: this.#messageHandler.handleRosCompressedImage,
+          shouldSubscribe: this.#imageShouldSubscribe,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: RAW_IMAGE_DATATYPES,
+        subscription: {
+          handler: this.#messageHandler.handleRawImage,
+          shouldSubscribe: this.#imageShouldSubscribe,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_IMAGE_DATATYPES,
+        subscription: {
+          handler: this.#messageHandler.handleCompressedImage,
+          shouldSubscribe: this.#imageShouldSubscribe,
+        },
+      },
+    ];
+    return subscriptions.concat(this.#annotations.getSubscriptions());
   }
 
   public override dispose(): void {

@@ -22,7 +22,7 @@ import { SettingsTreeAction } from "@foxglove/studio";
 
 import { TopicEntities } from "./TopicEntities";
 import { PrimitivePool } from "./primitives/PrimitivePool";
-import type { IRenderer } from "../IRenderer";
+import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
@@ -52,8 +52,14 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   public constructor(renderer: IRenderer) {
     super("foxglove.SceneEntities", renderer);
   }
-  public override addSubscriptionsToRenderer(): void {
-    this.renderer.addSchemaSubscriptions(SCENE_UPDATE_DATATYPES, this.#handleSceneUpdate);
+  public override getSubscriptions(): readonly AnyRendererSubscription[] {
+    return [
+      {
+        type: "schema",
+        schemaNames: SCENE_UPDATE_DATATYPES,
+        subscription: { handler: this.#handleSceneUpdate },
+      },
+    ];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
