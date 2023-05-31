@@ -37,7 +37,7 @@ import type {
 } from "./IRenderer";
 import type { PickedRenderable } from "./Picker";
 import { SELECTED_ID_VARIABLE } from "./Renderable";
-import { LegacyImageConfig, Renderer } from "./Renderer";
+import { Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent } from "./RendererContext";
 import { RendererOverlay } from "./RendererOverlay";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
@@ -118,16 +118,6 @@ export function ThreeDeeRender(props: {
       Partial<LayerSettingsTransform>
     >;
 
-    // Merge in config from the legacy Image panel
-    const legacyImageConfig = partialConfig as DeepPartial<LegacyImageConfig> | undefined;
-    const imageMode: ImageModeConfig = {
-      imageTopic: legacyImageConfig?.cameraTopic,
-      ...partialConfig?.imageMode,
-      annotations: partialConfig?.imageMode?.annotations as
-        | ImageModeConfig["annotations"]
-        | undefined,
-    };
-
     return {
       cameraState,
       followMode: partialConfig?.followMode ?? "follow-pose",
@@ -137,7 +127,12 @@ export function ThreeDeeRender(props: {
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
       publish,
-      imageMode,
+      imageMode: {
+        ...partialConfig?.imageMode,
+        annotations: partialConfig?.imageMode?.annotations as
+          | ImageModeConfig["annotations"]
+          | undefined,
+      },
     };
   });
   const configRef = useLatest(config);

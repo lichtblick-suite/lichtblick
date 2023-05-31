@@ -94,24 +94,6 @@ import { InterfaceMode } from "./types";
 
 const log = Logger.getLogger(__filename);
 
-/** Legacy Image panel settings that occur at the root level */
-export type LegacyImageConfig = {
-  cameraTopic: string;
-  enabledMarkerTopics: string[];
-  synchronize: boolean;
-  flipHorizontal: boolean;
-  flipVertical: boolean;
-  maxValue: number;
-  minValue: number;
-  mode: "fit" | "fill" | "other";
-  pan: { x: number; y: number };
-  rotation: number;
-  smooth: boolean;
-  transformMarkers: boolean;
-  zoom: number;
-  zoomPercentage: number;
-};
-
 /** Menu item entry and callback for the "Custom Layers" menu */
 export type CustomLayerAction = {
   action: SettingsTreeNodeActionItem;
