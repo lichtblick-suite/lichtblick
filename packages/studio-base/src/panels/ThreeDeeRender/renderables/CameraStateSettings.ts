@@ -268,10 +268,13 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       return;
     }
 
-    const path = action.payload.path;
-    const category = path[0]!;
-    const value = action.payload.value;
-    // CAMERA SETTINGS
+    const {
+      path: [category],
+      path,
+      value,
+    } = action.payload;
+
+    // camera settings
     if (category === "cameraState") {
       if (path[1] === "syncCamera") {
         // Update the configuration. This is done manually since syncCamera is under `scene`, not `cameraState`
@@ -281,9 +284,12 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       } else {
         this.renderer.updateConfig((draft) => set(draft, path, value));
       }
+
+      this.updateSettingsTree();
     }
+
+    // frame settings
     if (category === "general") {
-      // FRAME SETTINGS
       if (path[1] === "followTf") {
         const followTf = value as string | undefined;
         // Update the configuration. This is done manually since followTf is at the top level of
@@ -310,12 +316,9 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
           draft.followMode = followMode;
         });
       }
-    } else {
-      return;
-    }
 
-    // Update the settings sidebar
-    this.updateSettingsTree();
+      this.updateSettingsTree();
+    }
   };
 
   // this extension has  NO RENDERABLES so the parent startFrame would do nothing
