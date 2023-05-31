@@ -9640,7 +9640,7 @@ __metadata:
     "@foxglove/studio-base": "workspace:*"
     "@foxglove/studio-desktop": "workspace:*"
     electron: 25.0.0
-    playwright: 1.34.0
+    playwright: 1.34.3
     webpack: 5.84.1
   languageName: unknown
   linkType: soft
@@ -16850,21 +16850,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.34.0":
-  version: 1.34.0
-  resolution: "playwright-core@npm:1.34.0"
-  checksum: 1821ab254b3c756e52c144c26cae7250dd5a1c779277cdd583bd289501d45cceaea40a8185ebf7eaa56b8291e4a042e3eef65f511da2306349c275794c9a582d
+"playwright-core@npm:1.34.3":
+  version: 1.34.3
+  resolution: "playwright-core@npm:1.34.3"
+  bin:
+    playwright-core: cli.js
+  checksum: eaf9e9b2d77b9726867dcbc641a1c72b0e8f680cdd71ff904366deea1c96141ff7563f6c6fb29f9975309d1b87dead97ea93f6f44953b59946882fb785b34867
   languageName: node
   linkType: hard
 
-"playwright@npm:1.34.0":
-  version: 1.34.0
-  resolution: "playwright@npm:1.34.0"
+"playwright@npm:1.34.3":
+  version: 1.34.3
+  resolution: "playwright@npm:1.34.3"
   dependencies:
-    playwright-core: 1.34.0
+    playwright-core: 1.34.3
   bin:
     playwright: cli.js
-  checksum: 5e5586e7c4e42f206526fe4306e35c68b7af353d6e3701c9e1045940aa3a916ac50b0b7c27a8eaeb3831ddc4f1146a367f98a5b6b841f977e9770b925e81877f
+  checksum: 4495b23eacc673c03fd4706ce5914dd4855d46657e63411e54bb928e796d7ca59a6101379000ec73e2731437d04a441242cebbb6d4e069e050255db9eff65f7d
   languageName: node
   linkType: hard
 
@@ -21221,7 +21223,7 @@ __metadata:
     "@foxglove/log": "workspace:*"
     "@foxglove/studio-web": "workspace:*"
     "@types/serve-handler": ^6
-    playwright: 1.34.0
+    playwright: 1.34.3
     serve-handler: 6.1.5
     webpack: 5.84.1
     webpack-dev-server: 4.15.0
