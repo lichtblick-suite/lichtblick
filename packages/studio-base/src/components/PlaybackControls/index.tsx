@@ -12,23 +12,23 @@
 //   You may not use this file except in compliance with the License.
 
 import {
+  ArrowRepeatAll20Regular,
+  ArrowRepeatAllOff20Regular,
+  Info24Regular,
+  Next20Filled,
+  Next20Regular,
   Pause20Filled,
   Pause20Regular,
   Play20Filled,
   Play20Regular,
-  Next20Filled,
-  Next20Regular,
   Previous20Filled,
   Previous20Regular,
-  Info24Regular,
-  ArrowRepeatAll20Regular,
-  ArrowRepeatAllOff20Regular,
 } from "@fluentui/react-icons";
 import { Tooltip } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { compare, Time } from "@foxglove/rostime";
+import { Time, compare } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { CreateEventDialog } from "@foxglove/studio-base/components/CreateEventDialog";
 import { DataSourceInfoView } from "@foxglove/studio-base/components/DataSourceInfoView";
@@ -45,8 +45,8 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import {
-  useWorkspaceStore,
   WorkspaceContextStore,
+  useWorkspaceStore,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
@@ -55,7 +55,7 @@ import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
-import { jumpSeek, DIRECTION } from "./sharedHelpers";
+import { DIRECTION, jumpSeek } from "./sharedHelpers";
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -66,6 +66,9 @@ const useStyles = makeStyles()((theme) => ({
     backgroundColor: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.divider}`,
     zIndex: 100000,
+  },
+  disabled: {
+    opacity: theme.palette.action.disabledOpacity,
   },
   popper: {
     "&[data-popper-placement*=top] .MuiTooltip-tooltip": {
@@ -93,7 +96,7 @@ export default function PlaybackControls(props: {
   const presence = useMessagePipeline(selectPresence);
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
   const repeat = useWorkspaceStore(selectPlaybackRepeat);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const { currentUser } = useCurrentUser();
@@ -205,8 +208,9 @@ export default function PlaybackControls(props: {
                 }
               >
                 <HoverableIconButton
-                  className={classes.dataSourceInfoButton}
-                  disabled={presence !== PlayerPresence.PRESENT}
+                  className={cx(classes.dataSourceInfoButton, {
+                    [classes.disabled]: disableControls,
+                  })}
                   size="small"
                   icon={<Info24Regular />}
                 />
