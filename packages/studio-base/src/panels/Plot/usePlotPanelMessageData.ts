@@ -4,6 +4,7 @@
 
 import { groupBy, isEmpty, pick } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLatest } from "react-use";
 
 import { isLessThan, isTimeInRangeInclusive, subtract } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
@@ -86,6 +87,9 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
     [allPaths, showSingleCurrentMessage],
   );
 
+  // Use a reference for the blocks time range to stabilize our addMessages callback.
+  const latestBlocksTimeRange = useLatest(blocksTimeRange);
+
   const addMessages = useCallback(
     (accumulated: TaggedPlotDataByPath, msgEvents: readonly MessageEvent[]) => {
       const lastEventTime = msgEvents[msgEvents.length - 1]?.receiveTime;
@@ -108,7 +112,7 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
           }
 
           const headerStamp = getTimestampForMessage(msgEvent.message);
-          const existingBlockRange = blocksTimeRange.byPath[path];
+          const existingBlockRange = latestBlocksTimeRange.current.byPath[path];
           if (
             existingBlockRange &&
             isTimeInRangeInclusive(
@@ -162,8 +166,8 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
       return newAccumulated ?? accumulated;
     },
     [
-      blocksTimeRange,
       cachedGetMessagePathDataItems,
+      latestBlocksTimeRange,
       followingView,
       showSingleCurrentMessage,
       topicToPaths,
