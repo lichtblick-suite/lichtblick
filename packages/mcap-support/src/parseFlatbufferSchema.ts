@@ -200,6 +200,7 @@ export function parseFlatbufferSchema(
       byteBuffer,
       typeIndex,
       byteBuffer.readInt32(byteBuffer.position()) + byteBuffer.position(),
+      false,
     );
     return toObject(table);
   };
