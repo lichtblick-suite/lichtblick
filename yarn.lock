@@ -2580,7 +2580,7 @@ __metadata:
     chart.js: 4.3.0
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
-    chromatic: 6.17.4
+    chromatic: 6.18.0
     comlink: 4.4.1
     crypto-browserify: 3.12.0
     css-loader: 6.7.4
@@ -4666,7 +4666,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/csf-tools@npm:7.0.18":
+"@storybook/csf-tools@npm:7.0.18, @storybook/csf-tools@npm:^7.0.12":
   version: 7.0.18
   resolution: "@storybook/csf-tools@npm:7.0.18"
   dependencies:
@@ -8469,18 +8469,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.17.4":
-  version: 6.17.4
-  resolution: "chromatic@npm:6.17.4"
+"chromatic@npm:6.18.0":
+  version: 6.18.0
+  resolution: "chromatic@npm:6.18.0"
   dependencies:
     "@discoveryjs/json-ext": ^0.5.7
+    "@storybook/csf-tools": ^7.0.12
     "@types/webpack-env": ^1.17.0
     snyk-nodejs-lockfile-parser: ^1.49.0
   bin:
     chroma: bin/main.cjs
     chromatic: bin/main.cjs
     chromatic-cli: bin/main.cjs
-  checksum: d49ebcc17f2f3010e95d06b5084b7802d293a4ad3cd571dc5b744f5e90763a19b643729fc3dcfe86beb44b6f542800378c7a4c1478b963d3adbdc58a1bfa9988
+  checksum: 1e3e679070d708f53096b7f4e195b1108c22ea42750a7721294bb20d404ab4859db1b3d3bfced6ce838dd5437bd71bb6e507d79efd8e4a2f05bfa7c482c7a4e0
   languageName: node
   linkType: hard
 
