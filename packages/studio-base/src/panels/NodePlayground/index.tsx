@@ -23,7 +23,6 @@ import {
   Link,
   Typography,
   inputClasses,
-  useTheme,
 } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -168,11 +167,10 @@ const userNodeSelector = (state: LayoutState) =>
 
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
-  const theme = useTheme();
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
   const userNodes = useCurrentLayoutSelector(userNodeSelector);

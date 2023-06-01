@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CloseIcon from "@mui/icons-material/Close";
-import { Dialog, DialogTitle, IconButton, Typography, useTheme } from "@mui/material";
+import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -45,8 +45,7 @@ export default function NotificationModal({
   notification: NotificationMessage;
   onRequestClose?: () => void;
 }): React.ReactElement {
-  const theme = useTheme();
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
 
   const displayPropsBySeverity = {
     error: theme.palette.error.main,

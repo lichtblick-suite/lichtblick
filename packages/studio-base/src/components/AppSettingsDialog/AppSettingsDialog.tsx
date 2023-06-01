@@ -19,7 +19,6 @@ import {
   Tabs,
   Typography,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { MouseEvent, SyntheticEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -200,8 +199,7 @@ export function AppSettingsDialog(
   const [telemetryEnabled, setTelemetryEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.TELEMETRY_ENABLED,
   );
-  const { classes, cx } = useStyles();
-  const theme = useTheme();
+  const { classes, cx, theme } = useStyles();
   const smUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   // automatic updates are a desktop-only setting

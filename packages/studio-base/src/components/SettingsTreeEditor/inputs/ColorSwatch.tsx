@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Theme, useTheme } from "@mui/material";
+import { Theme } from "@mui/material";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
@@ -47,8 +47,8 @@ const useStyles = makeStyles()((theme) => ({
 
 export function ColorSwatch(props: ColorSwatchProps): JSX.Element {
   const { color, size = "medium", className, ...rest } = props;
-  const { classes, cx } = useStyles();
-  const theme = useTheme();
+  const { classes, cx, theme } = useStyles();
+
   return (
     <div
       className={cx(

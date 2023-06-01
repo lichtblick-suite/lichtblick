@@ -7,15 +7,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import ErrorIcon from "@mui/icons-material/Error";
-import {
-  Button,
-  Divider,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Button, Divider, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { TFunction } from "i18next";
 import { isEqual, partition } from "lodash";
 import memoizeWeak from "memoize-weak";
@@ -210,9 +202,8 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     visibilityFilter: "all",
   });
   const { t } = useTranslation("settingsEditor");
-  const { classes, cx } = useStyles();
+  const { classes, cx, theme } = useStyles();
 
-  const theme = useTheme();
   const indent = props.path.length;
   const allowVisibilityToggle = props.settings?.visible != undefined;
   const visible = props.settings?.visible !== false;
