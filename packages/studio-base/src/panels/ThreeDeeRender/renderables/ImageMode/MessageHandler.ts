@@ -169,10 +169,6 @@ export class MessageHandler {
   ): void => {
     const annotations = normalizeAnnotations(messageEvent.message, messageEvent.schemaName);
 
-    if (!annotations) {
-      return;
-    }
-
     const { topic, schemaName } = messageEvent;
     if (this.#config.synchronize !== true) {
       this.#lastReceivedMessages.annotationsByTopicSchema.set(topic, schemaName, {

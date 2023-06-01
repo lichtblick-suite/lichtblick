@@ -677,16 +677,39 @@ const AnnotationsUpdateStory = (
     sizeInBytes: 0,
   };
 
+  const annotationShouldDisappear: MessageEvent<Partial<ImageAnnotations>> = {
+    topic: "annotationsToClear",
+    receiveTime: { sec: 0, nsec: 0 },
+    message: {
+      circles: [],
+      points: [],
+      texts: [
+        {
+          timestamp: { sec: 0, nsec: 0 },
+          position: { x: 30, y: 40 },
+          text: "erase me",
+          font_size: 5,
+          text_color: { r: 1, g: 0, b: 0, a: 1 },
+          background_color: { r: 1, g: 1, b: 0, a: 1 },
+        },
+      ],
+    },
+    schemaName: "foxglove.ImageAnnotations",
+    sizeInBytes: 0,
+  };
+
   const [fixture, setFixture] = useState({
     topics: [
       { name: "calibration", schemaName: "foxglove.CameraCalibration" },
       { name: "camera", schemaName: "foxglove.RawImage" },
       { name: "annotations", schemaName: "foxglove.ImageAnnotations" },
+      { name: "annotationsToClear", schemaName: "foxglove.ImageAnnotations" },
     ],
     frame: {
       calibration: [calibrationMessage],
       camera: [cameraMessage],
       annotations: [annotationsMessage],
+      annotationsToClear: [annotationShouldDisappear],
     },
     capabilities: [],
     activeData: {
@@ -704,6 +727,14 @@ const AnnotationsUpdateStory = (
       sizeInBytes: 0,
     };
 
+    const emptyAnnotations: MessageEvent<Partial<ImageAnnotations>> = {
+      topic: "annotationsToClear",
+      schemaName: "foxglove.ImageAnnotations",
+      receiveTime: { sec: 1, nsec: 0 },
+      message: {},
+      sizeInBytes: 0,
+    };
+
     let timeOutID2: NodeJS.Timeout;
 
     const timeOutID = setTimeout(() => {
@@ -711,6 +742,7 @@ const AnnotationsUpdateStory = (
         const newFixture = { ...oldFixture };
         newFixture.frame = {
           annotations: [newAnnotations],
+          annotationsToClear: [emptyAnnotations],
           calibration: [],
           camera: [],
         };
@@ -741,6 +773,11 @@ const AnnotationsUpdateStory = (
             annotations: [
               {
                 topic: "annotations",
+                schemaName: "foxglove.ImageAnnotations",
+                settings: { visible: true },
+              },
+              {
+                topic: "annotationsToClear",
                 schemaName: "foxglove.ImageAnnotations",
                 settings: { visible: true },
               },

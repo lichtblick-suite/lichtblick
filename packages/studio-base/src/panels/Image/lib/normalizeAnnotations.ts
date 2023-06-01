@@ -58,9 +58,7 @@ function foxglovePointTypeToStyle(
   return undefined;
 }
 
-function normalizeFoxgloveImageAnnotations(
-  message: Partial<ImageAnnotations>,
-): Annotation[] | undefined {
+function normalizeFoxgloveImageAnnotations(message: Partial<ImageAnnotations>): Annotation[] {
   const annotations: Annotation[] = [];
 
   const circles = message.circles ?? [];
@@ -115,14 +113,14 @@ function normalizeFoxgloveImageAnnotations(
     });
   }
 
-  return annotations.length === 0 ? undefined : annotations;
+  return annotations;
 }
 
 function normalizeTimestamp(stamp: Time | bigint): Time {
   return typeof stamp === "bigint" ? fromNanoSec(stamp) : stamp;
 }
 
-function normalizeRosImageMarkerArray(message: ImageMarkerArray): Annotation[] | undefined {
+function normalizeRosImageMarkerArray(message: ImageMarkerArray): Annotation[] {
   return filterMap(message.markers, (marker, i) => normalizeRosImageMarker(marker, ["markers", i]));
 }
 
@@ -212,10 +210,7 @@ function toPOD(message: unknown): unknown {
     : message;
 }
 
-function normalizeAnnotations(
-  maybeLazyMessage: unknown,
-  datatype: string,
-): Annotation[] | undefined {
+function normalizeAnnotations(maybeLazyMessage: unknown, datatype: string): Annotation[] {
   // The panel may send the annotations to a web worker, for this we need
   const message = toPOD(maybeLazyMessage);
 
@@ -226,10 +221,7 @@ function normalizeAnnotations(
     case "visualization_msgs/msg/ImageMarker":
     case "ros.visualization_msgs.ImageMarker": {
       const normalized = normalizeRosImageMarker(message as ImageMarker, []);
-      if (normalized) {
-        return [normalized];
-      }
-      break;
+      return normalized ? [normalized] : [];
     }
     // marker arrays
     case "foxglove_msgs/ImageMarkerArray":
@@ -250,8 +242,7 @@ function normalizeAnnotations(
       return normalizeFoxgloveImageAnnotations(message as ImageAnnotations);
     }
   }
-
-  return undefined;
+  return [];
 }
 
 /** Only used for getting details to display from original message */

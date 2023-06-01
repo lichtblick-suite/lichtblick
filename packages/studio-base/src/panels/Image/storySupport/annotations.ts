@@ -180,8 +180,7 @@ const markers: ImageMarker[] = [
   }),
 ];
 
-export const annotations =
-  normalizeAnnotations({ markers }, "foxglove_msgs/ImageMarkerArray") ?? [];
+export const annotations = normalizeAnnotations({ markers }, "foxglove_msgs/ImageMarkerArray");
 
 const points = [
   { x: 40, y: 40 },

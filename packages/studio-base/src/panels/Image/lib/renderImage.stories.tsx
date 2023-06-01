@@ -159,7 +159,7 @@ export const FoxgloveAnnotations: StoryObj = {
         },
         imageMessage,
         rawMarkerData: {
-          markers: normalizeAnnotations(foxgloveAnnotations, "foxglove.ImageAnnotations")!,
+          markers: normalizeAnnotations(foxgloveAnnotations, "foxglove.ImageAnnotations"),
           cameraInfo,
           transformMarkers: false,
         },
