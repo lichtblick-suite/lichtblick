@@ -317,7 +317,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
 
   useNativeAppMenuEvent(
     "open-file",
-    useCallback(() => dialogActions.dataSource.open("file"), [dialogActions.dataSource]),
+    useCallback(async () => await dialogActions.openFile.open(), [dialogActions.openFile]),
   );
 
   useNativeAppMenuEvent(

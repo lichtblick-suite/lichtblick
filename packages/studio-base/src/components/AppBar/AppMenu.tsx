@@ -19,7 +19,7 @@ import {
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
-import { NestedMenuItem, MenuItem } from "./NestedMenuItem";
+import { MenuItem, NestedMenuItem } from "./NestedMenuItem";
 
 type AppMenuProps = {
   handleClose: () => void;
@@ -89,9 +89,9 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         label: t("openLocalFile"),
         key: "open-file",
         onClick: () => {
-          dialogActions.dataSource.open("file");
           handleAnalytics("open-file");
           handleNestedMenuClose();
+          dialogActions.openFile.open().catch(console.error);
         },
       },
       {
@@ -124,7 +124,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     return items;
   }, [
     classes.truncate,
-    dialogActions.dataSource,
+    dialogActions,
     handleAnalytics,
     handleNestedMenuClose,
     recentSources,

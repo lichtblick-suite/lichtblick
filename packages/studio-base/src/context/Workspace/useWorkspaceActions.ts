@@ -11,7 +11,10 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import {
+  IDataSourceFactory,
+  usePlayerSelection,
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
@@ -24,12 +27,16 @@ import {
   RightSidebarItemKey,
   RightSidebarItemKeys,
 } from "./WorkspaceContext";
+import { useOpenFile } from "./useOpenFile";
 
 export type WorkspaceActions = {
   dialogActions: {
     dataSource: {
       close: () => void;
       open: (item: DataSourceDialogItem, dataSource?: IDataSourceFactory) => void;
+    };
+    openFile: {
+      open: () => Promise<void>;
     };
     preferences: {
       close: () => void;
@@ -90,6 +97,10 @@ export function useWorkspaceActions(): WorkspaceActions {
   const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
   const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
 
+  const { availableSources } = usePlayerSelection();
+
+  const openFile = useOpenFile(availableSources);
+
   const set = useCallback(
     (setter: (draft: Draft<WorkspaceContextStore>) => void) => {
       setState(produce<WorkspaceContextStore>(setter));
@@ -122,6 +133,10 @@ export function useWorkspaceActions(): WorkspaceActions {
               draft.dialogs.dataSource.open = true;
             });
           },
+        },
+
+        openFile: {
+          open: openFile,
         },
 
         preferences: {
@@ -257,5 +272,5 @@ export function useWorkspaceActions(): WorkspaceActions {
         },
       },
     };
-  }, [enableNewTopNav, set, supportsAccountSettings]);
+  }, [enableNewTopNav, openFile, set, supportsAccountSettings]);
 }
