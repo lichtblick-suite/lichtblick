@@ -50,7 +50,8 @@ type LineStyle = "polygon" | "line_strip" | "line_list";
 
 enum RenderOrder {
   FILL = 1,
-  LINE = 2,
+  LINE_PREPASS = 2,
+  LINE = 3,
 }
 
 const FALLBACK_COLOR: Color = { r: 0, g: 0, b: 0, a: 0 };
@@ -60,9 +61,11 @@ const FALLBACK_COLOR: Color = { r: 0, g: 0, b: 0, a: 0 };
  */
 export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRenderer=*/ undefined> {
   #geometry?: LineSegmentsGeometry;
-  #line: LineSegments2;
-  #linePickingMaterial: PickingMaterial;
-  #lineMaterial: LineMaterial;
+  readonly #linePrepass: LineSegments2;
+  readonly #linePrepassMaterial: LineMaterial;
+  readonly #line: LineSegments2;
+  readonly #lineMaterial: LineMaterial;
+  readonly #linePickingMaterial: PickingMaterial;
   /** Style that was last used for configuring geometry */
   #style?: LineStyle;
   /** Number of points that was last used for configuring geometry */
@@ -99,13 +102,39 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     });
 
     this.#geometry = new LineSegmentsGeometry();
+
+    // We alleviate corner artifacts using a two-pass render for lines. The
+    // first pass writes to depth only, followed by a color pass with stencil
+    // operations. The source for this technique is:
+    // <https://github.com/mrdoob/three.js/issues/23680#issuecomment-1063294691>
+    // <https://gkjohnson.github.io/threejs-sandbox/fat-line-opacity/webgl_lines_fat.html>
+    this.#linePrepassMaterial = new LineMaterial({
+      worldUnits: false,
+      colorWrite: false,
+      vertexColors: true,
+      linewidth: 0,
+      transparent: false,
+      depthWrite: true,
+      stencilWrite: true,
+      stencilRef: 1,
+      stencilZPass: THREE.ReplaceStencilOp,
+    });
     this.#lineMaterial = new LineMaterial({
       worldUnits: false,
       vertexColors: true,
       linewidth: 0,
       transparent: false,
       depthWrite: true,
+      stencilWrite: true,
+      stencilRef: 0,
+      stencilFunc: THREE.NotEqualStencilFunc,
+      stencilFail: THREE.ReplaceStencilOp,
+      stencilZPass: THREE.ReplaceStencilOp,
     });
+    this.#linePrepass = new LineSegments2(this.#geometry, this.#linePrepassMaterial);
+    this.#linePrepass.renderOrder = RenderOrder.LINE_PREPASS;
+    this.#linePrepass.userData.picking = false;
+    this.add(this.#linePrepass);
     this.#line = new LineSegments2(this.#geometry, this.#lineMaterial);
     this.#line.renderOrder = RenderOrder.LINE;
     this.#line.userData.pickingMaterial = this.#linePickingMaterial = new PickingMaterial();
@@ -114,6 +143,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
 
   public override dispose(): void {
     this.#geometry?.dispose();
+    this.#linePrepassMaterial.dispose();
     this.#lineMaterial.dispose();
     this.#linePickingMaterial.dispose();
     this.#fillGeometry?.dispose();
@@ -190,6 +220,9 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       this.#lineMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
       this.#lineMaterial.linewidth = thickness * this.#scale;
       this.#lineMaterial.needsUpdate = true;
+      this.#linePrepassMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
+      this.#linePrepassMaterial.linewidth = thickness * this.#scale;
+      this.#linePrepassMaterial.needsUpdate = true;
       this.#linePickingMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
       this.#linePickingMaterial.linewidth = thickness * this.#scale;
       this.#linePickingMaterial.needsUpdate = true;
@@ -226,6 +259,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
             this.#geometry = new LineSegmentsGeometry();
             break;
         }
+        this.#linePrepass.geometry = this.#geometry;
         this.#line.geometry = this.#geometry;
       }
 
@@ -317,14 +351,19 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       }
 
       if (useVertexColors) {
+        this.#linePrepassMaterial.vertexColors = true;
         this.#lineMaterial.vertexColors = true;
       } else {
         const color = outlineColor ?? FALLBACK_COLOR;
+        this.#linePrepassMaterial.vertexColors = false;
         this.#lineMaterial.vertexColors = false;
         this.#lineMaterial.color.setRGB(color.r, color.g, color.b).convertSRGBToLinear();
         this.#lineMaterial.opacity = color.a;
         hasTransparency = color.a < 1;
       }
+      this.#linePrepassMaterial.transparent = hasTransparency;
+      this.#linePrepassMaterial.depthWrite = !hasTransparency;
+      this.#linePrepassMaterial.needsUpdate = true;
       this.#lineMaterial.transparent = hasTransparency;
       this.#lineMaterial.depthWrite = !hasTransparency;
       this.#lineMaterial.needsUpdate = true;
