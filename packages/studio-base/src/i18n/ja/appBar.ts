@@ -6,6 +6,8 @@ import { TypeOptions } from "i18next";
 
 export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
   about: "情報",
+  exploreSampleData: "サンプルデータを探索する",
+  open: "を開く",
   openLocalFile: "ローカルファイルを開く",
   openConnection: "接続を開く",
   noDataSource: undefined,

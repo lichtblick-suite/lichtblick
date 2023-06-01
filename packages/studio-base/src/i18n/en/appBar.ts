@@ -4,6 +4,8 @@
 
 export const appBar = {
   about: "About",
+  exploreSampleData: "Explore sample data",
+  open: "Open…",
   openLocalFile: "Open local file…",
   openConnection: "Open connection…",
   noDataSource: "No data source",

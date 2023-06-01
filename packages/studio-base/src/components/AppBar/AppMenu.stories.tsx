@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryFn, StoryObj } from "@storybook/react";
-import { screen, userEvent } from "@storybook/testing-library";
+import { Meta, StoryFn, StoryObj } from "@storybook/react";
+import { userEvent, within } from "@storybook/testing-library";
 
 import PlayerSelectionContext, {
   PlayerSelection,
@@ -14,7 +14,17 @@ import { AppMenu } from "./AppMenu";
 
 export default {
   title: "components/AppBar/AppMenu",
-  component: AppMenu,
+  component: (): JSX.Element => (
+    <AppMenu
+      open
+      anchorPosition={{ top: 0, left: 0 }}
+      anchorReference="anchorPosition"
+      disablePortal
+      handleClose={() => {
+        // no-op
+      }}
+    />
+  ),
   decorators: [
     (Story: StoryFn): JSX.Element => (
       <WorkspaceContextProvider>
@@ -24,7 +34,14 @@ export default {
       </WorkspaceContextProvider>
     ),
   ],
-};
+  play: async ({ canvasElement, args }) => {
+    if (args.id == undefined) {
+      return;
+    }
+    const canvas = within(canvasElement);
+    userEvent.hover(await canvas.findByTestId(args.id));
+  },
+} as Meta<{ id?: string }>;
 
 // Connection
 const playerSelection: PlayerSelection = {
@@ -42,131 +59,96 @@ const playerSelection: PlayerSelection = {
   availableSources: [],
 };
 
-export const Default: StoryObj = {
-  render: () => (
-    <AppMenu
-      open
-      anchorPosition={{ top: 0, left: 0 }}
-      anchorReference="anchorPosition"
-      disablePortal
-      handleClose={() => {
-        // no-op
-      }}
-    />
-  ),
-};
+type AppMenuStory = StoryObj<{ id?: string }>;
 
-const Selected: StoryObj<{ id: string }> = {
-  ...Default,
-  play: async ({ args: { id } }) => {
-    userEvent.hover(screen.getByTestId(id));
-  },
-};
+export const Default: AppMenuStory = {};
 
-export const FileMenuDark = {
-  ...Selected,
+export const FileMenuDark: AppMenuStory = {
   args: { id: "app-menu-file" },
   parameters: { colorScheme: "dark" },
 };
 
-export const FileMenuDarkChinese = {
-  ...Selected,
+export const FileMenuDarkChinese: AppMenuStory = {
   args: { id: "app-menu-file" },
   parameters: { colorScheme: "dark", forceLanguage: "zh" },
 };
 
-export const FileMenuDarkJapanese = {
-  ...Selected,
+export const FileMenuDarkJapanese: AppMenuStory = {
   args: { id: "app-menu-file" },
   parameters: { colorScheme: "dark", forceLanguage: "ja" },
 };
 
-export const FileMenuLight = {
-  ...Selected,
+export const FileMenuLight: AppMenuStory = {
   args: { id: "app-menu-file" },
   parameters: { colorScheme: "light" },
 };
 
-export const FileMenuLightChinese = {
-  ...Selected,
+export const FileMenuLightChinese: AppMenuStory = {
   args: { id: "app-menu-file" },
   parameters: { colorScheme: "light", forceLanguage: "zh" },
 };
 
-export const FileMenuLightJapanese = {
-  ...Selected,
+export const FileMenuLightJapanese: AppMenuStory = {
   args: { id: "app-menu-file" },
   parameters: { colorScheme: "light", forceLanguage: "ja" },
 };
 
-export const ViewMenuDark = {
-  ...Selected,
+export const ViewMenuDark: AppMenuStory = {
   args: { id: "app-menu-view" },
   parameters: { colorScheme: "dark" },
 };
 
-export const ViewMenuDarkChinese = {
-  ...Selected,
+export const ViewMenuDarkChinese: AppMenuStory = {
   args: { id: "app-menu-view" },
   parameters: { colorScheme: "dark", forceLanguage: "zh" },
 };
 
-export const ViewMenuDarkJapanese = {
-  ...Selected,
+export const ViewMenuDarkJapanese: AppMenuStory = {
   args: { id: "app-menu-view" },
   parameters: { colorScheme: "dark", forceLanguage: "ja" },
 };
 
-export const ViewMenuLight = {
-  ...Selected,
+export const ViewMenuLight: AppMenuStory = {
   args: { id: "app-menu-view" },
   parameters: { colorScheme: "light" },
 };
 
-export const ViewMenuLightChinese = {
-  ...Selected,
+export const ViewMenuLightChinese: AppMenuStory = {
   args: { id: "app-menu-view" },
   parameters: { colorScheme: "light", forceLanguage: "zh" },
 };
 
-export const ViewMenuLightJapanese = {
-  ...Selected,
-  args: { id: "app-menu-view" },
+export const ViewMenuLightJapanese: AppMenuStory = {
+  ...ViewMenuLight,
   parameters: { colorScheme: "light", forceLanguage: "ja" },
 };
 
-export const HelpMenuDark = {
-  ...Selected,
+export const HelpMenuDark: AppMenuStory = {
   args: { id: "app-menu-help" },
   parameters: { colorScheme: "dark" },
 };
 
-export const HelpMenuDarkChinese = {
-  ...Selected,
+export const HelpMenuDarkChinese: AppMenuStory = {
   args: { id: "app-menu-help" },
   parameters: { colorScheme: "dark", forceLanguage: "zh" },
 };
 
-export const HelpMenuDarkJapanese = {
-  ...Selected,
+export const HelpMenuDarkJapanese: AppMenuStory = {
   args: { id: "app-menu-help" },
   parameters: { colorScheme: "dark", forceLanguage: "ja" },
 };
 
-export const HelpMenuLight = {
-  ...Selected,
+export const HelpMenuLight: AppMenuStory = {
   args: { id: "app-menu-help" },
   parameters: { colorScheme: "light" },
 };
 
-export const HelpMenuLightChinese = {
-  ...Selected,
+export const HelpMenuLightChinese: AppMenuStory = {
   args: { id: "app-menu-help" },
   parameters: { colorScheme: "light", forceLanguage: "zh" },
 };
 
-export const HelpMenuLightJapanese = {
-  ...Selected,
+export const HelpMenuLightJapanese: AppMenuStory = {
   args: { id: "app-menu-help" },
   parameters: { colorScheme: "light", forceLanguage: "ja" },
 };

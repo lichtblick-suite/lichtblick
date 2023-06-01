@@ -2,7 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
+import {
+  Menu,
+  MenuItem as MuiMenuItem,
+  PaperProps,
+  PopoverPosition,
+  PopoverReference,
+} from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
@@ -84,6 +90,16 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
 
   const fileItems = useMemo(() => {
     const items: MenuItem[] = [
+      {
+        type: "item",
+        label: t("open"),
+        key: "open",
+        onClick: () => {
+          dialogActions.dataSource.open("start");
+          handleAnalytics("open-data-source-dialog");
+          handleNestedMenuClose();
+        },
+      },
       {
         type: "item",
         label: t("openLocalFile"),
@@ -249,6 +265,17 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         >
           {t("help")}
         </NestedMenuItem>
+        <MuiMenuItem
+          id="app-menu-demo"
+          onPointerEnter={() => handleItemPointerEnter("app-menu-demo")}
+          onClick={() => {
+            dialogActions.dataSource.open("demo");
+            handleAnalytics("demo");
+            handleNestedMenuClose();
+          }}
+        >
+          {t("exploreSampleData")}
+        </MuiMenuItem>
       </Menu>
     </>
   );
