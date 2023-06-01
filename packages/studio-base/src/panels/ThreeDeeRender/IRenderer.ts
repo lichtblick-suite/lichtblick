@@ -60,6 +60,7 @@ export type RendererEvents = {
   topicHandlersChanged: (renderer: IRenderer) => void;
   topicsChanged: (renderer: IRenderer) => void;
   resetViewChanged: (renderer: IRenderer) => void;
+  resetAllFramesCursor: (renderer: IRenderer) => void;
 };
 
 export type FollowMode = "follow-pose" | "follow-position" | "follow-none";

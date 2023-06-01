@@ -447,7 +447,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     },
   ): void {
     if (clearTransforms === true) {
-      this.transformTree.clear();
+      this.#clearTransformTree();
     }
     if (resetAllFramesCursor === true) {
       this.#resetAllFramesCursor();
@@ -463,49 +463,61 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #allFramesCursor: {
     // index represents where the last read message is in allFrames
     index: number;
+    lastReadMessage: MessageEvent<unknown> | undefined;
     cursorTimeReached?: Time;
   } = {
     index: -1,
+    lastReadMessage: undefined,
     cursorTimeReached: undefined,
   };
 
   #resetAllFramesCursor() {
     this.#allFramesCursor = {
       index: -1,
+      lastReadMessage: undefined,
       cursorTimeReached: undefined,
     };
+    this.emit("resetAllFramesCursor", this);
   }
 
   /**
    * Iterates through allFrames and handles messages with a receiveTime <= currentTime
-   * @param allFrames - array of all preloaded messages
+   * @param allFrames - sorted array of all preloaded messages
    * @returns {boolean} - whether the allFramesCursor has been updated and new messages were read in
    */
   public handleAllFramesMessages(allFrames?: readonly MessageEvent[]): boolean {
-    const currentTime = fromNanoSec(this.currentTime);
-    const allFramesCursor = this.#allFramesCursor;
-    // index always indicates last read-in message
-    let cursor = allFramesCursor.index;
-    let cursorTimeReached = allFramesCursor.cursorTimeReached;
-
     if (!allFrames || allFrames.length === 0) {
-      // when tf preloading is disabled
-      if (cursor > -1) {
-        this.#resetAllFramesCursor();
-      }
       return false;
     }
+
+    const currentTime = fromNanoSec(this.currentTime);
 
     /**
      * Assumptions about allFrames needed by allFramesCursor:
      *  - always sorted by receiveTime
-     *  - preloaded topics/schemas are only ever all removed or all added at once, otherwise it is not stable and would need to be reset
      *  - allFrame chunks are only ever loaded from beginning to end and does not have any eviction
      */
+
+    const messageAtCursor = allFrames[this.#allFramesCursor.index];
+
+    // reset cursor if lastReadMessage no longer is the same as the message at the cursor
+    // This means that messages were added or removed from the array and need to be re-read
+    if (
+      this.#allFramesCursor.lastReadMessage != undefined &&
+      messageAtCursor != undefined &&
+      this.#allFramesCursor.lastReadMessage !== messageAtCursor
+    ) {
+      this.#resetAllFramesCursor();
+    }
+
+    let cursor = this.#allFramesCursor.index;
+    let cursorTimeReached = this.#allFramesCursor.cursorTimeReached;
+    let lastReadMessage = this.#allFramesCursor.lastReadMessage;
 
     // cursor should never be over allFramesLength, if it some how is, it means the cursor was at the end of `allFrames` prior to eviction and eviction shortened allframes
     // in this case we should set the cursor to the end of allFrames
     cursor = Math.min(cursor, allFrames.length - 1);
+
     let message;
 
     let hasAddedMessageEvents = false;
@@ -525,6 +537,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       }
 
       this.addMessageEvent(message);
+      lastReadMessage = message;
       if (cursor === allFrames.length - 1) {
         cursorTimeReached = message.receiveTime;
       }
@@ -535,7 +548,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       return false;
     }
 
-    this.#allFramesCursor = { index: cursor, cursorTimeReached };
+    this.#allFramesCursor = { index: cursor, cursorTimeReached, lastReadMessage };
     return true;
   }
 
@@ -554,28 +567,37 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   #addTransformSubscriptions(): void {
     const config = this.config;
+    const preloadTransforms = config.scene.transforms?.enablePreloading ?? true;
     // Internal handlers for TF messages to update the transform tree
     this.#addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.#handleFrameTransform,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: preloadTransforms,
     });
     this.#addSchemaSubscriptions(FRAME_TRANSFORMS_DATATYPES, {
       handler: this.#handleFrameTransforms,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: preloadTransforms,
     });
     this.#addSchemaSubscriptions(TF_DATATYPES, {
       handler: this.#handleTFMessage,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: preloadTransforms,
     });
     this.#addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
       handler: this.#handleTransformStamped,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: preloadTransforms,
     });
+    this.off("resetAllFramesCursor", this.#clearTransformTree);
+    if (preloadTransforms) {
+      this.on("resetAllFramesCursor", this.#clearTransformTree);
+    }
   }
+
+  #clearTransformTree = () => {
+    this.transformTree.clear();
+  };
 
   // Call on scene extensions to add subscriptions to the renderer
   #addSubscriptionsFromSceneExtensions(filterFn?: (extension: SceneExtension) => boolean): void {
