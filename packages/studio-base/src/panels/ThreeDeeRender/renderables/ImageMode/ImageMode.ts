@@ -13,6 +13,7 @@ import {
   CREATE_BITMAP_ERR_KEY,
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
+  ImageRenderableSettings,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
 import {
   AnyImage,
@@ -320,8 +321,16 @@ export class ImageMode
   public override settingsNodes(): SettingsTreeEntry[] {
     const handler = this.handleSettingsAction;
 
-    const { imageTopic, calibrationTopic, synchronize, flipHorizontal, flipVertical, rotation } =
-      this.#getImageModeSettings();
+    const {
+      imageTopic,
+      calibrationTopic,
+      synchronize,
+      flipHorizontal,
+      flipVertical,
+      rotation,
+      minValue,
+      maxValue,
+    } = this.#getImageModeSettings();
 
     const imageTopics = filterMap(this.renderer.topics ?? [], (topic) => {
       if (!topicIsConvertibleToSchema(topic, ALL_SUPPORTED_IMAGE_SCHEMAS)) {
@@ -384,10 +393,6 @@ export class ImageMode
     const calibrationTopicError =
       this.renderer.settings.errors.errors.errorAtPath(CALIBRATION_TOPIC_PATH);
 
-    // Not yet implemented
-    // const minValue: number | undefined = undefined;
-    // const maxValue: number | undefined = undefined;
-
     const fields: SettingsTreeFields = {};
     fields.imageTopic = {
       label: "Topic",
@@ -429,20 +434,22 @@ export class ImageMode
         { label: "270°", value: 270 },
       ],
     };
-    // fields.TODO_minValue = {
-    //   readonly: true,
-    //   input: "number",
-    //   label: "🚧 Min (depth images)",
-    //   placeholder: "0",
-    //   value: minValue,
-    // };
-    // fields.TODO_maxValue = {
-    //   readonly: true,
-    //   input: "number",
-    //   label: "🚧 Max (depth images)",
-    //   placeholder: "10000",
-    //   value: maxValue,
-    // };
+    fields.minValue = {
+      input: "number",
+      label: "Min (depth images)",
+      placeholder: "0",
+      step: 1,
+      precision: 0,
+      value: minValue,
+    };
+    fields.maxValue = {
+      input: "number",
+      label: "Max (depth images)",
+      placeholder: "10000",
+      step: 1,
+      precision: 0,
+      value: maxValue,
+    };
     return [
       {
         path: ["imageMode"],
@@ -494,18 +501,23 @@ export class ImageMode
       }
 
       if (config.rotation !== prevImageModeConfig.rotation) {
-        this.#imageRenderable?.setRotation(config.rotation);
         this.#camera.setRotation(config.rotation);
       }
-
       if (config.flipHorizontal !== prevImageModeConfig.flipHorizontal) {
-        this.#imageRenderable?.setFlipHorizontal(config.flipHorizontal);
         this.#camera.setFlipHorizontal(config.flipHorizontal);
       }
-
       if (config.flipVertical !== prevImageModeConfig.flipVertical) {
-        this.#imageRenderable?.setFlipVertical(config.flipVertical);
         this.#camera.setFlipVertical(config.flipVertical);
+      }
+      if (
+        config.minValue !== prevImageModeConfig.minValue ||
+        config.maxValue !== prevImageModeConfig.maxValue
+      ) {
+        this.#imageRenderable?.setSettings({
+          ...this.#imageRenderable.userData.settings,
+          minValue: config.minValue,
+          maxValue: config.maxValue,
+        });
       }
       if (config.synchronize !== prevImageModeConfig.synchronize) {
         this.removeAllRenderables();
@@ -643,10 +655,12 @@ export class ImageMode
       return renderable;
     }
 
-    // we don't have settings for images yet
-    const userSettings = { ...IMAGE_RENDERABLE_DEFAULT_SETTINGS };
-
     const config = this.#getImageModeSettings();
+    const userSettings: ImageRenderableSettings = {
+      ...IMAGE_RENDERABLE_DEFAULT_SETTINGS,
+      minValue: config.minValue,
+      maxValue: config.maxValue,
+    };
     renderable = new ImageRenderable(topicName, this.renderer, {
       receiveTime,
       messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
@@ -658,9 +672,6 @@ export class ImageMode
       cameraInfo: undefined,
       cameraModel: undefined,
       image,
-      rotation: config.rotation,
-      flipHorizontal: config.flipHorizontal,
-      flipVertical: config.flipVertical,
       texture: undefined,
       material: undefined,
       geometry: undefined,
@@ -824,6 +835,8 @@ export class ImageMode
       rotation: settings.rotation,
       flipHorizontal: settings.flipHorizontal,
       flipVertical: settings.flipVertical,
+      minValue: settings.minValue,
+      maxValue: settings.maxValue,
     };
   }
 }

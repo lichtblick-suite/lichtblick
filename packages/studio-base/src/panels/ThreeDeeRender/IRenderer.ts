@@ -87,6 +87,10 @@ export type ImageModeConfig = {
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;
   flipVertical?: boolean;
+  /** Minimum (black) value for single-channel images */
+  minValue?: number;
+  /** Maximum (white) value for single-channel images */
+  maxValue?: number;
 };
 
 export type RendererConfig = {

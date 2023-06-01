@@ -301,7 +301,8 @@ export function RendererOverlay(props: {
       return;
     }
 
-    const { topic, image, rotation, flipHorizontal, flipVertical } = currentImage;
+    const { topic, image, rotation, flipHorizontal, flipVertical, minValue, maxValue } =
+      currentImage;
     const stamp = "header" in image ? image.header.stamp : image.timestamp;
     let bitmap: ImageBitmap;
     try {
@@ -309,7 +310,7 @@ export function RendererOverlay(props: {
         bitmap = await decodeCompressedImageToBitmap(image);
       } else {
         const imageData = new ImageData(image.width, image.height);
-        decodeRawImage(image, {}, imageData.data);
+        decodeRawImage(image, { minValue, maxValue }, imageData.data);
         bitmap = await createImageBitmap(imageData);
       }
 

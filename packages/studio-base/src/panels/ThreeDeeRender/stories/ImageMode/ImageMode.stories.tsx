@@ -187,11 +187,15 @@ const ImageModeFoxgloveImage = ({
   onDownloadImage,
   flipHorizontal = false,
   flipVertical = false,
+  minValue,
+  maxValue,
 }: {
-  imageType?: "raw" | "png";
+  imageType?: "raw" | "png" | "raw_mono16";
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;
   flipVertical?: boolean;
+  minValue?: number;
+  maxValue?: number;
   onDownloadImage?: (blob: Blob, fileName: string) => void;
 }): JSX.Element => {
   const topics: Topic[] = [
@@ -199,6 +203,7 @@ const ImageModeFoxgloveImage = ({
     { name: "/cam2/info", schemaName: "foxglove.CameraCalibration" },
     { name: "/cam1/png", schemaName: "foxglove.CompressedImage" },
     { name: "/cam2/raw", schemaName: "foxglove.RawImage" },
+    { name: "/mono16/raw", schemaName: "foxglove.RawImage" },
   ];
 
   const cam1: MessageEvent<Partial<CameraInfo>> = {
@@ -288,6 +293,39 @@ const ImageModeFoxgloveImage = ({
     sizeInBytes: 0,
   };
 
+  let mono16Raw: MessageEvent<Partial<RawImage>>;
+  {
+    const width = 640;
+    const height = 480;
+    const mono16Data = new DataView(new ArrayBuffer(width * height * 2));
+    for (let r = 0; r < height; r++) {
+      for (let c = 0; c < width; c++) {
+        const val = Math.round(
+          65535 *
+            (0.5 +
+              0.25 * Math.sin((2 * Math.PI * r) / height) +
+              0.25 * Math.sin(2 * Math.PI * (c / width))),
+        );
+        mono16Data.setUint16((r * width + c) * 2, val, true);
+      }
+    }
+    mono16Raw = {
+      topic: "/mono16/raw",
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 0, nsec: 0 },
+        frame_id: SENSOR_FRAME_ID,
+        height,
+        width,
+        encoding: "16UC1",
+        step: width * 2,
+        data: new Uint8Array(mono16Data.buffer),
+      },
+      schemaName: "foxglove.RawImage",
+      sizeInBytes: 0,
+    };
+  }
+
   const fixture: Fixture = {
     topics,
     frame: {
@@ -295,12 +333,30 @@ const ImageModeFoxgloveImage = ({
       "/cam2/info": [cam2],
       "/cam1/png": [cam1Png],
       "/cam2/raw": [cam2Raw],
+      "/mono16/raw": [mono16Raw],
     },
     capabilities: [],
     activeData: {
       currentTime: { sec: 0, nsec: 0 },
     },
   };
+
+  let imageTopic: string;
+  let calibrationTopic: string | undefined;
+  switch (imageType) {
+    case "raw":
+      imageTopic = "/cam2/raw";
+      calibrationTopic = "/cam2/info";
+      break;
+    case "png":
+      imageTopic = "/cam1/png";
+      calibrationTopic = "/cam1/info";
+      break;
+    case "raw_mono16":
+      imageTopic = "/mono16/raw";
+      break;
+  }
+
   return (
     <PanelSetup fixture={fixture}>
       <ImagePanel
@@ -315,11 +371,13 @@ const ImageModeFoxgloveImage = ({
             },
           },
           imageMode: {
-            calibrationTopic: imageType === "raw" ? "/cam2/info" : "/cam1/info",
-            imageTopic: imageType === "raw" ? "/cam2/raw" : "/cam1/png",
+            calibrationTopic,
+            imageTopic,
             rotation,
             flipHorizontal,
             flipVertical,
+            minValue,
+            maxValue,
           },
           cameraState: {
             distance: 1.5,
@@ -437,6 +495,17 @@ export const DownloadPngImage90FlipHV: StoryObj<
 > = {
   ...DownloadRawImage,
   args: { imageType: "png", rotation: 90, flipHorizontal: true, flipVertical: true },
+};
+
+export const DownloadMono16Image: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
+  ...DownloadRawImage,
+  args: { imageType: "raw_mono16" },
+};
+export const DownloadMono16ImageCustomMinMax: StoryObj<
+  React.ComponentProps<typeof ImageModeFoxgloveImage>
+> = {
+  ...DownloadRawImage,
+  args: { imageType: "raw_mono16", minValue: 10000, maxValue: 20000 },
 };
 
 export const ImageModeResizeHandled: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> =
