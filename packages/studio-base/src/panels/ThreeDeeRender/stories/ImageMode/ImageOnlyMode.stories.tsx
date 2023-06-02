@@ -11,6 +11,7 @@ import tinycolor from "tinycolor2";
 
 import { ImageAnnotations, LineType, PointsAnnotationType, SceneUpdate } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
+import { ImageModeConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { makeRawImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 import { Topic } from "@foxglove/studio-base/players/types";
@@ -26,13 +27,7 @@ export default {
   parameters: { colorScheme: "light" },
 };
 
-const ImageWith3D = ({
-  initialCalibrationTopic,
-  initialImageTopic,
-}: {
-  initialImageTopic: string | undefined;
-  initialCalibrationTopic: string | undefined;
-}): JSX.Element => {
+const ImageWith3D = (initialConfig: ImageModeConfig): JSX.Element => {
   const topics: Topic[] = [
     { name: "annotations", schemaName: "foxglove.ImageAnnotations" },
     { name: "camera/calibration", schemaName: "foxglove.CameraCalibration" },
@@ -269,8 +264,7 @@ const ImageWith3D = ({
             },
           },
           imageMode: {
-            calibrationTopic: initialCalibrationTopic,
-            imageTopic: initialImageTopic,
+            ...initialConfig,
             annotations: [
               {
                 topic: "annotations",
@@ -292,29 +286,51 @@ const ImageWith3D = ({
 
 export const ImageOnlyModeOff: StoryObj<React.ComponentProps<typeof ImageWith3D>> = {
   render: ImageWith3D,
-  args: { initialImageTopic: "camera/img", initialCalibrationTopic: "camera/calibration" },
+  args: { imageTopic: "camera/img", calibrationTopic: "camera/calibration" },
 };
 
 export const ImageOnlyModeOn: StoryObj<React.ComponentProps<typeof ImageWith3D>> = {
   render: ImageWith3D,
-  args: { initialImageTopic: "camera/img", initialCalibrationTopic: undefined },
+  args: { imageTopic: "camera/img", calibrationTopic: undefined },
 };
 
 export const ImageOnlyModeOffWithAutoSelectedTopics: StoryObj<
   React.ComponentProps<typeof ImageWith3D>
 > = {
   render: ImageWith3D,
-  args: { initialImageTopic: undefined, initialCalibrationTopic: undefined },
+  args: { imageTopic: undefined, calibrationTopic: undefined },
 };
 
 export const ImageOnlyModeOffWithAutoSelectedCalibration: StoryObj<
   React.ComponentProps<typeof ImageWith3D>
 > = {
   render: ImageWith3D,
-  args: { initialImageTopic: "abc", initialCalibrationTopic: undefined },
+  args: { imageTopic: "abc", calibrationTopic: undefined },
   play: async () => {
     userEvent.click(await screen.findByText("abc", { selector: ".MuiSelect-select" }));
     userEvent.click(await screen.findByText("camera/img"));
+  },
+};
+
+export const ImageModeForegroundOpacity50Percent: StoryObj<
+  React.ComponentProps<typeof ImageWith3D>
+> = {
+  render: ImageWith3D,
+  args: {
+    imageTopic: "camera/img",
+    calibrationTopic: "camera/calibration",
+    foregroundOpacity: 0.5,
+  },
+};
+
+export const ImageModeForegroundOpacity100Percent: StoryObj<
+  React.ComponentProps<typeof ImageWith3D>
+> = {
+  render: ImageWith3D,
+  args: {
+    imageTopic: "camera/img",
+    calibrationTopic: "camera/calibration",
+    foregroundOpacity: 1.0,
   },
 };
 

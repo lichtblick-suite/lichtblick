@@ -7,6 +7,10 @@ import * as THREE from "three";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { getAnnotationAtPath } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import { PointsAnnotation as NormalizedPointsAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import {
+  ANNOTATION_RENDER_ORDER,
+  annotationRenderOrderMaterialProps,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/annotations/annotationRenderOrder";
 import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
 import { DynamicBufferGeometry } from "../../../DynamicBufferGeometry";
@@ -73,9 +77,11 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
       size: 0,
       sizeAttenuation: false,
       vertexColors: true,
+      ...annotationRenderOrderMaterialProps,
     });
     this.#pickingMaterial = new PickingMaterial();
     this.#points = new THREE.Points(this.#geometry, this.#pointsMaterial);
+    this.#points.renderOrder = ANNOTATION_RENDER_ORDER.POINTS;
     this.#points.userData.pickingMaterial = this.#pickingMaterial;
     this.add(this.#points);
   }
