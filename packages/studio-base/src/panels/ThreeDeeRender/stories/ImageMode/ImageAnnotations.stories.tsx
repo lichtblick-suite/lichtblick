@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
 import { ImageModeConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
-import { makeImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
+import { makeRawImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
@@ -23,7 +23,7 @@ export default {
 const AnnotationsStory = (imageModeConfigOverride: Partial<ImageModeConfig> = {}): JSX.Element => {
   const width = 60;
   const height = 45;
-  const { calibrationMessage, cameraMessage } = makeImageAndCalibration({
+  const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
     width,
     height,
     frameId: "camera",
@@ -283,7 +283,7 @@ export const MessageConverterSupport: StoryObj = {
     const width = 60;
     const height = 45;
 
-    const { calibrationMessage, cameraMessage } = makeImageAndCalibration({
+    const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
       width,
       height,
       frameId: "camera",
@@ -473,7 +473,7 @@ const AnnotationsUpdateStory = (
   const readySignal = useReadySignal();
   const width = 60;
   const height = 45;
-  const { calibrationMessage, cameraMessage } = makeImageAndCalibration({
+  const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
     width,
     height,
     frameId: "camera",

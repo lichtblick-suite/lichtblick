@@ -11,7 +11,7 @@ import tinycolor from "tinycolor2";
 
 import { ImageAnnotations, LineType, PointsAnnotationType, SceneUpdate } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
-import { makeImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
+import { makeRawImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -224,7 +224,7 @@ const ImageWith3D = ({
   const width = 60;
   const height = 45;
 
-  const { calibrationMessage, cameraMessage } = makeImageAndCalibration({
+  const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
     width,
     height,
     frameId: "cam",

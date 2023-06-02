@@ -3,8 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { screen, userEvent } from "@storybook/testing-library";
-import { useCallback, useState } from "react";
+import { screen, userEvent, waitFor } from "@storybook/testing-library";
+import { useCallback, useMemo, useState } from "react";
+import { useAsync } from "react-use";
 
 import {
   CompressedImage,
@@ -14,7 +15,10 @@ import {
 } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { makeImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
+import {
+  makeCompressedImageAndCalibration,
+  makeRawImageAndCalibration,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import delay from "@foxglove/studio-base/util/delay";
@@ -542,7 +546,7 @@ export const ImageModePick: StoryObj<React.ComponentProps<typeof ImageModeFoxglo
 const InvalidPinholeCamera = (): JSX.Element => {
   const width = 60;
   const height = 45;
-  const { calibrationMessage, cameraMessage } = makeImageAndCalibration({
+  const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
     width,
     height,
     frameId: "camera",
@@ -641,5 +645,132 @@ export const ImageModeInvalidCameraCalibration: StoryObj = {
   play: async () => {
     const errorIcon = await screen.findByTestId("ErrorIcon");
     userEvent.hover(errorIcon);
+  },
+};
+
+export const UnsupportedEncodingError: StoryObj = {
+  render: function Story() {
+    const imageTopic = "camera";
+    const topics: Topic[] = [{ name: imageTopic, schemaName: "foxglove.RawImage" }];
+
+    const cameraMessage: MessageEvent<RawImage> = {
+      topic: imageTopic,
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 10, nsec: 0 },
+        frame_id: "camera",
+        width: 10,
+        height: 10,
+        encoding: "nonsense",
+        step: 1,
+        data: new Uint8Array(),
+      },
+      schemaName: "foxglove.RawImage",
+      sizeInBytes: 0,
+    };
+
+    const fixture: Fixture = {
+      topics,
+      frame: { [imageTopic]: [cameraMessage] },
+      capabilities: [],
+      activeData: { currentTime: { sec: 0, nsec: 0 } },
+    };
+
+    return (
+      <PanelSetup fixture={fixture} includeSettings>
+        <ImagePanel overrideConfig={{ ...ImagePanel.defaultConfig, imageMode: { imageTopic } }} />
+      </PanelSetup>
+    );
+  },
+  play: async () => {
+    const errorIcon = await screen.findAllByTestId("ErrorIcon");
+    userEvent.hover(errorIcon[0]!);
+  },
+};
+
+export const DecompressionError: StoryObj = {
+  render: function Story() {
+    const imageTopic = "camera";
+    const topics: Topic[] = [{ name: imageTopic, schemaName: "foxglove.CompressedImage" }];
+
+    const cameraMessage: MessageEvent<CompressedImage> = {
+      topic: imageTopic,
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 10, nsec: 0 },
+        frame_id: "camera",
+        format: "png",
+        data: new TextEncoder().encode("this is not a png"),
+      },
+      schemaName: "foxglove.CompressedImage",
+      sizeInBytes: 0,
+    };
+
+    const fixture: Fixture = {
+      topics,
+      frame: { [imageTopic]: [cameraMessage] },
+      capabilities: [],
+      activeData: { currentTime: { sec: 0, nsec: 0 } },
+    };
+
+    return (
+      <PanelSetup fixture={fixture} includeSettings>
+        <ImagePanel overrideConfig={{ ...ImagePanel.defaultConfig, imageMode: { imageTopic } }} />
+      </PanelSetup>
+    );
+  },
+  play: async () => {
+    const errorIcon = await waitFor(async () => {
+      const icons = await screen.findAllByTestId("ErrorIcon");
+      if (icons.length !== 2) {
+        throw new Error("Expected 2 error icons");
+      }
+      return icons[0];
+    });
+    userEvent.hover(errorIcon!);
+  },
+};
+
+export const LargeImage: StoryObj = {
+  render: function Story() {
+    const imageTopic = "camera";
+    const topics: Topic[] = useMemo(
+      () => [{ name: imageTopic, schemaName: "foxglove.CompressedImage" }],
+      [],
+    );
+
+    const fixture = useAsync(async (): Promise<Fixture> => {
+      const width = 1000;
+      const height = 600;
+
+      const { cameraMessage } = await makeCompressedImageAndCalibration({
+        width,
+        height,
+        frameId: "camera",
+        imageTopic,
+        calibrationTopic: "calibration",
+      });
+      return {
+        topics,
+        frame: {
+          [imageTopic]: [cameraMessage],
+        },
+        capabilities: [],
+        activeData: {
+          currentTime: { sec: 0, nsec: 0 },
+        },
+      };
+    }, [topics]);
+
+    return (
+      <PanelSetup fixture={fixture.value}>
+        <ImagePanel
+          overrideConfig={{
+            ...ImagePanel.defaultConfig,
+            imageMode: { imageTopic },
+          }}
+        />
+      </PanelSetup>
+    );
   },
 };

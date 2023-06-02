@@ -61,7 +61,6 @@ const IMAGE_TOPIC_DIFFERENT_FRAME = "IMAGE_TOPIC_DIFFERENT_FRAME";
 const CAMERA_MODEL = "CameraModel";
 
 const DEFAULT_FOCAL_LENGTH = 500;
-const DEFAULT_IMAGE_WIDTH = 512;
 
 type ImageModeEvent = { type: "hasModifiedViewChanged" };
 
@@ -588,8 +587,7 @@ export class ImageMode
       return;
     }
 
-    const resizeBitmapWidth = !this.#fallbackCameraModelActive() ? DEFAULT_IMAGE_WIDTH : undefined;
-    decodeCompressedImageToBitmap(image, resizeBitmapWidth)
+    decodeCompressedImageToBitmap(image)
       .then((maybeBitmap) => {
         const prevRenderable = renderable;
         const currentRenderable = this.#imageRenderable;
@@ -597,7 +595,7 @@ export class ImageMode
         if (currentRenderable !== prevRenderable) {
           return;
         }
-        this.renderer.settings.errors.removeFromTopic(topic, CREATE_BITMAP_ERR_KEY);
+        this.renderer.settings.errors.remove(IMAGE_TOPIC_PATH, CREATE_BITMAP_ERR_KEY);
         renderable.setBitmap(maybeBitmap);
         if (this.#fallbackCameraModelActive()) {
           this.#updateFallbackCameraModel(maybeBitmap, getFrameIdFromImage(image));
@@ -612,8 +610,8 @@ export class ImageMode
         if (currentRenderable !== prevRenderable) {
           return;
         }
-        this.renderer.settings.errors.addToTopic(
-          topic,
+        this.renderer.settings.errors.add(
+          IMAGE_TOPIC_PATH,
           CREATE_BITMAP_ERR_KEY,
           `Error creating bitmap: ${err.message}`,
         );

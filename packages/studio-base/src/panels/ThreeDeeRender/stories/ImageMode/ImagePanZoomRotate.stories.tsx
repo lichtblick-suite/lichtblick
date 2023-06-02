@@ -8,7 +8,7 @@ import * as THREE from "three";
 
 import { ImageAnnotations, SceneUpdate } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
-import { makeImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
+import { makeRawImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import { ImagePanel, ThreeDeePanel } from "../../index";
@@ -27,7 +27,7 @@ type BaseStoryProps = {
 const BaseStory = ({ rotation, flipHorizontal, flipVertical }: BaseStoryProps): JSX.Element => {
   const width = 60;
   const height = 45;
-  const { calibrationMessage, cameraMessage } = makeImageAndCalibration({
+  const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
     width,
     height,
     frameId: "camera",
