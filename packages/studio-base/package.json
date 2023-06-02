@@ -68,7 +68,7 @@
     "@types/memoize-weak": "workspace:*",
     "@types/moment-duration-format": "2.2.3",
     "@types/nearley": "2.11.2",
-    "@types/prettier": "2.7.2",
+    "@types/prettier": "2.7.3",
     "@types/react": "17.0.53",
     "@types/react-dom": "17.0.18",
     "@types/react-hover-observer": "workspace:*",
