@@ -20,7 +20,7 @@
     "@types/pngjs": "^6.0.1",
     "@types/tinycolor2": "1.4.3",
     "@types/utif": "^3.0.1",
-    "@xmldom/xmldom": "0.8.7",
+    "@xmldom/xmldom": "0.8.8",
     "app-builder-lib": "*",
     "async-mutex": "0.4.0",
     "builder-util": "*",
