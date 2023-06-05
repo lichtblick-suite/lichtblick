@@ -28,6 +28,9 @@ export default function ThemeProvider({
   useEffect(() => {
     // Trick CodeEditor into sync with our theme
     document.documentElement.setAttribute("data-color-mode", isDark ? "dark" : "light");
+
+    // remove styles set to prevent browser flash on init
+    document.querySelector("#loading-styles")?.remove();
   }, [isDark]);
 
   const { i18n } = useTranslation();

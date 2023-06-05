@@ -24,6 +24,7 @@ import {
   APP_BAR_HEIGHT,
   APP_BAR_FOREGROUND_COLOR,
 } from "@foxglove/studio-base/src/components/AppBar/constants";
+import * as palette from "@foxglove/studio-base/src/theme/palette";
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import getDevModeIcon from "./getDevModeIcon";
@@ -117,6 +118,12 @@ function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
 function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
   const enableNewTopNav = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
+  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "system";
+  const isDark =
+    colorScheme === "dark" || (colorScheme === "system" && nativeTheme.shouldUseDarkColors);
+  const backgroundColor = isDark
+    ? palette.dark.background?.default
+    : palette.light.background?.default;
 
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
 
@@ -124,6 +131,7 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     Math.floor((APP_BAR_HEIGHT - /*button size*/ 12) / 2) - /*for good measure*/ 1;
 
   const windowOptions: BrowserWindowConstructorOptions = {
+    backgroundColor,
     height: 800,
     width: 1200,
     minWidth: 350,

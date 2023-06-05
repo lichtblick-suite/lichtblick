@@ -9,6 +9,7 @@ import path from "path";
 import { Configuration, WebpackPluginInstance } from "webpack";
 
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
+import * as palette from "@foxglove/studio-base/src/theme/palette";
 import { makeConfig } from "@foxglove/studio-base/webpack";
 
 import { WebpackConfigParams } from "./WebpackConfigParams";
@@ -71,11 +72,13 @@ export const webpackRendererConfig =
     </script>
     <style>
       html, body {
-        background-color: #fdfdfd;
+        background-color: ${palette.light.background?.default};
+        color: ${palette.light.text?.primary};
       }
       @media (prefers-color-scheme: dark) {
         html, body {
-          background-color: #121217;
+          background-color: ${palette.dark.background?.default};
+          color: ${palette.dark.text?.primary};
         }
       }
     </style>
