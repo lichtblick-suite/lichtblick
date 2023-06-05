@@ -48,10 +48,6 @@ export type RendererEvents = {
     parameters: ReadonlyMap<string, ParameterValue> | undefined,
     renderer: IRenderer,
   ) => void;
-  variablesChange: (
-    variables: ReadonlyMap<string, VariableValue> | undefined,
-    renderer: IRenderer,
-  ) => void;
   /** Fired when the structure of the transform tree changes ie: new frame added/removed or frame assigned new parent */
   transformTreeUpdated: (renderer: IRenderer) => void;
   settingsTreeChange: (renderer: IRenderer) => void;
@@ -309,8 +305,6 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   setTopics(topics: ReadonlyArray<Topic> | undefined): void;
 
   setParameters(parameters: Immutable<Map<string, ParameterValue>> | undefined): void;
-
-  setVariables(variables: Immutable<Map<string, VariableValue>>): void;
 
   updateCustomLayersCount(): void;
 
