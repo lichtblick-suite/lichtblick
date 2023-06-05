@@ -2,9 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { DeepReadonly as Immutable } from "ts-essentials";
+import type { Immutable } from "./immutable";
 
-export type { DeepReadonly as Immutable } from "ts-essentials";
+export type { Immutable } from "./immutable";
 
 // Valid types for parameter data (such as rosparams)
 export type ParameterValue =
