@@ -637,9 +637,10 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       return;
     }
 
-    // get the point occuring most recently before preview time but not after preview time
+    // Find the point occuring most recently before or at preview time but not after
+    // preview time.
     const prevNavMessages = allNavMessages.filter(
-      (message) => toSec(message.receiveTime) < previewTime,
+      (message) => toSec(message.receiveTime) <= previewTime,
     );
     const event = minBy(prevNavMessages, (message) => previewTime - toSec(message.receiveTime));
     if (!event) {
