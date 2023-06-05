@@ -19,4 +19,6 @@ export const appBar = {
   file: "File",
   view: "View",
   help: "Help",
+  signIn: "Sign in",
+  unknown: "unknown",
 };

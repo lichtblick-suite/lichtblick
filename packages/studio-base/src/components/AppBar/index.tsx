@@ -13,6 +13,7 @@ import {
 import PersonIcon from "@mui/icons-material/Person";
 import { Avatar, Button, IconButton, Tooltip, AppBar as MuiAppBar } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 import { shallow } from "zustand/shallow";
@@ -218,6 +219,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   } = props;
   const { classes, cx } = useStyles({ leftInset, debugDragRegion });
   const { currentUser, signIn } = useCurrentUser();
+  const { t } = useTranslation("appBar");
 
   const { appBarLayoutButton } = useAppContext();
 
@@ -360,7 +362,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     });
                   }}
                 >
-                  Sign in
+                  {t("signIn")}
                 </Button>
               )}
               <Tooltip

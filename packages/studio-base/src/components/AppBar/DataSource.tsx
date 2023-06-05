@@ -104,7 +104,7 @@ export function DataSource(): JSX.Element {
       <Stack direction="row" alignItems="center">
         <div className={classes.sourceName}>
           <div className={classes.textTruncate}>
-            <TextMiddleTruncate text={playerDisplayName ?? "<unknown>"} />
+            <TextMiddleTruncate text={playerDisplayName ?? `<${t("unknown")}>`} />
           </div>
         </div>
         <div className={cx(classes.adornment, { [classes.adornmentError]: error })}>

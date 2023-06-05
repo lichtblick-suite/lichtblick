@@ -17,4 +17,6 @@ export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
   file: "ファイル",
   view: "表示",
   help: "ヘルプ",
+  signIn: "ログイン",
+  unknown: "不明",
 };

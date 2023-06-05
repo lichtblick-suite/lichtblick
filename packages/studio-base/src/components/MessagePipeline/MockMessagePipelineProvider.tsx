@@ -44,7 +44,7 @@ const NO_DATATYPES = new Map();
 
 function noop() {}
 
-type MockMessagePipelineProps = {
+export type MockMessagePipelineProps = {
   name?: string;
   presence?: PlayerPresence;
   topics?: Topic[];
