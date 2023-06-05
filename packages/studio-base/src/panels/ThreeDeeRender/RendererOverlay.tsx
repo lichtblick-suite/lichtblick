@@ -247,6 +247,7 @@ export function RendererOverlay(props: {
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         open={publishMenuExpanded}
         onClose={() => setPublishMenuExpanded(false)}
+        MenuListProps={{ dense: true }}
       >
         <MenuItem
           selected={props.publishClickType === "pose_estimate"}
@@ -256,7 +257,7 @@ export function RendererOverlay(props: {
           }}
         >
           <ListItemIcon>{PublishClickIcons.pose_estimate}</ListItemIcon>
-          <ListItemText>Publish pose estimate</ListItemText>
+          <ListItemText disableTypography>Publish pose estimate</ListItemText>
         </MenuItem>
         <MenuItem
           selected={props.publishClickType === "pose"}
@@ -266,7 +267,7 @@ export function RendererOverlay(props: {
           }}
         >
           <ListItemIcon>{PublishClickIcons.pose}</ListItemIcon>
-          <ListItemText>Publish pose</ListItemText>
+          <ListItemText disableTypography>Publish pose</ListItemText>
         </MenuItem>
         <MenuItem
           selected={props.publishClickType === "point"}
@@ -276,7 +277,7 @@ export function RendererOverlay(props: {
           }}
         >
           <ListItemIcon>{PublishClickIcons.point}</ListItemIcon>
-          <ListItemText>Publish point</ListItemText>
+          <ListItemText disableTypography>Publish point</ListItemText>
         </MenuItem>
       </Menu>
     </>

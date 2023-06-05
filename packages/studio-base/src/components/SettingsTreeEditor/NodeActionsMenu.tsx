@@ -51,6 +51,7 @@ export function NodeActionsMenu({
         onClose={() => setAnchorEl(undefined)}
         MenuListProps={{
           "aria-label": "node actions button",
+          dense: true,
         }}
       >
         {actions.map((action, index) => {
@@ -67,7 +68,9 @@ export function NodeActionsMenu({
                   <Icon fontSize="small" />
                 </ListItemIcon>
               )}
-              <ListItemText inset={!Icon && anyItemHasIcon}>{action.label}</ListItemText>
+              <ListItemText inset={!Icon && anyItemHasIcon} disableTypography>
+                {action.label}
+              </ListItemText>
             </MenuItem>
           );
         })}

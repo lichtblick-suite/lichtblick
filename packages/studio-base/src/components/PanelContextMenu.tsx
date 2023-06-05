@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Divider, ListItemText, Menu, MenuItem } from "@mui/material";
+import { Divider, Menu, MenuItem } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Immutable } from "@foxglove/studio";
@@ -116,7 +116,7 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
               key={`item_${index}_${item.label}`}
               disabled={item.disabled}
             >
-              <ListItemText>{item.label}</ListItemText>
+              {item.label}
             </MenuItem>
           );
         })}

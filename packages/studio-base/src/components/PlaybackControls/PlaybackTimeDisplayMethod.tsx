@@ -125,6 +125,7 @@ function PlaybackTimeMethodMenu({
         open={open}
         onClose={handleClose}
         MenuListProps={{
+          dense: true,
           "aria-labelledby": "playback-time-display-toggle-button",
         }}
         anchorOrigin={{
@@ -153,7 +154,7 @@ function PlaybackTimeMethodMenu({
             <ListItemText
               inset={timeFormat !== option.key}
               primary={option.label}
-              primaryTypographyProps={{ variant: "body2" }}
+              primaryTypographyProps={{ variant: "inherit" }}
             />
           </MenuItem>
         ))}

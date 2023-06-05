@@ -24,6 +24,7 @@ import {
   listItemTextClasses,
   selectClasses,
   inputBaseClasses,
+  Typography,
 } from "@mui/material";
 import { produce } from "immer";
 import { compact, set, uniq } from "lodash";
@@ -312,13 +313,9 @@ function DiagnosticSummary(props: Props): JSX.Element {
           >
             {KNOWN_LEVELS.map((level) => (
               <MenuItem key={level} value={level}>
-                <ListItemText
-                  primary={LEVEL_NAMES[level]?.toUpperCase()}
-                  primaryTypographyProps={{
-                    variant: "inherit",
-                    color: MESSAGE_COLORS[LEVEL_NAMES[level] ?? "stale"],
-                  }}
-                />
+                <Typography variant="inherit" color={MESSAGE_COLORS[LEVEL_NAMES[level] ?? "stale"]}>
+                  {LEVEL_NAMES[level]?.toUpperCase()}
+                </Typography>
               </MenuItem>
             ))}
           </Select>

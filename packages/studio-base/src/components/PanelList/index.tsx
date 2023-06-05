@@ -67,6 +67,7 @@ const useStyles = makeStyles<void, "dragIcon">()((theme, _params, classes) => {
       flex: "auto",
     },
     listItemButton: {
+      height: theme.spacing(4), // hard coded here because the parent element of this changes based on context
       cursor: "grab",
 
       [`&:not(:hover) .${classes.dragIcon}`]: {
@@ -267,7 +268,7 @@ function DraggablePanelItem({
             </Stack>
           }
         >
-          <ListItem disableGutters disablePadding>
+          <ListItem disablePadding>
             <ListItemButton
               selected={highlighted}
               className={classes.listItemButton}
@@ -275,14 +276,12 @@ function DraggablePanelItem({
               ref={mergedRef}
               onClick={onClickWithStopPropagation}
             >
-              <ListItemText
-                primary={
-                  <span data-testid={`panel-menu-item ${panel.title}`}>
-                    <TextHighlight targetStr={targetString} searchText={searchQuery} />
-                  </span>
-                }
-                primaryTypographyProps={{ fontWeight: checked ? "bold" : undefined }}
-              />
+              <ListItemText disableTypography>
+                <span data-testid={`panel-menu-item ${panel.title}`}>
+                  <TextHighlight targetStr={targetString} searchText={searchQuery} />
+                </span>
+              </ListItemText>
+
               <ReOrderDotsVertical16Filled className={classes.dragIcon} />
             </ListItemButton>
           </ListItem>

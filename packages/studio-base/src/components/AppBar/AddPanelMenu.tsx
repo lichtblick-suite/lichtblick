@@ -38,6 +38,7 @@ export function AddPanelMenu(props: AddPanelProps): JSX.Element {
       open={open}
       onClose={handleClose}
       MenuListProps={{
+        dense: true,
         disablePadding: true,
         "aria-labelledby": "add-panel-button",
         className: classes.menuList,
