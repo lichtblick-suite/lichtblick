@@ -19,11 +19,15 @@ export type SettingsManagerEvents = {
   update: () => void;
 };
 
+type NodeValidator = (entry: SettingsTreeEntry, errorState: LayerErrors) => void;
+
 export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   public errors = new LayerErrors();
 
   #nodesByKey = new Map<string, SettingsTreeEntry[]>();
   #root: SettingsTreeNodeWithActionHandler = { children: {} };
+
+  #globalSettingsEntryValidators: NodeValidator[] = [];
 
   public constructor(baseTree: SettingsTreeNodes) {
     super();
@@ -35,6 +39,10 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   }
 
   public setNodesForKey(key: string, nodes: SettingsTreeEntry[]): void {
+    nodes.forEach((entry) =>
+      this.#globalSettingsEntryValidators.forEach((validator) => validator(entry, this.errors)),
+    );
+
     this.#root = produce(this.#root, (draft) => {
       // Delete all previous nodes for this key
       const prevNodes = this.#nodesByKey.get(key);
@@ -43,7 +51,6 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
           removeNodeAtPath(draft, path);
         }
       }
-
       // Add the new nodes
       for (const { path, node } of nodes) {
         node.error ??= this.errors.errors.errorAtPath(path);
@@ -94,6 +101,17 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
       nextNode.handler?.(action);
       curNode = nextNode;
     }
+  };
+
+  /** Add Validator function that can run over nodes `set` on the tree and update error state accordingly */
+  public addNodeValidator = (nodeValidator: NodeValidator): void => {
+    this.#globalSettingsEntryValidators.push(nodeValidator);
+  };
+
+  public removeNodeValidator = (nodeValidator: NodeValidator): void => {
+    this.#globalSettingsEntryValidators = this.#globalSettingsEntryValidators.filter(
+      (v) => v !== nodeValidator,
+    );
   };
 
   public handleErrorUpdate = (path: Path): void => {

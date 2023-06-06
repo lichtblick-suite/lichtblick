@@ -23,6 +23,7 @@ import {
   Topic,
   VariableValue,
 } from "@foxglove/studio";
+import { LayerErrors } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import { FoxgloveGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import { dark, light } from "@foxglove/studio-base/theme/palette";
@@ -667,13 +668,32 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#addSubscriptionsFromSceneExtensions(
       (extension) => extension === this.#imageModeExtension,
     );
+    this.settings.addNodeValidator(this.#imageOnlyModeTopicSettingsValidator);
   };
 
   #disableImageOnlySubscriptionMode = (): void => {
+    // .clear() will clean up remaining errors on topics
+    this.settings.removeNodeValidator(this.#imageOnlyModeTopicSettingsValidator);
     this.clear({ clearTransforms: true, resetAllFramesCursor: true });
     this.#clearSubscriptions();
     this.#addSubscriptionsFromSceneExtensions();
     this.#addTransformSubscriptions();
+  };
+
+  /** Adds errors to visible topic nodes when calibration is undefined */
+  #imageOnlyModeTopicSettingsValidator = (entry: SettingsTreeEntry, errors: LayerErrors) => {
+    const { path, node } = entry;
+    if (path[0] === "topics") {
+      if (node.visible === true) {
+        errors.addToTopic(
+          path[1]!,
+          "IMAGE_ONLY_TOPIC",
+          "Camera calibration information is required to display 3D topics",
+        );
+      } else {
+        errors.removeFromTopic(path[1]!, "IMAGE_ONLY_TOPIC");
+      }
+    }
   };
 
   public addCustomLayerAction(options: {
@@ -693,7 +713,17 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       icon: options.icon,
     };
     this.#customLayerActions.set(options.layerId, { action, handler });
+    this.#updateTopicsAndCustomLayerSettingsNodes();
+  }
 
+  #updateTopicsAndCustomLayerSettingsNodes(): void {
+    this.settings.setNodesForKey(RENDERER_ID, [
+      this.#getTopicsSettingsEntry(),
+      this.#getCustomLayersSettingsEntry(),
+    ]);
+  }
+
+  #getTopicsSettingsEntry(): SettingsTreeEntry {
     // "Topics" settings tree node
     const topics: SettingsTreeEntry = {
       path: ["topics"],
@@ -709,8 +739,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         handler: this.#handleTopicsAction,
       },
     };
+    return topics;
+  }
 
-    // "Custom Layers" settings tree node
+  #getCustomLayersSettingsEntry(): SettingsTreeEntry {
     const layerCount = Object.keys(this.config.layers).length;
     const customLayers: SettingsTreeEntry = {
       path: ["layers"],
@@ -721,9 +753,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         handler: this.#handleCustomLayersAction,
       },
     };
-
-    this.settings.setNodesForKey(RENDERER_ID, [topics, customLayers]);
+    return customLayers;
   }
+
   /** Enable or disable object selection mode */
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   public setPickingEnabled(enabled: boolean): void {
