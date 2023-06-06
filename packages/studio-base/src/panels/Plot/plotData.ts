@@ -118,7 +118,11 @@ export function getBlockItemsByPath(
     }
 
     for (const [path, messagePathItems] of Object.entries(messagePathItemsForBlock)) {
-      count += messagePathItems[0]?.[0]?.queriedData.length ?? 0;
+      for (const items of messagePathItems) {
+        for (const item of items) {
+          count += item.queriedData.length;
+        }
+      }
 
       const existingItems = ret[path] ?? [];
       // getMessagePathItemsForBlock returns an array of exactly one range of items.
