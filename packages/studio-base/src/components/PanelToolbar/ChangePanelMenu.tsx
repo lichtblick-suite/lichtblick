@@ -7,12 +7,13 @@ import { useCallback, useContext } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
 
+import { PanelCatalog, PanelSelection } from "@foxglove/studio-base/components/PanelCatalog";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 const useStyles = makeStyles()((theme) => ({
   paper: {
+    backgroundColor: theme.palette.background.menu,
     maxHeight: `calc(100vh - ${theme.spacing(12)})`,
     overflow: "auto",
 
@@ -90,7 +91,9 @@ export default function ChangePanelMenu({
         >
           <Paper elevation={8} className={classes.paper}>
             <ClickAwayListener onClickAway={onClose}>
-              <PanelList
+              <PanelCatalog
+                mode="list"
+                isMenu
                 selectedPanelType={panelContext?.type}
                 onPanelSelect={handleSwap(panelContext?.id)}
               />

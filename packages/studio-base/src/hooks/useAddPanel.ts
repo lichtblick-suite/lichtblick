@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { useCallback } from "react";
 
-import { PanelSelection } from "@foxglove/studio-base/components/PanelList";
+import { PanelSelection } from "@foxglove/studio-base/components/PanelCatalog";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 

@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { MosaicDragType } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
 
-import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
+import { PanelCatalog, PanelSelection } from "@foxglove/studio-base/components/PanelCatalog";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
@@ -92,7 +92,7 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
               {t("learnMore", { ns: "general" })}
             </Link>
           </Typography>
-          <PanelList mode="grid" onPanelSelect={onPanelSelect} />
+          <PanelCatalog mode="grid" onPanelSelect={onPanelSelect} />
         </Stack>
       </div>
     </div>
