@@ -3073,7 +3073,7 @@ __metadata:
     use-immer: 0.9.0
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
-    webpack: 5.85.0
+    webpack: 5.85.1
     zustand: 4.3.8
   languageName: unknown
   linkType: soft
@@ -3124,7 +3124,7 @@ __metadata:
     tinycolor2: 1.6.0
     tss-react: 4.8.6
     utif: 3.1.0
-    webpack: 5.85.0
+    webpack: 5.85.1
     webpack-dev-server: 4.15.0
   languageName: unknown
   linkType: soft
@@ -3148,7 +3148,7 @@ __metadata:
     react-dom: 17.0.2
     react-i18next: 12.3.1
     tss-react: 4.8.6
-    webpack: 5.85.0
+    webpack: 5.85.1
     webpack-dev-server: 4.15.0
   languageName: unknown
   linkType: soft
@@ -8219,7 +8219,7 @@ __metadata:
     mathjs: 11.8.0
     react: 17.0.2
     react-dom: 17.0.2
-    webpack: 5.85.0
+    webpack: 5.85.1
     webpack-dev-server: 4.15.0
   languageName: unknown
   linkType: soft
@@ -10097,7 +10097,7 @@ __metadata:
     "@foxglove/studio-desktop": "workspace:*"
     electron: 25.0.0
     playwright: 1.34.3
-    webpack: 5.85.0
+    webpack: 5.85.1
   languageName: unknown
   linkType: soft
 
@@ -12156,7 +12156,7 @@ __metadata:
     ts-prune: 0.10.3
     tslib: 2.5.2
     typescript: 5.1.3
-    webpack: 5.85.0
+    webpack: 5.85.1
     webpack-cli: 5.1.1
     webpack-dev-server: 4.15.0
     webpack-hot-middleware: 2.25.3
@@ -21674,7 +21674,7 @@ __metadata:
     "@types/serve-handler": ^6
     playwright: 1.34.3
     serve-handler: 6.1.5
-    webpack: 5.85.0
+    webpack: 5.85.1
     webpack-dev-server: 4.15.0
   languageName: unknown
   linkType: soft
@@ -21846,9 +21846,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5, webpack@npm:5.85.0":
-  version: 5.85.0
-  resolution: "webpack@npm:5.85.0"
+"webpack@npm:5, webpack@npm:5.85.1":
+  version: 5.85.1
+  resolution: "webpack@npm:5.85.1"
   dependencies:
     "@types/eslint-scope": ^3.7.3
     "@types/estree": ^1.0.0
@@ -21879,7 +21879,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: b013be9fbc7f6810d1f229f570c70710ddbc7290f817411acffe4214b2b6c783a041ab1f2005d9e1109f4ab21c136f0f8d8c067a5fb64f20a82dcbc1ee0d3f42
+  checksum: 6fa659ef5e53211e6eeaed1987ac415ddd219584414b2d5ca0d528f0c7dd49be5363a9840e1def33efe1b3305ef3ad3c91f803bd87e41d2771b125340caa4df7
   languageName: node
   linkType: hard
 
