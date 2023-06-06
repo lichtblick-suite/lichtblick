@@ -671,6 +671,8 @@ export class ImageMode
       minValue: config.minValue,
       maxValue: config.maxValue,
       foregroundOpacity: config.foregroundOpacity,
+      // planarProjectionFactor must be 1 to avoid imprecise projection due to small number of grid subdivisions
+      planarProjectionFactor: 1,
     };
     renderable = new ImageRenderable(topicName, this.renderer, {
       receiveTime,
