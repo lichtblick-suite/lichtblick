@@ -306,12 +306,14 @@ function Chart(props: Props): JSX.Element {
     running.current = true;
     updateChart(newUpdate)
       .catch((err: Error) => {
-        setUpdateError(err);
+        if (isMounted()) {
+          setUpdateError(err);
+        }
       })
       .finally(() => {
         running.current = false;
       });
-  }, [getNewUpdateMessage, updateChart]);
+  }, [getNewUpdateMessage, isMounted, updateChart]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;

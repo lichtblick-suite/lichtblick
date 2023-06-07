@@ -153,7 +153,7 @@ export const CanZoomAndUpdate: StoryObj = {
 
   parameters: {
     chromatic: {
-      delay: 500,
+      delay: 1_000,
     },
   },
 };
