@@ -248,11 +248,27 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
             // color buffer is unused (we don't use vertex colors)
             this.#geometry = new LineGeometry();
             break;
-          case "line_list":
+          case "line_list": {
             this.#positionBuffer = new Float32Array(pointsLength * 3);
             this.#colorBuffer = new Uint8Array(pointsLength * 8);
             this.#geometry = new LineSegmentsGeometry();
+
+            // [rgba, rgba]
+            const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(
+              this.#colorBuffer,
+              8,
+              1,
+            );
+            this.#geometry.setAttribute(
+              "instanceColorStart",
+              new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0, true),
+            );
+            this.#geometry.setAttribute(
+              "instanceColorEnd",
+              new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4, true),
+            );
             break;
+          }
         }
         this.#linePrepass.geometry = this.#geometry;
         this.#line.geometry = this.#geometry;
@@ -344,6 +360,9 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       if (useVertexColors) {
         this.#linePrepassMaterial.vertexColors = true;
         this.#lineMaterial.vertexColors = true;
+        this.#lineMaterial.color.setRGB(1, 1, 1); // any non-white color will tint the vertex colors
+        this.#geometry.getAttribute("instanceColorStart").needsUpdate = true;
+        this.#geometry.getAttribute("instanceColorEnd").needsUpdate = true;
       } else {
         const color = outlineColor ?? FALLBACK_COLOR;
         this.#linePrepassMaterial.vertexColors = false;
@@ -367,17 +386,6 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
           this.#geometry.instanceCount = pointsLength >>> 1;
           break;
       }
-
-      // [rgba, rgba]
-      const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(colors, 8, 1);
-      this.#geometry.setAttribute(
-        "instanceColorStart",
-        new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0, true),
-      );
-      this.#geometry.setAttribute(
-        "instanceColorEnd",
-        new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4, true),
-      );
     }
   }
 }

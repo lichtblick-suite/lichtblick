@@ -18,6 +18,9 @@ import { ImagePanel } from "../../index";
 export default {
   title: "panels/ThreeDeeRender/Images/Annotations",
   component: ImagePanel,
+  parameters: {
+    colorScheme: "light",
+  },
 };
 
 const AnnotationsStory = (imageModeConfigOverride: Partial<ImageModeConfig> = {}): JSX.Element => {
@@ -267,18 +270,15 @@ const AnnotationsStory = (imageModeConfigOverride: Partial<ImageModeConfig> = {}
 };
 
 export const Annotations: StoryObj = {
-  parameters: { colorScheme: "light" },
   render: AnnotationsStory,
 };
 
 export const AnnotationsWithoutCalibration: StoryObj = {
-  parameters: { colorScheme: "light" },
   render: AnnotationsStory,
   args: { calibrationTopic: undefined },
 };
 
 export const MessageConverterSupport: StoryObj = {
-  parameters: { colorScheme: "light" },
   render: function Story() {
     const width = 60;
     const height = 45;
@@ -815,10 +815,213 @@ function moveAnnotations(annotation: Partial<ImageAnnotations>, vector: { x: num
 
 export const AnnotationsUpdate: StoryObj = {
   parameters: {
-    colorScheme: "light",
     useReadySignal: true,
   },
   render: AnnotationsUpdateStory,
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+type UpdateLineArgs = {
+  messages: readonly Partial<ImageAnnotations>[];
+};
+
+function UpdateLineStory({ messages }: UpdateLineArgs): JSX.Element {
+  const readySignal = useReadySignal();
+  const width = 60;
+  const height = 45;
+  const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
+    width,
+    height,
+    frameId: "camera",
+    imageTopic: "camera",
+    calibrationTopic: "calibration",
+  });
+
+  const annotationsMessage: MessageEvent<Partial<ImageAnnotations>> = {
+    topic: "annotations",
+    receiveTime: { sec: 0, nsec: 0 },
+    message: messages[0]!,
+    schemaName: "foxglove.ImageAnnotations",
+    sizeInBytes: 0,
+  };
+
+  const [fixture, setFixture] = useState<Fixture>({
+    topics: [
+      { name: "calibration", schemaName: "foxglove.CameraCalibration" },
+      { name: "camera", schemaName: "foxglove.RawImage" },
+      { name: "annotations", schemaName: "foxglove.ImageAnnotations" },
+    ],
+    frame: {
+      calibration: [calibrationMessage],
+      camera: [cameraMessage],
+      annotations: [annotationsMessage],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+      isPlaying: true,
+    },
+  });
+
+  useEffect(() => {
+    void (async () => {
+      for (let i = 1; i < messages.length; i++) {
+        const newAnnotations: MessageEvent<Partial<ImageAnnotations>> = {
+          ...annotationsMessage,
+          message: messages[i]!,
+        };
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        setFixture((oldFixture) => ({
+          ...oldFixture,
+          frame: { annotations: [newAnnotations] },
+        }));
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      readySignal();
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readySignal]);
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ImagePanel
+        overrideConfig={{
+          ...ImagePanel.defaultConfig,
+          imageMode: {
+            calibrationTopic: "calibration",
+            imageTopic: "camera",
+            annotations: [
+              {
+                topic: "annotations",
+                schemaName: "foxglove.ImageAnnotations",
+                settings: { visible: true },
+              },
+            ],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+/** Vertex colors remain enabled, but colors change */
+export const UpdateLineChangeVertexColors: StoryObj<UpdateLineArgs> = {
+  parameters: {
+    useReadySignal: true,
+  },
+  render: UpdateLineStory,
+  args: {
+    messages: [
+      {
+        points: [
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LIST,
+            points: [
+              { x: 0, y: 0 },
+              { x: 0, y: 8 },
+              { x: 2, y: 6 },
+              { x: 5, y: 2 },
+            ],
+            outline_color: { r: 1, g: 0, b: 0, a: 1 },
+            outline_colors: [
+              { r: 0, g: 0.5, b: 1, a: 1 },
+              { r: 0, g: 0, b: 0.5, a: 1 },
+              { r: 0, g: 0.5, b: 0, a: 1 },
+              { r: 0.5, g: 0, b: 0, a: 1 },
+            ],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 1,
+          },
+        ],
+      },
+      {
+        points: [
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LIST,
+            points: [
+              { x: 10 + 0, y: 0 },
+              { x: 10 + 0, y: 8 },
+              { x: 10 + 2, y: 6 },
+              { x: 10 + 5, y: 2 },
+            ],
+            outline_color: { r: 1, g: 0, b: 0, a: 1 },
+            outline_colors: [
+              { r: 1, g: 0, b: 0, a: 1 },
+              { r: 0, g: 1, b: 0, a: 1 },
+              { r: 0, g: 0, b: 1, a: 1 },
+              { r: 0, g: 1, b: 1, a: 1 },
+            ],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 2,
+          },
+        ],
+      },
+    ],
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
+/** Change from vertex colors off to on */
+export const UpdateLineEnableVertexColors: StoryObj<UpdateLineArgs> = {
+  parameters: {
+    useReadySignal: true,
+  },
+  render: UpdateLineStory,
+  args: {
+    messages: [
+      {
+        points: [
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LOOP,
+            points: [
+              { x: 0, y: 0 },
+              { x: 0, y: 8 },
+              { x: 2, y: 6 },
+              { x: 5, y: 2 },
+            ],
+            outline_color: { r: 1, g: 0, b: 0, a: 1 },
+            outline_colors: [],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 1,
+          },
+        ],
+      },
+      {
+        points: [
+          {
+            timestamp: { sec: 0, nsec: 0 },
+            type: PointsAnnotationType.LINE_LIST,
+            points: [
+              { x: 10 + 0, y: 0 },
+              { x: 10 + 0, y: 8 },
+              { x: 10 + 2, y: 6 },
+              { x: 10 + 5, y: 2 },
+            ],
+            outline_color: { r: 1, g: 0, b: 0, a: 1 },
+            outline_colors: [
+              { r: 1, g: 0, b: 0, a: 1 },
+              { r: 0, g: 1, b: 0, a: 1 },
+              { r: 0, g: 0, b: 1, a: 1 },
+              { r: 0, g: 1, b: 1, a: 1 },
+            ],
+            fill_color: { r: 0, g: 0, b: 0, a: 0 },
+            thickness: 2,
+          },
+        ],
+      },
+    ],
+  },
 
   play: async (ctx) => {
     await ctx.parameters.storyReady;

@@ -245,6 +245,7 @@ class LinePrimitiveRenderable extends THREE.Object3D {
           this.#colorBuffer = new Float32Array(necessaryColorBufferSize);
         }
         this.#material.vertexColors = true;
+        (this.#material.color as THREE.Color).setRGB(1, 1, 1); // any non-white color will tint the vertex colors
         this.#material.opacity = 1;
         this.#material.uniforms.opacity!.value = 1;
         if (useIndices) {

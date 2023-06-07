@@ -128,7 +128,7 @@ export class RenderableTriangles extends RenderablePrimitive {
       if (colorChanged) {
         material.vertexColors = true;
         // need to set overall material color back or else it will blend them with the vertex colors
-        material.color.set("#ffffff");
+        material.color.setRGB(1, 1, 1);
         material.opacity = 1.0;
         // can assume that color exists since colorchanged is true
         geometry.attributes.color!.needsUpdate = true;
