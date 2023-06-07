@@ -212,7 +212,7 @@ export default class UserNodePlayer implements Player {
     (datatypes: RosDatatypes, nodeDatatypes: readonly RosDatatypes[]): RosDatatypes => {
       return nodeDatatypes.reduce(
         (allDatatypes, userNodeDatatypes) => new Map([...allDatatypes, ...userNodeDatatypes]),
-        new Map([...datatypes, ...basicDatatypes]),
+        new Map([...basicDatatypes, ...datatypes]),
       );
     },
   );

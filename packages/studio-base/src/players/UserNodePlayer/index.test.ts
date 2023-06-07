@@ -1614,6 +1614,37 @@ describe("UserNodePlayer", () => {
           { name: `${DEFAULT_STUDIO_NODE_PREFIX}state`, schemaName: "std_msgs/Header" },
         ]);
       });
+      it("does not override dynamically generated datatypes with built-in datatypes", async () => {
+        const fakePlayer = new FakePlayer();
+        const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
+        void userNodePlayer.setUserNodes({
+          nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        });
+
+        const [done] = setListenerHelper(userNodePlayer);
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            // Emit datatypes which includes the built-in type `std_msgs/Header`.
+            datatypes: new Map(
+              Object.entries({
+                "std_msgs/Header": {
+                  definitions: [
+                    { type: "string", name: "some_field", isArray: false, isComplex: false },
+                  ],
+                },
+              }),
+            ),
+          },
+        });
+
+        // We expect that the player's emitted `std_msgs/Header` datatype was not overriden by the
+        // built-in type.
+        const { datatypes } = (await done)!;
+        expect(datatypes?.get("std_msgs/Header")).toEqual({
+          definitions: [{ type: "string", name: "some_field", isArray: false, isComplex: false }],
+        });
+      });
     });
 
     describe("global variable behavior", () => {
