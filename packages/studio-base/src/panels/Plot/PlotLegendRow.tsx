@@ -165,9 +165,8 @@ export function PlotLegendRow({
           style={{ color: getLineColor(path.color, index) }}
           icon={<Square24Regular />}
           checkedIcon={<Square24Filled />}
-          onChange={(event) => {
-            event.stopPropagation();
-
+          onClick={(event) => event.stopPropagation()} // prevent toggling from opening settings
+          onChange={() => {
             const newPaths = paths.slice();
             const newPath = newPaths[index];
 
