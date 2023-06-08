@@ -173,7 +173,7 @@ export const CleansUpTooltipOnUnmount: StoryObj = {
           clientX: 70 + left,
           clientY: 296 + top,
         });
-        await delay(100);
+        await delay(500);
         tooltip = document.querySelector("[data-testid=TimeBasedChartTooltipContent]") ?? undefined;
       }
       if (tooltip == undefined) {
@@ -233,6 +233,12 @@ export const CallPauseOnInitialMount: StoryObj = {
         </MockMessagePipelineProvider>
       </div>
     );
+  },
+
+  parameters: {
+    chromatic: {
+      delay: 500,
+    },
   },
 };
 
