@@ -523,7 +523,15 @@ export const constructDatatypes = (
       default: {
         const locationType = checker.getTypeAtLocation(tsNode);
 
-        const symbol = locationType.symbol;
+        const symbol = locationType.symbol as ts.Symbol | undefined;
+        if (symbol == undefined) {
+          throw new DatatypeExtractionError({
+            severity: DiagnosticSeverity.Error,
+            message: `Unsupported type for member '${name}'.`,
+            source: Sources.DatatypeExtraction,
+            code: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+          });
+        }
         const declaration = symbol.declarations?.[0];
         if (symbol.declarations?.length !== 1 || !declaration) {
           throw new DatatypeExtractionError(badTypeReturnError);

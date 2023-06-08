@@ -400,6 +400,7 @@ describe("pipeline", () => {
       description: string;
       datatypes?: RosDatatypes;
       error?: (typeof ErrorCodes.DatatypeExtraction)[keyof typeof ErrorCodes.DatatypeExtraction];
+      errorMessage?: string;
       outputDatatype?: string;
       only?: boolean;
       /* Debugging helper */
@@ -1563,6 +1564,20 @@ describe("pipeline", () => {
           };`,
         error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
       },
+      {
+        description: "Generic type that's just too difficult :(",
+        sourceCode: `
+          import { Input, Message } from "./types";
+          type Output = {
+            foo: Message<"Foo">;
+          };
+          export default (msg: any): Output => {
+            throw new Error();
+          };`,
+        datatypes: new Map([["Foo", { definitions: [] }]]),
+        errorMessage: "Unsupported type for member 'foo'.",
+        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+      },
     ];
 
     describe("extracts datatypes from the return type of the publisher", () => {
@@ -1575,7 +1590,15 @@ describe("pipeline", () => {
         typeof skip === "boolean" ? !skip : true,
       );
       filteredTestCases.forEach(
-        ({ description, sourceCode, datatypes = new Map(), error, outputDatatype, rosLib }) => {
+        ({
+          description,
+          sourceCode,
+          datatypes = new Map(),
+          error,
+          errorMessage,
+          outputDatatype,
+          rosLib,
+        }) => {
           it(`${error != undefined ? "Expected Error: " : ""}${description}`, () => {
             const typesLib = generateTypesLib({ topics: [], datatypes });
             const inputNodeData: NodeData = {
@@ -1592,6 +1615,9 @@ describe("pipeline", () => {
               expect(nodeData.datatypes).toEqual(datatypes);
             } else {
               expect(nodeData.diagnostics.map(({ code }) => code)).toEqual([error]);
+            }
+            if (errorMessage != undefined) {
+              expect(nodeData.diagnostics.map(({ message }) => message)).toEqual([errorMessage]);
             }
           });
         },
