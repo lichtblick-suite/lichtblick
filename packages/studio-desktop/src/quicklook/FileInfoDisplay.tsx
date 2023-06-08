@@ -96,7 +96,7 @@ const useStyles = makeStyles()(() => ({
     wordBreak: "break-word",
     borderCollapse: "separate",
 
-    "&:nth-child(2n)": {
+    "&:nth-of-type(2n)": {
       "--zebra-color": "rgba(0, 0, 0, 5%)",
 
       "@media (prefers-color-scheme: dark)": {

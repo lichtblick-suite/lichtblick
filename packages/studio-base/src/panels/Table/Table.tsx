@@ -47,7 +47,7 @@ const useStyles = makeStyles<void, "tableData" | "tableHeader">()((theme, _param
   tableRow: {
     svg: { opacity: 0.6 },
 
-    "&:nth-child(even)": {
+    "&:nth-of-type(even)": {
       backgroundColor: theme.palette.action.hover,
     },
     "&:hover": {
