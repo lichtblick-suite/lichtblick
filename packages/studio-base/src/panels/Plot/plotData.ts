@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { assignWith, last, isEmpty } from "lodash";
+import { assignWith, last, isEmpty, first } from "lodash";
 import memoizeWeak from "memoize-weak";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -27,8 +27,8 @@ function maxTime(a: Time, b: Time): Time {
 type TimeRange = { start: Time; end: Time };
 
 /**
- * Find the earliest and latest times of messages in data, for all messages and
- * per-path.
+ * Find the earliest and latest times of messages in data, for all messages and per-path.
+ * Assumes invidual ranges of messages are already sorted by receiveTime.
  */
 export function findTimeRanges(data: Im<PlotDataByPath>): {
   all: TimeRange;
@@ -40,12 +40,10 @@ export function findTimeRanges(data: Im<PlotDataByPath>): {
   for (const path of Object.keys(data)) {
     const thisPath = (byPath[path] = { start: MAX_TIME, end: MIN_TIME });
     for (const item of data[path] ?? []) {
-      for (const datum of item) {
-        start = minTime(start, datum.receiveTime);
-        end = maxTime(end, datum.receiveTime);
-        thisPath.start = minTime(thisPath.start, datum.receiveTime);
-        thisPath.end = maxTime(thisPath.end, datum.receiveTime);
-      }
+      thisPath.start = minTime(thisPath.start, first(item)?.receiveTime ?? MAX_TIME);
+      thisPath.end = maxTime(thisPath.end, last(item)?.receiveTime ?? MIN_TIME);
+      start = minTime(start, thisPath.start);
+      end = maxTime(end, thisPath.end);
     }
   }
 
@@ -118,12 +116,6 @@ export function getBlockItemsByPath(
     }
 
     for (const [path, messagePathItems] of Object.entries(messagePathItemsForBlock)) {
-      for (const items of messagePathItems) {
-        for (const item of items) {
-          count += item.queriedData.length;
-        }
-      }
-
       const existingItems = ret[path] ?? [];
       // getMessagePathItemsForBlock returns an array of exactly one range of items.
       const [pathItems] = messagePathItems;
@@ -142,12 +134,14 @@ export function getBlockItemsByPath(
           existingItems.push(pathItems.slice());
         }
       }
+      count += pathItems?.length ?? 0;
       ret[path] = existingItems;
       lastBlockIndexForPath[path] = i;
     }
 
     i += 1;
   }
+
   return ret;
 }
 

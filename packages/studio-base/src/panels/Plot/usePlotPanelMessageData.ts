@@ -5,6 +5,7 @@
 import { groupBy, isEmpty, pick } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLatest } from "react-use";
+import { useDebounce } from "use-debounce";
 
 import { isLessThan, isTimeInRangeInclusive, subtract } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
@@ -62,6 +63,12 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
   }, [blocks, decodeMessagePathsForMessagesByTopic, showSingleCurrentMessage]);
 
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(allPaths);
+
+  // Debounce blocks data to improve handling of large blocks.
+  const [debouncedPlotDataForBlocks] = useDebounce(plotDataForBlocks, 500, {
+    leading: true,
+    maxWait: 2_000,
+  });
 
   const blocksTimeRange = useMemo(
     () => PlotData.findTimeRanges(plotDataForBlocks),
@@ -197,8 +204,9 @@ export function usePlotPanelMessageData(params: Params): Immutable<PlotDataByPat
   }, [plotDataByPath, plotDataForBlocks]);
 
   const combinedPlotData = useMemo(
-    () => PlotData.combine([plotDataForBlocks, ...Object.values(accumulatedPathIntervals)]),
-    [accumulatedPathIntervals, plotDataForBlocks],
+    () =>
+      PlotData.combine([debouncedPlotDataForBlocks, ...Object.values(accumulatedPathIntervals)]),
+    [accumulatedPathIntervals, debouncedPlotDataForBlocks],
   );
 
   return combinedPlotData;
