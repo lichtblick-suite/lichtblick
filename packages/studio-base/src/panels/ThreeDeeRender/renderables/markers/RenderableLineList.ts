@@ -14,7 +14,7 @@ import {
   markerHasTransparency,
 } from "./materials";
 import type { IRenderer } from "../../IRenderer";
-import { LineMaterial } from "../../LineMaterial";
+import { LineMaterialWithAlphaVertex } from "../../LineMaterialWithAlphaVertex";
 import { Marker } from "../../ros";
 
 export class RenderableLineList extends RenderableMarker {
@@ -94,9 +94,9 @@ export class RenderableLineList extends RenderableMarker {
       this.#line.material.needsUpdate = true;
     }
 
-    const matLinePrepass = this.#linePrepass.material as LineMaterial;
+    const matLinePrepass = this.#linePrepass.material as LineMaterialWithAlphaVertex;
     matLinePrepass.lineWidth = lineWidth;
-    const matLine = this.#line.material as LineMaterial;
+    const matLine = this.#line.material as LineMaterialWithAlphaVertex;
     matLine.lineWidth = lineWidth;
 
     const prevPointsLength = this.#positionBuffer.length / 3;

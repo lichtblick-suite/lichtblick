@@ -14,7 +14,7 @@ import {
   markerHasTransparency,
 } from "./materials";
 import type { IRenderer } from "../../IRenderer";
-import { LineMaterial } from "../../LineMaterial";
+import { LineMaterialWithAlphaVertex } from "../../LineMaterialWithAlphaVertex";
 import { Marker } from "../../ros";
 
 const tempTuple4: THREE.Vector4Tuple = [0, 0, 0, 0];
@@ -102,9 +102,9 @@ export class RenderableLineStrip extends RenderableMarker {
       this.#line.material.needsUpdate = true;
     }
 
-    const matLinePrepass = this.#linePrepass.material as LineMaterial;
+    const matLinePrepass = this.#linePrepass.material as LineMaterialWithAlphaVertex;
     matLinePrepass.lineWidth = lineWidth;
-    const matLine = this.#line.material as LineMaterial;
+    const matLine = this.#line.material as LineMaterialWithAlphaVertex;
     matLine.lineWidth = lineWidth;
 
     const prevPointsLength = this.#positionBuffer.length / 3;

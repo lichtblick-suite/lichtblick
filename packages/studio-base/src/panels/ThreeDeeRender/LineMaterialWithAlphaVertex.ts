@@ -471,7 +471,8 @@ export interface LineMaterialParameters extends MaterialParameters {
   worldUnits?: boolean | undefined;
 }
 
-export class LineMaterial extends ShaderMaterial {
+/** LineMaterial that supports vertex colors with an alpha channel */
+export class LineMaterialWithAlphaVertex extends ShaderMaterial {
   public readonly isLineMaterial = true;
 
   public constructor(parameters: LineMaterialParameters) {
@@ -515,6 +516,7 @@ export class LineMaterial extends ShaderMaterial {
   }
 
   public set lineWidth(value) {
+    this.linewidth = value;
     this.uniforms.linewidth!.value = value;
   }
 

@@ -17,6 +17,7 @@ type Camera = THREE.PerspectiveCamera | THREE.OrthographicCamera;
 // The width and height of the output viewport. This could be 1 to sample a
 // single pixel, but GL_POINTS with a >1 point size would be clipped
 const PIXEL_WIDTH = 31;
+const tempResolution = new THREE.Vector2(0, 0);
 
 const WHITE_COLOR = new THREE.Color(0xffffff);
 
@@ -287,17 +288,27 @@ export class Picker {
     }
 
     const sprite = material.type === "SpriteMaterial" ? 1 : 0;
+
+    const pickResolution = tempResolution.set(
+      this.#pickingTarget.width,
+      this.#pickingTarget.height,
+    );
     const sizeAttenuation =
       (material as Partial<THREE.PointsMaterial>).sizeAttenuation === true ? 1 : 0;
     const pickingMaterial = renderItem.object.userData.pickingMaterial as
       | THREE.ShaderMaterial
       | undefined;
+    // scale picking material to picking target size
+    if (pickingMaterial?.uniforms.resolution != undefined) {
+      pickingMaterial.uniforms.resolution.value.copy(pickResolution);
+    }
     const renderMaterial = pickingMaterial ?? this.#renderMaterial(sprite, sizeAttenuation);
     if (sprite === 1) {
       renderMaterial.uniforms.rotation = { value: (material as THREE.SpriteMaterial).rotation };
       renderMaterial.uniforms.center = { value: (object as THREE.Sprite).center };
     }
     setObjectId(renderMaterial, objId);
+    renderMaterial.uniformsNeedUpdate = true;
     this.#gl.renderBufferDirect(
       this.#camera,
       NullScene,
@@ -412,7 +423,6 @@ function setObjectId(material: THREE.ShaderMaterial, objectId: number): void {
     ((objectId >> 8) & 255) / 255,
     (objectId & 255) / 255,
   ];
-  material.uniformsNeedUpdate = true;
 }
 
 // Used for debug colors, this remaps objectIds to pseudo-random 32-bit integers

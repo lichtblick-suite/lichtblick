@@ -4,7 +4,7 @@
 
 import * as THREE from "three";
 
-import { LineMaterial } from "../../LineMaterial";
+import { LineMaterialWithAlphaVertex } from "../../LineMaterialWithAlphaVertex";
 import { ColorRGBA, Marker, MarkerType } from "../../ros";
 
 export type LineOptions = {
@@ -75,35 +75,41 @@ export function makeStandardInstancedMaterial(marker: Marker): THREE.MeshStandar
   });
 }
 
-export function makeLinePrepassMaterial(marker: Marker, options: LineOptions): LineMaterial {
+export function makeLinePrepassMaterial(
+  marker: Marker,
+  options: LineOptions,
+): LineMaterialWithAlphaVertex {
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
-  const material = new LineMaterial({
+  const material = new LineMaterialWithAlphaVertex({
     worldUnits: options.worldUnits ?? true,
     colorWrite: false,
     transparent,
     depthWrite: !transparent,
     linewidth: lineWidth,
-    resolution: options.resolution,
+    resolution: options.resolution.clone(),
 
     stencilWrite: true,
     stencilRef: 1,
     stencilZPass: THREE.ReplaceStencilOp,
   });
-  material.lineWidth = lineWidth; // Fix for THREE.js type annotations
+  material.lineWidth = lineWidth;
   return material;
 }
 
-export function makeLineMaterial(marker: Marker, options: LineOptions): LineMaterial {
+export function makeLineMaterial(
+  marker: Marker,
+  options: LineOptions,
+): LineMaterialWithAlphaVertex {
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
-  const material = new LineMaterial({
+  const material = new LineMaterialWithAlphaVertex({
     worldUnits: options.worldUnits ?? true,
     vertexColors: true,
     linewidth: lineWidth,
     transparent,
     depthWrite: !transparent,
-    resolution: options.resolution,
+    resolution: options.resolution.clone(),
 
     stencilWrite: true,
     stencilRef: 0,
@@ -111,7 +117,7 @@ export function makeLineMaterial(marker: Marker, options: LineOptions): LineMate
     stencilFail: THREE.ReplaceStencilOp,
     stencilZPass: THREE.ReplaceStencilOp,
   });
-  material.lineWidth = lineWidth; // Fix for THREE.js type annotations
+  material.lineWidth = lineWidth;
   return material;
 }
 
@@ -131,7 +137,7 @@ export function makeLinePickingMaterial(
     uniforms: {
       objectId: { value: [NaN, NaN, NaN, NaN] },
       linewidth: { value: lineWidth },
-      resolution: { value: options.resolution },
+      resolution: { value: options.resolution.clone() },
       dashOffset: { value: 0 },
       dashScale: { value: 1 },
       dashSize: { value: 1 },
