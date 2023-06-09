@@ -460,7 +460,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   const onClick = useCallback(
     (messageEvent: MessageEvent) => {
-      context.seekPlayback?.(toSec(messageEvent.receiveTime));
+      context.seekPlayback?.(messageEvent.receiveTime);
     },
     [context],
   );
