@@ -219,31 +219,41 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         return;
       }
 
-      const texture = this.userData.texture as THREE.CanvasTexture | undefined;
-      if (texture == undefined || !bitmapDimensionsEqual(bitmap, texture.image as ImageBitmap)) {
-        texture?.image.close();
-        texture?.dispose();
+      const canvasTexture = this.userData.texture;
+      if (
+        canvasTexture == undefined ||
+        // instanceof check allows us to switch from a raw image (DataTexture) to a compressed image (CanvasTexture)
+        !(canvasTexture instanceof THREE.CanvasTexture) ||
+        !bitmapDimensionsEqual(bitmap, canvasTexture.image as ImageBitmap | undefined)
+      ) {
+        if (canvasTexture?.image instanceof ImageBitmap) {
+          canvasTexture.image.close();
+        }
+        canvasTexture?.dispose();
         this.userData.texture = createCanvasTexture(bitmap);
       } else {
-        texture.image = bitmap;
-        texture.needsUpdate = true;
+        canvasTexture.image = bitmap;
+        canvasTexture.needsUpdate = true;
       }
     } else {
       const { width, height } = image;
-      const prevTexture = this.userData.texture as THREE.DataTexture | undefined;
+      let dataTexture = this.userData.texture;
       if (
-        prevTexture == undefined ||
-        prevTexture.image.width !== width ||
-        prevTexture.image.height !== height
+        dataTexture == undefined ||
+        // instanceof check allows us to switch from a compressed image (CanvasTexture) to a raw image (DataTexture)
+        !(dataTexture instanceof THREE.DataTexture) ||
+        dataTexture.image.width !== width ||
+        dataTexture.image.height !== height
       ) {
-        prevTexture?.dispose();
-        this.userData.texture = createDataTexture(width, height);
+        dataTexture?.dispose();
+        dataTexture = createDataTexture(width, height);
+        this.userData.texture = dataTexture;
       }
+      assert(dataTexture instanceof THREE.DataTexture); // https://github.com/microsoft/TypeScript/issues/54594
 
-      const texture = this.userData.texture as THREE.DataTexture;
       try {
-        decodeRawImage(image, this.#getRawImageOptions(), texture.image.data);
-        texture.needsUpdate = true;
+        decodeRawImage(image, this.#getRawImageOptions(), dataTexture.image.data);
+        dataTexture.needsUpdate = true;
         this.renderer.settings.errors.remove(IMAGE_TOPIC_PATH, CREATE_BITMAP_ERR_KEY);
         this.renderer.settings.errors.removeFromTopic(this.userData.topic, CREATE_BITMAP_ERR_KEY);
       } catch (error) {

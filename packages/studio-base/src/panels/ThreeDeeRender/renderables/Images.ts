@@ -11,13 +11,13 @@ import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
-import { BitmapCache } from "./Images/BitmapCache";
 import {
   CREATE_BITMAP_ERR_KEY,
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
 } from "./Images/ImageRenderable";
 import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
+import { decodeCompressedImageToBitmap } from "./Images/decodeImage";
 import {
   normalizeCompressedImage,
   normalizeRawImage,
@@ -77,9 +77,6 @@ export class Images extends SceneExtension<ImageRenderable> {
    * This stores the last camera info message on each topic so it can be applied when rendering the image
    */
   #cameraInfoByTopic = new Map<string, CameraInfo>();
-
-  /** Cache of decoded bitmaps to avoid flickering when toggling topics */
-  #bitmapCache = new BitmapCache();
 
   public constructor(renderer: IRenderer) {
     super("foxglove.Images", renderer);
@@ -288,22 +285,21 @@ export class Images extends SceneExtension<ImageRenderable> {
     const isCompressedImage = "format" in image;
 
     if (isCompressedImage) {
-      this.#bitmapCache.getBitmap(
-        messageEvent,
-        image,
-        DEFAULT_BITMAP_WIDTH,
-        (bitmap) => {
+      decodeCompressedImageToBitmap(image, DEFAULT_BITMAP_WIDTH)
+        .then((maybeBitmap) => {
           const prevRenderable = renderable;
           const currentRenderable = this.renderables.get(imageTopic);
           if (currentRenderable !== prevRenderable) {
             return;
           }
           this.renderer.settings.errors.removeFromTopic(imageTopic, CREATE_BITMAP_ERR_KEY);
-          renderable.setBitmap(bitmap);
+          if (maybeBitmap instanceof ImageBitmap) {
+            renderable.setBitmap(maybeBitmap);
+          }
           renderable.update();
           this.renderer.queueAnimationFrame();
-        },
-        (err) => {
+        })
+        .catch((err) => {
           const prevRenderable = renderable;
           const currentRenderable = this.renderables.get(imageTopic);
           if (currentRenderable !== prevRenderable) {
@@ -314,8 +310,7 @@ export class Images extends SceneExtension<ImageRenderable> {
             CREATE_BITMAP_ERR_KEY,
             `Error creating bitmap: ${err.message}`,
           );
-        },
-      );
+        });
     }
 
     renderable.userData.receiveTime = receiveTime;
@@ -371,7 +366,10 @@ export class Images extends SceneExtension<ImageRenderable> {
       this.#recomputeCameraModel(renderable, cameraInfo);
     }
 
-    renderable.update();
+    // Compressed images handle their own update after loading the bitmap
+    if (!isCompressedImage) {
+      renderable.update();
+    }
   };
 
   #handleCameraInfo = (
