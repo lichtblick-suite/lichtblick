@@ -4,7 +4,6 @@
 
 import { DeepPartial } from "ts-essentials";
 
-import { TwoKeyMap } from "@foxglove/den/collection";
 import { fromNanoSec } from "@foxglove/rostime";
 import {
   CameraCalibration,
@@ -41,7 +40,7 @@ describe("MessageHandler: synchronized = false", () => {
     const state = messageHandler.getRenderState();
 
     expect(state).toEqual({
-      annotationsByTopicSchema: new TwoKeyMap(),
+      annotationsByTopic: new Map(),
     });
   });
   it("should have camera info if handled camera info", () => {
@@ -69,13 +68,7 @@ describe("MessageHandler: synchronized = false", () => {
   it("should have annotations if handled annotations", () => {
     const messageHandler = new MessageHandler({
       synchronize: false,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
 
     const annotation = createCircleAnnotations([0n]);
@@ -88,9 +81,7 @@ describe("MessageHandler: synchronized = false", () => {
     messageHandler.handleAnnotations(annotationMessage as MessageEvent<ImageAnnotations>);
     const state = messageHandler.getRenderState();
 
-    expect(
-      state.annotationsByTopicSchema?.get("annotations", "foxglove.ImageAnnotations"),
-    ).not.toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations")).not.toBeUndefined();
   });
   it("clears image if image topic changed", () => {
     const messageHandler = new MessageHandler({ synchronize: false, imageTopic: "image1" });
@@ -123,18 +114,10 @@ describe("MessageHandler: synchronized = false", () => {
   it("clears specific annotations if annotations subscriptions change", () => {
     const messageHandler = new MessageHandler({
       synchronize: false,
-      annotations: [
-        {
-          topic: "annotations1",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-        {
-          topic: "annotations2",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: {
+        annotations1: { visible: true },
+        annotations2: { visible: true },
+      },
     });
 
     const annotation = createCircleAnnotations([0n]);
@@ -155,40 +138,19 @@ describe("MessageHandler: synchronized = false", () => {
 
     // annotations2 removed
     messageHandler.setConfig({
-      annotations: [
-        {
-          topic: "annotations1",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-        {
-          topic: "annotations2",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: false },
-        },
-      ],
+      annotations: { annotations1: { visible: true }, annotations2: { visible: false } },
     });
     const state = messageHandler.getRenderState();
 
-    expect(
-      state.annotationsByTopicSchema?.get("annotations1", "foxglove.ImageAnnotations"),
-    ).not.toBeUndefined();
-    expect(
-      state.annotationsByTopicSchema?.get("annotations2", "foxglove.ImageAnnotations"),
-    ).toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations1")).not.toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations2")).toBeUndefined();
   });
   it("listener function called whenever a message is handled or when config changes", () => {
     const messageHandler = new MessageHandler({
       synchronize: false,
       imageTopic: "image",
       calibrationTopic: "calibration",
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
     const listener = jest.fn();
 
@@ -215,13 +177,7 @@ describe("MessageHandler: synchronized = false", () => {
 
     // annotations2 removed
     messageHandler.setConfig({
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: false },
-        },
-      ],
+      annotations: { annotations: { visible: false } },
     });
     expect(listener).toHaveBeenCalledTimes(4);
   });
@@ -255,13 +211,7 @@ describe("MessageHandler: synchronized = true", () => {
   it("does not show state with annotations if only handled annotations", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
 
     const annotation = createCircleAnnotations([0n]);
@@ -274,21 +224,13 @@ describe("MessageHandler: synchronized = true", () => {
     messageHandler.handleAnnotations(annotationMessage as MessageEvent<ImageAnnotations>);
     const state = messageHandler.getRenderState();
 
-    expect(
-      state.annotationsByTopicSchema?.get("annotations", "foxglove.ImageAnnotations"),
-    ).toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations")).toBeUndefined();
   });
 
   it("shows state with image and annotations if they have the same timestamp", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
     const time = 2n;
 
@@ -309,21 +251,13 @@ describe("MessageHandler: synchronized = true", () => {
     const state = messageHandler.getRenderState();
 
     expect(state.image).not.toBeUndefined();
-    expect(
-      state.annotationsByTopicSchema?.get("annotations", "foxglove.ImageAnnotations"),
-    ).not.toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations")).not.toBeUndefined();
   });
 
   it("shows state without image and annotations if they have different header timestamps", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
     const time = 2n;
 
@@ -344,21 +278,13 @@ describe("MessageHandler: synchronized = true", () => {
     const state = messageHandler.getRenderState();
 
     expect(state.image).toBeUndefined();
-    expect(
-      state.annotationsByTopicSchema?.get("annotations", "foxglove.ImageAnnotations"),
-    ).toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations")).toBeUndefined();
   });
 
   it("shows most recent image and annotations with same timestamps", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
     let time = 2n;
 
@@ -396,22 +322,15 @@ describe("MessageHandler: synchronized = true", () => {
     const state = messageHandler.getRenderState();
 
     expect((state.image?.message as RawImage).timestamp).toEqual(fromNanoSec(time));
-    expect(
-      state.annotationsByTopicSchema?.get("annotations", "foxglove.ImageAnnotations")
-        ?.annotations[0]?.stamp,
-    ).toEqual(fromNanoSec(time));
+    expect(state.annotationsByTopic?.get("annotations")?.annotations[0]?.stamp).toEqual(
+      fromNanoSec(time),
+    );
   });
 
   it("shows most older image and annotations with same timestamps if newer messages have different timestamps", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
 
     const time = 2n;
@@ -450,27 +369,15 @@ describe("MessageHandler: synchronized = true", () => {
     const state = messageHandler.getRenderState();
 
     expect((state.image?.message as RawImage).timestamp).toEqual(fromNanoSec(time));
-    expect(
-      state.annotationsByTopicSchema?.get("annotations", "foxglove.ImageAnnotations")
-        ?.annotations[0]?.stamp,
-    ).toEqual(fromNanoSec(time));
+    expect(state.annotationsByTopic?.get("annotations")?.annotations[0]?.stamp).toEqual(
+      fromNanoSec(time),
+    );
   });
 
   it("does not show image in state if it hasn't received requisite annotations at same timestamp", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations1",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-        {
-          topic: "annotations2",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations1: { visible: true }, annotations2: { visible: true } },
     });
     const time = 2n;
 
@@ -492,20 +399,14 @@ describe("MessageHandler: synchronized = true", () => {
     const state = messageHandler.getRenderState();
 
     expect(state.image).toBeUndefined();
-    expect(state.annotationsByTopicSchema).toBeUndefined();
+    expect(state.annotationsByTopic).toBeUndefined();
   });
 
   it("clears image when image topic changed", () => {
     const messageHandler = new MessageHandler({
       imageTopic: "image1",
       synchronize: true,
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
     const time = 2n;
 
@@ -532,18 +433,10 @@ describe("MessageHandler: synchronized = true", () => {
       synchronize: true,
       imageTopic: "image",
       calibrationTopic: "calibration",
-      annotations: [
-        {
-          topic: "annotations1",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-        {
-          topic: "annotations2",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: {
+        annotations1: { visible: true },
+        annotations2: { visible: true },
+      },
     });
     const time = 2n;
 
@@ -571,40 +464,19 @@ describe("MessageHandler: synchronized = true", () => {
 
     // annotations2 removed
     messageHandler.setConfig({
-      annotations: [
-        {
-          topic: "annotations1",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-        {
-          topic: "annotations2",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: false },
-        },
-      ],
+      annotations: { annotations1: { visible: true }, annotations2: { visible: false } },
     });
     const state = messageHandler.getRenderState();
 
-    expect(
-      state.annotationsByTopicSchema?.get("annotations1", "foxglove.ImageAnnotations"),
-    ).not.toBeUndefined();
-    expect(
-      state.annotationsByTopicSchema?.get("annotations2", "foxglove.ImageAnnotations"),
-    ).toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations1")).not.toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations2")).toBeUndefined();
   });
   it("listener function called whenever a message is handled or when config changes", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
       imageTopic: "image",
       calibrationTopic: "calibration",
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: true },
-        },
-      ],
+      annotations: { annotations: { visible: true } },
     });
     const listener = jest.fn();
 
@@ -631,13 +503,7 @@ describe("MessageHandler: synchronized = true", () => {
 
     // annotations2 removed
     messageHandler.setConfig({
-      annotations: [
-        {
-          topic: "annotations",
-          schemaName: "foxglove.ImageAnnotations",
-          settings: { visible: false },
-        },
-      ],
+      annotations: { annotations: { visible: false } },
     });
     expect(listener).toHaveBeenCalledTimes(4);
   });

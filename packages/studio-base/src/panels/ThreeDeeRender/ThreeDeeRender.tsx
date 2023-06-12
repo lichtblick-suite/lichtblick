@@ -29,7 +29,6 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import type {
   FollowMode,
   IRenderer,
-  ImageModeConfig,
   RendererConfig,
   RendererEvents,
   RendererSubscription,
@@ -126,12 +125,7 @@ export function ThreeDeeRender(props: {
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
       publish,
-      imageMode: {
-        ...partialConfig?.imageMode,
-        annotations: partialConfig?.imageMode?.annotations as
-          | ImageModeConfig["annotations"]
-          | undefined,
-      },
+      imageMode: partialConfig?.imageMode ?? {},
     };
   });
   const configRef = useLatest(config);
@@ -380,14 +374,7 @@ export function ThreeDeeRender(props: {
       if (shouldSubscribe == undefined) {
         if (config.topics[topic.name]?.visible === true) {
           shouldSubscribe = true;
-        } else if (
-          config.imageMode.annotations?.some(
-            (sub) =>
-              sub.topic === topic.name &&
-              sub.schemaName === (convertTo ?? topic.schemaName) &&
-              sub.settings.visible,
-          ) === true
-        ) {
+        } else if (config.imageMode.annotations?.[topic.name]?.visible === true) {
           shouldSubscribe = true;
         } else {
           shouldSubscribe = false;

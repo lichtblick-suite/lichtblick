@@ -5,7 +5,6 @@
 import { Immutable } from "immer";
 
 import { AVLTree } from "@foxglove/avl";
-import { TwoKeyMap } from "@foxglove/den/collection";
 import {
   Time,
   fromNanoSec,
@@ -49,7 +48,7 @@ type NormalizedAnnotations = {
 
 type SynchronizationItem = {
   image?: Readonly<MessageEvent<AnyImage>>;
-  annotationsByTopicSchema: TwoKeyMap<string, string, NormalizedAnnotations>;
+  annotationsByTopic: Map<string, NormalizedAnnotations>;
 };
 
 type Config = Pick<
@@ -60,7 +59,7 @@ type Config = Pick<
 type MessageHandlerState = {
   image?: MessageEvent<AnyImage>;
   cameraInfo?: CameraInfo;
-  annotationsByTopicSchema: TwoKeyMap<string, string, NormalizedAnnotations>;
+  annotationsByTopic: Map<string, NormalizedAnnotations>;
 };
 
 export type MessageRenderState = Readonly<Partial<MessageHandlerState>>;
@@ -99,7 +98,7 @@ export class MessageHandler {
   public constructor(config: Immutable<Config>) {
     this.#config = config;
     this.#lastReceivedMessages = {
-      annotationsByTopicSchema: new TwoKeyMap(),
+      annotationsByTopic: new Map(),
     };
     this.#tree = new AVLTree<Time, SynchronizationItem>(compareTime);
   }
@@ -152,7 +151,7 @@ export class MessageHandler {
     } else {
       this.#tree.set(getTimestampFromImage(image), {
         image: normalizedImageMessage,
-        annotationsByTopicSchema: new TwoKeyMap(),
+        annotationsByTopic: new Map(),
       });
     }
     this.#emitState();
@@ -169,9 +168,9 @@ export class MessageHandler {
   ): void => {
     const annotations = normalizeAnnotations(messageEvent.message, messageEvent.schemaName);
 
-    const { topic, schemaName } = messageEvent;
+    const { topic } = messageEvent;
     if (this.#config.synchronize !== true) {
-      this.#lastReceivedMessages.annotationsByTopicSchema.set(topic, schemaName, {
+      this.#lastReceivedMessages.annotationsByTopic.set(topic, {
         originalMessage: messageEvent,
         annotations,
       });
@@ -196,11 +195,11 @@ export class MessageHandler {
       if (!item) {
         item = {
           image: undefined,
-          annotationsByTopicSchema: new TwoKeyMap(),
+          annotationsByTopic: new Map(),
         };
         this.#tree.set(stamp, item);
       }
-      item.annotationsByTopicSchema.set(topic, schemaName, {
+      item.annotationsByTopic.set(topic, {
         originalMessage: messageEvent,
         annotations: group,
       });
@@ -238,26 +237,24 @@ export class MessageHandler {
       this.#config.annotations &&
       this.#config.annotations !== newConfig.annotations
     ) {
-      const newVisibleAnnotationsMap = new TwoKeyMap<string, string, boolean>();
+      const newVisibleTopics = new Set<string>();
 
-      newConfig.annotations.forEach(
-        ({ topic, schemaName, settings }) =>
-          settings.visible && newVisibleAnnotationsMap.set(topic, schemaName, settings.visible),
-      );
+      for (const [topic, settings] of Object.entries(newConfig.annotations)) {
+        if (settings?.visible === true) {
+          newVisibleTopics.add(topic);
+        }
+      }
 
-      for (const [
-        topic,
-        schemaName,
-      ] of this.#lastReceivedMessages.annotationsByTopicSchema.keys()) {
-        if (newVisibleAnnotationsMap.get(topic, schemaName) == undefined) {
-          this.#lastReceivedMessages.annotationsByTopicSchema.delete(topic, schemaName);
+      for (const topic of this.#lastReceivedMessages.annotationsByTopic.keys()) {
+        if (!newVisibleTopics.has(topic)) {
+          this.#lastReceivedMessages.annotationsByTopic.delete(topic);
           changed = true;
         }
       }
       for (const syncEntry of this.#tree.values()) {
-        for (const [topic, schemaName] of syncEntry.annotationsByTopicSchema.keys()) {
-          if (newVisibleAnnotationsMap.get(topic, schemaName) == undefined) {
-            syncEntry.annotationsByTopicSchema.delete(topic, schemaName);
+        for (const topic of syncEntry.annotationsByTopic.keys()) {
+          if (!newVisibleTopics.has(topic)) {
+            syncEntry.annotationsByTopic.delete(topic);
             changed = true;
           }
         }
@@ -276,7 +273,7 @@ export class MessageHandler {
 
   public clear(): void {
     this.#lastReceivedMessages = {
-      annotationsByTopicSchema: new TwoKeyMap(),
+      annotationsByTopic: new Map(),
     };
     this.#tree.clear();
     this.#oldRenderState = undefined;
@@ -294,13 +291,13 @@ export class MessageHandler {
     if (this.#config.synchronize === true) {
       const validEntry = findSynchronizedSetAndRemoveOlderItems(
         this.#tree,
-        this.#visibleAnnotationsMap(),
+        this.#visibleAnnotations(),
       );
       if (validEntry) {
         return {
           cameraInfo: this.#lastReceivedMessages.cameraInfo,
           image: validEntry[1].image,
-          annotationsByTopicSchema: validEntry[1].annotationsByTopicSchema,
+          annotationsByTopic: validEntry[1].annotationsByTopic,
         };
       }
       return {
@@ -311,35 +308,34 @@ export class MessageHandler {
     return { ...this.#lastReceivedMessages };
   }
 
-  #visibleAnnotationsMap(): TwoKeyMap<string, string, boolean> {
-    const map = new TwoKeyMap<string, string, true>();
-
-    this.#config.annotations?.forEach(
-      ({ topic, schemaName, settings }) =>
-        settings.visible && map.set(topic, schemaName, settings.visible),
-    );
-    return map;
+  #visibleAnnotations(): Set<string> {
+    const visibleAnnotations = new Set<string>();
+    for (const [topic, settings] of Object.entries(this.#config.annotations ?? {})) {
+      if (settings?.visible === true) {
+        visibleAnnotations.add(topic);
+      }
+    }
+    return visibleAnnotations;
   }
 }
 
 /**
  * Find the newest entry where we have everything synchronized and remove all older entries from tree.
  * @param tree - AVL tree that stores a [image?, annotations?] in sorted order by timestamp.
- * @param visibleAnnotationsMap - visible topic schema pairs mapped to true boolean values
+ * @param visibleAnnotations - visible annotation topics
  * @returns - the newest synchronized item with all active annotations and image, or undefined if none found
  */
 export function findSynchronizedSetAndRemoveOlderItems(
   tree: AVLTree<Time, SynchronizationItem>,
-  visibleAnnotationsMap: TwoKeyMap<string, string, boolean>,
+  visibleAnnotations: Set<string>,
 ): [Time, SynchronizationItem] | undefined {
   let validEntry: [Time, SynchronizationItem] | undefined = undefined;
   for (const entry of tree.entries()) {
     const messageState = entry[1];
     const hasOnlyVisibleAnnotations =
-      visibleAnnotationsMap.size === messageState.annotationsByTopicSchema.size &&
-      Array.from(visibleAnnotationsMap.keys()).every(
-        ([topic, schemaName]) =>
-          messageState.annotationsByTopicSchema.get(topic, schemaName) != undefined,
+      visibleAnnotations.size === messageState.annotationsByTopic.size &&
+      Array.from(visibleAnnotations.keys()).every(
+        (topic) => messageState.annotationsByTopic.get(topic) != undefined,
       );
     // If we have an image and all the messages for annotation topics then we have a synchronized set.
     if (messageState.image && hasOnlyVisibleAnnotations) {

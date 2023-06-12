@@ -626,13 +626,7 @@ const InvalidPinholeCamera = (): JSX.Element => {
           imageMode: {
             calibrationTopic: "calibration",
             imageTopic: "camera",
-            annotations: [
-              {
-                topic: "annotations",
-                schemaName: "foxglove.ImageAnnotations",
-                settings: { visible: true },
-              },
-            ],
+            annotations: { annotations: { visible: true } },
           },
         }}
       />

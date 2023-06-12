@@ -267,13 +267,7 @@ const ImageWith3D = (initialConfig: ImageModeConfig): JSX.Element => {
           },
           imageMode: {
             ...initialConfig,
-            annotations: [
-              {
-                topic: "annotations",
-                schemaName: "foxglove.ImageAnnotations",
-                settings: { visible: true },
-              },
-            ],
+            annotations: { annotations: { visible: true } },
           },
           topics: {
             sceneUpdate1: {

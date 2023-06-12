@@ -254,13 +254,7 @@ const AnnotationsStory = (imageModeConfigOverride: Partial<ImageModeConfig> = {}
           imageMode: {
             calibrationTopic: "calibration",
             imageTopic: "camera",
-            annotations: [
-              {
-                topic: "annotations",
-                schemaName: "foxglove.ImageAnnotations",
-                settings: { visible: true },
-              },
-            ],
+            annotations: { annotations: { visible: true } },
             ...imageModeConfigOverride,
           },
         }}
@@ -437,28 +431,10 @@ export const MessageConverterSupport: StoryObj = {
             imageMode: {
               calibrationTopic: "calibration",
               imageTopic: "camera",
-              annotations: [
-                {
-                  topic: "annotations",
-                  schemaName: "foxglove.ImageAnnotations",
-                  settings: { visible: true },
-                },
-                {
-                  topic: "annotations",
-                  schemaName: "foxglove_msgs/ImageAnnotations",
-                  settings: { visible: true },
-                },
-                {
-                  topic: "custom_annotations",
-                  schemaName: "foxglove_msgs/ImageAnnotations",
-                  settings: { visible: true },
-                },
-                {
-                  topic: "custom_annotations",
-                  schemaName: "foxglove_msgs/msg/ImageAnnotations",
-                  settings: { visible: true },
-                },
-              ],
+              annotations: {
+                annotations: { visible: true },
+                custom_annotations: { visible: true },
+              },
             },
           }}
         />
@@ -770,18 +746,7 @@ const AnnotationsUpdateStory = (
           imageMode: {
             calibrationTopic: "calibration",
             imageTopic: "camera",
-            annotations: [
-              {
-                topic: "annotations",
-                schemaName: "foxglove.ImageAnnotations",
-                settings: { visible: true },
-              },
-              {
-                topic: "annotationsToClear",
-                schemaName: "foxglove.ImageAnnotations",
-                settings: { visible: true },
-              },
-            ],
+            annotations: { annotations: { visible: true }, annotationsToClear: { visible: true } },
             ...imageModeConfigOverride,
           },
         }}
@@ -895,13 +860,7 @@ function UpdateLineStory({ messages }: UpdateLineArgs): JSX.Element {
           imageMode: {
             calibrationTopic: "calibration",
             imageTopic: "camera",
-            annotations: [
-              {
-                topic: "annotations",
-                schemaName: "foxglove.ImageAnnotations",
-                settings: { visible: true },
-              },
-            ],
+            annotations: { annotations: { visible: true } },
           },
         }}
       />
