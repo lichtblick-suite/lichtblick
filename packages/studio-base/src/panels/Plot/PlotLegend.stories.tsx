@@ -152,5 +152,11 @@ export const LimitWidth: StoryObj = {
     );
   },
 
-  parameters: { useReadySignal: true, colorScheme: "light" },
+  parameters: {
+    chromatic: {
+      delay: 500,
+    },
+    colorScheme: "light",
+    useReadySignal: true,
+  },
 };
