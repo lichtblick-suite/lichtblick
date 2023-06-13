@@ -2986,6 +2986,7 @@ __metadata:
     "@types/uuid": 9.0.1
     "@types/wicg-file-system-access": 2020.9.6
     "@uiw/react-textarea-code-editor": 2.1.1
+    async-mutex: 0.4.0
     babel-jest: 29.5.0
     babel-plugin-transform-import-meta: 2.2.0
     browserify-zlib: 0.2.0

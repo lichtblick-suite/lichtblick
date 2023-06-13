@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEqual, uniq } from "lodash";
+import { Mutex } from "async-mutex";
+import { isEqual, unionBy, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import ReactDOM from "react-dom";
 import shallowequal from "shallowequal";
@@ -143,6 +144,8 @@ export default class UserNodePlayer implements Player {
     lastPlayerStateActiveData: undefined,
     inputsByOutputTopic: new Map(),
   });
+
+  readonly #emitLock = new Mutex();
 
   // exposed as a static to allow testing to mock/replace
   public static CreateNodeTransformWorker = (): SharedWorker => {
@@ -767,14 +770,17 @@ export default class UserNodePlayer implements Player {
       validNodeRegistrations.push(nodeRegistration);
     }
 
+    let changedTopicsRequireEmitState = false;
     state.nodeRegistrations = validNodeRegistrations;
     const nodeTopics = state.nodeRegistrations.map(({ output }) => output);
     if (!isEqual(nodeTopics, this.#memoizedNodeTopics)) {
       this.#memoizedNodeTopics = nodeTopics;
+      changedTopicsRequireEmitState = true;
     }
     const nodeDatatypes = state.nodeRegistrations.map(({ nodeData: { datatypes } }) => datatypes);
     if (!isEqual(nodeDatatypes, this.#memoizedNodeDatatypes)) {
       this.#memoizedNodeDatatypes = nodeDatatypes;
+      changedTopicsRequireEmitState = true;
     }
 
     // We need to set the user node diagnostics, which is a react set state
@@ -794,6 +800,31 @@ export default class UserNodePlayer implements Player {
         this.#setUserNodeDiagnostics(nodeRegistration.nodeId, []);
       }
     });
+
+    // If we have new topics after processing the node registrations we need to emit a new
+    // state to let downstream clients subscribe to newly available topics. This is
+    // necessary because we won't emit a new state otherwise if there are no other active
+    // subscriptions.
+    if (changedTopicsRequireEmitState && this.#playerState?.activeData) {
+      const newTopics = unionBy(
+        this.#playerState.activeData.topics,
+        this.#memoizedNodeTopics,
+        (top) => top.name,
+      );
+      const newDatatypes = this.#getDatatypes(
+        this.#playerState.activeData.datatypes,
+        this.#memoizedNodeDatatypes,
+      );
+      this.#playerState = {
+        ...this.#playerState,
+        activeData: {
+          ...this.#playerState.activeData,
+          datatypes: newDatatypes,
+          topics: newTopics,
+        },
+      };
+      void this.#emitState();
+    }
   }
 
   async #getRosLib(state: ProtectedState): Promise<string> {
@@ -977,25 +1008,29 @@ export default class UserNodePlayer implements Player {
   }
 
   async #emitState() {
-    if (!this.#playerState) {
-      return;
-    }
+    // Wrap in mutex in case the emitState triggered by changed node registrations happens
+    // to run at the same time as an emitstate triggered by the underlying player.
+    await this.#emitLock.runExclusive(async () => {
+      if (!this.#playerState) {
+        return;
+      }
 
-    // only augment child problems if we have our own problems
-    // if neither child or parent have problems we do nothing
-    let problems = this.#playerState.problems;
-    if (this.#problemStore.size > 0) {
-      problems = (problems ?? []).concat(Array.from(this.#problemStore.values()));
-    }
+      // only augment child problems if we have our own problems
+      // if neither child or parent have problems we do nothing
+      let problems = this.#playerState.problems;
+      if (this.#problemStore.size > 0) {
+        problems = (problems ?? []).concat(Array.from(this.#problemStore.values()));
+      }
 
-    const playerState: PlayerState = {
-      ...this.#playerState,
-      problems,
-    };
+      const playerState: PlayerState = {
+        ...this.#playerState,
+        problems,
+      };
 
-    if (this.#listener) {
-      await this.#listener(playerState);
-    }
+      if (this.#listener) {
+        await this.#listener(playerState);
+      }
+    });
   }
 
   public setListener(listener: (_: PlayerState) => Promise<void>): void {

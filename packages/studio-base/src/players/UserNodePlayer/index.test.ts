@@ -283,7 +283,7 @@ describe("UserNodePlayer", () => {
         setUserNodeDiagnostics: mockSetNodeDiagnostics,
       });
 
-      const [done1, done2] = setListenerHelper(userNodePlayer, 2);
+      const [done1, done2, done3] = setListenerHelper(userNodePlayer, 3);
 
       const activeData = {
         ...basicPlayerState,
@@ -294,9 +294,11 @@ describe("UserNodePlayer", () => {
       };
       await fakePlayer.emit({ activeData });
 
-      void userNodePlayer.setUserNodes({
+      await userNodePlayer.setUserNodes({
         nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
+      await done1;
+
       await fakePlayer.emit({
         activeData: {
           ...activeData,
@@ -304,12 +306,12 @@ describe("UserNodePlayer", () => {
         },
       });
 
-      let { topicNames, messages } = await done1!;
+      let { topicNames, messages } = await done2!;
 
       expect(messages.length).toEqual(0);
-      expect(topicNames).toEqual([]);
+      expect(topicNames).toEqual([`${DEFAULT_STUDIO_NODE_PREFIX}1`]);
 
-      ({ topicNames, messages } = await done2!);
+      ({ topicNames, messages } = await done3!);
       expect(messages.length).toEqual(0);
       expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
 
@@ -337,11 +339,11 @@ describe("UserNodePlayer", () => {
         setUserNodeDiagnostics: mockSetNodeDiagnostics,
       });
 
-      void userNodePlayer.setUserNodes({
+      const [done1, done2, done3] = setListenerHelper(userNodePlayer, 3);
+
+      await userNodePlayer.setUserNodes({
         nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
-
-      const [done1, done2, done3] = setListenerHelper(userNodePlayer, 3);
 
       const activeData: PlayerStateActiveData = {
         ...basicPlayerState,
@@ -1340,7 +1342,7 @@ describe("UserNodePlayer", () => {
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
-      const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
+      const [firstDone, secondDone, thirdDone] = setListenerHelper(userNodePlayer, 3);
 
       await fakePlayer.emit({
         activeData: {
@@ -1357,7 +1359,10 @@ describe("UserNodePlayer", () => {
       const { topicNames: firstTopicNames }: any = await firstDone;
       expect(firstTopicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
 
-      void userNodePlayer.setUserNodes({});
+      await userNodePlayer.setUserNodes({});
+      const { topicNames: secondTopicNames }: any = await secondDone;
+      expect(secondTopicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
+
       await fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
@@ -1369,9 +1374,10 @@ describe("UserNodePlayer", () => {
           ),
         },
       });
-      const { topicNames: secondTopicNames }: any = await secondDone;
-      expect(secondTopicNames).toEqual(["/np_input"]);
+      const { topicNames: thirdTopicNames }: any = await thirdDone;
+      expect(thirdTopicNames).toEqual(["/np_input"]);
     });
+
     it("properly sets diagnostics when there is an error", async () => {
       const code = `
         export const inputs = ["/np_input_does_not_exist"];
