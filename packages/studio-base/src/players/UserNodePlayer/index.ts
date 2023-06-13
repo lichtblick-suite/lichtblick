@@ -340,7 +340,10 @@ export default class UserNodePlayer implements Player {
 
         for (const message of blockMessages) {
           if (nodeRegistration.inputs.includes(message.topic)) {
-            const outputMessage = await nodeRegistration.processMessage(message, globalVariables);
+            const outputMessage = await nodeRegistration.processBlockMessage(
+              message,
+              globalVariables,
+            );
             if (outputMessage) {
               // https://github.com/typescript-eslint/typescript-eslint/issues/6632
               if (!messagesByTopic[outTopic]) {
@@ -428,21 +431,27 @@ export default class UserNodePlayer implements Player {
     const nodeData = await transformWorker.send<NodeData>("transform", transformMessage);
     const { inputTopics, outputTopic, transpiledCode, projectCode, outputDatatype } = nodeData;
 
-    let rpc: Rpc | undefined;
-
-    // This signals that we have terminated the node registration and we should bail any message
-    // processing that is in-flight.
-    //
-    // These are lazily created in the first message we process and cleared on terminate.
-    let terminateCondvar: Condvar | undefined;
-    let terminateSignal: Promise<void> | undefined;
-
     // problemKey is a unique identifier for each userspace node so we can manage problems from
     // a specific node. A node may have a problem that may later clear. Using the key we can add/remove
     // problems for specific userspace nodes independently of other userspace nodes.
     const problemKey = `node-id-${nodeId}`;
-    const buildMessageProcessor = (): NodeRegistration["processMessage"] => {
-      return async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
+    const buildMessageProcessor = (): {
+      registration: NodeRegistration["processMessage"];
+      terminate: () => void;
+    } => {
+      // rpc channel for this processor. Lazily created on each message if an unused
+      // channel isn't available.
+      let rpc: undefined | Rpc;
+
+      // This signals that we have terminated the node registration and we should bail any
+      // message processing that is in-flight.
+      //
+      // These are lazily created in the first message we process and cleared on
+      // terminate.
+      let terminateCondvar: undefined | Condvar;
+      let terminateSignal: undefined | Promise<void>;
+
+      const registration = async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
         // Register the node within a web worker to be executed.
         if (!rpc) {
           rpc = this.#unusedNodeRuntimeWorkers.pop();
@@ -460,7 +469,7 @@ export default class UserNodePlayer implements Player {
               });
 
               // trigger listener updates
-              void this.#emitState();
+              void this.#queueEmitState();
             };
 
             const port: MessagePort = worker.port;
@@ -472,7 +481,7 @@ export default class UserNodePlayer implements Player {
                 message: `User script runtime error: ${String(event.data)}`,
               });
 
-              void this.#emitState();
+              void this.#queueEmitState();
             };
             port.start();
             rpc = new Rpc(port);
@@ -485,7 +494,7 @@ export default class UserNodePlayer implements Player {
                 message: `User script runtime error: ${msg}`,
               });
 
-              void this.#emitState();
+              void this.#queueEmitState();
             });
           }
 
@@ -586,31 +595,39 @@ export default class UserNodePlayer implements Player {
           schemaName: outputDatatype,
         };
       };
+
+      const terminate = () => {
+        this.#problemStore.delete(problemKey);
+
+        // Signal any pending in-flight message processing to terminate and clear the state so we can
+        // re-initialize when the next message is processed.
+        terminateCondvar?.notifyAll();
+        terminateCondvar = undefined;
+        terminateSignal = undefined;
+
+        if (rpc) {
+          this.#unusedNodeRuntimeWorkers.push(rpc);
+          rpc = undefined;
+        }
+      };
+
+      return { registration, terminate };
     };
 
-    const terminate = () => {
-      this.#problemStore.delete(problemKey);
-
-      // Signal any pending in-flight message processing to terminate and clear the state so we can
-      // re-initialize when the next message is processed.
-      terminateCondvar?.notifyAll();
-      terminateCondvar = undefined;
-      terminateSignal = undefined;
-
-      if (rpc) {
-        this.#unusedNodeRuntimeWorkers.push(rpc);
-        rpc = undefined;
-      }
-    };
+    const messageProcessor = buildMessageProcessor();
+    const blockProcessor = buildMessageProcessor();
 
     const result: NodeRegistration = {
       nodeId,
       nodeData,
       inputs: inputTopics,
       output: { name: outputTopic, schemaName: outputDatatype },
-      processMessage: buildMessageProcessor(),
-      processBlockMessage: buildMessageProcessor(),
-      terminate,
+      processMessage: messageProcessor.registration,
+      processBlockMessage: blockProcessor.registration,
+      terminate: () => {
+        messageProcessor.terminate();
+        blockProcessor.terminate();
+      },
     };
     state.nodeRegistrationCache.push({ nodeId, userNode, result });
     return result;
@@ -631,7 +648,7 @@ export default class UserNodePlayer implements Player {
           message: `User Script error: ${event.message}`,
         });
 
-        void this.#emitState();
+        void this.#queueEmitState();
       };
 
       const port: MessagePort = worker.port;
@@ -643,7 +660,7 @@ export default class UserNodePlayer implements Player {
           message: `User Script error: ${String(event.data)}`,
         });
 
-        void this.#emitState();
+        void this.#queueEmitState();
       };
       port.start();
       const rpc = new Rpc(port);
@@ -656,7 +673,7 @@ export default class UserNodePlayer implements Player {
           message: `User Script error: ${msg}`,
         });
 
-        void this.#emitState();
+        void this.#queueEmitState();
       });
 
       this.#nodeTransformRpc = rpc;
@@ -823,7 +840,7 @@ export default class UserNodePlayer implements Player {
           topics: newTopics,
         },
       };
-      void this.#emitState();
+      await this.#queueEmitState();
     }
   }
 
@@ -862,7 +879,7 @@ export default class UserNodePlayer implements Player {
       const { activeData } = playerState;
       if (!activeData) {
         this.#playerState = playerState;
-        await this.#emitState();
+        await this.#queueEmitState();
         return;
       }
 
@@ -1003,11 +1020,11 @@ export default class UserNodePlayer implements Player {
 
       this.#playerState = playerState;
     } finally {
-      await this.#emitState();
+      await this.#queueEmitState();
     }
   }
 
-  async #emitState() {
+  async #queueEmitState() {
     // Wrap in mutex in case the emitState triggered by changed node registrations happens
     // to run at the same time as an emitstate triggered by the underlying player.
     await this.#emitLock.runExclusive(async () => {
