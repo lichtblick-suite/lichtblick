@@ -30,7 +30,7 @@ export const defaultLayout: LayoutData = {
       },
     },
     "RawMessages!os6rgs": {},
-    "ImageViewPanel!3mnp456": {},
+    "Image!3mnp456": {},
   },
   globalVariables: {},
   userNodes: {},
@@ -38,7 +38,7 @@ export const defaultLayout: LayoutData = {
   layout: {
     first: "3D!18i6zy7",
     second: {
-      first: "ImageViewPanel!3mnp456",
+      first: "Image!3mnp456",
       second: "RawMessages!os6rgs",
       direction: "column",
       splitPercentage: 30,

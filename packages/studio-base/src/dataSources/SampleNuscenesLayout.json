@@ -1,43 +1,161 @@
 {
   "configById": {
-    "ImageViewPanel!1r5tdvh": {
-      "cameraTopic": "/CAM_FRONT_LEFT/image_rect_compressed",
-      "enabledMarkerTopics": ["/CAM_FRONT_LEFT/annotations", "/CAM_FRONT_LEFT/lidar"],
-      "transformMarkers": false,
-      "synchronize": false,
-      "mode": "fit",
-      "pan": {
-        "x": 0,
-        "y": 0
+    "Image!s2ii8x": {
+      "imageMode": {
+        "imageTopic": "/CAM_FRONT_LEFT/image_rect_compressed",
+        "calibrationTopic": "/CAM_FRONT_LEFT/camera_info",
+        "synchronize": false,
+        "rotation": 0,
+        "annotations": {
+          "/CAM_FRONT_LEFT/annotations": {
+            "visible": true
+          },
+          "/CAM_FRONT_LEFT/lidar": {
+            "visible": false
+          }
+        },
+        "foregroundOpacity": 0
       },
-      "rotation": 0,
-      "zoom": 1
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 45,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "/LIDAR_TOP": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/semantic_map": {
+          "visible": true
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      }
     },
-    "ImageViewPanel!15kmj7r": {
-      "cameraTopic": "/CAM_FRONT/image_rect_compressed",
-      "enabledMarkerTopics": ["/CAM_FRONT/lidar", "/CAM_FRONT/annotations"],
-      "transformMarkers": false,
-      "synchronize": false,
-      "mode": "fit",
-      "pan": {
-        "x": 0,
-        "y": 0
+    "Image!qd8g5l": {
+      "imageMode": {
+        "imageTopic": "/CAM_FRONT/image_rect_compressed",
+        "calibrationTopic": "/CAM_FRONT/camera_info",
+        "synchronize": false,
+        "rotation": 0,
+        "annotations": {
+          "/CAM_FRONT/lidar": {
+            "visible": false
+          },
+          "/CAM_FRONT/annotations": {
+            "visible": true
+          }
+        }
       },
-      "rotation": 0,
-      "zoom": 1
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 45,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "/LIDAR_TOP": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/semantic_map": {
+          "visible": true
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      }
     },
-    "ImageViewPanel!1jn49st": {
-      "cameraTopic": "/CAM_FRONT_RIGHT/image_rect_compressed",
-      "enabledMarkerTopics": ["/CAM_FRONT_RIGHT/annotations", "/CAM_FRONT_RIGHT/lidar"],
-      "transformMarkers": false,
-      "synchronize": false,
-      "mode": "fit",
-      "pan": {
-        "x": 0,
-        "y": 0
+    "Image!37zuv25": {
+      "imageMode": {
+        "imageTopic": "/CAM_FRONT_RIGHT/image_rect_compressed",
+        "calibrationTopic": "/CAM_FRONT_RIGHT/camera_info",
+        "synchronize": false,
+        "rotation": 0,
+        "annotations": {
+          "/CAM_FRONT_RIGHT/annotations": {
+            "visible": true
+          },
+          "/CAM_FRONT_RIGHT/lidar": {
+            "visible": false
+          }
+        }
       },
-      "rotation": 0,
-      "zoom": 1
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 45,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "/LIDAR_TOP": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/semantic_map": {
+          "visible": true
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      }
     },
     "3D!12ucir": {
       "cameraState": {
@@ -129,7 +247,8 @@
         "poseEstimateThetaDeviation": 0.26179939
       },
       "followMode": "follow-pose",
-      "followTf": "base_link"
+      "followTf": "base_link",
+      "imageMode": {}
     },
     "map!2vkib4e": {
       "disabledTopics": [],
@@ -141,7 +260,8 @@
         "lat": 1.2988182017789598,
         "lon": 103.78844261169435
       },
-      "topicColors": {}
+      "topicColors": {},
+      "maxNativeZoom": 18
     },
     "3D!3edtgyg": {
       "cameraState": {
@@ -197,7 +317,8 @@
         "poseEstimateThetaDeviation": 0.26179939
       },
       "followMode": "follow-pose",
-      "followTf": "base_link"
+      "followTf": "base_link",
+      "imageMode": {}
     },
     "Plot!2pb7zl7": {
       "paths": [
@@ -217,12 +338,12 @@
       "showLegend": true,
       "isSynced": true,
       "xAxisVal": "timestamp",
-      "title": "Plot",
       "showXAxisLabels": true,
       "showYAxisLabels": true,
       "legendDisplay": "floating",
       "showPlotValuesInLegend": false,
-      "sidebarDimension": 240
+      "sidebarDimension": 240,
+      "foxglovePanelTitle": "Plot"
     },
     "Plot!4792hqu": {
       "paths": [
@@ -252,12 +373,12 @@
       "showLegend": true,
       "isSynced": true,
       "xAxisVal": "timestamp",
-      "title": "Plot",
       "showXAxisLabels": true,
       "showYAxisLabels": true,
       "legendDisplay": "floating",
       "showPlotValuesInLegend": false,
-      "sidebarDimension": 240
+      "sidebarDimension": 240,
+      "foxglovePanelTitle": "Plot"
     },
     "StateTransitions!3i4dk1l": {
       "paths": [
@@ -297,10 +418,10 @@
           "title": "Perception",
           "layout": {
             "first": {
-              "first": "ImageViewPanel!1r5tdvh",
+              "first": "Image!s2ii8x",
               "second": {
-                "first": "ImageViewPanel!15kmj7r",
-                "second": "ImageViewPanel!1jn49st",
+                "first": "Image!qd8g5l",
+                "second": "Image!37zuv25",
                 "direction": "row",
                 "splitPercentage": 50
               },
