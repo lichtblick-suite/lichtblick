@@ -5,7 +5,6 @@
 type WebpackArgv = {
   mode?: string;
   env?: {
-    FOXGLOVE_BACKEND?: string;
     WEBPACK_SERVE?: boolean;
     WEBPACK_BUNDLE?: boolean;
     WEBPACK_BUILD?: boolean;
