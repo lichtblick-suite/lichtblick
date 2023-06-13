@@ -52,14 +52,14 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     hasCustomToolbar: true,
   },
   {
-    title: t("newImage"),
+    title: t("image"),
     type: "Image",
     description: t("imageDescription"),
     thumbnail: imageViewThumbnail,
     module: async () => ({ default: (await import("./ThreeDeeRender")).ImagePanel }),
   },
   {
-    title: t("image"),
+    title: t("imageLegacy"),
     type: "ImageViewPanel",
     description: t("imageDescription"),
     thumbnail: imageViewThumbnail,

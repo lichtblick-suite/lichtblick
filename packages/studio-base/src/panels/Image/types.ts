@@ -27,6 +27,7 @@ export type Config = DefaultConfig & {
   transformMarkers: boolean;
   zoom?: number;
   zoomPercentage?: number;
+  closedDeprecationBanner?: boolean;
 };
 
 export type UseImagePanelMessagesParams = {
