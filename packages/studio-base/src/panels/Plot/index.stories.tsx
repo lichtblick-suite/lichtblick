@@ -790,6 +790,9 @@ export const WithMinAndMaxYValues: StoryObj = {
   },
 
   parameters: {
+    chromatic: {
+      delay: 500,
+    },
     colorScheme: "light",
     useReadySignal: true,
   },
