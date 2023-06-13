@@ -100,7 +100,6 @@ jobs:
       - uses: chromaui/action@v1
         if: ${{ github.event.repository.full_name == 'foxglove/studio' }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           projectToken: f50040a29fb8
           storybookBuildDir: storybook-static
           autoAcceptChanges: main
