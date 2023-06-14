@@ -194,6 +194,39 @@ describe("parseProtobufSchema", () => {
       }
     `);
 
+    expect(sceneUpdateChannel.datatypes.get("google.protobuf.Timestamp")).toMatchInlineSnapshot(`
+      {
+        "definitions": [
+          {
+            "isArray": false,
+            "name": "sec",
+            "type": "int64",
+          },
+          {
+            "isArray": false,
+            "name": "nsec",
+            "type": "int32",
+          },
+        ],
+      }
+    `);
+    expect(sceneUpdateChannel.datatypes.get("google.protobuf.Duration")).toMatchInlineSnapshot(`
+      {
+        "definitions": [
+          {
+            "isArray": false,
+            "name": "sec",
+            "type": "int64",
+          },
+          {
+            "isArray": false,
+            "name": "nsec",
+            "type": "int32",
+          },
+        ],
+      }
+    `);
+
     // Duration too large
     expect(() =>
       sceneUpdateChannel.deserialize(Buffer.from("EhMKBAgCEAMiCwiAgICAgICAEBAB", "base64")),

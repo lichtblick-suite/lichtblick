@@ -25,7 +25,7 @@ export function parseProtobufSchema(
   root.resolveAll();
   const rootType = root.lookupType(schemaName);
 
-  // Modify the definition of google.protobuf.Timestamp and Duration so they get deserialized as
+  // Modify the definition of google.protobuf.Timestamp and Duration so they are interpreted as
   // {sec: number, nsec: number}, compatible with the rest of Studio. The standard Protobuf types
   // use different names (`seconds` and `nanos`), and `seconds` is an `int64`, which would be
   // deserialized as a bigint by default.
@@ -35,20 +35,28 @@ export function parseProtobufSchema(
     if (!type || !(type instanceof protobufjs.Type)) {
       return;
     }
+    // Rename fields so that protobufDefinitionsToDatatypes uses the new names
+    for (const field of type.fieldsArray) {
+      if (field.name === "seconds") {
+        field.name = "sec";
+      } else if (field.name === "nanos") {
+        field.name = "nsec";
+      }
+    }
     type.setup(); // ensure the original optimized toObject has been created
     const prevToObject = type.toObject; // eslint-disable-line @typescript-eslint/unbound-method
     const newToObject: typeof prevToObject = (message, options) => {
       const result = prevToObject.call(type, message, options);
-      const { seconds, nanos } = result as { seconds: bigint; nanos: number };
-      if (typeof seconds !== "bigint" || typeof nanos !== "number") {
+      const { sec, nsec } = result as { sec: bigint; nsec: number };
+      if (typeof sec !== "bigint" || typeof nsec !== "number") {
         return result;
       }
-      if (seconds > BigInt(Number.MAX_SAFE_INTEGER)) {
+      if (sec > BigInt(Number.MAX_SAFE_INTEGER)) {
         throw new Error(
-          `Timestamps with seconds greater than 2^53-1 are not supported (found seconds=${seconds}, nanos=${nanos})`,
+          `Timestamps with seconds greater than 2^53-1 are not supported (found seconds=${sec}, nanos=${nsec})`,
         );
       }
-      return { sec: Number(seconds), nsec: nanos };
+      return { sec: Number(sec), nsec };
     };
     type.toObject = newToObject;
   };
