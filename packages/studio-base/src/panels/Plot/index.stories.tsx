@@ -730,6 +730,46 @@ export const DisabledPath: StoryObj = {
   },
 };
 
+export const HiddenConnectingLines: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              showLine: false,
+              timestampMethod: "receiveTime",
+            },
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              showLine: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "hidden connecting lines",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
+
 export const ReferenceLine: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });

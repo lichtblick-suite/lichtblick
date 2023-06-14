@@ -126,7 +126,7 @@ function getDatasetsFromMessagePlotPath({
   dataset: DataSet;
   hasMismatchedData: boolean;
 } {
-  let showLine = true;
+  let showLine = path.showLine !== false;
   let hasMismatchedData =
     isCustomScale(xAxisVal) &&
     xAxisRanges != undefined &&

@@ -25,6 +25,7 @@ export const plot = {
   showValues: "Show values",
   yAxis: "Y Axis",
   showLabels: "Show labels",
+  showLine: "Show lines",
   min: "Min",
   max: "Max",
   xAxis: "X Axis",
