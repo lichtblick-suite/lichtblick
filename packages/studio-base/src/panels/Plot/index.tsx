@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import DownloadIcon from "@mui/icons-material/Download";
 import { useTheme } from "@mui/material";
 import { compact, isNumber, uniq } from "lodash";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
@@ -29,10 +28,13 @@ import {
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
+import {
+  PanelContextMenu,
+  PanelContextMenuItem,
+} from "@foxglove/studio-base/components/PanelContextMenu";
 import PanelToolbar, {
   PANEL_TOOLBAR_MIN_HEIGHT,
 } from "@foxglove/studio-base/components/PanelToolbar";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
 import { usePlotPanelMessageData } from "@foxglove/studio-base/panels/Plot/usePlotPanelMessageData";
@@ -223,6 +225,17 @@ function Plot(props: Props) {
     [legendDisplay],
   );
 
+  const getPanelContextMenuItems = useCallback(() => {
+    const items: PanelContextMenuItem[] = [
+      {
+        type: "item",
+        label: "Download plot data as CSV",
+        onclick: () => downloadCSV(datasets, xAxisVal),
+      },
+    ];
+    return items;
+  }, [datasets, xAxisVal]);
+
   return (
     <Stack
       flex="auto"
@@ -231,16 +244,7 @@ function Plot(props: Props) {
       overflow="hidden"
       position="relative"
     >
-      <PanelToolbar
-        additionalIcons={
-          <ToolbarIconButton
-            onClick={() => downloadCSV(datasets, xAxisVal)}
-            title="Download plot data as CSV"
-          >
-            <DownloadIcon fontSize="small" />
-          </ToolbarIconButton>
-        }
-      />
+      <PanelToolbar />
       <Stack
         direction={stackDirection}
         flex="auto"
@@ -275,6 +279,7 @@ function Plot(props: Props) {
             onClick={onClick}
             defaultView={defaultView}
           />
+          <PanelContextMenu getItems={getPanelContextMenuItems} />
         </Stack>
       </Stack>
     </Stack>
