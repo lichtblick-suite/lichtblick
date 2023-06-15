@@ -318,28 +318,6 @@ export const ImageOnlyModeOffWithAutoSelectedCalibration: StoryObj<
   },
 };
 
-export const ImageModeForegroundOpacity50Percent: StoryObj<
-  React.ComponentProps<typeof ImageWith3D>
-> = {
-  render: ImageWith3D,
-  args: {
-    imageTopic: "camera/img",
-    calibrationTopic: "camera/calibration",
-    foregroundOpacity: 0.5,
-  },
-};
-
-export const ImageModeForegroundOpacity100Percent: StoryObj<
-  React.ComponentProps<typeof ImageWith3D>
-> = {
-  render: ImageWith3D,
-  args: {
-    imageTopic: "camera/img",
-    calibrationTopic: "camera/calibration",
-    foregroundOpacity: 1.0,
-  },
-};
-
 function makeSceneUpdate({
   topic,
   frameId,

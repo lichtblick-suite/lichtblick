@@ -13,8 +13,7 @@
           "/CAM_FRONT_LEFT/lidar": {
             "visible": false
           }
-        },
-        "foregroundOpacity": 0
+        }
       },
       "cameraState": {
         "distance": 20,
