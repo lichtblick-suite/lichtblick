@@ -2,13 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Menu,
-  MenuItem as MuiMenuItem,
-  PaperProps,
-  PopoverPosition,
-  PopoverReference,
-} from "@mui/material";
+import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
@@ -203,6 +197,12 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     handleNestedMenuClose();
   }, [handleAnalytics, handleNestedMenuClose]);
 
+  const onDemoClick = useCallback(() => {
+    dialogActions.dataSource.open("demo");
+    handleAnalytics("demo");
+    handleNestedMenuClose();
+  }, [dialogActions.dataSource, handleAnalytics, handleNestedMenuClose]);
+
   const helpItems = useMemo<MenuItem[]>(
     () => [
       { type: "item", key: "about", label: t("about"), onClick: onAboutClick },
@@ -215,8 +215,10 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         onClick: onSlackClick,
         external: true,
       },
+      { type: "divider" },
+      { type: "item", key: "demo", label: t("exploreSampleData"), onClick: onDemoClick },
     ],
-    [onAboutClick, onDocsClick, onSlackClick, t],
+    [onAboutClick, onDemoClick, onDocsClick, onSlackClick, t],
   );
 
   return (
@@ -265,17 +267,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         >
           {t("help")}
         </NestedMenuItem>
-        <MuiMenuItem
-          id="app-menu-demo"
-          onPointerEnter={() => handleItemPointerEnter("app-menu-demo")}
-          onClick={() => {
-            dialogActions.dataSource.open("demo");
-            handleAnalytics("demo");
-            handleNestedMenuClose();
-          }}
-        >
-          {t("exploreSampleData")}
-        </MuiMenuItem>
       </Menu>
     </>
   );
