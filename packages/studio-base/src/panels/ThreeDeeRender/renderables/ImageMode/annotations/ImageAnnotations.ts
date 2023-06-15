@@ -39,10 +39,20 @@ interface ImageAnnotationsContext {
   messageHandler: MessageHandler;
 }
 
+/** For backwards compatibility with older studio versions and webviz */
+const LEGACY_ANNOTATION_SCHEMAS = new Set([
+  "foxglove_msgs/ImageMarkerArray",
+  "foxglove_msgs/msg/ImageMarkerArray",
+  "studio_msgs/ImageMarkerArray",
+  "studio_msgs/msg/ImageMarkerArray",
+  "webviz_msgs/ImageMarkerArray",
+]);
+
 const ALL_SUPPORTED_SCHEMAS = new Set([
   ...IMAGE_ANNOTATIONS_DATATYPES,
   ...IMAGE_MARKER_DATATYPES,
   ...IMAGE_MARKER_ARRAY_DATATYPES,
+  ...LEGACY_ANNOTATION_SCHEMAS,
 ]);
 
 /**
