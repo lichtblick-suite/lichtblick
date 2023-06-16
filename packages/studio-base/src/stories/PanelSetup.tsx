@@ -188,8 +188,15 @@ function PanelWrapper({
   includeSettings?: boolean;
   settingsWidth?: number;
 }): JSX.Element {
-  const settings =
-    usePanelStateStore((store) => Object.values(store.settingsTrees)[0]) ?? EmptyTree;
+  const settings = usePanelStateStore((store) => {
+    const trees = Object.values(store.settingsTrees);
+    if (trees.length > 1) {
+      throw new Error(
+        `includeSettings requires there to be at most 1 panel, found ${trees.length}`,
+      );
+    }
+    return trees[0] ?? EmptyTree;
+  });
 
   return (
     <>

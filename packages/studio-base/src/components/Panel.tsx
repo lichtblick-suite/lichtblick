@@ -146,6 +146,9 @@ type ComponentConstructorType<P> = { displayName?: string } & (
   | { (props: P): React.ReactElement<unknown> | ReactNull }
 );
 
+/** Used in storybook when panels are renered outside of a <PanelLayout/> */
+const FALLBACK_PANEL_ID = "$unknown_id";
+
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
 //   export default Panel(MyPanelComponent)
@@ -159,7 +162,7 @@ export default function Panel<
   PanelComponent: ComponentConstructorType<PanelProps> & PanelStatics<Config>,
 ): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
-    const { childId, overrideConfig, tabId, ...otherProps } = props;
+    const { childId = FALLBACK_PANEL_ID, overrideConfig, tabId, ...otherProps } = props;
     const theme = useTheme();
     const { classes, cx } = useStyles();
     const isMounted = useMountedState();
@@ -177,7 +180,7 @@ export default function Panel<
     } = useSelectedPanels();
 
     const isSelected = useMemo(
-      () => childId != undefined && selectedPanelIds.includes(childId),
+      () => selectedPanelIds.includes(childId),
       [childId, selectedPanelIds],
     );
     const numSelectedPanelsIfSelected = useMemo(
@@ -332,9 +335,6 @@ export default function Panel<
 
     const replacePanel = useCallback(
       (newPanelType: string, config: Record<string, unknown>) => {
-        if (childId == undefined) {
-          return;
-        }
         swapPanel({
           tabId,
           originalId: childId,
@@ -351,9 +351,6 @@ export default function Panel<
 
     const onPanelRootClick: MouseEventHandler<HTMLDivElement> = useCallback(
       (e) => {
-        if (childId == undefined) {
-          return;
-        }
         if (panelSettingsOpen) {
           // Allow clicking with no modifiers to select a panel (and deselect others) when panel settings are open
           e.stopPropagation(); // select the deepest clicked panel, not parent tab panels
@@ -406,7 +403,7 @@ export default function Panel<
         return;
       }
       const tabSavedProps = tabId != undefined ? (savedProps[tabId] as TabPanelConfig) : undefined;
-      if (tabId != undefined && tabSavedProps != undefined && childId != undefined) {
+      if (tabId != undefined && tabSavedProps != undefined) {
         const newId = getPanelIdForType(PanelComponent.panelType);
         const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]?.layout;
         if (activeTabLayout == undefined) {
@@ -526,7 +523,7 @@ export default function Panel<
 
     return (
       <Profiler
-        id={childId ?? "$unknown_id"}
+        id={childId}
         onRender={(
           _id,
           _phase,
@@ -544,7 +541,7 @@ export default function Panel<
         <PanelContext.Provider
           value={{
             type,
-            id: childId ?? "$unknown_id",
+            id: childId,
             title,
             config: panelComponentConfig,
             saveConfig: saveConfig as SaveConfig<PanelConfig>,

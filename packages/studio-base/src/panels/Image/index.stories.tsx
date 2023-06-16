@@ -48,7 +48,7 @@ export const TopicButNoDataSourceHovered: StoryObj = {
   parameters: { colorScheme: "dark" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    userEvent.hover(await canvas.findByTestId("panel-mouseenter-container"));
+    userEvent.hover(await canvas.findByTestId(/panel-mouseenter-container/));
   },
 };
 
