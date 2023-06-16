@@ -8,11 +8,7 @@ import { forwardRef } from "react";
 import tinycolor2 from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-import {
-  APP_BAR_FOREGROUND_COLOR,
-  APP_BAR_HEIGHT,
-  APP_BAR_PRIMARY_COLOR,
-} from "@foxglove/studio-base/components/AppBar/constants";
+import { APP_BAR_HEIGHT } from "@foxglove/studio-base/components/AppBar/constants";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 
@@ -36,10 +32,10 @@ const useStyles = makeStyles()((theme) => ({
     borderRadius: 0,
 
     ":hover": {
-      backgroundColor: tinycolor2(APP_BAR_FOREGROUND_COLOR).setAlpha(0.08).toString(),
+      backgroundColor: tinycolor2(theme.palette.common.white).setAlpha(0.08).toString(),
     },
     "&.Mui-selected": {
-      backgroundColor: APP_BAR_PRIMARY_COLOR,
+      backgroundColor: theme.palette.appBar.primary,
     },
   },
 }));

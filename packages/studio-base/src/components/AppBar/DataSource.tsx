@@ -7,7 +7,6 @@ import { CircularProgress, IconButton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
-import { APP_BAR_PRIMARY_COLOR } from "@foxglove/studio-base/components/AppBar/constants";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -38,7 +37,7 @@ const useStyles = makeStyles<void, "adornmentError">()((theme, _params, _classes
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    color: APP_BAR_PRIMARY_COLOR,
+    color: theme.palette.appBar.primary,
     width: ICON_SIZE,
     height: ICON_SIZE,
   },

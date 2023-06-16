@@ -6,8 +6,21 @@ import { PaletteOptions } from "@mui/material/styles";
 import { CSSProperties } from "react";
 
 declare module "@mui/material/styles" {
+  interface Palette {
+    name: string;
+    appBar: {
+      main: CSSProperties["color"];
+      primary: CSSProperties["color"];
+      text: CSSProperties["color"];
+    };
+  }
   interface PaletteOptions {
     name: string;
+    appBar: {
+      main: CSSProperties["color"];
+      primary: CSSProperties["color"];
+      text: CSSProperties["color"];
+    };
   }
   interface TypeBackground {
     menu: CSSProperties["color"];
@@ -18,6 +31,11 @@ export const dark: PaletteOptions = {
   name: "dark",
   mode: "dark",
   tonalOffset: 0.15,
+  appBar: {
+    main: "#35363A",
+    primary: "#9480ed",
+    text: "#ffffff",
+  },
   primary: { main: "#9480ed" },
   secondary: { main: "#b1b1b1" },
   error: { main: "#f54966" },
@@ -56,6 +74,11 @@ export const light: PaletteOptions = {
   name: "light",
   mode: "light",
   tonalOffset: 0.22,
+  appBar: {
+    main: "#27272b",
+    primary: "#9480ed",
+    text: "#ffffff",
+  },
   primary: { main: "#6f3be8" },
   secondary: { main: "#808080" },
   error: { main: "#db3553" },

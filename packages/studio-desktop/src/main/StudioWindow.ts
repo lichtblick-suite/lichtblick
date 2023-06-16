@@ -19,11 +19,7 @@ import path from "path";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
-import {
-  APP_BAR_BACKGROUND_COLOR,
-  APP_BAR_HEIGHT,
-  APP_BAR_FOREGROUND_COLOR,
-} from "@foxglove/studio-base/src/components/AppBar/constants";
+import { APP_BAR_HEIGHT } from "@foxglove/studio-base/src/components/AppBar/constants";
 import * as palette from "@foxglove/studio-base/src/theme/palette";
 
 import StudioAppUpdater from "./StudioAppUpdater";
@@ -102,14 +98,18 @@ const getTitleCase = (baseString: string): string =>
 
 type ClearableMenu = Menu & { clear: () => void };
 
+function getWindowBackgroundColor(): string | undefined {
+  const theme = palette[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
+  return theme.background?.default;
+}
+
 function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
+  const theme = palette[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
   if (isWindows) {
     return {
       height: APP_BAR_HEIGHT,
-      color: nativeTheme.shouldUseDarkColors
-        ? APP_BAR_BACKGROUND_COLOR.dark
-        : APP_BAR_BACKGROUND_COLOR.light,
-      symbolColor: APP_BAR_FOREGROUND_COLOR,
+      color: theme.appBar.main,
+      symbolColor: theme.appBar.text,
     };
   }
   return {};
@@ -118,20 +118,13 @@ function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
 function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
   const enableNewTopNav = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
-  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "system";
-  const isDark =
-    colorScheme === "dark" || (colorScheme === "system" && nativeTheme.shouldUseDarkColors);
-  const backgroundColor = isDark
-    ? palette.dark.background?.default
-    : palette.light.background?.default;
-
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
 
   const macTrafficLightInset =
     Math.floor((APP_BAR_HEIGHT - /*button size*/ 12) / 2) - /*for good measure*/ 1;
 
   const windowOptions: BrowserWindowConstructorOptions = {
-    backgroundColor,
+    backgroundColor: getWindowBackgroundColor(),
     height: 800,
     width: 1200,
     minWidth: 350,
@@ -172,6 +165,10 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     if (isWindows) {
       // Although the TS types say this function is always available, it is undefined on non-Windows platforms
       browserWindow.setTitleBarOverlay(getTitleBarOverlayOptions());
+    }
+    const bgColor = getWindowBackgroundColor();
+    if (bgColor != undefined) {
+      browserWindow.setBackgroundColor(bgColor);
     }
   });
 
