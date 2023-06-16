@@ -105,9 +105,9 @@ export function NumberInput(
         newValue == undefined
           ? undefined
           : clamp(newValue, min ?? Number.NEGATIVE_INFINITY, max ?? Number.POSITIVE_INFINITY);
-      onChange(clampedValue);
+      onChange(clampedValue != undefined ? Number(clampedValue.toFixed(precision)) : clampedValue);
     },
-    [disabled, readOnly, min, max, onChange],
+    [disabled, readOnly, min, max, onChange, precision],
   );
 
   const onPointerDown = useCallback(
