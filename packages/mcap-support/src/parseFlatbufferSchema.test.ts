@@ -352,7 +352,14 @@ describe("parseFlatbufferSchema", () => {
     Type.addIndex(builder, 123);
     builder.finish(Type.endType(builder));
 
-    expect(deserialize(builder.asUint8Array())).toEqual({ base_type: 7, index: 123 });
+    expect(deserialize(builder.asUint8Array())).toEqual({
+      base_size: 4n,
+      base_type: 7,
+      element: 0n,
+      element_size: 0n,
+      fixed_length: 0n,
+      index: 123,
+    });
   });
   it("converts uint8 vectors to uint8arrays", () => {
     const builder = new Builder();

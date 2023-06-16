@@ -191,7 +191,11 @@ export function parseFlatbufferSchema(
     }
   }
   const parser = new Parser(rawSchema);
-  const toObject = parser.toObjectLambda(typeIndex);
+  // We set readDefaults=true to ensure that the reader receives default values for unset fields, or
+  // fields that were explicitly set but with ForceDefaults(false) on the writer side. This is
+  // necessary because `datatypes` does not include information about default values from the
+  // schema. See discussion: <https://github.com/foxglove/studio/pull/6256>
+  const toObject = parser.toObjectLambda(typeIndex, /*readDefaults=*/ true);
   const deserialize = (buffer: ArrayBufferView) => {
     const byteBuffer = new ByteBuffer(
       new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength),
