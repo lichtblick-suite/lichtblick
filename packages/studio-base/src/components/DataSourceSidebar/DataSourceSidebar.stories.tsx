@@ -4,30 +4,37 @@
 
 import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { fromDate } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { PlayerPresence, Topic } from "@foxglove/studio-base/players/types";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import DataSourceSidebar from "./DataSourceSidebar";
 
 function Wrapper(Story: StoryFn): JSX.Element {
   const theme = useTheme();
+  const [appConfig] = useState(() =>
+    makeMockAppConfiguration([[AppSetting.ENABLE_NEW_TOPNAV, false]]),
+  );
   return (
-    <WorkspaceContextProvider>
-      <EventsProvider>
-        <div style={{ height: "100%", backgroundColor: theme.palette.background.paper }}>
-          <Story />
-        </div>
-      </EventsProvider>
-    </WorkspaceContextProvider>
+    <AppConfigurationContext.Provider value={appConfig}>
+      <WorkspaceContextProvider>
+        <EventsProvider>
+          <div style={{ height: "100%", backgroundColor: theme.palette.background.paper }}>
+            <Story />
+          </div>
+        </EventsProvider>
+      </WorkspaceContextProvider>
+    </AppConfigurationContext.Provider>
   );
 }
 

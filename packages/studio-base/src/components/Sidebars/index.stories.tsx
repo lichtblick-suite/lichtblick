@@ -8,7 +8,9 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import Sidebars, { SidebarItem } from ".";
 
@@ -71,29 +73,35 @@ function Story({
     }
   }, [clickKey]);
 
+  const [appConfig] = useState(() =>
+    makeMockAppConfiguration([[AppSetting.ENABLE_NEW_TOPNAV, false]]),
+  );
+
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div style={{ height }}>
-        <Sidebars
-          items={ITEMS}
-          bottomItems={BOTTOM_ITEMS}
-          rightItems={new Map()}
-          leftItems={new Map()}
-          selectedKey={selectedKey}
-          onSelectKey={setSelectedKey}
-          selectedRightKey={undefined}
-          onSelectRightKey={() => {}}
-          selectedLeftKey={undefined}
-          onSelectLeftKey={() => {}}
-          leftSidebarSize={undefined}
-          rightSidebarSize={undefined}
-          setLeftSidebarSize={() => {}}
-          setRightSidebarSize={() => {}}
-        >
-          Main content
-        </Sidebars>
-      </div>
-    </DndProvider>
+    <AppConfigurationContext.Provider value={appConfig}>
+      <DndProvider backend={HTML5Backend}>
+        <div style={{ height }}>
+          <Sidebars
+            items={ITEMS}
+            bottomItems={BOTTOM_ITEMS}
+            rightItems={new Map()}
+            leftItems={new Map()}
+            selectedKey={selectedKey}
+            onSelectKey={setSelectedKey}
+            selectedRightKey={undefined}
+            onSelectRightKey={() => {}}
+            selectedLeftKey={undefined}
+            onSelectLeftKey={() => {}}
+            leftSidebarSize={undefined}
+            rightSidebarSize={undefined}
+            setLeftSidebarSize={() => {}}
+            setRightSidebarSize={() => {}}
+          >
+            Main content
+          </Sidebars>
+        </div>
+      </DndProvider>
+    </AppConfigurationContext.Provider>
   );
 }
 

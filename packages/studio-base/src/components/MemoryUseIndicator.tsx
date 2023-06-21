@@ -36,7 +36,7 @@ function toMB(bytes: number): number {
 function MemoryUseIndicator(): JSX.Element {
   const memoryInfo = useMemoryInfo({ refreshIntervalMs: 5000 });
   const { classes, cx } = useStyles();
-  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   // If we can't load memory info (maybe not supported) then we don't show any indicator
   if (!memoryInfo) {

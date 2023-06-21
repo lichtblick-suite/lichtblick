@@ -91,7 +91,7 @@ export function useWorkspaceActions(): WorkspaceActions {
   const { signIn } = useCurrentUser();
   const supportsAccountSettings = signIn != undefined;
 
-  const [currentEnableNewTopNav = false] = useAppConfigurationValue<boolean>(
+  const [currentEnableNewTopNav = true] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_NEW_TOPNAV,
   );
   const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);

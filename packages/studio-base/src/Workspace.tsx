@@ -240,7 +240,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
   );
   // Since we can't toggle the title bar on an electron window, keep the setting at its initial
   // value until the app is reloaded/relaunched.
-  const [currentEnableNewTopNav = false] = useAppConfigurationValue<boolean>(
+  const [currentEnableNewTopNav = true] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_NEW_TOPNAV,
   );
 

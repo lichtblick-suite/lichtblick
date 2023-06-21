@@ -4,8 +4,10 @@
 
 import { StoryObj, StoryContext, StoryFn } from "@storybook/react";
 import { fireEvent, screen, userEvent, within } from "@storybook/testing-library";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import CurrentUserContext from "@foxglove/studio-base/context/CurrentUserContext";
@@ -18,6 +20,7 @@ import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceC
 import { ISO8601Timestamp, Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import LayoutBrowser from "./index";
 
@@ -126,17 +129,23 @@ function WithSetup(Child: StoryFn, ctx: StoryContext): JSX.Element {
     }),
     [],
   );
+  const [appConfig] = useState(() =>
+    makeMockAppConfiguration([[AppSetting.ENABLE_NEW_TOPNAV, false]]),
+  );
+
   return (
     <div style={{ display: "flex", height: "100%", width: 320 }}>
-      <UserProfileStorageContext.Provider value={userProfile}>
-        <LayoutStorageContext.Provider value={storage}>
-          <LayoutManagerProvider>
-            <CurrentLayoutProvider>
-              <Child />
-            </CurrentLayoutProvider>
-          </LayoutManagerProvider>
-        </LayoutStorageContext.Provider>
-      </UserProfileStorageContext.Provider>
+      <AppConfigurationContext.Provider value={appConfig}>
+        <UserProfileStorageContext.Provider value={userProfile}>
+          <LayoutStorageContext.Provider value={storage}>
+            <LayoutManagerProvider>
+              <CurrentLayoutProvider>
+                <Child />
+              </CurrentLayoutProvider>
+            </LayoutManagerProvider>
+          </LayoutStorageContext.Provider>
+        </UserProfileStorageContext.Provider>
+      </AppConfigurationContext.Provider>
     </div>
   );
 }

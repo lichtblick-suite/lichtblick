@@ -46,7 +46,7 @@ const EMPTY_SETTINGS_TREE: SettingsTree = Object.freeze({
 
 const EmptyWrapper = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslation("panelSettings");
-  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   if (enableNewTopNav) {
     return <EmptyState>{children}</EmptyState>;
@@ -77,7 +77,7 @@ export default function PanelSettings({
   } = useSelectedPanels();
   const selectedPanelIds = selectedPanelIdsForTests ?? originalSelectedPanelIds;
 
-  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   // If no panel is selected and there is only one panel in the layout, select it
   useEffect(() => {

@@ -91,7 +91,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
   const { t } = useTranslation("dataSourceInfo");
   const { dialogActions } = useWorkspaceActions();
 
-  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   const eventsSupported = useEvents(selectEventsSupported);
   const showEventsTab = !enableNewTopNav && currentUser != undefined && eventsSupported;
