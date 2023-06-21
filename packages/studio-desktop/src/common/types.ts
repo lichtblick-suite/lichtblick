@@ -4,17 +4,14 @@
 
 // Events that are forwarded from the main process
 export type ForwardedMenuEvent =
+  | "open"
   | "open-file"
-  | "open-remote-file"
-  | "open-sample-data"
-  | "open-app-settings"
-  | "open-layouts"
-  | "open-add-panel"
-  | "open-panel-settings"
-  | "open-variables"
-  | "open-extensions"
-  | "open-help"
-  | "open-account";
+  | "open-connection"
+  | "open-demo"
+  | "open-help-about"
+  | "open-help-docs"
+  | "open-help-general"
+  | "open-help-slack";
 
 export type ForwardedWindowEvent =
   | "enter-full-screen"

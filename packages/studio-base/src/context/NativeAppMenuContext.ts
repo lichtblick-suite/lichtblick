@@ -5,17 +5,14 @@
 import { createContext, useContext } from "react";
 
 export type NativeAppMenuEvent =
+  | "open"
   | "open-file"
-  | "open-remote-file"
-  | "open-sample-data"
-  | "open-layouts"
-  | "open-add-panel"
-  | "open-panel-settings"
-  | "open-variables"
-  | "open-extensions"
-  | "open-help"
-  | "open-account"
-  | "open-app-settings";
+  | "open-connection"
+  | "open-demo"
+  | "open-help-about"
+  | "open-help-docs"
+  | "open-help-general"
+  | "open-help-slack";
 
 type Handler = () => void;
 
