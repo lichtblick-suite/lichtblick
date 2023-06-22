@@ -8,11 +8,20 @@ import { makeStyles } from "tss-react/mui";
 
 import { scaleValue } from "@foxglove/den/math";
 
+export type HoverOverEvent = {
+  /** Hovered `fraction` value */
+  fraction: number;
+  /** Current hovered X position in client coordinates */
+  clientX: number;
+  /** Current hovered Y position in client coordinates */
+  clientY: number;
+};
+
 type Props = {
   fraction: number | undefined;
   disabled?: boolean;
   onChange: (value: number) => void;
-  onHoverOver?: (value: number) => void;
+  onHoverOver?: (event: HoverOverEvent) => void;
   onHoverOut?: () => void;
   renderSlider?: (value?: number) => ReactNode;
 };
@@ -101,13 +110,24 @@ export default function Slider(props: Props): JSX.Element {
 
   const onPointerMove = useCallback(
     (ev: React.PointerEvent | PointerEvent): void => {
-      const val = getValueAtMouse(ev);
+      if (mouseDownRef.current && ev.currentTarget !== window) {
+        // onPointerMove is used on the <div/> for hovering, and on the window for dragging. While
+        // dragging we only want to pay attention to the window events (otherwise we'd be handling
+        // each event twice).
+        return;
+      }
       if (disabled) {
         return;
       }
 
+      const val = getValueAtMouse(ev);
       if (elRef.current) {
-        onHoverOver?.(val);
+        const elRect = elRef.current.getBoundingClientRect();
+        onHoverOver?.({
+          fraction: val,
+          clientX: ev.clientX,
+          clientY: elRect.y + elRect.height / 2,
+        });
       }
       if (!mouseDownRef.current) {
         return;
@@ -135,8 +155,10 @@ export default function Slider(props: Props): JSX.Element {
   useEffect(() => {
     if (mouseDown) {
       window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("pointermove", onPointerMove);
       return () => {
         window.removeEventListener("pointerup", onPointerUp);
+        window.removeEventListener("pointermove", onPointerMove);
       };
     }
     return undefined;
