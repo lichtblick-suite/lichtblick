@@ -56,7 +56,7 @@ all_versions_in_group(Group, Result) :-
 % Define version groups for dependencies. All dependencies in the same group will be required to have the same version.
 version_group(Dep, storybook) :-
   Dep = 'storybook';
-  has_prefix('@storybook/', Dep), Dep \= '@storybook/testing-library'.
+  has_prefix('@storybook/', Dep), Dep \= '@storybook/testing-library', Dep \= '@storybook/jest'.
 version_group(Dep, typescript_eslint) :-
   has_prefix('@typescript-eslint/', Dep).
 version_group(Dep, emotion) :-

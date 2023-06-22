@@ -2,13 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ClearIcon from "@mui/icons-material/Clear";
+import CancelIcon from "@mui/icons-material/Cancel";
 import ErrorIcon from "@mui/icons-material/Error";
 import {
   Autocomplete,
-  List,
-  ListProps,
   MenuItem,
+  MenuList,
+  MenuListProps,
   Select,
   TextField,
   ToggleButton,
@@ -37,6 +37,21 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
     : "rgba(0, 0, 0, 0.06)";
 
   return {
+    autocomplete: {
+      ".MuiInputBase-root.MuiInputBase-sizeSmall": {
+        paddingInline: 0,
+        paddingBlock: theme.spacing(0.3125),
+      },
+    },
+    clearIndicator: {
+      marginRight: theme.spacing(-0.25),
+      opacity: theme.palette.action.disabledOpacity,
+
+      ":hover": {
+        background: "transparent",
+        opacity: 1,
+      },
+    },
     error: {},
     fieldLabel: {
       color: theme.palette.text.secondary,
@@ -127,21 +142,29 @@ function FieldInput({
     case "autocomplete":
       return (
         <Autocomplete
+          className={classes.autocomplete}
           size="small"
           freeSolo={true}
           value={field.value}
           disabled={field.disabled}
           readOnly={field.readonly}
-          ListboxComponent={List}
-          ListboxProps={{ dense: true } as Partial<ListProps>}
+          ListboxComponent={MenuList}
+          ListboxProps={{ dense: true } as Partial<MenuListProps>}
           renderOption={(props, option, { selected }) => (
             <MenuItem selected={selected} {...props}>
               {option}
             </MenuItem>
           )}
-          componentsProps={{ clearIndicator: { size: "small" } }}
-          clearIcon={<ClearIcon fontSize="small" />}
-          renderInput={(params) => <TextField {...params} variant="filled" size="small" />}
+          componentsProps={{
+            clearIndicator: {
+              size: "small",
+              className: classes.clearIndicator,
+            },
+          }}
+          clearIcon={<CancelIcon fontSize="small" />}
+          renderInput={(params) => (
+            <TextField {...params} variant="filled" size="small" placeholder={field.placeholder} />
+          )}
           onInputChange={(_event, value) =>
             actionHandler({ action: "update", payload: { path, input: "autocomplete", value } })
           }

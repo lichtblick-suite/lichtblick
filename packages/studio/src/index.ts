@@ -481,7 +481,16 @@ export type SettingsIcon =
  * in the settings editor.
  */
 export type SettingsTreeFieldValue =
-  | { input: "autocomplete"; value?: string; items: string[] }
+  | {
+      input: "autocomplete";
+      value?: string;
+      items: string[];
+
+      /**
+       * Optional placeholder text displayed in the field input when value is undefined
+       */
+      placeholder?: string;
+    }
   | { input: "boolean"; value?: boolean }
   | {
       input: "rgb";

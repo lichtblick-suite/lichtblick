@@ -21,7 +21,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 type Props = Immutable<{
   topic: string;
-  schemaName: string;
+  schemaName?: string;
   datatypes: RosDatatypes;
   name: string;
 }>;
