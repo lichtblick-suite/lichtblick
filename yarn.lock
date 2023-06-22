@@ -2969,6 +2969,7 @@ __metadata:
     "@types/cytoscape": ^3.19.9
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/foxglove__web": "workspace:*"
+    "@types/geojson": 7946.0.10
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
     "@types/leaflet": 1.9.3
@@ -3014,6 +3015,7 @@ __metadata:
     fork-ts-checker-webpack-plugin: 8.0.0
     fuzzysort: 2.0.4
     fzf: 0.5.2
+    geojson: 0.5.0
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
     i18next: 22.5.0
@@ -6063,10 +6065,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:*":
-  version: 7946.0.8
-  resolution: "@types/geojson@npm:7946.0.8"
-  checksum: 6049a39b025cfe323d5cf87333d87c133ec963cdbd349c49295bee779827ee4b46a3041fd8bd2e7a4b02d6d1e26f3002968875928941bbed08477bfd5f6f9284
+"@types/geojson@npm:*, @types/geojson@npm:7946.0.10":
+  version: 7946.0.10
+  resolution: "@types/geojson@npm:7946.0.10"
+  checksum: 12c407c2dc93ecb26c08af533ee732f1506a9b29456616ba7ba1d525df96206c28ddf44a528f6a5415d7d22893e9d967420940a9c095ee5e539c1eba5fefc1f4
   languageName: node
   linkType: hard
 
@@ -12411,6 +12413,13 @@ __metadata:
   version: 1.0.0-beta.2
   resolution: "gensync@npm:1.0.0-beta.2"
   checksum: a7437e58c6be12aa6c90f7730eac7fa9833dc78872b4ad2963d2031b00a3367a93f98aec75f9aaac7220848e4026d67a8655e870b24f20a543d103c0d65952ec
+  languageName: node
+  linkType: hard
+
+"geojson@npm:0.5.0":
+  version: 0.5.0
+  resolution: "geojson@npm:0.5.0"
+  checksum: 44fbf916dc66d17f1561fb56fd2741f21e26da5dd7daf842a794119c841c7f6d611ccc21d9797c9c62a78c41a0f841c0648042989a5a5a05045835c6ada8612f
   languageName: node
   linkType: hard
 
