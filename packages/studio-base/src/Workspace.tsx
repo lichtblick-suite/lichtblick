@@ -32,7 +32,6 @@ import { TopicList } from "@foxglove/studio-base/components/DataSourceSidebar/To
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -464,11 +463,13 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
     ]);
 
     if (!enableNewTopNav) {
-      topItems.set("layouts", {
-        iconName: "FiveTileGrid",
-        title: "Layouts",
-        component: AppContextLayoutBrowser ?? LayoutBrowser,
-      });
+      if (AppContextLayoutBrowser) {
+        topItems.set("layouts", {
+          iconName: "FiveTileGrid",
+          title: "Layouts",
+          component: AppContextLayoutBrowser,
+        });
+      }
       topItems.set("add-panel", {
         iconName: "RectangularClipping",
         title: "Add panel",

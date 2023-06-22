@@ -14,6 +14,9 @@
 import momentDurationFormatSetup from "moment-duration-format";
 import moment from "moment-timezone";
 
+// Educate the unused-dependency checker that we implicitly use moment via moment-timezone
+// foxglove-depcheck-used: moment
+
 import { Time, toDate, fromDate } from "@foxglove/rostime";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 
