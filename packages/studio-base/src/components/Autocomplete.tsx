@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ClearIcon from "@mui/icons-material/Clear";
+import CancelIcon from "@mui/icons-material/Cancel";
 import {
   MenuItem,
   Autocomplete as MuiAutocomplete,
@@ -77,9 +77,22 @@ const useStyles = makeStyles()((theme) => {
       ".MuiInputBase-root.MuiInputBase-sizeSmall": {
         backgroundColor: "transparent",
         paddingInline: 0,
+
         "&:focus-within": {
           backgroundColor: inputBackgroundColor,
         },
+        "&:hover, &:focus-within": {
+          paddingRight: theme.spacing(2.5),
+        },
+      },
+    },
+    clearIndicator: {
+      marginRight: theme.spacing(-0.25),
+      opacity: theme.palette.action.disabledOpacity,
+
+      ":hover": {
+        background: "transparent",
+        opacity: 1,
       },
     },
     inputError: {
@@ -288,10 +301,13 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
   return (
     <MuiAutocomplete
       className={classes.root}
-      clearIcon={<ClearIcon fontSize="small" />}
+      clearIcon={<CancelIcon fontSize="small" />}
       componentsProps={{
-        clearIndicator: { size: "small" },
         paper: { elevation: 8 },
+        clearIndicator: {
+          size: "small",
+          className: classes.clearIndicator,
+        },
       }}
       disableCloseOnSelect
       disabled={disabled}
