@@ -36,8 +36,7 @@ const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeD
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-const selectPlayerSourceId = ({ playerState }: MessagePipelineContext) =>
-  playerState.urlState?.sourceId;
+const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 
 function DataSourceInfoContent(props: {
   disableSource?: boolean;
@@ -45,8 +44,8 @@ function DataSourceInfoContent(props: {
   endTimeRef: MutableRefObject<ReactNull | HTMLDivElement>;
   playerName?: string;
   playerPresence: PlayerPresence;
-  playerSourceId?: string;
   startTime?: Time;
+  isLiveConnection: boolean;
 }): JSX.Element {
   const {
     disableSource = false,
@@ -54,16 +53,12 @@ function DataSourceInfoContent(props: {
     endTimeRef,
     playerName,
     playerPresence,
-    playerSourceId,
     startTime,
   } = props;
   const { classes } = useStyles();
   const { t } = useTranslation("dataSourceInfo");
 
-  const isLiveConnection =
-    playerSourceId != undefined
-      ? playerSourceId.endsWith("socket") || playerSourceId.endsWith("lidar")
-      : false;
+  const isLiveConnection = props.isLiveConnection;
 
   return (
     <Stack gap={1.5}>
@@ -145,7 +140,8 @@ export function DataSourceInfoView({ disableSource }: { disableSource?: boolean 
   const endTime = useMessagePipeline(selectEndTime);
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const playerSourceId = useMessagePipeline(selectPlayerSourceId);
+  const seek = useMessagePipeline(selectSeek);
+
   const durationRef = useRef<HTMLDivElement>(ReactNull);
   const endTimeRef = useRef<HTMLDivElement>(ReactNull);
   const { formatDate, formatTime } = useAppTimeFormat();
@@ -180,8 +176,8 @@ export function DataSourceInfoView({ disableSource }: { disableSource?: boolean 
       endTimeRef={endTimeRef}
       playerName={playerName}
       playerPresence={playerPresence}
-      playerSourceId={playerSourceId}
       startTime={startTime}
+      isLiveConnection={seek == undefined}
     />
   );
 }

@@ -16,6 +16,7 @@ type Props = {
   disableDate?: boolean;
   horizontal?: boolean;
   time: Time;
+  title?: string;
 };
 
 const useStyles = makeStyles()({
@@ -26,7 +27,7 @@ const useStyles = makeStyles()({
 
 export default function Timestamp(props: Props): JSX.Element {
   const { classes } = useStyles();
-  const { disableDate = false, horizontal = false, time } = props;
+  const { disableDate = false, horizontal = false, time, title } = props;
   const { formatDate, formatTime } = useAppTimeFormat();
   const currentTimeStr = useMemo(() => formatTime(time), [time, formatTime]);
   const rawTimeStr = useMemo(() => formatTimeRaw(time), [time]);
@@ -34,7 +35,7 @@ export default function Timestamp(props: Props): JSX.Element {
 
   if (!isAbsoluteTime(time)) {
     return (
-      <Stack direction="row" alignItems="center" flexGrow={0}>
+      <Stack title={title} direction="row" alignItems="center" flexGrow={0}>
         <Typography className={classes.numericValue} variant="inherit">
           {rawTimeStr}
         </Typography>
@@ -43,15 +44,16 @@ export default function Timestamp(props: Props): JSX.Element {
   }
 
   return (
-    <Stack gap={0.5}>
-      <Stack
-        gap={1}
-        flexWrap="wrap"
-        direction={horizontal ? "row" : "column"}
-        alignItems={horizontal ? "center" : "flex-start"}
-        justifyContent={horizontal ? "flex-start" : "center"}
-      >
-        {!disableDate && (
+    <Stack
+      title={title}
+      gap={horizontal ? 0 : 1}
+      flexWrap={horizontal ? "nowrap" : "wrap"}
+      direction={horizontal ? "row" : "column"}
+      alignItems={horizontal ? "center" : "flex-start"}
+      justifyContent={horizontal ? "flex-start" : "center"}
+    >
+      {!disableDate && (
+        <>
           <Typography
             className={classes.numericValue}
             noWrap
@@ -60,13 +62,14 @@ export default function Timestamp(props: Props): JSX.Element {
           >
             {date}
           </Typography>
-        )}
+          {horizontal && <>&nbsp;</>}
+        </>
+      )}
 
-        <Stack direction="row" alignItems="center" flexShrink={0} gap={0.5}>
-          <Typography variant="inherit" className={classes.numericValue}>
-            {currentTimeStr}
-          </Typography>
-        </Stack>
+      <Stack direction="row" alignItems="center" flexShrink={0} gap={0.5}>
+        <Typography variant="inherit" className={classes.numericValue}>
+          {currentTimeStr}
+        </Typography>
       </Stack>
     </Stack>
   );

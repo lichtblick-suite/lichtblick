@@ -291,6 +291,9 @@ export type StackProps = {
   /** CSS styles to apply to the component. */
   style?: CSSProperties;
 
+  /** HTML title attribute */
+  title?: string;
+
   /** Standard pointer events. */
   onPointerDown?: React.DOMAttributes<HTMLDivElement>["onPointerDown"];
   onPointerEnter?: React.DOMAttributes<HTMLDivElement>["onPointerEnter"];

@@ -246,6 +246,7 @@ export const DataSources: Story = {
               presence={PlayerPresence.PRESENT}
               urlState={props.urlState}
               problems={props.problems}
+              seekPlayback={() => {}}
             >
               <div style={{ padding: 8 }}>{props.label ?? props.urlState?.sourceId}</div>
               <div>
