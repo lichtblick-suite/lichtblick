@@ -16,7 +16,7 @@ import {
   fromNanoSec,
   clampTime,
 } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
+import { Immutable, MessageEvent } from "@foxglove/studio";
 import { IteratorCursor } from "@foxglove/studio-base/players/IterablePlayer/IteratorCursor";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import { MessageBlock, Progress } from "@foxglove/studio-base/players/types";
@@ -36,7 +36,7 @@ type BlockLoaderArgs = {
 };
 
 type CacheBlock = MessageBlock & {
-  needTopics: Set<string>;
+  needTopics: Immutable<Set<string>>;
 };
 
 type Blocks = (CacheBlock | undefined)[];
@@ -187,15 +187,13 @@ export class BlockLoader {
     }
 
     log.debug("loading blocks", { topics });
-    const beginBlockId = 0;
-    const lastBlockId = this.#blocks.length;
 
     const { progress } = args;
     let totalBlockSizeBytes = this.#cacheSize();
 
-    for (let blockId = beginBlockId; blockId < lastBlockId; ++blockId) {
+    for (let blockId = 0; blockId < this.#blocks.length; ++blockId) {
       // Topics we will fetch for this range
-      let topicsToFetch = new Set<string>();
+      let topicsToFetch: Immutable<Set<string>>;
 
       // Keep looking for a block that needs loading
       {
@@ -215,11 +213,8 @@ export class BlockLoader {
       // This creates a continuous span of the same topics to fetch
       let endBlockId = blockId;
       for (let endIdx = blockId + 1; endIdx < this.#blocks.length; ++endIdx) {
-        const nextBlock = this.#blocks[endIdx];
-
-        const needTopics = nextBlock?.needTopics ?? topics;
-
         // if needtopics is undefined cause there's no block, then needTopics is all topics
+        const needTopics = this.#blocks[endIdx]?.needTopics ?? topics;
 
         // The topics we need to fetch no longer match the topics we need so we stop the range
         if (!isEqual(topicsToFetch, needTopics)) {
@@ -229,6 +224,7 @@ export class BlockLoader {
         endBlockId = endIdx;
       }
 
+      // Compute the cursor start/end time from the range of blocks we need to load
       const cursorStartTime = this.#blockIdToStartTime(blockId);
       const cursorEndTime = clampTime(this.#blockIdToEndTime(endBlockId), this.#start, this.#end);
 
@@ -248,12 +244,17 @@ export class BlockLoader {
           this.#abortController.signal,
         );
 
+      log.debug("Loading range", { blockId, endBlockId });
+      // Loop through the blocks corresponding to the range of our cursor
       for (let currentBlockId = blockId; currentBlockId <= endBlockId; ++currentBlockId) {
+        // Until time is the end time of the current block, we want all the messages from the cursor
+        // until (inclusive) of the end of of the block
         const untilTime = clampTime(this.#blockIdToEndTime(currentBlockId), this.#start, this.#end);
 
         const results = await cursor.readUntil(untilTime);
         // No results means cursor aborted or eof
         if (!results) {
+          await cursor.end();
           return;
         }
 
@@ -264,21 +265,6 @@ export class BlockLoader {
         // starts as an empty array.
         for (const topic of topicsToFetch) {
           messagesByTopic[topic] = [];
-        }
-
-        // Empty result set does not require further processing and does not change the size
-        if (results.length === 0) {
-          const existingBlock = this.#blocks[currentBlockId];
-          this.#blocks[currentBlockId] = {
-            needTopics: new Set(),
-            messagesByTopic: {
-              ...existingBlock?.messagesByTopic,
-              // Any new topics override the same previous topic
-              ...messagesByTopic,
-            },
-            sizeInBytes: existingBlock?.sizeInBytes ?? 0,
-          };
-          continue;
         }
 
         let sizeInBytes = 0;
