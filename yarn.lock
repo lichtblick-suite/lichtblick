@@ -3029,6 +3029,7 @@ __metadata:
     jszip: 3.10.1
     just-diff: 6.0.2
     leaflet: 1.9.4
+    leaflet-ellipse: 0.9.1
     lodash: 4.17.21
     mathjs: 11.8.0
     memoize-weak: 1.0.2
@@ -14979,6 +14980,13 @@ __metadata:
   version: 1.0.5
   resolution: "lazy-val@npm:1.0.5"
   checksum: 31e12e0b118826dfae74f8f3ff8ebcddfe4200ff88d0d448db175c7265ee537e0ba55488d411728246337f3ed3c9ec68416f10889f632a2ce28fb7a970909fb5
+  languageName: node
+  linkType: hard
+
+"leaflet-ellipse@npm:0.9.1":
+  version: 0.9.1
+  resolution: "leaflet-ellipse@npm:0.9.1"
+  checksum: 7882348084074bd12344ea962ef2cf42a1de2a97f0ad6d70a0455af9901f5e881c8da38698140351d5b559f33aec1b9e963cf2ec1a8c0b0b946b3c6935be2da8
   languageName: node
   linkType: hard
 

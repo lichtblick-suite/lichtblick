@@ -9,3 +9,4 @@ import "./react";
 import "./overrides";
 import "./webpack-defines";
 import "./i18next";
+import "./leaflet-ellipse";

@@ -123,6 +123,7 @@
     "jszip": "3.10.1",
     "just-diff": "6.0.2",
     "leaflet": "1.9.4",
+    "leaflet-ellipse": "0.9.1",
     "lodash": "4.17.21",
     "mathjs": "11.8.0",
     "memoize-weak": "1.0.2",
