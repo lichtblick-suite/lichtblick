@@ -32,7 +32,7 @@ const TOPICS: Topic[] = [
   { schemaName: "visualization_msgs/MarkerArray", name: "/markers/annotations" },
   { schemaName: "sensor_msgs/Imu", name: "/imu" },
   { schemaName: "diagnostic_msgs/DiagnosticArray", name: "/diagnostics" },
-  { schemaName: "nav_msgs/Odometry", name: "/odom" },
+  { schemaName: "nav_msgs/Odometry", name: "/odom", aliasedFromName: "/old_odom_name" },
 ];
 
 export const Default: StoryObj = {

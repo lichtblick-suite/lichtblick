@@ -211,6 +211,8 @@ export type Topic = {
   name: string;
   // Name of the datatype (see `type PlayerStateActiveData` for details).
   schemaName: string | undefined;
+  // Name of the topic before topic aliasing, if any.
+  aliasedFromName?: string;
 };
 
 export type TopicWithSchemaName = Topic & { schemaName: string };

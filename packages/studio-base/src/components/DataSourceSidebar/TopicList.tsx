@@ -93,6 +93,11 @@ const useStyles = makeStyles()((theme) => ({
       border: "none",
     },
   },
+  aliasedTopicName: {
+    color: theme.palette.primary.main,
+    display: "block",
+    textAlign: "start",
+  },
   startAdornment: {
     display: "flex",
   },
@@ -136,7 +141,16 @@ function TopicListItem({
       }
     >
       <ListItemText
-        primary={<HighlightChars str={topic.name} indices={positions} />}
+        primary={
+          <>
+            <HighlightChars str={topic.name} indices={positions} />
+            {topic.aliasedFromName && (
+              <Typography variant="caption" className={classes.aliasedTopicName}>
+                from {topic.aliasedFromName}
+              </Typography>
+            )}
+          </>
+        }
         primaryTypographyProps={{ noWrap: true, title: topic.name }}
         secondary={
           topic.schemaName == undefined ? (

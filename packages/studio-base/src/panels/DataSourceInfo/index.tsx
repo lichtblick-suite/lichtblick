@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Divider } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
@@ -77,6 +77,11 @@ function TopicRow({ topic }: { topic: Topic }): JSX.Element {
           iconSize="small"
           getText={() => topic.name}
         />
+        {topic.aliasedFromName && (
+          <Typography variant="subtitle2" fontSize="0.5rem">
+            from {topic.aliasedFromName}
+          </Typography>
+        )}
       </td>
       <td>
         {topic.schemaName == undefined ? (

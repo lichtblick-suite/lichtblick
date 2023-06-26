@@ -184,4 +184,41 @@ describe("ExtensionCatalogProvider", () => {
       },
     ]);
   });
+
+  it("should register topic aliases", async () => {
+    const source = `
+        module.exports = {
+            activate: function(ctx) {
+                ctx.registerTopicAliases(() => {
+                    return [];
+                })
+            }
+        }
+    `;
+
+    const loadExtension = jest.fn().mockResolvedValue(source);
+    const mockPrivateLoader: ExtensionLoader = {
+      namespace: "org",
+      getExtensions: jest
+        .fn()
+        .mockResolvedValue([fakeExtension({ namespace: "org", name: "sample", version: "1" })]),
+      loadExtension,
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+    };
+
+    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
+      initialProps: {},
+      wrapper: ({ children }) => (
+        <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>
+          {children}
+        </ExtensionCatalogProvider>
+      ),
+    });
+
+    await waitFor(() => expect(loadExtension).toHaveBeenCalledTimes(1));
+    expect(result.current.installedTopicAliasFunctions).toEqual([
+      { extensionId: "id", aliasFunction: expect.any(Function) },
+    ]);
+  });
 });

@@ -417,6 +417,20 @@ export type RegisterMessageConverterArgs<Src> = {
   converter: (msg: Src, event: Immutable<MessageEvent<Src>>) => unknown;
 };
 
+type BaseTopic = { name: string; schemaName?: string };
+type TopicAlias = { name: string; sourceTopicName: string };
+
+/**
+ * An AliasFunction takes a list of data source topics and variables and outputs
+ * a list of aliased topics.
+ */
+export type TopicAliasFunction = (
+  args: Immutable<{
+    topics: BaseTopic[];
+    globalVariables: Readonly<Record<string, VariableValue>>;
+  }>,
+) => TopicAlias[];
+
 export interface ExtensionContext {
   /** The current _mode_ of the application. */
   readonly mode: "production" | "development" | "test";
@@ -424,6 +438,13 @@ export interface ExtensionContext {
   registerPanel(params: ExtensionPanelRegistration): void;
 
   registerMessageConverter<Src>(args: RegisterMessageConverterArgs<Src>): void;
+
+  /**
+   * Registers a new alias function with the extension context. The function will be
+   * called every time there is a new set of topics and variables and returns an array of
+   * topic aliases.
+   */
+  registerTopicAliases(aliasFunction: TopicAliasFunction): void;
 }
 
 export interface ExtensionActivate {
