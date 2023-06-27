@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MathNumericType, atan2, eigs, isNumber, unit } from "mathjs";
+import { MathNumericType, atan2, eigs, isNumber } from "mathjs";
 
 import {
   NavSatFixMsg,
@@ -70,14 +70,14 @@ export function getAccuracy(
         }
 
         // Ellipse `tilt` is defined as number of degrees from the negative x axis
-        const theta = unit(atan2(eigenvector[1], eigenvector[0]), "rad").toNumber("deg");
+        const theta = (atan2(eigenvector[1], eigenvector[0]) * 180) / Math.PI;
         const tilt = -1 * theta;
 
         const primaryRadius = Math.sqrt(eigenvalues[1]);
         const secondaryRadius = Math.sqrt(eigenvalues[0]);
 
         if (isNaN(tilt) || isNaN(primaryRadius) || isNaN(secondaryRadius)) {
-          throw new Error("Unable to calculate accuracy");
+          return undefined;
         }
 
         return {
