@@ -2965,7 +2965,7 @@ __metadata:
     "@testing-library/react": 12.1.2
     "@testing-library/react-hooks": 8.0.1
     "@types/base16": ^1.0.2
-    "@types/cytoscape": ^3.19.9
+    "@types/cytoscape": ^3.19.10
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/foxglove__web": "workspace:*"
     "@types/geojson": 7946.0.10
@@ -5922,10 +5922,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/cytoscape@npm:^3.19.9":
-  version: 3.19.9
-  resolution: "@types/cytoscape@npm:3.19.9"
-  checksum: 773e7c73198a0dc9fe8fe708aca47af5e1fc47ba6e3138e37e3de23cd336441dd79d2a0215473c755a6bdd9842e3ed83e2e6d51abd128a34a5680fc10b3402b5
+"@types/cytoscape@npm:^3.19.10":
+  version: 3.19.10
+  resolution: "@types/cytoscape@npm:3.19.10"
+  checksum: f8ac379f07e06135d62d399a40f5949f7678c2eea5a4600257532d769b9c7f06602a0f1afbe4c7c8ada54fa8736c42df6b68f4066967fbf68d2349077069c3a8
   languageName: node
   linkType: hard
 
