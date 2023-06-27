@@ -217,4 +217,10 @@ export const decorators = [WithContextProviders, WithI18nUnlessDisabled];
 export const parameters = {
   // Disable default padding around the page body
   layout: "fullscreen",
+  chromatic: {
+    // Detect any visual differences, no matter how small
+    // https://www.chromatic.com/docs/threshold
+    diffThreshold: 0,
+    diffIncludeAntiAliasing: true,
+  },
 };
