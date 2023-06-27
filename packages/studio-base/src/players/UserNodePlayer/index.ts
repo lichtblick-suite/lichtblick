@@ -18,7 +18,7 @@ import ReactDOM from "react-dom";
 import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
-import { Condvar, MutexLocked } from "@foxglove/den/async";
+import { MutexLocked } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
@@ -443,14 +443,6 @@ export default class UserNodePlayer implements Player {
       // channel isn't available.
       let rpc: undefined | Rpc;
 
-      // This signals that we have terminated the node registration and we should bail any
-      // message processing that is in-flight.
-      //
-      // These are lazily created in the first message we process and cleared on
-      // terminate.
-      let terminateCondvar: undefined | Condvar;
-      let terminateSignal: undefined | Promise<void>;
-
       const registration = async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
         // Register the node within a web worker to be executed.
         if (!rpc) {
@@ -520,36 +512,18 @@ export default class UserNodePlayer implements Player {
           this.#addUserNodeLogs(nodeId, userNodeLogs);
         }
 
-        // This signals that we have terminated the node registration and we should bail any message
-        // processing that is in-flight.
-        if (!terminateCondvar) {
-          terminateCondvar = new Condvar();
-          terminateSignal = terminateCondvar.wait();
-        }
-
-        // To send the message over RPC we invoke maybePlainObject which calls toJSON on the message
-        // and builds a plain js object of the entire message. This is expensive so a future enhancement
-        // would be to send the underlying message array and build a lazy message reader
-        const result = await Promise.race([
-          rpc.send<ProcessMessageOutput>("processMessage", {
-            message: {
-              topic: msgEvent.topic,
-              receiveTime: msgEvent.receiveTime,
-              message: maybePlainObject(msgEvent.message),
-              datatype: msgEvent.schemaName,
-            },
-            globalVariables,
-          }),
-          terminateSignal,
-        ]);
-
-        if (!result) {
-          this.#problemStore.set(problemKey, {
-            message: `User Script ${nodeId} timed out`,
-            severity: "warn",
-          });
-          return;
-        }
+        // To send the message over RPC we need to send a plain JS object. We invoke
+        // maybePlainObject which calls toJSON on the message and builds a plain js object of the
+        // entire message.
+        const result = await rpc.send<ProcessMessageOutput>("processMessage", {
+          message: {
+            topic: msgEvent.topic,
+            receiveTime: msgEvent.receiveTime,
+            message: maybePlainObject(msgEvent.message),
+            datatype: msgEvent.schemaName,
+          },
+          globalVariables,
+        });
 
         const allDiagnostics = result.userNodeDiagnostics;
         if (result.error) {
@@ -598,12 +572,6 @@ export default class UserNodePlayer implements Player {
 
       const terminate = () => {
         this.#problemStore.delete(problemKey);
-
-        // Signal any pending in-flight message processing to terminate and clear the state so we can
-        // re-initialize when the next message is processed.
-        terminateCondvar?.notifyAll();
-        terminateCondvar = undefined;
-        terminateSignal = undefined;
 
         if (rpc) {
           this.#unusedNodeRuntimeWorkers.push(rpc);
