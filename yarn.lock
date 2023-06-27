@@ -2993,7 +2993,7 @@ __metadata:
     "@types/url-search-params": 1.1.0
     "@types/uuid": 9.0.1
     "@types/wicg-file-system-access": 2020.9.6
-    "@uiw/react-textarea-code-editor": 2.1.1
+    "@uiw/react-textarea-code-editor": 2.1.7
     async-mutex: 0.4.0
     babel-jest: 29.5.0
     babel-plugin-transform-import-meta: 2.2.0
@@ -6931,9 +6931,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/react-textarea-code-editor@npm:2.1.1":
-  version: 2.1.1
-  resolution: "@uiw/react-textarea-code-editor@npm:2.1.1"
+"@uiw/react-textarea-code-editor@npm:2.1.7":
+  version: 2.1.7
+  resolution: "@uiw/react-textarea-code-editor@npm:2.1.7"
   dependencies:
     "@babel/runtime": ^7.18.6
     rehype: ~12.0.1
@@ -6942,7 +6942,7 @@ __metadata:
     "@babel/runtime": ">=7.10.0"
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: daf731993b15f48b5c3a1dc5f543344bf5c687ce165b5c05cba03b9d83865d9f746c02722be4266ee0c3961b1635e7a186bc42f313032bfa2fc1f7083d27c034
+  checksum: c338eeb5667e4fde0828d447d5cd69f831414d71d1416ebae8e80224b4ea71590b4fb59a00d916cf62c4eafe2779994bb37a476326c6f492088d33199221dc60
   languageName: node
   linkType: hard
 
