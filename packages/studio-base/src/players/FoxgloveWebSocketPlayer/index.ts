@@ -1051,9 +1051,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
       // Try to retrieve the ROS message definition for this topic
       let msgdef: MessageDefinition[];
       try {
-        const datatypes = options?.["datatypes"] as RosDatatypes | undefined;
-        if (!datatypes || !(datatypes instanceof Map)) {
-          throw new Error("The datatypes option is required for publishing");
+        const datatypes = (options?.["datatypes"] as RosDatatypes | undefined) ?? this.#datatypes;
+        if (!(datatypes instanceof Map)) {
+          throw new Error("Datatypes option must be a map");
         }
         msgdef = rosDatatypesToMessageDefinition(datatypes, schemaName);
       } catch (error) {
