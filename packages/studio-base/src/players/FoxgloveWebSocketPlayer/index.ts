@@ -1070,7 +1070,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         encoding === "ros1" ? new Ros1MessageWriter(msgdef) : new Ros2MessageWriter(msgdef);
     }
 
-    const channelId = this.#client.advertise(topic, encoding, schemaName);
+    const channelId = this.#client.advertise({ topic, encoding, schemaName });
     this.#publicationsByTopic.set(topic, {
       id: channelId,
       topic,
