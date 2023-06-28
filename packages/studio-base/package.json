@@ -125,7 +125,7 @@
     "leaflet": "1.9.4",
     "leaflet-ellipse": "0.9.1",
     "lodash": "4.17.21",
-    "mathjs": "11.8.0",
+    "mathjs": "11.8.2",
     "memoize-weak": "1.0.2",
     "meshoptimizer": "0.19.0",
     "moment": "2.29.4",
