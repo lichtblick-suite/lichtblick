@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import EventEmitter from "eventemitter3";
 import { isEqual, sortedIndexBy } from "lodash";
 
 import { minIndexBy, sortedIndexByTuple } from "@foxglove/den/collection";
@@ -52,6 +53,11 @@ type Options = {
   maxTotalSize?: number;
 };
 
+interface EventTypes {
+  /** Dispatched when the loaded ranges have changed. Use `loadedRanges()` to get the new ranges. */
+  loadedRangesChange: () => void;
+}
+
 /**
  * CachingIterableSource proxies access to IIterableSource through a memory buffer.
  *
@@ -59,7 +65,7 @@ type Options = {
  * buffer for previously read messages, then the underlying source is used and the messages are
  * cached when read.
  */
-class CachingIterableSource implements IIterableSource {
+class CachingIterableSource extends EventEmitter<EventTypes> implements IIterableSource {
   #source: IIterableSource;
 
   // Stores which topics we have been caching. See notes at usage site for why we store this.
@@ -82,6 +88,8 @@ class CachingIterableSource implements IIterableSource {
   #maxBlockSizeBytes: number;
 
   public constructor(source: IIterableSource, opt?: Options) {
+    super();
+
     this.#source = source;
     this.#maxTotalSizeBytes = opt?.maxTotalSize ?? 1073741824; // 1GB
     this.#maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
@@ -450,11 +458,13 @@ class CachingIterableSource implements IIterableSource {
     const rangeNs = Number(toNanoSec(subtract(this.#initResult.end, this.#initResult.start)));
     if (rangeNs === 0) {
       this.#loadedRangesCache = [{ start: 0, end: 1 }];
+      this.emit("loadedRangesChange");
       return;
     }
 
     if (this.#cache.length === 0) {
       this.#loadedRangesCache = [{ start: 0, end: 0 }];
+      this.emit("loadedRangesChange");
       return;
     }
 
@@ -488,6 +498,7 @@ class CachingIterableSource implements IIterableSource {
     }
 
     this.#loadedRangesCache = ranges;
+    this.emit("loadedRangesChange");
   }
 
   // Purge the oldest cache block if adding sizeInBytes to the cache would exceed the maxTotalSizeBytes

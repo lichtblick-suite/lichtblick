@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import EventEmitter from "eventemitter3";
+
 import { Condvar } from "@foxglove/den/async";
 import { VecQueue } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
@@ -27,6 +29,11 @@ type Options = {
   readAheadDuration?: Time;
 };
 
+interface EventTypes {
+  /** Dispatched when the loaded ranges have changed. Use `loadedRanges()` to get the new ranges. */
+  loadedRangesChange: () => void;
+}
+
 /**
  * BufferedIterableSource proxies access to IIterableSource. It buffers the messageIterator by
  * reading ahead in the underlying source.
@@ -35,7 +42,7 @@ type Options = {
  * is the consumer and reads messages from cache while the startProducer method produces messages by
  * reading from the underlying source and populating the cache.
  */
-class BufferedIterableSource implements IIterableSource {
+class BufferedIterableSource extends EventEmitter<EventTypes> implements IIterableSource {
   #source: CachingIterableSource;
 
   #readDone = false;
@@ -63,8 +70,13 @@ class BufferedIterableSource implements IIterableSource {
   #readAheadDuration: Time;
 
   public constructor(source: IIterableSource, opt?: Options) {
+    super();
+
     this.#readAheadDuration = opt?.readAheadDuration ?? DEFAULT_READ_AHEAD_DURATION;
     this.#source = new CachingIterableSource(source);
+
+    // pass-through the range change event
+    this.#source.on("loadedRangesChange", () => this.emit("loadedRangesChange"));
   }
 
   public async initialize(): Promise<Initalization> {
@@ -168,6 +180,7 @@ class BufferedIterableSource implements IIterableSource {
 
   public async terminate(): Promise<void> {
     this.#cache.clear();
+    this.#source.removeAllListeners("loadedRangesChange");
     await this.#source.terminate();
   }
 

@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import assert from "assert";
 import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
@@ -932,36 +933,35 @@ export class IterablePlayer implements Player {
   }
 
   async #stateIdle() {
+    assert(this.#abort == undefined, "Invariant: some other abort controller exists");
+
     this.#isPlaying = false;
     this.#presence = PlayerPresence.PRESENT;
-    this.#queueEmitState();
 
-    if (this.#abort) {
-      throw new Error("Invariant: some other abort controller exists");
-    }
+    // set the latest value of the loaded ranges for the next emit state
+    this.#progress = {
+      fullyLoadedFractionRanges: this.#bufferedSource.loadedRanges(),
+      messageCache: this.#progress.messageCache,
+    };
+
     const abort = (this.#abort = new AbortController());
+    const aborted = new Promise((resolve) => abort.signal.addEventListener("abort", resolve));
 
-    const aborted = new Promise<void>((resolve) => {
-      abort.signal.addEventListener("abort", () => {
-        resolve();
-      });
-    });
-
-    for (;;) {
+    const rangeChangeHandler = () => {
       this.#progress = {
         fullyLoadedFractionRanges: this.#bufferedSource.loadedRanges(),
         messageCache: this.#progress.messageCache,
       };
       this.#queueEmitState();
+    };
 
-      // When idling nothing is querying the source, but our buffered source might be
-      // buffering behind the scenes. Every second we emit state with an update to show that
-      // buffering is happening.
-      await Promise.race([delay(1000), aborted]);
-      if (this.#nextState) {
-        break;
-      }
-    }
+    // While idle, the buffered source might still be loading and we still want to update downstream
+    // with the new ranges we've buffered. This event will update progress and queue state emits
+    this.#bufferedSource.on("loadedRangesChange", rangeChangeHandler);
+
+    this.#queueEmitState();
+    await aborted;
+    this.#bufferedSource.off("loadedRangesChange", rangeChangeHandler);
   }
 
   async #statePlay() {
@@ -997,6 +997,13 @@ export class IterablePlayer implements Player {
           return;
         }
 
+        // Update with the latest loaded ranges from the buffered source
+        // The messageCache is updated separately by block loader events
+        this.#progress = {
+          fullyLoadedFractionRanges: this.#bufferedSource.loadedRanges(),
+          messageCache: this.#progress.messageCache,
+        };
+
         // If subscriptions changed, update to the new subscriptions
         if (this.#allTopics !== allTopics) {
           // Discard any last message event since the new iterator will repeat it
@@ -1007,11 +1014,6 @@ export class IterablePlayer implements Player {
           this.#setState("reset-playback-iterator");
           return;
         }
-
-        this.#progress = {
-          fullyLoadedFractionRanges: this.#bufferedSource.loadedRanges(),
-          messageCache: this.#progress.messageCache,
-        };
 
         const time = Date.now() - start;
         // make sure we've slept at least 16 millis or so (aprox 1 frame)
@@ -1045,6 +1047,11 @@ export class IterablePlayer implements Player {
           fullyLoadedFractionRanges: this.#progress.fullyLoadedFractionRanges,
           messageCache: progress.messageCache,
         };
+
+        // If we are in playback, we will let playback queue state updates
+        if (this.#state === "play") {
+          return;
+        }
 
         this.#queueEmitState();
       },

@@ -192,7 +192,7 @@ describe("IterablePlayer", () => {
     await store.done;
 
     // Reset store to get state from the seeks
-    store.reset(3);
+    store.reset(2);
 
     // replace the message iterator with our own implementation
     // This implementation performs a seekPlayback during backfill.
@@ -273,7 +273,7 @@ describe("IterablePlayer", () => {
     // The state order:
     // 1. a state update completing the second seek
     // 1. a state update for moving to idle
-    expect(playerStates).toEqual([withMessages, baseState, baseState]);
+    expect(playerStates).toEqual([withMessages, baseState]);
 
     player.close();
   });
@@ -293,7 +293,7 @@ describe("IterablePlayer", () => {
     await store.done;
 
     // Reset store to get state from the seeks
-    store.reset(4);
+    store.reset(3);
 
     // replace the message iterator with our own implementation
     source.getBackfillMessages = async function () {
@@ -351,7 +351,7 @@ describe("IterablePlayer", () => {
     // The state order:
     // 1. a state update completing the second seek
     // 1. a state update for moving to idle
-    expect(playerStates).toEqual([bufferingState, baseState, baseState, baseState]);
+    expect(playerStates).toEqual([bufferingState, baseState, baseState]);
 
     player.close();
   });
@@ -410,7 +410,7 @@ describe("IterablePlayer", () => {
       enablePreload: false,
       sourceId: "test",
     });
-    const store = new PlayerStateStore(5);
+    const store = new PlayerStateStore(4);
     player.setSubscriptions([{ topic: "foo" }]);
     player.setListener(async (state) => await store.add(state));
 
@@ -455,7 +455,6 @@ describe("IterablePlayer", () => {
         presence: PlayerPresence.INITIALIZING,
         progress: {},
       },
-      { ...baseState, progress: {} },
       { ...baseState, progress: {} },
       { ...baseState, progress: {} },
       baseState,
@@ -574,7 +573,7 @@ describe("IterablePlayer", () => {
     await store.done;
 
     // Call set subscriptions and add a new topic
-    store.reset(3);
+    store.reset(2);
     player.setSubscriptions([{ topic: "foo" }, { topic: "bar" }]);
 
     await store.done;
