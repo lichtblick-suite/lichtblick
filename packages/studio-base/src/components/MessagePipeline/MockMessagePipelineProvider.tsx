@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Immutable } from "immer";
 import { omit } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import shallowequal from "shallowequal";
@@ -19,7 +18,7 @@ import { Writable } from "ts-essentials";
 import { createStore } from "zustand";
 
 import { Time, isLessThan } from "@foxglove/rostime";
-import { ParameterValue } from "@foxglove/studio";
+import { Immutable, ParameterValue } from "@foxglove/studio";
 import {
   AdvertiseOptions,
   MessageEvent,
