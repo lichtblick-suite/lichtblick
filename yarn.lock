@@ -3086,6 +3086,7 @@ __metadata:
   dependencies:
     "@actions/exec": 1.1.1
     "@actions/tool-cache": 2.0.1
+    "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 2.1.1
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
