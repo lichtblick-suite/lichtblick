@@ -10,7 +10,6 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
-import PersonIcon from "@mui/icons-material/Person";
 import { Avatar, Button, IconButton, Tooltip, AppBar as MuiAppBar } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -167,10 +166,6 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }, 
             backgroundColor: tc(theme.palette.appBar.main).setAlpha(0.3).toString(),
           },
         },
-      },
-      userIconImage: {
-        objectFit: "cover",
-        width: "100%",
       },
       button: {
         marginInline: theme.spacing(1),
@@ -374,17 +369,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   onClick={(event) => setUserAnchorEl(event.currentTarget)}
                   data-testid="user-button"
                 >
-                  <Avatar className={classes.avatar} variant="rounded">
-                    {currentUser?.avatarImageUrl ? (
-                      <img
-                        src={currentUser.avatarImageUrl}
-                        referrerPolicy="same-origin"
-                        className={classes.userIconImage}
-                      />
-                    ) : (
-                      <PersonIcon />
-                    )}
-                  </Avatar>
+                  <Avatar
+                    src={currentUser?.avatarImageUrl ?? undefined}
+                    className={classes.avatar}
+                    variant="rounded"
+                  />
                 </IconButton>
               </Tooltip>
               {showCustomWindowControls && (
