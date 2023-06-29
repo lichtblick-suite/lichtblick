@@ -122,6 +122,15 @@ rules:
     - selector: "CallExpression[callee.name='setInterval'][arguments.length<2]"
       message: "`setInterval()` must be invoked with at least two arguments."
 
+    - selector: "CallExpression[callee.object.name='Promise'][callee.property.name='race']"
+      message: >
+        Promise.race is banned
+          use `import { race } from "@foxglove/den/async"` instead
+
+        See:
+          https://github.com/nodejs/node/issues/17469#issuecomment-685216777
+          https://bugs.chromium.org/p/v8/issues/detail?id=9858"
+
   jest/expect-expect:
     [error, { assertFunctionNames: [expect*, sendNotification.expectCalledDuringTest] }]
 
