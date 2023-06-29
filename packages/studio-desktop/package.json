@@ -47,7 +47,7 @@
     "tinycolor2": "1.6.0",
     "tss-react": "4.8.6",
     "utif": "3.1.0",
-    "webpack": "5.87.0",
+    "webpack": "5.88.1",
     "webpack-dev-server": "4.15.1"
   }
 }
