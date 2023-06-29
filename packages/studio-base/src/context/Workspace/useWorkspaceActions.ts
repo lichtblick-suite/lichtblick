@@ -4,10 +4,9 @@
 
 import { Draft, produce } from "immer";
 import { union } from "lodash";
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 
 import { useGuaranteedContext } from "@foxglove/hooks";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
@@ -15,8 +14,6 @@ import {
   IDataSourceFactory,
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import {
   WorkspaceContext,
@@ -90,12 +87,6 @@ export function useWorkspaceActions(): WorkspaceActions {
 
   const { signIn } = useCurrentUser();
   const supportsAccountSettings = signIn != undefined;
-
-  const [currentEnableNewTopNav = true] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_NEW_TOPNAV,
-  );
-  const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
-  const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
 
   const { availableSources } = usePlayerSelection();
 
@@ -173,14 +164,10 @@ export function useWorkspaceActions(): WorkspaceActions {
         }),
 
       openPanelSettings: () =>
-        enableNewTopNav
-          ? set((draft) => {
-              draft.sidebars.left.item = "panel-settings";
-              draft.sidebars.left.open = true;
-            })
-          : set((draft) => {
-              draft.sidebars.legacy.item = "panel-settings";
-            }),
+        set((draft) => {
+          draft.sidebars.left.item = "panel-settings";
+          draft.sidebars.left.open = true;
+        }),
 
       openLayoutBrowser: () =>
         set((draft) => {
@@ -272,5 +259,5 @@ export function useWorkspaceActions(): WorkspaceActions {
         },
       },
     };
-  }, [enableNewTopNav, openFile, set, supportsAccountSettings]);
+  }, [openFile, set, supportsAccountSettings]);
 }

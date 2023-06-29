@@ -58,7 +58,7 @@ export const NoPanelSelected: StoryObj = {
   render: () => {
     return (
       <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture} omitDragAndDrop>
-        <PanelSettings disableToolbar />
+        <PanelSettings />
       </PanelSetup>
     );
   },
@@ -72,7 +72,7 @@ export const PanelSelected: StoryObj = {
         fixture={{ ...fixture, savedProps: { "Sample1!abc": { someKey: "someVal" } } }}
         omitDragAndDrop
       >
-        <PanelSettings disableToolbar selectedPanelIdsForTests={selectedPanelIds} />
+        <PanelSettings selectedPanelIdsForTests={selectedPanelIds} />
       </PanelSetup>
     );
   },
@@ -111,7 +111,7 @@ export const PanelSelectedWithAppBar: StoryObj = {
         }}
         omitDragAndDrop
       >
-        <PanelSettings disableToolbar selectedPanelIdsForTests={selectedPanelIds} />
+        <PanelSettings selectedPanelIdsForTests={selectedPanelIds} />
       </PanelSetup>
     );
   },
@@ -121,7 +121,7 @@ export const PanelLoading: StoryObj = {
   render: () => {
     return (
       <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture} omitDragAndDrop>
-        <PanelSettings disableToolbar selectedPanelIdsForTests={selectedPanelIds} />
+        <PanelSettings selectedPanelIdsForTests={selectedPanelIds} />
       </PanelSetup>
     );
   },

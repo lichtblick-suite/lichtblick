@@ -71,7 +71,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export type NewSidebarItem = {
+export type SidebarItem = {
   title: string;
   component: React.ComponentType;
   badge?: {
@@ -84,14 +84,14 @@ function Noop(): ReactNull {
   return ReactNull;
 }
 
-export function NewSidebar<K extends string>({
+export function Sidebar<K extends string>({
   items,
   anchor,
   onClose,
   activeTab,
   setActiveTab,
 }: {
-  items: Map<K, NewSidebarItem>;
+  items: Map<K, SidebarItem>;
   anchor: "right" | "left";
   onClose: () => void;
   activeTab: K | undefined;

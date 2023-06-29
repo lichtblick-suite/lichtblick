@@ -7,9 +7,7 @@ import { forwardRef, HTMLAttributes, PropsWithChildren } from "react";
 import { TransitionStatus } from "react-transition-group";
 import { makeStyles } from "tss-react/mui";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { APP_BAR_HEIGHT } from "@foxglove/studio-base/components/AppBar/constants";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 export const PANEL_ROOT_CLASS_NAME = "FoxglovePanelRoot-root";
 
@@ -21,10 +19,10 @@ type PanelRootProps = {
 } & HTMLAttributes<HTMLDivElement>;
 
 export const usePanelRootStyles = makeStyles<
-  Omit<PanelRootProps, "fullscreenState" | "selected"> & { appBarEnabled: boolean }
+  Omit<PanelRootProps, "fullscreenState" | "selected">
 >()((theme, props) => {
   const { palette, transitions } = theme;
-  const { appBarEnabled, sourceRect, hasFullscreenDescendant } = props;
+  const { sourceRect, hasFullscreenDescendant } = props;
   const duration = transitions.duration.shorter;
 
   return {
@@ -71,7 +69,7 @@ export const usePanelRootStyles = makeStyles<
     entered: {
       borderWidth: 4,
       position: "fixed",
-      top: appBarEnabled ? APP_BAR_HEIGHT : 0, // offset by app bar height if enabled
+      top: APP_BAR_HEIGHT, // offset by app bar height
       left: 0,
       right: 0,
       bottom: 77, // match PlaybackBar height
@@ -108,12 +106,9 @@ export const usePanelRootStyles = makeStyles<
 
 export const PanelRoot = forwardRef<HTMLDivElement, PropsWithChildren<PanelRootProps>>(
   function PanelRoot(props, ref): JSX.Element {
-    const [appBarEnabled = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
-
     const { fullscreenState, selected, sourceRect, hasFullscreenDescendant, className, ...rest } =
       props;
     const { classes, cx } = usePanelRootStyles({
-      appBarEnabled,
       sourceRect,
       hasFullscreenDescendant,
     });

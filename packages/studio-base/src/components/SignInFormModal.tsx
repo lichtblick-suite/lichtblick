@@ -6,7 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, IconButton } from "@mui/material";
 import { useState } from "react";
 
-import SigninForm from "@foxglove/studio-base/components/AccountSettingsSidebar/SigninForm";
+import SigninForm from "@foxglove/studio-base/components/SigninForm";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 export function SignInFormModal(): JSX.Element {

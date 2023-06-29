@@ -73,7 +73,6 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
             <ListItem
               disablePadding
               key={nodeId}
-              selected={selectedNodeId === nodeId}
               secondaryAction={
                 <IconButton
                   size="small"
@@ -87,7 +86,10 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
                 </IconButton>
               }
             >
-              <ListItemButton onClick={() => selectNode(nodeId)}>
+              <ListItemButton
+                selected={selectedNodeId === nodeId}
+                onClick={() => selectNode(nodeId)}
+              >
                 <ListItemText
                   primary={nodes[nodeId]?.name}
                   primaryTypographyProps={{ variant: "body1" }}

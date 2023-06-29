@@ -17,14 +17,12 @@ import {
 import path from "path";
 
 import Logger from "@foxglove/log";
-import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 import { APP_BAR_HEIGHT } from "@foxglove/studio-base/src/components/AppBar/constants";
 import { NativeAppMenuEvent } from "@foxglove/studio-base/src/context/NativeAppMenuContext";
 import * as palette from "@foxglove/studio-base/src/theme/palette";
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import getDevModeIcon from "./getDevModeIcon";
-import { getAppSetting } from "./settings";
 import { simulateUserClick } from "./simulateUserClick";
 import { getTelemetrySettings } from "./telemetry";
 import { encodeRendererArg } from "../common/rendererArgs";
@@ -62,7 +60,6 @@ function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
 
 function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
-  const enableNewTopNav = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
 
   const macTrafficLightInset =
@@ -76,10 +73,9 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     minHeight: 250,
     autoHideMenuBar: true,
     title: FOXGLOVE_PRODUCT_NAME,
-    frame: enableNewTopNav && isLinux ? false : true,
-    titleBarStyle: enableNewTopNav ? "hidden" : "default",
-    trafficLightPosition:
-      isMac && enableNewTopNav ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
+    frame: isLinux ? false : true,
+    titleBarStyle: "hidden",
+    trafficLightPosition: isMac ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
     titleBarOverlay: getTitleBarOverlayOptions(),
     webPreferences: {
       contextIsolation: true,

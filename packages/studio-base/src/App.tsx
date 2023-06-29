@@ -6,7 +6,6 @@ import { Fragment, Suspense, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { DesktopInterfaceChangeWindowReloader } from "@foxglove/studio-base/components/DesktopInterfaceChangeWindowReloader";
 import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
@@ -51,7 +50,6 @@ type AppProps = CustomWindowControlsProps & {
   appBarLeftInset?: number;
   extraProviders?: JSX.Element[];
   onAppBarDoubleClick?: () => void;
-  onReloadWindow?: () => void;
 };
 
 // Suppress context menu for the entire app except on inputs & textareas.
@@ -142,9 +140,6 @@ export function App(props: AppProps): JSX.Element {
                         onUnmaximizeWindow={props.onUnmaximizeWindow}
                         onCloseWindow={props.onCloseWindow}
                       />
-                      {props.onReloadWindow && (
-                        <DesktopInterfaceChangeWindowReloader reloadWindow={props.onReloadWindow} />
-                      )}
                     </PanelCatalogProvider>
                   </Suspense>
                 </DndProvider>
