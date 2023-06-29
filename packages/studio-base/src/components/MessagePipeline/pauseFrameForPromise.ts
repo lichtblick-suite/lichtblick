@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import promiseTimeout from "@foxglove/studio-base/util/promiseTimeout";
+import { PromiseTimeoutError, promiseTimeout } from "@foxglove/den/async";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 export type FramePromise = { name: string; promise: Promise<void> };
@@ -27,7 +27,7 @@ export async function pauseFrameForPromises(promises: FramePromise[]): Promise<v
     );
   } catch (error) {
     // An async render task failed to finish in time; some panels may display data from the wrong frame.
-    const isTimeoutError = (error as Error).message.includes("Promise timed out");
+    const isTimeoutError = error instanceof PromiseTimeoutError;
     if (!isTimeoutError) {
       sendNotification("Player ", error, "app", "error");
       return;

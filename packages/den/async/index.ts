@@ -6,4 +6,5 @@ export { default as LazilyInitialized } from "./LazilyInitialized";
 export { default as MutexLocked } from "./MutexLocked";
 export { default as signal, type Signal } from "./signal";
 export { default as debouncePromise } from "./debouncePromise";
+export * from "./promiseTimeout";
 export * from "./Condvar";
