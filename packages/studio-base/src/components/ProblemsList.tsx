@@ -111,7 +111,7 @@ function ProblemDetails(props: { details: DetailsType; tip?: string }): JSX.Elem
 
   const content = useMemo(() => {
     if (details instanceof Error) {
-      return <div className={classes.detailsText}>{details.stack}</div>;
+      return <div className={classes.detailsText}>{details.message}</div>;
     } else if (details != undefined && details !== "") {
       return (
         <Typography style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
@@ -135,9 +135,9 @@ function ProblemDetails(props: { details: DetailsType; tip?: string }): JSX.Elem
 
 export function ProblemsList(): JSX.Element {
   const { classes } = useStyles();
-  const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
+  const playerProblems = useMessagePipeline(selectPlayerProblems);
 
-  if (playerProblems.length === 0) {
+  if (playerProblems == undefined || playerProblems.length === 0) {
     return <EmptyState>No problems found</EmptyState>;
   }
 
