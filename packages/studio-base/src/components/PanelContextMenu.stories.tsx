@@ -54,7 +54,7 @@ function DummyPanel(): JSX.Element {
 
 const Dummy = Panel(
   Object.assign(DummyPanel, {
-    panelType: "ImageViewPanel",
+    panelType: "Dummy",
     defaultConfig: {},
   }),
 );

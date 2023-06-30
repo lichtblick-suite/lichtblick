@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { migrateLegacyToNew3DPanels } from "@foxglove/studio-base/services/migrateLegacyToNew3DPanels";
+import { migrateLegacyToNewImagePanels } from "./migrateLegacyToNewImagePanels";
 
 let MOCK_ID = 0;
 jest.mock("@foxglove/studio-base/util/layout", () => ({
@@ -12,15 +12,33 @@ jest.mock("@foxglove/studio-base/util/layout", () => ({
   },
 }));
 
-describe("migrateLegacyToNew3DPanels", () => {
+describe("migrateLegacyToNewImagePanels", () => {
   beforeEach(() => {
     MOCK_ID = 0;
   });
-  it("migrates legacy 3D panel config at root", () => {
+  it("migrates legacy Image panel config at root", () => {
     expect(
-      migrateLegacyToNew3DPanels({
-        layout: "3D Panel!a",
-        configById: { "3D Panel!a": {} },
+      migrateLegacyToNewImagePanels({
+        layout: "ImageViewPanel!a",
+        configById: {
+          "ImageViewPanel!a": {
+            cameraTopic: "/cam/image_rect_compressed",
+            enabledMarkerTopics: ["/cam/annotations", "/cam/lidar"],
+            transformMarkers: false,
+            synchronize: true,
+            mode: "fit",
+            pan: {
+              x: 0,
+              y: 0,
+            },
+            rotation: 90,
+            zoom: 1,
+            flipHorizontal: true,
+            flipVertical: true,
+            minValue: 2,
+            maxValue: 6,
+          },
+        },
         globalVariables: {},
         userNodes: {},
         playbackConfig: { speed: 1 },
@@ -28,14 +46,14 @@ describe("migrateLegacyToNew3DPanels", () => {
     ).toMatchInlineSnapshot(`
       {
         "configById": {
-          "3D!1": {
+          "Image!1": {
             "cameraState": {
               "distance": 20,
               "far": 5000,
               "fovy": 45,
               "near": 0.5,
               "perspective": true,
-              "phi": 59.99999999999999,
+              "phi": 60,
               "target": [
                 0,
                 0,
@@ -52,11 +70,28 @@ describe("migrateLegacyToNew3DPanels", () => {
                 0,
                 1,
               ],
-              "thetaOffset": 0,
+              "thetaOffset": 45,
             },
-            "followMode": "follow-none",
+            "followMode": "follow-pose",
             "followTf": undefined,
-            "imageMode": {},
+            "imageMode": {
+              "annotations": {
+                "/cam/annotations": {
+                  "visible": true,
+                },
+                "/cam/lidar": {
+                  "visible": true,
+                },
+              },
+              "calibrationTopic": undefined,
+              "flipHorizontal": true,
+              "flipVertical": true,
+              "imageTopic": "/cam/image_rect_compressed",
+              "maxValue": 6,
+              "minValue": 2,
+              "rotation": 90,
+              "synchronize": true,
+            },
             "layers": {},
             "publish": {
               "pointTopic": "/clicked_point",
@@ -73,7 +108,7 @@ describe("migrateLegacyToNew3DPanels", () => {
           },
         },
         "globalVariables": {},
-        "layout": "3D!1",
+        "layout": "Image!1",
         "playbackConfig": {
           "speed": 1,
         },
@@ -82,15 +117,15 @@ describe("migrateLegacyToNew3DPanels", () => {
     `);
   });
 
-  it("migrates legacy 3D panel config inside layout", () => {
+  it("migrates legacy Image panel config inside layout", () => {
     expect(
-      migrateLegacyToNew3DPanels({
+      migrateLegacyToNewImagePanels({
         layout: {
           direction: "row",
-          first: { direction: "row", first: "XXX!a", second: "3D Panel!a" },
+          first: { direction: "row", first: "XXX!a", second: "ImageViewPanel!a" },
           second: "XXX!b",
         },
-        configById: { "3D Panel!a": {}, "XXX!a": { foo: "bar" }, "XXX!b": { foo: "baz" } },
+        configById: { "ImageViewPanel!a": {}, "XXX!a": { foo: "bar" }, "XXX!b": { foo: "baz" } },
         globalVariables: {},
         userNodes: {},
         playbackConfig: { speed: 1 },
@@ -98,14 +133,14 @@ describe("migrateLegacyToNew3DPanels", () => {
     ).toMatchInlineSnapshot(`
       {
         "configById": {
-          "3D!1": {
+          "Image!1": {
             "cameraState": {
               "distance": 20,
               "far": 5000,
               "fovy": 45,
               "near": 0.5,
               "perspective": true,
-              "phi": 59.99999999999999,
+              "phi": 60,
               "target": [
                 0,
                 0,
@@ -122,11 +157,21 @@ describe("migrateLegacyToNew3DPanels", () => {
                 0,
                 1,
               ],
-              "thetaOffset": 0,
+              "thetaOffset": 45,
             },
-            "followMode": "follow-none",
+            "followMode": "follow-pose",
             "followTf": undefined,
-            "imageMode": {},
+            "imageMode": {
+              "annotations": {},
+              "calibrationTopic": undefined,
+              "flipHorizontal": undefined,
+              "flipVertical": undefined,
+              "imageTopic": undefined,
+              "maxValue": undefined,
+              "minValue": undefined,
+              "rotation": 0,
+              "synchronize": undefined,
+            },
             "layers": {},
             "publish": {
               "pointTopic": "/clicked_point",
@@ -154,7 +199,7 @@ describe("migrateLegacyToNew3DPanels", () => {
           "first": {
             "direction": "row",
             "first": "XXX!a",
-            "second": "3D!1",
+            "second": "Image!1",
           },
           "second": "XXX!b",
         },
@@ -166,9 +211,9 @@ describe("migrateLegacyToNew3DPanels", () => {
     `);
   });
 
-  it("migrates legacy 3D panel config inside tab", () => {
+  it("migrates legacy Image panel config inside tab", () => {
     expect(
-      migrateLegacyToNew3DPanels({
+      migrateLegacyToNewImagePanels({
         layout: {
           direction: "row",
           first: "Tab!a",
@@ -186,12 +231,15 @@ describe("migrateLegacyToNew3DPanels", () => {
           },
           "Tab!b": {
             tabs: [
-              { title: "Four", layout: { direction: "row", first: "XXX!a", second: "3D Panel!a" } },
+              {
+                title: "Four",
+                layout: { direction: "row", first: "XXX!a", second: "ImageViewPanel!a" },
+              },
             ],
 
             activeTabIdx: 0,
           },
-          "3D Panel!a": {},
+          "ImageViewPanel!a": {},
           "XXX!a": { foo: "foo" },
           "XXX!b": { foo: "bar" },
           "XXX!c": { foo: "baz" },
@@ -204,14 +252,14 @@ describe("migrateLegacyToNew3DPanels", () => {
     ).toMatchInlineSnapshot(`
       {
         "configById": {
-          "3D!1": {
+          "Image!1": {
             "cameraState": {
               "distance": 20,
               "far": 5000,
               "fovy": 45,
               "near": 0.5,
               "perspective": true,
-              "phi": 59.99999999999999,
+              "phi": 60,
               "target": [
                 0,
                 0,
@@ -228,11 +276,21 @@ describe("migrateLegacyToNew3DPanels", () => {
                 0,
                 1,
               ],
-              "thetaOffset": 0,
+              "thetaOffset": 45,
             },
-            "followMode": "follow-none",
+            "followMode": "follow-pose",
             "followTf": undefined,
-            "imageMode": {},
+            "imageMode": {
+              "annotations": {},
+              "calibrationTopic": undefined,
+              "flipHorizontal": undefined,
+              "flipVertical": undefined,
+              "imageTopic": undefined,
+              "maxValue": undefined,
+              "minValue": undefined,
+              "rotation": 0,
+              "synchronize": undefined,
+            },
             "layers": {},
             "publish": {
               "pointTopic": "/clicked_point",
@@ -271,7 +329,7 @@ describe("migrateLegacyToNew3DPanels", () => {
                 "layout": {
                   "direction": "row",
                   "first": "XXX!a",
-                  "second": "3D!1",
+                  "second": "Image!1",
                 },
                 "title": "Four",
               },

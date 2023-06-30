@@ -8,7 +8,6 @@ import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import gaugeThumbnail from "./Gauge/thumbnail.png";
-import imageViewThumbnail from "./Image/thumbnail.png";
 import indicatorThumbnail from "./Indicator/thumbnail.png";
 import logThumbnail from "./Log/thumbnail.png";
 import mapThumbnail from "./Map/thumbnail.png";
@@ -21,6 +20,7 @@ import stateTransitionsThumbnail from "./StateTransitions/thumbnail.png";
 import tabThumbnail from "./Tab/thumbnail.png";
 import tableThumbnail from "./Table/thumbnail.png";
 import teleopThumbnail from "./Teleop/thumbnail.png";
+import imageViewThumbnail from "./ThreeDeeRender/imageThumbnail.png";
 import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
@@ -57,13 +57,6 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("imageDescription"),
     thumbnail: imageViewThumbnail,
     module: async () => ({ default: (await import("./ThreeDeeRender")).ImagePanel }),
-  },
-  {
-    title: t("imageLegacy"),
-    type: "ImageViewPanel",
-    description: t("imageDescription"),
-    thumbnail: imageViewThumbnail,
-    module: async () => await import("./Image"),
   },
   {
     title: t("indicator"),

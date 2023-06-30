@@ -5,14 +5,14 @@
 import * as THREE from "three";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
-import { getAnnotationAtPath } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
-import { PointsAnnotation as NormalizedPointsAnnotation } from "@foxglove/studio-base/panels/Image/types";
+import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
+
 import {
   ANNOTATION_RENDER_ORDER,
   annotationRenderOrderMaterialProps,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/annotations/annotationRenderOrder";
-import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
-
+} from "./annotationRenderOrder";
+import { getAnnotationAtPath } from "./normalizeAnnotations";
+import { PointsAnnotation as NormalizedPointsAnnotation } from "./types";
 import { DynamicBufferGeometry } from "../../../DynamicBufferGeometry";
 import { BaseUserData, Renderable } from "../../../Renderable";
 import { SRGBToLinear } from "../../../color";

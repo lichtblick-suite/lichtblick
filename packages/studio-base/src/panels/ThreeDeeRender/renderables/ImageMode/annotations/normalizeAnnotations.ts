@@ -13,7 +13,7 @@ import {
 } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
-import type { Annotation, PathKey, PointsAnnotation } from "../types";
+import type { Annotation, PathKey, PointsAnnotation } from "./types";
 
 // Should mirror TextAnnotation.font_size default value
 const DEFAULT_FONT_SIZE = 12;

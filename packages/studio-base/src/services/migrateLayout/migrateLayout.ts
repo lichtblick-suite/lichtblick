@@ -6,8 +6,9 @@ import { MarkOptional } from "ts-essentials";
 
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
-import { Layout, ISO8601Timestamp } from "./ILayoutStorage";
 import { migrateLegacyToNew3DPanels } from "./migrateLegacyToNew3DPanels";
+import { migrateLegacyToNewImagePanels } from "./migrateLegacyToNewImagePanels";
+import { Layout, ISO8601Timestamp } from "../ILayoutStorage";
 
 /**
  * Perform any necessary migrations on old layout data.
@@ -17,6 +18,7 @@ export function migratePanelsState(data: MarkOptional<LayoutData, "configById">)
   delete result.savedProps;
 
   result = migrateLegacyToNew3DPanels(result);
+  result = migrateLegacyToNewImagePanels(result);
 
   return result;
 }

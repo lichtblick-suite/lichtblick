@@ -10,17 +10,17 @@ import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeome
 
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { Color } from "@foxglove/schemas";
-import { getAnnotationAtPath } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
-import {
-  PointsAnnotation as NormalizedPointsAnnotation,
-  CircleAnnotation as NormalizedCircleAnnotation,
-} from "@foxglove/studio-base/panels/Image/types";
+import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
+
 import {
   ANNOTATION_RENDER_ORDER,
   annotationRenderOrderMaterialProps,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/annotations/annotationRenderOrder";
-import { RosObject, RosValue } from "@foxglove/studio-base/players/types";
-
+} from "./annotationRenderOrder";
+import { getAnnotationAtPath } from "./normalizeAnnotations";
+import {
+  PointsAnnotation as NormalizedPointsAnnotation,
+  CircleAnnotation as NormalizedCircleAnnotation,
+} from "./types";
 import { BaseUserData, Renderable } from "../../../Renderable";
 import { SRGBToLinear } from "../../../color";
 

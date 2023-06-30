@@ -33,7 +33,7 @@ import { NamespacedLayoutStorage } from "./NamespacedLayoutStorage";
 import WriteThroughLayoutCache from "./WriteThroughLayoutCache";
 import { isLayoutEqual } from "./compareLayouts";
 import computeLayoutSyncOperations, { SyncOperation } from "./computeLayoutSyncOperations";
-import { migratePanelsState } from "../migrateLayout";
+import { migratePanelsState } from "../migrateLayout/migrateLayout";
 
 const log = Logger.getLogger(__filename);
 

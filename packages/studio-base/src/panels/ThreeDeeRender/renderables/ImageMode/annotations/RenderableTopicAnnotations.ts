@@ -5,13 +5,13 @@
 import * as THREE from "three";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
-import { Annotation as NormalizedAnnotation } from "@foxglove/studio-base/panels/Image/types";
 import { RosObject } from "@foxglove/studio-base/players/types";
 import { LabelPool } from "@foxglove/three-text";
 
 import { RenderableLineAnnotation } from "./RenderableLineAnnotation";
 import { RenderablePointsAnnotation } from "./RenderablePointsAnnotation";
 import { RenderableTextAnnotation } from "./RenderableTextAnnotation";
+import { Annotation as NormalizedAnnotation } from "./types";
 
 /**
  * Holds renderables for all the 2D image annotations on a single topic.

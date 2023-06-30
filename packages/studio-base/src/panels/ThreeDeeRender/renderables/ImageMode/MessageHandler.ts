@@ -16,8 +16,6 @@ import {
   ImageAnnotations as FoxgloveImageAnnotations,
 } from "@foxglove/schemas";
 import { Immutable, MessageEvent } from "@foxglove/studio";
-import { normalizeAnnotations } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
-import { Annotation } from "@foxglove/studio-base/panels/Image/types";
 import { ImageModeConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import {
   AnyImage,
@@ -35,6 +33,8 @@ import {
   ImageMarkerArray as RosImageMarkerArray,
 } from "@foxglove/studio-base/types/Messages";
 
+import { normalizeAnnotations } from "./annotations/normalizeAnnotations";
+import { Annotation } from "./annotations/types";
 import { PartialMessageEvent } from "../../SceneExtension";
 import { CompressedImage as RosCompressedImage, Image as RosImage, CameraInfo } from "../../ros";
 

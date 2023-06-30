@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { round } from "lodash";
-import { MosaicNode } from "react-mosaic-component";
 
 import { filterMap } from "@foxglove/den/collection";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
@@ -13,9 +12,9 @@ import {
   getAllPanelIds,
   getPanelIdForType,
   getPanelTypeFromId,
-  isTabPanel,
-  isTabPanelConfig,
 } from "@foxglove/studio-base/util/layout";
+
+import { replacePanel } from "./replacePanel";
 
 const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
   type: "point",
@@ -93,53 +92,6 @@ function migrateLegacyToNew3DConfig(legacyConfig: Partial<Legacy3DConfig>): Rend
     layers: {},
     imageMode: {},
   };
-}
-
-function replacePanelInLayout(
-  layout: MosaicNode<string>,
-  oldId: string,
-  newId: string,
-): MosaicNode<string> {
-  if (typeof layout === "string") {
-    return layout === oldId ? newId : layout;
-  } else {
-    return {
-      ...layout,
-      first: replacePanelInLayout(layout.first, oldId, newId),
-      second: replacePanelInLayout(layout.second, oldId, newId),
-    };
-  }
-}
-
-function replacePanel(
-  panelsState: LayoutData,
-  oldId: string,
-  newId: string,
-  newConfig: Record<string, unknown>,
-): LayoutData {
-  const newPanelsState = {
-    ...panelsState,
-    configById: { ...panelsState.configById, [newId]: newConfig },
-  };
-  delete newPanelsState.configById[oldId];
-  if (newPanelsState.layout != undefined) {
-    newPanelsState.layout = replacePanelInLayout(newPanelsState.layout, oldId, newId);
-    const tabPanelIds = Object.keys(newPanelsState.configById).filter(isTabPanel);
-    for (const tabId of tabPanelIds) {
-      const tabConfig = newPanelsState.configById[tabId];
-      if (isTabPanelConfig(tabConfig)) {
-        newPanelsState.configById[tabId] = {
-          ...tabConfig,
-          tabs: tabConfig.tabs.map((tab) => ({
-            ...tab,
-            layout:
-              tab.layout != undefined ? replacePanelInLayout(tab.layout, oldId, newId) : undefined,
-          })),
-        };
-      }
-    }
-  }
-  return newPanelsState;
 }
 
 export function migrateLegacyToNew3DPanels(layoutData: LayoutData): LayoutData {

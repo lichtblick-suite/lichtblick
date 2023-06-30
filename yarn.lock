@@ -3073,7 +3073,6 @@ __metadata:
     url-search-params: 1.1.0
     use-debounce: 9.0.4
     use-immer: 0.9.0
-    use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
     webpack: 5.88.1
     zustand: 4.3.8
@@ -20910,15 +20909,6 @@ __metadata:
     immer: ">=2.0.0"
     react: ^16.8.0 || ^17.0.1 || ^18.0.0
   checksum: 3f02e31d38f354125e6cffaaed0a08d9bf122b9df261aa7b38a25246813b3bd8b22bf97b192099d4e84adcfbbb07e69e14ba29520e0ac8d93f3991ef3a3652b4
-  languageName: node
-  linkType: hard
-
-"use-pan-and-zoom@npm:0.6.5":
-  version: 0.6.5
-  resolution: "use-pan-and-zoom@npm:0.6.5"
-  peerDependencies:
-    react: ^17.0.2
-  checksum: 38c5f5ac85ada18437d4315039ffe8a9cc067d95e70461c935427da5a3d231dcc5b6cc5a87f96ec70fe623e50eb0c8b02fbdd06fc322e961b511b0cc915d64b8
   languageName: node
   linkType: hard
 
