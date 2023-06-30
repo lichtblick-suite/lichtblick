@@ -178,10 +178,3 @@ overrides:
       react/forbid-component-props: off
     files:
       - "**/*.stories.tsx"
-
-  - rules:
-      "@foxglove/no-restricted-imports": off
-    files:
-      # Ignore existing implementations of @mui/styled and @mui/Box
-      - "packages/studio-base/src/components/DataSourceSidebar/DataSourceSidebar.tsx"
-      - "packages/studio-base/src/components/LayoutBrowser/LayoutRow.tsx"
