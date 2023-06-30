@@ -2793,26 +2793,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2-web@npm:4.1.0":
-  version: 4.1.0
-  resolution: "@foxglove/rosbag2-web@npm:4.1.0"
+"@foxglove/rosbag2-web@npm:4.1.1":
+  version: 4.1.1
+  resolution: "@foxglove/rosbag2-web@npm:4.1.1"
   dependencies:
-    "@foxglove/rosbag2": ^5.0.0
+    "@foxglove/rosbag2": ^5.0.1
     "@foxglove/sql.js": ^0.0.4
-  checksum: 3b1f4dcfbcb1c51aa1df8441c5b618a361286abf5d749c36bb386d1fee9cd927317a564950478c9905b06c73482039752600f04676330c7329e1f942bd2bde6c
+  checksum: 24a8d5495f109481636e2188ed1faf51dfc99137477b9aaae9f384edc0577637de8498901ea825af5755ec73468b22c4eafacd2d2127b56f861b4b305ff5e7a1
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "@foxglove/rosbag2@npm:5.0.0"
+"@foxglove/rosbag2@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "@foxglove/rosbag2@npm:5.0.1"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^3.0.0
     "@foxglove/rosmsg2-serialization": ^2.0.0
     "@foxglove/rostime": ^1.1.2
-    "@foxglove/schemas": ^1.1.0
+    "@foxglove/schemas": ^1.3.1
     js-yaml: ^4.1.0
-  checksum: 95d6aeb369591f36ab2dcead94db2f39cd1b21a43606d2315fbe55e53ccb6399da34cfe7ebcea5d2c845007ba5a8ad1d6735c5b0714fc18c0159c495d3ee37a8
+  checksum: ff9f11834451b676d5a9c4fb257e701c3e742ea8770d3489a4bf307e19fdcc109162c3b485c90a9fa5f59da274cf8eb66547863881fbb6b8bb3bb199f84acc95
   languageName: node
   linkType: hard
 
@@ -2889,7 +2889,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:1.3.1, @foxglove/schemas@npm:^1.1.0":
+"@foxglove/schemas@npm:1.3.1, @foxglove/schemas@npm:^1.3.1":
   version: 1.3.1
   resolution: "@foxglove/schemas@npm:1.3.1"
   dependencies:
@@ -2926,7 +2926,7 @@ __metadata:
     "@foxglove/message-definition": 0.2.0
     "@foxglove/ros1": 2.0.0
     "@foxglove/rosbag": 0.4.0
-    "@foxglove/rosbag2-web": 4.1.0
+    "@foxglove/rosbag2-web": 4.1.1
     "@foxglove/roslibjs": 0.0.3
     "@foxglove/rosmsg": 4.2.2
     "@foxglove/rosmsg-msgs-common": 3.0.0
