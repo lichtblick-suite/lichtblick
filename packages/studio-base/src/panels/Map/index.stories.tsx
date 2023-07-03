@@ -539,7 +539,7 @@ export const GeoJSON: StoryObj = {
   play: async () => {
     const followSelect = document.querySelectorAll("div[role=button][aria-haspopup=listbox]")[1];
     if (followSelect) {
-      userEvent.click(followSelect);
+      await userEvent.click(followSelect);
     }
   },
 };

@@ -89,6 +89,7 @@ export const WhenSelectingATopicSchemaIsSuggested: Story = {
   args: { allowPublish: true },
   name: "When selecting a topic schema is suggested",
   play: async ({ canvasElement, step }) => {
+    const { keyboard, type } = userEvent.setup();
     const canvas = within(canvasElement);
 
     const inputs = await canvas.findAllByRole("combobox");
@@ -96,10 +97,10 @@ export const WhenSelectingATopicSchemaIsSuggested: Story = {
     const schemaInput = inputs[1];
     const valueTextarea = await canvas.findByPlaceholderText("Enter message content as JSON");
 
-    await step("Select a topic", () => {
-      userEvent.type(topicInput!, "/sample_");
-      userEvent.keyboard("[ArrowDown]");
-      userEvent.keyboard("[Enter]");
+    await step("Select a topic", async () => {
+      await type(topicInput!, "/sample_");
+      await keyboard("[ArrowDown]");
+      await keyboard("[Enter]");
     });
 
     expect(topicInput).toHaveValue("/sample_topic");
@@ -132,7 +133,7 @@ export const PublishEnabledWithCustomButtonSettings: Story = {
     const canvas = within(canvasElement);
     const buttons = await canvas.findAllByText("Send message");
 
-    buttons.forEach((button) => userEvent.hover(button));
+    buttons.forEach(async (button) => await userEvent.hover(button));
   },
 };
 
@@ -224,7 +225,7 @@ export const PublishEnabledWithCustomButtonSettingsEditingOff: Story = {
     const canvas = within(canvasElement);
     const buttons = await canvas.findAllByText("Send message");
 
-    buttons.forEach((button) => userEvent.hover(button));
+    buttons.forEach(async (button) => await userEvent.hover(button));
   },
 };
 

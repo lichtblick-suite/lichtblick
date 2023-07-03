@@ -166,7 +166,7 @@ export const Occupancy_Grid_Costmap_With_Settings: StoryObj = {
 
   play: async () => {
     const label = await screen.findByText("/custom");
-    userEvent.click(label);
+    await userEvent.click(label);
   },
 };
 

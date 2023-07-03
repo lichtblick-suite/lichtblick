@@ -37,10 +37,11 @@ export const TextEntry: StoryObj = {
   },
 
   play: async () => {
+    const { click, type } = userEvent.setup();
     const inputs = await screen.findAllByPlaceholderText("RRGGBB");
     for (const input of inputs) {
-      userEvent.click(input);
-      userEvent.type(input, "aabbcc");
+      await click(input);
+      await type(input, "aabbcc");
     }
   },
 };

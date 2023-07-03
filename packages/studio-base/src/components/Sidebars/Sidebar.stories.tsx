@@ -107,7 +107,7 @@ export const LeftClicked: StoryObj = {
 
   play: async () => {
     const leftTab = await screen.findByTestId("b-left");
-    userEvent.click(leftTab);
+    await userEvent.click(leftTab);
   },
 };
 
@@ -121,7 +121,7 @@ export const LeftClosed: StoryObj = {
 
   play: async () => {
     const leftClose = await screen.findByTestId("sidebar-close-left");
-    userEvent.click(leftClose);
+    await userEvent.click(leftClose);
   },
 };
 
@@ -142,7 +142,7 @@ export const RightClicked: StoryObj = {
 
   play: async () => {
     const rightTab = await screen.findByTestId("y-right");
-    userEvent.click(rightTab);
+    await userEvent.click(rightTab);
   },
 };
 
@@ -156,7 +156,7 @@ export const RightClosed: StoryObj = {
 
   play: async () => {
     const rightClose = await screen.findByTestId("sidebar-close-right");
-    userEvent.click(rightClose);
+    await userEvent.click(rightClose);
   },
 };
 
@@ -175,10 +175,11 @@ export const BothClicked: StoryObj = {
   parameters: { colorScheme: "dark" },
 
   play: async () => {
+    const { click } = userEvent.setup();
     const leftTab = await screen.findByTestId("b-left");
-    userEvent.click(leftTab);
+    await click(leftTab);
 
     const rightTab = await screen.findByTestId("y-right");
-    userEvent.click(rightTab);
+    await click(rightTab);
   },
 };

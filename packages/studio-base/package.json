@@ -55,7 +55,7 @@
     "@storybook/addon-actions": "7.0.24",
     "@storybook/jest": "0.1.0",
     "@storybook/react": "7.0.24",
-    "@storybook/testing-library": "0.1.0",
+    "@storybook/testing-library": "0.2.0",
     "@svgr/webpack": "8.0.1",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "8.0.1",

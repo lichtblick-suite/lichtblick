@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryFn, StoryObj } from "@storybook/react";
-import { userEvent, within } from "@storybook/testing-library";
+import { Meta, StoryFn, StoryObj } from "@storybook/react";
+import { fireEvent, within } from "@storybook/testing-library";
 import { range } from "lodash";
 
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -20,7 +20,11 @@ import Stack from "@foxglove/studio-base/components/Stack";
 
 export default {
   title: "components/Autocomplete",
+  component: Autocomplete,
   parameters: { colorScheme: "dark" },
+  args: {
+    onSelect: () => {},
+  },
   decorators: [
     (Story: StoryFn): JSX.Element => (
       <Stack padding={2.5}>
@@ -28,131 +32,115 @@ export default {
       </Stack>
     ),
   ],
-};
+} as Meta<typeof Autocomplete>;
 
-const clickInput: StoryObj["play"] = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+type Story = StoryObj<typeof Autocomplete>;
+
+const clickInput: Story["play"] = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
   const canvas = within(canvasElement);
   const input = await canvas.findByTestId("autocomplete-textfield");
 
-  userEvent.click(input);
+  fireEvent.click(input);
 };
 
-export const FilteringToO: StoryObj = {
-  render: () => (
-    <Autocomplete
-      items={["one", "two", "three"]}
-      filterText="o"
-      value="o"
-      onSelect={() => {}}
-      hasError
-    />
-  ),
+export const FilteringToO: Story = {
+  args: {
+    items: ["one", "two", "three"],
+    hasError: true,
+    filterText: "o",
+    value: "o",
+  },
   name: "filtering to 'o'",
   play: clickInput,
 };
 
-export const FilteringToOLight: StoryObj = {
+export const FilteringToOLight: Story = {
   ...FilteringToO,
   name: "filtering to 'o' light",
   parameters: { colorScheme: "light" },
 };
 
-export const WithNonStringItemsAndLeadingWhitespace: StoryObj = {
-  render: () => (
-    <Autocomplete
-      items={[
-        { value: "one", text: "ONE" },
-        { value: "two", text: "    TWO" },
-        { value: "three", text: "THREE" },
-      ]}
-      getItemText={({ text }: any) => text}
-      filterText="o"
-      value="o"
-      onSelect={() => {}}
-    />
-  ),
+export const WithNonStringItemsAndLeadingWhitespace: Story = {
+  args: {
+    items: [
+      { value: "one", text: "ONE" },
+      { value: "two", text: "    TWO" },
+      { value: "three", text: "THREE" },
+    ],
+    getItemText: ({ text }: any) => text,
+    filterText: "o",
+    value: "o",
+  },
   name: "with non-string items and leading whitespace",
   play: clickInput,
 };
 
-export const UncontrolledValue: StoryObj = {
-  render: () => (
-    <Autocomplete
-      items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
-      getItemText={({ value }) => `item: ${value.toUpperCase()}`}
-      onSelect={() => {}}
-    />
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const input = await canvas.findByTestId("autocomplete-textfield");
-    userEvent.type(input, "h");
+export const UncontrolledValue: Story = {
+  args: {
+    items: [{ value: "one" }, { value: "two" }, { value: "three" }],
+    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
+    filterText: "h",
+    value: "h",
   },
+  play: clickInput,
 };
 
-export const UncontrolledValueLight: StoryObj = {
+export const UncontrolledValueLight: Story = {
   ...UncontrolledValue,
   parameters: { colorScheme: "light" },
 };
 
-export const UncontrolledValueWithSelectedItem: StoryObj = {
-  render: () => (
-    <Autocomplete
-      items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
-      getItemText={({ value }) => `item: ${value.toUpperCase()}`}
-      selectedItem={{ value: "two" }}
-      onSelect={() => {}}
-    />
-  ),
+export const UncontrolledValueWithSelectedItem: Story = {
+  args: {
+    items: [{ value: "one" }, { value: "two" }, { value: "three" }],
+    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
+    selectedItem: { value: "two" },
+  },
   play: clickInput,
 };
 
-export const UncontrolledValueWithSelectedItemAndClearOnFocus: StoryObj = {
-  render: () => (
-    <Autocomplete
-      items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
-      getItemText={({ value }) => `item: ${value.toUpperCase()}`}
-      selectedItem={{ value: "two" }}
-      onSelect={() => {}}
-      selectOnFocus
-    />
-  ),
+export const UncontrolledValueWithSelectedItemAndClearOnFocus: Story = {
+  args: {
+    items: [{ value: "one" }, { value: "two" }, { value: "three" }],
+    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
+    selectedItem: { value: "two" },
+    selectOnFocus: true,
+  },
   name: "uncontrolled value with selected item and clearOnFocus",
   play: clickInput,
 };
 
-export const SortWhenFilteringFalse: StoryObj = {
-  render: () => (
-    <Autocomplete
-      items={[{ value: "bab" }, { value: "bb" }, { value: "a2" }, { value: "a1" }]}
-      getItemText={({ value }) => `item: ${value.toUpperCase()}`}
-      value="b"
-      onSelect={() => {}}
-      sortWhenFiltering={false}
-    />
-  ),
+export const SortWhenFilteringFalse: Story = {
+  args: {
+    items: [{ value: "bab" }, { value: "bb" }, { value: "a2" }, { value: "a1" }],
+    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
+    sortWhenFiltering: false,
+    value: "b",
+    filterText: "b",
+  },
   name: "sortWhenFiltering=false",
   play: clickInput,
 };
 
-export const WithALongTruncatedPathAndAutoSize: StoryObj = {
-  render: () => (
+export const WithALongTruncatedPathAndAutoSize: Story = {
+  render: (args): JSX.Element => (
     <div style={{ width: 200 }}>
-      <Autocomplete
-        items={[]}
-        value="/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething"
-        onSelect={() => {}}
-        autoSize
-      />
+      <Autocomplete {...args} />
     </div>
   ),
+  args: {
+    items: [],
+    value: "/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething",
+    autoSize: true,
+  },
   name: "with a long truncated path (and autoSize)",
   play: clickInput,
 };
 
-export const ManyItems: StoryObj = {
-  render: () => (
-    <Autocomplete items={range(1, 1000).map((i) => `item_${i}`)} onSelect={() => {}} autoSize />
-  ),
+export const ManyItems: Story = {
+  args: {
+    items: range(1, 1000).map((i) => `item_${i}`),
+    autoSize: true,
+  },
   play: clickInput,
 };

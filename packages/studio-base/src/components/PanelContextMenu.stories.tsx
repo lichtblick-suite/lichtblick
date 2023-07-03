@@ -68,10 +68,17 @@ export const Default: StoryObj = {
     );
   },
 
-  play: () => {
-    for (const el of document.getElementsByClassName(DUMMY_CLASS)) {
-      const rect = el.getBoundingClientRect();
-      userEvent.click(el, { clientX: rect.x + 100, clientY: rect.y + 100, button: 2 });
+  play: async () => {
+    for (const target of document.getElementsByClassName(DUMMY_CLASS)) {
+      const rect = target.getBoundingClientRect();
+      await userEvent.pointer({
+        target,
+        keys: "[MouseRight]",
+        coords: {
+          clientX: rect.x + 100,
+          clientY: rect.y + 100,
+        },
+      });
     }
   },
 };

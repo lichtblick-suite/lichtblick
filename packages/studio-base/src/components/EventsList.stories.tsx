@@ -56,7 +56,7 @@ export const Selected: StoryObj = {
 
   play: async () => {
     const events = await screen.findAllByTestId("sidebar-event");
-    userEvent.click(events[1]!);
+    await userEvent.click(events[1]!);
   },
 
   parameters: {

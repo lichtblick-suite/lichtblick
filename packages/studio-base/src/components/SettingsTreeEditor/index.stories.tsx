@@ -1021,7 +1021,7 @@ export const Vec3: StoryObj = {
 };
 
 async function clickSelect(): Promise<void> {
-  userEvent.click(document.querySelector(".MuiSelect-select")!);
+  await userEvent.click(document.querySelector(".MuiSelect-select")!);
 }
 
 export const SelectInvalidWithUndefined: StoryObj = {

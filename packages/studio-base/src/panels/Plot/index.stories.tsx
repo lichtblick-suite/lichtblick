@@ -480,7 +480,7 @@ export const LineGraphWithSettings: StoryObj = {
 
   play: async (ctx) => {
     const label = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
-    userEvent.click(label);
+    await userEvent.click(label);
     await ctx.parameters.storyReady;
   },
 };
@@ -841,7 +841,7 @@ export const WithMinAndMaxYValues: StoryObj = {
 
   play: async () => {
     const label = await screen.findByText("Y Axis");
-    userEvent.click(label);
+    await userEvent.click(label);
   },
 };
 

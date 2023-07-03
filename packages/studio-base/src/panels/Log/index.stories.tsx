@@ -308,7 +308,7 @@ export const AutoCompleteItems: StoryObj = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = (await canvas.findAllByPlaceholderText("Search filter"))[0]!;
-    userEvent.click(input);
+    await userEvent.click(input);
   },
 };
 

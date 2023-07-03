@@ -41,7 +41,7 @@ const heavyFixture: Fixture = {
 
 const clickInput: StoryObj["play"] = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
-  userEvent.click(await canvas.findByTestId("autocomplete-textfield"));
+  await userEvent.click(await canvas.findByTestId("autocomplete-textfield"));
 };
 
 function MessagePathInputStory(props: {
@@ -92,10 +92,12 @@ export const AutocompleteScalarFromTopicAndEmptyPath: MsgPathInputStoryObj = {
   render: MessagePathInputStory,
   args: { path: "", validTypes: ["int32"] },
   play: async ({ canvasElement }) => {
+    const { click } = userEvent.setup();
     const canvas = within(canvasElement);
-    userEvent.click(await canvas.findByTestId("autocomplete-textfield"));
+
+    await click(await canvas.findByTestId("autocomplete-textfield"));
     const options = await waitFor(() => screen.queryAllByTestId("autocomplete-item"));
-    userEvent.click(options[2]!);
+    await click(options[2]!);
   },
 };
 
@@ -103,14 +105,15 @@ export const AutocompleteScalarFromTopic: MsgPathInputStoryObj = {
   render: MessagePathInputStory,
   args: { path: "", validTypes: ["int32"] },
   play: async ({ canvasElement }) => {
+    const { click, keyboard } = userEvent.setup();
     const canvas = within(canvasElement);
     const input = await canvas.findByTestId("autocomplete-textfield");
 
-    userEvent.click(input);
-    userEvent.keyboard("/some_logs_");
+    await click(input);
+    await keyboard("/some_logs_");
 
     const options = await waitFor(() => screen.queryAllByTestId("autocomplete-item"));
-    userEvent.click(options[1]!);
+    await click(options[1]!);
   },
 };
 
@@ -118,14 +121,15 @@ export const AutocompleteScalarFromFullTopic: MsgPathInputStoryObj = {
   render: MessagePathInputStory,
   args: { path: "", validTypes: ["int32"] },
   play: async ({ canvasElement }) => {
+    const { click, keyboard } = userEvent.setup();
     const canvas = within(canvasElement);
     const input = await canvas.findByTestId("autocomplete-textfield");
 
-    userEvent.click(input);
-    userEvent.keyboard("/some_logs_topic");
+    await click(input);
+    await keyboard("/some_logs_topic");
 
     const options = await waitFor(() => screen.queryAllByTestId("autocomplete-item"));
-    userEvent.click(options[0]!);
+    await click(options[0]!);
   },
 };
 

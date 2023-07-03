@@ -101,12 +101,13 @@ export const ChangingLanguage: StoryObj = {
   },
 
   play: async () => {
+    const { click, keyboard } = userEvent.setup();
     const input = await screen.findByText("English", { exact: false });
-    userEvent.click(input);
+    await click(input);
 
-    userEvent.keyboard("中文");
+    await keyboard("中文");
     const item = await screen.findByText("中文", { exact: false });
-    userEvent.click(item);
+    await click(item);
   },
 };
 

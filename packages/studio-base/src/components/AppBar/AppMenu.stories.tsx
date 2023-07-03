@@ -39,7 +39,7 @@ export default {
       return;
     }
     const canvas = within(canvasElement);
-    userEvent.hover(await canvas.findByTestId(args.id));
+    await userEvent.hover(await canvas.findByTestId(args.id));
   },
 } as Meta<{ id?: string }>;
 
