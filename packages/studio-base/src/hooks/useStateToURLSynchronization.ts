@@ -11,10 +11,6 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import { AppURLState, updateAppURLState } from "@foxglove/studio-base/util/appURLState";
@@ -23,7 +19,6 @@ const selectCanSeek = (ctx: MessagePipelineContext) =>
   ctx.playerState.capabilities.includes(PlayerCapabilities.playbackControl);
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 const selectUrlState = (ctx: MessagePipelineContext) => ctx.playerState.urlState;
-const selectLayoutId = (layoutState: LayoutState) => layoutState.selectedLayout?.id;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 
 function updateUrl(newState: AppURLState) {
@@ -32,14 +27,13 @@ function updateUrl(newState: AppURLState) {
 }
 
 /**
- * Syncs our current player, layout and other state with the URL in the address bar.
+ * Syncs our current player state and time with the URL in the address bar.
  */
 export function useStateToURLSynchronization(): void {
   const playerUrlState = useMessagePipeline(selectUrlState);
   const stablePlayerUrlState = useDeepMemo(playerUrlState);
   const canSeek = useMessagePipeline(selectCanSeek);
   const currentTime = useMessagePipeline(selectCurrentTime);
-  const layoutId = useCurrentLayoutSelector(selectLayoutId);
   const [debouncedCurrentTime] = useDebounce(currentTime, 500, { maxWait: 500 });
   const selectedEventId = useEvents(selectSelectedEventId);
 
@@ -49,15 +43,6 @@ export function useStateToURLSynchronization(): void {
       time: canSeek ? debouncedCurrentTime : undefined,
     });
   }, [canSeek, debouncedCurrentTime]);
-
-  // Sync layoutId with the url.
-  useEffect(() => {
-    if (layoutId == undefined) {
-      return;
-    }
-
-    updateUrl({ layoutId });
-  }, [layoutId]);
 
   // Sync player state with the url.
   useEffect(() => {

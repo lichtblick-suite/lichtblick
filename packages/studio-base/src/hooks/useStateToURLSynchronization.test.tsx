@@ -16,7 +16,6 @@ import { renderHook } from "@testing-library/react-hooks";
 import { ReactNode } from "react";
 
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useStateToURLSynchronization } from "@foxglove/studio-base/hooks/useStateToURLSynchronization";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 
@@ -27,7 +26,6 @@ describe("useStateToURLSynchronization", () => {
   it("updates the url with a stable source & player state", () => {
     const spy = jest.spyOn(window.history, "replaceState");
 
-    (useCurrentLayoutSelector as jest.Mock).mockReturnValue(undefined);
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({
         playerState: {
@@ -74,12 +72,11 @@ describe("useStateToURLSynchronization", () => {
         },
       }),
     );
-    (useCurrentLayoutSelector as jest.Mock).mockReturnValue("test-layout");
     rerender();
     expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&layoutId=test-layout&time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&time=1970-01-01T00%3A00%3A01.000000001Z",
     );
   });
 });
