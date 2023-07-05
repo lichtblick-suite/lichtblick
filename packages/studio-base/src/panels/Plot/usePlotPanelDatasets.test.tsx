@@ -10,7 +10,7 @@ import { MessageEvent, PlayerStateActiveData, Topic } from "@foxglove/studio-bas
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-import { usePlotPanelMessageData } from "./usePlotPanelMessageData";
+import { usePlotPanelDatasets } from "./usePlotPanelDatasets";
 
 const topics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
 const datatypes: RosDatatypes = new Map(
@@ -41,7 +41,7 @@ const fixtureMessages2: MessageEvent[] = [
   },
 ];
 
-describe("usePlotPanelMessageData", () => {
+describe("usePlotPanelDatasets", () => {
   it("doesn't accumulate frames when showing single messages", () => {
     const testActiveData: PlayerStateActiveData = {
       messages: [],
@@ -58,24 +58,30 @@ describe("usePlotPanelMessageData", () => {
     };
 
     const initialProps = {
+      activeData: testActiveData,
       allPaths: ["/topic.value"],
       followingView: undefined,
       showSingleCurrentMessage: true,
-      activeData: testActiveData,
-    };
+      startTime: { sec: 0, nsec: 0 },
+      xAxisVal: "timestamp",
+      yAxisPaths: [{ value: "/topic.value", enabled: true, timestampMethod: "receiveTime" }],
+    } as const;
 
-    const { result, rerender } = renderHook(usePlotPanelMessageData, {
-      initialProps,
-      wrapper: ({ children, activeData }) => {
-        return (
-          <MockCurrentLayoutProvider>
-            <MockMessagePipelineProvider topics={topics} activeData={activeData}>
-              {children}
-            </MockMessagePipelineProvider>
-          </MockCurrentLayoutProvider>
-        );
+    const { result, rerender } = renderHook(
+      ({ activeData: _, ...props }) => usePlotPanelDatasets(props),
+      {
+        initialProps,
+        wrapper: ({ children, activeData }) => {
+          return (
+            <MockCurrentLayoutProvider>
+              <MockMessagePipelineProvider topics={topics} activeData={activeData}>
+                {children}
+              </MockMessagePipelineProvider>
+            </MockCurrentLayoutProvider>
+          );
+        },
       },
-    });
+    );
 
     rerender({
       ...initialProps,
@@ -98,9 +104,14 @@ describe("usePlotPanelMessageData", () => {
     });
 
     expect(result.current).toEqual({
-      "/topic.value": [
-        [{ headerStamp: undefined, queriedData: [], receiveTime: { nsec: 0, sec: 1 } }],
+      bounds: expect.any(Object),
+      datasets: [
+        expect.objectContaining({
+          data: [],
+          label: "/topic.value",
+        }),
       ],
+      pathsWithMismatchedDataLengths: [],
     });
   });
 });

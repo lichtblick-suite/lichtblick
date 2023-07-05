@@ -43,6 +43,7 @@ import {
   useSetHoverValue,
   useTimelineInteractionState,
 } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
+import { Bounds } from "@foxglove/studio-base/types/Bounds";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Downsampler } from "./Downsampler";
@@ -97,6 +98,7 @@ export type Props = {
   height: number;
   zoom: boolean;
   data: ChartComponentProps["data"];
+  dataBounds?: Bounds;
   tooltips?: Map<string, TimeBasedChartTooltipData>;
   xAxes?: ScaleOptions<"linear">;
   yAxes: ScaleOptions<"linear">;
@@ -123,18 +125,19 @@ export type Props = {
 export default function TimeBasedChart(props: Props): JSX.Element {
   const requestID = useRef<number>(0);
   const {
+    currentTime,
+    data,
+    dataBounds,
     datasetId,
+    defaultView,
+    height,
+    isSynced = false,
+    showXAxisLabels,
     type,
     width,
-    height,
-    data,
-    isSynced = false,
-    yAxes,
     xAxes,
-    defaultView,
-    currentTime,
     xAxisIsPlaybackTime,
-    showXAxisLabels,
+    yAxes,
   } = props;
 
   const { labels, datasets } = data;
@@ -204,9 +207,14 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   // some callbacks don't need to re-create when the current scales change, so we keep a ref
   const currentScalesRef = useRef<RpcScales | undefined>(undefined);
 
-  // calculates the minX/maxX for all our datasets
-  // we do this on the unfiltered datasets because we need the bounds to properly filter adjacent points
+  // Calculates the minX/maxX for all our datasets. We do this on the unfiltered datasets
+  // because we need the bounds to properly filter adjacent points. Defers to precomputed
+  // dataBounds, if available.
   const datasetBounds = useMemo(() => {
+    if (dataBounds) {
+      return dataBounds;
+    }
+
     let xMin: number | undefined;
     let xMax: number | undefined;
     let yMin: number | undefined;
@@ -230,7 +238,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     }
 
     return { x: { min: xMin, max: xMax }, y: { min: yMin, max: yMax } };
-  }, [datasets]);
+  }, [dataBounds, datasets]);
 
   const onResetZoom = () => {
     setHasUserPannedOrZoomed(false);
