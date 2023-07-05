@@ -15,19 +15,30 @@ describe("getAccuracy", () => {
     altitude: 0,
   };
 
-  it("handles 'diagonal' covariance type", () => {
-    const msg: NavSatFixMsg = {
-      ...position,
-      position_covariance: [25, 0, 0, 0, 100, 0, 0, 0, 10000],
-      position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_DIAGONAL_KNOWN,
-    };
-    const {
-      radii: [r1, r2],
-      tilt,
-    } = getAccuracy(msg)!;
-    expect(r1).toBeCloseTo(5);
-    expect(r2).toBeCloseTo(10);
-    expect(tilt).toBeCloseTo(0);
+  describe("'diagaonal' covariance type", () => {
+    it("returns an ellipsoid", () => {
+      const msg: NavSatFixMsg = {
+        ...position,
+        position_covariance: [25, 0, 0, 0, 100, 0, 0, 0, 10000],
+        position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_DIAGONAL_KNOWN,
+      };
+      const {
+        radii: [r1, r2],
+        tilt,
+      } = getAccuracy(msg)!;
+      expect(r1).toBeCloseTo(5);
+      expect(r2).toBeCloseTo(10);
+      expect(tilt).toBeCloseTo(0);
+    });
+
+    it("returns undefined for invalid input", () => {
+      const msg: NavSatFixMsg = {
+        ...position,
+        position_covariance: [NaN, 0, 0, 0, NaN, 0, 0, 0, NaN],
+        position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_DIAGONAL_KNOWN,
+      };
+      expect(getAccuracy(msg)).toBeUndefined();
+    });
   });
 
   describe("'known' covariance type", () => {

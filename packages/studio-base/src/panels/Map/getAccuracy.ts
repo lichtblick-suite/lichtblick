@@ -35,6 +35,9 @@ export function getAccuracy(
       // Tilt is degrees from west
       const eastVariance = covariance[0];
       const northVariance = covariance[4];
+      if (!isFinite(eastVariance) || !isFinite(northVariance)) {
+        return undefined;
+      }
       return { radii: [Math.sqrt(eastVariance), Math.sqrt(northVariance)], tilt: 0 };
     }
     case NavSatFixPositionCovarianceType.COVARIANCE_TYPE_APPROXIMATED:
@@ -76,7 +79,7 @@ export function getAccuracy(
         const primaryRadius = Math.sqrt(eigenvalues[1]);
         const secondaryRadius = Math.sqrt(eigenvalues[0]);
 
-        if (isNaN(tilt) || isNaN(primaryRadius) || isNaN(secondaryRadius)) {
+        if (!isFinite(tilt) || !isFinite(primaryRadius) || !isFinite(secondaryRadius)) {
           return undefined;
         }
 
