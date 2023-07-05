@@ -7,6 +7,37 @@ updates:
     open-pull-requests-limit: 10
     labels: [] # disable default labels
 
+    # Define groups of dependencies to be updated together
+    # https://github.blog/changelog/2023-06-30-grouped-version-updates-for-dependabot-public-beta/
+    groups:
+      storybook:
+        patterns:
+          - "storybook"
+          - "@storybook/*"
+      eslint:
+        patterns:
+          - "@typescript-eslint/*"
+      emotion:
+        patterns:
+          - "@emotion/*"
+      electron:
+        patterns:
+          - "electron"
+          - "electron-*"
+          - "app-builder-lib"
+          - "builder-util"
+      jest:
+        patterns:
+          - "jest"
+          - "jest-*"
+          - "babel-jest"
+          - "@types/jest"
+      webpack:
+        patterns:
+          - "webpack"
+          - "webpack-cli"
+          - "webpack-dev-server"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
