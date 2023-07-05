@@ -30,6 +30,11 @@ export default function MaybeCollapsedValue({ itemLabel }: Props): JSX.Element {
     ? itemLabel
     : itemLabel.slice(0, COLLAPSE_TEXT_OVER_LENGTH);
 
+  // Tooltip is expensive to render. Skip it if we're not truncating.
+  if (!lengthOverLimit) {
+    return <span>{itemLabel}</span>;
+  }
+
   return (
     <Tooltip
       title={!showingEntireLabel ? "Text was truncated, click to see all" : ""}

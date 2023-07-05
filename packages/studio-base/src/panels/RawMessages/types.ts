@@ -13,3 +13,8 @@ export type RawMessagesPanelConfig = {
   showFullMessageForDiff: boolean;
   topicPath: string;
 };
+
+export const Constants = {
+  CUSTOM_METHOD: "custom",
+  PREV_MSG_METHOD: "previous message",
+} as const;

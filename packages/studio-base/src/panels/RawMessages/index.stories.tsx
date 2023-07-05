@@ -13,8 +13,7 @@
 
 import { StoryObj } from "@storybook/react";
 
-import RawMessages, { PREV_MSG_METHOD } from "@foxglove/studio-base/panels/RawMessages";
-import { RawMessagesPanelConfig } from "@foxglove/studio-base/panels/RawMessages/types";
+import RawMessages from "@foxglove/studio-base/panels/RawMessages";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import {
@@ -27,6 +26,7 @@ import {
   topicsWithIdsToDiffFixture,
   withMissingData,
 } from "./fixture";
+import { Constants, RawMessagesPanelConfig } from "./types";
 
 const noDiffConfig = {
   diffMethod: "custom",
@@ -313,7 +313,7 @@ export const DiffConsecutiveMessages: StoryObj = {
       <RawMessages
         overrideConfig={{
           topicPath: "/foo",
-          diffMethod: PREV_MSG_METHOD,
+          diffMethod: Constants.PREV_MSG_METHOD,
           diffTopicPath: "",
           diffEnabled: true,
           showFullMessageForDiff: true,
@@ -330,7 +330,7 @@ export const DiffConsecutiveMessagesWithFilter: StoryObj = {
       <RawMessages
         overrideConfig={{
           topicPath: "/foo{type==2}",
-          diffMethod: PREV_MSG_METHOD,
+          diffMethod: Constants.PREV_MSG_METHOD,
           diffTopicPath: "",
           diffEnabled: true,
           showFullMessageForDiff: true,
@@ -347,7 +347,7 @@ export const DiffConsecutiveMessagesWithBigint: StoryObj = {
       <RawMessages
         overrideConfig={{
           topicPath: "/baz/bigint",
-          diffMethod: PREV_MSG_METHOD,
+          diffMethod: Constants.PREV_MSG_METHOD,
           diffTopicPath: "",
           diffEnabled: true,
           showFullMessageForDiff: true,
@@ -364,7 +364,7 @@ export const DisplayCorrectMessageWhenDiffIsDisabledEvenWithDiffMethodTopicSet: 
       <RawMessages
         overrideConfig={{
           topicPath: "/foo",
-          diffMethod: PREV_MSG_METHOD,
+          diffMethod: Constants.PREV_MSG_METHOD,
           diffTopicPath: "/another/baz/enum_advanced",
           diffEnabled: false,
           showFullMessageForDiff: true,

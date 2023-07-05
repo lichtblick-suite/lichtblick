@@ -13,6 +13,7 @@
 
 import { Link, Typography } from "@mui/material";
 import { useCallback } from "react";
+import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
@@ -57,13 +58,23 @@ export default function Metadata({
   diffMessage,
 }: Props): JSX.Element {
   const { classes } = useStyles();
+
+  // Access these by ref so that our callbacks aren't invalidated and CopyButton
+  // memoization is stable.
+  const latestData = useLatest(data);
+  const latestDiffData = useLatest(diffData);
+
   const docsLink = datatype ? getMessageDocumentationLink(datatype) : undefined;
-  const copyData = useCallback(() => JSON.stringify(data, copyMessageReplacer, 2) ?? "", [data]);
+  const copyData = useCallback(
+    () => JSON.stringify(latestData.current, copyMessageReplacer, 2) ?? "",
+    [latestData],
+  );
   const copyDiffData = useCallback(
-    () => JSON.stringify(diffData, copyMessageReplacer, 2) ?? "",
-    [diffData],
+    () => JSON.stringify(latestDiffData.current, copyMessageReplacer, 2) ?? "",
+    [latestDiffData],
   );
   const copyDiff = useCallback(() => JSON.stringify(diff, copyMessageReplacer, 2) ?? "", [diff]);
+
   return (
     <Stack alignItems="flex-start" paddingInline={0.25} paddingBlockStart={0.75}>
       <Stack direction="row" alignItems="center" gap={0.5}>

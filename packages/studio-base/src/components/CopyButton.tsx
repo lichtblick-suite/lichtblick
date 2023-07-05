@@ -17,7 +17,7 @@ import { useCallback, useState, PropsWithChildren } from "react";
 
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
-export default function CopyButton(
+function CopyButtonComponent(
   props: PropsWithChildren<{
     getText: () => string;
     size?: "small" | "medium" | "large";
@@ -84,3 +84,5 @@ export default function CopyButton(
     </Button>
   );
 }
+
+export default React.memo(CopyButtonComponent);
