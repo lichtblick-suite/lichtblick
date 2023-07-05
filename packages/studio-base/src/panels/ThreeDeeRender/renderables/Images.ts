@@ -11,13 +11,8 @@ import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
-import {
-  CREATE_BITMAP_ERR_KEY,
-  IMAGE_RENDERABLE_DEFAULT_SETTINGS,
-  ImageRenderable,
-} from "./Images/ImageRenderable";
+import { IMAGE_RENDERABLE_DEFAULT_SETTINGS, ImageRenderable } from "./Images/ImageRenderable";
 import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
-import { decodeCompressedImageToBitmap } from "./Images/decodeImage";
 import {
   normalizeCompressedImage,
   normalizeRawImage,
@@ -280,38 +275,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
 
     const renderable = this.#getImageRenderable(imageTopic, receiveTime, image, frameId);
-    renderable.setImage(image);
-
-    const isCompressedImage = "format" in image;
-
-    if (isCompressedImage) {
-      decodeCompressedImageToBitmap(image, DEFAULT_BITMAP_WIDTH)
-        .then((maybeBitmap) => {
-          const prevRenderable = renderable;
-          const currentRenderable = this.renderables.get(imageTopic);
-          if (currentRenderable !== prevRenderable) {
-            return;
-          }
-          this.renderer.settings.errors.removeFromTopic(imageTopic, CREATE_BITMAP_ERR_KEY);
-          if (maybeBitmap instanceof ImageBitmap) {
-            renderable.setBitmap(maybeBitmap);
-          }
-          renderable.update();
-          this.renderer.queueAnimationFrame();
-        })
-        .catch((err) => {
-          const prevRenderable = renderable;
-          const currentRenderable = this.renderables.get(imageTopic);
-          if (currentRenderable !== prevRenderable) {
-            return;
-          }
-          this.renderer.settings.errors.addToTopic(
-            imageTopic,
-            CREATE_BITMAP_ERR_KEY,
-            `Error creating bitmap: ${err.message}`,
-          );
-        });
-    }
+    renderable.setImage(image, DEFAULT_BITMAP_WIDTH);
 
     renderable.userData.receiveTime = receiveTime;
     // Auto-select settings.cameraInfoTopic if it's not already set
@@ -364,11 +328,6 @@ export class Images extends SceneExtension<ImageRenderable> {
       );
     } else {
       this.#recomputeCameraModel(renderable, cameraInfo);
-    }
-
-    // Compressed images handle their own update after loading the bitmap
-    if (!isCompressedImage) {
-      renderable.update();
     }
   };
 

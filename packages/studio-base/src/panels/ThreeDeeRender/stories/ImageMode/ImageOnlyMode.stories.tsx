@@ -293,11 +293,8 @@ export const ImageOnlyModeOn: StoryObj<React.ComponentProps<typeof ImageWith3D>>
   args: { imageTopic: "camera/img", calibrationTopic: undefined },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const icons = await canvas.findAllByTestId("ErrorIcon");
-    if (icons.length !== 1) {
-      throw new Error("Expected 1 error icon");
-    }
-    await userEvent.hover(icons[0]!);
+    const icon = await canvas.findByTestId("ErrorIcon");
+    await userEvent.hover(icon);
   },
 };
 
