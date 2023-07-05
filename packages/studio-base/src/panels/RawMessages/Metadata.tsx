@@ -65,7 +65,7 @@ export default function Metadata({
   );
   const copyDiff = useCallback(() => JSON.stringify(diff, copyMessageReplacer, 2) ?? "", [diff]);
   return (
-    <Stack alignItems="flex-start" padding={0.25}>
+    <Stack alignItems="flex-start" paddingInline={0.25} paddingBlockStart={0.75}>
       <Stack direction="row" alignItems="center" gap={0.5}>
         <Typography variant="caption" lineHeight={1.2} color="text.secondary">
           {diffMessage ? (
