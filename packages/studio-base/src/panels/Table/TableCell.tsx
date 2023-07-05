@@ -13,9 +13,11 @@
 
 import MinusIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import { IconButton } from "@mui/material";
+import { Row } from "@tanstack/react-table";
 import { PropsWithChildren } from "react";
-import { Row } from "react-table";
 import { makeStyles } from "tss-react/mui";
+
+import { CellValue } from "@foxglove/studio-base/panels/Table/types";
 
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 
@@ -35,7 +37,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 type TableCellProps = {
-  row: Row;
+  row: Row<CellValue>;
   accessorPath: string;
 };
 
@@ -48,7 +50,7 @@ export default function TableCell({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const toggleIsExpanded = React.useCallback(() => setIsExpanded((expanded) => !expanded), []);
 
-  if (row.isExpanded || isExpanded) {
+  if (row.getIsExpanded() || isExpanded) {
     return (
       <div>
         {isExpanded && (

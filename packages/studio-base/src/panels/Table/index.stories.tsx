@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { fireEvent, within } from "@storybook/testing-library";
+import { fireEvent, userEvent, within } from "@storybook/testing-library";
 
 import Table from "@foxglove/studio-base/panels/Table";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -186,8 +186,7 @@ export const Sorting: StoryObj = {
     const canvas = within(canvasElement);
 
     const [targetCol] = await canvas.findAllByTestId("column-header-val");
-    fireEvent.click(targetCol!);
-    fireEvent.click(targetCol!);
+    await userEvent.click(targetCol!);
   },
 };
 

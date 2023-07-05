@@ -2953,6 +2953,7 @@ __metadata:
     "@storybook/react": 7.0.24
     "@storybook/testing-library": 0.2.0
     "@svgr/webpack": 8.0.1
+    "@tanstack/react-table": 8.9.3
     "@testing-library/react": 12.1.2
     "@testing-library/react-hooks": 8.0.1
     "@types/base16": ^1.0.2
@@ -2970,7 +2971,6 @@ __metadata:
     "@types/react": 17.0.53
     "@types/react-dom": 17.0.18
     "@types/react-hover-observer": "workspace:*"
-    "@types/react-table": 7.7.14
     "@types/react-transition-group": ^4.4.6
     "@types/react-virtualized": 9.21.22
     "@types/react-window": ^1.8.5
@@ -3048,7 +3048,6 @@ __metadata:
     react-mosaic-component: 6.0.1
     react-refresh-typescript: 2.0.9
     react-resize-detector: 9.1.0
-    react-table: 7.8.0
     react-transition-group: 4.4.5
     react-use: 17.4.0
     react-virtualized: 9.22.5
@@ -5585,6 +5584,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:8.9.3":
+  version: 8.9.3
+  resolution: "@tanstack/react-table@npm:8.9.3"
+  dependencies:
+    "@tanstack/table-core": 8.9.3
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: a71fbbc608bb11b79ecd2b1a838fad2fc4140f9eb1a25bd44b6b1b4c6acd52741b5745e3e022390c642c284d0d528249360e322c0dbc3d34fea031611c207a7d
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.9.3":
+  version: 8.9.3
+  resolution: "@tanstack/table-core@npm:8.9.3"
+  checksum: 52c7e57daaa3160450fb0bde702ec0b8aab159e2b19efd1012e03b3e167acc52839f5b39578cc8bf96e91346719f400d0435a5191384c168d9477da82f276c38
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^8.0.0":
   version: 8.20.0
   resolution: "@testing-library/dom@npm:8.20.0"
@@ -6407,15 +6425,6 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: bceec20a57c91fa9b6b63898a228f6074b8d62dce29b7069a7e986bc7f8cd910ffd197808b559b0a0dd53221e6058db13622a1d1f1faa708557e8c41af1326e4
-  languageName: node
-  linkType: hard
-
-"@types/react-table@npm:7.7.14":
-  version: 7.7.14
-  resolution: "@types/react-table@npm:7.7.14"
-  dependencies:
-    "@types/react": "*"
-  checksum: 238047beca9abecc4b3e1e377b823b492b1a00d011b8456012bbcbd2682d5a7e0c0b1cca6384ccc41e724156e991d35e5725a5a3c4b01ff7bbaf095643569da9
   languageName: node
   linkType: hard
 
@@ -17970,15 +17979,6 @@ __metadata:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 05b263e141fd428eea433e399f88c3e1a379b4a2293958f59b5a5c75dd86c621ce60583724257cc3dc1f5c120a664666ff3fa53d41e6c283687676dc55afa02b
-  languageName: node
-  linkType: hard
-
-"react-table@npm:7.8.0":
-  version: 7.8.0
-  resolution: "react-table@npm:7.8.0"
-  peerDependencies:
-    react: ^16.8.3 || ^17.0.0-0 || ^18.0.0
-  checksum: 44ca0fb848c6869cd793cede8dc33072b38ebb8f8d2833565afe7cf3eac5d1fa455ac5fb9d06838b16fab0523d5d03e3e82f7645032f71245096e67b892313b9
   languageName: node
   linkType: hard
 
