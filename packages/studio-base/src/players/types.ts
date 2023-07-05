@@ -58,7 +58,7 @@ export interface Player {
   // Basic playback controls. Available if `capabilities` contains PlayerCapabilities.playbackControl.
   startPlayback?(): void;
   pausePlayback?(): void;
-  seekPlayback?(time: Time, backfillDuration?: Time): void;
+  seekPlayback?(time: Time): void;
   playUntil?(time: Time): void;
   // Seek to a particular time. Might trigger backfilling.
   // If the Player supports non-real-time speeds (i.e. PlayerState#capabilities contains

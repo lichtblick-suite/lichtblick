@@ -114,8 +114,8 @@ export class TopicAliasingPlayer implements Player {
     this.#player.pausePlayback?.();
   }
 
-  public seekPlayback?(time: Time, backfillDuration?: Time | undefined): void {
-    this.#player.seekPlayback?.(time, backfillDuration);
+  public seekPlayback?(time: Time): void {
+    this.#player.seekPlayback?.(time);
   }
 
   public playUntil?(time: Time): void {

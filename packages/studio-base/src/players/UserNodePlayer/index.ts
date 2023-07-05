@@ -1120,7 +1120,7 @@ export default class UserNodePlayer implements Player {
     this.#player.setPlaybackSpeed?.(speed);
   }
 
-  public seekPlayback(time: Time, backfillDuration?: Time): void {
-    this.#player.seekPlayback?.(time, backfillDuration);
+  public seekPlayback(time: Time): void {
+    this.#player.seekPlayback?.(time);
   }
 }

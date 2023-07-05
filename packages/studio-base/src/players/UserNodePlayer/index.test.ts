@@ -224,7 +224,7 @@ describe("UserNodePlayer", () => {
       });
       expect(fakePlayer.seekPlayback).not.toHaveBeenCalled();
       userNodePlayer.seekPlayback({ sec: 2, nsec: 2 });
-      expect(fakePlayer.seekPlayback).toHaveBeenCalledWith({ sec: 2, nsec: 2 }, undefined);
+      expect(fakePlayer.seekPlayback).toHaveBeenCalledWith({ sec: 2, nsec: 2 });
     });
 
     it("delegates publishing to underlying player", () => {
