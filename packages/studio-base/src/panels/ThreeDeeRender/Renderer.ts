@@ -1022,8 +1022,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   public setFollowFrameId(frameId: string | undefined): void {
+    if (this.followFrameId !== frameId) {
+      log.debug(`Setting followFrameId to ${frameId}`);
+    }
     this.followFrameId = frameId;
-    log.debug(`Setting followFrameId to ${frameId}`);
   }
 
   #frameHandler = (currentTime: bigint): void => {
