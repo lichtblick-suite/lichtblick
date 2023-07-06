@@ -19,6 +19,7 @@ import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@foxglove/den/async";
+import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
@@ -229,40 +230,21 @@ export default class UserNodePlayer implements Player {
     result: (MessageBlock | undefined)[];
   } = { result: [] };
 
-  // Basic memoization by remembering the last values passed to getMessages
-  #lastGetMessagesInput: {
-    parsedMessages: readonly MessageEvent[];
-    globalVariables: GlobalVariables;
-    nodeRegistrations: readonly NodeRegistration[];
-  } = { parsedMessages: [], globalVariables: {}, nodeRegistrations: [] };
-  #lastGetMessagesResult: { parsedMessages: readonly MessageEvent[] } = {
-    parsedMessages: [],
-  };
-
   // Processes input messages through nodes to create messages on output topics
-  // Memoized to prevent reprocessing on same input
   async #getMessages(
-    parsedMessages: readonly MessageEvent[],
+    inputMessages: readonly MessageEvent[],
     globalVariables: GlobalVariables,
     nodeRegistrations: readonly NodeRegistration[],
-  ): Promise<{
-    parsedMessages: readonly MessageEvent[];
-  }> {
-    // prevents from memoizing results for empty requests
-    if (parsedMessages.length === 0) {
-      return { parsedMessages };
+  ): Promise<readonly MessageEvent[]> {
+    // fast-track if there's no input and return empty output
+    if (inputMessages.length === 0) {
+      return [];
     }
-    if (
-      shallowequal(this.#lastGetMessagesInput, {
-        parsedMessages,
-        globalVariables,
-        nodeRegistrations,
-      })
-    ) {
-      return this.#lastGetMessagesResult;
-    }
-    const parsedMessagesPromises: Promise<MessageEvent | undefined>[] = [];
-    for (const message of parsedMessages) {
+
+    const identity = <T>(item: T) => item;
+
+    const outputMessages: MessageEvent[] = [];
+    for (const message of inputMessages) {
       const messagePromises = [];
       for (const nodeRegistration of nodeRegistrations) {
         if (
@@ -271,24 +253,13 @@ export default class UserNodePlayer implements Player {
         ) {
           const messagePromise = nodeRegistration.processMessage(message, globalVariables);
           messagePromises.push(messagePromise);
-          parsedMessagesPromises.push(messagePromise);
         }
       }
-      await Promise.all(messagePromises);
+      const output = await Promise.all(messagePromises);
+      outputMessages.push(...filterMap(output, identity));
     }
 
-    const nodeParsedMessages = (await Promise.all(parsedMessagesPromises)).filter(
-      (value): value is MessageEvent => value != undefined,
-    );
-
-    const result = {
-      parsedMessages: parsedMessages
-        .concat(nodeParsedMessages)
-        .sort((a, b) => compare(a.receiveTime, b.receiveTime)),
-    };
-    this.#lastGetMessagesInput = { parsedMessages, globalVariables, nodeRegistrations };
-    this.#lastGetMessagesResult = result;
-    return result;
+    return outputMessages;
   }
 
   async #getBlocks(
@@ -377,9 +348,9 @@ export default class UserNodePlayer implements Player {
     this.#globalVariablesChanged = true;
   }
 
-  // Called when userNode state is updated.
+  // Called when userNode state is updated (i.e. scripts are saved)
   public async setUserNodes(userNodes: UserNodes): Promise<void> {
-    await this.#protectedState.runExclusive(async (state) => {
+    const newPlayerState = await this.#protectedState.runExclusive(async (state) => {
       for (const nodeId of Object.keys(userNodes)) {
         const prevNode = state.userNodes[nodeId];
         const newNode = userNodes[nodeId];
@@ -397,7 +368,35 @@ export default class UserNodePlayer implements Player {
       // This code causes us to reset workers twice because the seeking resets the workers too
       await this.#resetWorkersUnlocked(state);
       this.#setSubscriptionsUnlocked(this.#subscriptions, state);
+
+      const playerState = this.#playerState;
+      const lastActive = state.lastPlayerStateActiveData;
+      // If we have previous player state and are paused, then we re-emit the last active data so
+      // any panels that want our output topic get the updated message.
+      //
+      // Note: Until we learn otherwise, we assume that if a player is playing, it will emit new
+      // player state that will output new messages so we don't emit here while playing.
+      if (playerState && lastActive?.isPlaying === false) {
+        return {
+          ...playerState,
+          activeData: {
+            ...lastActive,
+            // We want to avoid re-emitting upstream data source messages into panels to maintain
+            // the invariant that the player emits a data-source message into "currentFrame" only once.
+            //
+            // Using an empty messages array will make user node player only emit the script output
+            // messages as a result of the updated script.
+            messages: [],
+          },
+        };
+      }
+
+      return undefined;
     });
+
+    if (newPlayerState) {
+      await this.#onPlayerState(newPlayerState);
+    }
   }
 
   // Defines the inputs/outputs and worker interface of a user node.
@@ -916,9 +915,7 @@ export default class UserNodePlayer implements Player {
         // remove topics that already have messages in state, because we won't need to take their last message to process
         // this also removes possible duplicate messages to be parsed
         for (const message of messages) {
-          if (inputTopicsForRecompute.has(message.topic)) {
-            inputTopicsForRecompute.delete(message.topic);
-          }
+          inputTopicsForRecompute.delete(message.topic);
         }
 
         const messagesForRecompute: MessageEvent[] = [];
@@ -937,13 +934,26 @@ export default class UserNodePlayer implements Player {
 
         const messagesRecomputed = messagesForRecompute.length > 0;
 
-        const messagesToBeParsed =
-          messagesForRecompute.length > 0 ? messages.concat(messagesForRecompute) : messages;
-        const { parsedMessages } = await this.#getMessages(
-          messagesToBeParsed,
+        // These are new messages generated from input messages
+        const computed = await this.#getMessages(
+          messages,
           globalVariables,
           state.nodeRegistrations,
         );
+
+        // These are messages generated from previously saved messages on input topics
+        const recomputed = await this.#getMessages(
+          messagesForRecompute,
+          globalVariables,
+          state.nodeRegistrations,
+        );
+
+        // The current frame messages are the input messages + recomputed + computed sorted by
+        // receive time
+        const currentFrameMessages = messages
+          .concat(recomputed)
+          .concat(computed)
+          .sort((a, b) => compare(a.receiveTime, b.receiveTime));
 
         const playerProgress = {
           ...playerState.progress,
@@ -967,7 +977,7 @@ export default class UserNodePlayer implements Player {
           progress: playerProgress,
           activeData: {
             ...activeData,
-            messages: parsedMessages,
+            messages: currentFrameMessages,
             topics: this.#getTopics(topics, this.#memoizedNodeTopics),
             datatypes: allDatatypes,
             messagesRecomputed,
