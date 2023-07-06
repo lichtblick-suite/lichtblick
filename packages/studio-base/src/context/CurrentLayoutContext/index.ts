@@ -72,8 +72,7 @@ export interface ICurrentLayout {
      * asynchronously and don't want to update every time the state changes.
      */
     getCurrentLayoutState: () => LayoutState;
-
-    setSelectedLayoutId: (id: LayoutID | undefined) => void;
+    setCurrentLayoutState: (newState: LayoutState) => void;
 
     savePanelConfigs: (payload: SaveConfigsPayload) => void;
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;

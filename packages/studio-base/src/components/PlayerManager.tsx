@@ -28,14 +28,12 @@ import { MessagePipelineProvider } from "@foxglove/studio-base/components/Messag
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   LayoutState,
-  useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   ExtensionCatalog,
   useExtensionCatalog,
 } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { useNativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
 import PlayerSelectionContext, {
   DataSourceArgs,
@@ -87,9 +85,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const analytics = useAnalytics();
   const metricsCollector = useMemo(() => new AnalyticsMetricsCollector(analytics), [analytics]);
-
-  const layoutStorage = useLayoutManager();
-  const { setSelectedLayoutId } = useCurrentLayoutActions();
 
   const [basePlayer, setBasePlayer] = useState<Player | undefined>();
 
@@ -155,6 +150,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const { enqueueSnackbar } = useSnackbar();
 
+  const [selectedSource, setSelectedSource] = useState<IDataSourceFactory | undefined>();
+
   const selectSource = useCallback(
     async (sourceId: string, args?: DataSourceArgs) => {
       log.debug(`Select Source: ${sourceId}`);
@@ -172,6 +169,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
       metricsCollector.setProperty("player", sourceId);
 
+      setSelectedSource(foundSource);
+
       // Sample sources don't need args or prompts to initialize
       if (foundSource.type === "sample") {
         const newPlayer = foundSource.initialize({
@@ -179,32 +178,12 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         });
 
         setBasePlayer(newPlayer);
-
-        if (foundSource.sampleLayout) {
-          try {
-            const layouts = await layoutStorage.getLayouts();
-            let sourceLayout = layouts.find((layout) => layout.name === foundSource.displayName);
-            if (sourceLayout == undefined) {
-              sourceLayout = await layoutStorage.saveNewLayout({
-                name: foundSource.displayName,
-                data: foundSource.sampleLayout,
-                permission: "CREATOR_WRITE",
-              });
-            }
-
-            if (isMounted()) {
-              setSelectedLayoutId(sourceLayout.id);
-            }
-          } catch (err) {
-            enqueueSnackbar((err as Error).message, { variant: "error" });
-          }
-        }
-
         return;
       }
 
       if (!args) {
         enqueueSnackbar("Unable to initialize player: no args", { variant: "error" });
+        setSelectedSource(undefined);
         return;
       }
 
@@ -305,16 +284,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         enqueueSnackbar((error as Error).message, { variant: "error" });
       }
     },
-    [
-      playerSources,
-      metricsCollector,
-      enqueueSnackbar,
-      layoutStorage,
-      isMounted,
-      setSelectedLayoutId,
-      addRecent,
-      nativeWindow,
-    ],
+    [playerSources, metricsCollector, enqueueSnackbar, isMounted, addRecent, nativeWindow],
   );
 
   // Select a recent entry by id
@@ -335,6 +305,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const value: PlayerSelection = {
     selectSource,
     selectRecent,
+    selectedSource,
     availableSources: playerSources,
     recentSources,
   };

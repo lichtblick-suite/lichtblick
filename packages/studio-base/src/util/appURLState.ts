@@ -97,18 +97,3 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
 
   return isEmpty(state) ? undefined : state;
 }
-
-/**
- * Tries to parse app url state from the window's current location.
- */
-export function windowAppURLState(): AppURLState | undefined {
-  if (typeof window === "undefined") {
-    return undefined;
-  }
-
-  try {
-    return parseAppURLState(new URL(window.location.href));
-  } catch {
-    return undefined;
-  }
-}

@@ -19,7 +19,6 @@ import {
   AppSetting,
 } from "@foxglove/studio-base";
 
-import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
 import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -37,7 +36,6 @@ export function Root(props: {
       }),
     [],
   );
-  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   const [extensionLoaders] = useState(() => [
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
@@ -65,7 +63,6 @@ export function Root(props: {
         deepLinks={[window.location.href]}
         dataSources={dataSources}
         appConfiguration={appConfiguration}
-        layoutStorage={layoutStorage}
         extensionLoaders={extensionLoaders}
         enableGlobalCss
         extraProviders={props.extraProviders}

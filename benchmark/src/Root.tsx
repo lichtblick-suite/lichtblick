@@ -14,7 +14,7 @@ import {
   TransformPlayer,
   TransformPreloadingPlayer,
 } from "./players";
-import { PredefinedLayoutStorage, MemoryAppConfiguration } from "./services";
+import { MemoryAppConfiguration } from "./services";
 
 export function Root(): JSX.Element {
   const [appConfiguration] = useState(
@@ -30,16 +30,23 @@ export function Root(): JSX.Element {
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new McapLocalBenchmarkDataSourceFactory(),
-      new SyntheticDataSourceFactory("pointcloud", PointcloudPlayer),
-      new SyntheticDataSourceFactory("sinewave", SinewavePlayer),
-      new SyntheticDataSourceFactory("transform", TransformPlayer),
-      new SyntheticDataSourceFactory("transformpreloading", TransformPreloadingPlayer),
+      new SyntheticDataSourceFactory(
+        "pointcloud",
+        PointcloudPlayer,
+        LAYOUTS.pointCloudMultipleThreeDee,
+      ),
+      new SyntheticDataSourceFactory("sinewave", SinewavePlayer, LAYOUTS.sinewave),
+      new SyntheticDataSourceFactory("transform", TransformPlayer, LAYOUTS.multipleThreeDee),
+      new SyntheticDataSourceFactory(
+        "transformpreloading",
+        TransformPreloadingPlayer,
+        LAYOUTS.transformPreloading,
+      ),
     ];
 
     return sources;
   }, []);
 
-  const layoutStorage = useMemo(() => new PredefinedLayoutStorage(LAYOUTS), []);
   const [extensionLoaders] = useState(() => []);
 
   const url = new URL(window.location.href);
@@ -50,7 +57,6 @@ export function Root(): JSX.Element {
       deepLinks={[url.href]}
       dataSources={dataSources}
       appConfiguration={appConfiguration}
-      layoutStorage={layoutStorage}
       extensionLoaders={extensionLoaders}
     />
   );

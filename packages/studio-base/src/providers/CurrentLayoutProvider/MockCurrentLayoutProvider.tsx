@@ -39,7 +39,7 @@ export default function MockCurrentLayoutProvider({
     layoutStateListeners.current.delete(listener);
   }, []);
 
-  const [layoutState, setLayoutStateInternal] = useState({
+  const [layoutState, setLayoutStateInternal] = useState<LayoutState>({
     selectedLayout: {
       id: "mock-layout" as LayoutID,
       data: {
@@ -52,7 +52,7 @@ export default function MockCurrentLayoutProvider({
     },
   });
   const layoutStateRef = useRef(layoutState);
-  const setLayoutState = useCallback((newState: typeof layoutState) => {
+  const setLayoutState = useCallback((newState: LayoutState) => {
     setLayoutStateInternal(newState);
 
     // listeners rely on being able to getCurrentLayoutState() inside effects that may run before we re-render
@@ -69,8 +69,11 @@ export default function MockCurrentLayoutProvider({
       setLayoutState({
         ...layoutStateRef.current,
         selectedLayout: {
+          id: "mock-layout" as LayoutID,
           ...layoutStateRef.current.selectedLayout,
-          data: panelsReducer(layoutStateRef.current.selectedLayout.data, action),
+          data: layoutStateRef.current.selectedLayout?.data
+            ? panelsReducer(layoutStateRef.current.selectedLayout.data, action)
+            : undefined,
         },
       });
     },
@@ -79,10 +82,8 @@ export default function MockCurrentLayoutProvider({
 
   const actions: ICurrentLayout["actions"] = useMemo(
     () => ({
-      setSelectedLayoutId: () => {
-        throw new Error("Not implemented in MockCurrentLayoutProvider");
-      },
       getCurrentLayoutState: () => layoutStateRef.current,
+      setCurrentLayoutState: setLayoutState,
 
       savePanelConfigs: (payload) => performAction({ type: "SAVE_PANEL_CONFIGS", payload }),
       updatePanelConfigs: (panelType, perPanelFunc) =>
@@ -103,7 +104,7 @@ export default function MockCurrentLayoutProvider({
       startDrag: (payload) => performAction({ type: "START_DRAG", payload }),
       endDrag: (payload) => performAction({ type: "END_DRAG", payload }),
     }),
-    [performAction],
+    [performAction, setLayoutState],
   );
 
   const value: ICurrentLayout = useShallowMemo({

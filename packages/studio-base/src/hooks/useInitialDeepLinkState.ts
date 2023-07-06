@@ -9,7 +9,6 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -69,33 +68,6 @@ function useSyncSourceFromUrl(
     unappliedSourceArgs,
     setUnappliedSourceArgs,
   ]);
-}
-function useSyncLayoutFromUrl(
-  targetUrlState: AppURLState | undefined,
-  { currentUserRequired }: { currentUserRequired: boolean },
-) {
-  const { setSelectedLayoutId } = useCurrentLayoutActions();
-  const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const [unappliedLayoutArgs, setUnappliedLayoutArgs] = useState(
-    targetUrlState ? { layoutId: targetUrlState.layoutId } : undefined,
-  );
-  // Select layout from URL.
-  useEffect(() => {
-    if (!unappliedLayoutArgs?.layoutId) {
-      return;
-    }
-
-    // If our datasource requires a current user then wait until the player is
-    // available to load the layout since we may need to sync layouts first and
-    // that's only possible after the user has logged in.
-    if (currentUserRequired && playerPresence !== PlayerPresence.PRESENT) {
-      return;
-    }
-
-    log.debug(`Initializing layout from url: ${unappliedLayoutArgs.layoutId}`);
-    setSelectedLayoutId(unappliedLayoutArgs.layoutId);
-    setUnappliedLayoutArgs({ layoutId: undefined });
-  }, [currentUserRequired, playerPresence, setSelectedLayoutId, unappliedLayoutArgs?.layoutId]);
 }
 
 function useSyncTimeFromUrl(targetUrlState: AppURLState | undefined) {
@@ -164,7 +136,6 @@ export function useInitialDeepLinkState(deepLinks: readonly string[]): {
     return { currentUserRequired };
   }, [targetUrlState?.ds, availableSources]);
   useSyncSourceFromUrl(targetUrlState, currentUserRequiredParam);
-  useSyncLayoutFromUrl(targetUrlState, currentUserRequiredParam);
   useSyncTimeFromUrl(targetUrlState);
   return currentUserRequiredParam;
 }

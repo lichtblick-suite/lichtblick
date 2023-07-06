@@ -11,18 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryFn, StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
-import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
-import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
-import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import PanelLayout from "./PanelLayout";
@@ -89,19 +85,6 @@ class MockPanelCatalog implements PanelCatalog {
 
 export default {
   title: "components/PanelLayout",
-  decorators: [
-    (Wrapped: StoryFn): JSX.Element => {
-      const storage = new MockLayoutStorage(LayoutManager.LOCAL_STORAGE_NAMESPACE, []);
-
-      return (
-        <LayoutStorageContext.Provider value={storage}>
-          <LayoutManagerProvider>
-            <Wrapped />
-          </LayoutManagerProvider>
-        </LayoutStorageContext.Provider>
-      );
-    },
-  ],
 };
 
 export const PanelNotFound: StoryObj = {

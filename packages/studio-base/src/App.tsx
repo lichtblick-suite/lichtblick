@@ -22,7 +22,6 @@ import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
 import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigurationContext";
-import LayoutStorageContext from "./context/LayoutStorageContext";
 import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
 import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
 import { IDataSourceFactory } from "./context/PlayerSelectionContext";
@@ -30,18 +29,14 @@ import { UserNodeStateProvider } from "./context/UserNodeStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
-import LayoutManagerProvider from "./providers/LayoutManagerProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
-import UserProfileLocalStorageProvider from "./providers/UserProfileLocalStorageProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
 import { ExtensionLoader } from "./services/ExtensionLoader";
-import { ILayoutStorage } from "./services/ILayoutStorage";
 
 type AppProps = CustomWindowControlsProps & {
   deepLinks: string[];
   appConfiguration: IAppConfiguration;
   dataSources: IDataSourceFactory[];
-  layoutStorage: ILayoutStorage;
   extensionLoaders: readonly ExtensionLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;
@@ -66,7 +61,6 @@ export function App(props: AppProps): JSX.Element {
   const {
     appConfiguration,
     dataSources,
-    layoutStorage,
     extensionLoaders,
     nativeAppMenu,
     nativeWindow,
@@ -78,7 +72,6 @@ export function App(props: AppProps): JSX.Element {
 
   const providers = [
     /* eslint-disable react/jsx-key */
-    <UserProfileLocalStorageProvider />,
     <TimelineInteractionStateProvider />,
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
@@ -99,10 +92,6 @@ export function App(props: AppProps): JSX.Element {
 
   if (extraProviders) {
     providers.unshift(...extraProviders);
-  } else {
-    // Extra providers have their own layout providers
-    providers.unshift(<LayoutManagerProvider />);
-    providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
   }
 
   // The toast and logs provider comes first so they are available to all downstream providers
