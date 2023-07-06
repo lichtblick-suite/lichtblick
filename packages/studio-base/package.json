@@ -156,7 +156,7 @@
     "react-use": "17.4.0",
     "react-virtualized": "9.22.5",
     "react-window": "1.8.9",
-    "readable-stream": "4.4.0",
+    "readable-stream": "4.4.2",
     "rehype-raw": "6.1.1",
     "reselect": "4.1.8",
     "sanitize-html": "2.11.0",
