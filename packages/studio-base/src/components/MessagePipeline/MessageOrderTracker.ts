@@ -51,7 +51,7 @@ class MessageOrderTracker {
 
     const problems: PlayerProblem[] = [];
 
-    const { messages, currentTime, lastSeekTime, messagesRecomputed } = playerState.activeData;
+    const { messages, currentTime, lastSeekTime } = playerState.activeData;
     let didSeek = false;
 
     if (this.#lastLastSeekTime !== lastSeekTime) {
@@ -105,8 +105,6 @@ class MessageOrderTracker {
         }
 
         if (
-          // If we have recomputed the current frame there could be messages from before the lastMessageTime
-          messagesRecomputed !== true &&
           this.#lastMessageTime &&
           this.#lastMessageTopic != undefined &&
           isLessThan(messageTime, this.#lastMessageTime)
