@@ -3121,7 +3121,7 @@ __metadata:
     html-webpack-plugin: 5.5.3
     jszip: 3.10.1
     path-browserify: 1.0.1
-    plist: 3.0.6
+    plist: 3.1.0
     pngjs: 7.0.0
     quicklookjs: 0.0.3
     react: 17.0.2
@@ -7146,7 +7146,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:0.8.8":
+"@xmldom/xmldom@npm:0.8.8, @xmldom/xmldom@npm:^0.8.8":
   version: 0.8.8
   resolution: "@xmldom/xmldom@npm:0.8.8"
   checksum: 5f5fc0482fcc599f62e3009516932a265e00f1bb2093fe2c76f3f8d9bfebdd13246f48d4132c9b301c7a573f0fa8712e56aa747dce75b179c2b73f1dde7b5f42
@@ -17051,13 +17051,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plist@npm:3.0.6, plist@npm:^3.0.4, plist@npm:^3.0.5":
-  version: 3.0.6
-  resolution: "plist@npm:3.0.6"
+"plist@npm:3.1.0, plist@npm:^3.0.4, plist@npm:^3.0.5":
+  version: 3.1.0
+  resolution: "plist@npm:3.1.0"
   dependencies:
+    "@xmldom/xmldom": ^0.8.8
     base64-js: ^1.5.1
     xmlbuilder: ^15.1.1
-  checksum: e21390fab8a3c388f8f51b76c0aa187242a40537119ce865d8637630e7d7df79b21f841ec6a4668e7c68d409a6f584d696619099a6125d28011561639c0823b8
+  checksum: c8ea013da8646d4c50dff82f9be39488054621cc229957621bb00add42b5d4ce3657cf58d4b10c50f7dea1a81118f825838f838baeb4e6f17fab453ecf91d424
   languageName: node
   linkType: hard
 

@@ -37,7 +37,7 @@
     "html-webpack-plugin": "5.5.3",
     "jszip": "3.10.1",
     "path-browserify": "1.0.1",
-    "plist": "3.0.6",
+    "plist": "3.1.0",
     "pngjs": "7.0.0",
     "quicklookjs": "0.0.3",
     "react": "17.0.2",
