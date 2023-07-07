@@ -168,4 +168,54 @@ describe("Initial deep link state", () => {
       type: "connection",
     });
   });
+
+  it("recognizes org mismatches to set userSwitchRequired correctly", () => {
+    const { wrapper, setWrapperProps } = makeWrapper({
+      currentUser: undefined,
+      playerSelection: emptyPlayerSelection,
+    });
+
+    const correctOrgSlug = "my-org";
+
+    const { result, rerender } = renderHook(
+      () => useInitialDeepLinkState(["https://studio.foxglove.dev/?org=" + correctOrgSlug]),
+      { wrapper },
+    );
+
+    expect(result.current.currentUserRequired).toBeFalsy();
+    expect(result.current.userSwitchRequired).toBeFalsy();
+
+    expect(selectSource).not.toHaveBeenCalled();
+
+    const org: User["org"] = {
+      id: "wrong-orgid",
+      slug: "wrong-org",
+      displayName: "Fake Org",
+      isEnterprise: false,
+      allowsUploads: false,
+      supportsEdgeSites: false,
+    };
+
+    const currentUser = {
+      id: "id",
+      email: "email",
+      orgPaid: true,
+      orgId: org.id,
+      orgDisplayName: org.displayName,
+      orgSlug: org.slug,
+      org,
+    };
+
+    setWrapperProps({ currentUser });
+    rerender();
+
+    expect(result.current.currentUserRequired).toBeFalsy();
+    expect(result.current.userSwitchRequired).toBeTruthy();
+
+    setWrapperProps({ currentUser: { ...currentUser, org: { ...org, slug: correctOrgSlug } } });
+    rerender();
+
+    expect(result.current.currentUserRequired).toBeFalsy();
+    expect(result.current.userSwitchRequired).toBeFalsy();
+  });
 });

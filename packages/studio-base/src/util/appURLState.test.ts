@@ -57,6 +57,7 @@ describe("app state url parser", () => {
       const url = urlBuilder();
       url.searchParams.append("ds", "foo");
       url.searchParams.append("layoutId", "1234");
+      url.searchParams.append("org", "my-org-slug");
       url.searchParams.append("time", time);
       url.searchParams.append("ds.bar", "barValue");
       url.searchParams.append("ds.baz", "bazValue");
@@ -67,6 +68,7 @@ describe("app state url parser", () => {
       const parsed = parseAppURLState(url);
       expect(parsed).toMatchObject({
         layoutId: "1234",
+        org: "my-org-slug",
         ds: "foo",
         time: { sec: now.sec + 500, nsec: 0 },
         dsParams: { bar: "barValue", baz: "bazValue" },

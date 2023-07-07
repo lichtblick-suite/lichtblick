@@ -426,7 +426,7 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
         /* eslint-enable react/jsx-key */
       ]}
     >
-      {props.showSignInForm && <SignInFormModal />}
+      {props.showSignInForm && <SignInFormModal userSwitchRequired={currentUser != undefined} />}
       {dataSourceDialog.open && <DataSourceDialog />}
       <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
       <SyncAdapters />
@@ -487,11 +487,13 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const { currentUser } = useCurrentUser();
 
-  const { currentUserRequired } = useInitialDeepLinkState(props.deepLinks ?? DEFAULT_DEEPLINKS);
+  const { currentUserRequired, userSwitchRequired } = useInitialDeepLinkState(
+    props.deepLinks ?? DEFAULT_DEEPLINKS,
+  );
 
   const isPlayerPresent = useMessagePipeline(selectPlayerIsPresent);
 
-  const showSignInForm = currentUserRequired && currentUser == undefined;
+  const showSignInForm = currentUserRequired && (currentUser == undefined || userSwitchRequired);
 
   const initialItem: undefined | DataSourceDialogItem =
     isPlayerPresent || !showOpenDialogOnStartup || showSignInForm ? undefined : "start";
