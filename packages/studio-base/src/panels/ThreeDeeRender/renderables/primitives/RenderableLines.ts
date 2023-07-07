@@ -256,8 +256,7 @@ class LinePrimitiveRenderable extends THREE.Object3D {
         this.#material.vertexColors = false;
         const color = this.#material.color as THREE.Color;
         rgbToThreeColor(color, singleColor);
-        // material.opacity = singleColor.a; // does not work for some reason
-        this.#material.uniforms.opacity!.value = singleColor.a;
+        this.#material.setOpacity(singleColor.a);
       }
 
       this.#updateMaterial();

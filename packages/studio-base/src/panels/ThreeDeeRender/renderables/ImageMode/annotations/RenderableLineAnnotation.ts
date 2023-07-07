@@ -4,7 +4,6 @@
 
 import * as THREE from "three";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
-import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
@@ -21,12 +20,13 @@ import {
   PointsAnnotation as NormalizedPointsAnnotation,
   CircleAnnotation as NormalizedCircleAnnotation,
 } from "./types";
+import { LineMaterialWithAlphaVertex } from "../../../LineMaterialWithAlphaVertex";
 import { BaseUserData, Renderable } from "../../../Renderable";
 import { SRGBToLinear } from "../../../color";
 
 const tempVec3 = new THREE.Vector3();
 
-class PickingMaterial extends LineMaterial {
+class PickingMaterial extends LineMaterialWithAlphaVertex {
   public constructor() {
     super({
       worldUnits: false,
@@ -59,9 +59,9 @@ const FALLBACK_COLOR: Color = { r: 0, g: 0, b: 0, a: 0 };
 export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRenderer=*/ undefined> {
   #geometry?: LineSegmentsGeometry;
   readonly #linePrepass: LineSegments2;
-  readonly #linePrepassMaterial: LineMaterial;
+  readonly #linePrepassMaterial: LineMaterialWithAlphaVertex;
   readonly #line: LineSegments2;
-  readonly #lineMaterial: LineMaterial;
+  readonly #lineMaterial: LineMaterialWithAlphaVertex;
   readonly #linePickingMaterial: PickingMaterial;
   /** Style that was last used for configuring geometry */
   #style?: LineStyle;
@@ -105,7 +105,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     // operations. The source for this technique is:
     // <https://github.com/mrdoob/three.js/issues/23680#issuecomment-1063294691>
     // <https://gkjohnson.github.io/threejs-sandbox/fat-line-opacity/webgl_lines_fat.html>
-    this.#linePrepassMaterial = new LineMaterial({
+    this.#linePrepassMaterial = new LineMaterialWithAlphaVertex({
       worldUnits: false,
       colorWrite: false,
       vertexColors: true,
@@ -115,7 +115,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       stencilZPass: THREE.ReplaceStencilOp,
       ...annotationRenderOrderMaterialProps,
     });
-    this.#lineMaterial = new LineMaterial({
+    this.#lineMaterial = new LineMaterialWithAlphaVertex({
       worldUnits: false,
       vertexColors: true,
       linewidth: 0,
@@ -213,13 +213,13 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     // Update line width if thickness or scale has changed
     if (this.#annotationNeedsUpdate || this.#scaleNeedsUpdate) {
       this.#lineMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
-      this.#lineMaterial.linewidth = thickness * this.#scale;
+      this.#lineMaterial.lineWidth = thickness * this.#scale;
       this.#lineMaterial.needsUpdate = true;
       this.#linePrepassMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
-      this.#linePrepassMaterial.linewidth = thickness * this.#scale;
+      this.#linePrepassMaterial.lineWidth = thickness * this.#scale;
       this.#linePrepassMaterial.needsUpdate = true;
       this.#linePickingMaterial.resolution.set(this.#canvasWidth, this.#canvasHeight);
-      this.#linePickingMaterial.linewidth = thickness * this.#scale;
+      this.#linePickingMaterial.lineWidth = thickness * this.#scale;
       this.#linePickingMaterial.needsUpdate = true;
       this.#scaleNeedsUpdate = false;
     }
@@ -361,6 +361,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
         this.#linePrepassMaterial.vertexColors = true;
         this.#lineMaterial.vertexColors = true;
         this.#lineMaterial.color.setRGB(1, 1, 1); // any non-white color will tint the vertex colors
+        this.#lineMaterial.setOpacity(1);
         this.#geometry.getAttribute("instanceColorStart").needsUpdate = true;
         this.#geometry.getAttribute("instanceColorEnd").needsUpdate = true;
       } else {
@@ -368,7 +369,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
         this.#linePrepassMaterial.vertexColors = false;
         this.#lineMaterial.vertexColors = false;
         this.#lineMaterial.color.setRGB(color.r, color.g, color.b).convertSRGBToLinear();
-        this.#lineMaterial.opacity = color.a;
+        this.#lineMaterial.setOpacity(color.a);
       }
       this.#lineMaterial.needsUpdate = true;
 

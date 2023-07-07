@@ -568,6 +568,11 @@ export class LineMaterialWithAlphaVertex extends ShaderMaterial {
     this.uniforms.gapSize!.value = value;
   }
 
+  // Cannot use `set opacity()` because it would conflict with the superclass property
+  public setOpacity(value: number) {
+    this.uniforms.opacity!.value = value;
+  }
+
   public get resolution(): THREE.Vector2 {
     return this.uniforms.resolution!.value;
   }
