@@ -37,6 +37,9 @@ updates:
           - "webpack"
           - "webpack-cli"
           - "webpack-dev-server"
+      babel:
+        patterns:
+          - "@babel/*"
       monaco-editor:
         patterns:
           - "monaco-editor"
