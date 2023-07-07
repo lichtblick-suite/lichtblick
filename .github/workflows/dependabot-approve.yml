@@ -15,8 +15,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
         with:
-          route: POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
+          route: POST /repos/{owner_and_repo}/pulls/{pull_number}/reviews
+          owner_and_repo: ${{ github.repository }}
           pull_number: ${{ github.event.pull_request.number }}
           event: "APPROVE"
