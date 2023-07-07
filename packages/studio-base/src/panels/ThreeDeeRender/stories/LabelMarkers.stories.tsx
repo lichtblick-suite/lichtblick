@@ -10,7 +10,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, QUAT_IDENTITY, rad2deg, SENSOR_FRAME_ID } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { Marker, MarkerType, TransformStamped, Vector3 } from "../ros";
 
 export default {

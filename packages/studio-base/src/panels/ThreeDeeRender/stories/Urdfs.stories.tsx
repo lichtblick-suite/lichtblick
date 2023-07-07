@@ -10,7 +10,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, STL_CUBE_MESH_RESOURCE } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 
 const RED = makeColorAttribute("#f44336");
 const GREEN = makeColorAttribute("#4caf50");

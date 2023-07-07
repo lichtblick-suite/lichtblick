@@ -15,7 +15,7 @@ import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 
 export default {
   title: "panels/ThreeDeeRender/foxglove.LaserScan",

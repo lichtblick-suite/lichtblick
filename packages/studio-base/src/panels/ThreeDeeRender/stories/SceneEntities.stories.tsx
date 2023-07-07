@@ -16,7 +16,7 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, QUAT_IDENTITY, rad2deg } from "./common";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 
 export default {
   title: "panels/ThreeDeeRender/SceneEntities",

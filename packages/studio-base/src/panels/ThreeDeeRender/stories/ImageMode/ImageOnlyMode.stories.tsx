@@ -14,13 +14,13 @@ import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transf
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
-import { ImagePanel, ThreeDeePanel } from "../../index";
+import { ImagePanel } from "../../index";
 import { TransformStamped } from "../../ros";
 import { QUAT_IDENTITY, makeColor } from "../common";
 
 export default {
   title: "panels/ThreeDeeRender/Images",
-  component: ThreeDeePanel,
+  component: ImagePanel,
   parameters: { colorScheme: "light" },
 };
 

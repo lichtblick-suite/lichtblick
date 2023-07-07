@@ -11,7 +11,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { makeColor, OBJ_CUBE_MESH_RESOURCE, QUAT_IDENTITY, STL_CUBE_MESH_RESOURCE } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 import { DEFAULT_CAMERA_STATE } from "../camera";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { Marker, TransformStamped } from "../ros";
 
 export default {

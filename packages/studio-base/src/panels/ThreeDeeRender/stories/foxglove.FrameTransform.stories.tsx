@@ -12,7 +12,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makePass, QUAT_IDENTITY, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { LegacyFrameTransform } from "../normalizeMessages";
 
 const VEC3_ZERO = { x: 0, y: 0, z: 0 };

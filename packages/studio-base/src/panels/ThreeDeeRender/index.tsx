@@ -72,16 +72,19 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   );
 }
 
-export const ThreeDeePanel = Panel(
-  Object.assign(ThreeDeeRenderAdapter.bind(undefined, "3d"), {
-    panelType: "3D",
+/**
+ * The Image panel is a special case of the 3D panel with `interfaceMode` set to `"image"`.
+ */
+export const ImagePanel = Panel<Record<string, unknown>, Props>(
+  Object.assign(ThreeDeeRenderAdapter.bind(undefined, "image"), {
+    panelType: "Image",
     defaultConfig: {},
   }),
 );
 
-export const ImagePanel = Panel<Record<string, unknown>, Props>(
-  Object.assign(ThreeDeeRenderAdapter.bind(undefined, "image"), {
-    panelType: "Image",
+export default Panel(
+  Object.assign(ThreeDeeRenderAdapter.bind(undefined, "3d"), {
+    panelType: "3D",
     defaultConfig: {},
   }),
 );

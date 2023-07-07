@@ -11,11 +11,11 @@ import { MessageEvent } from "@foxglove/studio";
 import { makeRawImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
-import { ImagePanel, ThreeDeePanel } from "../../index";
+import { ImagePanel } from "../../index";
 
 export default {
   title: "panels/ThreeDeeRender/Images/PanZoomRotate",
-  component: ThreeDeePanel,
+  component: ImagePanel,
   parameters: { colorScheme: "light" },
 };
 

@@ -13,7 +13,7 @@ import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import { PNG_TEST_IMAGE, rad2deg, SENSOR_FRAME_ID } from "./common";
 import { useFixtureQueue } from "./useFixtureQueue";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { CameraInfo, CompressedImage as RosCompressedImage, Image } from "../ros";
 
 export default {

@@ -17,7 +17,7 @@ import {
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { Marker, TransformStamped } from "../ros";
 
 export default {

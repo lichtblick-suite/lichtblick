@@ -10,7 +10,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { Header, Marker } from "../ros";
 
 export default {

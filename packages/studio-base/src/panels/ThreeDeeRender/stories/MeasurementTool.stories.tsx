@@ -11,7 +11,7 @@ import delay from "@foxglove/studio-base/util/delay";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { TransformStamped } from "../ros";
 
 export default {

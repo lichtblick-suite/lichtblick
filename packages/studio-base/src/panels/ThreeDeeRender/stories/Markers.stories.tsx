@@ -12,7 +12,7 @@ import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext
 
 import { makeColor, QUAT_IDENTITY, rad2deg, SENSOR_FRAME_ID } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import { ThreeDeePanel } from "../index";
+import ThreeDeePanel from "../index";
 import { ColorRGBA, Marker, TransformStamped } from "../ros";
 
 export default {
