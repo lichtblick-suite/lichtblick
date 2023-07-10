@@ -3,15 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { debounce } from "lodash";
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { StoreApi, useStore } from "zustand";
 
 import { useGuaranteedContext } from "@foxglove/hooks";
@@ -84,13 +76,17 @@ export function MessagePipelineProvider({
   globalVariables,
 }: ProviderProps): React.ReactElement {
   const promisesToWaitForRef = useRef<FramePromise[]>([]);
-  const [store] = useState(() =>
-    createMessagePipelineStore({ promisesToWaitForRef, initialPlayer: player }),
-  );
-  useEffect(() => {
-    store.getState().dispatch({ type: "set-player", player });
-    player?.setPublishers(store.getState().allPublishers);
-  }, [player, store]);
+
+  // We make a new store when the player changes. This throws away any state from the previous store
+  // and re-creates the pipeline functions and references. We make a new store to avoid holding onto
+  // any state from the previous store.
+  //
+  // Note: This throws away any publishers, subscribers, etc that panels may have registered. We
+  // are ok with this behavior because the <Workspace> re-mounts all panels when a player changes.
+  // The re-mounted panels will re-initialize and setup new publishers and subscribers.
+  const store = useMemo(() => {
+    return createMessagePipelineStore({ promisesToWaitForRef, initialPlayer: player });
+  }, [player]);
 
   const subscriptions = useStore(store, selectSubscriptions);
 

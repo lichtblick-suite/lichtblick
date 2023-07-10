@@ -506,26 +506,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(player.publishers).toBe(lastPublishers);
   });
 
-  it("informs new player of existing prior advertisements", () => {
-    const player1 = new FakePlayer();
-    const { Hook, Wrapper, setPlayer } = makeTestHook({ player: player1 });
-    const { result, rerender } = renderHook(Hook, { wrapper: Wrapper });
-
-    act(() =>
-      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
-    );
-    expect(player1.publishers).toEqual<typeof player1.publishers>([
-      { topic: "/studio/test", schemaName: "test" },
-    ]);
-
-    const player2 = new FakePlayer();
-    setPlayer(player2);
-    rerender();
-    expect(player2.publishers).toEqual<typeof player2.publishers>([
-      { topic: "/studio/test", schemaName: "test" },
-    ]);
-  });
-
   it("renders with the same callback functions every time", async () => {
     const player = new FakePlayer();
     const { Hook, Wrapper } = makeTestHook({ player });
@@ -614,61 +594,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(player.close).toHaveBeenCalledTimes(1);
   });
 
-  describe("when changing the player", () => {
-    let player: FakePlayer;
-    let player2: FakePlayer;
-    let all: ReturnType<typeof makeTestHook>["all"];
-    let Hook: ReturnType<typeof makeTestHook>["Hook"];
-    beforeEach(async () => {
-      player = new FakePlayer();
-      player.playerId = "fake player 1";
-      jest.spyOn(player, "close");
-      let Wrapper, setPlayer;
-      ({ Hook, Wrapper, all, setPlayer } = makeTestHook({ player }));
-      const { rerender } = renderHook(Hook, { wrapper: Wrapper });
-
-      await doubleAct(async () => await player.emit());
-      expect(all.length).toBe(2); // eslint-disable-line jest/no-standalone-expect
-
-      player2 = new FakePlayer();
-      player2.playerId = "fake player 2";
-      setPlayer(player2);
-      rerender();
-      expect(player.close).toHaveBeenCalledTimes(1); // eslint-disable-line jest/no-standalone-expect
-      expect(all.length).toBe(4); // eslint-disable-line jest/no-standalone-expect
-    });
-
-    it("closes old player when new player is supplied and stops old player message flow", async () => {
-      await doubleAct(async () => await player2.emit());
-      expect(all.length).toBe(5);
-      await doubleAct(async () => await player.emit());
-      expect(all.length).toBe(5);
-      expect(
-        all.map((ctx) => {
-          if (ctx instanceof Error) {
-            throw ctx;
-          }
-          return ctx.playerState.playerId;
-        }),
-      ).toEqual(["", "fake player 1", "fake player 1", "", "fake player 2"]);
-    });
-
-    it("does not think the old player is the new player if it emits first", async () => {
-      await doubleAct(async () => await player.emit());
-      expect(all.length).toBe(4);
-      await doubleAct(async () => await player2.emit());
-      expect(all.length).toBe(5);
-      expect(
-        all.map((ctx) => {
-          if (ctx instanceof Error) {
-            throw ctx;
-          }
-          return ctx.playerState.playerId;
-        }),
-      ).toEqual(["", "fake player 1", "fake player 1", "", "fake player 2"]);
-    });
-  });
-
   it("does not throw when interacting w/ context and player is missing", () => {
     expect(() => {
       const { Hook, Wrapper } = makeTestHook({});
@@ -679,28 +604,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       expect(result.current.seekPlayback).toBeUndefined();
       result.current.publish({ topic: "/foo", msg: {} });
     }).not.toThrow();
-  });
-
-  it("transfers subscriptions and publishers between players", async () => {
-    const player = new FakePlayer();
-    const { Hook, Wrapper, setPlayer } = makeTestHook({ player });
-    const { result, rerender } = renderHook(Hook, {
-      wrapper: Wrapper,
-    });
-    act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
-    act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
-    act(() =>
-      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
-    );
-
-    const player2 = new FakePlayer();
-    setPlayer(player2);
-    rerender();
-    await act(async () => await delay(1));
-    expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
-    expect(player2.publishers).toEqual<typeof player2.publishers>([
-      { topic: "/studio/test", schemaName: "test" },
-    ]);
   });
 
   describe("pauseFrame", () => {

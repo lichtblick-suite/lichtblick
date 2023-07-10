@@ -68,7 +68,6 @@ type UpdatePlayerStateAction = {
 export type MessagePipelineStateAction =
   | UpdateSubscriberAction
   | UpdatePlayerStateAction
-  | { type: "set-player"; player: Player | undefined }
   | { type: "set-publishers"; id: string; payloads: AdvertiseOptions[] };
 
 export function createMessagePipelineStore({
@@ -328,28 +327,6 @@ export function reducer(
         allPublishers: flatten(Object.values(newPublishersById)),
       };
     }
-
-    case "set-player":
-      if (action.player === prevState.player) {
-        return prevState;
-      }
-      return {
-        ...prevState,
-        player: action.player,
-        lastCapabilities: [],
-        lastMessageEventByTopic: new Map(),
-        public: {
-          ...prevState.public,
-          sortedTopics: [],
-          datatypes: new Map(),
-          messageEventsBySubscriberId: new Map(),
-          startPlayback: undefined,
-          pausePlayback: undefined,
-          playUntil: undefined,
-          setPlaybackSpeed: undefined,
-          seekPlayback: undefined,
-        },
-      };
   }
 
   assertNever(
