@@ -2761,7 +2761,7 @@ __metadata:
     "@types/protobufjs": "workspace:*"
     flatbuffers: 23.5.26
     flatbuffers_reflection: 0.0.7
-    protobufjs: "patch:protobufjs@7.2.3#../../patches/protobufjs.patch"
+    protobufjs: "patch:protobufjs@7.2.4#../../patches/protobufjs.patch"
     typescript: 5.1.6
   languageName: unknown
   linkType: soft
@@ -17296,9 +17296,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:7.2.3":
-  version: 7.2.3
-  resolution: "protobufjs@npm:7.2.3"
+"protobufjs@npm:7.2.4":
+  version: 7.2.4
+  resolution: "protobufjs@npm:7.2.4"
   dependencies:
     "@protobufjs/aspromise": ^1.1.2
     "@protobufjs/base64": ^1.1.2
@@ -17312,13 +17312,13 @@ __metadata:
     "@protobufjs/utf8": ^1.1.0
     "@types/node": ">=13.7.0"
     long: ^5.0.0
-  checksum: 9afa6de5fced0139a5180c063718508fac3ea734a9f1aceb99712367b15473a83327f91193f16b63540f9112b09a40912f5f0441a9b0d3f3c6a1c7f707d78249
+  checksum: a952cdf2a5e5250c16ae651b570849b6f5b20a5475c3eef63ffb290ad239aa2916adfc1cc676f7fc93c69f48113df268761c0c246f7f023118c85bdd1a170044
   languageName: node
   linkType: hard
 
-"protobufjs@patch:protobufjs@7.2.3#../../patches/protobufjs.patch::locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
-  version: 7.2.3
-  resolution: "protobufjs@patch:protobufjs@npm%3A7.2.3#../../patches/protobufjs.patch::version=7.2.3&hash=b342bd&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
+"protobufjs@patch:protobufjs@7.2.4#../../patches/protobufjs.patch::locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
+  version: 7.2.4
+  resolution: "protobufjs@patch:protobufjs@npm%3A7.2.4#../../patches/protobufjs.patch::version=7.2.4&hash=b342bd&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
   dependencies:
     "@protobufjs/aspromise": ^1.1.2
     "@protobufjs/base64": ^1.1.2
@@ -17332,7 +17332,7 @@ __metadata:
     "@protobufjs/utf8": ^1.1.0
     "@types/node": ">=13.7.0"
     long: ^5.0.0
-  checksum: 30f1cd2382edf301c0c5b05420fa0c7c5806dfc4ca336742d5638d6afcf89ec7ba2e0ededdb20ae5c8ca2810f7ba612dfa3866cf79c8038015b6b8f3366e23ea
+  checksum: e9889b1e99af939f87ccd7655eeceb5d3ccad51a0a6f81f983d2308702146417490a45d802e613e2a5a2f504bc2900a156c6787afca78699ec9f2aac9f6cfe71
   languageName: node
   linkType: hard
 
