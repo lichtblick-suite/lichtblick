@@ -88,6 +88,8 @@ export class RenderableLines extends RenderablePrimitive {
   }
 }
 
+const MIN_PICKING_LINE_WIDTH_PX = 5;
+
 class LinePrimitiveRenderable extends THREE.Object3D {
   #geometry: LineSegmentsGeometry | LineGeometry | undefined;
   #positionBuffer: Float32Array | undefined;
@@ -117,12 +119,15 @@ class LinePrimitiveRenderable extends THREE.Object3D {
       depthWrite: !this.#transparent,
       resolution: canvasSize.clone(),
     });
-    this.#material.linewidth = primitive.thickness; // Fix for THREE.js type annotations
+    this.#material.lineWidth = primitive.thickness; // Fix for THREE.js type annotations
 
     this.#pickingMaterial = new PickingMaterial();
     this.#pickingMaterial.resolution.set(canvasSize.x, canvasSize.y);
-    this.#pickingMaterial.linewidth = primitive.thickness;
     this.#pickingMaterial.worldUnits = !primitive.scale_invariant;
+    // make sure thin, scale_invariant lines are still pickable
+    this.#pickingMaterial.lineWidth = primitive.scale_invariant
+      ? Math.max(primitive.thickness, MIN_PICKING_LINE_WIDTH_PX)
+      : primitive.thickness;
     this.#pickingMaterial.needsUpdate = true;
   }
 
@@ -275,8 +280,11 @@ class LinePrimitiveRenderable extends THREE.Object3D {
     this.#material.worldUnits = !this.#primitive.scale_invariant;
     this.#material.needsUpdate = true;
 
-    this.#pickingMaterial.lineWidth = this.#primitive.thickness;
     this.#pickingMaterial.worldUnits = !this.#primitive.scale_invariant;
+    // make sure thin, scale invariant lines are still pickable
+    this.#pickingMaterial.lineWidth = this.#primitive.scale_invariant
+      ? Math.max(this.#primitive.thickness, MIN_PICKING_LINE_WIDTH_PX)
+      : this.#primitive.thickness;
     this.#pickingMaterial.uniformsNeedUpdate = true;
     this.#pickingMaterial.needsUpdate = true;
   }
