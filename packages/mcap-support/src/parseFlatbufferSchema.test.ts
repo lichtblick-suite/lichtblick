@@ -353,11 +353,11 @@ describe("parseFlatbufferSchema", () => {
     builder.finish(Type.endType(builder));
 
     expect(deserialize(builder.asUint8Array())).toEqual({
-      base_size: 4n,
+      base_size: 4,
       base_type: 7,
-      element: 0n,
-      element_size: 0n,
-      fixed_length: 0n,
+      element: 0,
+      element_size: 0,
+      fixed_length: 0,
       index: 123,
     });
   });
