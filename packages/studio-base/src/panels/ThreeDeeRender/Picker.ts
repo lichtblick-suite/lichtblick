@@ -93,7 +93,7 @@ export class Picker {
     options: PickerOptions = {},
   ): number {
     // Use the onAfterRender callback to actually render geometry for picking
-    this.#emptyScene.onAfterRender = this.#handleAfterRender;
+    this.#emptyScene.onAfterRender = this.#renderForPicking;
 
     this.#camera = camera;
     const { xInView, yInView } = this.#updateCameraForPickAndGetPickCoordsInView(x, y, options);
@@ -113,7 +113,7 @@ export class Picker {
       this.#pixelBuffer[3]!;
 
     if (options.debug === true) {
-      this.pickDebugRender(camera);
+      this.#pickDebugRender(camera);
     }
 
     return val;
@@ -126,7 +126,7 @@ export class Picker {
     renderable: Renderable,
     options: PickerOptions = {},
   ): number {
-    this.#emptyScene.onAfterRender = this.#makeHandleInstanceAfterRender(renderable);
+    this.#emptyScene.onAfterRender = this.#renderForPickingInstance.bind(this, renderable);
 
     this.#camera = camera;
     const { xInView, yInView } = this.#updateCameraForPickAndGetPickCoordsInView(x, y, options);
@@ -140,7 +140,7 @@ export class Picker {
     this.#resetCameraFromPick(options);
 
     if (options.debug === true) {
-      this.pickInstanceDebugRender(camera, renderable);
+      this.#pickInstanceDebugRender(camera, renderable);
     }
 
     return (
@@ -210,9 +210,9 @@ export class Picker {
     this.#gl.setClearColor(this.#currClearColor, originalAlpha);
   }
 
-  public pickDebugRender(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera): void {
+  #pickDebugRender(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera): void {
     this.#isDebugPass = true;
-    this.#emptyScene.onAfterRender = this.#handleAfterRender;
+    this.#emptyScene.onAfterRender = this.#renderForPicking;
     const currAlpha = this.#gl.getClearAlpha();
     this.#gl.getClearColor(this.#currClearColor);
     this.#gl.setClearColor(WHITE_COLOR, 1);
@@ -222,12 +222,12 @@ export class Picker {
     this.#isDebugPass = false;
   }
 
-  public pickInstanceDebugRender(
+  #pickInstanceDebugRender(
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
     renderable: Renderable,
   ): void {
     this.#isDebugPass = true;
-    this.#emptyScene.onAfterRender = this.#makeHandleInstanceAfterRender(renderable);
+    this.#emptyScene.onAfterRender = this.#renderForPickingInstance.bind(this, renderable);
     const currAlpha = this.#gl.getClearAlpha();
     this.#gl.getClearColor(this.#currClearColor);
     this.#gl.setClearColor(WHITE_COLOR, 1);
@@ -237,42 +237,40 @@ export class Picker {
     this.#isDebugPass = false;
   }
 
-  #handleAfterRender = (): void => {
+  #renderForPicking = (): void => {
     // This is the magic, these render lists are still filled with valid data.
     // So we can submit them again for picking and save lots of work!
     const renderList = this.#gl.renderLists.get(this.#scene, 0);
-    renderList.opaque.forEach(this.#processItem);
-    renderList.transmissive.forEach(this.#processItem);
-    renderList.transparent.forEach(this.#processItem);
+    renderList.opaque.forEach(this.#renderItemForPicking);
+    renderList.transmissive.forEach(this.#renderItemForPicking);
+    renderList.transparent.forEach(this.#renderItemForPicking);
   };
 
-  #makeHandleInstanceAfterRender(renderable: Renderable): () => void {
-    return (): void => {
-      // Note that no attempt is made to define a sensible sort order. Since the
-      // instanced picking pass should only be rendering opaque pixels, the
-      // worst that will happen is some overdraw
-      renderable.traverseVisible((object) => {
-        const maybeRender = object as Partial<THREE.Mesh>;
-        if (maybeRender.id != undefined && maybeRender.geometry && maybeRender.material) {
-          const renderItem: THREE.RenderItem = {
-            id: maybeRender.id,
-            object,
-            geometry: maybeRender.geometry,
-            material: maybeRender.material as THREE.Material,
-            // `program` is not used by WebGLRenderer even though it is defined in RenderItem
-            program: undefined as unknown as THREE.WebGLProgram,
-            groupOrder: 0,
-            renderOrder: 0,
-            z: 0,
-            group: ReactNull,
-          };
-          this.#processInstancedItem(renderItem);
-        }
-      });
-    };
+  #renderForPickingInstance(renderable: Renderable) {
+    // Note that no attempt is made to define a sensible sort order. Since the
+    // instanced picking pass should only be rendering opaque pixels, the
+    // worst that will happen is some overdraw
+    renderable.traverseVisible((object) => {
+      const maybeRender = object as Partial<THREE.Mesh>;
+      if (maybeRender.id != undefined && maybeRender.geometry && maybeRender.material) {
+        const renderItem: THREE.RenderItem = {
+          id: maybeRender.id,
+          object,
+          geometry: maybeRender.geometry,
+          material: maybeRender.material as THREE.Material,
+          // `program` is not used by WebGLRenderer even though it is defined in RenderItem
+          program: undefined as unknown as THREE.WebGLProgram,
+          groupOrder: 0,
+          renderOrder: 0,
+          z: 0,
+          group: ReactNull,
+        };
+        this.#renderInstancedItemForPicking(renderItem);
+      }
+    });
   }
 
-  #processItem = (renderItem: THREE.RenderItem): void => {
+  #renderItemForPicking = (renderItem: THREE.RenderItem): void => {
     if (!this.#camera) {
       return;
     }
@@ -319,7 +317,7 @@ export class Picker {
     );
   };
 
-  #processInstancedItem = (renderItem: THREE.RenderItem): void => {
+  #renderInstancedItemForPicking = (renderItem: THREE.RenderItem): void => {
     if (!this.#camera) {
       return;
     }
