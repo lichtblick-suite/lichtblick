@@ -191,6 +191,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public ros = false;
 
   #picker: Picker;
+  #selectionBackdropScene: THREE.Scene;
   #selectionBackdrop: ScreenOverlay;
   #selectedRenderable: PickedRenderable | undefined;
   public colorScheme: "dark" | "light" = "light";
@@ -289,8 +290,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#picker = new Picker(this.gl, this.#scene);
 
     this.#selectionBackdrop = new ScreenOverlay(this);
-    this.#selectionBackdrop.visible = false;
-    this.#scene.add(this.#selectionBackdrop);
+    this.#selectionBackdropScene = new THREE.Scene();
+    this.#selectionBackdropScene.add(this.#selectionBackdrop);
 
     const samples = msaaSamples(this.gl.capabilities);
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
@@ -1039,7 +1040,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     const camera = this.cameraHandler.getActiveCamera();
     camera.layers.set(LAYER_DEFAULT);
-    this.#selectionBackdrop.visible = this.#selectedRenderable != undefined;
 
     // use the FALLBACK_FRAME_ID if renderFrame is undefined and there are no options for transforms
     const renderFrameId =
@@ -1055,9 +1055,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.gl.render(this.#scene, camera);
 
     if (this.#selectedRenderable) {
+      this.gl.render(this.#selectionBackdropScene, camera);
       this.gl.clearDepth();
       camera.layers.set(LAYER_SELECTED);
-      this.#selectionBackdrop.visible = false;
       this.gl.render(this.#scene, camera);
     }
 

@@ -16,6 +16,8 @@ export class ScreenOverlay extends THREE.Object3D {
 
     this.#material = new THREE.ShaderMaterial({
       transparent: true,
+      depthTest: false,
+      depthWrite: false,
       uniforms: { color: { value: [1, 0, 1, 1] } },
       vertexShader: /* glsl */ `
         void main() {
