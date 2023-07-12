@@ -156,7 +156,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #canvas: HTMLCanvasElement;
   public readonly gl: THREE.WebGLRenderer;
   public maxLod = DetailLevel.High;
-  public debugPicking = false;
+  public debugPicking: boolean;
   public config: Immutable<RendererConfig>;
   public settings: SettingsManager;
   // [{ name, datatype }]
@@ -222,6 +222,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     config: Immutable<RendererConfig>;
     interfaceMode: InterfaceMode;
     fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
+    debugPicking?: boolean;
   }) {
     super();
     // NOTE: Global side effect
@@ -231,6 +232,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const canvas = (this.#canvas = args.canvas);
     const config = (this.config = args.config);
     this.#fetchAsset = args.fetchAsset;
+    this.debugPicking = args.debugPicking ?? false;
 
     this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode));
     this.settings.on("update", () => this.emit("settingsTreeChange", this));
@@ -873,6 +875,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       selectObject(selection.renderable);
       log.debug(
         `Selected ${selection.renderable.id} (${selection.renderable.name}) (instance=${selection.instanceIndex})`,
+        selection.renderable,
       );
     }
 

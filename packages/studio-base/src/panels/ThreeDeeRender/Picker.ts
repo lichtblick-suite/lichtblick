@@ -123,7 +123,7 @@ export class Picker {
     x: number,
     y: number,
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
-    renderable: Renderable,
+    renderable: THREE.Object3D,
     options: PickerOptions = {},
   ): number {
     this.#emptyScene.onAfterRender = this.#renderForPickingInstance.bind(this, renderable);
@@ -224,7 +224,7 @@ export class Picker {
 
   #pickInstanceDebugRender(
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
-    renderable: Renderable,
+    renderable: THREE.Object3D,
   ): void {
     this.#isDebugPass = true;
     this.#emptyScene.onAfterRender = this.#renderForPickingInstance.bind(this, renderable);
@@ -246,7 +246,7 @@ export class Picker {
     renderList.transparent.forEach(this.#renderItemForPicking);
   };
 
-  #renderForPickingInstance(renderable: Renderable) {
+  #renderForPickingInstance(renderable: THREE.Object3D) {
     // Note that no attempt is made to define a sensible sort order. Since the
     // instanced picking pass should only be rendering opaque pixels, the
     // worst that will happen is some overdraw

@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
 import * as THREE from "three";
 
 import { fromSec } from "@foxglove/rostime";
@@ -356,5 +357,127 @@ export const ComparisonWithPointCloudColors: StoryObj = {
         />
       </PanelSetup>
     );
+  },
+};
+
+function HistoryPickingStory(): JSX.Element {
+  const topics: Topic[] = [{ name: "/scan", schemaName: "foxglove.LaserScan" }];
+
+  const laserScan1: MessageEvent<LaserScan> = {
+    topic: "/scan",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      timestamp: { sec: 10, nsec: 0 },
+      frame_id: "sensor",
+      pose: emptyPose(),
+      start_angle: 0,
+      end_angle: Math.PI / 4,
+      ranges: new Array(10).fill(0).map((_, i) => 2 + 0.05 * i),
+      intensities: new Array(10).fill(0).map((_, i) => i),
+    },
+    schemaName: "foxglove.LaserScan",
+    sizeInBytes: 0,
+  };
+
+  const laserScan2: MessageEvent<LaserScan> = {
+    topic: "/scan",
+    receiveTime: { sec: 20, nsec: 0 },
+    message: {
+      timestamp: { sec: 20, nsec: 0 },
+      frame_id: "sensor",
+      pose: emptyPose(),
+      start_angle: 0,
+      end_angle: Math.PI / 2,
+      ranges: new Array(10).fill(0).map((_, i) => 3 + 0.1 * i),
+      intensities: new Array(10).fill(0).map((_, i) => i),
+    },
+    schemaName: "foxglove.LaserScan",
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    topics,
+    frame: {
+      "/scan": [laserScan1, laserScan2],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: fromSec(20),
+    },
+  });
+
+  return (
+    <div style={{ width: 600, height: 400, flexShrink: 0 }}>
+      <PanelSetup fixture={fixture}>
+        <ThreeDeePanel
+          debugPicking
+          overrideConfig={{
+            followTf: "base_link",
+            scene: { enableStats: false },
+            topics: {
+              "/scan": {
+                visible: true,
+                pointSize: 10,
+                colorMode: "colormap",
+                colorMap: "turbo",
+                colorField: "intensity",
+                decayTime: 20,
+              },
+            },
+            cameraState: {
+              distance: 8,
+              perspective: false,
+              phi: rad2deg(0),
+              targetOffset: [4, 0, 0],
+              thetaOffset: rad2deg(0),
+              fovy: rad2deg(0.75),
+              near: 0.01,
+              far: 5000,
+              target: [0, 0, 0],
+              targetOrientation: [0, 0, 0, 1],
+            },
+          }}
+        />
+      </PanelSetup>
+    </div>
+  );
+}
+
+/** Click background to render overall hitmap */
+export const HistoryPicking: StoryObj = {
+  render: HistoryPickingStory,
+  async play() {
+    await userEvent.click(await screen.findByTestId("ExpandingToolbar-Inspect objects"));
+    await userEvent.pointer({
+      target: document.querySelector("canvas")!,
+      keys: "[MouseLeft]",
+      coords: { clientX: 0, clientY: 0 },
+    });
+  },
+};
+
+/** Click first scan */
+export const HistoryPickingInstances1: StoryObj = {
+  render: HistoryPickingStory,
+  async play() {
+    await userEvent.click(await screen.findByTestId("ExpandingToolbar-Inspect objects"));
+    await userEvent.pointer({
+      target: document.querySelector("canvas")!,
+      keys: "[MouseLeft]",
+      coords: { clientX: 212, clientY: 181 },
+    });
+  },
+};
+
+/** Click second scan */
+export const HistoryPickingInstances2: StoryObj = {
+  render: HistoryPickingStory,
+  async play() {
+    await userEvent.click(await screen.findByTestId("ExpandingToolbar-Inspect objects"));
+    await userEvent.pointer({
+      target: document.querySelector("canvas")!,
+      keys: "[MouseLeft]",
+      coords: { clientX: 255, clientY: 191 },
+    });
   },
 };
