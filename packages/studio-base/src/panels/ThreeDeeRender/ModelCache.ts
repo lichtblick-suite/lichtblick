@@ -13,6 +13,7 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 
 import Logger from "@foxglove/log";
+import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 
 const log = Logger.getLogger(__filename);
 
@@ -23,6 +24,7 @@ export type ModelCacheOptions = {
   edgeMaterial: THREE.Material;
   ignoreColladaUpAxis: boolean;
   meshUpAxis: MeshUpAxis;
+  fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
 };
 
 type LoadModelOptions = {
@@ -45,11 +47,13 @@ export class ModelCache {
   #textDecoder = new TextDecoder();
   #models = new Map<string, Promise<LoadedModel | undefined>>();
   #edgeMaterial: THREE.Material;
+  #fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
 
   #dracoLoader?: DRACOLoader;
 
   public constructor(public readonly options: ModelCacheOptions) {
     this.#edgeMaterial = options.edgeMaterial;
+    this.#fetchAsset = options.fetchAsset;
   }
 
   public async load(
@@ -80,18 +84,14 @@ export class ModelCache {
   ): Promise<LoadedModel> {
     const GLB_MAGIC = 0x676c5446; // "glTF"
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      const errMsg = response.statusText;
-      throw new Error(`Error ${response.status}${errMsg ? ` (${errMsg})` : ``}`);
-    }
+    const asset = await this.#fetchAsset(url);
 
-    const buffer = await response.arrayBuffer();
+    const buffer = asset.data;
     if (buffer.byteLength < 4) {
       throw new Error(`${buffer.byteLength} bytes received`);
     }
-    const view = new DataView(buffer);
-    const contentType = options.overrideMediaType ?? response.headers.get("content-type") ?? "";
+    const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    const contentType = options.overrideMediaType ?? asset.mediaType ?? "";
 
     // Check if this is a glTF .glb or .gltf file
     if (
@@ -105,7 +105,13 @@ export class ModelCache {
 
     // Check if this is a STL file based on content-type or file extension
     if (STL_MIME_TYPES.includes(contentType) || /\.stl$/i.test(url)) {
-      return this.#loadSTL(url, buffer, this.options.meshUpAxis);
+      // Create a copy of the array buffer to respect the `byteOffset` and `byteLength` value as
+      // the underlying three.js STLLoader only accepts an ArrayBuffer instance.
+      return this.#loadSTL(
+        url,
+        buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
+        this.options.meshUpAxis,
+      );
     }
 
     // Check if this is a COLLADA file based on content-type or file extension

@@ -4,6 +4,7 @@
 
 import { Time } from "@foxglove/rostime";
 import { Immutable, MessageEvent, ParameterValue } from "@foxglove/studio";
+import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import {
   AdvertiseOptions,
   PlayerState,
@@ -25,6 +26,7 @@ export type MessagePipelineContext = Immutable<{
   setParameter: (key: string, value: ParameterValue) => void;
   publish: (request: PublishPayload) => void;
   callService: (service: string, request: unknown) => Promise<unknown>;
+  fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
   startPlayback?: () => void;
   pausePlayback?: () => void;
   playUntil?: (time: Time) => void;

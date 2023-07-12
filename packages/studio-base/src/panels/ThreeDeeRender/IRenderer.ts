@@ -13,6 +13,7 @@ import {
   Topic,
   VariableValue,
 } from "@foxglove/studio";
+import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import { LabelPool } from "@foxglove/three-text";
 
@@ -346,4 +347,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   // Callback handlers
   animationFrame: () => void;
   queueAnimationFrame: () => void;
+
+  // Function to fetch an asset from Studio's asset manager.
+  fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
 }

@@ -4,6 +4,7 @@
 
 import { Time } from "@foxglove/rostime";
 import { Immutable, ParameterValue } from "@foxglove/studio";
+import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
@@ -129,6 +130,13 @@ export class TopicAliasingPlayer implements Player {
   public setGlobalVariables(globalVariables: GlobalVariables): void {
     this.#player.setGlobalVariables(globalVariables);
     this.#inputs = { ...this.#inputs, variables: globalVariables };
+  }
+
+  public async fetchAsset(uri: string): Promise<Asset> {
+    if (this.#player.fetchAsset) {
+      return await this.#player.fetchAsset(uri);
+    }
+    throw Error("Player does not support fetching assets");
   }
 
   async #onPlayerState(playerState: PlayerState) {

@@ -15,6 +15,7 @@ import { MessageDefinition } from "@foxglove/message-definition";
 import { Time } from "@foxglove/rostime";
 import type { MessageEvent, ParameterValue } from "@foxglove/studio";
 import { Immutable } from "@foxglove/studio";
+import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
@@ -55,6 +56,8 @@ export interface Player {
   // If the player support service calls (i.e. PlayerState#capabilities contains PlayerCapabilities.callServices)
   // this will make a service call to the named service with the request payload.
   callService(service: string, request: unknown): Promise<unknown>;
+  // Asset fetching. Available if `capabilities` contains PlayerCapabilities.assets.
+  fetchAsset?(uri: string): Promise<Asset>;
   // Basic playback controls. Available if `capabilities` contains PlayerCapabilities.playbackControl.
   startPlayback?(): void;
   pausePlayback?(): void;
@@ -297,6 +300,9 @@ export type PublishPayload = { topic: string; msg: Record<string, unknown> };
 export const PlayerCapabilities = {
   // Publishing messages. Need to be connected to some sort of live robotics system (e.g. ROS).
   advertise: "advertise",
+
+  // Fetching assets.
+  assets: "assets",
 
   // Calling services
   callServices: "callServices",

@@ -15,6 +15,7 @@ import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serializati
 import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
 import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
+import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
@@ -45,6 +46,9 @@ import {
   ServiceCallResponse,
   Parameter,
   StatusLevel,
+  FetchAssetStatus,
+  FetchAssetResponse,
+  BinaryOpcode,
 } from "@foxglove/ws-protocol";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
@@ -132,6 +136,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #subscribedTopics?: Map<string, Set<string>>;
   #advertisedServices?: Map<string, Set<string>>;
   #nextServiceCallId = 0;
+  #nextAssetRequestId = 0;
+  #fetchAssetRequests = new Map<number, (response: FetchAssetResponse) => void>();
+  #fetchedAssets = new Map<string, Promise<Asset>>();
 
   public constructor({
     url,
@@ -345,6 +352,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       if (event.capabilities.includes(ServerCapability.connectionGraph)) {
         this.#client?.subscribeConnectionGraph();
+      }
+
+      if (event.capabilities.includes(ServerCapability.assets)) {
+        this.#playerCapabilities = this.#playerCapabilities.concat(PlayerCapabilities.assets);
       }
 
       this.#emitState();
@@ -684,6 +695,17 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       this.#emitState();
     });
+
+    this.#client.on("fetchAssetResponse", (response) => {
+      const responseCallback = this.#fetchAssetRequests.get(response.requestId);
+      if (!responseCallback) {
+        throw Error(
+          `Received a response for a fetch asset request for which no callback was registered`,
+        );
+      }
+      responseCallback(response);
+      this.#serviceResponseCbs.delete(response.requestId);
+    });
   };
 
   #updateTopicsAndDatatypes() {
@@ -987,6 +1009,50 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
   }
 
+  public async fetchAsset(uri: string): Promise<Asset> {
+    if (!this.#client) {
+      throw new Error(
+        `Attempted to fetch assset ${uri} without a valid Foxglove WebSocket connection.`,
+      );
+    } else if (!this.#serverCapabilities.includes(ServerCapability.assets)) {
+      throw new Error(`Fetching assets (${uri}) is not supported for FoxgloveWebSocketPlayer`);
+    }
+
+    let promise = this.#fetchedAssets.get(uri);
+    if (promise) {
+      return await promise;
+    }
+
+    promise = new Promise<Asset>((resolve, reject) => {
+      const fetchedAsset = this.#fetchedAssets.get(uri);
+      if (fetchedAsset) {
+        resolve(fetchedAsset);
+        return;
+      }
+
+      const assetRequestId = ++this.#nextAssetRequestId;
+      this.#fetchAssetRequests.set(assetRequestId, (response) => {
+        if (response.status === FetchAssetStatus.SUCCESS) {
+          const newAsset: Asset = {
+            uri,
+            data: new Uint8Array(
+              response.data.buffer,
+              response.data.byteOffset,
+              response.data.byteLength,
+            ),
+          };
+          resolve(newAsset);
+        } else {
+          reject(new Error(`Failed to fetch asset: ${response.error}`));
+        }
+      });
+      this.#client?.fetchAsset(uri, assetRequestId);
+    });
+
+    this.#fetchedAssets.set(uri, promise);
+    return await promise;
+  }
+
   public setGlobalVariables(): void {}
 
   // Return the current time
@@ -1111,6 +1177,16 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#hasReceivedMessage = false;
     this.#problems.clear();
     this.#parameters.clear();
+    this.#fetchedAssets.clear();
+    for (const [requestId, callback] of this.#fetchAssetRequests) {
+      callback({
+        op: BinaryOpcode.FETCH_ASSET_RESPONSE,
+        status: FetchAssetStatus.ERROR,
+        requestId,
+        error: "WebSocket connection reset",
+      });
+    }
+    this.#fetchAssetRequests.clear();
   }
 
   #updateDataTypes(datatypes: MessageDefinitionMap): void {

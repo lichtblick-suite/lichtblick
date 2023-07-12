@@ -23,6 +23,7 @@ import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
+import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { MemoizedLibGenerator } from "@foxglove/studio-base/players/UserNodePlayer/MemoizedLibGenerator";
 import { generateTypesLib } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
@@ -1094,6 +1095,13 @@ export default class UserNodePlayer implements Player {
 
   public async callService(service: string, request: unknown): Promise<unknown> {
     return await this.#player.callService(service, request);
+  }
+
+  public async fetchAsset(uri: string): Promise<Asset> {
+    if (this.#player.fetchAsset) {
+      return await this.#player.fetchAsset(uri);
+    }
+    throw Error("Player does not support fetching assets");
   }
 
   public startPlayback(): void {

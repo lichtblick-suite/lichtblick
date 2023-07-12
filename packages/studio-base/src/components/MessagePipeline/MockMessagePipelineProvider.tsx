@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Immutable } from "immer";
 import { omit } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import shallowequal from "shallowequal";
@@ -18,7 +19,8 @@ import { Writable } from "ts-essentials";
 import { createStore } from "zustand";
 
 import { Time, isLessThan } from "@foxglove/rostime";
-import { Immutable, ParameterValue } from "@foxglove/studio";
+import { ParameterValue } from "@foxglove/studio";
+import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import {
   AdvertiseOptions,
   MessageEvent,
@@ -56,6 +58,7 @@ export type MockMessagePipelineProps = {
   setPublishers?: (arg0: string, arg1: AdvertiseOptions[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
   setParameter?: (key: string, value: ParameterValue) => void;
+  fetchAsset?: BuiltinPanelExtensionContext["unstable_fetchAsset"];
   noActiveData?: boolean;
   activeData?: Partial<PlayerStateActiveData>;
   capabilities?: string[];
@@ -155,6 +158,11 @@ function getPublicState(
     setParameter: props.setParameter ?? noop,
     publish: props.publish ?? noop,
     callService: props.callService ?? (async () => {}),
+    fetchAsset:
+      props.fetchAsset ??
+      (async () => {
+        throw new Error(`not supported`);
+      }),
     startPlayback: props.startPlayback,
     playUntil: noop,
     pausePlayback: props.pausePlayback,
