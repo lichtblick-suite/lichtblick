@@ -332,7 +332,10 @@ export function usePlotPanelDatasets(params: Params): {
 
       const mergedDatasets: DataSets = {
         bounds: unionBounds(accumulated.bounds, newDatasets.bounds),
-        datasets: zipWith(accumulated.datasets, newDatasets.datasets, mergeDatasets),
+        // If showing a single current message replace instead of concatenating datasets.
+        datasets: showSingleCurrentMessage
+          ? newDatasets.datasets
+          : zipWith(accumulated.datasets, newDatasets.datasets, mergeDatasets),
         pathsWithMismatchedDataLengths: union(
           accumulated.pathsWithMismatchedDataLengths,
           newDatasets.pathsWithMismatchedDataLengths,
