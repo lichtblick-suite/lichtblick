@@ -3,11 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { CSSProperties, useMemo } from "react";
-import { withStyles } from "tss-react/mui";
+import { makeStyles } from "tss-react/mui";
 
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 
-export const Wrapper = withStyles("div", () => ({
+export const useStyles = makeStyles()(() => ({
   root: {
     top: 0,
     bottom: 0,
@@ -28,6 +28,7 @@ export function VerticalBarWrapper({
   scales,
   xValue,
 }: React.PropsWithChildren<VerticalBarWrapperProps>): JSX.Element {
+  const { classes } = useStyles();
   const positionX = useMemo(() => {
     const xScale = scales?.x;
     if (!xScale || xValue == undefined) {
@@ -56,5 +57,9 @@ export function VerticalBarWrapper({
     return { visibility: "visible", transform: `translateX(${positionX}px)` };
   }, [positionX]);
 
-  return <Wrapper style={style}>{children}</Wrapper>;
+  return (
+    <div className={classes.root} style={style}>
+      {children}
+    </div>
+  );
 }

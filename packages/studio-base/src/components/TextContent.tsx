@@ -15,13 +15,12 @@ import { Link } from "@mui/material";
 import { PropsWithChildren, CSSProperties, useCallback, useContext } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { withStyles } from "tss-react/mui";
+import { makeStyles } from "tss-react/mui";
 
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const TextContentRoot = withStyles("div", (theme) => {
-  const { palette, shape, spacing, typography, shadows } = theme;
+const useStyles = makeStyles()(({ palette, shape, spacing, typography, shadows }) => {
   return {
     root: {
       fontFamily: typography.body2.fontFamily,
@@ -163,7 +162,7 @@ export default function TextContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement | ReactNull {
   const { children, style, allowMarkdownHtml } = props;
-
+  const { classes } = useStyles();
   const handleLink = useContext(LinkHandlerContext);
 
   const linkRenderer = useCallback(
@@ -186,7 +185,7 @@ export default function TextContent(
   );
 
   return (
-    <TextContentRoot style={style}>
+    <div className={classes.root} style={style}>
       {typeof children === "string" ? (
         <Markdown
           rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw] : []}
@@ -197,6 +196,6 @@ export default function TextContent(
       ) : (
         children
       )}
-    </TextContentRoot>
+    </div>
   );
 }
