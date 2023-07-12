@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
 import { cloneDeep } from "lodash";
 import { useEffect, useState } from "react";
 
@@ -12,6 +13,7 @@ import { ImageModeConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRe
 import { makeRawImageAndCalibration } from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
+import delay from "@foxglove/studio-base/util/delay";
 
 import { ImagePanel } from "../../index";
 
@@ -23,7 +25,10 @@ export default {
   },
 };
 
-const AnnotationsStory = (imageModeConfigOverride: Partial<ImageModeConfig> = {}): JSX.Element => {
+const AnnotationsStory = (
+  args: { debugPicking?: boolean; imageModeConfigOverride?: Partial<ImageModeConfig> } = {},
+): JSX.Element => {
+  const { debugPicking, imageModeConfigOverride } = args;
   const width = 60;
   const height = 45;
   const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
@@ -247,19 +252,22 @@ const AnnotationsStory = (imageModeConfigOverride: Partial<ImageModeConfig> = {}
     },
   };
   return (
-    <PanelSetup fixture={fixture}>
-      <ImagePanel
-        overrideConfig={{
-          ...ImagePanel.defaultConfig,
-          imageMode: {
-            calibrationTopic: "calibration",
-            imageTopic: "camera",
-            annotations: { annotations: { visible: true } },
-            ...imageModeConfigOverride,
-          },
-        }}
-      />
-    </PanelSetup>
+    <div style={{ width: 1200, height: 900, flexShrink: 0 }}>
+      <PanelSetup fixture={fixture}>
+        <ImagePanel
+          debugPicking={debugPicking}
+          overrideConfig={{
+            ...ImagePanel.defaultConfig,
+            imageMode: {
+              calibrationTopic: "calibration",
+              imageTopic: "camera",
+              annotations: { annotations: { visible: true } },
+              ...imageModeConfigOverride,
+            },
+          }}
+        />
+      </PanelSetup>
+    </div>
   );
 };
 
@@ -267,9 +275,28 @@ export const Annotations: StoryObj = {
   render: AnnotationsStory,
 };
 
+export const AnnotationsPicking: StoryObj = {
+  render: AnnotationsStory,
+  args: {
+    debugPicking: true,
+  },
+  async play() {
+    await delay(1000);
+    await userEvent.hover(await screen.findByTestId(/panel-mouseenter-container/));
+    await userEvent.click(await screen.findByTestId("ExpandingToolbar-Inspect objects"));
+    await userEvent.pointer({
+      target: document.querySelector("canvas")!,
+      keys: "[MouseLeft]",
+      coords: { clientX: 0, clientY: 0 },
+    });
+  },
+};
+
 export const AnnotationsWithoutCalibration: StoryObj = {
   render: AnnotationsStory,
-  args: { calibrationTopic: undefined },
+  args: {
+    imageModeConfigOverride: { calibrationTopic: undefined },
+  },
 };
 
 export const MessageConverterSupport: StoryObj = {

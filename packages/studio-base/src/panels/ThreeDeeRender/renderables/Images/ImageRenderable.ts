@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { assert } from "ts-essentials";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
+import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { IRenderer } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderable";
@@ -17,6 +18,8 @@ import { RosValue } from "@foxglove/studio-base/players/types";
 import { AnyImage } from "./ImageTypes";
 import { RawImageOptions, decodeCompressedImageToBitmap } from "./decodeImage";
 import { CameraInfo } from "../../ros";
+
+const log = Logger.getLogger(__filename);
 
 export interface ImageRenderableSettings {
   visible: boolean;
@@ -195,6 +198,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         this.renderer.queueAnimationFrame();
       })
       .catch((err) => {
+        log.error(err);
         if (this.#disposed) {
           return;
         }
