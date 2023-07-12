@@ -12,7 +12,7 @@
 
 import { useSnackbar } from "notistack";
 import { extname } from "path";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -31,14 +31,12 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
 import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { Sidebars, SidebarItem } from "@foxglove/studio-base/components/Sidebars";
-import { SignInFormModal } from "@foxglove/studio-base/components/SignInFormModal";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { StudioLogsSettings } from "@foxglove/studio-base/components/StudioLogsSettings";
 import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
@@ -60,11 +58,11 @@ import {
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useDefaultWebLaunchPreference } from "@foxglove/studio-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
-import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+import { parseAppURLState } from "@foxglove/studio-base/util/appURLState";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 
@@ -99,12 +97,10 @@ function keyboardEventHasModifier(event: KeyboardEvent) {
 }
 
 type WorkspaceProps = CustomWindowControlsProps & {
-  deepLinks?: string[]; // eslint-disable-line react/no-unused-prop-types
+  deepLinks?: string[];
   appBarLeftInset?: number;
   onAppBarDoubleClick?: () => void;
 };
-
-const DEFAULT_DEEPLINKS = Object.freeze([]);
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerIsPresent = ({ playerState }: MessagePipelineContext) =>
@@ -118,6 +114,7 @@ const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
 const selectPlayerId = (ctx: MessagePipelineContext) => ctx.playerState.playerId;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
+const selectSelectEvent = (store: EventsStore) => store.selectEvent;
 
 const selectWorkspaceDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 const selectWorkspaceSidebarItem = (store: WorkspaceContextStore) => store.sidebars.legacy.item;
@@ -128,9 +125,7 @@ const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
 
-type WorkspaceContentProps = WorkspaceProps & { showSignInForm: boolean };
-
-function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
+function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
@@ -418,15 +413,55 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
     [getMessagePipeline],
   );
 
+  const targetUrlState = useMemo(() => {
+    const deepLinks = props.deepLinks ?? [];
+    return deepLinks[0] ? parseAppURLState(new URL(deepLinks[0])) : undefined;
+  }, [props.deepLinks]);
+
+  const [unappliedSourceArgs, setUnappliedSourceArgs] = useState(
+    targetUrlState ? { ds: targetUrlState.ds, dsParams: targetUrlState.dsParams } : undefined,
+  );
+
+  const selectEvent = useEvents(selectSelectEvent);
+  // Load data source from URL.
+  useEffect(() => {
+    if (!unappliedSourceArgs) {
+      return;
+    }
+
+    // Apply any available datasource args
+    if (unappliedSourceArgs.ds) {
+      log.debug("Initialising source from url", unappliedSourceArgs);
+      selectSource(unappliedSourceArgs.ds, {
+        type: "connection",
+        params: unappliedSourceArgs.dsParams,
+      });
+      selectEvent(unappliedSourceArgs.dsParams?.eventId);
+      setUnappliedSourceArgs({ ds: undefined, dsParams: undefined });
+    }
+  }, [selectEvent, selectSource, unappliedSourceArgs, setUnappliedSourceArgs]);
+
+  const [unappliedTime, setUnappliedTime] = useState(
+    targetUrlState ? { time: targetUrlState.time } : undefined,
+  );
+  // Seek to time in URL.
+  useEffect(() => {
+    if (unappliedTime?.time == undefined || !seek) {
+      return;
+    }
+
+    // Wait until player is ready before we try to seek.
+    if (playerPresence !== PlayerPresence.PRESENT) {
+      return;
+    }
+
+    log.debug(`Seeking to url time:`, unappliedTime.time);
+    seek(unappliedTime.time);
+    setUnappliedTime({ time: undefined });
+  }, [playerPresence, seek, unappliedTime]);
+
   return (
-    <MultiProvider
-      providers={[
-        /* eslint-disable react/jsx-key */
-        <PanelStateContextProvider />,
-        /* eslint-enable react/jsx-key */
-      ]}
-    >
-      {props.showSignInForm && <SignInFormModal userSwitchRequired={currentUser != undefined} />}
+    <PanelStateContextProvider>
       {dataSourceDialog.open && <DataSourceDialog />}
       <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
       <SyncAdapters />
@@ -474,9 +509,9 @@ function WorkspaceContent(props: WorkspaceContentProps): JSX.Element {
           </div>
         )}
       </div>
-      {!props.showSignInForm && workspaceExtensions}
+      {workspaceExtensions}
       <WorkspaceDialogs />
-    </MultiProvider>
+    </PanelStateContextProvider>
   );
 }
 
@@ -485,18 +520,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
   );
 
-  const { currentUser } = useCurrentUser();
-
-  const { currentUserRequired, userSwitchRequired } = useInitialDeepLinkState(
-    props.deepLinks ?? DEFAULT_DEEPLINKS,
-  );
-
   const isPlayerPresent = useMessagePipeline(selectPlayerIsPresent);
 
-  const showSignInForm = currentUserRequired && (currentUser == undefined || userSwitchRequired);
-
   const initialItem: undefined | DataSourceDialogItem =
-    isPlayerPresent || !showOpenDialogOnStartup || showSignInForm ? undefined : "start";
+    isPlayerPresent || !showOpenDialogOnStartup ? undefined : "start";
 
   const initialState: Pick<WorkspaceContextStore, "dialogs"> = {
     dialogs: {
@@ -514,7 +541,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   return (
     <WorkspaceContextProvider initialState={initialState}>
-      <WorkspaceContent showSignInForm={showSignInForm} {...props} />
+      <WorkspaceContent {...props} />
     </WorkspaceContextProvider>
   );
 }
