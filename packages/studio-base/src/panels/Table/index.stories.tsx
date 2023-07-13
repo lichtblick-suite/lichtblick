@@ -6,6 +6,7 @@ import { StoryObj } from "@storybook/react";
 import { fireEvent, userEvent, within } from "@storybook/testing-library";
 
 import Table from "@foxglove/studio-base/panels/Table";
+import { mockMessage } from "@foxglove/studio-base/players/TopicAliasingPlayer/mocks";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 const makeArrayData = ({
@@ -58,6 +59,32 @@ const fixture: Fixture = {
   },
 };
 
+const longTextFixture: Fixture = {
+  datatypes: new Map([
+    [
+      "schema",
+      {
+        definitions: [
+          { type: "string", name: "value_a", isConstant: false, isArray: false },
+          { type: "string", name: "value_b", isConstant: false, isArray: false },
+        ],
+      },
+    ],
+  ]),
+  topics: [{ name: "topic", schemaName: "schema" }],
+  frame: {
+    topic: [
+      mockMessage(
+        {
+          value_a: Array(30).fill("Long string that could wrap.").join(" \n"),
+          value_b: "Another value",
+        },
+        { topic: "topic" },
+      ),
+    ],
+  },
+};
+
 export default {
   title: "panels/Table",
 };
@@ -74,6 +101,14 @@ export const NoData: StoryObj = {
   render: () => (
     <PanelSetup fixture={{ frame: {}, topics: [] }}>
       <Table overrideConfig={{ topicPath: "/unknown" }} />
+    </PanelSetup>
+  ),
+};
+
+export const LongTextValue: StoryObj = {
+  render: () => (
+    <PanelSetup fixture={longTextFixture}>
+      <Table overrideConfig={{ topicPath: "topic" }} />
     </PanelSetup>
   ),
 };
