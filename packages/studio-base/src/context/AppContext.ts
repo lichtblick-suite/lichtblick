@@ -4,8 +4,11 @@
 
 import { createContext, useContext } from "react";
 
+import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
+
 interface IAppContext {
   appBarLayoutButton?: JSX.Element;
+  appBarMenuItems?: readonly AppBarMenuItem[];
   createEvent?: (args: {
     deviceId: string;
     timestamp: string;
