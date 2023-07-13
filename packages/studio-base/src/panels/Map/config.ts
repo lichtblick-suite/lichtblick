@@ -35,6 +35,7 @@ function isGeoJSONSchema(schemaName: string) {
   switch (schemaName) {
     case "foxglove_msgs/GeoJSON":
     case "foxglove_msgs/msg/GeoJSON":
+    case "foxglove::GeoJSON":
     case "foxglove.GeoJSON":
       return true;
     default:

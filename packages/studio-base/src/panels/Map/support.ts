@@ -33,6 +33,7 @@ export function isGeoJSONMessage(msgEvent: MessageEvent): msgEvent is GeoJsonMes
   return (
     datatype === "foxglove_msgs/GeoJSON" ||
     datatype === "foxglove_msgs/msg/GeoJSON" ||
+    datatype === "foxglove::GeoJSON" ||
     datatype === "foxglove.GeoJSON"
   );
 }
@@ -64,8 +65,10 @@ export function isSupportedSchema(schemaName: string): boolean {
     case "foxglove_msgs/LocationFix":
     case "foxglove_msgs/msg/LocationFix":
     case "foxglove.LocationFix":
+    case "foxglove::LocationFix":
     case "foxglove_msgs/GeoJSON":
     case "foxglove_msgs/msg/GeoJSON":
+    case "foxglove::GeoJSON":
     case "foxglove.GeoJSON":
       return true;
     default:
