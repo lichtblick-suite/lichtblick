@@ -9,5 +9,5 @@ import { useStudioLogsSettingsTree } from "./useStudioLogsSettingsTree";
 export function StudioLogsSettings(): JSX.Element {
   const logSettings = useStudioLogsSettingsTree();
 
-  return <SettingsTreeEditor settings={logSettings} />;
+  return <SettingsTreeEditor variant="log" settings={logSettings} />;
 }

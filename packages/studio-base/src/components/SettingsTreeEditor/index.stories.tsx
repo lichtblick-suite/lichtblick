@@ -4,7 +4,7 @@
 
 import { useTheme } from "@mui/material";
 import { StoryObj } from "@storybook/react";
-import { fireEvent, userEvent } from "@storybook/testing-library";
+import { userEvent, within } from "@storybook/testing-library";
 import { produce } from "immer";
 import { last } from "lodash";
 import { useCallback, useMemo, useState, useEffect } from "react";
@@ -845,7 +845,7 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
   return (
     <PanelSetup fixture={MessagePathInputStoryFixture}>
       <Stack fullWidth overflow="auto" style={{ background: theme.palette.background.paper }}>
-        <SettingsTreeEditor settings={settingsTree} />
+        <SettingsTreeEditor variant="panel" settings={settingsTree} />
       </Stack>
     </PanelSetup>
   );
@@ -856,10 +856,10 @@ export const Basics: StoryObj = {
     return <Wrapper nodes={BasicSettings} />;
   },
 
-  play: () => {
-    Array.from(document.querySelectorAll("[data-testid=node-actions-menu-button]"))
-      .slice(0, 1)
-      .forEach((node) => fireEvent.click(node));
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const [button] = await canvas.findAllByTestId("node-actions-menu-button");
+    await userEvent.click(button!);
   },
 };
 
@@ -889,14 +889,13 @@ export const PanelExamples: StoryObj = {
     return <Wrapper nodes={PanelExamplesSettings} />;
   },
 
-  play: () => {
-    Array.from(document.querySelectorAll("[data-node-function=edit-label]"))
-      .slice(0, 1)
-      .forEach((node) => {
-        fireEvent.click(node);
-        fireEvent.change(document.activeElement!, { target: { value: "Renamed Node" } });
-        fireEvent.keyDown(document.activeElement!, { key: "Enter" });
-      });
+  play: async ({ canvasElement }) => {
+    const [button] = canvasElement.querySelectorAll("[data-node-function=edit-label]");
+
+    const user = userEvent.setup();
+
+    await user.click(button!);
+    await user.keyboard("Renamed Node {Enter}");
   },
 };
 
@@ -917,12 +916,11 @@ export const Filter: StoryObj = {
     return <Wrapper nodes={FilterSettings} />;
   },
 
-  play: () => {
-    const node = document.querySelector("[data-testid=settings-filter-field] input");
-    if (node) {
-      fireEvent.click(node);
-      fireEvent.change(node, { target: { value: "matcha" } });
-    }
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const [input] = await canvas.findAllByTestId("panel-settings-filter-input");
+
+    await userEvent.type(input!, "matcha");
   },
 };
 

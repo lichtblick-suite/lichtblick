@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CloseIcon from "@mui/icons-material/Close";
+import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, TextField } from "@mui/material";
 import fuzzySort from "fuzzysort";
@@ -214,6 +214,7 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
       >
         <TextField
           fullWidth
+          variant="filled"
           placeholder={t("searchPanels")}
           value={searchQuery}
           onChange={handleSearchChange}
@@ -221,10 +222,10 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
           autoFocus
           data-testid="panel-list-textfield"
           InputProps={{
-            startAdornment: <SearchIcon fontSize="small" color="primary" />,
+            startAdornment: <SearchIcon fontSize="small" />,
             endAdornment: searchQuery && (
               <IconButton size="small" edge="end" onClick={() => setSearchQuery("")}>
-                <CloseIcon fontSize="small" />
+                <CancelIcon fontSize="small" />
               </IconButton>
             ),
           }}

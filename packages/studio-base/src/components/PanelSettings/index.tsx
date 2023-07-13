@@ -168,6 +168,7 @@ export default function PanelSettings({
           )}
           {settingsTree || showTitleField ? (
             <SettingsTreeEditor
+              variant="panel"
               key={selectedPanelId}
               settings={settingsTree ?? EMPTY_SETTINGS_TREE}
             />
