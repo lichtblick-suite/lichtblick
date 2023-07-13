@@ -135,14 +135,21 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     // moves forward to track the next place we should be reading.
     let readHead = args.start ?? this.#initResult.start;
 
+    const findIndexContainingPredicate = (item: CacheBlock) => {
+      return compare(item.start, readHead) <= 0 && compare(item.end, readHead) >= 0;
+    };
+
+    const findAfterPredicate = (item: CacheBlock) => {
+      // Find the first index where readHead is less than an existing start
+      return compare(readHead, item.start) < 0;
+    };
+
     for (;;) {
       if (compare(readHead, maxEnd) > 0) {
         break;
       }
 
-      const cacheBlockIndex = this.#cache.findIndex((item) => {
-        return compare(item.start, readHead) <= 0 && compare(item.end, readHead) >= 0;
-      });
+      const cacheBlockIndex = this.#cache.findIndex(findIndexContainingPredicate);
 
       let block = this.#cache[cacheBlockIndex];
 
@@ -195,10 +202,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
       const sourceReadStart = readHead;
 
       // Look for the block that comes after our read head
-      const nextBlockIndex = this.#cache.findIndex((item) => {
-        // Find the first index where readHead is less than an existing start
-        return compare(readHead, item.start) < 0;
-      });
+      const nextBlockIndex = this.#cache.findIndex(findAfterPredicate);
 
       // If we have a next block (this is the block ours would come before), then we only need
       // to read up to that block.

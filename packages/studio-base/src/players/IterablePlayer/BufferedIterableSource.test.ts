@@ -26,6 +26,7 @@ function waiter(count: number) {
     wait: async () => {
       for (let i = 0; i < count; ++i) {
         await notificationSignal;
+        // eslint-disable-next-line no-loop-func
         notificationSignal = new Promise<void>((resolve) => {
           resolver = resolve;
         });

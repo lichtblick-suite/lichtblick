@@ -167,6 +167,9 @@ overrides:
       "@typescript-eslint/no-unnecessary-condition": error
       "@typescript-eslint/unbound-method": [error, { ignoreStatic: true }]
 
+      # https://eslint.org/docs/latest/rules/no-loop-func
+      "no-loop-func": error
+
   - rules:
       "@typescript-eslint/no-explicit-any": off
     files:

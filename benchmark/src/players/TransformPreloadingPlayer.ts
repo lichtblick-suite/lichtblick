@@ -246,6 +246,7 @@ class TransformPreloadingPlayer implements Player {
         const endFrame = performance.now();
         seekFramesMs.push(endFrame - startFrame);
       }
+      // eslint-disable-next-line no-loop-func
       seekFramesMs.forEach((ms, i) => (seekFramesMsTotals[i]! += ms));
     }
 
