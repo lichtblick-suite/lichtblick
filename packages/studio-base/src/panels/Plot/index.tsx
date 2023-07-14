@@ -13,6 +13,7 @@
 
 import { compact, isNumber, uniq } from "lodash";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
+import { DeepWritable } from "ts-essentials";
 
 import {
   Time,
@@ -36,7 +37,7 @@ import PanelToolbar, {
 } from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
-import { usePlotPanelDatasets } from "@foxglove/studio-base/panels/Plot/usePlotPanelDatasets";
+import { usePlotPanelData } from "@foxglove/studio-base/panels/Plot/usePlotPanelData";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
@@ -82,6 +83,11 @@ function selectCurrentTime(ctx: MessagePipelineContext) {
 
 function selectEndTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.endTime;
+}
+
+// Hack until we can make all the downstream chart types immutable.
+function castWritable<T>(t: T) {
+  return t as DeepWritable<T>;
 }
 
 function Plot(props: Props) {
@@ -177,7 +183,7 @@ function Plot(props: Props) {
     bounds: datasetBounds,
     datasets,
     pathsWithMismatchedDataLengths,
-  } = usePlotPanelDatasets({
+  } = usePlotPanelData({
     allPaths,
     followingView,
     showSingleCurrentMessage,
@@ -242,32 +248,32 @@ function Plot(props: Props) {
       >
         {legendDisplay !== "none" && (
           <PlotLegend
-            paths={yAxisPaths}
-            datasets={datasets}
             currentTime={currentTimeSinceStart}
+            datasets={datasets}
+            legendDisplay={legendDisplay}
             onClickPath={(index: number) => setFocusedPath(["paths", String(index)])}
+            paths={yAxisPaths}
+            pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
             saveConfig={saveConfig}
             showLegend={showLegend}
-            pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
-            legendDisplay={legendDisplay}
             showPlotValuesInLegend={showPlotValuesInLegend}
             sidebarDimension={sidebarDimension}
           />
         )}
         <Stack flex="auto" alignItems="center" justifyContent="center" overflow="hidden">
           <PlotChart
+            currentTime={currentTimeSinceStart}
+            datasetBounds={datasetBounds}
+            datasets={castWritable(datasets)}
+            defaultView={defaultView}
             isSynced={xAxisVal === "timestamp" && isSynced}
-            paths={yAxisPaths}
-            minYValue={parseFloat((minYValue ?? "").toString())}
             maxYValue={parseFloat((maxYValue ?? "").toString())}
+            minYValue={parseFloat((minYValue ?? "").toString())}
+            onClick={onClick}
+            paths={yAxisPaths}
             showXAxisLabels={showXAxisLabels}
             showYAxisLabels={showYAxisLabels}
-            datasets={datasets}
-            datasetBounds={datasetBounds}
             xAxisVal={xAxisVal}
-            currentTime={currentTimeSinceStart}
-            onClick={onClick}
-            defaultView={defaultView}
           />
           <PanelContextMenu getItems={getPanelContextMenuItems} />
         </Stack>

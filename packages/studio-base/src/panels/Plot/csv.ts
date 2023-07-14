@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "@foxglove/studio";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
@@ -23,7 +24,7 @@ const getCVSColName = (xAxisVal: PlotXAxisVal): string => {
   }[xAxisVal];
 };
 
-function generateCSV(datasets: DataSet[], xAxisVal: PlotXAxisVal): string {
+function generateCSV(datasets: Immutable<DataSet[]>, xAxisVal: PlotXAxisVal): string {
   const headLine = [getCVSColName(xAxisVal), "receive time", "header.stamp", "topic", "value"];
   const combinedLines = [];
   combinedLines.push(headLine);
@@ -35,7 +36,7 @@ function generateCSV(datasets: DataSet[], xAxisVal: PlotXAxisVal): string {
   return combinedLines.join("\n");
 }
 
-function downloadCSV(datasets: DataSet[], xAxisVal: PlotXAxisVal): void {
+function downloadCSV(datasets: Immutable<DataSet[]>, xAxisVal: PlotXAxisVal): void {
   const csvData = generateCSV(datasets, xAxisVal);
   const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
   downloadFiles([{ blob, fileName: `plot_data.csv` }]);

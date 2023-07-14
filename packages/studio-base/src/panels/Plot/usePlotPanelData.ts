@@ -3,13 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
-import { groupBy, intersection, isEmpty, transform, union, zipWith } from "lodash";
-import { useCallback, useMemo, useState } from "react";
+import { groupBy, intersection, isEmpty, mapValues } from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLatest } from "react-use";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
-import { isLessThan, subtract } from "@foxglove/rostime";
+import { isGreaterThan, isLessThan, isTimeInRangeInclusive, subtract } from "@foxglove/rostime";
 import { Immutable, Subscription, Time } from "@foxglove/studio";
 import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import parseRosPath, {
@@ -20,31 +20,23 @@ import {
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
-import {
-  BasePlotPath,
-  DataSet,
-  PlotDataByPath,
-  PlotPath,
-  PlotXAxisVal,
-} from "@foxglove/studio-base/panels/Plot/internalTypes";
-import * as PlotData from "@foxglove/studio-base/panels/Plot/plotData";
 import { derivative } from "@foxglove/studio-base/panels/Plot/transformPlotRange";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { Bounds, makeInvertedBounds, unionBounds } from "@foxglove/studio-base/types/Bounds";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
-import { DataSets, getDatasets, mergeDatasets } from "./datasets";
-import { useFlattenedBlocksByTopic } from "./useFlattenedBlocksByTopic";
+import { calculateDatasetBounds } from "./datasets";
+import { BasePlotPath, DataSet, PlotDataByPath, PlotPath, PlotXAxisVal } from "./internalTypes";
+import * as maps from "./maps";
+import { getBlockItemsByPath } from "./messageProcessing";
+import { EmptyPlotData, PlotData, appendPlotData, buildPlotData, reducePlotData } from "./plotData";
+import { useAllFramesByTopic } from "./useAllFramesByTopic";
 
-const ZERO_TIME = { sec: 0, nsec: 0 };
+const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 
-const EmptyAllFrames: Record<string, MessageEvent[]> = {};
+const EmptyAllFrames: Immutable<Record<string, MessageEvent[]>> = Object.freeze({});
 
-const EmptyDatasets: DataSets = {
-  datasets: [],
-  bounds: makeInvertedBounds(),
-  pathsWithMismatchedDataLengths: [],
-};
+type TaggedPlotData = { tag: string; data: Immutable<PlotData> };
 
 type Params = Immutable<{
   allPaths: string[];
@@ -56,35 +48,34 @@ type Params = Immutable<{
   yAxisPaths: PlotPath[];
 }>;
 
-type State = DataSets & {
+type State = Immutable<{
   allFrames: Record<string, Immutable<MessageEvent[]>>;
   allPaths: readonly string[];
-  bounds: Bounds;
   cursors: Record<string, number>;
+  data: PlotData;
   subscriptions: Subscription[];
   xAxisVal: PlotXAxisVal;
   xAxisPath: undefined | BasePlotPath;
-};
+}>;
 
 /**
  * Applies the @derivative modifier to the dataset. This has to be done on the complete
  * dataset, not calculated incrementally.
  */
-function applyDerivativeToDatasets(datasets: DataSets["datasets"]): DataSets["datasets"] {
-  return datasets.map((dataset) => {
-    if (dataset == undefined) {
-      return undefined;
-    }
-
-    if (dataset.path.value.endsWith(".@derivative")) {
-      return {
-        path: dataset.path,
-        dataset: { ...dataset.dataset, data: derivative(dataset.dataset.data) },
-      };
-    } else {
-      return dataset;
-    }
-  });
+function applyDerivativeToPlotData(data: Immutable<PlotData>): Immutable<PlotData> {
+  return {
+    ...data,
+    datasetsByPath: maps.mapValues(data.datasetsByPath, (dataset, path) => {
+      if (path.value.endsWith(".@derivative")) {
+        return {
+          ...dataset,
+          data: derivative(dataset.data),
+        };
+      } else {
+        return dataset;
+      }
+    }),
+  };
 }
 
 /**
@@ -99,45 +90,38 @@ function applyDerivativeToDatasets(datasets: DataSets["datasets"]): DataSets["da
  * time ordering is undefined (could be different for different data sources), but the header stamps
  * still need sorting so the plot renders correctly.
  */
-function sortDatasetsByHeaderStamp(datasets: DataSets["datasets"]): DataSets["datasets"] {
-  return datasets.map((dataset) => {
-    if (dataset == undefined) {
-      return undefined;
-    }
-
-    if (dataset.path.timestampMethod !== "headerStamp") {
+function sortPlotDataByHeaderStamp(data: Immutable<PlotData>): Immutable<PlotData> {
+  const processedDatasets = maps.mapValues(data.datasetsByPath, (dataset, path) => {
+    if (path.timestampMethod !== "headerStamp") {
       return dataset;
     }
 
-    return {
-      path: dataset.path,
-      dataset: { ...dataset.dataset, data: dataset.dataset.data.sort((a, b) => a.x - b.x) },
-    };
+    return { ...dataset, data: dataset.data.slice().sort((a, b) => a.x - b.x) };
   });
+
+  return { ...data, datasetsByPath: processedDatasets };
 }
 
 function makeInitialState(): State {
   return {
     allFrames: {},
     allPaths: [],
-    bounds: makeInvertedBounds(),
     cursors: {},
-    datasets: [],
+    data: EmptyPlotData,
     subscriptions: [],
-    pathsWithMismatchedDataLengths: [],
     xAxisVal: "timestamp",
     xAxisPath: undefined,
   };
 }
 
 /**
- * Collates and combines datasets from alLFrames and currentFrame messages.
+ * Collates and combines data from alLFrames and currentFrame messages.
  */
-export function usePlotPanelDatasets(params: Params): {
+export function usePlotPanelData(params: Params): Immutable<{
   bounds: Bounds;
   datasets: DataSet[];
   pathsWithMismatchedDataLengths: string[];
-} {
+}> {
   const {
     allPaths,
     followingView,
@@ -165,9 +149,9 @@ export function usePlotPanelDatasets(params: Params): {
 
   const [state, setState] = useState(makeInitialState);
 
-  const allFramesFromBlocks = useFlattenedBlocksByTopic(subscribeTopics);
+  const allFramesByTopic = useAllFramesByTopic(subscribeTopics);
 
-  const allFrames = showSingleCurrentMessage ? EmptyAllFrames : allFramesFromBlocks;
+  const allFrames = showSingleCurrentMessage ? EmptyAllFrames : allFramesByTopic;
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(allPaths);
 
@@ -179,31 +163,21 @@ export function usePlotPanelDatasets(params: Params): {
     setState((oldState) => {
       const newState = resetDatasets ? makeInitialState() : oldState;
 
-      const newFramesByTopic = transform(
-        allFrames,
-        (acc, messages, topic) => {
-          acc[topic] = messages.slice(newState.cursors[topic] ?? 0);
-        },
-        {} as State["allFrames"],
+      const newFramesByTopic = mapValues(allFrames, (messages, topic) =>
+        messages.slice(newState.cursors[topic] ?? 0),
       );
 
-      const newCursors = transform(
-        allFrames,
-        (acc, messages, topic) => {
-          acc[topic] = messages.length;
-        },
-        {} as State["cursors"],
-      );
+      const newCursors = mapValues(allFrames, (messages) => messages.length);
 
-      const newBlockItems = PlotData.getBlockItemsByPath(
+      const newBlockItems = getBlockItemsByPath(
         decodeMessagePathsForMessagesByTopic,
         newFramesByTopic,
       );
 
       const anyNewFrames = Object.values(newFramesByTopic).some((msgs) => msgs.length > 0);
 
-      const newDatasets = anyNewFrames
-        ? getDatasets({
+      const newPlotData = anyNewFrames
+        ? buildPlotData({
             paths: yAxisPaths,
             itemsByPath: newBlockItems,
             startTime: startTime ?? ZERO_TIME,
@@ -211,24 +185,13 @@ export function usePlotPanelDatasets(params: Params): {
             xAxisPath,
             invertedTheme: theme.palette.mode === "dark",
           })
-        : EmptyDatasets;
-
-      const mergedDatasets: State["datasets"] = zipWith(
-        newState.datasets,
-        newDatasets.datasets,
-        mergeDatasets,
-      );
+        : EmptyPlotData;
 
       return {
         allFrames,
         allPaths,
-        bounds: unionBounds(newState.bounds, newDatasets.bounds),
         cursors: newCursors,
-        datasets: mergedDatasets,
-        pathsWithMismatchedDataLengths: union(
-          newState.pathsWithMismatchedDataLengths,
-          newDatasets.pathsWithMismatchedDataLengths,
-        ),
+        data: appendPlotData(newState.data, newPlotData),
         subscriptions,
         xAxisPath,
         xAxisVal,
@@ -238,34 +201,46 @@ export function usePlotPanelDatasets(params: Params): {
 
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(allPaths);
 
-  // When restoring, keep only the paths that are present in allPaths. Without this, the
-  // reducer value will grow unbounded with new paths as users add/remove series.
   const restore = useCallback(
-    (previous?: DataSets): DataSets => {
-      if (previous) {
-        return {
-          datasets: previous.datasets.filter((ds) => ds && allPaths.includes(ds.path.value)),
-          bounds: previous.bounds,
-          pathsWithMismatchedDataLengths: intersection(
-            previous.pathsWithMismatchedDataLengths,
-            allPaths,
-          ),
-        };
-      } else {
-        return {
-          datasets: [],
-          bounds: makeInvertedBounds(),
-          pathsWithMismatchedDataLengths: [],
-        };
+    (previous?: TaggedPlotData): TaggedPlotData => {
+      if (!previous) {
+        // If we're showing single frames, we don't want to accumulate chunks of messages
+        // across multiple frames, so we put everything into a single restore tag and
+        // each new frame replaces the old one.
+        const tag = showSingleCurrentMessage ? "single" : new Date().toISOString();
+        return { tag, data: EmptyPlotData };
       }
+
+      // Discard datasets no longer in current y paths and recompute bounds and mismatched
+      // paths so we don't hang onto data we no longer need.
+      const newYPathValues = yAxisPaths.map((path) => path.value);
+      const retainedDataSets = maps.pick(previous.data.datasetsByPath, yAxisPaths);
+      const newMismatchedPaths = intersection(
+        previous.data.pathsWithMismatchedDataLengths,
+        newYPathValues,
+      );
+      const newBounds = filterMap([...retainedDataSets.values()], calculateDatasetBounds).reduce(
+        unionBounds,
+        makeInvertedBounds(),
+      );
+
+      return {
+        tag: previous.tag,
+        data: {
+          bounds: newBounds,
+          datasetsByPath: retainedDataSets,
+          pathsWithMismatchedDataLengths: newMismatchedPaths,
+        },
+      };
     },
-    [allPaths],
+    [showSingleCurrentMessage, yAxisPaths],
   );
 
-  const latestAllFramesDatasets = useLatest(state.datasets);
+  // Access allFrames by reference to avoid invalidating the addMessages callback.
+  const latestAllFrames = useLatest(allFrames);
 
   const addMessages = useCallback(
-    (accumulated: DataSets, msgEvents: Immutable<MessageEvent[]>) => {
+    (accumulated: TaggedPlotData, msgEvents: Immutable<MessageEvent[]>) => {
       const lastEventTime = msgEvents.at(-1)?.receiveTime;
       const isFollowing = followingView?.type === "following";
       const newMessages: PlotDataByPath = {};
@@ -276,18 +251,27 @@ export function usePlotPanelDatasets(params: Params): {
           continue;
         }
 
-        for (const [pathIndex, path] of paths.entries()) {
-          // Skip datasets we're getting from allFrames.
-          if ((latestAllFramesDatasets.current[pathIndex]?.dataset.data.length ?? 0) > 0) {
-            continue;
-          }
-
+        for (const path of paths) {
           const dataItem = cachedGetMessagePathDataItems(path, msgEvent);
           if (!dataItem) {
             continue;
           }
 
           const headerStamp = getTimestampForMessage(msgEvent.message);
+
+          const allFramesForPathStart = latestAllFrames.current[path]?.at(0)?.receiveTime;
+          const allFramesForPathEnd = latestAllFrames.current[path]?.at(-1)?.receiveTime;
+          if (
+            allFramesForPathStart &&
+            allFramesForPathEnd &&
+            isTimeInRangeInclusive(msgEvent.receiveTime, allFramesForPathStart, allFramesForPathEnd)
+          ) {
+            // Skip messages that fall within the range of our allFrames data since we
+            // would just filter them out later anyway. Note that this assumes allFrames
+            // are loaded contiguously starting from the beginning of message data.
+            continue;
+          }
+
           const plotDataItem = {
             queriedData: dataItem,
             receiveTime: msgEvent.receiveTime,
@@ -321,7 +305,7 @@ export function usePlotPanelDatasets(params: Params): {
         return accumulated;
       }
 
-      const newDatasets = getDatasets({
+      const newPlotData = buildPlotData({
         paths: yAxisPaths,
         itemsByPath: newMessages,
         startTime: startTime ?? ZERO_TIME,
@@ -330,24 +314,17 @@ export function usePlotPanelDatasets(params: Params): {
         invertedTheme: theme.palette.mode === "dark",
       });
 
-      const mergedDatasets: DataSets = {
-        bounds: unionBounds(accumulated.bounds, newDatasets.bounds),
-        // If showing a single current message replace instead of concatenating datasets.
-        datasets: showSingleCurrentMessage
-          ? newDatasets.datasets
-          : zipWith(accumulated.datasets, newDatasets.datasets, mergeDatasets),
-        pathsWithMismatchedDataLengths: union(
-          accumulated.pathsWithMismatchedDataLengths,
-          newDatasets.pathsWithMismatchedDataLengths,
-        ),
+      return {
+        tag: accumulated.tag,
+        data: showSingleCurrentMessage
+          ? newPlotData
+          : appendPlotData(accumulated.data, newPlotData),
       };
-
-      return mergedDatasets;
     },
     [
       cachedGetMessagePathDataItems,
       followingView,
-      latestAllFramesDatasets,
+      latestAllFrames,
       showSingleCurrentMessage,
       startTime,
       theme.palette.mode,
@@ -358,43 +335,67 @@ export function usePlotPanelDatasets(params: Params): {
     ],
   );
 
-  const currentFrameDatasets = useMessageReducer<DataSets>({
+  const currentFrameData = useMessageReducer<TaggedPlotData>({
     topics: subscribeTopics,
     preloadType: "full",
     restore,
     addMessages,
   });
 
+  // Accumulate separate message playback sequences into distinct intervals we
+  // can later combine into a single combined set of message data.
+  const [accumulatedPathIntervals, setAccumulatedPathIntervals] = useState<
+    Record<string, Immutable<PlotData>>
+  >({});
+
+  useEffect(() => {
+    if (!isEmpty(currentFrameData.data.datasetsByPath)) {
+      setAccumulatedPathIntervals((oldValue) => ({
+        ...oldValue,
+        [currentFrameData.tag]: currentFrameData.data,
+      }));
+    }
+  }, [currentFrameData.data, currentFrameData.tag]);
+
+  // Trim currentFrame data outside allFrames, assuming allFrames is contiguous from start
+  // time.
+  const trimmedCurrentFrameData = useMemo(() => {
+    return filterMap(Object.values(accumulatedPathIntervals), (dataset) => {
+      const trimmedDatasets = maps.mapValues(dataset.datasetsByPath, (ds, path) => {
+        const topic = parseRosPath(path.value)?.topicName;
+        const end = topic ? allFrames[topic]?.at(-1)?.receiveTime : undefined;
+        if (end) {
+          return {
+            ...ds,
+            data: ds.data.filter((datum) => isGreaterThan(datum.receiveTime, end)),
+          };
+        } else {
+          return ds;
+        }
+      });
+
+      if ([...trimmedDatasets.values()].some((ds) => ds.data.length > 0)) {
+        return { ...dataset, datasetsByPath: trimmedDatasets };
+      } else {
+        return undefined;
+      }
+    });
+  }, [accumulatedPathIntervals, allFrames]);
+
   // Combine allFrames & currentFrames datasets, optionally applying the @derivative
   // modifier and sorting by header stamp, which can only be calculated on a complete
   // dataset, not point by point.
-  const combinedDatasets = useMemo(() => {
-    const stateWithDerivatives = applyDerivativeToDatasets(state.datasets);
-    const sortedStateWithDerivatives = sortDatasetsByHeaderStamp(stateWithDerivatives);
-    const currentFrameWithDerivatives = applyDerivativeToDatasets(currentFrameDatasets.datasets);
-    const sortedCurrentFrameWithDerivatives = sortDatasetsByHeaderStamp(
-      currentFrameWithDerivatives,
-    );
-    const allDatasets = Object.values(sortedStateWithDerivatives).concat(
-      Object.values(sortedCurrentFrameWithDerivatives),
-    );
-    const bounds = unionBounds(state.bounds, currentFrameDatasets.bounds);
-    return {
-      bounds,
-      datasets: filterMap(allDatasets, (ds) => (ds ? ds.dataset : undefined)),
-      pathsWithMismatchedDataLengths: union(
-        state.pathsWithMismatchedDataLengths,
-        currentFrameDatasets.pathsWithMismatchedDataLengths,
-      ),
-    };
-  }, [
-    currentFrameDatasets.bounds,
-    currentFrameDatasets.datasets,
-    currentFrameDatasets.pathsWithMismatchedDataLengths,
-    state.bounds,
-    state.datasets,
-    state.pathsWithMismatchedDataLengths,
-  ]);
+  const allData = useMemo(() => {
+    const combinedPlotData = reducePlotData([state.data, ...trimmedCurrentFrameData]);
+    const dataAfterDerivative = applyDerivativeToPlotData(combinedPlotData);
+    const sortedData = sortPlotDataByHeaderStamp(dataAfterDerivative);
 
-  return combinedDatasets;
+    return {
+      bounds: sortedData.bounds,
+      datasets: filterMap(yAxisPaths, (path) => sortedData.datasetsByPath.get(path)),
+      pathsWithMismatchedDataLengths: sortedData.pathsWithMismatchedDataLengths,
+    };
+  }, [state.data, trimmedCurrentFrameData, yAxisPaths]);
+
+  return allData;
 }

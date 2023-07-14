@@ -16,6 +16,7 @@ import { ComponentProps, useCallback, useMemo, useRef } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
+import { Immutable } from "@foxglove/studio";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
@@ -27,7 +28,7 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 const minLegendWidth = 25;
 const maxLegendWidth = 800;
 
-type Props = {
+type Props = Immutable<{
   currentTime?: number;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   legendDisplay: "floating" | "top" | "left";
@@ -38,7 +39,7 @@ type Props = {
   showLegend: boolean;
   showPlotValuesInLegend: boolean;
   sidebarDimension: number;
-};
+}>;
 
 const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonFloating">()(
   ({ palette, shadows, shape, spacing }, _params, classes) => ({
@@ -249,14 +250,14 @@ export function PlotLegend(props: Props): JSX.Element {
             <div className={classes.container}>
               {paths.map((path, index) => (
                 <PlotLegendRow
-                  key={index}
+                  currentTime={currentTime}
+                  datasets={datasets}
+                  hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
                   index={index}
+                  key={index}
                   onClickPath={() => onClickPath(index)}
                   path={path}
                   paths={paths}
-                  hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
-                  datasets={datasets}
-                  currentTime={currentTime}
                   savePaths={savePaths}
                   showPlotValuesInLegend={showPlotValuesInLegend}
                 />

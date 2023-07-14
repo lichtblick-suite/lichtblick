@@ -22,10 +22,10 @@ import TimeBasedChart, {
   ChartDefaultView,
   Props as TimeBasedChartProps,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { DataSets } from "@foxglove/studio-base/panels/Plot/datasets";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import { PlotPath, PlotXAxisVal, isReferenceLinePlotPathType } from "./internalTypes";
+import { PlotData } from "./plotData";
 
 // A "reference line" plot path is a numeric value. It creates a horizontal line on the plot at the specified value.
 function getAnnotationFromReferenceLine(path: PlotPath, index: number): AnnotationOptions {
@@ -62,7 +62,7 @@ type PlotChartProps = {
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
-  datasetBounds: DataSets["bounds"];
+  datasetBounds: PlotData["bounds"];
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
   defaultView?: ChartDefaultView;

@@ -14,7 +14,6 @@ import {
   DataSet,
   Datum,
   isReferenceLinePlotPathType,
-  PlotDataByPath,
   PlotDataItem,
   PlotPath,
   PlotXAxisVal,
@@ -104,7 +103,26 @@ function getDatumsForMessagePathItem(
   return { data, hasMismatchedData };
 }
 
-function getDatasetsFromMessagePlotPath({
+/**
+ * Calculates the bounds of a dataset by iterating through all data.
+ */
+export function calculateDatasetBounds(dataset: Immutable<DataSet>): undefined | Bounds {
+  if (dataset.data.length === 0) {
+    return undefined;
+  }
+
+  const newBounds = makeInvertedBounds();
+  for (const datum of dataset.data) {
+    newBounds.x.min = Math.min(newBounds.x.min, datum.x);
+    newBounds.x.max = Math.max(newBounds.x.max, datum.x);
+    newBounds.y.min = Math.min(newBounds.y.min, datum.y);
+    newBounds.y.max = Math.max(newBounds.y.max, datum.y);
+  }
+
+  return newBounds;
+}
+
+export function getDatasetsFromMessagePlotPath({
   path,
   yAxisRanges,
   index,
@@ -192,97 +210,5 @@ function getDatasetsFromMessagePlotPath({
   return {
     dataset,
     hasMismatchedData,
-  };
-}
-
-type GetDatasetArgs = Immutable<{
-  paths: PlotPath[];
-  itemsByPath: PlotDataByPath;
-  startTime: Time;
-  xAxisVal: PlotXAxisVal;
-  xAxisPath?: BasePlotPath;
-  invertedTheme?: boolean;
-}>;
-
-type DatasetWithPath = { path: PlotPath; dataset: DataSet };
-
-export type DataSets = {
-  bounds: Bounds;
-  datasets: Array<undefined | DatasetWithPath>;
-  pathsWithMismatchedDataLengths: string[];
-};
-
-export function getDatasets({
-  paths,
-  itemsByPath,
-  startTime,
-  xAxisVal,
-  xAxisPath,
-  invertedTheme,
-}: GetDatasetArgs): DataSets {
-  const bounds: Bounds = makeInvertedBounds();
-  const pathsWithMismatchedDataLengths: string[] = [];
-  const datasets: DataSets["datasets"] = [];
-  for (const [index, path] of paths.entries()) {
-    const yRanges = itemsByPath[path.value] ?? [];
-    const xRanges = xAxisPath && itemsByPath[xAxisPath.value];
-    if (!path.enabled) {
-      datasets.push(undefined);
-    } else if (!isReferenceLinePlotPathType(path)) {
-      const res = getDatasetsFromMessagePlotPath({
-        path,
-        yAxisRanges: yRanges,
-        index,
-        startTime,
-        xAxisVal,
-        xAxisRanges: xRanges,
-        xAxisPath,
-        invertedTheme,
-      });
-
-      if (res.hasMismatchedData) {
-        pathsWithMismatchedDataLengths.push(path.value);
-      }
-      for (const datum of res.dataset.data) {
-        if (isFinite(datum.x)) {
-          bounds.x.min = Math.min(bounds.x.min, datum.x);
-          bounds.x.max = Math.max(bounds.x.max, datum.x);
-        }
-        if (isFinite(datum.y)) {
-          bounds.y.min = Math.min(bounds.y.min, datum.y);
-          bounds.y.max = Math.max(bounds.y.max, datum.y);
-        }
-      }
-      datasets.push({ path, dataset: res.dataset });
-    }
-  }
-
-  return {
-    bounds,
-    datasets,
-    pathsWithMismatchedDataLengths,
-  };
-}
-
-/**
- * Merges two datasets into a single dataset containing all points from both.
- */
-export function mergeDatasets(
-  a: undefined | DatasetWithPath,
-  b: undefined | DatasetWithPath,
-): undefined | DatasetWithPath {
-  if (a == undefined) {
-    return b;
-  }
-  if (b == undefined) {
-    return a;
-  }
-  return {
-    path: a.path,
-    dataset: {
-      ...a.dataset,
-      data: a.dataset.data.concat(b.dataset.data),
-      showLine: a.dataset.showLine === true && b.dataset.showLine === true,
-    },
   };
 }

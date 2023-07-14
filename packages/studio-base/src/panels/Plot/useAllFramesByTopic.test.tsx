@@ -9,9 +9,9 @@ import MockMessagePipelineProvider from "@foxglove/studio-base/components/Messag
 import { Progress } from "@foxglove/studio-base/players/types";
 import { mockMessage } from "@foxglove/studio-base/test/mocks/mockMessage";
 
-import { useFlattenedBlocksByTopic } from "./useFlattenedBlocksByTopic";
+import { useAllFramesByTopic } from "./useAllFramesByTopic";
 
-describe("useFlattenedBlocksPerTopic", () => {
+describe("useAllFramesByTopic", () => {
   it("flattens blocks", () => {
     const initialProgress: Progress = {
       messageCache: {
@@ -29,7 +29,7 @@ describe("useFlattenedBlocksPerTopic", () => {
 
     const topics = ["topic_a", "topic_b"];
 
-    const { result, rerender } = renderHook(() => useFlattenedBlocksByTopic(topics), {
+    const { result, rerender } = renderHook(() => useAllFramesByTopic(topics), {
       initialProps: { progress: initialProgress },
       wrapper: ({ children, progress }) => (
         <MockMessagePipelineProvider progress={progress}>{children}</MockMessagePipelineProvider>

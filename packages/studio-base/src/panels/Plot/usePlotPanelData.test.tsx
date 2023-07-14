@@ -10,7 +10,7 @@ import { MessageEvent, PlayerStateActiveData, Topic } from "@foxglove/studio-bas
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-import { usePlotPanelDatasets } from "./usePlotPanelDatasets";
+import { usePlotPanelData } from "./usePlotPanelData";
 
 const topics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
 const datatypes: RosDatatypes = new Map(
@@ -68,7 +68,7 @@ describe("usePlotPanelDatasets", () => {
     } as const;
 
     const { result, rerender } = renderHook(
-      ({ activeData: _, ...props }) => usePlotPanelDatasets(props),
+      ({ activeData: _, ...props }) => usePlotPanelData(props),
       {
         initialProps,
         wrapper: ({ children, activeData }) => {
@@ -105,12 +105,7 @@ describe("usePlotPanelDatasets", () => {
 
     expect(result.current).toEqual({
       bounds: expect.any(Object),
-      datasets: [
-        expect.objectContaining({
-          data: [],
-          label: "/topic.value",
-        }),
-      ],
+      datasets: [],
       pathsWithMismatchedDataLengths: [],
     });
   });

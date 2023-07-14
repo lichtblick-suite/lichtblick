@@ -3,14 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { sumBy, transform } from "lodash";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { Immutable } from "@foxglove/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { MessageBlock, MessageEvent } from "@foxglove/studio-base/players/types";
+import { MessageBlock, MessageEvent, SubscribePayload } from "@foxglove/studio-base/players/types";
 
 const EmptyBlocks: MessageBlock[] = [];
 
@@ -31,20 +32,40 @@ function makeInitialState(): State {
 const selectBlocks = (ctx: MessagePipelineContext) =>
   ctx.playerState.progress.messageCache?.blocks ?? EmptyBlocks;
 
+const selectSetSubscriptions = (ctx: MessagePipelineContext) => ctx.setSubscriptions;
+
 /**
- * Flattens incoming blocks into per-topic allFrames arrays.
+ * Maintains subscriptions and flattens incoming blocks into per-topic allFrames arrays.
  *
- * Internally this is implemented via cursor and an accumulating arrays instead of
+ * Internally this is implemented via cursor and accumulating arrays instead of
  * returning new arrays on each invocation to improve performance.
  *
- * @param blocks blocks containing messages
  * @param topics to load from blocks
  * @returns flattened per-topic arrays of messages
  */
-export function useFlattenedBlocksByTopic(
+export function useAllFramesByTopic(
   topics: readonly string[],
 ): Immutable<Record<string, MessageEvent[]>> {
-  const [state, setState] = useState<State>(makeInitialState);
+  const [state, setState] = useState(makeInitialState);
+
+  const [subscriberId] = useState(() => uuidv4());
+
+  const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
+
+  const subscriptions: SubscribePayload[] = useMemo(
+    () => topics.map((topic) => ({ topic, preloadType: "full" })),
+    [topics],
+  );
+
+  useEffect(() => {
+    setSubscriptions(subscriberId, subscriptions);
+
+    return () => {
+      setSubscriptions(subscriberId, []);
+    };
+  }, [subscriberId, setSubscriptions, subscriptions]);
+
+  useEffect(() => {}, [subscriberId, setSubscriptions]);
 
   const blocks = useMessagePipeline(selectBlocks);
 
@@ -66,14 +87,17 @@ export function useFlattenedBlocksByTopic(
     return true;
   }, [state.messages]);
 
-  // Reset cursors and buffers if the first block has changed.
+  // Reset cursors and buffers if the first block has changed or if our topic list doesn't
+  // match our accumulated message topic list. We have to check this because as the topics
+  // in the blocks can be a superset of the topics we're interested in.
   const shouldResetState = blocks[0]?.messagesByTopic !== state.previousBlocks[0]?.messagesByTopic;
 
   if (shouldResetState || (blocks !== state.previousBlocks && memoryAvailable)) {
     // setState directly here instead of a useEffect to avoid an extra render.
     setState((oldState) => {
       // Rebuild message buffers and cursors from last state, resetting if we are
-      // rebuilding from scratch.
+      // rebuilding from scratch, making sure there is an entry in messages for all
+      // requested topics even if we don't find messages for each topic in loaded blocks.
       const newState = transform(
         topics,
         (acc, topic) => {
@@ -89,12 +113,10 @@ export function useFlattenedBlocksByTopic(
           break;
         }
 
-        for (const topic of topics) {
-          const blockMessages = block.messagesByTopic[topic];
-          if (blockMessages == undefined) {
-            continue;
-          }
-
+        // There is a delay between the time we set new subscriptions and the messages for
+        // those subscriptions appear in blocks so we load all topics we find in blocks
+        // here.
+        for (const [topic, blockMessages] of Object.entries(block.messagesByTopic)) {
           if (idx > (newState.cursors[topic] ?? -1)) {
             newState.messages[topic] = (newState.messages[topic] ?? []).concat(blockMessages);
             newState.cursors[topic] = idx;

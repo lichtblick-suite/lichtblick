@@ -8,6 +8,7 @@ import { ComponentProps, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
+import { Immutable } from "@foxglove/studio";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -19,7 +20,7 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { PlotPath } from "./internalTypes";
 
-type PlotLegendRowProps = {
+type PlotLegendRowProps = Immutable<{
   currentTime?: number;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   hasMismatchedDataLength: boolean;
@@ -29,7 +30,7 @@ type PlotLegendRowProps = {
   paths: PlotPath[];
   savePaths: (paths: PlotPath[]) => void;
   showPlotValuesInLegend: boolean;
-};
+}>;
 
 const ROW_HEIGHT = 28;
 

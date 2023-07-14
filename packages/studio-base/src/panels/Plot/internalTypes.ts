@@ -46,6 +46,10 @@ export type Datum = ChartDatum & {
 
 export type DataSet = ChartDataset<"scatter", Datum[]>;
 
+// Key datasets by the full PlotPath instead of just the string value because we need to
+// generate a new dataset if the plot path is ordered by headerStamp.
+export type DatasetsByPath = Map<PlotPath, DataSet>;
+
 export type PlotDataItem = {
   queriedData: MessagePathDataItem[];
   receiveTime: Time;
