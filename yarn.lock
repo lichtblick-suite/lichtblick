@@ -2630,10 +2630,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/cdr@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@foxglove/cdr@npm:2.0.0"
-  checksum: 2a42f9bc04a04078573c18060a173079db213818a739ea7e93b1701394336bc86a5e7ccbcdf93d747f15a734ea6da5250932a475a55593285a496badddddd450
+"@foxglove/cdr@npm:2.1.0, @foxglove/cdr@npm:^2.0.0":
+  version: 2.1.0
+  resolution: "@foxglove/cdr@npm:2.1.0"
+  checksum: 153632a8911a76d047d896f0a17e12b5a6779465a35790c2fe349efc0eb8a618c877d015a066d8b13a804f0c72131a7e9ca0bf48ed116aa3095a3d7252ab1062
   languageName: node
   linkType: hard
 
@@ -2748,6 +2748,8 @@ __metadata:
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
     "@foxglove/message-definition": 0.2.0
+    "@foxglove/omgidl-parser": 0.0.1
+    "@foxglove/omgidl-serialization": 0.0.2
     "@foxglove/rosmsg": 4.2.2
     "@foxglove/rosmsg-serialization": 2.0.1
     "@foxglove/rosmsg2-serialization": 2.0.2
@@ -2779,6 +2781,25 @@ __metadata:
     data-uri-to-buffer: ^3.0.1
     fetch-blob: ^2.1.1
   checksum: 68d0c28d85622853752a221eeae78c5b0e750901a7eb603d05a0174556a690640a68b246751327a42f46e4447bd072784f81606cc7729bf49c6df8f0f5afa19d
+  languageName: node
+  linkType: hard
+
+"@foxglove/omgidl-parser@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@foxglove/omgidl-parser@npm:0.0.1"
+  dependencies:
+    tslib: ^2
+  checksum: 2d1c768d612a22f8f61bc433ab4695e016a02fe4ac2a2f52fce4c0433b5dcacf02ade9c221fa0edaa042a0388267021a21d9c09f7f7f74b8db8d9f5d61492857
+  languageName: node
+  linkType: hard
+
+"@foxglove/omgidl-serialization@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@foxglove/omgidl-serialization@npm:0.0.2"
+  dependencies:
+    "@foxglove/cdr": 2.1.0
+    "@foxglove/message-definition": ^0.2.0
+  checksum: 13639f349a639b9175dd48e5d26cebf75880efada8760ec79ab94ac3cd776765e302fccebc73e01d2e8c47c26b1ed767b4a5e0d6cf804690e64e62c5206f4ef0
   languageName: node
   linkType: hard
 

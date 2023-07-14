@@ -92,4 +92,25 @@ describe("parseChannel", () => {
     const obj = channel.deserialize(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
     expect(obj).toEqual({ data: "ABCD" });
   });
+  it("works with omgidl xcdr2", () => {
+    const channel = parseChannel({
+      messageEncoding: "cdr",
+      schema: {
+        name: "foo_msgs::Bar",
+        encoding: "omgidl",
+        data: new TextEncoder().encode(`
+        enum Color {RED, GREEN, BLUE};
+        module foo_msgs {
+          struct NonRootBar {string data;};
+          struct Bar {foo_msgs::NonRootBar data; Color color;};
+        };
+        `),
+      },
+    });
+
+    const obj = channel.deserialize(
+      new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0, 0, 0, 0, 2, 0, 0, 0]),
+    );
+    expect(obj).toEqual({ data: { data: "ABCD" }, color: 2 });
+  });
 });
