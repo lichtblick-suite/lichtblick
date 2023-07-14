@@ -14,7 +14,7 @@ import {
   decodeMono8,
   decodeRGB8,
   decodeRGBA8,
-  decodeYUV,
+  decodeUYVY,
   decodeYUYV,
 } from "@foxglove/den/image";
 import { RawImage } from "@foxglove/schemas";
@@ -35,6 +35,10 @@ export type RawImageOptions = {
   maxValue?: number;
 };
 
+/**
+ * See also:
+ * https://github.com/ros2/common_interfaces/blob/366eea24ffce6c87f8860cbcd27f4863f46ad822/sensor_msgs/include/sensor_msgs/image_encodings.hpp
+ */
 export function decodeRawImage(
   image: RosImage | RawImage,
   options: RawImageOptions,
@@ -45,11 +49,12 @@ export function decodeRawImage(
   const rawData = image.data as Uint8Array;
   switch (encoding) {
     case "yuv422":
-    case "uyuv":
-      decodeYUV(image.data as Int8Array, width, height, output);
+    case "uyvy":
+      decodeUYVY(rawData, width, height, output);
       break;
+    case "yuv422_yuy2":
     case "yuyv":
-      decodeYUYV(image.data as Int8Array, width, height, output);
+      decodeYUYV(rawData, width, height, output);
       break;
     case "rgb8":
       decodeRGB8(rawData, width, height, output);

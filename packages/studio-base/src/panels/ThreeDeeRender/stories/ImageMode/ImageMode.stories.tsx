@@ -785,3 +785,132 @@ export const LargeImage: StoryObj = {
     );
   },
 };
+
+function makeYUYV(width: number, height: number) {
+  const result = new Uint8Array(2 * width * height);
+  for (let r = 0; r < height; r++) {
+    for (let c = 0; c < width; c += 2) {
+      const y1 = r === c ? 255 : 127;
+      const y2 = r === c + 1 ? 255 : 127;
+      const u = Math.trunc(255 * (c / width));
+      const v = Math.trunc(255 * (r / height));
+      result[2 * (r * width + c) + 0] = y1;
+      result[2 * (r * width + c) + 1] = u;
+      result[2 * (r * width + c) + 2] = y2;
+      result[2 * (r * width + c) + 3] = v;
+    }
+  }
+  return result;
+}
+
+function makeUYVY(width: number, height: number) {
+  const result = makeYUYV(width, height);
+  for (let i = 0; i < result.length; i += 4) {
+    const [y1, u, y2, v] = result.subarray(i, i + 4);
+    result[i + 0] = u!;
+    result[i + 1] = y1!;
+    result[i + 2] = v!;
+    result[i + 3] = y2!;
+  }
+  return result;
+}
+
+export const YUYV: StoryObj = {
+  render: function Story() {
+    const imageTopic = "camera";
+    const topics: Topic[] = useMemo(
+      () => [{ name: imageTopic, schemaName: "foxglove.RawImage" }],
+      [],
+    );
+
+    const width = 200;
+    const height = 150;
+    const cameraMessage: MessageEvent<RawImage> = {
+      topic: imageTopic,
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 10, nsec: 0 },
+        frame_id: "camera",
+        width,
+        height,
+        encoding: "yuyv",
+        step: width * 2,
+        data: makeYUYV(width, height),
+      },
+      schemaName: "foxglove.RawImage",
+      sizeInBytes: 0,
+    };
+
+    const fixture: Fixture = {
+      topics,
+      frame: {
+        [imageTopic]: [cameraMessage],
+      },
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    };
+
+    return (
+      <PanelSetup fixture={fixture}>
+        <ImagePanel
+          overrideConfig={{
+            ...ImagePanel.defaultConfig,
+            imageMode: { imageTopic },
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
+
+export const UYVY: StoryObj = {
+  render: function Story() {
+    const imageTopic = "camera";
+    const topics: Topic[] = useMemo(
+      () => [{ name: imageTopic, schemaName: "foxglove.RawImage" }],
+      [],
+    );
+
+    const width = 200;
+    const height = 150;
+    const cameraMessage: MessageEvent<RawImage> = {
+      topic: imageTopic,
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        timestamp: { sec: 10, nsec: 0 },
+        frame_id: "camera",
+        width,
+        height,
+        encoding: "uyvy",
+        step: width * 2,
+        data: makeUYVY(width, height),
+      },
+      schemaName: "foxglove.RawImage",
+      sizeInBytes: 0,
+    };
+
+    const fixture: Fixture = {
+      topics,
+      frame: {
+        [imageTopic]: [cameraMessage],
+      },
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    };
+
+    return (
+      <PanelSetup fixture={fixture}>
+        <ImagePanel
+          overrideConfig={{
+            ...ImagePanel.defaultConfig,
+            imageMode: { imageTopic },
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};

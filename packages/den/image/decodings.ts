@@ -11,6 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+/**
+ * Adapted from:
+ * https://github.com/ros2/rviz/blob/e8838720e57b56cc0d50e05b00b28bee3c5dc9ee/rviz_default_plugins/src/rviz_default_plugins/displays/image/ros_image_texture.cpp#L332
+ */
 function yuvToRGBA8(
   y1: number,
   u: number,
@@ -20,20 +24,20 @@ function yuvToRGBA8(
   output: Uint8ClampedArray,
 ): void {
   // rgba
-  output[c] = y1 + 1.402 * v;
-  output[c + 1] = y1 - 0.34414 * u - 0.71414 * v;
-  output[c + 2] = y1 + 1.772 * u;
+  output[c] = y1 + Math.trunc((1403 * v) / 1000);
+  output[c + 1] = y1 - Math.trunc((344 * u) / 1000) - Math.trunc((714 * v) / 1000);
+  output[c + 2] = y1 + Math.trunc((1770 * u) / 1000);
   output[c + 3] = 255;
 
   // rgba
-  output[c + 4] = y2 + 1.402 * v;
-  output[c + 5] = y2 - 0.34414 * u - 0.71414 * v;
-  output[c + 6] = y2 + 1.772 * u;
+  output[c + 4] = y2 + Math.trunc((1403 * v) / 1000);
+  output[c + 5] = y2 - Math.trunc((344 * u) / 1000) - Math.trunc((714 * v) / 1000);
+  output[c + 6] = y2 + Math.trunc((1770 * u) / 1000);
   output[c + 7] = 255;
 }
 
-export function decodeYUV(
-  yuv: Int8Array,
+export function decodeUYVY(
+  yuv: Uint8Array,
   width: number,
   height: number,
   output: Uint8ClampedArray,
@@ -54,9 +58,8 @@ export function decodeYUV(
   }
 }
 
-// change name in the future do something more distinct
 export function decodeYUYV(
-  yuyv: Int8Array,
+  yuyv: Uint8Array,
   width: number,
   height: number,
   output: Uint8ClampedArray,
