@@ -28,8 +28,14 @@ import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 import { calculateDatasetBounds } from "./datasets";
 import { BasePlotPath, DataSet, PlotDataByPath, PlotPath, PlotXAxisVal } from "./internalTypes";
 import * as maps from "./maps";
-import { getBlockItemsByPath } from "./messageProcessing";
-import { EmptyPlotData, PlotData, appendPlotData, buildPlotData, reducePlotData } from "./plotData";
+import {
+  EmptyPlotData,
+  PlotData,
+  appendPlotData,
+  buildPlotData,
+  reducePlotData,
+  getByPath,
+} from "./plotData";
 import { useAllFramesByTopic } from "./useAllFramesByTopic";
 
 const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
@@ -169,10 +175,7 @@ export function usePlotPanelData(params: Params): Immutable<{
 
       const newCursors = mapValues(allFrames, (messages) => messages.length);
 
-      const newBlockItems = getBlockItemsByPath(
-        decodeMessagePathsForMessagesByTopic,
-        newFramesByTopic,
-      );
+      const newBlockItems = getByPath(decodeMessagePathsForMessagesByTopic(newFramesByTopic));
 
       const anyNewFrames = Object.values(newFramesByTopic).some((msgs) => msgs.length > 0);
 
