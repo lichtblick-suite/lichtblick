@@ -3026,7 +3026,7 @@ __metadata:
     cytoscape-dagre: 2.5.0
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
-    fake-indexeddb: 4.0.1
+    fake-indexeddb: 4.0.2
     fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 8.0.0
     fuzzysort: 2.0.4
@@ -11530,12 +11530,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fake-indexeddb@npm:4.0.1":
-  version: 4.0.1
-  resolution: "fake-indexeddb@npm:4.0.1"
+"fake-indexeddb@npm:4.0.2":
+  version: 4.0.2
+  resolution: "fake-indexeddb@npm:4.0.2"
   dependencies:
     realistic-structured-clone: ^3.0.0
-  checksum: dd1c82111e3b97c262a647a29dc012209f8c3bed0fbe7ae9630927772842fe8d3276794ff196d0021a5e60563a25a4323eca622a6a7bc6575b62e074328a0c90
+  checksum: ad257e5cc6273d9ea667b4129d8b0798830d56a68c7c77ddba752b3fd0088cb33e34b9569b218d16dfc8a78733d360d325f89c2ce352b70a0587c1f46f6f881d
   languageName: node
   linkType: hard
 
