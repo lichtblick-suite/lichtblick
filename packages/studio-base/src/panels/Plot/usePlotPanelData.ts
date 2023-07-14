@@ -392,7 +392,15 @@ export function usePlotPanelData(params: Params): Immutable<{
 
     return {
       bounds: sortedData.bounds,
-      datasets: filterMap(yAxisPaths, (path) => sortedData.datasetsByPath.get(path)),
+      // Return a dataset for all paths here so that the ordering of datasets corresponds
+      // to yAxisPaths as expected by downstream components like the legend.
+      //
+      // Label is needed so that TimeBasedChart doesn't discard the empty dataset and mess
+      // up the ordering.
+      datasets: yAxisPaths.map(
+        (path) =>
+          sortedData.datasetsByPath.get(path) ?? { label: path.label ?? path.value, data: [] },
+      ),
       pathsWithMismatchedDataLengths: sortedData.pathsWithMismatchedDataLengths,
     };
   }, [state.data, trimmedCurrentFrameData, yAxisPaths]);

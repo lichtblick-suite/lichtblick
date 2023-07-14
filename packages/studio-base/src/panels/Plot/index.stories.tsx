@@ -13,6 +13,7 @@
 
 import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
+import { produce } from "immer";
 import { shuffle } from "lodash";
 import { useCallback, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -385,6 +386,30 @@ export const LineGraph: StoryObj = {
   },
 
   name: "line graph",
+
+  parameters: {
+    useReadySignal: true,
+  },
+};
+
+export const LineGraphWithValuesAndDisabledSeries: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    const config = produce(exampleConfig, (draft) => {
+      draft.paths[1]!.enabled = false;
+      draft.showPlotValuesInLegend = true;
+    });
+
+    return <PlotWrapper pauseFrame={pauseFrame} config={config} />;
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+
+  name: "line graph with values and disabled series",
 
   parameters: {
     useReadySignal: true,

@@ -105,7 +105,12 @@ describe("usePlotPanelDatasets", () => {
 
     expect(result.current).toEqual({
       bounds: expect.any(Object),
-      datasets: [],
+      datasets: [
+        {
+          data: [],
+          label: "/topic.value",
+        },
+      ],
       pathsWithMismatchedDataLengths: [],
     });
   });
