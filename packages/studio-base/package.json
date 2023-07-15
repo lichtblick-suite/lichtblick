@@ -17,7 +17,7 @@
     "@emotion/cache": "11.11.0",
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
-    "@fluentui/react-icons": "2.0.206",
+    "@fluentui/react-icons": "2.0.207",
     "@foxglove/avl": "1.0.0",
     "@foxglove/chartjs-plugin-zoom": "2.0.4",
     "@foxglove/comlink-transfer-handlers": "workspace:*",
