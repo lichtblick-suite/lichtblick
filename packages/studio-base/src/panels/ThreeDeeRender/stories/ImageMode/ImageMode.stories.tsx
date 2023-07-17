@@ -3,13 +3,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { screen, userEvent, waitFor } from "@storybook/testing-library";
+import { fireEvent, screen, userEvent, waitFor } from "@storybook/testing-library";
 import { useCallback, useMemo, useState } from "react";
 import { useAsync } from "react-use";
+import tinycolor from "tinycolor2";
 
 import {
+  CameraCalibration,
   CompressedImage,
   ImageAnnotations,
+  PointsAnnotation,
   PointsAnnotationType,
   RawImage,
 } from "@foxglove/schemas";
@@ -912,5 +915,184 @@ export const UYVY: StoryObj = {
         />
       </PanelSetup>
     );
+  },
+};
+
+export const RationalPolynomialDistortion: StoryObj = {
+  render: function Story() {
+    const imageTopic = "camera";
+    const calibrationTopic = "calibration";
+    const annotationsTopic = "annotations";
+    const topics: Topic[] = useMemo(
+      () => [
+        { name: imageTopic, schemaName: "foxglove.RawImage" },
+        { name: calibrationTopic, schemaName: "foxglove.CameraCalibration" },
+        { name: annotationsTopic, schemaName: "foxglove.ImageAnnotations" },
+      ],
+      [],
+    );
+
+    const width = 1928;
+    const height = 1208;
+
+    const fx = 1214.314459;
+    const fy = 1214.314459;
+    const cx = 964.3224501;
+    const cy = 540.9620611;
+    const k1 = 0.023768356069922447;
+    const k2 = -0.31508326530456543;
+    const p1 = -0.000028460506655392237;
+    const p2 = -0.000457515794551;
+    const k3 = -0.01789267733693123;
+    const k4 = 0.4375666677951813;
+    const k5 = -0.39708587527275085;
+    const k6 = -0.10816607624292374;
+    const calibrationMessage: MessageEvent<CameraCalibration> = {
+      topic: calibrationTopic,
+      schemaName: "foxglove.CameraCalibration",
+      sizeInBytes: 0,
+      receiveTime: { sec: 0, nsec: 0 },
+      message: {
+        timestamp: { sec: 0, nsec: 0 },
+        width: 1928,
+        height: 1208,
+        frame_id: "cam",
+        distortion_model: "rational_polynomial",
+        K: [fx, 0, cx, 0, fy, cy, 0, 0, 1],
+        P: [fx, 0, cx, 0, 0, fy, cy, 0, 0, 0, 1, 0],
+        D: [k1, k2, p1, p2, k3, k4, k5, k6],
+        R: [1, 0, 0, 0, 1, 0, 0, 0, 1],
+      },
+    };
+
+    const getGridLineColor = (idx: number) => {
+      if (idx % 200 === 199 || idx % 200 === 0 || idx % 200 === 1) {
+        return 0;
+      }
+      if (idx % 50 === 0) {
+        return 100;
+      }
+      return 127;
+    };
+    const imageData = new Uint8Array(width * height * 3);
+    let i = 0;
+    for (let r = 0; r < height; r++) {
+      for (let c = 0; c < width; c++) {
+        if (r === 0 || r === height - 1 || c === 0 || c === width - 1) {
+          imageData[i] = 150;
+          imageData[i + 1] = 150;
+          imageData[i + 2] = 255;
+          i += 3;
+        } else {
+          const color = getGridLineColor(r) + getGridLineColor(c);
+          imageData[i] = color;
+          imageData[i + 1] = color;
+          imageData[i + 2] = color;
+          i += 3;
+        }
+      }
+    }
+
+    const imageMessage: MessageEvent<RawImage> = {
+      topic: imageTopic,
+      schemaName: "foxglove.RawImage",
+      sizeInBytes: 0,
+      receiveTime: { sec: 0, nsec: 0 },
+      message: {
+        frame_id: "cam",
+        timestamp: { sec: 0, nsec: 0 },
+        width,
+        height,
+        step: width * 3,
+        encoding: "rgb8",
+        data: imageData,
+      },
+    };
+
+    const lines: PointsAnnotation = {
+      timestamp: { sec: 0, nsec: 0 },
+      type: PointsAnnotationType.LINE_STRIP,
+      points: [],
+      thickness: 2,
+      outline_color: { r: 0, g: 0.8, b: 0, a: 1 },
+      outline_colors: [],
+      fill_color: { r: 0, g: 0, b: 0, a: 0 },
+    };
+    const points: PointsAnnotation = {
+      timestamp: { sec: 0, nsec: 0 },
+      type: PointsAnnotationType.POINTS,
+      points: [],
+      thickness: 20,
+      outline_color: { r: 0, g: 0, b: 0, a: 0 },
+      outline_colors: [],
+      fill_color: { r: 0, g: 0, b: 0, a: 0 },
+    };
+    const inset = 100;
+    const rows = 5;
+    const cols = 8;
+    for (let row = 0; row <= rows; row++) {
+      for (let col = 0; col <= cols; col++) {
+        const x = inset + Math.round((width - 2 * inset) * (col / cols));
+        const y = inset + Math.round((height - 2 * inset) * (row / rows));
+        points.points.push({ x, y });
+        lines.points.push({ x, y });
+        const { r, g, b } = tinycolor({
+          h: ((row / rows + col / cols) / 2) * 360,
+          s: 100,
+          v: 100,
+        }).toRgb();
+        points.outline_colors.push({ r: r / 255, g: g / 255, b: b / 255, a: 1 });
+      }
+    }
+    const annotationsMessage: MessageEvent<ImageAnnotations> = {
+      topic: "annotations",
+      schemaName: "foxglove.ImageAnnotations",
+      receiveTime: { sec: 0, nsec: 0 },
+      sizeInBytes: 0,
+      message: {
+        points: [lines, points],
+        circles: [],
+        texts: [],
+      },
+    };
+
+    const fixture: Fixture = {
+      topics,
+      frame: {
+        [imageTopic]: [imageMessage],
+        [calibrationTopic]: [calibrationMessage],
+        [annotationsTopic]: [annotationsMessage],
+      },
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    };
+
+    return (
+      <PanelSetup fixture={fixture}>
+        <ImagePanel
+          overrideConfig={{
+            ...ImagePanel.defaultConfig,
+            imageMode: {
+              imageTopic,
+              calibrationTopic,
+              annotations: { [annotationsTopic]: { visible: true } },
+            },
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+
+  async play() {
+    const canvas = document.querySelector("canvas")!;
+    const rect = canvas.getBoundingClientRect();
+
+    fireEvent.wheel(canvas, {
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + rect.height / 2,
+      deltaY: 100,
+    });
   },
 };

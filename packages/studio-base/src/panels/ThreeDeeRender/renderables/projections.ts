@@ -17,9 +17,8 @@ import {
   Vector3,
 } from "../ros";
 
-const tempVec2 = { x: 0, y: 0 };
-const tempVec3a = { x: 0, y: 0, z: 0 };
-const tempVec3b = { x: 0, y: 0, z: 0 };
+const tempVec = { x: 0, y: 0, z: 0 };
+const tempVec2 = { x: 0, y: 0, z: 0 };
 
 export function projectPixel(
   out: Vector3,
@@ -27,16 +26,14 @@ export function projectPixel(
   cameraModel: PinholeCameraModel,
   settings: { distance: number; planarProjectionFactor: number },
 ): Vector3 {
-  cameraModel.undistortPixel(tempVec2, uv);
-
   if (settings.planarProjectionFactor === 0) {
-    cameraModel.projectPixelTo3dRay(out, tempVec2);
+    cameraModel.projectPixelTo3dRay(out, uv);
   } else if (settings.planarProjectionFactor === 1) {
-    cameraModel.projectPixelTo3dPlane(out, tempVec2);
+    cameraModel.projectPixelTo3dPlane(out, uv);
   } else {
-    cameraModel.projectPixelTo3dRay(tempVec3a, tempVec2);
-    cameraModel.projectPixelTo3dPlane(tempVec3b, tempVec2);
-    lerpVec3(out, tempVec3a, tempVec3b, settings.planarProjectionFactor);
+    cameraModel.projectPixelTo3dRay(tempVec, uv);
+    cameraModel.projectPixelTo3dPlane(tempVec2, uv);
+    lerpVec3(out, tempVec, tempVec2, settings.planarProjectionFactor);
   }
 
   multiplyScalar(out, settings.distance);
