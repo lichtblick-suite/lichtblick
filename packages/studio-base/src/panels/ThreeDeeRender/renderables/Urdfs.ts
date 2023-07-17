@@ -4,7 +4,7 @@
 
 import { vec3 } from "gl-matrix";
 import i18next from "i18next";
-import { maxBy } from "lodash";
+import { debounce, maxBy } from "lodash";
 import * as THREE from "three";
 
 import { UrdfGeometryMesh, UrdfRobot, UrdfVisual, parseRobot, UrdfJoint } from "@foxglove/den/urdf";
@@ -70,6 +70,7 @@ export type LayerSettingsUrdf = BaseSettings & {
 export type LayerSettingsCustomUrdf = CustomLayerSettings & {
   layerId: "foxglove.Urdf";
   url: string;
+  framePrefix: string;
 };
 
 const DEFAULT_SETTINGS: LayerSettingsUrdf = {
@@ -85,6 +86,7 @@ const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
   instanceId: "invalid",
   layerId: LAYER_ID,
   url: "",
+  framePrefix: "",
 };
 
 const tempVec3a = new THREE.Vector3();
@@ -242,6 +244,12 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
         const fields: SettingsTreeFields = {
           url: { label: "URL", input: "string", placeholder, help, value: config.url ?? "" },
+          framePrefix: {
+            label: "Frame prefix",
+            input: "string",
+            help: "Prefix to apply to all frame names (also often called tfPrefix)",
+            value: config.framePrefix ?? "",
+          },
         };
 
         entries.push({
@@ -415,9 +423,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     } else if (path.length === 3) {
       // ["layers", instanceId, field]
       this.saveSetting(path, action.payload.value);
-      const instanceId = path[1]!;
+      const [_layers, instanceId, field] = path as [string, string, string];
       if (path[1] === PARAM_KEY) {
         this.#loadUrdf(instanceId, this.renderer.parameters?.get(PARAM_NAME) as string | undefined);
+      } else if (field === "framePrefix") {
+        this.#debouncedLoadUrdf(instanceId, undefined);
       } else {
         this.#loadUrdf(instanceId, undefined);
       }
@@ -451,10 +461,21 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
   #handleParametersChange = (parameters: ReadonlyMap<string, unknown> | undefined): void => {
     const robotDescription = parameters?.get(PARAM_NAME);
-    if (typeof robotDescription !== "string") {
-      return;
+    if (typeof robotDescription === "string") {
+      this.#loadUrdf(PARAM_KEY, robotDescription);
     }
-    this.#loadUrdf(PARAM_KEY, robotDescription);
+
+    // Update custom layer URDFs that use param:// URLs.
+    for (const [instanceId, renderable] of this.renderables.entries()) {
+      const url = (renderable.userData.settings as Partial<LayerSettingsCustomUrdf>).url ?? "";
+      if (url.startsWith("param://")) {
+        const paramName = url.slice("param://".length);
+        const urdf = parameters?.get(paramName);
+        if (typeof urdf === "string") {
+          this.#loadUrdf(instanceId, urdf);
+        }
+      }
+    }
   };
 
   #handleAddUrdf = (instanceId: string): void => {
@@ -489,6 +510,26 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       return;
     }
     this.renderer.settings.errors.remove(renderable.userData.settingsPath, VALID_URL_ERR);
+
+    const { protocol } = new URL(url);
+
+    // Special case: Retrieve URDF from parameter store.
+    if (protocol === "param:") {
+      const paramName = url.slice("param://".length);
+      const urdfParam = this.renderer.parameters?.get(paramName) as string | undefined;
+
+      if (urdfParam) {
+        this.#loadUrdf(instanceId, urdfParam);
+        return;
+      } else {
+        this.renderer.settings.errors.add(
+          renderable.userData.settingsPath,
+          VALID_URL_ERR,
+          `Invalid parameter URL "${url}": The parameter "${paramName}" does not exist`,
+        );
+        return;
+      }
+    }
 
     // Check if this URL has already been fetched
     if (renderable.userData.url === url) {
@@ -541,6 +582,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     }
 
     // Clear any previous parsed data for this instanceId
+    const transforms = this.#transformsByInstanceId.get(instanceId) ?? [];
+    for (const transform of transforms) {
+      this.renderer.removeTransform(transform.child, transform.parent, 0n);
+    }
     this.#transformsByInstanceId.delete(instanceId);
     this.#framesByInstanceId.delete(instanceId);
     this.updateSettingsTree();
@@ -550,6 +595,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
     const settings = this.#getCurrentSettings(instanceId);
     const url = (settings as Partial<LayerSettingsCustomUrdf>).url;
+    const framePrefix = (settings as Partial<LayerSettingsCustomUrdf>).framePrefix;
 
     // Create a UrdfRenderable if it does not already exist
     if (!renderable) {
@@ -586,7 +632,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
     // Parse the URDF
     const loadedRenderable = renderable;
-    parseUrdf(urdf, async (uri) => await this.#getFileFetch(uri))
+    parseUrdf(urdf, async (uri) => await this.#getFileFetch(uri), framePrefix)
       .then((parsed) => {
         this.#loadRobot(loadedRenderable, parsed);
         // the frame from the settings update is called before the robot is loaded
@@ -603,6 +649,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         );
       });
   }
+
+  #debouncedLoadUrdf = debounce(this.#loadUrdf.bind(this), 500);
 
   #loadRobot(renderable: UrdfRenderable, { robot, frames, transforms }: ParsedUrdf): void {
     const renderer = this.renderer;
@@ -675,10 +723,31 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 async function parseUrdf(
   text: string,
   getFileContents: (url: string) => Promise<string>,
+  framePrefix?: string,
 ): Promise<ParsedUrdf> {
+  const applyFramePrefix = (name: string) => `${framePrefix}${name}`;
   try {
     log.debug(`Parsing ${text.length} byte URDF`);
     const robot = await parseRobot(text, getFileContents);
+
+    if (framePrefix) {
+      robot.links = new Map(
+        [...robot.links].map(([name, link]) => [
+          applyFramePrefix(name),
+          { ...link, name: applyFramePrefix(link.name) },
+        ]),
+      );
+      robot.joints = new Map(
+        [...robot.joints].map(([name, joint]) => [
+          name,
+          {
+            ...joint,
+            parent: applyFramePrefix(joint.parent),
+            child: applyFramePrefix(joint.child),
+          },
+        ]),
+      );
+    }
 
     const frames = Array.from(robot.links.values(), (link) => link.name);
     const transforms = Array.from(robot.joints.values(), (joint) => {
@@ -811,7 +880,7 @@ function createMeshMarker(
   };
 }
 
-const VALID_PROTOCOLS = ["https:", "http:", "file:", "data:", "package:"];
+const VALID_PROTOCOLS = ["https:", "http:", "file:", "data:", "package:", "param:"];
 
 function isValidUrl(str: string): boolean {
   try {
