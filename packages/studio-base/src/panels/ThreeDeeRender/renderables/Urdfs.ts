@@ -10,7 +10,12 @@ import * as THREE from "three";
 import { UrdfGeometryMesh, UrdfRobot, UrdfVisual, parseRobot, UrdfJoint } from "@foxglove/den/urdf";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeAction, SettingsTreeChildren, SettingsTreeFields } from "@foxglove/studio";
+import {
+  SettingsTreeAction,
+  SettingsTreeChildren,
+  SettingsTreeField,
+  SettingsTreeFields,
+} from "@foxglove/studio";
 import { eulerToQuaternion } from "@foxglove/studio-base/util/geometry";
 
 import { RenderableCube } from "./markers/RenderableCube";
@@ -65,18 +70,21 @@ const RPY_LABEL: [string, string, string] = ["R", "P", "Y"];
 
 export type LayerSettingsUrdf = BaseSettings & {
   instanceId: string; // This will be set to the topic name
+  displayMode: "auto" | "visual" | "collision";
 };
 
 export type LayerSettingsCustomUrdf = CustomLayerSettings & {
   layerId: "foxglove.Urdf";
   url: string;
   framePrefix: string;
+  displayMode: "auto" | "visual" | "collision";
 };
 
 const DEFAULT_SETTINGS: LayerSettingsUrdf = {
   visible: false,
   frameLocked: true,
   instanceId: "invalid",
+  displayMode: "auto",
 };
 
 const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
@@ -87,6 +95,7 @@ const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
   layerId: LAYER_ID,
   url: "",
   framePrefix: "",
+  displayMode: "auto",
 };
 
 const tempVec3a = new THREE.Vector3();
@@ -189,16 +198,39 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
   public override settingsNodes(): SettingsTreeEntry[] {
     const entries: SettingsTreeEntry[] = [];
+    const displayMode: SettingsTreeField = {
+      label: "Display mode",
+      input: "select",
+      value: "auto",
+      options: [
+        {
+          label: "Auto",
+          value: "auto",
+        },
+        {
+          label: "Visual",
+          value: "visual",
+        },
+        {
+          label: "Collision",
+          value: "collision",
+        },
+      ],
+    };
 
     // /robot_description topic entry
     const topic = this.renderer.topicsByName?.get(TOPIC_NAME);
     if (topic != undefined) {
       const config = (this.renderer.config.topics[TOPIC_NAME] ?? {}) as Partial<LayerSettingsUrdf>;
+      const fields: SettingsTreeFields = {
+        displayMode: { ...displayMode, value: config.displayMode ?? "auto" },
+      };
       entries.push({
         path: ["topics", TOPIC_NAME],
         node: {
           label: TOPIC_NAME,
           icon: "PrecisionManufacturing",
+          fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
           handler: this.#handleTopicSettingsAction,
           children: urdfChildren(
@@ -215,7 +247,9 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     if (parameter != undefined) {
       const config = (this.renderer.config.topics[PARAM_KEY] ?? {}) as Partial<LayerSettingsUrdf>;
 
-      const fields: SettingsTreeFields = {};
+      const fields: SettingsTreeFields = {
+        displayMode: { ...displayMode, value: config.displayMode ?? "auto" },
+      };
 
       entries.push({
         path: ["topics", PARAM_KEY],
@@ -250,6 +284,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
             help: "Prefix to apply to all frame names (also often called tfPrefix)",
             value: config.framePrefix ?? "",
           },
+          displayMode: { ...displayMode, value: config.displayMode ?? "auto" },
         };
 
         entries.push({
@@ -424,8 +459,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       // ["layers", instanceId, field]
       this.saveSetting(path, action.payload.value);
       const [_layers, instanceId, field] = path as [string, string, string];
-      if (path[1] === PARAM_KEY) {
+      if (instanceId === PARAM_KEY) {
         this.#loadUrdf(instanceId, this.renderer.parameters?.get(PARAM_NAME) as string | undefined);
+      } else if (instanceId === TOPIC_NAME) {
+        this.#loadUrdf(instanceId, this.renderables.get(instanceId)?.userData.urdf);
       } else if (field === "framePrefix") {
         this.#debouncedLoadUrdf(instanceId, undefined);
       } else {
@@ -575,8 +612,13 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
   #loadUrdf(instanceId: string, urdf: string | undefined): void {
     let renderable = this.renderables.get(instanceId);
-    if (renderable && urdf != undefined && renderable.userData.urdf === urdf) {
-      const settings = this.#getCurrentSettings(instanceId);
+    const settings = this.#getCurrentSettings(instanceId);
+    if (
+      renderable &&
+      urdf != undefined &&
+      renderable.userData.urdf === urdf &&
+      renderable.userData.settings.displayMode === settings.displayMode
+    ) {
       renderable.userData.settings = settings;
       return;
     }
@@ -593,7 +635,6 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
     const frameId = this.renderer.fixedFrameId ?? ""; // Unused
     const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
-    const settings = this.#getCurrentSettings(instanceId);
     const url = (settings as Partial<LayerSettingsCustomUrdf>).url;
     const framePrefix = (settings as Partial<LayerSettingsCustomUrdf>).framePrefix;
 
@@ -654,7 +695,9 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
   #loadRobot(renderable: UrdfRenderable, { robot, frames, transforms }: ParsedUrdf): void {
     const renderer = this.renderer;
-    const instanceId = renderable.userData.settings.instanceId;
+    const settings = renderable.userData.settings;
+    const instanceId = settings.instanceId;
+    const displayMode = settings.displayMode;
 
     this.#loadFrames(instanceId, frames);
     this.#loadTransforms(instanceId, transforms);
@@ -675,13 +718,17 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     // Create a renderable for each link
     for (const link of robot.links.values()) {
       const frameId = link.name;
+      const renderVisual = displayMode !== "collision";
+      const renderCollision =
+        displayMode === "collision" || (displayMode === "auto" && link.visuals.length === 0);
 
-      for (let i = 0; i < link.visuals.length; i++) {
-        createChild(frameId, i, link.visuals[i]!);
+      if (renderVisual) {
+        for (let i = 0; i < link.visuals.length; i++) {
+          createChild(frameId, i, link.visuals[i]!);
+        }
       }
 
-      if (link.visuals.length === 0 && link.colliders.length > 0) {
-        // If there are no visuals, but there are colliders, render those instead
+      if (renderCollision) {
         for (let i = 0; i < link.colliders.length; i++) {
           createChild(frameId, i, link.colliders[i]!);
         }
