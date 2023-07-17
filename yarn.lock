@@ -2748,7 +2748,7 @@ __metadata:
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
     "@foxglove/message-definition": 0.2.0
-    "@foxglove/omgidl-parser": 0.0.1
+    "@foxglove/omgidl-parser": 0.1.0
     "@foxglove/omgidl-serialization": 0.0.2
     "@foxglove/rosmsg": 4.2.2
     "@foxglove/rosmsg-serialization": 2.0.1
@@ -2784,12 +2784,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/omgidl-parser@npm:0.0.1":
-  version: 0.0.1
-  resolution: "@foxglove/omgidl-parser@npm:0.0.1"
+"@foxglove/omgidl-parser@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@foxglove/omgidl-parser@npm:0.1.0"
   dependencies:
     tslib: ^2
-  checksum: 2d1c768d612a22f8f61bc433ab4695e016a02fe4ac2a2f52fce4c0433b5dcacf02ade9c221fa0edaa042a0388267021a21d9c09f7f7f74b8db8d9f5d61492857
+  checksum: 0aba062c3870ac7bbaf804f8d9c11a7dca4024b9910f699739bba4ff4a0b32ec6f4f19ebdcbebdda22f46249aefd7442f184d0470d85901e404610549226ebd2
   languageName: node
   linkType: hard
 
