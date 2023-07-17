@@ -72,7 +72,11 @@ export class Markers extends SceneExtension<TopicMarkers> {
         order: topic.name.toLocaleLowerCase(),
         fields: {
           color: { label: "Color", input: "rgba", value: config.color },
-          showOutlines: { label: "Show outline", input: "boolean", value: config.showOutlines },
+          showOutlines: {
+            label: "Show outline",
+            input: "boolean",
+            value: config.showOutlines ?? DEFAULT_SETTINGS.showOutlines,
+          },
           selectedIdVariable: {
             label: "Selection Variable",
             input: "string",
