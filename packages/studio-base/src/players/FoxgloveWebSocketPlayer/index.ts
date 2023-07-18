@@ -876,8 +876,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
     // Filter out duplicates.
     const uniquePublications = uniqWith(publishers, isEqual);
 
-    // Save publications and return early if we are not connected.
-    if (!this.#client || this.#closed) {
+    // Save publications and return early if we are not connected or the advertise capability is missing.
+    if (
+      !this.#client ||
+      this.#closed ||
+      !this.#playerCapabilities.includes(PlayerCapabilities.advertise)
+    ) {
       this.#unresolvedPublications = uniquePublications;
       return;
     }
