@@ -17,6 +17,7 @@ import { useCallback, useEffect } from "react";
 
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import NodePlayground from "@foxglove/studio-base/panels/NodePlayground";
+import { generateFoxgloveSchemaDeclarations } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
@@ -91,6 +92,35 @@ const logs: UserNodeLog[] = [
   },
 ];
 
+const generatedSchemas = generateFoxgloveSchemaDeclarations()
+  .filter(
+    (schema) =>
+      !schema.fileName.endsWith("index.ts") &&
+      !schema.fileName.endsWith("Time.ts") &&
+      !schema.fileName.endsWith("Duration.ts"),
+  )
+  .map((schema) => schema.fileName.split("/").at(-1)?.replaceAll(".ts", ""))
+  .join(", ");
+
+const sourceCodeWithSchemas = `
+import { Input } from "ros";
+import { ${generatedSchemas} } from "@foxglove/schemas";
+
+export const inputs = ["/my_topic"];
+export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
+
+export default function script(event: Input<"/my_topic">): Log {
+  return {
+    timestamp: event.receiveTime,
+    level: LogLevel.ERROR,
+    message: "log message",
+    name: "mr log",
+    file: "log.log",
+    line: 1,
+  };
+}
+`;
+
 const sourceCodeWithUtils = `
   import { Input } from "ros";
   import { norm } from "./pointClouds";
@@ -143,6 +173,30 @@ export const RawUserUtils: StoryObj = {
     </div>
   ),
   name: "rawUserUtils",
+};
+
+export const SchemaUsageInNode: StoryObj = {
+  render: () => (
+    <PanelSetup
+      fixture={{
+        ...fixture,
+        userNodes: {
+          nodeId1: {
+            name: "/studio_script/script",
+            sourceCode: sourceCodeWithSchemas.trim(),
+          },
+        },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: [] },
+      }}
+    >
+      <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
+    </PanelSetup>
+  ),
+  name: "schema usage in node",
+  parameters: {
+    colorScheme: "light",
+  },
 };
 
 export const UtilsUsageInNode: StoryObj = {

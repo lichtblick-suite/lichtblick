@@ -37,7 +37,7 @@ import { makeStyles } from "tss-react/mui";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
-import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
+import { getUserScriptProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import templates from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 
@@ -115,7 +115,7 @@ type Props = {
   addNewNode: (sourceCode?: string) => void;
 };
 
-const { utilityFiles } = getNodeProjectConfig();
+const { utilityFiles } = getUserScriptProjectConfig();
 
 const SidebarHeader = ({
   title,

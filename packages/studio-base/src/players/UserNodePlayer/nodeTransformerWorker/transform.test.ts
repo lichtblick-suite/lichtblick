@@ -425,6 +425,22 @@ describe("pipeline", () => {
       }),
     );
 
+    const uint32DataType: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "val",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "uint32",
+            },
+          ],
+        },
+      }),
+    );
+
     const posDatatypes: RosDatatypes = new Map(
       Object.entries({
         [baseNodeData.name]: {
@@ -691,6 +707,15 @@ describe("pipeline", () => {
             return { num: 1 };
           };`,
         datatypes: numDataType,
+      },
+      {
+        description: "Enum as return type",
+        sourceCode: `
+          enum MyEnum { A = 1, B = 2, C };
+          export default (msg: any): { val: MyEnum } => {
+            return { val: MyEnum.A };
+          };`,
+        datatypes: uint32DataType,
       },
       {
         description: "Imported type from 'ros' in return type",
@@ -1134,6 +1159,22 @@ describe("pipeline", () => {
           export default publisher;`,
         datatypes: basicDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
+      },
+      {
+        description: "Should detect output datatype from @foxglove/schemas",
+        sourceCode: `
+          import { Color } from "@foxglove/schemas";
+
+          export const inputs = [];
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
+
+          const publisher = (message: any): Color => {
+            return { r: 1, g: 1, b: 1, a: 1 };
+          };
+
+          export default publisher;`,
+        datatypes: basicDatatypes,
+        outputDatatype: "foxglove.Color",
       },
       {
         description: "Should handle deep subtype lookup",

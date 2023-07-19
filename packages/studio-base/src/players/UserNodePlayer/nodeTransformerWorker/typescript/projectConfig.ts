@@ -11,40 +11,51 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { sortBy } from "lodash";
+
+import { exportTypeScriptSchemas } from "@foxglove/schemas/internal";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import {
-  ros_lib_filename,
   ros_lib_dts,
+  ros_lib_filename,
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
-import { lib_filename, lib_dts } from "./lib";
+import { lib_dts, lib_filename } from "./lib";
+import { UserScriptProjectConfig, UserScriptProjectFile } from "./types";
 
-export type NodeProjectFile = {
-  fileName: string;
-  filePath: string;
-  sourceCode: string;
-};
+/**
+ * Generates virtual ts files for each type exported by the @foxglove/schemas package.
+ */
+export function generateFoxgloveSchemaDeclarations(): UserScriptProjectFile[] {
+  const schemas = sortBy([...exportTypeScriptSchemas().entries()], ([name]) => name);
+  const files = schemas.map(([name, sourceCode]) => {
+    return {
+      fileName: `@foxglove/schemas/${name}.ts`,
+      filePath: `@foxglove/schemas/${name}.ts`,
+      // Replace all enum declarations with const enum declarations so they can be imported
+      // as a pure type and don't require any runtime typescript enum support.
+      sourceCode: sourceCode.replaceAll(/export enum (\w+) {/g, "export const enum $1 {"),
+    };
+  });
 
-export type NodeProjectConfig = {
-  defaultLibFileName: string;
-  declarations: NodeProjectFile[];
-  utilityFiles: NodeProjectFile[];
-  rosLib: NodeProjectFile;
-};
+  return files;
+}
 
-const utilityFiles: NodeProjectFile[] = rawUserUtils.map((utility) => ({
+const utilityFiles: UserScriptProjectFile[] = rawUserUtils.map((utility) => ({
   ...utility,
   filePath: `${DEFAULT_STUDIO_NODE_PREFIX}${utility.fileName}`,
 }));
 
-export function getNodeProjectConfig(): NodeProjectConfig {
-  const declarations = [];
+export function getUserScriptProjectConfig(): UserScriptProjectConfig {
+  const declarations: UserScriptProjectConfig["declarations"] = [];
   declarations.push({
     fileName: lib_filename,
     filePath: lib_filename,
     sourceCode: lib_dts,
   });
+
+  declarations.push(...generateFoxgloveSchemaDeclarations());
 
   return {
     defaultLibFileName: lib_filename,

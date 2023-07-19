@@ -22,10 +22,11 @@ import { ReactElement, useCallback, useEffect, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
+import { ModuleResolutionKind } from "typescript";
 
 import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/getPrettifiedCode";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
-import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
+import { getUserScriptProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
@@ -76,7 +77,7 @@ const gotoSelection = (editor: monacoApi.editor.IEditor, selection?: monacoApi.I
   }
 };
 
-const projectConfig = getNodeProjectConfig();
+const projectConfig = getUserScriptProjectConfig();
 const Editor = ({
   autoFormatOnSave,
   script,
@@ -240,12 +241,25 @@ const Editor = ({
       // this way (instead of specifying it in the compiler options)
       // is a hack to overwrite the default type defs since the
       // typescript language service does not expose such a method.
-      projectConfig.declarations.forEach((lib) =>
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(
-          lib.sourceCode,
-          `file:///node_modules/@types/${lib.fileName}`,
-        ),
-      );
+      projectConfig.declarations.forEach((lib) => {
+        if (lib.fileName.startsWith("@foxglove/schemas")) {
+          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            lib.sourceCode,
+            `file:///node_modules/${lib.fileName}`,
+          );
+        } else {
+          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            lib.sourceCode,
+            `file:///node_modules/@types/${lib.fileName}`,
+          );
+        }
+      });
+      monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+        ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
+        // This is needed for @foxglove/schemas to resolve correctly in the editor.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        moduleResolution: ModuleResolutionKind.NodeNext as any,
+      });
       projectConfig.utilityFiles.forEach((sourceFile) => {
         const filePath = monacoApi.Uri.parse(`file://${sourceFile.filePath}`);
         const model =
