@@ -77,6 +77,14 @@ docker run --rm -p "8080:8080" ghcr.io/foxglove/studio:latest
 
 Foxglove Studio will be accessible in your browser at [localhost:8080](http://localhost:8080/).
 
+### Overriding the default layout
+
+[Bind-mount](https://docs.docker.com/storage/bind-mounts/) a layout JSON file at `/foxglove/default-layout.json` to set the default layout used when loading Studio from the Docker image.
+
+```sh
+docker run --rm -p "8080:8080" -v /path/to/custom_layout.json:/foxglove/default-layout.json ghcr.io/foxglove/studio:latest
+```
+
 ## Contributing
 
 Foxglove Studio is written in TypeScript – contributions are welcome!

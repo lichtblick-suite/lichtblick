@@ -136,6 +136,7 @@ export const mainConfig =
     </head>
     <script>
       global = globalThis;
+      globalThis.FOXGLOVE_STUDIO_DEFAULT_LAYOUT = [/*FOXGLOVE_STUDIO_DEFAULT_LAYOUT_PLACEHOLDER*/][0];
     </script>
     <body>
       <div id="root"></div>

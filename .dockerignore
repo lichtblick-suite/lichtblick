@@ -4,3 +4,4 @@
 .webpack/
 dist/
 node_modules/
+Dockerfile
