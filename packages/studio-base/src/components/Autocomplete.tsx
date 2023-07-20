@@ -12,13 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import CancelIcon from "@mui/icons-material/Cancel";
-import {
-  MenuItem,
-  Autocomplete as MuiAutocomplete,
-  TextField,
-  alpha,
-  useTheme,
-} from "@mui/material";
+import { MenuItem, Autocomplete as MuiAutocomplete, TextField, alpha } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
 import * as React from "react";
 import {
@@ -33,6 +27,7 @@ import {
 import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
 
+import { HighlightChars } from "@foxglove/studio-base/components/HighlightChars";
 import { ReactWindowListboxAdapter } from "@foxglove/studio-base/components/ReactWindowListboxAdapter";
 
 const MAX_FZF_MATCHES = 200;
@@ -107,7 +102,13 @@ const useStyles = makeStyles()((theme) => {
       lineHeight: "calc(100% - 10px)",
       overflowWrap: "break-word",
       color: theme.palette.text.primary,
-      whiteSpace: "pre",
+
+      // re-establish the <mark /> styles because the autocomplete is in a Portal
+      mark: {
+        backgroundColor: "transparent",
+        color: theme.palette.info.main,
+        fontWeight: 700,
+      },
     },
     itemSelected: {
       backgroundColor: alpha(
@@ -147,29 +148,6 @@ function itemToFzfResult<T>(item: T): FzfResultItem<T> {
     end: 0,
   };
 }
-
-const HighlightChars = (props: { str: string; indices: Set<number> }) => {
-  const theme = useTheme();
-  const chars = props.str.split("");
-
-  const nodes = chars.map((char, i) => {
-    if (props.indices.has(i)) {
-      return (
-        <b key={i} style={{ color: theme.palette.info.main }}>
-          {char}
-        </b>
-      );
-    } else {
-      return (
-        <span key={i} style={{ whiteSpace: "pre" }}>
-          {char}
-        </span>
-      );
-    }
-  });
-
-  return <>{nodes}</>;
-};
 
 /**
  * <Autocomplete> is a Studio-specific wrapper of MUI autocomplete with support
