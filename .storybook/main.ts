@@ -49,8 +49,10 @@ const storybookConfig: StorybookConfig = {
 
       resolve: {
         ...studioWebpackConfig.resolve,
-        alias: {
-          ...studioWebpackConfig.resolve?.alias,
+        fallback: {
+          ...studioWebpackConfig.resolve?.fallback,
+          constants: (config.resolve!.fallback as Record<string, string | false | string[]>)
+            .constants!,
         },
       },
       module: studioWebpackConfig.module,
