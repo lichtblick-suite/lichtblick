@@ -44,22 +44,15 @@ export function LaunchPreferenceScreen(): ReactElement {
 
   async function launchInWeb() {
     setSessionPreference(LaunchPreferenceValue.WEB); // always set session preference to allow overriding the URL param
-    if (rememberPreference) {
-      await setGlobalPreference(LaunchPreferenceValue.WEB);
-    }
+    await setGlobalPreference(rememberPreference ? LaunchPreferenceValue.WEB : undefined);
   }
 
   async function launchInDesktop() {
     setSessionPreference(LaunchPreferenceValue.DESKTOP); // always set session preference to allow overriding the URL param
-    if (rememberPreference) {
-      await setGlobalPreference(LaunchPreferenceValue.DESKTOP);
-    }
+    await setGlobalPreference(rememberPreference ? LaunchPreferenceValue.DESKTOP : undefined);
   }
 
-  async function toggleRememberPreference() {
-    if (rememberPreference) {
-      await setGlobalPreference(undefined);
-    }
+  function toggleRememberPreference() {
     setRememberPreference(!rememberPreference);
   }
 
