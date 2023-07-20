@@ -11,19 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { StoryObj } from "@storybook/react";
-import { isEqual } from "lodash";
-import cloneDeep from "lodash/cloneDeep";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { range } from "lodash";
+import { useCallback, useEffect, useRef, useState } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";
+import { useImmer } from "use-immer";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import delay from "@foxglove/studio-base/util/delay";
 
-import TimeBasedChart from "./index";
 import type { Props } from "./index";
+import TimeBasedChart from "./index";
 
 const dataX = 0.000057603000000000004;
 const dataY = 5.544444561004639;
@@ -107,10 +107,10 @@ export const SimpleLight: StoryObj = { ...Simple, parameters: { colorScheme: "li
 
 export const CanZoomAndUpdate: StoryObj = {
   render: function Story() {
-    const [chartProps, setChartProps] = useState(structuredClone(commonProps));
-    const callCountRef = useRef(0);
+    const [chartProps, setChartProps] = useImmer(commonProps);
+    const hasScrolled = useRef(false);
 
-    const readySignal = useReadySignal();
+    const readySignal = useReadySignal({ count: 6 });
 
     const doScroll = useCallback(async () => {
       const canvasEl = document.querySelector("canvas");
@@ -119,43 +119,37 @@ export const CanZoomAndUpdate: StoryObj = {
       }
 
       // Zoom is a continuous event, so we need to simulate wheel multiple times
-      for (let i = 0; i < 5; i++) {
+      for (const _ of range(2)) {
         triggerWheel(canvasEl.parentElement!, 2);
-        await delay(10);
+        await delay(200);
       }
 
       await delay(100);
-      setChartProps((oldProps) => {
-        const newProps = cloneDeep(oldProps);
-        const newDataPoint = cloneDeep(newProps.data.datasets[0]!.data[0]!);
-        newDataPoint.x = 20;
-        newProps.data.datasets[0]!.data[1] = newDataPoint;
-        return newProps;
+
+      setChartProps((draft) => {
+        draft.data.datasets[0]!.data[1] = {
+          ...draft.data.datasets[0]!.data[0]!,
+          x: 20,
+        };
       });
-    }, []);
+    }, [setChartProps]);
 
     const pauseFrame = useCallback(() => {
       return () => {
         // first render of the chart triggers scrolling
-        if (callCountRef.current === 0) {
+        if (!hasScrolled.current) {
           void doScroll();
         }
 
-        ++callCountRef.current;
-      };
-    }, [doScroll]);
-
-    // Fire ready signal after chart props are updated.
-    useEffect(() => {
-      if (!isEqual(chartProps, commonProps)) {
+        hasScrolled.current = true;
         readySignal();
-      }
-    }, [chartProps, readySignal]);
+      };
+    }, [doScroll, readySignal]);
 
     return (
-      <div style={{ width: 800, height: 800, background: "black" }}>
+      <div style={{ width: 800, height: 400, background: "black" }}>
         <MockMessagePipelineProvider pauseFrame={pauseFrame}>
-          <TimeBasedChart {...chartProps} width={800} height={800} />
+          <TimeBasedChart {...chartProps} width={800} height={400} />
         </MockMessagePipelineProvider>
       </div>
     );
