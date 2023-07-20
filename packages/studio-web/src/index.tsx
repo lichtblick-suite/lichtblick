@@ -9,7 +9,7 @@ import Logger from "@foxglove/log";
 import type { IDataSourceFactory } from "@foxglove/studio-base";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 
-import VersionBanner from "./VersionBanner";
+import { CompatibilityBanner } from "./CompatibilityBanner";
 import { canRenderApp } from "./canRenderApp";
 
 const log = Logger.getLogger(__filename);
@@ -48,7 +48,11 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
 
   const canRender = canRenderApp();
   const banner = (
-    <VersionBanner isChrome={isChrome} currentVersion={chromeVersion} isDismissable={canRender} />
+    <CompatibilityBanner
+      isChrome={isChrome}
+      currentVersion={chromeVersion}
+      isDismissable={canRender}
+    />
   );
 
   if (!canRender) {

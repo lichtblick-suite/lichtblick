@@ -79,7 +79,7 @@ const useStyles = makeStyles<void, "button" | "icon">()((theme, _params, classes
   },
 }));
 
-function VersionBannerBase({
+function CompatibilityBannerBase({
   isChrome,
   isDismissable,
   onDismiss,
@@ -144,7 +144,7 @@ function VersionBannerBase({
   );
 }
 
-export default function VersionBanner({
+export function CompatibilityBanner({
   isChrome,
   currentVersion,
   isDismissable,
@@ -168,7 +168,7 @@ export default function VersionBanner({
   return (
     <MuiThemeProvider theme={muiTheme}>
       <Portal>
-        <VersionBannerBase
+        <CompatibilityBannerBase
           isChrome={isChrome}
           isDismissable={isDismissable}
           onDismiss={() => setShowBanner(false)}
