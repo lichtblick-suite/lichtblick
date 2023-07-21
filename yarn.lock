@@ -2671,7 +2671,7 @@ __metadata:
     chart.js: 4.3.0
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
-    chromatic: 6.19.9
+    chromatic: 6.20.0
     comlink: 4.4.1
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
@@ -8435,14 +8435,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.19.9":
-  version: 6.19.9
-  resolution: "chromatic@npm:6.19.9"
+"chromatic@npm:6.20.0":
+  version: 6.20.0
+  resolution: "chromatic@npm:6.20.0"
   bin:
     chroma: dist/bin.js
     chromatic: dist/bin.js
     chromatic-cli: dist/bin.js
-  checksum: 50552c3043d96e7badb0d16ddd1839c0601d0f5e0c2c573acda5d6b0d0fad96067f0c659ad0a2b278d8b28b46670549b4bcedfd2d350a9077975aff203c29193
+  checksum: 90d413144ea9502cb96fd0065a0cf2ece63d832da2d7fd93f9577fd09080cbeb829ce9ca1d2384d4f7739cc249aa09033ca61820ac3c1656ff92d6a4ba2fbd67
   languageName: node
   linkType: hard
 
