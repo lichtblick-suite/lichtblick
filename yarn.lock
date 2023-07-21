@@ -2344,9 +2344,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/eslint-plugin@npm:0.22.1":
-  version: 0.22.1
-  resolution: "@foxglove/eslint-plugin@npm:0.22.1"
+"@foxglove/eslint-plugin@npm:0.23.0":
+  version: 0.23.0
+  resolution: "@foxglove/eslint-plugin@npm:0.23.0"
   dependencies:
     "@typescript-eslint/utils": ^5
     tsutils: ^3
@@ -2357,9 +2357,9 @@ __metadata:
     eslint-plugin-es: ^4
     eslint-plugin-filenames: ^1
     eslint-plugin-import: ^2
-    eslint-plugin-prettier: ^3 || ^4
-    prettier: ^2
-  checksum: e36b25da6be6426b2f4d6ff31099535d140f4b54461d1594a41f576dcfb99341a9c2d62ea29275d34ac38da16c9811ffd16ad03931225491a95f46552e2f3e82
+    eslint-plugin-prettier: ^5
+    prettier: ^3
+  checksum: 961ae4af3f7ff5decc73c2ed3e47a2050cc0096dce14c9e08e9174ebb9c33455d0de6167c01702b51323dcd075b5e850441633e4b0c768d824e6baae84208ae5
   languageName: node
   linkType: hard
 
@@ -11623,7 +11623,7 @@ __metadata:
     "@babel/core": 7.22.9
     "@babel/preset-env": 7.22.9
     "@babel/preset-typescript": 7.22.5
-    "@foxglove/eslint-plugin": 0.22.1
+    "@foxglove/eslint-plugin": 0.23.0
     "@foxglove/eslint-plugin-studio": "workspace:*"
     "@foxglove/tsconfig": 2.0.0
     "@octokit/rest": 20.0.1
