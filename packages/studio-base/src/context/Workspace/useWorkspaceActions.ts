@@ -71,7 +71,7 @@ export type WorkspaceActions = {
   };
 };
 
-export function setterValue<T>(action: SetStateAction<T>, value: T): T {
+function setterValue<T>(action: SetStateAction<T>, value: T): T {
   if (action instanceof Function) {
     return action(value);
   }

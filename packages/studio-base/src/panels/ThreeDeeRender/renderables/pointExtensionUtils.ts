@@ -63,7 +63,7 @@ export const DEFAULT_POINT_SETTINGS: LayerSettingsPointExtension = {
 };
 
 export const POINT_CLOUD_REQUIRED_FIELDS = ["x", "y", "z"];
-export const POINT_SHAPE_OPTIONS = [
+const POINT_SHAPE_OPTIONS = [
   { label: "Circle", value: "circle" },
   { label: "Square", value: "square" },
 ];

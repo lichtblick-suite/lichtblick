@@ -1,0 +1,18 @@
+diff --git a/dist/parser/typescript.js b/dist/parser/typescript.js
+index 862f9980aabfd3eaef6d7c1a2935f8b09b532447..535b2a769f90e939be1074df635634dd06f7ea0e 100644
+--- a/dist/parser/typescript.js
++++ b/dist/parser/typescript.js
+@@ -17,11 +17,8 @@ async function parseTypescript(filename) {
+   return (0, _parser.parse)(content, {
+     sourceType: 'module',
+     plugins: ['typescript', 'jsx', 'asyncGenerators', 'bigInt', 'classProperties', 'classPrivateProperties', 'classPrivateMethods', // { decorators: { decoratorsBeforeExport: true } },
+-    'decorators-legacy', 'doExpressions', 'dynamicImport', 'exportDefaultFrom', 'exportNamespaceFrom', 'functionBind', 'functionSent', 'importMeta', 'logicalAssignment', 'nullishCoalescingOperator', 'numericSeparator', 'objectRestSpread', 'optionalCatchBinding', 'optionalChaining', {
+-      pipelineOperator: {
+-        proposal: 'minimal'
+-      }
+-    }, 'throwExpressions']
++    'decorators-legacy', 'doExpressions', 'dynamicImport', 'exportDefaultFrom', 'exportNamespaceFrom', 'functionBind', 'functionSent', 'importMeta', 'logicalAssignment', 'nullishCoalescingOperator', 'numericSeparator', 'objectRestSpread', 'optionalCatchBinding', 'optionalChaining',
++    ['pipelineOperator', { proposal: 'minimal' }], 'throwExpressions']
+   });
+ }
+ 

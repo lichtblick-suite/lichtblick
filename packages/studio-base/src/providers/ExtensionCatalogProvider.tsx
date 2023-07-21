@@ -107,7 +107,7 @@ function activateExtension(
   };
 }
 
-export function createExtensionRegistryStore(
+function createExtensionRegistryStore(
   loaders: readonly ExtensionLoader[],
   mockMessageConverters: readonly RegisterMessageConverterArgs<unknown>[] | undefined,
 ): StoreApi<ExtensionCatalog> {

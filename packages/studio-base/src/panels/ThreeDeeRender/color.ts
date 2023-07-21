@@ -53,16 +53,6 @@ export function rgbToThreeColor(output: THREE.Color, rgb: ColorRGB): THREE.Color
   return output.setRGB(rgb.r, rgb.g, rgb.b).convertSRGBToLinear();
 }
 
-// ts-prune-ignore-next
-export function rgbaToHexString(color: ColorRGBA): string {
-  const rgba =
-    (THREE.MathUtils.clamp(color.r * 255, 0, 255) << 24) ^
-    (THREE.MathUtils.clamp(color.g * 255, 0, 255) << 16) ^
-    (THREE.MathUtils.clamp(color.b * 255, 0, 255) << 8) ^
-    (THREE.MathUtils.clamp(color.a * 255, 0, 255) << 0);
-  return ("00000000" + rgba.toString(16)).slice(-8);
-}
-
 export function rgbaToCssString(color: ColorRGBA): string {
   const r = Math.trunc(color.r * 255);
   const g = Math.trunc(color.g * 255);

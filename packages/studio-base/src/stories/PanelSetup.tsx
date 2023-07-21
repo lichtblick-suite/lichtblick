@@ -108,18 +108,7 @@ type UnconnectedProps = {
   className?: string;
 };
 
-function setNativeValue(element: unknown, value: unknown) {
-  const valueSetter = Object.getOwnPropertyDescriptor(element, "value")?.set; // eslint-disable-line @typescript-eslint/unbound-method
-  const prototype = Object.getPrototypeOf(element);
-  const prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value")?.set; // eslint-disable-line @typescript-eslint/unbound-method
-  if (valueSetter && valueSetter !== prototypeValueSetter) {
-    prototypeValueSetter?.call(element, value);
-  } else {
-    valueSetter?.call(element, value);
-  }
-}
-
-export function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
+function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
   const allPanels = [...panels.getBuiltin(t), ...panels.getDebug(t)];
 
   const visiblePanels = [...panels.getBuiltin(t)];
@@ -134,30 +123,12 @@ export function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
   };
 }
 
-export function triggerInputChange(
-  node: HTMLInputElement | HTMLTextAreaElement,
-  value: string = "",
-): void {
-  // force trigger textarea to change
-  node.value = `${value} `;
-  // trigger input change: https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-onchange-event-in-react-js
-  setNativeValue(node, value);
-
-  const ev = new Event("input", { bubbles: true });
-  node.dispatchEvent(ev);
-}
-
-export function triggerInputBlur(node: HTMLInputElement | HTMLTextAreaElement): void {
-  const ev = new Event("blur", { bubbles: true });
-  node.dispatchEvent(ev);
-}
-
 export function triggerWheel(target: HTMLElement, deltaX: number): void {
   const event = new WheelEvent("wheel", { deltaX, bubbles: true, cancelable: true });
   target.dispatchEvent(event);
 }
 
-export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => {
+const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => {
   return (
     <DndProvider backend={HTML5Backend}>
       <Mosaic

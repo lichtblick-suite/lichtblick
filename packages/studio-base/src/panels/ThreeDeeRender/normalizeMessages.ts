@@ -111,6 +111,7 @@ export function normalizeMatrix6(mat: number[] | undefined): Matrix6 {
   return mat as Matrix6;
 }
 
+// ts-unused-exports:disable-next-line
 export function normalizeQuaternion(quat: Partial<Quaternion> | undefined): Quaternion {
   if (!quat) {
     return { x: 0, y: 0, z: 0, w: 1 };
@@ -150,6 +151,7 @@ export function normalizeHeader(header: PartialMessage<Header> | undefined): Hea
   };
 }
 
+// ts-unused-exports:disable-next-line
 export function normalizeTransform(transform: PartialMessage<Transform> | undefined): Transform {
   return {
     translation: normalizeVector3(transform?.translation),

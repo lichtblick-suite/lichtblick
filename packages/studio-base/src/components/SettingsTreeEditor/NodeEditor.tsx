@@ -34,7 +34,7 @@ import { VisibilityToggle } from "./VisibilityToggle";
 import { icons } from "./icons";
 import { prepareSettingsNodes } from "./utils";
 
-export type NodeEditorProps = {
+type NodeEditorProps = {
   actionHandler: (action: SettingsTreeAction) => void;
   defaultOpen?: boolean;
   filter?: string;
@@ -43,7 +43,7 @@ export type NodeEditorProps = {
   settings?: Immutable<SettingsTreeNode>;
 };
 
-export const NODE_HEADER_MIN_HEIGHT = 35;
+const NODE_HEADER_MIN_HEIGHT = 35;
 
 const useStyles = makeStyles()((theme) => ({
   actionButton: {

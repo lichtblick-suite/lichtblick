@@ -13,7 +13,6 @@
 
 import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
-// ts-prune-ignore-next
 export const fixture: Fixture = {
   topics: [
     { name: "/msgs/big_topic", schemaName: "msgs/big_topic" },
@@ -236,7 +235,6 @@ export const fixture: Fixture = {
 };
 
 // separate fixture so that we only need to define datatypes for small subset of types
-// ts-prune-ignore-next
 export const enumFixture: Fixture = {
   datatypes: new Map(
     Object.entries({
@@ -278,7 +276,6 @@ const exampleMessage = {
   pets: [10000, 10001, 10001, 10000],
 };
 
-// ts-prune-ignore-next
 export const enumAdvancedFixture: Fixture = {
   datatypes: new Map(
     Object.entries({
@@ -328,7 +325,6 @@ export const enumAdvancedFixture: Fixture = {
   },
 };
 
-// ts-prune-ignore-next
 export const withMissingData: Fixture = {
   datatypes: new Map(
     Object.entries({
@@ -353,7 +349,6 @@ export const withMissingData: Fixture = {
   },
 };
 
-// ts-prune-ignore-next
 export const topicsToDiffFixture: Fixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
@@ -391,7 +386,6 @@ export const topicsToDiffFixture: Fixture = {
   },
 };
 
-// ts-prune-ignore-next
 export const topicsWithIdsToDiffFixture: Fixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
@@ -435,7 +429,6 @@ export const topicsWithIdsToDiffFixture: Fixture = {
   },
 };
 
-// ts-prune-ignore-next
 export const multipleNumberMessagesFixture: Fixture = {
   datatypes: new Map(
     Object.entries({
@@ -472,7 +465,6 @@ export const multipleNumberMessagesFixture: Fixture = {
   },
 };
 
-// ts-prune-ignore-next
 export const multipleMessagesFilter: Fixture = {
   datatypes: new Map(
     Object.entries({

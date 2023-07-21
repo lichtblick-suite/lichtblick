@@ -37,7 +37,6 @@ const markerObject = {
   },
 };
 
-// ts-prune-ignore-next
 export const POINT_CLOUD_MESSAGE: PointCloud2 = {
   fields: [
     { name: "x", offset: 0, datatype: 7, count: 1 },
@@ -107,7 +106,6 @@ export const POINT_CLOUD_MESSAGE: PointCloud2 = {
   ]),
 };
 
-// ts-prune-ignore-next
 export const POINT_CLOUD_WITH_ADDITIONAL_FIELDS: PointCloud2 = {
   fields: [
     { name: "x", offset: 0, datatype: 7, count: 1 },

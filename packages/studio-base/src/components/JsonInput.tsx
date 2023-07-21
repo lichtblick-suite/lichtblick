@@ -43,7 +43,7 @@ type ParseAndStringifyFn = {
   stringify: (obj: unknown) => string;
   parse: (val: string) => unknown;
 };
-export type BaseProps = {
+type BaseProps = {
   dataTestId?: string;
   dataValidator?: (data: unknown) => ValidationResult | undefined;
   onChange?: OnChange;

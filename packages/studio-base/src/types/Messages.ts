@@ -233,7 +233,6 @@ export type PointField = Readonly<{
   count: number;
 }>;
 
-// ts-prune-ignore-next
 export type PointCloud2 = StampedMessage & {
   fields: readonly PointField[];
   height: number;

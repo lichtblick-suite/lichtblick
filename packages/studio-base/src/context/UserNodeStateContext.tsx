@@ -20,7 +20,7 @@ type UserNodeState = {
   };
 };
 
-export const UserNodeStateContext = createContext<
+const UserNodeStateContext = createContext<
   | {
       state: UserNodeState;
       setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;

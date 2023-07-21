@@ -7,10 +7,10 @@ import { expect } from "@storybook/jest";
 import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 
+import Publish from "@foxglove/studio-base/panels/Publish";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
-import Publish from "./index";
 import { PublishConfig } from "./types";
 
 const getFixture = ({ allowPublish }: { allowPublish: boolean }): Fixture => {

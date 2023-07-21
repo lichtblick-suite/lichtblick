@@ -15,7 +15,6 @@ type MakeImageArgs = {
   fy?: number;
 };
 
-// ts-prune-ignore-next
 export function makeRawImageAndCalibration(args: MakeImageArgs): {
   calibrationMessage: MessageEvent<Partial<CameraCalibration>>;
   cameraMessage: MessageEvent<Partial<RawImage>>;
@@ -83,7 +82,6 @@ export function makeRawImageAndCalibration(args: MakeImageArgs): {
   return { calibrationMessage, cameraMessage };
 }
 
-// ts-prune-ignore-next
 export async function makeCompressedImageAndCalibration(args: MakeImageArgs): Promise<{
   calibrationMessage: MessageEvent<Partial<CameraCalibration>>;
   cameraMessage: MessageEvent<Partial<CompressedImage>>;

@@ -14,5 +14,4 @@ export function useAnalytics(): IAnalytics {
   return useContext(AnalyticsContext);
 }
 
-// ts-prune-ignore-next
 export default AnalyticsContext;

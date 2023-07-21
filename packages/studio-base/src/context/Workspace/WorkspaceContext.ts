@@ -10,7 +10,7 @@ import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDial
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
-export const SidebarItemKeys = [
+const SidebarItemKeys = [
   "account",
   "add-panel",
   "app-bar-tour",

@@ -314,5 +314,4 @@ const datatypes: RosDatatypes = new Map(
   }),
 );
 
-// ts-prune-ignore-next
 export default datatypes;

@@ -13,15 +13,6 @@
 
 import { CSSProperties, PropsWithChildren } from "react";
 
-export const SCREENSHOT_VIEWPORT = {
-  width: 1001,
-  height: 745,
-};
-
-export const ScreenshotSizedContainer = (props: {
-  children: React.ReactNode;
-}): React.ReactElement => <div style={SCREENSHOT_VIEWPORT}>{props.children}</div>;
-
 type ExpectedResultProps = {
   top?: CSSProperties["top"];
   left?: CSSProperties["left"];

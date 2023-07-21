@@ -19,7 +19,7 @@ import {
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-export type PlaybackControlsTooltipItem =
+type PlaybackControlsTooltipItem =
   | { type: "divider" }
   | { type: "item"; title: string; value: string };
 

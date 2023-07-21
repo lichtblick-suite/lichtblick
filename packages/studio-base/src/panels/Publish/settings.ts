@@ -42,7 +42,7 @@ function topicError(topicName?: string) {
   return undefined;
 }
 
-export const buildSettingsTree = (
+const buildSettingsTree = (
   config: PublishConfig,
   schemaNames: string[],
   topics: readonly Topic[],

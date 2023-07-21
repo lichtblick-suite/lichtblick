@@ -25,7 +25,6 @@ import TopicLink from "./TopicLink";
 import { InteractionData } from "./types";
 import { Pose } from "../transforms";
 
-// ts-prune-ignore-next
 export const OBJECT_TAB_TYPE = "Selected object";
 export type TabType = typeof OBJECT_TAB_TYPE;
 

@@ -56,13 +56,12 @@ function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElem
   );
 }
 
-export type UnconnectedPlaybackPerformanceProps = Immutable<{
+type UnconnectedPlaybackPerformanceProps = Immutable<{
   timestamp: number;
   activeData?: PlayerStateActiveData;
 }>;
 
-// Exported for stories
-export function UnconnectedPlaybackPerformance({
+function UnconnectedPlaybackPerformance({
   timestamp,
   activeData,
 }: UnconnectedPlaybackPerformanceProps): JSX.Element {

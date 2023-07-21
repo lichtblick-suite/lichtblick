@@ -62,7 +62,8 @@
     "@types/node": "15.3.0",
     "react-dom": "patch:react-dom@npm:17.0.2#./patches/react-dom.patch",
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch",
-    "react-dnd": "patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch"
+    "react-dnd": "patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch",
+    "depcheck/@babel/parser": "^7.20.0"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
@@ -90,7 +91,7 @@
     "@typescript-eslint/parser": "5.62.0",
     "babel-plugin-transform-import-meta": "2.2.0",
     "cross-env": "7.0.3",
-    "depcheck": "1.4.3",
+    "depcheck": "patch:depcheck@npm:1.4.3#./patches/depcheck.patch",
     "electron": "25.3.1",
     "electron-builder": "24.6.2",
     "eslint": "8.45.0",
@@ -114,7 +115,7 @@
     "semver": "7.5.4",
     "storybook": "7.1.0",
     "ts-node": "10.9.1",
-    "ts-prune": "0.10.3",
+    "ts-unused-exports": "9.0.5",
     "tslib": "2.6.0",
     "typescript": "5.1.6",
     "webpack": "5.88.2",

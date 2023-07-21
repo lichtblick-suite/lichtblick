@@ -34,4 +34,5 @@ function useReadySignal({ count }: { count: number } = { count: 1 }): ReadySigna
 }
 
 export { useReadySignal };
+// ts-unused-exports:disable-next-line
 export default ReadySignalContext;

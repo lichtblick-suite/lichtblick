@@ -24,5 +24,4 @@ function useDelayedFixture(fixtureToSet: Fixture): Fixture {
   return fixture;
 }
 
-// ts-prune-ignore-next
 export default useDelayedFixture;

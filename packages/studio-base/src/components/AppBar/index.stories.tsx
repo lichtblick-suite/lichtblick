@@ -19,17 +19,13 @@ export default {
   component: AppBar,
   decorators: [StorybookDecorator],
   args: {
-    signIn: action("signIn"),
-    onSelectDataSourceAction: action("onSelectDataSourceAction"),
     onMinimizeWindow: action("onMinimizeWindow"),
     onMaximizeWindow: action("onMaximizeWindow"),
     onUnmaximizeWindow: action("onUnmaximizeWindow"),
     onCloseWindow: action("onCloseWindow"),
-    prefsDialogOpen: false,
-    setPrefsDialogOpen: action("setPrefsDialogOpen"),
   },
   parameters: { colorScheme: "both-column" },
-} as Meta<typeof AppBar>;
+} satisfies Meta<typeof AppBar>;
 
 type Story = StoryObj<typeof AppBar>;
 

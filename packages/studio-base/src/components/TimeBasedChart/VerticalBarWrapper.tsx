@@ -7,7 +7,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 
-export const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()(() => ({
   root: {
     top: 0,
     bottom: 0,

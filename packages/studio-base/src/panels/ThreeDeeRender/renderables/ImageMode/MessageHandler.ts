@@ -323,7 +323,7 @@ export class MessageHandler {
  * @param visibleAnnotations - visible annotation topics
  * @returns - the newest synchronized item with all active annotations and image, or undefined if none found
  */
-export function findSynchronizedSetAndRemoveOlderItems(
+function findSynchronizedSetAndRemoveOlderItems(
   tree: AVLTree<Time, SynchronizationItem>,
   visibleAnnotations: Set<string>,
 ): [Time, SynchronizationItem] | undefined {

@@ -7,7 +7,6 @@ import { range } from "lodash";
 import { add, toNanoSec, toSec } from "@foxglove/rostime";
 import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
 
-// ts-prune-ignore-next
 export function makeMockEvents(
   count: number,
   startSec: number = 100,

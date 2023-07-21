@@ -18,7 +18,6 @@ import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLa
 
 import panelsReducer from "./reducers";
 
-// ts-prune-ignore-next
 /**
  * An alternative implementation of CurrentLayoutProvider, for use in tests, which performs actions
  * synchronously and doesn't require a LayoutManager.

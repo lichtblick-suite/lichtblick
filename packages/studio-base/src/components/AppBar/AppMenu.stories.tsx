@@ -56,7 +56,7 @@ export default {
     const canvas = within(canvasElement);
     await userEvent.hover(await canvas.findByTestId(args.testId));
   },
-} as Meta<StoryArgs>;
+} satisfies Meta<StoryArgs>;
 
 // Connection
 const playerSelection: PlayerSelection = {

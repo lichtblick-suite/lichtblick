@@ -20,7 +20,7 @@ const DEFAULT_FONT_SIZE = 12;
 const DEFAULT_PADDING = 4;
 
 // Supported annotation schema names
-export const ANNOTATION_DATATYPES = [
+const ANNOTATION_DATATYPES = [
   // Single marker
   "visualization_msgs/ImageMarker",
   "visualization_msgs/msg/ImageMarker",

@@ -14,14 +14,13 @@
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-// ts-prune-ignore-next
+
 export const datatypes: RosDatatypes = new Map(
   Object.entries({
     "some/datatype": { definitions: [{ name: "index", type: "int32" }] },
   }),
 );
 
-// ts-prune-ignore-next
 export const messages = Object.freeze<MessageEvent[]>([
   {
     topic: "/some/topic",
@@ -46,7 +45,6 @@ export const messages = Object.freeze<MessageEvent[]>([
   },
 ]);
 
-// ts-prune-ignore-next
 export const MessagePathInputStoryFixture: Fixture = {
   datatypes: new Map(
     Object.entries({

@@ -47,5 +47,4 @@ function useFixtureQueue(fixture: Fixture): [Fixture, () => () => void] {
   return [activeFixture, pauseFrame];
 }
 
-// ts-prune-ignore-next
 export { useFixtureQueue };

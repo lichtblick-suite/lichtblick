@@ -78,4 +78,5 @@ const AppBarDropdownButton = forwardRef<HTMLButtonElement, Props>((props, ref) =
 });
 AppBarDropdownButton.displayName = "AppBarDropdownButton";
 
+// ts-unused-exports:disable-next-line
 export { AppBarDropdownButton };

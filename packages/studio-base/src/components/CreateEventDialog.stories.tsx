@@ -28,7 +28,7 @@ export default {
   parameters: {
     colorScheme: "light",
   },
-} as Meta<typeof CreateEventDialog>;
+} satisfies Meta<typeof CreateEventDialog>;
 
 export const Empty: StoryObj = {};
 

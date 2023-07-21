@@ -43,7 +43,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 // The minimum amount of time to wait between showing the parameter update animation again
-export const ANIMATION_RESET_DELAY_MS = 3000;
+const ANIMATION_RESET_DELAY_MS = 3000;
 
 function isActiveElementEditable(): boolean {
   const activeEl = document.activeElement;

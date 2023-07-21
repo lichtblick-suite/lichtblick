@@ -32,7 +32,7 @@ export default {
       </Stack>
     ),
   ],
-} as Meta<typeof Autocomplete>;
+} satisfies Meta<typeof Autocomplete>;
 
 type Story = StoryObj<typeof Autocomplete>;
 

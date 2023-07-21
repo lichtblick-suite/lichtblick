@@ -438,7 +438,7 @@ function createSphereMarker(
   };
 }
 
-export function normalizePoseStamped(pose: PartialMessage<PoseStamped>): PoseStamped {
+function normalizePoseStamped(pose: PartialMessage<PoseStamped>): PoseStamped {
   return {
     header: normalizeHeader(pose.header),
     pose: normalizePose(pose.pose),

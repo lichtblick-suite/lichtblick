@@ -124,7 +124,7 @@ const useStyles = makeStyles()((theme) => ({
 
 type SectionKey = "resources" | "products" | "contact" | "legal";
 
-export const aboutItems: Map<
+const aboutItems: Map<
   SectionKey,
   {
     subheader: string;

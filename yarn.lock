@@ -412,16 +412,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/parser@npm:7.16.4":
-  version: 7.16.4
-  resolution: "@babel/parser@npm:7.16.4"
-  bin:
-    parser: ./bin/babel-parser.js
-  checksum: ce0a8f92f440f2a12bc932f070a7b60c5133bf8a63f461841f9e39af0194f573707959d606c6fad1a2fd496a45148553afd9b74d3b8dd36cdb7861598d1f3e36
-  languageName: node
-  linkType: hard
-
-"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.13.16, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.16.4, @babel/parser@npm:^7.20.7, @babel/parser@npm:^7.22.0, @babel/parser@npm:^7.22.5, @babel/parser@npm:^7.22.7":
+"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.13.16, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.16.4, @babel/parser@npm:^7.20.0, @babel/parser@npm:^7.20.7, @babel/parser@npm:^7.22.0, @babel/parser@npm:^7.22.5, @babel/parser@npm:^7.22.7":
   version: 7.22.7
   resolution: "@babel/parser@npm:7.22.7"
   bin:
@@ -5463,18 +5454,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ts-morph/common@npm:~0.12.2":
-  version: 0.12.2
-  resolution: "@ts-morph/common@npm:0.12.2"
-  dependencies:
-    fast-glob: ^3.2.7
-    minimatch: ^3.0.4
-    mkdirp: ^1.0.4
-    path-browserify: ^1.0.1
-  checksum: 3095b7159523a65296305113c6d85c8c7d873b821df28a7bd95b9a0a344fcb386b3356940f0833a7275cc43869669c8a8aed012cc2c25892a066d31db7440a85
-  languageName: node
-  linkType: hard
-
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.8
   resolution: "@tsconfig/node10@npm:1.0.8"
@@ -8641,15 +8620,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"code-block-writer@npm:^11.0.0":
-  version: 11.0.0
-  resolution: "code-block-writer@npm:11.0.0"
-  dependencies:
-    tslib: 2.3.1
-  checksum: d3d92a06f762d5926ecdb2033e4f30eb4c51aca365ea69ef424afbce7cc2b1518a50deff2645cc17b6fa53f234d664631f2268a4caf91af6a1fd696aa0b2fefb
-  languageName: node
-  linkType: hard
-
 "collect-v8-coverage@npm:^1.0.0":
   version: 1.0.1
   resolution: "collect-v8-coverage@npm:1.0.1"
@@ -9586,6 +9556,39 @@ __metadata:
   bin:
     depcheck: bin/depcheck.js
   checksum: 122631cab325707a55e26a8b530eb72c893bd481194100b1853ac2bc944b61320eb0e1ea0ff7e71724009cdfbd4057381d7bf868b9c5aad0c4207ac0bdca5e48
+  languageName: node
+  linkType: hard
+
+"depcheck@patch:depcheck@npm:1.4.3#./patches/depcheck.patch::locator=foxglove-studio%40workspace%3A.":
+  version: 1.4.3
+  resolution: "depcheck@patch:depcheck@npm%3A1.4.3#./patches/depcheck.patch::version=1.4.3&hash=396644&locator=foxglove-studio%40workspace%3A."
+  dependencies:
+    "@babel/parser": 7.16.4
+    "@babel/traverse": ^7.12.5
+    "@vue/compiler-sfc": ^3.0.5
+    camelcase: ^6.2.0
+    cosmiconfig: ^7.0.0
+    debug: ^4.2.0
+    deps-regex: ^0.1.4
+    ignore: ^5.1.8
+    is-core-module: ^2.4.0
+    js-yaml: ^3.14.0
+    json5: ^2.1.3
+    lodash: ^4.17.20
+    minimatch: ^3.0.4
+    multimatch: ^5.0.0
+    please-upgrade-node: ^3.2.0
+    query-ast: ^1.0.3
+    readdirp: ^3.5.0
+    require-package-name: ^2.0.1
+    resolve: ^1.18.1
+    sass: ^1.29.0
+    scss-parser: ^1.0.4
+    semver: ^7.3.2
+    yargs: ^16.1.0
+  bin:
+    depcheck: bin/depcheck.js
+  checksum: f00786f3f5c984a72ab312add0025f082596d703c2cb522c9c969de15583dfb8a896d80d988d860498900e89e16aba6de6c445f65b236ed9272f82b5e782e860
   languageName: node
   linkType: hard
 
@@ -11231,7 +11234,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.7, fast-glob@npm:^3.2.9":
+"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.9":
   version: 3.2.12
   resolution: "fast-glob@npm:3.2.12"
   dependencies:
@@ -11639,7 +11642,7 @@ __metadata:
     "@typescript-eslint/parser": 5.62.0
     babel-plugin-transform-import-meta: 2.2.0
     cross-env: 7.0.3
-    depcheck: 1.4.3
+    depcheck: "patch:depcheck@npm:1.4.3#./patches/depcheck.patch"
     electron: 25.3.1
     electron-builder: 24.6.2
     eslint: 8.45.0
@@ -11663,7 +11666,7 @@ __metadata:
     semver: 7.5.4
     storybook: 7.1.0
     ts-node: 10.9.1
-    ts-prune: 0.10.3
+    ts-unused-exports: 9.0.5
     tslib: 2.6.0
     typescript: 5.1.6
     webpack: 5.88.2
@@ -14247,7 +14250,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json5@npm:^1.0.1":
+"json5@npm:^1.0.2":
   version: 1.0.2
   resolution: "json5@npm:1.0.2"
   dependencies:
@@ -19728,13 +19731,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"true-myth@npm:^4.1.0":
-  version: 4.1.1
-  resolution: "true-myth@npm:4.1.1"
-  checksum: 0b937bb215b78d0ccff8637ac1c49be7f08c04f32a7b755c45a1566a1d522f50b0cadac93ad869b6bea9b843f60479160d3382c2c91d2381ef3559915564ff82
-  languageName: node
-  linkType: hard
-
 "truncate-utf8-bytes@npm:^1.0.0":
   version: 1.0.2
   resolution: "truncate-utf8-bytes@npm:1.0.2"
@@ -19789,16 +19785,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-morph@npm:^13.0.1":
-  version: 13.0.2
-  resolution: "ts-morph@npm:13.0.2"
-  dependencies:
-    "@ts-morph/common": ~0.12.2
-    code-block-writer: ^11.0.0
-  checksum: 325e850b99f96a71b57ced55e2bf687bdc6dc477070a946a47ca925633c62f201d2a706c6972e7bb6a37d7d9e0414b040fd46800d2fd86423185818fefe284a6
-  languageName: node
-  linkType: hard
-
 "ts-node@npm:10.9.1":
   version: 10.9.1
   resolution: "ts-node@npm:10.9.1"
@@ -19837,38 +19823,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-prune@npm:0.10.3":
-  version: 0.10.3
-  resolution: "ts-prune@npm:0.10.3"
+"ts-unused-exports@npm:9.0.5":
+  version: 9.0.5
+  resolution: "ts-unused-exports@npm:9.0.5"
   dependencies:
-    commander: ^6.2.1
-    cosmiconfig: ^7.0.1
-    json5: ^2.1.3
-    lodash: ^4.17.21
-    true-myth: ^4.1.0
-    ts-morph: ^13.0.1
+    chalk: ^4.0.0
+    tsconfig-paths: ^3.9.0
+  peerDependencies:
+    typescript: ">=3.8.3"
+  peerDependenciesMeta:
+    typescript:
+      optional: false
   bin:
-    ts-prune: lib/index.js
-  checksum: 2cbc4d64a2e50637d06691e7f962b913d87aba2419ba772a3a1cb6e4b7542412cd77af592ba7b376ed273f5e37d9be180613b479602b9f92693e4d72f0f5a373
+    ts-unused-exports: bin/ts-unused-exports
+  checksum: 67aefd95c14082189e591ee656cb89d9339cd7ee07ea1c56f3aa080b6434fa79ff1750d0e292fa62dffd197acfd0f8a46974647f91eb1a3f7b9a5cfd5acf6c19
   languageName: node
   linkType: hard
 
-"tsconfig-paths@npm:^3.14.1":
-  version: 3.14.1
-  resolution: "tsconfig-paths@npm:3.14.1"
+"tsconfig-paths@npm:^3.14.1, tsconfig-paths@npm:^3.9.0":
+  version: 3.14.2
+  resolution: "tsconfig-paths@npm:3.14.2"
   dependencies:
     "@types/json5": ^0.0.29
-    json5: ^1.0.1
+    json5: ^1.0.2
     minimist: ^1.2.6
     strip-bom: ^3.0.0
-  checksum: 8afa01c673ebb4782ba53d3a12df97fa837ce524f8ad38ee4e2b2fd57f5ac79abc21c574e9e9eb014d93efe7fe8214001b96233b5c6ea75bd1ea82afe17a4c6d
-  languageName: node
-  linkType: hard
-
-"tslib@npm:2.3.1":
-  version: 2.3.1
-  resolution: "tslib@npm:2.3.1"
-  checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
+  checksum: a6162eaa1aed680537f93621b82399c7856afd10ec299867b13a0675e981acac4e0ec00896860480efc59fc10fd0b16fdc928c0b885865b52be62cadac692447
   languageName: node
   linkType: hard
 

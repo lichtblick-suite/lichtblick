@@ -42,7 +42,7 @@ type LayerSettingsVelodyneScans = LayerSettingsPointExtension & {
 };
 const DEFAULT_SETTINGS = { ...DEFAULT_POINT_SETTINGS, stixelsEnabled: false };
 
-export function pointFieldDataTypeToNumericType(type: PointFieldDataType): NumericType {
+function pointFieldDataTypeToNumericType(type: PointFieldDataType): NumericType {
   switch (type) {
     case PointFieldDataType.UINT8:
       return NumericType.UINT8;

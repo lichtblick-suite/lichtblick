@@ -20,5 +20,5 @@ const process = {
   argv: [],
 };
 
-// ts-prune-ignore-next
+// ts-unused-exports:disable-next-line
 export default process;

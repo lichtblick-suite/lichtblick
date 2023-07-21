@@ -28,7 +28,7 @@ import { Model, RawPacket, ReturnMode, packetRate } from "@foxglove/velodyne-clo
 
 const log = Logger.getLogger(__filename);
 
-export const DEFAULT_VELODYNE_PORT = 2369;
+const DEFAULT_VELODYNE_PORT = 2369;
 
 const RPM = 600;
 const PROBLEM_SOCKET_ERROR = "SOCKET_ERROR";

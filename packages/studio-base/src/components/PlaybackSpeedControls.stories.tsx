@@ -41,7 +41,7 @@ export default {
       await userEvent.click(el);
     }
   },
-} as Meta<typeof MockMessagePipelineProvider>;
+} satisfies Meta<typeof MockMessagePipelineProvider>;
 
 type Story = StoryObj<typeof MockMessagePipelineProvider>;
 

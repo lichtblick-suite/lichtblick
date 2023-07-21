@@ -60,5 +60,4 @@ export function useCurrentUserType(): UserType {
   return "authenticated-free";
 }
 
-// ts-prune-ignore-next
 export default CurrentUserContext;
