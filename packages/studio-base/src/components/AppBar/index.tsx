@@ -188,7 +188,7 @@ type AppBarProps = CustomWindowControlsProps & {
   disableSignIn?: boolean;
 };
 
-const selectCurrentLayoutId = ({ selectedLayout }: LayoutState) => selectedLayout?.id;
+const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
 const selectWorkspace = (store: WorkspaceContextStore) => store;
 
 export function AppBar(props: AppBarProps): JSX.Element {
@@ -215,7 +215,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
 
-  const currentLayoutId = useCurrentLayoutSelector(selectCurrentLayoutId);
+  const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
 
   const {
     sidebars: {
@@ -282,7 +282,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               <AppBarIconButton
                 className={cx({ "Mui-selected": panelMenuOpen })}
                 color="inherit"
-                disabled={currentLayoutId == undefined}
+                disabled={!hasCurrentLayout}
                 id="add-panel-button"
                 data-tourid="add-panel-button"
                 title="Add panel"
