@@ -1,0 +1,31 @@
+# Automatically approve and merge PRs made by Dependabot
+
+name: Dependabot
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+        with:
+          route: POST /repos/{owner_and_repo}/pulls/{pull_number}/reviews
+          owner_and_repo: ${{ github.repository }}
+          pull_number: ${{ github.event.pull_request.number }}
+          event: "APPROVE"
+
+      - uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+        with:
+          route: POST /repos/{owner_and_repo}/issues/{pull_number}/comments
+          owner_and_repo: ${{ github.repository }}
+          pull_number: ${{ github.event.pull_request.number }}
+          # two quotes are needed to avoid a syntax error when running the action
+          body: "'@dependabot squash and merge'"
