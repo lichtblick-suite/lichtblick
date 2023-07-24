@@ -230,7 +230,7 @@ describe("BlockLoader", () => {
     });
     expect(consoleErrorMock.mock.calls[0] ?? []).toContain("cache-full");
     consoleErrorMock.mockClear();
-    expect.assertions(2);
+    expect.assertions(3);
   });
 
   it("should remove unused topics on blocks if cache is full", async () => {
