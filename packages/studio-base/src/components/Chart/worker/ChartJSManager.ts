@@ -23,6 +23,8 @@ import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/ty
 import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+import { lineSegmentLabelColor } from "./lineSegments";
+
 const log = Logger.getLogger(__filename);
 
 export type InitOpts = {
@@ -195,6 +197,16 @@ export default class ChartJSManager {
     const instance = this.#chartInstance;
     if (instance == undefined) {
       return {};
+    }
+
+    for (const ds of data?.datasets ?? []) {
+      // Apply a line segment coloring function, if the label color is present in the data points.
+      // This has to happen here because functions can't be serialized to the chart worker. The
+      // state transition panel uses this to apply different colors to each segment of a single
+      // line.
+      ds.segment = {
+        borderColor: lineSegmentLabelColor,
+      };
     }
 
     if (options != undefined) {

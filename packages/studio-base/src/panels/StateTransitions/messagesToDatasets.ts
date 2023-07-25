@@ -4,14 +4,10 @@
 
 import stringHash from "string-hash";
 
-import { Time, toSec, subtract as subtractTimes } from "@foxglove/rostime";
+import { Time, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import {
-  ChartDataset,
-  ChartDatasets,
-  ChartDatum,
-} from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { darkColor, expandedLineColors } from "@foxglove/studio-base/util/plotColors";
+import { ChartDataset, ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
+import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 import { getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
@@ -19,6 +15,22 @@ import positiveModulo from "./positiveModulo";
 import { StateTransitionPath } from "./types";
 
 const baseColors = [grey, ...expandedLineColors];
+
+/**
+ * Returns a function that can be used to assign unique indexes to distinct values. Returns the
+ * previous index if the value has been seen before otherwise a new index.
+ */
+function makeValueIndexer() {
+  const seenValues = new Map<unknown, number>();
+  return (val: unknown) => {
+    const seen = seenValues.get(val);
+    if (seen != undefined) {
+      return seen;
+    }
+    seenValues.set(val, seenValues.size);
+    return seenValues.size - 1;
+  };
+}
 
 type Args = {
   path: StateTransitionPath;
@@ -28,22 +40,32 @@ type Args = {
   blocks: readonly (readonly MessageAndData[] | undefined)[];
 };
 
+/**
+ * Processes messages into datasets. For performance reasons all values are condensed into a single
+ * dataset with different labels and colors applied per-point.
+ */
 export default function messagesToDatasets(args: Args): ChartDatasets {
   const { path, pathIndex, startTime, y, blocks } = args;
 
-  const datasets = [];
+  const dataset: ChartDataset = {
+    borderWidth: 10,
+    data: [],
+    label: pathIndex.toString(),
+    pointBackgroundColor: "rgba(0, 0, 0, 0.4)",
+    pointBorderColor: "transparent",
+    pointHoverRadius: 3,
+    pointRadius: 1.25,
+    pointStyle: "circle",
+    showLine: true,
+  };
 
   let previousTimestamp: Time | undefined;
-  let currentData: ChartDatum[] = [];
 
-  const datasetIndexMap = new Map<unknown, number>();
+  const indexer = makeValueIndexer();
   let lastDatasetIndex: undefined | number = undefined;
 
   for (const messages of blocks) {
     if (!messages) {
-      currentData.push({ x: NaN, y: NaN });
-      lastDatasetIndex = undefined;
-      previousTimestamp = undefined;
       continue;
     }
 
@@ -60,7 +82,7 @@ export default function messagesToDatasets(args: Args): ChartDatasets {
 
       const { constantName, value } = queriedData;
 
-      const datasetIndex = datasetIndexMap.get(value);
+      const datasetIndex = indexer(value);
 
       // Skip duplicates.
       if (
@@ -93,64 +115,25 @@ export default function messagesToDatasets(args: Args): ChartDatasets {
 
       const x = toSec(subtractTimes(timestamp, startTime));
 
-      // If the value maps to a different dataset than the last value, close the previous segment
-      // and insert a gap.
-      const newSegment = datasetIndex !== lastDatasetIndex;
-      if (newSegment) {
-        currentData.push({ x, y });
-        currentData.push({ x: NaN, y: NaN });
-      }
       const label =
         constantName != undefined ? `${constantName} (${String(value)})` : String(value);
-      if (datasetIndex == undefined) {
-        datasetIndexMap.set(value, datasets.length);
-        const elementWithLabel = {
-          x,
-          y,
-          label,
-          labelColor: color,
-          value,
-          constantName,
-        };
 
-        // new data starts with our current point, the current point
-        currentData = [elementWithLabel];
-        const dataset: ChartDataset = {
-          borderWidth: 10,
-          borderColor: color,
-          data: currentData,
-          label: pathIndex.toString(),
-          pointBackgroundColor: darkColor(color),
-          pointBorderColor: "transparent",
-          pointHoverRadius: 3,
-          pointRadius: 1.25,
-          pointStyle: "circle",
-          showLine: true,
-          datalabels: {
-            color,
-          },
-        };
+      const isNewSegment = datasetIndex !== lastDatasetIndex;
 
-        lastDatasetIndex = datasets.length;
-        datasets.push(dataset);
-      } else {
-        currentData = datasets[datasetIndex]?.data ?? [];
-        if (newSegment) {
-          currentData.push({
-            x,
-            y,
-            label,
-            labelColor: color,
-            value,
-            constantName,
-          });
-        } else {
-          currentData.push({ x, y, value, constantName });
-        }
-        lastDatasetIndex = datasetIndex;
-      }
+      const elementWithLabel = {
+        x,
+        y,
+        label: isNewSegment ? label : "",
+        labelColor: color,
+        value,
+        constantName,
+      };
+
+      dataset.data.push(elementWithLabel);
+
+      lastDatasetIndex = datasetIndex;
     }
   }
 
-  return datasets;
+  return [dataset];
 }
