@@ -196,6 +196,13 @@ export default function PlaybackControls(props: {
               />
             )}
             <Tooltip
+              // A desired workflow is the ability to copy data source info text (start, end, duration)
+              // from the tooltip. However, there's a UX quirk where the tooltip will close if the user
+              // clicks on the <HoverableIconButton> and then goes to copy text from the tooltip.
+              //
+              // Disabling the focus listener fixes this quirk and the tooltip behaves as expected.
+              // https://mui.com/material-ui/api/tooltip/#prop-disableFocusListener
+              disableFocusListener
               classes={{ popper: classes.popper }}
               title={
                 <Stack paddingY={0.75}>
