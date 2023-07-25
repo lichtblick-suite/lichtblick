@@ -2624,7 +2624,7 @@ __metadata:
     "@foxglove/xmlrpc": 1.3.0
     "@mcap/core": 1.2.1
     "@mui/icons-material": 5.14.1
-    "@mui/material": 5.14.1
+    "@mui/material": 5.14.2
     "@popperjs/core": 2.11.8
     "@protobufjs/base64": 1.1.2
     "@storybook/addon-actions": 7.1.1
@@ -2815,7 +2815,7 @@ __metadata:
     "@fluentui/react-icons": 2.0.208
     "@foxglove/log": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
-    "@mui/material": 5.14.1
+    "@mui/material": 5.14.2
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@storybook/react": 7.1.1
     "@types/copy-webpack-plugin": 10.1.0
@@ -3426,10 +3426,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.14.1":
-  version: 5.14.1
-  resolution: "@mui/core-downloads-tracker@npm:5.14.1"
-  checksum: 8de805bb200ca9f6bc12574faeea5c550b2f7b1fdaf7dd2ad052fc06277c1490f7006f0ac7eaaad5eab02d011951bd588ee0d28838c78cc789e10bf22603941f
+"@mui/core-downloads-tracker@npm:^5.14.2":
+  version: 5.14.2
+  resolution: "@mui/core-downloads-tracker@npm:5.14.2"
+  checksum: ea8032d101b190c2eb5bc67378a9142a56c15d6341ef6f9ad244921f1ba042e301328a132ecfc7a1473a09c56b11333b83859d12e50c12d1ee7a6a26eff27e36
   languageName: node
   linkType: hard
 
@@ -3449,13 +3449,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/material@npm:5.14.1":
-  version: 5.14.1
-  resolution: "@mui/material@npm:5.14.1"
+"@mui/material@npm:5.14.2":
+  version: 5.14.2
+  resolution: "@mui/material@npm:5.14.2"
   dependencies:
     "@babel/runtime": ^7.22.6
     "@mui/base": 5.0.0-beta.8
-    "@mui/core-downloads-tracker": ^5.14.1
+    "@mui/core-downloads-tracker": ^5.14.2
     "@mui/system": ^5.14.1
     "@mui/types": ^7.2.4
     "@mui/utils": ^5.14.1
@@ -3478,7 +3478,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: a7eea3ecde7d8d36f3450c36fb200146b223004ead715d969e535a601bdb0fabb0cb284406e5beda781c6e3a294682b32fdeffe0178a7faf52fc09fe9995f965
+  checksum: 271ccb56133c43b98338240dfa169c781c8dc9e8cc6e51188d539b30f1744957bda903d24684e532f213184f2522b5120457ceb3fc85e97ba84c1df637dce66a
   languageName: node
   linkType: hard
 

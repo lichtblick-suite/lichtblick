@@ -9,7 +9,7 @@
   "devDependencies": {
     "@fluentui/react-icons": "2.0.208",
     "@foxglove/log": "workspace:*",
-    "@mui/material": "5.14.1",
+    "@mui/material": "5.14.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@storybook/react": "7.1.1",
     "@types/copy-webpack-plugin": "10.1.0",
