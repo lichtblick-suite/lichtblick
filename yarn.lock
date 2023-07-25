@@ -2783,7 +2783,7 @@ __metadata:
     builder-util: "*"
     clean-webpack-plugin: 4.0.0
     electron: 25.3.1
-    electron-builder: 24.6.2
+    electron-builder: 24.6.3
     electron-devtools-installer: 3.2.0
     electron-squirrel-startup: 1.0.0
     electron-updater: 6.1.4
@@ -7201,9 +7201,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"app-builder-lib@npm:*, app-builder-lib@npm:24.6.2":
-  version: 24.6.2
-  resolution: "app-builder-lib@npm:24.6.2"
+"app-builder-lib@npm:*, app-builder-lib@npm:24.6.3":
+  version: 24.6.3
+  resolution: "app-builder-lib@npm:24.6.3"
   dependencies:
     7zip-bin: ~5.1.1
     "@develar/schema-utils": ~2.6.5
@@ -7233,7 +7233,7 @@ __metadata:
     semver: ^7.3.8
     tar: ^6.1.12
     temp-file: ^3.4.0
-  checksum: 1e49929c86807ee2dbaaed854a577aef6251efae5a9b601961caf504638f53e4fdf6d0991e0a876df00772c417f77131d47c46e257c70af6fdb315597ed5046a
+  checksum: 5268895465d491a8cb48b0a8ee9dce8cfbb47f2ee56f4be219aead726df0a01e9086f7d9aeea1410a52a79448a2b749948987b6465d615444f65bf53ae2116bd
   languageName: node
   linkType: hard
 
@@ -9769,11 +9769,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dmg-builder@npm:24.6.2":
-  version: 24.6.2
-  resolution: "dmg-builder@npm:24.6.2"
+"dmg-builder@npm:24.6.3":
+  version: 24.6.3
+  resolution: "dmg-builder@npm:24.6.3"
   dependencies:
-    app-builder-lib: 24.6.2
+    app-builder-lib: 24.6.3
     builder-util: 24.5.0
     builder-util-runtime: 9.2.1
     dmg-license: ^1.0.11
@@ -9783,7 +9783,7 @@ __metadata:
   dependenciesMeta:
     dmg-license:
       optional: true
-  checksum: c5527efe939cfd2e1fbd148e3a93fa44e94446c1391f2566697b4c2d3e5a682857302774480d1f4c7937cab6dbcdbb1e7281ddb58452958655afae23214799a7
+  checksum: a3bd6901ee73f4e17c582d394347dbcc1c08bc9d05fba2bfe1ec1c616d13c0e7ffd436d586f5cd698a93060cf2ea49794356f5352ff75e533fc8ff97966070bc
   languageName: node
   linkType: hard
 
@@ -10045,15 +10045,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-builder@npm:24.6.2":
-  version: 24.6.2
-  resolution: "electron-builder@npm:24.6.2"
+"electron-builder@npm:24.6.3":
+  version: 24.6.3
+  resolution: "electron-builder@npm:24.6.3"
   dependencies:
-    app-builder-lib: 24.6.2
+    app-builder-lib: 24.6.3
     builder-util: 24.5.0
     builder-util-runtime: 9.2.1
     chalk: ^4.1.2
-    dmg-builder: 24.6.2
+    dmg-builder: 24.6.3
     fs-extra: ^10.1.0
     is-ci: ^3.0.0
     lazy-val: ^1.0.5
@@ -10063,7 +10063,7 @@ __metadata:
   bin:
     electron-builder: cli.js
     install-app-deps: install-app-deps.js
-  checksum: 5ab0a7c5863c044df42fe48b8a1b5714fc3ec0ee6bafd4d56a405e6d7c497c27bce996ac746cf675ed9155f811e6b98a5e5e4ae1700a6bb02b03c0359cae8f94
+  checksum: b5a9758353143f6d96318b893010eee2886d36d0aef264e68dc7b2d825738b2785e73708db3ceff9c82a3e66e5c3a3170954660fb8b533b735e11aad3a92b2e8
   languageName: node
   linkType: hard
 
@@ -11645,7 +11645,7 @@ __metadata:
     cross-env: 7.0.3
     depcheck: "patch:depcheck@npm:1.4.3#./patches/depcheck.patch"
     electron: 25.3.1
-    electron-builder: 24.6.2
+    electron-builder: 24.6.3
     eslint: 8.45.0
     eslint-config-prettier: 8.8.0
     eslint-import-resolver-webpack: 0.13.2
