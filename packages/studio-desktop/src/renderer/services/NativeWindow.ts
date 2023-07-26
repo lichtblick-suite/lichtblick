@@ -21,9 +21,6 @@ export class NativeWindow implements INativeWindow {
   public on(name: NativeWindowEvent, listener: Handler): void {
     this.#bridge?.addIpcEventListener(name, listener);
   }
-  public off(name: NativeWindowEvent, listener: Handler): void {
-    this.#bridge?.removeIpcEventListener(name, listener);
-  }
 
   public handleTitleBarDoubleClick(): void {
     this.#bridge?.handleTitleBarDoubleClick();

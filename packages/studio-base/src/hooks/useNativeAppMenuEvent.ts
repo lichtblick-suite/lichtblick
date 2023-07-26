@@ -22,11 +22,6 @@ export default function useNativeAppMenuEvent(
       return;
     }
 
-    const fn = handler;
-    nativeAppMenu.on(eventName, fn);
-
-    return () => {
-      nativeAppMenu.off(eventName, fn);
-    };
+    return nativeAppMenu.on(eventName, handler);
   }, [eventName, handler, nativeAppMenu]);
 }

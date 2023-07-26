@@ -102,19 +102,21 @@ export default function Root(props: {
   const onCloseWindow = useCallback(() => nativeWindow.close(), [nativeWindow]);
 
   useEffect(() => {
-    const onEnterFullScreen = () => setFullScreen(true);
-    const onLeaveFullScreen = () => setFullScreen(false);
-    const onMaximize = () => setMaximized(true);
-    const onUnmaximize = () => setMaximized(false);
-    desktopBridge.addIpcEventListener("enter-full-screen", onEnterFullScreen);
-    desktopBridge.addIpcEventListener("leave-full-screen", onLeaveFullScreen);
-    desktopBridge.addIpcEventListener("maximize", onMaximize);
-    desktopBridge.addIpcEventListener("unmaximize", onUnmaximize);
+    const unregisterFull = desktopBridge.addIpcEventListener("enter-full-screen", () =>
+      setFullScreen(true),
+    );
+    const unregisterLeave = desktopBridge.addIpcEventListener("leave-full-screen", () =>
+      setFullScreen(false),
+    );
+    const unregisterMax = desktopBridge.addIpcEventListener("maximize", () => setMaximized(true));
+    const unregisterUnMax = desktopBridge.addIpcEventListener("unmaximize", () =>
+      setMaximized(false),
+    );
     return () => {
-      desktopBridge.removeIpcEventListener("enter-full-screen", onEnterFullScreen);
-      desktopBridge.removeIpcEventListener("leave-full-screen", onLeaveFullScreen);
-      desktopBridge.removeIpcEventListener("maximize", onMaximize);
-      desktopBridge.removeIpcEventListener("unmaximize", onUnmaximize);
+      unregisterFull();
+      unregisterLeave();
+      unregisterMax();
+      unregisterUnMax();
     };
   }, []);
 

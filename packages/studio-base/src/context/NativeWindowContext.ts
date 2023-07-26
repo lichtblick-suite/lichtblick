@@ -12,7 +12,6 @@ export interface INativeWindow {
   setRepresentedFilename(filename: string | undefined): Promise<void>;
 
   on(name: NativeWindowEvent, handler: Handler): void;
-  off(name: NativeWindowEvent, handler: Handler): void;
 }
 
 const NativeWindowContext = createContext<INativeWindow | undefined>(undefined);

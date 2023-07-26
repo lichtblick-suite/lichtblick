@@ -198,11 +198,13 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     useCallback(() => dialogActions.preferences.open("general"), [dialogActions.preferences]),
   );
 
-  useNativeAppMenuEvent("open-help-docs", () => window.open("https://foxglove.dev/docs", "_blank"));
+  useNativeAppMenuEvent("open-help-docs", () => {
+    window.open("https://foxglove.dev/docs", "_blank");
+  });
 
-  useNativeAppMenuEvent("open-help-slack", () =>
-    window.open("https://foxglove.dev/slack", "_blank"),
-  );
+  useNativeAppMenuEvent("open-help-slack", () => {
+    window.open("https://foxglove.dev/slack", "_blank");
+  });
 
   const nativeAppMenu = useNativeAppMenu();
 

@@ -4,7 +4,7 @@
 
 import { INativeAppMenu, NativeAppMenuEvent } from "@foxglove/studio-base";
 
-import { NativeMenuBridge } from "../../common/types";
+import { NativeMenuBridge, UnregisterFn } from "../../common/types";
 
 type Handler = () => void;
 
@@ -20,10 +20,7 @@ export class NativeAppMenu implements INativeAppMenu {
   public removeFileEntry(name: string): void {
     void this.#bridge?.menuRemoveInputSource(name);
   }
-  public on(name: NativeAppMenuEvent, listener: Handler): void {
-    this.#bridge?.addIpcEventListener(name, listener);
-  }
-  public off(name: NativeAppMenuEvent, listener: Handler): void {
-    this.#bridge?.removeIpcEventListener(name, listener);
+  public on(name: NativeAppMenuEvent, listener: Handler): UnregisterFn | undefined {
+    return this.#bridge?.addIpcEventListener(name, listener);
   }
 }

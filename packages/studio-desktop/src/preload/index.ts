@@ -94,10 +94,10 @@ export function main(): void {
 
   const desktopBridge: Desktop = {
     addIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void) {
-      ipcRenderer.on(eventName, () => handler());
-    },
-    removeIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void) {
-      ipcRenderer.off(eventName, () => handler());
+      ipcRenderer.on(eventName, handler);
+      return () => {
+        ipcRenderer.off(eventName, handler);
+      };
     },
     async setRepresentedFilename(path: string | undefined) {
       await ipcRenderer.invoke("setRepresentedFilename", path);
@@ -164,10 +164,16 @@ export function main(): void {
 
   const menuBridge: NativeMenuBridge = {
     addIpcEventListener(eventName: ForwardedMenuEvent, handler: () => void) {
-      ipcRenderer.on(eventName, () => handler());
-    },
-    removeIpcEventListener(eventName: ForwardedMenuEvent, handler: () => void) {
-      ipcRenderer.off(eventName, () => handler());
+      ipcRenderer.on(eventName, handler);
+
+      // We use an unregister handler return value approach because the bridge interface wraps
+      // the handler function that render provides making it impossible for renderer to provide the
+      // same function reference to `.off`.
+      //
+      // https://www.electronjs.org/docs/latest/api/context-bridge#parameter--error--return-type-support
+      return () => {
+        ipcRenderer.off(eventName, handler);
+      };
     },
     async menuAddInputSource(name: string, handler: () => void) {
       if (menuClickListeners.has(name)) {

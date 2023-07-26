@@ -15,13 +15,13 @@ export type NativeAppMenuEvent =
   | "open-help-slack";
 
 type Handler = () => void;
+type UnregisterFn = () => void;
 
 export interface INativeAppMenu {
   addFileEntry(name: string, handler: Handler): void;
   removeFileEntry(name: string): void;
 
-  on(name: NativeAppMenuEvent, handler: Handler): void;
-  off(name: NativeAppMenuEvent, handler: Handler): void;
+  on(name: NativeAppMenuEvent, handler: Handler): UnregisterFn | undefined;
 }
 
 const NativeAppMenuContext = createContext<INativeAppMenu | undefined>(undefined);
