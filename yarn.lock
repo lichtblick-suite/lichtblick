@@ -2734,7 +2734,7 @@ __metadata:
     react-i18next: 13.0.2
     react-json-tree: "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch"
     react-markdown: 8.0.7
-    react-monaco-editor: 0.53.0
+    react-monaco-editor: 0.54.0
     react-mosaic-component: 6.0.1
     react-refresh-typescript: 2.0.9
     react-resize-detector: 9.1.0
@@ -17402,16 +17402,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-monaco-editor@npm:0.53.0":
-  version: 0.53.0
-  resolution: "react-monaco-editor@npm:0.53.0"
+"react-monaco-editor@npm:0.54.0":
+  version: 0.54.0
+  resolution: "react-monaco-editor@npm:0.54.0"
   dependencies:
     prop-types: ^15.8.1
   peerDependencies:
     "@types/react": ">=16 <= 18"
-    monaco-editor: ^0.38.0
+    monaco-editor: ^0.39.0
     react: ">=16 <= 18"
-  checksum: c71801f8cca4f5f80d25818d5cb83b3ab71b247ed4069b5c67e8c75391d65ec3b7b49ed760c49a412106b644d2ad7282f6dcd599348482c4daf00ac15bd87022
+  checksum: 86ae96e92964f6f999ff5090482b76df412775edc51868f2b255005d5bf3c53c9193de3a398e48a2ba46c990d83d64cace8a3183f3121d79b21b4bc3fc5abed3
   languageName: node
   linkType: hard
 
