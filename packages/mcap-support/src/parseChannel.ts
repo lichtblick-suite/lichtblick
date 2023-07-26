@@ -5,7 +5,8 @@
 import { MessageDefinition } from "@foxglove/message-definition";
 import { parseIdl } from "@foxglove/omgidl-parser";
 import { MessageReader as OmgidlMessageReader } from "@foxglove/omgidl-serialization";
-import { parse as parseMessageDefinition, parseRos2idl } from "@foxglove/rosmsg";
+import { parseRos2idl } from "@foxglove/ros2idl-parser";
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { MessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 

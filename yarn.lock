@@ -2403,6 +2403,7 @@ __metadata:
     "@foxglove/message-definition": 0.2.0
     "@foxglove/omgidl-parser": 0.1.0
     "@foxglove/omgidl-serialization": 0.1.0
+    "@foxglove/ros2idl-parser": 0.1.1
     "@foxglove/rosmsg": 4.2.2
     "@foxglove/rosmsg-serialization": 2.0.1
     "@foxglove/rosmsg2-serialization": 2.0.2
@@ -2469,6 +2470,17 @@ __metadata:
   bin:
     roscore: dist/nodejs/roscore.js
   checksum: 87ba6c9749888ba2445575ae54efc0f042c917b439a56e31d1743f3b7e9d151754c1575e06fefc7b8e5fda5bbff52585e23d80bf7336582030bbb0a5140d7d44
+  languageName: node
+  linkType: hard
+
+"@foxglove/ros2idl-parser@npm:0.1.1":
+  version: 0.1.1
+  resolution: "@foxglove/ros2idl-parser@npm:0.1.1"
+  dependencies:
+    "@foxglove/message-definition": ^0.2.0
+    "@foxglove/omgidl-parser": 0.1.0
+    md5-typescript: ^1.0.5
+  checksum: 12010ffe91285a130bd4ea1dc9be0d63ad31a071d3f55ce0b1ca0cec50fe2e047c96a512207d1d1f5d2faff66e82f1c411811e8f617534aa7ded4a623850eed6
   languageName: node
   linkType: hard
 
