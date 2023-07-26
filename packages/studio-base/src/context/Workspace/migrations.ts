@@ -8,7 +8,6 @@ import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectio
 import {
   LeftSidebarItemKey,
   RightSidebarItemKey,
-  SidebarItemKey,
   WorkspaceContextStore,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 
@@ -36,7 +35,6 @@ type WorkspaceContextStoreV0 = {
     initialTab: undefined | AppSettingsTab;
     open: boolean;
   };
-  sidebarItem: undefined | SidebarItemKey;
 };
 
 export function migrateV0WorkspaceState(
@@ -63,9 +61,6 @@ export function migrateV0WorkspaceState(
       shown: v0State.featureTours.shown,
     },
     sidebars: {
-      legacy: {
-        item: v0State.sidebarItem,
-      },
       left: {
         item: v0State.leftSidebarItem,
         open: v0State.leftSidebarOpen,

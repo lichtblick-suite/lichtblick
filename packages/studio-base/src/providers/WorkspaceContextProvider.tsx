@@ -36,9 +36,6 @@ function createWorkspaceContextStore(
             shown: [],
           },
           sidebars: {
-            legacy: {
-              item: "connection",
-            },
             left: {
               item: "panel-settings",
               open: true,

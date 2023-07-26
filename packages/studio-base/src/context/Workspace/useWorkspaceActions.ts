@@ -9,7 +9,6 @@ import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { useGuaranteedContext } from "@foxglove/hooks";
 import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
-import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import {
   IDataSourceFactory,
   usePlayerSelection,
@@ -18,7 +17,6 @@ import {
 import {
   WorkspaceContext,
   WorkspaceContextStore,
-  SidebarItemKey,
   LeftSidebarItemKey,
   LeftSidebarItemKeys,
   RightSidebarItemKey,
@@ -46,18 +44,13 @@ export type WorkspaceActions = {
     finishTour: (tour: string) => void;
   };
 
-  openAccountSettings: () => void;
   openPanelSettings: () => void;
-  openLayoutBrowser: () => void;
 
   playbackControlActions: {
     setRepeat: Dispatch<SetStateAction<boolean>>;
   };
 
   sidebarActions: {
-    legacy: {
-      selectItem: (selectedSidebarItem: undefined | SidebarItemKey) => void;
-    };
     left: {
       selectItem: (item: undefined | LeftSidebarItemKey) => void;
       setOpen: Dispatch<SetStateAction<boolean>>;
@@ -84,9 +77,6 @@ function setterValue<T>(action: SetStateAction<T>, value: T): T {
  */
 export function useWorkspaceActions(): WorkspaceActions {
   const { setState } = useGuaranteedContext(WorkspaceContext);
-
-  const { signIn } = useCurrentUser();
-  const supportsAccountSettings = signIn != undefined;
 
   const { availableSources } = usePlayerSelection();
 
@@ -157,21 +147,10 @@ export function useWorkspaceActions(): WorkspaceActions {
         },
       },
 
-      openAccountSettings: () =>
-        supportsAccountSettings &&
-        set((draft) => {
-          draft.sidebars.legacy.item = "account";
-        }),
-
       openPanelSettings: () =>
         set((draft) => {
           draft.sidebars.left.item = "panel-settings";
           draft.sidebars.left.open = true;
-        }),
-
-      openLayoutBrowser: () =>
-        set((draft) => {
-          draft.sidebars.legacy.item = "layouts";
         }),
 
       playbackControlActions: {
@@ -184,23 +163,6 @@ export function useWorkspaceActions(): WorkspaceActions {
       },
 
       sidebarActions: {
-        legacy: {
-          selectItem: (selectedSidebarItem: undefined | SidebarItemKey) => {
-            if (selectedSidebarItem === "app-settings") {
-              set((draft) => {
-                draft.dialogs.preferences = { open: true, initialTab: undefined };
-              });
-            } else if (selectedSidebarItem === "app-bar-tour") {
-              set((draft) => {
-                draft.featureTours.active = "appBar";
-              });
-            } else {
-              set((draft) => {
-                draft.sidebars.legacy.item = selectedSidebarItem;
-              });
-            }
-          },
-        },
         left: {
           selectItem: (selectedLeftSidebarItem: undefined | LeftSidebarItemKey) => {
             set((draft) => {
@@ -259,5 +221,5 @@ export function useWorkspaceActions(): WorkspaceActions {
         },
       },
     };
-  }, [openFile, set, supportsAccountSettings]);
+  }, [openFile, set]);
 }

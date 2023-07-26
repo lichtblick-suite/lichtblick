@@ -81,21 +81,6 @@ const useStyles = makeStyles()({
   },
 });
 
-function activeElementIsInput() {
-  return (
-    document.activeElement instanceof HTMLInputElement ||
-    document.activeElement instanceof HTMLTextAreaElement
-  );
-}
-
-function keyboardEventHasModifier(event: KeyboardEvent) {
-  if (navigator.userAgent.includes("Mac")) {
-    return event.metaKey;
-  } else {
-    return event.ctrlKey;
-  }
-}
-
 type WorkspaceProps = CustomWindowControlsProps & {
   deepLinks?: string[];
   appBarLeftInset?: number;
@@ -117,7 +102,6 @@ const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 const selectSelectEvent = (store: EventsStore) => store.selectEvent;
 
 const selectWorkspaceDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
-const selectWorkspaceSidebarItem = (store: WorkspaceContextStore) => store.sidebars.legacy.item;
 const selectWorkspaceLeftSidebarItem = (store: WorkspaceContextStore) => store.sidebars.left.item;
 const selectWorkspaceLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
 const selectWorkspaceLeftSidebarSize = (store: WorkspaceContextStore) => store.sidebars.left.size;
@@ -132,7 +116,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
 
-  const sidebarItem = useWorkspaceStore(selectWorkspaceSidebarItem);
   const dataSourceDialog = useWorkspaceStore(selectWorkspaceDataSourceDialog);
   const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);
   const leftSidebarOpen = useWorkspaceStore(selectWorkspaceLeftSidebarOpen);
@@ -389,18 +372,10 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
 
   const keyDownHandlers = useMemo(() => {
     return {
-      b: (ev: KeyboardEvent) => {
-        if (!keyboardEventHasModifier(ev) || activeElementIsInput() || sidebarItem == undefined) {
-          return;
-        }
-
-        ev.preventDefault();
-        sidebarActions.legacy.selectItem(undefined);
-      },
       "[": () => sidebarActions.left.setOpen((oldValue) => !oldValue),
       "]": () => sidebarActions.right.setOpen((oldValue) => !oldValue),
     };
-  }, [sidebarActions.left, sidebarActions.legacy, sidebarActions.right, sidebarItem]);
+  }, [sidebarActions.left, sidebarActions.right]);
 
   const play = useMessagePipeline(selectPlay);
   const playUntil = useMessagePipeline(selectPlayUntil);

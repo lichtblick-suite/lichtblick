@@ -10,21 +10,6 @@ import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDial
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
-const SidebarItemKeys = [
-  "account",
-  "add-panel",
-  "app-bar-tour",
-  "app-settings",
-  "connection",
-  "extensions",
-  "help",
-  "layouts",
-  "panel-settings",
-  "studio-logs-settings",
-  "variables",
-] as const;
-export type SidebarItemKey = (typeof SidebarItemKeys)[number];
-
 export const LeftSidebarItemKeys = ["panel-settings", "topics", "problems"] as const;
 export type LeftSidebarItemKey = (typeof LeftSidebarItemKeys)[number];
 
@@ -51,9 +36,6 @@ export type WorkspaceContextStore = {
     repeat: boolean;
   };
   sidebars: {
-    legacy: {
-      item: undefined | SidebarItemKey;
-    };
     left: {
       item: undefined | LeftSidebarItemKey;
       open: boolean;
@@ -75,10 +57,7 @@ WorkspaceContext.displayName = "WorkspaceContext";
 
 export const WorkspaceStoreSelectors = {
   selectPanelSettingsOpen: (store: WorkspaceContextStore): boolean => {
-    return (
-      store.sidebars.legacy.item === "panel-settings" ||
-      (store.sidebars.left.open && store.sidebars.left.item === "panel-settings")
-    );
+    return store.sidebars.left.open && store.sidebars.left.item === "panel-settings";
   },
 };
 
