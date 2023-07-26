@@ -20,6 +20,9 @@ import {
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { derivative } from "@foxglove/studio-base/panels/Plot/transformPlotRange";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { Bounds, makeInvertedBounds, unionBounds } from "@foxglove/studio-base/types/Bounds";
@@ -59,6 +62,7 @@ type State = Immutable<{
   allPaths: readonly string[];
   cursors: Record<string, number>;
   data: PlotData;
+  globalVariables: GlobalVariables;
   subscriptions: Subscription[];
   xAxisVal: PlotXAxisVal;
   xAxisPath: undefined | BasePlotPath;
@@ -114,6 +118,7 @@ function makeInitialState(): State {
     allPaths: [],
     cursors: {},
     data: EmptyPlotData,
+    globalVariables: {},
     subscriptions: [],
     xAxisVal: "timestamp",
     xAxisPath: undefined,
@@ -161,8 +166,15 @@ export function usePlotPanelData(params: Params): Immutable<{
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(allPaths);
 
+  const { globalVariables } = useGlobalVariables();
+
+  // Resets all data when global variables change. This could be more fine grained and parse the
+  // paths to only rebuild when variables change that are referenced in plot paths.
   const resetDatasets =
-    allPaths !== state.allPaths || xAxisVal !== state.xAxisVal || xAxisPath !== state.xAxisPath;
+    allPaths !== state.allPaths ||
+    xAxisVal !== state.xAxisVal ||
+    xAxisPath !== state.xAxisPath ||
+    globalVariables !== state.globalVariables;
 
   if (allFrames !== state.allFrames || resetDatasets) {
     // use setState directly instead of useEffect to skip an extra render.
@@ -195,6 +207,7 @@ export function usePlotPanelData(params: Params): Immutable<{
         allPaths,
         cursors: newCursors,
         data: appendPlotData(newState.data, newPlotData),
+        globalVariables,
         subscriptions,
         xAxisPath,
         xAxisVal,

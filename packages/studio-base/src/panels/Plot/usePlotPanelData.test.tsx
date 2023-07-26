@@ -6,13 +6,22 @@
 import { renderHook } from "@testing-library/react-hooks";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { MessageEvent, PlayerStateActiveData, Topic } from "@foxglove/studio-base/players/types";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import {
+  MessageEvent,
+  PlayerStateActiveData,
+  Progress,
+  Topic,
+} from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { mockMessage } from "@foxglove/studio-base/test/mocks/mockMessage";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import { usePlotPanelData } from "./usePlotPanelData";
 
-const topics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
+jest.mock("@foxglove/studio-base/hooks/useGlobalVariables");
+
+const topics: Topic[] = [{ name: "topic", schemaName: "schema" }];
 const datatypes: RosDatatypes = new Map(
   Object.entries({
     datatype: {
@@ -21,51 +30,39 @@ const datatypes: RosDatatypes = new Map(
   }),
 );
 
-const fixtureMessages1: MessageEvent[] = [
-  {
-    topic: "/topic",
-    receiveTime: { sec: 0, nsec: 0 },
-    message: { value: 0 },
-    schemaName: "datatype",
-    sizeInBytes: 0,
-  },
-];
+const fixtureMessages1: MessageEvent[] = [mockMessage({ value: 1 })];
 
-const fixtureMessages2: MessageEvent[] = [
-  {
-    topic: "/topic",
-    receiveTime: { sec: 1, nsec: 0 },
-    message: { value: 1 },
-    schemaName: "datatype",
-    sizeInBytes: 0,
-  },
-];
+const fixtureMessages2: MessageEvent[] = [mockMessage({ value: 2 })];
 
-describe("usePlotPanelDatasets", () => {
+const fixtureActiveData: PlayerStateActiveData = {
+  messages: [],
+  totalBytesReceived: 0,
+  currentTime: { sec: 0, nsec: 0 },
+  startTime: { sec: 0, nsec: 0 },
+  endTime: { sec: 3, nsec: 0 },
+  isPlaying: false,
+  speed: 1,
+  lastSeekTime: 0,
+  topics,
+  topicStats: new Map(),
+  datatypes,
+};
+
+const fixtureInitialProps = {
+  activeData: fixtureActiveData,
+  allPaths: ["topic.values[0]"],
+  followingView: undefined,
+  showSingleCurrentMessage: false,
+  startTime: { sec: 0, nsec: 0 },
+  xAxisVal: "timestamp",
+  yAxisPaths: [{ value: "topic.value", enabled: true, timestampMethod: "receiveTime" }],
+} as const;
+
+describe("usePlotPanelData", () => {
   it("doesn't accumulate frames when showing single messages", () => {
-    const testActiveData: PlayerStateActiveData = {
-      messages: [],
-      totalBytesReceived: 0,
-      currentTime: { sec: 0, nsec: 0 },
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 3, nsec: 0 },
-      isPlaying: false,
-      speed: 1,
-      lastSeekTime: 0,
-      topics,
-      topicStats: new Map(),
-      datatypes,
-    };
+    const initialProps = { ...fixtureInitialProps, showSingleCurrentMessage: true };
 
-    const initialProps = {
-      activeData: testActiveData,
-      allPaths: ["/topic.value"],
-      followingView: undefined,
-      showSingleCurrentMessage: true,
-      startTime: { sec: 0, nsec: 0 },
-      xAxisVal: "timestamp",
-      yAxisPaths: [{ value: "/topic.value", enabled: true, timestampMethod: "receiveTime" }],
-    } as const;
+    (useGlobalVariables as jest.Mock).mockReturnValue({ globalVariables: { var: 1 } });
 
     const { result, rerender } = renderHook(
       ({ activeData: _, ...props }) => usePlotPanelData(props),
@@ -108,10 +105,62 @@ describe("usePlotPanelDatasets", () => {
       datasets: [
         {
           data: [],
-          label: "/topic.value",
+          label: "topic.value",
         },
       ],
       pathsWithMismatchedDataLengths: [],
     });
+  });
+
+  it("updates data when global variables change", () => {
+    const initialProps = { ...fixtureInitialProps };
+    const progress: Progress = {
+      fullyLoadedFractionRanges: [],
+      messageCache: {
+        startTime: { sec: 0, nsec: 0 },
+        blocks: [
+          {
+            messagesByTopic: {
+              topic: fixtureMessages1,
+            },
+            sizeInBytes: 1,
+          },
+        ],
+      },
+    };
+
+    (useGlobalVariables as jest.Mock).mockReturnValue({ globalVariables: { var: 1 } });
+
+    const { result, rerender } = renderHook(
+      ({ activeData: _, ...props }) => usePlotPanelData(props),
+      {
+        initialProps,
+        wrapper: ({ children, activeData }) => {
+          return (
+            <MockCurrentLayoutProvider>
+              <MockMessagePipelineProvider
+                topics={topics}
+                activeData={activeData}
+                progress={progress}
+              >
+                {children}
+              </MockMessagePipelineProvider>
+            </MockCurrentLayoutProvider>
+          );
+        },
+      },
+    );
+
+    const initialOutput = result.current;
+
+    rerender();
+
+    expect(result.current).toBe(initialOutput);
+
+    (useGlobalVariables as jest.Mock).mockReturnValue({ globalVariables: { var: 2 } });
+
+    rerender();
+
+    expect(result.current).not.toBe(initialOutput);
   });
 });
