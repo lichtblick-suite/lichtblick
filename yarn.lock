@@ -2400,7 +2400,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/message-definition": 0.2.0
+    "@foxglove/message-definition": 0.3.0
     "@foxglove/omgidl-parser": 0.1.0
     "@foxglove/omgidl-serialization": 0.1.0
     "@foxglove/ros2idl-parser": 0.1.1
@@ -2421,7 +2421,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/message-definition@npm:0.2.0, @foxglove/message-definition@npm:^0.2.0":
+"@foxglove/message-definition@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@foxglove/message-definition@npm:0.3.0"
+  checksum: 48edc4e57b7b1152514fafe3eb0652ebd85032524d6a8c102db5e3a53b0311fde6200b5aeada6a76bafd6033d3d6ac1bd38e6aa331219f4421c356b8b6d7fd94
+  languageName: node
+  linkType: hard
+
+"@foxglove/message-definition@npm:^0.2.0":
   version: 0.2.0
   resolution: "@foxglove/message-definition@npm:0.2.0"
   checksum: 8f972dd52cf2f44e8357c8f13ee2136b23548d49d9251fc47c68569a33effe5d082c0681e3b0761751dd27759ac778f1e45de9f52d5925298ccc80e607784159
@@ -2614,7 +2621,7 @@ __metadata:
     "@foxglove/hooks": "workspace:*"
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/message-definition": 0.2.0
+    "@foxglove/message-definition": 0.3.0
     "@foxglove/ros1": 2.0.0
     "@foxglove/rosbag": 0.4.0
     "@foxglove/rosbag2-web": 4.1.1
