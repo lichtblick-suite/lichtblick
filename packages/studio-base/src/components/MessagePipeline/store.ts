@@ -135,6 +135,10 @@ export function createMessagePipelineStore({
         }
 
         const response = await fetch(uri, options);
+        if (!response.ok) {
+          const errMsg = response.statusText;
+          throw new Error(`Error ${response.status}${errMsg ? ` (${errMsg})` : ``}`);
+        }
         return {
           uri,
           data: new Uint8Array(await response.arrayBuffer()),
