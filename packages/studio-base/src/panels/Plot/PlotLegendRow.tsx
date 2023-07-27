@@ -127,6 +127,7 @@ export function PlotLegendRow({
   const [hoverComponentId] = useState<string>(() => uuidv4());
   const hoverValue = useHoverValue({
     componentId: hoverComponentId,
+    disableUpdates: !showPlotValuesInLegend,
     isTimestampScale: true,
   });
 

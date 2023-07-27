@@ -143,7 +143,7 @@ const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonF
   }),
 );
 
-export function PlotLegend(props: Props): JSX.Element {
+function PlotLegendComponent(props: Props): JSX.Element {
   const {
     currentTime,
     datasets,
@@ -294,3 +294,5 @@ export function PlotLegend(props: Props): JSX.Element {
     </div>
   );
 }
+
+export const PlotLegend = React.memo(PlotLegendComponent);

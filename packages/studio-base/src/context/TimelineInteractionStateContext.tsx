@@ -85,24 +85,27 @@ export function useSetHoverValue(): TimelineInteractionStateStore["setHoverValue
   return useTimelineInteractionState(selectSetHoverValue);
 }
 
+const undefinedSelector = () => undefined;
+
 /**
- * Encapsulates logic for selecting the current hover value depending
- * on which component registered the hover value.
+ * Encapsulates logic for selecting the current hover value depending on which component registered
+ * the hover value.
+ *
+ * @param componentId the component to scope updates to
+ * @param disableUpdates if true then return undefined, for performance reasons so that clients can
+ * avoid using hooks conditionally but opt out of updates
+ * @param isTimestampScale override componentId scoping for timestamp based charts
  */
-export function useHoverValue(args?: {
+export function useHoverValue(args: {
   componentId: string;
+  disableUpdates?: boolean;
   isTimestampScale: boolean;
 }): HoverValue | undefined {
-  const hasArgs = !!args;
-  const componentId = args?.componentId;
-  const isTimestampScale = args?.isTimestampScale ?? false;
+  const componentId = args.componentId;
+  const isTimestampScale = args.isTimestampScale;
 
   const selector = useCallback(
     (store: TimelineInteractionStateStore) => {
-      if (!hasArgs) {
-        // Raw form -- user needs to check that the value should be shown.
-        return store.hoverValue;
-      }
       if (store.hoverValue == undefined) {
         return undefined;
       }
@@ -113,10 +116,10 @@ export function useHoverValue(args?: {
       // Otherwise just show hover bars when hovering over the panel itself.
       return store.hoverValue.componentId === componentId ? store.hoverValue : undefined;
     },
-    [hasArgs, componentId, isTimestampScale],
+    [componentId, isTimestampScale],
   );
 
-  return useTimelineInteractionState(selector);
+  return useTimelineInteractionState(args.disableUpdates === true ? undefinedSelector : selector);
 }
 
 /**
