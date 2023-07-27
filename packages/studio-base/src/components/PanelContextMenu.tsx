@@ -40,7 +40,7 @@ type PanelContextMenuProps = {
  * This is a convenience component for attaching a context menu to a panel. It
  * must be a child of a Panel component to work.
  */
-export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
+function PanelContextMenuComponent(props: PanelContextMenuProps): JSX.Element {
   const { getItems } = props;
 
   const rootRef = useRef<HTMLDivElement>(ReactNull);
@@ -124,3 +124,5 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
     </div>
   );
 }
+
+export const PanelContextMenu = React.memo(PanelContextMenuComponent);

@@ -59,7 +59,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export function PanelActionsDropdown({ isUnknownPanel }: Props): JSX.Element {
+function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
   const { classes, cx } = useStyles();
   const [menuAnchorEl, setMenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [subMenuAnchorEl, setSubmenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
@@ -263,3 +263,5 @@ export function PanelActionsDropdown({ isUnknownPanel }: Props): JSX.Element {
     </div>
   );
 }
+
+export const PanelActionsDropdown = React.memo(PanelActionsDropdownComponent);

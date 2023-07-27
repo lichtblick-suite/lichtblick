@@ -13,6 +13,7 @@
 
 import { compact, isNumber, uniq } from "lodash";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
+import { useLatest } from "react-use";
 import { DeepWritable } from "ts-essentials";
 
 import {
@@ -220,16 +221,19 @@ function Plot(props: Props) {
     [legendDisplay],
   );
 
+  // Access datasets by latest reference to stabilize our getPanelContextMenuItems callback.
+  const latestDatasets = useLatest(datasets);
+
   const getPanelContextMenuItems = useCallback(() => {
     const items: PanelContextMenuItem[] = [
       {
         type: "item",
         label: "Download plot data as CSV",
-        onclick: () => downloadCSV(datasets, xAxisVal),
+        onclick: () => downloadCSV(latestDatasets.current, xAxisVal),
       },
     ];
     return items;
-  }, [datasets, xAxisVal]);
+  }, [latestDatasets, xAxisVal]);
 
   return (
     <Stack
