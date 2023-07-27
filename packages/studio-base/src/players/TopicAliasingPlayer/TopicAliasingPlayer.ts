@@ -120,7 +120,11 @@ export class TopicAliasingPlayer implements Player {
   }
 
   public playUntil?(time: Time): void {
-    this.#player.playUntil?.(time);
+    if (this.#player.playUntil) {
+      this.#player.playUntil(time);
+      return;
+    }
+    this.#player.seekPlayback?.(time);
   }
 
   public setPlaybackSpeed?(speedFraction: number): void {
