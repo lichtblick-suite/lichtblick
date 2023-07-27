@@ -153,6 +153,7 @@ export function ProblemsList(): JSX.Element {
           <AccordionSummary
             className={classes.acccordionSummary}
             expandIcon={<ArrowDropDownIcon />}
+            title={problem.message}
           >
             <ProblemIcon severity={problem.severity} />
             <Typography variant="inherit" noWrap>
