@@ -3,13 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as base64 from "@protobufjs/base64";
-import { isEqual, isMatch, uniqWith } from "lodash";
+import { isEqual, uniqWith } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import { MessageDefinition } from "@foxglove/message-definition";
+import { MessageDefinition, isMsgDefEqual } from "@foxglove/message-definition";
 import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
 import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
@@ -1198,7 +1198,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     const maybeRos = ["ros1", "ros2"].includes(this.#profile ?? "");
     for (const [name, types] of datatypes) {
       const knownTypes = this.#datatypes.get(name);
-      if (knownTypes && !isMatch(types, knownTypes)) {
+      if (knownTypes && !isMsgDefEqual(types, knownTypes)) {
         this.#problems.addProblem(`schema-changed-${name}`, {
           message: `Definition of schema '${name}' has changed during the server's runtime`,
           severity: "error",
