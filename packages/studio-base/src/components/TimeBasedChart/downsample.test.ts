@@ -31,6 +31,30 @@ describe("downsampleTimeseries", () => {
     });
   });
 
+  it("preserves distinctly labeled segments", () => {
+    const result = downsampleTimeseries(
+      {
+        data: [
+          { x: 0, y: 0, value: 0, label: "1" },
+          { x: 10, y: 0, value: 0, label: "2" },
+          { x: 20, y: 0, value: 0 },
+          { x: 20, y: 1, value: 1 },
+          { x: 20, y: 10, value: 10 },
+          { x: 20, y: 20, value: 20 },
+        ],
+      },
+      bounds,
+    );
+    expect(result).toEqual({
+      data: [
+        { x: 0, y: 0, value: 0, label: "1" },
+        { x: 10, y: 0, value: 0, label: "2" },
+        { x: 20, y: 0, value: 0 },
+        { x: 20, y: 20, value: 20 },
+      ],
+    });
+  });
+
   it("should keep the min/max values within an interval", () => {
     const result = downsampleTimeseries(
       {
