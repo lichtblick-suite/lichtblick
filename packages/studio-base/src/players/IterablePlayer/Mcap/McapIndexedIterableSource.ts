@@ -132,6 +132,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       startTime: toNanoSec(start),
       endTime: toNanoSec(end),
       topics,
+      validateCrcs: false,
     })) {
       const channelInfo = this.#channelInfoById.get(message.channelId);
       if (!channelInfo) {
@@ -181,6 +182,7 @@ export class McapIndexedIterableSource implements IIterableSource {
         endTime: toNanoSec(time),
         topics: [topic],
         reverse: true,
+        validateCrcs: false,
       })) {
         const channelInfo = this.#channelInfoById.get(message.channelId);
         if (!channelInfo) {
