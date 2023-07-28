@@ -291,6 +291,8 @@ function RawMessages(props: Props) {
     [getValueLabels, onTopicPathChange, openSiblingPanel],
   );
 
+  const enumMapping = useMemo(() => enumValuesByDatatypeAndField(datatypes), [datatypes]);
+
   const valueRenderer = useCallback(
     (
       structureItem: MessagePathStructureItem | undefined,
@@ -324,7 +326,6 @@ function RawMessages(props: Props) {
               const keyPathIndex = keyPath.findIndex((key) => typeof key === "string");
               const field = keyPath[keyPathIndex];
               if (typeof field === "string") {
-                const enumMapping = enumValuesByDatatypeAndField(datatypes);
                 const datatype = childStructureItem.datatype;
                 constantName = enumMapping[datatype]?.[field]?.[String(itemValue)];
               }
@@ -352,7 +353,7 @@ function RawMessages(props: Props) {
         }}
       </ReactHoverObserver>
     ),
-    [classes.hoverObserver, datatypes, getValueLabels, onTopicPathChange, openSiblingPanel],
+    [classes.hoverObserver, enumMapping, getValueLabels, onTopicPathChange, openSiblingPanel],
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
