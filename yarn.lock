@@ -2796,7 +2796,7 @@ __metadata:
     "@types/pngjs": ^6.0.1
     "@types/tinycolor2": 1.4.3
     "@types/utif": ^3.0.1
-    "@xmldom/xmldom": 0.8.9
+    "@xmldom/xmldom": 0.8.10
     app-builder-lib: "*"
     async-mutex: 0.4.0
     builder-util: "*"
@@ -6885,10 +6885,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:0.8.9, @xmldom/xmldom@npm:^0.8.8":
-  version: 0.8.9
-  resolution: "@xmldom/xmldom@npm:0.8.9"
-  checksum: b324f35170bf1ad43afa9e8c85372149e626d6f54ffc3ea3d34591eb6d945202470f631a53107f634e4258afb0c0067ee243f210ce9b6050189c677c3d481c7c
+"@xmldom/xmldom@npm:0.8.10, @xmldom/xmldom@npm:^0.8.8":
+  version: 0.8.10
+  resolution: "@xmldom/xmldom@npm:0.8.10"
+  checksum: 4c136aec31fb3b49aaa53b6fcbfe524d02a1dc0d8e17ee35bd3bf35e9ce1344560481cd1efd086ad1a4821541482528672306d5e37cdbd187f33d7fadd3e2cf0
   languageName: node
   linkType: hard
 
