@@ -39,7 +39,6 @@ export type LayoutID = string & { __brand: "LayoutID" };
 
 export type SelectedLayout = {
   id: LayoutID;
-  loading?: boolean;
   data: LayoutData | undefined;
   name?: string;
   edited?: boolean;
@@ -85,7 +84,7 @@ export interface ICurrentLayout {
     /**
      * Override any current layout. This will reset the layout state
      */
-    setCurrentLayout: (newLayout: SelectedLayout) => void;
+    setCurrentLayout: (newLayout: SelectedLayout | undefined) => void;
 
     /**
      * Update the transient state associated with a particular panel type.

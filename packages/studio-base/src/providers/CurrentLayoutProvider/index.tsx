@@ -109,10 +109,7 @@ export default function CurrentLayoutProvider({
 
   const performAction = useCallback(
     (action: PanelsActions) => {
-      if (
-        layoutStateRef.current.selectedLayout?.data == undefined ||
-        layoutStateRef.current.selectedLayout.loading === true
-      ) {
+      if (layoutStateRef.current.selectedLayout?.data == undefined) {
         return;
       }
       const oldData = layoutStateRef.current.selectedLayout.data;
@@ -134,7 +131,6 @@ export default function CurrentLayoutProvider({
         selectedLayout: {
           id: layoutStateRef.current.selectedLayout.id,
           data: newData,
-          loading: false,
           name: layoutStateRef.current.selectedLayout.name,
           edited: true,
         },
@@ -144,7 +140,7 @@ export default function CurrentLayoutProvider({
   );
 
   const setCurrentLayout = useCallback(
-    (newLayout: SelectedLayout) => {
+    (newLayout: SelectedLayout | undefined) => {
       setLayoutState({
         sharedPanelState: {},
         selectedLayout: newLayout,
@@ -155,10 +151,7 @@ export default function CurrentLayoutProvider({
 
   const updateSharedPanelState = useCallback<ICurrentLayout["actions"]["updateSharedPanelState"]>(
     (type, newSharedState) => {
-      if (
-        layoutStateRef.current.selectedLayout?.data == undefined ||
-        layoutStateRef.current.selectedLayout.loading === true
-      ) {
+      if (layoutStateRef.current.selectedLayout?.data == undefined) {
         return;
       }
 

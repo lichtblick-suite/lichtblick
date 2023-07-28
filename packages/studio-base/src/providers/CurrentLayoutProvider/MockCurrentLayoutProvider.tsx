@@ -64,7 +64,7 @@ export default function MockCurrentLayoutProvider({
   }, []);
 
   const setCurrentLayout = useCallback(
-    (newLayout: SelectedLayout) => {
+    (newLayout: SelectedLayout | undefined) => {
       setLayoutState({
         selectedLayout: newLayout,
       });
