@@ -208,12 +208,12 @@ export const Urdfs: StoryObj = {
               },
               paramUrdfRobot1: {
                 layerId: "foxglove.Urdf",
-                url: `param://${urdfParamName}`,
+                url: encodeURI(`data:text/xml;utf8,${URDF3}`),
                 framePrefix: `robot_1/`,
               },
               paramUrdfRobot2: {
                 layerId: "foxglove.Urdf",
-                url: `param://${urdfParamName}`,
+                url: encodeURI(`data:text/xml;utf8,${URDF3}`),
                 framePrefix: `robot_2/`,
               },
             },

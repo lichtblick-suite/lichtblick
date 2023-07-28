@@ -524,18 +524,6 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     if (typeof robotDescription === "string") {
       this.#loadUrdf(PARAM_KEY, robotDescription);
     }
-
-    // Update custom layer URDFs that use param:// URLs.
-    for (const [instanceId, renderable] of this.renderables.entries()) {
-      const url = (renderable.userData.settings as Partial<LayerSettingsCustomUrdf>).url ?? "";
-      if (url.startsWith("param://")) {
-        const paramName = url.slice("param://".length);
-        const urdf = parameters?.get(paramName);
-        if (typeof urdf === "string") {
-          this.#loadUrdf(instanceId, urdf);
-        }
-      }
-    }
   };
 
   #handleAddUrdf = (instanceId: string): void => {
@@ -570,26 +558,6 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       return;
     }
     this.renderer.settings.errors.remove(renderable.userData.settingsPath, VALID_URL_ERR);
-
-    const { protocol } = new URL(url);
-
-    // Special case: Retrieve URDF from parameter store.
-    if (protocol === "param:") {
-      const paramName = url.slice("param://".length);
-      const urdfParam = this.renderer.parameters?.get(paramName) as string | undefined;
-
-      if (urdfParam) {
-        this.#loadUrdf(instanceId, urdfParam);
-        return;
-      } else {
-        this.renderer.settings.errors.add(
-          renderable.userData.settingsPath,
-          VALID_URL_ERR,
-          `Invalid parameter URL "${url}": The parameter "${paramName}" does not exist`,
-        );
-        return;
-      }
-    }
 
     // Check if this URL has already been fetched
     if (renderable.userData.url === url) {
@@ -961,7 +929,7 @@ function createMeshMarker(
   };
 }
 
-const VALID_PROTOCOLS = ["https:", "http:", "file:", "data:", "package:", "param:"];
+const VALID_PROTOCOLS = ["https:", "http:", "file:", "data:", "package:"];
 
 function isValidUrl(str: string): boolean {
   try {
