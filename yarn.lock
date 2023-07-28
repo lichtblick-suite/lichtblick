@@ -2264,15 +2264,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react-icons@npm:2.0.208":
-  version: 2.0.208
-  resolution: "@fluentui/react-icons@npm:2.0.208"
+"@fluentui/react-icons@npm:2.0.209":
+  version: 2.0.209
+  resolution: "@fluentui/react-icons@npm:2.0.209"
   dependencies:
     "@griffel/react": ^1.0.0
     tslib: ^2.1.0
   peerDependencies:
     react: ">=16.8.0 <19.0.0"
-  checksum: f785427700252bd2fefc964b821ebb1900d28b01ed6e259291b4231a25d8d870c9af372309cf31d184debd0e3b38035330f489c88f01fe126c2d421e4d4a0bc7
+  checksum: b4b6305d1d3a2e79943662eca0f19873dc953e7ec2c0d967510741a5518572b1032f09035c99dfacc33a201269d8542fced43dbf1c578af9375f3448f894bdd6
   languageName: node
   linkType: hard
 
@@ -2611,7 +2611,7 @@ __metadata:
     "@emotion/cache": 11.11.0
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
-    "@fluentui/react-icons": 2.0.208
+    "@fluentui/react-icons": 2.0.209
     "@foxglove/avl": 1.0.0
     "@foxglove/chartjs-plugin-zoom": 2.0.4
     "@foxglove/comlink-transfer-handlers": "workspace:*"
@@ -2831,7 +2831,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-web@workspace:packages/studio-web"
   dependencies:
-    "@fluentui/react-icons": 2.0.208
+    "@fluentui/react-icons": 2.0.209
     "@foxglove/log": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
     "@mui/material": 5.14.2
