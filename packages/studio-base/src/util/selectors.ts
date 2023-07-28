@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { keyBy } from "lodash";
+import memoizeWeak from "memoize-weak";
 import { createSelector } from "reselect";
 
 import { Immutable } from "@foxglove/studio";
@@ -71,9 +72,12 @@ export function extractTypeFromStudioEnumAnnotation(name: string): string | unde
   return undefined;
 }
 
-// returns a map of the form {datatype -> {field -> {value -> name}}}
-export const enumValuesByDatatypeAndField = createSelector(
-  (datatypes: Immutable<RosDatatypes>) => datatypes,
+// Returns a nested record of the form {datatype -> {field -> {value -> name}}}.
+//
+// We need memoizeWeak here because this function is called by multiple callers, each with their own
+// stable version of datatypes, so memoizing on a single datatypes via a memo that depends on a
+// single global stable value like createSelector won't work.
+export const enumValuesByDatatypeAndField = memoizeWeak(
   (
     datatypes: Immutable<RosDatatypes>,
   ): { [datatype: string]: { [field: string]: { [value: string]: string } } } => {
