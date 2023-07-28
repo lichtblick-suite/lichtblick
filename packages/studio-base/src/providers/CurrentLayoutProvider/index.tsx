@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { difference, isEqual } from "lodash";
+import { difference, isEqual, pick, uniq } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { getNodeAtPath } from "react-mosaic-component";
 import shallowequal from "shallowequal";
@@ -15,6 +15,7 @@ import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import CurrentLayoutContext, {
   ICurrentLayout,
   LayoutState,
+  SelectedLayout,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   AddPanelPayload,
@@ -124,7 +125,12 @@ export default function CurrentLayoutProvider({
         return;
       }
 
+      // Get all the panel types that exist in the new config
+      const panelTypesInUse = uniq(Object.keys(newData.configById).map(getPanelTypeFromId));
+
       setLayoutState({
+        // discared shared panel state for panel types that are no longer in the layout
+        sharedPanelState: pick(layoutStateRef.current.sharedPanelState, panelTypesInUse),
         selectedLayout: {
           id: layoutStateRef.current.selectedLayout.id,
           data: newData,
@@ -137,10 +143,39 @@ export default function CurrentLayoutProvider({
     [setLayoutState],
   );
 
+  const setCurrentLayout = useCallback(
+    (newLayout: SelectedLayout) => {
+      setLayoutState({
+        sharedPanelState: {},
+        selectedLayout: newLayout,
+      });
+    },
+    [setLayoutState],
+  );
+
+  const updateSharedPanelState = useCallback<ICurrentLayout["actions"]["updateSharedPanelState"]>(
+    (type, newSharedState) => {
+      if (
+        layoutStateRef.current.selectedLayout?.data == undefined ||
+        layoutStateRef.current.selectedLayout.loading === true
+      ) {
+        return;
+      }
+
+      setLayoutState({
+        ...layoutStateRef.current,
+        sharedPanelState: { ...layoutStateRef.current.sharedPanelState, [type]: newSharedState },
+      });
+    },
+    [setLayoutState],
+  );
+
   const actions: ICurrentLayout["actions"] = useMemo(
     () => ({
       getCurrentLayoutState: () => layoutStateRef.current,
-      setCurrentLayoutState: setLayoutState,
+      setCurrentLayout,
+
+      updateSharedPanelState,
 
       savePanelConfigs: (payload: SaveConfigsPayload) =>
         performAction({ type: "SAVE_PANEL_CONFIGS", payload }),
@@ -210,7 +245,7 @@ export default function CurrentLayoutProvider({
       startDrag: (payload: StartDragPayload) => performAction({ type: "START_DRAG", payload }),
       endDrag: (payload: EndDragPayload) => performAction({ type: "END_DRAG", payload }),
     }),
-    [analytics, performAction, setLayoutState, setSelectedPanelIds],
+    [analytics, performAction, setCurrentLayout, setSelectedPanelIds, updateSharedPanelState],
   );
 
   const value: ICurrentLayout = useShallowMemo({

@@ -9,6 +9,7 @@ import CurrentLayoutContext, {
   ICurrentLayout,
   LayoutID,
   LayoutState,
+  SelectedLayout,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   PanelsActions,
@@ -62,6 +63,25 @@ export default function MockCurrentLayoutProvider({
     }
   }, []);
 
+  const setCurrentLayout = useCallback(
+    (newLayout: SelectedLayout) => {
+      setLayoutState({
+        selectedLayout: newLayout,
+      });
+    },
+    [setLayoutState],
+  );
+
+  const updateSharedPanelState = useCallback<ICurrentLayout["actions"]["updateSharedPanelState"]>(
+    (type, newSharedState) => {
+      setLayoutState({
+        ...layoutStateRef.current,
+        sharedPanelState: { ...layoutStateRef.current.sharedPanelState, [type]: newSharedState },
+      });
+    },
+    [setLayoutState],
+  );
+
   const performAction = useCallback(
     (action: PanelsActions) => {
       onAction?.(action);
@@ -82,7 +102,9 @@ export default function MockCurrentLayoutProvider({
   const actions: ICurrentLayout["actions"] = useMemo(
     () => ({
       getCurrentLayoutState: () => layoutStateRef.current,
-      setCurrentLayoutState: setLayoutState,
+
+      setCurrentLayout,
+      updateSharedPanelState,
 
       savePanelConfigs: (payload) => performAction({ type: "SAVE_PANEL_CONFIGS", payload }),
       updatePanelConfigs: (panelType, perPanelFunc) =>
@@ -103,7 +125,7 @@ export default function MockCurrentLayoutProvider({
       startDrag: (payload) => performAction({ type: "START_DRAG", payload }),
       endDrag: (payload) => performAction({ type: "END_DRAG", payload }),
     }),
-    [performAction, setLayoutState],
+    [performAction, setCurrentLayout, updateSharedPanelState],
   );
 
   const value: ICurrentLayout = useShallowMemo({

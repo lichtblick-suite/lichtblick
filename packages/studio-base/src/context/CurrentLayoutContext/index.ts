@@ -11,7 +11,7 @@ import {
   useGuaranteedContext,
 } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
-import { VariableValue } from "@foxglove/studio";
+import { VariableValue, RenderState } from "@foxglove/studio";
 import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import toggleSelectedPanel from "@foxglove/studio-base/providers/CurrentLayoutProvider/toggleSelectedPanel";
 import { PanelConfig, PlaybackConfig, UserNodes } from "@foxglove/studio-base/types/panels";
@@ -31,18 +31,27 @@ import {
   SwapPanelPayload,
 } from "./actions";
 
+type PanelType = string;
+
+export type SharedPanelState = RenderState["sharedPanelState"];
+
 export type LayoutID = string & { __brand: "LayoutID" };
 
+export type SelectedLayout = {
+  id: LayoutID;
+  loading?: boolean;
+  data: LayoutData | undefined;
+  name?: string;
+  edited?: boolean;
+};
+
 export type LayoutState = Readonly<{
-  selectedLayout:
-    | {
-        id: LayoutID;
-        loading?: boolean;
-        data: LayoutData | undefined;
-        name?: string;
-        edited?: boolean;
-      }
-    | undefined;
+  /**
+   * Transient state shared between panels, keyed by panel type.
+   */
+  sharedPanelState?: Record<PanelType, SharedPanelState>;
+
+  selectedLayout: SelectedLayout | undefined;
 }>;
 
 /**
@@ -72,7 +81,16 @@ export interface ICurrentLayout {
      * asynchronously and don't want to update every time the state changes.
      */
     getCurrentLayoutState: () => LayoutState;
-    setCurrentLayoutState: (newState: LayoutState) => void;
+
+    /**
+     * Override any current layout. This will reset the layout state
+     */
+    setCurrentLayout: (newLayout: SelectedLayout) => void;
+
+    /**
+     * Update the transient state associated with a particular panel type.
+     */
+    updateSharedPanelState: (type: PanelType, data: SharedPanelState) => void;
 
     savePanelConfigs: (payload: SaveConfigsPayload) => void;
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;
@@ -113,9 +131,11 @@ CurrentLayoutContext.displayName = "CurrentLayoutContext";
 export function usePanelMosaicId(): string {
   return useGuaranteedContext(CurrentLayoutContext).mosaicId;
 }
+
 export function useCurrentLayoutActions(): CurrentLayoutActions {
   return useGuaranteedContext(CurrentLayoutContext).actions;
 }
+
 export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState) => T): T {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
@@ -166,6 +186,7 @@ export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState)
 
   return state.current.value;
 }
+
 export function useSelectedPanels(): SelectedPanelActions {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
   const [selectedPanelIds, setSelectedPanelIdsState] = useState(() =>

@@ -29,19 +29,14 @@ const KEY = "studio.layout";
 export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
   const { selectedSource } = usePlayerSelection();
 
-  const { setCurrentLayoutState } = useCurrentLayoutActions();
+  const { setCurrentLayout } = useCurrentLayoutActions();
   const currentLayoutData = useCurrentLayoutSelector(selectLayoutData);
 
   useEffect(() => {
     if (selectedSource?.sampleLayout) {
-      setCurrentLayoutState({
-        selectedLayout: {
-          id: "default" as LayoutID,
-          data: selectedSource.sampleLayout,
-        },
-      });
+      setCurrentLayout({ id: "default" as LayoutID, data: selectedSource.sampleLayout });
     }
-  }, [selectedSource, setCurrentLayoutState]);
+  }, [selectedSource, setCurrentLayout]);
 
   const [debouncedLayoutData] = useDebounce(currentLayoutData, 250, { maxWait: 500 });
 
@@ -69,13 +64,8 @@ export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
     const layoutData = migratePanelsState(
       serializedLayoutData ? (JSON.parse(serializedLayoutData) as LayoutData) : defaultLayout,
     );
-    setCurrentLayoutState({
-      selectedLayout: {
-        id: "default" as LayoutID,
-        data: layoutData,
-      },
-    });
-  }, [setCurrentLayoutState]);
+    setCurrentLayout({ id: "default" as LayoutID, data: layoutData });
+  }, [setCurrentLayout]);
 
   return <></>;
 }

@@ -6,13 +6,9 @@ import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
 import { useGuaranteedContext } from "@foxglove/hooks";
-import { Immutable, RenderState, SettingsTree } from "@foxglove/studio";
+import { Immutable, SettingsTree } from "@foxglove/studio";
 
 export type ImmutableSettingsTree = Immutable<SettingsTree>;
-
-export type SharedPanelState = RenderState["sharedPanelState"];
-
-type PanelType = string;
 
 export type PanelStateStore = {
   /**
@@ -31,11 +27,6 @@ export type PanelStateStore = {
   defaultTitles: Record<string, string | undefined>;
 
   /**
-   * Transient state shared between panels, keyed by panel type.
-   */
-  sharedPanelState: Record<PanelType, SharedPanelState>;
-
-  /**
    * Increments the sequence number for the panel, forcing a remount.
    */
   incrementSequenceNumber: (panelId: string) => void;
@@ -47,11 +38,6 @@ export type PanelStateStore = {
 
   /** Updates the default title for the given panel. */
   updateDefaultTitle: (panelId: string, title: string | undefined) => void;
-
-  /**
-   * Update the transient state associated with a particular panel type.
-   */
-  updateSharedPanelState: (type: PanelType, data: SharedPanelState) => void;
 };
 
 export const PanelStateContext = createContext<undefined | StoreApi<PanelStateStore>>(undefined);

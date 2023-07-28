@@ -46,7 +46,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import {
   usePanelSettingsTreeUpdate,
-  useSharedPanelState,
   useDefaultPanelTitle,
 } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -55,6 +54,7 @@ import { assertNever } from "@foxglove/studio-base/util/assertNever";
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import { initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext } from "./types";
+import { useSharedPanelState } from "./useSharedPanelState";
 
 const log = Logger.getLogger(__filename);
 
