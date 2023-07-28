@@ -26,7 +26,8 @@ import {
   topicsWithIdsToDiffFixture,
   withMissingData,
 } from "./fixture";
-import { Constants, RawMessagesPanelConfig } from "./types";
+import type { RawMessagesPanelConfig } from "./types";
+import { Constants, NodeState } from "./types";
 
 const noDiffConfig = {
   diffMethod: "custom",
@@ -113,7 +114,7 @@ export const Overridden: StoryObj = {
         overrideConfig={{
           ...noDiffConfig,
           topicPath: "/msgs/big_topic",
-          expansion: { LotsOfStuff: "c", timestamp_array: "e" },
+          expansion: { LotsOfStuff: NodeState.Collapsed, timestamp_array: NodeState.Expanded },
         }}
       />
     </PanelSetup>

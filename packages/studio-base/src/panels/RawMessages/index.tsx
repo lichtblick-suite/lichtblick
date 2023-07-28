@@ -60,7 +60,7 @@ import {
   getValueActionForValue,
 } from "./getValueActionForValue";
 import { Constants, RawMessagesPanelConfig } from "./types";
-import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths } from "./utils";
+import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths, toggleExpansion } from "./utils";
 
 type Props = {
   config: Immutable<RawMessagesPanelConfig>;
@@ -152,7 +152,7 @@ function RawMessages(props: Props) {
   const baseItem = inTimetickDiffMode ? prevTickObj : currTickObj;
   const diffItem = inTimetickDiffMode ? currTickObj : diffTopicObj;
 
-  const autoExpandPaths = useMemo(() => {
+  const nodes = useMemo(() => {
     if (baseItem) {
       const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
       return generateDeepKeyPaths(maybeDeepParse(data), 5);
@@ -200,24 +200,9 @@ function RawMessages(props: Props) {
 
   const onLabelClick = useCallback(
     (keypath: (string | number)[]) => {
-      const key = keypath.join("~");
-      setExpansion((old) => {
-        if (old === "all") {
-          return { [key]: "c" };
-        } else if (old === "none") {
-          return { [key]: "e" };
-        } else if (old == undefined) {
-          return { [key]: autoExpandPaths.has(key) ? "c" : "e" };
-        } else {
-          if (old[key]) {
-            return { ...old, [key]: old[key] === "c" ? "e" : "c" };
-          } else {
-            return { ...old, [key]: autoExpandPaths.has(key) ? "c" : "e" };
-          }
-        }
-      });
+      setExpansion((old) => toggleExpansion(old ?? "all", nodes, keypath.join("~")));
     },
-    [autoExpandPaths],
+    [nodes],
   );
 
   useEffect(() => {
@@ -373,7 +358,7 @@ function RawMessages(props: Props) {
         return true;
       }
 
-      return autoExpandPaths.has(joinedPath);
+      return true;
     };
 
     if (topicPath.length === 0) {
@@ -614,7 +599,6 @@ function RawMessages(props: Props) {
       </Stack>
     );
   }, [
-    autoExpandPaths,
     baseItem,
     classes.big,
     classes.topic,
