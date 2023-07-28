@@ -274,53 +274,6 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       return;
     }
 
-    const topic = this.userData.topic;
-    const isDecay = settings.decayTime > 0;
-    if (isDecay) {
-      // Push a new (empty) entry to the history of points
-      const geometry = createGeometry(topic, THREE.StaticDrawUsage);
-      const points = new PointCloudRenderable(
-        topic,
-        {
-          receiveTime: -1n, // unused
-          messageTime: -1n, // unused
-          frameId: "", //unused
-          pose: getPose(pointCloud),
-          settingsPath: [], //unused
-          settings: { visible: true }, //unused
-          topic,
-          pointCloud,
-          originalMessage,
-        },
-        geometry,
-        material,
-        this.userData.pickingMaterial,
-        this.userData.instancePickingMaterial,
-      );
-      pointsHistory.addHistoryEntry({ receiveTime, messageTime, renderable: points });
-      this.add(points);
-
-      if (settings.stixelsEnabled) {
-        const stixelGeometry = createStixelGeometry(topic, THREE.StaticDrawUsage);
-        const stixels = new StixelsRenderable(
-          topic,
-          {
-            receiveTime: -1n, // unused
-            messageTime: -1n, // unused
-            frameId: "", //unused
-            pose: getPose(pointCloud),
-            settingsPath: [], //unused
-            settings: { visible: true }, //unused
-            topic,
-          },
-          stixelGeometry,
-          stixelMaterial,
-        );
-        stixelsHistory.addHistoryEntry({ receiveTime, messageTime, renderable: stixels });
-        this.add(stixels);
-      }
-    }
-
     const latestPointsEntry = pointsHistory.latest();
     latestPointsEntry.receiveTime = receiveTime;
     latestPointsEntry.messageTime = messageTime;
@@ -336,6 +289,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
 
     const latestStixelEntry = stixelsHistory.latest();
 
+    const isDecay = settings.decayTime > 0;
     if (!isDecay && prevIsDecay !== isDecay) {
       latestPointsEntry.renderable.geometry.setUsage(THREE.DynamicDrawUsage);
       latestStixelEntry.renderable.geometry.setUsage(THREE.DynamicDrawUsage);
@@ -370,6 +324,64 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     if (this.userData.settings.stixelsEnabled) {
       this.#stixelsHistory.updateHistoryFromCurrentTime(currentTime);
       this.#stixelsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
+    }
+  }
+
+  public pushHistory(
+    this: PointCloudHistoryRenderable,
+    pointCloud: PointCloud | PointCloud2,
+    originalMessage: RosObject | undefined,
+    settings: LayerSettingsPointClouds,
+    receiveTime: bigint,
+  ): void {
+    const messageTime = toNanoSec(getTimestamp(pointCloud));
+    const pointsHistory = this.#pointsHistory;
+    const stixelsHistory = this.#stixelsHistory;
+    const material = this.userData.material;
+    const stixelMaterial = this.userData.stixelMaterial;
+    const topic = this.userData.topic;
+
+    // Push a new (empty) entry to the history of points
+    const geometry = createGeometry(topic, THREE.StaticDrawUsage);
+    const points = new PointCloudRenderable(
+      topic,
+      {
+        receiveTime: -1n, // unused
+        messageTime: -1n, // unused
+        frameId: "", //unused
+        pose: getPose(pointCloud),
+        settingsPath: [], //unused
+        settings: { visible: true }, //unused
+        topic,
+        pointCloud,
+        originalMessage,
+      },
+      geometry,
+      material,
+      this.userData.pickingMaterial,
+      this.userData.instancePickingMaterial,
+    );
+    pointsHistory.addHistoryEntry({ receiveTime, messageTime, renderable: points });
+    this.add(points);
+
+    if (settings.stixelsEnabled) {
+      const stixelGeometry = createStixelGeometry(topic, THREE.StaticDrawUsage);
+      const stixels = new StixelsRenderable(
+        topic,
+        {
+          receiveTime: -1n, // unused
+          messageTime: -1n, // unused
+          frameId: "", //unused
+          pose: getPose(pointCloud),
+          settingsPath: [], //unused
+          settings: { visible: true }, //unused
+          topic,
+        },
+        stixelGeometry,
+        stixelMaterial,
+      );
+      stixelsHistory.addHistoryEntry({ receiveTime, messageTime, renderable: stixels });
+      this.add(stixels);
     }
   }
 
@@ -888,12 +900,13 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
       this.renderables.set(topic, renderable);
     }
 
-    renderable.updatePointCloud(
-      pointCloud,
-      originalMessage,
-      renderable.userData.settings,
-      receiveTime,
-    );
+    const { settings } = renderable.userData;
+
+    if (settings.decayTime > 0) {
+      renderable.pushHistory(pointCloud, originalMessage, settings, receiveTime);
+    }
+
+    renderable.updatePointCloud(pointCloud, originalMessage, settings, receiveTime);
   }
 }
 
