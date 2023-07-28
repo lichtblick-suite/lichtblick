@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEqual } from "lodash";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 
-import { useShallowMemo, useChangeDetector, useDeepMemo } from "@foxglove/hooks";
+import { useDeepMemo, useShallowMemo } from "@foxglove/hooks";
 import { Immutable } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import useGlobalVariables, {
@@ -124,30 +123,6 @@ export function useCachedGetMessagePathDataItems(
   }, [datatypes, relevantTopics]);
   const relevantDatatypes = useDeepMemo(unmemoizedRelevantDatatypes);
 
-  // Cache MessagePathDataItem arrays by Message. We need to clear out this cache whenever
-  // the topics or datatypes change, since that's what getMessagePathDataItems
-  // depends on, outside of the message+path.
-  const cachesByPath = useRef<{
-    [key: string]: {
-      filledInPath: RosPath;
-      weakMap: WeakMap<MessageEvent, MessagePathDataItem[] | undefined>;
-    };
-  }>({});
-  if (useChangeDetector([relevantTopics, relevantDatatypes], { initiallyTrue: true })) {
-    cachesByPath.current = {};
-  }
-  // When the filled in paths changed, then that means that either the path string changed, or a
-  // relevant global variable changed. Delete the caches for where the `filledInPath` doesn't match
-  // any more.
-  if (useChangeDetector([memoizedFilledInPaths], { initiallyTrue: false })) {
-    for (const [path, current] of Object.entries(cachesByPath.current)) {
-      const filledInPath = memoizedFilledInPaths[path];
-      if (!filledInPath || !isEqual(current.filledInPath, filledInPath)) {
-        delete cachesByPath.current[path];
-      }
-    }
-  }
-
   return useCallback(
     (path: string, message: MessageEvent): MessagePathDataItem[] | undefined => {
       if (!memoizedPaths.includes(path)) {
@@ -157,22 +132,12 @@ export function useCachedGetMessagePathDataItems(
       if (!filledInPath) {
         return;
       }
-      const currentPath = (cachesByPath.current[path] = cachesByPath.current[path] ?? {
+      const messagePathDataItems = getMessagePathDataItems(
+        message,
         filledInPath,
-        weakMap: new WeakMap(),
-      });
-      const { weakMap } = currentPath;
-      if (!weakMap.has(message)) {
-        const messagePathDataItems = getMessagePathDataItems(
-          message,
-          filledInPath,
-          relevantTopics,
-          relevantDatatypes,
-        );
-        weakMap.set(message, messagePathDataItems);
-        return messagePathDataItems;
-      }
-      const messagePathDataItems = weakMap.get(message);
+        relevantTopics,
+        relevantDatatypes,
+      );
       return messagePathDataItems;
     },
     [relevantDatatypes, memoizedFilledInPaths, memoizedPaths, relevantTopics],

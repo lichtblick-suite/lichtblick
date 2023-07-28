@@ -11,13 +11,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { act, renderHook } from "@testing-library/react-hooks";
+
+import { renderHook } from "@testing-library/react-hooks";
 
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -49,179 +48,6 @@ function addValuesWithPathsToItems(
 }
 
 describe("useCachedGetMessagePathDataItems", () => {
-  const initialTopics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
-  const initialDatatypes: RosDatatypes = new Map(
-    Object.entries({
-      datatype: {
-        definitions: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }],
-      },
-    }),
-  );
-
-  function setup(initialPaths: string[], initialGlobalVariables?: GlobalVariables) {
-    let topics = initialTopics;
-    let datatypes = initialDatatypes;
-    const initialProps = {
-      paths: initialPaths,
-      topics: initialTopics,
-      datatypes: initialDatatypes,
-    };
-
-    const { result, rerender } = renderHook(
-      ({ paths }) => ({
-        setGlobalVariables: useCurrentLayoutActions().setGlobalVariables,
-        getItems: useCachedGetMessagePathDataItems(paths),
-      }),
-      {
-        initialProps,
-        wrapper: function Wrapper({ children }) {
-          return (
-            <MockCurrentLayoutProvider initialState={{ globalVariables: initialGlobalVariables }}>
-              <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
-                {children}
-              </MockMessagePipelineProvider>
-            </MockCurrentLayoutProvider>
-          );
-        },
-      },
-    );
-
-    return {
-      result,
-      rerender: ({
-        paths,
-        topics: newTopics,
-        datatypes: newDatatypes,
-      }: {
-        paths: string[];
-        topics: Topic[];
-        datatypes: RosDatatypes;
-      }) => {
-        topics = newTopics;
-        datatypes = newDatatypes;
-        rerender({ paths, topics, datatypes });
-      },
-      initialProps,
-    };
-  }
-
-  it("clears the cache whenever any inputs to getMessagePathDataItems change", async () => {
-    const message: MessageEvent = {
-      topic: "/topic",
-      receiveTime: { sec: 0, nsec: 0 },
-      message: { an_array: [5, 10, 15, 20] },
-      schemaName: "datatype",
-      sizeInBytes: 0,
-    };
-
-    const { result, rerender, initialProps } = setup(["/topic.an_array[0]", "/topic.an_array[1]"]);
-
-    const data0 = result.current.getItems("/topic.an_array[0]", message);
-    const data1 = result.current.getItems("/topic.an_array[1]", message);
-    expect(data0).toEqual([{ path: "/topic.an_array[0]", value: 5 }]);
-    expect(data1).toEqual([{ path: "/topic.an_array[1]", value: 10 }]);
-
-    // Calling again returns cached version.
-    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0);
-
-    // Throws when asking for a path not in the list.
-    expect(() => result.current.getItems("/topic.an_array[2]", message)).toThrow(
-      "not in the list of cached paths",
-    );
-
-    // Using the exact same paths but with a new array instance will keep the returned function exactly the same.
-    const originalCachedGetMessage = result.current.getItems;
-    rerender({ ...initialProps, paths: ["/topic.an_array[0]", "/topic.an_array[1]"] });
-    expect(result.current.getItems).toBe(originalCachedGetMessage);
-
-    // Changing paths maintains cache for the remaining path.
-    rerender({ ...initialProps, paths: ["/topic.an_array[0]"] });
-    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0);
-    expect(() => result.current.getItems("/topic.an_array[1]", message)).toThrow(
-      "not in the list of cached paths",
-    );
-    expect(result.current).not.toBe(originalCachedGetMessage); // Function should also be different.
-    // Change it back to make sure that we indeed cleared the cache for the path that we removed.
-    rerender({ ...initialProps, paths: ["/topic.an_array[0]", "/topic.an_array[1]"] });
-    expect(result.current.getItems("/topic.an_array[1]", message)).not.toBe(data1);
-    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0); // Another sanity check.
-
-    // Changing unrelated topics and datatypes does not clear the cache.
-    const data0BeforeProviderTopicsChange = result.current.getItems("/topic.an_array[0]", message);
-    rerender({
-      ...initialProps,
-      topics: [
-        { name: "/topic", schemaName: "datatype" },
-        { name: "/topic2", schemaName: "datatype2" },
-      ],
-      datatypes: new Map([
-        [
-          "datatype",
-          { definitions: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
-        ],
-        [
-          "datatype2",
-          { definitions: [{ name: "an_array2", type: "uint32", isArray: true, isComplex: false }] },
-        ],
-      ]),
-    });
-    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(
-      data0BeforeProviderTopicsChange,
-    );
-
-    // Invalidate cache with topics.
-    rerender({ ...initialProps, topics: [{ name: "/topic", schemaName: "datatype2" }] });
-    expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
-      data0BeforeProviderTopicsChange,
-    );
-
-    // Invalidate cache with datatypes.
-    rerender({ ...initialProps });
-    const data0BeforeDatatypesChange = result.current.getItems("/topic.an_array[0]", message);
-    rerender({
-      ...initialProps,
-      datatypes: new Map([
-        [
-          "datatype",
-          { definitions: [{ name: "an_array", type: "uint64", isArray: true, isComplex: false }] },
-        ],
-      ]),
-    });
-    expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
-      data0BeforeDatatypesChange,
-    );
-    expect(result.current.getItems("/topic.an_array[0]", message)).toEqual([
-      { path: "/topic.an_array[0]", value: 5 },
-    ]);
-  });
-
-  it("clears the cache only when relevant global variables change", async () => {
-    const message: MessageEvent = {
-      topic: "/topic",
-      receiveTime: { sec: 0, nsec: 0 },
-      message: { an_array: [5, 10, 15, 20] },
-      schemaName: "datatype",
-      sizeInBytes: 0,
-    };
-    const { result } = setup(["/topic.an_array[$foo]"], { foo: 0 });
-
-    const data0 = result.current.getItems("/topic.an_array[$foo]", message);
-    expect(data0).toEqual([{ path: "/topic.an_array[0]", value: 5 }]);
-
-    // Sanity check.
-    expect(result.current.getItems("/topic.an_array[$foo]", message)).toBe(data0);
-
-    // Changing an unrelated global variable should not invalidate the cache.
-    act(() => result.current.setGlobalVariables({ bar: 0 }));
-    expect(result.current.getItems("/topic.an_array[$foo]", message)).toBe(data0);
-
-    // Changing a relevant global variable.
-    act(() => result.current.setGlobalVariables({ foo: 1 }));
-    expect(result.current.getItems("/topic.an_array[$foo]", message)).toEqual([
-      { path: "/topic.an_array[1]", value: 10 },
-    ]);
-  });
-
   it("supports types with reference cycles (i.e. reference themselves within their children)", () => {
     const topics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
     const datatypes: RosDatatypes = new Map(
