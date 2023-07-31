@@ -12,26 +12,11 @@
 //   You may not use this file except in compliance with the License.
 import {
   constantsByDatatype,
-  getTopicsByTopicName,
   enumValuesByDatatypeAndField,
   extractTypeFromStudioEnumAnnotation,
-} from "@foxglove/studio-base/util/selectors";
+} from "./enums";
 
 describe("selectors", () => {
-  describe("topicsByTopicName", () => {
-    it("indexes the topics by topic name", () => {
-      expect(
-        getTopicsByTopicName([
-          { name: "/some/topic", schemaName: "dummy" },
-          { name: "/another/topic", schemaName: "dummy" },
-        ]),
-      ).toEqual<ReturnType<typeof getTopicsByTopicName>>({
-        "/some/topic": { name: "/some/topic", schemaName: "dummy" },
-        "/another/topic": { name: "/another/topic", schemaName: "dummy" },
-      });
-    });
-  });
-
   describe("constantsByDatatype", () => {
     it("indexes constant names by value for each datatype", () => {
       expect(

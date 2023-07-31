@@ -45,8 +45,8 @@ import getDiff, {
 } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
-import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { DiffSpan } from "./DiffSpan";
@@ -130,15 +130,15 @@ function RawMessages(props: Props) {
     () => topicRosPath && topics.find(({ name }) => name === topicRosPath.topicName),
     [topicRosPath, topics],
   );
+
+  const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
+
   const rootStructureItem: MessagePathStructureItem | undefined = useMemo(() => {
     if (!topic || !topicRosPath || topic.schemaName == undefined) {
       return;
     }
-    return traverseStructure(
-      messagePathStructures(datatypes)[topic.schemaName],
-      topicRosPath.messagePath,
-    ).structureItem;
-  }, [datatypes, topic, topicRosPath]);
+    return traverseStructure(structures[topic.schemaName], topicRosPath.messagePath).structureItem;
+  }, [structures, topic, topicRosPath]);
 
   const [expansion, setExpansion] = useState(config.expansion);
   const matchedMessages = useMessageDataItem(topicPath, { historySize: 2 });

@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { cloneDeep } from "lodash";
-
+import { unwrap } from "@foxglove/den/monads";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import {
   traverseStructure,
-  messagePathsForDatatype,
+  messagePathsForStructure,
   messagePathStructures,
   validTerminatingStructureItem,
 } from "./messagePathsForDatatype";
@@ -400,11 +399,6 @@ describe("messagePathStructures", () => {
     });
   });
 
-  it("caches when passing in the same datatypes", () => {
-    expect(messagePathStructures(datatypes)).toBe(messagePathStructures(datatypes));
-    expect(messagePathStructures(cloneDeep(datatypes))).not.toBe(messagePathStructures(datatypes));
-  });
-
   it("supports types which reference themselves", () => {
     const selfReferencingDatatypes: RosDatatypes = new Map(
       Object.entries({
@@ -430,9 +424,11 @@ describe("messagePathStructures", () => {
   });
 });
 
-describe("messagePathsForDatatype", () => {
+describe("messagePathsForStructure", () => {
+  const structures = messagePathStructures(datatypes);
+
   it("returns all possible message paths when not passing in `validTypes`", () => {
-    expect(messagePathsForDatatype("pose_msgs/PoseDebug", datatypes)).toEqual([
+    expect(messagePathsForStructure(unwrap(structures["pose_msgs/PoseDebug"]))).toEqual([
       "",
       ".header",
       ".header.frame_id",
@@ -451,9 +447,9 @@ describe("messagePathsForDatatype", () => {
       ".some_pose.header.stamp.sec",
       ".some_pose.x",
     ]);
-    expect(messagePathsForDatatype("msgs/Log", datatypes)).toEqual(["", ".id"]);
+    expect(messagePathsForStructure(unwrap(structures["msgs/Log"]))).toEqual(["", ".id"]);
 
-    expect(messagePathsForDatatype("tf/tfMessage", datatypes)).toEqual([
+    expect(messagePathsForStructure(unwrap(structures["tf/tfMessage"]))).toEqual([
       "",
       ".transforms",
       ".transforms[0]",
@@ -469,7 +465,7 @@ describe("messagePathsForDatatype", () => {
       ".transforms[0].transform.translation",
     ]);
 
-    expect(messagePathsForDatatype("visualization_msgs/MarkerArray", datatypes)).toEqual([
+    expect(messagePathsForStructure(unwrap(structures["visualization_msgs/MarkerArray"]))).toEqual([
       "",
       ".markers",
       ".markers[:]{id==0}",
@@ -479,13 +475,15 @@ describe("messagePathsForDatatype", () => {
 
   it("returns an array of possible message paths for the given `validTypes`", () => {
     expect(
-      messagePathsForDatatype("pose_msgs/PoseDebug", datatypes, { validTypes: ["float64"] }),
+      messagePathsForStructure(unwrap(structures["pose_msgs/PoseDebug"]), {
+        validTypes: ["float64"],
+      }),
     ).toEqual([".some_pose.dummy_array[:]", ".some_pose.x"]);
   });
 
   it("does not suggest hashes with multiple values when setting `noMultiSlices`", () => {
     expect(
-      messagePathsForDatatype("pose_msgs/PoseDebug", datatypes, {
+      messagePathsForStructure(unwrap(structures["pose_msgs/PoseDebug"]), {
         validTypes: ["float64"],
         noMultiSlices: true,
       }),

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack } from "@mui/material";
-import { flatten, flatMap, partition } from "lodash";
+import { flatten, flatMap, partition, keyBy } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
 
 import { MessageDefinitionField } from "@foxglove/message-definition";
@@ -24,13 +24,12 @@ import useGlobalVariables, {
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 import { RosPath, RosPrimitive } from "./constants";
 import {
   traverseStructure,
   messagePathStructures,
-  messagePathsForDatatype,
+  messagePathsForStructure,
   validTerminatingStructureItem,
   StructureTraversalResult,
 } from "./messagePathsForDatatype";
@@ -333,6 +332,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     return undefined;
   }, [invalidGlobalVariablesVariable, structureTraversalResult, validTypes, rosPath, topic]);
 
+  const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
+
   const { autocompleteItems, autocompleteFilterText, autocompleteRange } = useMemo(() => {
     if (disableAutocomplete) {
       return {
@@ -386,11 +387,13 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         const initialFilterLength =
           rosPath.messagePath[0]?.type === "filter" ? rosPath.messagePath[0].repr.length + 2 : 0;
 
+        const structure = topic.schemaName != undefined ? structures[topic.schemaName] : undefined;
+
         return {
           autocompleteItems:
-            topic.schemaName == undefined
+            structure == undefined
               ? []
-              : messagePathsForDatatype(topic.schemaName, datatypes, {
+              : messagePathsForStructure(structure, {
                   validTypes,
                   noMultiSlices,
                   messagePath: rosPath.messagePath,
@@ -439,14 +442,16 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     rosPath,
     invalidGlobalVariablesVariable,
     path,
-    topicNamesAutocompleteItems,
     topicNamesAndFieldsAutocompleteItems,
+    topicNamesAutocompleteItems,
     structureTraversalResult,
-    datatypes,
+    structures,
     validTypes,
     noMultiSlices,
     globalVariables,
   ]);
+
+  const topicsByName = useMemo(() => keyBy(topics, ({ name }) => name), [topics]);
 
   const orderedAutocompleteItems = useMemo(() => {
     if (prioritizedDatatype == undefined) {
@@ -456,10 +461,10 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     return flatten(
       partition(
         autocompleteItems,
-        (item) => getTopicsByTopicName(topics)[item]?.schemaName === prioritizedDatatype,
+        (item) => topicsByName[item]?.schemaName === prioritizedDatatype,
       ),
     );
-  }, [autocompleteItems, prioritizedDatatype, topics]);
+  }, [autocompleteItems, prioritizedDatatype, topicsByName]);
 
   const usesUnsupportedMathModifier =
     (supportsMathModifiers == undefined || !supportsMathModifiers) && path.includes(".@");

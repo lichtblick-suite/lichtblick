@@ -13,12 +13,15 @@
 //   You may not use this file except in compliance with the License.
 
 import { renderHook } from "@testing-library/react-hooks";
+import { keyBy } from "lodash";
 
+import { messagePathStructures } from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
 
 import {
   fillInGlobalVariablesInPath,
@@ -38,7 +41,10 @@ function addValuesWithPathsToItems(
     if (!rosPath) {
       return undefined;
     }
-    const items = getMessagePathDataItems(message, rosPath, providerTopics, datatypes);
+    const topicsByName = keyBy(providerTopics, ({ name }) => name);
+    const structures = messagePathStructures(datatypes);
+    const enums = enumValuesByDatatypeAndField(datatypes);
+    const items = getMessagePathDataItems(message, rosPath, topicsByName, structures, enums);
     return items?.map(({ value, path, constantName }) => ({
       value,
       path,
