@@ -24,21 +24,25 @@ describe("startup", () => {
     // Get the first window that the app opens, wait if necessary.
     const electronWindow = await electronApp.firstWindow();
 
-    // Direct Electron console to Node terminal.
-    await new Promise<void>((resolve, reject) => {
-      electronWindow.on("console", (message) => {
-        if (message.type() === "error") {
-          reject(new Error(message.text()));
-          return;
-        }
-        log.info(message.text());
+    try {
+      // Direct Electron console to Node terminal.
+      await new Promise<void>((resolve, reject) => {
+        electronWindow.on("console", (message) => {
+          if (message.type() === "error") {
+            reject(new Error(message.text()));
+            return;
+          }
+          log.info(message.text());
 
-        if (message.text().includes("App rendered")) {
-          resolve();
-        }
+          if (message.text().includes("App rendered")) {
+            // Wait for a few seconds for the app to render more components and detect if
+            // there are any errors after the initial app render
+            setTimeout(resolve, 2_000);
+          }
+        });
       });
-    });
-
-    await electronApp.close();
+    } finally {
+      await electronApp.close();
+    }
   }, 10_000);
 });

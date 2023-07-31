@@ -37,23 +37,27 @@ describe("startup", () => {
     const page = await browser.newPage();
     await page.goto(url);
 
-    await new Promise<void>((resolve, reject) => {
-      page.on("console", (message) => {
-        if (message.type() === "error") {
-          reject(new Error(message.text()));
-          return;
-        }
-        log.info(message.text());
+    try {
+      await new Promise<void>((resolve, reject) => {
+        page.on("console", (message) => {
+          if (message.type() === "error") {
+            reject(new Error(message.text()));
+            return;
+          }
+          log.info(message.text());
 
-        if (message.text().includes("App rendered")) {
-          resolve();
-        }
+          if (message.text().includes("App rendered")) {
+            // Wait for a few seconds for the app to render more components and detect if
+            // there are any errors after the initial app render
+            setTimeout(resolve, 2_000);
+          }
+        });
       });
-    });
-
-    await browser.close();
-    await new Promise<void>((resolve) => {
-      server.close(() => resolve());
-    });
+    } finally {
+      await browser.close();
+      await new Promise<void>((resolve) => {
+        server.close(() => resolve());
+      });
+    }
   }, 15_000);
 });
