@@ -26,13 +26,18 @@ type Props = {
   onPause: () => void;
 };
 
-const selectActiveData = (ctx: MessagePipelineContext) => ctx.playerState.activeData;
+const selectIsPlaying = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.isPlaying;
+const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
+const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
+const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 
 export default function PlaybackTimeDisplay(props: Props): JSX.Element {
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
-  const activeData = useMessagePipeline(selectActiveData);
 
-  const { isPlaying, startTime, endTime, currentTime } = activeData ?? {};
+  const isPlaying = useMessagePipeline(selectIsPlaying);
+  const startTime = useMessagePipeline(selectStartTime);
+  const endTime = useMessagePipeline(selectEndTime);
+  const currentTime = useMessagePipeline(selectCurrentTime);
 
   return (
     <PlaybackTimeDisplayMethod
