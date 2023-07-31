@@ -8,7 +8,6 @@ import { useDebounce } from "use-debounce";
 
 import Log from "@foxglove/log";
 import {
-  LayoutID,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -34,7 +33,7 @@ export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
 
   useEffect(() => {
     if (selectedSource?.sampleLayout) {
-      setCurrentLayout({ id: "default" as LayoutID, data: selectedSource.sampleLayout });
+      setCurrentLayout({ data: selectedSource.sampleLayout });
     }
   }, [selectedSource, setCurrentLayout]);
 
@@ -64,7 +63,7 @@ export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
     const layoutData = migratePanelsState(
       serializedLayoutData ? (JSON.parse(serializedLayoutData) as LayoutData) : defaultLayout,
     );
-    setCurrentLayout({ id: "default" as LayoutID, data: layoutData });
+    setCurrentLayout({ data: layoutData });
   }, [setCurrentLayout]);
 
   return <></>;

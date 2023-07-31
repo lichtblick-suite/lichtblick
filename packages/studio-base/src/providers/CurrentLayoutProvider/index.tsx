@@ -129,7 +129,6 @@ export default function CurrentLayoutProvider({
         // discared shared panel state for panel types that are no longer in the layout
         sharedPanelState: pick(layoutStateRef.current.sharedPanelState, panelTypesInUse),
         selectedLayout: {
-          id: layoutStateRef.current.selectedLayout.id,
           data: newData,
           name: layoutStateRef.current.selectedLayout.name,
           edited: true,

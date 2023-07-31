@@ -10,7 +10,6 @@ import { useEffect } from "react";
 
 import {
   CurrentLayoutActions,
-  LayoutID,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -33,7 +32,6 @@ describe("CurrentLayoutProvider", () => {
 
       useEffect(() => {
         actions.setCurrentLayout({
-          id: "foo" as LayoutID,
           data: {
             configById: { "Foo!bar": { setting: 1 } },
             globalVariables: { var: "hello" },

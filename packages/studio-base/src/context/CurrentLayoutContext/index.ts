@@ -35,10 +35,7 @@ type PanelType = string;
 
 export type SharedPanelState = RenderState["sharedPanelState"];
 
-export type LayoutID = string & { __brand: "LayoutID" };
-
 export type SelectedLayout = {
-  id: LayoutID;
   data: LayoutData | undefined;
   name?: string;
   edited?: boolean;
