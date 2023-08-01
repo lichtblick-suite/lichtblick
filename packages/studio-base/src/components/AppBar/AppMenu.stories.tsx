@@ -11,6 +11,7 @@ import { AppContext } from "@foxglove/studio-base/context/AppContext";
 import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { AppMenu } from "./AppMenu";
@@ -41,11 +42,13 @@ export default {
   decorators: [
     (Story, { args: { testId: _, ...args } }): JSX.Element => (
       <AppContext.Provider value={{ appBarMenuItems: args.appBarMenuItems }}>
-        <WorkspaceContextProvider>
-          <PlayerSelectionContext.Provider value={playerSelection}>
-            <Story {...args} />
-          </PlayerSelectionContext.Provider>
-        </WorkspaceContextProvider>
+        <MockCurrentLayoutProvider>
+          <WorkspaceContextProvider>
+            <PlayerSelectionContext.Provider value={playerSelection}>
+              <Story {...args} />
+            </PlayerSelectionContext.Provider>
+          </WorkspaceContextProvider>
+        </MockCurrentLayoutProvider>
       </AppContext.Provider>
     ),
   ],

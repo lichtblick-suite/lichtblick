@@ -33,6 +33,8 @@ import {
 
 type PanelType = string;
 
+export type { LayoutData };
+
 export type SharedPanelState = RenderState["sharedPanelState"];
 
 export type SelectedLayout = {

@@ -70,7 +70,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
       right: { open: rightSidebarOpen },
     },
   } = useWorkspaceStore(selectWorkspace, shallow);
-  const { sidebarActions, dialogActions } = useWorkspaceActions();
+  const { sidebarActions, dialogActions, layoutActions } = useWorkspaceActions();
 
   const handleNestedMenuClose = useCallback(() => {
     setNestedMenu(undefined);
@@ -178,9 +178,31 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
           handleNestedMenuClose();
         },
       },
+      {
+        type: "divider",
+      },
+      {
+        type: "item",
+        label: t("importLayoutFromFile"),
+        key: "import-layout",
+        onClick: () => {
+          layoutActions.importFromFile();
+          handleNestedMenuClose();
+        },
+      },
+      {
+        type: "item",
+        label: t("exportLayoutToFile"),
+        key: "export-layout",
+        onClick: () => {
+          layoutActions.exportToFile();
+          handleNestedMenuClose();
+        },
+      },
     ],
     [
       handleNestedMenuClose,
+      layoutActions,
       leftSidebarOpen,
       rightSidebarOpen,
       sidebarActions.left,

@@ -7,31 +7,34 @@ import { StoryFn, StoryObj } from "@storybook/react";
 import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { DataSourceDialog } from "./DataSourceDialog";
 
 const Wrapper = (Story: StoryFn): JSX.Element => {
   return (
-    <WorkspaceContextProvider
-      initialState={{
-        dialogs: {
-          dataSource: {
-            activeDataSource: undefined,
-            item: "connection",
-            open: true,
+    <MockCurrentLayoutProvider>
+      <WorkspaceContextProvider
+        initialState={{
+          dialogs: {
+            dataSource: {
+              activeDataSource: undefined,
+              item: "connection",
+              open: true,
+            },
+            preferences: {
+              initialTab: undefined,
+              open: false,
+            },
           },
-          preferences: {
-            initialTab: undefined,
-            open: false,
-          },
-        },
-      }}
-    >
-      <PlayerSelectionContext.Provider value={playerSelection}>
-        <Story />
-      </PlayerSelectionContext.Provider>
-    </WorkspaceContextProvider>
+        }}
+      >
+        <PlayerSelectionContext.Provider value={playerSelection}>
+          <Story />
+        </PlayerSelectionContext.Provider>
+      </WorkspaceContextProvider>
+    </MockCurrentLayoutProvider>
   );
 };
 

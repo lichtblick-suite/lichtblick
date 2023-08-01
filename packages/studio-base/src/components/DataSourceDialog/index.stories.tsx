@@ -4,29 +4,32 @@
 
 import { StoryFn, StoryObj } from "@storybook/react";
 
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { DataSourceDialog } from "./DataSourceDialog";
 
 const Wrapper = (Story: StoryFn): JSX.Element => {
   return (
-    <WorkspaceContextProvider
-      initialState={{
-        dialogs: {
-          dataSource: {
-            activeDataSource: undefined,
-            item: "start",
-            open: true,
+    <MockCurrentLayoutProvider>
+      <WorkspaceContextProvider
+        initialState={{
+          dialogs: {
+            dataSource: {
+              activeDataSource: undefined,
+              item: "start",
+              open: true,
+            },
+            preferences: {
+              initialTab: undefined,
+              open: false,
+            },
           },
-          preferences: {
-            initialTab: undefined,
-            open: false,
-          },
-        },
-      }}
-    >
-      <Story />
-    </WorkspaceContextProvider>
+        }}
+      >
+        <Story />
+      </WorkspaceContextProvider>
+    </MockCurrentLayoutProvider>
   );
 };
 

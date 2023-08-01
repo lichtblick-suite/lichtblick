@@ -21,4 +21,6 @@ export const appBar = {
   help: "Help",
   signIn: "Sign in",
   unknown: "unknown",
+  importLayoutFromFile: "Import layout from file…",
+  exportLayoutToFile: "Export layout to file…",
 };
