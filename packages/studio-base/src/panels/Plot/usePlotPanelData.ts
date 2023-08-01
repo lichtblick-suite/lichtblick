@@ -45,6 +45,8 @@ const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 
 const EmptyAllFrames: Immutable<Record<string, MessageEvent[]>> = Object.freeze({});
 
+const EMPTY_ARR = Object.freeze(new Array<PlotData>());
+
 type TaggedPlotData = { tag: string; data: Immutable<PlotData> };
 
 type Params = Immutable<{
@@ -376,7 +378,7 @@ export function usePlotPanelData(params: Params): Immutable<{
   // Trim currentFrame data outside allFrames, assuming allFrames is contiguous from start
   // time.
   const trimmedCurrentFrameData = useMemo(() => {
-    return filterMap(Object.values(accumulatedPathIntervals), (dataset) => {
+    const trimmed = filterMap(Object.values(accumulatedPathIntervals), (dataset) => {
       const trimmedDatasets = maps.mapValues(dataset.datasetsByPath, (ds, path) => {
         const topic = parseRosPath(path.value)?.topicName;
         const end = topic ? allFrames[topic]?.at(-1)?.receiveTime : undefined;
@@ -396,6 +398,13 @@ export function usePlotPanelData(params: Params): Immutable<{
         return undefined;
       }
     });
+
+    // If all data is trimmed then return a stable empty array so we don't rebuild allData below
+    if (trimmed.length === 0) {
+      return EMPTY_ARR;
+    }
+
+    return trimmed;
   }, [accumulatedPathIntervals, allFrames]);
 
   // Combine allFrames & currentFrames datasets, optionally applying the @derivative
