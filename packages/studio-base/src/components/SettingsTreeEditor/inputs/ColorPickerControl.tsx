@@ -4,7 +4,7 @@
 
 import TagIcon from "@mui/icons-material/Tag";
 import { TextField } from "@mui/material";
-import { useCallback, useState, useEffect, useMemo } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { HexAlphaColorPicker, HexColorPicker } from "react-colorful";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
@@ -44,42 +44,23 @@ type ColorPickerInputProps = {
   onEnterKey?: () => void;
 };
 
-function isValidHexColor(color: string, alphaType: "none" | "alpha") {
-  return alphaType === "alpha" ? /^[0-9a-f]{8}$/i.test(color) : /^[0-9a-f]{6}$/i.test(color);
-}
-
 export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
   const { alphaType, onChange, value, onEnterKey } = props;
 
   const { classes } = useStyles();
 
-  const parsedValue = useMemo(() => (value ? tinycolor(value) : undefined), [value]);
-  const displayValue =
-    alphaType === "alpha" ? parsedValue?.toHex8String() : parsedValue?.toHexString();
-  const swatchColor = displayValue ?? "#00000044";
-
-  const [editedValue, setEditedValue] = useState("");
-
-  const editedValueIsInvalid = editedValue.length > 0 && !isValidHexColor(editedValue, alphaType);
-
-  const updateColor = useDebouncedCallback((newValue: string) => {
-    onChange(newValue);
+  const {
+    swatchColor,
+    updatePrefixedColor,
+    editedValueIsInvalid,
+    editedValue,
+    updateEditedValue,
+    onInputBlur,
+  } = useColorPickerControl({
+    alphaType,
+    onChange,
+    value,
   });
-
-  const updateEditedValue = useCallback(
-    (newValue: string) => {
-      setEditedValue(newValue);
-
-      if (isValidHexColor(newValue, alphaType)) {
-        onChange(`#${newValue}`);
-      }
-    },
-    [alphaType, onChange],
-  );
-
-  useEffect(() => {
-    setEditedValue((alphaType === "alpha" ? parsedValue?.toHex8() : parsedValue?.toHex()) ?? "");
-  }, [alphaType, parsedValue]);
 
   return (
     <Stack className={classes.container} gap={1}>
@@ -87,13 +68,13 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         <HexAlphaColorPicker
           className={classes.picker}
           color={swatchColor}
-          onChange={(newValue) => updateColor(newValue)}
+          onChange={updatePrefixedColor}
         />
       ) : (
         <HexColorPicker
           className={classes.picker}
           color={swatchColor}
-          onChange={(newValue) => updateColor(newValue)}
+          onChange={updatePrefixedColor}
         />
       )}
       <TextField
@@ -109,7 +90,84 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         value={editedValue}
         onKeyDown={(event) => event.key === "Enter" && onEnterKey?.()}
         onChange={(event) => updateEditedValue(event.target.value)}
+        onBlur={onInputBlur}
       />
     </Stack>
   );
+}
+
+const hexMatcher = /^#?([0-9A-F]{3,8})$/i;
+function isValidHexColor(color: string, alphaType: "none" | "alpha") {
+  const match = hexMatcher.exec(color);
+  const length = match?.[1]?.length ?? 0;
+
+  // 3 and 6 are always valid color values
+  // 4 and 8 are valid only if using alpha
+  return length === 3 || length === 6 || (alphaType === "alpha" && (length === 4 || length === 8));
+}
+
+// Internal business logic hook for ColorPickerControl
+//
+// Exported for tests and we disable the eslint requirement to specify a return value because this
+// hook is considered "internal" and we are ok inferring the return type
+//
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function useColorPickerControl(
+  props: Pick<ColorPickerInputProps, "alphaType" | "value" | "onChange">,
+) {
+  const { alphaType, onChange, value } = props;
+
+  const parsedValue = useMemo(() => (value ? tinycolor(value) : undefined), [value]);
+  const hex = alphaType === "alpha" ? parsedValue?.toHex8() : parsedValue?.toHex();
+  const displayValue =
+    alphaType === "alpha" ? parsedValue?.toHex8String() : parsedValue?.toHexString();
+  const swatchColor = displayValue ?? "#00000044";
+
+  const [editedValue, setEditedValue] = useState(hex ?? "");
+
+  const editedValueIsInvalid = editedValue.length > 0 && !isValidHexColor(editedValue, alphaType);
+
+  const updateColor = useDebouncedCallback((newValue: string) => {
+    onChange(`#${newValue}`);
+    setEditedValue(newValue);
+  });
+
+  // HexColorPicker onChange provides a leading `#` for values and updateColor needs
+  // un-prefixed values so it can update the edited field
+  const updatePrefixedColor = useCallback(
+    (newValue: string) => {
+      const parsed = tinycolor(newValue);
+      updateColor(alphaType === "alpha" ? parsed.toHex8() : parsed.toHex());
+    },
+    [alphaType, updateColor],
+  );
+
+  const updateEditedValue = useCallback(
+    (newValue: string) => {
+      setEditedValue(newValue);
+
+      // if it is a valid color then we can emit the new value
+      if (isValidHexColor(newValue, alphaType)) {
+        const parsed = tinycolor(newValue);
+        const settingValue = alphaType === "alpha" ? parsed.toHex8String() : parsed.toHexString();
+        onChange(settingValue);
+      }
+    },
+    [alphaType, onChange],
+  );
+
+  // When the input blurs we update the edited value to the latest input value to show the user
+  // the expanded form that is the actual setting value.
+  const onInputBlur = useCallback(() => {
+    setEditedValue(hex ?? "");
+  }, [hex]);
+
+  return {
+    swatchColor,
+    updatePrefixedColor,
+    editedValueIsInvalid,
+    editedValue,
+    updateEditedValue,
+    onInputBlur,
+  };
 }

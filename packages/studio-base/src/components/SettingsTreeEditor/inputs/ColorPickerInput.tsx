@@ -26,6 +26,7 @@ const useStyles = makeStyles<void, "iconButton">()((theme, _params, classes) => 
       padding: 0,
     },
     ".MuiInputBase-root": {
+      fontFamily: `${fonts.MONOSPACE}`,
       cursor: "pointer",
 
       [`:not(:hover) .${classes.iconButton}`]: {
