@@ -143,7 +143,7 @@ function PanelExtensionAdapter(
 
   const hoverValue = useHoverValue({
     componentId: `PanelExtensionAdapter:${panelId}`,
-    isTimestampScale: true,
+    isPlaybackSeconds: true,
   });
   const setHoverValue = useSetHoverValue();
   const clearHoverValue = useClearHoverValue();

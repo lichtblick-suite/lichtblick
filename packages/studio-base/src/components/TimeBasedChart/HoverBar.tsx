@@ -19,16 +19,16 @@ import { VerticalBarWrapper } from "./VerticalBarWrapper";
 type Props = {
   scales?: RpcScales;
   componentId: string;
-  isTimestampScale: boolean;
+  isPlaybackSeconds: boolean;
 };
 
 export default React.memo<React.PropsWithChildren<Props>>(function HoverBar({
   children,
   componentId,
-  isTimestampScale,
+  isPlaybackSeconds,
   scales,
 }) {
-  const hoverValue = useHoverValue({ componentId, isTimestampScale });
+  const hoverValue = useHoverValue({ componentId, isPlaybackSeconds });
 
   return (
     <VerticalBarWrapper scales={scales} xValue={hoverValue?.value}>

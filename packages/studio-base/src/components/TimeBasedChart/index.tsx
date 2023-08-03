@@ -769,7 +769,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
           <div className={classes.root} onDoubleClick={onResetZoom}>
             <HoverBar
               componentId={componentId}
-              isTimestampScale={xAxisIsPlaybackTime}
+              isPlaybackSeconds={xAxisIsPlaybackTime}
               scales={currentScalesRef.current}
             >
               <div

@@ -54,7 +54,7 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
 
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
-  const hoverValue = useHoverValue({ componentId, isTimestampScale: true });
+  const hoverValue = useHoverValue({ componentId, isPlaybackSeconds: true });
   const { formatTime } = useAppTimeFormat();
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
@@ -100,7 +100,7 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
   return (
     <Stack ref={ref} flex="auto">
       {scaleBounds && (
-        <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
+        <HoverBar componentId={componentId} scales={scaleBounds} isPlaybackSeconds>
           <Tooltip
             arrow
             classes={{ popper: classes.tooltip }}
