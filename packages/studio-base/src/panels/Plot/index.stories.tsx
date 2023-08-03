@@ -855,16 +855,14 @@ export const WithMinAndMaxYValues: StoryObj = {
   },
 
   parameters: {
-    chromatic: {
-      delay: 500,
-    },
     colorScheme: "light",
     useReadySignal: true,
   },
 
   name: "with min and max Y values",
 
-  play: async () => {
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
     const label = await screen.findByText("Y Axis");
     await userEvent.click(label);
   },
