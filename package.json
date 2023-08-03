@@ -92,7 +92,7 @@
     "babel-plugin-transform-import-meta": "2.2.0",
     "cross-env": "7.0.3",
     "depcheck": "patch:depcheck@npm:1.4.3#./patches/depcheck.patch",
-    "electron": "25.3.2",
+    "electron": "25.4.0",
     "electron-builder": "24.6.3",
     "eslint": "8.46.0",
     "eslint-config-prettier": "8.9.0",
