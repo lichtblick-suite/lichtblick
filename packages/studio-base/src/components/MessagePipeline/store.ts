@@ -37,6 +37,9 @@ export function defaultPlayerState(): PlayerState {
 export type MessagePipelineInternalState = {
   dispatch: (action: MessagePipelineStateAction) => void;
 
+  /** Reset public and private state back to initial empty values */
+  reset: () => void;
+
   player?: Player;
 
   /** used to keep track of whether we need to update public.startPlayback/playUntil/etc. */
@@ -80,9 +83,6 @@ export function createMessagePipelineStore({
 }): StoreApi<MessagePipelineInternalState> {
   return createStore((set, get) => ({
     player: initialPlayer,
-    dispatch(action) {
-      set((state) => reducer(state, action));
-    },
     publishersById: {},
     allPublishers: [],
     subscriptionsById: new Map(),
@@ -90,6 +90,36 @@ export function createMessagePipelineStore({
     newTopicsBySubscriberId: new Map(),
     lastMessageEventByTopic: new Map(),
     lastCapabilities: [],
+
+    dispatch(action) {
+      set((state) => reducer(state, action));
+    },
+
+    reset() {
+      set((prev) => ({
+        ...prev,
+        publishersById: {},
+        allPublishers: [],
+        subscriptionsById: new Map(),
+        subscriberIdsByTopic: new Map(),
+        newTopicsBySubscriberId: new Map(),
+        lastMessageEventByTopic: new Map(),
+        lastCapabilities: [],
+        public: {
+          ...prev.public,
+          playerState: defaultPlayerState(),
+          messageEventsBySubscriberId: new Map(),
+          subscriptions: [],
+          sortedTopics: [],
+          datatypes: new Map(),
+          startPlayback: undefined,
+          playUntil: undefined,
+          pausePlayback: undefined,
+          setPlaybackSpeed: undefined,
+          seekPlayback: undefined,
+        },
+      }));
+    },
 
     public: {
       playerState: defaultPlayerState(),
@@ -334,6 +364,7 @@ function updatePlayerStateAction(
     renderDone: action.renderDone,
     public: newPublicState,
     lastCapabilities: capabilities,
+    lastMessageEventByTopic,
   };
 }
 

@@ -23,7 +23,6 @@ import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
 import {
   MessagePipelineInternalState,
   createMessagePipelineStore,
-  MessagePipelineStateAction,
   defaultPlayerState,
 } from "./store";
 import { MessagePipelineContext } from "./types";
@@ -124,8 +123,8 @@ export function MessagePipelineProvider({
   const msPerFrameRef = useRef<number>(16);
   msPerFrameRef.current = 1000 / (messageRate ?? 60);
 
-  const dispatch = store.getState().dispatch;
   useEffect(() => {
+    const dispatch = store.getState().dispatch;
     if (!player) {
       // When there is no player, set the player state to the default to go back to a state where we
       // indicate the player is not present.
@@ -140,7 +139,7 @@ export function MessagePipelineProvider({
     const { listener, cleanupListener } = createPlayerListener({
       msPerFrameRef,
       promisesToWaitForRef,
-      dispatch,
+      store,
     });
     player.setListener(listener);
     return () => {
@@ -152,7 +151,7 @@ export function MessagePipelineProvider({
         renderDone: undefined,
       });
     };
-  }, [player, dispatch]);
+  }, [player, store]);
 
   useEffect(() => {
     player?.setGlobalVariables(globalVariables);
@@ -199,14 +198,16 @@ function concatProblems(origState: PlayerState, problems: PlayerProblem[]): Play
 function createPlayerListener(args: {
   msPerFrameRef: React.MutableRefObject<number>;
   promisesToWaitForRef: React.MutableRefObject<FramePromise[]>;
-  dispatch: (action: MessagePipelineStateAction) => void;
+  store: StoreApi<MessagePipelineInternalState>;
 }): {
   listener: (state: PlayerState) => Promise<void>;
   cleanupListener: () => void;
 } {
-  const { msPerFrameRef, promisesToWaitForRef, dispatch: updateState } = args;
+  const { msPerFrameRef, promisesToWaitForRef, store } = args;
+  const updateState = store.getState().dispatch;
   const messageOrderTracker = new MessageOrderTracker();
   let closed = false;
+  let prevPlayerId: string | undefined;
   let resolveFn: undefined | (() => void);
   const listener = async (listenerPlayerState: PlayerState) => {
     if (closed) {
@@ -263,6 +264,11 @@ function createPlayerListener(args: {
         resolveFn();
       }, frameTime);
     }
+
+    if (prevPlayerId != undefined && listenerPlayerState.playerId !== prevPlayerId) {
+      store.getState().reset();
+    }
+    prevPlayerId = listenerPlayerState.playerId;
 
     updateState({
       type: "update-player-state",

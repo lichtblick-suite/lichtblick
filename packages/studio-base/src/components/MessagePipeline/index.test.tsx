@@ -481,6 +481,94 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toBeUndefined();
   });
 
+  it("does not inject the last message when the player id changes", async () => {
+    const player = new FakePlayer();
+    const { Hook, Wrapper } = makeTestHook({ player });
+    const { result, rerender } = renderHook(Hook, { wrapper: Wrapper });
+    await doubleAct(
+      async () =>
+        await player.emit({
+          activeData: {
+            messages: [
+              {
+                topic: "/input/foo",
+                receiveTime: { sec: 0, nsec: 0 },
+                message: { foo: "bar" },
+                schemaName: "foo",
+                sizeInBytes: 0,
+              },
+            ],
+            currentTime: { sec: 0, nsec: 0 },
+            startTime: { sec: 0, nsec: 0 },
+            endTime: { sec: 1, nsec: 0 },
+            isPlaying: true,
+            speed: 0.2,
+            lastSeekTime: 1234,
+            topics: [{ name: "/input/foo", schemaName: "foo" }],
+            topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
+            datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+            totalBytesReceived: 1234,
+          },
+        }),
+    );
+
+    act(() => {
+      result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
+    });
+    expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
+
+    // Emit empty player state to process new subscriptions
+    await doubleAct(async () => await player.emit());
+
+    expect(result.current.messageEventsBySubscriberId.get("custom-id")).toEqual([
+      {
+        message: {
+          foo: "bar",
+        },
+        receiveTime: {
+          nsec: 0,
+          sec: 0,
+        },
+        schemaName: "foo",
+        sizeInBytes: 0,
+        topic: "/input/foo",
+      },
+    ]);
+    rerender();
+
+    // Unsubscribe and re-subscribe to trigger injection of old messages
+    act(() => {
+      result.current.setSubscriptions("custom-id", []);
+    });
+    act(() => {
+      result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
+    });
+    expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
+
+    await act(
+      async () =>
+        await player.emit({
+          playerId: "player2",
+          activeData: {
+            messages: [],
+            currentTime: { sec: 0, nsec: 0 },
+            startTime: { sec: 0, nsec: 0 },
+            endTime: { sec: 1, nsec: 0 },
+            isPlaying: true,
+            speed: 0.2,
+            lastSeekTime: 1234,
+            topics: [],
+            topicStats: new Map(),
+            datatypes: new Map(),
+            totalBytesReceived: 1234,
+          },
+        }),
+    );
+
+    expect(result.current.playerState.playerId).toEqual("player2");
+    expect(result.current.messageEventsBySubscriberId.get("custom-id")).toBeUndefined();
+  });
+
   it("sets publishers", async () => {
     const player = new FakePlayer();
     const { Hook, Wrapper } = makeTestHook({ player });

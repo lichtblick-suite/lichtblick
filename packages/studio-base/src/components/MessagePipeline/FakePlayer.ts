@@ -38,17 +38,19 @@ export default class FakePlayer implements Player {
     activeData,
     presence,
     progress,
+    playerId,
   }: {
     activeData?: PlayerStateActiveData;
     presence?: PlayerPresence;
     progress?: PlayerState["progress"];
+    playerId?: string;
   } = {}): Promise<void> {
     if (!this.#listener) {
       return undefined;
     }
 
     return await this.#listener({
-      playerId: this.playerId,
+      playerId: playerId ?? this.playerId,
       presence: presence ?? PlayerPresence.PRESENT,
       capabilities: this.#capabilities,
       profile: this.#profile,
