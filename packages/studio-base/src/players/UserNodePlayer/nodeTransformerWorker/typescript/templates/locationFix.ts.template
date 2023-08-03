@@ -5,20 +5,20 @@
 // You can visualize this message with the Map panel
 // https://foxglove.dev/docs/studio/panels/map
 
-import { Input, Message } from "./types";
+import { Input } from "./types";
+import { LocationFix, PositionCovarianceType } from "@foxglove/schemas";
 
 export const inputs = ["/input/topic"];
 export const output = "/studio_script/my_gps";
 
-// Our node will output a LocationFix message
-type LocationFix = Message<"foxglove.LocationFix">;
-
 export default function script(event: Input<"/input/topic">): LocationFix {
   return {
+    timestamp: event.receiveTime,
+    frame_id: "frame",
     latitude: 51.477928,
     longitude: -0.001545,
     altitude: 0,
-    position_covariance_type: 0,
-    position_covariance: new Float64Array(),
+    position_covariance_type: PositionCovarianceType.APPROXIMATED,
+    position_covariance: [0, 0, 0, 0, 0, 0, 0, 0, 0],
   };
-};
+}
