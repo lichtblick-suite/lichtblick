@@ -86,6 +86,7 @@
     "@types/three": "^0.149.0",
     "@types/tinycolor2": "1.4.3",
     "@types/url-search-params": "1.1.0",
+    "@types/use-sync-external-store": "0.0.3",
     "@types/uuid": "9.0.2",
     "@types/wicg-file-system-access": "2020.9.6",
     "@uiw/react-textarea-code-editor": "2.1.7",
@@ -175,8 +176,9 @@
     "url-search-params": "1.1.0",
     "use-debounce": "9.0.4",
     "use-immer": "0.9.0",
+    "use-sync-external-store": "1.2.0",
     "uuid": "9.0.0",
     "webpack": "5.88.2",
-    "zustand": "4.3.9"
+    "zustand": "4.4.0"
   }
 }

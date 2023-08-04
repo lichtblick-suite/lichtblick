@@ -42,10 +42,7 @@ export type PanelStateStore = {
 
 export const PanelStateContext = createContext<undefined | StoreApi<PanelStateStore>>(undefined);
 
-export function usePanelStateStore<T>(
-  selector: (store: PanelStateStore) => T,
-  equalityFn?: (a: T, b: T) => boolean,
-): T {
+export function usePanelStateStore<T>(selector: (store: PanelStateStore) => T): T {
   const context = useGuaranteedContext(PanelStateContext);
-  return useStore(context, selector, equalityFn);
+  return useStore(context, selector);
 }

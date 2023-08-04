@@ -132,8 +132,7 @@ export function useHoverValue(opt?: {
  */
 export function useTimelineInteractionState<T>(
   selector: (store: TimelineInteractionStateStore) => T,
-  equalityFn?: (a: T, b: T) => boolean,
 ): T {
   const context = useGuaranteedContext(TimelineInteractionStateContext);
-  return useStore(context, selector, equalityFn);
+  return useStore(context, selector);
 }

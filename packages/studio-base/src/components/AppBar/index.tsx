@@ -10,12 +10,11 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
-import { Avatar, Button, IconButton, Tooltip, AppBar as MuiAppBar } from "@mui/material";
+import { Avatar, Button, IconButton, AppBar as MuiAppBar, Tooltip } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-import { shallow } from "zustand/shallow";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppBarIconButton } from "@foxglove/studio-base/components/AppBar/AppBarIconButton";
@@ -35,8 +34,8 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import {
-  useWorkspaceStore,
   WorkspaceContextStore,
+  useWorkspaceStoreWithShallowSelector,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
@@ -222,7 +221,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       left: { open: leftSidebarOpen },
       right: { open: rightSidebarOpen },
     },
-  } = useWorkspaceStore(selectWorkspace, shallow);
+  } = useWorkspaceStoreWithShallowSelector(selectWorkspace);
   const { sidebarActions } = useWorkspaceActions();
 
   const [appMenuEl, setAppMenuEl] = useState<undefined | HTMLElement>(undefined);

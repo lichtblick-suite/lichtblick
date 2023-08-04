@@ -39,10 +39,7 @@ export const ExtensionCatalogContext = createContext<undefined | StoreApi<Extens
   undefined,
 );
 
-export function useExtensionCatalog<T>(
-  selector: (registry: ExtensionCatalog) => T,
-  equalityFn?: (a: T, b: T) => boolean,
-): T {
+export function useExtensionCatalog<T>(selector: (registry: ExtensionCatalog) => T): T {
   const context = useGuaranteedContext(ExtensionCatalogContext);
-  return useStore(context, selector, equalityFn);
+  return useStore(context, selector);
 }

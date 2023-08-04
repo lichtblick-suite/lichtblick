@@ -2680,6 +2680,7 @@ __metadata:
     "@types/three": ^0.149.0
     "@types/tinycolor2": 1.4.3
     "@types/url-search-params": 1.1.0
+    "@types/use-sync-external-store": 0.0.3
     "@types/uuid": 9.0.2
     "@types/wicg-file-system-access": 2020.9.6
     "@uiw/react-textarea-code-editor": 2.1.7
@@ -2769,9 +2770,10 @@ __metadata:
     url-search-params: 1.1.0
     use-debounce: 9.0.4
     use-immer: 0.9.0
+    use-sync-external-store: 1.2.0
     uuid: 9.0.0
     webpack: 5.88.2
-    zustand: 4.3.9
+    zustand: 4.4.0
   languageName: unknown
   linkType: soft
 
@@ -6387,6 +6389,13 @@ __metadata:
   version: 1.1.0
   resolution: "@types/url-search-params@npm:1.1.0"
   checksum: d279350351451a0469aaf8984e455e7480a6a64d3377e9fac7aca25c3f65014cc9792c567a7a91d8ce63f9c94b9b255e09763417a269256d40115c3803245fb1
+  languageName: node
+  linkType: hard
+
+"@types/use-sync-external-store@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@types/use-sync-external-store@npm:0.0.3"
+  checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
   languageName: node
   linkType: hard
 
@@ -21472,20 +21481,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:4.3.9":
-  version: 4.3.9
-  resolution: "zustand@npm:4.3.9"
+"zustand@npm:4.4.0":
+  version: 4.4.0
+  resolution: "zustand@npm:4.4.0"
   dependencies:
     use-sync-external-store: 1.2.0
   peerDependencies:
+    "@types/react": ">=16.8"
     immer: ">=9.0"
     react: ">=16.8"
   peerDependenciesMeta:
+    "@types/react":
+      optional: true
     immer:
       optional: true
     react:
       optional: true
-  checksum: fc83d653913fa537c354ba8b95d3a4fdebe62d2ebd3d9f5aeff2edf062811c0f5af48e02ab4da32b666752fd4f3e78c2b44624e445254f48503595435d4a7d70
+  checksum: 37e69eec1b56677a93712e5aa6d0048b55997379919dc0f78f61181f8a58994a6cae064f816f8101f5b1039008d3c1c9d136432a62e0edeb796807cc84cf45ef
   languageName: node
   linkType: hard
 

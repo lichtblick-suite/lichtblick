@@ -85,10 +85,7 @@ export type EventsStore = Immutable<{
 
 export const EventsContext = createContext<undefined | StoreApi<EventsStore>>(undefined);
 
-export function useEvents<T>(
-  selector: (store: EventsStore) => T,
-  equalityFn?: (a: T, b: T) => boolean,
-): T {
+export function useEvents<T>(selector: (store: EventsStore) => T): T {
   const context = useGuaranteedContext(EventsContext);
-  return useStore(context, selector, equalityFn);
+  return useStore(context, selector);
 }
