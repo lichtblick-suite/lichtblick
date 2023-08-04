@@ -141,7 +141,10 @@ function RawMessages(props: Props) {
   }, [structures, topic, topicRosPath]);
 
   const [expansion, setExpansion] = useState(config.expansion);
-  const matchedMessages = useMessageDataItem(topicPath, { historySize: 2 });
+
+  // Pass an empty path to useMessageDataItem if our path doesn't resolve to a valid topic to avoid
+  // spamming the message pipeline with useless subscription requests.
+  const matchedMessages = useMessageDataItem(topic ? topicPath : "", { historySize: 2 });
   const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "");
 
   const diffTopicObj = diffMessages[0];
