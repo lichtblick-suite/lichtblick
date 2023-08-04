@@ -92,7 +92,7 @@
     "@uiw/react-textarea-code-editor": "2.1.7",
     "async-mutex": "0.4.0",
     "babel-jest": "29.6.2",
-    "babel-plugin-transform-import-meta": "2.2.0",
+    "babel-plugin-transform-import-meta": "2.2.1",
     "browserify-zlib": "0.2.0",
     "chart.js": "4.3.3",
     "chartjs-plugin-annotation": "3.0.1",

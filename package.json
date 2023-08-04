@@ -89,7 +89,7 @@
     "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",
-    "babel-plugin-transform-import-meta": "2.2.0",
+    "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
     "depcheck": "patch:depcheck@npm:1.4.3#./patches/depcheck.patch",
     "electron": "25.4.0",
