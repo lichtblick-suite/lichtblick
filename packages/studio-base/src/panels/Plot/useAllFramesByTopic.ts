@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { sumBy, transform } from "lodash";
+import { pickBy, sumBy, transform } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import { Immutable } from "@foxglove/studio";
 import {
   MessagePipelineContext,
@@ -118,7 +119,9 @@ export function useAllFramesByTopic(
         // here.
         for (const [topic, blockMessages] of Object.entries(block.messagesByTopic)) {
           if (idx > (newState.cursors[topic] ?? -1)) {
-            newState.messages[topic] = (newState.messages[topic] ?? []).concat(blockMessages);
+            if (blockMessages.length > 0) {
+              newState.messages[topic] = (newState.messages[topic] ?? []).concat(blockMessages);
+            }
             newState.cursors[topic] = idx;
           }
         }
@@ -128,5 +131,8 @@ export function useAllFramesByTopic(
     });
   }
 
-  return state.messages;
+  // Stablize the flattened messages by shallow memoing the whole set after excluding empty topics.
+  const stableMessagesWithData = useShallowMemo(pickBy(state.messages, (msgs) => msgs.length > 0));
+
+  return stableMessagesWithData;
 }

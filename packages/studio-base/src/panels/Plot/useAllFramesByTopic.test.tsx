@@ -38,7 +38,6 @@ describe("useAllFramesByTopic", () => {
 
     expect(result.current).toEqual({
       topic_a: [expect.objectContaining({ topic: "topic_a" })],
-      topic_b: [],
     });
 
     const updatedProgress: Progress = {

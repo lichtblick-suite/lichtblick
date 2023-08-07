@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { compact, isNumber, uniq } from "lodash";
+import { isNumber, uniq } from "lodash";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
 import { useLatest } from "react-use";
 import { DeepWritable } from "ts-essentials";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   Time,
   add as addTimes,
@@ -23,6 +24,7 @@ import {
   subtract as subtractTimes,
   toSec,
 } from "@foxglove/rostime";
+import { Immutable } from "@foxglove/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -55,7 +57,8 @@ export type { PlotConfig } from "./types";
 
 const defaultSidebarDimension = 240;
 
-const EmptyDatasets: DataSet[] = [];
+const EmptyDataSets: Immutable<DataSet[]> = Object.freeze([]);
+const EmtpyDataSet: Immutable<DataSet> = Object.freeze({ data: [], label: "" });
 
 export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicName: string): void {
   openSiblingPanel({
@@ -179,16 +182,11 @@ function Plot(props: Props) {
     return followingView ?? fixedView ?? undefined;
   }, [fixedView, followingView]);
 
-  const allPaths = useMemo(() => {
-    return yAxisPaths.map(({ value }) => value).concat(compact([xAxisPath?.value]));
-  }, [xAxisPath?.value, yAxisPaths]);
-
   const {
     bounds: datasetBounds,
     datasets,
     pathsWithMismatchedDataLengths,
   } = usePlotPanelData({
-    allPaths,
     followingView,
     showSingleCurrentMessage,
     startTime,
@@ -240,6 +238,13 @@ function Plot(props: Props) {
 
   const onClickPath = useCallback((index: number) => setFocusedPath(["paths", String(index)]), []);
 
+  // Stabilize datasets we send to the chart by first replacing empty datasets with a constant value
+  // and then shallow memoizing the whole set. This prevents a lot of unnecessary and expensive
+  // rendering while the user is interactively editing paths that don't result in any messages.
+  const stableDatasets = useShallowMemo(
+    datasets.map((ds) => (ds.data.length === 0 ? EmtpyDataSet : ds)),
+  );
+
   return (
     <Stack
       flex="auto"
@@ -259,7 +264,7 @@ function Plot(props: Props) {
         {legendDisplay !== "none" && (
           <PlotLegend
             currentTime={showPlotValuesInLegend ? currentTimeSinceStart : undefined}
-            datasets={showPlotValuesInLegend ? datasets : EmptyDatasets}
+            datasets={showPlotValuesInLegend ? datasets : EmptyDataSets}
             legendDisplay={legendDisplay}
             onClickPath={onClickPath}
             paths={yAxisPaths}
@@ -274,7 +279,7 @@ function Plot(props: Props) {
           <PlotChart
             currentTime={currentTimeSinceStart}
             datasetBounds={datasetBounds}
-            datasets={castWritable(datasets)}
+            datasets={castWritable(stableDatasets)}
             defaultView={defaultView}
             isSynced={xAxisVal === "timestamp" && isSynced}
             maxYValue={parseFloat((maxYValue ?? "").toString())}

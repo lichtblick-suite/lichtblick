@@ -7,20 +7,16 @@ import memoizeWeak from "memoize-weak";
 
 import { Time } from "@foxglove/rostime";
 import { Immutable as Im } from "@foxglove/studio";
-import {
-  MessageAndData,
-  MessageDataItemsByPath,
-} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { getDatasetsFromMessagePlotPath } from "@foxglove/studio-base/panels/Plot/datasets";
 import { Bounds, makeInvertedBounds, unionBounds } from "@foxglove/studio-base/types/Bounds";
 import { Range } from "@foxglove/studio-base/util/ranges";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import {
-  BasePlotPath,
   DatasetsByPath,
   Datum,
-  PlotDataByPath,
+  PlotDataItem,
   PlotPath,
   PlotXAxisVal,
   isReferenceLinePlotPathType,
@@ -144,7 +140,7 @@ function compare(a: Im<PlotData>, b: Im<PlotData>): number {
  * Note: this is a free function so we are not making it for every loop iteration
  * in `getByPath` below.
  */
-function messageAndDataToPathItem(messageAndData: MessageAndData) {
+export function messageAndDataToPathItem(messageAndData: MessageAndData): PlotDataItem {
   const headerStamp = getTimestampForMessage(messageAndData.messageEvent.message);
   return {
     queriedData: messageAndData.queriedData,
@@ -152,18 +148,6 @@ function messageAndDataToPathItem(messageAndData: MessageAndData) {
     headerStamp,
   };
 }
-
-/**
- * Fetch the data we need from each item in itemsByPath and discard the rest of
- * the message to save memory.
- */
-export const getByPath = (itemsByPath: MessageDataItemsByPath): PlotDataByPath => {
-  const ret: PlotDataByPath = {};
-  for (const [path, items] of Object.entries(itemsByPath)) {
-    ret[path] = items.map(messageAndDataToPathItem);
-  }
-  return ret;
-};
 
 /**
  * Reduce multiple PlotData objects into a single PlotData object, concatenating messages
@@ -185,10 +169,10 @@ export function reducePlotData(data: Im<PlotData[]>): Im<PlotData> {
 export function buildPlotData(
   args: Im<{
     invertedTheme?: boolean;
-    itemsByPath: PlotDataByPath;
+    itemsByPath: Map<PlotPath, PlotDataItem[]>;
     paths: PlotPath[];
     startTime: Time;
-    xAxisPath?: BasePlotPath;
+    xAxisPath?: PlotPath;
     xAxisVal: PlotXAxisVal;
   }>,
 ): PlotData {
@@ -197,8 +181,8 @@ export function buildPlotData(
   const pathsWithMismatchedDataLengths: string[] = [];
   const datasets: DatasetsByPath = new Map();
   for (const [index, path] of paths.entries()) {
-    const yRanges = itemsByPath[path.value] ?? [];
-    const xRanges = xAxisPath && itemsByPath[xAxisPath.value];
+    const yRanges = itemsByPath.get(path) ?? [];
+    const xRanges = xAxisPath && itemsByPath.get(xAxisPath);
     if (!path.enabled) {
       continue;
     } else if (!isReferenceLinePlotPathType(path)) {
