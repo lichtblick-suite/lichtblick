@@ -179,6 +179,6 @@
     "use-sync-external-store": "1.2.0",
     "uuid": "9.0.0",
     "webpack": "5.88.2",
-    "zustand": "4.4.0"
+    "zustand": "4.4.1"
   }
 }
