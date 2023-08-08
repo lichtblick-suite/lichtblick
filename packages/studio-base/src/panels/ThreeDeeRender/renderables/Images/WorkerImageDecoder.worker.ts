@@ -9,7 +9,7 @@ import type { RawImage } from "@foxglove/schemas";
 import { decodeRawImage, RawImageOptions } from "./decodeImage";
 import type { Image as RosImage } from "../../ros";
 
-function decode(image: RosImage | RawImage, options: RawImageOptions): ImageData {
+function decode(image: RosImage | RawImage, options: Partial<RawImageOptions>): ImageData {
   const result = new ImageData(image.width, image.height);
   decodeRawImage(image, options, result.data);
   return Comlink.transfer(result, [result.data.buffer]);

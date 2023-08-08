@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { merge } from "lodash";
+
 import {
   decodeBGR8,
   decodeBGRA8,
@@ -21,6 +23,7 @@ import { RawImage } from "@foxglove/schemas";
 
 import { CompressedImageTypes } from "./ImageTypes";
 import { Image as RosImage } from "../../ros";
+import { ColorModeSettings, getColorConverter } from "../colorMode";
 
 export async function decodeCompressedImageToBitmap(
   image: CompressedImageTypes,
@@ -30,10 +33,18 @@ export async function decodeCompressedImageToBitmap(
   return await createImageBitmap(bitmapData, { resizeWidth });
 }
 
-export type RawImageOptions = {
-  minValue?: number;
-  maxValue?: number;
+export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<
+  Omit<ColorModeSettings, "colorField" | "minValue" | "maxValue">
+> = {
+  colorMode: "gradient",
+  flatColor: "#ffffff",
+  gradient: ["#000000", "#ffffff"],
+  colorMap: "turbo",
+  explicitAlpha: 0,
 };
+const MIN_MAX_16_BIT = { minValue: 0, maxValue: 65535 };
+
+export type RawImageOptions = ColorModeSettings;
 
 /**
  * See also:
@@ -41,7 +52,7 @@ export type RawImageOptions = {
  */
 export function decodeRawImage(
   image: RosImage | RawImage,
-  options: RawImageOptions,
+  options: Partial<RawImageOptions>,
   output: Uint8ClampedArray,
 ): void {
   const { encoding, width, height } = image;
@@ -89,9 +100,33 @@ export function decodeRawImage(
       decodeMono8(rawData, width, height, output);
       break;
     case "mono16":
-    case "16UC1":
-      decodeMono16(rawData, width, height, is_bigendian, output, options);
+    case "16UC1": {
+      // combine options with defaults. lodash merge makes sure undefined values in options are replaced with defaults
+      // whereas a normal spread would allow undefined values to overwrite defaults
+      const settings = merge({}, IMAGE_DEFAULT_COLOR_MODE_SETTINGS, MIN_MAX_16_BIT, options);
+      if (settings.colorMode === "rgba-fields" || settings.colorMode === "flat") {
+        throw Error(`${settings.colorMode} color mode is not supported for mono16 images`);
+      }
+      const min = settings.minValue;
+      const max = settings.maxValue;
+      const tempColor = { r: 0, g: 0, b: 0, a: 0 };
+      const converter = getColorConverter(
+        settings as ColorModeSettings & {
+          colorMode: typeof settings.colorMode;
+        },
+        min,
+        max,
+      );
+      decodeMono16(rawData, width, height, is_bigendian, output, {
+        minValue: options.minValue,
+        maxValue: options.maxValue,
+        colorConverter: (value: number) => {
+          converter(tempColor, value);
+          return tempColor;
+        },
+      });
       break;
+    }
     default:
       throw new Error(`Unsupported encoding ${encoding}`);
   }

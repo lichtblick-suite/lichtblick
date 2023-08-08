@@ -211,7 +211,11 @@ export function decodeMono16(
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   is_bigendian: boolean,
   output: Uint8ClampedArray,
-  options?: { minValue?: number; maxValue?: number },
+  options?: {
+    minValue?: number;
+    maxValue?: number;
+    colorConverter?: (value: number) => { r: number; g: number; b: number; a: number };
+  },
 ): void {
   const view = new DataView(mono16.buffer, mono16.byteOffset);
 
@@ -225,16 +229,27 @@ export function decodeMono16(
   if (maxValue === minValue) {
     maxValue = minValue + 1;
   }
+  const converter = options?.colorConverter;
 
   let outIdx = 0;
   for (let i = 0; i < width * height * 2; i += 2) {
     let val = view.getUint16(i, !is_bigendian);
 
-    val = ((val - minValue) / (maxValue - minValue)) * 255;
+    if (converter) {
+      const { r, g, b } = converter(val);
 
-    output[outIdx++] = val;
-    output[outIdx++] = val;
-    output[outIdx++] = val;
+      output[outIdx++] = r * 255;
+      output[outIdx++] = g * 255;
+      output[outIdx++] = b * 255;
+    } else {
+      // 0 - 1.0
+      val = (val - minValue) / (maxValue - minValue);
+      val *= 255;
+
+      output[outIdx++] = val;
+      output[outIdx++] = val;
+      output[outIdx++] = val;
+    }
     output[outIdx++] = 255;
   }
 }

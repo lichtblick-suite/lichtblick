@@ -29,6 +29,7 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import type {
   FollowMode,
   IRenderer,
+  ImageModeConfig,
   RendererConfig,
   RendererEvents,
   RendererSubscription,
@@ -127,7 +128,9 @@ export function ThreeDeeRender(props: {
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
       publish,
-      imageMode: partialConfig?.imageMode ?? {},
+      // deep partial on config, makes gradient tuple type [string | undefined, string | undefined]
+      // which is incompatible with `Partial<ColorModeSettings>`
+      imageMode: (partialConfig?.imageMode ?? {}) as Partial<ImageModeConfig>,
     };
   });
   const configRef = useLatest(config);

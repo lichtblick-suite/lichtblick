@@ -10,6 +10,7 @@ import {
   CompressedImage as RosCompressedImage,
   CAMERA_INFO_DATATYPES,
 } from "../../ros";
+import { ColorModeSettings } from "../colorMode";
 
 export const ALL_CAMERA_INFO_SCHEMAS = new Set([
   ...CAMERA_INFO_DATATYPES,
@@ -36,12 +37,10 @@ export function getTimestampFromImage(image: AnyImage): Time {
   }
 }
 /** Data needed to download an image */
-export type DownloadImageInfo = {
+export type DownloadImageInfo = ColorModeSettings & {
   topic: string;
   image: AnyImage;
   rotation: 0 | 90 | 180 | 270;
   flipHorizontal: boolean;
   flipVertical: boolean;
-  minValue?: number;
-  maxValue?: number;
 };

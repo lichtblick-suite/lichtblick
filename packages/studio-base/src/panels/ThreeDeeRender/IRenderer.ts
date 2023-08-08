@@ -29,6 +29,7 @@ import { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { DownloadImageInfo } from "./renderables/Images/ImageTypes";
 import { MeasurementTool } from "./renderables/MeasurementTool";
 import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTool";
+import { ColorModeSettings } from "./renderables/colorMode";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import { Quaternion, Vector3 } from "./ros";
 import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
@@ -67,7 +68,7 @@ export type ImageAnnotationSettings = {
 };
 
 /** Settings pertaining to Image mode */
-export type ImageModeConfig = {
+export type ImageModeConfig = Partial<ColorModeSettings> & {
   /** Image topic to display */
   imageTopic?: string;
   /** Topic containing CameraCalibration or CameraInfo */

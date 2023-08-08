@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { merge } from "lodash";
 import * as THREE from "three";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -18,6 +19,7 @@ import {
   DownloadImageInfo,
   getFrameIdFromImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
@@ -44,6 +46,7 @@ import {
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
 import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "../Images/topicPrefixMatching";
+import { ColorModeSettings, colorModeSettingsFields } from "../colorMode";
 
 const IMAGE_TOPIC_PATH = ["imageMode", "imageTopic"];
 const CALIBRATION_TOPIC_PATH = ["imageMode", "calibrationTopic"];
@@ -79,6 +82,7 @@ const DEFAULT_CONFIG = {
   flipHorizontal: false,
   flipVertical: false,
   rotation: 0 as 0 | 90 | 180 | 270,
+  ...IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
 };
 
 type ConfigWithDefaults = ImageModeConfig & typeof DEFAULT_CONFIG;
@@ -327,16 +331,10 @@ export class ImageMode
   public override settingsNodes(): SettingsTreeEntry[] {
     const handler = this.handleSettingsAction;
 
-    const {
-      imageTopic,
-      calibrationTopic,
-      synchronize,
-      flipHorizontal,
-      flipVertical,
-      rotation,
-      minValue,
-      maxValue,
-    } = this.#getImageModeSettings();
+    const settings = this.#getImageModeSettings();
+
+    const { imageTopic, calibrationTopic, synchronize, flipHorizontal, flipVertical, rotation } =
+      settings;
 
     const imageTopics = filterMap(this.renderer.topics ?? [], (topic) => {
       if (!topicIsConvertibleToSchema(topic, ALL_SUPPORTED_IMAGE_SCHEMAS)) {
@@ -428,22 +426,23 @@ export class ImageMode
         { label: "270°", value: 270 },
       ],
     };
-    fields.minValue = {
-      input: "number",
-      label: "Min (depth images)",
-      placeholder: "0",
-      step: 1,
-      precision: 0,
-      value: minValue,
-    };
-    fields.maxValue = {
-      input: "number",
-      label: "Max (depth images)",
-      placeholder: "10000",
-      step: 1,
-      precision: 0,
-      value: maxValue,
-    };
+
+    const colorModeFields = colorModeSettingsFields({
+      config: settings as ImageModeConfig,
+
+      defaults: {
+        gradient: DEFAULT_CONFIG.gradient,
+      },
+      modifiers: {
+        supportsPackedRgbModes: false,
+        supportsRgbaFieldsMode: false,
+        hideFlatColor: true,
+        hideExplicitAlpha: true,
+      },
+    });
+
+    Object.assign(fields, colorModeFields);
+
     return [
       {
         path: ["imageMode"],
@@ -503,16 +502,16 @@ export class ImageMode
       if (config.flipVertical !== prevImageModeConfig.flipVertical) {
         this.#camera.setFlipVertical(config.flipVertical);
       }
-      if (
-        config.minValue !== prevImageModeConfig.minValue ||
-        config.maxValue !== prevImageModeConfig.maxValue
-      ) {
-        this.#imageRenderable?.setSettings({
-          ...this.#imageRenderable.userData.settings,
-          minValue: config.minValue,
-          maxValue: config.maxValue,
-        });
-      }
+      this.#imageRenderable?.setSettings({
+        ...this.#imageRenderable.userData.settings,
+        colorMode: config.colorMode,
+        flatColor: config.flatColor,
+        gradient: config.gradient as [string, string],
+        colorMap: config.colorMap,
+        explicitAlpha: config.explicitAlpha,
+        minValue: config.minValue,
+        maxValue: config.maxValue,
+      });
       if (config.synchronize !== prevImageModeConfig.synchronize) {
         this.removeAllRenderables();
       }
@@ -615,10 +614,13 @@ export class ImageMode
     if (renderable) {
       return renderable;
     }
-
     const config = this.#getImageModeSettings();
+
     const userSettings: ImageRenderableSettings = {
       ...IMAGE_RENDERABLE_DEFAULT_SETTINGS,
+      colorMode: config.colorMode,
+      gradient: config.gradient as [string, string],
+      colorMap: config.colorMap,
       minValue: config.minValue,
       maxValue: config.maxValue,
       // planarProjectionFactor must be 1 to avoid imprecise projection due to small number of grid subdivisions
@@ -682,13 +684,14 @@ export class ImageMode
   #getImageModeSettings(): Immutable<ConfigWithDefaults> {
     const config = { ...this.renderer.config.imageMode };
 
-    return {
-      ...config,
-      synchronize: config.synchronize ?? DEFAULT_CONFIG.synchronize,
-      rotation: config.rotation ?? DEFAULT_CONFIG.rotation,
-      flipHorizontal: config.flipHorizontal ?? DEFAULT_CONFIG.flipHorizontal,
-      flipVertical: config.flipVertical ?? DEFAULT_CONFIG.flipVertical,
-    };
+    const colorMode =
+      config.colorMode === "rgba-fields"
+        ? DEFAULT_CONFIG.colorMode
+        : config.colorMode ?? DEFAULT_CONFIG.colorMode;
+
+    // Ensures that no required fields are left undefined
+    // rightmost values are applied last and have the most precedence
+    return merge({}, DEFAULT_CONFIG, { colorMode }, config);
   }
 
   /**
@@ -802,6 +805,11 @@ export class ImageMode
       flipVertical: settings.flipVertical,
       minValue: settings.minValue,
       maxValue: settings.maxValue,
+      colorMode: settings.colorMode,
+      colorMap: settings.colorMap,
+      gradient: settings.gradient as ColorModeSettings["gradient"],
+      explicitAlpha: settings.explicitAlpha,
+      flatColor: settings.flatColor,
     };
   }
 }

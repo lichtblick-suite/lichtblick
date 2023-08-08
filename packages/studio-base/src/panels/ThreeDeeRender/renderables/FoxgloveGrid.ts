@@ -11,14 +11,14 @@ import { GRID_DATATYPES } from "@foxglove/studio-base/panels/ThreeDeeRender/foxg
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import {
-  baseColorModeSettingsNode,
+  colorModeSettingsFields,
   ColorModeSettings,
   getColorConverter,
   NEEDS_MIN_MAX,
   FS_SRGB_TO_LINEAR,
   RGBA_PACKED_FIELDS,
   hasSeparateRgbaFields,
-} from "./pointClouds/colors";
+} from "./colorMode";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
@@ -411,20 +411,28 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       }
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsFoxgloveGrid>;
 
-      const node = baseColorModeSettingsNode(
-        this.#fieldsByTopic.get(topic.name) ?? [],
+      const colorModeFields = colorModeSettingsFields({
+        msgFields: this.#fieldsByTopic.get(topic.name),
         config,
-        topic,
-        DEFAULT_SETTINGS,
-        { supportsPackedRgbModes: false, supportsRgbaFieldsMode: true },
-      );
-      node.icon = "Cells";
-      node.fields.frameLocked = {
-        label: "Frame lock",
-        input: "boolean",
-        value: config.frameLocked ?? DEFAULT_SETTINGS.frameLocked,
+        defaults: DEFAULT_SETTINGS,
+        modifiers: { supportsPackedRgbModes: false, supportsRgbaFieldsMode: true },
+      });
+
+      const node: SettingsTreeNodeWithActionHandler = {
+        order: topic.name.toLocaleLowerCase(),
+        icon: "Cells",
+        visible: config.visible ?? DEFAULT_SETTINGS.visible,
+        fields: {
+          ...colorModeFields,
+          frameLocked: {
+            label: "Frame lock",
+            input: "boolean",
+            value: config.frameLocked ?? DEFAULT_SETTINGS.frameLocked,
+          },
+        },
+        handler,
       };
-      (node as SettingsTreeNodeWithActionHandler).handler = handler;
+
       entries.push({
         path: ["topics", topic.name],
         node,

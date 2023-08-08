@@ -32,7 +32,10 @@ export class WorkerImageDecoder {
   /**
    * Copies `image` to the worker, and transfers the decoded result back to the main thread.
    */
-  public async decode(image: RosImage | RawImage, options: RawImageOptions): Promise<ImageData> {
+  public async decode(
+    image: RosImage | RawImage,
+    options: Partial<RawImageOptions>,
+  ): Promise<ImageData> {
     return await this.#remote.decode(image, options);
   }
 
