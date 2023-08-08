@@ -101,6 +101,15 @@ export const UrdfDisplayMode: StoryObj = {
         displayMode: "collision",
         translation: { x: 2, y: 0, z: 0 },
       },
+      urdf4: {
+        sourceType: "param",
+        parameter: urdfParamName,
+        layerId: "foxglove.Urdf",
+        framePrefix: "display_collision_colored/",
+        displayMode: "collision",
+        translation: { x: 4, y: 0, z: 0 },
+        fallbackColor: "#eb34d8",
+      },
     };
 
     const fixture = useDelayedFixture({
