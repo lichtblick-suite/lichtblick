@@ -2660,7 +2660,7 @@ __metadata:
     "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
-    "@foxglove/ws-protocol": 0.7.0
+    "@foxglove/ws-protocol": 0.7.1
     "@foxglove/xmlrpc": 1.3.0
     "@mcap/core": 1.3.0
     "@mui/icons-material": 5.14.3
@@ -2944,14 +2944,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ws-protocol@npm:0.7.0":
-  version: 0.7.0
-  resolution: "@foxglove/ws-protocol@npm:0.7.0"
+"@foxglove/ws-protocol@npm:0.7.1":
+  version: 0.7.1
+  resolution: "@foxglove/ws-protocol@npm:0.7.1"
   dependencies:
     debug: ^4
     eventemitter3: ^5.0.1
-    tslib: ^2.5.3
-  checksum: e0850fd9b034526027e450d48c60f1d447d519da01d882ca342f8dcbf935611c217c6eac996b2ed486749a394ba006f80fd7f39b4393cf7be3a65003fecca700
+    tslib: ^2.6.0
+  checksum: 913681bf45109f9989d60329270727381192e5fc278de1df50bb5c88f2376c7c97570e9a8c79c5761c3a6af0277e88b9a455c3973205c7d6bbdcf8f8a9dd3567
   languageName: node
   linkType: hard
 
@@ -20467,7 +20467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.6.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.5.3":
+"tslib@npm:2.6.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.6.0":
   version: 2.6.1
   resolution: "tslib@npm:2.6.1"
   checksum: b0d176d176487905b66ae4d5856647df50e37beea7571c53b8d10ba9222c074b81f1410fb91da13debaf2cbc970663609068bdebafa844ea9d69b146527c38fe
