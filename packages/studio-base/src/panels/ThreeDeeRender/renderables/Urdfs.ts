@@ -8,6 +8,7 @@ import { debounce, maxBy } from "lodash";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
+import { filterMap } from "@foxglove/den/collection";
 import { UrdfGeometryMesh, UrdfRobot, UrdfVisual, parseRobot, UrdfJoint } from "@foxglove/den/urdf";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
@@ -18,6 +19,7 @@ import {
   SettingsTreeFields,
 } from "@foxglove/studio";
 import { eulerToQuaternion } from "@foxglove/studio-base/util/geometry";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCylinder } from "./markers/RenderableCylinder";
@@ -58,7 +60,7 @@ const PARAM_KEY = "param:/robot_description";
 const PARAM_NAME = "/robot_description";
 const PARAM_DISPLAY_NAME = "/robot_description (parameter)";
 
-const VALID_URL_ERR = "ValidUrl";
+const VALID_SRC_ERR = "ValidSrc";
 const FETCH_URDF_ERR = "FetchUrdf";
 const PARSE_URDF_ERR = "ParseUrdf";
 
@@ -77,7 +79,11 @@ export type LayerSettingsUrdf = BaseSettings & {
 
 export type LayerSettingsCustomUrdf = CustomLayerSettings & {
   layerId: "foxglove.Urdf";
-  url: string;
+  sourceType: "url" | "filePath" | "param" | "topic";
+  url?: string;
+  filePath?: string;
+  parameter?: string;
+  topic?: string;
   framePrefix: string;
   displayMode: "auto" | "visual" | "collision";
 };
@@ -96,10 +102,15 @@ const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
   label: "URDF",
   instanceId: "invalid",
   layerId: LAYER_ID,
+  sourceType: "url",
   url: "",
+  filePath: "",
+  parameter: "",
+  topic: "",
   framePrefix: "",
   displayMode: "auto",
 };
+const URDF_TOPIC_SCHEMAS = new Set<string>(["std_msgs/String", "std_msgs/msg/String"]);
 
 const tempVec3a = new THREE.Vector3();
 const tempVec3b = new THREE.Vector3();
@@ -111,7 +122,10 @@ export type UrdfUserData = BaseUserData & {
   settings: LayerSettingsUrdf | LayerSettingsCustomUrdf;
   fetching?: { url: string; control: AbortController };
   url: string | undefined;
+  filePath: string | undefined;
   urdf: string | undefined;
+  sourceType: LayerSettingsCustomUrdf["sourceType"] | undefined;
+  parameter: string | undefined;
   renderables: Map<string, Renderable>;
 };
 
@@ -160,6 +174,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   #transformsByInstanceId = new Map<string, TransformData[]>();
   #jointStates = new Map<string, JointPosition>();
   #textDecoder = new TextDecoder();
+  #urdfsByTopic = new Map<string, string>();
 
   public constructor(renderer: IRenderer) {
     super("foxglove.Urdfs", renderer);
@@ -175,7 +190,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     // Load existing URDF layers from the config
     for (const [instanceId, entry] of Object.entries(renderer.config.layers)) {
       if (entry?.layerId === LAYER_ID) {
-        this.#loadUrdf(instanceId, undefined);
+        this.#loadUrdf({ instanceId, urdf: undefined });
       }
     }
   }
@@ -195,6 +210,15 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         type: "schema",
         schemaNames: JOINTSTATE_DATATYPES,
         subscription: { handler: this.#handleJointState },
+      },
+
+      {
+        type: "schema",
+        schemaNames: URDF_TOPIC_SCHEMAS,
+        subscription: {
+          shouldSubscribe: this.#shouldSubscribe,
+          handler: this.#handleRobotDescription,
+        },
       },
     ];
   }
@@ -226,7 +250,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     if (topic != undefined) {
       const config = (this.renderer.config.topics[TOPIC_NAME] ?? {}) as Partial<LayerSettingsUrdf>;
       const fields: SettingsTreeFields = {
-        displayMode: { ...displayMode, value: config.displayMode ?? "auto" },
+        displayMode: { ...displayMode, value: config.displayMode ?? DEFAULT_SETTINGS.displayMode },
       };
       entries.push({
         path: ["topics", TOPIC_NAME],
@@ -251,7 +275,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       const config = (this.renderer.config.topics[PARAM_KEY] ?? {}) as Partial<LayerSettingsUrdf>;
 
       const fields: SettingsTreeFields = {
-        displayMode: { ...displayMode, value: config.displayMode ?? "auto" },
+        displayMode: { ...displayMode, value: config.displayMode ?? DEFAULT_SETTINGS.displayMode },
       };
 
       entries.push({
@@ -275,20 +299,90 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     for (const [instanceId, layerConfig] of Object.entries(this.renderer.config.layers)) {
       if (layerConfig?.layerId === LAYER_ID) {
         const config = layerConfig as Partial<LayerSettingsCustomUrdf>;
-        const placeholder = "package://";
-        const help =
-          "package:// URL or http(s) URL pointing to a Unified Robot Description Format (URDF) XML file";
 
         const fields: SettingsTreeFields = {
-          url: { label: "URL", input: "string", placeholder, help, value: config.url ?? "" },
-          label: { label: "Label", input: "string", value: config.label ?? "URDF" },
+          sourceType: {
+            label: "Source",
+            input: "select",
+            value: config.sourceType ?? DEFAULT_CUSTOM_SETTINGS.sourceType,
+            options: [
+              {
+                label: "URL",
+                value: "url",
+              },
+              {
+                label: "File path (Desktop only)",
+                value: "filePath",
+                disabled: !isDesktopApp(),
+              },
+              {
+                label: "Parameter",
+                value: "param",
+              },
+              {
+                label: "Topic",
+                value: "topic",
+              },
+            ],
+          },
+          url:
+            config.sourceType === "url"
+              ? {
+                  label: "URL",
+                  input: "string",
+                  placeholder: "package://",
+                  help: "package:// URL or http(s) URL pointing to a Unified Robot Description Format (URDF) XML file",
+                  value: config.url ?? DEFAULT_CUSTOM_SETTINGS.url,
+                }
+              : undefined,
+          filePath:
+            config.sourceType === "filePath"
+              ? {
+                  label: "File path",
+                  input: "string",
+                  help: "Absolute file path (desktop app only)",
+                  value: config.filePath ?? DEFAULT_CUSTOM_SETTINGS.filePath,
+                  disabled: !isDesktopApp(),
+                }
+              : undefined,
+          topic:
+            config.sourceType === "topic"
+              ? {
+                  label: "Topic",
+                  input: "autocomplete",
+                  value: config.topic ?? DEFAULT_CUSTOM_SETTINGS.topic,
+                  items: filterMap(this.renderer.topics ?? [], (_topic) =>
+                    URDF_TOPIC_SCHEMAS.has(_topic.schemaName) ? _topic.name : undefined,
+                  ),
+                }
+              : undefined,
+          parameter:
+            config.sourceType === "param"
+              ? {
+                  label: "Parameter",
+                  input: "autocomplete",
+                  value: config.parameter ?? DEFAULT_CUSTOM_SETTINGS.parameter,
+                  items: filterMap(this.renderer.parameters ?? [], ([paramName, value]) =>
+                    typeof value === "string" ? paramName : undefined,
+                  ),
+                }
+              : undefined,
+          label: {
+            label: "Label",
+            input: "string",
+            value: config.label ?? DEFAULT_CUSTOM_SETTINGS.label,
+          },
           framePrefix: {
             label: "Frame prefix",
             input: "string",
             help: "Prefix to apply to all frame names (also often called tfPrefix)",
+            placeholder: "Frame prefix",
             value: config.framePrefix ?? "",
           },
-          displayMode: { ...displayMode, value: config.displayMode ?? "auto" },
+          displayMode: {
+            ...displayMode,
+            value: config.displayMode ?? DEFAULT_CUSTOM_SETTINGS.displayMode,
+          },
         };
 
         entries.push({
@@ -432,7 +526,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         });
 
         // Add the URDF renderable
-        this.#loadUrdf(newInstanceId, undefined);
+        const renderable = this.renderables.get(instanceId);
+        this.#loadUrdf({ instanceId: newInstanceId, urdf: renderable?.userData.urdf });
 
         // Update the settings tree
         this.updateSettingsTree();
@@ -482,24 +577,69 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       // ["layers", instanceId, field]
       this.saveSetting(path, action.payload.value);
       const [_layers, instanceId, field] = path as [string, string, string];
-      if (instanceId === PARAM_KEY) {
-        this.#loadUrdf(instanceId, this.renderer.parameters?.get(PARAM_NAME) as string | undefined);
-      } else if (instanceId === TOPIC_NAME) {
-        this.#loadUrdf(instanceId, this.renderables.get(instanceId)?.userData.urdf);
+      const renderable = this.renderables.get(instanceId);
+      let urdf = renderable?.userData.urdf;
+
+      if (field === "url" || field === "filePath") {
+        this.#debouncedLoadUrdf({ instanceId, urdf: undefined });
+      } else if (field === "parameter") {
+        urdf = this.renderer.parameters?.get(action.payload.value as string) as string | undefined;
+        this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "framePrefix") {
-        this.#debouncedLoadUrdf(instanceId, undefined);
+        this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
+      } else if (field === "displayMode" || field === "visible") {
+        this.#loadUrdf({ instanceId, urdf, forceReload: true });
+      } else if (field === "sourceType") {
+        const sourceType = action.payload.value as LayerSettingsCustomUrdf["sourceType"];
+        if (sourceType === "topic") {
+          urdf = renderable?.userData.topic
+            ? this.#urdfsByTopic.get(renderable.userData.topic)
+            : undefined;
+        } else if (sourceType === "param") {
+          urdf = renderable?.userData.parameter
+            ? (this.renderer.parameters?.get(renderable.userData.parameter) as string | undefined)
+            : undefined;
+        } else {
+          urdf = undefined;
+        }
+        this.#loadUrdf({ instanceId, urdf, forceReload: true });
+      } else if (field === "topic") {
+        urdf = this.#urdfsByTopic.get(action.payload.value as string);
+        this.#loadUrdf({ instanceId, urdf });
       } else {
-        this.#loadUrdf(instanceId, undefined);
+        this.#loadUrdf({ instanceId, urdf });
       }
     }
   };
 
   #handleRobotDescription = (messageEvent: PartialMessageEvent<{ data: string }>): void => {
+    const topic = messageEvent.topic;
     const robotDescription = messageEvent.message.data;
     if (typeof robotDescription !== "string") {
       return;
     }
-    this.#loadUrdf(TOPIC_NAME, robotDescription);
+    this.#urdfsByTopic.set(topic, robotDescription);
+
+    if (topic === TOPIC_NAME) {
+      this.#loadUrdf({ instanceId: TOPIC_NAME, urdf: robotDescription });
+    }
+
+    // Update custom layer URDFs that subscribe to this topic.
+    const subscribedInstanceIds = filterMap(this.renderables, ([instanceId, renderable]) =>
+      renderable.userData.sourceType === "topic" && renderable.userData.topic === topic
+        ? instanceId
+        : undefined,
+    );
+    for (const instanceId of subscribedInstanceIds) {
+      this.#loadUrdf({ instanceId, urdf: robotDescription });
+    }
+  };
+
+  #shouldSubscribe = (topic: string): boolean => {
+    return Array.from(this.renderables.values()).some(
+      (renderable) =>
+        renderable.userData.sourceType === "topic" && renderable.userData.topic === topic,
+    );
   };
 
   #handleJointState = (messageEvent: PartialMessageEvent<JointState>): void => {
@@ -522,7 +662,21 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   #handleParametersChange = (parameters: ReadonlyMap<string, unknown> | undefined): void => {
     const robotDescription = parameters?.get(PARAM_NAME);
     if (typeof robotDescription === "string") {
-      this.#loadUrdf(PARAM_KEY, robotDescription);
+      this.#loadUrdf({ instanceId: PARAM_KEY, urdf: robotDescription });
+    }
+
+    // Update custom layer URDFs that use parameters.
+    for (const [instanceId, renderable] of this.renderables.entries()) {
+      const sourceType = (renderable.userData.settings as Partial<LayerSettingsCustomUrdf>)
+        .sourceType;
+      const paramName = (renderable.userData.settings as Partial<LayerSettingsCustomUrdf>)
+        .parameter;
+      if (sourceType === "param" && paramName != undefined) {
+        const urdf = parameters?.get(paramName);
+        if (typeof urdf === "string") {
+          this.#loadUrdf({ instanceId, urdf });
+        }
+      }
     }
   };
 
@@ -539,7 +693,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     });
 
     // Add the URDF renderable
-    this.#loadUrdf(instanceId, undefined);
+    this.#loadUrdf({ instanceId, urdf: undefined });
 
     // Update the settings tree
     this.updateSettingsTree();
@@ -554,13 +708,17 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     // Check if a valid URL was provided
     if (!isValidUrl(url)) {
       const path = renderable.userData.settingsPath;
-      this.renderer.settings.errors.add(path, VALID_URL_ERR, `Invalid URDF URL: "${url}"`);
+      this.renderer.settings.errors.add(path, VALID_SRC_ERR, `Invalid URDF URL: "${url}"`);
       return;
     }
-    this.renderer.settings.errors.remove(renderable.userData.settingsPath, VALID_URL_ERR);
+    this.renderer.settings.errors.remove(renderable.userData.settingsPath, VALID_SRC_ERR);
 
     // Check if this URL has already been fetched
-    if (renderable.userData.url === url) {
+    if (
+      (renderable.userData.sourceType === "url" && renderable.userData.url === url) ||
+      (renderable.userData.sourceType === "filePath" &&
+        `file://${renderable.userData.filePath}` === url)
+    ) {
       return;
     }
 
@@ -581,7 +739,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       .then((urdf) => {
         log.debug(`Fetched ${urdf.data.length} byte URDF from ${url}`);
         this.renderer.settings.errors.remove(["layers", instanceId], FETCH_URDF_ERR);
-        this.#loadUrdf(instanceId, this.#textDecoder.decode(urdf.data));
+        this.#loadUrdf({ instanceId, urdf: this.#textDecoder.decode(urdf.data) });
       })
       .catch((unknown) => {
         const err = unknown as Error;
@@ -601,15 +759,12 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     return settings;
   }
 
-  #loadUrdf(instanceId: string, urdf: string | undefined): void {
+  #loadUrdf(args: { instanceId: string; urdf?: string; forceReload?: boolean }): void {
+    const { instanceId, urdf } = args;
+    const forceReload = args.forceReload ?? false;
     let renderable = this.renderables.get(instanceId);
     const settings = this.#getCurrentSettings(instanceId);
-    if (
-      renderable &&
-      urdf != undefined &&
-      renderable.userData.urdf === urdf &&
-      renderable.userData.settings.displayMode === settings.displayMode
-    ) {
+    if (renderable && urdf && !forceReload && renderable.userData.urdf === urdf) {
       renderable.userData.settings = settings;
       return;
     }
@@ -626,9 +781,14 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
     const frameId = this.renderer.fixedFrameId ?? ""; // Unused
     const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
+    const sourceType = (settings as Partial<LayerSettingsCustomUrdf>).sourceType;
     const url = (settings as Partial<LayerSettingsCustomUrdf>).url;
+    const filePath = (settings as Partial<LayerSettingsCustomUrdf>).filePath;
+    const parameter = (settings as Partial<LayerSettingsCustomUrdf>).parameter;
+    const topic = (settings as Partial<LayerSettingsCustomUrdf>).topic;
     const framePrefix = (settings as Partial<LayerSettingsCustomUrdf>).framePrefix;
-    const label = (settings as Partial<LayerSettingsCustomUrdf>).label ?? "URDF";
+    const label =
+      (settings as Partial<LayerSettingsCustomUrdf>).label ?? DEFAULT_CUSTOM_SETTINGS.label;
 
     if (label !== renderable?.userData.settings.label) {
       // Label has changed, update the config
@@ -645,6 +805,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       renderable = new UrdfRenderable(instanceId, this.renderer, {
         urdf,
         url: urdf != undefined ? url : undefined,
+        filePath: urdf != undefined ? filePath : undefined,
         fetching: undefined,
         renderables: new Map(),
         receiveTime: 0n,
@@ -653,24 +814,53 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         pose: makePose(),
         settingsPath,
         settings,
+        sourceType,
+        topic,
+        parameter,
       });
       this.add(renderable);
       this.renderables.set(instanceId, renderable);
     }
 
     renderable.userData.urdf = urdf;
-    renderable.userData.url = urdf != undefined ? url : undefined;
+    renderable.userData.url = urdf != undefined && sourceType === "url" ? url : undefined;
+    renderable.userData.filePath =
+      urdf != undefined && sourceType === "filePath" ? filePath : undefined;
+    renderable.userData.sourceType = sourceType;
+    renderable.userData.topic = topic;
+    renderable.userData.parameter = parameter;
     renderable.userData.settings = settings;
     renderable.userData.fetching = undefined;
 
-    if (!urdf) {
+    if (!urdf || forceReload) {
       renderable.removeChildren();
+    }
 
-      // Fetch the URDF from the URL if we have one
-      if (url != undefined) {
-        this.#fetchUrdf(instanceId, url);
+    if (!urdf) {
+      const path = renderable.userData.settingsPath;
+      this.renderer.settings.errors.remove(path, PARSE_URDF_ERR);
+      this.renderer.settings.errors.remove(path, MISSING_TRANSFORM);
+      if (sourceType === "url") {
+        if (url != undefined) {
+          this.#fetchUrdf(instanceId, url);
+        } else {
+          this.renderer.settings.errors.add(path, VALID_SRC_ERR, `Invalid URDF URL: "${url}"`);
+        }
+      } else if (sourceType === "filePath") {
+        if (filePath != undefined) {
+          this.#fetchUrdf(instanceId, `file://${filePath}`);
+        } else {
+          const errMsg = `Invalid File Path: "${filePath}"`;
+          this.renderer.settings.errors.add(path, VALID_SRC_ERR, errMsg);
+        }
+      } else if (sourceType === "param") {
+        this.renderer.settings.errors.add(path, VALID_SRC_ERR, `Invalid Parameter: "${parameter}"`);
+      } else if (sourceType === "topic") {
+        this.renderer.settings.errors.add(path, VALID_SRC_ERR, `Invalid Topic: "${topic}"`);
       }
       return;
+    } else {
+      this.renderer.settings.errors.remove(renderable.userData.settingsPath, VALID_SRC_ERR);
     }
 
     // Parse the URDF
@@ -678,6 +868,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     parseUrdf(urdf, async (uri) => await this.#getFileFetch(uri), framePrefix)
       .then((parsed) => {
         this.#loadRobot(loadedRenderable, parsed);
+        this.renderer.settings.errors.remove(
+          loadedRenderable.userData.settingsPath,
+          PARSE_URDF_ERR,
+        );
         // the frame from the settings update is called before the robot is loaded
         // need to queue another animation frame after robot has been loaded
         this.renderer.queueAnimationFrame();

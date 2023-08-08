@@ -373,8 +373,8 @@ function FieldInput({
           }
           MenuProps={{ MenuListProps: { dense: true } }}
         >
-          {field.options.map(({ label, value = UNDEFINED_SENTINEL_VALUE }) => (
-            <MenuItem key={value} value={value}>
+          {field.options.map(({ label, value = UNDEFINED_SENTINEL_VALUE, disabled }) => (
+            <MenuItem key={value} value={value} disabled={disabled}>
               {label}
             </MenuItem>
           ))}

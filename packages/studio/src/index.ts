@@ -565,12 +565,12 @@ export type SettingsTreeFieldValue =
   | {
       input: "select";
       value?: number | number[];
-      options: Array<{ label: string; value: undefined | number }>;
+      options: Array<{ label: string; value: undefined | number; disabled?: boolean }>;
     }
   | {
       input: "select";
       value?: string | string[];
-      options: Array<{ label: string; value: undefined | string }>;
+      options: Array<{ label: string; value: undefined | string; disabled?: boolean }>;
     }
   | {
       input: "string";

@@ -427,6 +427,9 @@ export function ThreeDeeRender(props: {
     schemaHandlers,
     topicHandlers,
     config.imageMode.annotations,
+    // Need to update subscriptions when layers change as URDF layers might subscribe to topics
+    // shouldSubscribe values will be re-evaluated
+    config.layers,
   ]);
 
   // Notify the extension context when our subscription list changes

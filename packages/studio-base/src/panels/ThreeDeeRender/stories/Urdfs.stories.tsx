@@ -130,6 +130,7 @@ export const Urdfs: StoryObj = {
     const topics: Topic[] = [
       { name: "/robot_description", schemaName: "std_msgs/String" },
       { name: "/tf_static", schemaName: "tf2_msgs/TFMessage" },
+      { name: "/some/robot_description", schemaName: "std_msgs/String" },
     ];
     const robot_description: MessageEvent<{ data: string }> = {
       topic: "/robot_description",
@@ -184,6 +185,15 @@ export const Urdfs: StoryObj = {
               transforms: [mesh_T_robot_1, mesh_T_robot_2],
             },
           },
+          {
+            topic: "/some/robot_description",
+            schemaName: "std_msgs/String",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              data: URDF3,
+            },
+          },
         ],
       },
     });
@@ -202,18 +212,21 @@ export const Urdfs: StoryObj = {
                 layerId: "foxglove.Grid",
                 position: [0, 0, 0],
               },
-              urdf: {
+              urdfFromUrl: {
                 layerId: "foxglove.Urdf",
+                sourceType: "url",
                 url: encodeURI(`data:text/xml;utf8,${URDF2}`),
               },
-              paramUrdfRobot1: {
+              urdfFromParameter: {
                 layerId: "foxglove.Urdf",
-                url: encodeURI(`data:text/xml;utf8,${URDF3}`),
+                sourceType: "param",
+                parameter: urdfParamName,
                 framePrefix: `robot_1/`,
               },
-              paramUrdfRobot2: {
+              urdfFromTopic: {
                 layerId: "foxglove.Urdf",
-                url: encodeURI(`data:text/xml;utf8,${URDF3}`),
+                sourceType: "topic",
+                topic: "/some/robot_description",
                 framePrefix: `robot_2/`,
               },
             },
