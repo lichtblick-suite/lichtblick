@@ -234,6 +234,7 @@ export class IterablePlayer implements Player {
     this.#lastTickMillis = undefined;
     this.#isPlaying = false;
     this.#untilTime = undefined;
+    this.#lastRangeMillis = undefined;
     if (this.#state === "play") {
       this.#setState("idle");
     }
@@ -278,6 +279,8 @@ export class IterablePlayer implements Player {
     this.#metricsCollector.seek(targetTime);
     this.#seekTarget = targetTime;
     this.#untilTime = undefined;
+    this.#lastTickMillis = undefined;
+    this.#lastRangeMillis = undefined;
 
     this.#setState("seek-backfill");
   }
@@ -310,6 +313,8 @@ export class IterablePlayer implements Player {
       if (!this.#isPlaying && this.#currentTime) {
         this.#seekTarget ??= this.#currentTime;
         this.#untilTime = undefined;
+        this.#lastTickMillis = undefined;
+        this.#lastRangeMillis = undefined;
 
         // Trigger a seek backfill to load any missing messages and reset the forward iterator
         this.#setState("seek-backfill");
