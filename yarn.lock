@@ -2695,7 +2695,7 @@ __metadata:
     comlink: 4.4.1
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
-    cytoscape: 3.25.1
+    cytoscape: 3.26.0
     cytoscape-dagre: 2.5.0
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
@@ -9338,13 +9338,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:3.25.1":
-  version: 3.25.1
-  resolution: "cytoscape@npm:3.25.1"
+"cytoscape@npm:3.26.0":
+  version: 3.26.0
+  resolution: "cytoscape@npm:3.26.0"
   dependencies:
     heap: ^0.2.6
     lodash: ^4.17.21
-  checksum: 1dd773dbf42813feb22418da95f403064650a3c2c29641a46856251d2ba318688522e491bab59b53529206e62cf1470c1a4744878fa0a7abba2ad6277b41d21d
+  checksum: c6a3b2fbe99009cde6e5e2eb6ff2e0469b37f3e12b0828d676aa3c25a7ce7b6ed689b6765e9d3975d51c718a7870e358c639c9128352813b95eb342ef64a26b8
   languageName: node
   linkType: hard
 
