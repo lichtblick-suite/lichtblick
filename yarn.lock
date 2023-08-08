@@ -2691,11 +2691,11 @@ __metadata:
     chart.js: 4.3.3
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
-    chromatic: 6.20.0
+    chromatic: 6.21.0
     comlink: 4.4.1
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
-    cytoscape: 3.26.0
+    cytoscape: 3.25.1
     cytoscape-dagre: 2.5.0
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
@@ -2707,7 +2707,7 @@ __metadata:
     geojson: 0.5.0
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
-    i18next: 23.4.2
+    i18next: 23.4.1
     i18next-browser-languagedetector: 7.1.0
     idb: 7.1.1
     idb-keyval: 6.2.1
@@ -8491,14 +8491,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.20.0":
-  version: 6.20.0
-  resolution: "chromatic@npm:6.20.0"
+"chromatic@npm:6.21.0":
+  version: 6.21.0
+  resolution: "chromatic@npm:6.21.0"
   bin:
     chroma: dist/bin.js
     chromatic: dist/bin.js
     chromatic-cli: dist/bin.js
-  checksum: 90d413144ea9502cb96fd0065a0cf2ece63d832da2d7fd93f9577fd09080cbeb829ce9ca1d2384d4f7739cc249aa09033ca61820ac3c1656ff92d6a4ba2fbd67
+  checksum: f30903455790099566c8701b8e4c9419cab288b598b6cd28f34e457ff9879cdc31e4d34b377ba962b014ac6b52d17c506d044cf5cb0b2031340f6068d350a139
   languageName: node
   linkType: hard
 
@@ -9338,13 +9338,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:3.26.0":
-  version: 3.26.0
-  resolution: "cytoscape@npm:3.26.0"
+"cytoscape@npm:3.25.1":
+  version: 3.25.1
+  resolution: "cytoscape@npm:3.25.1"
   dependencies:
     heap: ^0.2.6
     lodash: ^4.17.21
-  checksum: c6a3b2fbe99009cde6e5e2eb6ff2e0469b37f3e12b0828d676aa3c25a7ce7b6ed689b6765e9d3975d51c718a7870e358c639c9128352813b95eb342ef64a26b8
+  checksum: 1dd773dbf42813feb22418da95f403064650a3c2c29641a46856251d2ba318688522e491bab59b53529206e62cf1470c1a4744878fa0a7abba2ad6277b41d21d
   languageName: node
   linkType: hard
 
@@ -12828,12 +12828,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:23.4.2":
-  version: 23.4.2
-  resolution: "i18next@npm:23.4.2"
+"i18next@npm:23.4.1":
+  version: 23.4.1
+  resolution: "i18next@npm:23.4.1"
   dependencies:
     "@babel/runtime": ^7.22.5
-  checksum: 2e2ef20a23c72ded0125924c1f982c9a8b4c00cab6bbc22b2fb3a619c07b882c5bb9268a8889d01b88d2ebb51226437a7442adca0ef9d919128e9642378962e5
+  checksum: d9283d3de5e4ea2e55f61bd8ada98b5aef1b7db35a69c8ccf193367c5cbee6f795a67c5cd8a7af511e56c12b021b91d97253863b6c2336726925d20518fb02cc
   languageName: node
   linkType: hard
 
