@@ -400,6 +400,7 @@ describe("BufferedIterableSource", () => {
     const source = new TestSource();
     const bufferedSource = new BufferedIterableSource(source, {
       readAheadDuration: { sec: 1, nsec: 0 },
+      minReadAheadDuration: { sec: 0, nsec: 0 },
     });
 
     await bufferedSource.initialize();
@@ -454,6 +455,69 @@ describe("BufferedIterableSource", () => {
     await messageIterator.next();
     await signal.wait();
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.2999999999 }]);
+
+    // We should have called the messageIterator method only once
+    expect(messageIteratorCount).toEqual(1);
+  });
+
+  it("should buffer minimum duration ahead before messages can be read", async () => {
+    const source = new TestSource();
+    const bufferedSource = new BufferedIterableSource(source, {
+      readAheadDuration: { sec: 3, nsec: 0 },
+      minReadAheadDuration: { sec: 2, nsec: 0 },
+    });
+
+    await bufferedSource.initialize();
+
+    const signal = waiter(1);
+
+    const debounceNotify = debounce(() => {
+      signal.notify();
+    }, 500);
+
+    let messageIteratorCount = 0;
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      expect(args).toEqual({
+        topics: ["a"],
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 10, nsec: 0 },
+        consumptionType: "partial",
+      });
+      messageIteratorCount += 1;
+
+      for (let i = 0; i < 8; ++i) {
+        debounceNotify();
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: i, nsec: 0 },
+            message: undefined,
+            sizeInBytes: 0,
+            schemaName: "foo",
+          },
+        };
+      }
+    };
+
+    const messageIterator = bufferedSource.messageIterator({
+      topics: ["a"],
+    });
+
+    // Reading the first message should buffer a minimum amount
+    await messageIterator.next();
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.2999999999 }]);
+    // Reading the next message should not increase the buffer
+    await messageIterator.next();
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.2999999999 }]);
+    // Next message should increase the buffer again
+    await messageIterator.next();
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.3999999999 }]);
+    // Let the buffer read to the end
+    await signal.wait();
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.5999999999 }]);
 
     // We should have called the messageIterator method only once
     expect(messageIteratorCount).toEqual(1);
