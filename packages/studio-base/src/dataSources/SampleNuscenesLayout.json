@@ -324,7 +324,7 @@
         {
           "value": "/imu.linear_accel.x",
           "enabled": true,
-          "timestampMethod": "headerStamp"
+          "timestampMethod": "receiveTime"
         },
         {
           "value": "/diagnostics.status[:].values[:]{key==\"throttle_sensor\"}.value",
