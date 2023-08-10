@@ -115,7 +115,7 @@
     "semver": "7.5.4",
     "storybook": "7.2.2",
     "ts-node": "10.9.1",
-    "ts-unused-exports": "9.0.5",
+    "ts-unused-exports": "10.0.0",
     "tslib": "2.6.1",
     "typescript": "5.1.6",
     "webpack": "5.88.2",
