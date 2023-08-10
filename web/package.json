@@ -5,7 +5,7 @@
     "@foxglove/log": "workspace:*",
     "@foxglove/studio-web": "workspace:*",
     "@types/serve-handler": "^6",
-    "playwright": "1.36.2",
+    "playwright": "1.37.0",
     "serve-handler": "6.1.5",
     "webpack": "5.88.2",
     "webpack-dev-server": "4.15.1"
