@@ -2760,7 +2760,7 @@ __metadata:
     react-dnd-html5-backend: 16.0.1
     react-dom: 17.0.2
     react-hover-observer: 2.1.1
-    react-i18next: 13.0.3
+    react-i18next: 13.1.1
     react-json-tree: "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch"
     react-markdown: 8.0.7
     react-monaco-editor: 0.54.0
@@ -2866,7 +2866,7 @@ __metadata:
     html-webpack-plugin: 5.5.3
     react: 17.0.2
     react-dom: 17.0.2
-    react-i18next: 13.0.3
+    react-i18next: 13.1.1
     tss-react: 4.8.8
     webpack: 5.88.2
     webpack-dev-server: 4.15.1
@@ -17830,9 +17830,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:13.0.3":
-  version: 13.0.3
-  resolution: "react-i18next@npm:13.0.3"
+"react-i18next@npm:13.1.1":
+  version: 13.1.1
+  resolution: "react-i18next@npm:13.1.1"
   dependencies:
     "@babel/runtime": ^7.22.5
     html-parse-stringify: ^3.0.1
@@ -17844,7 +17844,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 5b23c517204ac7ce66191368b185bb278c34e75778714ffdae84dd4672fdaf8c500c7965cb87508c686de55ac7c8853f05134ee61aa21add1b8c8e02bcc0a0a4
+  checksum: 3ad3c655fb47a7098ed108874364617940109018e5b4d42a6cd93a2e9fe9a17eef1adc78b77d5e26e62fe8ce073a20428eadf870bbbff11b4d632bd6831fd5b3
   languageName: node
   linkType: hard
 
