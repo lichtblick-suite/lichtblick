@@ -418,6 +418,10 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     for (const frameId of this.renderer.transformTree.frames().keys()) {
       this.#addFrameAxis(frameId);
     }
+    const config = this.renderer.config;
+    if (config.scene.transforms?.editable === true) {
+      this.#updateFrameAxes();
+    }
     this.updateSettingsTree();
   };
 
