@@ -11210,9 +11210,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-resolver-webpack@npm:0.13.3":
-  version: 0.13.3
-  resolution: "eslint-import-resolver-webpack@npm:0.13.3"
+"eslint-import-resolver-webpack@npm:0.13.4":
+  version: 0.13.4
+  resolution: "eslint-import-resolver-webpack@npm:0.13.4"
   dependencies:
     array-find: ^1.0.0
     debug: ^3.2.7
@@ -11228,7 +11228,7 @@ __metadata:
   peerDependencies:
     eslint-plugin-import: ">=1.4.0"
     webpack: ">=1.11.0"
-  checksum: 0d3a9f5a8bf30003f45b93b4a0d764b67fd9a9dd807f284229422ff7645bf6be4b875d7729aadab8574f1bd7b26ebf0fafbedfd929f03cc30150cf872e55bea1
+  checksum: adc86143e97567505c96f9990a40478d76fec2b63e7002fcb206ca6487fb0fc08e8a7dc778a9af542f7fdf1f5f433451f92457f70d02a481eef6406595311efa
   languageName: node
   linkType: hard
 
@@ -12186,7 +12186,7 @@ __metadata:
     electron-builder: 24.6.3
     eslint: 8.47.0
     eslint-config-prettier: 8.10.0
-    eslint-import-resolver-webpack: 0.13.3
+    eslint-import-resolver-webpack: 0.13.4
     eslint-plugin-es: 4.1.0
     eslint-plugin-file-progress: 1.3.0
     eslint-plugin-filenames: 1.3.2
