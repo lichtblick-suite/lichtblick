@@ -56,7 +56,7 @@
     "@storybook/jest": "0.1.0",
     "@storybook/react": "7.3.0",
     "@storybook/testing-library": "0.2.0",
-    "@svgr/webpack": "8.0.1",
+    "@svgr/webpack": "8.1.0",
     "@tanstack/react-table": "8.9.3",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "8.0.1",
