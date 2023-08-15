@@ -31,7 +31,6 @@ import {
   Topic,
   TopicStats,
 } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
 import {
   Channel,
@@ -93,7 +92,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #closed: boolean = false; // Whether the player has been completely closed using close().
   #topics?: Topic[]; // Topics as published by the WebSocket.
   #topicsStats = new Map<string, TopicStats>(); // Topic names to topic statistics.
-  #datatypes: RosDatatypes = new Map(); // Datatypes as published by the WebSocket.
+  #datatypes: MessageDefinitionMap = new Map(); // Datatypes as published by the WebSocket.
   #parsedMessages: MessageEvent[] = []; // Queue of messages that we'll send in next _emitState() call.
   #receivedBytes: number = 0;
   #metricsCollector: PlayerMetricsCollectorInterface;
@@ -1130,7 +1129,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
       // Try to retrieve the ROS message definition for this topic
       let msgdef: MessageDefinition[];
       try {
-        const datatypes = (options?.["datatypes"] as RosDatatypes | undefined) ?? this.#datatypes;
+        const datatypes =
+          (options?.["datatypes"] as MessageDefinitionMap | undefined) ?? this.#datatypes;
         if (!(datatypes instanceof Map)) {
           throw new Error("Datatypes option must be a map");
         }
@@ -1203,7 +1203,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   #updateDataTypes(datatypes: MessageDefinitionMap): void {
-    let updatedDatatypes: RosDatatypes | undefined = undefined;
+    let updatedDatatypes: MessageDefinitionMap | undefined = undefined;
     const maybeRos = ["ros1", "ros2"].includes(this.#profile ?? "");
     for (const [name, types] of datatypes) {
       const knownTypes = this.#datatypes.get(name);
