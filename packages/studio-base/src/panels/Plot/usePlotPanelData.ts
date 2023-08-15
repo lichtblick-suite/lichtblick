@@ -185,7 +185,9 @@ export function usePlotPanelData(params: Params): Immutable<{
 
   const allFramesByTopic = useAllFramesByTopic(subscribeTopics);
 
-  const allFrames = showSingleCurrentMessage ? EmptyAllFrames : allFramesByTopic;
+  // If showing a single message skip all messages coming from allFrames and use the messages from
+  // useMessageReducer only.
+  const allFramesToProcess = showSingleCurrentMessage ? EmptyAllFrames : allFramesByTopic;
 
   const messageDataPathGetter = useCachedGetMessagePathDataItems(validAllPathValues);
 
@@ -198,7 +200,7 @@ export function usePlotPanelData(params: Params): Immutable<{
     xAxisPathAsFullPlotPath !== state.xAxisPath ||
     globalVariables !== state.globalVariables;
 
-  if (allFrames !== state.allFrames || validAllPaths !== state.allPaths || resetDatasets) {
+  if (allFramesToProcess !== state.allFrames || validAllPaths !== state.allPaths || resetDatasets) {
     // Derive a new state based on the old state & new message data. Note that we maintain a
     // separate cursor into allFrames for each path. This is necessary because newly added series
     // might have the same path as previous series but will need to process all messages not from
@@ -221,7 +223,8 @@ export function usePlotPanelData(params: Params): Immutable<{
           continue;
         }
 
-        const newMessages = allFramesByTopic[topic]?.slice(newCursors.get(path) ?? 0);
+        const newMessages = allFramesToProcess[topic]?.slice(newCursors.get(path) ?? 0);
+
         if (newMessages == undefined || newMessages.length === 0) {
           continue;
         }
@@ -254,7 +257,7 @@ export function usePlotPanelData(params: Params): Immutable<{
         : EmptyPlotData;
 
       return {
-        allFrames,
+        allFrames: allFramesToProcess,
         allPaths: validAllPaths,
         cursors: newCursors,
         data: appendPlotData(newState.data, newPlotData),
@@ -304,7 +307,7 @@ export function usePlotPanelData(params: Params): Immutable<{
   );
 
   // Access allFrames by reference to avoid invalidating the addMessages callback.
-  const latestAllFrames = useLatest(allFrames);
+  const latestAllFrames = useLatest(allFramesToProcess);
 
   const addMessages = useCallback(
     (accumulated: TaggedPlotData, msgEvents: Immutable<MessageEvent[]>) => {
@@ -430,7 +433,7 @@ export function usePlotPanelData(params: Params): Immutable<{
     const trimmed = filterMap(Object.values(accumulatedPathIntervals), (dataset) => {
       const trimmedDatasets = maps.mapValues(dataset.datasetsByPath, (ds, path) => {
         const topic = parseRosPath(path.value)?.topicName;
-        const end = topic ? allFrames[topic]?.at(-1)?.receiveTime : undefined;
+        const end = topic ? allFramesToProcess[topic]?.at(-1)?.receiveTime : undefined;
         if (end) {
           return {
             ...ds,
@@ -454,7 +457,7 @@ export function usePlotPanelData(params: Params): Immutable<{
     }
 
     return trimmed;
-  }, [accumulatedPathIntervals, allFrames]);
+  }, [accumulatedPathIntervals, allFramesToProcess]);
 
   // Combine allFrames & currentFrames datasets, optionally applying the @derivative
   // modifier and sorting by header stamp, which can only be calculated on a complete

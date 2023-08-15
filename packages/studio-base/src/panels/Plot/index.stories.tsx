@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { StoryObj } from "@storybook/react";
-import { screen, userEvent } from "@storybook/testing-library";
+import { screen, userEvent, waitFor } from "@storybook/testing-library";
 import { produce } from "immer";
 import { shuffle } from "lodash";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { fromSec } from "@foxglove/rostime";
@@ -1149,7 +1149,12 @@ export const IndexBasedXAxisForArray: StoryObj = {
 export const IndexBasedXAxisForArrayWithUpdate: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });
-    const pauseFrame = useCallback(() => {
+
+    const [ourFixture, setOurFixture] = useState(structuredClone(fixture));
+
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    useEffect(() => {
       setOurFixture((oldValue) => {
         return {
           ...oldValue,
@@ -1161,8 +1166,8 @@ export const IndexBasedXAxisForArrayWithUpdate: StoryObj = {
                 message: {
                   header: { stamp: { sec: 3, nsec: 0 } },
                   items: [
-                    { id: 10, speed: 4 },
-                    { id: 42, speed: 2 },
+                    { id: 10, speed: 1 },
+                    { id: 42, speed: 10 },
                   ],
                 },
                 schemaName: "msgs/State",
@@ -1172,10 +1177,7 @@ export const IndexBasedXAxisForArrayWithUpdate: StoryObj = {
           },
         };
       });
-
-      return readySignal;
-    }, [readySignal]);
-    const [ourFixture, setOurFixture] = useState(structuredClone(fixture));
+    }, []);
 
     return (
       <PlotWrapper
@@ -1203,7 +1205,7 @@ export const IndexBasedXAxisForArrayWithUpdate: StoryObj = {
   },
 
   play: async (ctx) => {
-    await ctx.parameters.storyReady;
+    await waitFor(() => ctx.parameters.storyReady);
   },
 };
 
