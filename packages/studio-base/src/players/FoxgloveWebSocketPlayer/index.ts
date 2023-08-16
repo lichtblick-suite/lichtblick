@@ -138,6 +138,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #nextAssetRequestId = 0;
   #fetchAssetRequests = new Map<number, (response: FetchAssetResponse) => void>();
   #fetchedAssets = new Map<string, Promise<Asset>>();
+  #parameterTypeByName = new Map<string, Parameter["type"]>();
 
   public constructor({
     url,
@@ -567,17 +568,23 @@ export default class FoxgloveWebSocketPlayer implements Player {
             }
           : param;
       });
+      const parameterTypes = parameters.map((p) => [p.name, p.type] as [string, Parameter["type"]]);
+      const parameterTypesMap = new Map<string, Parameter["type"]>(parameterTypes);
 
       const newParameters = mappedParameters.filter((param) => !this.#parameters.has(param.name));
 
       if (id === GET_ALL_PARAMS_REQUEST_ID) {
         // Reset params
         this.#parameters = new Map(mappedParameters.map((param) => [param.name, param.value]));
+        this.#parameterTypeByName = parameterTypesMap;
       } else {
         // Update params
         const updatedParameters = new Map(this.#parameters);
         mappedParameters.forEach((param) => updatedParameters.set(param.name, param.value));
         this.#parameters = updatedParameters;
+        for (const [paramName, paramType] of parameterTypesMap) {
+          this.#parameterTypeByName.set(paramName, paramType);
+        }
       }
 
       this.#emitState();
@@ -939,7 +946,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         {
           name: key,
           value: paramValueToSent as Parameter["value"],
-          type: isByteArray ? "byte_array" : undefined,
+          type: isByteArray ? "byte_array" : this.#parameterTypeByName.get(key),
         },
       ],
       uuidv4(),
@@ -1200,6 +1207,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       });
     }
     this.#fetchAssetRequests.clear();
+    this.#parameterTypeByName.clear();
   }
 
   #updateDataTypes(datatypes: MessageDefinitionMap): void {
