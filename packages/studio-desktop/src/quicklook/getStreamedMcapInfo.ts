@@ -101,7 +101,7 @@ interface GenericMcapStreamReader<R> {
 }
 
 export default async function getStreamedMcapInfo<R>(
-  file: File,
+  file: Blob,
   mcapStreamReader: GenericMcapStreamReader<R>,
   processRecord: (info: McapInfo, record: R) => void,
   fileType: string,

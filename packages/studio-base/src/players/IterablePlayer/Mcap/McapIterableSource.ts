@@ -8,7 +8,7 @@ import Log from "@foxglove/log";
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
-import { FileReadable } from "./FileReadable";
+import { BlobReadable } from "./BlobReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
 import { McapUnindexedIterableSource } from "./McapUnindexedIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
@@ -22,8 +22,12 @@ import {
 
 const log = Log.getLogger(__filename);
 
-type McapSource = { type: "file"; file: File } | { type: "url"; url: string };
+type McapSource = { type: "file"; file: Blob } | { type: "url"; url: string };
 
+/**
+ * Create a McapIndexedReader if it will be possible to do an indexed read. If the file is not
+ * indexed or is empty, returns undefined.
+ */
 async function tryCreateIndexedReader(readable: McapTypes.IReadable) {
   const decompressHandlers = await loadDecompressHandlers();
   try {
@@ -57,7 +61,7 @@ export class McapIterableSource implements IIterableSource {
         // "network error" in the event of a permission error.
         await source.file.slice(0, 1).arrayBuffer();
 
-        const readable = new FileReadable(source.file);
+        const readable = new BlobReadable(source.file);
         const reader = await tryCreateIndexedReader(readable);
         if (reader) {
           this.#sourceImpl = new McapIndexedIterableSource(reader);

@@ -2707,7 +2707,6 @@ __metadata:
     "@types/text-metrics": "workspace:*"
     "@types/three": ^0.149.0
     "@types/tinycolor2": 1.4.3
-    "@types/url-search-params": 1.1.0
     "@types/use-sync-external-store": 0.0.3
     "@types/uuid": 9.0.2
     "@types/wicg-file-system-access": 2020.9.6
@@ -2795,7 +2794,6 @@ __metadata:
     ts-loader: 9.4.4
     tss-react: 4.8.8
     typescript: 5.1.6
-    url-search-params: 1.1.0
     use-debounce: 9.0.4
     use-immer: 0.9.0
     use-sync-external-store: 1.2.0
@@ -6579,10 +6577,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:15.3.0":
-  version: 15.3.0
-  resolution: "@types/node@npm:15.3.0"
-  checksum: fb9d6c4e9be5cc7b972b97bbbe4e111f48be284ae173d6946bc336ffec8dd3bf024a3c2fb0f065e07ae499127b8ff2aa5ab098a37ca03be1b5856ba499d6f2a4
+"@types/node@npm:16.18.40":
+  version: 16.18.40
+  resolution: "@types/node@npm:16.18.40"
+  checksum: a683930491b4fd7cb2dc7684e32bbeedc4a83fb1949a7b15ea724fbfaa9988cec59091f169a3f1090cb91992caba8c1a7d50315b2c67c6e2579a3788bb09eec4
   languageName: node
   linkType: hard
 
@@ -6906,13 +6904,6 @@ __metadata:
   version: 2.0.6
   resolution: "@types/unist@npm:2.0.6"
   checksum: 25cb860ff10dde48b54622d58b23e66214211a61c84c0f15f88d38b61aa1b53d4d46e42b557924a93178c501c166aa37e28d7f6d994aba13d24685326272d5db
-  languageName: node
-  linkType: hard
-
-"@types/url-search-params@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@types/url-search-params@npm:1.1.0"
-  checksum: d279350351451a0469aaf8984e455e7480a6a64d3377e9fac7aca25c3f65014cc9792c567a7a91d8ce63f9c94b9b255e09763417a269256d40115c3803245fb1
   languageName: node
   linkType: hard
 
@@ -21195,13 +21186,6 @@ __metadata:
     querystringify: ^2.1.1
     requires-port: ^1.0.0
   checksum: fbdba6b1d83336aca2216bbdc38ba658d9cfb8fc7f665eb8b17852de638ff7d1a162c198a8e4ed66001ddbf6c9888d41e4798912c62b4fd777a31657989f7bdf
-  languageName: node
-  linkType: hard
-
-"url-search-params@npm:1.1.0":
-  version: 1.1.0
-  resolution: "url-search-params@npm:1.1.0"
-  checksum: a246b10254bd10ce941ca69549f853521d4f07b5935722d6376f3a8cc08ee238be4587b11e6e3c997696ea03b74a85d94b8e7c76b2565f832797b78a7ccbc101
   languageName: node
   linkType: hard
 

@@ -155,9 +155,18 @@ const useStyles = makeStyles()(() => ({
   },
 }));
 
-function formatCount(count: number | bigint | undefined, noun: string): string | undefined {
-  if (count == undefined || count === 0 || count === 0n) {
+function formatCount(
+  count: number | bigint | undefined,
+  noun: string,
+  options: { includeZero?: boolean } = {},
+): string | undefined {
+  if (count == undefined) {
     return undefined;
+  }
+  if (options.includeZero !== true) {
+    if (count === 0 || count === 0n) {
+      return undefined;
+    }
   }
   return `${count.toLocaleString()}\xa0${noun}${count === 1 || count === 1n ? "" : "s"}`;
 }
@@ -225,7 +234,7 @@ export default function FileInfoDisplay({
             {[
               formatCount(fileInfo?.topics?.length, "topic"),
               formatCount(fileInfo?.numChunks, "chunk"),
-              formatCount(fileInfo?.totalMessages, "message"),
+              formatCount(fileInfo?.totalMessages, "message", { includeZero: true }),
               formatCount(fileInfo?.numAttachments, "attachment"),
               formatByteSize(fileStats.size).replace(/ /g, "\xa0"),
             ]

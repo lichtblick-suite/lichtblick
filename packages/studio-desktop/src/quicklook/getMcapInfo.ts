@@ -13,7 +13,7 @@ import { FileInfo } from "./types";
 
 const log = Logger.getLogger(__filename);
 
-export async function getMcapInfo(file: File): Promise<FileInfo> {
+export async function getMcapInfo(file: Blob): Promise<FileInfo> {
   const isValidMcap = hasMcapPrefix(
     new DataView(await file.slice(0, McapConstants.MCAP_MAGIC.length).arrayBuffer()),
   );

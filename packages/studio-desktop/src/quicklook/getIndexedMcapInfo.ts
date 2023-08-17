@@ -9,7 +9,7 @@ import { fromNanoSec } from "@foxglove/rostime";
 import { FileInfo, TopicInfo } from "./types";
 
 export default async function getIndexedMcapInfo(
-  file: File,
+  file: Blob,
   decompressHandlers: McapTypes.DecompressHandlers,
 ): Promise<FileInfo> {
   const reader = await McapIndexedReader.Initialize({
@@ -33,10 +33,16 @@ export default async function getIndexedMcapInfo(
       break;
     }
   }
-  if (reader.channelsById.size === 0 || hasMissingSchemas) {
-    throw new Error(
-      "MCAP summary does not contain channels or schemas, cannot use indexed reading",
-    );
+
+  if (reader.statistics?.messageCount === 0n) {
+    // If we have statistics and they tell us definitively that there are no messages, we don't need
+    // to fall back to streamed reading.
+  } else {
+    if (reader.channelsById.size === 0 || hasMissingSchemas) {
+      throw new Error(
+        "MCAP summary does not contain channels or schemas, cannot use indexed reading",
+      );
+    }
   }
 
   const topicInfosByTopic = new Map<string, TopicInfo>();

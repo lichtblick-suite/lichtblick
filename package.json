@@ -15,6 +15,9 @@
     "email": "support@foxglove.dev"
   },
   "homepage": "https://foxglove.dev/",
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "clean": "tsc --build --clean packages/**/tsconfig.json && rimraf .webpack */.webpack dist storybook-screenshots storybook-static",
     "build:packages": "tsc --build --verbose packages/**/tsconfig.json",
@@ -59,7 +62,7 @@
     ]
   },
   "resolutions": {
-    "@types/node": "15.3.0",
+    "@types/node": "16.18.40",
     "react-dom": "patch:react-dom@npm:17.0.2#./patches/react-dom.patch",
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch",
     "react-dnd": "patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch",
