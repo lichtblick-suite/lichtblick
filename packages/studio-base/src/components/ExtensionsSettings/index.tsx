@@ -2,7 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Button, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 import { differenceWith, groupBy, isEmpty, keyBy } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
@@ -152,22 +161,21 @@ export default function ExtensionsSettings(): React.ReactElement {
     );
   }
 
-  if (marketplaceEntries.error) {
-    return (
-      <Stack gap={1} alignItems="center" justifyContent="center" fullHeight>
-        <Typography align="center" variant="body2" color="text.secondary">
-          Failed to fetch the list of available extensions. Check your Internet connection and try
-          again.
-        </Typography>
-        <Button onClick={async () => await refreshMarketplaceEntries()}>
-          Retry Fetching Extensions
-        </Button>
-      </Stack>
-    );
-  }
-
   return (
     <Stack gap={1}>
+      {marketplaceEntries.error && (
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" onClick={async () => await refreshMarketplaceEntries()}>
+              Retry
+            </Button>
+          }
+        >
+          <AlertTitle>Failed to retrieve the list of available marketplace extensions</AlertTitle>
+          Check your internet connection and try again.
+        </Alert>
+      )}
       {!isEmpty(namespacedEntries) ? (
         Object.entries(namespacedEntries).map(([namespace, entries]) => (
           <List key={namespace}>

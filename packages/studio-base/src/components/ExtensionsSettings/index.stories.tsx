@@ -103,3 +103,26 @@ export const Sidebar: StoryObj = {
     );
   },
 };
+
+export const WithoutNetwork: StoryObj = {
+  render: function Story() {
+    const [config] = useState(() => makeMockAppConfiguration());
+
+    const marketPlace = {
+      ...MockExtensionMarketplace,
+      getAvailableExtensions: () => {
+        throw new Error("offline");
+      },
+    };
+
+    return (
+      <AppConfigurationContext.Provider value={config}>
+        <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
+          <ExtensionMarketplaceContext.Provider value={marketPlace}>
+            <ExtensionsSettings />
+          </ExtensionMarketplaceContext.Provider>
+        </ExtensionCatalogProvider>
+      </AppConfigurationContext.Provider>
+    );
+  },
+};
