@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Button, inputBaseClasses, TextField, Tooltip, Typography } from "@mui/material";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
@@ -23,6 +23,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
+import { useDefaultPanelTitle } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -117,6 +118,16 @@ function Publish(props: Props) {
       throw new Error(`called _publish() when input was invalid`);
     }
   }, [config.topicName, parsedObject, publish]);
+
+  const [, setDefaultPanelTitle] = useDefaultPanelTitle();
+
+  useEffect(() => {
+    if (config.topicName != undefined && config.topicName.length > 0) {
+      setDefaultPanelTitle(`Publish ${config.topicName}`);
+    } else {
+      setDefaultPanelTitle("Publish");
+    }
+  }, [config.topicName, setDefaultPanelTitle]);
 
   const canPublish = Boolean(
     capabilities.includes(PlayerCapabilities.advertise) &&

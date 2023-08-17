@@ -165,9 +165,11 @@ function FieldInput({
           renderInput={(params) => (
             <TextField {...params} variant="filled" size="small" placeholder={field.placeholder} />
           )}
-          onInputChange={(_event, value) =>
-            actionHandler({ action: "update", payload: { path, input: "autocomplete", value } })
-          }
+          onInputChange={(_event, value, reason) => {
+            if (reason === "input") {
+              actionHandler({ action: "update", payload: { path, input: "autocomplete", value } });
+            }
+          }}
           onChange={(_event, value) =>
             actionHandler({
               action: "update",

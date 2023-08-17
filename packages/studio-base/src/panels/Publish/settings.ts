@@ -9,10 +9,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
 import buildSampleMessage from "@foxglove/studio-base/panels/Publish/buildSampleMessage";
 import { Topic } from "@foxglove/studio-base/players/types";
-import {
-  useDefaultPanelTitle,
-  usePanelSettingsTreeUpdate,
-} from "@foxglove/studio-base/providers/PanelStateContextProvider";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
@@ -98,7 +95,6 @@ export function usePublishPanelSettings(
   datatypes: Immutable<RosDatatypes>,
 ): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-  const [, setDefaultPanelTitle] = useDefaultPanelTitle();
   const schemaNames = useMemo(() => Array.from(datatypes.keys()).sort(), [datatypes]);
 
   const actionHandler = useCallback(
@@ -114,7 +110,6 @@ export function usePublishPanelSettings(
             if (isEqual(path, ["general", "topicName"])) {
               const topicSchemaName = topics.find((t) => t.name === value)?.schemaName;
               const sampleMessage = getSampleMessage(datatypes, topicSchemaName);
-              setDefaultPanelTitle(value ? `Publish ${value}` : "Publish");
 
               draft.topicName = value;
 
@@ -139,7 +134,7 @@ export function usePublishPanelSettings(
         }),
       );
     },
-    [datatypes, saveConfig, setDefaultPanelTitle, topics],
+    [datatypes, saveConfig, topics],
   );
 
   useEffect(() => {
