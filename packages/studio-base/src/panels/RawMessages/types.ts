@@ -22,4 +22,5 @@ export type RawMessagesPanelConfig = {
 export const Constants = {
   CUSTOM_METHOD: "custom",
   PREV_MSG_METHOD: "previous message",
+  FONT_SIZE_OPTIONS: [8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 36, 48, 60, 72],
 } as const;
