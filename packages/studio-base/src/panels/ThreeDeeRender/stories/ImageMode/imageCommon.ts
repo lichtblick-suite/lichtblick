@@ -72,6 +72,7 @@ export function makeRawImageAndCalibration(args: MakeImageArgs): {
       frame_id: frameId,
       width,
       height,
+      step: 3 * width,
       encoding: "rgb8",
       data: imageData,
     },

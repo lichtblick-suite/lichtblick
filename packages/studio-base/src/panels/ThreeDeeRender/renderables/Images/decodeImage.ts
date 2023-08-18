@@ -55,49 +55,49 @@ export function decodeRawImage(
   options: Partial<RawImageOptions>,
   output: Uint8ClampedArray,
 ): void {
-  const { encoding, width, height } = image;
+  const { encoding, width, height, step } = image;
   const is_bigendian = "is_bigendian" in image ? image.is_bigendian : false;
   const rawData = image.data as Uint8Array;
   switch (encoding) {
     case "yuv422":
     case "uyvy":
-      decodeUYVY(rawData, width, height, output);
+      decodeUYVY(rawData, width, height, step, output);
       break;
     case "yuv422_yuy2":
     case "yuyv":
-      decodeYUYV(rawData, width, height, output);
+      decodeYUYV(rawData, width, height, step, output);
       break;
     case "rgb8":
-      decodeRGB8(rawData, width, height, output);
+      decodeRGB8(rawData, width, height, step, output);
       break;
     case "rgba8":
-      decodeRGBA8(rawData, width, height, output);
+      decodeRGBA8(rawData, width, height, step, output);
       break;
     case "bgra8":
-      decodeBGRA8(rawData, width, height, output);
+      decodeBGRA8(rawData, width, height, step, output);
       break;
     case "bgr8":
     case "8UC3":
-      decodeBGR8(rawData, width, height, output);
+      decodeBGR8(rawData, width, height, step, output);
       break;
     case "32FC1":
-      decodeFloat1c(rawData, width, height, is_bigendian, output);
+      decodeFloat1c(rawData, width, height, step, is_bigendian, output);
       break;
     case "bayer_rggb8":
-      decodeBayerRGGB8(rawData, width, height, output);
+      decodeBayerRGGB8(rawData, width, height, step, output);
       break;
     case "bayer_bggr8":
-      decodeBayerBGGR8(rawData, width, height, output);
+      decodeBayerBGGR8(rawData, width, height, step, output);
       break;
     case "bayer_gbrg8":
-      decodeBayerGBRG8(rawData, width, height, output);
+      decodeBayerGBRG8(rawData, width, height, step, output);
       break;
     case "bayer_grbg8":
-      decodeBayerGRBG8(rawData, width, height, output);
+      decodeBayerGRBG8(rawData, width, height, step, output);
       break;
     case "mono8":
     case "8UC1":
-      decodeMono8(rawData, width, height, output);
+      decodeMono8(rawData, width, height, step, output);
       break;
     case "mono16":
     case "16UC1": {
@@ -117,7 +117,7 @@ export function decodeRawImage(
         min,
         max,
       );
-      decodeMono16(rawData, width, height, is_bigendian, output, {
+      decodeMono16(rawData, width, height, step, is_bigendian, output, {
         minValue: options.minValue,
         maxValue: options.maxValue,
         colorConverter: (value: number) => {
