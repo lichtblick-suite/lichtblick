@@ -12,9 +12,7 @@ import { useShallowMemo } from "@foxglove/hooks";
 import { isGreaterThan, isLessThan, isTimeInRangeInclusive, subtract } from "@foxglove/rostime";
 import { Immutable, Subscription, Time } from "@foxglove/studio";
 import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
-import parseRosPath, {
-  getTopicsFromPaths,
-} from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { useCachedGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
 import useGlobalVariables, {
@@ -22,7 +20,8 @@ import useGlobalVariables, {
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { derivative } from "@foxglove/studio-base/panels/Plot/transformPlotRange";
 import { useStableValidPathsForDatasourceTopics } from "@foxglove/studio-base/panels/Plot/useStableValidPathsForDatasourceTopics";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
+import { MessageEvent, SubscribePayload } from "@foxglove/studio-base/players/types";
 import { Bounds, makeInvertedBounds, unionBounds } from "@foxglove/studio-base/types/Bounds";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
@@ -163,11 +162,6 @@ export function usePlotPanelData(params: Params): Immutable<{
     [validAllPaths],
   );
 
-  const subscribeTopics = useMemo(
-    () => getTopicsFromPaths(validAllPathValues),
-    [validAllPathValues],
-  );
-
   const theme = useTheme();
 
   // When iterating message events, we need a reverse lookup from topic to the
@@ -177,13 +171,22 @@ export function usePlotPanelData(params: Params): Immutable<{
     [validAllPaths],
   );
 
-  const subscriptions: Subscription[] = useMemo(() => {
-    return subscribeTopics.map((topic) => ({ topic, preload: true }));
-  }, [subscribeTopics]);
+  const subscriptions: SubscribePayload[] = useMemo(
+    () =>
+      filterMap(validAllPaths, (path) => {
+        const payload = subscribePayloadFromMessagePath(path.value, "full");
+        // If the path is ordered by header stamp we have to include the header in sliced fields.
+        if (path.timestampMethod === "headerStamp" && payload?.fields != undefined) {
+          payload.fields.push("header");
+        }
+        return payload;
+      }),
+    [validAllPaths],
+  );
 
   const [state, setState] = useState(makeInitialState);
 
-  const allFramesByTopic = useAllFramesByTopic(subscribeTopics);
+  const allFramesByTopic = useAllFramesByTopic(subscriptions);
 
   // If showing a single message skip all messages coming from allFrames and use the messages from
   // useMessageReducer only.
@@ -214,17 +217,30 @@ export function usePlotPanelData(params: Params): Immutable<{
       const newState = resetDatasets ? makeInitialState() : oldState;
       const newDataItems: Map<PlotPath, PlotDataItem[]> = new Map();
       const newCursors: Map<PlotPath, number> = new Map();
+      const newDatasetsByPath: Map<PlotPath, Immutable<DataSet>> = new Map();
       let haveNewMessages = false;
       for (const path of validAllPaths) {
-        newCursors.set(path, newState.cursors.get(path) ?? 0);
-
         const topic = parseRosPath(path.value)?.topicName;
         if (topic == undefined) {
           continue;
         }
 
-        const newMessages = allFramesToProcess[topic]?.slice(newCursors.get(path) ?? 0);
+        // True if messages contain the same fields as our previous state. If so we can reuse the
+        // previous cursor.
+        const isSameMessageContent =
+          allFramesToProcess[topic]?.[0] === newState.allFrames[topic]?.[0];
 
+        if (isSameMessageContent) {
+          newCursors.set(path, newState.cursors.get(path) ?? 0);
+          const oldDataset = oldState.data.datasetsByPath.get(path);
+          if (oldDataset) {
+            newDatasetsByPath.set(path, oldDataset);
+          }
+        } else {
+          newCursors.set(path, 0);
+        }
+
+        const newMessages = allFramesToProcess[topic]?.slice(newCursors.get(path) ?? 0);
         if (newMessages == undefined || newMessages.length === 0) {
           continue;
         }
@@ -260,7 +276,13 @@ export function usePlotPanelData(params: Params): Immutable<{
         allFrames: allFramesToProcess,
         allPaths: validAllPaths,
         cursors: newCursors,
-        data: appendPlotData(newState.data, newPlotData),
+        data: appendPlotData(
+          {
+            ...newState.data,
+            datasetsByPath: newDatasetsByPath,
+          },
+          newPlotData,
+        ),
         globalVariables,
         subscriptions,
         xAxisPath: xAxisPathAsFullPlotPath,
@@ -406,8 +428,8 @@ export function usePlotPanelData(params: Params): Immutable<{
   );
 
   const currentFrameData = useMessageReducer<TaggedPlotData>({
-    topics: subscribeTopics,
-    preloadType: "full",
+    topics: subscriptions,
+    preloadType: "partial",
     restore,
     addMessages,
   });

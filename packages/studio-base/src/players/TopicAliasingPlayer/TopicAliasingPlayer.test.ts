@@ -32,6 +32,31 @@ describe("TopicAliasingPlayer", () => {
     ]);
   });
 
+  it("preserves sliced subscriptions", async () => {
+    const fakePlayer = new FakePlayer();
+    const mappers: TopicAliasFunctions = [
+      {
+        extensionId: "anh",
+        aliasFunction: () => [{ sourceTopicName: "/original_topic_1", name: "/renamed_topic_1" }],
+      },
+    ];
+    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    player.setListener(async () => {});
+    player.setSubscriptions([
+      { topic: "/renamed_topic_1", fields: ["a", "b"] },
+      { topic: "/topic_2", fields: ["c", "d"] },
+    ]);
+    await fakePlayer.emit(
+      mockPlayerState(undefined, {
+        topics: [{ name: "/original_topic_1", schemaName: "any.schema" }],
+      }),
+    );
+    expect(fakePlayer.subscriptions).toEqual([
+      { topic: "/original_topic_1", fields: ["a", "b"] },
+      { topic: "/topic_2", fields: ["c", "d"] },
+    ]);
+  });
+
   it("maps messages", async () => {
     const fakePlayer = new FakePlayer();
     const mappers: TopicAliasFunctions = [

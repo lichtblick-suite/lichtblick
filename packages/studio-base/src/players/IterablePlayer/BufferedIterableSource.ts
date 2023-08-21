@@ -100,7 +100,7 @@ class BufferedIterableSource extends EventEmitter<EventTypes> implements IIterab
       throw new Error("Invariant: uninitialized");
     }
 
-    if (args.topics.length === 0) {
+    if (args.topics.size === 0) {
       this.#readDone = true;
       return;
     }
@@ -248,7 +248,7 @@ class BufferedIterableSource extends EventEmitter<EventTypes> implements IIterab
     const self = this;
     return (async function* bufferedIterableGenerator() {
       try {
-        if (args.topics.length === 0) {
+        if (args.topics.size === 0) {
           return;
         }
 

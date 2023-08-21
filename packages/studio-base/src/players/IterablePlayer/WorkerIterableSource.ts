@@ -5,7 +5,7 @@
 import * as Comlink from "comlink";
 
 import { abortSignalTransferHandler } from "@foxglove/comlink-transfer-handlers";
-import { MessageEvent, Time } from "@foxglove/studio";
+import { Immutable, MessageEvent, Time } from "@foxglove/studio";
 
 import type {
   GetBackfillMessagesArgs,
@@ -84,7 +84,9 @@ export class WorkerIterableSource implements IIterableSource {
     return await this.#worker.getBackfillMessages(rest, abortSignal);
   }
 
-  public getMessageCursor(args: MessageIteratorArgs & { abort?: AbortSignal }): IMessageCursor {
+  public getMessageCursor(
+    args: Immutable<MessageIteratorArgs & { abort?: AbortSignal }>,
+  ): IMessageCursor {
     if (this.#worker == undefined) {
       throw new Error(`WorkerIterableSource is not initialized`);
     }

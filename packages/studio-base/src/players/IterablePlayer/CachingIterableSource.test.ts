@@ -3,14 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessageEvent } from "@foxglove/studio";
+import { mockTopicSelection } from "@foxglove/studio-base/test/mocks/mockTopicSelection";
 
 import { CachingIterableSource } from "./CachingIterableSource";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
   Initalization,
-  MessageIteratorArgs,
   IteratorResult,
+  MessageIteratorArgs,
 } from "./IIterableSource";
 
 class TestSource implements IIterableSource {
@@ -70,7 +71,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // confirm messages are what we expect
@@ -109,7 +110,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // confirm messages are what we expect
@@ -163,7 +164,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       for await (const _ of messageIterator) {
@@ -175,7 +176,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: [],
+        topics: new Map(),
       });
 
       await messageIterator.next();
@@ -206,7 +207,7 @@ describe("CachingIterableSource", () => {
       };
 
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 5, nsec: 0 },
       });
 
@@ -256,7 +257,7 @@ describe("CachingIterableSource", () => {
       };
 
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 0, nsec: 0 },
       });
 
@@ -353,7 +354,7 @@ describe("CachingIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     await messageIterator.next();
@@ -388,7 +389,7 @@ describe("CachingIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     await messageIterator.next();
@@ -432,7 +433,7 @@ describe("CachingIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
       end: { sec: 4, nsec: 0 },
     });
 
@@ -490,7 +491,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       for await (const _ of messageIterator) {
@@ -499,7 +500,7 @@ describe("CachingIterableSource", () => {
     }
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
       end: { sec: 4, nsec: 0 },
     });
 
@@ -548,7 +549,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // load all the messages into cache
@@ -567,7 +568,7 @@ describe("CachingIterableSource", () => {
     };
 
     const backfill = await bufferedSource.getBackfillMessages({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
       time: { sec: 2, nsec: 0 },
     });
     expect(backfill).toEqual([
@@ -614,7 +615,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a", "b"],
+        topics: mockTopicSelection("a", "b"),
       });
 
       // load all the messages into cache
@@ -633,7 +634,7 @@ describe("CachingIterableSource", () => {
     };
 
     const backfill = await bufferedSource.getBackfillMessages({
-      topics: ["a", "b"],
+      topics: mockTopicSelection("a", "b"),
       time: { sec: 2, nsec: 500 },
     });
     expect(backfill).toEqual([
@@ -682,7 +683,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // load all the messages into cache
@@ -722,7 +723,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // load all the messages into cache
@@ -735,7 +736,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a", "b"],
+        topics: mockTopicSelection("a", "b"),
       });
 
       await messageIterator.next();
@@ -771,7 +772,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // confirm messages are what we expect
@@ -810,7 +811,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // confirm messages are what we expect when reading from the cache
@@ -877,7 +878,7 @@ describe("CachingIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a", "b"],
+        topics: mockTopicSelection("a", "b"),
       });
 
       // load all the messages into cache
@@ -896,7 +897,7 @@ describe("CachingIterableSource", () => {
     };
 
     const backfill = await bufferedSource.getBackfillMessages({
-      topics: ["a", "b"],
+      topics: mockTopicSelection("a", "b"),
       time: { sec: 2, nsec: 0 },
     });
 

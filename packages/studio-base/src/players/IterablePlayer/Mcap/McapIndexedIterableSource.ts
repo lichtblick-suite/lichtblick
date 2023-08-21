@@ -4,6 +4,7 @@
 
 import { McapIndexedReader, McapTypes } from "@mcap/core";
 
+import { pickFields } from "@foxglove/den/records";
 import Logger from "@foxglove/log";
 import { ParsedChannel, parseChannel } from "@foxglove/mcap-support";
 import { Time, fromNanoSec, toNanoSec, compare } from "@foxglove/rostime";
@@ -124,14 +125,16 @@ export class McapIndexedIterableSource implements IIterableSource {
     const start = args.start ?? this.#start;
     const end = args.end ?? this.#end;
 
-    if (topics.length === 0 || !start || !end) {
+    if (topics.size === 0 || !start || !end) {
       return;
     }
+
+    const topicNames = Array.from(topics.keys());
 
     for await (const message of this.#reader.readMessages({
       startTime: toNanoSec(start),
       endTime: toNanoSec(end),
-      topics,
+      topics: topicNames,
       validateCrcs: false,
     })) {
       const channelInfo = this.#channelInfoById.get(message.channelId);
@@ -146,14 +149,20 @@ export class McapIndexedIterableSource implements IIterableSource {
         continue;
       }
       try {
+        const msg = channelInfo.parsedChannel.deserialize(message.data) as Record<string, unknown>;
+        const spec = args.topics.get(channelInfo.channel.topic);
+        const payload = spec?.fields != undefined ? pickFields(msg, spec.fields) : msg;
         yield {
           type: "message-event",
           msgEvent: {
             topic: channelInfo.channel.topic,
             receiveTime: fromNanoSec(message.logTime),
             publishTime: fromNanoSec(message.publishTime),
-            message: channelInfo.parsedChannel.deserialize(message.data),
-            sizeInBytes: message.data.byteLength,
+            message: payload,
+            // Treat sliced messages as zero bytes. This is a rough approximation of course but the
+            // alternative is taking the performance hit of sizing the sliced fields for each
+            // message.
+            sizeInBytes: spec?.fields == undefined ? message.data.byteLength : 0,
             schemaName: channelInfo.schemaName ?? "",
           },
         };
@@ -174,7 +183,7 @@ export class McapIndexedIterableSource implements IIterableSource {
     const { topics, time } = args;
 
     const messages: MessageEvent[] = [];
-    for (const topic of topics) {
+    for (const topic of topics.keys()) {
       // NOTE: An iterator is made for each topic to get the latest message on that topic.
       // An single iterator for all the topics could result in iterating through many
       // irrelevant messages to get to an older message on a topic.

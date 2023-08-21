@@ -27,9 +27,12 @@ export type { MessageEvent };
 export type MessageDefinitionsByTopic = {
   [topic: string]: string;
 };
+
 export type ParsedMessageDefinitionsByTopic = {
   [topic: string]: MessageDefinition[];
 };
+
+export type TopicSelection = Map<string, SubscribePayload>;
 
 // A `Player` is a class that manages playback state. It manages subscriptions,
 // current time, which topics and datatypes are available, and so on.
@@ -252,6 +255,11 @@ export type MessageBlock = {
   readonly messagesByTopic: {
     readonly [topic: string]: MessageEvent[];
   };
+  /**
+   * Indicates which topics are yet to be fully loaded for this block. Can be used to track the
+   * progress of block loading. For a fully loaded block this will be empty or undefined.
+   */
+  needTopics?: TopicSelection;
   readonly sizeInBytes: number;
 };
 
@@ -274,10 +282,22 @@ export type SubscriptionPreloadType =
   | "full" // Fetch messages for the entire content range.
   | "partial"; // Fetch messages as needed.
 
-// Represents a subscription to a single topic, for use in `setSubscriptions`.
+/**
+ * Represents a subscription to a single topic, for use in `setSubscriptions`.
+ */
 export type SubscribePayload = {
-  // The topic name to subscribe to
+  /**
+   * The name of the topic to subscribe to.
+   */
   topic: string;
+  /**
+   * If defined the source will return only these fields from messages. Otherwize entire messages
+   * will be returned.
+   */
+  fields?: string[];
+  /**
+   * Defines the range of messages to subscribe to.
+   */
   preloadType?: SubscriptionPreloadType;
 };
 

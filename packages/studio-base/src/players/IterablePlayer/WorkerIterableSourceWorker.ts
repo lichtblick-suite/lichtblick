@@ -5,7 +5,7 @@
 import * as Comlink from "comlink";
 
 import { abortSignalTransferHandler } from "@foxglove/comlink-transfer-handlers";
-import { MessageEvent } from "@foxglove/studio";
+import { Immutable, MessageEvent } from "@foxglove/studio";
 
 import type {
   GetBackfillMessagesArgs,
@@ -47,7 +47,7 @@ export class WorkerIterableSourceWorker implements IIterableSource {
   }
 
   public getMessageCursor(
-    args: Omit<MessageIteratorArgs, "abort">,
+    args: Omit<Immutable<MessageIteratorArgs>, "abort">,
     abort?: AbortSignal,
   ): IMessageCursor & Comlink.ProxyMarked {
     const iter = this._source.messageIterator(args);

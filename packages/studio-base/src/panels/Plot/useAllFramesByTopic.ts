@@ -45,18 +45,13 @@ const selectSetSubscriptions = (ctx: MessagePipelineContext) => ctx.setSubscript
  * @returns flattened per-topic arrays of messages
  */
 export function useAllFramesByTopic(
-  topics: readonly string[],
+  subscriptions: Immutable<SubscribePayload[]>,
 ): Immutable<Record<string, MessageEvent[]>> {
   const [state, setState] = useState(makeInitialState);
 
   const [subscriberId] = useState(() => uuidv4());
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
-
-  const subscriptions: SubscribePayload[] = useMemo(
-    () => topics.map((topic) => ({ topic, preloadType: "full" })),
-    [topics],
-  );
 
   useEffect(() => {
     setSubscriptions(subscriberId, subscriptions);
@@ -65,6 +60,8 @@ export function useAllFramesByTopic(
       setSubscriptions(subscriberId, []);
     };
   }, [subscriberId, setSubscriptions, subscriptions]);
+
+  const topics = useMemo(() => subscriptions.map((sub) => sub.topic), [subscriptions]);
 
   useEffect(() => {}, [subscriberId, setSubscriptions]);
 
@@ -111,6 +108,13 @@ export function useAllFramesByTopic(
       // append new messages to accumulating per-topic buffers and update cursors
       for (const [idx, block] of blocks.entries()) {
         if (block == undefined) {
+          break;
+        }
+
+        // Only include fully loaded blocks. This is necessary because existing blocks may contain
+        // messages on our topics but that have not been updated to contain the list of fields we're
+        // currently subscribed for.
+        if (block.needTopics?.size !== 0) {
           break;
         }
 

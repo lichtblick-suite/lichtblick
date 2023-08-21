@@ -2749,6 +2749,7 @@ __metadata:
     mathjs: 11.9.1
     memoize-weak: 1.0.2
     meshoptimizer: 0.19.0
+    moize: 6.1.6
     moment: 2.29.4
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.43
@@ -11886,6 +11887,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-equals@npm:^3.0.1":
+  version: 3.0.3
+  resolution: "fast-equals@npm:3.0.3"
+  checksum: e7ac0ae5a10289c773f75654ced22563837336bde7ebb595b7d238a20b77008a821c1ca3526a50e96fe0662ced7454cf99b7488bb64506463a4f4729c523ac4c
+  languageName: node
+  linkType: hard
+
 "fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.9":
   version: 3.2.12
   resolution: "fast-glob@npm:3.2.12"
@@ -15653,6 +15661,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"micro-memoize@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "micro-memoize@npm:4.1.2"
+  checksum: 4b02750622d44b5ab31573c629b5d91927dd0c2727743ff75e790c223ab6cd02c48cc3bddea69da0dffb688091a0a71a17944947dd165f8ba9e03728bc30a76d
+  languageName: node
+  linkType: hard
+
 "micromark-core-commonmark@npm:^1.0.1":
   version: 1.0.5
   resolution: "micromark-core-commonmark@npm:1.0.5"
@@ -16146,6 +16161,16 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: a96865108c6c3b1b8e1d5e9f11843de1e077e57737602de1b82030815f311be11f96f09cce59bd5b903d0b29834733e5313f9301e3ed6d6f6fba2eae0df4298f
+  languageName: node
+  linkType: hard
+
+"moize@npm:6.1.6":
+  version: 6.1.6
+  resolution: "moize@npm:6.1.6"
+  dependencies:
+    fast-equals: ^3.0.1
+    micro-memoize: ^4.1.2
+  checksum: a81c56e8d3d30ad0c324369ab636e48b9799abb7f5e0955250f99744dbea456848107d293436face8e12acf7bc820e759048118083cc37644a4c95a37c66e566
   languageName: node
   linkType: hard
 

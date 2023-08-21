@@ -132,7 +132,7 @@ export class UlogIterableSource implements IIterableSource {
       throw new Error(`UlogDataProvider is not initialized`);
     }
 
-    if (topics.length === 0) {
+    if (topics.size === 0) {
       return;
     }
 
@@ -145,7 +145,7 @@ export class UlogIterableSource implements IIterableSource {
         const receiveTime = fromMicros(Number(timestamp));
         const sub = this.#ulog.subscriptions.get(msg.msgId);
         const topic = sub?.name;
-        if (topic && topics.includes(topic) && isTimeInRangeInclusive(receiveTime, start, end)) {
+        if (topic && topics.has(topic) && isTimeInRangeInclusive(receiveTime, start, end)) {
           yield {
             type: "message-event",
             msgEvent: {
@@ -159,7 +159,7 @@ export class UlogIterableSource implements IIterableSource {
         }
       } else if (msg.type === MessageType.Log || msg.type === MessageType.LogTagged) {
         const receiveTime = fromMicros(Number(msg.timestamp));
-        if (topics.includes(LOG_TOPIC) && isTimeInRangeInclusive(receiveTime, start, end)) {
+        if (topics.has(LOG_TOPIC) && isTimeInRangeInclusive(receiveTime, start, end)) {
           yield {
             type: "message-event",
             msgEvent: {

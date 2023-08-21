@@ -115,7 +115,7 @@ export class RosDb3IterableSource implements IIterableSource {
     }
 
     const topics = opt.topics;
-    if (topics.length === 0) {
+    if (topics.size === 0) {
       return;
     }
 
@@ -128,7 +128,7 @@ export class RosDb3IterableSource implements IIterableSource {
     const msgIterator = this.#bag.readMessages({
       startTime: start,
       endTime: inclusiveEndTime,
-      topics,
+      topics: Array.from(topics.keys()),
     });
     for await (const msg of msgIterator) {
       yield {

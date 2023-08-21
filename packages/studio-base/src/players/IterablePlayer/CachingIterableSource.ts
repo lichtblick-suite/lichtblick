@@ -7,8 +7,9 @@ import { isEqual, sortedIndexBy } from "lodash";
 
 import { minIndexBy, sortedIndexByTuple } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
-import { subtract, add, toNanoSec, compare } from "@foxglove/rostime";
-import { Time, MessageEvent } from "@foxglove/studio";
+import { add, compare, subtract, toNanoSec } from "@foxglove/rostime";
+import { MessageEvent, Time } from "@foxglove/studio";
+import { TopicSelection } from "@foxglove/studio-base/players/types";
 import { Range } from "@foxglove/studio-base/util/ranges";
 
 import {
@@ -69,7 +70,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
   #source: IIterableSource;
 
   // Stores which topics we have been caching. See notes at usage site for why we store this.
-  #cachedTopics: string[] = [];
+  #cachedTopics: TopicSelection = new Map();
 
   // The producer loads results into the cache and the consumer reads from the cache.
   #cache: CacheBlock[] = [];
@@ -102,7 +103,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
 
   public async terminate(): Promise<void> {
     this.#cache.length = 0;
-    this.#cachedTopics.length = 0;
+    this.#cachedTopics.clear();
   }
 
   public loadedRanges(): Range[] {
@@ -119,13 +120,12 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     const maxEnd = args.end ?? this.#initResult.end;
     const maxEndNanos = toNanoSec(maxEnd);
 
-    const newTopics = [...args.topics].sort();
-
     // When the list of topics we want changes we purge the entire cache and start again.
+    //
     // This is heavy-handed but avoids dealing with how to handle disjoint cached ranges across topics.
-    if (!isEqual(newTopics, this.#cachedTopics)) {
+    if (!isEqual(args.topics, this.#cachedTopics)) {
       log.debug("topics changed - clearing cache, resetting range");
-      this.#cachedTopics = newTopics;
+      this.#cachedTopics = args.topics;
       this.#cache.length = 0;
       this.#totalSizeBytes = 0;
       this.#recomputeLoadedRangeCache();
@@ -375,7 +375,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     });
 
     const out: MessageEvent[] = [];
-    const needsTopics = new Set(args.topics);
+    const needsTopics = new Map(args.topics);
 
     // Starting at the block we found for args.time, work backwards through blocks until:
     // * we've loaded all the topics
@@ -442,7 +442,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     // fallback to the source for any topics we weren't able to load
     const sourceBackfill = await this.#source.getBackfillMessages({
       ...args,
-      topics: Array.from(needsTopics),
+      topics: needsTopics,
     });
 
     out.push(...sourceBackfill);

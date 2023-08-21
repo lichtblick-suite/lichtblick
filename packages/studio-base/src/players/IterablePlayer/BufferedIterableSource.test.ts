@@ -5,14 +5,15 @@
 import { debounce } from "lodash";
 
 import { MessageEvent } from "@foxglove/studio";
+import { mockTopicSelection } from "@foxglove/studio-base/test/mocks/mockTopicSelection";
 
 import { BufferedIterableSource } from "./BufferedIterableSource";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
   Initalization,
-  MessageIteratorArgs,
   IteratorResult,
+  MessageIteratorArgs,
 } from "./IIterableSource";
 
 function waiter(count: number) {
@@ -94,7 +95,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     // confirm messages are what we expect
@@ -155,7 +156,7 @@ describe("BufferedIterableSource", () => {
 
     {
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
       });
 
       // confirm messages are what we expect
@@ -213,7 +214,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     await signal.wait();
@@ -274,7 +275,7 @@ describe("BufferedIterableSource", () => {
     };
 
     bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     await partialBuffer.wait();
@@ -312,7 +313,7 @@ describe("BufferedIterableSource", () => {
       };
 
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 5, nsec: 0 },
       });
 
@@ -343,7 +344,7 @@ describe("BufferedIterableSource", () => {
       };
 
       const messageIterator = bufferedSource.messageIterator({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 0, nsec: 0 },
       });
 
@@ -416,7 +417,7 @@ describe("BufferedIterableSource", () => {
       args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       expect(args).toEqual({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 0, nsec: 0 },
         end: { sec: 10, nsec: 0 },
         consumptionType: "partial",
@@ -439,7 +440,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     // Reading the first message buffers some data
@@ -480,7 +481,7 @@ describe("BufferedIterableSource", () => {
       args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       expect(args).toEqual({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 0, nsec: 0 },
         end: { sec: 10, nsec: 0 },
         consumptionType: "partial",
@@ -503,7 +504,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     // Reading the first message should buffer a minimum amount
@@ -557,7 +558,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     {
@@ -595,7 +596,7 @@ describe("BufferedIterableSource", () => {
       args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       expect(args).toEqual({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 0, nsec: 0 },
         end: { sec: 10, nsec: 0 },
         consumptionType: "partial",
@@ -612,7 +613,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     // Reading the first message buffers some data
@@ -652,7 +653,7 @@ describe("BufferedIterableSource", () => {
       args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       expect(args).toEqual({
-        topics: ["a"],
+        topics: mockTopicSelection("a"),
         start: { sec: 0, nsec: 0 },
         end: { sec: 10, nsec: 0 },
         consumptionType: "partial",
@@ -669,7 +670,7 @@ describe("BufferedIterableSource", () => {
     };
 
     const messageIterator = bufferedSource.messageIterator({
-      topics: ["a"],
+      topics: mockTopicSelection("a"),
     });
 
     // Reading the first message buffers some data

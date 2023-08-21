@@ -23,6 +23,7 @@ import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
+import { mergeSubscriptions } from "@foxglove/studio-base/components/MessagePipeline/subscriptions";
 import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { MemoizedLibGenerator } from "@foxglove/studio-base/players/UserNodePlayer/MemoizedLibGenerator";
@@ -331,6 +332,7 @@ export default class UserNodePlayer implements Player {
       // behavior.
       outputBlocks.push({
         messagesByTopic,
+        needTopics: block.needTopics,
         sizeInBytes: block.sizeInBytes,
       });
     }
@@ -1066,7 +1068,10 @@ export default class UserNodePlayer implements Player {
     }
 
     this.#nodeSubscriptions = nodeSubscriptions;
-    this.#player.setSubscriptions(realTopicSubscriptions);
+
+    // Merge subscriptions we pass on to the underlying player.
+    const mergedSubscriptions = mergeSubscriptions(realTopicSubscriptions);
+    this.#player.setSubscriptions(mergedSubscriptions);
   }
 
   public close = (): void => {

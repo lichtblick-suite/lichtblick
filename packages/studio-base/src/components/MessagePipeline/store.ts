@@ -8,7 +8,11 @@ import shallowequal from "shallowequal";
 import { createStore, StoreApi } from "zustand";
 
 import { Condvar } from "@foxglove/den/async";
-import { MessageEvent } from "@foxglove/studio";
+import { Immutable, MessageEvent } from "@foxglove/studio";
+import {
+  makeSubscriptionMemoizer,
+  mergeSubscriptions,
+} from "@foxglove/studio-base/components/MessagePipeline/subscriptions";
 import {
   AdvertiseOptions,
   Player,
@@ -44,8 +48,9 @@ export type MessagePipelineInternalState = {
 
   /** used to keep track of whether we need to update public.startPlayback/playUntil/etc. */
   lastCapabilities: string[];
-
-  subscriptionsById: Map<string, SubscribePayload[]>;
+  // Preserves reference equality of subscriptions to minimize player subscription churn.
+  subscriptionMemoizer: (sub: SubscribePayload) => SubscribePayload;
+  subscriptionsById: Map<string, Immutable<SubscribePayload[]>>;
   publishersById: { [key: string]: AdvertiseOptions[] };
   allPublishers: AdvertiseOptions[];
   subscriberIdsByTopic: Map<string, string[]>;
@@ -61,7 +66,7 @@ export type MessagePipelineInternalState = {
 type UpdateSubscriberAction = {
   type: "update-subscriber";
   id: string;
-  payloads: SubscribePayload[];
+  payloads: Immutable<SubscribePayload[]>;
 };
 type UpdatePlayerStateAction = {
   type: "update-player-state";
@@ -85,6 +90,7 @@ export function createMessagePipelineStore({
     player: initialPlayer,
     publishersById: {},
     allPublishers: [],
+    subscriptionMemoizer: makeSubscriptionMemoizer(),
     subscriptionsById: new Map(),
     subscriberIdsByTopic: new Map(),
     newTopicsBySubscriberId: new Map(),
@@ -100,6 +106,7 @@ export function createMessagePipelineStore({
         ...prev,
         publishersById: {},
         allPublishers: [],
+        subscriptionMemoizer: makeSubscriptionMemoizer(),
         subscriptionsById: new Map(),
         subscriberIdsByTopic: new Map(),
         newTopicsBySubscriberId: new Map(),
@@ -226,8 +233,6 @@ function updateSubscriberAction(
 
   const subscriberIdsByTopic = new Map<string, string[]>();
 
-  const subscriptions: SubscribePayload[] = [];
-
   // make a map of topics to subscriber ids
   for (const [id, subs] of newSubscriptionsById) {
     for (const subscription of subs) {
@@ -236,9 +241,10 @@ function updateSubscriberAction(
       const ids = subscriberIdsByTopic.get(topic) ?? [];
       ids.push(id);
       subscriberIdsByTopic.set(topic, ids);
-      subscriptions.push(subscription);
     }
   }
+
+  const subscriptions = mergeSubscriptions(Array.from(newSubscriptionsById.values()).flat());
 
   return {
     ...prevState,

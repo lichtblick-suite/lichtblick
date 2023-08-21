@@ -3,8 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Time } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
-import { PlayerProblem, Topic, TopicStats } from "@foxglove/studio-base/players/types";
+import { Immutable, MessageEvent } from "@foxglove/studio";
+import {
+  PlayerProblem,
+  Topic,
+  TopicSelection,
+  TopicStats,
+} from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 export type Initalization = {
@@ -24,7 +29,7 @@ export type Initalization = {
 
 export type MessageIteratorArgs = {
   /** Which topics to return from the iterator */
-  topics: string[];
+  topics: TopicSelection;
 
   /**
    * The start time of the iterator (inclusive). If no start time is specified, the iterator will start
@@ -83,7 +88,7 @@ export type IteratorResult =
     };
 
 export type GetBackfillMessagesArgs = {
-  topics: string[];
+  topics: TopicSelection;
   time: Time;
 
   abortSignal?: AbortSignal;
@@ -158,13 +163,15 @@ export interface IIterableSource {
    * generator function, and a `finally` block to do any necessary cleanup tasks when the request
    * finishes or is canceled.
    */
-  messageIterator(args: MessageIteratorArgs): AsyncIterableIterator<Readonly<IteratorResult>>;
+  messageIterator(
+    args: Immutable<MessageIteratorArgs>,
+  ): AsyncIterableIterator<Readonly<IteratorResult>>;
 
   /**
    * Load the most recent messages per topic that occurred before or at the target time, if
    * available.
    */
-  getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]>;
+  getBackfillMessages(args: Immutable<GetBackfillMessagesArgs>): Promise<MessageEvent[]>;
 
   /**
    * A source can optionally implement a cursor interface in addition to a messageIterator interface.
@@ -173,7 +180,9 @@ export interface IIterableSource {
    * This improves performance for some workflows (i.e. message reading over webworkers) by avoiding
    * individual "next" calls per message.
    */
-  getMessageCursor?: (args: MessageIteratorArgs & { abort?: AbortSignal }) => IMessageCursor;
+  getMessageCursor?: (
+    args: Immutable<MessageIteratorArgs> & { abort?: AbortSignal },
+  ) => IMessageCursor;
 
   /**
    * Optional method a data source can implement to cleanup resources. The player will call this

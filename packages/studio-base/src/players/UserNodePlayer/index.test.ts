@@ -604,6 +604,54 @@ describe("UserNodePlayer", () => {
       expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input" }]);
     });
 
+    it("passes through sliced subscriptions", async () => {
+      const fakePlayer = new FakePlayer();
+      const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
+      const topicNames = ["/np_input"];
+      void userNodePlayer.setUserNodes({
+        nodeId: { name: "someNodeName", sourceCode: nodeUserCode },
+      });
+      userNodePlayer.setSubscriptions(topicNames.map((topic) => ({ topic, fields: ["a"] })));
+      await delay(10); // wait for subscriptions to take effect
+
+      // A direct subscription to a topic should maintain the requested fields.
+      expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input", fields: ["a"] }]);
+    });
+
+    it("requests full subscriptions for input topics", async () => {
+      const fakePlayer = new FakePlayer();
+      const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
+
+      // Bootstrap the node.
+      const done = setListenerHelper(userNodePlayer)[0]!;
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [],
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+        },
+      });
+      await done;
+      void userNodePlayer.setUserNodes({
+        nodeId: { name: "someNodeName", sourceCode: nodeUserCode },
+      });
+
+      // Subscribe to a slice of the output topic and a slice of the input topic.
+      userNodePlayer.setSubscriptions([
+        { topic: "/np_input", fields: ["a"] },
+        { topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`, fields: ["a"] },
+      ]);
+
+      // Wait for subscriptions to take effect.
+      await delay(10);
+
+      // The underlying player subscription should not be sliced since we don't know which fields of
+      // the message the script will use.
+      expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input", preloadType: "partial" }]);
+    });
+
     it("subscribes to underlying topics even when user script has a compilation error", async () => {
       const fakePlayer = new FakePlayer();
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);

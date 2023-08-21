@@ -12,12 +12,12 @@ import Log from "@foxglove/log";
 import {
   Time,
   add,
-  compare,
   clampTime,
+  compare,
   fromMillis,
   fromNanoSec,
-  toString,
   toRFC3339String,
+  toString,
 } from "@foxglove/rostime";
 import { MessageEvent, ParameterValue } from "@foxglove/studio";
 import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
@@ -25,16 +25,17 @@ import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemMan
 import {
   AdvertiseOptions,
   Player,
+  PlayerCapabilities,
   PlayerMetricsCollectorInterface,
+  PlayerPresence,
   PlayerState,
+  PlayerStateActiveData,
   Progress,
   PublishPayload,
   SubscribePayload,
   Topic,
-  PlayerPresence,
-  PlayerCapabilities,
+  TopicSelection,
   TopicStats,
-  PlayerStateActiveData,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import delay from "@foxglove/studio-base/util/delay";
@@ -132,8 +133,8 @@ export class IterablePlayer implements Player {
   #profile: string | undefined;
   #metricsCollector: PlayerMetricsCollectorInterface;
   #subscriptions: SubscribePayload[] = [];
-  #allTopics: Set<string> = new Set();
-  #preloadTopics: Set<string> = new Set();
+  #allTopics: TopicSelection = new Map();
+  #preloadTopics: TopicSelection = new Map();
 
   #progress: Progress = {};
   #id: string = uuidv4();
@@ -290,10 +291,12 @@ export class IterablePlayer implements Player {
     this.#subscriptions = newSubscriptions;
     this.#metricsCollector.setSubscriptions(newSubscriptions);
 
-    const allTopics = new Set(this.#subscriptions.map((subscription) => subscription.topic));
-    const preloadTopics = new Set(
+    const allTopics: TopicSelection = new Map(
+      this.#subscriptions.map((subscription) => [subscription.topic, subscription]),
+    );
+    const preloadTopics = new Map(
       filterMap(this.#subscriptions, (sub) =>
-        sub.preloadType !== "partial" ? sub.topic : undefined,
+        sub.preloadType === "full" ? [sub.topic, sub] : undefined,
       ),
     );
 
@@ -549,7 +552,7 @@ export class IterablePlayer implements Player {
 
     log.debug("Initializing forward iterator from", next);
     this.#playbackIterator = this.#bufferedSource.messageIterator({
-      topics: Array.from(this.#allTopics),
+      topics: this.#allTopics,
       start: next,
       consumptionType: "partial",
     });
@@ -592,7 +595,7 @@ export class IterablePlayer implements Player {
 
     log.debug("Initializing forward iterator from", this.#start);
     this.#playbackIterator = this.#bufferedSource.messageIterator({
-      topics: Array.from(this.#allTopics),
+      topics: this.#allTopics,
       start: this.#start,
       consumptionType: "partial",
     });
@@ -681,12 +684,10 @@ export class IterablePlayer implements Player {
       this.#queueEmitState();
     }, 100);
 
-    const topics = Array.from(this.#allTopics);
-
     try {
       this.#abort = new AbortController();
       const messages = await this.#bufferedSource.getBackfillMessages({
-        topics,
+        topics: this.#allTopics,
         time: targetTime,
         abortSignal: this.#abort.signal,
       });

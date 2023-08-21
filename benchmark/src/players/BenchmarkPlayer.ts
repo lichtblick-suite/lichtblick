@@ -125,9 +125,11 @@ class BenchmarkPlayer implements Player {
     } while (this.#subscriptions.length === 0);
 
     // Get all messages for our subscriptions
-    const subscribeTopics = this.#subscriptions.map((sub) => sub.topic);
-    const topicsForPreload = new Set(
-      filterMap(this.#subscriptions, (sub) => (sub.preloadType === "full" ? sub.topic : undefined)),
+    const subscribeTopics = new Map(this.#subscriptions.map((sub) => [sub.topic, sub]));
+    const topicsForPreload = new Map(
+      filterMap(this.#subscriptions, (sub) =>
+        sub.preloadType === "full" ? [sub.topic, sub] : undefined,
+      ),
     );
     const iterator = this.#source.messageIterator({
       topics: subscribeTopics,

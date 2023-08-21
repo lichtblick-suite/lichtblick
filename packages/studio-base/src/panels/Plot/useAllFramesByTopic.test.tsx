@@ -20,6 +20,7 @@ describe("useAllFramesByTopic", () => {
             messagesByTopic: {
               topic_a: [mockMessage("message", { topic: "topic_a" })],
             },
+            needTopics: new Map(),
             sizeInBytes: 1,
           },
         ],
@@ -27,7 +28,7 @@ describe("useAllFramesByTopic", () => {
       },
     };
 
-    const topics = ["topic_a", "topic_b"];
+    const topics = [{ topic: "topic_a" }, { topic: "topic_b" }];
 
     const { result, rerender } = renderHook(() => useAllFramesByTopic(topics), {
       initialProps: { progress: initialProgress },
@@ -50,6 +51,7 @@ describe("useAllFramesByTopic", () => {
               topic_b: [mockMessage("message", { topic: "topic_b" })],
             },
             sizeInBytes: 1,
+            needTopics: new Map(),
           },
         ],
         startTime: { sec: 0, nsec: 0 },
