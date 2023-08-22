@@ -204,6 +204,57 @@ export const OnePath: StoryObj = {
   parameters: { useReadySignal: true },
 };
 
+export const WithXAxisMinMax: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PanelSetup fixture={fixture} pauseFrame={pauseFrame} includeSettings>
+        <StateTransitions
+          overrideConfig={{
+            xAxisMinValue: 13,
+            xAxisMaxValue: 14,
+            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            isSynced: true,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
+  },
+  parameters: { colorScheme: "light", useReadySignal: true },
+};
+
+export const WithXAxisRange: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    const ourFixture = produce(fixture, (draft) => {
+      draft.activeData!.endTime = systemStateMessages.at(-1)?.header.stamp;
+    });
+
+    return (
+      <PanelSetup fixture={ourFixture} pauseFrame={pauseFrame} includeSettings>
+        <StateTransitions
+          overrideConfig={{
+            xAxisRange: 3,
+            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            isSynced: true,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
+  },
+  parameters: { colorScheme: "light", useReadySignal: true },
+};
+
 export const WithSettings: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });

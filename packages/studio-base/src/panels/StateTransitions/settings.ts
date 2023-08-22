@@ -2,10 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { TFunction } from "i18next";
 import { produce } from "immer";
-import { isEqual, set } from "lodash";
+import { isEqual, isNumber, set } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot";
@@ -75,12 +77,46 @@ const makeRootSeriesNode = memoizeWeak((paths: StateTransitionPath[]): SettingsT
   };
 });
 
-function buildSettingsTree(config: StateTransitionConfig): SettingsTreeNodes {
+function buildSettingsTree(
+  config: StateTransitionConfig,
+  t: TFunction<"stateTransitions">,
+): SettingsTreeNodes {
+  const maxXError =
+    isNumber(config.xAxisMinValue) &&
+    isNumber(config.xAxisMaxValue) &&
+    config.xAxisMinValue >= config.xAxisMaxValue
+      ? t("maxXError")
+      : undefined;
+
   return {
     general: {
       label: "General",
       fields: {
         isSynced: { label: "Sync with other plots", input: "boolean", value: config.isSynced },
+      },
+    },
+    xAxis: {
+      label: t("xAxis"),
+      fields: {
+        xAxisMinValue: {
+          label: t("min"),
+          input: "number",
+          value: config.xAxisMinValue != undefined ? Number(config.xAxisMinValue) : undefined,
+          placeholder: "auto",
+        },
+        xAxisMaxValue: {
+          label: t("max"),
+          input: "number",
+          error: maxXError,
+          value: config.xAxisMaxValue != undefined ? Number(config.xAxisMaxValue) : undefined,
+          placeholder: "auto",
+        },
+        xAxisRange: {
+          label: t("secondsRange"),
+          input: "number",
+          placeholder: "auto",
+          value: config.xAxisRange,
+        },
       },
     },
     paths: makeRootSeriesNode(config.paths),
@@ -93,6 +129,7 @@ export function useStateTransitionsPanelSettings(
   focusedPath?: readonly string[],
 ): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+  const { t } = useTranslation("stateTransitions");
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
@@ -100,6 +137,20 @@ export function useStateTransitionsPanelSettings(
         const { input, path, value } = action.payload;
         if (input === "boolean" && isEqual(path, ["general", "isSynced"])) {
           saveConfig({ isSynced: value });
+        } else if (path[0] === "xAxis") {
+          saveConfig(
+            produce((draft) => {
+              set(draft, path.slice(1), value);
+
+              // X min/max and range are mutually exclusive.
+              if (path[1] === "xAxisRange") {
+                draft.xAxisMinValue = undefined;
+                draft.xAxisMaxValue = undefined;
+              } else if (path[1] === "xAxisMinValue" || path[1] === "xAxisMaxValue") {
+                draft.xAxisRange = undefined;
+              }
+            }),
+          );
         } else {
           saveConfig(
             produce((draft) => {
@@ -137,7 +188,7 @@ export function useStateTransitionsPanelSettings(
     updatePanelSettingsTree({
       actionHandler,
       focusedPath,
-      nodes: buildSettingsTree(config),
+      nodes: buildSettingsTree(config, t),
     });
-  }, [actionHandler, config, focusedPath, updatePanelSettingsTree]);
+  }, [actionHandler, config, focusedPath, t, updatePanelSettingsTree]);
 }

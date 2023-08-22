@@ -4,7 +4,13 @@
 
 import stringHash from "string-hash";
 
-import { Time, subtract as subtractTimes, toSec } from "@foxglove/rostime";
+import {
+  Time,
+  isGreaterThan,
+  isLessThan,
+  subtract as subtractTimes,
+  toSec,
+} from "@foxglove/rostime";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDataset, ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
@@ -33,11 +39,13 @@ function makeValueIndexer() {
 }
 
 type Args = {
+  blocks: readonly (readonly MessageAndData[] | undefined)[];
+  minTime?: Time;
+  maxTime?: Time;
   path: StateTransitionPath;
+  pathIndex: number;
   startTime: Time;
   y: number;
-  pathIndex: number;
-  blocks: readonly (readonly MessageAndData[] | undefined)[];
 };
 
 /**
@@ -45,7 +53,7 @@ type Args = {
  * dataset with different labels and colors applied per-point.
  */
 export default function messagesToDatasets(args: Args): ChartDatasets {
-  const { path, pathIndex, startTime, y, blocks } = args;
+  const { minTime, maxTime, path, pathIndex, startTime, y, blocks } = args;
 
   const dataset: ChartDataset = {
     borderWidth: 10,
@@ -72,6 +80,14 @@ export default function messagesToDatasets(args: Args): ChartDatasets {
     for (const itemByPath of messages) {
       const timestamp = getTimestampForMessageEvent(itemByPath.messageEvent, path.timestampMethod);
       if (!timestamp) {
+        continue;
+      }
+
+      if (minTime && isGreaterThan(minTime, timestamp)) {
+        continue;
+      }
+
+      if (maxTime && isLessThan(maxTime, timestamp)) {
         continue;
       }
 

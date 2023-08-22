@@ -168,6 +168,10 @@ function selectCurrentTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.currentTime;
 }
 
+function selectEndTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.endTime;
+}
+
 type Props = {
   config: StateTransitionConfig;
   saveConfig: SaveConfig<StateTransitionConfig>;
@@ -193,6 +197,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     [currentTime, startTime],
   );
   const itemsByPath = useMessagesByPath(pathStrings);
+
+  const endTime = useMessagePipeline(selectEndTime);
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
 
@@ -222,6 +228,32 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     return isEmpty(newItemsNotInBlocks) ? EMPTY_ITEMS_BY_PATH : newItemsNotInBlocks;
   }, [decodedBlocks, itemsByPath]);
 
+  const { minTime, maxTime } = useMemo(() => {
+    if (config.xAxisRange != undefined) {
+      return endTime
+        ? {
+            minTime: subtractTimes(endTime, fromSec(config.xAxisRange)),
+            maxTime: endTime,
+          }
+        : {};
+    }
+
+    if (startTime) {
+      return {
+        minTime:
+          config.xAxisMinValue != undefined
+            ? addTimes(startTime, fromSec(config.xAxisMinValue))
+            : undefined,
+        maxTime:
+          config.xAxisMaxValue != undefined
+            ? addTimes(startTime, fromSec(config.xAxisMaxValue))
+            : undefined,
+      };
+    }
+
+    return {};
+  }, [config.xAxisMaxValue, config.xAxisMinValue, config.xAxisRange, endTime, startTime]);
+
   const { datasets, minY } = useMemo(() => {
     // ignore all data when we don't have a start time
     if (!startTime) {
@@ -243,11 +275,13 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       const blocksForPath = decodedBlocks.map((decodedBlock) => decodedBlock[path.value]);
 
       const newBlockDataSets = messagesToDatasets({
+        blocks: blocksForPath,
+        minTime,
+        maxTime,
         path,
+        pathIndex,
         startTime,
         y,
-        pathIndex,
-        blocks: blocksForPath,
       });
 
       outDatasets = outDatasets.concat(newBlockDataSets);
@@ -257,11 +291,13 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       const items = newItemsByPath[path.value];
       if (items) {
         const newPathDataSets = messagesToDatasets({
+          blocks: [items],
+          minTime,
+          maxTime,
           path,
+          pathIndex,
           startTime,
           y,
-          pathIndex,
-          blocks: [items],
         });
         outDatasets = outDatasets.concat(newPathDataSets);
       }
@@ -271,7 +307,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       datasets: outDatasets,
       minY: outMinY,
     };
-  }, [startTime, paths, decodedBlocks, newItemsByPath]);
+  }, [decodedBlocks, maxTime, minTime, newItemsByPath, paths, startTime]);
 
   const yScale = useMemo<ScaleOptions<"linear">>(() => {
     return {
