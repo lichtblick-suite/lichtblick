@@ -13,6 +13,44 @@ import {
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { migrateV0WorkspaceState } from "@foxglove/studio-base/context/Workspace/migrations";
 
+/**
+ * Creates the default initial state for the workspace store.
+ */
+export function makeWorkspaceContextInitialState(): WorkspaceContextStore {
+  return {
+    dialogs: {
+      dataSource: {
+        activeDataSource: undefined,
+        item: undefined,
+        open: false,
+      },
+      preferences: {
+        initialTab: undefined,
+        open: false,
+      },
+    },
+    featureTours: {
+      active: undefined,
+      shown: [],
+    },
+    sidebars: {
+      left: {
+        item: "panel-settings",
+        open: true,
+        size: undefined,
+      },
+      right: {
+        item: undefined,
+        open: false,
+        size: undefined,
+      },
+    },
+    playbackControls: {
+      repeat: false,
+    },
+  };
+}
+
 function createWorkspaceContextStore(
   initialState?: Partial<WorkspaceContextStore>,
 ): StoreApi<WorkspaceContextStore> {
@@ -20,37 +58,7 @@ function createWorkspaceContextStore(
     persist(
       () => {
         const store: WorkspaceContextStore = {
-          dialogs: {
-            dataSource: {
-              activeDataSource: undefined,
-              item: undefined,
-              open: false,
-            },
-            preferences: {
-              initialTab: undefined,
-              open: false,
-            },
-          },
-          featureTours: {
-            active: undefined,
-            shown: [],
-          },
-          sidebars: {
-            left: {
-              item: "panel-settings",
-              open: true,
-              size: undefined,
-            },
-            right: {
-              item: undefined,
-              open: false,
-              size: undefined,
-            },
-          },
-          playbackControls: {
-            repeat: false,
-          },
-
+          ...makeWorkspaceContextInitialState(),
           ...initialState,
         };
         return store;
@@ -59,24 +67,30 @@ function createWorkspaceContextStore(
         name: "fox.workspace",
         version: 1,
         migrate: migrateV0WorkspaceState,
-        partialize: (value) => {
+        partialize: (state) => {
           // Note that this is an opt-in list of keys from the store that we
           // include and restore when persisting to and from localStorage.
-          return pick(value, ["featureTours", "playbackControls", "sidebars"]);
+          return pick(state, ["featureTours", "playbackControls", "sidebars"]);
         },
       },
     ),
   );
 }
 
-export default function WorkspaceContextProvider({
-  children,
-  initialState,
-}: {
+export default function WorkspaceContextProvider(props: {
   children?: ReactNode;
   initialState?: Partial<WorkspaceContextStore>;
+  workspaceStoreCreator?: (
+    initialState?: Partial<WorkspaceContextStore>,
+  ) => StoreApi<WorkspaceContextStore>;
 }): JSX.Element {
-  const [store] = useState(() => createWorkspaceContextStore(initialState));
+  const { children, initialState, workspaceStoreCreator } = props;
+
+  const [store] = useState(() =>
+    workspaceStoreCreator
+      ? workspaceStoreCreator(initialState)
+      : createWorkspaceContextStore(initialState),
+  );
 
   return <WorkspaceContext.Provider value={store}>{children}</WorkspaceContext.Provider>;
 }

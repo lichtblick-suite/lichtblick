@@ -497,6 +497,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
   );
 
+  const { workspaceStoreCreator } = useAppContext();
+
   const isPlayerPresent = useMessagePipeline(selectPlayerIsPresent);
 
   const initialItem: undefined | DataSourceDialogItem =
@@ -517,7 +519,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   };
 
   return (
-    <WorkspaceContextProvider initialState={initialState}>
+    <WorkspaceContextProvider
+      initialState={initialState}
+      workspaceStoreCreator={workspaceStoreCreator}
+    >
       <WorkspaceContent {...props} />
     </WorkspaceContextProvider>
   );

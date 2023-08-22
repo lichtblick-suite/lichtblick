@@ -3,9 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { createContext, useContext } from "react";
+import { StoreApi } from "zustand";
 
 import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 
 interface IAppContext {
   appBarLayoutButton?: JSX.Element;
@@ -16,10 +18,13 @@ interface IAppContext {
     durationNanos: string;
     metadata: Record<string, string>;
   }) => Promise<void>;
+  importLayoutFile?: (fileName: string, data: LayoutData) => Promise<void>;
+  layoutEmptyState?: JSX.Element;
   syncAdapters?: readonly JSX.Element[];
   workspaceExtensions?: readonly JSX.Element[];
-  layoutEmptyState?: JSX.Element;
-  importLayoutFile?: (fileName: string, data: LayoutData) => Promise<void>;
+  workspaceStoreCreator?: (
+    initialState?: Partial<WorkspaceContextStore>,
+  ) => StoreApi<WorkspaceContextStore>;
 }
 
 const AppContext = createContext<IAppContext>({});
