@@ -72,28 +72,26 @@ export function parseTimeStr(str: string, timezone?: string): Time | undefined {
   return result;
 }
 
-const todTimeRegex = /^\d+:\d+:\d+.\d+\s[PpAa][Mm]\s[A-Za-z$]+/;
+const todDateTimeRegex = /^\d+-\d+-\d+\s+\d+:\d+:\d+.\d+\s[PpAa][Mm]\s[A-Za-z$]+/;
 export const getValidatedTimeAndMethodFromString = ({
   text,
-  date,
   timezone,
 }: {
   text?: string;
-  date: string;
   timezone?: string;
 }): { time?: Time; method: TimeDisplayMethod } | undefined => {
   if (text == undefined || text === "") {
     return;
   }
   const isInvalidRawTime = isNaN(+text);
-  const isInvalidTodTime = !(todTimeRegex.test(text) && parseTimeStr(`${date} ${text}`, timezone));
+  const isInvalidTodTime = !(todDateTimeRegex.test(text) && parseTimeStr(text, timezone));
 
   if (isInvalidRawTime && isInvalidTodTime) {
     return;
   }
 
   return {
-    time: !isInvalidRawTime ? parseFuzzyRosTime(text) : parseTimeStr(`${date} ${text}`, timezone),
+    time: !isInvalidRawTime ? parseFuzzyRosTime(text) : parseTimeStr(text, timezone),
     method: isInvalidRawTime ? "TOD" : "SEC",
   };
 };

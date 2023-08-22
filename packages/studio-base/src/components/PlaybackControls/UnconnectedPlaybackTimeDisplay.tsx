@@ -21,7 +21,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
+import { IAppTimeFormat } from "@foxglove/studio-base/hooks/useAppTimeFormat";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import {
   formatDate,
@@ -31,6 +31,7 @@ import {
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 type PlaybackTimeDisplayMethodProps = {
+  appTimeFormat: IAppTimeFormat;
   currentTime?: Time;
   startTime?: Time;
   endTime?: Time;
@@ -40,51 +41,53 @@ type PlaybackTimeDisplayMethodProps = {
   isPlaying: boolean;
 };
 
-const useStyles = makeStyles()((theme) => ({
-  textField: {
-    borderRadius: theme.shape.borderRadius,
+const useStyles = makeStyles<{ timeDisplayMethod: TimeDisplayMethod }>()(
+  (theme, { timeDisplayMethod }) => ({
+    textField: {
+      borderRadius: theme.shape.borderRadius,
 
-    "&.Mui-disabled": {
+      "&.Mui-disabled": {
+        [`.${filledInputClasses.root}`]: {
+          backgroundColor: "transparent",
+        },
+      },
+      "&:not(.Mui-disabled):hover": {
+        backgroundColor: theme.palette.action.hover,
+
+        [`.${iconButtonClasses.root}`]: {
+          visibility: "visible",
+        },
+      },
       [`.${filledInputClasses.root}`]: {
         backgroundColor: "transparent",
-      },
-    },
-    "&:not(.Mui-disabled):hover": {
-      backgroundColor: theme.palette.action.hover,
 
+        ":hover": {
+          backgroundColor: "transparent",
+        },
+      },
+      [`.${inputBaseClasses.input}`]: {
+        fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero' !important`,
+        minWidth: timeDisplayMethod === "TOD" ? "28ch" : "20ch",
+      },
       [`.${iconButtonClasses.root}`]: {
-        visibility: "visible",
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        borderLeft: `1px solid ${theme.palette.background.paper}`,
+        visibility: "hidden",
+        marginRight: theme.spacing(-1),
       },
     },
-    [`.${filledInputClasses.root}`]: {
-      backgroundColor: "transparent",
+    textFieldError: {
+      outline: `1px solid ${theme.palette.error.main}`,
+      outlineOffset: -1,
 
-      ":hover": {
-        backgroundColor: "transparent",
+      [`.${inputBaseClasses.root}`]: {
+        color: theme.palette.error.main,
+        borderLeftColor: theme.palette.error.main,
       },
     },
-    [`.${inputBaseClasses.input}`]: {
-      fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero' !important`,
-      minWidth: "20ch",
-    },
-    [`.${iconButtonClasses.root}`]: {
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-      borderLeft: `1px solid ${theme.palette.background.paper}`,
-      visibility: "hidden",
-      marginRight: theme.spacing(-1),
-    },
-  },
-  textFieldError: {
-    outline: `1px solid ${theme.palette.error.main}`,
-    outlineOffset: -1,
-
-    [`.${inputBaseClasses.root}`]: {
-      color: theme.palette.error.main,
-      borderLeftColor: theme.palette.error.main,
-    },
-  },
-}));
+  }),
+);
 
 function PlaybackTimeMethodMenu({
   timeFormat,
@@ -144,7 +147,10 @@ function PlaybackTimeMethodMenu({
           <MenuItem
             key={option.key}
             selected={timeFormat === option.key}
-            onClick={async () => await setTimeFormat(option.key as TimeDisplayMethod)}
+            onClick={async () => {
+              await setTimeFormat(option.key as TimeDisplayMethod);
+              handleClose();
+            }}
           >
             {timeFormat === option.key && (
               <ListItemIcon>
@@ -163,7 +169,8 @@ function PlaybackTimeMethodMenu({
   );
 }
 
-export default function PlaybackTimeDisplayMethod({
+export function UnconnectedPlaybackTimeDisplay({
+  appTimeFormat,
   currentTime,
   startTime,
   endTime,
@@ -172,20 +179,23 @@ export default function PlaybackTimeDisplayMethod({
   onPause,
   isPlaying,
 }: PlaybackTimeDisplayMethodProps): JSX.Element {
-  const { classes, cx } = useStyles();
+  const { classes, cx } = useStyles({ timeDisplayMethod: appTimeFormat.timeFormat });
   const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const timeFormat = useAppTimeFormat();
+
   const timeRawString = useMemo(
     () => (currentTime ? formatTimeRaw(currentTime) : undefined),
     [currentTime],
   );
   const timeOfDayString = useMemo(
-    () => (currentTime ? formatTime(currentTime, timezone) : undefined),
+    () =>
+      currentTime
+        ? `${formatDate(currentTime, timezone)} ${formatTime(currentTime, timezone)}`
+        : undefined,
     [currentTime, timezone],
   );
   const currentTimeString = useMemo(
-    () => (timeFormat.timeFormat === "SEC" ? timeRawString : timeOfDayString),
-    [timeFormat.timeFormat, timeRawString, timeOfDayString],
+    () => (appTimeFormat.timeFormat === "SEC" ? timeRawString : timeOfDayString),
+    [appTimeFormat.timeFormat, timeRawString, timeOfDayString],
   );
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputText, setInputText] = useState<string | undefined>(currentTimeString ?? undefined);
@@ -204,7 +214,6 @@ export default function PlaybackTimeDisplayMethod({
 
       const validTimeAndMethod = getValidatedTimeAndMethodFromString({
         text: inputText,
-        date: formatDate(currentTime, timezone),
         timezone,
       });
 
@@ -221,12 +230,12 @@ export default function PlaybackTimeDisplayMethod({
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
       ) {
         onSeek(validTimeAndMethod.time);
-        if (validTimeAndMethod.method !== timeFormat.timeFormat) {
-          void timeFormat.setTimeFormat(validTimeAndMethod.method);
+        if (validTimeAndMethod.method !== appTimeFormat.timeFormat) {
+          void appTimeFormat.setTimeFormat(validTimeAndMethod.method);
         }
       }
     },
-    [inputText, startTime, currentTime, endTime, timezone, onSeek, timeFormat],
+    [inputText, startTime, currentTime, endTime, timezone, onSeek, appTimeFormat],
   );
 
   useEffect(() => {
@@ -264,8 +273,8 @@ export default function PlaybackTimeDisplayMethod({
                     timezone,
                     timeOfDayString,
                     timeRawString,
-                    timeFormat: timeFormat.timeFormat,
-                    setTimeFormat: timeFormat.setTimeFormat,
+                    timeFormat: appTimeFormat.timeFormat,
+                    setTimeFormat: appTimeFormat.setTimeFormat,
                   }}
                 />
               ),
@@ -291,7 +300,9 @@ export default function PlaybackTimeDisplayMethod({
           disabled
           variant="filled"
           size="small"
-          defaultValue={timeFormat.timeFormat === "SEC" ? "0000000000.000000000" : "00:00:00.000"}
+          defaultValue={
+            appTimeFormat.timeFormat === "SEC" ? "0000000000.000000000" : "0000-00-00 00:00:00.000"
+          }
           InputProps={{
             endAdornment: (
               <IconButton edge="end" disabled>

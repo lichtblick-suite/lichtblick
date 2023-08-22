@@ -114,7 +114,7 @@ describe("formatTime.parseTimeStr", () => {
 });
 
 describe("formatTime.getValidatedTimeAndMethodFromString", () => {
-  const commonArgs = { date: "2020-01-01", timezone: "America/Los_Angeles" };
+  const commonArgs = { timezone: "America/Los_Angeles" };
   it("takes a string and gets a validated ROS or TOD time", () => {
     expect(formatTime.getValidatedTimeAndMethodFromString({ ...commonArgs, text: "" })).toEqual(
       undefined,
@@ -128,6 +128,12 @@ describe("formatTime.getValidatedTimeAndMethodFromString", () => {
     expect(
       formatTime.getValidatedTimeAndMethodFromString({
         ...commonArgs,
+        text: "1:30:10.000 PM PST",
+      }),
+    ).toEqual(undefined);
+    expect(
+      formatTime.getValidatedTimeAndMethodFromString({
+        ...commonArgs,
         text: "1598635994.000000000",
       }),
     ).toEqual({
@@ -135,7 +141,10 @@ describe("formatTime.getValidatedTimeAndMethodFromString", () => {
       method: "SEC",
     });
     expect(
-      formatTime.getValidatedTimeAndMethodFromString({ ...commonArgs, text: "1:30:10.000 PM PST" }),
+      formatTime.getValidatedTimeAndMethodFromString({
+        ...commonArgs,
+        text: "2020-01-01 1:30:10.000 PM PST",
+      }),
     ).toEqual({
       time: { nsec: 0, sec: 1577914210 },
       method: "TOD",

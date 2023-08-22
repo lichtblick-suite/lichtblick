@@ -17,9 +17,10 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
-import PlaybackTimeDisplayMethod from "./PlaybackTimeDisplayMethod";
+import { UnconnectedPlaybackTimeDisplay } from "./UnconnectedPlaybackTimeDisplay";
 
 type Props = {
   onSeek: (seekTo: Time) => void;
@@ -38,9 +39,11 @@ export default function PlaybackTimeDisplay(props: Props): JSX.Element {
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
+  const appTimeFormat = useAppTimeFormat();
 
   return (
-    <PlaybackTimeDisplayMethod
+    <UnconnectedPlaybackTimeDisplay
+      appTimeFormat={appTimeFormat}
       currentTime={currentTime}
       startTime={startTime}
       endTime={endTime}

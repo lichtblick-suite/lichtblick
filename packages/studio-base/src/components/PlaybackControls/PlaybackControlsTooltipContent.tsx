@@ -53,7 +53,7 @@ const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeD
 
 export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNull | JSX.Element {
   const { stamp } = params;
-  const { formatTime, timeFormat } = useAppTimeFormat();
+  const { timeFormat, formatTime, formatDate } = useAppTimeFormat();
   const hoveredEvents = useTimelineInteractionState(selectHoveredEvents);
   const startTime = useMessagePipeline(selectStartTime);
   const { classes } = useStyles();
@@ -89,6 +89,7 @@ export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNu
 
   switch (timeFormat) {
     case "TOD":
+      tooltipItems.push({ type: "item", title: "Date", value: formatDate(stamp) });
       tooltipItems.push({ type: "item", title: "Time", value: formatTime(stamp) });
       break;
     case "SEC":
