@@ -357,19 +357,30 @@ describe("CachingIterableSource", () => {
       topics: mockTopicSelection("a"),
     });
 
-    await messageIterator.next();
+    // Reads the next message and updates the read head. The latter is done for the source to know
+    // which blocks it can evict.
+    const readNextMsgAndUpdateReadHead = async () => {
+      const { done, value } = await messageIterator.next();
+      if (done ?? false) {
+        return;
+      }
+      if (value.type === "message-event") {
+        bufferedSource.setCurrentReadHead(value.msgEvent.receiveTime);
+      }
+    };
 
+    await readNextMsgAndUpdateReadHead();
     // Nothing has been actually saved into the cache but we did emit the first item
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0 }]);
 
-    await messageIterator.next();
+    await readNextMsgAndUpdateReadHead();
     // We've read another message which let us setup a block for all the time we've read till now
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.5 }]);
 
-    await messageIterator.next();
+    await readNextMsgAndUpdateReadHead();
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0.5000000001, end: 0.9999999999 }]);
 
-    await messageIterator.next();
+    await readNextMsgAndUpdateReadHead();
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0.5000000001, end: 1 }]);
   });
 
@@ -687,11 +698,58 @@ describe("CachingIterableSource", () => {
       });
 
       // load all the messages into cache
-      for await (const _ of messageIterator) {
-        // no-op
+      for await (const result of messageIterator) {
+        // Update the current read head so the source knows which blocks it can evict.
+        if (result.type === "message-event") {
+          bufferedSource.setCurrentReadHead(result.msgEvent.receiveTime);
+        }
       }
 
       expect(bufferedSource.loadedRanges()).toEqual([{ start: 0.6, end: 1 }]);
+    }
+  });
+
+  it("should report full cache as cache fills up", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source, {
+      maxBlockSize: 102,
+      maxTotalSize: 202,
+    });
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let i = 0; i < 8; ++i) {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: i, nsec: 0 },
+            message: undefined,
+            sizeInBytes: 101,
+            schemaName: "foo",
+          },
+        };
+      }
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: mockTopicSelection("a"),
+      });
+
+      // At the start the cache is empty and the source can read messages
+      expect(bufferedSource.canReadMore()).toBeTruthy();
+
+      // The cache size after reading the first message should still allow reading a new message
+      await messageIterator.next();
+      expect(bufferedSource.canReadMore()).toBeTruthy();
+
+      // Next message fills up the cache and the source can not read more messages
+      await messageIterator.next();
+      expect(bufferedSource.canReadMore()).toBeFalsy();
     }
   });
 
