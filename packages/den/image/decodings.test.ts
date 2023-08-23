@@ -297,7 +297,9 @@ describe("decodeMono16", () => {
         /*is_bigendian=*/ false,
         new Uint8ClampedArray([]),
       ),
-    ).toThrowErrorMatchingInlineSnapshot(`"RGBA8 image row step (7) must be at least 2*width (8)"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Uint16 image row step (7) must be at least 2*width (8)"`,
+    );
     expect(() =>
       decodeMono16(
         new Uint8Array(width * height * 2),

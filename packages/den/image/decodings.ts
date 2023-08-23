@@ -270,7 +270,7 @@ export function decodeMono16(
   },
 ): void {
   if (step < width * 2) {
-    throw new Error(`RGBA8 image row step (${step}) must be at least 2*width (${width * 2})`);
+    throw new Error(`Uint16 image row step (${step}) must be at least 2*width (${width * 2})`);
   }
   const view = new DataView(mono16.buffer, mono16.byteOffset);
 
