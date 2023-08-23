@@ -16,13 +16,15 @@ import { renderHook } from "@testing-library/react-hooks";
 import { cloneDeep } from "lodash";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { SubscribePayload } from "@foxglove/studio-base/players/types";
+import { mockMessage } from "@foxglove/studio-base/test/mocks/mockMessage";
 
 import * as PanelAPI from ".";
 
-describe("useBlocksByTopic", () => {
+describe("useBlocksSubscriptions", () => {
   it("returns an empty structure when there are no blocks", async () => {
-    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
-      initialProps: { topics: ["/foo"] },
+    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksSubscriptions(topics), {
+      initialProps: { topics: [{ topic: "/foo" }] },
       wrapper: ({ children }) => (
         <MockMessagePipelineProvider>{children}</MockMessagePipelineProvider>
       ),
@@ -32,8 +34,8 @@ describe("useBlocksByTopic", () => {
   });
 
   it("returns no messagesByTopic when the player does not provide blocks", async () => {
-    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
-      initialProps: { topics: ["/topic1"] },
+    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksSubscriptions(topics), {
+      initialProps: { topics: [{ topic: "/topic1" }] },
       wrapper: ({ children }) => (
         <MockMessagePipelineProvider activeData={{}}>{children}</MockMessagePipelineProvider>
       ),
@@ -54,8 +56,8 @@ describe("useBlocksByTopic", () => {
         startTime: { sec: 0, nsec: 0 },
       },
     };
-    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
-      initialProps: { topics: ["/topic1"] },
+    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksSubscriptions(topics), {
+      initialProps: { topics: [{ topic: "/topic1" }] },
       wrapper: ({ children }) => (
         <MockMessagePipelineProvider activeData={activeData} progress={progress}>
           {children}
@@ -68,6 +70,39 @@ describe("useBlocksByTopic", () => {
     expect(result.current).toEqual([undefined, undefined]);
   });
 
+  it("handles sliced subscriptions", async () => {
+    const activeData = {};
+    const progress = {
+      messageCache: {
+        blocks: [
+          {
+            sizeInBytes: 0,
+            messagesByTopic: { "/topic": [mockMessage({ a: 1, b: 2 }, { topic: "/topic" })] },
+          },
+        ],
+        startTime: { sec: 0, nsec: 0 },
+      },
+    };
+
+    const stableSubscriptions: SubscribePayload[] = [{ topic: "/topic", fields: ["a"] }];
+
+    const { result } = renderHook(
+      ({ subscriptions }) => PanelAPI.useBlocksSubscriptions(subscriptions),
+      {
+        initialProps: { subscriptions: stableSubscriptions },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider activeData={activeData} progress={progress}>
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
+    );
+
+    expect(result.current).toEqual([
+      { "/topic": [expect.objectContaining({ topic: "/topic", message: { a: 1, b: 2 } })] },
+    ]);
+  });
+
   it("maintains block identity across repeated renders", async () => {
     const activeData = {};
     let progress = {
@@ -76,33 +111,39 @@ describe("useBlocksByTopic", () => {
         startTime: { sec: 0, nsec: 0 },
       },
     };
-    const { result, rerender } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
-      initialProps: { topics: ["/topic"] },
-      wrapper: ({ children }) => (
-        <MockMessagePipelineProvider activeData={activeData} progress={progress}>
-          {children}
-        </MockMessagePipelineProvider>
-      ),
-    });
+
+    const stableSubscriptions: SubscribePayload[] = [{ topic: "/topic" }];
+
+    const { result, rerender } = renderHook(
+      ({ subscriptions }) => PanelAPI.useBlocksSubscriptions(subscriptions),
+      {
+        initialProps: { subscriptions: stableSubscriptions },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider activeData={activeData} progress={progress}>
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
+    );
 
     const c1 = result.current;
     expect(result.current).toEqual([{ "/topic": [] }]);
 
-    // Same identity on everything. useBlocksByTopic does not run again.
+    // Same identity on everything. useBlocksSubscriptions does not run again.
     progress = { messageCache: { ...progress.messageCache } };
-    rerender({ topics: ["/topic"] });
+    rerender({ subscriptions: stableSubscriptions });
     expect(result.current).toBe(c1);
 
     // Block identity is the same, but blocks array identity changes.
     progress = {
       messageCache: { ...progress.messageCache, blocks: progress.messageCache.blocks.slice() },
     };
-    rerender({ topics: ["/topic"] });
+    rerender({ subscriptions: stableSubscriptions });
     const c3 = result.current;
 
     // Both identities change.
     progress = { messageCache: cloneDeep(progress.messageCache) };
-    rerender({ topics: ["/topic"] });
+    rerender({ subscriptions: stableSubscriptions });
     const c4 = result.current;
 
     expect(c1).not.toBe(c3);

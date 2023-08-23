@@ -15,16 +15,15 @@ import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { useShallowMemo } from "@foxglove/hooks";
 import { Immutable } from "@foxglove/studio";
 import {
-  useMessagePipeline,
   MessagePipelineContext,
+  useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import {
-  SubscribePayload,
   MessageEvent,
   MessageBlock as PlayerMessageBlock,
+  SubscribePayload,
 } from "@foxglove/studio-base/players/types";
 
 export type MessageBlock = Immutable<{
@@ -42,6 +41,7 @@ const filterBlockByTopics = memoizeWeak(
       // to a MemoryCacheBlock with no per-topic arrays.
       return {};
     }
+
     const ret: Record<string, readonly MessageEvent[]> = {};
     for (const topic of topics) {
       // Don't include an empty array when the data has not been cached for this topic for this
@@ -56,7 +56,7 @@ const filterBlockByTopics = memoizeWeak(
   },
 );
 
-const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
+const useSubscriptionsForBlocks = (subscriptions: Immutable<SubscribePayload[]>) => {
   const [id] = useState(() => uuidv4());
 
   const setSubscriptions = useMessagePipeline(
@@ -66,9 +66,7 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
       [],
     ),
   );
-  const subscriptions: SubscribePayload[] = useMemo(() => {
-    return topics.map((topic) => ({ topic, preloadType: "full" }));
-  }, [topics]);
+
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
 
   useEffect(() => {
@@ -89,10 +87,12 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
 //   - Each block represents the same duration of time
 //   - The number of blocks is consistent for the data source
 //   - Blocks are stored in increasing order of time
-export function useBlocksByTopic(topics: readonly string[]): readonly MessageBlock[] {
-  const requestedTopics = useShallowMemo(topics);
+export function useBlocksSubscriptions(
+  subscriptions: Immutable<SubscribePayload[]>,
+): readonly MessageBlock[] {
+  const requestedTopics = useMemo(() => subscriptions.map((sub) => sub.topic), [subscriptions]);
 
-  useSubscribeToTopicsForBlocks(requestedTopics);
+  useSubscriptionsForBlocks(subscriptions);
 
   const allBlocks = useMessagePipeline<Immutable<(PlayerMessageBlock | undefined)[] | undefined>>(
     useCallback((ctx) => ctx.playerState.progress.messageCache?.blocks, []),

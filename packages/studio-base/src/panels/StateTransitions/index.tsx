@@ -20,11 +20,10 @@ import { useResizeDetector } from "react-resize-detector";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
+import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { useBlocksByTopic } from "@foxglove/studio-base/PanelAPI";
-import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
@@ -43,6 +42,8 @@ import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import { ChartData, ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
+import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
+import { SubscribePayload } from "@foxglove/studio-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -183,7 +184,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const { classes } = useStyles();
 
   const pathStrings = useMemo(() => paths.map(({ value }) => value), [paths]);
-  const subscribeTopics = useMemo(() => getTopicsFromPaths(pathStrings), [pathStrings]);
 
   const { openPanelSettings } = useWorkspaceActions();
   const { id: panelId } = usePanelContext();
@@ -202,7 +202,20 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
 
-  const blocks = useBlocksByTopic(subscribeTopics);
+  const subscriptions: SubscribePayload[] = useMemo(
+    () =>
+      filterMap(paths, (path) => {
+        const payload = subscribePayloadFromMessagePath(path.value, "full");
+        // Include the header in case we are ordering by header stamp.
+        if (path.timestampMethod === "headerStamp" && payload?.fields != undefined) {
+          payload.fields.push("header");
+        }
+        return payload;
+      }),
+    [paths],
+  );
+
+  const blocks = PanelAPI.useBlocksSubscriptions(subscriptions);
   const decodedBlocks = useMemo(
     () => blocks.map(decodeMessagePathsForMessagesByTopic),
     [blocks, decodeMessagePathsForMessagesByTopic],
