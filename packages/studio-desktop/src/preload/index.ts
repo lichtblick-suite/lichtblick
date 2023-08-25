@@ -102,6 +102,9 @@ export function main(): void {
     async updateNativeColorScheme() {
       await ipcRenderer.invoke("updateNativeColorScheme");
     },
+    async updateLanguage() {
+      await ipcRenderer.invoke("updateLanguage");
+    },
     getDeepLinks(): string[] {
       return decodeRendererArg("deepLinks", window.process.argv) ?? [];
     },

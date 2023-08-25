@@ -17,3 +17,4 @@ export * from "./plot";
 export * from "./settingsEditor";
 export * from "./stateTransitions";
 export * from "./threeDee";
+export * from "./desktopWindow";

@@ -105,6 +105,9 @@ interface Desktop {
   unmaximizeWindow(): void;
   closeWindow(): void;
   reloadWindow(): void;
+
+  /** Notify the app that the language setting has been changed */
+  updateLanguage(): void;
 }
 
 export type { NativeMenuBridge, Storage, StorageContent, Desktop, DesktopExtension };

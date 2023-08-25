@@ -4,9 +4,11 @@
 
 import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
 import fs from "fs";
+import i18n from "i18next";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
+import { initI18n } from "@foxglove/studio-base/src/i18n";
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
@@ -47,7 +49,17 @@ function updateNativeColorScheme() {
     colorScheme === "dark" ? "dark" : colorScheme === "light" ? "light" : "system";
 }
 
-export function main(): void {
+async function updateLanguage() {
+  const language = getAppSetting<string>(AppSetting.LANGUAGE);
+  log.info(`Loaded language from settings: ${language}`);
+  await i18n.changeLanguage(language);
+  log.info(`Set language: ${i18n.language}`);
+}
+
+export async function main(): Promise<void> {
+  await initI18n({ context: "electron-main" });
+  await updateLanguage();
+
   // https://github.com/electron/electron/issues/28422#issuecomment-987504138
   app.commandLine.appendSwitch("enable-experimental-web-platform-features");
 
@@ -188,6 +200,10 @@ export function main(): void {
 
   ipcMain.handle("updateNativeColorScheme", () => {
     updateNativeColorScheme();
+  });
+
+  ipcMain.handle("updateLanguage", () => {
+    void updateLanguage();
   });
 
   // This method will be called when Electron has finished

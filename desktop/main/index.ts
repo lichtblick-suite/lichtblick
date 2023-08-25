@@ -4,4 +4,4 @@
 
 import { main } from "@foxglove/studio-desktop/src/main";
 
-main();
+void main();

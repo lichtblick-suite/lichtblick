@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+/// <reference types="../typings/i18next" />
+
 import {
   BrowserWindow,
   BrowserWindowConstructorOptions,
@@ -14,6 +16,7 @@ import {
   shell,
   systemPreferences,
 } from "electron";
+import i18n, { t } from "i18next";
 import path from "path";
 
 import Logger from "@foxglove/log";
@@ -201,7 +204,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
   const menuTemplate: MenuItemConstructorOptions[] = [];
 
   const checkForUpdatesItem: MenuItemConstructorOptions = {
-    label: "Check for Updates…",
+    label: t("desktopWindow:checkForUpdates"),
     click: () => void StudioAppUpdater.Instance().checkNow(),
     enabled: StudioAppUpdater.Instance().canCheckForUpdates(),
   };
@@ -215,7 +218,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         checkForUpdatesItem,
         { type: "separator" },
         {
-          label: "Settings…",
+          label: t("desktopWindow:settings"),
           accelerator: "CommandOrControl+,",
           click: () => sendNativeAppMenuEvent("open-help-general", browserWindow),
         },
@@ -234,11 +237,11 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
 
   menuTemplate.push({
     role: "fileMenu",
-    label: "File",
+    label: t("desktopWindow:file"),
     id: "fileMenu",
     submenu: [
       {
-        label: "New Window",
+        label: t("desktopWindow:newWindow"),
         click: () => {
           new StudioWindow().load();
         },
@@ -250,7 +253,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
 
   menuTemplate.push({
     role: "editMenu",
-    label: "Edit",
+    label: t("desktopWindow:edit"),
     submenu: [
       { role: "undo" },
       { role: "redo" },
@@ -280,7 +283,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     const workers = browserWindow.webContents.getAllSharedWorkers();
     Menu.buildFromTemplate(
       workers.length === 0
-        ? [{ label: "No Shared Workers", enabled: false }]
+        ? [{ label: t("desktopWindow:noSharedWorkers"), enabled: false }]
         : workers.map(
             (worker) =>
               new MenuItem({
@@ -296,7 +299,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
 
   menuTemplate.push({
     role: "viewMenu",
-    label: "View",
+    label: t("desktopWindow:view"),
     submenu: [
       { role: "resetZoom" },
       { role: "zoomIn" },
@@ -305,13 +308,13 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
       { role: "togglefullscreen" },
       { type: "separator" },
       {
-        label: "Advanced",
+        label: t("desktopWindow:advanced"),
         submenu: [
           { role: "reload" },
           { role: "forceReload" },
           { role: "toggleDevTools" },
           {
-            label: "Inspect Shared Worker…",
+            label: t("desktopWindow:inspectSharedWorker"),
             click() {
               showSharedWorkersMenu();
             },
@@ -325,20 +328,20 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     role: "help",
     submenu: [
       {
-        label: "About",
+        label: t("appBar:about"),
         click: () => sendNativeAppMenuEvent("open-help-about", browserWindow),
       },
       {
-        label: "View our docs",
+        label: t("appBar:viewOurDocs"),
         click: () => sendNativeAppMenuEvent("open-help-docs", browserWindow),
       },
       {
-        label: "Join our Slack",
+        label: t("appBar:joinOurSlack"),
         click: () => sendNativeAppMenuEvent("open-help-slack", browserWindow),
       },
       { type: "separator" },
       {
-        label: "Explore sample data",
+        label: t("appBar:exploreSampleData"),
         click: async () => {
           await simulateUserClick(browserWindow);
           sendNativeAppMenuEvent("open-demo", browserWindow);
@@ -366,6 +369,14 @@ class StudioWindow {
     const [newWindow, newMenu] = this.#buildBrowserWindow();
     this.#browserWindow = newWindow;
     this.#menu = newMenu;
+
+    i18n.on("languageChanged", () => {
+      const isAppMenu = Menu.getApplicationMenu() === this.#menu;
+      this.#rebuildMenu();
+      if (isAppMenu) {
+        Menu.setApplicationMenu(this.#menu);
+      }
+    });
   }
 
   public load(): void {
@@ -412,6 +423,11 @@ class StudioWindow {
     }
   }
 
+  #rebuildMenu() {
+    this.#menu = buildMenu(this.#browserWindow);
+    this.#rebuildFileMenu(this.#menu.getMenuItemById("fileMenu")!);
+  }
+
   #buildBrowserWindow(): [BrowserWindow, Menu] {
     const browserWindow = newStudioWindow(this.#deepLinks, () => {
       this.#reloadMainWindow();
@@ -439,7 +455,7 @@ class StudioWindow {
 
     fileMenu.submenu?.append(
       new MenuItem({
-        label: "New Window",
+        label: t("desktopWindow:newWindow"),
         click: () => {
           new StudioWindow().load();
         },
@@ -454,7 +470,7 @@ class StudioWindow {
 
     fileMenu.submenu?.append(
       new MenuItem({
-        label: "Open…",
+        label: t("appBar:open"),
         click: async () => {
           await simulateUserClick(browserWindow);
           this.#sendNativeAppMenuEvent("open");
@@ -464,7 +480,7 @@ class StudioWindow {
 
     fileMenu.submenu?.append(
       new MenuItem({
-        label: "Open local file…",
+        label: t("appBar:openLocalFile"),
         click: async () => {
           await simulateUserClick(browserWindow);
           this.#sendNativeAppMenuEvent("open-file");
@@ -474,7 +490,7 @@ class StudioWindow {
 
     fileMenu.submenu?.append(
       new MenuItem({
-        label: "Open connection...",
+        label: t("appBar:openConnection"),
         click: async () => {
           await simulateUserClick(browserWindow);
           this.#sendNativeAppMenuEvent("open-connection");

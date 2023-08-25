@@ -16,20 +16,22 @@ export type Language = keyof typeof translations;
 
 export const defaultNS = "general";
 
-export async function initI18n(): Promise<void> {
-  await i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      resources: translations,
-      detection: {
-        order: ["localStorage", "navigator"],
-        caches: ["localStorage"],
-      },
-      fallbackLng: "en",
-      defaultNS,
-      interpolation: {
-        escapeValue: false, // not needed for react as it escapes by default
-      },
-    });
+export async function initI18n(options?: { context?: "browser" | "electron-main" }): Promise<void> {
+  const { context = "browser" } = options ?? {};
+  if (context === "browser") {
+    i18n.use(initReactI18next);
+    i18n.use(LanguageDetector);
+  }
+  await i18n.init({
+    resources: translations,
+    detection:
+      context === "browser"
+        ? { order: ["localStorage", "navigator"], caches: ["localStorage"] }
+        : undefined,
+    fallbackLng: "en",
+    defaultNS,
+    interpolation: {
+      escapeValue: false, // not needed for react as it escapes by default
+    },
+  });
 }
