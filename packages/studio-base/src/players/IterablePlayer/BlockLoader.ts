@@ -345,7 +345,7 @@ export class BlockLoader {
       }
 
       await cursor.end();
-      blockId = endBlockId + 1;
+      blockId = endBlockId;
     }
   }
 
