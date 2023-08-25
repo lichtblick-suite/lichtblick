@@ -9,6 +9,7 @@ import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { toNanoSec } from "@foxglove/rostime";
 import { Immutable, SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
+import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
@@ -164,6 +165,12 @@ export class ImageMode
       },
       labelPool: renderer.labelPool,
       messageHandler: this.#messageHandler,
+      addSettingsError(path: Path, errorId: string, errorMessage: string) {
+        renderer.settings.errors.add(path, errorId, errorMessage);
+      },
+      removeSettingsError(path: Path, errorId: string) {
+        renderer.settings.errors.remove(path, errorId);
+      },
     });
     this.add(this.#annotations);
 

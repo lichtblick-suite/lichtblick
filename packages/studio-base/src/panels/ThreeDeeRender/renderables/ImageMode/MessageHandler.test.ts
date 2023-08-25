@@ -225,6 +225,8 @@ describe("MessageHandler: synchronized = true", () => {
     const state = messageHandler.getRenderState();
 
     expect(state.annotationsByTopic?.get("annotations")).toBeUndefined();
+    expect(state.presentAnnotationTopics).toBeUndefined();
+    expect(state.missingAnnotationTopics).toBeUndefined();
   });
 
   it("shows state with image and annotations if they have the same timestamp", () => {
@@ -252,12 +254,17 @@ describe("MessageHandler: synchronized = true", () => {
 
     expect(state.image).not.toBeUndefined();
     expect(state.annotationsByTopic?.get("annotations")).not.toBeUndefined();
+    expect(state.presentAnnotationTopics).toBeUndefined();
+    expect(state.missingAnnotationTopics).toBeUndefined();
   });
 
   it("shows state without image and annotations if they have different header timestamps", () => {
     const messageHandler = new MessageHandler({
       synchronize: true,
-      annotations: { annotations: { visible: true } },
+      annotations: {
+        annotations1: { visible: true },
+        annotations2: { visible: true },
+      },
     });
     const time = 2n;
 
@@ -265,20 +272,31 @@ describe("MessageHandler: synchronized = true", () => {
       timestamp: fromNanoSec(time),
     });
 
-    const annotation = createCircleAnnotations([time + 1n]);
-    const annotationMessage = wrapInMessageEvent(
-      "annotations",
+    const annotation1 = createCircleAnnotations([time]);
+    const annotationMessage1 = wrapInMessageEvent(
+      "annotations1",
       "foxglove.ImageAnnotations",
       0n,
-      annotation,
+      annotation1,
+    );
+    const annotation2 = createCircleAnnotations([time + 1n]);
+    const annotationMessage2 = wrapInMessageEvent(
+      "annotations2",
+      "foxglove.ImageAnnotations",
+      0n,
+      annotation2,
     );
 
     messageHandler.handleRawImage(image);
-    messageHandler.handleAnnotations(annotationMessage as MessageEvent<ImageAnnotations>);
+    messageHandler.handleAnnotations(annotationMessage1 as MessageEvent<ImageAnnotations>);
+    messageHandler.handleAnnotations(annotationMessage2 as MessageEvent<ImageAnnotations>);
     const state = messageHandler.getRenderState();
 
     expect(state.image).toBeUndefined();
-    expect(state.annotationsByTopic?.get("annotations")).toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations1")).toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations2")).toBeUndefined();
+    expect(state.presentAnnotationTopics).toEqual(["annotations1"]);
+    expect(state.missingAnnotationTopics).toEqual(["annotations2"]);
   });
 
   it("shows most recent image and annotations with same timestamps", () => {
