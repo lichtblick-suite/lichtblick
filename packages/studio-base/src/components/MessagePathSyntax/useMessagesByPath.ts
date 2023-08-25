@@ -13,13 +13,14 @@
 
 import { useMemo } from "react";
 
+import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
 
 // Given a set of message paths, subscribe to the appropriate topics and return
 // messages with their queried data decoded for each path.
@@ -28,7 +29,10 @@ export default function useMessagesByPath(
   historySize: number = Infinity,
 ): MessageDataItemsByPath {
   const memoizedPaths: string[] = useShallowMemo(paths);
-  const subscribeTopics = useMemo(() => getTopicsFromPaths(memoizedPaths), [memoizedPaths]);
+  const subscribeTopics = useMemo(
+    () => filterMap(memoizedPaths, (path) => subscribePayloadFromMessagePath(path)),
+    [memoizedPaths],
+  );
 
   const messagesByTopic = PanelAPI.useMessagesByTopic({
     topics: subscribeTopics,

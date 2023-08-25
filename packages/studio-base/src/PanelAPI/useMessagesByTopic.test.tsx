@@ -34,6 +34,20 @@ describe("useMessagesByTopic", () => {
     expect(result.current).toEqual({ "/foo": [] });
   });
 
+  it("accepts SubscribePayloads", async () => {
+    const { result } = renderHook(
+      ({ topics, historySize }) => PanelAPI.useMessagesByTopic({ topics, historySize }),
+      {
+        initialProps: { topics: [{ topic: "/foo", fields: ["a"] }], historySize: 1 },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider>{children}</MockMessagePipelineProvider>
+        ),
+      },
+    );
+
+    expect(result.current).toEqual({ "/foo": [] });
+  });
+
   it("add messages to their respective arrays", () => {
     const message1: MessageEvent = {
       topic: "/foo",

@@ -100,10 +100,11 @@ describe("useMessagesByPath", () => {
     const { unmount, rerender } = renderHook(Hooks, {
       wrapper,
       initialProps: {
-        paths: ["/some/topic", "/some/other/topic"],
+        paths: ["/some/topic", "/some/other/topic", "/sliced_topic.field"],
         topics: [
           { name: "/some/topic", schemaName: "dummy" },
           { name: "/some/other/topic", schemaName: "dummy" },
+          { name: "/sliced_topic", schemaName: "dummy" },
         ],
       },
     });
@@ -117,6 +118,12 @@ describe("useMessagesByPath", () => {
         [
           { topic: "/some/topic", preloadType: "partial", requestor: undefined },
           { topic: "/some/other/topic", preloadType: "partial", requestor: undefined },
+          {
+            topic: "/sliced_topic",
+            preloadType: "partial",
+            fields: ["field"],
+            requestor: undefined,
+          },
         ],
       ],
       [

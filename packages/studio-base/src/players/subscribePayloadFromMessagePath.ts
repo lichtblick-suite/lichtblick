@@ -28,12 +28,12 @@ export function subscribePayloadFromMessagePath(
   );
 
   if (!firstField) {
-    return { topic: parsedPath.topicName, preloadType };
+    return { topic: parsedPath.topicName, preloadType: preloadType ?? "partial" };
   }
 
   return {
     topic: parsedPath.topicName,
-    preloadType,
+    preloadType: preloadType ?? "partial",
     fields: [firstField.name],
   };
 }

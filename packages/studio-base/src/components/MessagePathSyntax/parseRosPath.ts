@@ -11,10 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { memoize, uniq } from "lodash";
-import { Parser, Grammar } from "nearley";
-
-import { filterMap } from "@foxglove/den/collection";
+import { memoize } from "lodash";
+import { Grammar, Parser } from "nearley";
 
 import { RosPath } from "./constants";
 import grammar from "./grammar.ne";
@@ -48,13 +46,5 @@ const parseRosPath = memoize((path: string): RosPath | undefined => {
     return undefined;
   }
 });
-export default parseRosPath;
 
-export function getTopicsFromPaths(paths: readonly string[]): string[] {
-  return uniq(
-    filterMap(paths, (path) => {
-      const rosPath = parseRosPath(path);
-      return rosPath ? rosPath.topicName : undefined;
-    }),
-  );
-}
+export default parseRosPath;
