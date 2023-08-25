@@ -18,9 +18,6 @@ type Handler = () => void;
 type UnregisterFn = () => void;
 
 export interface INativeAppMenu {
-  addFileEntry(name: string, handler: Handler): void;
-  removeFileEntry(name: string): void;
-
   on(name: NativeAppMenuEvent, handler: Handler): UnregisterFn | undefined;
 }
 

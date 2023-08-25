@@ -14,12 +14,6 @@ export class NativeAppMenu implements INativeAppMenu {
   public constructor(bridge?: NativeMenuBridge) {
     this.#bridge = bridge;
   }
-  public addFileEntry(name: string, handler: Handler): void {
-    void this.#bridge?.menuAddInputSource(name, handler);
-  }
-  public removeFileEntry(name: string): void {
-    void this.#bridge?.menuRemoveInputSource(name);
-  }
   public on(name: NativeAppMenuEvent, listener: Handler): UnregisterFn | undefined {
     return this.#bridge?.addIpcEventListener(name, listener);
   }

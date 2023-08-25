@@ -33,9 +33,6 @@ export function main(): void {
     console.error(ev);
   };
 
-  type IpcListener = (ev: unknown, ...args: unknown[]) => void;
-  const menuClickListeners = new Map<string, IpcListener>();
-
   // Initialize the RPC channel for electron-socket asynchronously
   PreloaderSockets.Create().catch((err) => {
     log.error("Failed to initialize preloader sockets", err);
@@ -174,30 +171,6 @@ export function main(): void {
       return () => {
         ipcRenderer.off(eventName, handler);
       };
-    },
-    async menuAddInputSource(name: string, handler: () => void) {
-      if (menuClickListeners.has(name)) {
-        throw new Error(`Menu input source ${name} already exists`);
-      }
-
-      const listener: IpcListener = (_ev, ...args) => {
-        if (args[0] === name) {
-          handler();
-        }
-      };
-
-      menuClickListeners.set(name, listener);
-      ipcRenderer.on("menu.click-input-source", listener);
-      await ipcRenderer.invoke("menu.add-input-source", name);
-    },
-    async menuRemoveInputSource(name: string) {
-      const listener = menuClickListeners.get(name);
-      if (listener == undefined) {
-        return;
-      }
-      menuClickListeners.delete(name);
-      ipcRenderer.off("menu.click-input-source", listener);
-      await ipcRenderer.invoke("menu.remove-input-source", name);
     },
   };
 

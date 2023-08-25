@@ -47,7 +47,6 @@ import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   LeftSidebarItemKey,
@@ -205,30 +204,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   useNativeAppMenuEvent("open-help-slack", () => {
     window.open("https://foxglove.dev/slack", "_blank");
   });
-
-  const nativeAppMenu = useNativeAppMenu();
-
-  const connectionSources = useMemo(() => {
-    return availableSources.filter((source) => source.type === "connection");
-  }, [availableSources]);
-
-  useEffect(() => {
-    if (!nativeAppMenu) {
-      return;
-    }
-
-    for (const item of connectionSources) {
-      nativeAppMenu.addFileEntry(item.displayName, () => {
-        dialogActions.dataSource.open("connection", item);
-      });
-    }
-
-    return () => {
-      for (const item of connectionSources) {
-        nativeAppMenu.removeFileEntry(item.displayName);
-      }
-    };
-  }, [connectionSources, dialogActions.dataSource, nativeAppMenu]);
 
   const { enqueueSnackbar } = useSnackbar();
 

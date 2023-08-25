@@ -13,7 +13,6 @@ import StudioWindow from "./StudioWindow";
 import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
-import { installMenuInterface } from "./menu";
 import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
@@ -275,8 +274,6 @@ export function main(): void {
         new StudioWindow().load();
       }
     });
-
-    installMenuInterface();
 
     initialWindow.load();
   });
