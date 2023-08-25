@@ -53,7 +53,7 @@ const LEGACY_ANNOTATION_SCHEMAS = new Set([
   "webviz_msgs/ImageMarkerArray",
 ]);
 
-const ALL_SUPPORTED_SCHEMAS = new Set([
+export const ALL_SUPPORTED_ANNOTATION_SCHEMAS = new Set([
   ...IMAGE_ANNOTATIONS_DATATYPES,
   ...IMAGE_MARKER_DATATYPES,
   ...IMAGE_MARKER_ARRAY_DATATYPES,
@@ -88,7 +88,7 @@ export class ImageAnnotations extends THREE.Object3D {
     return [
       {
         type: "schema",
-        schemaNames: ALL_SUPPORTED_SCHEMAS,
+        schemaNames: ALL_SUPPORTED_ANNOTATION_SCHEMAS,
         subscription: { handler: this.#context.messageHandler.handleAnnotations },
       },
     ];
@@ -226,7 +226,7 @@ export class ImageAnnotations extends THREE.Object3D {
 
     const annotationTopics = this.#context
       .topics()
-      .filter((topic) => topicIsConvertibleToSchema(topic, ALL_SUPPORTED_SCHEMAS));
+      .filter((topic) => topicIsConvertibleToSchema(topic, ALL_SUPPORTED_ANNOTATION_SCHEMAS));
 
     // Sort annotation topics with prefixes matching the image topic to the top.
     if (config.imageTopic) {

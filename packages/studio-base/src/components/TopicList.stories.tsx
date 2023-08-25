@@ -4,6 +4,8 @@
 
 import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
@@ -42,9 +44,11 @@ export default {
     topicStats,
   },
   render: (args) => (
-    <MockMessagePipelineProvider {...args}>
-      <TopicList />
-    </MockMessagePipelineProvider>
+    <DndProvider backend={HTML5Backend}>
+      <MockMessagePipelineProvider {...args}>
+        <TopicList />
+      </MockMessagePipelineProvider>
+    </DndProvider>
   ),
 } as Meta<typeof MockMessagePipelineProvider>;
 

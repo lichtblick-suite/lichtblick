@@ -44,6 +44,7 @@ import { makeStyles } from "tss-react/mui";
 import { useShallowMemo } from "@foxglove/hooks";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import { MessagePathDragOverlay } from "@foxglove/studio-base/components/MessagePathDragOverlay";
 import { MosaicPathContext } from "@foxglove/studio-base/components/MosaicPathContext";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
@@ -59,6 +60,7 @@ import {
   WorkspaceStoreSelectors,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
+import { useMessagePathDrop } from "@foxglove/studio-base/services/messagePathDragging";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
@@ -462,6 +464,15 @@ export default function Panel<
       [parentPanelContext],
     );
 
+    const {
+      isDragging,
+      isOver,
+      isValidTarget,
+      connectMessagePathDropTarget,
+      dropMessage,
+      setMessagePathDropConfig,
+    } = useMessagePathDrop();
+
     // We use two separate sets of key handlers because the panel context and exitFullScreen
     // change often and invalidate our key handlers during user interactions.
     const { keyUpHandlers, keyDownHandlers } = useMemo(
@@ -555,6 +566,7 @@ export default function Panel<
             tabId,
             // disallow dragging the root panel in a layout
             connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
+            setMessagePathDropConfig,
           }}
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
@@ -583,6 +595,7 @@ export default function Panel<
                     connectOverlayDragPreview(el);
                     connectToolbarDragPreview(el);
                   }
+                  connectMessagePathDropTarget(el);
                 }}
               >
                 {isSelected && !fullscreen && numSelectedPanelsIfSelected > 1 && (
@@ -608,6 +621,14 @@ export default function Panel<
                       </Button>
                     </Stack>
                   </div>
+                )}
+                {type !== TAB_PANEL_TYPE && (
+                  <MessagePathDragOverlay
+                    isDragging={isDragging}
+                    isValidTarget={isValidTarget}
+                    isOver={isOver}
+                    message={dropMessage}
+                  />
                 )}
                 {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullscreen && (
                   <div

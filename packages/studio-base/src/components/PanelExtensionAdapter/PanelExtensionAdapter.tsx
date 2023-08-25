@@ -120,7 +120,7 @@ function PanelExtensionAdapter(
 
   const { capabilities, profile: dataSourceProfile } = playerState;
 
-  const { openSiblingPanel } = usePanelContext();
+  const { openSiblingPanel, setMessagePathDropConfig } = usePanelContext();
 
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
@@ -508,6 +508,10 @@ function PanelExtensionAdapter(
         }
         setDefaultPanelTitle(title);
       },
+
+      EXPERIMENTAL_setMessagePathDropConfig(dropConfig) {
+        setMessagePathDropConfig(dropConfig);
+      },
     };
   }, [
     capabilities,
@@ -526,6 +530,7 @@ function PanelExtensionAdapter(
     setSharedPanelState,
     setSubscriptions,
     updatePanelSettingsTree,
+    setMessagePathDropConfig,
   ]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);

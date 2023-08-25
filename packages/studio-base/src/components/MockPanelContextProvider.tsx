@@ -30,6 +30,7 @@ const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<PanelConfig> = {
   setHasFullscreenDescendant: () => {},
   isFullscreen: false,
   connectToolbarDragHandle: () => {},
+  setMessagePathDropConfig: () => {},
 };
 
 function MockPanelContextProvider({

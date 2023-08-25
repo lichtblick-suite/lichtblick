@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MessagePathDropConfig } from "@foxglove/studio";
 import { SaveConfig, PanelConfig, OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 
 export type PanelContextType<T> = {
@@ -35,6 +36,8 @@ export type PanelContextType<T> = {
   setHasFullscreenDescendant: (hasFullscreenDescendant: boolean) => void;
 
   connectToolbarDragHandle?: (el: Element | ReactNull) => void;
+
+  setMessagePathDropConfig: (config: MessagePathDropConfig | undefined) => void;
 };
 
 // Context used for components to know which panel they are inside

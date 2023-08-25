@@ -238,6 +238,35 @@ export type RenderState = {
   appSettings?: Map<string, AppSettingValue>;
 };
 
+export type DraggedMessagePath = {
+  /** The full message path */
+  path: string;
+  /** The schema name of the top-level topic being dragged */
+  rootSchemaName: string | undefined;
+};
+
+export type MessagePathDropStatus = {
+  /** True if the panel would be able to accept this dragged message path. */
+  canDrop: boolean;
+  /**
+   * Indicate the type of operation that would occur if this path were dropped. Used to change the
+   * mouse cursor.
+   */
+  effect?: "replace" | "add";
+  /**
+   * A message to display to the user indicating what will happen when the path is dropped.
+   */
+  message?: string;
+};
+
+export type MessagePathDropConfig = {
+  /** Called when the user drags a message path over the panel. */
+  getDropStatus: (path: DraggedMessagePath) => MessagePathDropStatus;
+
+  /** Called when the user drops a message path on the panel. */
+  handleDrop: (path: DraggedMessagePath) => void;
+};
+
 export type PanelExtensionContext = {
   /**
    * The root element for the panel. Add your panel elements as children under this element.
@@ -394,6 +423,12 @@ export type PanelExtensionContext = {
    * manually. A value of `undefined` will display the panel's name in the title bar.
    */
   setDefaultPanelTitle(defaultTitle: string | undefined): void;
+
+  /**
+   * Updates the configuration for message path drag & drop support. A value of `undefined`
+   * indicates that the panel does not accept any dragged message paths.
+   */
+  EXPERIMENTAL_setMessagePathDropConfig: (config: MessagePathDropConfig | undefined) => void;
 };
 
 export type ExtensionPanelRegistration = {

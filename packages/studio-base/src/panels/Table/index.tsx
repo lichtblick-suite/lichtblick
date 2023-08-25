@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useEffect } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
@@ -20,6 +21,7 @@ import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/cons
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { useCachedGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -58,6 +60,19 @@ function TablePanel({ config, saveConfig }: Props) {
   const msg = msgs?.[0];
   const cachedMessages = msg ? cachedGetMessagePathDataItems(topicPath, msg) ?? [] : [];
   const firstCachedMessage = cachedMessages[0];
+
+  const { setMessagePathDropConfig } = usePanelContext();
+
+  useEffect(() => {
+    setMessagePathDropConfig({
+      getDropStatus(_path) {
+        return { canDrop: true, effect: "replace" };
+      },
+      handleDrop(path) {
+        saveConfig({ topicPath: path.path });
+      },
+    });
+  }, [setMessagePathDropConfig, saveConfig]);
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">

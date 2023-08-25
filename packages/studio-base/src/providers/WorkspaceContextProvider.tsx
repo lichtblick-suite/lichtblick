@@ -53,43 +53,47 @@ export function makeWorkspaceContextInitialState(): WorkspaceContextStore {
 
 function createWorkspaceContextStore(
   initialState?: Partial<WorkspaceContextStore>,
+  options?: { disablePersistenceForStorybook?: boolean },
 ): StoreApi<WorkspaceContextStore> {
+  const stateCreator = () => {
+    const store: WorkspaceContextStore = {
+      ...makeWorkspaceContextInitialState(),
+      ...initialState,
+    };
+    return store;
+  };
+  if (options?.disablePersistenceForStorybook === true) {
+    return createStore<WorkspaceContextStore>()(stateCreator);
+  }
   return createStore<WorkspaceContextStore>()(
-    persist(
-      () => {
-        const store: WorkspaceContextStore = {
-          ...makeWorkspaceContextInitialState(),
-          ...initialState,
-        };
-        return store;
+    persist(stateCreator, {
+      name: "fox.workspace",
+      version: 1,
+      migrate: migrateV0WorkspaceState,
+      partialize: (state) => {
+        // Note that this is an opt-in list of keys from the store that we
+        // include and restore when persisting to and from localStorage.
+        return pick(state, ["featureTours", "playbackControls", "sidebars"]);
       },
-      {
-        name: "fox.workspace",
-        version: 1,
-        migrate: migrateV0WorkspaceState,
-        partialize: (state) => {
-          // Note that this is an opt-in list of keys from the store that we
-          // include and restore when persisting to and from localStorage.
-          return pick(state, ["featureTours", "playbackControls", "sidebars"]);
-        },
-      },
-    ),
+    }),
   );
 }
 
 export default function WorkspaceContextProvider(props: {
   children?: ReactNode;
+  disablePersistenceForStorybook?: boolean;
   initialState?: Partial<WorkspaceContextStore>;
   workspaceStoreCreator?: (
     initialState?: Partial<WorkspaceContextStore>,
+    options?: { disablePersistenceForStorybook?: boolean },
   ) => StoreApi<WorkspaceContextStore>;
 }): JSX.Element {
-  const { children, initialState, workspaceStoreCreator } = props;
+  const { children, initialState, workspaceStoreCreator, disablePersistenceForStorybook } = props;
 
   const [store] = useState(() =>
     workspaceStoreCreator
-      ? workspaceStoreCreator(initialState)
-      : createWorkspaceContextStore(initialState),
+      ? workspaceStoreCreator(initialState, { disablePersistenceForStorybook })
+      : createWorkspaceContextStore(initialState, { disablePersistenceForStorybook }),
   );
 
   return <WorkspaceContext.Provider value={store}>{children}</WorkspaceContext.Provider>;

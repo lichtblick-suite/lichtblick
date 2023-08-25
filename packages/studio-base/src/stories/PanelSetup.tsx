@@ -342,7 +342,7 @@ type Props = UnconnectedProps & {
 export default function PanelSetup(props: Props): JSX.Element {
   const theme = useTheme();
   return (
-    <WorkspaceContextProvider>
+    <WorkspaceContextProvider disablePersistenceForStorybook>
       <UserNodeStateProvider>
         <TimelineInteractionStateProvider>
           <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
