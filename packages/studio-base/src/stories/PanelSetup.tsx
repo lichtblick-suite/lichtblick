@@ -91,6 +91,7 @@ export type Fixture = {
   setSubscriptions?: ComponentProps<typeof MockMessagePipelineProvider>["setSubscriptions"];
   setParameter?: (key: string, value: ParameterValue) => void;
   fetchAsset?: ComponentProps<typeof MockMessagePipelineProvider>["fetchAsset"];
+  callService?: (service: string, request: unknown) => Promise<unknown>;
   messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
   panelState?: Partial<PanelStateStore>;
 };
@@ -274,6 +275,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     setSubscriptions,
     setParameter,
     fetchAsset,
+    callService,
   } = props.fixture ?? {};
   let dTypes = datatypes;
   if (!dTypes) {
@@ -309,6 +311,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
         setSubscriptions={setSubscriptions}
         setParameter={setParameter}
         fetchAsset={fetchAsset ?? defaultFetchAsset}
+        callService={callService}
       >
         <PanelCatalogContext.Provider value={mockPanelCatalog}>
           <AppConfigurationContext.Provider value={mockAppConfiguration}>

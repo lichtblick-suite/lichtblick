@@ -5,6 +5,8 @@
 export const panels = {
   "3D": "3D",
   "3DPanelDescription": "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
+  callService: "Call Service",
+  callServiceDescription: "Call a service and view the service call result",
   dataSourceInfo: "Data Source Info",
   dataSourceInfoDescription: "View details like topics and timestamps for the current data source.",
   gauge: "Gauge",
