@@ -45,6 +45,7 @@ import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/use
 import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
 import { SubscribePayload } from "@foxglove/studio-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
+import { Bounds } from "@foxglove/studio-base/types/Bounds";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -193,12 +194,15 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const { startTime } = PanelAPI.useDataSourceInfo();
   const currentTime = useMessagePipeline(selectCurrentTime);
   const currentTimeSinceStart = useMemo(
-    () => (!currentTime || !startTime ? undefined : toSec(subtractTimes(currentTime, startTime))),
+    () => (currentTime && startTime ? toSec(subtractTimes(currentTime, startTime)) : undefined),
     [currentTime, startTime],
   );
-  const itemsByPath = useMessagesByPath(pathStrings);
-
   const endTime = useMessagePipeline(selectEndTime);
+  const endTimeSinceStart = useMemo(
+    () => (endTime && startTime ? toSec(subtractTimes(endTime, startTime)) : undefined),
+    [endTime, startTime],
+  );
+  const itemsByPath = useMessagesByPath(pathStrings);
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
 
@@ -241,32 +245,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     return isEmpty(newItemsNotInBlocks) ? EMPTY_ITEMS_BY_PATH : newItemsNotInBlocks;
   }, [decodedBlocks, itemsByPath]);
 
-  const { minTime, maxTime } = useMemo(() => {
-    if (config.xAxisRange != undefined) {
-      return endTime
-        ? {
-            minTime: subtractTimes(endTime, fromSec(config.xAxisRange)),
-            maxTime: endTime,
-          }
-        : {};
-    }
-
-    if (startTime) {
-      return {
-        minTime:
-          config.xAxisMinValue != undefined
-            ? addTimes(startTime, fromSec(config.xAxisMinValue))
-            : undefined,
-        maxTime:
-          config.xAxisMaxValue != undefined
-            ? addTimes(startTime, fromSec(config.xAxisMaxValue))
-            : undefined,
-      };
-    }
-
-    return {};
-  }, [config.xAxisMaxValue, config.xAxisMinValue, config.xAxisRange, endTime, startTime]);
-
   const { datasets, minY } = useMemo(() => {
     // ignore all data when we don't have a start time
     if (!startTime) {
@@ -289,8 +267,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
       const newBlockDataSets = messagesToDatasets({
         blocks: blocksForPath,
-        minTime,
-        maxTime,
         path,
         pathIndex,
         startTime,
@@ -305,8 +281,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       if (items) {
         const newPathDataSets = messagesToDatasets({
           blocks: [items],
-          minTime,
-          maxTime,
           path,
           pathIndex,
           startTime,
@@ -320,7 +294,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       datasets: outDatasets,
       minY: outMinY,
     };
-  }, [decodedBlocks, maxTime, minTime, newItemsByPath, paths, startTime]);
+  }, [decodedBlocks, newItemsByPath, paths, startTime]);
 
   const yScale = useMemo<ScaleOptions<"linear">>(() => {
     return {
@@ -345,6 +319,34 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       },
     };
   }, []);
+
+  const databounds: undefined | Bounds = useMemo(() => {
+    if (
+      (config.xAxisMinValue != undefined || config.xAxisMaxValue != undefined) &&
+      endTimeSinceStart != undefined
+    ) {
+      return {
+        x: {
+          min: config.xAxisMinValue ?? 0,
+          max: config.xAxisMaxValue ?? endTimeSinceStart,
+        },
+        y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
+      };
+    } else if (config.xAxisRange != undefined && currentTimeSinceStart != undefined) {
+      return {
+        x: { min: currentTimeSinceStart - config.xAxisRange, max: currentTimeSinceStart },
+        y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
+      };
+    } else {
+      return undefined;
+    }
+  }, [
+    config.xAxisMaxValue,
+    config.xAxisMinValue,
+    config.xAxisRange,
+    currentTimeSinceStart,
+    endTimeSinceStart,
+  ]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.
@@ -408,6 +410,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             width={width ?? 0}
             height={height}
             data={data}
+            dataBounds={databounds}
             type="scatter"
             xAxes={xScale}
             xAxisIsPlaybackTime

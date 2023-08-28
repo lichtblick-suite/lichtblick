@@ -213,8 +213,8 @@ export const WithXAxisMinMax: StoryObj = {
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame} includeSettings>
         <StateTransitions
           overrideConfig={{
-            xAxisMinValue: 13,
-            xAxisMaxValue: 14,
+            xAxisMinValue: 11,
+            xAxisMaxValue: 15,
             paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
             isSynced: true,
           }}
@@ -234,7 +234,7 @@ export const WithXAxisRange: StoryObj = {
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     const ourFixture = produce(fixture, (draft) => {
-      draft.activeData!.endTime = systemStateMessages.at(-1)?.header.stamp;
+      draft.activeData!.currentTime = systemStateMessages.at(-1)?.header.stamp;
     });
 
     return (
