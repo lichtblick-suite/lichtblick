@@ -425,7 +425,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           } else if (
             channel.encoding === "cdr" &&
             (channel.schemaEncoding == undefined ||
-              ["ros2idl", "ros2msg"].includes(channel.schemaEncoding))
+              ["ros2idl", "ros2msg", "omgidl"].includes(channel.schemaEncoding))
           ) {
             schemaEncoding = channel.schemaEncoding ?? "ros2msg";
             schemaData = textEncoder.encode(channel.schema);
