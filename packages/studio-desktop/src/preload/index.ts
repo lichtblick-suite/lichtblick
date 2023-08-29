@@ -22,6 +22,14 @@ import {
 } from "../common/types";
 import { FOXGLOVE_PRODUCT_NAME, FOXGLOVE_PRODUCT_VERSION } from "../common/webpackDefines";
 
+// Since we have no way of modifying `window.process.argv` we use a sentinel cookie and reload
+// hack to reset the page without deep links. By setting a session cookie and reloading
+// we allow this preload script to read the cookie and ignore deep links in `getDeepLinks`
+const ignoreDeepLinks = document.cookie.includes("fox.ignoreDeepLinks=true");
+document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
+
+const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
+
 export function main(): void {
   const log = Logger.getLogger(__filename);
 
@@ -106,7 +114,16 @@ export function main(): void {
       await ipcRenderer.invoke("updateLanguage");
     },
     getDeepLinks(): string[] {
-      return decodeRendererArg("deepLinks", window.process.argv) ?? [];
+      return deepLinks;
+    },
+    resetDeepLinks(): void {
+      // See `ignoreDeepLinks` comment above for why we do this hack to reset deep links
+
+      // set a session cookie called "fox.ignoreDeepLinks"
+      document.cookie = "fox.ignoreDeepLinks=true;";
+
+      // Reload the window so the new preloader script can read the cookie
+      window.location.reload();
     },
     async getExtensions() {
       const homePath = (await ipcRenderer.invoke("getHomePath")) as string;

@@ -10,8 +10,8 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
-import { Avatar, Button, IconButton, AppBar as MuiAppBar, Tooltip } from "@mui/material";
-import { useCallback, useState } from "react";
+import { Avatar, Button, IconButton, Tooltip } from "@mui/material";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
@@ -43,33 +43,17 @@ import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { AddPanelMenu } from "./AddPanelMenu";
+import { AppBarContainer } from "./AppBarContainer";
 import { DataSource } from "./DataSource";
 import { UserMenu } from "./UserMenu";
-import { APP_BAR_HEIGHT } from "./constants";
 
-const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }, "avatar">()(
-  (theme, { leftInset, debugDragRegion = false }, classes) => {
-    const DRAGGABLE_STYLE: Record<string, string> = { WebkitAppRegion: "drag" };
+const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
+  (theme, { debugDragRegion = false }, classes) => {
     const NOT_DRAGGABLE_STYLE: Record<string, string> = { WebkitAppRegion: "no-drag" };
     if (debugDragRegion) {
-      DRAGGABLE_STYLE.backgroundColor = "green";
       NOT_DRAGGABLE_STYLE.backgroundColor = "red";
     }
     return {
-      appBar: {
-        gridArea: "appbar",
-        boxShadow: "none",
-        backgroundColor: theme.palette.appBar.main,
-        borderBottom: "none",
-        color: theme.palette.common.white,
-        height: APP_BAR_HEIGHT,
-
-        // Leave space for system window controls on the right on Windows.
-        // Use hard-coded padding for Mac because it looks better than env(titlebar-area-x).
-        paddingLeft: leftInset,
-        paddingRight: "calc(100% - env(titlebar-area-x) - env(titlebar-area-width))",
-        ...DRAGGABLE_STYLE, // make custom window title bar draggable for desktop app
-      },
       toolbar: {
         display: "grid",
         width: "100%",
@@ -203,7 +187,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     onUnmaximizeWindow,
     showCustomWindowControls = false,
   } = props;
-  const { classes, cx, theme } = useStyles({ leftInset, debugDragRegion });
+  const { classes, cx, theme } = useStyles({ debugDragRegion });
   const { currentUser, signIn } = useCurrentUser();
   const { t } = useTranslation("appBar");
 
@@ -232,25 +216,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const userMenuOpen = Boolean(userAnchorEl);
   const panelMenuOpen = Boolean(panelAnchorEl);
 
-  const handleDoubleClick = useCallback(
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-      event.preventDefault();
-      onDoubleClick?.();
-    },
-    [onDoubleClick],
-  );
-
   return (
     <>
-      <MuiAppBar
-        className={classes.appBar}
-        position="relative"
-        color="inherit"
-        elevation={0}
-        onDoubleClick={handleDoubleClick}
-        data-tourid="app-bar"
-      >
+      <AppBarContainer onDoubleClick={onDoubleClick} leftInset={leftInset}>
         <div className={classes.toolbar}>
           <div className={classes.start}>
             <div className={classes.startInner}>
@@ -387,7 +355,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
             </div>
           </div>
         </div>
-      </MuiAppBar>
+      </AppBarContainer>
       <AddPanelMenu
         anchorEl={panelAnchorEl}
         open={panelMenuOpen}

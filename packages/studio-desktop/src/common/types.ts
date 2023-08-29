@@ -83,6 +83,9 @@ interface Desktop {
   // Get an array of deep links provided on app launch
   getDeepLinks: () => string[];
 
+  // Reset the deep links. After reset, `getDeepLinks` will return an empty array.
+  resetDeepLinks: () => void;
+
   // Get an array of available extensions and parsed package.json files
   getExtensions: () => Promise<DesktopExtension[]>;
 
