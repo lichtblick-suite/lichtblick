@@ -707,7 +707,7 @@ export class IterablePlayer implements Player {
       await this.#resetPlaybackIterator();
       this.#setState(this.#isPlaying ? "play" : "idle");
     } catch (err) {
-      if (this.#nextState && err instanceof DOMException && err.name === "AbortError") {
+      if (this.#nextState && err.name === "AbortError") {
         log.debug("Aborted backfill");
       } else {
         throw err;
