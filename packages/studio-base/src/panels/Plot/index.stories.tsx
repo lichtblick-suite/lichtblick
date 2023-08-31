@@ -493,7 +493,13 @@ export const LineGraphWithSettings: StoryObj = {
     return (
       <PlotWrapper
         pauseFrame={pauseFrame}
-        config={{ ...exampleConfig, minYValue: -1, maxYValue: 1, minXValue: 0, maxXValue: 3 }}
+        config={{
+          ...exampleConfig,
+          minYValue: -3.1415,
+          maxYValue: 0.00001,
+          minXValue: 0.001234,
+          maxXValue: 30,
+        }}
         includeSettings
       />
     );
@@ -507,8 +513,12 @@ export const LineGraphWithSettings: StoryObj = {
   name: "line graph with settings",
 
   play: async (ctx) => {
-    const label = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
-    await userEvent.click(label);
+    const yLabel = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
+    await userEvent.click(yLabel);
+
+    const xLabel = await screen.findByTestId("settings__nodeHeaderToggle__xAxis");
+    await userEvent.click(xLabel);
+
     await ctx.parameters.storyReady;
   },
 };
