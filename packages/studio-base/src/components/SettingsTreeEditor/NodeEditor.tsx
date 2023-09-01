@@ -479,12 +479,15 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
         </>
       )}
       {state.open && selectVisibilityFilterEnabled && hasChildren && (
-        <FieldEditor
-          key="visibilityFilter"
-          field={{ ...getSelectVisibilityFilterField(t), value: state.visibilityFilter }}
-          path={makeStablePath(props.path, "visibilityFilter")}
-          actionHandler={selectVisibilityFilter}
-        />
+        <>
+          <Stack paddingBottom={0.5} style={{ gridColumn: "span 2" }} />
+          <FieldEditor
+            key="visibilityFilter"
+            field={{ ...getSelectVisibilityFilterField(t), value: state.visibilityFilter }}
+            path={makeStablePath(props.path, "visibilityFilter")}
+            actionHandler={selectVisibilityFilter}
+          />
+        </>
       )}
       {state.open && childNodes}
       {indent === 1 && <Divider style={{ gridColumn: "span 2" }} />}
