@@ -8,7 +8,7 @@
  */
 function supportsClassStaticInitialization() {
   try {
-    // eslint-disable-next-line no-new-func
+    // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
     new Function("class X { static { } }");
     return true;
   } catch (err) {

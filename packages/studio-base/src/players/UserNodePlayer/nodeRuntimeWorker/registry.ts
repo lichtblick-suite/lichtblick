@@ -81,7 +81,7 @@ export const requireImplementation = (id: string, projectCode: Map<string, strin
     if (requestedFile.endsWith(file)) {
       const sourceExports = {};
       const require = (reqId: string) => requireImplementation(reqId, projectCode);
-      // eslint-disable-next-line no-new-func
+      // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
       new Function("exports", "require", source)(sourceExports, require);
       return sourceExports;
     }
@@ -116,7 +116,7 @@ export const registerNode = ({
     const require = (id: string) => requireImplementation(id, projectCode);
 
     // Using new Function in order to execute user-input text in User Scripts as code
-    // eslint-disable-next-line no-new-func
+    // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
     new Function("exports", "require", nodeCode)(nodeExports, require);
     nodeCallback = nodeExports.default!;
     return {

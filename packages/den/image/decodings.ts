@@ -340,7 +340,7 @@ function makeSpecializedDecodeBayer(
   //
   // We'll do something much simpler.  For each group of 2x2, we're replicate the R and B values for all pixels.
   // For the two row, we'll replicate G0 for the green channels, and replicate G1 for the bottom row.
-  // eslint-disable-next-line no-new-func
+  // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
   return new Function(
     "data",
     "width",

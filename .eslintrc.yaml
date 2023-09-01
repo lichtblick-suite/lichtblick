@@ -149,7 +149,6 @@ overrides:
 
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
-      "@typescript-eslint/no-implied-eval": off # We need to use `new Function()`
 
       # These are related to `any` types, which we generally don't have except from imports
       "@typescript-eslint/no-unsafe-member-access": off
