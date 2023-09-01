@@ -157,8 +157,6 @@ overrides:
       "@typescript-eslint/no-unsafe-assignment": off
       "@typescript-eslint/no-unsafe-call": off
 
-      "@typescript-eslint/require-await": off # Async functions without await are used to satisfy interface requirements
-
       # These could theoretically be turned on (or merit investigation) but are currently noisy
       "@typescript-eslint/no-misused-promises": off # Often used with e.g. useCallback(async () => {})
       "@typescript-eslint/restrict-template-expressions": off
