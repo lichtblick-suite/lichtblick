@@ -291,8 +291,8 @@ export type SubscribePayload = {
    */
   topic: string;
   /**
-   * If defined the source will return only these fields from messages. Otherwize entire messages
-   * will be returned.
+   * If defined the source will return only these fields from messages.
+   * Otherwise entire messages will be returned.
    */
   fields?: string[];
   /**

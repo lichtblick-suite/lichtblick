@@ -34,7 +34,10 @@ export type MessageBlock = Immutable<{
 // That said, MessageBlock identity will change when the set of topics changes, so consumers should
 // prefer to use the identity of topic-block message arrays where possible.
 const filterBlockByTopics = memoizeWeak(
-  (block: Immutable<PlayerMessageBlock> | undefined, topics: readonly string[]): MessageBlock => {
+  (
+    block: Immutable<PlayerMessageBlock> | undefined,
+    topics: readonly string[] | SubscribePayload[],
+  ): MessageBlock => {
     if (!block) {
       // For our purposes, a missing MemoryCacheBlock just means "no topics have been cached for
       // this block". This is semantically different to an empty array per topic, but not different
@@ -44,12 +47,13 @@ const filterBlockByTopics = memoizeWeak(
 
     const ret: Record<string, readonly MessageEvent[]> = {};
     for (const topic of topics) {
+      const topicName = typeof topic === "string" ? topic : topic.topic;
       // Don't include an empty array when the data has not been cached for this topic for this
       // block. The missing entry means "we don't know the message for this topic in this block", as
       // opposed to "we know there are no messages for this topic in this block".
-      const blockMessages = block.messagesByTopic[topic];
+      const blockMessages = block.messagesByTopic[topicName];
       if (blockMessages) {
-        ret[topic] = blockMessages;
+        ret[topicName] = blockMessages;
       }
     }
     return ret;

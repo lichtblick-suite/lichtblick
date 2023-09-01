@@ -29,24 +29,6 @@ describe("merges", () => {
   });
 });
 
-describe("mapValues", () => {
-  it("maps values", () => {
-    const input = new Map([
-      ["a", 1],
-      ["b", 2],
-    ]);
-
-    const mapped = maps.mapValues(input, (value, key) => `${key}/${value * 10}`);
-
-    expect(mapped).toEqual(
-      new Map([
-        ["a", "a/10"],
-        ["b", "b/20"],
-      ]),
-    );
-  });
-});
-
 describe("pick", () => {
   it("picks by key", () => {
     const input = new Map([

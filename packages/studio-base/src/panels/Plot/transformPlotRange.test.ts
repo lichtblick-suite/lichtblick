@@ -11,56 +11,31 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { derivative, applyToDatum, mathFunctions } from "./transformPlotRange";
+import { derivative } from "./datasets";
+import { applyToDatum, mathFunctions } from "./transformPlotRange";
+
+const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 
 describe("transformPlotRange", () => {
   describe("derivative", () => {
     it("takes the derivative using the previous message", () => {
       const data = [
         {
-          x: 0,
-          y: 0,
-          value: 0,
-          constantName: undefined,
-        },
-        {
-          x: 1,
-          y: -1,
-          value: -1,
-          constantName: undefined,
-        },
-        {
-          x: 2,
-          y: -1.5,
-          value: -1.5,
-          constantName: undefined,
-        },
-        {
-          x: 3,
-          y: 5,
-          value: 5,
-          constantName: undefined,
+          x: new Float32Array([0, 1, 2, 3]),
+          y: new Float32Array([0, -1, -1.5, 5]),
+          value: [0, -1, -1.5, 5],
+          receiveTime: [ZERO_TIME, ZERO_TIME, ZERO_TIME, ZERO_TIME],
         },
       ];
 
       const newData = [
         {
-          x: 1,
-          y: -1,
-          value: -1,
           constantName: undefined,
-        },
-        {
-          x: 2,
-          y: -0.5,
-          value: -0.5,
-          constantName: undefined,
-        },
-        {
-          x: 3,
-          y: 6.5,
-          value: 6.5,
-          constantName: undefined,
+          headerStamp: undefined,
+          x: new Float32Array([1, 2, 3]),
+          y: new Float32Array([-1, -0.5, 6.5]),
+          value: [-1, -0.5, 6.5],
+          receiveTime: [ZERO_TIME, ZERO_TIME, ZERO_TIME],
         },
       ];
       expect(derivative(data)).toEqual(newData);

@@ -13,10 +13,7 @@
 
 import { isNumber, uniq } from "lodash";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
-import { useLatest } from "react-use";
-import { DeepWritable } from "ts-essentials";
 
-import { useShallowMemo } from "@foxglove/hooks";
 import {
   Time,
   add as addTimes,
@@ -24,7 +21,6 @@ import {
   subtract as subtractTimes,
   toSec,
 } from "@foxglove/rostime";
-import { Immutable } from "@foxglove/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -40,8 +36,6 @@ import PanelToolbar, {
 } from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
-import { DataSet } from "@foxglove/studio-base/panels/Plot/internalTypes";
-import { usePlotPanelData } from "@foxglove/studio-base/panels/Plot/usePlotPanelData";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
@@ -49,16 +43,18 @@ import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
 import PlotChart from "./PlotChart";
 import { PlotLegend } from "./PlotLegend";
 import { downloadCSV } from "./csv";
+import { TypedDataSet } from "./internalTypes";
+import { EmptyPlotData, EmptyData } from "./plotData";
 import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
+import useDatasets from "./useDatasets";
 
 export { plotableRosTypes } from "./types";
 export type { PlotConfig } from "./types";
 
 const defaultSidebarDimension = 240;
 
-const EmptyDataSets: Immutable<DataSet[]> = Object.freeze([]);
-const EmtpyDataSet: Immutable<DataSet> = Object.freeze({ data: [], label: "" });
+const EmptyDatasets: TypedDataSet[] = [];
 
 export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicName: string): void {
   openSiblingPanel({
@@ -92,10 +88,7 @@ function selectEndTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.endTime;
 }
 
-// Hack until we can make all the downstream chart types immutable.
-function castWritable<T>(t: T) {
-  return t as DeepWritable<T>;
-}
+const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 
 function Plot(props: Props) {
   const { saveConfig, config } = props;
@@ -135,8 +128,6 @@ function Plot(props: Props) {
       saveConfig({ paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }] });
     }
   }, [saveConfig, yAxisPaths.length]);
-
-  const showSingleCurrentMessage = xAxisVal === "currentCustom" || xAxisVal === "index";
 
   const startTime = useMessagePipeline(selectStartTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
@@ -183,17 +174,44 @@ function Plot(props: Props) {
   }, [fixedView, followingView]);
 
   const {
-    bounds: datasetBounds,
-    datasets,
-    pathsWithMismatchedDataLengths,
-  } = usePlotPanelData({
-    followingView,
-    showSingleCurrentMessage,
-    startTime,
-    xAxisVal,
+    data: plotData,
+    provider,
+    getFullData,
+  } = useDatasets({
+    startTime: startTime ?? ZERO_TIME,
+    paths: yAxisPaths,
+    invertedTheme: false,
     xAxisPath,
-    yAxisPaths,
+    xAxisVal,
   });
+
+  const {
+    datasets,
+    bounds: datasetBounds,
+    pathsWithMismatchedDataLengths,
+  } = useMemo(() => {
+    const data = plotData ?? EmptyPlotData;
+    return {
+      bounds: data.bounds,
+      pathsWithMismatchedDataLengths: data.pathsWithMismatchedDataLengths,
+      // Return a dataset for all paths here so that the ordering of datasets corresponds
+      // to yAxisPaths as expected by downstream components like the legend.
+      //
+      // Label is needed so that TimeBasedChart doesn't discard the empty dataset and mess
+      // up the ordering.
+      datasets: yAxisPaths.map((path) => {
+        for (const [otherPath, dataset] of data.datasets.entries()) {
+          if (
+            otherPath.value === path.value &&
+            otherPath.timestampMethod === path.timestampMethod
+          ) {
+            return dataset;
+          }
+        }
+        return { label: path.label ?? path.value, data: [EmptyData] };
+      }),
+    };
+  }, [plotData, yAxisPaths]);
 
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
@@ -222,28 +240,29 @@ function Plot(props: Props) {
     [legendDisplay],
   );
 
-  // Access datasets by latest reference to stabilize our getPanelContextMenuItems callback.
-  const latestDatasets = useLatest(datasets);
-
   const getPanelContextMenuItems = useCallback(() => {
     const items: PanelContextMenuItem[] = [
       {
         type: "item",
         label: "Download plot data as CSV",
-        onclick: () => downloadCSV(latestDatasets.current, xAxisVal),
+        onclick: async () => {
+          // Because the full dataset is never in the rendering thread, we have to request it from the worker.
+          const data = await getFullData();
+          if (data == undefined) {
+            return;
+          }
+          const csvDatasets = [];
+          for (const dataset of data.datasets.values()) {
+            csvDatasets.push(dataset);
+          }
+          downloadCSV(csvDatasets, xAxisVal);
+        },
       },
     ];
     return items;
-  }, [latestDatasets, xAxisVal]);
+  }, [getFullData, xAxisVal]);
 
   const onClickPath = useCallback((index: number) => setFocusedPath(["paths", String(index)]), []);
-
-  // Stabilize datasets we send to the chart by first replacing empty datasets with a constant value
-  // and then shallow memoizing the whole set. This prevents a lot of unnecessary and expensive
-  // rendering while the user is interactively editing paths that don't result in any messages.
-  const stableDatasets = useShallowMemo(
-    datasets.map((ds) => (ds.data.length === 0 ? EmtpyDataSet : ds)),
-  );
 
   return (
     <Stack
@@ -264,7 +283,7 @@ function Plot(props: Props) {
         {legendDisplay !== "none" && (
           <PlotLegend
             currentTime={showPlotValuesInLegend ? currentTimeSinceStart : undefined}
-            datasets={showPlotValuesInLegend ? datasets : EmptyDataSets}
+            datasets={showPlotValuesInLegend ? datasets : EmptyDatasets}
             legendDisplay={legendDisplay}
             onClickPath={onClickPath}
             paths={yAxisPaths}
@@ -279,7 +298,7 @@ function Plot(props: Props) {
           <PlotChart
             currentTime={currentTimeSinceStart}
             datasetBounds={datasetBounds}
-            datasets={castWritable(stableDatasets)}
+            provider={provider}
             defaultView={defaultView}
             isSynced={xAxisVal === "timestamp" && isSynced}
             maxYValue={parseFloat((maxYValue ?? "").toString())}

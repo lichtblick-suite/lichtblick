@@ -11,27 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Immutable } from "@foxglove/studio";
-
 export type MathFunction = (arg: number) => number;
-
-export function derivative<T extends { x: number; y: number }>(
-  data: Immutable<T[]>,
-): Immutable<T>[] {
-  const newDatums = [];
-  for (let i = 1; i < data.length; i++) {
-    const item = data[i]!;
-    const prevItem = data[i - 1]!;
-    const secondsDifference = item.x - prevItem.x;
-    const value = (item.y - prevItem.y) / secondsDifference;
-    newDatums.push({
-      ...item,
-      y: value,
-      value,
-    });
-  }
-  return newDatums;
-}
 
 export const mathFunctions: { [fn: string]: MathFunction } = {
   abs: Math.abs,

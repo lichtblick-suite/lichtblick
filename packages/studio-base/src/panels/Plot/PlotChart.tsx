@@ -14,7 +14,7 @@
 import { useTheme } from "@mui/material";
 import { ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
-import { ComponentProps, useMemo } from "react";
+import { useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -61,7 +61,7 @@ type PlotChartProps = {
   maxYValue: number;
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
-  datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
+  provider: TimeBasedChartProps["typedProvider"];
   datasetBounds: PlotData["bounds"];
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
@@ -73,7 +73,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
   const {
     currentTime,
     datasetBounds,
-    datasets,
+    provider,
     defaultView,
     isSynced,
     maxYValue,
@@ -115,10 +115,6 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
     refreshMode: "debounce",
   });
 
-  const data = useMemo(() => {
-    return { datasets };
-  }, [datasets]);
-
   return (
     <div style={{ width: "100%", flexGrow: 1, overflow: "hidden", padding: "2px" }} ref={sizeRef}>
       <TimeBasedChart
@@ -127,7 +123,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
         zoom
         width={width ?? 0}
         height={height ?? 0}
-        data={data}
+        typedProvider={provider}
         dataBounds={datasetBounds}
         annotations={annotations}
         type="scatter"

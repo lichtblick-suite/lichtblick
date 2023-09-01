@@ -19,7 +19,16 @@ type Datum = ScatterDataPoint & {
   // Constant name for the datum (used by state transitions)
   constantName?: string | undefined;
 };
-export type ChartData = ChartJsChartData<"scatter", (Datum | typeof ChartNull)[]>;
+export type ObjectData = (Datum | typeof ChartNull)[];
+export type ChartData = ChartJsChartData<"scatter", ObjectData>;
+
+export type TypedData = {
+  x: Float32Array;
+  y: Float32Array;
+  value: (string | number | bigint | boolean | undefined)[];
+  constantName?: string[];
+};
+export type TypedChartData = ChartJsChartData<"scatter", TypedData[]>;
 
 export type RpcScale = {
   // min scale value

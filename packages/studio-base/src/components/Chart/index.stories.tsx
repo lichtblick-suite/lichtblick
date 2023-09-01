@@ -106,8 +106,8 @@ const props: ComponentProps<typeof ChartComponent> = {
 };
 
 const propsWithDatalabels = cloneDeep(props);
-if (propsWithDatalabels.data.datasets[0]?.datalabels) {
-  propsWithDatalabels.data.datasets[0].datalabels.display = true;
+if (propsWithDatalabels.data!.datasets[0]?.datalabels) {
+  propsWithDatalabels.data!.datasets[0].datalabels.display = true;
 }
 
 const divStyle = { width: 600, height: 800, background: "black" };

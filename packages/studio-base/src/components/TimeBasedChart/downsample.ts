@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { ChartDataset, ChartDatum } from "./types";
+import type { ChartDataset } from "chart.js";
 
-type DownsampleBounds = {
-  width: number;
-  height: number;
-  x: { min: number; max: number };
-  y: { min: number; max: number };
-};
+import { Point } from "@foxglove/studio-base/components/Chart/datasets";
+
+import type { PlotViewport } from "./types";
+
+type Dataset<T> = ChartDataset<"scatter", T>;
 
 /**
  * Downsample a timeseries dataset
@@ -33,21 +32,15 @@ type DownsampleBounds = {
  * dataset, and the interval connects to the next interval with the same slope line as the original
  * data. The min/max entries preserve spikes within the data.
  */
-export function downsampleTimeseries(
-  dataset: ChartDataset,
-  bounds: DownsampleBounds,
-): ChartDataset {
-  // datasets of length 1 don't need downsampling
-  if (dataset.data.length <= 1) {
-    return dataset;
-  }
+export function downsampleTimeseries(points: Iterable<Point>, view: PlotViewport): number[] {
+  const { bounds, width, height } = view;
 
-  const pixelPerXValue = bounds.width / (bounds.x.max - bounds.x.min);
-  const pixelPerYValue = bounds.height / (bounds.y.max - bounds.y.min);
+  const pixelPerXValue = width / (bounds.x.max - bounds.x.min);
+  const pixelPerYValue = height / (bounds.y.max - bounds.y.min);
 
-  const downsampled: ChartDatum[] = [];
+  const downsampled: number[] = [];
 
-  type IntervalItem = { xPixel: number; yPixel: number; datum: ChartDatum };
+  type IntervalItem = { xPixel: number; yPixel: number; label: string | undefined; index: number };
 
   let intFirst: IntervalItem | undefined;
   let intLast: IntervalItem | undefined;
@@ -61,27 +54,25 @@ export function downsampleTimeseries(
   const minX = bounds.x.min - xRange * 0.5;
   const maxX = bounds.x.max + xRange * 0.5;
 
-  let firstPastBounds: (typeof dataset.data)[0] | undefined = undefined;
+  let firstPastBounds: number | undefined = undefined;
 
-  for (const datum of dataset.data) {
-    if (!datum) {
-      continue;
-    }
+  for (const datum of points) {
+    const { index, label } = datum;
 
     // track the first point before our bounds
     if (datum.x < minX) {
       if (downsampled.length === 0) {
-        downsampled.push(datum);
+        downsampled.push(index);
       } else {
         // the first point outside our bounds will always be at index 0
-        downsampled[0] = datum;
+        downsampled[0] = index;
       }
       continue;
     }
 
     // track the first point outside of our bounds
     if (datum.x > maxX) {
-      firstPastBounds = datum;
+      firstPastBounds = index;
       continue;
     }
 
@@ -92,93 +83,86 @@ export function downsampleTimeseries(
 
     // interval has ended, we determine whether to write additional points for min/max/last. Always
     // create a new interval when encountering a new label to preserve the transition from one label to another
-    if (
-      intFirst?.xPixel !== x ||
-      (intLast?.datum?.label != undefined && intLast.datum.label !== datum.label)
-    ) {
+    if (intFirst?.xPixel !== x || (intLast?.label != undefined && intLast.label !== datum.label)) {
       // add the min value from previous interval if it doesn't match the first or last of that interval
       if (intMin && intMin.yPixel !== intFirst?.yPixel && intMin.yPixel !== intLast?.yPixel) {
-        downsampled.push(intMin.datum);
+        downsampled.push(intMin.index);
       }
 
       // add the max value from previous interval if it doesn't match the first or last of that interval
       if (intMax && intMax.yPixel !== intFirst?.yPixel && intMax.yPixel !== intLast?.yPixel) {
-        downsampled.push(intMax.datum);
+        downsampled.push(intMax.index);
       }
 
       // add the last value if it doesn't match the first
       if (intLast && intFirst?.yPixel !== intLast.yPixel) {
-        downsampled.push(intLast.datum);
+        downsampled.push(intLast.index);
       }
 
       // always add the first datum of an new interval
-      downsampled.push(datum);
+      downsampled.push(index);
 
-      intFirst = { xPixel: x, yPixel: y, datum };
-      intLast = { xPixel: x, yPixel: y, datum };
-      intMin = { xPixel: x, yPixel: y, datum };
-      intMax = { xPixel: x, yPixel: y, datum };
+      intFirst = { xPixel: x, yPixel: y, index, label };
+      intLast = { xPixel: x, yPixel: y, index, label };
+      intMin = { xPixel: x, yPixel: y, index, label };
+      intMax = { xPixel: x, yPixel: y, index, label };
       continue;
     }
 
-    intLast ??= { xPixel: x, yPixel: y, datum };
+    intLast ??= { xPixel: x, yPixel: y, index, label };
     intLast.xPixel = x;
     intLast.yPixel = y;
-    intLast.datum = datum;
+    intLast.index = index;
+    intLast.label = label;
 
     if (intMin && y < intMin.yPixel) {
       intMin.yPixel = y;
-      intMin.datum = datum;
+      intMin.index = index;
+      intMin.label = label;
     }
 
     if (intMax && y > intMax.yPixel) {
       intMax.yPixel = y;
-      intMax.datum = datum;
+      intMax.index = index;
+      intMax.label = label;
     }
   }
 
   // add the min value from previous interval if it doesn't match the first or last of that interval
   if (intMin && intMin.yPixel !== intFirst?.yPixel && intMin.yPixel !== intLast?.yPixel) {
-    downsampled.push(intMin.datum);
+    downsampled.push(intMin.index);
   }
 
   // add the max value from previous interval if it doesn't match the first or last of that interval
   if (intMax && intMax.yPixel !== intFirst?.yPixel && intMax.yPixel !== intLast?.yPixel) {
-    downsampled.push(intMax.datum);
+    downsampled.push(intMax.index);
   }
 
   // add the last value if it doesn't match the first
   if (intLast && intFirst?.yPixel !== intLast.yPixel) {
-    downsampled.push(intLast.datum);
+    downsampled.push(intLast.index);
   }
 
-  if (firstPastBounds) {
+  if (firstPastBounds != undefined) {
     downsampled.push(firstPastBounds);
   }
 
-  return { ...dataset, data: downsampled };
+  return downsampled;
 }
 
-export function downsampleScatter(dataset: ChartDataset, bounds: DownsampleBounds): ChartDataset {
-  // datasets of length 1 don't need downsampling
-  if (dataset.data.length <= 1) {
-    return dataset;
-  }
+export function downsampleScatter(points: Iterable<Point>, view: PlotViewport): number[] {
+  const { bounds, width, height } = view;
 
-  const pixelPerXValue = bounds.width / (bounds.x.max - bounds.x.min);
-  const pixelPerYValue = bounds.height / (bounds.y.max - bounds.y.min);
-  const pixelPerRow = bounds.width;
+  const pixelPerXValue = width / (bounds.x.max - bounds.x.min);
+  const pixelPerYValue = height / (bounds.y.max - bounds.y.min);
+  const pixelPerRow = width;
 
-  const downsampled: ChartDatum[] = [];
+  const downsampled: number[] = [];
 
   // downsampling tracks a sparse array of x/y locations
   const sparse: boolean[] = [];
 
-  for (const datum of dataset.data) {
-    if (!datum) {
-      continue;
-    }
-
+  for (const datum of points) {
     // Out-of-bounds scatter points are ignored. We don't filter on y
     // because y values are needed to allow chart to auto scale to the correct
     // height.
@@ -195,8 +179,22 @@ export function downsampleScatter(dataset: ChartDataset, bounds: DownsampleBound
       continue;
     }
     sparse[locator] = true;
-    downsampled.push(datum);
+    downsampled.push(datum.index);
   }
 
-  return { ...dataset, data: downsampled };
+  return downsampled;
+}
+
+/**
+ * Given a dataset and a viewport, `downsample` chooses a list of
+ * representative points that, when plotted, resemble the full dataset.
+ */
+export function downsample<T>(
+  dataset: Dataset<T>,
+  points: Iterable<Point>,
+  view: PlotViewport,
+): number[] {
+  return dataset.showLine !== true
+    ? downsampleScatter(points, view)
+    : downsampleTimeseries(points, view);
 }

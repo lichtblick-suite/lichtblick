@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable } from "@foxglove/studio";
+import { iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
-import { DataSet, Datum, PlotXAxisVal } from "./internalTypes";
+import { TypedDataSet, Datum, PlotXAxisVal } from "./internalTypes";
 
 function getCSVRow(label: string | undefined, data: Datum) {
   const { x, value, receiveTime, headerStamp } = data;
@@ -24,19 +24,19 @@ const getCVSColName = (xAxisVal: PlotXAxisVal): string => {
   }[xAxisVal];
 };
 
-function generateCSV(datasets: Immutable<DataSet[]>, xAxisVal: PlotXAxisVal): string {
+function generateCSV(datasets: TypedDataSet[], xAxisVal: PlotXAxisVal): string {
   const headLine = [getCVSColName(xAxisVal), "receive time", "header.stamp", "topic", "value"];
   const combinedLines = [];
   combinedLines.push(headLine);
   for (const dataset of datasets) {
-    for (const datum of dataset.data) {
+    for (const datum of iterateTyped(dataset.data)) {
       combinedLines.push(getCSVRow(dataset.label, datum));
     }
   }
   return combinedLines.join("\n");
 }
 
-function downloadCSV(datasets: Immutable<DataSet[]>, xAxisVal: PlotXAxisVal): void {
+function downloadCSV(datasets: TypedDataSet[], xAxisVal: PlotXAxisVal): void {
   const csvData = generateCSV(datasets, xAxisVal);
   const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
   downloadFiles([{ blob, fileName: `plot_data.csv` }]);

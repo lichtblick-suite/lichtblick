@@ -24,7 +24,7 @@ import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
-import { ChartData, RpcElement, RpcScales } from "./types";
+import { TypedChartData, ChartData, RpcElement, RpcScales } from "./types";
 
 const log = Logger.getLogger(__filename);
 
@@ -42,7 +42,8 @@ export type OnClickArg = {
 };
 
 type Props = {
-  data: ChartData;
+  data?: ChartData;
+  typedData?: TypedChartData;
   options: ChartOptions;
   isBoundsReset: boolean;
   type: "scatter";
@@ -110,13 +111,23 @@ function Chart(props: Props): JSX.Element {
   const panEnabled =
     (props.options.plugins?.zoom as ZoomPluginOptions | undefined)?.pan?.enabled ?? false;
 
-  const { type, data, isBoundsReset, options, width, height, onStartRender, onFinishRender } =
-    props;
+  const {
+    type,
+    data,
+    typedData,
+    isBoundsReset,
+    options,
+    width,
+    height,
+    onStartRender,
+    onFinishRender,
+  } = props;
 
   const sendWrapperRef = useRef<RpcSend | undefined>();
   const rpcSendRef = useRef<RpcSend | undefined>();
 
   const hasPannedSinceMouseDown = useRef(false);
+  const queuedUpdates = useRef<Partial<ChartUpdateMessage>[]>([]);
   const previousUpdateMessage = useRef<Record<string, unknown>>({});
 
   useLayoutEffect(() => {
@@ -203,6 +214,9 @@ function Chart(props: Props): JSX.Element {
     if (prev.data !== data) {
       prev.data = out.data = data;
     }
+    if (prev.typedData !== typedData) {
+      prev.typedData = out.typedData = typedData;
+    }
     if (prev.options !== options) {
       prev.options = out.options = options;
     }
@@ -221,7 +235,7 @@ function Chart(props: Props): JSX.Element {
     }
 
     return out;
-  }, [data, height, options, isBoundsReset, width]);
+  }, [data, typedData, height, options, isBoundsReset, width]);
 
   // Update the chart with a new set of data
   const updateChart = useCallback(
@@ -253,6 +267,7 @@ function Chart(props: Props): JSX.Element {
             node: offscreenCanvas,
             type,
             data: update.data,
+            typedData: update.typedData,
             options: update.options,
             devicePixelRatio,
             width: update.width,
@@ -265,6 +280,14 @@ function Chart(props: Props): JSX.Element {
           ],
         );
 
+        // Flush any updates that occurred before the worker was initialized
+        const { current: queued } = queuedUpdates;
+        queuedUpdates.current = [];
+        for (const queuedUpdate of queued) {
+          const newScales = await sendWrapperRef.current<RpcScales>("update", queuedUpdate);
+          maybeUpdateScales(newScales);
+        }
+
         // once we are initialized, we can allow other handlers to send to the rpc endpoint
         rpcSendRef.current = sendWrapperRef.current;
 
@@ -273,7 +296,10 @@ function Chart(props: Props): JSX.Element {
         return;
       }
 
-      assert(rpcSendRef.current, "No RPC");
+      if (!rpcSendRef.current) {
+        queuedUpdates.current = [...queuedUpdates.current, update];
+        return;
+      }
 
       onStartRender?.();
       const scales = await rpcSendRef.current<RpcScales>("update", update);
@@ -283,16 +309,9 @@ function Chart(props: Props): JSX.Element {
     [maybeUpdateScales, onFinishRender, onStartRender, type],
   );
 
-  // Prevent updating the chart if we are already updating the chart to avoid backing up stale updates
-  const running = useRef(false);
   const [updateError, setUpdateError] = useState<Error | undefined>();
   useLayoutEffect(() => {
     if (!containerRef.current) {
-      return;
-    }
-
-    // Do we want to queue up this change or do we assume another update will trigger it
-    if (running.current) {
       return;
     }
 
@@ -303,16 +322,11 @@ function Chart(props: Props): JSX.Element {
       return;
     }
 
-    running.current = true;
-    updateChart(newUpdate)
-      .catch((err: Error) => {
-        if (isMounted()) {
-          setUpdateError(err);
-        }
-      })
-      .finally(() => {
-        running.current = false;
-      });
+    updateChart(newUpdate).catch((err: Error) => {
+      if (isMounted()) {
+        setUpdateError(err);
+      }
+    });
   }, [getNewUpdateMessage, isMounted, updateChart]);
 
   useLayoutEffect(() => {

@@ -1379,7 +1379,7 @@ export const CustomXAxisTopicWithMismatchedDataLengths: StoryObj = {
 
 export const SuperCloseValues: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (

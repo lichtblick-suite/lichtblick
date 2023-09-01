@@ -110,7 +110,7 @@ export const CanZoomAndUpdate: StoryObj = {
     const [chartProps, setChartProps] = useImmer(commonProps);
     const hasScrolled = useRef(false);
 
-    const readySignal = useReadySignal({ count: 6 });
+    const readySignal = useReadySignal({ count: 3 });
 
     const doScroll = useCallback(async () => {
       const canvasEl = document.querySelector("canvas");
@@ -127,8 +127,8 @@ export const CanZoomAndUpdate: StoryObj = {
       await delay(100);
 
       setChartProps((draft) => {
-        draft.data.datasets[0]!.data[1] = {
-          ...draft.data.datasets[0]!.data[0]!,
+        draft.data!.datasets[0]!.data[1] = {
+          ...draft.data!.datasets[0]!.data[0]!,
           x: 20,
         };
       });
@@ -237,7 +237,7 @@ export const CallPauseOnInitialMount: StoryObj = {
     const readySignal = useReadySignal();
 
     useEffect(() => {
-      if (unpauseFrameCount === 3) {
+      if (unpauseFrameCount === 1) {
         readySignal();
       }
     }, [readySignal, unpauseFrameCount]);

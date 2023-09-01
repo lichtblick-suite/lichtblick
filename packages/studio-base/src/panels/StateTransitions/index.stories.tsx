@@ -132,7 +132,7 @@ export const ColorPalette: StoryObj = {
 
 export const CloseValues: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     const closeMessages = [
@@ -184,7 +184,7 @@ export const CloseValues: StoryObj = {
 
 export const OnePath: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -206,7 +206,7 @@ export const OnePath: StoryObj = {
 
 export const WithXAxisMinMax: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -230,7 +230,7 @@ export const WithXAxisMinMax: StoryObj = {
 
 export const WithXAxisRange: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     const ourFixture = produce(fixture, (draft) => {
@@ -257,7 +257,7 @@ export const WithXAxisRange: StoryObj = {
 
 export const WithSettings: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -279,7 +279,7 @@ export const WithSettings: StoryObj = {
 
 export const MultiplePaths: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -304,7 +304,7 @@ export const MultiplePaths: StoryObj = {
 
 export const LongPath: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -326,7 +326,7 @@ export const LongPath: StoryObj = {
 
 export const ColorClash: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -398,7 +398,7 @@ const messageCache: BlockCache = {
 
 export const Blocks: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (

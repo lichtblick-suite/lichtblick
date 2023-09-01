@@ -36,11 +36,13 @@ import Rpc from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import ChartJSManager, { InitOpts } from "./ChartJSManager";
+import { TypedChartData } from "../types";
 
 type RpcEvent<EventType> = { id: string; event: EventType };
 
 export type ChartUpdateMessage = {
   data?: ChartData<"scatter">;
+  typedData?: TypedChartData;
   height?: number;
   options?: ChartOptions;
   isBoundsReset: boolean;

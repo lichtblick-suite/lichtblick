@@ -12,25 +12,26 @@ import {
 } from "@fluentui/react-icons";
 import { IconButton } from "@mui/material";
 import { clamp } from "lodash";
-import { ComponentProps, useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@foxglove/studio";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
-import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import { PlotLegendRow } from "@foxglove/studio-base/panels/Plot/PlotLegendRow";
 import { PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
 import { PlotConfig } from "@foxglove/studio-base/panels/Plot/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+
+import { TypedDataSet } from "./internalTypes";
 
 const minLegendWidth = 25;
 const maxLegendWidth = 800;
 
 type Props = Immutable<{
   currentTime?: number;
-  datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
+  datasets: TypedDataSet[];
   legendDisplay: "floating" | "top" | "left";
   onClickPath: (index: number) => void;
   paths: PlotPath[];
