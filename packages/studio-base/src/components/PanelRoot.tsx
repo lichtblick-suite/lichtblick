@@ -18,7 +18,7 @@ type PanelRootProps = {
   hasFullscreenDescendant: boolean;
 } & HTMLAttributes<HTMLDivElement>;
 
-const usePanelRootStyles = makeStyles<Omit<PanelRootProps, "fullscreenState" | "selected">>()(
+const useStyles = makeStyles<Omit<PanelRootProps, "fullscreenState" | "selected">>()(
   (theme, props) => {
     const { palette, transitions } = theme;
     const { sourceRect, hasFullscreenDescendant } = props;
@@ -106,12 +106,9 @@ const usePanelRootStyles = makeStyles<Omit<PanelRootProps, "fullscreenState" | "
 
 export const PanelRoot = forwardRef<HTMLDivElement, PropsWithChildren<PanelRootProps>>(
   function PanelRoot(props, ref): JSX.Element {
-    const { fullscreenState, selected, sourceRect, hasFullscreenDescendant, className, ...rest } =
+    const { className, fullscreenState, hasFullscreenDescendant, selected, sourceRect, ...rest } =
       props;
-    const { classes, cx } = usePanelRootStyles({
-      sourceRect,
-      hasFullscreenDescendant,
-    });
+    const { classes, cx } = useStyles({ sourceRect, hasFullscreenDescendant });
 
     const classNames = cx(PANEL_ROOT_CLASS_NAME, className, classes.root, {
       [classes.entering]: fullscreenState === "entering",

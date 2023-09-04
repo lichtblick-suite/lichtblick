@@ -32,7 +32,18 @@ class MockPanelCatalog implements PanelCatalog {
 }
 
 describe("UnconnectedPanelLayout", () => {
+  beforeEach(() => {
+    // jsdom can't parse our @container CSS so we have to silence console.error for this test.
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    (console.error as jest.Mock).mockRestore();
+  });
+
   it("does not remount panels when changing split percentage", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+
     const renderA = jest.fn().mockReturnValue(<>A</>);
     const moduleA = jest.fn().mockResolvedValue({
       default: Panel(Object.assign(renderA, { panelType: "a", defaultConfig: {} })),

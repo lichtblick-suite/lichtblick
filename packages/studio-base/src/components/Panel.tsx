@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import BorderAllIcon from "@mui/icons-material/BorderAll";
-import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import LibraryAddOutlinedIcon from "@mui/icons-material/LibraryAddOutlined";
-import TabIcon from "@mui/icons-material/Tab";
-import { Button, useTheme } from "@mui/material";
+import {
+  Delete20Regular,
+  TabDesktop20Regular,
+  TabDesktopMultiple20Regular,
+  TableSimple20Regular,
+} from "@fluentui/react-icons";
 import { last } from "lodash";
 import React, {
   ComponentType,
@@ -44,12 +45,11 @@ import { makeStyles } from "tss-react/mui";
 import { useShallowMemo } from "@foxglove/hooks";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import { MessagePathDragOverlay } from "@foxglove/studio-base/components/MessagePathDragOverlay";
 import { MosaicPathContext } from "@foxglove/studio-base/components/MosaicPathContext";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
-import { PanelRoot, PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
-import Stack from "@foxglove/studio-base/components/Stack";
+import { PanelOverlay, PanelOverlayProps } from "@foxglove/studio-base/components/PanelOverlay";
+import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -72,62 +72,31 @@ import {
 } from "@foxglove/studio-base/util/layout";
 
 const useStyles = makeStyles()((theme) => ({
-  actionsOverlay: {
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 100000, // highest level within panel
-    backgroundColor: theme.palette.background.paper,
-    display: "flex",
-    alignItems: "center",
-    alignContent: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    flexWrap: "wrap",
-    visibility: "hidden",
-    pointerEvents: "none",
-
-    [`.${PANEL_ROOT_CLASS_NAME}:hover > &`]: {
-      visibility: "visible",
-      pointerEvents: "auto",
-    },
-    // for screenshot tests
-    ".hoverForScreenshot &": {
-      visible: "visible",
-      pointerEvents: "auto",
-    },
-  },
   perfInfo: {
     position: "absolute",
-    whiteSpace: "pre-line",
     bottom: 2,
-    left: 2,
-    fontSize: 9,
+    left: 3,
+    whiteSpace: "pre-line",
+    fontSize: "0.75em",
+    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero'`,
     opacity: 0.7,
     userSelect: "none",
     mixBlendMode: "difference",
   },
-  container: {
-    padding: theme.spacing(2),
-    maxWidth: 300,
-    margin: "auto",
-    gap: theme.spacing(1),
-  },
-  button: {
-    flexDirection: "column",
+  tabCount: {
     alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    display: "flex",
+    inset: 0,
     textAlign: "center",
-    whiteSpace: "nowrap",
-    padding: theme.spacing(1, 2),
-    width: "50%",
-    flex: "auto",
-
-    ".MuiButton-startIcon": {
-      margin: 0,
-    },
+    letterSpacing: "-0.125em",
+    // Totally random numbers here to get the text to fit inside the icon
+    paddingTop: 1,
+    paddingLeft: 5,
+    paddingRight: 11,
+    fontSize: `${theme.typography.subtitle2.fontSize} !important`,
+    fontWeight: 600,
   },
 }));
 
@@ -165,8 +134,7 @@ export default function Panel<
 ): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
     const { childId = FALLBACK_PANEL_ID, overrideConfig, tabId, ...otherProps } = props;
-    const theme = useTheme();
-    const { classes, cx } = useStyles();
+    const { classes, cx, theme } = useStyles();
     const isMounted = useMountedState();
 
     const { mosaicActions } = useContext(MosaicContext);
@@ -490,9 +458,14 @@ export default function Panel<
           },
           "`": () => setQuickActionsKeyPressed(true),
           "~": () => setQuickActionsKeyPressed(true),
+          Escape: () => {
+            if (numSelectedPanelsIfSelected > 1) {
+              return setSelectedPanelIds([]);
+            }
+          },
         },
       }),
-      [selectAllPanels],
+      [selectAllPanels, numSelectedPanelsIfSelected, setSelectedPanelIds],
     );
 
     const fullScreenKeyHandlers = useMemo(
@@ -531,6 +504,87 @@ export default function Panel<
     const dragSpec = { tabId, panelId: childId, onDragStart };
     const [connectOverlayDragSource, connectOverlayDragPreview] = usePanelDrag(dragSpec);
     const [connectToolbarDragHandle, connectToolbarDragPreview] = usePanelDrag(dragSpec);
+
+    const panelOverlayProps = useMemo(() => {
+      const overlayProps: PanelOverlayProps = {
+        open:
+          isDragging || quickActionsKeyPressed || (isSelected && numSelectedPanelsIfSelected > 1),
+        variant: undefined,
+        highlightMode: undefined,
+        actions: undefined,
+        dropMessage,
+      };
+
+      if (isDragging && !isValidTarget) {
+        overlayProps.variant = "invalidDropTarget";
+      }
+      if (isDragging && isOver) {
+        overlayProps.variant = "validDropTarget";
+      }
+      if (isSelected && numSelectedPanelsIfSelected > 1) {
+        overlayProps.onClickAway = () => setSelectedPanelIds([]);
+        overlayProps.variant = "selected";
+        overlayProps.highlightMode = "all";
+        overlayProps.actions = [
+          {
+            key: "group",
+            text: "Group in tab",
+            icon: <TabDesktop20Regular />,
+            onClick: groupPanels,
+          },
+          {
+            key: "create-tabs",
+            text: "Create tabs",
+            icon: (
+              <>
+                <span className={classes.tabCount}>
+                  {numSelectedPanelsIfSelected <= 99 ? numSelectedPanelsIfSelected : ""}{" "}
+                </span>
+                <TabDesktopMultiple20Regular />
+              </>
+            ),
+            onClick: createTabs,
+          },
+        ];
+      }
+      if (type !== TAB_PANEL_TYPE && quickActionsKeyPressed) {
+        overlayProps.variant = "selected";
+        overlayProps.highlightMode = "active";
+      }
+      if (quickActionsKeyPressed) {
+        overlayProps.actions = [
+          {
+            key: "split",
+            text: "Split panel",
+            icon: <TableSimple20Regular />,
+            onClick: splitPanel,
+          },
+          {
+            key: "remove",
+            text: "Remove panel",
+            icon: <Delete20Regular />,
+            color: "error",
+            onClick: removePanel,
+          },
+        ];
+      }
+      return overlayProps;
+    }, [
+      classes.tabCount,
+      createTabs,
+      dropMessage,
+      groupPanels,
+      isDragging,
+      isOver,
+      isSelected,
+      isValidTarget,
+      numSelectedPanelsIfSelected,
+      quickActionsKeyPressed,
+      removePanel,
+      setSelectedPanelIds,
+      splitPanel,
+      type,
+    ]);
 
     return (
       <Profiler
@@ -586,7 +640,7 @@ export default function Panel<
                 hasFullscreenDescendant={hasFullscreenDescendant}
                 fullscreenState={fullscreenState}
                 sourceRect={fullscreenSourceRect}
-                selected={isSelected}
+                selected={isSelected || (isDragging && isValidTarget && isOver)}
                 data-testid={cx("panel-mouseenter-container", childId)}
                 ref={(el) => {
                   panelRootRef.current = el;
@@ -598,41 +652,9 @@ export default function Panel<
                   connectMessagePathDropTarget(el);
                 }}
               >
-                {isSelected && !fullscreen && numSelectedPanelsIfSelected > 1 && (
-                  <div className={classes.actionsOverlay}>
-                    <Stack className={classes.container}>
-                      <Button
-                        fullWidth
-                        size="large"
-                        variant="contained"
-                        startIcon={<TabIcon fontSize="large" />}
-                        onClick={groupPanels}
-                      >
-                        Group in tab
-                      </Button>
-                      <Button
-                        fullWidth
-                        size="large"
-                        variant="contained"
-                        startIcon={<LibraryAddOutlinedIcon fontSize="large" />}
-                        onClick={createTabs}
-                      >
-                        Create {numSelectedPanelsIfSelected} tabs
-                      </Button>
-                    </Stack>
-                  </div>
-                )}
-                {type !== TAB_PANEL_TYPE && (
-                  <MessagePathDragOverlay
-                    isDragging={isDragging}
-                    isValidTarget={isValidTarget}
-                    isOver={isOver}
-                    message={dropMessage}
-                  />
-                )}
-                {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullscreen && (
-                  <div
-                    className={classes.actionsOverlay}
+                {!fullscreen && type !== TAB_PANEL_TYPE && (
+                  <PanelOverlay
+                    {...panelOverlayProps}
                     ref={(el) => {
                       quickActionsOverlayRef.current = el;
                       // disallow dragging the root panel in a layout
@@ -640,31 +662,7 @@ export default function Panel<
                         connectOverlayDragSource(el);
                       }
                     }}
-                  >
-                    <Stack className={classes.container} direction="row">
-                      <Button
-                        className={classes.button}
-                        size="large"
-                        variant="contained"
-                        startIcon={<DeleteForeverOutlinedIcon fontSize="large" />}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          removePanel();
-                        }}
-                      >
-                        Remove
-                      </Button>
-                      <Button
-                        className={classes.button}
-                        size="large"
-                        variant="contained"
-                        startIcon={<BorderAllIcon fontSize="large" />}
-                        onClick={splitPanel}
-                      >
-                        Split
-                      </Button>
-                    </Stack>
-                  </div>
+                  />
                 )}
                 <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
                   <React.StrictMode>{child}</React.StrictMode>

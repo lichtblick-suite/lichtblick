@@ -37,6 +37,15 @@ function getDummyPanel(renderFn: jest.Mock) {
 }
 
 describe("Panel", () => {
+  beforeEach(() => {
+    // jsdom can't parse our @container CSS so we have to silence console.error for this test.
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    (console.error as jest.Mock).mockRestore();
+  });
+
   it("saves defaultConfig when there is no saved config", async () => {
     const renderFn = jest.fn();
     const DummyPanel = getDummyPanel(renderFn);
