@@ -187,9 +187,33 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const pathStrings = useMemo(() => paths.map(({ value }) => value), [paths]);
 
   const { openPanelSettings } = useWorkspaceActions();
-  const { id: panelId } = usePanelContext();
+  const { id: panelId, setMessagePathDropConfig } = usePanelContext();
   const { setSelectedPanelIds } = useSelectedPanels();
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
+
+  useEffect(() => {
+    setMessagePathDropConfig({
+      getDropStatus(path) {
+        if (!path.isLeaf) {
+          return { canDrop: false };
+        }
+        return { canDrop: true, effect: "add" };
+      },
+      handleDrop(path) {
+        saveConfig((prevConfig) => ({
+          ...prevConfig,
+          paths: [
+            // If there was only a single series and its path was empty (the default state of the
+            // panel), replace the series rather than adding to it
+            ...(prevConfig.paths.length === 1 && prevConfig.paths[0]?.value === ""
+              ? []
+              : prevConfig.paths),
+            { value: path.path, enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }));
+      },
+    });
+  }, [saveConfig, setMessagePathDropConfig]);
 
   const { startTime } = PanelAPI.useDataSourceInfo();
   const currentTime = useMessagePipeline(selectCurrentTime);

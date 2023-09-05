@@ -21,6 +21,8 @@ const MESSAGE_PATH_DRAG_TYPE = Symbol("MESSAGE_PATH_DRAG_TYPE");
 type MessagePathDragObject = {
   path: string;
   rootSchemaName: string | undefined;
+  isTopic: boolean;
+  isLeaf: boolean;
 
   /**
    * Expose the drop info to the drag source so it can change cursor & appearance as necessary.
@@ -42,13 +44,20 @@ type MessagePathDragObject = {
 type MessagePathDragParams = {
   path: string;
   rootSchemaName: string | undefined;
+  isTopic: boolean;
+  isLeaf: boolean;
 };
 
 /**
  * Use this to create a drag source for message paths that can be dropped onto target components
  * that use `useMessagePathDrop()`.
  */
-export function useMessagePathDrag({ path, rootSchemaName }: MessagePathDragParams): {
+export function useMessagePathDrag({
+  path,
+  rootSchemaName,
+  isTopic,
+  isLeaf,
+}: MessagePathDragParams): {
   connectDragSource: ConnectDragSource;
   connectDragPreview: ConnectDragPreview;
   cursor?: CSSProperties["cursor"];
@@ -60,10 +69,12 @@ export function useMessagePathDrag({ path, rootSchemaName }: MessagePathDragPara
     () => ({
       path,
       rootSchemaName,
+      isTopic,
+      isLeaf,
       setDropStatus,
       overDropTargets: overDropTargets.current,
     }),
-    [path, rootSchemaName],
+    [path, rootSchemaName, isTopic, isLeaf],
   );
   const [{ isDragging }, connectDragSource, connectDragPreview] = useDrag({
     type: MESSAGE_PATH_DRAG_TYPE,

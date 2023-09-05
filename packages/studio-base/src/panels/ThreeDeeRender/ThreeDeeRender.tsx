@@ -165,12 +165,17 @@ export function ThreeDeeRender(props: {
   useEffect(() => {
     context.EXPERIMENTAL_setMessagePathDropConfig({
       getDropStatus(path) {
-        if (interfaceMode === "image" && path.rootSchemaName != undefined) {
-          if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
-            return { canDrop: true, effect: "replace" };
-          } else if (ALL_SUPPORTED_ANNOTATION_SCHEMAS.has(path.rootSchemaName)) {
-            return { canDrop: true, effect: "add" };
-          }
+        if (interfaceMode !== "image") {
+          return { canDrop: false };
+        }
+        if (!path.isTopic || path.rootSchemaName == undefined) {
+          return { canDrop: false };
+        }
+        if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
+          return { canDrop: true, effect: "replace" };
+        }
+        if (ALL_SUPPORTED_ANNOTATION_SCHEMAS.has(path.rootSchemaName)) {
+          return { canDrop: true, effect: "add" };
         }
         return { canDrop: false };
       },

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { fireEvent, screen } from "@storybook/testing-library";
+import { fireEvent, screen, waitFor } from "@storybook/testing-library";
 import { useEffect, useState } from "react";
 
 import { DraggedMessagePath } from "@foxglove/studio";
@@ -76,16 +76,7 @@ class MockPanelCatalog implements PanelCatalog {
                 <>
                   <PanelToolbar />
                   <div>Drop here!</div>
-                  {droppedPath && (
-                    <>
-                      <div>
-                        Path: <code>{droppedPath.path}</code>
-                      </div>
-                      <div>
-                        Root schema name: <code>{droppedPath.rootSchemaName}</code>
-                      </div>
-                    </>
-                  )}
+                  {droppedPath && <pre>{JSON.stringify(droppedPath, undefined, 2)}</pre>}
                 </>
               );
             },
@@ -115,6 +106,7 @@ export const Basic: StoryObj<{ initialLayoutState: Partial<LayoutData> }> = {
   render: (args) => {
     const fixture: Fixture = {
       topics: [{ name: "foo", schemaName: "test.Foo" }],
+      datatypes: new Map([["test.Foo", { definitions: [{ name: "bar", type: "string" }] }]]),
     };
     const providers = [
       /* eslint-disable react/jsx-key */
@@ -185,6 +177,27 @@ export const DragTopicDrop: typeof Basic = {
     fireEvent.click(await screen.findByText("Topics"));
 
     const handle = await screen.findByTestId("TopicListDragHandle");
+    fireEvent.dragStart(handle);
+    const dest = await screen.findByText("Drop here!");
+    fireEvent.dragOver(dest);
+    fireEvent.drop(dest);
+  },
+};
+
+export const DragPathDrop: typeof Basic = {
+  ...DragTopicStart,
+  play: async () => {
+    fireEvent.click(await screen.findByText("Topics"));
+    fireEvent.change(await screen.findByPlaceholderText("Filter by topic or schema name…"), {
+      target: { value: "foobar" },
+    });
+    const handle = await waitFor(async () => {
+      const handles = await screen.findAllByTestId("TopicListDragHandle");
+      if (handles.length < 2) {
+        throw new Error("Expected 2 drag handles");
+      }
+      return handles[1]!;
+    });
     fireEvent.dragStart(handle);
     const dest = await screen.findByText("Drop here!");
     fireEvent.dragOver(dest);

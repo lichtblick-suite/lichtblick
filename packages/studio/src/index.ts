@@ -243,6 +243,10 @@ export type DraggedMessagePath = {
   path: string;
   /** The schema name of the top-level topic being dragged */
   rootSchemaName: string | undefined;
+  /** True if the path represents a whole topic (no message path component). */
+  isTopic: boolean;
+  /** True if the path represents a primitive value inside a message. */
+  isLeaf: boolean;
 };
 
 export type MessagePathDropStatus = {

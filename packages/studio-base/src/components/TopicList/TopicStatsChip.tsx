@@ -41,6 +41,7 @@ const useStyles = makeStyles()((theme) => ({
 
 export function TopicStatsChip({ topicName }: { topicName: string }): JSX.Element {
   const { classes } = useStyles();
+
   return (
     <Paper variant="outlined" className={classes.root}>
       <div className={classes.stat} data-topic={topicName} data-topic-stat="frequency">
