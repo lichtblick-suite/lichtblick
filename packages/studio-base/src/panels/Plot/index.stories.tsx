@@ -1161,7 +1161,7 @@ export const IndexBasedXAxisForArray: StoryObj = {
 
 export const IndexBasedXAxisForArrayWithUpdate: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 1 });
 
     const [ourFixture, setOurFixture] = useState(structuredClone(fixture));
 

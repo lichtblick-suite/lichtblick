@@ -270,6 +270,11 @@ function rebuild(id: string) {
     return;
   }
 
+  // We do not downsample single-message plots (for now)
+  if (isSingleMessage(params)) {
+    return;
+  }
+
   const downsampled = mapDatasets((dataset) => {
     const indices = downsample(dataset, iterateTyped(dataset.data), view);
     const resolved = resolveTypedIndices(dataset.data, indices);
