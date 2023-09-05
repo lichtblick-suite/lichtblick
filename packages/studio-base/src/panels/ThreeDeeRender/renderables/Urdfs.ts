@@ -594,7 +594,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         const quaternion = tempQuaternion1.setFromAxisAngle(axis, degrees * DEG2RAD);
         const euler = tempEuler.setFromQuaternion(quaternion);
         frame.offsetEulerDegrees = [euler.x * RAD2DEG, euler.y * RAD2DEG, euler.z * RAD2DEG];
-        this.saveSetting(["transforms", frameKey, "rpyOffset"], frame.offsetEulerDegrees);
+        this.saveSetting(["transforms", frameKey, "rpyCoefficient"], frame.offsetEulerDegrees);
       } else {
         const scale = action.payload.value as number;
         axis.multiplyScalar(scale);

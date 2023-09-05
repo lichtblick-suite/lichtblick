@@ -30,7 +30,7 @@ import { CoordinateFrame, Duration, makePose, MAX_DURATION, Transform } from "..
 
 export type LayerSettingsTransform = BaseSettings & {
   xyzOffset: Readonly<[number | undefined, number | undefined, number | undefined]>;
-  rpyOffset: Readonly<[number | undefined, number | undefined, number | undefined]>;
+  rpyCoefficient: Readonly<[number | undefined, number | undefined, number | undefined]>;
 };
 
 const PICKING_LINE_SIZE = 6;
@@ -47,7 +47,7 @@ const DEFAULT_SETTINGS: LayerSettingsTransform = {
   visible: true,
   frameLocked: true,
   xyzOffset: [0, 0, 0],
-  rpyOffset: [0, 0, 0],
+  rpyCoefficient: [0, 0, 0],
 };
 
 export type FrameAxisUserData = BaseUserData & {
@@ -511,7 +511,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
 
     const frameKey = `frame:${renderable.userData.frameId}`;
     frame.offsetPosition = getOffset(this.renderer.config.transforms[frameKey]?.xyzOffset);
-    frame.offsetEulerDegrees = getOffset(this.renderer.config.transforms[frameKey]?.rpyOffset);
+    frame.offsetEulerDegrees = getOffset(this.renderer.config.transforms[frameKey]?.rpyCoefficient);
   }
 }
 function createLineGeometry(): LineGeometry {
@@ -594,13 +594,15 @@ function buildSettingsFields(
 
   if (config.scene.transforms?.editable ?? DEFAULT_EDITABLE) {
     let xyzOffsetValue = config.transforms[frameKey]?.xyzOffset as THREE.Vector3Tuple | undefined;
-    let rpyOffsetValue = config.transforms[frameKey]?.rpyOffset as THREE.Vector3Tuple | undefined;
+    let rpyCoefficient = config.transforms[frameKey]?.rpyCoefficient as
+      | THREE.Vector3Tuple
+      | undefined;
 
     if (xyzOffsetValue && vec3IsZero(xyzOffsetValue)) {
       xyzOffsetValue = undefined;
     }
-    if (rpyOffsetValue && vec3IsZero(rpyOffsetValue)) {
-      rpyOffsetValue = undefined;
+    if (rpyCoefficient && vec3IsZero(rpyCoefficient)) {
+      rpyCoefficient = undefined;
     }
 
     fields.xyzOffset = {
@@ -611,7 +613,7 @@ function buildSettingsFields(
       labels: ["X", "Y", "Z"],
       value: xyzOffsetValue,
     };
-    fields.rpyOffset = {
+    fields.rpyCoefficient = {
       label: "Rotation Offset",
       input: "vec3",
       precision: PRECISION_DEGREES,
@@ -619,7 +621,7 @@ function buildSettingsFields(
       min: -180,
       max: 180,
       labels: ["R", "P", "Y"],
-      value: rpyOffsetValue,
+      value: rpyCoefficient,
     };
   }
 

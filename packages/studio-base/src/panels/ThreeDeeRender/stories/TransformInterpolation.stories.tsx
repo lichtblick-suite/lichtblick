@@ -212,11 +212,11 @@ export const TransformOffsets: StoryObj = {
             transforms: {
               "frame:b": {
                 xyzOffset: [0, 1, 0],
-                rpyOffset: [45, 0, 0],
+                rpyCoefficient: [45, 0, 0],
               },
               "frame:c": {
                 xyzOffset: [0, 1, 0],
-                rpyOffset: [-45, 0, 0],
+                rpyCoefficient: [-45, 0, 0],
               },
               "frame:d": {
                 xyzOffset: [0, 1, 0],

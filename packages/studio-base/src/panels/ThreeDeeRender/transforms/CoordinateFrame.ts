@@ -17,15 +17,13 @@ type TimeAndTransform = [time: Time, transform: Transform];
 export const MAX_DURATION: Duration = 4_294_967_295n * BigInt(1e9);
 
 const DEG2RAD = Math.PI / 180;
-const RAD2DEG = 180 / Math.PI;
 
 const tempLower: TimeAndTransform = [0n, Transform.Identity()];
 const tempUpper: TimeAndTransform = [0n, Transform.Identity()];
-const tempVec3: vec3 = [0, 0, 0];
 const tempVec4: vec4 = [0, 0, 0, 0];
+const temp2Vec4: vec4 = [0, 0, 0, 0];
 const tempTransform = Transform.Identity();
 const tempMatrix = mat4Identity();
-const temp2Matrix = mat4Identity();
 
 const FALLBACK_FRAME_ID = Symbol("FALLBACK_FRAME_ID");
 export type FallbackFrameId = typeof FALLBACK_FRAME_ID;
@@ -467,10 +465,9 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
 
       if (curFrame.offsetEulerDegrees) {
         const quaternion = tempTransform.rotation();
-        const rotationMatrix = mat4.fromQuat(temp2Matrix, quaternion);
-        const euler = eulerFromMatrixUnscaled(tempVec3, rotationMatrix);
-        vec3.add(euler, euler, curFrame.offsetEulerDegrees);
-        tempTransform.setRotation(quaternionFromEuler(tempVec4, euler));
+        const multByRotation = quaternionFromEuler(tempVec4, curFrame.offsetEulerDegrees);
+        quat.multiply(temp2Vec4, quaternion, multByRotation);
+        tempTransform.setRotation(temp2Vec4);
       }
 
       if (curFrame.offsetPosition) {
@@ -554,34 +551,6 @@ function copyPose(out: Pose, pose: Readonly<Pose>): void {
   out.orientation.y = o.y;
   out.orientation.z = o.z;
   out.orientation.w = o.w;
-}
-
-// Compute XYZ Euler angles in degrees from an unscaled rotation matrix. This
-// method is adapted from THREE.js Euler#setFromRotationMatrix()
-function eulerFromMatrixUnscaled(out: vec3, m: mat4): vec3 {
-  const m11 = m[0];
-  const m12 = m[4];
-  const m13 = m[8];
-  const m22 = m[5];
-  const m23 = m[9];
-  const m32 = m[6];
-  const m33 = m[10];
-
-  out[1] = Math.asin(Math.max(-1, Math.min(1, m13)));
-
-  if (Math.abs(m13) < 0.9999999) {
-    out[0] = Math.atan2(-m23, m33);
-    out[2] = Math.atan2(-m12, m11);
-  } else {
-    out[0] = Math.atan2(m32, m22);
-    out[2] = 0;
-  }
-
-  // Convert to degrees
-  out[0] *= RAD2DEG;
-  out[1] *= RAD2DEG;
-  out[2] *= RAD2DEG;
-  return out;
 }
 
 // Compute a quaternion from XYZ Euler angles in degrees. This method is adapted
