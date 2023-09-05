@@ -27,7 +27,7 @@
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
     "electron": "25.5.0",
-    "electron-builder": "24.6.3",
+    "electron-builder": "24.6.4",
     "electron-devtools-installer": "3.2.0",
     "electron-squirrel-startup": "1.0.0",
     "electron-updater": "6.1.4",
