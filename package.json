@@ -98,7 +98,7 @@
     "depcheck": "patch:depcheck@npm:1.4.3#./patches/depcheck.patch",
     "electron": "25.5.0",
     "electron-builder": "24.6.4",
-    "eslint": "8.47.0",
+    "eslint": "8.48.0",
     "eslint-config-prettier": "8.10.0",
     "eslint-import-resolver-webpack": "0.13.7",
     "eslint-plugin-es": "4.1.0",
