@@ -10,7 +10,7 @@ storybook-static/
 
 # Yarn
 .yarn/*
-!.yarn/releases
+!.yarn/patches
 !.yarn/plugins
 !.yarn/sdks
 .pnp.*
