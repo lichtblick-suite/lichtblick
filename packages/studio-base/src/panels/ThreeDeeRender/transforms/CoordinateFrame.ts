@@ -51,12 +51,12 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
   public offsetPosition: vec3 | undefined;
   public offsetEulerDegrees: vec3 | undefined;
 
-  #parent?: CoordinateFrame<UserFrameId>;
+  #parent?: CoordinateFrame;
   #transforms: ArrayMap<Time, Transform>;
 
   public constructor(
     id: ID,
-    parent: CoordinateFrame<UserFrameId> | undefined, // fallback frame not allowed as parent
+    parent: CoordinateFrame | undefined, // fallback frame not allowed as parent
     maxStorageTime: Duration,
     maxCapacity: number,
     capacityOverfillPercentage = 0.1,
@@ -73,13 +73,13 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
 
   public static assertUserFrame(
     frame: CoordinateFrame<AnyFrameId>,
-  ): asserts frame is CoordinateFrame<UserFrameId> {
+  ): asserts frame is CoordinateFrame {
     if (frame.id === FALLBACK_FRAME_ID) {
       throw new Error("Expected user frame");
     }
   }
 
-  public parent(): CoordinateFrame<UserFrameId> | undefined {
+  public parent(): CoordinateFrame | undefined {
     return this.#parent;
   }
 
@@ -93,7 +93,7 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
     }
     CoordinateFrame.assertUserFrame(this);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: CoordinateFrame<UserFrameId> = this;
+    let root: CoordinateFrame = this;
     while (root.#parent) {
       root = root.#parent;
     }
@@ -118,7 +118,7 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
    * Set the parent frame for this frame. If the parent frame is already set to
    * a different frame, the transform history is cleared.
    */
-  public setParent(parent: CoordinateFrame<UserFrameId>): void {
+  public setParent(parent: CoordinateFrame): void {
     if (this.#parent && this.#parent !== parent) {
       this.#transforms.clear();
     }
@@ -131,7 +131,7 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
    * @param id Frame ID to search for
    * @returns The ancestor frame, or undefined if not found
    */
-  public findAncestor(id: string): CoordinateFrame<UserFrameId> | undefined {
+  public findAncestor(id: string): CoordinateFrame | undefined {
     let ancestor = this.#parent;
     while (ancestor) {
       if (ancestor.id === id) {
@@ -315,7 +315,7 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
         : undefined;
     }
     // Check if the two frames share a common ancestor
-    let curSrcFrame: CoordinateFrame<UserFrameId> | undefined = srcFrame;
+    let curSrcFrame: CoordinateFrame | undefined = srcFrame;
     while (curSrcFrame) {
       const commonAncestor = this.findAncestor(curSrcFrame.id);
       if (commonAncestor) {

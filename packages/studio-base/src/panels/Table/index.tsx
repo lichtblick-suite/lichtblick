@@ -46,7 +46,9 @@ function TablePanel({ config, saveConfig }: Props) {
   const { topicPath } = config;
   const { classes } = useStyles();
   const onTopicPathChange = React.useCallback(
-    (newTopicPath: string) => saveConfig({ topicPath: newTopicPath }),
+    (newTopicPath: string) => {
+      saveConfig({ topicPath: newTopicPath });
+    },
     [saveConfig],
   );
 

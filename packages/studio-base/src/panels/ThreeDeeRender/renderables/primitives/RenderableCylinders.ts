@@ -26,7 +26,7 @@ export class RenderableCylinders extends RenderablePrimitive {
   #geometry: THREE.CylinderGeometry;
   // actual shared geometry across instances, only copy -- do not modify
   // stored for ease of use
-  #sharedEdgesGeometry: THREE.EdgesGeometry<THREE.BufferGeometry>;
+  #sharedEdgesGeometry: THREE.EdgesGeometry;
   #instanceOpacity: THREE.InstancedBufferAttribute;
   #instanceTopScale: THREE.InstancedBufferAttribute;
   #instanceBottomScale: THREE.InstancedBufferAttribute;

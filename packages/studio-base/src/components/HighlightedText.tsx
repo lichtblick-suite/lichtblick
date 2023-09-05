@@ -15,7 +15,7 @@ export function HighlightedText({
   text: string;
   highlight?: string;
 }): JSX.Element {
-  if (highlight == undefined || !highlight.trim()) {
+  if (!highlight?.trim()) {
     return <span>{text}</span>;
   }
   const regex = new RegExp(`(${escapeRegExp(highlight)})`, "gi");

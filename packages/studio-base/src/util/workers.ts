@@ -27,6 +27,7 @@ export const enforceFetchIsBlocked = <R, Args extends readonly unknown[]>(
   fn: (...args: Args) => R,
 ): ((...args: Args) => Promise<R>) => {
   const canFetch =
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
     typeof fetch !== "undefined" &&
     fetch("data:test")
       .then(() => true)

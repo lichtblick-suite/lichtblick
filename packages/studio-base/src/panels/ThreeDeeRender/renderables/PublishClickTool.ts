@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import type { IRenderer } from "../IRenderer";
-import { Renderable, BaseUserData } from "../Renderable";
+import { Renderable } from "../Renderable";
 import { SceneExtension } from "../SceneExtension";
 import { Marker, MarkerAction, MarkerType, TIME_ZERO } from "../ros";
 import { makePose, Point, Pose } from "../transforms/geometry";
@@ -65,7 +65,7 @@ export type PublishClickEvent =
   | { type: "foxglove.publish-submit"; publishClickType: "point"; point: Point }
   | { type: "foxglove.publish-submit"; publishClickType: "pose" | "pose_estimate"; pose: Pose };
 
-export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, PublishClickEvent> {
+export class PublishClickTool extends SceneExtension<Renderable, PublishClickEvent> {
   #sphere: RenderableSphere;
   #arrow: RenderableArrow;
 

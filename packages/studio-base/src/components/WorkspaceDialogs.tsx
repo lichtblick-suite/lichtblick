@@ -26,7 +26,9 @@ export function WorkspaceDialogs(): JSX.Element {
         <AppSettingsDialog
           id="app-settings-dialog"
           open
-          onClose={() => dialogActions.preferences.close()}
+          onClose={() => {
+            dialogActions.preferences.close();
+          }}
         />
       )}
     </>

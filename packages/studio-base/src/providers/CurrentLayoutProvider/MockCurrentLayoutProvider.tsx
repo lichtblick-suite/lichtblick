@@ -103,24 +103,54 @@ export default function MockCurrentLayoutProvider({
       setCurrentLayout,
       updateSharedPanelState,
 
-      savePanelConfigs: (payload) => performAction({ type: "SAVE_PANEL_CONFIGS", payload }),
-      updatePanelConfigs: (panelType, perPanelFunc) =>
-        performAction({ type: "SAVE_FULL_PANEL_CONFIG", payload: { panelType, perPanelFunc } }),
-      createTabPanel: (payload) => performAction({ type: "CREATE_TAB_PANEL", payload }),
-      changePanelLayout: (payload) => performAction({ type: "CHANGE_PANEL_LAYOUT", payload }),
-      overwriteGlobalVariables: (payload) =>
-        performAction({ type: "OVERWRITE_GLOBAL_DATA", payload }),
-      setGlobalVariables: (payload) => performAction({ type: "SET_GLOBAL_DATA", payload }),
-      setUserNodes: (payload) => performAction({ type: "SET_USER_NODES", payload }),
-      setPlaybackConfig: (payload) => performAction({ type: "SET_PLAYBACK_CONFIG", payload }),
-      closePanel: (payload) => performAction({ type: "CLOSE_PANEL", payload }),
-      splitPanel: (payload) => performAction({ type: "SPLIT_PANEL", payload }),
-      swapPanel: (payload) => performAction({ type: "SWAP_PANEL", payload }),
-      moveTab: (payload) => performAction({ type: "MOVE_TAB", payload }),
-      addPanel: (payload) => performAction({ type: "ADD_PANEL", payload }),
-      dropPanel: (payload) => performAction({ type: "DROP_PANEL", payload }),
-      startDrag: (payload) => performAction({ type: "START_DRAG", payload }),
-      endDrag: (payload) => performAction({ type: "END_DRAG", payload }),
+      savePanelConfigs: (payload) => {
+        performAction({ type: "SAVE_PANEL_CONFIGS", payload });
+      },
+      updatePanelConfigs: (panelType, perPanelFunc) => {
+        performAction({ type: "SAVE_FULL_PANEL_CONFIG", payload: { panelType, perPanelFunc } });
+      },
+      createTabPanel: (payload) => {
+        performAction({ type: "CREATE_TAB_PANEL", payload });
+      },
+      changePanelLayout: (payload) => {
+        performAction({ type: "CHANGE_PANEL_LAYOUT", payload });
+      },
+      overwriteGlobalVariables: (payload) => {
+        performAction({ type: "OVERWRITE_GLOBAL_DATA", payload });
+      },
+      setGlobalVariables: (payload) => {
+        performAction({ type: "SET_GLOBAL_DATA", payload });
+      },
+      setUserNodes: (payload) => {
+        performAction({ type: "SET_USER_NODES", payload });
+      },
+      setPlaybackConfig: (payload) => {
+        performAction({ type: "SET_PLAYBACK_CONFIG", payload });
+      },
+      closePanel: (payload) => {
+        performAction({ type: "CLOSE_PANEL", payload });
+      },
+      splitPanel: (payload) => {
+        performAction({ type: "SPLIT_PANEL", payload });
+      },
+      swapPanel: (payload) => {
+        performAction({ type: "SWAP_PANEL", payload });
+      },
+      moveTab: (payload) => {
+        performAction({ type: "MOVE_TAB", payload });
+      },
+      addPanel: (payload) => {
+        performAction({ type: "ADD_PANEL", payload });
+      },
+      dropPanel: (payload) => {
+        performAction({ type: "DROP_PANEL", payload });
+      },
+      startDrag: (payload) => {
+        performAction({ type: "START_DRAG", payload });
+      },
+      endDrag: (payload) => {
+        performAction({ type: "END_DRAG", payload });
+      },
     }),
     [performAction, setCurrentLayout, updateSharedPanelState],
   );

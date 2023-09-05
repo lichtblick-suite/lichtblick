@@ -102,7 +102,9 @@ export function App(props: AppProps): JSX.Element {
 
   useEffect(() => {
     document.addEventListener("contextmenu", contextMenuHandler);
-    return () => document.removeEventListener("contextmenu", contextMenuHandler);
+    return () => {
+      document.removeEventListener("contextmenu", contextMenuHandler);
+    };
   }, []);
 
   return (

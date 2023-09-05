@@ -432,7 +432,9 @@ describe("useMessageReducer", () => {
           },
         })),
     );
-    await act(async () => await promise);
+    await act(async () => {
+      await promise;
+    });
 
     // restore call with undefined, then add message called with our subscribed message
     expect(restore.mock.calls).toEqual([[undefined], [undefined]]);
@@ -471,7 +473,9 @@ describe("useMessageReducer", () => {
           },
         })),
     );
-    await act(async () => await promise2);
+    await act(async () => {
+      await promise2;
+    });
 
     expect(restore.mock.calls).toEqual([[undefined], [undefined]]);
     expect(addMessage.mock.calls).toEqual([

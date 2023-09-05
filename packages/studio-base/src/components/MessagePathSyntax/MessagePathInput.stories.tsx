@@ -60,7 +60,9 @@ function MessagePathInputStory(props: {
           path={path}
           validTypes={props.validTypes}
           prioritizedDatatype={props.prioritizedDatatype}
-          onChange={(newPath) => setPath(newPath)}
+          onChange={(newPath) => {
+            setPath(newPath);
+          }}
         />
       </Stack>
     </PanelSetup>

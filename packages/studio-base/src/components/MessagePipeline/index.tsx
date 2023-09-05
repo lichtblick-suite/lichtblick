@@ -276,7 +276,7 @@ function createPlayerListener(args: {
       renderDone,
     });
 
-    return await promise;
+    await promise;
   };
   return {
     listener,

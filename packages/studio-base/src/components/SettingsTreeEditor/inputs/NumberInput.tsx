@@ -157,9 +157,9 @@ export function NumberInput(
     <TextField
       {...props}
       value={displayValue ?? ""}
-      onChange={(event) =>
-        updateValue(event.target.value.length > 0 ? Number(event.target.value) : undefined)
-      }
+      onChange={(event) => {
+        updateValue(event.target.value.length > 0 ? Number(event.target.value) : undefined);
+      }}
       type="number"
       className={cx(classes.textField, { [classes.textFieldReadonly]: readOnly })}
       inputProps={{
@@ -177,9 +177,9 @@ export function NumberInput(
             size="small"
             edge="start"
             tabIndex={-1} // Disable tabbing to the step buttons.
-            onClick={(event: React.MouseEvent) =>
-              updateValue((value ?? placeHolderValue ?? 0) - (event.shiftKey ? step * 10 : step))
-            }
+            onClick={(event: React.MouseEvent) => {
+              updateValue((value ?? placeHolderValue ?? 0) - (event.shiftKey ? step * 10 : step));
+            }}
           >
             {iconDown ?? <ChevronLeftIcon fontSize="small" />}
           </IconButton>
@@ -190,9 +190,9 @@ export function NumberInput(
             size="small"
             edge="end"
             tabIndex={-1} // Disable tabbing to the step buttons.
-            onClick={(event: React.MouseEvent) =>
-              updateValue((value ?? placeHolderValue ?? 0) + (event.shiftKey ? step * 10 : step))
-            }
+            onClick={(event: React.MouseEvent) => {
+              updateValue((value ?? placeHolderValue ?? 0) + (event.shiftKey ? step * 10 : step));
+            }}
           >
             {iconUp ?? <ChevronRightIcon fontSize="small" />}
           </IconButton>

@@ -97,7 +97,9 @@ export function ShareJsonModal({
           multiline
           rows={10}
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => {
+            setValue(event.target.value);
+          }}
           autoFocus
           error={error != undefined}
           helperText={
@@ -116,7 +118,9 @@ export function ShareJsonModal({
           <CopyButton color="default" getText={getText} />
           <HoverableIconButton
             activeColor="error"
-            onClick={() => setValue("{}")}
+            onClick={() => {
+              setValue("{}");
+            }}
             title="Clear"
             aria-label="Clear"
             icon={<DeleteOutline />}

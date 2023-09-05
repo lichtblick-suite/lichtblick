@@ -33,9 +33,9 @@ function converterKey(topic: string, schema: string): ConverterKey {
  * convertedMessages in place for efficiency.
  */
 export function convertMessage(
-  messageEvent: Immutable<MessageEvent<unknown>>,
+  messageEvent: Immutable<MessageEvent>,
   converters: Immutable<TopicSchemaConverterMap>,
-  convertedMessages: MessageEvent<unknown>[],
+  convertedMessages: MessageEvent[],
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);
@@ -94,7 +94,7 @@ export function collateTopicSchemaConversions(
   messageConverters: undefined | readonly MessageConverter[],
 ): TopicSchemaConversions {
   const topicSchemaConverters: TopicSchemaConverterMap = new Map();
-  const unconvertedSubscriptionTopics: Set<string> = new Set();
+  const unconvertedSubscriptionTopics = new Set<string>();
 
   // Bin the subscriptions into two sets: those which want a conversion and those that do not.
   //

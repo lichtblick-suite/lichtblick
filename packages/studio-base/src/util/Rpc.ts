@@ -74,7 +74,7 @@ export default class Rpc {
     [key: number]: (arg0: any) => void;
   } = {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  #receivers: Map<string, (arg0: any) => any> = new Map();
+  #receivers = new Map<string, (arg0: any) => any>();
 
   public constructor(channel: Omit<Channel, "terminate">) {
     this.#channel = channel;
@@ -106,7 +106,8 @@ export default class Rpc {
     })
       .then((result) => {
         if (!result) {
-          return this.#channel.postMessage({ topic: RESPONSE, id });
+          this.#channel.postMessage({ topic: RESPONSE, id });
+          return;
         }
         const transferables = result[Rpc.transferables];
         delete result[Rpc.transferables];

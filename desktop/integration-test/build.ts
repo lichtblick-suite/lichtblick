@@ -25,7 +25,7 @@ export default async (): Promise<void> => {
     }),
   );
 
-  return await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     // eslint-disable-next-line no-restricted-syntax
     console.info("Building Webpack. To skip, set INTEGRATION_SKIP_BUILD=1");
     compiler.run((err, result) => {

@@ -155,7 +155,12 @@ function SubmittableJsonInput(props: {
           </IconButton>
         </Tooltip>,
         <Tooltip key="reset" title="Reset">
-          <IconButton key="reset" onClick={() => setValue(editableValue(props.value))}>
+          <IconButton
+            key="reset"
+            onClick={() => {
+              setValue(editableValue(props.value));
+            }}
+          >
             <ClearIcon />
           </IconButton>
         </Tooltip>,
@@ -173,7 +178,9 @@ function Parameters(): ReactElement {
 
   const setParameter = useDebouncedCallback(
     useCallback(
-      (name: string, value: ParameterValue) => setParameterUnbounced(name, value),
+      (name: string, value: ParameterValue) => {
+        setParameterUnbounced(name, value);
+      },
       [setParameterUnbounced],
     ),
     500,
@@ -192,7 +199,9 @@ function Parameters(): ReactElement {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => (skipAnimation.current = false), ANIMATION_RESET_DELAY_MS);
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -210,8 +219,12 @@ function Parameters(): ReactElement {
 
     setChangedParameters(newChangedParameters);
     previousParametersRef.current = parameters;
-    const timerId = setTimeout(() => setChangedParameters([]), ANIMATION_RESET_DELAY_MS);
-    return () => clearTimeout(timerId);
+    const timerId = setTimeout(() => {
+      setChangedParameters([]);
+    }, ANIMATION_RESET_DELAY_MS);
+    return () => {
+      clearTimeout(timerId);
+    };
   }, [parameters, skipAnimation]);
 
   if (!canGetParams) {

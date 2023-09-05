@@ -85,11 +85,11 @@ describe("CurrentLayoutProvider", () => {
 
     const actions = result.current;
     expect(result.current).toBe(actions);
-    act(() =>
+    act(() => {
       result.current.savePanelConfigs({
         configs: [{ id: "ExamplePanel!1", config: { foo: "bar" } }],
-      }),
-    );
+      });
+    });
     expect(result.current.savePanelConfigs).toBe(actions.savePanelConfigs);
     (console.warn as jest.Mock).mockClear();
   });

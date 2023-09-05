@@ -15,13 +15,13 @@ export function useOpenFile(sources: IDataSourceFactory[]): () => Promise<void> 
   const { selectSource } = usePlayerSelection();
 
   const allExtensions = useMemo(() => {
-    return sources.reduce((all, source) => {
+    return sources.reduce<string[]>((all, source) => {
       if (!source.supportedFileTypes) {
         return all;
       }
 
       return [...all, ...source.supportedFileTypes];
-    }, [] as string[]);
+    }, []);
   }, [sources]);
 
   return useCallback(async () => {

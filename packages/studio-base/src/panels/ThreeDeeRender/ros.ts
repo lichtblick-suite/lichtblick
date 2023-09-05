@@ -42,6 +42,7 @@ export enum MarkerType {
 
 export enum MarkerAction {
   ADD = 0,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   MODIFY = 0,
   DELETE = 2,
   DELETEALL = 3,

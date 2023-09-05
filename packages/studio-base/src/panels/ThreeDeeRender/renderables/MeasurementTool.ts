@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { Label } from "@foxglove/three-text";
 
 import type { IRenderer } from "../IRenderer";
-import { Renderable, BaseUserData } from "../Renderable";
+import { Renderable } from "../Renderable";
 import { SceneExtension } from "../SceneExtension";
 
 type MeasurementState = "idle" | "place-first-point" | "place-second-point";
@@ -58,7 +58,7 @@ class FixedSizeMeshMaterial extends THREE.ShaderMaterial {
 
 type MeasurementEvent = { type: "foxglove.measure-start" } | { type: "foxglove.measure-end" };
 
-export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, MeasurementEvent> {
+export class MeasurementTool extends SceneExtension<Renderable, MeasurementEvent> {
   #circleGeometry = new THREE.CircleGeometry(5, 16);
   #circleMaterial = new FixedSizeMeshMaterial({
     color: 0xff0000,

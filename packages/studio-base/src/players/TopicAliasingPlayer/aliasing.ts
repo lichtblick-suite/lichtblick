@@ -55,7 +55,7 @@ function aliasBlocks(blocks: MessageBlocks, mapping: Im<TopicAliasMap>): Message
           }
           acc[topic] = messages;
         },
-        {} as Record<string, MessageEvent<unknown>[]>,
+        {} as Record<string, MessageEvent[]>,
       ),
     };
   });
@@ -173,7 +173,7 @@ function aliasTopicStats(
     return stats;
   }
 
-  const mappedStats: Map<string, TopicStats> = new Map();
+  const mappedStats = new Map<string, TopicStats>();
 
   for (const [topic, stat] of stats) {
     mappedStats.set(topic, stat);

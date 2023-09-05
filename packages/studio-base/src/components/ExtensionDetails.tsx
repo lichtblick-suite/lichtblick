@@ -179,7 +179,9 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
         <Tabs
           textColor="inherit"
           value={activeTab}
-          onChange={(_event, newValue: number) => setActiveTab(newValue)}
+          onChange={(_event, newValue: number) => {
+            setActiveTab(newValue);
+          }}
         >
           <Tab disableRipple label="README" value={0} />
           <Tab disableRipple label="CHANGELOG" value={1} />

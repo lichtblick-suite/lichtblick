@@ -164,7 +164,9 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
   const onMetaDataKeyDown = useCallback(
     (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === "Enter") {
-        createEvent().catch((error) => log.error(error));
+        createEvent().catch((error) => {
+          log.error(error);
+        });
       }
     },
     [createEvent],
@@ -262,7 +264,9 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
                   placeholder="Key (string)"
                   error={hasDuplicate}
                   onKeyDown={onMetaDataKeyDown}
-                  onChange={(evt) => updateMetadata(index, "key", evt.currentTarget.value)}
+                  onChange={(evt) => {
+                    updateMetadata(index, "key", evt.currentTarget.value);
+                  }}
                 />
                 <TextField
                   fullWidth
@@ -270,15 +274,24 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
                   placeholder="Value (string)"
                   error={hasDuplicate}
                   onKeyDown={onMetaDataKeyDown}
-                  onChange={(evt) => updateMetadata(index, "value", evt.currentTarget.value)}
+                  onChange={(evt) => {
+                    updateMetadata(index, "value", evt.currentTarget.value);
+                  }}
                 />
                 <ButtonGroup>
-                  <IconButton tabIndex={-1} onClick={() => addRow(index)}>
+                  <IconButton
+                    tabIndex={-1}
+                    onClick={() => {
+                      addRow(index);
+                    }}
+                  >
                     <AddIcon />
                   </IconButton>
                   <IconButton
                     tabIndex={-1}
-                    onClick={() => removeRow(index)}
+                    onClick={() => {
+                      removeRow(index);
+                    }}
                     style={{ visibility: event.metadataEntries.length > 1 ? "visible" : "hidden" }}
                   >
                     <RemoveIcon />

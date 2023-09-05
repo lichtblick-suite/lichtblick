@@ -10,9 +10,13 @@ export default function useVisibilityState(): DocumentVisibilityState {
     // Update if state changed between the initial call and this effect
     setVisibility(document.visibilityState);
 
-    const listener = () => setVisibility(document.visibilityState);
+    const listener = () => {
+      setVisibility(document.visibilityState);
+    };
     document.addEventListener("visibilitychange", listener);
-    return () => document.removeEventListener("visibilitychange", listener);
+    return () => {
+      document.removeEventListener("visibilitychange", listener);
+    };
   }, []);
   return visibility;
 }

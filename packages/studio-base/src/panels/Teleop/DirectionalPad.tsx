@@ -106,9 +106,15 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
     disabled
       ? undefined
       : {
-          onMouseDown: () => handleMouseDown(action),
-          onMouseUp: () => handleMouseUp(),
-          onMouseLeave: () => handleMouseUp(),
+          onMouseDown: () => {
+            handleMouseDown(action);
+          },
+          onMouseUp: () => {
+            handleMouseUp();
+          },
+          onMouseLeave: () => {
+            handleMouseUp();
+          },
         };
 
   return (

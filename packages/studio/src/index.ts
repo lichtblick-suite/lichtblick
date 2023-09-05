@@ -486,9 +486,7 @@ export interface ExtensionContext {
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
 }
 
-export interface ExtensionActivate {
-  (extensionContext: ExtensionContext): void;
-}
+export type ExtensionActivate = (extensionContext: ExtensionContext) => void;
 
 // ExtensionModule describes the interface your extension entry level module must export
 // as its default export

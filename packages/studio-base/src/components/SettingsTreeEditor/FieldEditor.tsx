@@ -170,12 +170,12 @@ function FieldInput({
               actionHandler({ action: "update", payload: { path, input: "autocomplete", value } });
             }
           }}
-          onChange={(_event, value) =>
+          onChange={(_event, value) => {
             actionHandler({
               action: "update",
               payload: { path, input: "autocomplete", value: value ?? undefined },
-            })
-          }
+            });
+          }}
           options={field.items}
         />
       );
@@ -193,9 +193,9 @@ function FieldInput({
           min={field.min}
           precision={field.precision}
           step={field.step}
-          onChange={(value) =>
-            actionHandler({ action: "update", payload: { path, input: "number", value } })
-          }
+          onChange={(value) => {
+            actionHandler({ action: "update", payload: { path, input: "number", value } });
+          }}
         />
       );
     case "toggle":
@@ -242,12 +242,12 @@ function FieldInput({
           InputProps={{
             readOnly: field.readonly,
           }}
-          onChange={(event) =>
+          onChange={(event) => {
             actionHandler({
               action: "update",
               payload: { path, input: "string", value: event.target.value },
-            })
-          }
+            });
+          }}
         />
       );
     case "boolean":
@@ -280,12 +280,12 @@ function FieldInput({
           readOnly={field.readonly}
           placeholder={field.placeholder}
           value={field.value?.toString()}
-          onChange={(value) =>
+          onChange={(value) => {
             actionHandler({
               action: "update",
               payload: { path, input: "rgb", value },
-            })
-          }
+            });
+          }}
           hideClearButton={field.hideClearButton}
         />
       );
@@ -297,12 +297,12 @@ function FieldInput({
           readOnly={field.readonly}
           placeholder={field.placeholder}
           value={field.value?.toString()}
-          onChange={(value) =>
+          onChange={(value) => {
             actionHandler({
               action: "update",
               payload: { path, input: "rgba", value },
-            })
-          }
+            });
+          }}
         />
       );
     case "messagepath":
@@ -313,12 +313,12 @@ function FieldInput({
             disabled={field.disabled}
             readOnly={field.readonly}
             supportsMathModifiers={field.supportsMathModifiers}
-            onChange={(value) =>
+            onChange={(value) => {
               actionHandler({
                 action: "update",
                 payload: { path, input: "messagepath", value },
-              })
-            }
+              });
+            }}
             validTypes={field.validTypes}
           />
         </Stack>
@@ -360,7 +360,7 @@ function FieldInput({
             }
             return value;
           }}
-          onChange={(event) =>
+          onChange={(event) => {
             actionHandler({
               action: "update",
               payload: {
@@ -371,8 +371,8 @@ function FieldInput({
                     ? undefined
                     : (event.target.value as undefined | string | string[]),
               },
-            })
-          }
+            });
+          }}
           MenuProps={{ MenuListProps: { dense: true } }}
         >
           {field.options.map(({ label, value = UNDEFINED_SENTINEL_VALUE, disabled }) => (
@@ -393,9 +393,9 @@ function FieldInput({
           colors={field.value}
           disabled={field.disabled}
           readOnly={field.readonly}
-          onChange={(value) =>
-            actionHandler({ action: "update", payload: { path, input: "gradient", value } })
-          }
+          onChange={(value) => {
+            actionHandler({ action: "update", payload: { path, input: "gradient", value } });
+          }}
         />
       );
     case "vec3":
@@ -409,9 +409,9 @@ function FieldInput({
           readOnly={field.readonly}
           min={field.min}
           max={field.max}
-          onChange={(value) =>
-            actionHandler({ action: "update", payload: { path, input: "vec3", value } })
-          }
+          onChange={(value) => {
+            actionHandler({ action: "update", payload: { path, input: "vec3", value } });
+          }}
         />
       );
     case "vec2":
@@ -425,9 +425,9 @@ function FieldInput({
           readOnly={field.readonly}
           min={field.min}
           max={field.max}
-          onChange={(value) =>
-            actionHandler({ action: "update", payload: { path, input: "vec2", value } })
-          }
+          onChange={(value) => {
+            actionHandler({ action: "update", payload: { path, input: "vec2", value } });
+          }}
         />
       );
   }

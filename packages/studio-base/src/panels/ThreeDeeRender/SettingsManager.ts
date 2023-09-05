@@ -39,9 +39,11 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   }
 
   public setNodesForKey(key: string, nodes: SettingsTreeEntry[]): void {
-    nodes.forEach((entry) =>
-      this.#globalSettingsEntryValidators.forEach((validator) => validator(entry, this.errors)),
-    );
+    nodes.forEach((entry) => {
+      this.#globalSettingsEntryValidators.forEach((validator) => {
+        validator(entry, this.errors);
+      });
+    });
 
     this.#root = produce(this.#root, (draft) => {
       // Delete all previous nodes for this key
@@ -213,8 +215,7 @@ function setLabelAtPath(root: SettingsTreeNode, path: Path, label: string): void
 
   // Recursively walk/build the settings tree down to the end of the path
   let curNode = root;
-  for (let i = 0; i < path.length; i++) {
-    const segment = path[i]!;
+  for (const segment of path) {
     if (!curNode.children) {
       curNode.children = {};
     }

@@ -533,13 +533,13 @@ export default class Ros1Player implements Player {
       }
 
       // Advertise this topic to ROS as being published by us
-      this.#rosNode.advertise({ topic, dataType, messageDefinition: msgdef }).catch((error) =>
+      this.#rosNode.advertise({ topic, dataType, messageDefinition: msgdef }).catch((error) => {
         this.#addProblem(advertiseProblemId, {
           severity: "error",
           message: `Failed to advertise "${topic}"`,
           error,
-        }),
-      );
+        });
+      });
     }
 
     this.#emitState();
@@ -557,14 +557,16 @@ export default class Ros1Player implements Player {
       if (this.#rosNode.isAdvertising(topic)) {
         this.#rosNode
           .publish(topic, msg)
-          .then(() => this.#clearProblem(problemId))
-          .catch((error) =>
+          .then(() => {
+            this.#clearProblem(problemId);
+          })
+          .catch((error) => {
             this.#addProblem(problemId, {
               severity: "error",
               message: `Publishing to ${topic} failed`,
               error,
-            }),
-          );
+            });
+          });
       } else {
         this.#addProblem(problemId, {
           severity: "warn",

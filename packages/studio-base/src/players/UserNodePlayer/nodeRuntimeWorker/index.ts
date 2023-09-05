@@ -41,7 +41,9 @@ if (!inSharedWorker()) {
   const rpc = new Rpc(port);
 
   // If any errors occurred while nobody was connected, send them now
-  unsentErrors.forEach(async (message) => await rpc.send("error", message));
+  unsentErrors.forEach(async (message) => {
+    await rpc.send("error", message);
+  });
   unsentErrors = [];
   (global as unknown as SharedWorkerGlobalScope).onerror = (event: ErrorEvent) => {
     void rpc.send("error", event.error.toString());

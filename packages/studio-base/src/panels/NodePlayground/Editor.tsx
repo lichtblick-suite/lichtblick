@@ -310,7 +310,9 @@ const Editor = ({
 
       // Because this didMount function only runs once, we need to store the saveCode function in a
       // ref so the command can always access the latest version.
-      run: async () => await saveCodeRef.current(),
+      run: async () => {
+        await saveCodeRef.current();
+      },
     });
   }, []);
 
@@ -318,7 +320,9 @@ const Editor = ({
   // on every edit.
   const latestSetScriptCode = useLatest(setScriptCode);
   const onChange = useCallback(
-    (srcCode: string) => latestSetScriptCode.current(srcCode),
+    (srcCode: string) => {
+      latestSetScriptCode.current(srcCode);
+    },
     [latestSetScriptCode],
   );
 

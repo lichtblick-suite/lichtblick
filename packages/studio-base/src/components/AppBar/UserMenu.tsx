@@ -141,8 +141,20 @@ export function UserMenu({
         }
       >
         {currentUser && <MenuItem disabled>{currentUser.email}</MenuItem>}
-        <MenuItem onClick={() => onSettingsClick()}>Settings</MenuItem>
-        <MenuItem onClick={() => onSettingsClick("extensions")}>Extensions</MenuItem>
+        <MenuItem
+          onClick={() => {
+            onSettingsClick();
+          }}
+        >
+          Settings
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onSettingsClick("extensions");
+          }}
+        >
+          Extensions
+        </MenuItem>
         {currentUser && <MenuItem onClick={onProfileClick}>User profile</MenuItem>}
         <Divider variant="middle" />
         <MenuItem onClick={onDocsClick}>Documentation</MenuItem>

@@ -26,7 +26,9 @@ const useWarnImmediateReRender =
           const raf = requestAnimationFrame(() => {
             renderedRef.current = false;
           });
-          return () => cancelAnimationFrame(raf);
+          return () => {
+            cancelAnimationFrame(raf);
+          };
         });
       };
 

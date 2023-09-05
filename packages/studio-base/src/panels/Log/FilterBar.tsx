@@ -89,6 +89,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
 
   const renderLogLevelValue = useCallback(
     (value: number) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       const option = LOG_LEVEL_OPTIONS.find((o) => o.key === value);
       const className = logLevelToClass(Number(option?.key ?? LogLevel.DEBUG));
       return <div className={className}>{option?.text}</div>;

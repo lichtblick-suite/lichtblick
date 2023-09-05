@@ -44,7 +44,9 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
       >
         <Button
           startIcon={<ChevronLeftIcon fontSize="large" />}
-          onClick={() => dialogActions.dataSource.open("start")}
+          onClick={() => {
+            dialogActions.dataSource.open("start");
+          }}
           size="large"
         >
           Back
@@ -55,7 +57,9 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
             size="large"
             color="inherit"
             variant="outlined"
-            onClick={() => dialogActions.dataSource.close()}
+            onClick={() => {
+              dialogActions.dataSource.close();
+            }}
           >
             Cancel
           </Button>

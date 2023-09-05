@@ -337,7 +337,9 @@ describe("3D Renderer", () => {
     // transform with headerstamp before currentTime
     currentFrame = [beforeHeader];
     renderer.setCurrentTime(currentTime);
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     // second frame
     currentTime = 6n;
@@ -345,7 +347,9 @@ describe("3D Renderer", () => {
     // transform with headerstamp on currentTime
     currentFrame = [onHeader];
     renderer.setCurrentTime(currentTime);
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     // third frame
     currentTime = 7n;
@@ -353,7 +357,9 @@ describe("3D Renderer", () => {
     // transform with headerstamp after currentTime
     currentFrame = [afterHeader];
     renderer.setCurrentTime(currentTime);
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -371,7 +377,9 @@ describe("3D Renderer", () => {
     expect(renderer.transformTree.frame("after")).toBeUndefined();
     // currentFrame will be set back to what it was at that time
     currentFrame = [beforeHeader];
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
   });
@@ -397,7 +405,9 @@ describe("3D Renderer", () => {
     // transform with headerstamp before currentTime
     currentFrame = [beforeHeader];
     renderer.setCurrentTime(currentTime);
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     // second frame
     currentTime = 6n;
@@ -405,7 +415,9 @@ describe("3D Renderer", () => {
     // transform with headerstamp on currentTime
     currentFrame = [onHeader];
     renderer.setCurrentTime(currentTime);
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     // third frame
     currentTime = 7n;
@@ -413,7 +425,9 @@ describe("3D Renderer", () => {
     // transform with headerstamp after currentTime
     currentFrame = [afterHeader];
     renderer.setCurrentTime(currentTime);
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -432,7 +446,9 @@ describe("3D Renderer", () => {
     // currentFrame will be set back to what it was at that time
     const seekOnHeader = createTFMessageEvent("root", "seekOn", currentTime, [currentTime]);
     currentFrame = [seekOnHeader];
-    currentFrame.forEach((msg) => renderer.addMessageEvent(msg));
+    currentFrame.forEach((msg) => {
+      renderer.addMessageEvent(msg);
+    });
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();

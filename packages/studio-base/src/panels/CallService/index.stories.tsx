@@ -85,9 +85,13 @@ export const CallServiceEnabledServiceName: StoryObj = {
     const canvas = within(canvasElement);
     const responseTextareas = await canvas.findAllByPlaceholderText("Response");
     const buttons = await canvas.findAllByTestId("call-service-button");
-    buttons.forEach(async (button) => await userEvent.click(button));
+    buttons.forEach(async (button) => {
+      await userEvent.click(button);
+    });
     await delay(500);
-    responseTextareas.forEach((textarea) => expect(textarea).toHaveValue(successResponseJson));
+    responseTextareas.forEach((textarea) => {
+      expect(textarea).toHaveValue(successResponseJson);
+    });
   },
 
   parameters: { panelSetup: { fixture: getFixture({ allowCallService: true }) } },
@@ -109,7 +113,9 @@ export const CallServiceEnabledWithCustomButtonSettings: StoryObj = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const buttons = await canvas.findAllByText("Call that funky service");
-    buttons.forEach(async (button) => await userEvent.hover(button));
+    buttons.forEach(async (button) => {
+      await userEvent.hover(button);
+    });
   },
 
   parameters: { panelSetup: { fixture: getFixture({ allowCallService: true }) } },
@@ -146,11 +152,13 @@ export const CallingServiceThatDoesNotExist: StoryObj = {
     const canvas = within(canvasElement);
     const responseTextareas = await canvas.findAllByPlaceholderText("Response");
     const buttons = await canvas.findAllByTestId("call-service-button");
-    buttons.forEach(async (button) => await userEvent.click(button));
+    buttons.forEach(async (button) => {
+      await userEvent.click(button);
+    });
     await delay(500);
-    responseTextareas.forEach((textarea) =>
-      expect(textarea).toHaveValue(`Service "/non_existing_service" does not exist`),
-    );
+    responseTextareas.forEach((textarea) => {
+      expect(textarea).toHaveValue(`Service "/non_existing_service" does not exist`);
+    });
   },
 
   parameters: { panelSetup: { fixture: getFixture({ allowCallService: true }) } },

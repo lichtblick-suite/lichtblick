@@ -87,7 +87,9 @@ export default {
     if (args.inputValue) {
       await keyboard(args.inputValue);
     }
-    args.events?.map(async (keypress) => await keyboard(keypress));
+    args.events?.map(async (keypress) => {
+      await keyboard(keypress);
+    });
   },
 } satisfies Meta<Args>;
 

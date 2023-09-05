@@ -213,12 +213,10 @@ export type Marker =
   | CylinderMarker
   | LineStripMarker
   | LineListMarker
-  | CubeListMarker
   | PointsMarker
   | TextMarker
   | MeshMarker
   | TriangleListMarker
-  | MeshMarker
   | InstancedLineListMarker
   | ColorMarker;
 

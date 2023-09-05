@@ -76,7 +76,9 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
               secondaryAction={
                 <IconButton
                   size="small"
-                  onClick={() => deleteNode(nodeId)}
+                  onClick={() => {
+                    deleteNode(nodeId);
+                  }}
                   edge="end"
                   aria-label="delete"
                   title="Delete"
@@ -88,7 +90,9 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
             >
               <ListItemButton
                 selected={selectedNodeId === nodeId}
-                onClick={() => selectNode(nodeId)}
+                onClick={() => {
+                  selectNode(nodeId);
+                }}
               >
                 <ListItemText
                   primary={nodes[nodeId]?.name}
@@ -202,14 +206,18 @@ const Sidebar = ({
           nodes={userNodes}
           selectNode={selectNode}
           deleteNode={deleteNode}
-          collapse={() => updateExplorer(undefined)}
+          collapse={() => {
+            updateExplorer(undefined);
+          }}
           selectedNodeId={selectedNodeId}
         />
       ),
       utils: (
         <Stack flex="auto" position="relative">
           <SidebarHeader
-            collapse={() => updateExplorer(undefined)}
+            collapse={() => {
+              updateExplorer(undefined);
+            }}
             title="Utilities"
             subheader={
               <Typography variant="body2" color="text.secondary">
@@ -251,11 +259,19 @@ const Sidebar = ({
           <SidebarHeader
             title="Templates"
             subheader="Create scripts from these templates, click a template to create a new script."
-            collapse={() => updateExplorer(undefined)}
+            collapse={() => {
+              updateExplorer(undefined);
+            }}
           />
           <List dense>
             {templates.map(({ name, description, template }) => (
-              <ListItem disablePadding key={name} onClick={() => addNewNode(template)}>
+              <ListItem
+                disablePadding
+                key={name}
+                onClick={() => {
+                  addNewNode(template);
+                }}
+              >
                 <ListItemButton>
                   <ListItemText
                     primary={name}
@@ -291,7 +307,9 @@ const Sidebar = ({
             title="Scripts"
             icon={<NoteIcon fontSize="large" />}
             data-testid="node-explorer"
-            onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
+            onClick={() => {
+              updateExplorer(nodesSelected ? undefined : "nodes");
+            }}
           />
           <Tab
             disableRipple
@@ -299,7 +317,9 @@ const Sidebar = ({
             title="Utilities"
             icon={<ConstructionOutlinedIcon fontSize="large" />}
             data-testid="utils-explorer"
-            onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
+            onClick={() => {
+              updateExplorer(utilsSelected ? undefined : "utils");
+            }}
           />
           <Tab
             disableRipple
@@ -307,7 +327,9 @@ const Sidebar = ({
             title="Templates"
             icon={<TemplateIcon fontSize="large" />}
             data-testid="templates-explorer"
-            onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
+            onClick={() => {
+              updateExplorer(templatesSelected ? undefined : "templates");
+            }}
           />
         </Tabs>
         {explorer != undefined && (

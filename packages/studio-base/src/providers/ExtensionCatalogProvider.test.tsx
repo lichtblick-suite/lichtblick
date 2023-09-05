@@ -54,7 +54,9 @@ describe("ExtensionCatalogProvider", () => {
       ),
     });
 
-    await waitFor(() => expect(loadExtension).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
     expect(result.current.installedExtensions).toEqual([
       {
         description: "description",
@@ -110,8 +112,12 @@ describe("ExtensionCatalogProvider", () => {
       ),
     });
 
-    await waitFor(() => expect(loadExtension1).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(loadExtension2).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(loadExtension1).toHaveBeenCalledTimes(1);
+    });
+    await waitFor(() => {
+      expect(loadExtension2).toHaveBeenCalledTimes(1);
+    });
     expect(result.current.installedExtensions).toEqual([
       {
         description: "description",
@@ -175,7 +181,9 @@ describe("ExtensionCatalogProvider", () => {
       ),
     });
 
-    await waitFor(() => expect(loadExtension).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
     expect(result.current.installedMessageConverters).toEqual([
       {
         fromSchemaName: "from.Schema",
@@ -216,7 +224,9 @@ describe("ExtensionCatalogProvider", () => {
       ),
     });
 
-    await waitFor(() => expect(loadExtension).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
     expect(result.current.installedTopicAliasFunctions).toEqual([
       { extensionId: "id", aliasFunction: expect.any(Function) },
     ]);

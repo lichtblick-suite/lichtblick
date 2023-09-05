@@ -148,7 +148,9 @@ export default function ExtensionsSettings(): React.ReactElement {
   );
 
   useEffect(() => {
-    refreshMarketplaceEntries().catch((error) => log.error(error));
+    refreshMarketplaceEntries().catch((error) => {
+      log.error(error);
+    });
   }, [refreshMarketplaceEntries]);
 
   if (focusedExtension != undefined) {
@@ -156,7 +158,9 @@ export default function ExtensionsSettings(): React.ReactElement {
       <ExtensionDetails
         installed={focusedExtension.installed}
         extension={focusedExtension.entry}
-        onClose={() => setFocusedExtension(undefined)}
+        onClose={() => {
+          setFocusedExtension(undefined);
+        }}
       />
     );
   }
@@ -188,7 +192,9 @@ export default function ExtensionsSettings(): React.ReactElement {
               <ExtensionListEntry
                 key={`${entry.id}`}
                 entry={entry}
-                onClick={() => setFocusedExtension({ installed: true, entry })}
+                onClick={() => {
+                  setFocusedExtension({ installed: true, entry });
+                }}
               />
             ))}
           </List>
@@ -210,7 +216,9 @@ export default function ExtensionsSettings(): React.ReactElement {
           <ExtensionListEntry
             key={`${entry.id}_${entry.namespace}`}
             entry={entry}
-            onClick={() => setFocusedExtension({ installed: false, entry })}
+            onClick={() => {
+              setFocusedExtension({ installed: false, entry });
+            }}
           />
         ))}
       </List>

@@ -33,7 +33,7 @@ type State = {
   path: string;
   parsedPath: RosPath | undefined;
   latestMessage: MessageEvent | undefined;
-  latestMatchingQueriedData: unknown | undefined;
+  latestMatchingQueriedData: unknown;
   error: Error | undefined;
   pathParseError: string | undefined;
 };
@@ -88,7 +88,7 @@ function reducer(state: State, action: Action): State {
         ) {
           pathParseError = "Message paths using variables are not currently supported";
         }
-        let latestMatchingQueriedData: unknown | undefined;
+        let latestMatchingQueriedData: unknown;
         let error: Error | undefined;
         try {
           latestMatchingQueriedData =
@@ -225,8 +225,9 @@ export function Gauge({ context }: Props): JSX.Element {
   }, [context]);
 
   const settingsActionHandler = useCallback(
-    (action: SettingsTreeAction) =>
-      setConfig((prevConfig) => settingsActionReducer(prevConfig, action)),
+    (action: SettingsTreeAction) => {
+      setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
+    },
     [setConfig],
   );
 
@@ -242,7 +243,9 @@ export function Gauge({ context }: Props): JSX.Element {
     if (state.parsedPath?.topicName != undefined) {
       context.subscribe([state.parsedPath.topicName]);
     }
-    return () => context.unsubscribeAll();
+    return () => {
+      context.unsubscribeAll();
+    };
   }, [context, state.parsedPath?.topicName]);
 
   // Indicate render is complete - the effect runs after the dom is updated

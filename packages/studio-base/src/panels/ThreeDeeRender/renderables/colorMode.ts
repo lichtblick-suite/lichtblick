@@ -195,7 +195,7 @@ function bestColorByField(
       return field;
     }
   }
-  return fields.find((field) => field === "x") || fields[0] ? fields[0]! : "";
+  return fields.find((field) => field === "x") ?? fields[0] ?? "";
 }
 
 export function hasSeparateRgbaFields(fields: string[]): boolean {

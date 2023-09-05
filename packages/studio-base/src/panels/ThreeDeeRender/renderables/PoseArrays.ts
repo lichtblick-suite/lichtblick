@@ -103,8 +103,12 @@ export type PoseArrayUserData = BaseUserData & {
 
 export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
   public override dispose(): void {
-    this.userData.axes.forEach((axis) => axis.dispose());
-    this.userData.arrows.forEach((arrow) => arrow.dispose());
+    this.userData.axes.forEach((axis) => {
+      axis.dispose();
+    });
+    this.userData.arrows.forEach((arrow) => {
+      arrow.dispose();
+    });
     this.userData.lineStrip?.dispose();
     super.dispose();
   }

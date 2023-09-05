@@ -19,7 +19,7 @@ function isPointElementWithRawData(element: PointElement): element is PointEleme
  */
 export function lineSegmentLabelColor(context: ScriptableLineSegmentContext): undefined | string {
   if (isPointElementWithRawData(context.p0)) {
-    return context.p0.raw.labelColor as string;
+    return context.p0.raw.labelColor!;
   }
   return undefined;
 }

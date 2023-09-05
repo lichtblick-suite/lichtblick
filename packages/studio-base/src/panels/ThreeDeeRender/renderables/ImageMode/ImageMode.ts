@@ -158,7 +158,9 @@ export class ImageMode
       topics: () => renderer.topics ?? [],
       config: () => this.#getImageModeSettings(),
       updateConfig: (updateHandler) => {
-        renderer.updateConfig((draft) => updateHandler(draft.imageMode));
+        renderer.updateConfig((draft) => {
+          updateHandler(draft.imageMode);
+        });
       },
       updateSettingsTree: () => {
         this.updateSettingsTree();

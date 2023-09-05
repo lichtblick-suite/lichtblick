@@ -32,13 +32,15 @@ export function useAppConfigurationValue<T extends AppConfigurationValue>(
     };
 
     appConfiguration.addChangeListener(key, handler);
-    return () => appConfiguration.removeChangeListener(key, handler);
+    return () => {
+      appConfiguration.removeChangeListener(key, handler);
+    };
   }, [key, appConfiguration]);
 
   const wrappedSetter = useCallback(
     async (value?: T) => {
       setConfigurationValue(value);
-      return await appConfiguration.set(key, value);
+      await appConfiguration.set(key, value);
     },
     [appConfiguration, key],
   );

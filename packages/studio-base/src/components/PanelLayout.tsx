@@ -174,7 +174,9 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied
           resize={{ minimumPaneSizePercentage: 2 }}
           value={layout}
-          onChange={(newLayout) => onChange(newLayout ?? undefined)}
+          onChange={(newLayout) => {
+            onChange(newLayout ?? undefined);
+          }}
           mosaicId={mosaicId}
         />
       ) : (

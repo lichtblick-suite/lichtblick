@@ -40,7 +40,9 @@ export function FilterTagInput({
     <Autocomplete
       value={items}
       multiple
-      onChange={(_event, value) => onChange(value)}
+      onChange={(_event, value) => {
+        onChange(value);
+      }}
       id="tags-filled"
       options={suggestions}
       freeSolo

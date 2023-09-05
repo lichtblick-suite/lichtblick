@@ -105,7 +105,9 @@ export default function ExpandingToolbar<T extends string>({
           color={checked === true ? "info" : "default"}
           title={tooltip}
           data-testid={`ExpandingToolbar-${tooltip}`}
-          onClick={() => onSelectTab(selectedTabLocal)}
+          onClick={() => {
+            onSelectTab(selectedTabLocal);
+          }}
         >
           {icon}
         </IconButton>
@@ -140,7 +142,12 @@ export default function ExpandingToolbar<T extends string>({
               <Tab label={child.props.name} value={child.props.name} />
             ))}
           </Tabs>
-          <IconButton className={classes.iconButton} onClick={() => onSelectTab(undefined)}>
+          <IconButton
+            className={classes.iconButton}
+            onClick={() => {
+              onSelectTab(undefined);
+            }}
+          >
             <ArrowMinimize24Filled />
           </IconButton>
         </Stack>

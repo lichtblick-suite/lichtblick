@@ -48,7 +48,9 @@ export function NodeActionsMenu({
         id="basic-menu"
         anchorEl={anchorEl}
         open={open}
-        onClose={() => setAnchorEl(undefined)}
+        onClose={() => {
+          setAnchorEl(undefined);
+        }}
         MenuListProps={{
           "aria-label": "node actions button",
           dense: true,
@@ -62,7 +64,12 @@ export function NodeActionsMenu({
           }
           const Icon = action.icon ? icons[action.icon] : undefined;
           return (
-            <MenuItem key={action.id} onClick={() => handleClose(action.id)}>
+            <MenuItem
+              key={action.id}
+              onClick={() => {
+                handleClose(action.id);
+              }}
+            >
               {Icon && (
                 <ListItemIcon>
                   <Icon fontSize="small" />

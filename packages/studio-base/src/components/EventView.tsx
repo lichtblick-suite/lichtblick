@@ -124,9 +124,15 @@ function EventViewComponent(params: {
         [classes.eventSelected]: isSelected,
         [classes.eventHovered]: isHovered,
       })}
-      onClick={() => onClick(event)}
-      onMouseEnter={() => onHoverStart(event)}
-      onMouseLeave={() => onHoverEnd(event)}
+      onClick={() => {
+        onClick(event);
+      }}
+      onMouseEnter={() => {
+        onHoverStart(event);
+      }}
+      onMouseLeave={() => {
+        onHoverEnd(event);
+      }}
     >
       {fields.map(([key, value]) => (
         <Fragment key={key}>

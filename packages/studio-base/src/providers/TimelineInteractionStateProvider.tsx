@@ -22,13 +22,15 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
       hoveredEvent: undefined,
       hoverValue: undefined,
 
-      clearHoverValue: (componentId: string) =>
+      clearHoverValue: (componentId: string) => {
         set((store) => ({
           hoverValue: store.hoverValue?.componentId === componentId ? undefined : store.hoverValue,
-        })),
+        }));
+      },
 
-      setEventsAtHoverValue: (eventsAtHoverValue: TimelinePositionedEvent[]) =>
-        set({ eventsAtHoverValue: keyBy(eventsAtHoverValue, (event) => event.event.id) }),
+      setEventsAtHoverValue: (eventsAtHoverValue: TimelinePositionedEvent[]) => {
+        set({ eventsAtHoverValue: keyBy(eventsAtHoverValue, (event) => event.event.id) });
+      },
 
       setGlobalBounds: (
         newBounds:
@@ -58,10 +60,11 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
         }
       },
 
-      setHoverValue: (newValue: HoverValue) =>
+      setHoverValue: (newValue: HoverValue) => {
         set((store) => ({
           hoverValue: isEqual(newValue, store.hoverValue) ? store.hoverValue : newValue,
-        })),
+        }));
+      },
     };
   });
 }

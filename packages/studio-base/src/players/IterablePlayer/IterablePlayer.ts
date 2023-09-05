@@ -206,7 +206,7 @@ export class IterablePlayer implements Player {
   }
 
   #startPlayImpl(opt?: { untilTime: Time }): void {
-    if (this.#isPlaying || this.#untilTime || !this.#start || !this.#end) {
+    if (this.#isPlaying || this.#untilTime != undefined || !this.#start || !this.#end) {
       return;
     }
 
@@ -729,7 +729,7 @@ export class IterablePlayer implements Player {
     }
 
     if (this.#hasError) {
-      return await this.#listener({
+      await this.#listener({
         name: this.#name,
         presence: PlayerPresence.ERROR,
         progress: {},
@@ -743,6 +743,7 @@ export class IterablePlayer implements Player {
           parameters: this.#urlParams,
         },
       });
+      return;
     }
 
     const messages = this.#messages;
@@ -781,7 +782,7 @@ export class IterablePlayer implements Player {
       },
     };
 
-    return await this.#listener(data);
+    await this.#listener(data);
   }
 
   /**
@@ -951,7 +952,9 @@ export class IterablePlayer implements Player {
     };
 
     const abort = (this.#abort = new AbortController());
-    const aborted = new Promise((resolve) => abort.signal.addEventListener("abort", resolve));
+    const aborted = new Promise((resolve) => {
+      abort.signal.addEventListener("abort", resolve);
+    });
 
     const rangeChangeHandler = () => {
       this.#progress = {

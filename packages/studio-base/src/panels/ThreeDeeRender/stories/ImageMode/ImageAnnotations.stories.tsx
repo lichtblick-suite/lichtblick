@@ -755,7 +755,9 @@ const AnnotationsUpdateStory = (
         };
         return newFixture;
       });
-      timeOutID2 = setTimeout(() => readySignal(), 100);
+      timeOutID2 = setTimeout(() => {
+        readySignal();
+      }, 100);
     }, 500);
 
     return () => {

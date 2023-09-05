@@ -30,7 +30,7 @@ describe("debouncePromise", () => {
       if (!promise) {
         throw new Error("no remaining promises");
       }
-      return await promise;
+      await promise;
     });
 
     let prevExpectedCallsStarted = 0;
@@ -97,7 +97,7 @@ describe("debouncePromise", () => {
     let calls = 0;
     const debouncedFn = debouncePromise(async () => {
       ++calls;
-      return await sig;
+      await sig;
     });
 
     expect(calls).toBe(0);

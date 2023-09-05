@@ -47,7 +47,7 @@ const mctmLogger: DiagnosticInfo = {
   stamp: { sec: 1547062466, nsec: 1674890 },
   displayName: "mctm_logger: MCTM Logger",
 };
-const okMap: Map<string, DiagnosticsById> = new Map([
+const okMap = new Map<string, DiagnosticsById>([
   ["watchdog", new Map([["status", watchdogStatus]])],
   ["mctm_logger", new Map([["MCTM Logger", mctmLogger]])],
 ]);
@@ -82,7 +82,7 @@ const usrrStatus: DiagnosticInfo = {
   stamp: { sec: 1547062466, nsec: 98998486 },
   displayName: "usrr_rear_left_center/usrr_segmentation_node: status",
 };
-const errorMap: Map<string, DiagnosticsById> = new Map([
+const errorMap = new Map<string, DiagnosticsById>([
   ["usrr_rear_left_center/usrr_segmentation_node", new Map([["status", usrrStatus]])],
 ]);
 

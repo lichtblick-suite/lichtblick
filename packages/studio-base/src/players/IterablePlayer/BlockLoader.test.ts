@@ -95,8 +95,7 @@ describe("BlockLoader", () => {
     source.messageIterator = async function* messageIterator(
       _args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
-      for (let i = 0; i < msgEvents.length; ++i) {
-        const msgEvent = msgEvents[i]!;
+      for (const msgEvent of msgEvents) {
         yield {
           type: "message-event",
           msgEvent,
@@ -195,8 +194,7 @@ describe("BlockLoader", () => {
     source.messageIterator = async function* messageIterator(
       _args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
-      for (let i = 0; i < msgEvents.length; ++i) {
-        const msgEvent = msgEvents[i]!;
+      for (const msgEvent of msgEvents) {
         yield {
           type: "message-event",
           msgEvent,
@@ -270,8 +268,7 @@ describe("BlockLoader", () => {
     source.messageIterator = async function* messageIterator(
       _args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
-      for (let i = 0; i < msgEvents.length; ++i) {
-        const msgEvent = msgEvents[i]!;
+      for (const msgEvent of msgEvents) {
         // need to filter iterator by requested topics since there's messages from more than 1 topic in here
         if (_args.topics.has(msgEvent.topic)) {
           yield {
@@ -391,8 +388,7 @@ describe("BlockLoader", () => {
     source.messageIterator = async function* messageIterator(
       _args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
-      for (let i = 0; i < msgEvents.length; ++i) {
-        const msgEvent = msgEvents[i]!;
+      for (const msgEvent of msgEvents) {
         yield {
           type: "message-event",
           msgEvent,

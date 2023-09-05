@@ -147,11 +147,11 @@ describe("Rpc", () => {
     rpc.receive("foo", () => {
       // no-op
     });
-    expect(() =>
+    expect(() => {
       rpc.receive("foo", () => {
         // no-op
-      }),
-    ).toThrow();
+      });
+    }).toThrow();
   });
 
   it("rejects when terminated", async () => {

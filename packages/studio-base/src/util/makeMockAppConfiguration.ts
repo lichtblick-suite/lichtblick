@@ -16,7 +16,9 @@ export function makeMockAppConfiguration(
     get: (key: string) => map.get(key),
     set: async (key: string, value: AppConfigurationValue) => {
       map.set(key, value);
-      [...(listeners.get(key) ?? [])].forEach((listener) => listener(value));
+      [...(listeners.get(key) ?? [])].forEach((listener) => {
+        listener(value);
+      });
     },
     addChangeListener: (key, cb) => {
       let listenersForKey = listeners.get(key);

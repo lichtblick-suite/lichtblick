@@ -30,7 +30,8 @@ export default {
     // `execCommand` method.
     if (mightActuallyBePartial(navigator.clipboard).writeText != undefined) {
       try {
-        return await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(text);
+        return;
       } catch (error) {
         fallbackCopy(text);
       }

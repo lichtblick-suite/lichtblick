@@ -91,11 +91,11 @@ function ToolbarComponent(props: Props): JSX.Element {
               title="Diff method"
               value={diffMethod}
               MenuProps={{ MenuListProps: { dense: true } }}
-              onChange={(event: SelectChangeEvent) =>
+              onChange={(event: SelectChangeEvent) => {
                 saveConfig({
                   diffMethod: event.target.value as RawMessagesPanelConfig["diffMethod"],
-                })
-              }
+                });
+              }}
             >
               <MenuItem value={Constants.PREV_MSG_METHOD}>{Constants.PREV_MSG_METHOD}</MenuItem>
               <MenuItem value={Constants.CUSTOM_METHOD}>custom</MenuItem>

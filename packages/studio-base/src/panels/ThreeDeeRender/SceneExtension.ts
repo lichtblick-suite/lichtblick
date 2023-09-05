@@ -10,7 +10,7 @@ import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
 
 import type { AnyRendererSubscription, IRenderer } from "./IRenderer";
 import { Path } from "./LayerErrors";
-import { BaseUserData, Renderable } from "./Renderable";
+import { Renderable } from "./Renderable";
 import type { SettingsTreeEntry } from "./SettingsManager";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./renderables/transforms";
 import { AnyFrameId } from "./transforms";
@@ -39,7 +39,7 @@ export type PartialMessageEvent<T> = MessageEvent<DeepPartial<T>>;
  * - Custom layer actions are added with `renderer.addCustomLayerAction()`.
  */
 export class SceneExtension<
-  TRenderable extends Renderable<BaseUserData> = Renderable<BaseUserData>,
+  TRenderable extends Renderable = Renderable,
   E extends THREE.BaseEvent = THREE.Event,
 > extends THREE.Object3D<E> {
   /** A unique identifier for this SceneExtension, such as `foxglove.Markers`. */
@@ -64,7 +64,9 @@ export class SceneExtension<
     // updateSettingsTree() will call settingsNodes() which may be overridden in a child class.
     // The child class may not assign its members until after this constructor returns. This breaks
     // type assumptions, so we need to defer the call to updateSettingsTree()
-    queueMicrotask(() => this.updateSettingsTree());
+    queueMicrotask(() => {
+      this.updateSettingsTree();
+    });
   }
 
   /**

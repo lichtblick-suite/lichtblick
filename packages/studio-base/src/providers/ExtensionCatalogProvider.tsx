@@ -200,7 +200,9 @@ export default function ExtensionCatalogProvider({
   // Request an initial refresh on first mount
   const refreshExtensions = store.getState().refreshExtensions;
   useEffect(() => {
-    refreshExtensions().catch((err) => log.error(err));
+    refreshExtensions().catch((err) => {
+      log.error(err);
+    });
   }, [refreshExtensions]);
 
   return (

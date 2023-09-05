@@ -209,7 +209,11 @@ export default function FileInfoDisplay({
         .sort((a, b) => a.localeCompare(b)),
     [fileInfo?.compressionTypes],
   );
-  useEffect(() => error && console.error(error), [error]);
+  useEffect(() => {
+    if (error) {
+      console.error(error);
+    }
+  }, [error]);
   return (
     <div className={classes.root}>
       <header className={classes.header}>

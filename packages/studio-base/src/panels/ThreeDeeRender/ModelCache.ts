@@ -198,7 +198,9 @@ export class ModelCache {
     const upAxis = ignoreUpAxis
       ? "Z_UP"
       : (xml.querySelector("up_axis")?.textContent ?? "Y_UP").trim().toUpperCase();
-    xml.querySelectorAll("up_axis").forEach((node) => node.remove());
+    xml.querySelectorAll("up_axis").forEach((node) => {
+      node.remove();
+    });
     const xmlText = xml.documentElement.outerHTML;
 
     const manager = new THREE.LoadingManager(undefined, undefined, onError);

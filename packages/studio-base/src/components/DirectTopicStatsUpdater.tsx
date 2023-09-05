@@ -97,7 +97,9 @@ export function DirectTopicStatsUpdater({ interval = 1 }: { interval?: number })
       }
     });
     observer.observe(rootRef.current.parentElement, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [updateStats]);
 
   useEffect(() => {

@@ -139,11 +139,11 @@ export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState)
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
   // Catch locations using unstable function selectors
-  useShouldNotChangeOften(selector, () =>
+  useShouldNotChangeOften(selector, () => {
     log.warn(
       "useCurrentLayoutSelector is changing frequently. Rewrite your selector as a stable function.",
-    ),
-  );
+    );
+  });
 
   const state = useRef<{ value: T; selector: typeof selector } | undefined>(undefined);
   if (!state.current || selector !== state.current.selector) {
@@ -191,9 +191,13 @@ export function useSelectedPanels(): SelectedPanelActions {
     currentLayout.getSelectedPanelIds(),
   );
   useLayoutEffect(() => {
-    const listener = (newIds: readonly string[]) => setSelectedPanelIdsState(newIds);
+    const listener = (newIds: readonly string[]) => {
+      setSelectedPanelIdsState(newIds);
+    };
     currentLayout.addSelectedPanelIdsListener(listener);
-    return () => currentLayout.removeSelectedPanelIdsListener(listener);
+    return () => {
+      currentLayout.removeSelectedPanelIdsListener(listener);
+    };
   }, [currentLayout]);
 
   const setSelectedPanelIds = useGuaranteedContext(CurrentLayoutContext).setSelectedPanelIds;

@@ -174,7 +174,9 @@ export default function TextContent(
           variant="inherit"
           href={linkProps.href}
           rel="noopener noreferrer"
-          onClick={(event) => handleLink(event, linkProps.href ?? "")}
+          onClick={(event) => {
+            handleLink(event, linkProps.href ?? "");
+          }}
           target="_blank"
         >
           {linkProps.children}

@@ -6,6 +6,8 @@ export default function setImmediate(
   callback: (..._args: unknown[]) => void,
   ...args: unknown[]
 ): NodeJS.Immediate {
-  void Promise.resolve().then(() => callback(...args));
+  void Promise.resolve().then(() => {
+    callback(...args);
+  });
   return undefined as unknown as NodeJS.Immediate;
 }

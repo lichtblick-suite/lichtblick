@@ -44,10 +44,9 @@ function InteractionContextMenuItem({
 }): JSX.Element {
   const object = getObject(interactiveObject) as Partial<Interactive<BaseMarker>>;
 
-  const selectItemObject = useCallback(
-    () => selectObject(interactiveObject as SelectedObject),
-    [interactiveObject, selectObject],
-  );
+  const selectItemObject = useCallback(() => {
+    selectObject(interactiveObject as SelectedObject);
+  }, [interactiveObject, selectObject]);
 
   return (
     <MenuItem data-test="InteractionContextMenuItem" onClick={selectItemObject}>

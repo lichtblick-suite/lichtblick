@@ -42,9 +42,9 @@ export function ForwardAnalyticsContextProvider({
     createStore(() => ({ value: forwardedAnalytics.getState().value })),
   );
   useEffect(() => {
-    const unsubscribe = forwardedAnalytics.subscribe(() =>
-      store.setState({ value: forwardedAnalytics.getState().value }),
-    );
+    const unsubscribe = forwardedAnalytics.subscribe(() => {
+      store.setState({ value: forwardedAnalytics.getState().value });
+    });
     return unsubscribe;
   }, [forwardedAnalytics, store]);
   const { value } = useStore(store);

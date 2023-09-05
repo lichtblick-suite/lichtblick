@@ -283,7 +283,9 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
             <MuiMenuItem
               key={item.key}
               onClick={item.onClick}
-              onPointerEnter={() => setNestedMenu(undefined)}
+              onPointerEnter={() => {
+                setNestedMenu(undefined);
+              }}
             >
               {item.label}
             </MuiMenuItem>

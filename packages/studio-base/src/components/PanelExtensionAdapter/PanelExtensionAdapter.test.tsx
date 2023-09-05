@@ -59,6 +59,7 @@ describe("PanelExtensionAdapter", () => {
   it("sets didSeek=true when seeking", async () => {
     const mockRAF = jest
       .spyOn(window, "requestAnimationFrame")
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
 
     const renderStates: Immutable<RenderState>[] = [];
@@ -111,11 +112,17 @@ describe("PanelExtensionAdapter", () => {
     expect(initPanel).toHaveBeenCalled();
 
     wrapper.rerender(<Wrapper lastSeekTime={1} />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
     wrapper.rerender(<Wrapper lastSeekTime={1} />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
     wrapper.rerender(<Wrapper lastSeekTime={2} />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(renderStates).toEqual([
       { currentFrame: [message], didSeek: false },
       { currentFrame: [message], didSeek: true },
@@ -452,14 +459,14 @@ describe("PanelExtensionAdapter", () => {
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
 
-      expect(() =>
+      expect(() => {
         context.layout.addPanel({
           position: "foo" as "sibling",
           type: "X",
           updateIfExists: true,
           getState: () => undefined,
-        }),
-      ).toThrow();
+        });
+      }).toThrow();
 
       context.layout.addPanel({
         position: "sibling",
@@ -534,6 +541,7 @@ describe("PanelExtensionAdapter", () => {
   it("should get and set variables", async () => {
     const mockRAF = jest
       .spyOn(window, "requestAnimationFrame")
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
 
     let sequence = 0;
@@ -579,13 +587,21 @@ describe("PanelExtensionAdapter", () => {
     const handle = render(<Wrapper />);
 
     handle.rerender(<Wrapper />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
     handle.rerender(<Wrapper />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
     handle.rerender(<Wrapper />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
     handle.rerender(<Wrapper />);
-    await act(async () => await Promise.resolve());
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     expect(renderStates).toEqual([
       { variables: new Map() },
@@ -639,16 +655,18 @@ describe("PanelExtensionAdapter", () => {
     };
 
     // Setup the request animation frame to take some time
-    const mockRAF = jest.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
-      queueMicrotask(() => cb(performance.now())) as any;
-      return 1;
-    });
+    const mockRAF = jest
+      .spyOn(window, "requestAnimationFrame")
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
 
     const resumeFrameWait = pauseFrameCond.wait();
     render(<Wrapper currentTime={{ sec: 1, nsec: 0 }} />);
     expect(initPanel).toHaveBeenCalled();
 
-    await act(async () => await resumeFrameWait);
+    await act(async () => {
+      await resumeFrameWait;
+    });
 
     expect(renderStates).toEqual([
       {
@@ -695,7 +713,9 @@ describe("PanelExtensionAdapter", () => {
       [expect.any(String), [{ preloadType: "full", topic: "x" }]],
       [expect.any(String), []],
     ]);
-    await act(async () => await sig);
+    await act(async () => {
+      await sig;
+    });
     unmount();
     expect(mockSetSubscriptions.mock.calls).toEqual([
       [expect.any(String), [{ preloadType: "full", topic: "x" }]],

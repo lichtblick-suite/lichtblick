@@ -28,7 +28,9 @@ export default function VariablesList(): ReactElement {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => (skipAnimation.current = false), ANIMATION_RESET_DELAY_MS);
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const previousGlobalVariablesRef = useRef<GlobalVariables | undefined>(globalVariables);
@@ -49,8 +51,12 @@ export default function VariablesList(): ReactElement {
 
     setChangedVariables(newChangedVariables);
     previousGlobalVariablesRef.current = globalVariables;
-    const timerId = setTimeout(() => setChangedVariables([]), ANIMATION_RESET_DELAY_MS);
-    return () => clearTimeout(timerId);
+    const timerId = setTimeout(() => {
+      setChangedVariables([]);
+    }, ANIMATION_RESET_DELAY_MS);
+    return () => {
+      clearTimeout(timerId);
+    };
   }, [globalVariables, skipAnimation]);
 
   return (

@@ -48,7 +48,9 @@ export function useSessionStorageValue(
 
   useEffect(() => {
     window.addEventListener("storage", changeListener);
-    return () => window.removeEventListener("storage", changeListener);
+    return () => {
+      window.removeEventListener("storage", changeListener);
+    };
   }, [changeListener]);
 
   return [value ?? undefined, setValue];

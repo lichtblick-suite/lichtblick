@@ -385,6 +385,7 @@ export const SidebarOpenTemplatesExplorer: StoryObj = {
 };
 
 const NeverLoad = () => {
+  // eslint-disable-next-line @typescript-eslint/no-throw-literal
   throw new Promise(() => {
     // no-op
   });

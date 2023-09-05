@@ -48,7 +48,7 @@ type AutocompleteProps<T> = {
   menuStyle?: CSSProperties;
   minWidth?: number;
   onBlur?: () => void;
-  onChange?: (event: React.SyntheticEvent<Element>, text: string) => void;
+  onChange?: (event: React.SyntheticEvent, text: string) => void;
   onSelect: (value: string | T, autocomplete: IAutocomplete) => void;
   placeholder?: string;
   readOnly?: boolean;
@@ -238,7 +238,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
   ]);
 
   const onChange = useCallback(
-    (_event: ReactNull | React.SyntheticEvent<Element>, newValue: string): void => {
+    (_event: ReactNull | React.SyntheticEvent, newValue: string): void => {
       if (onChangeCallback) {
         if (_event) {
           onChangeCallback(_event, newValue);
@@ -253,10 +253,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
   // To allow multiple completions in sequence, it's up to the parent component
   // to manually blur the input to finish a completion.
   const onSelect = useCallback(
-    (
-      _event: SyntheticEvent<Element>,
-      selectedValue: ReactNull | string | FzfResultItem<T>,
-    ): void => {
+    (_event: SyntheticEvent, selectedValue: ReactNull | string | FzfResultItem<T>): void => {
       if (selectedValue != undefined && typeof selectedValue !== "string") {
         setValue(undefined);
         onSelectCallback(selectedValue.item, { setSelectionRange, focus, blur });

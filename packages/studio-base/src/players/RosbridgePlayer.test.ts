@@ -116,7 +116,9 @@ class MockRosTopic {
   }
 
   public subscribe(callback: (arg: unknown) => void) {
-    workerInstance.getMessagesByTopicName(this.#name).forEach(({ message }) => callback(message));
+    workerInstance.getMessagesByTopicName(this.#name).forEach(({ message }) => {
+      callback(message);
+    });
   }
 }
 

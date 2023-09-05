@@ -31,7 +31,9 @@ export class MemoryAppConfiguration implements IAppConfiguration {
     const listeners = this.#changeListeners.get(key);
     if (listeners) {
       // Copy the list of listeners to protect against mutation during iteration
-      [...listeners].forEach((listener) => listener(value));
+      [...listeners].forEach((listener) => {
+        listener(value);
+      });
     }
   }
 

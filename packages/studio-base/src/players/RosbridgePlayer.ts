@@ -109,7 +109,7 @@ export default class RosbridgePlayer implements Player {
   #topicPublishers = new Map<string, roslib.Topic>();
   // which topics we want to advertise to other nodes
   #advertisements: AdvertiseOptions[] = [];
-  #parsedTopics: Set<string> = new Set();
+  #parsedTopics = new Set<string>();
   #receivedBytes: number = 0;
   #metricsCollector: PlayerMetricsCollectorInterface;
   #hasReceivedMessage = false;
@@ -238,7 +238,9 @@ export default class RosbridgePlayer implements Player {
         topics: string[];
         types: string[];
         typedefs_full_text: string[];
-      }>((resolve, reject) => rosClient.getTopicsAndRawTypes(resolve, reject));
+      }>((resolve, reject) => {
+        rosClient.getTopicsAndRawTypes(resolve, reject);
+      });
 
       clearTimeout(topicsStallWarningTimeout);
       this.#problems.removeProblem("topicsAndRawTypesTimeout");
@@ -324,7 +326,9 @@ export default class RosbridgePlayer implements Player {
       this.setSubscriptions(this.#requestedSubscriptions);
 
       // Refresh the full graph topology
-      this.#refreshSystemState().catch((error) => log.error(error));
+      this.#refreshSystemState().catch((error) => {
+        log.error(error);
+      });
     } catch (error) {
       log.error(error);
       clearTimeout(topicsStallWarningTimeout);
@@ -638,8 +642,12 @@ export default class RosbridgePlayer implements Player {
     return await new Promise<Record<string, unknown>>((resolve, reject) => {
       proxy.callService(
         request,
-        (response: Record<string, unknown>) => resolve(response),
-        (error: Error) => reject(error),
+        (response: Record<string, unknown>) => {
+          resolve(response);
+        },
+        (error: Error) => {
+          reject(error);
+        },
       );
     });
   }
@@ -707,7 +715,9 @@ export default class RosbridgePlayer implements Player {
       this.#isRefreshing = true;
 
       const nodes = await new Promise<string[]>((resolve, reject) => {
-        this.#rosClient?.getNodes((fetchedNodes) => resolve(fetchedNodes), reject);
+        this.#rosClient?.getNodes((fetchedNodes) => {
+          resolve(fetchedNodes);
+        }, reject);
       });
 
       const promises = nodes.map(async (node) => {

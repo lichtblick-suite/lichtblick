@@ -289,7 +289,9 @@ function Plot(props: Props) {
     return items;
   }, [getFullData, xAxisVal]);
 
-  const onClickPath = useCallback((index: number) => setFocusedPath(["paths", String(index)]), []);
+  const onClickPath = useCallback((index: number) => {
+    setFocusedPath(["paths", String(index)]);
+  }, []);
 
   return (
     <Stack

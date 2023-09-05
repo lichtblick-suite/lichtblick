@@ -73,7 +73,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
   let prevCurrentFrame: Immutable<RenderState["currentFrame"]>;
   let prevCollatedConversions: undefined | TopicSchemaConversions;
-  const lastMessageByTopic: Map<string, MessageEvent> = new Map();
+  const lastMessageByTopic = new Map<string, MessageEvent>();
 
   // Pull these memoized versions into the closure so they are scoped to the lifetime of
   // the panel.
@@ -196,7 +196,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       if (currentFrame && currentFrame !== prevCurrentFrame) {
         // If we have a new frame, emit that frame and process all messages on that frame.
         // Unconverted messages are only processed on a new frame.
-        const postProcessedFrame: MessageEvent<unknown>[] = [];
+        const postProcessedFrame: MessageEvent[] = [];
         for (const messageEvent of currentFrame) {
           if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
             postProcessedFrame.push(messageEvent);
@@ -209,7 +209,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       } else if (conversionsChanged) {
         // If we don't have a new frame but our conversions have changed, run
         // only the new conversions on our most recent message on each topic.
-        const postProcessedFrame: MessageEvent<unknown>[] = [];
+        const postProcessedFrame: MessageEvent[] = [];
         for (const messageEvent of lastMessageByTopic.values()) {
           convertMessage(messageEvent, newConverters, postProcessedFrame);
         }
@@ -228,10 +228,10 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     if (watchedFields.has("allFrames")) {
       // Rebuild allFrames if we have new blocks or if our conversions have changed.
       const newBlocks = playerState?.progress.messageCache?.blocks;
-      if ((newBlocks && prevBlocks !== newBlocks) || conversionsChanged) {
+      if ((newBlocks != undefined && prevBlocks !== newBlocks) || conversionsChanged) {
         shouldRender = true;
         const blocksToProcess = newBlocks ?? prevBlocks ?? [];
-        const frames: MessageEvent<unknown>[] = (renderState.allFrames = []);
+        const frames: MessageEvent[] = (renderState.allFrames = []);
         // only populate allFrames with topics that the panel wants to preload
         const topicsToPreloadForPanel = Array.from(
           new Set<string>(

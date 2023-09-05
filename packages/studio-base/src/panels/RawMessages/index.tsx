@@ -60,7 +60,7 @@ import {
   getStructureItemForPath,
   getValueActionForValue,
 } from "./getValueActionForValue";
-import { Constants, RawMessagesPanelConfig } from "./types";
+import { Constants, NodeState, RawMessagesPanelConfig } from "./types";
 import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths, toggleExpansion } from "./utils";
 
 type Props = {
@@ -181,7 +181,10 @@ function RawMessages(props: Props) {
     if (expansion === "all") {
       return false;
     }
-    if (typeof expansion === "object" && Object.values(expansion).some((v) => v === "c")) {
+    if (
+      typeof expansion === "object" &&
+      Object.values(expansion).some((v) => v === NodeState.Collapsed)
+    ) {
       return true;
     } else {
       return false;
@@ -364,10 +367,10 @@ function RawMessages(props: Props) {
       }
 
       const joinedPath = keypath.join("~");
-      if (expansion && expansion[joinedPath] === "c") {
+      if (expansion && expansion[joinedPath] === NodeState.Collapsed) {
         return false;
       }
-      if (expansion && expansion[joinedPath] === "e") {
+      if (expansion && expansion[joinedPath] === NodeState.Expanded) {
         return true;
       }
 
@@ -446,7 +449,9 @@ function RawMessages(props: Props) {
                   <Checkbox
                     size="small"
                     defaultChecked
-                    onChange={() => saveConfig({ showFullMessageForDiff: !showFullMessageForDiff })}
+                    onChange={() => {
+                      saveConfig({ showFullMessageForDiff: !showFullMessageForDiff });
+                    }}
                   />
                 }
                 label="Show full msg"

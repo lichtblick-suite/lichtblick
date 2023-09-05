@@ -267,7 +267,7 @@ export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: Saved
     if (tabProps?.tabs) {
       tabProps.tabs.forEach((tab: TabConfig) => {
         tabLayouts.push(
-          tab.layout as MosaicNode<string>,
+          tab.layout!,
           ...getPanelIdsInsideTabPanels(getLeaves(tab.layout ?? ReactNull), savedProps),
         );
       });
@@ -345,7 +345,7 @@ export const removePanelFromTabPanel = (
     newTree = undefined;
   } else {
     const update = createRemoveUpdate(currentTabLayout ?? ReactNull, path);
-    newTree = updateTree<string>(currentTabLayout as MosaicNode<string>, [update]);
+    newTree = updateTree<string>(currentTabLayout!, [update]);
   }
 
   const saveConfigsPayload = {
@@ -363,7 +363,7 @@ export const createAddUpdates = (
   if (tree == undefined) {
     return [];
   }
-  const node = getNodeAtPath(tree, newPath) as MosaicNode<string>;
+  const node = getNodeAtPath(tree, newPath)!;
   const before = position === "left" || position === "top";
   const [first, second] = before ? [panelId, node] : [node, panelId];
   const direction: MosaicDirection = position === "left" || position === "right" ? "row" : "column";

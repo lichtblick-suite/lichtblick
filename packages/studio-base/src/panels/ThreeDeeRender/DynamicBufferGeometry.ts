@@ -11,13 +11,9 @@ interface TypedArray {
   set(n: ArrayLike<number>, offset: number): void;
 }
 
-interface TypedArrayConstructor<T extends TypedArray> {
-  new (length: number): T;
-}
+type TypedArrayConstructor<T extends TypedArray> = new (length: number) => T;
 
-interface ArrayConstructor {
-  new (length: number): ArrayLike<number>;
-}
+type ArrayConstructor = new (length: number) => ArrayLike<number>;
 
 export class DynamicBufferGeometry extends THREE.BufferGeometry {
   public override attributes: { [name: string]: THREE.BufferAttribute } = {};
@@ -39,7 +35,7 @@ export class DynamicBufferGeometry extends THREE.BufferGeometry {
   }
 
   public createAttribute<T extends TypedArray, C extends TypedArrayConstructor<T>>(
-    name: THREE.BuiltinShaderAttributeName | string,
+    name: THREE.BuiltinShaderAttributeName,
     arrayConstructor: C,
     itemSize: number,
     // eslint-disable-next-line @foxglove/no-boolean-parameters

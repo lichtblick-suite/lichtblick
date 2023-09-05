@@ -37,7 +37,9 @@ function StudioLogsSettingsProvider(props: PropsWithChildren<unknown>): JSX.Elem
       }
     }, 1000);
 
-    return () => clearInterval(intervalHandle);
+    return () => {
+      clearInterval(intervalHandle);
+    };
   }, [studioLogsSettingsStore, studioLogsSettingsSavedState]);
 
   useEffect(() => {

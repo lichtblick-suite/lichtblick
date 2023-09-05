@@ -33,7 +33,9 @@ function update(renderer: IRenderer) {
 export function Stats(): JSX.Element {
   const [div, setDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
 
-  useRendererEvent("endFrame", (_curTime, curRenderer) => update(curRenderer));
+  useRendererEvent("endFrame", (_curTime, curRenderer) => {
+    update(curRenderer);
+  });
 
   useEffect(() => {
     if (!div) {

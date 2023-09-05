@@ -56,7 +56,9 @@ export function Vec2Input(props: Vec2Props): JSX.Element {
         value={value?.[0]}
         min={min}
         max={max}
-        onChange={(newValue) => onChangeCallback(0, newValue)}
+        onChange={(newValue) => {
+          onChangeCallback(0, newValue);
+        }}
       />
       <NumberInput
         size="small"
@@ -70,7 +72,9 @@ export function Vec2Input(props: Vec2Props): JSX.Element {
         value={value?.[1]}
         min={min}
         max={max}
-        onChange={(newValue) => onChangeCallback(1, newValue)}
+        onChange={(newValue) => {
+          onChangeCallback(1, newValue);
+        }}
       />
     </Stack>
   );

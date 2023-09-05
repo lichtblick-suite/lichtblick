@@ -127,7 +127,9 @@ export class RenderableModels extends RenderablePrimitive {
                 model1.media_type === model2.media_type &&
                 byteArraysEqual(model1.data, model2.data),
               (model) => URL.createObjectURL(new Blob([model.data], { type: model.media_type })),
-              (url) => URL.revokeObjectURL(url),
+              (url) => {
+                URL.revokeObjectURL(url);
+              },
             );
           } catch (err) {
             this.renderer.settings.errors.add(

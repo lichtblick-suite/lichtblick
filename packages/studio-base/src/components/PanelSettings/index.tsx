@@ -95,7 +95,9 @@ export default function PanelSettings({
     }
     return (
       <ShareJsonModal
-        onRequestClose={() => setShowShareModal(false)}
+        onRequestClose={() => {
+          setShowShareModal(false);
+        }}
         initialValue={panelConfigById[selectedPanelId] ?? {}}
         onChange={(config) => {
           savePanelConfigs({
@@ -160,13 +162,15 @@ export default function PanelSettings({
                   fontSize="small"
                   allowShare={panelType !== TAB_PANEL_TYPE}
                   onReset={resetToDefaults}
-                  onShare={() => setShowShareModal(true)}
+                  onShare={() => {
+                    setShowShareModal(true);
+                  }}
                 />
               </Stack>
               <Divider />
             </>
           )}
-          {settingsTree || showTitleField ? (
+          {settingsTree != undefined || showTitleField ? (
             <SettingsTreeEditor
               variant="panel"
               key={selectedPanelId}

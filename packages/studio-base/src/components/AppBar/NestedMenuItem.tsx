@@ -64,7 +64,9 @@ export function NestedMenuItem(
     <>
       <MenuItem
         id={id}
-        ref={(element) => setAnchorEl(element ?? undefined)}
+        ref={(element) => {
+          setAnchorEl(element ?? undefined);
+        }}
         selected={open}
         className={classes.menuItem}
         onPointerEnter={handlePointerEnter}
@@ -81,7 +83,9 @@ export function NestedMenuItem(
         open={open}
         disablePortal
         anchorEl={anchorEl}
-        onClose={() => setAnchorEl(undefined)}
+        onClose={() => {
+          setAnchorEl(undefined);
+        }}
         onMouseLeave={() => {
           setAnchorEl(undefined);
         }}

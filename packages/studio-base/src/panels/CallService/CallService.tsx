@@ -122,8 +122,9 @@ export function CallService({ context }: Props): JSX.Element {
   );
 
   const settingsActionHandler = useCallback(
-    (action: SettingsTreeAction) =>
-      setConfig((prevConfig) => settingsActionReducer(prevConfig, action)),
+    (action: SettingsTreeAction) => {
+      setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
+    },
     [setConfig],
   );
 
@@ -192,7 +193,9 @@ export function CallService({ context }: Props): JSX.Element {
               size="small"
               placeholder="Enter service request as JSON"
               value={config.requestPayload}
-              onChange={(event) => setConfig({ ...config, requestPayload: event.target.value })}
+              onChange={(event) => {
+                setConfig({ ...config, requestPayload: event.target.value });
+              }}
               error={requestParseError != undefined}
             />
             {requestParseError && (

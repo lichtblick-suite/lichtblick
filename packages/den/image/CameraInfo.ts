@@ -4,8 +4,6 @@
 
 type FloatArray = number[] | Float32Array | Float64Array;
 
-type DistortionModel = "plumb_bob" | "rational_polynomial" | "";
-
 export type CameraInfo = Readonly<{
   width: number;
   height: number;
@@ -18,7 +16,7 @@ export type CameraInfo = Readonly<{
     width: number;
     do_rectify: boolean;
   };
-  distortion_model: DistortionModel | string;
+  distortion_model: string; // Usually "plumb_bob" | "rational_polynomial" | ""
   D: FloatArray;
   K: FloatArray;
   P: FloatArray;

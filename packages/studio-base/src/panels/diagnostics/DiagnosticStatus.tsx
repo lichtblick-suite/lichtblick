@@ -177,11 +177,13 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
   const { classes } = useStyles();
   const tableRef = useRef<HTMLTableElement>(ReactNull);
 
-  const resizeMouseDown = useCallback((event: React.MouseEvent<Element>) => {
+  const resizeMouseDown = useCallback((event: React.MouseEvent) => {
     setResizing(true);
     event.preventDefault();
   }, []);
-  const resizeMouseUp = useCallback(() => setResizing(false), []);
+  const resizeMouseUp = useCallback(() => {
+    setResizing(false);
+  }, []);
   const resizeMouseMove = useCallback(
     (event: MouseEvent) => {
       if (!tableRef.current) {
@@ -267,7 +269,9 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
             color="inherit"
             size="small"
             data-testid="open-plot-icon"
-            onClick={() => openSiblingPlotPanel(openSiblingPanel, valuePath)}
+            onClick={() => {
+              openSiblingPlotPanel(openSiblingPanel, valuePath);
+            }}
           >
             <ShowChartIcon fontSize="inherit" />
           </IconButton>
@@ -277,7 +281,9 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
             title="Open in State Transitions panel"
             color="inherit"
             size="small"
-            onClick={() => openSiblingStateTransitionsPanel(openSiblingPanel, valuePath)}
+            onClick={() => {
+              openSiblingStateTransitionsPanel(openSiblingPanel, valuePath);
+            }}
           >
             <PowerInputIcon fontSize="inherit" />
           </IconButton>
@@ -366,12 +372,12 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
                     className={classes.iconButton}
                     title="Open in State Transitions panel"
                     size="small"
-                    onClick={() =>
+                    onClick={() => {
                       openSiblingStateTransitionsPanel(
                         openSiblingPanel,
                         `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.message`,
-                      )
-                    }
+                      );
+                    }}
                   >
                     <PowerInputIcon fontSize="inherit" />
                   </IconButton>
@@ -389,7 +395,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
 // Returns true if the input string can be parsed as a float or an integer using
 // parseFloat(). Hex and octal numbers will return false.
 function isFloatOrInteger(n: string): boolean {
-  if (n[0] === "0" && n.length > 1) {
+  if (n.startsWith("0") && n.length > 1) {
     if (n[1] === "x" || n[1] === "X" || n[1] === "o" || n[1] === "O") {
       return false;
     }

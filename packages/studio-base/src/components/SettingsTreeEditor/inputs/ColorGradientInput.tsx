@@ -98,7 +98,9 @@ export function ColorGradientInput({
         <ColorPickerControl
           value={leftColor}
           alphaType="alpha"
-          onChange={(newValue) => onChange([newValue, rightColor])}
+          onChange={(newValue) => {
+            onChange([newValue, rightColor]);
+          }}
           onEnterKey={handleClose}
         />
       </Popover>
@@ -118,7 +120,9 @@ export function ColorGradientInput({
         <ColorPickerControl
           value={rightColor}
           alphaType="alpha"
-          onChange={(newValue) => onChange([leftColor, newValue])}
+          onChange={(newValue) => {
+            onChange([leftColor, newValue]);
+          }}
           onEnterKey={handleClose}
         />
       </Popover>

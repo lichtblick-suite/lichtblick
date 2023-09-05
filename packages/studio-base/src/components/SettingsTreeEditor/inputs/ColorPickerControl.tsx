@@ -81,7 +81,9 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         size="small"
         error={editedValueIsInvalid}
         InputProps={{
-          onFocus: (event) => event.target.select(),
+          onFocus: (event) => {
+            event.target.select();
+          },
           role: "input",
           startAdornment: <TagIcon fontSize="small" />,
           style: { fontFamily: fonts.MONOSPACE },
@@ -89,7 +91,9 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         placeholder={alphaType === "alpha" ? "RRGGBBAA" : "RRGGBB"}
         value={editedValue}
         onKeyDown={(event) => event.key === "Enter" && onEnterKey?.()}
-        onChange={(event) => updateEditedValue(event.target.value)}
+        onChange={(event) => {
+          updateEditedValue(event.target.value);
+        }}
         onBlur={onInputBlur}
       />
     </Stack>

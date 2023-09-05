@@ -60,27 +60,27 @@ export function useMessageReducer<T>(props: Params<T>): T {
     );
   }
 
-  useShouldNotChangeOften(props.restore, () =>
+  useShouldNotChangeOften(props.restore, () => {
     log.warn(
       "useMessageReducer restore() is changing frequently. " +
         "restore() will be called each time it changes, so a new function " +
         "shouldn't be created on each render. (If you're using Hooks, try useCallback.)",
-    ),
-  );
-  useShouldNotChangeOften(props.addMessage, () =>
+    );
+  });
+  useShouldNotChangeOften(props.addMessage, () => {
     log.warn(
       "useMessageReducer addMessage() is changing frequently. " +
         "addMessage() will be called each time it changes, so a new function " +
         "shouldn't be created on each render. (If you're using Hooks, try useCallback.)",
-    ),
-  );
-  useShouldNotChangeOften(props.addMessages, () =>
+    );
+  });
+  useShouldNotChangeOften(props.addMessages, () => {
     log.warn(
       "useMessageReducer addMessages() is changing frequently. " +
         "addMessages() will be called each time it changes, so a new function " +
         "shouldn't be created on each render. (If you're using Hooks, try useCallback.)",
-    ),
-  );
+    );
+  });
 
   const requestedTopics = useShallowMemo(props.topics);
 
@@ -95,7 +95,9 @@ export function useMessageReducer<T>(props: Params<T>): T {
   }, [preloadType, requestedTopics]);
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
-  useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
+  useEffect(() => {
+    setSubscriptions(id, subscriptions);
+  }, [id, setSubscriptions, subscriptions]);
   useEffect(() => {
     return () => {
       setSubscriptions(id, []);

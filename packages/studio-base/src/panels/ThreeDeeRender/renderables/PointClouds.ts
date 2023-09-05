@@ -472,8 +472,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     // field, so we can ensure point_step is >= this value
     let minBytesPerPoint = 0;
 
-    for (let i = 0; i < pointCloud.fields.length; i++) {
-      const field = pointCloud.fields[i]!;
+    for (const field of pointCloud.fields) {
       // Skip this field, we don't support counts other than 1
       if (!isSupportedField(field)) {
         continue;
@@ -996,9 +995,7 @@ function getFrameId(pointCloud: PointCloud | PointCloud2): string {
 
 function getStride(pointCloud: PointCloud | PointCloud2): number {
   const maybeRos = pointCloud as Partial<PointCloud2>;
-  return maybeRos.point_step != undefined
-    ? maybeRos.point_step
-    : (pointCloud as PointCloud).point_stride;
+  return maybeRos.point_step ?? (pointCloud as PointCloud).point_stride;
 }
 
 function getPose(pointCloud: PointCloud | PointCloud2): Pose {

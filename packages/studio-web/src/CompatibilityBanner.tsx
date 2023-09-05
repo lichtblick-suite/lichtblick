@@ -171,7 +171,9 @@ export function CompatibilityBanner({
         <CompatibilityBannerBase
           isChrome={isChrome}
           isDismissable={isDismissable}
-          onDismiss={() => setShowBanner(false)}
+          onDismiss={() => {
+            setShowBanner(false);
+          }}
         />
       </Portal>
       <div className={classes.spacer} />

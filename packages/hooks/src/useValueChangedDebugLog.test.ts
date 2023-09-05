@@ -18,9 +18,14 @@ describe("useValueChangeDebugLog", () => {
       }
     });
 
-    const { rerender } = renderHook((val) => useValueChangedDebugLog(val, "msg"), {
-      initialProps: 1,
-    });
+    const { rerender } = renderHook(
+      (val) => {
+        useValueChangedDebugLog(val, "msg");
+      },
+      {
+        initialProps: 1,
+      },
+    );
     rerender(2);
 
     expect(debugMock).toHaveBeenCalled();

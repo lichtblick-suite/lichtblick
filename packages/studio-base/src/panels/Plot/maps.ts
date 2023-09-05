@@ -10,7 +10,7 @@ export function merge<K, V1, V2, V3>(
   b: ReadonlyMap<K, V2>,
   fn: (aval: V1, bval: V2, key: K) => V3,
 ): Map<K, V1 | V2 | V3> {
-  const dest: Map<K, V1 | V2 | V3> = new Map();
+  const dest = new Map<K, V1 | V2 | V3>();
 
   for (const [key, aVal] of a) {
     const bVal = b.get(key);

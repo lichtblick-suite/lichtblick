@@ -680,7 +680,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     this.#client.on("connectionGraphUpdate", (event) => {
       if (event.publishedTopics.length > 0 || event.removedTopics.length > 0) {
-        const newMap: Map<string, Set<string>> = new Map(this.#publishedTopics ?? new Map());
+        const newMap = new Map<string, Set<string>>(this.#publishedTopics ?? new Map());
         for (const { name, publisherIds } of event.publishedTopics) {
           newMap.set(name, new Set(publisherIds));
         }
@@ -688,7 +688,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this.#publishedTopics = newMap;
       }
       if (event.subscribedTopics.length > 0 || event.removedTopics.length > 0) {
-        const newMap: Map<string, Set<string>> = new Map(this.#subscribedTopics ?? new Map());
+        const newMap = new Map<string, Set<string>>(this.#subscribedTopics ?? new Map());
         for (const { name, subscriberIds } of event.subscribedTopics) {
           newMap.set(name, new Set(subscriberIds));
         }
@@ -696,7 +696,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this.#subscribedTopics = newMap;
       }
       if (event.advertisedServices.length > 0 || event.removedServices.length > 0) {
-        const newMap: Map<string, Set<string>> = new Map(this.#advertisedServices ?? new Map());
+        const newMap = new Map<string, Set<string>>(this.#advertisedServices ?? new Map());
         for (const { name, providerIds } of event.advertisedServices) {
           newMap.set(name, new Set(providerIds));
         }

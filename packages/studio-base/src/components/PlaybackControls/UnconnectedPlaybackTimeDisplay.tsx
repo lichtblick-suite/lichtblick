@@ -289,9 +289,13 @@ export function UnconnectedPlaybackTimeDisplay({
             onBlur={(e) => {
               onSubmit(e);
               setIsEditing(false);
-              timeOutID.current = setTimeout(() => setHasError(false), 600);
+              timeOutID.current = setTimeout(() => {
+                setHasError(false);
+              }, 600);
             }}
-            onChange={(event) => setInputText(event.target.value)}
+            onChange={(event) => {
+              setInputText(event.target.value);
+            }}
           />
         </form>
       ) : (

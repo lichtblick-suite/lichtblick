@@ -14,7 +14,7 @@ function presence<T>(value: undefined | T): undefined | T {
     return undefined;
   }
 
-  return value == undefined ? undefined : value;
+  return value ?? undefined;
 }
 
 export function plotPathDisplayName(path: Readonly<PlotPath>, index: number): string {

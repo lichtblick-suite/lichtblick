@@ -99,7 +99,7 @@ export function Sidebar<K extends string>({
 }): JSX.Element {
   const { classes, cx } = useStyles();
 
-  const SelectedComponent = (activeTab != undefined && items.get(activeTab)?.component) || Noop;
+  const SelectedComponent = (activeTab && items.get(activeTab)?.component) ?? Noop;
 
   return (
     <Stack

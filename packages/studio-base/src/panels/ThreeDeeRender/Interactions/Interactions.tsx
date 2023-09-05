@@ -60,7 +60,9 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
       tooltip="Inspect objects"
       icon={<Cursor24Regular />}
       selectedTab={interactionsTabType}
-      onSelectTab={(newSelectedTab) => setInteractionsTabType(newSelectedTab)}
+      onSelectTab={(newSelectedTab) => {
+        setInteractionsTabType(newSelectedTab);
+      }}
     >
       <ToolGroup name={OBJECT_TAB_TYPE}>
         <ToolGroupFixedSizePane>

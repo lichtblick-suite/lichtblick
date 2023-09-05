@@ -48,7 +48,9 @@ export default function TableCell({
 }: PropsWithChildren<TableCellProps>): JSX.Element {
   const { classes } = useStyles();
   const [isExpanded, setIsExpanded] = React.useState(false);
-  const toggleIsExpanded = React.useCallback(() => setIsExpanded((expanded) => !expanded), []);
+  const toggleIsExpanded = React.useCallback(() => {
+    setIsExpanded((expanded) => !expanded);
+  }, []);
 
   if (row.getIsExpanded() || isExpanded) {
     return (

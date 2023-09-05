@@ -81,7 +81,9 @@ function useRendererProperty<K extends keyof IRenderer>(
     if (!renderer) {
       return;
     }
-    const onChange = () => setValue(() => renderer[key]);
+    const onChange = () => {
+      setValue(() => renderer[key]);
+    };
     onChange();
 
     renderer.addListener(event, onChange);
@@ -256,7 +258,7 @@ export function ThreeDeeRender(props: {
 
   // Handle user changes in the settings sidebar
   const actionHandler = useCallback(
-    (action: SettingsTreeAction) =>
+    (action: SettingsTreeAction) => {
       // Wrapping in unstable_batchedUpdates causes React to run effects _after_ the handleAction
       // function has finished executing. This allows scene extensions that call
       // renderer.updateConfig to read out the new config value and configure their renderables
@@ -275,20 +277,22 @@ export function ThreeDeeRender(props: {
             });
           }
         }
-      }),
+      });
+    },
     [config.followMode, config.scene.syncCamera, context, renderer],
   );
 
   // Maintain the settings tree
   const [settingsTree, setSettingsTree] = useState<SettingsTreeNodes | undefined>(undefined);
-  const updateSettingsTree = useCallback(
-    (curRenderer: IRenderer) => setSettingsTree(curRenderer.settings.tree()),
-    [],
-  );
+  const updateSettingsTree = useCallback((curRenderer: IRenderer) => {
+    setSettingsTree(curRenderer.settings.tree());
+  }, []);
   useRendererEvent("settingsTreeChange", updateSettingsTree, renderer);
 
   // Save the panel configuration when it changes
-  const updateConfig = useCallback((curRenderer: IRenderer) => setConfig(curRenderer.config), []);
+  const updateConfig = useCallback((curRenderer: IRenderer) => {
+    setConfig(curRenderer.config);
+  }, []);
   useRendererEvent("configChange", updateConfig, renderer);
 
   // Write to a global variable when the current selection changes
@@ -340,7 +344,9 @@ export function ThreeDeeRender(props: {
 
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
-    (newConfig: Immutable<RendererConfig>) => saveState(newConfig),
+    (newConfig: Immutable<RendererConfig>) => {
+      saveState(newConfig);
+    },
     1000,
     { leading: false, trailing: true, maxWait: 1000 },
   );
@@ -604,14 +610,20 @@ export function ThreeDeeRender(props: {
   // Create a useCallback wrapper for adding a new panel to the layout, used to open the
   // "Raw Messages" panel from the object inspector
   const addPanel = useCallback(
-    (params: Parameters<LayoutActions["addPanel"]>[0]) => context.layout.addPanel(params),
+    (params: Parameters<LayoutActions["addPanel"]>[0]) => {
+      context.layout.addPanel(params);
+    },
     [context.layout],
   );
 
   const [measureActive, setMeasureActive] = useState(false);
   useEffect(() => {
-    const onStart = () => setMeasureActive(true);
-    const onEnd = () => setMeasureActive(false);
+    const onStart = () => {
+      setMeasureActive(true);
+    };
+    const onEnd = () => {
+      setMeasureActive(false);
+    };
     renderer?.measurementTool.addEventListener("foxglove.measure-start", onStart);
     renderer?.measurementTool.addEventListener("foxglove.measure-end", onEnd);
     return () => {
@@ -665,7 +677,9 @@ export function ThreeDeeRender(props: {
   const latestPublishConfig = useLatest(config.publish);
 
   useEffect(() => {
-    const onStart = () => setPublishActive(true);
+    const onStart = () => {
+      setPublishActive(true);
+    };
     const onSubmit = (event: PublishClickEvent & { type: "foxglove.publish-submit" }) => {
       const frameId = renderer?.followFrameId;
       if (frameId == undefined) {
@@ -709,7 +723,9 @@ export function ThreeDeeRender(props: {
         log.info(error);
       }
     };
-    const onEnd = () => setPublishActive(false);
+    const onEnd = () => {
+      setPublishActive(false);
+    };
     renderer?.publishClickTool.addEventListener("foxglove.publish-start", onStart);
     renderer?.publishClickTool.addEventListener("foxglove.publish-submit", onSubmit);
     renderer?.publishClickTool.addEventListener("foxglove.publish-end", onEnd);

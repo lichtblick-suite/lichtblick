@@ -17,7 +17,7 @@ describe("overwriteFetch", () => {
   afterEach(() => {
     // reset the test
     global.fetch = async () => {
-      throw "not available";
+      throw new Error("not available");
     };
   });
 

@@ -160,7 +160,9 @@ function Publish(props: Props) {
               size="small"
               placeholder="Enter message content as JSON"
               value={config.value}
-              onChange={(event) => saveConfig({ value: event.target.value })}
+              onChange={(event) => {
+                saveConfig({ value: event.target.value });
+              }}
               error={error != undefined}
             />
           </Stack>
@@ -173,7 +175,7 @@ function Publish(props: Props) {
           flexGrow={0}
           gap={1.5}
         >
-          {(error || statusMessage) && (
+          {(error != undefined || statusMessage != undefined) && (
             <Typography variant="caption" noWrap color={error ? "error" : undefined}>
               {error ?? statusMessage}
             </Typography>

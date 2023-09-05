@@ -71,7 +71,9 @@ const useSubscriptionsForBlocks = (subscriptions: Immutable<SubscribePayload[]>)
     ),
   );
 
-  useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
+  useEffect(() => {
+    setSubscriptions(id, subscriptions);
+  }, [id, setSubscriptions, subscriptions]);
 
   useEffect(() => {
     return () => {

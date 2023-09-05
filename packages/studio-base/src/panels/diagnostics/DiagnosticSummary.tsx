@@ -308,7 +308,9 @@ function DiagnosticSummary(props: Props): JSX.Element {
             id="status-filter-menu"
             color="secondary"
             size="small"
-            onChange={(event) => saveConfig({ minLevel: event.target.value as number })}
+            onChange={(event) => {
+              saveConfig({ minLevel: event.target.value as number });
+            }}
             MenuProps={{ MenuListProps: { dense: true } }}
           >
             {KNOWN_LEVELS.map((level) => (
@@ -322,7 +324,9 @@ function DiagnosticSummary(props: Props): JSX.Element {
           <InputBase
             value={hardwareIdFilter}
             placeholder="Filter"
-            onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
+            onChange={(e) => {
+              saveConfig({ hardwareIdFilter: e.target.value });
+            }}
             style={{ flex: "auto", font: "inherit" }}
           />
         </Stack>

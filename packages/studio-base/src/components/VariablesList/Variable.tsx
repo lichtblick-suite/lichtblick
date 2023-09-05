@@ -209,7 +209,9 @@ export default function Variable(props: {
         <ListItemButton
           className={classes.listItemButton}
           selected={isSelected}
-          onClick={() => setExpanded(!expanded)}
+          onClick={() => {
+            setExpanded(!expanded);
+          }}
         >
           <ListItemText
             className={classes.listItemText}
@@ -225,9 +227,17 @@ export default function Variable(props: {
                   value={editedName ?? name}
                   placeholder="variable_name"
                   data-testid={`global-variable-key-input-${name}`}
-                  onClick={(e) => e.stopPropagation()}
-                  onFocus={() => editedName === "" && setExpanded(true)}
-                  onChange={(event) => setEditedName(event.target.value)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onFocus={() => {
+                    if (editedName === "") {
+                      setExpanded(true);
+                    }
+                  }}
+                  onChange={(event) => {
+                    setEditedName(event.target.value);
+                  }}
                   onBlur={onBlur}
                   endAdornment={
                     isDuplicate && (

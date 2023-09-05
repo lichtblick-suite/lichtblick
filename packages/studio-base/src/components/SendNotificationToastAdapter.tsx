@@ -47,7 +47,9 @@ export default function SendNotificationToastAdapter(): JSX.Element {
           <div>
             {message}{" "}
             <Link
-              onClick={() => setNotificationDetails({ message, details, severity })}
+              onClick={() => {
+                setNotificationDetails({ message, details, severity });
+              }}
               variant="inherit"
               fontStyle="italic"
               color="inherit"
@@ -76,7 +78,9 @@ export default function SendNotificationToastAdapter(): JSX.Element {
   return (
     <NotificationModal
       notification={notificationDetails}
-      onRequestClose={() => setNotificationDetails(undefined)}
+      onRequestClose={() => {
+        setNotificationDetails(undefined);
+      }}
     />
   );
 }

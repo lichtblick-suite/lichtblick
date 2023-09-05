@@ -49,12 +49,14 @@ export function simpleGetMessagePathDataItems(
         if (!filterMatches(pathPart, value)) {
           return undefined;
         }
-        return traverse(value, pathIndex + 1);
+        traverse(value, pathIndex + 1);
+        return;
       case "name":
         if (typeof value !== "object") {
           return undefined;
         }
-        return traverse((value as Record<string, unknown>)[pathPart.name], pathIndex + 1);
+        traverse((value as Record<string, unknown>)[pathPart.name], pathIndex + 1);
+        return;
     }
   }
   traverse(message.message, 0);

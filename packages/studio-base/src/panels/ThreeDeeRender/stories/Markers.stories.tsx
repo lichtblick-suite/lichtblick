@@ -658,7 +658,9 @@ export const EmptyLineStrip: StoryObj = {
             ],
           },
         }));
-        timeOutID2 = setTimeout(() => readySignal(), 100);
+        timeOutID2 = setTimeout(() => {
+          readySignal();
+        }, 100);
       }, 500);
 
       return () => {

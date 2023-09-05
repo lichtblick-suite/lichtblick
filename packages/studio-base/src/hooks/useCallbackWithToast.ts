@@ -20,7 +20,8 @@ export default function useCallbackWithToast<Args extends unknown[]>(
   return useCallback(
     async (...args: Args) => {
       try {
-        return await callback(...args);
+        await callback(...args);
+        return;
       } catch (error) {
         log.error(error);
         enqueueSnackbar((error as Error).toString(), { variant: "error" });

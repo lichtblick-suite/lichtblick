@@ -150,13 +150,17 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
           key: "vsplit",
           text: "Split right",
           icon: <SplitVertical20Regular />,
-          onClick: () => split(panelContext?.id, "row"),
+          onClick: () => {
+            split(panelContext?.id, "row");
+          },
         },
         {
           key: "hsplit",
           text: "Split down",
           icon: <SplitHorizontal20Regular />,
-          onClick: () => split(panelContext?.id, "column"),
+          onClick: () => {
+            split(panelContext?.id, "column");
+          },
         },
       );
     }
@@ -250,7 +254,9 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
                 event.stopPropagation();
                 item.onClick?.();
               }}
-              onMouseEnter={() => setSubmenuAnchorEl(undefined)}
+              onMouseEnter={() => {
+                setSubmenuAnchorEl(undefined);
+              }}
               className={cx(classes.menuItem, item.className)}
               data-testid={item["data-testid"]}
             >

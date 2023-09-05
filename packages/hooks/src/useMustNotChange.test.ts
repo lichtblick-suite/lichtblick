@@ -18,9 +18,14 @@ describe("useMustNotChange", () => {
       }
     });
 
-    const { rerender } = renderHook((val) => useMustNotChangeImpl(val), {
-      initialProps: 1,
-    });
+    const { rerender } = renderHook(
+      (val) => {
+        useMustNotChangeImpl(val);
+      },
+      {
+        initialProps: 1,
+      },
+    );
     rerender(2);
 
     expect(errorMock).toHaveBeenCalled();

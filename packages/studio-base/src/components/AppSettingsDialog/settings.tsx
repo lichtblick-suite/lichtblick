@@ -167,10 +167,12 @@ export function TimezoneSettings(): React.ReactElement {
 
   const allItems = useMemo(() => [...fixedItems, ...timezoneItems], [fixedItems, timezoneItems]);
 
-  const selectedItem = useMemo(
-    () => (timezone != undefined && allItems.find((item) => item.data === timezone)) || detectItem,
-    [allItems, detectItem, timezone],
-  );
+  const selectedItem = useMemo(() => {
+    if (timezone != undefined) {
+      return allItems.find((item) => item.data === timezone) ?? detectItem;
+    }
+    return detectItem;
+  }, [allItems, detectItem, timezone]);
 
   return (
     <FormControl fullWidth>

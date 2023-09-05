@@ -357,7 +357,7 @@ const addPanel = (
   }
   const fixedLayout: MosaicNode<string> = isEmpty(layout)
     ? id
-    : { direction: "row", first: id, second: layout as MosaicNode<string> };
+    : { direction: "row", first: id, second: layout! };
   const changeLayoutPayload = {
     layout: fixedLayout,
     trimConfigById: !relatedConfigs,
@@ -404,7 +404,7 @@ const dropPanel = (
     tabId != undefined
       ? panelsState.layout
       : updateTree<string>(
-          panelsState.layout as MosaicNode<string>,
+          panelsState.layout!,
           createAddUpdates(panelsState.layout, id, destinationPath, position ?? "left"),
         );
 

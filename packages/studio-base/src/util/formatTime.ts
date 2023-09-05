@@ -37,9 +37,7 @@ export function formatDate(stamp: Time, timezone?: string): string {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
-  return moment
-    .tz(toDate(stamp), timezone != undefined ? timezone : moment.tz.guess())
-    .format("YYYY-MM-DD");
+  return moment.tz(toDate(stamp), timezone ?? moment.tz.guess()).format("YYYY-MM-DD");
 }
 
 export function formatTime(stamp: Time, timezone?: string): string {
@@ -47,9 +45,7 @@ export function formatTime(stamp: Time, timezone?: string): string {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
-  return moment
-    .tz(toDate(stamp), timezone != undefined ? timezone : moment.tz.guess())
-    .format("h:mm:ss.SSS A z");
+  return moment.tz(toDate(stamp), timezone ?? moment.tz.guess()).format("h:mm:ss.SSS A z");
 }
 
 export function formatDuration(stamp: Time): string {

@@ -60,7 +60,9 @@ export class TopicAliasingPlayer implements Player {
   public setListener(listener: (playerState: PlayerState) => Promise<void>): void {
     this.#listener = listener;
 
-    this.#player.setListener(async (state) => await this.#onPlayerState(state));
+    this.#player.setListener(async (state) => {
+      await this.#onPlayerState(state);
+    });
   }
 
   public setAliasFunctions(aliasFunctions: Immutable<TopicAliasFunctions>): void {

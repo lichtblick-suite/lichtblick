@@ -453,8 +453,9 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       const parsed = parseGeoJSON(message.message.geojson);
       for (const { object, style } of parsed) {
         geoJSON(object, {
-          onEachFeature: (feature: Feature, layer) =>
-            addGeoFeatureEventHandlers(feature, message, layer),
+          onEachFeature: (feature: Feature, layer) => {
+            addGeoFeatureEventHandlers(feature, message, layer);
+          },
           style: config.topicColors[message.topic]
             ? { color: config.topicColors[message.topic], ...style }
             : style,
@@ -519,7 +520,9 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       allGeoMessages
         .filter((message) => message.topic === topic)
-        .forEach((message) => addGeoJsonMessage(message, topicLayer.allFrames));
+        .forEach((message) => {
+          addGeoJsonMessage(message, topicLayer.allFrames);
+        });
     }
   }, [
     addGeoJsonMessage,

@@ -34,7 +34,7 @@ export const builtinSampleValues: Record<string, unknown> = {
 export default function buildSampleMessage(
   datatypes: Immutable<RosDatatypes>,
   datatype: string,
-): unknown | undefined {
+): unknown {
   const builtin = builtinSampleValues[datatype];
   if (builtin != undefined) {
     return builtin;

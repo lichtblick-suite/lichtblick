@@ -62,11 +62,22 @@ export const Examples: StoryObj = {
       <Stack padding={4}>
         <p>standard (clickable)</p>
         <div className={classes.errorTrack}>
-          <Slider onChange={(v) => setValue(v)} fraction={value} />
+          <Slider
+            onChange={(v) => {
+              setValue(v);
+            }}
+            fraction={value}
+          />
         </div>
         <p>disabled (not clickable)</p>
         <div className={classes.errorTrack}>
-          <Slider disabled onChange={(v) => setValue(v)} fraction={value} />
+          <Slider
+            disabled
+            onChange={(v) => {
+              setValue(v);
+            }}
+            fraction={value}
+          />
         </div>
         <p>no value</p>
         <div className={classes.errorTrack}>
@@ -79,7 +90,12 @@ export const Examples: StoryObj = {
         </div>
         <p>draggable</p>
         <div className={classes.infoTrack}>
-          <Slider onChange={(v) => setDraggableValue(v)} fraction={draggableValue} />
+          <Slider
+            onChange={(v) => {
+              setDraggableValue(v);
+            }}
+            fraction={draggableValue}
+          />
         </div>
       </Stack>
     );
@@ -96,7 +112,9 @@ export const CustomRenderer: StoryObj = {
         <p>Customize slider UI using renderSlider</p>
         <div className={classes.infoTrack}>
           <Slider
-            onChange={(v) => setDraggableValue(v)}
+            onChange={(v) => {
+              setDraggableValue(v);
+            }}
             fraction={draggableValue}
             renderSlider={(width) => (
               <>

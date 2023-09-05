@@ -22,7 +22,11 @@ export const MAX_PROMISE_TIMEOUT_TIME_MS = 5000;
 export async function pauseFrameForPromises(promises: FramePromise[]): Promise<void> {
   try {
     await promiseTimeout(
-      Promise.all(promises.map(async ({ promise }) => await promise)),
+      Promise.all(
+        promises.map(async ({ promise }) => {
+          await promise;
+        }),
+      ),
       MAX_PROMISE_TIMEOUT_TIME_MS,
     );
   } catch (error) {

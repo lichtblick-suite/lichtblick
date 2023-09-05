@@ -35,7 +35,9 @@ class InMemoryFileReader implements FileReader {
     return {
       on: (type: "data" | "error", callback: ((_: Uint8Array) => void) & ((_: Error) => void)) => {
         if (type === "data") {
-          setTimeout(() => callback(this.#buffer.slice(offset, offset + length)), 0);
+          setTimeout(() => {
+            callback(this.#buffer.slice(offset, offset + length));
+          }, 0);
         }
       },
       destroy() {
@@ -88,7 +90,9 @@ describe("CachedFilelike", () => {
             callback: ((_: Uint8Array) => void) & ((_: Error) => void),
           ) => {
             if (type === "error") {
-              interval = setInterval(() => callback(new Error("Dummy error")), 20);
+              interval = setInterval(() => {
+                callback(new Error("Dummy error"));
+              }, 20);
             }
           },
           destroy() {

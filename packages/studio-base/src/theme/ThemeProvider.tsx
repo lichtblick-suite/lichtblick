@@ -45,7 +45,9 @@ export default function ThemeProvider({
     meta.name = "theme-color";
     meta.content = muiTheme.palette.background.paper;
     document.head.appendChild(meta);
-    return () => meta.remove();
+    return () => {
+      meta.remove();
+    };
   }, [muiTheme]);
 
   return (

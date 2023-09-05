@@ -83,7 +83,13 @@ const CloseSnackbarAction = ({ id }: { id: SnackbarKey }) => {
   const { closeSnackbar } = useSnackbar();
   const { classes } = useStyles();
   return (
-    <IconButton size="small" className={classes.dismissButton} onClick={() => closeSnackbar(id)}>
+    <IconButton
+      size="small"
+      className={classes.dismissButton}
+      onClick={() => {
+        closeSnackbar(id);
+      }}
+    >
       <Dismiss16Filled />
     </IconButton>
   );

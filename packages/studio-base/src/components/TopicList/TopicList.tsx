@@ -139,7 +139,9 @@ export function TopicList(): JSX.Element {
           id="topic-filter"
           variant="filled"
           disabled={playerPresence !== PlayerPresence.PRESENT}
-          onChange={(event) => setFilterText(event.target.value)}
+          onChange={(event) => {
+            setFilterText(event.target.value);
+          }}
           value={undebouncedFilterText}
           fullWidth
           placeholder="Filter by topic or schema name…"
@@ -154,7 +156,9 @@ export function TopicList(): JSX.Element {
               <IconButton
                 size="small"
                 title="Clear filter"
-                onClick={() => setFilterText("")}
+                onClick={() => {
+                  setFilterText("");
+                }}
                 edge="end"
               >
                 <ClearIcon fontSize="small" />

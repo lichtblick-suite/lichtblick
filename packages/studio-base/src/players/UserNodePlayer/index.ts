@@ -1023,7 +1023,9 @@ export default class UserNodePlayer implements Player {
     // Delay _player.setListener until our setListener is called because setListener in some cases
     // triggers initialization logic and remote requests. This is an unfortunate API behavior and
     // naming choice, but it's better for us not to do trigger this logic in the constructor.
-    this.#player.setListener(async (state) => await this.#onPlayerState(state));
+    this.#player.setListener(async (state) => {
+      await this.#onPlayerState(state);
+    });
   }
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {

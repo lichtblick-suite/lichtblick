@@ -113,8 +113,8 @@ export interface PanelStatics<Config> {
 
 // Like React.ComponentType<P>, but without restrictions on the constructor return type.
 type ComponentConstructorType<P> = { displayName?: string } & (
-  | { new (props: P): React.Component<unknown, unknown> }
-  | { (props: P): React.ReactElement<unknown> | ReactNull }
+  | (new (props: P) => React.Component<unknown, unknown>)
+  | ((props: P) => React.ReactElement<unknown> | ReactNull)
 );
 
 /** Used in storybook when panels are renered outside of a <PanelLayout/> */
@@ -446,8 +446,12 @@ export default function Panel<
     const { keyUpHandlers, keyDownHandlers } = useMemo(
       () => ({
         keyUpHandlers: {
-          "`": () => setQuickActionsKeyPressed(false),
-          "~": () => setQuickActionsKeyPressed(false),
+          "`": () => {
+            setQuickActionsKeyPressed(false);
+          },
+          "~": () => {
+            setQuickActionsKeyPressed(false);
+          },
         },
         keyDownHandlers: {
           a: (e: KeyboardEvent) => {
@@ -456,11 +460,15 @@ export default function Panel<
               selectAllPanels();
             }
           },
-          "`": () => setQuickActionsKeyPressed(true),
-          "~": () => setQuickActionsKeyPressed(true),
+          "`": () => {
+            setQuickActionsKeyPressed(true);
+          },
+          "~": () => {
+            setQuickActionsKeyPressed(true);
+          },
           Escape: () => {
             if (numSelectedPanelsIfSelected > 1) {
-              return setSelectedPanelIds([]);
+              setSelectedPanelIds([]);
             }
           },
         },
@@ -470,7 +478,9 @@ export default function Panel<
 
     const fullScreenKeyHandlers = useMemo(
       () => ({
-        Escape: () => exitFullscreen(),
+        Escape: () => {
+          exitFullscreen();
+        },
       }),
       [exitFullscreen],
     );
@@ -522,7 +532,9 @@ export default function Panel<
         overlayProps.variant = "validDropTarget";
       }
       if (isSelected && numSelectedPanelsIfSelected > 1) {
-        overlayProps.onClickAway = () => setSelectedPanelIds([]);
+        overlayProps.onClickAway = () => {
+          setSelectedPanelIds([]);
+        };
         overlayProps.variant = "selected";
         overlayProps.highlightMode = "all";
         overlayProps.actions = [
@@ -627,7 +639,9 @@ export default function Panel<
           {fullscreen && <KeyListener global keyDownHandlers={fullScreenKeyHandlers} />}
           <Transition
             in={fullscreen}
-            onExited={() => setHasFullscreenDescendant(false)}
+            onExited={() => {
+              setHasFullscreenDescendant(false);
+            }}
             nodeRef={panelRootRef}
             timeout={{
               // match to transition duration inside PanelRoot

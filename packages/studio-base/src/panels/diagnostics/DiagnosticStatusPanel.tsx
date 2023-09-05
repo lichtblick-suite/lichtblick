@@ -189,9 +189,9 @@ function DiagnosticStatusPanel(props: Props) {
               key={item.id}
               info={item}
               splitFraction={splitFraction}
-              onChangeSplitFraction={(newSplitFraction) =>
-                props.saveConfig({ splitFraction: newSplitFraction })
-              }
+              onChangeSplitFraction={(newSplitFraction) => {
+                props.saveConfig({ splitFraction: newSplitFraction });
+              }}
               topicToRender={topicToRender}
               numericPrecision={numericPrecision}
               openSiblingPanel={openSiblingPanel}

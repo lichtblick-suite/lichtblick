@@ -95,6 +95,8 @@ describe("WebWorkerManager", () => {
     const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 2);
     webWorkerManager.registerWorkerListener("1");
     webWorkerManager.unregisterWorkerListener("1");
-    expect(() => webWorkerManager.unregisterWorkerListener("1")).toThrow();
+    expect(() => {
+      webWorkerManager.unregisterWorkerListener("1");
+    }).toThrow();
   });
 });

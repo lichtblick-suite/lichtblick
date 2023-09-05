@@ -43,9 +43,13 @@ function CopyButtonComponent(
       .copy(getText())
       .then(() => {
         setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        setTimeout(() => {
+          setCopied(false);
+        }, 1500);
       })
-      .catch((err) => console.warn(err));
+      .catch((err) => {
+        console.warn(err);
+      });
   }, [getText]);
 
   if (children == undefined) {

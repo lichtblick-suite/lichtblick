@@ -140,7 +140,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const { Hook, Wrapper, all } = makeTestHook({ player });
     renderHook(Hook, { wrapper: Wrapper });
 
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     expect(all).toEqual([
       expect.objectContaining({
         playerState: {
@@ -168,45 +170,43 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const { Hook, Wrapper, all } = makeTestHook({ player });
     renderHook(Hook, { wrapper: Wrapper });
 
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [],
-            totalBytesReceived: 0,
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 0, nsec: 0 },
-            isPlaying: false,
-            speed: 1,
-            lastSeekTime: 0,
-            topics: [],
-            topicStats: new Map(),
-            datatypes: new Map([["Foo", { definitions: [] }]]),
-          },
-        }),
-    );
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [],
-            totalBytesReceived: 0,
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 0, nsec: 0 },
-            isPlaying: false,
-            speed: 1,
-            lastSeekTime: 0,
-            topics: [],
-            topicStats: new Map(),
-            datatypes: new Map([
-              ["Foo", { definitions: [] }],
-              ["Bar", { definitions: [] }],
-            ]),
-          },
-        }),
-    );
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [],
+          totalBytesReceived: 0,
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 0, nsec: 0 },
+          isPlaying: false,
+          speed: 1,
+          lastSeekTime: 0,
+          topics: [],
+          topicStats: new Map(),
+          datatypes: new Map([["Foo", { definitions: [] }]]),
+        },
+      });
+    });
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [],
+          totalBytesReceived: 0,
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 0, nsec: 0 },
+          isPlaying: false,
+          speed: 1,
+          lastSeekTime: 0,
+          topics: [],
+          topicStats: new Map(),
+          datatypes: new Map([
+            ["Foo", { definitions: [] }],
+            ["Bar", { definitions: [] }],
+          ]),
+        },
+      });
+    });
     expect(all.length).toBe(3);
     expect(all[0]!.playerState).toEqual({
       activeData: undefined,
@@ -229,45 +229,43 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const { Hook, Wrapper, all } = makeTestHook({ player });
     renderHook(Hook, { wrapper: Wrapper });
 
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [],
-            totalBytesReceived: 0,
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 0, nsec: 0 },
-            isPlaying: false,
-            speed: 1,
-            lastSeekTime: 0,
-            topics: [{ name: "foo", schemaName: "Foo" }],
-            topicStats: new Map(),
-            datatypes: new Map(),
-          },
-        }),
-    );
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [],
-            totalBytesReceived: 0,
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 0, nsec: 0 },
-            isPlaying: false,
-            speed: 1,
-            lastSeekTime: 0,
-            topics: [
-              { name: "foo", schemaName: "Foo" },
-              { name: "bar", schemaName: "Bar" },
-            ],
-            topicStats: new Map(),
-            datatypes: new Map(),
-          },
-        }),
-    );
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [],
+          totalBytesReceived: 0,
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 0, nsec: 0 },
+          isPlaying: false,
+          speed: 1,
+          lastSeekTime: 0,
+          topics: [{ name: "foo", schemaName: "Foo" }],
+          topicStats: new Map(),
+          datatypes: new Map(),
+        },
+      });
+    });
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [],
+          totalBytesReceived: 0,
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 0, nsec: 0 },
+          isPlaying: false,
+          speed: 1,
+          lastSeekTime: 0,
+          topics: [
+            { name: "foo", schemaName: "Foo" },
+            { name: "bar", schemaName: "Bar" },
+          ],
+          topicStats: new Map(),
+          datatypes: new Map(),
+        },
+      });
+    });
     expect(all).toEqual([
       expect.objectContaining<DeepPartial<(typeof all)[0]>>({
         playerState: {
@@ -299,9 +297,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     act(() => {
       void player.emit();
     });
-    await expect(async () => await player.emit()).rejects.toThrow(
-      "New playerState was emitted before last playerState was rendered.",
-    );
+    await expect(async () => {
+      await player.emit();
+    }).rejects.toThrow("New playerState was emitted before last playerState was rendered.");
   });
 
   it("sets subscriptions", async () => {
@@ -325,7 +323,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     ]);
     const lastSubscriptions = result.current.subscriptions;
     // cause the player to emit a frame outside the render loop to trigger another render
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     // make sure subscriptions are reference equal when they don't change
     expect(result.current.subscriptions).toBe(lastSubscriptions);
   });
@@ -339,32 +339,31 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const { result } = renderHook(Hook, {
       wrapper: Wrapper,
     });
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [
-              {
-                topic: "/input/foo",
-                receiveTime: { sec: 0, nsec: 0 },
-                message: { foo: "bar" },
-                schemaName: "foo",
-                sizeInBytes: 0,
-              },
-            ],
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 1, nsec: 0 },
-            isPlaying: true,
-            speed: 0.2,
-            lastSeekTime: 1234,
-            topics: [{ name: "/input/foo", schemaName: "foo" }],
-            topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
-            datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-            totalBytesReceived: 1234,
-          },
-        }),
-    );
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [
+            {
+              topic: "/input/foo",
+              receiveTime: { sec: 0, nsec: 0 },
+              message: { foo: "bar" },
+              schemaName: "foo",
+              sizeInBytes: 0,
+            },
+          ],
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 0.2,
+          lastSeekTime: 1234,
+          topics: [{ name: "/input/foo", schemaName: "foo" }],
+          topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+          totalBytesReceived: 1234,
+        },
+      });
+    });
 
     act(() => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
@@ -372,7 +371,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
 
     // Emit empty player state to process new subscriptions
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
 
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toEqual([
       {
@@ -395,32 +396,31 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const player = new FakePlayer();
     const { Hook, Wrapper, setPlayer } = makeTestHook({ player });
     const { result, rerender } = renderHook(Hook, { wrapper: Wrapper });
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [
-              {
-                topic: "/input/foo",
-                receiveTime: { sec: 0, nsec: 0 },
-                message: { foo: "bar" },
-                schemaName: "foo",
-                sizeInBytes: 0,
-              },
-            ],
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 1, nsec: 0 },
-            isPlaying: true,
-            speed: 0.2,
-            lastSeekTime: 1234,
-            topics: [{ name: "/input/foo", schemaName: "foo" }],
-            topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
-            datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-            totalBytesReceived: 1234,
-          },
-        }),
-    );
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [
+            {
+              topic: "/input/foo",
+              receiveTime: { sec: 0, nsec: 0 },
+              message: { foo: "bar" },
+              schemaName: "foo",
+              sizeInBytes: 0,
+            },
+          ],
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 0.2,
+          lastSeekTime: 1234,
+          topics: [{ name: "/input/foo", schemaName: "foo" }],
+          topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+          totalBytesReceived: 1234,
+        },
+      });
+    });
 
     act(() => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
@@ -428,7 +428,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
 
     // Emit empty player state to process new subscriptions
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
 
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toEqual([
       {
@@ -458,24 +460,23 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
 
-    await act(
-      async () =>
-        await player2.emit({
-          activeData: {
-            messages: [],
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 1, nsec: 0 },
-            isPlaying: true,
-            speed: 0.2,
-            lastSeekTime: 1234,
-            topics: [],
-            topicStats: new Map(),
-            datatypes: new Map(),
-            totalBytesReceived: 1234,
-          },
-        }),
-    );
+    await act(async () => {
+      await player2.emit({
+        activeData: {
+          messages: [],
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 0.2,
+          lastSeekTime: 1234,
+          topics: [],
+          topicStats: new Map(),
+          datatypes: new Map(),
+          totalBytesReceived: 1234,
+        },
+      });
+    });
 
     expect(result.current.playerState.playerId).toEqual("player2");
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toBeUndefined();
@@ -485,32 +486,31 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const player = new FakePlayer();
     const { Hook, Wrapper } = makeTestHook({ player });
     const { result, rerender } = renderHook(Hook, { wrapper: Wrapper });
-    await doubleAct(
-      async () =>
-        await player.emit({
-          activeData: {
-            messages: [
-              {
-                topic: "/input/foo",
-                receiveTime: { sec: 0, nsec: 0 },
-                message: { foo: "bar" },
-                schemaName: "foo",
-                sizeInBytes: 0,
-              },
-            ],
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 1, nsec: 0 },
-            isPlaying: true,
-            speed: 0.2,
-            lastSeekTime: 1234,
-            topics: [{ name: "/input/foo", schemaName: "foo" }],
-            topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
-            datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-            totalBytesReceived: 1234,
-          },
-        }),
-    );
+    await doubleAct(async () => {
+      await player.emit({
+        activeData: {
+          messages: [
+            {
+              topic: "/input/foo",
+              receiveTime: { sec: 0, nsec: 0 },
+              message: { foo: "bar" },
+              schemaName: "foo",
+              sizeInBytes: 0,
+            },
+          ],
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 0.2,
+          lastSeekTime: 1234,
+          topics: [{ name: "/input/foo", schemaName: "foo" }],
+          topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+          totalBytesReceived: 1234,
+        },
+      });
+    });
 
     act(() => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
@@ -518,7 +518,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
 
     // Emit empty player state to process new subscriptions
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
 
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toEqual([
       {
@@ -545,25 +547,24 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
 
-    await act(
-      async () =>
-        await player.emit({
-          playerId: "player2",
-          activeData: {
-            messages: [],
-            currentTime: { sec: 0, nsec: 0 },
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 1, nsec: 0 },
-            isPlaying: true,
-            speed: 0.2,
-            lastSeekTime: 1234,
-            topics: [],
-            topicStats: new Map(),
-            datatypes: new Map(),
-            totalBytesReceived: 1234,
-          },
-        }),
-    );
+    await act(async () => {
+      await player.emit({
+        playerId: "player2",
+        activeData: {
+          messages: [],
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 0.2,
+          lastSeekTime: 1234,
+          topics: [],
+          topicStats: new Map(),
+          datatypes: new Map(),
+          totalBytesReceived: 1234,
+        },
+      });
+    });
 
     expect(result.current.playerState.playerId).toEqual("player2");
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toBeUndefined();
@@ -574,16 +575,16 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const { Hook, Wrapper } = makeTestHook({ player });
     const { result } = renderHook(Hook, { wrapper: Wrapper });
 
-    act(() =>
-      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
-    );
+    act(() => {
+      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]);
+    });
     expect(player.publishers).toEqual<typeof player.publishers>([
       { topic: "/studio/test", schemaName: "test" },
     ]);
 
-    act(() =>
-      result.current.setPublishers("bar", [{ topic: "/studio/test2", schemaName: "test2" }]),
-    );
+    act(() => {
+      result.current.setPublishers("bar", [{ topic: "/studio/test2", schemaName: "test2" }]);
+    });
     expect(player.publishers).toEqual<typeof player.publishers>([
       { topic: "/studio/test", schemaName: "test" },
       { topic: "/studio/test2", schemaName: "test2" },
@@ -591,7 +592,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     const lastPublishers = player.publishers;
     // cause the player to emit a frame outside the render loop to trigger another render
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     // make sure publishers are reference equal when they don't change
     expect(player.publishers).toBe(lastPublishers);
   });
@@ -604,7 +607,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     const lastContext = result.current;
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     for (const [key, value] of Object.entries(result.current)) {
       if (typeof value === "function") {
         expect((lastContext as Record<string, unknown>)[key]).toBe(value);
@@ -623,9 +628,13 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(all.length).toBe(1);
     // Now wait for the player state emit cycle to complete.
     // This promise should resolve when the render loop finishes.
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     expect(all.length).toBe(2);
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     expect(all.length).toBe(3);
   });
 
@@ -647,7 +656,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     player.setCapabilities([PlayerCapabilities.playbackControl]);
 
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
 
     expect(result.current.startPlayback).not.toBeUndefined();
     expect(result.current.pausePlayback).not.toBeUndefined();
@@ -666,7 +677,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     player.setCapabilities([PlayerCapabilities.playbackControl, PlayerCapabilities.setSpeed]);
 
-    await doubleAct(async () => await player.emit());
+    await doubleAct(async () => {
+      await player.emit();
+    });
     expect(player.setPlaybackSpeed).toHaveBeenCalledTimes(0);
     result.current.setPlaybackSpeed!(0.5);
     expect(player.setPlaybackSpeed).toHaveBeenCalledWith(0.5);
@@ -704,7 +717,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       renderHook(Hook, { wrapper: Wrapper });
 
       await doubleAct(async () => {
-        return await player.emit().then(() => {
+        await player.emit().then(() => {
           hasFinishedFrame = true;
         });
       });

@@ -83,12 +83,7 @@ export function* iterateTyped<T extends { [key: string]: Array<any> | Float32Arr
   } as ExtractPoint<T>;
 
   let index = 0;
-  for (let i = 0; i < dataset.length; i++) {
-    const slice = dataset[i];
-    if (slice == undefined) {
-      continue;
-    }
-
+  for (const slice of dataset) {
     // Find a property for which we can check the length
     const first = R.head(R.values(slice));
     if (first == undefined) {

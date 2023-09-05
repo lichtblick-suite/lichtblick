@@ -98,7 +98,9 @@ describe("ArrayMap", () => {
   it("removes elements after key", () => {
     const list = new ArrayMap<number, string>();
     const data = [...Array(10).keys()];
-    data.forEach((val) => list.set(val, String(val)));
+    data.forEach((val) => {
+      list.set(val, String(val));
+    });
     list.removeAfter(4.5);
     expect(list.size).toBe(5);
     expect(list.binarySearch(0)).toBe(0);
@@ -116,7 +118,9 @@ describe("ArrayMap", () => {
   it("removes elements before key", () => {
     const list = new ArrayMap<number, string>();
     const data = [...Array(10).keys()];
-    data.forEach((val) => list.set(val, String(val)));
+    data.forEach((val) => {
+      list.set(val, String(val));
+    });
     list.removeBefore(4.5);
     expect(list.size).toBe(5);
     expect(list.binarySearch(0)).toBe(-1);
@@ -134,7 +138,9 @@ describe("ArrayMap", () => {
   it("removes specific elements", () => {
     const list = new ArrayMap<number, string>();
     const data = [...Array(10).keys()];
-    data.forEach((val) => list.set(val, String(val)));
+    data.forEach((val) => {
+      list.set(val, String(val));
+    });
     list.remove(3);
     expect(list.size).toBe(9);
     expect(list.binarySearch(0)).toBe(0);

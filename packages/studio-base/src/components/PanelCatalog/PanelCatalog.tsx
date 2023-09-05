@@ -47,7 +47,7 @@ const useStyles = makeStyles()((theme) => {
 
 // sanity checks to help panel authors debug issues
 function verifyPanels(panels: readonly PanelInfo[]): void {
-  const panelTypes: Map<string, PanelInfo> = new Map();
+  const panelTypes = new Map<string, PanelInfo>();
   for (const panel of panels) {
     const { title, type, config } = mightActuallyBePartial(panel);
     const dispName = title ?? type ?? "<unnamed>";
@@ -224,7 +224,13 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
           InputProps={{
             startAdornment: <SearchIcon fontSize="small" />,
             endAdornment: searchQuery && (
-              <IconButton size="small" edge="end" onClick={() => setSearchQuery("")}>
+              <IconButton
+                size="small"
+                edge="end"
+                onClick={() => {
+                  setSearchQuery("");
+                }}
+              >
                 <CancelIcon fontSize="small" />
               </IconButton>
             ),

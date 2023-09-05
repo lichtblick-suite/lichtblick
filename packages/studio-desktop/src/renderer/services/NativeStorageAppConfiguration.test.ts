@@ -15,11 +15,21 @@ function makeMockContext(): Storage & MockStorage {
   }
 
   return {
-    list: jest.fn().mockImplementation(() => raise("list")),
-    all: jest.fn().mockImplementation(() => raise("all")),
-    get: jest.fn().mockImplementation(() => raise("get")),
-    put: jest.fn().mockImplementation(() => raise("put")),
-    delete: jest.fn().mockImplementation(() => raise("delete")),
+    list: jest.fn().mockImplementation(() => {
+      raise("list");
+    }),
+    all: jest.fn().mockImplementation(() => {
+      raise("all");
+    }),
+    get: jest.fn().mockImplementation(() => {
+      raise("get");
+    }),
+    put: jest.fn().mockImplementation(() => {
+      raise("put");
+    }),
+    delete: jest.fn().mockImplementation(() => {
+      raise("delete");
+    }),
   };
 }
 

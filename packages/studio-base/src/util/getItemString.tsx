@@ -62,6 +62,7 @@ export function getItemString(
       PRIMITIVE_TYPES.includes(typeof key) &&
       PRIMITIVE_TYPES.includes(typeof value)
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       return `${key}: ${value}`;
     }
   } else if (keys.length === 3) {

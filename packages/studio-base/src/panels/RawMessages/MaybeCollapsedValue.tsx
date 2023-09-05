@@ -24,7 +24,9 @@ export default function MaybeCollapsedValue({ itemLabel }: Props): JSX.Element {
 
   const [showingEntireLabel, setShowingEntireLabel] = useState(!lengthOverLimit);
 
-  const expandText = useCallback(() => setShowingEntireLabel(true), []);
+  const expandText = useCallback(() => {
+    setShowingEntireLabel(true);
+  }, []);
 
   const truncatedItemText = showingEntireLabel
     ? itemLabel

@@ -18,7 +18,7 @@ function parsePackageName(name: string): { publisher?: string; name: string } {
   if (res == undefined) {
     return { name };
   }
-  return { publisher: res[1], name: res[2] as string };
+  return { publisher: res[1], name: res[2]! };
 }
 
 function qualifiedName(

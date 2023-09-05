@@ -132,7 +132,9 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
               }
               value="diagnostics"
               data-testid="np-errors"
-              onClick={() => handleClick("diagnostics")}
+              onClick={() => {
+                handleClick("diagnostics");
+              }}
             />
             <Tab
               label={
@@ -147,7 +149,9 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
               }
               value="logs"
               data-testid="np-logs"
-              onClick={() => handleClick("logs")}
+              onClick={() => {
+                handleClick("logs");
+              }}
             />
           </Tabs>
           <Stack direction="row" alignItems="center" gap={0.5}>

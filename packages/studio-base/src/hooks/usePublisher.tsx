@@ -43,7 +43,9 @@ export default function usePublisher({
   useEffect(() => {
     if (canPublish && topic && schemaName) {
       setPublishers(id, [{ topic, schemaName, options: { datatypes } }]);
-      return () => setPublishers(id, []);
+      return () => {
+        setPublishers(id, []);
+      };
     } else {
       return undefined;
     }

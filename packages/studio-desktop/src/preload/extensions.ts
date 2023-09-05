@@ -74,7 +74,7 @@ function parsePackageName(name: string): { namespace?: string; name: string } {
   if (res == undefined) {
     return { name };
   }
-  return { namespace: res[1], name: res[2] as string };
+  return { namespace: res[1], name: res[2]! };
 }
 
 export async function getExtensions(rootFolder: string): Promise<DesktopExtension[]> {

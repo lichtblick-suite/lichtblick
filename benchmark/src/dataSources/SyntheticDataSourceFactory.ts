@@ -8,9 +8,7 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { Player } from "@foxglove/studio-base/players/types";
 
-interface PlayerConstructor {
-  new (): Player;
-}
+type PlayerConstructor = new () => Player;
 
 class SyntheticDataSourceFactory implements IDataSourceFactory {
   public id;

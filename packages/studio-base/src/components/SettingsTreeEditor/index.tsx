@@ -119,7 +119,9 @@ export default function SettingsTreeEditor({
           <TextField
             id={`${variant}-settings-filter`}
             variant="filled"
-            onChange={(event) => setFilterText(event.target.value)}
+            onChange={(event) => {
+              setFilterText(event.target.value);
+            }}
             value={filterText}
             className={classes.textField}
             fullWidth
@@ -138,7 +140,9 @@ export default function SettingsTreeEditor({
                 <IconButton
                   size="small"
                   title={t("clearSearch")}
-                  onClick={() => setFilterText("")}
+                  onClick={() => {
+                    setFilterText("");
+                  }}
                   edge="end"
                 >
                   <CancelIcon fontSize="small" />

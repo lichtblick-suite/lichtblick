@@ -9,7 +9,7 @@ import Logger from "@foxglove/log";
 const log = Logger.getLogger(__filename);
 
 const useMustNotChangeImpl = (value: unknown): void => {
-  const valueRef = useRef<unknown | undefined>(value);
+  const valueRef = useRef<unknown>(value);
   if (valueRef.current !== value) {
     log.error("Value must not change", valueRef.current);
   }

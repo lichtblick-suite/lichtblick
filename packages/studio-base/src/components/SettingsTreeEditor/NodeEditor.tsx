@@ -369,7 +369,9 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               value={settings.label}
               onBlur={toggleEditing}
               onKeyDown={onLabelKeyDown}
-              onFocus={(event) => event.target.select()}
+              onFocus={(event) => {
+                event.target.select();
+              }}
               InputProps={{
                 endAdornment: (
                   <IconButton
@@ -425,11 +427,12 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
           )}
           {inlineActions.map((action) => {
             const Icon = action.icon ? icons[action.icon] : undefined;
-            const handler = () =>
+            const handler = () => {
               actionHandler({
                 action: "perform-node-action",
                 payload: { id: action.id, path: props.path },
               });
+            };
             return Icon ? (
               <IconButton
                 key={action.id}

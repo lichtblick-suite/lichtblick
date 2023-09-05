@@ -152,7 +152,9 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
           <Button
             color="inherit"
             variant="contained"
-            onClick={() => addNewNode()}
+            onClick={() => {
+              addNewNode();
+            }}
             startIcon={<AddIcon />}
           >
             New script
@@ -404,7 +406,9 @@ function NodePlayground(props: Props) {
               title="New node"
               data-testid="new-node"
               size="small"
-              onClick={() => addNewNode()}
+              onClick={() => {
+                addNewNode();
+              }}
             >
               <AddIcon />
             </IconButton>
@@ -456,7 +460,9 @@ function NodePlayground(props: Props) {
               <BottomBar
                 nodeId={selectedNodeId}
                 isSaved={isNodeSaved}
-                save={() => saveNode(currentScript?.code)}
+                save={() => {
+                  saveNode(currentScript?.code);
+                }}
                 diagnostics={selectedNodeDiagnostics}
                 logs={selectedNodeLogs}
               />

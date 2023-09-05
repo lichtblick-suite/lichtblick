@@ -11,7 +11,7 @@
 export class VecQueue<T> {
   #readPos = 0;
   #writePos = 0;
-  #buffer: Array<T | undefined> = new Array(4);
+  #buffer = new Array<T | undefined>(4);
 
   /**
    * Add an item at the end of the queue. If the queue is full the underlying buffer is grown.

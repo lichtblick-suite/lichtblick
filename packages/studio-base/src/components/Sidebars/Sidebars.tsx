@@ -161,7 +161,9 @@ export function Sidebars<LeftKey extends string, RightKey extends string>(
                   <ErrorBoundary>
                     <Sidebar<LeftKey>
                       anchor="left"
-                      onClose={() => onSelectLeftKey(undefined)}
+                      onClose={() => {
+                        onSelectLeftKey(undefined);
+                      }}
                       items={leftItems}
                       activeTab={selectedLeftKey}
                       setActiveTab={onSelectLeftKey}
@@ -173,7 +175,9 @@ export function Sidebars<LeftKey extends string, RightKey extends string>(
                   <ErrorBoundary>
                     <Sidebar<RightKey>
                       anchor="right"
-                      onClose={() => onSelectRightKey(undefined)}
+                      onClose={() => {
+                        onSelectRightKey(undefined);
+                      }}
                       items={rightItems}
                       activeTab={selectedRightKey}
                       setActiveTab={onSelectRightKey}

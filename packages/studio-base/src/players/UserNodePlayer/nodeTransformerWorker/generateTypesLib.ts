@@ -42,7 +42,7 @@ export const typedArrayMap = new Map<string, string>([
 ]);
 
 function safeString(str: string): string {
-  return JSON.stringify(str) as string;
+  return JSON.stringify(str)!;
 }
 
 export const generateTypesInterface = (datatypes: RosDatatypes): string => {
