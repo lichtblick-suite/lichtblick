@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageDefinition } from "@foxglove/message-definition";
-import { parseIdl } from "@foxglove/omgidl-parser";
+import { MessageDefinition, MessageDefinitionField } from "@foxglove/message-definition";
+import { IDLMessageDefinition, parseIDL } from "@foxglove/omgidl-parser";
 import { MessageReader as OmgidlMessageReader } from "@foxglove/omgidl-serialization";
 import { parseRos2idl } from "@foxglove/ros2idl-parser";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
@@ -24,6 +24,34 @@ export type ParsedChannel = {
   deserialize: (data: ArrayBufferView) => unknown;
   datatypes: MessageDefinitionMap;
 };
+
+function parseIDLDefinitionsToDatatypes(
+  parsedDefinitions: IDLMessageDefinition[],
+  rootName?: string,
+) {
+  //  The only IDL definition non-conformant-to-MessageDefinition is unions
+  const convertUnionToMessageDefinition = (definition: IDLMessageDefinition): MessageDefinition => {
+    if (definition.aggregatedKind === "union") {
+      const innerDefs: MessageDefinitionField[] = definition.cases.map((caseDefinition) => ({
+        ...caseDefinition.type,
+        predicates: caseDefinition.predicates,
+      }));
+
+      if (definition.defaultCase != undefined) {
+        innerDefs.push(definition.defaultCase);
+      }
+      const { name } = definition;
+      return {
+        name,
+        definitions: innerDefs,
+      };
+    }
+    return definition;
+  };
+
+  const standardDefs: MessageDefinition[] = parsedDefinitions.map(convertUnionToMessageDefinition);
+  return parsedDefinitionsToDatatypes(standardDefs, rootName);
+}
 
 function parsedDefinitionsToDatatypes(
   parsedDefinitions: MessageDefinition[],
@@ -140,9 +168,9 @@ export function parseChannel(channel: Channel): ParsedChannel {
     }
     const schema = new TextDecoder().decode(channel.schema.data);
     if (channel.schema.encoding === "omgidl") {
-      const parsedDefinitions = parseIdl(schema);
+      const parsedDefinitions = parseIDL(schema);
       const reader = new OmgidlMessageReader(channel.schema.name, parsedDefinitions);
-      const datatypes = parsedDefinitionsToDatatypes(parsedDefinitions);
+      const datatypes = parseIDLDefinitionsToDatatypes(parsedDefinitions);
       return {
         datatypes,
         deserialize: (data) => reader.readMessage(data),
