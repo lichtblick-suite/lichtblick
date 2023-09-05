@@ -89,9 +89,9 @@ export const CallServiceEnabledServiceName: StoryObj = {
       await userEvent.click(button);
     });
     await delay(500);
-    responseTextareas.forEach((textarea) => {
-      expect(textarea).toHaveValue(successResponseJson);
-    });
+    for (const textarea of responseTextareas) {
+      await expect(textarea).toHaveValue(successResponseJson);
+    }
   },
 
   parameters: { panelSetup: { fixture: getFixture({ allowCallService: true }) } },
@@ -156,9 +156,9 @@ export const CallingServiceThatDoesNotExist: StoryObj = {
       await userEvent.click(button);
     });
     await delay(500);
-    responseTextareas.forEach((textarea) => {
-      expect(textarea).toHaveValue(`Service "/non_existing_service" does not exist`);
-    });
+    for (const textarea of responseTextareas) {
+      await expect(textarea).toHaveValue(`Service "/non_existing_service" does not exist`);
+    }
   },
 
   parameters: { panelSetup: { fixture: getFixture({ allowCallService: true }) } },

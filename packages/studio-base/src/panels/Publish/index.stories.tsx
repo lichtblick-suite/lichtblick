@@ -103,9 +103,9 @@ export const WhenSelectingATopicSchemaIsSuggested: Story = {
       await keyboard("[Enter]");
     });
 
-    expect(topicInput).toHaveValue("/sample_topic");
-    expect(valueTextarea).toHaveValue(advancedJSON);
-    expect(schemaInput).toHaveValue("std_msgs/String");
+    await expect(topicInput).toHaveValue("/sample_topic");
+    await expect(valueTextarea).toHaveValue(advancedJSON);
+    await expect(schemaInput).toHaveValue("std_msgs/String");
   },
   parameters: { colorScheme: "light" },
 };
