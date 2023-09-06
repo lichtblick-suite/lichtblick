@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@types/protobufjs": "workspace:*",
-    "typescript": "5.1.6"
+    "typescript": "5.2.2"
   },
   "dependencies": {
     "@foxglove/message-definition": "0.3.0",
