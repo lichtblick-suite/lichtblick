@@ -175,7 +175,9 @@ function useData(id: string, topics: SubscribePayload[]) {
     ),
   });
 
-  const blocks = useBlocks(R.map((v) => ({ ...v, preloadType: "full" }), subscribed));
+  const blocks = useBlocks(
+    React.useMemo(() => R.map((v) => ({ ...v, preloadType: "full" }), subscribed), [subscribed]),
+  );
   useEffect(() => {
     for (const [index, block] of blocks.entries()) {
       if (R.isEmpty(block)) {
