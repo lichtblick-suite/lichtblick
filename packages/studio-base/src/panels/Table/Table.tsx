@@ -27,7 +27,9 @@ import {
   getExpandedRowModel,
   getSortedRowModel,
   useReactTable,
+  CellContext,
 } from "@tanstack/react-table";
+import memoizeWeak from "memoize-weak";
 import { makeStyles } from "tss-react/mui";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -134,7 +136,45 @@ const useStyles = makeStyles<void, "tableData" | "tableHeader">()((theme, _param
 
 const columnHelper = createColumnHelper<CellValue>();
 
-function getColumnsFromObject(val: CellValue, accessorPath: string, iconButtonClasses: string) {
+const memoizedCellRenderer = memoizeWeak((accessorPath: string, id: string) => {
+  return function ValueCell(info: CellContext<CellValue, unknown>) {
+    const value = info.getValue();
+    const row = info.row;
+    if (Array.isArray(value) && typeof value[0] !== "object") {
+      return JSON.stringify(value);
+    }
+
+    if (typeof value === "object" && value != undefined) {
+      return (
+        <TableCell row={row} accessorPath={id}>
+          <Table value={value} accessorPath={accessorPath} />
+        </TableCell>
+      );
+    }
+
+    // Interpolate in case the value is null.
+    return <TextCellContent value={`${value}`} />;
+  };
+});
+
+function Expander(info: CellContext<CellValue, unknown>) {
+  const { classes } = useStyles();
+  const { row } = info;
+  return (
+    <IconButton
+      className={classes.iconButton}
+      size="small"
+      data-testid={`expand-row-${row.index}`}
+      onClick={() => {
+        row.toggleExpanded();
+      }}
+    >
+      {row.getIsExpanded() ? <MinusIcon fontSize="small" /> : <PlusIcon fontSize="small" />}
+    </IconButton>
+  );
+}
+
+function getColumnsFromObject(val: CellValue, accessorPath: string) {
   const obj = val.toJSON?.() ?? val;
   if (isTypedArray(obj)) {
     return [
@@ -150,25 +190,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string, iconButtonCl
     return columnHelper.accessor(accessor, {
       header: accessor,
       id,
-      cell: (info) => {
-        const value = info.getValue();
-        const row = info.row;
-        if (Array.isArray(value) && typeof value[0] !== "object") {
-          return JSON.stringify(value);
-        }
-
-        // eslint-disable-next-line no-restricted-syntax
-        if (typeof value === "object" && value != null) {
-          return (
-            <TableCell row={row} accessorPath={id}>
-              <Table value={value} accessorPath={accessorPath} />
-            </TableCell>
-          );
-        }
-
-        // Interpolate in case the value is null.
-        return <TextCellContent value={`${value}`} />;
-      },
+      cell: memoizedCellRenderer(accessorPath, id),
     });
   });
 
@@ -176,20 +198,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string, iconButtonCl
     const expandColumn = columnHelper.display({
       id: "expander",
       header: "",
-      cell: ({ row }) => {
-        return (
-          <IconButton
-            className={iconButtonClasses}
-            size="small"
-            data-testid={`expand-row-${row.index}`}
-            onClick={() => {
-              row.toggleExpanded();
-            }}
-          >
-            {row.getIsExpanded() ? <MinusIcon fontSize="small" /> : <PlusIcon fontSize="small" />}
-          </IconButton>
-        );
-      },
+      cell: Expander,
     });
     columns.unshift(expandColumn);
   }
@@ -227,8 +236,8 @@ export default function Table({
     const maybeMessage = Array.isArray(value) ? value[0] ?? {} : value;
 
     // Strong assumption about structure of data.
-    return getColumnsFromObject(maybeMessage as CellValue, accessorPath, classes.iconButton);
-  }, [accessorPath, classes.iconButton, value]);
+    return getColumnsFromObject(maybeMessage as CellValue, accessorPath);
+  }, [accessorPath, value]);
 
   const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
