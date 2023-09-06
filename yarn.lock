@@ -2708,7 +2708,7 @@ __metadata:
     "@types/text-metrics": "workspace:*"
     "@types/three": ^0.149.0
     "@types/tinycolor2": 1.4.3
-    "@types/use-sync-external-store": 0.0.3
+    "@types/use-sync-external-store": 0.0.4
     "@types/uuid": 9.0.3
     "@types/wicg-file-system-access": 2020.9.6
     "@uiw/react-textarea-code-editor": 2.1.7
@@ -6953,10 +6953,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/use-sync-external-store@npm:0.0.3":
-  version: 0.0.3
-  resolution: "@types/use-sync-external-store@npm:0.0.3"
-  checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
+"@types/use-sync-external-store@npm:0.0.4":
+  version: 0.0.4
+  resolution: "@types/use-sync-external-store@npm:0.0.4"
+  checksum: f8bf56b14f28fda6d0215281d50623d5affd17c549ba46bcfcfbb97c6301a583066c0477856260ae6feadcaa714c46cd45678e76b74da0f6f8b364aec07bd854
   languageName: node
   linkType: hard
 

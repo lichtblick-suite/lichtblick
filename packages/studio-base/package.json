@@ -86,7 +86,7 @@
     "@types/text-metrics": "workspace:*",
     "@types/three": "^0.149.0",
     "@types/tinycolor2": "1.4.3",
-    "@types/use-sync-external-store": "0.0.3",
+    "@types/use-sync-external-store": "0.0.4",
     "@types/uuid": "9.0.3",
     "@types/wicg-file-system-access": "2020.9.6",
     "@uiw/react-textarea-code-editor": "2.1.7",
