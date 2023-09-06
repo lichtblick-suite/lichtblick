@@ -114,8 +114,10 @@ export function NumberInput(
     [disabled, readOnly, min, max, onChange, precision],
   );
 
+  const isDragging = useRef(false);
   const onPointerDown = useCallback(
     (event: React.PointerEvent) => {
+      isDragging.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
       const scrubStart = latestValue.current ?? placeHolderValue ?? 0;
       scrubValue.current = isFinite(scrubStart) ? scrubStart : 0;
@@ -124,24 +126,22 @@ export function NumberInput(
   );
 
   const onPointerUp = useCallback((event: React.PointerEvent) => {
+    isDragging.current = false;
     event.currentTarget.releasePointerCapture(event.pointerId);
   }, []);
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent<HTMLInputElement>) => {
-      if (event.buttons === 1) {
-        event.preventDefault();
-        event.currentTarget.blur();
-        const scale = event.shiftKey ? 10 : 1;
-        const delta =
-          Math.sign(event.movementX) *
-          Math.pow(Math.abs(event.movementX), 1.5) *
-          0.1 *
-          step *
-          scale;
-        scrubValue.current = round(scrubValue.current + delta, Constants.ScrubPrecision);
-        updateValue(scrubValue.current);
+      if (event.buttons !== 1 || !isDragging.current) {
+        return;
       }
+      event.preventDefault();
+      event.currentTarget.blur();
+      const scale = event.shiftKey ? 10 : 1;
+      const delta =
+        Math.sign(event.movementX) * Math.pow(Math.abs(event.movementX), 1.5) * 0.1 * step * scale;
+      scrubValue.current = round(scrubValue.current + delta, Constants.ScrubPrecision);
+      updateValue(scrubValue.current);
     },
     [step, updateValue],
   );
