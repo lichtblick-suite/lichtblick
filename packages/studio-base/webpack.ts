@@ -181,7 +181,7 @@ export function makeConfig(
           // bundle it for the renderer.
           // https://github.com/microsoft/TypeScript/issues/39436
           // Prettier's TS parser also bundles the same code: https://github.com/prettier/prettier/issues/11076
-          test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$|[\\/]node_modules[\\/]prettier[\\/]parser-typescript\.js$/,
+          test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$|[\\/]node_modules[\\/]prettier[\\/]plugins[\\/]typescript\.m?js$/,
           loader: "string-replace-loader", // foxglove-depcheck-used: string-replace-loader
           options: {
             multiple: [

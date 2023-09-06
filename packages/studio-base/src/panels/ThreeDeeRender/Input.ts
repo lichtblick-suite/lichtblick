@@ -53,7 +53,10 @@ export class Input extends EventEmitter<InputEvents> {
   #worldSpaceCursorCoords?: THREE.Vector3;
   #raycaster = new THREE.Raycaster();
 
-  public constructor(canvas: HTMLCanvasElement, private getCamera: () => THREE.Camera) {
+  public constructor(
+    canvas: HTMLCanvasElement,
+    private getCamera: () => THREE.Camera,
+  ) {
     super();
 
     const parentEl = canvas.parentElement;

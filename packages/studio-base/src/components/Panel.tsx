@@ -490,7 +490,7 @@ export default function Panel<
       // We have to lie to TypeScript with "as PanelProps" because the "PanelProps extends {...}"
       // constraint technically allows the panel to require the types of config/saveConfig be more
       // specific types that aren't satisfied by the functions we pass in
-      () => ({ config: panelComponentConfig, saveConfig, ...otherPanelProps } as PanelProps),
+      () => ({ config: panelComponentConfig, saveConfig, ...otherPanelProps }) as PanelProps,
       [otherPanelProps, panelComponentConfig, saveConfig],
     );
     const child = useMemo(() => <PanelComponent {...childProps} />, [childProps]);

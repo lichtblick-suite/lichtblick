@@ -24,7 +24,7 @@ import { SubscribePayload, MessageEvent } from "@foxglove/studio-base/players/ty
 import { PlotParams, Messages } from "./internalTypes";
 import { getPaths, PlotData } from "./plotData";
 
-type Service = Comlink.Remote<typeof import("./useDatasets.worker")["service"]>;
+type Service = Comlink.Remote<(typeof import("./useDatasets.worker"))["service"]>;
 let worker: Worker | undefined;
 let service: Service | undefined;
 let numClients: number = 0;

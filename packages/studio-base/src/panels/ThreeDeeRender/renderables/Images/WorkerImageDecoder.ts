@@ -19,7 +19,7 @@ import { Image as RosImage } from "../../ros";
  */
 export class WorkerImageDecoder {
   #worker: Worker;
-  #remote: Comlink.Remote<typeof import("./WorkerImageDecoder.worker")["service"]>;
+  #remote: Comlink.Remote<(typeof import("./WorkerImageDecoder.worker"))["service"]>;
 
   public constructor() {
     this.#worker = new Worker(

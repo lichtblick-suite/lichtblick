@@ -16,7 +16,7 @@
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
-  "prettier.prettierPath": "./node_modules/prettier",
+  "prettier.prettierPath": "./node_modules/prettier/index.cjs",
   "search.exclude": {
     "**/*.code-search": true,
     "**/bower_components": true,

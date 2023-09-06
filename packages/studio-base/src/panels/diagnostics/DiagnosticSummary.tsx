@@ -179,7 +179,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
             selectedName: info.status.name,
             topicToRender,
             collapsedSections: [],
-          } as DiagnosticStatusConfig),
+          }) as DiagnosticStatusConfig,
         updateIfExists: true,
       });
     },

@@ -184,7 +184,7 @@ const getSelectVisibilityFilterField = (t: TFunction<"settingsEditor">) =>
     label: t("filterList"),
     help: t("filterListHelp"),
     options: SelectVisibilityFilterOptions(t),
-  } as const);
+  }) as const;
 
 type State = {
   editing: boolean;

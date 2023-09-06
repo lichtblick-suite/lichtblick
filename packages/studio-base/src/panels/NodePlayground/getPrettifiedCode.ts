@@ -15,9 +15,15 @@
 async function getPrettifiedCode(code: string): Promise<string> {
   // use dynamic imports to avoid loading prettier unless the function is invoked
   const prettier = await import("prettier/standalone");
-  const parserPlugin = await import("prettier/parser-typescript");
+  const estreePlugin = (await import(
+    "prettier/plugins/estree"
+  )) as typeof import("prettier/plugins/estree");
+  const typescriptPlugin = await import("prettier/plugins/typescript");
 
-  return prettier.format(code, { parser: "typescript", plugins: [parserPlugin] });
+  return await prettier.format(code, {
+    parser: "typescript",
+    plugins: [estreePlugin, typescriptPlugin],
+  });
 }
 
 export default getPrettifiedCode;

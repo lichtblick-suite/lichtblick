@@ -267,9 +267,7 @@ export default function FileInfoDisplay({
       {error && <Flash color="error">{error.toString()}</Flash>}
       <table className={classes.topicList}>
         <tbody>
-          {fileInfo?.topics?.map((topicInfo, i) => (
-            <TopicRow key={i} info={topicInfo} />
-          ))}
+          {fileInfo?.topics?.map((topicInfo, i) => <TopicRow key={i} info={topicInfo} />)}
         </tbody>
       </table>
     </div>

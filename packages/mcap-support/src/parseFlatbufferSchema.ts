@@ -79,9 +79,8 @@ function typeForField(schema: SchemaT, field: FieldT): MessageDefinitionField[] 
         const enums = schema.enums[field.type.index]?.values;
         if (enums == undefined) {
           throw new Error(
-            `Invalid schema, missing enum values for field type ${
-              schema.enums[field.type.index]?.name
-            }`,
+            `Invalid schema, missing enum values for field type ${schema.enums[field.type.index]
+              ?.name}`,
           );
         }
         for (const enumVal of enums) {

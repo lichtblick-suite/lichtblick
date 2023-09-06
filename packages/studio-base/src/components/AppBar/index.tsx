@@ -47,122 +47,124 @@ import { AppBarContainer } from "./AppBarContainer";
 import { DataSource } from "./DataSource";
 import { UserMenu } from "./UserMenu";
 
-const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
-  (theme, { debugDragRegion = false }, classes) => {
-    const NOT_DRAGGABLE_STYLE: Record<string, string> = { WebkitAppRegion: "no-drag" };
-    if (debugDragRegion) {
-      NOT_DRAGGABLE_STYLE.backgroundColor = "red";
-    }
-    return {
-      toolbar: {
-        display: "grid",
-        width: "100%",
-        gridTemplateAreas: `"start middle end"`,
-        gridTemplateColumns: "1fr auto 1fr",
-        alignItems: "center",
-      },
-      logo: {
-        padding: theme.spacing(0.75, 0.5),
-        fontSize: "2rem",
-        color: theme.palette.appBar.primary,
-        borderRadius: 0,
+const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
+  theme,
+  { debugDragRegion = false },
+  classes,
+) => {
+  const NOT_DRAGGABLE_STYLE: Record<string, string> = { WebkitAppRegion: "no-drag" };
+  if (debugDragRegion) {
+    NOT_DRAGGABLE_STYLE.backgroundColor = "red";
+  }
+  return {
+    toolbar: {
+      display: "grid",
+      width: "100%",
+      gridTemplateAreas: `"start middle end"`,
+      gridTemplateColumns: "1fr auto 1fr",
+      alignItems: "center",
+    },
+    logo: {
+      padding: theme.spacing(0.75, 0.5),
+      fontSize: "2rem",
+      color: theme.palette.appBar.primary,
+      borderRadius: 0,
 
-        "svg:not(.MuiSvgIcon-root)": {
-          fontSize: "1em",
-        },
-        "&:hover": {
-          backgroundColor: tc(theme.palette.common.white).setAlpha(0.08).toRgbString(),
-        },
-        "&.Mui-selected": {
-          backgroundColor: theme.palette.appBar.primary,
-          color: theme.palette.common.white,
-        },
-        "&.Mui-disabled": {
-          color: "currentColor",
-          opacity: theme.palette.action.disabledOpacity,
-        },
+      "svg:not(.MuiSvgIcon-root)": {
+        fontSize: "1em",
       },
-      dropDownIcon: {
-        fontSize: "12px !important",
+      "&:hover": {
+        backgroundColor: tc(theme.palette.common.white).setAlpha(0.08).toRgbString(),
       },
-      start: {
-        gridArea: "start",
-        display: "flex",
-        flex: 1,
-        alignItems: "center",
-      },
-      startInner: {
-        display: "flex",
-        alignItems: "center",
-        ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
-      },
-      middle: {
-        gridArea: "middle",
-        justifySelf: "center",
-        overflow: "hidden",
-        maxWidth: "100%",
-        ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
-      },
-      end: {
-        gridArea: "end",
-        flex: 1,
-        display: "flex",
-        justifyContent: "flex-end",
-      },
-      endInner: {
-        display: "flex",
-        alignItems: "center",
-        ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
-      },
-      keyEquivalent: {
-        fontFamily: fonts.MONOSPACE,
-        background: tc(theme.palette.common.white).darken(45).toString(),
-        padding: theme.spacing(0, 0.5),
-        aspectRatio: 1,
-        borderRadius: theme.shape.borderRadius,
-        marginLeft: theme.spacing(1),
-      },
-      tooltip: {
-        marginTop: `${theme.spacing(0.5)} !important`,
-      },
-      avatar: {
+      "&.Mui-selected": {
+        backgroundColor: theme.palette.appBar.primary,
         color: theme.palette.common.white,
-        backgroundColor: tc(theme.palette.appBar.main).lighten().toString(),
-        height: theme.spacing(3.5),
-        width: theme.spacing(3.5),
       },
-      iconButton: {
-        padding: theme.spacing(1),
-        borderRadius: 0,
+      "&.Mui-disabled": {
+        color: "currentColor",
+        opacity: theme.palette.action.disabledOpacity,
+      },
+    },
+    dropDownIcon: {
+      fontSize: "12px !important",
+    },
+    start: {
+      gridArea: "start",
+      display: "flex",
+      flex: 1,
+      alignItems: "center",
+    },
+    startInner: {
+      display: "flex",
+      alignItems: "center",
+      ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
+    },
+    middle: {
+      gridArea: "middle",
+      justifySelf: "center",
+      overflow: "hidden",
+      maxWidth: "100%",
+      ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
+    },
+    end: {
+      gridArea: "end",
+      flex: 1,
+      display: "flex",
+      justifyContent: "flex-end",
+    },
+    endInner: {
+      display: "flex",
+      alignItems: "center",
+      ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
+    },
+    keyEquivalent: {
+      fontFamily: fonts.MONOSPACE,
+      background: tc(theme.palette.common.white).darken(45).toString(),
+      padding: theme.spacing(0, 0.5),
+      aspectRatio: 1,
+      borderRadius: theme.shape.borderRadius,
+      marginLeft: theme.spacing(1),
+    },
+    tooltip: {
+      marginTop: `${theme.spacing(0.5)} !important`,
+    },
+    avatar: {
+      color: theme.palette.common.white,
+      backgroundColor: tc(theme.palette.appBar.main).lighten().toString(),
+      height: theme.spacing(3.5),
+      width: theme.spacing(3.5),
+    },
+    iconButton: {
+      padding: theme.spacing(1),
+      borderRadius: 0,
 
-        "&:hover": {
-          backgroundColor: tc(theme.palette.common.white).setAlpha(0.08).toString(),
+      "&:hover": {
+        backgroundColor: tc(theme.palette.common.white).setAlpha(0.08).toString(),
 
-          [`.${classes.avatar}`]: {
-            backgroundColor: tc(theme.palette.appBar.main).lighten(20).toString(),
-          },
-        },
-        "&.Mui-selected": {
-          backgroundColor: theme.palette.appBar.primary,
-
-          [`.${classes.avatar}`]: {
-            backgroundColor: tc(theme.palette.appBar.main).setAlpha(0.3).toString(),
-          },
+        [`.${classes.avatar}`]: {
+          backgroundColor: tc(theme.palette.appBar.main).lighten(20).toString(),
         },
       },
-      button: {
-        marginInline: theme.spacing(1),
+      "&.Mui-selected": {
         backgroundColor: theme.palette.appBar.primary,
 
-        "&:hover": {
-          backgroundColor: theme.palette.augmentColor({
-            color: { main: theme.palette.appBar.primary as string },
-          }).dark,
+        [`.${classes.avatar}`]: {
+          backgroundColor: tc(theme.palette.appBar.main).setAlpha(0.3).toString(),
         },
       },
-    };
-  },
-);
+    },
+    button: {
+      marginInline: theme.spacing(1),
+      backgroundColor: theme.palette.appBar.primary,
+
+      "&:hover": {
+        backgroundColor: theme.palette.augmentColor({
+          color: { main: theme.palette.appBar.primary as string },
+        }).dark,
+      },
+    },
+  };
+});
 
 type AppBarProps = CustomWindowControlsProps & {
   leftInset?: number;
