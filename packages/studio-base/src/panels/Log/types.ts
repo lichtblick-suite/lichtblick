@@ -10,6 +10,7 @@ export type Config = {
   searchTerms: string[];
   minLogLevel: number;
   topicToRender?: string;
+  nameFilter?: Record<string, { visible?: boolean }>;
 };
 
 export enum LogLevel {

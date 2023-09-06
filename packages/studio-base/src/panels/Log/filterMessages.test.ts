@@ -48,6 +48,7 @@ describe("filter", () => {
       filterMessages(ros1msgs, {
         minLogLevel: 3,
         searchTerms: [],
+        nameFilter: {},
       }),
     ).toEqual([]);
   });
@@ -57,6 +58,7 @@ describe("filter", () => {
       filterMessages(ros1msgs, {
         minLogLevel: 2,
         searchTerms: [],
+        nameFilter: {},
       }),
     ).toEqual(ros1msgs);
   });
@@ -66,6 +68,7 @@ describe("filter", () => {
       filterMessages(ros2msgs, {
         minLogLevel: LogLevel.INFO,
         searchTerms: [],
+        nameFilter: {},
       }),
     ).toEqual(ros2msgs);
 
@@ -73,6 +76,7 @@ describe("filter", () => {
       filterMessages(ros2msgs, {
         minLogLevel: LogLevel.ERROR,
         searchTerms: [],
+        nameFilter: {},
       }),
     ).toEqual([]);
   });
@@ -85,6 +89,7 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["/some_topic"],
+          nameFilter: {},
         }),
       ).toEqual(ros1msgs);
     });
@@ -94,6 +99,7 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["some"],
+          nameFilter: {},
         }),
       ).toEqual(ros1msgs);
     });
@@ -103,6 +109,7 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["int"],
+          nameFilter: {},
         }),
       ).toEqual(ros1msgs);
     });
@@ -112,6 +119,7 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["random"],
+          nameFilter: {},
         }),
       ).toEqual([]);
     });
@@ -121,6 +129,27 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel: 2,
           searchTerms: ["int", "random"],
+          nameFilter: {},
+        }),
+      ).toEqual(ros1msgs);
+    });
+
+    it("should exclude messages for names that are set to invisible", () => {
+      expect(
+        filterMessages(ros1msgs, {
+          minLogLevel,
+          searchTerms: [],
+          nameFilter: { "/some_topic": { visible: false } },
+        }),
+      ).toEqual([]);
+    });
+
+    it("should include messages for names that are set to visible", () => {
+      expect(
+        filterMessages(ros1msgs, {
+          minLogLevel,
+          searchTerms: [],
+          nameFilter: { "/some_topic": { visible: true } },
         }),
       ).toEqual(ros1msgs);
     });

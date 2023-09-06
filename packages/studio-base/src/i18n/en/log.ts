@@ -5,4 +5,8 @@
 export const log = {
   topicError: "Topic {{topic}} is not available",
   topic: "Topic",
+  minLogLevel: "Log level",
+  nameFilter: "Namespaces",
+  showAll: "Show all",
+  hideAll: "Hide all",
 };

@@ -16,10 +16,17 @@ import { LogMessageEvent } from "./types";
 
 export default function filterMessages(
   events: readonly LogMessageEvent[],
-  filter: { minLogLevel: number; searchTerms: string[] },
+  filter: {
+    minLogLevel: number;
+    searchTerms: string[];
+    nameFilter: Record<string, { visible?: boolean }>;
+  },
 ): readonly LogMessageEvent[] {
-  const { minLogLevel, searchTerms } = filter;
-  const hasActiveFilters = minLogLevel > 1 || searchTerms.length > 0;
+  const { minLogLevel, searchTerms, nameFilter } = filter;
+  const hasActiveFilters =
+    minLogLevel > 1 ||
+    searchTerms.length > 0 ||
+    Object.values(nameFilter).some(({ visible }) => visible === false);
   // return all messages if we wouldn't filter anything
   if (!hasActiveFilters) {
     return events;
@@ -31,6 +38,11 @@ export default function filterMessages(
     const logMessage = event.message;
     const effectiveLogLevel = getNormalizedLevel(event.schemaName, logMessage);
     if (effectiveLogLevel < minLogLevel) {
+      return false;
+    }
+
+    const maybeName = logMessage.name;
+    if (maybeName != undefined && nameFilter[maybeName]?.visible === false) {
       return false;
     }
 

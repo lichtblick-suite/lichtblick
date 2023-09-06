@@ -128,7 +128,6 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("logDescription"),
     thumbnail: logThumbnail,
     module: async () => await import("./Log"),
-    hasCustomToolbar: true,
   },
   {
     title: t("stateTransitions"),
