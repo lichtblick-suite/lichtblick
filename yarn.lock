@@ -6144,12 +6144,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/case-sensitive-paths-webpack-plugin@npm:2.1.6":
-  version: 2.1.6
-  resolution: "@types/case-sensitive-paths-webpack-plugin@npm:2.1.6"
+"@types/case-sensitive-paths-webpack-plugin@npm:2.1.7":
+  version: 2.1.7
+  resolution: "@types/case-sensitive-paths-webpack-plugin@npm:2.1.7"
   dependencies:
     "@types/webpack": ^4
-  checksum: c5eb21985fc79afc72fa2e0d2e8494d8162dd46b370efd25a0be1f583a8669376ba001684497c6eb17a068775b2a80be1c948cbea47695e03e8956f46ee1305b
+  checksum: a20d375d0329b2bfb5574f9e601610e4a21ee950b036c55aa4de1893a30ed781fccf06d3b1bffe74726ffb7c0e0f1b42df5b545fb53069085b16a92888d064b4
   languageName: node
   linkType: hard
 
@@ -12407,7 +12407,7 @@ __metadata:
     "@storybook/react-webpack5": 7.4.0
     "@types/babel__core": ^7.20.1
     "@types/babel__preset-env": ^7.9.2
-    "@types/case-sensitive-paths-webpack-plugin": 2.1.6
+    "@types/case-sensitive-paths-webpack-plugin": 2.1.7
     "@types/jest": 29.5.4
     "@types/license-checker": ^25.0.4
     "@types/semver": ^7.5.0
