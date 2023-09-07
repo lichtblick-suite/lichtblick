@@ -11,13 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  Delete20Regular,
-  FullScreenMaximize20Regular,
-  ShapeSubtract20Regular,
-  SplitHorizontal20Regular,
-  SplitVertical20Regular,
-} from "@fluentui/react-icons";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Divider, Menu, MenuItem } from "@mui/material";
@@ -149,7 +142,6 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
         {
           key: "vsplit",
           text: "Split right",
-          icon: <SplitVertical20Regular />,
           onClick: () => {
             split(panelContext?.id, "row");
           },
@@ -157,7 +149,6 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
         {
           key: "hsplit",
           text: "Split down",
-          icon: <SplitHorizontal20Regular />,
           onClick: () => {
             split(panelContext?.id, "column");
           },
@@ -169,7 +160,6 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
       items.push({
         key: "enter-fullscreen",
         text: "Fullscreen",
-        icon: <FullScreenMaximize20Regular />,
         onClick: enterFullscreen,
         "data-testid": "panel-menu-fullscreen",
       });
@@ -180,7 +170,6 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
     items.push({
       key: "remove",
       text: "Remove panel",
-      icon: <Delete20Regular />,
       onClick: close,
       "data-testid": "panel-menu-remove",
       className: classes.error,
@@ -238,7 +227,6 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
           onClick={handleSubmenuClick}
           onMouseEnter={handleSubmenuMouseEnter}
         >
-          <ShapeSubtract20Regular />
           Change panel
           <ChevronRightIcon className={classes.icon} fontSize="small" />
         </MenuItem>
@@ -260,7 +248,6 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
               className={cx(classes.menuItem, item.className)}
               data-testid={item["data-testid"]}
             >
-              {item.icon}
               {item.text}
             </MenuItem>
           ),
