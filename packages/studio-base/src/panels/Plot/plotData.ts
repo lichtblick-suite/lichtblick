@@ -133,9 +133,9 @@ export function appendPlotData(a: PlotData, b: PlotData): PlotData {
 }
 
 /**
- * Merge two PlotData objects into a single PlotData object, discarding any overlapping
- * messages between the two items. Assumes they represent non-contiguous segments of a
- * chart.
+ * Merge two PlotData objects into a single PlotData object, discarding any
+ * overlapping messages between the two items. Assumes they represent
+ * non-contiguous segments of a chart.
  */
 function mergePlotData(a: PlotData, b: PlotData): PlotData {
   if (a === EmptyPlotData) {
@@ -156,8 +156,10 @@ function mergePlotData(a: PlotData, b: PlotData): PlotData {
   };
 }
 
-// Sort by start time, then end time, so that folding from the left gives us the
-// right consolidated interval.
+/**
+ * Sort by start time, then end time, so that folding from the left gives us
+ * the right consolidated interval.
+ */
 function compare(a: Im<PlotData>, b: Im<PlotData>): number {
   const rangeA = findXRanges(a).all;
   const rangeB = findXRanges(b).all;

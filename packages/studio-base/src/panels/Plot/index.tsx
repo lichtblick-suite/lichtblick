@@ -210,6 +210,11 @@ function Plot(props: Props) {
     invertedTheme: false,
     xAxisPath,
     xAxisVal,
+    minXValue,
+    maxXValue,
+    minYValue,
+    maxYValue,
+    followingViewWidth,
   });
 
   const {

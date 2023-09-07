@@ -340,8 +340,8 @@ function sliceSingle(slice: TypedData, start: number, end?: number): TypedData {
     if (xVal == undefined || yVal == undefined) {
       continue;
     }
-    x[i] = xVal;
-    y[i] = yVal;
+    x[i - i0] = xVal;
+    y[i - i0] = yVal;
   }
 
   return {
@@ -390,7 +390,7 @@ export function sliceTyped(dataset: TypedData[], start: number, end?: number): T
   return [sliceSingle(startSlice, offset0), ...between, sliceSingle(endSlice, 0, offset1)];
 }
 
-function getXBounds(dataset: TypedData[]): [min: number, max: number] | undefined {
+export function getXBounds(dataset: TypedData[]): [min: number, max: number] | undefined {
   const min = dataset.at(0)?.x.at(0);
   const max = dataset.at(-1)?.x.at(-1);
   if (min == undefined || max == undefined) {

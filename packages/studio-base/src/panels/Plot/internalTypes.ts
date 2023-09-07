@@ -91,4 +91,9 @@ export type PlotParams = {
   invertedTheme?: boolean;
   xAxisPath?: BasePlotPath;
   xAxisVal: PlotXAxisVal;
+  followingViewWidth: number | undefined;
+  minXValue: number | undefined;
+  maxXValue: number | undefined;
+  minYValue: string | number | undefined;
+  maxYValue: string | number | undefined;
 };

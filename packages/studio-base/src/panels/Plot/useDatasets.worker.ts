@@ -140,6 +140,11 @@ function isSingleMessage(params: PlotParams): boolean {
   return xAxisVal === "currentCustom" || xAxisVal === "index";
 }
 
+function isBounded(params: PlotParams): boolean {
+  const { followingViewWidth } = params;
+  return followingViewWidth != undefined && followingViewWidth > 0;
+}
+
 function getPathData(messages: Messages, path: BasePlotPath): PlotDataItem[] | undefined {
   const parsed = parseRosPath(path.value);
   if (parsed == undefined) {
@@ -227,11 +232,22 @@ function getClientData(client: Client): PlotData | undefined {
     return undefined;
   }
 
-  return R.pipe(
-    reducePlotData,
-    applyDerivativeToPlotData,
-    sortPlotDataByHeaderStamp,
-  )([blockData, currentData]);
+  const { bounds: blockBounds } = blockData;
+  const { bounds: currentBounds } = currentData;
+
+  let datasets: PlotData[] = [];
+  if (isSingleMessage(params) || isBounded(params)) {
+    // bounded and single-message plots _only_ use current data
+    datasets = [currentData];
+  } else if (blockBounds.x.min <= currentBounds.x.min && blockBounds.x.max > currentBounds.x.max) {
+    // ignore current data if block data covers it already
+    datasets = [blockData];
+  } else {
+    // unbounded plots should also use current data
+    datasets = [blockData, currentData];
+  }
+
+  return R.pipe(reducePlotData, applyDerivativeToPlotData, sortPlotDataByHeaderStamp)(datasets);
 }
 
 function getProvidedData(data: PlotData): ProviderState<TypedData[]> {
