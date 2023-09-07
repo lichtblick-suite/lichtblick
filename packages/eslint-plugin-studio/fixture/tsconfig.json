@@ -1,0 +1,8 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "compilerOptions": {
+    "lib": ["es2020", "dom"],
+    "noEmit": true
+  },
+  "files": ["file.ts"]
+}

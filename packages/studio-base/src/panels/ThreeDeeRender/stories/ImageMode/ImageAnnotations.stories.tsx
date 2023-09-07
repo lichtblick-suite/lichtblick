@@ -4,7 +4,7 @@
 
 import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
-import { cloneDeep } from "lodash";
+import * as _ from "lodash-es";
 import { useEffect, useState } from "react";
 
 import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
@@ -785,7 +785,7 @@ const AnnotationsUpdateStory = (
 };
 
 function moveAnnotations(annotation: Partial<ImageAnnotations>, vector: { x: number; y: number }) {
-  const newAnnotation = cloneDeep(annotation);
+  const newAnnotation = _.cloneDeep(annotation);
 
   newAnnotation.circles?.forEach(({ position }) => {
     position.x += vector.x;

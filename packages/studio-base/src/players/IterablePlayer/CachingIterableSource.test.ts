@@ -167,6 +167,7 @@ describe("CachingIterableSource", () => {
         topics: mockTopicSelection("a"),
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of messageIterator) {
         // no-op
       }
@@ -505,6 +506,7 @@ describe("CachingIterableSource", () => {
         topics: mockTopicSelection("a"),
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of messageIterator) {
         // no-op
       }
@@ -564,6 +566,7 @@ describe("CachingIterableSource", () => {
       });
 
       // load all the messages into cache
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of messageIterator) {
         // no-op
       }
@@ -630,6 +633,7 @@ describe("CachingIterableSource", () => {
       });
 
       // load all the messages into cache
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of messageIterator) {
         // no-op
       }
@@ -785,6 +789,7 @@ describe("CachingIterableSource", () => {
       });
 
       // load all the messages into cache
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of messageIterator) {
         // no-op
       }
@@ -940,6 +945,7 @@ describe("CachingIterableSource", () => {
       });
 
       // load all the messages into cache
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of messageIterator) {
         // no-op
       }

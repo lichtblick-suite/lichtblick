@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Typography } from "@mui/material";
-import { last } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -70,7 +70,7 @@ function reducer(state: State, action: Action): State {
     switch (action.type) {
       case "frame": {
         if (state.pathParseError != undefined) {
-          return { ...state, latestMessage: last(action.messages), error: undefined };
+          return { ...state, latestMessage: _.last(action.messages), error: undefined };
         }
         let latestMatchingQueriedData = state.latestMatchingQueriedData;
         let latestMessage = state.latestMessage;

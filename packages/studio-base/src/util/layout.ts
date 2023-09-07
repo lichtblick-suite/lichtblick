@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { compact, flatMap, xor, uniq } from "lodash";
+import * as _ from "lodash-es";
 import {
   createRemoveUpdate,
   getLeaves,
@@ -273,7 +273,7 @@ export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: Saved
       });
     }
   });
-  return flatMap(tabLayouts, getLeaves);
+  return _.flatMap(tabLayouts, getLeaves);
 }
 
 export const DEFAULT_TAB_PANEL_CONFIG: TabPanelConfig = {
@@ -503,11 +503,11 @@ export const replaceAndRemovePanels = (
 ): MosaicNode<string> | undefined => {
   const { originalId, newId, idsToRemove = [] } = panelArgs;
   const panelIds = getLeaves(layout);
-  if (xor(panelIds, idsToRemove).length === 0) {
+  if (_.xor(panelIds, idsToRemove).length === 0) {
     return newId;
   }
 
-  return uniq(compact([...idsToRemove, originalId])).reduce(
+  return _.uniq(_.compact([...idsToRemove, originalId])).reduce(
     (currentLayout: MosaicNode<string> | undefined, panelIdToRemove) => {
       if (!panelIds.includes(panelIdToRemove)) {
         return currentLayout;

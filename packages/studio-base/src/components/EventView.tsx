@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { alpha } from "@mui/material";
-import { compact } from "lodash";
+import * as _ from "lodash-es";
 import { Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -111,7 +111,7 @@ function EventViewComponent(params: {
     params;
   const { classes, cx } = useStyles();
 
-  const fields = compact([
+  const fields = _.compact([
     ["timestamp", formattedTime],
     Number(event.event.durationNanos) > 0 && ["duration", formatEventDuration(event.event)],
     ...Object.entries(event.event.metadata),

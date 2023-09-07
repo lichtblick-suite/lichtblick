@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import findIndex from "lodash/findIndex";
-import sortBy from "lodash/sortBy";
+import * as _ from "lodash-es";
 
 import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
 import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtils";
@@ -55,11 +54,11 @@ export default class WebWorkerManager<W extends Channel> {
       const rpc = new Rpc(worker);
       setupMainThreadRpc(rpc);
 
-      const emptyIndex = findIndex(this.#workerStates, (x) => !x);
+      const emptyIndex = _.findIndex(this.#workerStates, (x) => !x);
       this.#workerStates[emptyIndex] = { worker, rpc, listenerIds: [id] };
       return rpc;
     }
-    const workerStateByListenerCount = sortBy(
+    const workerStateByListenerCount = _.sortBy(
       this.#workerStates.filter(Boolean),
       (workerState) => workerState?.listenerIds.length,
     );
@@ -77,7 +76,7 @@ export default class WebWorkerManager<W extends Channel> {
     }
     this.#allListeners.delete(id);
 
-    const workerStateIndex = findIndex(this.#workerStates, (workerState) => {
+    const workerStateIndex = _.findIndex(this.#workerStates, (workerState) => {
       if (!workerState) {
         return false;
       }

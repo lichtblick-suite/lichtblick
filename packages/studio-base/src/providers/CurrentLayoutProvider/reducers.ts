@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEmpty, isEqual, pick } from "lodash";
+import * as _ from "lodash-es";
 import {
   updateTree,
   createDragToUpdates,
@@ -78,12 +78,14 @@ function changePanelLayout(
   state: LayoutData,
   { layout, trimConfigById = true }: ChangePanelLayoutPayload,
 ): LayoutData {
-  const panelIds: string[] = getLeaves(layout ?? ReactNull).filter((panelId) => !isEmpty(panelId));
+  const panelIds: string[] = getLeaves(layout ?? ReactNull).filter(
+    (panelId) => !_.isEmpty(panelId),
+  );
   const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, state.configById);
   // Filter configById in case a panel was removed from the layout
   // We don't want its configById hanging around forever
   const configById = trimConfigById
-    ? pick(state.configById, [...panelIdsInsideTabPanels, ...panelIds])
+    ? _.pick(state.configById, [...panelIdsInsideTabPanels, ...panelIds])
     : state.configById;
   return { ...state, configById, layout };
 }
@@ -114,7 +116,7 @@ function savePanelConfigs(state: LayoutData, payload: SaveConfigsPayload): Layou
       // if the new config is unchanged, return currentSavedProps to keep same object
       // keeping the same object around is useful for upstream consumers of state which look at changes
       // in object reference to mean the object changed
-      if (isEqual(oldConfig, newConfig)) {
+      if (_.isEqual(oldConfig, newConfig)) {
         return currentSavedProps;
       }
 
@@ -129,7 +131,10 @@ function savePanelConfigs(state: LayoutData, payload: SaveConfigsPayload): Layou
     const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, newConfigById);
     // Filter savedProps in case a panel was removed from a Tab layout
     // We don't want its savedProps hanging around forever
-    return { ...state, configById: pick(newConfigById, [...panelIdsInsideTabPanels, ...panelIds]) };
+    return {
+      ...state,
+      configById: _.pick(newConfigById, [...panelIdsInsideTabPanels, ...panelIds]),
+    };
   }
 
   // if none of the configs changed, then we keep the same state object
@@ -355,7 +360,7 @@ const addPanel = (
   } else {
     layout = panelsState.layout;
   }
-  const fixedLayout: MosaicNode<string> = isEmpty(layout)
+  const fixedLayout: MosaicNode<string> = _.isEmpty(layout)
     ? id
     : { direction: "row", first: id, second: layout! };
   const changeLayoutPayload = {
@@ -748,7 +753,11 @@ const endDrag = (panelsState: LayoutData, dragPayload: EndDragPayload): LayoutDa
     });
   }
 
-  if (position != undefined && destinationPath != undefined && !isEqual(destinationPath, ownPath)) {
+  if (
+    position != undefined &&
+    destinationPath != undefined &&
+    !_.isEqual(destinationPath, ownPath)
+  ) {
     const updates = createDragToUpdates(originalLayout, ownPath, destinationPath, position);
     const newLayout = updateTree(originalLayout, updates);
     return changePanelLayout(panelsState, { layout: newLayout, trimConfigById: false });

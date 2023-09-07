@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Button } from "@mui/material";
-import { union } from "lodash";
+import * as _ from "lodash-es";
 import { useMemo, useRef, useState, ReactElement, useEffect } from "react";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -41,7 +41,7 @@ export default function VariablesList(): ReactElement {
       previousGlobalVariablesRef.current = globalVariables;
       return;
     }
-    const newChangedVariables = union(
+    const newChangedVariables = _.union(
       Object.keys(globalVariables),
       Object.keys(previousGlobalVariablesRef.current ?? {}),
     ).filter((name) => {

@@ -4,7 +4,7 @@
 
 import { StoryFn, StoryContext, StoryObj } from "@storybook/react";
 import { userEvent } from "@storybook/testing-library";
-import { cloneDeep, tap } from "lodash";
+import * as _ from "lodash-es";
 import { useState } from "react";
 import { useTimeoutFn } from "react-use";
 
@@ -27,7 +27,7 @@ const EMPTY_MESSAGE: NavSatFixMsg = {
   position_covariance: [1, 0, 0, 0, 1, 0, 0, 0, 1],
   position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_UNKNOWN,
 };
-const OFFSET_MESSAGE = tap(cloneDeep(EMPTY_MESSAGE), (message) => {
+const OFFSET_MESSAGE = _.tap(_.cloneDeep(EMPTY_MESSAGE), (message) => {
   message.latitude += 0.1;
   message.longitude += 0.1;
 });

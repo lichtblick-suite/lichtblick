@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as base64 from "@protobufjs/base64";
-import { isEqual, uniqWith } from "lodash";
+import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -450,7 +450,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           continue;
         }
         const existingChannel = this.#channelsByTopic.get(channel.topic);
-        if (existingChannel && !isEqual(channel, existingChannel.channel)) {
+        if (existingChannel && !_.isEqual(channel, existingChannel.channel)) {
           this.#problems.addProblem(`duplicate-topic:${channel.topic}`, {
             severity: "error",
             message: `Multiple channels advertise the same topic: ${channel.topic} (${existingChannel.channel.id} and ${channel.id})`,
@@ -889,7 +889,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public setPublishers(publishers: AdvertiseOptions[]): void {
     // Filter out duplicates.
-    const uniquePublications = uniqWith(publishers, isEqual);
+    const uniquePublications = _.uniqWith(publishers, _.isEqual);
 
     // Save publications and return early if we are not connected or the advertise capability is missing.
     if (

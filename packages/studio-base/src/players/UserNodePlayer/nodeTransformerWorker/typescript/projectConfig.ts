@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { sortBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { exportTypeScriptSchemas } from "@foxglove/schemas/internal";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
@@ -28,7 +28,7 @@ import { UserScriptProjectConfig, UserScriptProjectFile } from "./types";
  * Generates virtual ts files for each type exported by the @foxglove/schemas package.
  */
 export function generateFoxgloveSchemaDeclarations(): UserScriptProjectFile[] {
-  const schemas = sortBy([...exportTypeScriptSchemas().entries()], ([name]) => name);
+  const schemas = _.sortBy([...exportTypeScriptSchemas().entries()], ([name]) => name);
   const files = schemas.map(([name, sourceCode]) => {
     return {
       fileName: `@foxglove/schemas/${name}.ts`,

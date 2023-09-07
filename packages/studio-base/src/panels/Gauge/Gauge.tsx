@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { last } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -55,7 +55,7 @@ function reducer(state: State, action: Action): State {
     switch (action.type) {
       case "frame": {
         if (state.pathParseError != undefined) {
-          return { ...state, latestMessage: last(action.messages), error: undefined };
+          return { ...state, latestMessage: _.last(action.messages), error: undefined };
         }
         let latestMatchingQueriedData = state.latestMatchingQueriedData;
         let latestMessage = state.latestMessage;
@@ -144,7 +144,7 @@ function getConicGradient(config: Config, width: number, height: number, gaugeAn
           break;
         case "turbo": {
           const numStops = 20;
-          colorStops = new Array(numStops).fill(undefined).map((_, i) => ({
+          colorStops = new Array(numStops).fill(undefined).map((_x, i) => ({
             color: turboColorString(i / (numStops - 1)),
             location: i / (numStops - 1),
           }));

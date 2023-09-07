@@ -3,7 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { last } from "lodash";
+import * as _ from "lodash-es";
 
 import { signal } from "@foxglove/den/async";
 import { fromSec } from "@foxglove/rostime";
@@ -586,7 +586,7 @@ describe("IterablePlayer", () => {
       await store.add(state);
     });
     const playerStates = await store.done;
-    expect(last(playerStates)!.problems).toEqual([
+    expect(_.last(playerStates)!.problems).toEqual([
       {
         message: "Inconsistent datatype for topic: A",
         severity: "warn",

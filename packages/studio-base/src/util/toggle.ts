@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { reject } from "lodash";
+import * as _ from "lodash-es";
 
 // toggles an item in an array based on reference equality
 // or an optional predicate to determine if the item should be toggled in/out
@@ -21,7 +21,7 @@ export default function toggle<T>(
   item: T,
   predicate: (arg0: T) => boolean = (el) => el === item,
 ): T[] {
-  const newArray = reject(array, predicate);
+  const newArray = _.reject(array, predicate);
   if (newArray.length === array.length) {
     newArray.push(item);
   }

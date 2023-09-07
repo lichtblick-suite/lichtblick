@@ -14,7 +14,7 @@
 import { Button, Fade, Tooltip, useTheme } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 import * as R from "ramda";
 import React, {
   ComponentProps,
@@ -606,7 +606,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       // to fit the dataset.
       if (
         scales.x != undefined &&
-        isEqual(scales.x, currentScalesRef.current?.x) &&
+        _.isEqual(scales.x, currentScalesRef.current?.x) &&
         !userInteraction
       ) {
         return;

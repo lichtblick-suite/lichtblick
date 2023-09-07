@@ -13,7 +13,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { renderHook } from "@testing-library/react-hooks";
-import { cloneDeep } from "lodash";
+import * as _ from "lodash-es";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { SubscribePayload } from "@foxglove/studio-base/players/types";
@@ -142,7 +142,7 @@ describe("useBlocksSubscriptions", () => {
     const c3 = result.current;
 
     // Both identities change.
-    progress = { messageCache: cloneDeep(progress.messageCache) };
+    progress = { messageCache: _.cloneDeep(progress.messageCache) };
     rerender({ subscriptions: stableSubscriptions });
     const c4 = result.current;
 

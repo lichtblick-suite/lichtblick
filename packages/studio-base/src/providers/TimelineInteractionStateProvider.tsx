@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual, keyBy } from "lodash";
+import * as _ from "lodash-es";
 import { ReactNode, useState } from "react";
 import { createStore, StoreApi } from "zustand";
 
@@ -29,7 +29,7 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
       },
 
       setEventsAtHoverValue: (eventsAtHoverValue: TimelinePositionedEvent[]) => {
-        set({ eventsAtHoverValue: keyBy(eventsAtHoverValue, (event) => event.event.id) });
+        set({ eventsAtHoverValue: _.keyBy(eventsAtHoverValue, (event) => event.event.id) });
       },
 
       setGlobalBounds: (
@@ -62,7 +62,7 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
 
       setHoverValue: (newValue: HoverValue) => {
         set((store) => ({
-          hoverValue: isEqual(newValue, store.hoverValue) ? store.hoverValue : newValue,
+          hoverValue: _.isEqual(newValue, store.hoverValue) ? store.hoverValue : newValue,
         }));
       },
     };

@@ -92,7 +92,7 @@ function createStudioLogsSettingsStore(
       log.debug(`Set global level: ${level}`);
 
       // Enable the underlying log channels
-      for (const [_, logChannels] of channelByName) {
+      for (const [, logChannels] of channelByName) {
         for (const channel of logChannels) {
           channel.setLevel(level);
         }

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { keyBy } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useMemo } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -70,7 +70,7 @@ export function useCachedGetMessagePathDataItems(
   }, [globalVariables, parsedPaths]);
   const memoizedFilledInPaths = useDeepMemo(unmemoizedFilledInPaths);
 
-  const topicsByName = useMemo(() => keyBy(providerTopics, ({ name }) => name), [providerTopics]);
+  const topicsByName = useMemo(() => _.keyBy(providerTopics, ({ name }) => name), [providerTopics]);
 
   // Filter down topics and datatypes to only the ones we need to process the requested paths, so
   // our result can be dependent on the relevant topics only. Without this, adding topics/datatypes
@@ -79,7 +79,7 @@ export function useCachedGetMessagePathDataItems(
   const unmemoizedRelevantTopics = useMemo(() => {
     const seenNames = new Set<string>();
     const result: Topic[] = [];
-    for (const [_, parsedPath] of parsedPaths) {
+    for (const [, parsedPath] of parsedPaths) {
       if (seenNames.has(parsedPath.topicName)) {
         continue;
       }

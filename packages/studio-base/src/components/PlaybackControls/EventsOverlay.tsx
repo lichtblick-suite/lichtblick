@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { alpha } from "@mui/material";
-import { clamp } from "lodash";
+import * as _ from "lodash-es";
 import { makeStyles } from "tss-react/mui";
 
 import {
@@ -57,8 +57,8 @@ function EventTick({ event }: { event: TimelinePositionedEvent }): JSX.Element {
   const selectedEventId = useEvents(selectSelectedEventId);
   const { classes, cx } = useStyles();
 
-  const left = `calc(${clamp(event.startPosition, 0, 1) * 100}% - 1px)`;
-  const right = `calc(100% - ${clamp(event.endPosition, 0, 1) * 100}% - 1px)`;
+  const left = `calc(${_.clamp(event.startPosition, 0, 1) * 100}% - 1px)`;
+  const right = `calc(100% - ${_.clamp(event.endPosition, 0, 1) * 100}% - 1px)`;
 
   return (
     <div

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { debounce } from "lodash";
+import * as _ from "lodash-es";
 
 import { MessageEvent } from "@foxglove/studio";
 import { mockTopicSelection } from "@foxglove/studio-base/test/mocks/mockTopicSelection";
@@ -408,7 +408,7 @@ describe("BufferedIterableSource", () => {
 
     let signal = waiter(1);
 
-    const debounceNotify = debounce(() => {
+    const debounceNotify = _.debounce(() => {
       signal.notify();
     }, 500);
 
@@ -472,7 +472,7 @@ describe("BufferedIterableSource", () => {
 
     const signal = waiter(1);
 
-    const debounceNotify = debounce(() => {
+    const debounceNotify = _.debounce(() => {
       signal.notify();
     }, 500);
 
@@ -587,7 +587,7 @@ describe("BufferedIterableSource", () => {
 
     let signal = waiter(1);
 
-    const debounceNotify = debounce(() => {
+    const debounceNotify = _.debounce(() => {
       signal.notify();
     }, 500);
 
@@ -644,7 +644,7 @@ describe("BufferedIterableSource", () => {
 
     const signal = waiter(1);
 
-    const debounceNotify = debounce(() => {
+    const debounceNotify = _.debounce(() => {
       signal.notify();
     }, 500);
 

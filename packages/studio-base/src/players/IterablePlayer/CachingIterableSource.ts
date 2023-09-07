@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import EventEmitter from "eventemitter3";
-import { isEqual, sortedIndexBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { minIndexBy, sortedIndexByTuple } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
@@ -132,7 +132,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     // When the list of topics we want changes we purge the entire cache and start again.
     //
     // This is heavy-handed but avoids dealing with how to handle disjoint cached ranges across topics.
-    if (!isEqual(args.topics, this.#cachedTopics)) {
+    if (!_.isEqual(args.topics, this.#cachedTopics)) {
       log.debug("topics changed - clearing cache, resetting range");
       this.#cachedTopics = args.topics;
       this.#cache.length = 0;
@@ -263,7 +263,9 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
 
           // Find where we need to insert our new block.
           // It should come before any blocks with a start time > than new block start time.
-          const insertIndex = sortedIndexBy(this.#cache, newBlock, (item) => toNanoSec(item.start));
+          const insertIndex = _.sortedIndexBy(this.#cache, newBlock, (item) =>
+            toNanoSec(item.start),
+          );
           this.#cache.splice(insertIndex, 0, newBlock);
 
           block = newBlock;
@@ -372,7 +374,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
 
         // Find where we need to insert our new block.
         // It should come before any blocks with a start time > than new block start time.
-        const insertIndex = sortedIndexBy(this.#cache, newBlock, (item) => toNanoSec(item.start));
+        const insertIndex = _.sortedIndexBy(this.#cache, newBlock, (item) => toNanoSec(item.start));
         this.#cache.splice(insertIndex, 0, newBlock);
 
         this.#recomputeLoadedRangeCache();

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isString, isUndefined } from "lodash";
+import * as _ from "lodash-es";
 
 import { RosNode } from "@foxglove/ros1";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
@@ -52,7 +52,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
     }
 
     const hostname = args.params?.hostname;
-    if (!isUndefined(hostname) && !isString(hostname)) {
+    if (!_.isUndefined(hostname) && !_.isString(hostname)) {
       throw new Error(`Unable to initialize Ros1. Invalid hostname ${hostname}`);
     }
 

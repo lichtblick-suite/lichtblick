@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { groupBy, transform, uniq } from "lodash";
+import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 
 import { TopicAliasFunction, Immutable as Im, MessageEvent } from "@foxglove/studio";
@@ -41,7 +41,7 @@ function aliasBlocks(blocks: MessageBlocks, mapping: Im<TopicAliasMap>): Message
 
     return {
       ...block,
-      messagesByTopic: transform(
+      messagesByTopic: _.transform(
         block.messagesByTopic,
         (acc, messages, topic) => {
           const mappings = mapping.get(topic);
@@ -109,7 +109,7 @@ function aliasSubscribedTopics(
     return topics;
   }
 
-  const subscriptionsByTopic = groupBy(subcriptions, (sub) => sub.topic);
+  const subscriptionsByTopic = _.groupBy(subcriptions, (sub) => sub.topic);
   const mappedTopics = new Map<string, Set<string>>();
   for (const [id, values] of topics) {
     const mappedValues = [...values].flatMap((value) => {
@@ -237,7 +237,7 @@ function mergeAliases(
         });
       } else {
         inverseMapping.set(name, sourceTopicName);
-        const mergedValues = uniq(merged.get(sourceTopicName) ?? []).concat(name);
+        const mergedValues = _.uniq(merged.get(sourceTopicName) ?? []).concat(name);
         merged.set(sourceTopicName, mergedValues);
       }
     }

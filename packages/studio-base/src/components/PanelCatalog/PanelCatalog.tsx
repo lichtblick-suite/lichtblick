@@ -6,7 +6,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, TextField } from "@mui/material";
 import fuzzySort from "fuzzysort";
-import { countBy, isEmpty } from "lodash";
+import * as _ from "lodash-es";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
@@ -56,7 +56,7 @@ function verifyPanels(panels: readonly PanelInfo[]): void {
     }
     const existingPanel = mightActuallyBePartial(panelTypes.get(type));
     if (existingPanel) {
-      const bothHaveEmptyConfigs = isEmpty(existingPanel.config) && isEmpty(config);
+      const bothHaveEmptyConfigs = _.isEmpty(existingPanel.config) && _.isEmpty(config);
       if (bothHaveEmptyConfigs) {
         const otherDisplayName = existingPanel.title ?? existingPanel.type ?? "<unnamed>";
         throw new Error(
@@ -101,7 +101,7 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
   const namespacedPanels = useMemo(() => {
     // Remove namespace if panel title is unique.
     const panels = panelCatalog.getPanels();
-    const countByTitle = countBy(panels, (panel) => panel.title);
+    const countByTitle = _.countBy(panels, (panel) => panel.title);
     return panels.map((panel) => {
       if ((countByTitle[panel.title] ?? 0) > 1) {
         return panel;

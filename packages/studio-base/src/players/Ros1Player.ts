@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual, sortBy, keyBy } from "lodash";
+import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -199,7 +199,7 @@ export default class Ros1Player implements Player {
     if (!this.#providerTopics || newTopics.length !== this.#providerTopics.length) {
       return true;
     }
-    return !isEqual(this.#providerTopics, newTopics);
+    return !_.isEqual(this.#providerTopics, newTopics);
   };
 
   #requestTopics = async (): Promise<void> => {
@@ -218,7 +218,7 @@ export default class Ros1Player implements Player {
         schemaName,
       }));
       // Sort them for easy comparison
-      const sortedTopics = sortBy(topics, "name");
+      const sortedTopics = _.sortBy(topics, "name");
 
       if (this.#topicsChanged(sortedTopics)) {
         // Remove stats entries for removed topics
@@ -238,7 +238,7 @@ export default class Ros1Player implements Player {
       // Subscribe to all parameters
       try {
         const params = await rosNode.subscribeAllParams();
-        if (!isEqual(params, this.#parameters)) {
+        if (!_.isEqual(params, this.#parameters)) {
           this.#parameters = new Map();
           params.forEach((value, key) => this.#parameters.set(key, value));
         }
@@ -379,7 +379,7 @@ export default class Ros1Player implements Player {
     this.#addInternalSubscriptions(subscriptions);
 
     // See what topics we actually can subscribe to.
-    const availableTopicsByTopicName = keyBy(this.#providerTopics ?? [], ({ name }) => name);
+    const availableTopicsByTopicName = _.keyBy(this.#providerTopics ?? [], ({ name }) => name);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);
@@ -630,9 +630,9 @@ export default class Ros1Player implements Player {
     try {
       const graph = await rosNode.getSystemState();
       if (
-        !isEqual(this.#publishedTopics, graph.publishers) ||
-        !isEqual(this.#subscribedTopics, graph.subscribers) ||
-        !isEqual(this.#services, graph.services)
+        !_.isEqual(this.#publishedTopics, graph.publishers) ||
+        !_.isEqual(this.#subscribedTopics, graph.subscribers) ||
+        !_.isEqual(this.#services, graph.services)
       ) {
         this.#publishedTopics = graph.publishers;
         this.#subscribedTopics = graph.subscribers;

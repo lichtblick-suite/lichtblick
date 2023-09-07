@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Divider, Typography } from "@mui/material";
-import { isEmpty } from "lodash";
+import * as _ from "lodash-es";
 import { Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -66,7 +66,7 @@ export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNu
 
   const tooltipItems: PlaybackControlsTooltipItem[] = [];
 
-  if (!isEmpty(hoveredEvents)) {
+  if (!_.isEmpty(hoveredEvents)) {
     Object.values(hoveredEvents).forEach(({ event }) => {
       tooltipItems.push({
         type: "item",
@@ -78,7 +78,7 @@ export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNu
         title: "End",
         value: formatTime(event.endTime),
       });
-      if (!isEmpty(event.metadata)) {
+      if (!_.isEmpty(event.metadata)) {
         Object.entries(event.metadata).forEach(([metaKey, metaValue]) => {
           tooltipItems.push({ type: "item", title: metaKey, value: metaValue });
         });

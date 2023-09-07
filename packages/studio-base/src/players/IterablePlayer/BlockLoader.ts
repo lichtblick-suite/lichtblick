@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { simplify } from "intervals-fn";
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 
 import { Condvar } from "@foxglove/den/async";
 import { filterMap } from "@foxglove/den/collection";
@@ -85,7 +85,7 @@ export class BlockLoader {
   }
 
   public setTopics(topics: TopicSelection): void {
-    if (isEqual(topics, this.#topics)) {
+    if (_.isEqual(topics, this.#topics)) {
       return;
     }
 
@@ -222,7 +222,7 @@ export class BlockLoader {
         const needTopics = this.#blocks[endIdx]?.needTopics ?? topics;
 
         // The topics we need to fetch no longer match the topics we need so we stop the range
-        if (!isEqual(topicsToFetch, needTopics)) {
+        if (!_.isEqual(topicsToFetch, needTopics)) {
           break;
         }
 

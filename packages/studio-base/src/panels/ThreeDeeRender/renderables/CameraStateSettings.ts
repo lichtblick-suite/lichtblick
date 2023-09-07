@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { t } from "i18next";
-import { cloneDeep, set } from "lodash";
+import * as _ from "lodash-es";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -258,7 +258,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
     if (action.action === "perform-node-action" && action.payload.id === "reset-camera") {
       this.renderer.updateConfig((draft) => {
-        draft.cameraState = cloneDeep(DEFAULT_CAMERA_STATE);
+        draft.cameraState = _.cloneDeep(DEFAULT_CAMERA_STATE);
       });
       this.updateSettingsTree();
       return;
@@ -282,7 +282,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
           draft.scene.syncCamera = value as boolean;
         });
       } else {
-        this.renderer.updateConfig((draft) => set(draft, path, value));
+        this.renderer.updateConfig((draft) => _.set(draft, path, value));
       }
 
       this.updateSettingsTree();

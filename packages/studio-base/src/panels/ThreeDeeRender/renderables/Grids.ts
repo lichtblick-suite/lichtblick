@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { t } from "i18next";
-import { maxBy } from "lodash";
+import * as _ from "lodash-es";
 
 import Logger from "@foxglove/log";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
@@ -198,7 +198,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
     // Add this instance to the config
     this.renderer.updateConfig((draft) => {
-      const maxOrderLayer = maxBy(Object.values(draft.layers), (layer) => layer?.order);
+      const maxOrderLayer = _.maxBy(Object.values(draft.layers), (layer) => layer?.order);
       const order = 1 + (maxOrderLayer?.order ?? 0);
       draft.layers[instanceId] = { ...config, order };
     });

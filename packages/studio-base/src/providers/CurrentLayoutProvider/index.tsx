@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { difference, isEqual, pick, uniq } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { getNodeAtPath } from "react-mosaic-component";
 import shallowequal from "shallowequal";
@@ -117,17 +117,17 @@ export default function CurrentLayoutProvider({
 
       // The panel state did not change, so no need to perform layout state
       // updates or layout manager updates.
-      if (isEqual(oldData, newData)) {
+      if (_.isEqual(oldData, newData)) {
         log.warn("Panel action resulted in identical config:", action);
         return;
       }
 
       // Get all the panel types that exist in the new config
-      const panelTypesInUse = uniq(Object.keys(newData.configById).map(getPanelTypeFromId));
+      const panelTypesInUse = _.uniq(Object.keys(newData.configById).map(getPanelTypeFromId));
 
       setLayoutState({
         // discared shared panel state for panel types that are no longer in the layout
-        sharedPanelState: pick(layoutStateRef.current.sharedPanelState, panelTypesInUse),
+        sharedPanelState: _.pick(layoutStateRef.current.sharedPanelState, panelTypesInUse),
         selectedLayout: {
           data: newData,
           name: layoutStateRef.current.selectedLayout.name,
@@ -226,7 +226,7 @@ export default function CurrentLayoutProvider({
           const afterPanelIds = Object.keys(
             layoutStateRef.current.selectedLayout?.data?.configById ?? {},
           );
-          setSelectedPanelIds(difference(afterPanelIds, beforePanelIds));
+          setSelectedPanelIds(_.difference(afterPanelIds, beforePanelIds));
         }
         void analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
         void analytics.logEvent(AppEvent.PANEL_DELETE, {

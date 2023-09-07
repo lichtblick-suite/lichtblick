@@ -14,5 +14,9 @@
   "main": "./index.js",
   "files": [
     "src"
-  ]
+  ],
+  "devDependencies": {
+    "@typescript-eslint/rule-tester": "6.6.0",
+    "@typescript-eslint/utils": "6.6.0"
+  }
 }

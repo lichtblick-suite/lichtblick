@@ -11,13 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 import { useRef } from "react";
 
 // Continues to return the same instance as long as deep equality is maintained.
 export default function useDeepMemo<T>(value: T): T {
   const ref = useRef(value);
-  if (isEqual(value, ref.current)) {
+  if (_.isEqual(value, ref.current)) {
     return ref.current;
   }
   ref.current = value;

@@ -4,7 +4,7 @@
 
 import { TFunction } from "i18next";
 import { produce } from "immer";
-import { isEqual, isNumber, set } from "lodash";
+import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -82,8 +82,8 @@ function buildSettingsTree(
   t: TFunction<"stateTransitions">,
 ): SettingsTreeNodes {
   const maxXError =
-    isNumber(config.xAxisMinValue) &&
-    isNumber(config.xAxisMaxValue) &&
+    _.isNumber(config.xAxisMinValue) &&
+    _.isNumber(config.xAxisMaxValue) &&
     config.xAxisMinValue >= config.xAxisMaxValue
       ? t("maxXError")
       : undefined;
@@ -135,12 +135,12 @@ export function useStateTransitionsPanelSettings(
     (action: SettingsTreeAction) => {
       if (action.action === "update") {
         const { input, path, value } = action.payload;
-        if (input === "boolean" && isEqual(path, ["general", "isSynced"])) {
+        if (input === "boolean" && _.isEqual(path, ["general", "isSynced"])) {
           saveConfig({ isSynced: value });
         } else if (path[0] === "xAxis") {
           saveConfig(
             produce((draft) => {
-              set(draft, path.slice(1), value);
+              _.set(draft, path.slice(1), value);
 
               // X min/max and range are mutually exclusive.
               if (path[1] === "xAxisRange") {
@@ -154,7 +154,7 @@ export function useStateTransitionsPanelSettings(
         } else {
           saveConfig(
             produce((draft) => {
-              set(draft, path, value);
+              _.set(draft, path, value);
             }),
           );
         }

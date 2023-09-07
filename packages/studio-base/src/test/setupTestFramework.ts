@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { diff } from "jest-diff";
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 
 import { initI18n } from "@foxglove/studio-base/i18n";
 import {
@@ -132,13 +132,13 @@ expect.extend({
       pass = false;
     } else {
       for (const expectedItem of expectedArray) {
-        if (!receivedArray.some((receivedItem) => isEqual(receivedItem, expectedItem))) {
+        if (!receivedArray.some((receivedItem) => _.isEqual(receivedItem, expectedItem))) {
           pass = false;
           break;
         }
       }
       for (const receivedItem of receivedArray) {
-        if (!expectedArray.some((expectedItem) => isEqual(receivedItem, expectedItem))) {
+        if (!expectedArray.some((expectedItem) => _.isEqual(receivedItem, expectedItem))) {
           pass = false;
           break;
         }

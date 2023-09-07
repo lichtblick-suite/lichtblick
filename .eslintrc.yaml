@@ -29,6 +29,7 @@ rules:
   "@foxglove/license-header": error
   "@foxglove/prefer-hash-private": error
   "@foxglove/studio/link-target": error
+  "@foxglove/studio/lodash-imports": error
 
   tss-unused-classes/unused-classes: error
 
@@ -91,13 +92,6 @@ rules:
         - name: "@mui/system"
           importNames: [Box]
           message: "@mui/Box has performance implications. Use tss-react/mui instead."
-
-        - name: "lodash"
-          importNames: [get]
-          message: "Use optional chaining instead of lodash.get."
-
-        - name: "lodash/get"
-          message: "Use optional chaining instead of lodash.get."
 
   no-restricted-syntax:
     - error
@@ -166,6 +160,14 @@ overrides:
 
       # https://eslint.org/docs/latest/rules/no-loop-func
       "no-loop-func": error
+
+      # unused vars must have `_` prefix, but `_` alone is not ignored (see @foxglove/studio/lodash-imports)
+      "@typescript-eslint/no-unused-vars":
+        - error
+        - vars: all
+          args: after-used
+          varsIgnorePattern: "^_."
+          argsIgnorePattern: "^_."
 
   - rules:
       "@typescript-eslint/no-explicit-any": off

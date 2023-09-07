@@ -5,7 +5,7 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { IconButton, TextFieldProps, TextField } from "@mui/material";
-import { clamp, isFinite, round } from "lodash";
+import * as _ from "lodash-es";
 import { ReactNode, useCallback, useRef } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
@@ -95,7 +95,7 @@ export function NumberInput(
 
   const latestValue = useLatest(value);
 
-  const placeHolderValue = isFinite(Number(props.placeholder))
+  const placeHolderValue = _.isFinite(Number(props.placeholder))
     ? Number(props.placeholder)
     : undefined;
 
@@ -108,8 +108,8 @@ export function NumberInput(
       const clampedValue =
         newValue == undefined
           ? undefined
-          : clamp(newValue, min ?? Number.NEGATIVE_INFINITY, max ?? Number.POSITIVE_INFINITY);
-      onChange(clampedValue != undefined ? round(clampedValue, precision) : clampedValue);
+          : _.clamp(newValue, min ?? Number.NEGATIVE_INFINITY, max ?? Number.POSITIVE_INFINITY);
+      onChange(clampedValue != undefined ? _.round(clampedValue, precision) : clampedValue);
     },
     [disabled, readOnly, min, max, onChange, precision],
   );
@@ -120,7 +120,7 @@ export function NumberInput(
       isDragging.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
       const scrubStart = latestValue.current ?? placeHolderValue ?? 0;
-      scrubValue.current = isFinite(scrubStart) ? scrubStart : 0;
+      scrubValue.current = _.isFinite(scrubStart) ? scrubStart : 0;
     },
     [latestValue, placeHolderValue],
   );
@@ -140,7 +140,7 @@ export function NumberInput(
       const scale = event.shiftKey ? 10 : 1;
       const delta =
         Math.sign(event.movementX) * Math.pow(Math.abs(event.movementX), 1.5) * 0.1 * step * scale;
-      scrubValue.current = round(scrubValue.current + delta, Constants.ScrubPrecision);
+      scrubValue.current = _.round(scrubValue.current + delta, Constants.ScrubPrecision);
       updateValue(scrubValue.current);
     },
     [step, updateValue],
@@ -150,7 +150,7 @@ export function NumberInput(
     inputRef.current === document.activeElement
       ? value
       : value != undefined
-      ? round(value, precision)
+      ? _.round(value, precision)
       : undefined;
 
   return (

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
-import { cloneDeep, isEqual, merge } from "lodash";
+import * as _ from "lodash-es";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useLatest } from "react-use";
@@ -113,11 +113,11 @@ export function ThreeDeeRender(props: {
     const partialConfig = initialState as DeepPartial<RendererConfig> | undefined;
 
     // Initialize the camera from default settings overlaid with persisted settings
-    const cameraState: CameraState = merge(
-      cloneDeep(DEFAULT_CAMERA_STATE),
+    const cameraState: CameraState = _.merge(
+      _.cloneDeep(DEFAULT_CAMERA_STATE),
       partialConfig?.cameraState,
     );
-    const publish = merge(cloneDeep(DEFAULT_PUBLISH_SETTINGS), partialConfig?.publish);
+    const publish = _.merge(_.cloneDeep(DEFAULT_PUBLISH_SETTINGS), partialConfig?.publish);
 
     const transforms = (partialConfig?.transforms ?? {}) as Record<
       string,
@@ -464,7 +464,7 @@ export function ThreeDeeRender(props: {
 
     // Sort the list to make comparisons stable
     newSubscriptions.sort((a, b) => a.topic.localeCompare(b.topic));
-    setTopicsToSubscribe((prev) => (isEqual(prev, newSubscriptions) ? prev : newSubscriptions));
+    setTopicsToSubscribe((prev) => (_.isEqual(prev, newSubscriptions) ? prev : newSubscriptions));
   }, [
     topics,
     config.topics,
@@ -556,7 +556,7 @@ export function ThreeDeeRender(props: {
 
   // Update the renderer when the camera moves
   useEffect(() => {
-    if (!isEqual(cameraState, renderer?.getCameraState())) {
+    if (!_.isEqual(cameraState, renderer?.getCameraState())) {
       renderer?.setCameraState(cameraState);
       renderRef.current.needsRender = true;
     }

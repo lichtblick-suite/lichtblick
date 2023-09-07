@@ -17,7 +17,7 @@ import {
   TabDesktopMultiple20Regular,
   TableSimple20Regular,
 } from "@fluentui/react-icons";
-import { last } from "lodash";
+import * as _ from "lodash-es";
 import React, {
   ComponentType,
   MouseEventHandler,
@@ -253,7 +253,7 @@ export default function Panel<
 
         // Try to find a sibling panel and update it with the `siblingConfig`
         if (updateIfExists) {
-          const lastNode = last(ownPath);
+          const lastNode = _.last(ownPath);
           const siblingPathEnd = lastNode != undefined ? getOtherBranch(lastNode) : "second";
           const siblingPath = ownPath.slice(0, -1).concat(siblingPathEnd);
           const siblingId = getNodeAtPath(mosaicActions.getRoot(), siblingPath);

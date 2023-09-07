@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { sortBy, truncate } from "lodash";
+import * as _ from "lodash-es";
 
 import { Time } from "@foxglove/rostime";
 import { Header } from "@foxglove/studio-base/types/Messages";
@@ -118,7 +118,7 @@ export function computeDiagnosticInfo(
       ...status,
       values: status.values.map((kv) =>
         kv.value.length > MAX_STRING_LENGTH
-          ? { key: kv.key, value: truncate(kv.value, { length: MAX_STRING_LENGTH }) }
+          ? { key: kv.key, value: _.truncate(kv.value, { length: MAX_STRING_LENGTH }) }
           : kv,
       ),
     };
@@ -155,7 +155,7 @@ export const filterAndSortDiagnostics = (
 ): DiagnosticInfo[] => {
   const unpinnedNodes = nodes.filter(({ id }) => !pinnedIds.includes(id));
   if (hardwareIdFilter.length === 0) {
-    return sortBy(unpinnedNodes, (info) => info.displayName.replace(/^\//, ""));
+    return _.sortBy(unpinnedNodes, (info) => info.displayName.replace(/^\//, ""));
   }
   // fuzzyFilter sorts by match accuracy.
   return fuzzyFilter({

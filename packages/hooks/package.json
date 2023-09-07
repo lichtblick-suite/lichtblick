@@ -22,12 +22,12 @@
   "devDependencies": {
     "@testing-library/react-hooks": "8.0.1",
     "@types/foxglove__web": "workspace:*",
-    "@types/lodash": "^4",
+    "@types/lodash-es": "^4",
     "typescript": "5.2.2"
   },
   "dependencies": {
     "@foxglove/log": "workspace:*",
-    "lodash": "4.17.21",
+    "lodash-es": "4.17.21",
     "shallowequal": "1.1.0"
   },
   "peerDependencies": {

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { memoize, range, uniq } from "lodash";
+import * as _ from "lodash-es";
 import tinycolor from "tinycolor2";
 
 import { toolsColorScheme } from "@foxglove/studio-base/util/toolsColorScheme";
@@ -35,17 +35,17 @@ const colorExpansion = lineColors.map((color) => [
     .map((acolor) => acolor.toHexString()),
 ]);
 
-export const expandedLineColors = uniq(
-  range(0, colorExpansion[0]!.length)
+export const expandedLineColors = _.uniq(
+  _.range(0, colorExpansion[0]!.length)
     .map((i) => colorExpansion.map((colors) => colors[i]!))
     .flat(),
 );
 
-export const lightColor: (_: string) => string = memoize((color: string): string =>
+export const lightColor: (_: string) => string = _.memoize((color: string): string =>
   tinycolor(color).brighten(15).toString(),
 );
 
-export const darkColor: (_: string) => string = memoize((color: string): string =>
+export const darkColor: (_: string) => string = _.memoize((color: string): string =>
   tinycolor(color).darken(30).toString(),
 );
 

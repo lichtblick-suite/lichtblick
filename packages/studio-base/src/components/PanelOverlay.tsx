@@ -11,7 +11,7 @@ import {
   Paper,
   buttonClasses,
 } from "@mui/material";
-import { noop } from "lodash";
+import * as _ from "lodash-es";
 import { forwardRef } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 import tc from "tinycolor2";
@@ -132,7 +132,7 @@ export const PanelOverlay = forwardRef<HTMLDivElement, PanelOverlayProps>(
     const { classes, cx } = useStyles();
 
     return (
-      <ClickAwayListener onClickAway={onClickAway ? onClickAway : noop}>
+      <ClickAwayListener onClickAway={onClickAway ? onClickAway : _.noop}>
         <Backdrop
           transitionDuration={0}
           unmountOnExit

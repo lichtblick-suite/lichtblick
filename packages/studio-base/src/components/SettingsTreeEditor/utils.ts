@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { sortBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { Immutable, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 
@@ -13,7 +13,7 @@ export function prepareSettingsNodes(
   roots: Immutable<SettingsTreeNodes>,
 ): Immutable<Array<[string, SettingsTreeNode]>> {
   // Use sortBy here for stable sorting.
-  return sortBy(
+  return _.sortBy(
     Object.entries(roots).filter(
       (entry): entry is [string, SettingsTreeNode] => entry[1] != undefined,
     ),

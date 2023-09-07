@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { merge } from "lodash";
+import * as _ from "lodash-es";
 import * as THREE from "three";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -700,7 +700,7 @@ export class ImageMode
 
     // Ensures that no required fields are left undefined
     // rightmost values are applied last and have the most precedence
-    return merge({}, DEFAULT_CONFIG, { colorMode }, config);
+    return _.merge({}, DEFAULT_CONFIG, { colorMode }, config);
   }
 
   /**

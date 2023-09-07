@@ -4,7 +4,7 @@
 
 import { TFunction } from "i18next";
 import { produce } from "immer";
-import { isEqual, isNumber, set } from "lodash";
+import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -91,12 +91,16 @@ const makeRootSeriesNode = memoizeWeak(
 
 function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): SettingsTreeNodes {
   const maxYError =
-    isNumber(config.minYValue) && isNumber(config.maxYValue) && config.minYValue >= config.maxYValue
+    _.isNumber(config.minYValue) &&
+    _.isNumber(config.maxYValue) &&
+    config.minYValue >= config.maxYValue
       ? t("maxYError")
       : undefined;
 
   const maxXError =
-    isNumber(config.minXValue) && isNumber(config.maxXValue) && config.minXValue >= config.maxXValue
+    _.isNumber(config.minXValue) &&
+    _.isNumber(config.maxXValue) &&
+    config.minXValue >= config.maxXValue
       ? t("maxXError")
       : undefined;
 
@@ -222,17 +226,17 @@ export function usePlotPanelSettings(
           produce((draft) => {
             if (path[0] === "paths") {
               if (path[2] === "visible") {
-                set(draft, [...path.slice(0, 2), "enabled"], value);
+                _.set(draft, [...path.slice(0, 2), "enabled"], value);
               } else {
-                set(draft, path, value);
+                _.set(draft, path, value);
               }
-            } else if (isEqual(path, ["legend", "legendDisplay"])) {
+            } else if (_.isEqual(path, ["legend", "legendDisplay"])) {
               draft.legendDisplay = value;
               draft.showLegend = true;
-            } else if (isEqual(path, ["xAxis", "xAxisPath"])) {
-              set(draft, ["xAxisPath", "value"], value);
+            } else if (_.isEqual(path, ["xAxis", "xAxisPath"])) {
+              _.set(draft, ["xAxisPath", "value"], value);
             } else {
-              set(draft, path.slice(1), value);
+              _.set(draft, path.slice(1), value);
 
               // X min/max and following width are mutually exclusive.
               if (path[1] === "followingViewWidth") {

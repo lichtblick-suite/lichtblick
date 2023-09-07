@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Immutable } from "immer";
-import { omit } from "lodash";
+import * as _ from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import shallowequal from "shallowequal";
 import { Writable } from "ts-essentials";
@@ -258,7 +258,7 @@ export default function MockMessagePipelineProvider(
       };
       const initialPublicState = getPublicState(undefined, props, dispatch);
       return {
-        mockProps: omit(props, "children"),
+        mockProps: _.omit(props, "children"),
         player: undefined,
         dispatch,
         reset,
@@ -279,7 +279,7 @@ export default function MockMessagePipelineProvider(
   );
 
   useEffect(() => {
-    store.getState().dispatch({ type: "set-mock-props", mockProps: omit(props, "children") });
+    store.getState().dispatch({ type: "set-mock-props", mockProps: _.omit(props, "children") });
   }, [props, store]);
 
   return <ContextInternal.Provider value={store}>{props.children}</ContextInternal.Provider>;

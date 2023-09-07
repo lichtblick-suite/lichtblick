@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEqual, sortBy, transform, keyBy } from "lodash";
+import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -54,7 +54,7 @@ function collateNodeDetails(
   details: RosNodeDetails[],
   key: keyof RosNodeDetails,
 ): Map<string, Set<string>> {
-  return transform(
+  return _.transform(
     details,
     (acc, detail) => {
       const { node, values } = detail[key];
@@ -205,7 +205,7 @@ export default class RosbridgePlayer implements Player {
     if (!this.#providerTopics || newTopics.length !== this.#providerTopics.length) {
       return true;
     }
-    return !isEqual(this.#providerTopics, newTopics);
+    return !_.isEqual(this.#providerTopics, newTopics);
   };
 
   async #requestTopics(opt?: { forceUpdate: boolean }): Promise<void> {
@@ -292,7 +292,7 @@ export default class RosbridgePlayer implements Player {
       // We call requestTopics on a timeout to check for new topics. If there are no changes to topics
       // we want to bail and avoid updating readers, subscribers, etc.
       // However, during a re-connect, we _do_ want to refresh this list and re-subscribe
-      const sortedTopics = sortBy(topics, "name");
+      const sortedTopics = _.sortBy(topics, "name");
       if (!forceUpdate && !this.#topicsChanged(sortedTopics)) {
         return;
       }
@@ -452,7 +452,7 @@ export default class RosbridgePlayer implements Player {
     this.#parsedTopics = new Set(subscriptions.map(({ topic }) => topic));
 
     // See what topics we actually can subscribe to.
-    const availableTopicsByTopicName = keyBy(this.#providerTopics ?? [], ({ name }) => name);
+    const availableTopicsByTopicName = _.keyBy(this.#providerTopics ?? [], ({ name }) => name);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);

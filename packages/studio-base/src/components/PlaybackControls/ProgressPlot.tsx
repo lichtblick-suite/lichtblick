@@ -4,7 +4,7 @@
 
 import { keyframes } from "@emotion/react";
 import { simplify } from "intervals-fn";
-import { clamp } from "lodash";
+import * as _ from "lodash-es";
 import { useMemo } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
@@ -64,8 +64,8 @@ export function ProgressPlot(props: ProgressProps): JSX.Element {
     }
 
     return availableRanges.map((range) => ({
-      start: clamp(range.start, 0, 1),
-      end: clamp(range.end, 0, 1),
+      start: _.clamp(range.start, 0, 1),
+      end: _.clamp(range.end, 0, 1),
     }));
   }, [availableRanges]);
 

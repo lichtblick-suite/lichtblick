@@ -11,7 +11,7 @@ import {
   ArrowMinimize24Filled,
 } from "@fluentui/react-icons";
 import { IconButton } from "@mui/material";
-import { clamp } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useMemo, useRef } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
@@ -185,7 +185,7 @@ function PlotLegendComponent(props: Props): JSX.Element {
         legendDisplay === "left"
           ? event.clientX - dragStart.current.x
           : event.clientY - dragStart.current.y;
-      const newDimension = clamp(
+      const newDimension = _.clamp(
         dragStart.current.sidebarDimension + delta,
         minLegendWidth,
         maxLegendWidth,

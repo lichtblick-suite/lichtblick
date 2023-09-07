@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isTypedArray as lodashIsTypedArray } from "lodash";
+import * as _ from "lodash-es";
 
 type TypedArray =
   | Int8Array
@@ -18,5 +18,5 @@ type TypedArray =
   | Uint8ClampedArray;
 
 export function isTypedArray(value: unknown): value is TypedArray {
-  return lodashIsTypedArray(value);
+  return _.isTypedArray(value);
 }

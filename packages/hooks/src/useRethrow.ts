@@ -18,7 +18,7 @@ type Fn<A extends unknown[], R> = (...args: A) => R;
 export default function useRethrow<Args extends unknown[], Ret>(
   fn: Fn<Args, Ret>,
 ): Fn<Args, Ret | void> {
-  const [_, setError] = useState(undefined);
+  const [, setError] = useState(undefined);
   return useCallback(
     (...args: Args): Ret | void => {
       try {

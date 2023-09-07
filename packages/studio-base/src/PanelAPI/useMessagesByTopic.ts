@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { groupBy } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback } from "react";
 
 import { useDeepMemo } from "@foxglove/hooks";
@@ -39,7 +39,7 @@ export function useMessagesByTopic(params: {
 
   const addMessages = useCallback(
     (prevMessagesByTopic: UnknownMessageEventsByTopic, messages: readonly MessageEvent[]) => {
-      const newMessagesByTopic = groupBy(messages, "topic");
+      const newMessagesByTopic = _.groupBy(messages, "topic");
       const ret: UnknownMessageEventsByTopic = { ...prevMessagesByTopic };
       Object.entries(newMessagesByTopic).forEach(([topic, newMessages]) => {
         const retTopic = ret[topic];

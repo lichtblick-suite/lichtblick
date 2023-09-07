@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { debounce } from "lodash";
+import * as _ from "lodash-es";
 import { createContext, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { StoreApi, useStore } from "zustand";
 
@@ -94,7 +94,7 @@ export function MessagePipelineProvider({
   //
   // The delay of 0ms is intentional as we only want to give one timeout cycle to batch updates
   const debouncedPlayerSetSubscriptions = useMemo(() => {
-    return debounce((subs: Immutable<SubscribePayload[]>) => {
+    return _.debounce((subs: Immutable<SubscribePayload[]>) => {
       player?.setSubscriptions(subs);
     });
   }, [player]);

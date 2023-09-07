@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { StoryObj } from "@storybook/react";
-import { range } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";
@@ -119,7 +118,7 @@ export const CanZoomAndUpdate: StoryObj = {
       }
 
       // Zoom is a continuous event, so we need to simulate wheel multiple times
-      for (const _ of range(2)) {
+      for (let i = 0; i < 2; i++) {
         triggerWheel(canvasEl.parentElement!, 2);
         await delay(200);
       }

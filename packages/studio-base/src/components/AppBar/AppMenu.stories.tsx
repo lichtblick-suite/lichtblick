@@ -40,7 +40,7 @@ export default {
     },
   },
   decorators: [
-    (Story, { args: { testId: _, ...args } }): JSX.Element => (
+    (Story, { args: { testId: _testId, ...args } }): JSX.Element => (
       <AppContext.Provider value={{ appBarMenuItems: args.appBarMenuItems }}>
         <MockCurrentLayoutProvider>
           <WorkspaceContextProvider>

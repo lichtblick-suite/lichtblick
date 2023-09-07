@@ -13,7 +13,7 @@
 
 import { Divider } from "@mui/material";
 import { produce } from "immer";
-import { set } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -121,9 +121,9 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
       if (action.action === "update") {
         const { path, value } = action.payload;
         if (path[0] === "nameFilter") {
-          saveConfig(produce<Config>((draft) => set(draft, path, value)));
+          saveConfig(produce<Config>((draft) => _.set(draft, path, value)));
         } else {
-          saveConfig(produce<Config>((draft) => set(draft, path.slice(1), value)));
+          saveConfig(produce<Config>((draft) => _.set(draft, path.slice(1), value)));
         }
       } /* perform-node-action */ else {
         if (!["show-all", "hide-all"].includes(action.payload.id)) {
@@ -137,7 +137,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
               Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
             );
             seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
-            return set(draft, ["nameFilter"], newNameFilter);
+            return _.set(draft, ["nameFilter"], newNameFilter);
           }),
         );
       }

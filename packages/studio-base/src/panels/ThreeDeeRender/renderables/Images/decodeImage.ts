@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { merge } from "lodash";
+import * as _ from "lodash-es";
 
 import {
   decodeBGR8,
@@ -103,7 +103,7 @@ export function decodeRawImage(
     case "16UC1": {
       // combine options with defaults. lodash merge makes sure undefined values in options are replaced with defaults
       // whereas a normal spread would allow undefined values to overwrite defaults
-      const settings = merge({}, IMAGE_DEFAULT_COLOR_MODE_SETTINGS, MIN_MAX_16_BIT, options);
+      const settings = _.merge({}, IMAGE_DEFAULT_COLOR_MODE_SETTINGS, MIN_MAX_16_BIT, options);
       if (settings.colorMode === "rgba-fields" || settings.colorMode === "flat") {
         throw Error(`${settings.colorMode} color mode is not supported for mono16 images`);
       }

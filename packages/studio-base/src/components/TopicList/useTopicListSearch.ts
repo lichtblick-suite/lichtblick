@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Fzf, FzfResultItem, basicMatch } from "fzf";
-import { groupBy } from "lodash";
+import * as _ from "lodash-es";
 import { useMemo } from "react";
 
 import { MessageDefinition } from "@foxglove/message-definition";
@@ -82,7 +82,7 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
   const treeItems = useMemo(() => {
     const results: TopicListItem[] = [];
 
-    const messagePathResultsByTopicName = groupBy(
+    const messagePathResultsByTopicName = _.groupBy(
       messagePathResults,
       (item) => item.item.topic.name,
     );

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Draft, produce } from "immer";
-import { union } from "lodash";
+import * as _ from "lodash-es";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { useMountedState } from "react-use";
 
@@ -231,7 +231,7 @@ export function useWorkspaceActions(): WorkspaceActions {
         finishTour: (tour: string) => {
           set((draft) => {
             draft.featureTours.active = undefined;
-            draft.featureTours.shown = union(draft.featureTours.shown, [tour]);
+            draft.featureTours.shown = _.union(draft.featureTours.shown, [tour]);
           });
         },
       },

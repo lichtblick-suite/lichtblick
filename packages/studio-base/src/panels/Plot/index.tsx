@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isNumber, uniq } from "lodash";
+import * as _ from "lodash-es";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -63,7 +63,7 @@ export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicNa
     updateIfExists: true,
     siblingConfigCreator: (config: PanelConfig) => ({
       ...config,
-      paths: uniq(
+      paths: _.uniq(
         (config as PlotConfig).paths
           .concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }])
           .filter(({ value }) => value),
@@ -182,11 +182,11 @@ function Plot(props: Props) {
   const endTimeSinceStart = timeSincePreloadedStart(endTime);
   const fixedView = useMemo<ChartDefaultView | undefined>(() => {
     // Apply min/max x-value if either min or max or both is defined.
-    if ((isNumber(minXValue) && isNumber(endTimeSinceStart)) || isNumber(maxXValue)) {
+    if ((_.isNumber(minXValue) && _.isNumber(endTimeSinceStart)) || _.isNumber(maxXValue)) {
       return {
         type: "fixed",
-        minXValue: isNumber(minXValue) ? minXValue : 0,
-        maxXValue: isNumber(maxXValue) ? maxXValue : endTimeSinceStart ?? 0,
+        minXValue: _.isNumber(minXValue) ? minXValue : 0,
+        maxXValue: _.isNumber(maxXValue) ? maxXValue : endTimeSinceStart ?? 0,
       };
     }
     if (xAxisVal === "timestamp" && startTime && endTimeSinceStart != undefined) {

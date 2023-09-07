@@ -18,7 +18,7 @@ import {
   Tooltip,
   InputBase,
 } from "@mui/material";
-import { pick } from "lodash";
+import * as _ from "lodash-es";
 import { useMemo, useCallback, useState, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -95,9 +95,9 @@ const changeGlobalKey = (
 ) => {
   const keys = Object.keys(globalVariables);
   overwriteGlobalVariables({
-    ...pick(globalVariables, keys.slice(0, idx)),
+    ..._.pick(globalVariables, keys.slice(0, idx)),
     [newKey]: globalVariables[oldKey],
-    ...pick(globalVariables, keys.slice(idx + 1)),
+    ..._.pick(globalVariables, keys.slice(idx + 1)),
   });
 };
 

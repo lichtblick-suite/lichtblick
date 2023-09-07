@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { clamp } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useRef, ReactNode, useState, useLayoutEffect } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -75,7 +75,7 @@ export default function Slider(props: Props): JSX.Element {
     }
     const { left, right } = elRef.current.getBoundingClientRect();
     const scaled = scaleValue(ev.clientX, left, right, 0, 1);
-    return clamp(scaled, 0, 1);
+    return _.clamp(scaled, 0, 1);
   }, []);
 
   const [mouseDown, setMouseDown] = useState(false);

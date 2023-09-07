@@ -9,7 +9,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import ErrorIcon from "@mui/icons-material/Error";
 import { Button, Divider, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { TFunction } from "i18next";
-import { isEqual, partition } from "lodash";
+import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -228,11 +228,11 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     actionHandler({ action: "perform-node-action", payload: { id: actionId, path: props.path } });
   };
 
-  const isFocused = isEqual(focusedPath, props.path);
+  const isFocused = _.isEqual(focusedPath, props.path);
 
   useEffect(() => {
     const isOnFocusedPath =
-      focusedPath != undefined && isEqual(props.path, focusedPath.slice(0, props.path.length));
+      focusedPath != undefined && _.isEqual(props.path, focusedPath.slice(0, props.path.length));
 
     if (isOnFocusedPath) {
       setState((draft) => {
@@ -321,7 +321,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
 
   const [inlineActions, menuActions] = useMemo(
     () =>
-      partition(
+      _.partition(
         settings.actions,
         (action): action is SettingsTreeNodeActionItem =>
           action.type === "action" && action.display === "inline",

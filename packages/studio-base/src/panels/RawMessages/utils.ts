@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { first, kebabCase, last } from "lodash";
+import * as _ from "lodash-es";
 
 import { ros1 } from "@foxglove/rosmsg-msgs-common";
 import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
@@ -127,7 +127,7 @@ export function getChangeCounts(
 
 const foxgloveDocsLinksByDatatype = new Map<string, string>();
 for (const schema of Object.values(foxgloveMessageSchemas)) {
-  const url = `https://foxglove.dev/docs/studio/messages/${kebabCase(schema.name)}`;
+  const url = `https://foxglove.dev/docs/studio/messages/${_.kebabCase(schema.name)}`;
   foxgloveDocsLinksByDatatype.set(`foxglove_msgs/${schema.name}`, url);
   foxgloveDocsLinksByDatatype.set(`foxglove_msgs/msg/${schema.name}`, url);
   foxgloveDocsLinksByDatatype.set(`foxglove.${schema.name}`, url);
@@ -135,8 +135,8 @@ for (const schema of Object.values(foxgloveMessageSchemas)) {
 
 export function getMessageDocumentationLink(datatype: string): string | undefined {
   const parts = datatype.split(/[/.]/);
-  const pkg = first(parts);
-  const filename = last(parts);
+  const pkg = _.first(parts);
+  const filename = _.last(parts);
 
   if (pkg != undefined && ROS1_COMMON_MSG_PACKAGES.has(pkg)) {
     return `https://docs.ros.org/api/${pkg}/html/msg/${filename}.html`;

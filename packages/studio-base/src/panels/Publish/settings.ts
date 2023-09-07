@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
-import { isEqual, set } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
@@ -107,7 +107,7 @@ export function usePublishPanelSettings(
       saveConfig(
         produce<PublishConfig>((draft) => {
           if (input === "autocomplete") {
-            if (isEqual(path, ["general", "topicName"])) {
+            if (_.isEqual(path, ["general", "topicName"])) {
               const topicSchemaName = topics.find((t) => t.name === value)?.schemaName;
               const sampleMessage = getSampleMessage(datatypes, topicSchemaName);
 
@@ -119,7 +119,7 @@ export function usePublishPanelSettings(
               if (sampleMessage) {
                 draft.value = sampleMessage;
               }
-            } else if (isEqual(path, ["general", "datatype"])) {
+            } else if (_.isEqual(path, ["general", "datatype"])) {
               const sampleMessage = getSampleMessage(datatypes, value);
 
               draft.datatype = value;
@@ -129,7 +129,7 @@ export function usePublishPanelSettings(
               }
             }
           } else {
-            set(draft, path.slice(1), value);
+            _.set(draft, path.slice(1), value);
           }
         }),
       );

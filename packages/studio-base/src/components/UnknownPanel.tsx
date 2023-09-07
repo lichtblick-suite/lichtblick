@@ -18,7 +18,7 @@ type Props = {
 };
 
 function UnconnectedUnknownPanel(props: Props) {
-  const { config, saveConfig: _ } = props;
+  const { config, saveConfig: _saveConfig } = props;
 
   return (
     <Stack flex="auto" alignItems="center" justifyContent="center" data-testid={config.id}>

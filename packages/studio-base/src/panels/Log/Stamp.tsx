@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { padStart } from "lodash";
+import * as _ from "lodash-es";
 
 import { Time } from "@foxglove/studio";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
@@ -19,7 +19,7 @@ import { formatTime } from "@foxglove/studio-base/util/formatTime";
 
 // pad the start of `val` with 0's to make the total string length `count` size
 function PadStart(val: unknown, count: number) {
-  return padStart(`${val}`, count, "0");
+  return _.padStart(`${val}`, count, "0");
 }
 
 type Props = {

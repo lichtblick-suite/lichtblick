@@ -16,6 +16,6 @@ function reducer(_: unknown, err: Error) {
  * See: https://reactjs.org/docs/error-boundaries.html#how-about-event-handlers
  */
 export function useCrash(): (err: Error) => void {
-  const [_, dispatch] = useReducer(reducer, undefined);
+  const [, dispatch] = useReducer(reducer, undefined);
   return dispatch;
 }

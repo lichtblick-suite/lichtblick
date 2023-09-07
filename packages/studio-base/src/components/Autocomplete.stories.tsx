@@ -13,7 +13,7 @@
 
 import { Meta, StoryFn, StoryObj } from "@storybook/react";
 import { fireEvent, within } from "@storybook/testing-library";
-import { range } from "lodash";
+import * as _ from "lodash-es";
 
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -139,7 +139,7 @@ export const WithALongTruncatedPathAndAutoSize: Story = {
 
 export const ManyItems: Story = {
   args: {
-    items: range(1, 1000).map((i) => `item_${i}`),
+    items: _.range(1, 1000).map((i) => `item_${i}`),
     autoSize: true,
   },
   play: clickInput,

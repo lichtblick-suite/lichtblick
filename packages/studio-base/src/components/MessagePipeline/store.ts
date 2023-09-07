@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { flatten } from "lodash";
+import * as _ from "lodash-es";
 import { MutableRefObject } from "react";
 import shallowequal from "shallowequal";
 import { createStore, StoreApi } from "zustand";
@@ -390,7 +390,7 @@ export function reducer(
       return {
         ...prevState,
         publishersById: newPublishersById,
-        allPublishers: flatten(Object.values(newPublishersById)),
+        allPublishers: _.flatten(Object.values(newPublishersById)),
       };
     }
   }

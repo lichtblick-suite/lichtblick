@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
-import { set } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect } from "react";
 
 import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
@@ -61,11 +61,11 @@ export function useVariableSliderSettings(
         produce<VariableSliderConfig>((draft) => {
           const path = action.payload.path.slice(1);
           if (["min", "max"].includes(path[0] ?? "")) {
-            set(draft, ["sliderProps", ...path], action.payload.value);
+            _.set(draft, ["sliderProps", ...path], action.payload.value);
           } else if (path[0] === "step" && action.payload.input === "number") {
             draft.sliderProps.step = action.payload.value;
           } else {
-            set(draft, path, action.payload.value);
+            _.set(draft, path, action.payload.value);
           }
         }),
       );

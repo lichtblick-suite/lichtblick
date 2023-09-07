@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { uniqBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -33,7 +33,7 @@ describe("rosDatatypesToMessageDefinition", () => {
     // Should have 1 definition without a name, the root datatype.
     expect(definitions.filter(({ name }) => name == undefined).length).toEqual(1);
     // Should not duplicate definitions.
-    expect(uniqBy(definitions, "name").length).toEqual(definitions.length);
+    expect(_.uniqBy(definitions, "name").length).toEqual(definitions.length);
   });
 
   it("Errors if it can't find the definition", () => {

@@ -1,0 +1,10 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "include": ["./**/*.ts"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "lib": ["es2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  }
+}

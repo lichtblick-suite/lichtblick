@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { set as idbSet, get as idbGet, createStore as idbCreateStore } from "idb-keyval";
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAsync } from "react-use";
 import { v4 as uuid } from "uuid";
@@ -99,7 +99,7 @@ function useIndexedDbRecents(): IRecentsStore {
           savedRecent.type === "connection" &&
           newRecent.type === savedRecent.type &&
           savedRecent.sourceId === newRecent.sourceId &&
-          isEqual(newRecent.extra, savedRecent.extra)
+          _.isEqual(newRecent.extra, savedRecent.extra)
         ) {
           exists = true;
         }

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { t } from "i18next";
-import { set } from "lodash";
+import * as _ from "lodash-es";
 
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
@@ -124,7 +124,7 @@ export class SceneSettings extends SceneExtension {
         return;
       }
       // Update the configuration
-      this.renderer.updateConfig((draft) => set(draft, path, value));
+      this.renderer.updateConfig((draft) => _.set(draft, path, value));
 
       if (path[1] === "backgroundColor") {
         const backgroundColor = value as string | undefined;

@@ -13,7 +13,7 @@
 
 import { useTheme } from "@mui/material";
 import { TFunction } from "i18next";
-import { flatten } from "lodash";
+import * as _ from "lodash-es";
 import { ComponentProps, ReactNode, useLayoutEffect, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -287,7 +287,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     }
     dTypes = dummyDatatypes;
   }
-  const allData = flatten(Object.values(frame));
+  const allData = _.flatten(Object.values(frame));
 
   const inner = (
     <div

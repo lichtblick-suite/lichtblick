@@ -12,7 +12,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { differenceWith, groupBy, isEmpty, keyBy } from "lodash";
+import * as _ from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
 import { makeStyles } from "tss-react/mui";
@@ -101,7 +101,7 @@ export default function ExtensionsSettings(): React.ReactElement {
   );
 
   const marketplaceMap = useMemo(
-    () => keyBy(marketplaceEntries.value ?? [], (entry) => entry.id),
+    () => _.keyBy(marketplaceEntries.value ?? [], (entry) => entry.id),
     [marketplaceEntries],
   );
 
@@ -132,14 +132,14 @@ export default function ExtensionsSettings(): React.ReactElement {
   );
 
   const namespacedEntries = useMemo(
-    () => groupBy(installedEntries, (entry) => entry.namespace),
+    () => _.groupBy(installedEntries, (entry) => entry.namespace),
     [installedEntries],
   );
 
   // Hide installed extensions from the list of available extensions
   const filteredMarketplaceEntries = useMemo(
     () =>
-      differenceWith(
+      _.differenceWith(
         marketplaceEntries.value ?? [],
         installed ?? [],
         (a, b) => a.id === b.id && a.namespace === b.namespace,
@@ -180,7 +180,7 @@ export default function ExtensionsSettings(): React.ReactElement {
           Check your internet connection and try again.
         </Alert>
       )}
-      {!isEmpty(namespacedEntries) ? (
+      {!_.isEmpty(namespacedEntries) ? (
         Object.entries(namespacedEntries).map(([namespace, entries]) => (
           <List key={namespace}>
             <Stack paddingY={0.25} paddingX={2}>

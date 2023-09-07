@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { difference } from "lodash";
+import * as _ from "lodash-es";
 
 import {
   Immutable,
@@ -58,7 +58,7 @@ export function convertMessage(
 export function mapDifference<K, V>(a: Map<K, V[]>, b: undefined | Map<K, V[]>): Map<K, V[]> {
   const result = new Map<K, V[]>();
   for (const [key, value] of a.entries()) {
-    const newValues = difference(value, b?.get(key) ?? []);
+    const newValues = _.difference(value, b?.get(key) ?? []);
     if (newValues.length > 0) {
       result.set(key, newValues);
     }

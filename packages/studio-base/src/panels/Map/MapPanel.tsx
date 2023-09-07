@@ -14,7 +14,7 @@ import {
   Map as LeafMap,
   TileLayer,
 } from "leaflet";
-import { difference, groupBy, isEqual, minBy, partition, union } from "lodash";
+import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -107,12 +107,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   const [currentMapMessages, setCurrentMapMessages] = useState<MapPanelMessage[]>([]);
 
   const [allGeoMessages, allNavMessages] = useMemo(
-    () => partition(allMapMessages, isGeoJSONMessage),
+    () => _.partition(allMapMessages, isGeoJSONMessage),
     [allMapMessages],
   );
 
   const [currentGeoMessages, currentNavMessages] = useMemo(
-    () => partition(currentMapMessages, isGeoJSONMessage),
+    () => _.partition(currentMapMessages, isGeoJSONMessage),
     [currentMapMessages],
   );
 
@@ -180,8 +180,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
           produce((draft) => {
             draft.disabledTopics =
               value === true
-                ? difference(draft.disabledTopics, [topic])
-                : union(draft.disabledTopics, [topic]);
+                ? _.difference(draft.disabledTopics, [topic])
+                : _.union(draft.disabledTopics, [topic]);
           }),
         );
       }
@@ -385,7 +385,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         // Changing the topic list clears all map layers so we try to preserve reference identity
         // if the contents of the topic list haven't changed.
         setTopics((oldTopics) => {
-          return isEqual(oldTopics, renderState.topics) ? oldTopics : renderState.topics ?? [];
+          return _.isEqual(oldTopics, renderState.topics) ? oldTopics : renderState.topics ?? [];
         });
       }
 
@@ -542,7 +542,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       return;
     }
 
-    const navByTopic = groupBy(currentNavMessages, (msg) => msg.topic);
+    const navByTopic = _.groupBy(currentNavMessages, (msg) => msg.topic);
     for (const [topic, messages] of Object.entries(navByTopic)) {
       const topicLayer = topicLayers.get(topic);
       if (!topicLayer) {
@@ -550,7 +550,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       }
 
       topicLayer.currentFrame.clearLayers();
-      const [fixEvents, noFixEvents] = partition(messages, hasFix);
+      const [fixEvents, noFixEvents] = _.partition(messages, hasFix);
 
       const pointLayerNoFix = FilteredPointLayer({
         map: currentMap,
@@ -574,7 +574,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       topicLayer.currentFrame.addLayer(pointLayerFix);
     }
 
-    const geoByTopic = groupBy(currentGeoMessages, (msg) => msg.topic);
+    const geoByTopic = _.groupBy(currentGeoMessages, (msg) => msg.topic);
     for (const [topic, messages] of Object.entries(geoByTopic)) {
       const topicLayer = topicLayers.get(topic);
       if (topicLayer) {
@@ -604,7 +604,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     const prevNavMessages = allNavMessages.filter(
       (message) => toSec(message.receiveTime) <= previewTime,
     );
-    const event = minBy(prevNavMessages, (message) => previewTime - toSec(message.receiveTime));
+    const event = _.minBy(prevNavMessages, (message) => previewTime - toSec(message.receiveTime));
     if (!event) {
       return;
     }

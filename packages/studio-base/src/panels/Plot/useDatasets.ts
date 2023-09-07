@@ -144,7 +144,7 @@ function useData(id: string, topics: SubscribePayload[]) {
     };
     chooseClient();
     return () => {
-      const { [id]: _, ...rest } = clients;
+      const { [id]: _client, ...rest } = clients;
       clients = rest;
       chooseClient();
     };

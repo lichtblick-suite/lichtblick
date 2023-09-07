@@ -14,7 +14,7 @@
 import { Edit16Filled } from "@fluentui/react-icons";
 import { Button, Typography } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
-import { isEmpty, pickBy, uniq } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import tinycolor from "tinycolor2";
@@ -156,7 +156,7 @@ export function openSiblingStateTransitionsPanel(
     siblingConfigCreator: (config: PanelConfig) => {
       return {
         ...config,
-        paths: uniq(
+        paths: _.uniq(
           (config as StateTransitionConfig).paths.concat([
             { value: topicName, timestampMethod: "receiveTime" },
           ]),
@@ -262,11 +262,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   // since it's not needed to render the chart and would just cause unnecessary re-renders
   // if included in the dataset.
   const newItemsByPath = useMemo(() => {
-    const newItemsNotInBlocks = pickBy(
+    const newItemsNotInBlocks = _.pickBy(
       itemsByPath,
       (_items, path) => !decodedBlocks.some((block) => block[path]),
     );
-    return isEmpty(newItemsNotInBlocks) ? EMPTY_ITEMS_BY_PATH : newItemsNotInBlocks;
+    return _.isEmpty(newItemsNotInBlocks) ? EMPTY_ITEMS_BY_PATH : newItemsNotInBlocks;
   }, [decodedBlocks, itemsByPath]);
 
   const { datasets, minY } = useMemo(() => {

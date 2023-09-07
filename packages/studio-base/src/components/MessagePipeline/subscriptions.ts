@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { union } from "lodash";
+import * as _ from "lodash-es";
 import moize from "moize";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -47,7 +47,7 @@ export function mergeSubscriptions(
           return trimmed.length > 0 ? trimmed : undefined;
         });
         if (nonEmptyFields.length > 0) {
-          target.set(sub.topic, { ...sub, fields: union(existing.fields, nonEmptyFields) });
+          target.set(sub.topic, { ...sub, fields: _.union(existing.fields, nonEmptyFields) });
         }
       }
     } else {

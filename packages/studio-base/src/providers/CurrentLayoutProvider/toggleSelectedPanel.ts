@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { without, xor } from "lodash";
+import * as _ from "lodash-es";
 
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import { SavedProps } from "@foxglove/studio-base/types/panels";
@@ -50,7 +50,7 @@ export default function toggleSelectedPanel(
   }
   panelIdsToDeselect.push(...parentTabPanelIds);
 
-  const nextSelectedPanelIds = xor(selectedPanelIds, [panelId]);
-  const nextValidSelectedPanelIds = without(nextSelectedPanelIds, ...panelIdsToDeselect);
+  const nextSelectedPanelIds = _.xor(selectedPanelIds, [panelId]);
+  const nextValidSelectedPanelIds = _.without(nextSelectedPanelIds, ...panelIdsToDeselect);
   return nextValidSelectedPanelIds;
 }

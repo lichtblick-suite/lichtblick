@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { StoryObj } from "@storybook/react";
-import { noop } from "lodash";
+import * as _ from "lodash-es";
 import React, { ReactNode } from "react";
 
 import { ToolbarTab } from "@foxglove/studio-base/panels/Tab/ToolbarTab";
@@ -24,10 +24,10 @@ const baseProps = {
   isActive: false,
   isDragging: false,
   actions: {
-    addTab: noop,
-    removeTab: noop,
-    selectTab: noop,
-    setTabTitle: noop,
+    addTab: _.noop,
+    removeTab: _.noop,
+    selectTab: _.noop,
+    setTabTitle: _.noop,
   },
   tabCount: 1,
   tabIndex: 0,

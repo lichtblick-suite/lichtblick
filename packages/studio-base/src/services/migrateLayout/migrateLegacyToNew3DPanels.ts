@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { round } from "lodash";
+import * as _ from "lodash-es";
 
 import { filterMap } from "@foxglove/den/collection";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
@@ -23,7 +23,7 @@ const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
   poseEstimateTopic: "/initialpose",
   poseEstimateXDeviation: 0.5,
   poseEstimateYDeviation: 0.5,
-  poseEstimateThetaDeviation: round(Math.PI / 12, 8),
+  poseEstimateThetaDeviation: _.round(Math.PI / 12, 8),
 };
 type LegacyCameraState = {
   distance: number;

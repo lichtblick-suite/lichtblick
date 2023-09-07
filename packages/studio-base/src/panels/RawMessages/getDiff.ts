@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { every, uniq, keyBy, isEmpty } from "lodash";
+import * as _ from "lodash-es";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
@@ -37,7 +37,7 @@ export const diffLabels = {
   ID: { labelText: "STUDIO_DIFF___ID" },
 } as const;
 
-export const diffLabelsByLabelText = keyBy(Object.values(diffLabels), "labelText");
+export const diffLabelsByLabelText = _.keyBy(Object.values(diffLabels), "labelText");
 
 export type DiffObject = Record<string, unknown>;
 export default function getDiff({
@@ -64,7 +64,7 @@ export default function getDiff({
           candidateIdsToCompareWith[key] = { before: [], after: [] };
         }
       }
-      if (!every(allItems, (item) => typeof item === "object" && item)) {
+      if (!_.every(allItems, (item) => typeof item === "object" && item)) {
         candidateIdsToCompareWith = {};
       }
       for (const [idKey, candidates] of Object.entries(candidateIdsToCompareWith)) {
@@ -85,8 +85,8 @@ export default function getDiff({
         candidateIdsToCompareWith,
       )) {
         if (
-          uniq(candidateIdBefore).length === before.length &&
-          uniq(candidateIdAfter).length === after.length
+          _.uniq(candidateIdBefore).length === before.length &&
+          _.uniq(candidateIdAfter).length === after.length
         ) {
           idToCompareWith = idKey;
           break;
@@ -95,7 +95,7 @@ export default function getDiff({
     }
 
     if (idToCompareWith != undefined) {
-      const unmatchedAfterById = keyBy(after, idToCompareWith);
+      const unmatchedAfterById = _.keyBy(after, idToCompareWith);
       const diff = [];
       for (const beforeItem of before) {
         if (beforeItem == undefined || typeof beforeItem !== "object") {
@@ -109,7 +109,7 @@ export default function getDiff({
           showFullMessageForDiff,
         });
         delete unmatchedAfterById[id];
-        if (!isEmpty(innerDiff)) {
+        if (!_.isEmpty(innerDiff)) {
           const isDeleted =
             Object.keys(innerDiff as DiffObject).length === 1 &&
             Object.keys(innerDiff as DiffObject)[0] === diffLabels.DELETED.labelText;
@@ -130,7 +130,7 @@ export default function getDiff({
           idLabel: idToCompareWith,
           showFullMessageForDiff,
         });
-        if (!isEmpty(innerDiff)) {
+        if (!_.isEmpty(innerDiff)) {
           diff.push(innerDiff as DiffObject);
         }
       }
@@ -141,14 +141,14 @@ export default function getDiff({
   if (typeof before === "object" && typeof after === "object" && before && after) {
     const diff: DiffObject = {};
     const allKeys = Object.keys(before).concat(Object.keys(after));
-    for (const key of uniq(allKeys)) {
+    for (const key of _.uniq(allKeys)) {
       const innerDiff = getDiff({
         before: (before as DiffObject)[key],
         after: (after as DiffObject)[key],
         idLabel: undefined,
         showFullMessageForDiff,
       });
-      if (!isEmpty(innerDiff)) {
+      if (!_.isEmpty(innerDiff)) {
         diff[key] = innerDiff;
       } else if (showFullMessageForDiff) {
         diff[key] = (before as DiffObject)[key];

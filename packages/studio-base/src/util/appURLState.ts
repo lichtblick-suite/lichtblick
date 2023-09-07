@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEmpty, omitBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { fromRFC3339String, toRFC3339String, Time } from "@foxglove/rostime";
 
@@ -39,7 +39,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
   }
 
   if ("dsParams" in urlState) {
-    [...newURL.searchParams].forEach(([k, _]) => {
+    [...newURL.searchParams].forEach(([k]) => {
       if (k.startsWith("ds.")) {
         newURL.searchParams.delete(k);
       }
@@ -74,14 +74,14 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     }
   });
 
-  const state: AppURLState = omitBy(
+  const state: AppURLState = _.omitBy(
     {
       time,
       ds,
-      dsParams: isEmpty(dsParams) ? undefined : dsParams,
+      dsParams: _.isEmpty(dsParams) ? undefined : dsParams,
     },
-    isEmpty,
+    _.isEmpty,
   );
 
-  return isEmpty(state) ? undefined : state;
+  return _.isEmpty(state) ? undefined : state;
 }

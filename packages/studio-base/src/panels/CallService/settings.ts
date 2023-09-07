@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
-import { set } from "lodash";
+import * as _ from "lodash-es";
 import { useMemo } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -27,7 +27,7 @@ export function settingsActionReducer(prevConfig: Config, action: SettingsTreeAc
   return produce(prevConfig, (draft) => {
     if (action.action === "update") {
       const { path, value } = action.payload;
-      set(draft, path.slice(1), value);
+      _.set(draft, path.slice(1), value);
     }
   });
 }

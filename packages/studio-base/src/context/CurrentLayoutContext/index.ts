@@ -136,7 +136,7 @@ export function useCurrentLayoutActions(): CurrentLayoutActions {
 
 export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState) => T): T {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
-  const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
+  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
   // Catch locations using unstable function selectors
   useShouldNotChangeOften(selector, () => {

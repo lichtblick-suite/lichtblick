@@ -14,7 +14,7 @@
 import { StoryObj } from "@storybook/react";
 import { screen, userEvent, waitFor } from "@storybook/testing-library";
 import { produce } from "immer";
-import { shuffle } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -305,7 +305,7 @@ export const fixture: Fixture = {
     // Shuffle the location messages so that they are out of stamp order
     // This is used in the headerStamp series test to check that the dataset is sorted
     // prior to rendering. If the dataset is not sorted properly, the plot is jumbled.
-    "/some_topic/location_shuffled": shuffle(
+    "/some_topic/location_shuffled": _.shuffle(
       locationMessages.map(
         (message): MessageEvent => ({
           topic: "/some_topic/location_shuffled",

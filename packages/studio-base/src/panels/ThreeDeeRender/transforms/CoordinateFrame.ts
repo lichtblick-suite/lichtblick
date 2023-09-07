@@ -221,7 +221,7 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
     const index = this.#transforms.binarySearch(time);
     if (index >= 0) {
       // If the time is exactly on an existing transform, return it
-      const [_, tf] = this.#transforms.at(index)!;
+      const [, tf] = this.#transforms.at(index)!;
       outLower[0] = outUpper[0] = time;
       outLower[1] = outUpper[1] = tf;
       return true;

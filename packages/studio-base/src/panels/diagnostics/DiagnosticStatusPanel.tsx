@@ -13,7 +13,7 @@
 
 import { Autocomplete, TextField } from "@mui/material";
 import { produce } from "immer";
-import { set, sortBy, uniq } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useMemo, useEffect } from "react";
 
 import { SettingsTreeAction } from "@foxglove/studio";
@@ -62,7 +62,7 @@ function DiagnosticStatusPanel(props: Props) {
       .map((topic) => topic.name);
 
     // Keeps only the first occurrence of each topic.
-    return uniq([...filtered]);
+    return _.uniq([...filtered]);
   }, [topics]);
 
   // If the topicToRender is not in the availableTopics, then we should not try to use it
@@ -134,7 +134,7 @@ function DiagnosticStatusPanel(props: Props) {
       }
 
       const { path, value } = action.payload;
-      saveConfig(produce((draft) => set(draft, path.slice(1), value)));
+      saveConfig(produce((draft) => _.set(draft, path.slice(1), value)));
     },
     [saveConfig],
   );
@@ -184,7 +184,7 @@ function DiagnosticStatusPanel(props: Props) {
       </PanelToolbar>
       {filteredDiagnostics.length > 0 ? (
         <Stack flex="auto" overflowY="auto">
-          {sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
+          {_.sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
             <DiagnosticStatus
               key={item.id}
               info={item}

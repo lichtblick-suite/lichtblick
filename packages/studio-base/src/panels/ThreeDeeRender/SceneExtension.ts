@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { set, unset } from "lodash";
+import * as _ from "lodash-es";
 import * as THREE from "three";
 import { DeepPartial } from "ts-essentials";
 
@@ -137,9 +137,9 @@ export class SceneExtension<
     // Update the configuration
     this.renderer.updateConfig((draft) => {
       if (value == undefined) {
-        unset(draft, path);
+        _.unset(draft, path);
       } else {
-        set(draft, path, value);
+        _.set(draft, path, value);
       }
     });
 

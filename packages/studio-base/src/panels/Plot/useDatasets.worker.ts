@@ -316,7 +316,7 @@ function setLive(value: boolean): void {
 }
 
 function unregister(id: string): void {
-  const { [id]: _, ...rest } = clients;
+  const { [id]: _client, ...rest } = clients;
   clients = rest;
 }
 

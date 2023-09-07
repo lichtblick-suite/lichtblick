@@ -6,7 +6,7 @@ import { useTheme } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 import { produce } from "immer";
-import { last } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
 import Logger from "@foxglove/log";
@@ -809,7 +809,7 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
         if (action.payload.id === "remove-grid" || action.payload.id === "remove-background") {
           setDynamicNodes((oldNodes) => {
             const newNodes = { ...oldNodes };
-            delete newNodes[last(action.payload.path)!];
+            delete newNodes[_.last(action.payload.path)!];
             return newNodes;
           });
         }

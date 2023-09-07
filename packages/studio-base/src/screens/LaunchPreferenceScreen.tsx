@@ -39,7 +39,7 @@ export function LaunchPreferenceScreen(): ReactElement {
   const [globalPreference, setGlobalPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
   );
-  const [_, setSessionPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
+  const [, setSessionPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
   const [rememberPreference, setRememberPreference] = useState(globalPreference != undefined);
 
   async function launchInWeb() {

@@ -14,7 +14,7 @@
 import ErrorIcon from "@mui/icons-material/Error";
 import { Typography } from "@mui/material";
 import CodeEditor from "@uiw/react-textarea-code-editor";
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -115,7 +115,7 @@ function ValidatedInputBase({
    */
   useLayoutEffect(() => {
     if (!isEditing && value !== prevIncomingVal.current) {
-      if (isEqual(value, prevIncomingVal.current)) {
+      if (_.isEqual(value, prevIncomingVal.current)) {
         return;
       }
       let newVal = "";

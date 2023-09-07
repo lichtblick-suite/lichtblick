@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Typography } from "@mui/material";
-import { last, sumBy } from "lodash";
+import * as _ from "lodash-es";
 import { ReactElement } from "react";
 
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
@@ -45,11 +45,11 @@ function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElem
       />
       <Stack>
         <Typography variant="body2">
-          {(last(props.points) ?? { value: 0 }).value.toFixed(props.decimalPlaces)}
+          {(_.last(props.points) ?? { value: 0 }).value.toFixed(props.decimalPlaces)}
           {props.label}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {(sumBy(props.points, "value") / props.points.length).toFixed(props.decimalPlaces)} avg
+          {(_.sumBy(props.points, "value") / props.points.length).toFixed(props.decimalPlaces)} avg
         </Typography>
       </Stack>
     </Stack>

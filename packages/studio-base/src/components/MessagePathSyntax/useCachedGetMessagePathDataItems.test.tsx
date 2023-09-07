@@ -13,7 +13,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { renderHook } from "@testing-library/react-hooks";
-import { keyBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { messagePathStructures } from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
@@ -41,7 +41,7 @@ function addValuesWithPathsToItems(
     if (!rosPath) {
       return undefined;
     }
-    const topicsByName = keyBy(providerTopics, ({ name }) => name);
+    const topicsByName = _.keyBy(providerTopics, ({ name }) => name);
     const structures = messagePathStructures(datatypes);
     const enums = enumValuesByDatatypeAndField(datatypes);
     const items = getMessagePathDataItems(message, rosPath, topicsByName, structures, enums);

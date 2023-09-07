@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { groupBy } from "lodash";
+import * as _ from "lodash-es";
 
 import { MessageDefinition } from "@foxglove/message-definition";
 import { Immutable } from "@foxglove/studio";
@@ -89,7 +89,7 @@ export function getMessagePathSearchItems(
 ): { items: MessagePathSearchItem[]; itemsByTopicName: Map<string, MessagePathSearchItem[]> } {
   const items: MessagePathSearchItem[] = [];
   const itemsByTopicName = new Map<string, MessagePathSearchItem[]>();
-  const topicsBySchemaName = groupBy(
+  const topicsBySchemaName = _.groupBy(
     allTopics.filter((topic) => topic.schemaName != undefined),
     (topic) => topic.schemaName,
   );

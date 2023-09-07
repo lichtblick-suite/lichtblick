@@ -24,7 +24,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { isEqual, isObject, union } from "lodash";
+import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
@@ -97,7 +97,7 @@ function editableValue(
     typeof value === "number" ||
     typeof value === "boolean" ||
     Array.isArray(value) ||
-    isObject(value)
+    _.isObject(value)
   ) {
     return value;
   } else {
@@ -140,7 +140,7 @@ function SubmittableJsonInput(props: {
           setValue(newVal);
         }}
       />
-      {!isEqual(editableValue(value), editableValue(props.value)) && [
+      {!_.isEqual(editableValue(value), editableValue(props.value)) && [
         <Tooltip key="submit" title="Submit change">
           <IconButton
             onClick={() => {
@@ -209,12 +209,12 @@ function Parameters(): ReactElement {
       previousParametersRef.current = parameters;
       return;
     }
-    const newChangedParameters = union(
+    const newChangedParameters = _.union(
       Array.from(parameters.keys()),
       Array.from(previousParametersRef.current?.keys() ?? []),
     ).filter((name) => {
       const previousValue = previousParametersRef.current?.get(name);
-      return !isEqual(previousValue, parameters.get(name));
+      return !_.isEqual(previousValue, parameters.get(name));
     });
 
     setChangedParameters(newChangedParameters);

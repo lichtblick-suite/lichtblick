@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import assert from "assert";
-import { isEqual } from "lodash";
+import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -313,7 +313,7 @@ export class IterablePlayer implements Player {
     );
 
     // If there are no changes to topics there's no reason to perform a "seek" to trigger loading
-    if (isEqual(allTopics, this.#allTopics) && isEqual(preloadTopics, this.#preloadTopics)) {
+    if (_.isEqual(allTopics, this.#allTopics) && _.isEqual(preloadTopics, this.#preloadTopics)) {
       return;
     }
 

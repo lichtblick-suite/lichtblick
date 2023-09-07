@@ -24,7 +24,7 @@ import {
   tableRowClasses,
   iconButtonClasses,
 } from "@mui/material";
-import { clamp } from "lodash";
+import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
@@ -191,7 +191,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
       }
 
       const { left, right } = tableRef.current.getBoundingClientRect();
-      const newSplitFraction = clamp(
+      const newSplitFraction = _.clamp(
         (event.clientX - left) / (right - left),
         MIN_SPLIT_FRACTION,
         1 - MIN_SPLIT_FRACTION,

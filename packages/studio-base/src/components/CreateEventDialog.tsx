@@ -19,7 +19,7 @@ import {
   IconButton,
   ButtonGroup,
 } from "@mui/material";
-import { countBy } from "lodash";
+import * as _ from "lodash-es";
 import { KeyboardEvent, useCallback } from "react";
 import { useAsyncFn } from "react-use";
 import { keyframes } from "tss-react";
@@ -126,7 +126,7 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
   const { formatTime } = useAppTimeFormat();
   const { createEvent: appModuleCreateEvent } = useAppContext();
 
-  const countedMetadata = countBy(event.metadataEntries, (kv) => kv.key);
+  const countedMetadata = _.countBy(event.metadataEntries, (kv) => kv.key);
   const duplicateKey = Object.entries(countedMetadata).find(
     ([key, count]) => key.length > 0 && count > 1,
   );

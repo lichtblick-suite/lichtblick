@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { round } from "lodash";
+import * as _ from "lodash-es";
 
 import Logger from "@foxglove/log";
 import { Filelike } from "@foxglove/rosbag";
@@ -305,7 +305,7 @@ export default class CachedFilelike implements Filelike {
         const sec = (Date.now() - startTime) / 1000;
 
         const mibibytes = bytesToMiB(bytesRead);
-        const speed = round(mibibytes / sec, 2);
+        const speed = _.round(mibibytes / sec, 2);
         this.#log.debug(
           `Connection @ ${rangeToString(
             currentConnection.remainingRange,
@@ -334,7 +334,7 @@ export default class CachedFilelike implements Filelike {
 
 // Some formatting functions.
 function bytesToMiB(bytes: number) {
-  return round(bytes / 1024 / 1024, 3);
+  return _.round(bytes / 1024 / 1024, 3);
 }
 function rangeToString(range: Range) {
   return `${bytesToMiB(range.start)}-${bytesToMiB(range.end)}MiB`;

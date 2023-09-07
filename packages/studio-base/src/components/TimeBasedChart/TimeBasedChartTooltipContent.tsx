@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Square24Filled } from "@fluentui/react-icons";
-import { sortBy } from "lodash";
+import * as _ from "lodash-es";
 import { Fragment, PropsWithChildren, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -118,7 +118,7 @@ export default function TimeBasedChartTooltipContent(
     }
 
     // Sort by datasetIndex to keep the displayed values in the same order as the settings
-    return sortBy([...out.entries()], ([_, items]) => items.tooltip.datasetIndex);
+    return _.sortBy([...out.entries()], ([, items]) => items.tooltip.datasetIndex);
   }, [content, multiDataset]);
 
   // If the chart contains only one dataset, we don't need to render the dataset label - saving space

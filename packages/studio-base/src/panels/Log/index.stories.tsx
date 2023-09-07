@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { StoryObj } from "@storybook/react";
-import { range } from "lodash";
+import * as _ from "lodash-es";
 
 import Log from "@foxglove/studio-base/panels/Log";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -116,7 +116,7 @@ function makeLongFixture(): Fixture {
   return {
     topics: [{ name: "/rosout", schemaName: "rosgraph_msgs/Log" }],
     frame: {
-      "/rosout": range(200).map((idx) => ({
+      "/rosout": _.range(200).map((idx) => ({
         topic: "/rosout",
         receiveTime: { sec: 10 * idx, nsec: 0 },
         message: {

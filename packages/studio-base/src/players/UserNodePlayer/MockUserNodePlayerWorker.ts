@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isPlainObject } from "lodash";
+import * as _ from "lodash-es";
 
 import Rpc, { Channel, createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 
@@ -22,7 +22,7 @@ import transform from "./nodeTransformerWorker/transform";
 const validateWorkerArgs = (arg: unknown) => {
   expect(arg).not.toBeInstanceOf(Function);
 
-  if (isPlainObject(arg) && typeof arg === "object" && arg != undefined) {
+  if (_.isPlainObject(arg) && typeof arg === "object" && arg != undefined) {
     Object.values(arg).forEach((val) => {
       validateWorkerArgs(val);
     });
