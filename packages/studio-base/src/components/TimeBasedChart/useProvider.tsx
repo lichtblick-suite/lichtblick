@@ -36,7 +36,7 @@ export function getBounds(data: Datasets<ObjectData>): Bounds | undefined {
         xMax = Math.max(xMax ?? item.x, item.x);
       }
 
-      if (!isNaN(item.x)) {
+      if (!isNaN(item.y)) {
         yMin = Math.min(yMin ?? item.y, item.y);
         yMax = Math.max(yMax ?? item.y, item.y);
       }
