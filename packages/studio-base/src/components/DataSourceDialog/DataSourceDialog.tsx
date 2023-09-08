@@ -116,6 +116,7 @@ export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
 
   return (
     <Dialog
+      data-testid="DataSourceDialog"
       open
       onClose={onModalClose}
       fullWidth

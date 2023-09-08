@@ -42,8 +42,6 @@ const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
 const closeMenuItem: MenuItemConstructorOptions = isMac ? { role: "close" } : { role: "quit" };
 const log = Logger.getLogger(__filename);
 
-type ClearableMenu = Menu & { clear: () => void };
-
 function getWindowBackgroundColor(): string | undefined {
   const theme = palette[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
   return theme.background?.default;
@@ -253,6 +251,31 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         },
       },
       { type: "separator" },
+      {
+        id: "open",
+        label: t("appBar:open"),
+        click: async () => {
+          await simulateUserClick(browserWindow);
+          sendNativeAppMenuEvent("open", browserWindow);
+        },
+      },
+      {
+        id: "openLocalFile",
+        label: t("appBar:openLocalFile"),
+        click: async () => {
+          await simulateUserClick(browserWindow);
+          sendNativeAppMenuEvent("open-file", browserWindow);
+        },
+      },
+      {
+        id: "openConnection",
+        label: t("appBar:openConnection"),
+        click: async () => {
+          await simulateUserClick(browserWindow);
+          sendNativeAppMenuEvent("open-connection", browserWindow);
+        },
+      },
+      { type: "separator" },
       closeMenuItem,
     ],
   });
@@ -384,7 +407,7 @@ class StudioWindow {
 
     i18n.on("languageChanged", () => {
       const isAppMenu = Menu.getApplicationMenu() === this.#menu;
-      this.#rebuildMenu();
+      this.#menu = buildMenu(this.#browserWindow);
       if (isAppMenu) {
         Menu.setApplicationMenu(this.#menu);
       }
@@ -416,10 +439,6 @@ class StudioWindow {
     return StudioWindow.#windowsByContentId.get(id);
   }
 
-  #sendNativeAppMenuEvent(event: NativeAppMenuEvent) {
-    this.#browserWindow.webContents.send(event);
-  }
-
   #reloadMainWindow(): void {
     const windowWasMaximized = this.#browserWindow.isMaximized();
     this.#browserWindow.close();
@@ -435,17 +454,11 @@ class StudioWindow {
     }
   }
 
-  #rebuildMenu() {
-    this.#menu = buildMenu(this.#browserWindow);
-    this.#rebuildFileMenu(this.#menu.getMenuItemById("fileMenu")!);
-  }
-
   #buildBrowserWindow(): [BrowserWindow, Menu] {
     const browserWindow = newStudioWindow(this.#deepLinks, () => {
       this.#reloadMainWindow();
     });
     const newMenu = buildMenu(browserWindow);
-    this.#rebuildFileMenu(newMenu.getMenuItemById("fileMenu")!);
     const id = browserWindow.webContents.id;
 
     log.info(`New Foxglove Studio window ${id}`);
@@ -456,67 +469,6 @@ class StudioWindow {
     });
 
     return [browserWindow, newMenu];
-  }
-
-  #rebuildFileMenu(fileMenu: MenuItem): void {
-    const browserWindow = this.#browserWindow;
-
-    // https://github.com/electron/electron/issues/8598
-    (fileMenu.submenu as ClearableMenu).clear();
-    fileMenu.submenu?.items.splice(0, fileMenu.submenu.items.length);
-
-    fileMenu.submenu?.append(
-      new MenuItem({
-        label: t("desktopWindow:newWindow"),
-        click: () => {
-          new StudioWindow().load();
-        },
-      }),
-    );
-
-    fileMenu.submenu?.append(
-      new MenuItem({
-        type: "separator",
-      }),
-    );
-
-    fileMenu.submenu?.append(
-      new MenuItem({
-        label: t("appBar:open"),
-        click: async () => {
-          await simulateUserClick(browserWindow);
-          this.#sendNativeAppMenuEvent("open");
-        },
-      }),
-    );
-
-    fileMenu.submenu?.append(
-      new MenuItem({
-        label: t("appBar:openLocalFile"),
-        click: async () => {
-          await simulateUserClick(browserWindow);
-          this.#sendNativeAppMenuEvent("open-file");
-        },
-      }),
-    );
-
-    fileMenu.submenu?.append(
-      new MenuItem({
-        label: t("appBar:openConnection"),
-        click: async () => {
-          await simulateUserClick(browserWindow);
-          this.#sendNativeAppMenuEvent("open-connection");
-        },
-      }),
-    );
-
-    fileMenu.submenu?.append(
-      new MenuItem({
-        type: "separator",
-      }),
-    );
-
-    fileMenu.submenu?.append(new MenuItem(closeMenuItem));
   }
 }
 

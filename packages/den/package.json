@@ -15,5 +15,8 @@
   "dependencies": {
     "async-mutex": "0.4.0",
     "xacro-parser": "0.3.9"
+  },
+  "devDependencies": {
+    "@foxglove/tsconfig": "2.0.0"
   }
 }

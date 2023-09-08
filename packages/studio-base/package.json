@@ -40,6 +40,7 @@
     "@foxglove/schemas": "1.5.1",
     "@foxglove/studio": "workspace:*",
     "@foxglove/three-text": "0.1.1",
+    "@foxglove/tsconfig": "2.0.0",
     "@foxglove/typescript-transformers": "workspace:*",
     "@foxglove/ulog": "2.1.2",
     "@foxglove/velodyne-cloud": "1.0.1",

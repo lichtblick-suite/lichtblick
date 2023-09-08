@@ -21,5 +21,8 @@
   },
   "dependencies": {
     "typescript": "5.2.2"
+  },
+  "devDependencies": {
+    "@foxglove/tsconfig": "2.0.0"
   }
 }

@@ -174,7 +174,7 @@ export default function Connection(): JSX.Element {
 
   return (
     <View onOpen={disableOpen ? undefined : onOpen}>
-      <Stack className={classes.grid}>
+      <Stack className={classes.grid} data-testid="OpenConnection">
         <header className={classes.header}>
           <Typography variant="h3" fontWeight={600} gutterBottom>
             Open a new connection

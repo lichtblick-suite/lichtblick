@@ -20,6 +20,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
+    "@foxglove/tsconfig": "2.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "@types/foxglove__web": "workspace:*",
     "@types/lodash-es": "^4",
