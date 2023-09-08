@@ -529,7 +529,9 @@ function buildSettingsFields(
   const parentFrameId = frame?.parent()?.id;
 
   if (parentFrameId == undefined) {
-    return { parent: { label: "Parent", input: "string", readonly: true, value: "<root>" } };
+    return {
+      parent: { label: t("threeDee:parent"), input: "string", readonly: true, value: "<root>" },
+    };
   }
 
   const historySizeValue = String(frame?.transformsSize() ?? 0);
@@ -557,25 +559,25 @@ function buildSettingsFields(
 
   const fields: SettingsTreeFields = {
     parent: {
-      label: "Parent",
+      label: t("threeDee:parent"),
       input: "string",
       readonly: true,
       value: parentFrameId,
     },
     age: {
-      label: "Age",
+      label: t("threeDee:age"),
       input: "string",
       readonly: true,
       value: ageValue,
     },
     historySize: {
-      label: "History Size",
+      label: t("threeDee:historySize"),
       input: "string",
       readonly: true,
       value: historySizeValue,
     },
     xyz: {
-      label: "Translation",
+      label: t("threeDee:translation"),
       input: "vec3",
       precision: PRECISION_DISTANCE,
       labels: ["X", "Y", "Z"],
@@ -583,7 +585,7 @@ function buildSettingsFields(
       value: xyzValue,
     },
     rpy: {
-      label: "Rotation",
+      label: t("threeDee:rotation"),
       input: "vec3",
       precision: PRECISION_DEGREES,
       labels: ["R", "P", "Y"],
@@ -606,7 +608,7 @@ function buildSettingsFields(
     }
 
     fields.xyzOffset = {
-      label: "Translation Offset",
+      label: t("threeDee:translationOffset"),
       input: "vec3",
       precision: PRECISION_DISTANCE,
       step: 0.1,
@@ -614,7 +616,7 @@ function buildSettingsFields(
       value: xyzOffsetValue,
     };
     fields.rpyCoefficient = {
-      label: "Rotation Offset",
+      label: t("threeDee:rotationOffset"),
       input: "vec3",
       precision: PRECISION_DEGREES,
       step: 1,

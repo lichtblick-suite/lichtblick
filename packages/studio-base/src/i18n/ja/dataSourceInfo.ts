@@ -5,10 +5,10 @@
 import { TypeOptions } from "i18next";
 
 export const dataSourceInfo: Partial<TypeOptions["resources"]["dataSourceInfo"]> = {
-  dataSource: "データソース",
   currentSource: "現在のデータソース",
-  waitingForConnection: "接続待機中…",
-  startTime: "開始時刻",
-  endTime: "終了時刻",
+  dataSource: "データソース",
   duration: "所要時間",
+  endTime: "終了時刻",
+  startTime: "開始時刻",
+  waitingForConnection: "接続待機中…",
 };

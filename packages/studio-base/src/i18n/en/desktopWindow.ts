@@ -3,13 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const desktopWindow = {
-  newWindow: "New Window",
-  settings: "Settings…",
-  file: "File",
-  edit: "Edit",
-  view: "View",
   advanced: "Advanced",
-  inspectSharedWorker: "Inspect Shared Worker…",
-  noSharedWorkers: "No Shared Workers",
   checkForUpdates: "Check for Updates…",
+  edit: "Edit",
+  file: "File",
+  inspectSharedWorker: "Inspect Shared Worker…",
+  newWindow: "New Window",
+  noSharedWorkers: "No Shared Workers",
+  settings: "Settings…",
+  view: "View",
 };

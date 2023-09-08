@@ -3,10 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const dataSourceInfo = {
-  dataSource: "Data source",
   currentSource: "Current source",
-  waitingForConnection: "Waiting for connection…",
-  startTime: "Start time",
-  endTime: "End time",
+  dataSource: "Data source",
   duration: "Duration",
+  endTime: "End time",
+  startTime: "Start time",
+  waitingForConnection: "Waiting for connection…",
 };

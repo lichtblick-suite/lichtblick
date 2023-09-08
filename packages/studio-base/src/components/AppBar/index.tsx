@@ -256,7 +256,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 disabled={!hasCurrentLayout}
                 id="add-panel-button"
                 data-tourid="add-panel-button"
-                title="Add panel"
+                title={t("addPanel")}
                 aria-label="Add panel button"
                 aria-controls={panelMenuOpen ? "add-panel-menu" : undefined}
                 aria-haspopup="true"
@@ -282,11 +282,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 <AppBarIconButton
                   title={
                     <>
-                      {leftSidebarOpen ? "Hide" : "Show"} left sidebar{" "}
+                      {leftSidebarOpen ? t("hideLeftSidebar") : t("showLeftSidebar")}{" "}
                       <kbd className={classes.keyEquivalent}>[</kbd>
                     </>
                   }
-                  aria-label={`${leftSidebarOpen ? "Hide" : "Show"} left sidebar`}
+                  aria-label={`${leftSidebarOpen ? t("hideLeftSidebar") : t("showLeftSidebar")}`}
                   onClick={() => {
                     sidebarActions.left.setOpen(!leftSidebarOpen);
                   }}
@@ -297,11 +297,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 <AppBarIconButton
                   title={
                     <>
-                      {rightSidebarOpen ? "Hide" : "Show"} right sidebar{" "}
+                      {rightSidebarOpen ? t("hideRightSidebar") : t("showRightSidebar")}{" "}
                       <kbd className={classes.keyEquivalent}>]</kbd>
                     </>
                   }
-                  aria-label={`${rightSidebarOpen ? "Hide" : "Show"} right sidebar`}
+                  aria-label={`${rightSidebarOpen ? t("hideRightSidebar") : t("showRightSidebar")}`}
                   onClick={() => {
                     sidebarActions.right.setOpen(!rightSidebarOpen);
                   }}

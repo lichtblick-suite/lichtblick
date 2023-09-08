@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const incompatibleLayoutVersion = {
-  title: "Incompatible layout version",
   desktopText:
     "This layout was created with a newer version of Foxglove Studio. Please update to the latest version at ",
+  title: "Incompatible layout version",
   webText:
     "This layout was created with a newer version of Foxglove Studio. Please refresh your browser.",
 };

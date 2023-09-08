@@ -49,6 +49,10 @@ export const DefaultChinese: StoryObj = {
   ...Default,
   parameters: { forceLanguage: "zh" },
 };
+export const DefaultJapanese: StoryObj = {
+  ...Default,
+  parameters: { forceLanguage: "ja" },
+};
 
 export const WithErrors: StoryObj = {
   render: function Story() {
@@ -80,7 +84,6 @@ export const WithErrors: StoryObj = {
           {
             severity: "warn",
             message: "Connection lost",
-            tip: "A tip that we might want to show the user",
           },
           {
             severity: "info",
@@ -97,4 +100,8 @@ export const WithErrors: StoryObj = {
 export const WithErrorsChinese: StoryObj = {
   ...WithErrors,
   parameters: { forceLanguage: "zh" },
+};
+export const WithErrorsJapanese: StoryObj = {
+  ...WithErrors,
+  parameters: { forceLanguage: "ja" },
 };

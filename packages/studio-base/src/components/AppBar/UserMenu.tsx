@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -56,6 +57,7 @@ export function UserMenu({
   const analytics = useAnalytics();
   const { enqueueSnackbar } = useSnackbar();
   const [confirm, confirmModal] = useConfirm();
+  const { t } = useTranslation("appBar");
 
   const { dialogActions } = useWorkspaceActions();
 
@@ -146,24 +148,24 @@ export function UserMenu({
             onSettingsClick();
           }}
         >
-          Settings
+          {t("settings")}
         </MenuItem>
         <MenuItem
           onClick={() => {
             onSettingsClick("extensions");
           }}
         >
-          Extensions
+          {t("extensions")}
         </MenuItem>
-        {currentUser && <MenuItem onClick={onProfileClick}>User profile</MenuItem>}
+        {currentUser && <MenuItem onClick={onProfileClick}>{t("userProfile")}</MenuItem>}
         <Divider variant="middle" />
-        <MenuItem onClick={onDocsClick}>Documentation</MenuItem>
-        <MenuItem onClick={onSlackClick}>Join Slack community</MenuItem>
+        <MenuItem onClick={onDocsClick}>{t("documentation")}</MenuItem>
+        <MenuItem onClick={onSlackClick}>{t("joinSlackCommunity")}</MenuItem>
         {signIn != undefined && <Divider variant="middle" />}
         {currentUser ? (
-          <MenuItem onClick={onSignoutClick}>Sign out</MenuItem>
+          <MenuItem onClick={onSignoutClick}>{t("signOut")}</MenuItem>
         ) : signIn != undefined ? (
-          <MenuItem onClick={onSignInClick}>Sign in</MenuItem>
+          <MenuItem onClick={onSignInClick}>{t("signIn")}</MenuItem>
         ) : undefined}
       </Menu>
       {confirmModal}

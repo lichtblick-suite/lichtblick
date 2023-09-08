@@ -7,13 +7,14 @@ import { TypeOptions } from "i18next";
 export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   "3D": "3D",
   "3DPanelDescription": "マーカーやカメラ映像、メッシュ、URDFなどを3Dシーンで表示します。",
+  callService: undefined,
+  callServiceDescription: undefined,
   dataSourceInfo: "データソース情報",
   dataSourceInfoDescription:
     "現在のデータソースに関するトピックやタイムスタンプなどの詳細を表示します。",
   gauge: "ゲージ",
   gaugeDescription: "連続値に基づく色付きのゲージを表示します。",
   image: "画像",
-  imageLegacy: "画像 (Legacy)",
   imageDescription: "注釈付きの画像を表示します。",
   indicator: "インジケーター",
   indicatorDescription: "閾値に基づいた色やテキストで表示されるインジケーターを表示します。",

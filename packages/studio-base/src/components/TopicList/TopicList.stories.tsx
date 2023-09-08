@@ -58,10 +58,22 @@ type Story = StoryObj<typeof MockMessagePipelineProvider>;
 
 export const Default: Story = {};
 
+export const Empty: Story = {
+  args: { topics: [] },
+};
+export const EmptyChinese: Story = {
+  args: { topics: [] },
+  parameters: { forceLanguage: "zh" },
+};
+export const EmptyJapanese: Story = {
+  args: { topics: [] },
+  parameters: { forceLanguage: "ja" },
+};
+
 export const FilterByTopicName: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const filterInputs = await canvas.findAllByPlaceholderText("Filter by topic or schema name…");
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
 
     for (const input of filterInputs) {
       await userEvent.type(input, "/topic_1");
@@ -72,7 +84,7 @@ export const FilterByTopicName: Story = {
 export const FilterBySchemaName: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const filterInputs = await canvas.findAllByPlaceholderText("Filter by topic or schema name…");
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
 
     for (const input of filterInputs) {
       await userEvent.type(input, "std_msgs/String");
@@ -83,7 +95,7 @@ export const FilterBySchemaName: Story = {
 export const FilterByFieldName: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const filterInputs = await canvas.findAllByPlaceholderText("Filter by topic or schema name…");
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
 
     for (const input of filterInputs) {
       await userEvent.type(input, "data");
@@ -94,7 +106,7 @@ export const FilterByFieldName: Story = {
 export const FilterByMessagePath: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const filterInputs = await canvas.findAllByPlaceholderText("Filter by topic or schema name…");
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
 
     for (const input of filterInputs) {
       await userEvent.type(input, "to1da");
@@ -106,7 +118,7 @@ export const FilterTextCleared: Story = {
   play: async ({ canvasElement }) => {
     const user = userEvent.setup();
     const canvas = within(canvasElement);
-    const filterInputs = await canvas.findAllByPlaceholderText("Filter by topic or schema name…");
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
 
     for (const input of filterInputs) {
       await user.type(input, "/topic_1");
@@ -118,4 +130,24 @@ export const FilterTextCleared: Story = {
       await user.click(button);
     }
   },
+};
+
+export const NoResults: Story = {
+  play: async ({ canvasElement }) => {
+    const user = userEvent.setup();
+    const canvas = within(canvasElement);
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
+    for (const input of filterInputs) {
+      await user.type(input, "asdfasdf");
+    }
+  },
+};
+
+export const NoResultsChinese: Story = {
+  ...NoResults,
+  parameters: { forceLanguage: "zh" },
+};
+export const NoResultsJapanese: Story = {
+  ...NoResults,
+  parameters: { forceLanguage: "ja" },
 };

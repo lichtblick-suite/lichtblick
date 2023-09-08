@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
 
 import { MessageEvent } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
@@ -135,7 +136,7 @@ export const CameraInfoRender: StoryObj = {
     });
 
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup fixture={fixture} includeSettings>
         <ThreeDeePanel
           overrideConfig={{
             ...ThreeDeePanel.defaultConfig,
@@ -180,4 +181,19 @@ export const CameraInfoRender: StoryObj = {
   },
 
   parameters: { colorScheme: "dark" },
+
+  play: async () => {
+    const label = await screen.findByText("/empty");
+    await userEvent.click(label);
+  },
+};
+
+export const CameraInfoRenderChinese = {
+  ...CameraInfoRender,
+  parameters: { colorScheme: "dark", forceLanguage: "zh" },
+};
+
+export const CameraInfoRenderJapanese = {
+  ...CameraInfoRender,
+  parameters: { colorScheme: "dark", forceLanguage: "ja" },
 };

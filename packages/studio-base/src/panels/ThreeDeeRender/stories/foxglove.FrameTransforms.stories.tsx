@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
 
 import { fromSec } from "@foxglove/rostime";
 import type { FrameTransforms } from "@foxglove/schemas";
@@ -17,6 +18,7 @@ import ThreeDeePanel from "../index";
 export default {
   title: "panels/ThreeDeeRender",
   component: ThreeDeePanel,
+  parameters: { colorScheme: "dark" },
 };
 
 export const FoxgloveFrameTransforms: StoryObj = {
@@ -92,7 +94,7 @@ export const FoxgloveFrameTransforms: StoryObj = {
     });
 
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup fixture={fixture} includeSettings>
         <ThreeDeePanel
           overrideConfig={{
             followTf: "sensor_1",
@@ -123,5 +125,26 @@ export const FoxgloveFrameTransforms: StoryObj = {
     );
   },
 
-  parameters: { colorScheme: "dark" },
+  play: async () => {
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__general"));
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__transforms"));
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__transforms-settings"),
+    );
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__transforms-frame:base_link"),
+    );
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__transforms-frame:sensor_1"),
+    );
+  },
+};
+
+export const FoxgloveFrameTransformsChinese: StoryObj = {
+  ...FoxgloveFrameTransforms,
+  parameters: { forceLanguage: "zh" },
+};
+export const FoxgloveFrameTransformsJapanese: StoryObj = {
+  ...FoxgloveFrameTransforms,
+  parameters: { forceLanguage: "ja" },
 };

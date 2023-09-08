@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
 import * as _ from "lodash-es";
 
 import { toNanoSec } from "@foxglove/rostime";
@@ -71,16 +72,16 @@ export class Markers extends SceneExtension<TopicMarkers> {
         icon: "Shapes",
         order: topic.name.toLocaleLowerCase(),
         fields: {
-          color: { label: "Color", input: "rgba", value: config.color },
+          color: { label: t("threeDee:color"), input: "rgba", value: config.color },
           showOutlines: {
-            label: "Show outline",
+            label: t("threeDee:showOutline"),
             input: "boolean",
             value: config.showOutlines ?? DEFAULT_SETTINGS.showOutlines,
           },
           selectedIdVariable: {
-            label: "Selection Variable",
+            label: t("threeDee:selectionVariable"),
             input: "string",
-            help: "When selecting a marker, this global variable will be set to the marker ID",
+            help: t("threeDee:selectionVariableHelp"),
             value: config.selectedIdVariable,
             placeholder: SELECTED_ID_VARIABLE,
           },

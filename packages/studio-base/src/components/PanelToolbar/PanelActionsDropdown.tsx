@@ -15,6 +15,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Divider, Menu, MenuItem } from "@mui/material";
 import { MouseEvent, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
 
@@ -56,6 +57,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
   const { classes, cx } = useStyles();
   const [menuAnchorEl, setMenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [subMenuAnchorEl, setSubmenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const { t } = useTranslation("panelToolbar");
 
   const menuOpen = Boolean(menuAnchorEl);
   const submenuOpen = Boolean(subMenuAnchorEl);
@@ -141,14 +143,14 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
       items.push(
         {
           key: "vsplit",
-          text: "Split right",
+          text: t("splitRight"),
           onClick: () => {
             split(panelContext?.id, "row");
           },
         },
         {
           key: "hsplit",
-          text: "Split down",
+          text: t("splitDown"),
           onClick: () => {
             split(panelContext?.id, "column");
           },
@@ -159,7 +161,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
     if (panelContext?.isFullscreen !== true) {
       items.push({
         key: "enter-fullscreen",
-        text: "Fullscreen",
+        text: t("fullscreen"),
         onClick: enterFullscreen,
         "data-testid": "panel-menu-fullscreen",
       });
@@ -169,7 +171,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
 
     items.push({
       key: "remove",
-      text: "Remove panel",
+      text: t("removePanel"),
       onClick: close,
       "data-testid": "panel-menu-remove",
       className: classes.error,
@@ -184,6 +186,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
     panelContext?.id,
     panelContext?.isFullscreen,
     split,
+    t,
   ]);
 
   const buttonRef = useRef<HTMLDivElement>(ReactNull);
@@ -202,7 +205,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
         aria-expanded={menuOpen ? "true" : undefined}
         onClick={handleMenuClick}
         data-testid="panel-menu"
-        title="More"
+        title={t("more")}
       >
         <MoreVertIcon />
       </ToolbarIconButton>
@@ -227,7 +230,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
           onClick={handleSubmenuClick}
           onMouseEnter={handleSubmenuMouseEnter}
         >
-          Change panel
+          {t("changePanel")}
           <ChevronRightIcon className={classes.icon} fontSize="small" />
         </MenuItem>
         <ChangePanelMenu anchorEl={subMenuAnchorEl} onClose={handleSubmenuClose} tabId={tabId} />

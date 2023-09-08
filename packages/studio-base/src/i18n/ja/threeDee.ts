@@ -5,73 +5,151 @@
 import { TypeOptions } from "i18next";
 
 export const threeDee: Partial<TypeOptions["resources"]["threeDee"]> = {
-  frame: "フレーム",
+  // Common
   color: "色",
-  position: "位置",
+  colorMode: undefined,
+  frame: "フレーム",
   lineWidth: "ライン幅",
-  rotation: "回転",
+  position: "位置",
   reset: "リセット",
+  rotation: "回転",
+  scale: undefined,
+  gradient: undefined,
+  type: undefined,
+  topic: undefined,
 
   // Frame
+  age: undefined,
+  axisScale: "軸のスケール",
   displayFrame: "フレームを表示する",
   displayFrameHelp:
     "カメラを配置するための座標フレームです。カメラの位置と向きは、このフレームの原点を基準とした相対的なものとなります。",
+  editable: "編集可能",
+  enablePreloading: "事前の読み込みを有効にする",
+  fixed: "固定",
   followMode: "フォローモード",
   followModeHelp:
     "再生中のカメラの動作を変更し、表示フレームをフォローするかどうかを選択できます。",
-  pose: "ポーズ",
-  fixed: "固定",
   frameNotFound: "フレーム {{frameId}} が見つかりません",
-  noCoordinateFramesFound: "座標フレームが見つかりません",
-  enablePreloading: "事前の読み込みを有効にする",
-  lineColor: "ラインの色",
-  axisScale: "軸のスケール",
-  labelSize: "ラベルのサイズ",
-  labels: "ラベル",
-  editable: "編集可能",
-  settings: "設定",
-  transforms: "変換",
-  showAll: "すべて表示",
   hideAll: "すべて非表示",
+  historySize: undefined,
+  labels: "ラベル",
+  labelSize: "ラベルのサイズ",
+  lineColor: "ラインの色",
+  noCoordinateFramesFound: "座標フレームが見つかりません",
+  parent: undefined,
+  pose: "ポーズ",
+  rotationOffset: undefined,
+  settings: "設定",
+  showAll: "すべて表示",
+  transforms: "変換",
+  translation: undefined,
+  translationOffset: undefined,
 
   // Scene
-  scene: "シーン",
-  renderStats: "レンダリングの統計情報",
   background: "背景",
-  labelScale: "ラベルのスケール",
-  labelScaleHelp: "すべてのラベルに適用するスケールファクター",
+  debugPicking: undefined,
   ignoreColladaUpAxis: "COLLADA <up_axis> を無視",
   ignoreColladaUpAxisHelp:
     "COLLADA ファイル内の <up_axis> タグを無視することで、rviz の動作に合わせます。",
-  takeEffectAfterReboot: "この設定は再起動後に有効になります。",
+  labelScale: "ラベルのスケール",
+  labelScaleHelp: "すべてのラベルに適用するスケールファクター",
   meshUpAxis: "メッシュの上軸",
   meshUpAxisHelp:
     "方向を使用してメッシュを読み込むときに '上' として使用する方向（STL および OBJ）",
+  renderStats: "レンダリングの統計情報",
+  scene: "シーン",
+  takeEffectAfterReboot: "この設定は再起動後に有効になります。",
   YUp: "Y-up",
   ZUp: "Z-up",
 
   // Camera
-  view: "ビュー",
   distance: "距離",
-  perspective: "遠近法",
-  target: "ターゲット",
-  theta: "Theta",
-  phi: "Phi",
+  far: "Far",
   fovy: "Y軸 FOV",
   near: "Near",
-  far: "Far",
+  perspective: "遠近法",
+  phi: "Phi",
+  planarProjectionFactor: undefined,
   syncCamera: "カメラを同期する",
   syncCameraHelp: "この設定が有効になっている他のパネルとカメラを同期します。",
+  target: "ターゲット",
+  theta: "Theta",
+  view: "ビュー",
 
   // Topics
   topics: "トピック",
 
   // Custom layers
-  customLayers: "カスタムレイヤー",
+  addGrid: "グリッドを追加する",
   addURDF: "URDF を追加する",
-  size: "サイズ",
+  customLayers: "カスタムレイヤー",
+  delete: "削除",
   divisions: "分割数",
   grid: "グリッド",
-  delete: "削除",
-  addGrid: "グリッドを追加する",
+  size: "サイズ",
+
+  // Image Annotations
+  imageAnnotations: undefined,
+  resetView: undefined,
+
+  // Images
+  cameraInfo: undefined,
+
+  // Occupancy Grids
+  colorModeCustom: undefined,
+  colorModeRaw: undefined,
+  colorModeRvizCostmap: "Costmap",
+  colorModeRvizMap: "Map",
+  frameLock: undefined,
+  invalidColor: undefined,
+  maxColor: undefined,
+  minColor: undefined,
+  unknownColor: undefined,
+
+  // Point Extension Utils
+  decayTime: undefined,
+  decayTimeDefaultZeroSeconds: undefined,
+  pointShape: undefined,
+  pointShapeCircle: undefined,
+  pointShapeSquare: undefined,
+  pointSize: undefined,
+
+  // Color Mode
+  colorBy: undefined,
+  colorModeBgraPacked: undefined,
+  colorModeBgrPacked: undefined,
+  colorModeColorMap: undefined,
+  colorModeFlat: undefined,
+  colorModeRgbaSeparateFields: undefined,
+  flatColor: undefined,
+  opacity: undefined,
+  valueMax: undefined,
+  valueMin: undefined,
+
+  // Markers
+  selectionVariable: undefined,
+  selectionVariableHelp: undefined,
+  showOutline: undefined,
+
+  // Poses
+  covariance: undefined,
+  covarianceColor: undefined,
+  poseDisplayTypeArrow: undefined,
+  poseDisplayTypeAxis: undefined,
+  poseDisplayTypeLine: undefined,
+
+  // Publish
+  publish: undefined,
+  publishTopicHelp: undefined,
+  publishTypeHelp: undefined,
+  publishTypePoint: undefined,
+  publishTypePose: undefined,
+  publishTypePoseEstimate: undefined,
+  thetaDeviation: undefined,
+  thetaDeviationHelp: undefined,
+  xDeviation: undefined,
+  xDeviationHelp: undefined,
+  yDeviation: undefined,
+  yDeviationHelp: undefined,
 };

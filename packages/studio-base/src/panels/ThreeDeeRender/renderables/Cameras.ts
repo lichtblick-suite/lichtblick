@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
+
 import { PinholeCameraModel } from "@foxglove/den/image";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
@@ -115,12 +117,31 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
       }
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsCameraInfo>;
 
-      // prettier-ignore
       const fields: SettingsTreeFields = {
-        distance: { label: "Distance", input: "number", placeholder: String(DEFAULT_DISTANCE), step: 0.1, precision: PRECISION_DISTANCE, value: config.distance },
-        planarProjectionFactor: { label: "Planar Projection Factor", input: "number", placeholder: String(DEFAULT_PLANAR_PROJECTION_FACTOR), min: 0, max: 1, step: 0.1, precision: 2, value: config.planarProjectionFactor },
-        width: fieldLineWidth("Line Width", config.width, DEFAULT_WIDTH),
-        color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
+        distance: {
+          label: t("threeDee:distance"),
+          input: "number",
+          placeholder: String(DEFAULT_DISTANCE),
+          step: 0.1,
+          precision: PRECISION_DISTANCE,
+          value: config.distance,
+        },
+        planarProjectionFactor: {
+          label: t("threeDee:planarProjectionFactor"),
+          input: "number",
+          placeholder: String(DEFAULT_PLANAR_PROJECTION_FACTOR),
+          min: 0,
+          max: 1,
+          step: 0.1,
+          precision: 2,
+          value: config.planarProjectionFactor,
+        },
+        width: fieldLineWidth(t("threeDee:lineWidth"), config.width, DEFAULT_WIDTH),
+        color: {
+          label: t("threeDee:color"),
+          input: "rgba",
+          value: config.color ?? DEFAULT_COLOR_STR,
+        },
       };
 
       entries.push({

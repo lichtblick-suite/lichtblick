@@ -84,3 +84,12 @@ export const Light: StoryObj = {
   render: () => <SignInStates />,
   parameters: { colorScheme: "light" },
 };
+
+export const Chinese: StoryObj = {
+  ...Light,
+  parameters: { colorScheme: "light", forceLanguage: "zh" },
+};
+export const Japanese: StoryObj = {
+  ...Light,
+  parameters: { colorScheme: "light", forceLanguage: "ja" },
+};

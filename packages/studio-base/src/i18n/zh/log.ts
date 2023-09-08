@@ -7,4 +7,8 @@ import { TypeOptions } from "i18next";
 export const log: Partial<TypeOptions["resources"]["log"]> = {
   topicError: "话题 {{topic}} 不可用",
   topic: "话题",
+  hideAll: "隐藏全部",
+  minLogLevel: "日志级别",
+  nameFilter: "命名空间",
+  showAll: "显示全部",
 };

@@ -6,6 +6,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, List, ListItem, ListItemText, Skeleton, TextField } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AutoSizer } from "react-virtualized";
 import { VariableSizeList } from "react-window";
 import tc from "tinycolor2";
@@ -73,6 +74,7 @@ const useStyles = makeStyles<void, "dragHandle">()((theme, _params, classes) => 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 
 export function TopicList(): JSX.Element {
+  const { t } = useTranslation("topicList");
   const { classes, cx } = useStyles();
   const [undebouncedFilterText, setFilterText] = useState<string>("");
   const [debouncedFilterText] = useDebounce(undebouncedFilterText, 50);
@@ -94,11 +96,11 @@ export function TopicList(): JSX.Element {
   }, [treeItems]);
 
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
-    return <EmptyState>No data source selected</EmptyState>;
+    return <EmptyState>{t("noDataSourceSelected")}</EmptyState>;
   }
 
   if (playerPresence === PlayerPresence.ERROR) {
-    return <EmptyState>An error occurred</EmptyState>;
+    return <EmptyState>{t("anErrorOccurred")}</EmptyState>;
   }
 
   if (playerPresence === PlayerPresence.INITIALIZING) {
@@ -109,7 +111,7 @@ export function TopicList(): JSX.Element {
             disabled
             variant="filled"
             fullWidth
-            placeholder="Waiting for data..."
+            placeholder={t("waitingForData")}
             InputProps={{
               size: "small",
               startAdornment: <SearchIcon fontSize="small" />,
@@ -144,8 +146,9 @@ export function TopicList(): JSX.Element {
           }}
           value={undebouncedFilterText}
           fullWidth
-          placeholder="Filter by topic or schema name…"
+          placeholder={t("searchBarPlaceholder")}
           InputProps={{
+            inputProps: { "data-testid": "topic-filter" },
             size: "small",
             startAdornment: (
               <label className={classes.startAdornment} htmlFor="topic-filter">
@@ -155,7 +158,7 @@ export function TopicList(): JSX.Element {
             endAdornment: undebouncedFilterText && (
               <IconButton
                 size="small"
-                title="Clear filter"
+                title={t("clearFilter")}
                 onClick={() => {
                   setFilterText("");
                 }}
@@ -195,9 +198,9 @@ export function TopicList(): JSX.Element {
       ) : (
         <EmptyState>
           {playerPresence === PlayerPresence.PRESENT && undebouncedFilterText
-            ? `No topics or datatypes matching \n “${undebouncedFilterText}”`
-            : "No topics available. "}
-          {playerPresence === PlayerPresence.RECONNECTING && "Waiting for connection"}
+            ? `${t("noTopicsOrDatatypesMatching")} \n “${undebouncedFilterText}”`
+            : t("noTopicsAvailable")}
+          {playerPresence === PlayerPresence.RECONNECTING && t("waitingForConnection")}
         </EmptyState>
       )}
       <DirectTopicStatsUpdater interval={6} />

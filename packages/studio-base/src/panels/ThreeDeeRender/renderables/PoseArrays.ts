@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
@@ -80,12 +81,6 @@ const DEFAULT_SETTINGS: LayerSettingsPoseArray = {
   lineWidth: DEFAULT_LINE_WIDTH,
   gradient: DEFAULT_GRADIENT_STR,
 };
-
-const TYPE_OPTIONS = [
-  { label: "Axis", value: "axis" },
-  { label: "Arrow", value: "arrow" },
-  { label: "Line", value: "line" },
-];
 
 const tempColor1 = makeRgba();
 const tempColor2 = makeRgba();
@@ -188,23 +183,36 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       const gradient = config.gradient ?? DEFAULT_GRADIENT_STR;
 
       const fields: SettingsTreeFields = {
-        type: { label: "Type", input: "select", options: TYPE_OPTIONS, value: displayType },
+        type: {
+          label: t("threeDee:type"),
+          input: "select",
+          options: [
+            { label: t("threeDee:poseDisplayTypeAxis"), value: "axis" },
+            { label: t("threeDee:poseDisplayTypeArrow"), value: "arrow" },
+            { label: t("threeDee:poseDisplayTypeLine"), value: "line" },
+          ],
+          value: displayType,
+        },
       };
       switch (displayType) {
         case "axis":
-          fields["axisScale"] = fieldSize("Scale", axisScale, DEFAULT_AXIS_SCALE);
+          fields["axisScale"] = fieldSize(t("threeDee:scale"), axisScale, DEFAULT_AXIS_SCALE);
           break;
         case "arrow":
-          fields["arrowScale"] = fieldScaleVec3("Scale", arrowScale);
+          fields["arrowScale"] = fieldScaleVec3(t("threeDee:scale"), arrowScale);
           break;
         case "line":
-          fields["lineWidth"] = fieldLineWidth("Line Width", lineWidth, DEFAULT_LINE_WIDTH);
+          fields["lineWidth"] = fieldLineWidth(
+            t("threeDee:lineWidth"),
+            lineWidth,
+            DEFAULT_LINE_WIDTH,
+          );
           break;
       }
 
       // Axis does not currently support gradients. This could possibly be done with tinting
       if (displayType !== "axis") {
-        fields["gradient"] = fieldGradient("Gradient", gradient);
+        fields["gradient"] = fieldGradient(t("threeDee:gradient"), gradient);
       }
 
       entries.push({
@@ -352,8 +360,12 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   ): void {
     // Generate a Marker with the right scale and color
     const createArrowMarkerFromIndex = (i: number): Marker => {
-      const t = i / (poseArray.poses.length - 1);
-      const color = rgbaGradient(tempColor3, colorStart, colorEnd, t);
+      const color = rgbaGradient(
+        tempColor3,
+        colorStart,
+        colorEnd,
+        i / (poseArray.poses.length - 1),
+      );
       return createArrowMarker(renderable.userData.settings.arrowScale, color);
     };
 
@@ -496,8 +508,7 @@ function createLineStripMarker(
   // Create a gradient of colors for the line strip
   const colors: ColorRGBA[] = [];
   for (let i = 0; i < message.poses.length; i++) {
-    const t = i / (message.poses.length - 1);
-    colors.push(rgbaGradient(makeRgba(), colorStart, colorEnd, t));
+    colors.push(rgbaGradient(makeRgba(), colorStart, colorEnd, i / (message.poses.length - 1)));
   }
 
   return {

@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { userEvent, screen } from "@storybook/testing-library";
 import { useState } from "react";
 import { create } from "zustand";
 
@@ -19,10 +20,11 @@ import { CameraInfo, CompressedImage as RosCompressedImage, Image } from "../ros
 export default {
   title: "panels/ThreeDeeRender/Images",
   component: ThreeDeePanel,
+  parameters: { colorScheme: "light" },
 };
 
-export const ImageRender: StoryObj = {
-  render: function Story() {
+export const ImageRender: StoryObj<{ includeSettings: boolean }> = {
+  render: function Story({ includeSettings }: { includeSettings: boolean }) {
     const topics: Topic[] = [
       { name: "/cam1/info", schemaName: "sensor_msgs/CameraInfo" },
       { name: "/cam2/info", schemaName: "sensor_msgs/CameraInfo" },
@@ -132,7 +134,7 @@ export const ImageRender: StoryObj = {
     };
 
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup fixture={fixture} includeSettings={includeSettings}>
         <ThreeDeePanel
           overrideConfig={{
             ...ThreeDeePanel.defaultConfig,
@@ -180,8 +182,27 @@ export const ImageRender: StoryObj = {
       </PanelSetup>
     );
   },
+};
 
-  parameters: { colorScheme: "light" },
+export const ImageRenderSettings: typeof ImageRender = {
+  ...ImageRender,
+  args: { includeSettings: true },
+  play: async () => {
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__topics-/cam1/info"),
+    );
+  },
+};
+
+export const ImageRenderSettingsChinese: typeof ImageRender = {
+  ...ImageRenderSettings,
+  args: { includeSettings: true },
+  parameters: { forceLanguage: "zh" },
+};
+export const ImageRenderSettingsJapanese: typeof ImageRender = {
+  ...ImageRenderSettings,
+  args: { includeSettings: true },
+  parameters: { forceLanguage: "ja" },
 };
 
 export const FoxgloveImage: StoryObj = {
@@ -344,8 +365,6 @@ export const FoxgloveImage: StoryObj = {
       </PanelSetup>
     );
   },
-
-  parameters: { colorScheme: "light" },
 };
 
 export const ImageThenInfo: StoryObj = {
@@ -457,8 +476,6 @@ export const ImageThenInfo: StoryObj = {
       </PanelSetup>
     );
   },
-
-  parameters: { colorScheme: "light" },
 };
 
 export const InfoThenImage: StoryObj = {
@@ -570,8 +587,6 @@ export const InfoThenImage: StoryObj = {
       </PanelSetup>
     );
   },
-
-  parameters: { colorScheme: "light" },
 };
 
 export const UpdateImageToGreen: StoryObj = {
@@ -721,6 +736,4 @@ export const UpdateImageToGreen: StoryObj = {
       </PanelSetup>
     );
   },
-
-  parameters: { colorScheme: "light" },
 };

@@ -13,6 +13,7 @@
 import { useSnackbar } from "notistack";
 import { extname } from "path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -124,6 +125,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   const rightSidebarItem = useWorkspaceStore(selectWorkspaceRightSidebarItem);
   const rightSidebarOpen = useWorkspaceStore(selectWorkspaceRightSidebarOpen);
   const rightSidebarSize = useWorkspaceStore(selectWorkspaceRightSidebarSize);
+  const { t } = useTranslation("workspace");
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
 
@@ -328,12 +330,12 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
 
   const leftSidebarItems = useMemo(() => {
     const items = new Map<LeftSidebarItemKey, SidebarItem>([
-      ["panel-settings", { title: "Panel", component: PanelSettings }],
-      ["topics", { title: "Topics", component: TopicList }],
+      ["panel-settings", { title: t("panel"), component: PanelSettings }],
+      ["topics", { title: t("topics"), component: TopicList }],
       [
         "problems",
         {
-          title: "Problems",
+          title: t("problems"),
           component: ProblemsList,
           badge:
             playerProblems && playerProblems.length > 0
@@ -346,20 +348,20 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       ],
     ]);
     return items;
-  }, [playerProblems]);
+  }, [playerProblems, t]);
 
   const rightSidebarItems = useMemo(() => {
     const items = new Map<RightSidebarItemKey, SidebarItem>([
-      ["variables", { title: "Variables", component: VariablesList }],
+      ["variables", { title: t("variables"), component: VariablesList }],
     ]);
     if (enableStudioLogsSidebar) {
-      items.set("studio-logs-settings", { title: "Studio Logs", component: StudioLogsSettings });
+      items.set("studio-logs-settings", { title: t("studioLogs"), component: StudioLogsSettings });
     }
     if (showEventsTab) {
-      items.set("events", { title: "Events", component: EventsList });
+      items.set("events", { title: t("events"), component: EventsList });
     }
     return items;
-  }, [enableStudioLogsSidebar, showEventsTab]);
+  }, [enableStudioLogsSidebar, showEventsTab, t]);
 
   const keyDownHandlers = useMemo(() => {
     return {

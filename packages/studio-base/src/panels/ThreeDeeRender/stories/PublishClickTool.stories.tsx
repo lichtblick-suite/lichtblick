@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { screen } from "@storybook/testing-library";
+import { userEvent, screen } from "@storybook/testing-library";
 
 import { MessageEvent } from "@foxglove/studio";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
@@ -19,11 +19,11 @@ import { TransformStamped } from "../ros";
 export default {
   title: "panels/ThreeDeeRender/PublishClickTool",
   component: ThreeDeePanel,
+  parameters: { colorScheme: "dark" },
 };
 
 export const Point: StoryObj<{ type: PublishClickType }> = {
   render: PublishClickToolTemplate,
-  parameters: { colorScheme: "dark" },
   args: { type: "point" },
   play: async () => {
     (await screen.findByTestId("publish-button")).click();
@@ -40,7 +40,6 @@ export const Point: StoryObj<{ type: PublishClickType }> = {
 
 export const PosePosition: StoryObj<{ type: PublishClickType }> = {
   render: PublishClickToolTemplate,
-  parameters: { colorScheme: "dark" },
   args: { type: "pose" },
   play: async () => {
     (await screen.findByTestId("publish-button")).click();
@@ -57,7 +56,6 @@ export const PosePosition: StoryObj<{ type: PublishClickType }> = {
 
 export const PoseComplete: StoryObj<{ type: PublishClickType }> = {
   render: PublishClickToolTemplate,
-  parameters: { colorScheme: "dark" },
   args: { type: "pose" },
   play: async () => {
     (await screen.findByTestId("publish-button")).click();
@@ -80,7 +78,6 @@ export const PoseComplete: StoryObj<{ type: PublishClickType }> = {
 
 export const PoseEstimatePosition: StoryObj<{ type: PublishClickType }> = {
   render: PublishClickToolTemplate,
-  parameters: { colorScheme: "dark" },
   args: { type: "pose_estimate" },
   play: async () => {
     (await screen.findByTestId("publish-button")).click();
@@ -97,7 +94,6 @@ export const PoseEstimatePosition: StoryObj<{ type: PublishClickType }> = {
 
 export const PoseEstimateComplete: StoryObj<{ type: PublishClickType }> = {
   render: PublishClickToolTemplate,
-  parameters: { colorScheme: "dark" },
   args: { type: "pose_estimate" },
   play: async () => {
     (await screen.findByTestId("publish-button")).click();
@@ -118,7 +114,32 @@ export const PoseEstimateComplete: StoryObj<{ type: PublishClickType }> = {
   },
 };
 
-function PublishClickToolTemplate({ type }: { type: PublishClickType }): JSX.Element {
+export const Settings: StoryObj<typeof PublishClickToolTemplate> = {
+  render: PublishClickToolTemplate,
+  args: { type: "pose_estimate", includeSettings: true },
+  play: async () => {
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__general"));
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__publish"));
+  },
+};
+
+export const SettingsChinese: StoryObj<typeof PublishClickToolTemplate> = {
+  ...Settings,
+  parameters: { forceLanguage: "zh" },
+};
+
+export const SettingsJapanese: StoryObj<typeof PublishClickToolTemplate> = {
+  ...Settings,
+  parameters: { forceLanguage: "ja" },
+};
+
+function PublishClickToolTemplate({
+  type,
+  includeSettings,
+}: {
+  type: PublishClickType;
+  includeSettings?: boolean;
+}): JSX.Element {
   const topics: Topic[] = [{ name: "/tf", schemaName: "geometry_msgs/TransformStamped" }];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
@@ -146,7 +167,7 @@ function PublishClickToolTemplate({ type }: { type: PublishClickType }): JSX.Ele
   });
 
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} includeSettings={includeSettings}>
       <ThreeDeePanel
         overrideConfig={{
           ...ThreeDeePanel.defaultConfig,

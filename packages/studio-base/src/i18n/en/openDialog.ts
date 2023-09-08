@@ -3,39 +3,38 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const openDialog = {
-  // Start
-  newToFoxgloveStudio: "New to Foxglove Studio?",
-  newToFoxgloveStudioDescription:
-    "Start by exploring a sample dataset or checking out our documentation.",
+  canBeShared: "Share data files, visualization layouts, and custom extensions with teammates",
+  collaborateTitle: "Accelerate development with Foxglove Data Platform",
+  convenientWebInterface:
+    "Use a convenient web interface to tag, search, and retrieve data at lightning speed",
+  createAFreeAccount: "Create a free account",
   exploreSampleData: "Explore sample data",
-  viewOurDocs: "View our docs",
   joinOurCommunity: "Join our community",
   joinOurCommunityDescription:
     "Join us on Slack or GitHub to get help, make feature requests, and report bugs.",
   joinOurSlack: "Join our Slack",
-  openAGitHubIssue: "Open a GitHub issue",
+  learnMore: "Learn more",
   needHelp: "Need help?",
   needHelpDescription: "View our documentation, or check out the tutorials on the Foxglove blog.",
-  seeTutorials: "See tutorials",
-  collaborateTitle: "Accelerate development with Foxglove Data Platform",
-  secureStorageOfData: "Securely store petabytes of ROS or custom data",
-  convenientWebInterface:
-    "Use a convenient web interface to tag, search, and retrieve data at lightning speed",
-  canBeShared: "Share data files, visualization layouts, and custom extensions with teammates",
-  createAFreeAccount: "Create a free account",
-  signIn: "Sign in",
-  learnMore: "Learn more",
-  startCollaborating: "Start collaborating with your Foxglove organization",
-  startCollaboratingDescription:
-    "Make the most of your Foxglove account – whether you want to dive deep on your data or share tools with your teammates.",
-  uploadToDataPlatform: "Upload to Data Platform",
-  shareLayouts: "Share layouts",
+  newToFoxgloveStudio: "New to Foxglove Studio?",
+  newToFoxgloveStudioDescription:
+    "Start by exploring a sample dataset or checking out our documentation.",
+  openAGitHubIssue: "Open a GitHub issue",
+  openConnection: "Open connection",
+  openConnectionDescription: "Connect to a live robot or server.",
+  openDataSource: "Open data source",
   openLocalFile: "Open local file",
   openLocalFileDescription: "Visualize data directly from your local filesystem.",
   openUrl: "Upload and share data",
   openUrlDescription: "Use Foxglove Data Platform to share data with your team.",
-  openConnection: "Open connection",
-  openConnectionDescription: "Connect to a live robot or server.",
-  openDataSource: "Open data source",
   recentDataSources: "Recent data sources",
+  secureStorageOfData: "Securely store petabytes of ROS or custom data",
+  seeTutorials: "See tutorials",
+  shareLayouts: "Share layouts",
+  signIn: "Sign in",
+  startCollaborating: "Start collaborating with your Foxglove organization",
+  startCollaboratingDescription:
+    "Make the most of your Foxglove account – whether you want to dive deep on your data or share tools with your teammates.",
+  uploadToDataPlatform: "Upload to Data Platform",
+  viewOurDocs: "View our docs",
 };

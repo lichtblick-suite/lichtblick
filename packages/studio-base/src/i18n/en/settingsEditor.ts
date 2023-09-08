@@ -3,16 +3,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const settingsEditor = {
-  searchPanelSettings: "Search panel settings…",
-  title: "Title",
   clearSearch: "Clear search",
-  labels: "Labels",
-  showAll: "Show All",
-  hideAll: "Hide All",
   filterList: "Filter list",
   filterListHelp: "Filter list by visibility",
-  listAll: "List all",
-  listVisible: "List visible",
-  listInvisible: "List invisible",
   general: "General",
+  hideAll: "Hide All",
+  labels: "Labels",
+  listAll: "List all",
+  listInvisible: "List invisible",
+  listVisible: "List visible",
+  searchPanelSettings: "Search panel settings…",
+  showAll: "Show All",
+  title: "Title",
 };

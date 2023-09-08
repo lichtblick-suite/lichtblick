@@ -24,6 +24,42 @@ export default {
   },
 };
 
+export const Foxglove_PointCloud_RGBA_Settings: StoryObj = {
+  render: () => <Foxglove_PointCloud includeSettings />,
+  play: async () => {
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__general"));
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__topics-/pointcloud"),
+    );
+  },
+};
+export const Foxglove_PointCloud_RGBA_SettingsChinese: StoryObj = {
+  ...Foxglove_PointCloud_RGBA_Settings,
+  parameters: { forceLanguage: "zh" },
+};
+export const Foxglove_PointCloud_RGBA_SettingsJapanese: StoryObj = {
+  ...Foxglove_PointCloud_RGBA_Settings,
+  parameters: { forceLanguage: "ja" },
+};
+
+export const Foxglove_PointCloud_Gradient_Settings: StoryObj = {
+  render: () => <Foxglove_PointCloud colorMode="gradient" includeSettings />,
+  play: async () => {
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__general"));
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__topics-/pointcloud"),
+    );
+  },
+};
+export const Foxglove_PointCloud_Gradient_SettingsChinese: StoryObj = {
+  ...Foxglove_PointCloud_Gradient_Settings,
+  parameters: { forceLanguage: "zh" },
+};
+export const Foxglove_PointCloud_Gradient_SettingsJapanese: StoryObj = {
+  ...Foxglove_PointCloud_Gradient_Settings,
+  parameters: { forceLanguage: "ja" },
+};
+
 export const Foxglove_PointCloud_RGBA: StoryObj = {
   render: () => <Foxglove_PointCloud />,
 };
@@ -51,6 +87,7 @@ function Foxglove_PointCloud({
   maxValue,
   stixelsEnabled = false,
   debugPicking = false,
+  includeSettings = false,
 }: {
   pointShape?: "circle" | "square";
   colorMode?: "gradient" | "rgba-fields";
@@ -58,6 +95,7 @@ function Foxglove_PointCloud({
   maxValue?: number;
   stixelsEnabled?: boolean;
   debugPicking?: boolean;
+  includeSettings?: boolean;
 }): JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
@@ -158,7 +196,7 @@ function Foxglove_PointCloud({
   });
 
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} includeSettings={includeSettings}>
       <ThreeDeePanel
         debugPicking={debugPicking}
         overrideConfig={{

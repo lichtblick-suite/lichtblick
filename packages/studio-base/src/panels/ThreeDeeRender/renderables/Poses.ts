@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
@@ -72,11 +73,6 @@ const DEFAULT_SETTINGS: LayerSettingsPose = {
   covarianceColor: DEFAULT_COVARIANCE_COLOR_STR,
 };
 
-const TYPE_OPTIONS = [
-  { label: "Axis", value: "axis" },
-  { label: "Arrow", value: "arrow" },
-];
-
 export type PoseUserData = BaseUserData & {
   settings: LayerSettingsPose;
   topic: string;
@@ -142,11 +138,19 @@ export class Poses extends SceneExtension<PoseRenderable> {
       const type = config.type ?? DEFAULT_TYPE;
 
       const fields: SettingsTreeFields = {
-        type: { label: "Type", input: "select", options: TYPE_OPTIONS, value: type },
+        type: {
+          label: t("threeDee:type"),
+          input: "select",
+          options: [
+            { label: t("threeDee:poseDisplayTypeAxis"), value: "axis" },
+            { label: t("threeDee:poseDisplayTypeArrow"), value: "arrow" },
+          ],
+          value: type,
+        },
       };
       if (type === "axis") {
         fields["axisScale"] = {
-          label: "Scale",
+          label: t("threeDee:scale"),
           input: "number",
           step: 0.5,
           min: 0,
@@ -155,7 +159,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
         };
       } else {
         fields["arrowScale"] = {
-          label: "Scale",
+          label: t("threeDee:scale"),
           input: "vec3",
           labels: ["X", "Y", "Z"],
           step: 0.5,
@@ -163,7 +167,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
           value: config.arrowScale ?? DEFAULT_ARROW_SCALE,
         };
         fields["color"] = {
-          label: "Color",
+          label: t("threeDee:color"),
           input: "rgba",
           value: config.color ?? DEFAULT_COLOR_STR,
         };
@@ -174,13 +178,13 @@ export class Poses extends SceneExtension<PoseRenderable> {
         const covarianceColor = config.covarianceColor ?? DEFAULT_COVARIANCE_COLOR_STR;
 
         fields["showCovariance"] = {
-          label: "Covariance",
+          label: t("threeDee:covariance"),
           input: "boolean",
           value: showCovariance,
         };
         if (showCovariance) {
           fields["covarianceColor"] = {
-            label: "Covariance Color",
+            label: t("threeDee:covarianceColor"),
             input: "rgba",
             value: covarianceColor,
           };

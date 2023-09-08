@@ -124,6 +124,16 @@ export const Basic: StoryObj<{ initialLayoutState: Partial<LayoutData> }> = {
   },
 };
 
+export const Chinese: typeof Basic = {
+  ...Basic,
+  parameters: { forceLanguage: "zh" },
+};
+
+export const Japanese: typeof Basic = {
+  ...Basic,
+  parameters: { forceLanguage: "ja" },
+};
+
 export const FullscreenPanel: typeof Basic = {
   ...Basic,
   play: async () => {

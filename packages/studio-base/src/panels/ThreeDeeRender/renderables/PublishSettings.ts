@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
 import * as _ from "lodash-es";
 
 import { SettingsTreeAction } from "@foxglove/studio";
@@ -48,52 +49,50 @@ export class PublishSettings extends SceneExtension {
       {
         path: ["publish"],
         node: {
-          label: "Publish",
+          label: t("threeDee:publish"),
           fields: {
             type: {
-              label: "Type",
+              label: t("threeDee:type"),
               input: "select",
               value: publish.type,
               options: [
-                { label: "Point (geometry_msgs/Point)", value: "point" },
-                { label: "Pose (geometry_msgs/PoseStamped)", value: "pose" },
+                { label: t("threeDee:publishTypePoint"), value: "point" },
+                { label: t("threeDee:publishTypePose"), value: "pose" },
                 {
-                  label: "Pose estimate (geometry_msgs/PoseWithCovarianceStamped)",
+                  label: t("threeDee:publishTypePoseEstimate"),
                   value: "pose_estimate",
                 },
               ],
-              help: "The type of message to publish when clicking in the scene",
+              help: t("threeDee:publishTypeHelp"),
             },
             topic: {
-              label: "Topic",
+              label: t("threeDee:topic"),
               input: "string",
               value: {
                 point: publish.pointTopic,
                 pose: publish.poseTopic,
                 pose_estimate: publish.poseEstimateTopic,
               }[publish.type],
-              help: `The topic on which to publish ${
-                { point: "points", pose: "poses", pose_estimate: "pose estimates" }[publish.type]
-              }`,
+              help: t("threeDee:publishTopicHelp"),
             },
             ...(publish.type === "pose_estimate" && {
               poseEstimateXDeviation: {
-                label: "X deviation",
+                label: t("threeDee:xDeviation"),
                 input: "number",
                 value: publish.poseEstimateXDeviation,
-                help: "The X standard deviation to publish with pose estimates",
+                help: t("threeDee:xDeviationHelp"),
               },
               poseEstimateYDeviation: {
-                label: "Y deviation",
+                label: t("threeDee:yDeviation"),
                 input: "number",
                 value: publish.poseEstimateYDeviation,
-                help: "The Y standard deviation to publish with pose estimates",
+                help: t("threeDee:yDeviationHelp"),
               },
               poseEstimateThetaDeviation: {
-                label: "Theta deviation",
+                label: t("threeDee:thetaDeviation"),
                 input: "number",
                 value: publish.poseEstimateThetaDeviation,
-                help: "The theta standard deviation to publish with pose estimates",
+                help: t("threeDee:thetaDeviationHelp"),
               },
             }),
           },

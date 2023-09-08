@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { userEvent, screen } from "@storybook/testing-library";
 import { quat } from "gl-matrix";
 
 import { FrameTransform, PosesInFrame } from "@foxglove/schemas";
@@ -17,6 +18,7 @@ import ThreeDeePanel from "../index";
 export default {
   title: "panels/ThreeDeeRender",
   component: ThreeDeePanel,
+  parameters: { colorScheme: "dark" },
 };
 
 type Vec4 = [number, number, number, number];
@@ -139,7 +141,7 @@ export const Foxglove_PosesInFrame: StoryObj = {
     });
 
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup fixture={fixture} includeSettings>
         <ThreeDeePanel
           overrideConfig={{
             followTf: "base_link",
@@ -177,5 +179,18 @@ export const Foxglove_PosesInFrame: StoryObj = {
     );
   },
 
-  parameters: { colorScheme: "dark" },
+  play: async () => {
+    await userEvent.click(
+      await screen.findByTestId("settings__nodeHeaderToggle__topics-/baselink_path"),
+    );
+  },
+};
+
+export const Foxglove_PosesInFrame_Chinese: StoryObj = {
+  ...Foxglove_PosesInFrame,
+  parameters: { forceLanguage: "zh" },
+};
+export const Foxglove_PosesInFrame_Japanese: StoryObj = {
+  ...Foxglove_PosesInFrame,
+  parameters: { forceLanguage: "ja" },
 };

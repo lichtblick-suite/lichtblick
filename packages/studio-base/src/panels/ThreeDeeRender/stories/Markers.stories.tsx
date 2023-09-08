@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { userEvent, screen } from "@storybook/testing-library";
 import { useEffect, useState } from "react";
 
 import { MessageEvent } from "@foxglove/studio";
@@ -18,9 +19,13 @@ import { ColorRGBA, Marker, TransformStamped } from "../ros";
 export default {
   title: "panels/ThreeDeeRender",
   component: ThreeDeePanel,
+  parameters: {
+    colorScheme: "dark",
+    chromatic: { delay: 100 },
+  },
 };
 
-function AllMarkers(props: { showOutlines: boolean }): JSX.Element {
+function AllMarkers(props: { showOutlines: boolean; includeSettings?: boolean }): JSX.Element {
   const topics: Topic[] = [
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
     { name: "/markers", schemaName: "visualization_msgs/Marker" },
@@ -522,7 +527,7 @@ function AllMarkers(props: { showOutlines: boolean }): JSX.Element {
   });
 
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} includeSettings={props.includeSettings}>
       <ThreeDeePanel
         overrideConfig={{
           ...ThreeDeePanel.defaultConfig,
@@ -555,16 +560,31 @@ export const Markers: StoryObj = {
   render: function Story() {
     return <AllMarkers showOutlines={true} />;
   },
+};
 
-  parameters: { colorScheme: "dark", chromatic: { delay: 100 } },
+export const MarkersSettings: StoryObj = {
+  render: function Story() {
+    return <AllMarkers showOutlines={true} includeSettings />;
+  },
+  play: async () => {
+    await userEvent.click(await screen.findByTestId("settings__nodeHeaderToggle__topics-/markers"));
+  },
+};
+
+export const MarkersSettingsChinese: StoryObj = {
+  ...MarkersSettings,
+  parameters: { forceLanguage: "zh" },
+};
+
+export const MarkersSettingsJapanese: StoryObj = {
+  ...MarkersSettings,
+  parameters: { forceLanguage: "ja" },
 };
 
 export const MarkersNoOutlines: StoryObj = {
   render: function Story() {
     return <AllMarkers showOutlines={false} />;
   },
-
-  parameters: { colorScheme: "dark", chromatic: { delay: 100 } },
 };
 
 export const EmptyLineStrip: StoryObj = {
@@ -704,8 +724,6 @@ export const EmptyLineStrip: StoryObj = {
   },
 
   parameters: {
-    colorScheme: "dark",
-    chromatic: { delay: 100 },
     useReadySignal: true,
   },
 };

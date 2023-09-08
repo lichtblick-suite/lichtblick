@@ -3,14 +3,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panelSettings = {
-  importOrExportSettings: "Import/export settings",
-  importOrExportSettingsWithEllipsis: "Import/export settings...",
-  resetToDefaults: "Reset to defaults",
-  panelSettings: "Panel settings",
-  selectAPanelToEditItsSettings: "Select a panel to edit its settings.",
-  loadingPanelSettings: "Loading panel settings...",
   currentSettingsPanelName: "{{title}} panel settings",
-  panelName: "{{title}} panel",
+  importOrExportSettings: "Import/export settings",
+  importOrExportSettingsWithEllipsis: "Import/export settings…",
+  loadingPanelSettings: "Loading panel settings…",
   panelDoesNotHaveSettings: "This panel does not have any settings",
+  panelName: "{{title}} panel",
+  panelSettings: "Panel settings",
+  resetToDefaults: "Reset to defaults",
+  selectAPanelToEditItsSettings: "Select a panel to edit its settings.",
   unknown: "Unknown",
 };
