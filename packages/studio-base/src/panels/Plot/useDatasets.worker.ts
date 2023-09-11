@@ -5,7 +5,6 @@
 import * as Comlink from "comlink";
 import * as R from "ramda";
 
-import { compare as compareTimes, subtract as subtractTimes, fromSec } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
 import { iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
@@ -525,28 +524,20 @@ function updateView(id: string, view: PlotViewport): void {
   client.queueRebuild();
 }
 
-const CULL_THRESHOLD = fromSec(10);
+const MESSAGE_CULL_THRESHOLD = 15_000;
 
 function compressClients(): void {
   if (!isLive) {
     return;
   }
 
-  current = R.map((messages) => {
-    if (messages.length > 10000) {
-      return messages.slice(messages.length - 10000);
-    }
-
-    const start = messages.at(0)?.receiveTime;
-    const end = messages.at(-1)?.receiveTime;
-    if (end == undefined || start == undefined) {
-      return messages;
-    }
-
-    const cutoff = subtractTimes(end, CULL_THRESHOLD);
-    const index = R.findIndex(({ receiveTime }) => compareTimes(receiveTime, cutoff) > 0, messages);
-    return messages.slice(index);
-  }, current);
+  current = R.map(
+    (messages) =>
+      messages.length > MESSAGE_CULL_THRESHOLD
+        ? messages.slice(messages.length - MESSAGE_CULL_THRESHOLD)
+        : messages,
+    current,
+  );
 
   for (const client of R.values(clients)) {
     const { params } = client;
