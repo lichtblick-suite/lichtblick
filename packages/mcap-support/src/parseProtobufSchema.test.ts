@@ -200,7 +200,7 @@ describe("parseProtobufSchema", () => {
           {
             "isArray": false,
             "name": "sec",
-            "type": "int64",
+            "type": "int32",
           },
           {
             "isArray": false,
@@ -216,7 +216,7 @@ describe("parseProtobufSchema", () => {
           {
             "isArray": false,
             "name": "sec",
-            "type": "int64",
+            "type": "int32",
           },
           {
             "isArray": false,

@@ -74,6 +74,15 @@ export function protobufDefinitionsToDatatypes(
         throw new Error("Repeated bytes are not currently supported");
       }
       definitions.push({ type: "uint8", name: field.name, isArray: true });
+    } else if (
+      type.fullName === ".google.protobuf.Timestamp" ||
+      type.fullName === ".google.protobuf.Duration"
+    ) {
+      definitions.push({
+        type: "int32",
+        name: field.name === "seconds" ? "sec" : "nsec",
+        isArray: field.repeated,
+      });
     } else {
       definitions.push({
         type: protobufScalarToRosPrimitive(field.type),

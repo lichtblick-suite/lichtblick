@@ -29,34 +29,28 @@ export function parseProtobufSchema(
   // {sec: number, nsec: number}, compatible with the rest of Studio. The standard Protobuf types
   // use different names (`seconds` and `nanos`), and `seconds` is an `int64`, which would be
   // deserialized as a bigint by default.
+  //
+  // protobufDefinitionsToDatatypes also has matching logic to rename the fields.
   const fixTimeType = (
     type: protobufjs.ReflectionObject | null /* eslint-disable-line no-restricted-syntax */,
   ) => {
     if (!type || !(type instanceof protobufjs.Type)) {
       return;
     }
-    // Rename fields so that protobufDefinitionsToDatatypes uses the new names
-    for (const field of type.fieldsArray) {
-      if (field.name === "seconds") {
-        field.name = "sec";
-      } else if (field.name === "nanos") {
-        field.name = "nsec";
-      }
-    }
     type.setup(); // ensure the original optimized toObject has been created
     const prevToObject = type.toObject; // eslint-disable-line @typescript-eslint/unbound-method
     const newToObject: typeof prevToObject = (message, options) => {
       const result = prevToObject.call(type, message, options);
-      const { sec, nsec } = result as { sec: bigint; nsec: number };
-      if (typeof sec !== "bigint" || typeof nsec !== "number") {
+      const { seconds, nanos } = result as { seconds: bigint; nanos: number };
+      if (typeof seconds !== "bigint" || typeof nanos !== "number") {
         return result;
       }
-      if (sec > BigInt(Number.MAX_SAFE_INTEGER)) {
+      if (seconds > BigInt(Number.MAX_SAFE_INTEGER)) {
         throw new Error(
-          `Timestamps with seconds greater than 2^53-1 are not supported (found seconds=${sec}, nanos=${nsec})`,
+          `Timestamps with seconds greater than 2^53-1 are not supported (found seconds=${seconds}, nanos=${nanos})`,
         );
       }
-      return { sec: Number(sec), nsec };
+      return { sec: Number(seconds), nsec: nanos };
     };
     type.toObject = newToObject;
   };
