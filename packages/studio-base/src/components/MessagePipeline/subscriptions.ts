@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
 import moize from "moize";
+import * as R from "ramda";
 
-import { filterMap } from "@foxglove/den/collection";
 import { Immutable } from "@foxglove/studio";
 import { SubscribePayload } from "@foxglove/studio-base/players/types";
 
@@ -20,6 +19,63 @@ export function makeSubscriptionMemoizer(): (val: SubscribePayload) => Subscribe
 }
 
 /**
+ * Merge two SubscribePayloads, using either all of the fields or the union of
+ * the specific fields requested.
+ */
+function mergeSubscription(
+  a: Immutable<SubscribePayload>,
+  b: Immutable<SubscribePayload>,
+): Immutable<SubscribePayload> {
+  const isAllFields = a.fields == undefined || b.fields == undefined;
+  const fields = R.pipe(
+    R.chain((payload: Immutable<SubscribePayload>): readonly string[] => payload.fields ?? []),
+    R.map((v) => v.trim()),
+    R.filter((v: string) => v.length > 0),
+    R.uniq,
+  )([a, b]);
+
+  return {
+    ...a,
+    ...(fields.length > 0 && !isAllFields ? { fields } : {}),
+  };
+}
+
+/**
+ * Merge subscriptions that subscribe to the same topic, paying attention to
+ * the fields they need. This ignores `preloadType`.
+ */
+function denormalizeSubscriptions(
+  subscriptions: Immutable<SubscribePayload[]>,
+): Immutable<SubscribePayload[]> {
+  return R.pipe(
+    R.groupBy((v: Immutable<SubscribePayload>) => v.topic),
+    R.values,
+    // Filter out any set of payloads that contains _only_ empty `fields`
+    R.filter((payloads: Immutable<SubscribePayload[]> | undefined) => {
+      // Handle this later
+      if (payloads == undefined) {
+        return true;
+      }
+
+      return !R.all(
+        (v: Immutable<SubscribePayload>) => v.fields != undefined && v.fields.length === 0,
+        payloads,
+      );
+    }),
+    // Now reduce them down to a single payload for each topic
+    R.chain(
+      (payloads: Immutable<SubscribePayload[]> | undefined): Immutable<SubscribePayload>[] => {
+        const first = payloads?.[0];
+        if (payloads == undefined || first == undefined || payloads.length === 0) {
+          return [];
+        }
+        return [R.reduce(mergeSubscription, first, payloads)];
+      },
+    ),
+  )(subscriptions);
+}
+
+/**
  * Merges individual topic subscriptions into a set of subscriptions to send on to the player.
  *
  * If any client requests a "whole" subscription to a topic then all fields will be fetched for that
@@ -28,40 +84,9 @@ export function makeSubscriptionMemoizer(): (val: SubscribePayload) => Subscribe
  */
 export function mergeSubscriptions(
   subscriptions: Immutable<SubscribePayload[]>,
-): Immutable<SubscribePayload>[] {
-  const fullSubsByTopic = new Map<string, Immutable<SubscribePayload>>();
-  const partialSubsByTopic = new Map<string, Immutable<SubscribePayload>>();
-  for (const sub of subscriptions) {
-    const target = sub.preloadType === "full" ? fullSubsByTopic : partialSubsByTopic;
-    const existing = target.get(sub.topic);
-    if (existing) {
-      if (existing.fields == undefined) {
-        // Nothing to do, already subscribed to the whole topic.
-      } else if (sub.fields == undefined) {
-        // Replace any slice subscription with a subscription to the whole topic.
-        target.set(sub.topic, sub);
-      } else {
-        // Skip slice subscriptions with no non-empty fields selected.
-        const nonEmptyFields = filterMap(sub.fields, (field) => {
-          const trimmed = field.trim();
-          return trimmed.length > 0 ? trimmed : undefined;
-        });
-        if (nonEmptyFields.length > 0) {
-          target.set(sub.topic, { ...sub, fields: _.union(existing.fields, nonEmptyFields) });
-        }
-      }
-    } else {
-      if (sub.fields == undefined) {
-        // If no subscription for this topic exists, register a whole topic subscription.
-        target.set(sub.topic, sub);
-      } else {
-        // Only register a slice sub if some fields are selected.
-        const hasNonEmptyField = sub.fields.some((field) => field.trim().length > 0);
-        if (hasNonEmptyField) {
-          target.set(sub.topic, sub);
-        }
-      }
-    }
-  }
-  return [...fullSubsByTopic.values(), ...partialSubsByTopic.values()];
+): Immutable<SubscribePayload[]> {
+  return R.pipe(
+    R.partition((v: Immutable<SubscribePayload>) => v.preloadType === "full"),
+    ([full, partial]) => [...denormalizeSubscriptions(full), ...denormalizeSubscriptions(partial)],
+  )(subscriptions);
 }
