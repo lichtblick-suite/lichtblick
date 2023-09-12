@@ -60,6 +60,7 @@ const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonF
       alignItems: "flex-start",
       height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px - ${spacing(5.25)})`,
       overflow: "hidden",
+      minWidth: 200,
 
       [`.${classes.container}`]: {
         pointerEvents: "auto",
@@ -107,7 +108,8 @@ const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonF
       alignItems: "center",
       overflow: "auto",
       display: "grid",
-      gridTemplateColumns: "auto minmax(0, 1fr) auto",
+      gridTemplateColumns: "auto minmax(0, 1fr) auto auto",
+      columnGap: 1,
     },
     dragHandle: {
       userSelect: "none",
