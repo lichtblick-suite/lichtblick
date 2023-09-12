@@ -44,4 +44,19 @@ describe("useTopicListSearch", () => {
     const { result } = renderHook(() => useTopicListSearch({ topics, datatypes, filterText: "d" }));
     expect(result.current.map(itemToString)).toEqual(["abc", "xyz", "xyz.abcd"]);
   });
+
+  it("sorts better matches to the top", () => {
+    const topics: UseTopicListSearchParams["topics"] = [
+      { name: "footballer", schemaName: "ABCD" },
+      { name: "xyz", schemaName: "XYZW" },
+    ];
+    const datatypes: UseTopicListSearchParams["datatypes"] = new Map([
+      ["ABCD", { definitions: [{ name: "lmnop", type: "string" }] }],
+      ["XYZW", { definitions: [{ name: "foobar", type: "string" }] }],
+    ]);
+    const { result } = renderHook(() =>
+      useTopicListSearch({ topics, datatypes, filterText: "foobar" }),
+    );
+    expect(result.current.map(itemToString)).toEqual(["xyz", "xyz.foobar", "footballer"]);
+  });
 });

@@ -88,31 +88,40 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
     );
 
     // Gather all topics that either match or contain a matching message path
-    const allTopicsToShowByName = new Map<string, Topic>();
+    const allTopicsToShowByName = new Map<string, { topic: Topic; maxScore: number }>();
     const matchedTopicsByName = new Map<string, FzfResultItem<Topic>>();
     for (const topic of filteredTopics) {
-      allTopicsToShowByName.set(topic.item.name, topic.item);
+      allTopicsToShowByName.set(topic.item.name, { topic: topic.item, maxScore: topic.score });
       matchedTopicsByName.set(topic.item.name, topic);
     }
     for (const {
       item: { topic },
+      score,
     } of messagePathResults) {
-      allTopicsToShowByName.set(topic.name, topic);
+      const existingTopic = allTopicsToShowByName.get(topic.name);
+      if (existingTopic == undefined) {
+        allTopicsToShowByName.set(topic.name, { topic, maxScore: score });
+      } else if (score > existingTopic.maxScore) {
+        existingTopic.maxScore = score;
+      }
     }
 
-    // Sort topics with matches above topics that are only shown because they have matching paths
+    // Sort topics by max score across all paths, then topics with matches above topics that are only shown because they have matching paths
     const sortedTopics = Array.from(allTopicsToShowByName.values()).sort((a, b) => {
-      const aMatched = matchedTopicsByName.has(a.name);
-      const bMatched = matchedTopicsByName.has(b.name);
-      if (aMatched && !bMatched) {
-        return -1;
-      } else if (!aMatched && bMatched) {
-        return 1;
+      if (a.maxScore !== b.maxScore) {
+        return b.maxScore - a.maxScore;
       }
-      return a.name.localeCompare(b.name);
+
+      const aMatched = matchedTopicsByName.has(a.topic.name);
+      const bMatched = matchedTopicsByName.has(b.topic.name);
+      if (aMatched !== bMatched) {
+        return aMatched ? -1 : 1;
+      }
+
+      return a.topic.name.localeCompare(b.topic.name);
     });
 
-    for (const topic of sortedTopics) {
+    for (const { topic } of sortedTopics) {
       results.push({
         type: "topic",
         item: matchedTopicsByName.get(topic.name) ?? topicToFzfResult(topic),
