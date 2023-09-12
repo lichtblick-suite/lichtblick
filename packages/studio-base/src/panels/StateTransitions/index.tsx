@@ -193,13 +193,13 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   useEffect(() => {
     setMessagePathDropConfig({
-      getDropStatus(path) {
-        if (!path.isLeaf) {
+      getDropStatus(draggedPaths) {
+        if (draggedPaths.some((path) => !path.isLeaf)) {
           return { canDrop: false };
         }
         return { canDrop: true, effect: "add" };
       },
-      handleDrop(path) {
+      handleDrop(draggedPaths) {
         saveConfig((prevConfig) => ({
           ...prevConfig,
           paths: [
@@ -208,7 +208,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             ...(prevConfig.paths.length === 1 && prevConfig.paths[0]?.value === ""
               ? []
               : prevConfig.paths),
-            { value: path.path, enabled: true, timestampMethod: "receiveTime" },
+            ...draggedPaths.map((path) => ({
+              value: path.path,
+              enabled: true,
+              timestampMethod: "receiveTime" as const,
+            })),
           ],
         }));
       },

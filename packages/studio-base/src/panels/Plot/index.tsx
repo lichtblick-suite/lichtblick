@@ -117,13 +117,13 @@ function Plot(props: Props) {
 
   useEffect(() => {
     setMessagePathDropConfig({
-      getDropStatus(path) {
-        if (!path.isLeaf) {
+      getDropStatus(paths) {
+        if (paths.some((path) => !path.isLeaf)) {
           return { canDrop: false };
         }
         return { canDrop: true, effect: "add" };
       },
-      handleDrop(path) {
+      handleDrop(paths) {
         saveConfig((prevConfig) => ({
           ...prevConfig,
           paths: [
@@ -132,7 +132,11 @@ function Plot(props: Props) {
             ...(prevConfig.paths.length === 1 && prevConfig.paths[0]?.value === ""
               ? []
               : prevConfig.paths),
-            { value: path.path, enabled: true, timestampMethod: "receiveTime" },
+            ...paths.map((path) => ({
+              value: path.path,
+              enabled: true,
+              timestampMethod: "receiveTime" as const,
+            })),
           ],
         }));
       },

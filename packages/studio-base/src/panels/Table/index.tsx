@@ -67,11 +67,17 @@ function TablePanel({ config, saveConfig }: Props) {
 
   useEffect(() => {
     setMessagePathDropConfig({
-      getDropStatus(_path) {
+      getDropStatus(paths) {
+        if (paths.length !== 1) {
+          return { canDrop: false };
+        }
         return { canDrop: true, effect: "replace" };
       },
-      handleDrop(path) {
-        saveConfig({ topicPath: path.path });
+      handleDrop(paths) {
+        const path = paths[0];
+        if (path) {
+          saveConfig({ topicPath: path.path });
+        }
       },
     });
   }, [setMessagePathDropConfig, saveConfig]);

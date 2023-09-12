@@ -264,11 +264,11 @@ export type MessagePathDropStatus = {
 };
 
 export type MessagePathDropConfig = {
-  /** Called when the user drags a message path over the panel. */
-  getDropStatus: (path: DraggedMessagePath) => MessagePathDropStatus;
+  /** Called when the user drags message paths over the panel. */
+  getDropStatus: (paths: readonly DraggedMessagePath[]) => MessagePathDropStatus;
 
-  /** Called when the user drops a message path on the panel. */
-  handleDrop: (path: DraggedMessagePath) => void;
+  /** Called when the user drops message paths on the panel. */
+  handleDrop: (paths: readonly DraggedMessagePath[]) => void;
 };
 
 export type PanelExtensionContext = {

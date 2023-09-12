@@ -166,33 +166,39 @@ export function ThreeDeeRender(props: {
 
   useEffect(() => {
     context.EXPERIMENTAL_setMessagePathDropConfig({
-      getDropStatus(path) {
+      getDropStatus(paths) {
         if (interfaceMode !== "image") {
           return { canDrop: false };
         }
-        if (!path.isTopic || path.rootSchemaName == undefined) {
-          return { canDrop: false };
+        let effect: "add" | "replace" = "add";
+        for (const path of paths) {
+          if (!path.isTopic || path.rootSchemaName == undefined) {
+            return { canDrop: false };
+          }
+          if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
+            effect = "replace";
+          } else if (ALL_SUPPORTED_ANNOTATION_SCHEMAS.has(path.rootSchemaName)) {
+            // nothing to do
+          } else {
+            return { canDrop: false };
+          }
         }
-        if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
-          return { canDrop: true, effect: "replace" };
-        }
-        if (ALL_SUPPORTED_ANNOTATION_SCHEMAS.has(path.rootSchemaName)) {
-          return { canDrop: true, effect: "add" };
-        }
-        return { canDrop: false };
+        return { canDrop: true, effect };
       },
-      handleDrop(path) {
+      handleDrop(paths) {
         setConfig((prevConfig) =>
           produce(prevConfig, (draft) => {
-            if (path.rootSchemaName == undefined) {
-              return;
-            }
-            if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
-              draft.imageMode.imageTopic = path.path;
-            } else {
-              draft.imageMode.annotations ??= {};
-              draft.imageMode.annotations[path.path] ??= {};
-              draft.imageMode.annotations[path.path]!.visible = true;
+            for (const path of paths) {
+              if (path.rootSchemaName == undefined) {
+                continue;
+              }
+              if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
+                draft.imageMode.imageTopic = path.path;
+              } else {
+                draft.imageMode.annotations ??= {};
+                draft.imageMode.annotations[path.path] ??= {};
+                draft.imageMode.annotations[path.path]!.visible = true;
+              }
             }
           }),
         );

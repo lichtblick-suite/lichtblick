@@ -61,14 +61,16 @@ class MockPanelCatalog implements PanelCatalog {
           Object.assign(
             function DroppablePanel() {
               const { setMessagePathDropConfig } = usePanelContext();
-              const [droppedPath, setDroppedPath] = useState<DraggedMessagePath | undefined>();
+              const [droppedPaths, setDroppedPaths] = useState<
+                readonly DraggedMessagePath[] | undefined
+              >();
               useEffect(() => {
                 setMessagePathDropConfig({
-                  getDropStatus(_path) {
+                  getDropStatus(_paths) {
                     return { canDrop: true, message: "Example drop message" };
                   },
-                  handleDrop(path) {
-                    setDroppedPath(path);
+                  handleDrop(paths) {
+                    setDroppedPaths(paths);
                   },
                 });
               }, [setMessagePathDropConfig]);
@@ -76,7 +78,7 @@ class MockPanelCatalog implements PanelCatalog {
                 <>
                   <PanelToolbar />
                   <div>Drop here!</div>
-                  {droppedPath && <pre>{JSON.stringify(droppedPath, undefined, 2)}</pre>}
+                  {droppedPaths && <pre>{JSON.stringify(droppedPaths, undefined, 2)}</pre>}
                 </>
               );
             },
@@ -106,7 +108,17 @@ export const Basic: StoryObj<{ initialLayoutState: Partial<LayoutData> }> = {
   render: (args) => {
     const fixture: Fixture = {
       topics: [{ name: "foo", schemaName: "test.Foo" }],
-      datatypes: new Map([["test.Foo", { definitions: [{ name: "bar", type: "string" }] }]]),
+      datatypes: new Map([
+        [
+          "test.Foo",
+          {
+            definitions: [
+              { name: "bar", type: "string" },
+              { name: "baz", type: "string" },
+            ],
+          },
+        ],
+      ]),
     };
     const providers = [
       /* eslint-disable react/jsx-key */
@@ -207,6 +219,38 @@ export const DragPathDrop: typeof Basic = {
         throw new Error("Expected 2 drag handles");
       }
       return handles[1]!;
+    });
+    fireEvent.dragStart(handle);
+    const dest = await screen.findByText("Drop here!");
+    fireEvent.dragOver(dest);
+    fireEvent.drop(dest);
+  },
+};
+
+export const DragMultipleItems: typeof Basic = {
+  ...DragTopicStart,
+  play: async () => {
+    fireEvent.click(await screen.findByText("Topics"));
+    fireEvent.change(await screen.findByPlaceholderText("Filter by topic or schema name…"), {
+      target: { value: "fooba" },
+    });
+    fireEvent.click(
+      await screen.findByText(
+        (_content, element) => element instanceof HTMLSpanElement && element.textContent === ".bar",
+      ),
+    );
+    fireEvent.click(
+      await screen.findByText(
+        (_content, element) => element instanceof HTMLSpanElement && element.textContent === ".baz",
+      ),
+      { metaKey: true },
+    );
+    const handle = await waitFor(async () => {
+      const handles = await screen.findAllByTestId("TopicListDragHandle");
+      if (handles.length < 3) {
+        throw new Error("Expected 3 drag handles");
+      }
+      return handles[2]!;
     });
     fireEvent.dragStart(handle);
     const dest = await screen.findByText("Drop here!");

@@ -9,12 +9,31 @@
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-type TreeClasses = "dragHandle" | "isDragging";
+type TreeClasses = "dragHandle" | "isDragging" | "selected";
 
 /* eslint-disable tss-unused-classes/unused-classes */
 export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, classes) => ({
   root: {
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
     containerType: "inline-size",
+  },
+  filterBar: {
+    top: 0,
+    zIndex: theme.zIndex.appBar,
+    padding: theme.spacing(0.5),
+    position: "sticky",
+    backgroundColor: theme.palette.background.paper,
+  },
+  filterStartAdornment: {
+    display: "flex",
+  },
+  skeletonText: {
+    marginTop: theme.spacing(0.5),
+    marginBottom: theme.spacing(0.5),
   },
   aliasedTopicName: {
     color: theme.palette.primary.main,
@@ -46,9 +65,24 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
     backgroundColor: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.action.selected}`,
 
+    [`&.${classes.selected}`]: {
+      // use opaque color for better drag preview
+      backgroundColor: tc
+        .mix(
+          theme.palette.background.paper,
+          theme.palette.primary.main,
+          100 * theme.palette.action.selectedOpacity,
+        )
+        .toRgbString(),
+    },
     [`&.${classes.isDragging}:active`]: {
-      backgroundColor: tc(theme.palette.primary.main)
-        .setAlpha(theme.palette.action.hoverOpacity)
+      // use opaque color for better drag preview
+      backgroundColor: tc
+        .mix(
+          theme.palette.background.paper,
+          theme.palette.primary.main,
+          100 * theme.palette.action.hoverOpacity,
+        )
         .toRgbString(),
       outline: `1px solid ${theme.palette.primary.main}`,
       outlineOffset: -1,
@@ -65,5 +99,23 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
     cursor: "grab",
   },
   isDragging: {},
+  selected: {},
+
+  countBadge: {
+    padding: theme.spacing(0.25, 0.5),
+    borderRadius: "1em",
+    minWidth: theme.spacing(2),
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
+    fontWeight: "bold",
+    fontSize: theme.typography.caption.fontSize,
+    textAlign: "center",
+    marginLeft: theme.spacing(-1),
+  },
+
+  textContent: {
+    maxWidth: "100%",
+    userSelect: "text",
+  },
 }));
 /* eslint-enable tss-unused-classes/unused-classes */
