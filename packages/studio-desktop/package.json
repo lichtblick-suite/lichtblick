@@ -20,7 +20,7 @@
     "@types/electron-devtools-installer": "2.2.2",
     "@types/plist": "^3.0.2",
     "@types/pngjs": "^6.0.1",
-    "@types/tinycolor2": "1.4.3",
+    "@types/tinycolor2": "1.4.4",
     "@types/utif": "^3.0.1",
     "@xmldom/xmldom": "0.8.10",
     "app-builder-lib": "*",
