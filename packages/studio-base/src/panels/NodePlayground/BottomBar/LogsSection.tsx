@@ -3,13 +3,57 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Link, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 import Tree from "react-json-tree";
+import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
+const useStyles = makeStyles()({
+  list: {
+    height: "100%",
+    overflowY: "auto",
+  },
+});
+
 const LogsSection = ({ logs }: { logs: readonly UserNodeLog[] }): JSX.Element => {
+  // Manage auto-scroll behavior when user is also manually scrolling the list.
+  const [autoScroll, setAutoScroll] = useState(true);
+
+  const { classes } = useStyles();
+
+  const listRef = useRef<HTMLUListElement>(ReactNull);
+
+  useEffect(() => {
+    if (autoScroll) {
+      if (listRef.current) {
+        listRef.current.scrollTop = listRef.current.scrollHeight;
+      }
+    }
+  }, [autoScroll, logs]);
+
+  useEffect(() => {
+    const ref = listRef.current;
+    function listener(event: WheelEvent) {
+      if (event.deltaY < 0) {
+        setAutoScroll(false);
+      } else {
+        const scrolledUp = ref != undefined && ref.scrollHeight - ref.scrollTop > ref.clientHeight;
+        if (scrolledUp) {
+          setAutoScroll(true);
+        }
+      }
+    }
+
+    ref?.addEventListener("wheel", listener);
+
+    return () => {
+      ref?.removeEventListener("wheel", listener);
+    };
+  }, []);
+
   const jsonTreeTheme = useJsonTreeTheme();
   const valueColorMap: Record<string, string> = {
     string: jsonTreeTheme.base0B,
@@ -32,7 +76,7 @@ const LogsSection = ({ logs }: { logs: readonly UserNodeLog[] }): JSX.Element =>
     );
   }
   return (
-    <List dense disablePadding>
+    <List dense disablePadding ref={listRef} className={classes.list}>
       {logs.map(({ source, value }, idx) => {
         const renderTreeObj = value != undefined && typeof value === "object";
         return (

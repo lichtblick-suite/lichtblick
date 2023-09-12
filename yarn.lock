@@ -2826,6 +2826,7 @@ __metadata:
     react-monaco-editor: 0.54.0
     react-mosaic-component: 6.0.1
     react-refresh-typescript: 2.0.9
+    react-resizable-panels: 0.0.55
     react-resize-detector: 9.1.0
     react-transition-group: 4.4.5
     react-use: 17.4.0
@@ -18689,6 +18690,16 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 2c7fe9cbd766f5e54beb4bec2e2efb2de3583037b23fef8fa511ab426ed7f1ae992382db5acd8ab5bfb030a4b93a06a2ebca41377d6eeaf0e6791bb0a59616a4
+  languageName: node
+  linkType: hard
+
+"react-resizable-panels@npm:0.0.55":
+  version: 0.0.55
+  resolution: "react-resizable-panels@npm:0.0.55"
+  peerDependencies:
+    react: ^16.14.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0
+  checksum: a7cb938403b57d2489638eb2cf93fddcb420fbd51b8af2b959881ada83ba052f79f51610d650019e577f0e6018542e9195e4bfe45e4e884b4821744c45837646
   languageName: node
   linkType: hard
 

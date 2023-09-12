@@ -12,18 +12,8 @@
 //   You may not use this file except in compliance with the License.
 //
 
-import {
-  Badge,
-  Button,
-  Paper,
-  Tab,
-  Tabs,
-  Divider,
-  Collapse,
-  tabClasses,
-  badgeClasses,
-} from "@mui/material";
-import { useState, useRef, useEffect, ReactElement } from "react";
+import { Badge, Button, Divider, Paper, Tab, Tabs, badgeClasses, tabClasses } from "@mui/material";
+import { ReactElement, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -33,18 +23,25 @@ import LogsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/L
 import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 type Props = {
-  nodeId?: string;
-  isSaved: boolean;
-  save: () => void;
   diagnostics: readonly Diagnostic[];
+  isSaved: boolean;
   logs: readonly UserNodeLog[];
+  nodeId?: string;
+  onChangeTab: () => void;
+  save: () => void;
 };
 
-type BottomBarModes = "logs" | "diagnostics" | "closed";
+type BottomBarModes = "logs" | "diagnostics";
 
 const TAB_HEIGHT = 36;
 
 const useStyles = makeStyles()((theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    overflowY: "hidden",
+  },
   badge: {
     alignItems: "center",
 
@@ -76,35 +73,30 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactElement => {
+const BottomBar = ({
+  diagnostics,
+  isSaved,
+  logs,
+  nodeId,
+  onChangeTab,
+  save,
+}: Props): ReactElement => {
   const { classes } = useStyles();
-  const [bottomBarDisplay, setBottomBarDisplay] = useState<BottomBarModes>("closed");
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [bottomBarDisplay, setBottomBarDisplay] = useState<BottomBarModes>("diagnostics");
 
   const { clearUserNodeLogs } = useUserNodeState();
-  const scrollContainer = useRef<HTMLDivElement>(ReactNull);
 
   const handleChange = (_event: React.SyntheticEvent, value: BottomBarModes) => {
     setBottomBarDisplay(value);
   };
 
-  const handleClick = (value: BottomBarModes) => {
-    if (bottomBarDisplay === value) {
-      setBottomBarDisplay("closed");
-    }
+  const handleClick = () => {
+    onChangeTab();
   };
-
-  useEffect(() => {
-    if (autoScroll) {
-      if (scrollContainer.current) {
-        scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
-      }
-    }
-  }, [autoScroll, logs]);
 
   return (
     <>
-      <Paper elevation={0}>
+      <Paper elevation={0} className={classes.root}>
         <Divider />
         <Stack
           direction="row"
@@ -116,7 +108,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
           <Tabs
             className={classes.tabs}
             textColor="inherit"
-            value={bottomBarDisplay !== "closed" ? bottomBarDisplay : false}
+            value={bottomBarDisplay}
             onChange={handleChange}
           >
             <Tab
@@ -133,7 +125,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
               value="diagnostics"
               data-testid="np-errors"
               onClick={() => {
-                handleClick("diagnostics");
+                handleClick();
               }}
             />
             <Tab
@@ -150,11 +142,11 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
               value="logs"
               data-testid="np-logs"
               onClick={() => {
-                handleClick("logs");
+                handleClick();
               }}
             />
           </Tabs>
-          <Stack direction="row" alignItems="center" gap={0.5}>
+          <Stack direction="row" alignItems="center" gap={0.5} fullHeight>
             {bottomBarDisplay === "logs" && (
               <Button
                 size="small"
@@ -188,31 +180,9 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
             </Button>
           </Stack>
         </Stack>
-        {bottomBarDisplay !== "closed" && <Divider />}
-      </Paper>
-      <Paper elevation={0}>
-        <Stack fullHeight position="relative">
-          <Collapse
-            onScroll={({ currentTarget }) => {
-              const scrolledUp =
-                currentTarget.scrollHeight - currentTarget.scrollTop > currentTarget.clientHeight;
-              if (scrolledUp && autoScroll) {
-                setAutoScroll(false);
-              } else if (!scrolledUp && !autoScroll) {
-                setAutoScroll(true);
-              }
-            }}
-            ref={scrollContainer}
-            in={bottomBarDisplay !== "closed"}
-          >
-            <Stack overflow="auto" style={{ height: 150 }}>
-              {bottomBarDisplay === "diagnostics" && (
-                <DiagnosticsSection diagnostics={diagnostics} />
-              )}
-              {bottomBarDisplay === "logs" && <LogsSection logs={logs} />}
-            </Stack>
-          </Collapse>
-        </Stack>
+        <Divider />
+        {bottomBarDisplay === "diagnostics" && <DiagnosticsSection diagnostics={diagnostics} />}
+        {bottomBarDisplay === "logs" && <LogsSection logs={logs} />}
       </Paper>
     </>
   );

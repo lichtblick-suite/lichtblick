@@ -154,6 +154,7 @@
     "react-monaco-editor": "0.54.0",
     "react-mosaic-component": "6.0.1",
     "react-refresh-typescript": "2.0.9",
+    "react-resizable-panels": "0.0.55",
     "react-resize-detector": "9.1.0",
     "react-transition-group": "4.4.5",
     "react-use": "17.4.0",
