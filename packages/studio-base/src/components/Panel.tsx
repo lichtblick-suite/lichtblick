@@ -446,7 +446,7 @@ export default function Panel<
     const { keyUpHandlers, keyDownHandlers } = useMemo(
       () => ({
         keyUpHandlers: {
-          "`": () => {
+          Backquote: () => {
             setQuickActionsKeyPressed(false);
           },
           "~": () => {
@@ -460,7 +460,7 @@ export default function Panel<
               selectAllPanels();
             }
           },
-          "`": () => {
+          Backquote: () => {
             setQuickActionsKeyPressed(true);
           },
           "~": () => {

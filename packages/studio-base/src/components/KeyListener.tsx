@@ -29,10 +29,12 @@ function callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent): 
     return;
   }
 
-  if (typeof handlers[event.key] === "function") {
+  const handler = handlers[event.key] ?? handlers[event.code];
+
+  if (typeof handler === "function") {
     let preventDefault = true;
     try {
-      preventDefault = handlers[event.key]?.(event) ?? true;
+      preventDefault = handler(event) ?? true;
     } finally {
       if (preventDefault) {
         event.preventDefault();
