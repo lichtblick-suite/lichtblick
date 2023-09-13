@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@mui/material";
 import * as _ from "lodash-es";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -204,6 +205,8 @@ function Plot(props: Props) {
     return followingView ?? fixedView ?? undefined;
   }, [fixedView, followingView]);
 
+  const theme = useTheme();
+
   const {
     data: plotData,
     provider,
@@ -211,7 +214,7 @@ function Plot(props: Props) {
   } = useDatasets({
     startTime: startTime ?? ZERO_TIME,
     paths: yAxisPaths,
-    invertedTheme: false,
+    invertedTheme: theme.palette.mode === "dark",
     xAxisPath,
     xAxisVal,
     minXValue,
