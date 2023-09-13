@@ -8,10 +8,6 @@
 // See typings/index.d.ts for additional included references
 /// <reference types="./typings" />
 
-export {
-  default as DialogHostIdContext,
-  useDialogHostId,
-} from "@foxglove/studio-base/context/DialogHostIdContext";
 export { App } from "./App";
 export type { NetworkInterface, OsContext } from "./OsContext";
 export type {
