@@ -1103,13 +1103,10 @@ export default class UserNodePlayer implements Player {
         // Subscribe to all fields for all topics used by this user script
         // because we can't know what fields the user script actually uses
         // (for now)
-        return R.map(
-          (v) => ({
-            topic: v,
-            preloadType,
-          }),
-          topics,
-        );
+        return topics.map((v) => ({
+          topic: v,
+          preloadType,
+        }));
       }),
       mergeSubscriptions,
     )(payloadInputsPairs);

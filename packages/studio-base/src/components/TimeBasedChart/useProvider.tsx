@@ -82,12 +82,12 @@ export function getTypedBounds(data: Datasets<TypedData[]>): Bounds | undefined 
 function mergeBounds(a: Bounds, b: Bounds): Bounds {
   return {
     x: {
-      min: R.min(a.x.min, b.x.min),
-      max: R.max(a.x.max, b.x.max),
+      min: Math.min(a.x.min, b.x.min),
+      max: Math.max(a.x.max, b.x.max),
     },
     y: {
-      min: R.min(a.y.min, b.y.min),
-      max: R.max(a.y.max, b.y.max),
+      min: Math.min(a.y.min, b.y.min),
+      max: Math.max(a.y.max, b.y.max),
     },
   };
 }
@@ -102,12 +102,11 @@ const makeMerge =
     return {
       bounds: mergeBounds(a.bounds, b.bounds),
       data: {
-        datasets: R.map(
+        datasets: R.zip(a.data.datasets, b.data.datasets).map(
           ([aSet, bSet]: [Dataset<T>, Dataset<T>]): Dataset<T> => ({
             ...aSet,
             data: mergeData(aSet.data, bSet.data),
           }),
-          R.zip(a.data.datasets, b.data.datasets),
         ),
       },
     };

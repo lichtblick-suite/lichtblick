@@ -326,7 +326,7 @@ export const sortPlotDataByHeaderStamp = createPlotMapping((dataset: TypedDataSe
 
   const resolved = resolveTypedIndices(
     dataset.data,
-    R.map(([index]) => index, indices),
+    indices.map(([index]) => index),
   );
 
   if (resolved == undefined) {

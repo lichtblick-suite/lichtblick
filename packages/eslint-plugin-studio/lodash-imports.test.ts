@@ -22,7 +22,7 @@ const ruleTester = new RuleTester({
 
 ruleTester.run("lodash-imports", rule, {
   valid: [
-    `
+    /* ts */ `
     import * as _ from "lodash-es";
     _.isEqual(1, 1);
     `,

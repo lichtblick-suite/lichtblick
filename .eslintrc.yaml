@@ -21,6 +21,7 @@ extends:
   - plugin:@foxglove/react
   - plugin:@foxglove/jest
   - plugin:storybook/recommended
+  - plugin:@foxglove/studio/all
 
 settings:
   import/internal-regex: "^@foxglove"
@@ -28,8 +29,6 @@ settings:
 rules:
   "@foxglove/license-header": error
   "@foxglove/prefer-hash-private": error
-  "@foxglove/studio/link-target": error
-  "@foxglove/studio/lodash-imports": error
 
   tss-unused-classes/unused-classes: error
 

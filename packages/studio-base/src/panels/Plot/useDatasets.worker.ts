@@ -161,7 +161,7 @@ function buildPlot(params: PlotParams, messages: Messages): PlotData {
   const { paths, invertedTheme, startTime, xAxisPath, xAxisVal } = params;
   return buildPlotData({
     invertedTheme,
-    paths: R.map((path) => [path, getPathData(messages, path)], paths),
+    paths: paths.map((path) => [path, getPathData(messages, path)]),
     startTime,
     xAxisPath,
     xAxisData: xAxisPath != undefined ? getPathData(messages, xAxisPath) : undefined,

@@ -79,6 +79,6 @@ function proxyDataset(dataset: TypedDataSet): NormalDataSet {
 export function proxyTyped(data: TypedChartData): ChartData<"scatter"> {
   return {
     ...data,
-    datasets: R.map(proxyDataset, data.datasets),
+    datasets: data.datasets.map(proxyDataset),
   };
 }

@@ -6,5 +6,17 @@ module.exports = {
   rules: {
     "link-target": require("./link-target"),
     "lodash-imports": require("./lodash-imports"),
+    "ramda-usage": require("./ramda-usage"),
+  },
+
+  configs: {
+    all: {
+      plugins: ["@foxglove/studio"],
+      rules: {
+        "@foxglove/studio/link-target": "error",
+        "@foxglove/studio/lodash-imports": "error",
+        "@foxglove/studio/ramda-usage": "error",
+      },
+    },
   },
 };

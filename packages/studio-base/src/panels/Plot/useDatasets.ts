@@ -149,7 +149,7 @@ function chooseClient() {
   R.head(clientList)?.setter(topics);
 
   // Also clear the status of any topics we're no longer using
-  blockStatus = R.map((block) => R.pick(R.map(getPayloadString, topics), block), blockStatus);
+  blockStatus = blockStatus.map((block) => R.pick(topics.map(getPayloadString), block));
 }
 
 function getNumFields(events: readonly MessageEvent[]): number {
@@ -207,7 +207,7 @@ function useData(id: string, topics: SubscribePayload[]) {
   });
 
   const blocks = useBlocks(
-    React.useMemo(() => R.map((v) => ({ ...v, preloadType: "full" }), subscribed), [subscribed]),
+    React.useMemo(() => subscribed.map((v) => ({ ...v, preloadType: "full" })), [subscribed]),
   );
   useEffect(() => {
     for (const [index, block] of blocks.entries()) {

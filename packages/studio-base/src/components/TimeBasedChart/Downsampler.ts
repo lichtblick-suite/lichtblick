@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as R from "ramda";
-
 import { iterateObjects } from "@foxglove/studio-base/components/Chart/datasets";
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 
@@ -81,7 +79,7 @@ export class Downsampler {
       }
 
       const downsampled = downsample(dataset, iterateObjects(dataset.data), view);
-      const resolved = R.map((i) => dataset.data[i], downsampled);
+      const resolved = downsampled.map((i) => dataset.data[i]);
 
       // NaN item values create gaps in the line
       const undefinedToNanData = resolved.map((item) => {
