@@ -44,8 +44,11 @@ async function waitService(): Promise<Service> {
 
 const getIsLive = (ctx: MessagePipelineContext) => ctx.seekPlayback == undefined;
 
-// topic -> number of fields
-type BlockStatus = Record<string, number>;
+// We need to keep track of the block data we've already sent to the worker and
+// detect when it has changed, which can happen when the user changes a user
+// script or they trigger a subscription to different fields.
+// mapping from topic -> the first message on that topic in the block
+type BlockStatus = Record<string, unknown>;
 let blockStatus: BlockStatus[] = [];
 
 const getPayloadString = (payload: SubscribePayload): string =>
@@ -152,15 +155,6 @@ function chooseClient() {
   blockStatus = blockStatus.map((block) => R.pick(topics.map(getPayloadString), block));
 }
 
-function getNumFields(events: readonly MessageEvent[]): number {
-  const message = events[0]?.message;
-  if (message == undefined) {
-    return 0;
-  }
-
-  return Object.keys(message).length;
-}
-
 // Subscribe to "current" messages (those near the seek head) and forward new
 // messages to the worker as they arrive.
 function useData(id: string, topics: SubscribePayload[]) {
@@ -210,13 +204,18 @@ function useData(id: string, topics: SubscribePayload[]) {
     React.useMemo(() => subscribed.map((v) => ({ ...v, preloadType: "full" })), [subscribed]),
   );
   useEffect(() => {
+    const wasReset: Record<string, boolean> = {};
+
     for (const [index, block] of blocks.entries()) {
       if (R.isEmpty(block)) {
-        break;
+        continue;
       }
 
       // Package any new messages into a single bundle to send to the worker
       const messages: Messages = {};
+      // Make a note of any topics that had new data so we can clear out
+      // accumulated points in the worker
+      const resetData: Set<string> = new Set<string>();
       const status: BlockStatus = blockStatus[index] ?? {};
       for (const payload of subscribed) {
         const ref = getPayloadString(payload);
@@ -225,19 +224,29 @@ function useData(id: string, topics: SubscribePayload[]) {
           continue;
         }
 
-        const numFields = getNumFields(topicMessages);
-        if (status[ref] === numFields) {
+        const first = topicMessages[0]?.message;
+        const existing = status[ref];
+        if (R.equals(existing, first)) {
           continue;
         }
 
-        status[ref] = numFields;
+        // we already had a message in this block, meaning the data itself has
+        // changed; we have to rebuild the plots
+        if (existing != undefined && wasReset[ref] == undefined) {
+          resetData.add(payload.topic);
+          wasReset[ref] = true;
+        }
+
+        status[ref] = first;
         messages[payload.topic] = topicMessages as MessageEvent[];
       }
       blockStatus[index] = status;
 
-      if (!R.isEmpty(messages)) {
-        void service?.addBlock(messages);
+      if (R.isEmpty(messages)) {
+        continue;
       }
+
+      void service?.addBlock(messages, Array.from(resetData));
     }
   }, [subscribed, blocks]);
 }

@@ -391,20 +391,31 @@ function evictCache() {
   current = R.pick(topics, current);
 }
 
-function addBlock(block: Messages): void {
+function addBlock(block: Messages, resetTopics: string[]): void {
   const topics = R.keys(block);
-  blocks = R.mergeWith(R.concat, blocks, block);
+
+  blocks = R.pipe(
+    // Remove data for any topics that have been reset
+    R.omit(resetTopics),
+    // Merge the new block into the existing blocks
+    (newBlocks) => R.mergeWith(R.concat, newBlocks, block),
+  )(blocks);
 
   for (const client of R.values(clients)) {
     const { params } = client;
     const relevantTopics = R.intersection(topics, client.topics);
+    const shouldReset = R.intersection(relevantTopics, resetTopics).length > 0;
     if (params == undefined || isSingleMessage(params) || relevantTopics.length === 0) {
       continue;
     }
 
     mutateClient(client.id, {
       ...client,
-      blocks: accumulate(client.blocks, params, blocks),
+      blocks: accumulate(
+        shouldReset ? initAccumulated(client.topics) : client.blocks,
+        params,
+        blocks,
+      ),
     });
     client.queueRebuild();
   }
