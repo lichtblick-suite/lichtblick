@@ -8,8 +8,41 @@ import { StoryFn, StoryObj } from "@storybook/react";
 import { fromDate } from "@foxglove/rostime";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
-import { PlayerPresence, Topic } from "@foxglove/studio-base/players/types";
+import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+import { PlayerPresence, PlayerProblem, Topic } from "@foxglove/studio-base/players/types";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+
+function makeProblems(): PlayerProblem[] {
+  return [
+    {
+      severity: "error",
+      message: "Connection lost",
+      tip: "A tip that we might want to show the user",
+      error: Object.assign(new Error("Fake Error"), {
+        stack: `Error: Original Error
+at Story (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/studio-base-src-components-ProblemsList-stories.039002bb.iframe.bundle.js:58:28)
+at undecoratedStoryFn (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:2794)
+at hookified (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:7:17032)
+at https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:1915
+at jsxDecorator (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4cb8db42.iframe.bundle.js:13838:1100)
+at hookified (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:7:17032)
+at https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:1454
+at https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:1915
+at Ch (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4cb8db42.iframe.bundle.js:47712:137)
+at ck (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4cb8db42.iframe.bundle.js:47822:460)`,
+      }),
+    },
+    {
+      severity: "warn",
+      message: "Connection lost",
+    },
+    {
+      severity: "info",
+      message: "Connection lost",
+      tip: "A tip that we might want to show the user",
+    },
+  ];
+}
 
 export default {
   title: "components/ProblemsList",
@@ -62,35 +95,7 @@ export const WithErrors: StoryObj = {
         endTime={END_TIME}
         topics={TOPICS}
         presence={PlayerPresence.RECONNECTING}
-        problems={[
-          {
-            severity: "error",
-            message: "Connection lost",
-            tip: "A tip that we might want to show the user",
-            error: Object.assign(new Error("Fake Error"), {
-              stack: `Error: Original Error
-    at Story (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/studio-base-src-components-ProblemsList-stories.039002bb.iframe.bundle.js:58:28)
-    at undecoratedStoryFn (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:2794)
-    at hookified (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:7:17032)
-    at https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:1915
-    at jsxDecorator (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4cb8db42.iframe.bundle.js:13838:1100)
-    at hookified (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:7:17032)
-    at https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:1454
-    at https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/sb-preview/runtime.mjs:34:1915
-    at Ch (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4cb8db42.iframe.bundle.js:47712:137)
-    at ck (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4cb8db42.iframe.bundle.js:47822:460)`,
-            }),
-          },
-          {
-            severity: "warn",
-            message: "Connection lost",
-          },
-          {
-            severity: "info",
-            message: "Connection lost",
-            tip: "A tip that we might want to show the user",
-          },
-        ]}
+        problems={makeProblems()}
       >
         <ProblemsList />
       </MockMessagePipelineProvider>
@@ -104,4 +109,40 @@ export const WithErrorsChinese: StoryObj = {
 export const WithErrorsJapanese: StoryObj = {
   ...WithErrors,
   parameters: { forceLanguage: "ja" },
+};
+
+export const WithSessionProblems: StoryObj = {
+  render: function Story() {
+    const initialState: Pick<WorkspaceContextStore, "session"> = {
+      session: {
+        problems: [
+          {
+            message: "Session problem error",
+            severity: "error",
+            tag: "tag-1",
+            tip: "Something really bad happened",
+          },
+          {
+            message: "Session problem warn",
+            severity: "warn",
+            tag: "tag-2",
+            tip: "Something kinda bad happened",
+          },
+        ],
+      },
+    };
+    return (
+      <MockMessagePipelineProvider
+        startTime={START_TIME}
+        endTime={END_TIME}
+        topics={TOPICS}
+        presence={PlayerPresence.RECONNECTING}
+        problems={makeProblems()}
+      >
+        <WorkspaceContextProvider initialState={initialState}>
+          <ProblemsList />
+        </WorkspaceContextProvider>
+      </MockMessagePipelineProvider>
+    );
+  },
 };

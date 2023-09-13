@@ -33,6 +33,9 @@ export function makeWorkspaceContextInitialState(): WorkspaceContextStore {
       active: undefined,
       shown: [],
     },
+    session: {
+      problems: [],
+    },
     sidebars: {
       left: {
         item: "panel-settings",
