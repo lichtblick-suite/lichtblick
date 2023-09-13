@@ -23,6 +23,7 @@ import {
   CustomWindowControls,
   CustomWindowControlsProps,
 } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
+import { BetaAppMenu } from "@foxglove/studio-base/components/BetaAppMenu";
 import { FoxgloveLogo } from "@foxglove/studio-base/components/FoxgloveLogo";
 import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -199,6 +200,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
+  const [enableNewAppMenu = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_NEW_APP_MENU,
+  );
 
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
 
@@ -243,13 +247,23 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   primaryFill={theme.palette.common.white}
                 />
               </IconButton>
-              <AppMenu
-                open={appMenuOpen}
-                anchorEl={appMenuEl}
-                handleClose={() => {
-                  setAppMenuEl(undefined);
-                }}
-              />
+              {enableNewAppMenu ? (
+                <BetaAppMenu
+                  open={appMenuOpen}
+                  anchorEl={appMenuEl}
+                  handleClose={() => {
+                    setAppMenuEl(undefined);
+                  }}
+                />
+              ) : (
+                <AppMenu
+                  open={appMenuOpen}
+                  anchorEl={appMenuEl}
+                  handleClose={() => {
+                    setAppMenuEl(undefined);
+                  }}
+                />
+              )}
               <AppBarIconButton
                 className={cx({ "Mui-selected": panelMenuOpen })}
                 color="inherit"

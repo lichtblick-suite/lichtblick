@@ -72,6 +72,8 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   indicator: {
+    transition: theme.transitions.create("inset"),
+
     [theme.breakpoints.up("md")]: {
       right: 0,
       width: "100%",

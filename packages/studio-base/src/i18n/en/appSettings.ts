@@ -21,6 +21,8 @@ export const appSettings = {
   memoryUseIndicator: "Memory use indicator",
   memoryUseIndicatorDescription: "Show the app memory use in the sidebar.",
   messageRate: "Message rate",
+  newAppMenu: "Enable new app menu",
+  newAppMenuDescription: "Show the new app menu.",
   noExperimentalFeatures: "Currently there are no experimental features.",
   openLinksIn: "Open links in",
   privacy: "Privacy",

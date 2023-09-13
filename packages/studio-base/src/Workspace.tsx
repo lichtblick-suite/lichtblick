@@ -363,6 +363,9 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     return items;
   }, [enableStudioLogsSidebar, showEventsTab, t]);
 
+  const keyboardEventHasModifier = (event: KeyboardEvent) =>
+    navigator.userAgent.includes("Mac") ? event.metaKey : event.ctrlKey;
+
   const keyDownHandlers = useMemo(() => {
     return {
       "[": () => {
@@ -371,8 +374,19 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       "]": () => {
         sidebarActions.right.setOpen((oldValue) => !oldValue);
       },
+      o: (ev: KeyboardEvent) => {
+        if (!keyboardEventHasModifier(ev)) {
+          return;
+        }
+        ev.preventDefault();
+        if (ev.shiftKey) {
+          dialogActions.dataSource.open("connection");
+          return;
+        }
+        void dialogActions.openFile.open().catch(console.error);
+      },
     };
-  }, [sidebarActions.left, sidebarActions.right]);
+  }, [dialogActions.dataSource, dialogActions.openFile, sidebarActions.left, sidebarActions.right]);
 
   const play = useMessagePipeline(selectPlay);
   const playUntil = useMessagePipeline(selectPlayUntil);

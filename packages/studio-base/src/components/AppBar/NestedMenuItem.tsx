@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ChevronRight12Regular } from "@fluentui/react-icons";
-import { Divider, Menu, MenuItem } from "@mui/material";
+import { Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { PropsWithChildren, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -96,21 +96,30 @@ export function NestedMenuItem(
         disableEnforceFocus
         hideBackdrop
       >
-        {items.map((item, idx) =>
-          item.type !== "divider" ? (
-            <MenuItem
-              className={classes.menuItem}
-              key={item.key}
-              onClick={item.onClick}
-              disabled={item.disabled}
-            >
-              {item.label}
-              {item.shortcut ? <kbd>{item.shortcut}</kbd> : undefined}
-            </MenuItem>
-          ) : (
-            <Divider key={`${idx}-divider`} variant="middle" />
-          ),
-        )}
+        {items.map((item, idx) => {
+          switch (item.type) {
+            case "item":
+              return (
+                <MenuItem
+                  className={classes.menuItem}
+                  key={item.key}
+                  onClick={item.onClick}
+                  disabled={item.disabled}
+                >
+                  {item.label}
+                  {item.shortcut && <kbd>{item.shortcut}</kbd>}
+                </MenuItem>
+              );
+            case "divider":
+              return <Divider variant="middle" key={`divider${idx}`} />;
+            case "subheader":
+              return (
+                <MenuItem disabled key={item.key}>
+                  <Typography variant="overline">{item.label}</Typography>
+                </MenuItem>
+              );
+          }
+        })}
       </Menu>
     </>
   );

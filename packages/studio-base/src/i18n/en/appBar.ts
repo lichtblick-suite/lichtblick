@@ -19,8 +19,10 @@ export const appBar = {
   noDataSource: "No data source",
   open: "Open…",
   openConnection: "Open connection…",
+  openDataSources: "Open data sources",
   openLocalFile: "Open local file…",
   recentDataSources: "Recent data sources",
+  recentlyViewed: "Recently viewed",
   settings: "Settings",
   showLeftSidebar: "Show left sidebar",
   showRightSidebar: "Show right sidebar",
@@ -29,5 +31,6 @@ export const appBar = {
   unknown: "unknown",
   userProfile: "User profile",
   view: "View",
+  viewData: "View data",
   viewOurDocs: "View our docs",
 };

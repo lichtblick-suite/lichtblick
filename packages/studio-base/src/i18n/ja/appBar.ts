@@ -27,5 +27,6 @@ export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
   unknown: "不明",
   userProfile: undefined,
   view: "表示",
+  viewData: undefined,
   viewOurDocs: "ドキュメンテーションを見る",
 };

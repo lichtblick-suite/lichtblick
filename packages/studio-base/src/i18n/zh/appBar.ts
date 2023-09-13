@@ -31,5 +31,6 @@ export const appBar: Partial<TypeOptions["resources"]["appBar"]> = {
   unknown: "未知",
   userProfile: "用户资料",
   view: "查看",
+  viewData: undefined,
   viewOurDocs: "查看我们的文档",
 };

@@ -4,16 +4,19 @@
 
 import {
   Divider,
+  ListSubheader,
   Menu,
-  MenuItem as MuiMenuItem,
+  MenuItem,
   PaperProps,
   PopoverPosition,
   PopoverReference,
+  Typography,
 } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
+import { NestedMenuItem } from "@foxglove/studio-base/components/AppBar/NestedMenuItem";
 import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
@@ -26,8 +29,6 @@ import {
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-
-import { NestedMenuItem } from "./NestedMenuItem";
 
 type AppMenuProps = {
   handleClose: () => void;
@@ -276,21 +277,31 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
           } as Partial<PaperProps & { "data-tourid"?: string }>
         }
       >
-        {(appBarMenuItems ?? []).map((item, idx) =>
-          item.type === "divider" ? (
-            <Divider key={`divider${idx}`} />
-          ) : (
-            <MuiMenuItem
-              key={item.key}
-              onClick={item.onClick}
-              onPointerEnter={() => {
-                setNestedMenu(undefined);
-              }}
-            >
-              {item.label}
-            </MuiMenuItem>
-          ),
-        )}
+        {(appBarMenuItems ?? []).map((item, idx) => {
+          switch (item.type) {
+            case "item":
+              return (
+                <MenuItem
+                  key={item.key}
+                  onClick={(event) => {
+                    item.onClick?.(event);
+                    handleClose();
+                  }}
+                >
+                  {item.label}
+                  {item.shortcut && <kbd>{item.shortcut}</kbd>}
+                </MenuItem>
+              );
+            case "divider":
+              return <Divider variant="middle" key={`divider${idx}`} />;
+            case "subheader":
+              return (
+                <ListSubheader key={item.key} disableSticky>
+                  <Typography variant="overline">{item.label}</Typography>
+                </ListSubheader>
+              );
+          }
+        })}
         <NestedMenuItem
           onPointerEnter={handleItemPointerEnter}
           items={fileItems}
