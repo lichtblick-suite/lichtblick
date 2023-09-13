@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
+import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry";
@@ -14,6 +15,7 @@ import { ColorRGBA } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import { makeColor, QUAT_IDENTITY, rad2deg } from "./common";
 import ThreeDeePanel from "../index";
@@ -435,4 +437,437 @@ export const BasicEntities: StoryObj = {
   },
 
   parameters: { colorScheme: "light", chromatic: { delay: 100 } },
+};
+
+// Sample data across two frames for testing `LINE_LOOP` primitives
+// each message contains two loops, one has points that make it a closed square
+// the other has points that make it an open square. They should both render as squares however
+// because we always close `LINE_LOOP` point arrays.
+const lineLoopSampleData = [
+  {
+    deletions: [
+      {
+        timestamp: {
+          sec: 23,
+          nsec: 0,
+        },
+        type: 1,
+        id: "",
+      },
+    ],
+    entities: [
+      {
+        timestamp: {
+          sec: 23,
+          nsec: 0,
+        },
+        frame_id: "test_frame",
+        id: "4",
+        lifetime: {
+          sec: 0,
+          nsec: 0,
+        },
+        frame_locked: true,
+        metadata: [],
+        arrows: [],
+        cubes: [],
+        spheres: [],
+        cylinders: [],
+        lines: [
+          {
+            type: 1,
+            pose: {
+              position: {
+                x: 0,
+                y: 0,
+                z: 0,
+              },
+              orientation: {
+                x: 0,
+                y: 0,
+                z: 0,
+                w: 1,
+              },
+            },
+            thickness: 1.5,
+            scale_invariant: true,
+            points: [
+              {
+                x: -0.5,
+                y: 0.7999999999999998,
+                z: 0,
+              },
+              {
+                x: 0.5,
+                y: 0.7999999999999998,
+                z: 0,
+              },
+              {
+                x: 0.5,
+                y: -0.20000000000000018,
+                z: 0,
+              },
+              {
+                x: -0.5,
+                y: -0.20000000000000018,
+                z: 0,
+              },
+              {
+                x: -0.5,
+                y: 0.7999999999999998,
+                z: 0,
+              },
+            ],
+            color: {
+              r: 1,
+              g: 1,
+              b: 1,
+              a: 1,
+            },
+            colors: [],
+            indices: [],
+          },
+        ],
+        triangles: [],
+        texts: [],
+        models: [],
+      },
+      {
+        timestamp: {
+          sec: 23,
+          nsec: 0,
+        },
+        frame_id: "test_frame",
+        id: "5",
+        lifetime: {
+          sec: 0,
+          nsec: 0,
+        },
+        frame_locked: true,
+        metadata: [],
+        arrows: [],
+        cubes: [],
+        spheres: [],
+        cylinders: [],
+        lines: [
+          {
+            type: 1,
+            pose: {
+              position: {
+                x: 0,
+                y: 0,
+                z: 0,
+              },
+              orientation: {
+                x: 0,
+                y: 0,
+                z: 0,
+                w: 1,
+              },
+            },
+            thickness: 1.5,
+            scale_invariant: true,
+            points: [
+              {
+                x: -0.20000000000000018,
+                y: 0.5,
+                z: 0,
+              },
+              {
+                x: 0.7999999999999998,
+                y: 0.5,
+                z: 0,
+              },
+              {
+                x: 0.7999999999999998,
+                y: -0.5,
+                z: 0,
+              },
+              {
+                x: -0.20000000000000018,
+                y: -0.5,
+                z: 0,
+              },
+            ],
+            color: {
+              r: 1,
+              g: 1,
+              b: 1,
+              a: 1,
+            },
+            colors: [],
+            indices: [],
+          },
+        ],
+        triangles: [],
+        texts: [],
+        models: [],
+      },
+    ],
+  },
+  {
+    deletions: [
+      {
+        timestamp: {
+          sec: 23,
+          nsec: 100000000,
+        },
+        type: 1,
+        id: "",
+      },
+    ],
+    entities: [
+      {
+        timestamp: {
+          sec: 23,
+          nsec: 100000000,
+        },
+        frame_id: "test_frame",
+        id: "4",
+        lifetime: {
+          sec: 0,
+          nsec: 0,
+        },
+        frame_locked: true,
+        metadata: [],
+        arrows: [],
+        cubes: [],
+        spheres: [],
+        cylinders: [],
+        lines: [
+          {
+            type: 1,
+            pose: {
+              position: {
+                x: 0,
+                y: 0,
+                z: 0,
+              },
+              orientation: {
+                x: 0,
+                y: 0,
+                z: 0,
+                w: 1,
+              },
+            },
+            thickness: 1.5,
+            scale_invariant: true,
+            points: [
+              {
+                x: -0.5,
+                y: 0.8599999999999999,
+                z: 0,
+              },
+              {
+                x: 0.5,
+                y: 0.8599999999999999,
+                z: 0,
+              },
+              {
+                x: 0.5,
+                y: -0.14000000000000012,
+                z: 0,
+              },
+              {
+                x: -0.5,
+                y: -0.14000000000000012,
+                z: 0,
+              },
+              {
+                x: -0.5,
+                y: 0.8599999999999999,
+                z: 0,
+              },
+            ],
+            color: {
+              r: 1,
+              g: 1,
+              b: 1,
+              a: 1,
+            },
+            colors: [],
+            indices: [],
+          },
+        ],
+        triangles: [],
+        texts: [],
+        models: [],
+      },
+      {
+        timestamp: {
+          sec: 23,
+          nsec: 100000000,
+        },
+        frame_id: "test_frame",
+        id: "5",
+        lifetime: {
+          sec: 0,
+          nsec: 0,
+        },
+        frame_locked: true,
+        metadata: [],
+        arrows: [],
+        cubes: [],
+        spheres: [],
+        cylinders: [],
+        lines: [
+          {
+            type: 1,
+            pose: {
+              position: {
+                x: 0,
+                y: 0,
+                z: 0,
+              },
+              orientation: {
+                x: 0,
+                y: 0,
+                z: 0,
+                w: 1,
+              },
+            },
+            thickness: 1.5,
+            scale_invariant: true,
+            points: [
+              {
+                x: -0.14000000000000012,
+                y: 0.5,
+                z: 0,
+              },
+              {
+                x: 0.8599999999999999,
+                y: 0.5,
+                z: 0,
+              },
+              {
+                x: 0.8599999999999999,
+                y: -0.5,
+                z: 0,
+              },
+              {
+                x: -0.14000000000000012,
+                y: -0.5,
+                z: 0,
+              },
+            ],
+            color: {
+              r: 1,
+              g: 1,
+              b: 1,
+              a: 1,
+            },
+            colors: [],
+            indices: [],
+          },
+        ],
+        triangles: [],
+        texts: [],
+        models: [],
+      },
+    ],
+  },
+];
+
+function LineLoops(): JSX.Element {
+  const readySignal = useReadySignal();
+
+  // We're testing a Line loop using a position buffer bigger than it needs from a previous frame
+  // So we need to test across multiple frames
+  const frames = useMemo(() => {
+    const frame1: MessageEvent<Partial<SceneUpdate>> = {
+      topic: "scene",
+      schemaName: "foxglove.SceneUpdate",
+      sizeInBytes: 0,
+      receiveTime: { sec: 10, nsec: 0 },
+      message: lineLoopSampleData[0]!,
+    };
+    const frame2: MessageEvent<Partial<SceneUpdate>> = {
+      topic: "scene",
+      schemaName: "foxglove.SceneUpdate",
+      sizeInBytes: 0,
+      receiveTime: { sec: 11, nsec: 0 },
+      message: lineLoopSampleData[1]!,
+    };
+    return [frame1, frame2];
+  }, []);
+
+  const [fixture, setFixture] = useState({
+    topics: [{ name: "scene", schemaName: "foxglove.SceneUpdate" }],
+    frame: {
+      scene: [frames[0]!],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 10, nsec: 0 },
+      isPlaying: true,
+    },
+  });
+
+  useEffect(() => {
+    let timeOutID2: NodeJS.Timeout;
+
+    const timeOutID = setTimeout(() => {
+      setFixture((oldFixture) => {
+        const newFixture = { ...oldFixture };
+        newFixture.frame = {
+          scene: [frames[1]!],
+        };
+        newFixture.activeData = {
+          currentTime: { sec: 11, nsec: 0 },
+          isPlaying: true,
+        };
+        return newFixture;
+      });
+      timeOutID2 = setTimeout(() => {
+        readySignal();
+      }, 100);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeOutID);
+      clearTimeout(timeOutID2);
+    };
+  }, [readySignal, frames]);
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDeePanel
+        overrideConfig={{
+          ...ThreeDeePanel.defaultConfig,
+          followTf: "root",
+          layers: {
+            grid: { layerId: "foxglove.Grid" },
+          },
+          cameraState: {
+            distance: 7,
+            perspective: true,
+            phi: 40,
+            targetOffset: [0, 0, 0],
+            thetaOffset: rad2deg(-0.25),
+            fovy: 45,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+          topics: {
+            scene: { visible: true },
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+// Tests `LinePrimitives` reusing of larger `#positionBuffers`. These squares move across frames and test
+// that we correctly handle the case where the `#positionBuffer` in `RenderableLines/LinePrimitiveRenderable` is bigger than
+// the number of points after a `SceneUpdate`
+export const UpdatedLineLoopsDontHaveExtraLines: StoryObj = {
+  parameters: {
+    useReadySignal: true,
+    colorScheme: "dark",
+  },
+  render: LineLoops,
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
 };

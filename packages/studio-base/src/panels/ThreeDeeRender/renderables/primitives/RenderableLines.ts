@@ -202,11 +202,7 @@ class LinePrimitiveRenderable extends THREE.Object3D {
       // depend on the key iteration order, since three.js derives the count from the first
       // instanced interleaved attribute it sees).
       // this represent the number of _lines_ to render
-      this.#geometry.instanceCount = isSegments
-        ? numVertices >>> 1
-        : isLoop
-        ? numVertices
-        : Math.max(numVertices - 1, 0);
+      this.#geometry.instanceCount = isSegments ? numVertices >>> 1 : Math.max(numVertices - 1, 0);
 
       if (useIndices) {
         serializePositionsWithIndices(this.#positionBuffer, this.#primitive);
