@@ -568,7 +568,7 @@ const useStyles = makeStyles()(() => ({
 
 export const InALineGraphWithMultiplePlotsXAxesAreSynced: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 6 });
+    const readySignal = useReadySignal({ count: 10 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
     const { classes } = useStyles();
 

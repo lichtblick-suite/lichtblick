@@ -7,7 +7,6 @@ import * as R from "ramda";
 
 import { Immutable } from "@foxglove/studio";
 import { iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
-import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { messagePathStructures } from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { fillInGlobalVariablesInPath } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
@@ -31,9 +30,9 @@ import {
   TypedData,
   Messages,
 } from "./internalTypes";
+import { isSingleMessage, isBounded, getParamPaths, getParamTopics } from "./params";
 import {
   buildPlotData,
-  getPaths,
   resolvePath,
   appendPlotData,
   reducePlotData,
@@ -51,11 +50,6 @@ type Cursors = Record<string, number>;
 type Accumulated = {
   cursors: Cursors;
   data: PlotData;
-};
-
-type ParsedPath = {
-  parsed: RosPath;
-  value: string;
 };
 
 type Client = {
@@ -108,40 +102,6 @@ function getNewMessages(
   }
 
   return [newCursors, newMessages];
-}
-
-function getParamPaths(params: PlotParams): readonly string[] {
-  return getPaths(params.paths, params.xAxisPath);
-}
-
-function getParamTopics(params: PlotParams): readonly string[] {
-  return R.pipe(
-    R.chain((path: string): ParsedPath[] => {
-      const parsed = parseRosPath(path);
-      if (parsed == undefined) {
-        return [];
-      }
-
-      return [
-        {
-          parsed,
-          value: path,
-        },
-      ];
-    }),
-    R.map((v: ParsedPath) => v.parsed.topicName),
-    R.uniq,
-  )(getParamPaths(params));
-}
-
-function isSingleMessage(params: PlotParams): boolean {
-  const { xAxisVal } = params;
-  return xAxisVal === "currentCustom" || xAxisVal === "index";
-}
-
-function isBounded(params: PlotParams): boolean {
-  const { followingViewWidth } = params;
-  return followingViewWidth != undefined && followingViewWidth > 0;
 }
 
 function getPathData(messages: Messages, path: BasePlotPath): PlotDataItem[] | undefined {
