@@ -17,16 +17,12 @@ const fixture: Fixture = {
   frame: {
     "/diagnostics": [
       makeDiagnosticMessage(LEVELS.OK, "name1", "hardware_id1", ["message 1", "message 2"]),
-      makeDiagnosticMessage(
-        LEVELS.OK,
-        "name2",
-        "hardware_id1",
-        ["message 3"],
-        [
+      makeDiagnosticMessage(LEVELS.OK, "name2", "hardware_id1", ["message 3"], {
+        values: [
           { key: "key", value: "value" },
           { key: "key <b>with html</b>", value: "value <tt>with html</tt>" },
         ],
-      ),
+      }),
       makeDiagnosticMessage(LEVELS.ERROR, "name1", "levels_id", ["error message"]),
       makeDiagnosticMessage(LEVELS.OK, "name2", "levels_id", ["ok message"]),
       makeDiagnosticMessage(LEVELS.STALE, "name3", "levels_id", ["stale message"]),
@@ -122,6 +118,41 @@ export const MovedDivider: StoryObj = {
             selectedHardwareId: "hardware_id1",
             selectedName: undefined,
             splitFraction: 0.25,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
+
+export const OldDiagnosticsMarkedStale: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        includeSettings
+        fixture={{
+          ...fixture,
+          activeData: { currentTime: { sec: 10, nsec: 0 } },
+          frame: {
+            "/diagnostics": [
+              makeDiagnosticMessage(LEVELS.OK, "name1", "timeout_id", ["2 secs"], {
+                stamp: { sec: 2, nsec: 0 },
+              }),
+              makeDiagnosticMessage(LEVELS.OK, "name2", "timeout_id", ["4 secs"], {
+                stamp: { sec: 4, nsec: 0 },
+              }),
+              makeDiagnosticMessage(LEVELS.OK, "name3", "timeout_id", ["6 secs"], {
+                stamp: { sec: 6, nsec: 0 },
+              }),
+            ],
+          },
+        }}
+      >
+        <DiagnosticStatusPanel
+          overrideConfig={{
+            topicToRender: "/diagnostics",
+            selectedHardwareId: "timeout_id",
+            selectedName: undefined,
           }}
         />
       </PanelSetup>

@@ -14,8 +14,9 @@
 import { Autocomplete, TextField } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
+import { compare } from "@foxglove/rostime";
 import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -23,6 +24,7 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
+import useStaleTime from "@foxglove/studio-base/panels/diagnostics/useStaleTime";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
@@ -30,7 +32,12 @@ import DiagnosticStatus from "./DiagnosticStatus";
 import { buildStatusPanelSettingsTree } from "./settings";
 import useAvailableDiagnostics from "./useAvailableDiagnostics";
 import useDiagnostics from "./useDiagnostics";
-import { DiagnosticStatusConfig as Config, getDisplayName } from "./util";
+import {
+  DiagnosticStatusConfig as Config,
+  DEFAULT_SECONDS_UNTIL_STALE,
+  LEVELS,
+  getDisplayName,
+} from "./util";
 
 type Props = {
   config: Config;
@@ -48,8 +55,16 @@ function DiagnosticStatusPanel(props: Props) {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
-  const { selectedHardwareId, selectedName, splitFraction, topicToRender, numericPrecision } =
-    config;
+  const {
+    selectedHardwareId,
+    selectedName,
+    splitFraction,
+    topicToRender,
+    numericPrecision,
+    secondsUntilStale = DEFAULT_SECONDS_UNTIL_STALE,
+  } = config;
+
+  const staleTime = useStaleTime(secondsUntilStale);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
@@ -114,13 +129,18 @@ function DiagnosticStatusPanel(props: Props) {
     if (diagnosticsByName != undefined) {
       for (const diagnostic of diagnosticsByName.values()) {
         if (selectedName == undefined || selectedName === diagnostic.status.name) {
-          items.push(diagnostic);
+          const markStale = staleTime != undefined && compare(diagnostic.stamp, staleTime) < 0;
+          if (markStale) {
+            items.push({ ...diagnostic, status: { ...diagnostic.status, level: LEVELS.STALE } });
+          } else {
+            items.push(diagnostic);
+          }
         }
       }
     }
 
     return items;
-  }, [diagnostics, selectedHardwareId, selectedName]);
+  }, [diagnostics, selectedHardwareId, selectedName, staleTime]);
 
   // If there are available options but none match the user input we show a No matches
   // but if we don't have any options at all then we show waiting for diagnostics...
@@ -142,9 +162,9 @@ function DiagnosticStatusPanel(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      nodes: buildStatusPanelSettingsTree(topicToRender, numericPrecision, availableTopics),
+      nodes: buildStatusPanelSettingsTree(config, topicToRender, availableTopics),
     });
-  }, [actionHandler, availableTopics, topicToRender, numericPrecision, updatePanelSettingsTree]);
+  }, [actionHandler, config, availableTopics, topicToRender, updatePanelSettingsTree]);
 
   return (
     <Stack flex="auto" overflow="hidden">

@@ -302,7 +302,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
     [LEVELS.OK]: "success.main",
     [LEVELS.ERROR]: "error.main",
     [LEVELS.WARN]: "warning.main",
-    [LEVELS.STALE]: "info.main",
+    [LEVELS.STALE]: "text.secondary",
   };
 
   return (

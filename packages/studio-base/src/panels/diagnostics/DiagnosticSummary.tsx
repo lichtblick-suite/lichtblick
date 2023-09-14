@@ -13,18 +13,18 @@
 
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
+  IconButton,
+  InputBase,
   ListItem,
-  ListItemText,
   ListItemButton,
+  ListItemText,
   MenuItem,
   Select,
-  InputBase,
-  IconButton,
+  Typography,
   iconButtonClasses,
+  inputBaseClasses,
   listItemTextClasses,
   selectClasses,
-  inputBaseClasses,
-  Typography,
 } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
@@ -42,19 +42,22 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
+import useStaleTime from "@foxglove/studio-base/panels/diagnostics/useStaleTime";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import { buildSummarySettingsTree } from "./settings";
 import {
-  DiagnosticSummaryConfig,
+  DEFAULT_SECONDS_UNTIL_STALE,
   DiagnosticInfo,
   DiagnosticStatusConfig,
-  getDiagnosticsByLevel,
-  filterAndSortDiagnostics,
-  LEVEL_NAMES,
+  DiagnosticSummaryConfig,
   KNOWN_LEVELS,
+  LEVEL_NAMES,
+  filterAndSortDiagnostics,
+  getDiagnosticsByLevel,
+  getDiagnosticsWithStales,
 } from "./util";
 
 type NodeRowProps = {
@@ -158,9 +161,17 @@ function DiagnosticSummary(props: Props): JSX.Element {
   const { config, saveConfig } = props;
   const { classes } = useStyles();
   const { topics } = useDataSourceInfo();
-  const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
+  const {
+    minLevel,
+    topicToRender,
+    pinnedIds,
+    hardwareIdFilter,
+    sortByLevel = true,
+    secondsUntilStale = DEFAULT_SECONDS_UNTIL_STALE,
+  } = config;
   const { openSiblingPanel } = usePanelContext();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+  const staleTime = useStaleTime(secondsUntilStale);
 
   const togglePinned = useCallback(
     (info: DiagnosticInfo) => {
@@ -223,8 +234,12 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   const diagnostics = useDiagnostics(diagnosticTopic);
 
+  const diagnosticsWithOldMarkedAsStales = useMemo(() => {
+    return staleTime ? getDiagnosticsWithStales(diagnostics, staleTime) : diagnostics;
+  }, [diagnostics, staleTime]);
+
   const summary = useMemo(() => {
-    if (diagnostics.size === 0) {
+    if (diagnosticsWithOldMarkedAsStales.size === 0) {
       return (
         <EmptyState>
           Waiting for <code>{topicToRender}</code> messages
@@ -236,11 +251,11 @@ function DiagnosticSummary(props: Props): JSX.Element {
       if (name == undefined || trimmedHardwareId == undefined) {
         return;
       }
-      const diagnosticsByName = diagnostics.get(trimmedHardwareId);
+      const diagnosticsByName = diagnosticsWithOldMarkedAsStales.get(trimmedHardwareId);
       return diagnosticsByName?.get(name);
     });
 
-    const nodesByLevel = getDiagnosticsByLevel(diagnostics);
+    const nodesByLevel = getDiagnosticsByLevel(diagnosticsWithOldMarkedAsStales);
     const levels = Array.from(nodesByLevel.keys()).sort().reverse();
     const sortedNodes = sortByLevel
       ? ([] as DiagnosticInfo[]).concat(
@@ -277,7 +292,15 @@ function DiagnosticSummary(props: Props): JSX.Element {
         )}
       </AutoSizer>
     );
-  }, [diagnostics, hardwareIdFilter, pinnedIds, renderRow, sortByLevel, minLevel, topicToRender]);
+  }, [
+    diagnosticsWithOldMarkedAsStales,
+    hardwareIdFilter,
+    pinnedIds,
+    renderRow,
+    sortByLevel,
+    minLevel,
+    topicToRender,
+  ]);
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {

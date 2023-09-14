@@ -4,7 +4,11 @@
 
 import { SettingsTreeNodes } from "@foxglove/studio";
 
-import { DiagnosticSummaryConfig } from "./util";
+import {
+  DEFAULT_SECONDS_UNTIL_STALE,
+  DiagnosticStatusConfig,
+  DiagnosticSummaryConfig,
+} from "./util";
 
 export function buildSummarySettingsTree(
   config: DiagnosticSummaryConfig,
@@ -30,14 +34,24 @@ export function buildSummarySettingsTree(
           options: topicOptions,
         },
         sortByLevel: { label: "Sort by level", input: "boolean", value: config.sortByLevel },
+        secondsUntilStale: {
+          label: "Stale timeout",
+          help: "Number of seconds after which entries will be marked as stale if no new diagnostic message(s) have been received",
+          input: "number",
+          placeholder: `${DEFAULT_SECONDS_UNTIL_STALE} seconds`,
+          min: 0,
+          step: 1,
+          precision: 0,
+          value: config.secondsUntilStale,
+        },
       },
     },
   };
 }
 
 export function buildStatusPanelSettingsTree(
+  config: DiagnosticStatusConfig,
   topicToRender: string,
-  numericPrecision: number | undefined,
   availableTopics: readonly string[],
 ): SettingsTreeNodes {
   const topicOptions = availableTopics.map((topic) => ({ label: topic, value: topic }));
@@ -66,7 +80,17 @@ export function buildStatusPanelSettingsTree(
           precision: 0,
           step: 1,
           placeholder: "auto",
-          value: numericPrecision,
+          value: config.numericPrecision,
+        },
+        secondsUntilStale: {
+          label: "Stale timeout",
+          help: "Number of seconds after which entries will be marked as stale if no new diagnostic message(s) have been received",
+          input: "number",
+          placeholder: `${DEFAULT_SECONDS_UNTIL_STALE} seconds`,
+          min: 0,
+          step: 1,
+          precision: 0,
+          value: config.secondsUntilStale,
         },
       },
     },

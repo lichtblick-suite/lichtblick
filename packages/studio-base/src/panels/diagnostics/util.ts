@@ -13,7 +13,7 @@
 
 import * as _ from "lodash-es";
 
-import { Time } from "@foxglove/rostime";
+import { Time, compare } from "@foxglove/rostime";
 import { Header } from "@foxglove/studio-base/types/Messages";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
@@ -22,6 +22,7 @@ import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 // way smaller than 5KB, so this is a very generous maximum. But feel free to increase it more if
 // necessary. Exported for tests.
 export const MAX_STRING_LENGTH = 5000; // 5KB
+export const DEFAULT_SECONDS_UNTIL_STALE = 5; // ROS rqt_runtime_monitor default
 
 export const LEVELS: { OK: 0; WARN: 1; ERROR: 2; STALE: 3 } = {
   OK: 0,
@@ -49,6 +50,7 @@ export type DiagnosticStatusConfig = {
   splitFraction?: number;
   topicToRender: string;
   numericPrecision?: number;
+  secondsUntilStale?: number;
 };
 
 export type DiagnosticSummaryConfig = {
@@ -57,6 +59,7 @@ export type DiagnosticSummaryConfig = {
   topicToRender: string;
   hardwareIdFilter: string;
   sortByLevel?: boolean;
+  secondsUntilStale?: number;
 };
 
 export type DiagnosticId = string & ToString;
@@ -143,6 +146,24 @@ export function getDiagnosticsByLevel(
       } else {
         ret.set(diagnostic.status.level, [diagnostic]);
       }
+    }
+  }
+  return ret;
+}
+
+export function getDiagnosticsWithStales(
+  diagnosticsByHardwareId: Map<string, DiagnosticsById>,
+  staleTime: Time,
+): Map<string, DiagnosticsById> {
+  const ret = new Map<string, DiagnosticsById>();
+  for (const [hardwareId, diagnosticsByName] of diagnosticsByHardwareId) {
+    const newDiagnosticsByName: DiagnosticsById = new Map();
+    ret.set(hardwareId, newDiagnosticsByName);
+
+    for (const [name, diagnostic] of diagnosticsByName) {
+      const markStale = compare(diagnostic.stamp, staleTime) < 0;
+      const level = markStale ? LEVELS.STALE : diagnostic.status.level;
+      newDiagnosticsByName.set(name, { ...diagnostic, status: { ...diagnostic.status, level } });
     }
   }
   return ret;

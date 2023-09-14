@@ -24,14 +24,23 @@ export function makeDiagnosticMessage(
   name: string,
   hardware_id: string,
   messages: string[],
-  values: KeyValue[] = [],
+  options?: {
+    values?: KeyValue[] | undefined;
+    stamp?: MessageEvent<DiagnosticStatusArrayMsg>["message"]["header"]["stamp"];
+  },
 ): MessageEvent<DiagnosticStatusArrayMsg> {
   return {
     topic: "/diagnostics",
     receiveTime: { sec: 2, nsec: 0 },
     message: {
-      header: { frame_id: "", stamp: { sec: 1, nsec: 500_000_000 }, seq: 0 },
-      status: messages.map((message) => ({ level, name, hardware_id, message, values })),
+      header: { frame_id: "", stamp: options?.stamp ?? { sec: 1, nsec: 500_000_000 }, seq: 0 },
+      status: messages.map((message) => ({
+        level,
+        name,
+        hardware_id,
+        message,
+        values: options?.values ?? [],
+      })),
     },
     schemaName: "diagnostic_msgs/DiagnosticArray",
     sizeInBytes: 0,
@@ -185,6 +194,43 @@ export const FilteredByHardwareIdAndLevel: StoryObj = {
             pinnedIds: [],
             topicToRender: "/diagnostics",
             hardwareIdFilter: "filter",
+            sortByLevel: false,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+};
+
+export const OldDiagnosticsMarkedStale: StoryObj = {
+  render: () => {
+    return (
+      <PanelSetup
+        includeSettings
+        fixture={{
+          ...fixture,
+          activeData: { currentTime: { sec: 10, nsec: 0 } },
+          frame: {
+            "/diagnostics": [
+              makeDiagnosticMessage(LEVELS.OK, "name1", "timeout_id", ["2 secs"], {
+                stamp: { sec: 2, nsec: 0 },
+              }),
+              makeDiagnosticMessage(LEVELS.OK, "name2", "timeout_id", ["4 secs"], {
+                stamp: { sec: 4, nsec: 0 },
+              }),
+              makeDiagnosticMessage(LEVELS.OK, "name3", "timeout_id", ["6 secs"], {
+                stamp: { sec: 6, nsec: 0 },
+              }),
+            ],
+          },
+        }}
+      >
+        <DiagnosticSummary
+          overrideConfig={{
+            minLevel: 0,
+            pinnedIds: [],
+            topicToRender: "/diagnostics",
+            hardwareIdFilter: "",
             sortByLevel: false,
           }}
         />
