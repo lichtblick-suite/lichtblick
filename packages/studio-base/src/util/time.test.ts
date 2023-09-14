@@ -68,5 +68,14 @@ describe("time.getTimestampForMessageEvent", () => {
     expect(
       time.getTimestampForMessageEvent({ ...messageBase, message: {} }, "headerStamp"),
     ).toEqual(undefined);
+    expect(
+      time.getTimestampForMessageEvent(
+        {
+          ...messageBase,
+          message: { header: { stamp: 1694712977, seq: 0, frame_id: "" } },
+        },
+        "headerStamp",
+      ),
+    ).toEqual(undefined);
   });
 });

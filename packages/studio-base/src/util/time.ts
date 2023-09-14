@@ -51,13 +51,13 @@ export function getTimestampForMessage(message: unknown): Time | undefined {
   if ((message as Partial<StampedMessage>).header != undefined) {
     // This message has a "header" field
     const stamp = (message as Partial<StampedMessage>).header?.stamp;
-    if (stamp != undefined && "sec" in stamp && "nsec" in stamp) {
+    if (stamp != undefined && typeof stamp === "object" && "sec" in stamp && "nsec" in stamp) {
       return stamp;
     }
   } else if ((message as Partial<MarkerArray>).markers?.[0]?.header != undefined) {
     // This is a marker array message with a "markers" array and at least one entry
     const stamp = (message as MarkerArray).markers[0]?.header.stamp;
-    if (stamp != undefined && "sec" in stamp && "nsec" in stamp) {
+    if (stamp != undefined && typeof stamp === "object" && "sec" in stamp && "nsec" in stamp) {
       return stamp;
     }
   }
