@@ -11,7 +11,7 @@ module.exports = {
   create: (context) => {
     return {
       [`JSXElement > JSXOpeningElement > JSXAttribute[name.name="href"]`]: (node) => {
-        if (node.parent.attributes.some((attr) => attr.name.name === "target")) {
+        if (node.parent.attributes.some((attr) => attr.name?.name === "target")) {
           return;
         }
         context.report({
