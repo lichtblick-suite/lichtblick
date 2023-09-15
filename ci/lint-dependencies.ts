@@ -41,6 +41,7 @@ async function run(rootPath: string) {
   info(`Linting dependencies in ${rootPath}...`);
   const options: depcheck.Options = {
     detectors: [...Object.values(depcheck.detector), commentDetector, tripleSlashDetector],
+    ignoreMatches: ["~"],
   };
   return await depcheck(rootPath, options);
 }
