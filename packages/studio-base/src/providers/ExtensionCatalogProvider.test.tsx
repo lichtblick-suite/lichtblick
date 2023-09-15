@@ -189,6 +189,7 @@ describe("ExtensionCatalogProvider", () => {
         fromSchemaName: "from.Schema",
         toSchemaName: "to.Schema",
         converter: expect.any(Function),
+        extensionNamespace: "org",
       },
     ]);
   });

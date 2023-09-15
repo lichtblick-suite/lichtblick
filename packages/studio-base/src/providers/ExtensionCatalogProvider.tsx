@@ -24,9 +24,13 @@ import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/E
 
 const log = Logger.getLogger(__filename);
 
+type MessageConverter = RegisterMessageConverterArgs<unknown> & {
+  extensionNamespace?: ExtensionNamespace;
+};
+
 type ContributionPoints = {
   panels: Record<string, RegisteredPanel>;
-  messageConverters: RegisterMessageConverterArgs<unknown>[];
+  messageConverters: MessageConverter[];
   topicAliasFunctions: TopicAliasFunctions;
 };
 
@@ -79,7 +83,10 @@ function activateExtension(
       log.debug(
         `Extension ${extension.qualifiedName} registering message converter from: ${args.fromSchemaName} to: ${args.toSchemaName}`,
       );
-      messageConverters.push(args as RegisterMessageConverterArgs<unknown>);
+      messageConverters.push({
+        ...args,
+        extensionNamespace: extension.namespace,
+      } as MessageConverter);
     },
 
     registerTopicAliases: (aliasFunction: TopicAliasFunction) => {
