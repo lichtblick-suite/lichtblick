@@ -89,7 +89,7 @@
     "@types/babel__core": "^7.20.1",
     "@types/babel__preset-env": "^7.9.2",
     "@types/case-sensitive-paths-webpack-plugin": "2.1.7",
-    "@types/jest": "29.5.4",
+    "@types/jest": "29.5.5",
     "@types/license-checker": "^25.0.4",
     "@types/semver": "^7.5.1",
     "@typescript-eslint/eslint-plugin": "6.7.0",
