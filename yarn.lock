@@ -2879,7 +2879,7 @@ __metadata:
     "@types/plist": ^3.0.2
     "@types/pngjs": ^6.0.1
     "@types/tinycolor2": 1.4.4
-    "@types/utif": ^3.0.1
+    "@types/utif": ^3.0.2
     "@xmldom/xmldom": 0.8.10
     app-builder-lib: "*"
     async-mutex: 0.4.0
@@ -7070,12 +7070,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/utif@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@types/utif@npm:3.0.1"
+"@types/utif@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/utif@npm:3.0.2"
   dependencies:
     "@types/node": "*"
-  checksum: f3ec2e7783f67302224d540d7033d1459271cfb7441926e602515bbcc03b7468b5fc072114109768749da2a775fecf42c644cf0c5d2ae5aa5b0d991d2e14117c
+  checksum: 0b6b34b36a3dcf9639a70dc2f387aad5efa4b18abb53c7ba6b8a2e8d5d15cf61083bff7f128bc17a26758878798ec5fb72129497cc5a69146b8c7c7f0933c5b0
   languageName: node
   linkType: hard
 
