@@ -152,7 +152,7 @@
     "react-json-tree": "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch",
     "react-markdown": "8.0.7",
     "react-monaco-editor": "0.54.0",
-    "react-mosaic-component": "6.0.1",
+    "react-mosaic-component": "6.1.0",
     "react-refresh-typescript": "2.0.9",
     "react-resizable-panels": "0.0.55",
     "react-resize-detector": "9.1.0",
