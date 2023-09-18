@@ -61,7 +61,7 @@
     "@tanstack/react-table": "8.9.11",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "8.0.1",
-    "@types/base16": "^1.0.2",
+    "@types/base16": "^1.0.3",
     "@types/cytoscape": "^3.19.11",
     "@types/foxglove__roslibjs": "workspace:*",
     "@types/foxglove__web": "workspace:*",

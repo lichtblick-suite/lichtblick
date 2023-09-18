@@ -2733,7 +2733,7 @@ __metadata:
     "@tanstack/react-table": 8.9.11
     "@testing-library/react": 12.1.2
     "@testing-library/react-hooks": 8.0.1
-    "@types/base16": ^1.0.2
+    "@types/base16": ^1.0.3
     "@types/cytoscape": ^3.19.11
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/foxglove__web": "workspace:*"
@@ -6225,10 +6225,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/base16@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@types/base16@npm:1.0.2"
-  checksum: 5bc587d45066dae6fb14a4a7f72e57044fa1a8057eed86d4005f9e38a0c38b83009828ac3072e6e9e4be1cf5d5032849690adf8cd51efd545fa281bee5cf0fa5
+"@types/base16@npm:^1.0.2, @types/base16@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@types/base16@npm:1.0.3"
+  checksum: a2c314d4a67d02d6c7e42ad1b148299b8e471645fc38a9fc7b742447b37e62d9fa8857725837844c57a2a2953d3687ed0f4b0c48aa089d47257c8856359b5f49
   languageName: node
   linkType: hard
 
