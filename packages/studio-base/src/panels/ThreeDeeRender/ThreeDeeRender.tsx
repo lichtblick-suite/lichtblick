@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { produce } from "immer";
 import * as _ from "lodash-es";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
@@ -25,8 +24,6 @@ import {
 } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
-import { ALL_SUPPORTED_ANNOTATION_SCHEMAS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/annotations/ImageAnnotations";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import type {
@@ -165,46 +162,15 @@ export function ThreeDeeRender(props: {
   ]);
 
   useEffect(() => {
-    context.EXPERIMENTAL_setMessagePathDropConfig({
-      getDropStatus(paths) {
-        if (interfaceMode !== "image") {
-          return { canDrop: false };
-        }
-        let effect: "add" | "replace" = "add";
-        for (const path of paths) {
-          if (!path.isTopic || path.rootSchemaName == undefined) {
-            return { canDrop: false };
+    context.EXPERIMENTAL_setMessagePathDropConfig(
+      renderer
+        ? {
+            getDropStatus: renderer.getDropStatus,
+            handleDrop: renderer.handleDrop,
           }
-          if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
-            effect = "replace";
-          } else if (ALL_SUPPORTED_ANNOTATION_SCHEMAS.has(path.rootSchemaName)) {
-            // nothing to do
-          } else {
-            return { canDrop: false };
-          }
-        }
-        return { canDrop: true, effect };
-      },
-      handleDrop(paths) {
-        setConfig((prevConfig) =>
-          produce(prevConfig, (draft) => {
-            for (const path of paths) {
-              if (path.rootSchemaName == undefined) {
-                continue;
-              }
-              if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
-                draft.imageMode.imageTopic = path.path;
-              } else {
-                draft.imageMode.annotations ??= {};
-                draft.imageMode.annotations[path.path] ??= {};
-                draft.imageMode.annotations[path.path]!.visible = true;
-              }
-            }
-          }),
-        );
-      },
-    });
-  }, [context, interfaceMode]);
+        : undefined,
+    );
+  }, [context, renderer]);
 
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
   const [timezone, setTimezone] = useState<string | undefined>();

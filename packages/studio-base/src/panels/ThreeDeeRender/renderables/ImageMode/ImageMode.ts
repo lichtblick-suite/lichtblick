@@ -4,11 +4,18 @@
 
 import * as _ from "lodash-es";
 import * as THREE from "three";
+import { Writable } from "ts-essentials";
 
 import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { toNanoSec } from "@foxglove/rostime";
-import { Immutable, SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
+import {
+  DraggedMessagePath,
+  Immutable,
+  SettingsTreeAction,
+  SettingsTreeFields,
+  Topic,
+} from "@foxglove/studio";
 import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
@@ -30,7 +37,12 @@ import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms
 import { ImageModeCamera } from "./ImageModeCamera";
 import { MessageHandler, MessageRenderState } from "./MessageHandler";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
-import type { AnyRendererSubscription, IRenderer, ImageModeConfig } from "../../IRenderer";
+import type {
+  AnyRendererSubscription,
+  IRenderer,
+  ImageModeConfig,
+  RendererConfig,
+} from "../../IRenderer";
 import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
 import { SettingsTreeEntry } from "../../SettingsManager";
 import {
@@ -66,7 +78,7 @@ const REMOVE_IMAGE_TIMEOUT_MS = 50;
 
 type ImageModeEvent = { type: "hasModifiedViewChanged" };
 
-export const ALL_SUPPORTED_IMAGE_SCHEMAS = new Set([
+const ALL_SUPPORTED_IMAGE_SCHEMAS = new Set([
   ...ROS_IMAGE_DATATYPES,
   ...ROS_COMPRESSED_IMAGE_DATATYPES,
   ...RAW_IMAGE_DATATYPES,
@@ -533,6 +545,35 @@ export class ImageMode
 
     // Update the settings sidebar
     this.updateSettingsTree();
+  };
+
+  public override getDropEffectForPath = (
+    path: DraggedMessagePath,
+  ): "add" | "replace" | undefined => {
+    if (!path.isTopic || path.rootSchemaName == undefined) {
+      return undefined;
+    }
+    if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
+      return "replace";
+    } else if (this.#annotations.supportedAnnotationSchemas.has(path.rootSchemaName)) {
+      return "add";
+    }
+    return undefined;
+  };
+
+  public override updateConfigForDropPath = (
+    draft: Writable<RendererConfig>,
+    path: DraggedMessagePath,
+  ): void => {
+    if (path.rootSchemaName == undefined) {
+      return;
+    }
+    if (ALL_SUPPORTED_IMAGE_SCHEMAS.has(path.rootSchemaName)) {
+      draft.imageMode.imageTopic = path.path;
+    } else if (this.#annotations.supportedAnnotationSchemas.has(path.rootSchemaName)) {
+      draft.imageMode.annotations ??= {};
+      draft.imageMode.annotations[path.path] = { visible: true };
+    }
   };
 
   #cameraInfoShouldSubscribe = (topic: string): boolean => {

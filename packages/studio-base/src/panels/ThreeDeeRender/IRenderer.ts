@@ -6,8 +6,10 @@ import EventEmitter from "eventemitter3";
 import * as THREE from "three";
 
 import {
+  DraggedMessagePath,
   Immutable,
   MessageEvent,
+  MessagePathDropStatus,
   ParameterValue,
   SettingsIcon,
   Topic,
@@ -351,4 +353,10 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
 
   // Function to fetch an asset from Studio's asset manager.
   fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
+
+  /** Returns whether active scene extensions can handle the MessagePaths being dropped */
+  getDropStatus: (paths: readonly DraggedMessagePath[]) => MessagePathDropStatus;
+
+  /** Handles MessagePaths being dropped into the 3D panel. Allows scene extensions to update in response */
+  handleDrop: (paths: readonly DraggedMessagePath[]) => void;
 }

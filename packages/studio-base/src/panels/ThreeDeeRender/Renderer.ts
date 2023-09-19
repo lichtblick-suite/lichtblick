@@ -13,8 +13,10 @@ import Logger from "@foxglove/log";
 import { Time, fromNanoSec, isLessThan, toNanoSec } from "@foxglove/rostime";
 import type { FrameTransform, FrameTransforms, SceneUpdate } from "@foxglove/schemas";
 import {
+  DraggedMessagePath,
   Immutable,
   MessageEvent,
+  MessagePathDropStatus,
   ParameterValue,
   SettingsIcon,
   SettingsTreeAction,
@@ -1356,6 +1358,42 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       }
     });
   }
+
+  public getDropStatus = (paths: readonly DraggedMessagePath[]): MessagePathDropStatus => {
+    const effects: ("add" | "replace")[] = [];
+    for (const path of paths) {
+      let effect;
+      for (const extension of this.sceneExtensions.values()) {
+        const maybeEffect = extension.getDropEffectForPath(path);
+        if (maybeEffect) {
+          effect = maybeEffect;
+          break;
+        }
+      }
+      // if a single path does not have a drop effect, all paths are not droppable
+      if (effect == undefined) {
+        return { canDrop: false };
+      }
+      effects.push(effect);
+    }
+    // prioritize replace effect over add
+    const finalEffect = effects.includes("replace") ? "replace" : "add";
+
+    return {
+      canDrop: true,
+      effect: finalEffect,
+    };
+  };
+
+  public handleDrop = (paths: readonly DraggedMessagePath[]): void => {
+    this.updateConfig((draft) => {
+      for (const path of paths) {
+        for (const extension of this.sceneExtensions.values()) {
+          extension.updateConfigForDropPath(draft, path);
+        }
+      }
+    });
+  };
 }
 
 function handleMessage(

@@ -53,7 +53,7 @@ const LEGACY_ANNOTATION_SCHEMAS = new Set([
   "webviz_msgs/ImageMarkerArray",
 ]);
 
-export const ALL_SUPPORTED_ANNOTATION_SCHEMAS = new Set([
+const ALL_SUPPORTED_ANNOTATION_SCHEMAS = new Set([
   ...IMAGE_ANNOTATIONS_DATATYPES,
   ...IMAGE_MARKER_DATATYPES,
   ...IMAGE_MARKER_ARRAY_DATATYPES,
@@ -73,6 +73,8 @@ export class ImageAnnotations extends THREE.Object3D {
   #canvasWidth: number;
   #canvasHeight: number;
   #pixelRatio: number;
+
+  public supportedAnnotationSchemas = ALL_SUPPORTED_ANNOTATION_SCHEMAS;
 
   public constructor(context: ImageAnnotationsContext) {
     super();
