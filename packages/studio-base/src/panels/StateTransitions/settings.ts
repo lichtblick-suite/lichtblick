@@ -14,53 +14,60 @@ import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import { stateTransitionPathDisplayName } from "./shared";
+import { DEFAULT_PATH, stateTransitionPathDisplayName } from "./shared";
 import { StateTransitionConfig, StateTransitionPath } from "./types";
 
 // Note - we use memoizeWeak here instead of react memoization to allow us to memoize
 // at the level of individual nodes in our tree. This keeps our DOM updates small since
 // the NodeEditor component is wrapped in a React.memo.
 
-const makeSeriesNode = memoizeWeak((path: StateTransitionPath, index: number): SettingsTreeNode => {
-  return {
-    actions: [
-      {
-        type: "action",
-        id: "delete-series",
-        label: "Delete series",
-        display: "inline",
-        icon: "Clear",
+const makeSeriesNode = memoizeWeak(
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  (path: StateTransitionPath, index: number, canDelete: boolean): SettingsTreeNode => {
+    return {
+      actions: canDelete
+        ? [
+            {
+              type: "action",
+              id: "delete-series",
+              label: "Delete series",
+              display: "inline",
+              icon: "Clear",
+            },
+          ]
+        : [],
+      label: stateTransitionPathDisplayName(path, `Series ${index + 1}`),
+      fields: {
+        value: {
+          label: "Message path",
+          input: "messagepath",
+          value: path.value,
+          validTypes: plotableRosTypes,
+        },
+        label: {
+          input: "string",
+          label: "Label",
+          value: path.label,
+        },
+        timestampMethod: {
+          input: "select",
+          label: "Timestamp",
+          value: path.timestampMethod,
+          options: [
+            { label: "Receive Time", value: "receiveTime" },
+            { label: "Header Stamp", value: "headerStamp" },
+          ],
+        },
       },
-    ],
-    label: stateTransitionPathDisplayName(path, index),
-    fields: {
-      value: {
-        label: "Message path",
-        input: "messagepath",
-        value: path.value,
-        validTypes: plotableRosTypes,
-      },
-      label: {
-        input: "string",
-        label: "Label",
-        value: path.label,
-      },
-      timestampMethod: {
-        input: "select",
-        label: "Timestamp",
-        value: path.timestampMethod,
-        options: [
-          { label: "Receive Time", value: "receiveTime" },
-          { label: "Header Stamp", value: "headerStamp" },
-        ],
-      },
-    },
-  };
-});
+    };
+  },
+);
 
 const makeRootSeriesNode = memoizeWeak((paths: StateTransitionPath[]): SettingsTreeNode => {
   const children = Object.fromEntries(
-    paths.map((path, index) => [`${index}`, makeSeriesNode(path, index)]),
+    paths.length === 0
+      ? [["0", makeSeriesNode(DEFAULT_PATH, 0, /*canDelete=*/ false)]]
+      : paths.map((path, index) => [`${index}`, makeSeriesNode(path, index, /*canDelete=*/ true)]),
   );
   return {
     label: "Series",
@@ -153,7 +160,10 @@ export function useStateTransitionsPanelSettings(
           );
         } else {
           saveConfig(
-            produce((draft) => {
+            produce((draft: StateTransitionConfig): void => {
+              if (draft.paths.length === 0) {
+                draft.paths.push({ ...DEFAULT_PATH });
+              }
               _.set(draft, path, value);
             }),
           );
@@ -164,11 +174,10 @@ export function useStateTransitionsPanelSettings(
         if (action.payload.id === "add-series") {
           saveConfig(
             produce((draft) => {
-              draft.paths.push({
-                timestampMethod: "receiveTime",
-                value: "",
-                enabled: true,
-              });
+              if (draft.paths.length === 0) {
+                draft.paths.push({ ...DEFAULT_PATH });
+              }
+              draft.paths.push({ ...DEFAULT_PATH });
             }),
           );
         } else if (action.payload.id === "delete-series") {

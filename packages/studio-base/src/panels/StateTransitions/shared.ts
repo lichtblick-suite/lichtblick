@@ -4,6 +4,11 @@
 
 import { StateTransitionPath } from "./types";
 
+export const DEFAULT_PATH: StateTransitionPath = Object.freeze({
+  value: "",
+  timestampMethod: "receiveTime",
+});
+
 function presence<T>(value: undefined | T): undefined | T {
   if (value === "") {
     return undefined;
@@ -14,7 +19,7 @@ function presence<T>(value: undefined | T): undefined | T {
 
 export function stateTransitionPathDisplayName(
   path: Readonly<StateTransitionPath>,
-  index: number,
+  fallbackMessage: string,
 ): string {
-  return presence(path.label) ?? presence(path.value) ?? `Series ${index + 1}`;
+  return presence(path.label) ?? presence(path.value) ?? fallbackMessage;
 }

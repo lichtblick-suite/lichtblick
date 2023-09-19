@@ -120,6 +120,23 @@ export default {
   },
 };
 
+export const Empty: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 1 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
+        <StateTransitions />
+      </PanelSetup>
+    );
+  },
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
+  },
+  parameters: { useReadySignal: true },
+};
+
 export const ColorPalette: StoryObj = {
   render: () => (
     <Stack padding={2} fullWidth>
