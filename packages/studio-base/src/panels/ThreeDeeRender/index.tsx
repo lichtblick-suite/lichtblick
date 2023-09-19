@@ -32,6 +32,7 @@ type InitPanelArgs = {
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
   const { crash, forwardedAnalytics, interfaceMode, onDownloadImage, debugPicking } = args;
+  // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
     <StrictMode>
       <CaptureErrorBoundary onError={crash}>
@@ -48,6 +49,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
     context.panelElement,
   );
   return () => {
+    // eslint-disable-next-line react/no-deprecated
     ReactDOM.unmountComponentAtNode(context.panelElement);
   };
 }

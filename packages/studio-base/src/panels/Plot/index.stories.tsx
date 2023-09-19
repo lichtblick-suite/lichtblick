@@ -16,6 +16,7 @@ import { screen, userEvent, waitFor } from "@storybook/testing-library";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAsync } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
 import { fromSec } from "@foxglove/rostime";
@@ -349,6 +350,23 @@ const exampleConfig: PlotConfig = {
   sidebarDimension: 0,
 };
 
+function useDelayedFixture(customFixture?: Fixture) {
+  // HACK: when the fixture was provided immediately on first render, we encountered an ordering
+  // issue where useProvider/useDatasets would process block messages before the chart was
+  // registered, thus `evictCache()` would clear out all the data (since no topics were registered
+  // yet).
+  const finalFixture = customFixture ?? fixture;
+  const { value: delayedFixture } = useAsync(async () => {
+    // another tick is needed to allow the useDatasets worker to process metadata & registrations
+    // before messages are delivered
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    return finalFixture;
+  }, [finalFixture]);
+
+  // Topics and datatypes need to be present before messages are received for plots to render
+  return delayedFixture ?? { topics: finalFixture.topics, datatypes: finalFixture.datatypes };
+}
+
 function PlotWrapper(props: {
   style?: { [key: string]: string | number };
   includeSettings?: boolean;
@@ -356,9 +374,10 @@ function PlotWrapper(props: {
   pauseFrame: (_arg: string) => () => void;
   config: PlotConfig;
 }): JSX.Element {
+  const delayedFixture = useDelayedFixture(props.fixture);
   return (
     <PanelSetup
-      fixture={props.fixture ?? fixture}
+      fixture={delayedFixture}
       pauseFrame={props.pauseFrame}
       includeSettings={props.includeSettings}
       style={{ ...props.style }}
@@ -572,8 +591,9 @@ export const InALineGraphWithMultiplePlotsXAxesAreSynced: StoryObj = {
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
     const { classes } = useStyles();
 
+    const delayedFixture = useDelayedFixture();
     return (
-      <PanelSetup fixture={fixture} pauseFrame={pauseFrame} className={classes.PanelSetup}>
+      <PanelSetup fixture={delayedFixture} pauseFrame={pauseFrame} className={classes.PanelSetup}>
         <Plot
           overrideConfig={{
             ...exampleConfig,
@@ -883,7 +903,7 @@ export const WithMinAndMaxYValues: StoryObj = {
 
 export const WithJustMinYValueLessThanMinimumValue: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 5 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -917,7 +937,7 @@ export const WithJustMinYValueLessThanMinimumValue: StoryObj = {
 
 export const WithJustMinYValueMoreThanMinimumValue: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 5 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -951,7 +971,7 @@ export const WithJustMinYValueMoreThanMinimumValue: StoryObj = {
 
 export const WithJustMinYValueMoreThanMaximumValue: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 5 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
@@ -985,7 +1005,7 @@ export const WithJustMinYValueMoreThanMaximumValue: StoryObj = {
 
 export const WithJustMaxYValueLessThanMaximumValue: StoryObj = {
   render: function Story() {
-    const readySignal = useReadySignal({ count: 3 });
+    const readySignal = useReadySignal({ count: 5 });
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (

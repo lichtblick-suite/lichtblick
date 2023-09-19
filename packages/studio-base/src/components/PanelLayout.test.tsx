@@ -76,7 +76,7 @@ describe("UnconnectedPanelLayout", () => {
         onChange={onChange}
       />,
       {
-        wrapper: function Wrapper({ children }: React.PropsWithChildren<unknown>) {
+        wrapper: function Wrapper({ children }: React.PropsWithChildren) {
           const [config] = useState(() => makeMockAppConfiguration());
 
           return (

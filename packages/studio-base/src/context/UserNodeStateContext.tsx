@@ -33,7 +33,7 @@ const UserNodeStateContext = createContext<
 >(undefined);
 UserNodeStateContext.displayName = "UserNodeStateContext";
 
-export function UserNodeStateProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
+export function UserNodeStateProvider({ children }: React.PropsWithChildren): JSX.Element {
   const [state, setState] = useState<UserNodeState>({
     rosLib: ros_lib_dts,
     typesLib: generateEmptyTypesLib(),

@@ -3,7 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { Progress } from "@foxglove/studio-base/players/types";
@@ -30,9 +30,9 @@ describe("useAllFramesByTopic", () => {
 
     const topics = [{ topic: "topic_a" }, { topic: "topic_b" }];
 
+    let progress = initialProgress;
     const { result, rerender } = renderHook(() => useAllFramesByTopic(topics), {
-      initialProps: { progress: initialProgress },
-      wrapper: ({ children, progress }) => (
+      wrapper: ({ children }) => (
         <MockMessagePipelineProvider progress={progress}>{children}</MockMessagePipelineProvider>
       ),
     });
@@ -58,7 +58,8 @@ describe("useAllFramesByTopic", () => {
       },
     };
 
-    rerender({ progress: updatedProgress });
+    progress = updatedProgress;
+    rerender();
 
     expect(result.current).toEqual({
       topic_a: [

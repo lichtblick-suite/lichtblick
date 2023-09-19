@@ -3,7 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook } from "@testing-library/react-hooks";
+import { act, renderHook } from "@testing-library/react";
 
 import { useColorPickerControl } from "./ColorPickerControl";
 
@@ -15,16 +15,16 @@ describe("useColorPickerControl", () => {
       lastOnChange = val;
     };
 
-    const { result, rerender } = renderHook<
-      Parameters<typeof useColorPickerControl>[0],
-      ReturnType<typeof useColorPickerControl>
-    >((props) => useColorPickerControl(props), {
-      initialProps: {
-        alphaType: "none",
-        value: undefined,
-        onChange,
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useColorPickerControl>[0]) => useColorPickerControl(props),
+      {
+        initialProps: {
+          alphaType: "none",
+          value: undefined,
+          onChange,
+        },
       },
-    });
+    );
 
     // When there's no display value the swatch color defaults to black with some opacity
     expect(result.current.swatchColor).toEqual("#00000044");
@@ -60,16 +60,16 @@ describe("useColorPickerControl", () => {
       lastOnChange = val;
     };
 
-    const { result, rerender } = renderHook<
-      Parameters<typeof useColorPickerControl>[0],
-      ReturnType<typeof useColorPickerControl>
-    >((props) => useColorPickerControl(props), {
-      initialProps: {
-        alphaType: "alpha",
-        value: undefined,
-        onChange,
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useColorPickerControl>[0]) => useColorPickerControl(props),
+      {
+        initialProps: {
+          alphaType: "alpha",
+          value: undefined,
+          onChange,
+        },
       },
-    });
+    );
 
     // When there's no display value the swatch color defaults to black with some opacity
     expect(result.current.swatchColor).toEqual("#00000044");
@@ -101,16 +101,16 @@ describe("useColorPickerControl", () => {
   it("should update edited value with prop value", () => {
     const onChange = () => {};
 
-    const { result, rerender } = renderHook<
-      Parameters<typeof useColorPickerControl>[0],
-      ReturnType<typeof useColorPickerControl>
-    >((props) => useColorPickerControl(props), {
-      initialProps: {
-        alphaType: "alpha",
-        value: "abc",
-        onChange,
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useColorPickerControl>[0]) => useColorPickerControl(props),
+      {
+        initialProps: {
+          alphaType: "alpha",
+          value: "abc",
+          onChange,
+        },
       },
-    });
+    );
 
     act(() => {
       result.current.updateEditedValue("abc");

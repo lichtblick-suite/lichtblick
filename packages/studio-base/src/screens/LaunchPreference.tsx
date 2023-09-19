@@ -12,7 +12,7 @@ import { LaunchingInDesktopScreen } from "./LaunchingInDesktopScreen";
 import { AppSetting } from "../AppSetting";
 import { useAppConfigurationValue } from "../hooks";
 
-export function LaunchPreference(props: PropsWithChildren<unknown>): JSX.Element {
+export function LaunchPreference(props: PropsWithChildren): JSX.Element {
   const [globalLaunchPreference] = useAppConfigurationValue<string>(AppSetting.LAUNCH_PREFERENCE);
   const [sessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
 

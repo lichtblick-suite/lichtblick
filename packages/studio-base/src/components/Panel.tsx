@@ -111,12 +111,6 @@ export interface PanelStatics<Config> {
   defaultConfig: Config;
 }
 
-// Like React.ComponentType<P>, but without restrictions on the constructor return type.
-type ComponentConstructorType<P> = { displayName?: string } & (
-  | (new (props: P) => React.Component<unknown, unknown>)
-  | ((props: P) => React.ReactElement<unknown> | ReactNull)
-);
-
 /** Used in storybook when panels are renered outside of a <PanelLayout/> */
 const FALLBACK_PANEL_ID = "$unknown_id";
 
@@ -130,7 +124,7 @@ export default function Panel<
   Config extends PanelConfig,
   PanelProps extends { config: Config; saveConfig: SaveConfig<Config> },
 >(
-  PanelComponent: ComponentConstructorType<PanelProps> & PanelStatics<Config>,
+  PanelComponent: ComponentType<PanelProps> & PanelStatics<Config>,
 ): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
     const { childId = FALLBACK_PANEL_ID, overrideConfig, tabId, ...otherProps } = props;

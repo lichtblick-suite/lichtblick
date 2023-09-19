@@ -30,6 +30,7 @@ describe("<DocumentDropListener>", () => {
     wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
 
+    // eslint-disable-next-line react/no-deprecated
     ReactDOM.render(
       <div>
         <SnackbarProvider>
@@ -40,6 +41,7 @@ describe("<DocumentDropListener>", () => {
       </div>,
       wrapper,
     );
+    (console.error as jest.Mock).mockClear();
   });
 
   it("allows the event to bubble if the dataTransfer has no files", async () => {

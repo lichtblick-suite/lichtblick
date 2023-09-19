@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@foxglove/tsconfig": "2.0.0",
-    "@testing-library/react-hooks": "8.0.1",
+    "@testing-library/react": "14.0.0",
     "@types/foxglove__web": "workspace:*",
     "@types/lodash-es": "^4",
     "typescript": "5.2.2"
@@ -32,6 +32,6 @@
     "shallowequal": "1.1.0"
   },
   "peerDependencies": {
-    "react": "^17.0.2"
+    "react": "^18.2.0"
   }
 }

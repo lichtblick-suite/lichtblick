@@ -3,7 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook, waitFor } from "@testing-library/react";
 
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
@@ -45,7 +45,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
       initialProps: {},
       wrapper: ({ children }) => (
         <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>
@@ -103,7 +103,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
       initialProps: {},
       wrapper: ({ children }) => (
         <ExtensionCatalogProvider loaders={[mockPrivateLoader1, mockPrivateLoader2]}>
@@ -172,7 +172,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
       initialProps: {},
       wrapper: ({ children }) => (
         <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>
@@ -216,7 +216,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
       initialProps: {},
       wrapper: ({ children }) => (
         <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>

@@ -126,6 +126,7 @@ export function main(): void {
     );
   }
 
+  // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
     <>
       <GlobalStyle />

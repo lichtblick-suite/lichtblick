@@ -11,7 +11,7 @@ import { StudioLogsSettingsContext } from "@foxglove/studio-base/context/StudioL
 import { createStudioLogsSettingsStore } from "./store";
 import { LocalStorageSaveState } from "./types";
 
-function StudioLogsSettingsProvider(props: PropsWithChildren<unknown>): JSX.Element {
+function StudioLogsSettingsProvider(props: PropsWithChildren): JSX.Element {
   const [studioLogsSettingsSavedState, setStudioLogsSettingsSavedState] =
     useLocalStorage<LocalStorageSaveState>("fox.studio-logs-settings", {});
 

@@ -58,7 +58,7 @@ export function PanelGridCard(props: Props): JSX.Element {
           )}
           <CardContent className={classes.cardContent}>
             <Typography variant="subtitle2" gutterBottom>
-              <span data-testid={`panel-menu-item ${panel.title}`}>
+              <span data-testid={`panel-grid-card ${panel.title}`}>
                 <TextHighlight targetStr={targetString} searchText={searchQuery} />
               </span>
             </Typography>

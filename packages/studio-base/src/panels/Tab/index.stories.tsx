@@ -156,7 +156,7 @@ export const PickingAPanelFromThePanelListCreatesANewTabIfThereAreNone: Story = 
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    const panel = await canvas.findAllByTestId("panel-menu-item Some Panel");
+    const panel = await canvas.findAllByTestId("panel-grid-card Some Panel");
     fireEvent.click(panel[0]!);
   },
 };
@@ -175,7 +175,7 @@ export const PickingAPanelFromThePanelListUpdatesTheTabsLayout: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    const panel = await canvas.findAllByTestId("panel-menu-item Some Panel");
+    const panel = await canvas.findAllByTestId("panel-grid-card Some Panel");
     fireEvent.click(panel[0]!);
   },
 };

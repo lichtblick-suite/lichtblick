@@ -14,7 +14,7 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
@@ -38,7 +38,7 @@ import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
 
-// We require two state updates for each player emit() to take effect, because we  React 18 / @testing-library/react,
+// We require two state updates for each player emit() to take effect, for unknown reasons
 async function doubleAct(fn: () => Promise<void>) {
   let promise: Promise<void> | undefined;
   act(() => void (promise = fn()));
@@ -59,7 +59,7 @@ function makeTestHook({
     return value;
   }
   let currentPlayer = player;
-  function Wrapper({ children }: PropsWithChildren<unknown>) {
+  function Wrapper({ children }: PropsWithChildren) {
     const [config] = useState(() => makeMockAppConfiguration());
     return (
       <AppConfigurationContext.Provider value={config}>
@@ -460,7 +460,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
 
-    await act(async () => {
+    await doubleAct(async () => {
       await player2.emit({
         activeData: {
           messages: [],
@@ -546,8 +546,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
-
-    await act(async () => {
+    await doubleAct(async () => {
       await player.emit({
         playerId: "player2",
         activeData: {

@@ -3,7 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { PropsWithChildren } from "react";
 
 import AppConfigurationContext, {
@@ -25,7 +25,7 @@ class FakeProvider implements IAppConfiguration {
 
 describe("useAppConfigurationValue", () => {
   it("should have the value on first mount", async () => {
-    const wrapper = ({ children }: PropsWithChildren<unknown>) => {
+    const wrapper = ({ children }: PropsWithChildren) => {
       return (
         <AppConfigurationContext.Provider value={new FakeProvider()}>
           {children}
@@ -43,7 +43,7 @@ describe("useAppConfigurationValue", () => {
   });
 
   it("should treat empty string value as undefined", async () => {
-    const wrapper = ({ children }: PropsWithChildren<unknown>) => {
+    const wrapper = ({ children }: PropsWithChildren) => {
       return (
         <AppConfigurationContext.Provider value={new FakeProvider()}>
           {children}

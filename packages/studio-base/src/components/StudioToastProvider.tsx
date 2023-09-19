@@ -101,7 +101,7 @@ const Snackbar = forwardRef<HTMLDivElement, CustomContentProps>((props, ref) => 
 });
 Snackbar.displayName = "Snackbar";
 
-export default function StudioToastProvider({ children }: PropsWithChildren<unknown>): JSX.Element {
+export default function StudioToastProvider({ children }: PropsWithChildren): JSX.Element {
   const { classes: containerClasses } = useContainerStyles();
   const { classes } = useStyles();
   return (

@@ -17,7 +17,7 @@ export default function RemountOnValueChange(
   // When the value changes, useCallback will create a new component by returning a new
   // function instance. Since this is a completely new component it will remount its entire tree.
   const Parent = useCallback(
-    ({ children }: PropsWithChildren<unknown>) => {
+    ({ children }: PropsWithChildren) => {
       void props.value; // to suppress eslint complaining about the value in the deps list
       return <>{children}</>;
     },

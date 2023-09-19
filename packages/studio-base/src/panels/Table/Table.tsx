@@ -309,7 +309,7 @@ export default function Table({
                       key={column.id}
                       data-testid={`column-header-${sanitizeAccessorPath(column.id)}`}
                     >
-                      {flexRender(header.column.columnDef.header, header)}
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   );
                 })}
