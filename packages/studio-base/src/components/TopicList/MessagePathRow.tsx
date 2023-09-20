@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ReOrderDotsVertical16Regular } from "@fluentui/react-icons";
-import { Typography } from "@mui/material";
+import { Badge, Typography } from "@mui/material";
 import { FzfResultItem } from "fzf";
 import { useCallback, useMemo } from "react";
 
@@ -20,11 +20,13 @@ export function MessagePathRow({
   style,
   selected,
   onClick,
+  onContextMenu,
 }: {
   messagePathResult: FzfResultItem<MessagePathSearchItem>;
   style: React.CSSProperties;
   selected: boolean;
   onClick: React.MouseEventHandler<HTMLDivElement>;
+  onContextMenu: React.MouseEventHandler<HTMLDivElement>;
 }): JSX.Element {
   const { cx, classes } = useTopicListStyles();
 
@@ -67,8 +69,11 @@ export function MessagePathRow({
       })}
       style={{ ...style, cursor }}
       onClick={onClick}
+      onContextMenu={onContextMenu}
     >
-      {draggedItemCount > 1 && <div className={classes.countBadge}>{draggedItemCount}</div>}
+      {draggedItemCount > 1 && (
+        <Badge color="primary" className={classes.countBadge} badgeContent={draggedItemCount} />
+      )}
       <Stack flex="auto" direction="row" gap={2} overflow="hidden">
         <Typography variant="body2" noWrap>
           <HighlightChars

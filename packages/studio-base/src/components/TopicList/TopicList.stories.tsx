@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within } from "@storybook/testing-library";
+import { fireEvent, userEvent, within, waitFor } from "@storybook/testing-library";
+import * as _ from "lodash-es";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -54,6 +55,18 @@ export default {
   ),
 } as Meta<typeof MockMessagePipelineProvider>;
 
+async function findAllByTextContent(canvasElement: HTMLElement, str: string, count: number) {
+  return await waitFor(async () => {
+    const items = await within(canvasElement).findAllByText(
+      (_content, element) => element instanceof HTMLSpanElement && element.textContent === str,
+    );
+    if (items.length !== count) {
+      throw new Error(`Expected ${count} items, found ${items.length}`);
+    }
+    return items;
+  });
+}
+
 type Story = StoryObj<typeof MockMessagePipelineProvider>;
 
 export const Default: Story = {};
@@ -68,6 +81,82 @@ export const EmptyChinese: Story = {
 export const EmptyJapanese: Story = {
   args: { topics: [] },
   parameters: { forceLanguage: "ja" },
+};
+
+export const ContextMenuSingleTopic: Story = {
+  play: async ({ canvasElement }) => {
+    for (const item of await findAllByTextContent(canvasElement, "/topic_1", 2)) {
+      fireEvent.contextMenu(item, {
+        clientX: item.getBoundingClientRect().left + 100,
+        clientY: item.getBoundingClientRect().top + 20,
+      });
+    }
+  },
+};
+
+export const ContextMenuMultipleTopics: Story = {
+  play: async ({ canvasElement }) => {
+    const topic1s = await findAllByTextContent(canvasElement, "/topic_1", 2);
+    const topic2s = await findAllByTextContent(canvasElement, "/topic_2", 2);
+    for (const [topic1, topic2] of _.zip(topic1s, topic2s)) {
+      if (!topic1 || !topic2) {
+        continue;
+      }
+      fireEvent.click(topic1);
+      fireEvent.click(topic2, { metaKey: true });
+      fireEvent.contextMenu(topic1, {
+        clientX: topic1.getBoundingClientRect().left + 100,
+        clientY: topic1.getBoundingClientRect().top + 20,
+      });
+    }
+  },
+};
+
+export const ContextMenuSinglePath: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
+
+    for (const input of filterInputs) {
+      await userEvent.type(input, "data");
+    }
+
+    const pathItems = await findAllByTextContent(canvasElement, ".data", 4);
+
+    for (const item of pathItems) {
+      fireEvent.contextMenu(item, {
+        clientX: item.getBoundingClientRect().left + 100,
+        clientY: item.getBoundingClientRect().top + 20,
+      });
+    }
+  },
+};
+
+export const ContextMenuMultiplePaths: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const filterInputs = await canvas.findAllByTestId("topic-filter");
+
+    for (const input of filterInputs) {
+      await userEvent.type(input, "data");
+    }
+
+    const topic1Items = await findAllByTextContent(canvasElement, "/topic_1", 2);
+    const pathItems = await findAllByTextContent(canvasElement, ".data", 4);
+
+    for (const item of topic1Items) {
+      fireEvent.click(item);
+    }
+    for (const item of pathItems) {
+      fireEvent.click(item, { shiftKey: true });
+    }
+    for (const item of topic1Items) {
+      fireEvent.contextMenu(item, {
+        clientX: item.getBoundingClientRect().left + 100,
+        clientY: item.getBoundingClientRect().top + 20,
+      });
+    }
+  },
 };
 
 export const FilterByTopicName: Story = {

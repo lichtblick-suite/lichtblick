@@ -19,6 +19,7 @@ type State = {
 export function useMultiSelection<T>(source: readonly T[]): {
   selectedIndexes: Set<number>;
   onSelect: (props: OnSelectPayload) => void;
+  getSelectedIndexes: () => Set<number>;
 } {
   const [store] = useState(() =>
     createStore<State>(() => ({
@@ -60,5 +61,7 @@ export function useMultiSelection<T>(source: readonly T[]): {
 
   const { selectedIndexes } = useStore(store);
 
-  return { selectedIndexes, onSelect };
+  const getSelectedIndexes = useCallback(() => store.getState().selectedIndexes, [store]);
+
+  return { selectedIndexes, onSelect, getSelectedIndexes };
 }

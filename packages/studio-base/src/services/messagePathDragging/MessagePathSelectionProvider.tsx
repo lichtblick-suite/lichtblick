@@ -3,9 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { createContext, useMemo } from "react";
-import { useLatest } from "react-use";
 
-import { filterMap } from "@foxglove/den/collection";
 import { DraggedMessagePath } from "@foxglove/studio";
 
 type MessagePathSelectionContext = {
@@ -21,22 +19,12 @@ export const MessagePathSelectionContextInternal = createContext<
  */
 export function MessagePathSelectionProvider(
   props: React.PropsWithChildren<{
-    selectedIndexes: ReadonlySet<number>;
-    getItemAtIndex: (index: number) => DraggedMessagePath | undefined;
+    getSelectedItems: () => DraggedMessagePath[];
   }>,
 ): JSX.Element {
-  const latestProps = useLatest(props);
-
   const value = useMemo(
-    () => ({
-      getSelectedItems() {
-        return filterMap(
-          Array.from(latestProps.current.selectedIndexes).sort(),
-          latestProps.current.getItemAtIndex,
-        );
-      },
-    }),
-    [latestProps],
+    () => ({ getSelectedItems: props.getSelectedItems }),
+    [props.getSelectedItems],
   );
 
   return (

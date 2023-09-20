@@ -6,6 +6,11 @@ import { TypeOptions } from "i18next";
 export const topicList: Partial<TypeOptions["resources"]["topicList"]> = {
   anErrorOccurred: "发生错误",
   clearFilter: "清除筛选",
+  copyMessagePath: undefined,
+  copyMessagePaths: undefined,
+  copySchemaName: undefined,
+  copyTopicName: undefined,
+  copyTopicNames: undefined,
   noDataSourceSelected: "未选择数据源",
   noTopicsAvailable: "暂无主题。 ",
   noTopicsOrDatatypesMatching: "没有匹配的主题或数据类型",

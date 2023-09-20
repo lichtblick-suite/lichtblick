@@ -6,6 +6,11 @@ import { TypeOptions } from "i18next";
 export const topicList: Partial<TypeOptions["resources"]["topicList"]> = {
   anErrorOccurred: undefined,
   clearFilter: undefined,
+  copyMessagePath: undefined,
+  copyMessagePaths: undefined,
+  copySchemaName: undefined,
+  copyTopicName: undefined,
+  copyTopicNames: undefined,
   noDataSourceSelected: undefined,
   noTopicsAvailable: undefined,
   noTopicsOrDatatypesMatching: undefined,
