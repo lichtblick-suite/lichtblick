@@ -64,7 +64,7 @@
     "@types/cytoscape": "^3.19.11",
     "@types/foxglove__roslibjs": "workspace:*",
     "@types/foxglove__web": "workspace:*",
-    "@types/geojson": "7946.0.10",
+    "@types/geojson": "7946.0.11",
     "@types/gl-matrix": "3.2.0",
     "@types/hammerjs": "2.0.42",
     "@types/leaflet": "1.9.4",
