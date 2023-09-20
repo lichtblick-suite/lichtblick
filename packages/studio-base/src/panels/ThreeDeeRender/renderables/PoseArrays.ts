@@ -138,8 +138,9 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
 }
 
 export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.PoseArrays", renderer);
+  public static extensionId = "foxglove.PoseArrays";
+  public constructor(renderer: IRenderer, name: string = PoseArrays.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

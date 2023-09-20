@@ -83,8 +83,9 @@ export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
 }
 
 export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.OccupancyGrids", renderer);
+  public static extensionId = "foxglove.OccupancyGrids";
+  public constructor(renderer: IRenderer, name: string = OccupancyGrids.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

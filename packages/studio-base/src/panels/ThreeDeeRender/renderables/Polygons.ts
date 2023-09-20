@@ -61,8 +61,9 @@ export class PolygonRenderable extends Renderable<PolygonUserData> {
 }
 
 export class Polygons extends SceneExtension<PolygonRenderable> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Polygons", renderer);
+  public static extensionId = "foxglove.Polygons";
+  public constructor(renderer: IRenderer, name: string = Polygons.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

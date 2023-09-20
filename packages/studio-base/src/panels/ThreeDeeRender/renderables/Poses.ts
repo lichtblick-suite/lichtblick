@@ -97,8 +97,9 @@ export class PoseRenderable extends Renderable<PoseUserData> {
 }
 
 export class Poses extends SceneExtension<PoseRenderable> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Poses", renderer);
+  public static extensionId = "foxglove.Poses";
+  public constructor(renderer: IRenderer, name: string = Poses.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

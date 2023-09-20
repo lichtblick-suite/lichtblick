@@ -57,6 +57,7 @@ const NO_CAMERA_INFO_ERR = "NoCameraInfo";
 const CAMERA_MODEL = "CameraModel";
 
 export class Images extends SceneExtension<ImageRenderable> {
+  public static extensionId = "foxglove.Images";
   /* All known camera info topics */
   #cameraInfoTopics = new Set<string>();
 
@@ -74,8 +75,8 @@ export class Images extends SceneExtension<ImageRenderable> {
    */
   #cameraInfoByTopic = new Map<string, CameraInfo>();
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Images", renderer);
+  public constructor(renderer: IRenderer, name: string = Images.extensionId) {
+    super(name, renderer);
     this.renderer.on("topicsChanged", this.#handleTopicsChanged);
     this.#handleTopicsChanged();
   }

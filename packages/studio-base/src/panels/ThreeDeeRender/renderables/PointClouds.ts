@@ -695,10 +695,11 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
 }
 
 export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
+  public static extensionId = "foxglove.PointClouds";
   #fieldsByTopic = new Map<string, string[]>();
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.PointClouds", renderer);
+  public constructor(renderer: IRenderer, name: string = PointClouds.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

@@ -385,10 +385,11 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
 }
 
 export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
+  public static extensionId = "foxglove.Grid";
   #fieldsByTopic = new Map<string, string[]>();
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Grid", renderer);
+  public constructor(renderer: IRenderer, name: string = FoxgloveGrid.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

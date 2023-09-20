@@ -30,7 +30,7 @@ import {
   BuiltinPanelExtensionContext,
 } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { LayerErrors } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
-import { FoxgloveGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
+import { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import { dark, light } from "@foxglove/studio-base/theme/palette";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -62,26 +62,10 @@ import {
   normalizeTransformStamped,
 } from "./normalizeMessages";
 import { CameraStateSettings } from "./renderables/CameraStateSettings";
-import { Cameras } from "./renderables/Cameras";
-import { FrameAxes } from "./renderables/FrameAxes";
-import { Grids } from "./renderables/Grids";
 import { ImageMode } from "./renderables/ImageMode/ImageMode";
-import { Images } from "./renderables/Images";
 import { DownloadImageInfo } from "./renderables/Images/ImageTypes";
-import { LaserScans } from "./renderables/LaserScans";
-import { Markers } from "./renderables/Markers";
 import { MeasurementTool } from "./renderables/MeasurementTool";
-import { OccupancyGrids } from "./renderables/OccupancyGrids";
-import { PointClouds } from "./renderables/PointClouds";
-import { Polygons } from "./renderables/Polygons";
-import { PoseArrays } from "./renderables/PoseArrays";
-import { Poses } from "./renderables/Poses";
 import { PublishClickTool } from "./renderables/PublishClickTool";
-import { PublishSettings } from "./renderables/PublishSettings";
-import { FoxgloveSceneEntities } from "./renderables/SceneEntities";
-import { SceneSettings } from "./renderables/SceneSettings";
-import { Urdfs } from "./renderables/Urdfs";
-import { VelodyneScans } from "./renderables/VelodyneScans";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import {
   Header,
@@ -225,6 +209,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     config: Immutable<RendererConfig>;
     interfaceMode: InterfaceMode;
     fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
+    sceneExtensionConfig: SceneExtensionConfig;
     debugPicking?: boolean;
   }) {
     super();
@@ -314,56 +299,50 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
     log.debug(`Initialized ${renderSize.width}x${renderSize.height} renderer (${samples}x MSAA)`);
 
-    this.measurementTool = new MeasurementTool(this);
-    this.publishClickTool = new PublishClickTool(this);
+    const { reserved } = args.sceneExtensionConfig;
+
+    this.measurementTool = reserved.measurementTool.init(this);
+    this.publishClickTool = reserved.publishClickTool.init(this);
+    this.#addSceneExtension(this.measurementTool);
+    this.#addSceneExtension(this.publishClickTool);
 
     const aspect = renderSize.width / renderSize.height;
     switch (interfaceMode) {
-      case "image":
-        this.#imageModeExtension = new ImageMode(this, {
-          canvasSize: this.input.canvasSize,
-          // eslint-disable-next-line @foxglove/no-boolean-parameters
-          setHasCalibrationTopic: (hasCameraCalibrationTopic: boolean) => {
-            if (hasCameraCalibrationTopic) {
-              this.#disableImageOnlySubscriptionMode();
-            } else {
-              this.#enableImageOnlySubscriptionMode();
-            }
-          },
-        });
+      case "image": {
+        const imageMode = reserved.imageMode.init(this);
+        this.#imageModeExtension = imageMode;
         this.cameraHandler = this.#imageModeExtension;
         this.#imageModeExtension.addEventListener("hasModifiedViewChanged", () => {
           this.emit("resetViewChanged", this);
         });
-        this.#addSceneExtension(this.cameraHandler);
+        this.#addSceneExtension(this.#imageModeExtension);
         break;
-      case "3d":
+      }
+      case "3d": {
         this.cameraHandler = new CameraStateSettings(this, this.#canvas, aspect);
         this.#addSceneExtension(this.cameraHandler);
-        this.#addSceneExtension(new PublishSettings(this));
-        this.#addSceneExtension(new Images(this));
-        this.#addSceneExtension(new Cameras(this));
         break;
+      }
     }
 
-    this.#addSceneExtension(new SceneSettings(this));
-    this.#addSceneExtension(new FrameAxes(this, { visible: interfaceMode === "3d" }));
-    this.#addSceneExtension(new Grids(this));
-    this.#addSceneExtension(new Markers(this));
-    this.#addSceneExtension(new FoxgloveSceneEntities(this));
-    this.#addSceneExtension(new FoxgloveGrid(this));
-    this.#addSceneExtension(new LaserScans(this));
-    this.#addSceneExtension(new OccupancyGrids(this));
-    this.#addSceneExtension(new PointClouds(this));
-    this.#addSceneExtension(new Polygons(this));
-    this.#addSceneExtension(new Poses(this));
-    this.#addSceneExtension(new PoseArrays(this));
-    this.#addSceneExtension(new Urdfs(this));
-    this.#addSceneExtension(new VelodyneScans(this));
-    this.#addSceneExtension(this.measurementTool);
-    this.#addSceneExtension(this.publishClickTool);
+    const { extensionsById } = args.sceneExtensionConfig;
+    for (const extensionItem of Object.values(extensionsById)) {
+      if (
+        extensionItem.supportedInterfaceModes == undefined ||
+        extensionItem.supportedInterfaceModes.includes(interfaceMode)
+      ) {
+        this.#addSceneExtension(extensionItem.init(this));
+      }
+    }
+
+    log.debug(
+      `Renderer initialized with scene extensions ${Array.from(this.sceneExtensions.keys()).join(
+        ", ",
+      )}`,
+    );
+
     if (interfaceMode === "image" && config.imageMode.calibrationTopic == undefined) {
-      this.#enableImageOnlySubscriptionMode();
+      this.enableImageOnlySubscriptionMode();
     } else {
       this.#addTransformSubscriptions();
       this.#addSubscriptionsFromSceneExtensions();
@@ -675,7 +654,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
    * This mode should only be enabled in ImageMode when there is no calibration topic selected. Disabling these subscriptions
    * prevents the 3D aspects of the scene from being rendered from an insufficient camera info.
    */
-  #enableImageOnlySubscriptionMode = (): void => {
+  public enableImageOnlySubscriptionMode = (): void => {
     assert(
       this.#imageModeExtension,
       "Image mode extension should be defined when calling enable Image only mode",
@@ -688,7 +667,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.settings.addNodeValidator(this.#imageOnlyModeTopicSettingsValidator);
   };
 
-  #disableImageOnlySubscriptionMode = (): void => {
+  public disableImageOnlySubscriptionMode = (): void => {
     // .clear() will clean up remaining errors on topics
     this.settings.removeNodeValidator(this.#imageOnlyModeTopicSettingsValidator);
     this.clear({ clearTransforms: true, resetAllFramesCursor: true });

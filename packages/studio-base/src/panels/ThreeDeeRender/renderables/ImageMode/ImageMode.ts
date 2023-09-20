@@ -103,6 +103,7 @@ export class ImageMode
   extends SceneExtension<ImageRenderable, ImageModeEvent>
   implements ICameraHandler
 {
+  public static extensionId = "foxglove.ImageMode";
   #camera: ImageModeCamera;
   #cameraModel:
     | {
@@ -125,27 +126,10 @@ export class ImageMode
   // Will need to change when synchronization is implemented (FG-2686)
   #latestImage: { topic: string; image: AnyImage } | undefined;
 
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  #setHasCalibrationTopic: (hasCalibrationTopic: boolean) => void;
+  public constructor(renderer: IRenderer, name: string = ImageMode.extensionId) {
+    super(name, renderer);
 
-  /**
-   * @param canvasSize Canvas size in CSS pixels
-   */
-  public constructor(
-    renderer: IRenderer,
-    {
-      canvasSize,
-      setHasCalibrationTopic,
-    }: {
-      canvasSize: THREE.Vector2;
-
-      // eslint-disable-next-line @foxglove/no-boolean-parameters
-      setHasCalibrationTopic: (hasCalibrationTopic: boolean) => void;
-    },
-  ) {
-    super("foxglove.ImageMode", renderer);
-
-    this.#setHasCalibrationTopic = setHasCalibrationTopic;
+    const canvasSize = renderer.input.canvasSize;
 
     this.#camera = new ImageModeCamera();
 
@@ -306,6 +290,15 @@ export class ImageMode
     this.#latestImage = undefined;
     super.removeAllRenderables();
   }
+
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  #setHasCalibrationTopic = (hasCalibrationTopic: boolean): void => {
+    if (hasCalibrationTopic) {
+      this.renderer.disableImageOnlySubscriptionMode();
+    } else {
+      this.renderer.enableImageOnlySubscriptionMode();
+    }
+  };
 
   /**
    * If no image topic is selected, automatically select the first available one from `renderer.topics`.

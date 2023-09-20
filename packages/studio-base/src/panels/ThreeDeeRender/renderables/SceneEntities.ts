@@ -47,10 +47,11 @@ const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
 };
 
 export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
+  public static extensionId = "foxglove.SceneEntities";
   #primitivePool = new PrimitivePool(this.renderer);
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.SceneEntities", renderer);
+  public constructor(renderer: IRenderer, name: string = FoxgloveSceneEntities.extensionId) {
+    super(name, renderer);
   }
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
     return [

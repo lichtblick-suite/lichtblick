@@ -23,8 +23,9 @@ export const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
 };
 
 export class PublishSettings extends SceneExtension {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.PublishSettings", renderer);
+  public static extensionId = "foxglove.PublishSettings";
+  public constructor(renderer: IRenderer, name: string = PublishSettings.extensionId) {
+    super(name, renderer);
 
     renderer.publishClickTool.addEventListener(
       "foxglove.publish-type-change",

@@ -84,6 +84,7 @@ const tempEuler = new THREE.Euler();
 const tempTfPath: [string, string] = ["transforms", ""];
 
 export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
+  public static extensionId = "foxglove.FrameAxes";
   #lineMaterial: LineMaterial;
   #linePickingMaterial: THREE.ShaderMaterial;
 
@@ -95,8 +96,9 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   public constructor(
     renderer: IRenderer,
     defaultRenderableSettings: Partial<LayerSettingsTransform>,
+    name: string = FrameAxes.extensionId,
   ) {
-    super("foxglove.FrameAxes", renderer);
+    super(name, renderer);
 
     const linewidth = this.renderer.config.scene.transforms?.lineWidth ?? DEFAULT_LINE_WIDTH_PX;
     const color = stringToRgb(

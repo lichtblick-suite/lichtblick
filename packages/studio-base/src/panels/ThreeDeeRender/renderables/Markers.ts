@@ -35,8 +35,9 @@ const DEFAULT_SETTINGS: LayerSettingsMarker = {
 };
 
 export class Markers extends SceneExtension<TopicMarkers> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Markers", renderer);
+  public static extensionId = "foxglove.Markers";
+  public constructor(renderer: IRenderer, name: string = Markers.extensionId) {
+    super(name, renderer);
   }
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
     return [

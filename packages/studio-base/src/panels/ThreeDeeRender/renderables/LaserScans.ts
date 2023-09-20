@@ -315,8 +315,9 @@ class LaserScanHistoryRenderable extends Renderable<LaserScanHistoryUserData> {
 }
 
 export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.LaserScans", renderer);
+  public static extensionId = "foxglove.LaserScans";
+  public constructor(renderer: IRenderer, name: string = LaserScans.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

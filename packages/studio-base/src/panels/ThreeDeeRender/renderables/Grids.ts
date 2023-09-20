@@ -68,8 +68,9 @@ export class GridRenderable extends Renderable<GridUserData> {
 }
 
 export class Grids extends SceneExtension<GridRenderable> {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Grids", renderer);
+  public static extensionId = "foxglove.Grids";
+  public constructor(renderer: IRenderer, name: string = Grids.extensionId) {
+    super(name, renderer);
 
     renderer.addCustomLayerAction({
       layerId: LAYER_ID,

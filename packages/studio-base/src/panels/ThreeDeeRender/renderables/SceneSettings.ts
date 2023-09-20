@@ -15,8 +15,9 @@ import { SettingsTreeEntry } from "../SettingsManager";
 export const DEFAULT_LABEL_SCALE_FACTOR = 1;
 
 export class SceneSettings extends SceneExtension {
-  public constructor(renderer: IRenderer) {
-    super("foxglove.SceneSettings", renderer);
+  public static extensionId = "foxglove.SceneSettings";
+  public constructor(renderer: IRenderer, name: string = SceneSettings.extensionId) {
+    super(name, renderer);
 
     renderer.labelPool.scaleFactor =
       renderer.config.scene.labelScaleFactor ?? DEFAULT_LABEL_SCALE_FACTOR;

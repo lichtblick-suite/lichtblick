@@ -124,11 +124,12 @@ class VelodyneCloudConverter {
 }
 
 export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
+  public static extensionId = "foxglove.VelodyneScans";
   #pointCloudFieldsByTopic = new Map<string, string[]>();
   #velodyneCloudConverter = new VelodyneCloudConverter();
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.VelodyneScans", renderer);
+  public constructor(renderer: IRenderer, name: string = VelodyneScans.extensionId) {
+    super(name, renderer);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

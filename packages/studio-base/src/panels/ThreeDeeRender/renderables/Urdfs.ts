@@ -176,14 +176,15 @@ export class UrdfRenderable extends Renderable<UrdfUserData> {
 }
 
 export class Urdfs extends SceneExtension<UrdfRenderable> {
+  public static extensionId = "foxglove.Urdfs";
   #framesByInstanceId = new Map<string, string[]>();
   #transformsByInstanceId = new Map<string, TransformData[]>();
   #jointStates = new Map<string, JointPosition>();
   #textDecoder = new TextDecoder();
   #urdfsByTopic = new Map<string, string>();
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.Urdfs", renderer);
+  public constructor(renderer: IRenderer, name: string = Urdfs.extensionId) {
+    super(name, renderer);
 
     renderer.on("parametersChange", this.#handleParametersChange);
     renderer.addCustomLayerAction({

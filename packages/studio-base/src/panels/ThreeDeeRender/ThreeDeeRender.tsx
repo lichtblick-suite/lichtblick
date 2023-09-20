@@ -24,6 +24,10 @@ import {
 } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import {
+  DEFAULT_SCENE_EXTENSION_CONFIG,
+  SceneExtensionConfig,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import type {
@@ -99,10 +103,12 @@ export function ThreeDeeRender(props: {
   interfaceMode: InterfaceMode;
   /** Override default downloading behavior, used for Storybook */
   onDownloadImage?: (blob: Blob, fileName: string) => void;
+  /** Allow for injection or overriding of default extensions by custom extensions */
+  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
   /** Enable hitmap debugging by default, used for picking stories */
   debugPicking?: boolean;
 }): JSX.Element {
-  const { context, interfaceMode, onDownloadImage, debugPicking } = props;
+  const { context, interfaceMode, onDownloadImage, debugPicking, customSceneExtensions } = props;
   const { initialState, saveState, unstable_fetchAsset: fetchAsset } = context;
 
   // Load and save the persisted panel configuration
@@ -144,7 +150,18 @@ export function ThreeDeeRender(props: {
   const rendererRef = useRef<IRenderer | undefined>(undefined);
   useEffect(() => {
     const newRenderer = canvas
-      ? new Renderer({ canvas, config: configRef.current, interfaceMode, fetchAsset, debugPicking })
+      ? new Renderer({
+          canvas,
+          config: configRef.current,
+          interfaceMode,
+          fetchAsset,
+          sceneExtensionConfig: _.merge(
+            {},
+            DEFAULT_SCENE_EXTENSION_CONFIG,
+            customSceneExtensions ?? {},
+          ),
+          debugPicking,
+        })
       : undefined;
     setRenderer(newRenderer);
     rendererRef.current = newRenderer;
@@ -156,6 +173,7 @@ export function ThreeDeeRender(props: {
     canvas,
     configRef,
     config.scene.transforms?.enablePreloading,
+    customSceneExtensions,
     interfaceMode,
     fetchAsset,
     debugPicking,

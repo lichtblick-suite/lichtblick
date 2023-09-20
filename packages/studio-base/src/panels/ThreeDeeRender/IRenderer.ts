@@ -245,6 +245,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   markerPool: MarkerPool;
   sharedGeometry: SharedGeometry;
 
+  enableImageOnlySubscriptionMode: () => void;
+  disableImageOnlySubscriptionMode: () => void;
+
   dispose(): void;
   cameraSyncError(): undefined | string;
   setCameraSyncError(error: undefined | string): void;

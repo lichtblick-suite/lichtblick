@@ -9,6 +9,7 @@ import { fromNanoSec, toNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
+import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
 import { CameraStateSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
@@ -118,7 +119,12 @@ const fetchAsset = async (uri: string, options?: { signal: AbortSignal }): Promi
     mediaType: response.headers.get("content-type") ?? undefined,
   };
 };
-
+const defaultRendererProps = {
+  config: defaultRendererConfig,
+  interfaceMode: "3d" as const,
+  fetchAsset,
+  sceneExtensionConfig: DEFAULT_SCENE_EXTENSION_CONFIG,
+};
 describe("3D Renderer", () => {
   let canvas = document.createElement("canvas");
   let parent = document.createElement("div");
@@ -134,13 +140,11 @@ describe("3D Renderer", () => {
   });
 
   it("constructs a renderer without error", () => {
-    expect(
-      () =>
-        new Renderer({ canvas, config: defaultRendererConfig, interfaceMode: "3d", fetchAsset }),
-    ).not.toThrow();
+    expect(() => new Renderer({ ...defaultRendererProps, canvas })).not.toThrow();
   });
   it("does not set a unfollow pose snapshot  when in follow-pose mode", () => {
     const renderer = new Renderer({
+      ...defaultRendererProps,
       canvas,
       config: {
         ...defaultRendererConfig,
@@ -148,8 +152,6 @@ describe("3D Renderer", () => {
         followTf: "display",
         scene: { transforms: { enablePreloading: false } },
       },
-      interfaceMode: "3d",
-      fetchAsset,
     });
     const cameraState = renderer.sceneExtensions.get(
       "foxglove.CameraStateSettings",
@@ -175,7 +177,7 @@ describe("3D Renderer", () => {
       followTf: "display",
       scene: { transforms: { enablePreloading: false } },
     };
-    const renderer = new Renderer({ canvas, config, interfaceMode: "3d", fetchAsset });
+    const renderer = new Renderer({ ...defaultRendererProps, canvas, config });
     const cameraState = renderer.sceneExtensions.get(
       "foxglove.CameraStateSettings",
     ) as CameraStateSettings;
@@ -208,7 +210,7 @@ describe("3D Renderer", () => {
       followTf: "display",
       scene: { transforms: { enablePreloading: false } },
     };
-    const renderer = new Renderer({ canvas, config, interfaceMode: "3d", fetchAsset });
+    const renderer = new Renderer({ ...defaultRendererProps, canvas, config });
     const cameraState = renderer.sceneExtensions.get(
       "foxglove.CameraStateSettings",
     ) as CameraStateSettings;
@@ -240,7 +242,7 @@ describe("3D Renderer", () => {
       followTf: "display",
       scene: { transforms: { enablePreloading: false } },
     };
-    const renderer = new Renderer({ canvas, config, interfaceMode: "3d", fetchAsset });
+    const renderer = new Renderer({ ...defaultRendererProps, canvas, config });
     const cameraState = renderer.sceneExtensions.get(
       "foxglove.CameraStateSettings",
     ) as CameraStateSettings;
@@ -271,6 +273,7 @@ describe("3D Renderer", () => {
   });
   it("in fixed follow mode: ensures that the unfollowPoseSnapshot updates when there is a new fixedFrame", () => {
     const renderer = new Renderer({
+      ...defaultRendererProps,
       canvas,
       config: {
         ...defaultRendererConfig,
@@ -278,8 +281,6 @@ describe("3D Renderer", () => {
         followTf: "display",
         scene: { transforms: { enablePreloading: false } },
       },
-      interfaceMode: "3d",
-      fetchAsset,
     });
     const cameraState = renderer.sceneExtensions.get(
       "foxglove.CameraStateSettings",
@@ -319,13 +320,12 @@ describe("3D Renderer", () => {
     // This test is meant accurately represent the flow of seek through the react component
 
     const renderer = new Renderer({
+      ...defaultRendererProps,
       canvas,
       config: {
         ...defaultRendererConfig,
         scene: { transforms: { enablePreloading: false } },
       },
-      interfaceMode: "3d",
-      fetchAsset,
     });
     let currentFrame = [];
 
@@ -387,13 +387,12 @@ describe("3D Renderer", () => {
     // This test is meant accurately represent the flow of seek through the react component
 
     const renderer = new Renderer({
+      ...defaultRendererProps,
       canvas,
       config: {
         ...defaultRendererConfig,
         scene: { transforms: { enablePreloading: false } },
       },
-      interfaceMode: "3d",
-      fetchAsset,
     });
     let currentFrame = [];
 
@@ -457,13 +456,12 @@ describe("3D Renderer", () => {
   });
   it("tfPreloading on:  when seeking to before currentTime, clears transform tree and repopulates it up to receiveTime from allFrames", () => {
     const renderer = new Renderer({
+      ...defaultRendererProps,
       canvas,
       config: {
         ...defaultRendererConfig,
         scene: { transforms: { enablePreloading: true } },
       },
-      interfaceMode: "3d",
-      fetchAsset,
     });
     const allFrames = [
       createTFMessageEvent("root", "before4", 5n, [1n]),
@@ -506,13 +504,12 @@ describe("3D Renderer", () => {
   });
   it("tfPreloading on: does not clear transform tree when seeking to after", () => {
     const renderer = new Renderer({
+      ...defaultRendererProps,
       canvas,
       config: {
         ...defaultRendererConfig,
         scene: { transforms: { enablePreloading: true } },
       },
-      interfaceMode: "3d",
-      fetchAsset,
     });
     const allFrames = [
       createTFMessageEvent("root", "before4", 5n, [1n]),
@@ -559,10 +556,8 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
   let canvas = document.createElement("canvas");
   let parent = document.createElement("div");
   let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
     canvas,
-    config: defaultRendererConfig,
-    interfaceMode: "3d",
-    fetchAsset,
   };
   beforeEach(() => {
     jest.clearAllMocks();
