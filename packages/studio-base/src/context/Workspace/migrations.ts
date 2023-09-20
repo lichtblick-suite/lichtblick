@@ -60,9 +60,6 @@ export function migrateV0WorkspaceState(
       active: undefined,
       shown: v0State.featureTours.shown,
     },
-    session: {
-      problems: [],
-    },
     sidebars: {
       left: {
         item: v0State.leftSidebarItem,

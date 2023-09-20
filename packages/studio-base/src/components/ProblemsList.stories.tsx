@@ -4,12 +4,14 @@
 
 import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
+import { useEffect } from "react";
 
 import { fromDate } from "@foxglove/rostime";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
-import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+import { useProblemsActions } from "@foxglove/studio-base/context/ProblemsContext";
 import { PlayerPresence, PlayerProblem, Topic } from "@foxglove/studio-base/players/types";
+import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 function makeProblems(): PlayerProblem[] {
@@ -53,7 +55,9 @@ export default {
       return (
         <WorkspaceContextProvider>
           <div style={{ height: "100%", background: theme.palette.background.paper }}>
-            <Story />
+            <ProblemsContextProvider>
+              <Story />
+            </ProblemsContextProvider>
           </div>
         </WorkspaceContextProvider>
       );
@@ -113,24 +117,20 @@ export const WithErrorsJapanese: StoryObj = {
 
 export const WithSessionProblems: StoryObj = {
   render: function Story() {
-    const initialState: Pick<WorkspaceContextStore, "session"> = {
-      session: {
-        problems: [
-          {
-            message: "Session problem error",
-            severity: "error",
-            tag: "tag-1",
-            tip: "Something really bad happened",
-          },
-          {
-            message: "Session problem warn",
-            severity: "warn",
-            tag: "tag-2",
-            tip: "Something kinda bad happened",
-          },
-        ],
-      },
-    };
+    const problemsActions = useProblemsActions();
+    useEffect(() => {
+      problemsActions.setProblem("tag-1", {
+        message: "Session problem error",
+        severity: "error",
+        tip: "Something really bad happened",
+      });
+      problemsActions.setProblem("tag-2", {
+        message: "Session problem warn",
+        severity: "warn",
+        tip: "Something kinda bad happened",
+      });
+    }, [problemsActions]);
+
     return (
       <MockMessagePipelineProvider
         startTime={START_TIME}
@@ -139,7 +139,7 @@ export const WithSessionProblems: StoryObj = {
         presence={PlayerPresence.RECONNECTING}
         problems={makeProblems()}
       >
-        <WorkspaceContextProvider initialState={initialState}>
+        <WorkspaceContextProvider>
           <ProblemsList />
         </WorkspaceContextProvider>
       </MockMessagePipelineProvider>
