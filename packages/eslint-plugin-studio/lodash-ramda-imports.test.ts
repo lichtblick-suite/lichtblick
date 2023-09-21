@@ -7,8 +7,8 @@ import { TSESLint } from "@typescript-eslint/utils";
 import path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const rule = require("./lodash-imports") as TSESLint.RuleModule<
-  "useLodashEs" | "useNamespaceImport"
+const rule = require("./lodash-ramda-imports") as TSESLint.RuleModule<
+  "useDifferentPackage" | "useNamespaceImport"
 >;
 
 const ruleTester = new RuleTester({
@@ -20,11 +20,13 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run("lodash-imports", rule, {
+ruleTester.run("lodash-ramda-imports", rule, {
   valid: [
     /* ts */ `
     import * as _ from "lodash-es";
     _.isEqual(1, 1);
+    import * as R from "ramda";
+    R.equals(1, 1);
     `,
   ],
 
@@ -34,7 +36,9 @@ ruleTester.run("lodash-imports", rule, {
         import * as _ from "lodash";
         _.isEqual(1, 1);
       `,
-      errors: [{ messageId: "useLodashEs" }],
+      errors: [
+        { messageId: "useDifferentPackage", data: { package: "lodash-es", convertFrom: "lodash" } },
+      ],
       output: /* ts */ `
         import * as _ from "lodash-es";
         _.isEqual(1, 1);
@@ -46,7 +50,7 @@ ruleTester.run("lodash-imports", rule, {
         import _ from "lodash-es";
         _.isEqual(1, 1);
       `,
-      errors: [{ messageId: "useNamespaceImport" }],
+      errors: [{ messageId: "useNamespaceImport", data: { name: "_", package: "lodash-es" } }],
       output: /* ts */ `
         import * as _ from "lodash-es";
         _.isEqual(1, 1);
@@ -59,7 +63,7 @@ ruleTester.run("lodash-imports", rule, {
         _.isEqual(1, 1);
         isEmpty({});
       `,
-      errors: [{ messageId: "useNamespaceImport" }],
+      errors: [{ messageId: "useNamespaceImport", data: { name: "_", package: "lodash-es" } }],
       output: /* ts */ `
         import * as _ from "lodash-es";
         _.isEqual(1, 1);
@@ -73,11 +77,39 @@ ruleTester.run("lodash-imports", rule, {
         lodash.isEqual(1, 1);
         lodashIsEmpty({});
       `,
-      errors: [{ messageId: "useNamespaceImport" }],
+      errors: [{ messageId: "useNamespaceImport", data: { name: "_", package: "lodash-es" } }],
       output: /* ts */ `
         import * as _ from "lodash-es";
         _.isEqual(1, 1);
         _.isEmpty({});
+      `,
+    },
+
+    {
+      code: /* ts */ `
+        import lodash, { isEmpty as lodashIsEmpty } from "lodash-es";
+        lodash.isEqual(1, 1);
+        lodashIsEmpty({});
+      `,
+      errors: [{ messageId: "useNamespaceImport", data: { name: "_", package: "lodash-es" } }],
+      output: /* ts */ `
+        import * as _ from "lodash-es";
+        _.isEqual(1, 1);
+        _.isEmpty({});
+      `,
+    },
+
+    {
+      code: /* ts */ `
+        import ramda, { isEmpty as ramdaIsEmpty } from "ramda";
+        ramda.equals(1, 1);
+        ramdaIsEmpty({});
+      `,
+      errors: [{ messageId: "useNamespaceImport", data: { name: "R", package: "ramda" } }],
+      output: /* ts */ `
+        import * as R from "ramda";
+        R.equals(1, 1);
+        R.isEmpty({});
       `,
     },
   ],
