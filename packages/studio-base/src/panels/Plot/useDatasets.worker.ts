@@ -277,6 +277,7 @@ function setLive(value: boolean): void {
 function unregister(id: string): void {
   const { [id]: _client, ...rest } = clients;
   clients = rest;
+  evictCache();
 }
 
 function receiveMetadata(topics: readonly Topic[], datatypes: Immutable<RosDatatypes>): void {
@@ -379,8 +380,6 @@ function addBlock(block: Messages, resetTopics: string[]): void {
     });
     client.queueRebuild();
   }
-
-  evictCache();
 }
 
 function clearCurrent(): void {
