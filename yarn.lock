@@ -11734,9 +11734,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-storybook@npm:0.6.13":
-  version: 0.6.13
-  resolution: "eslint-plugin-storybook@npm:0.6.13"
+"eslint-plugin-storybook@npm:0.6.14":
+  version: 0.6.14
+  resolution: "eslint-plugin-storybook@npm:0.6.14"
   dependencies:
     "@storybook/csf": ^0.0.1
     "@typescript-eslint/utils": ^5.45.0
@@ -11744,7 +11744,7 @@ __metadata:
     ts-dedent: ^2.2.0
   peerDependencies:
     eslint: ">=6"
-  checksum: 4d7bebd19bbebcdc36042e1e796dfd25fbde5f9d3a3d551a4d75fe1f41f537412f53fcf6b5e544386c5e0e2ce7af30efdabeb9169df27333e3e793a26fe2f008
+  checksum: f2ba1d77da273a3294416394573edc60d780bc1d7ac177eb921f25b32b90bb87a549698126ce572211067130b93974cc812b594d726d234c41f71f163edd56d8
   languageName: node
   linkType: hard
 
@@ -12597,7 +12597,7 @@ __metadata:
     eslint-plugin-prettier: 5.0.0
     eslint-plugin-react: 7.33.2
     eslint-plugin-react-hooks: 4.6.0
-    eslint-plugin-storybook: 0.6.13
+    eslint-plugin-storybook: 0.6.14
     eslint-plugin-tss-unused-classes: 1.0.2
     jest: 29.7.0
     jest-environment-jsdom: 29.7.0
