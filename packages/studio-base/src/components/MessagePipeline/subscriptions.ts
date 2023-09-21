@@ -36,7 +36,7 @@ function mergeSubscription(
 
   return {
     ...a,
-    ...(fields.length > 0 && !isAllFields ? { fields } : {}),
+    fields: fields.length > 0 && !isAllFields ? fields : undefined,
   };
 }
 
