@@ -25,6 +25,7 @@ import {
   Topic,
   VariableValue,
 } from "@foxglove/studio";
+import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
 import {
   Asset,
   BuiltinPanelExtensionContext,
@@ -32,6 +33,7 @@ import {
 import { LayerErrors } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
+import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 import { dark, light } from "@foxglove/studio-base/theme/palette";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { LabelMaterial, LabelPool } from "@foxglove/three-text";
@@ -42,6 +44,7 @@ import {
   RendererConfig,
   RendererEvents,
   RendererSubscription,
+  TestOptions,
 } from "./IRenderer";
 import { Input } from "./Input";
 import { DEFAULT_MESH_UP_AXIS, ModelCache } from "./ModelCache";
@@ -63,7 +66,6 @@ import {
 } from "./normalizeMessages";
 import { CameraStateSettings } from "./renderables/CameraStateSettings";
 import { ImageMode } from "./renderables/ImageMode/ImageMode";
-import { DownloadImageInfo } from "./renderables/Images/ImageTypes";
 import { MeasurementTool } from "./renderables/MeasurementTool";
 import { PublishClickTool } from "./renderables/PublishClickTool";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
@@ -142,6 +144,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #canvas: HTMLCanvasElement;
   public readonly gl: THREE.WebGLRenderer;
   public maxLod = DetailLevel.High;
+
   public debugPicking: boolean;
   public config: Immutable<RendererConfig>;
   public settings: SettingsManager;
@@ -204,15 +207,22 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #devicePixelRatioMediaQuery?: MediaQueryList;
   #fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
 
+  public readonly displayTemporaryError?: (str: string) => void;
+  /** Options passed for local testing and storybook. */
+  public readonly testOptions: TestOptions;
+  public analytics?: IAnalytics;
+
   public constructor(args: {
     canvas: HTMLCanvasElement;
     config: Immutable<RendererConfig>;
     interfaceMode: InterfaceMode;
     fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
+    displayTemporaryError?: (message: string) => void;
+    testOptions: TestOptions;
     sceneExtensionConfig: SceneExtensionConfig;
-    debugPicking?: boolean;
   }) {
     super();
+    this.displayTemporaryError = args.displayTemporaryError;
     // NOTE: Global side effect
     THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
 
@@ -220,7 +230,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const canvas = (this.#canvas = args.canvas);
     const config = (this.config = args.config);
     this.#fetchAsset = args.fetchAsset;
-    this.debugPicking = args.debugPicking ?? false;
+    this.testOptions = args.testOptions;
+    this.debugPicking = args.testOptions.debugPicking ?? false;
 
     this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode));
     this.settings.on("update", () => this.emit("settingsTreeChange", this));
@@ -838,10 +849,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.queueAnimationFrame();
   }
 
-  public getCurrentImage(): DownloadImageInfo | undefined {
-    return this.#imageModeExtension?.getLatestImage();
-  }
-
   public setSelectedRenderable(selection: PickedRenderable | undefined): void {
     if (this.#selectedRenderable === selection) {
       return;
@@ -1316,6 +1323,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.settings.errors.remove(FOLLOW_TF_PATH, FOLLOW_FRAME_NOT_FOUND);
   }
+  public getContextMenuItems = (): PanelContextMenuItem[] => {
+    return Array.from(this.sceneExtensions.values()).flatMap((extension) =>
+      extension.getContextMenuItems(),
+    );
+  };
 
   #updateResolution(): void {
     const resolution = this.input.canvasSize;
@@ -1373,6 +1385,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       }
     });
   };
+
+  public setAnalytics(analytics: IAnalytics): void {
+    this.analytics = analytics;
+  }
 }
 
 function handleMessage(

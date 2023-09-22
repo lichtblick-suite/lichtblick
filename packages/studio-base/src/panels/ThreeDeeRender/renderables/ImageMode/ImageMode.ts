@@ -8,6 +8,7 @@ import { Writable } from "ts-essentials";
 
 import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
+import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import {
   DraggedMessagePath,
@@ -16,6 +17,7 @@ import {
   SettingsTreeFields,
   Topic,
 } from "@foxglove/studio";
+import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
 import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
@@ -27,12 +29,18 @@ import {
   DownloadImageInfo,
   getFrameIdFromImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
-import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
+import {
+  IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
+  decodeCompressedImageToBitmap,
+  decodeRawImage,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
 import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+import { downloadFiles } from "@foxglove/studio-base/util/download";
 
 import { ImageModeCamera } from "./ImageModeCamera";
 import { MessageHandler, MessageRenderState } from "./MessageHandler";
@@ -60,6 +68,8 @@ import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
 import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "../Images/topicPrefixMatching";
 import { ColorModeSettings, colorModeSettingsFields } from "../colorMode";
+
+const log = Logger.getLogger(__filename);
 
 const IMAGE_TOPIC_PATH = ["imageMode", "imageTopic"];
 const CALIBRATION_TOPIC_PATH = ["imageMode", "calibrationTopic"];
@@ -836,7 +846,7 @@ export class ImageMode
     this.updateSettingsTree();
   };
 
-  public getLatestImage(): DownloadImageInfo | undefined {
+  #getLatestImage(): DownloadImageInfo | undefined {
     if (!this.#latestImage) {
       return undefined;
     }
@@ -855,6 +865,86 @@ export class ImageMode
       flatColor: settings.flatColor,
     };
   }
+
+  #getDownloadImageCallback = (): (() => Promise<void>) => {
+    return async () => {
+      const currentImage = this.#getLatestImage();
+      if (!currentImage) {
+        return;
+      }
+
+      const { topic, image, rotation, flipHorizontal, flipVertical } = currentImage;
+      const stamp = "header" in image ? image.header.stamp : image.timestamp;
+      let bitmap: ImageBitmap;
+      try {
+        if ("format" in image) {
+          bitmap = await decodeCompressedImageToBitmap(image);
+        } else {
+          const imageData = new ImageData(image.width, image.height);
+          // currentImage passed for color settings access
+          decodeRawImage(image, currentImage, imageData.data);
+          bitmap = await createImageBitmap(imageData);
+        }
+
+        const width = rotation === 90 || rotation === 270 ? bitmap.height : bitmap.width;
+        const height = rotation === 90 || rotation === 270 ? bitmap.width : bitmap.height;
+
+        // re-render the image onto a new canvas to download the original image
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          throw new Error("Unable to create rendering context for image download");
+        }
+
+        // Draw the image in the selected orientation so it aligns with the canvas viewport
+        ctx.translate(width / 2, height / 2);
+        ctx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
+        ctx.rotate((rotation / 180) * Math.PI);
+        ctx.translate(-bitmap.width / 2, -bitmap.height / 2);
+        ctx.drawImage(bitmap, 0, 0);
+
+        // read the canvas data as an image (png)
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(`Failed to create an image from ${width}x${height} canvas`);
+            }
+          }, "image/png");
+        });
+        // name the image the same name as the topic
+        // note: the / characters in the file name will be replaced with _ by the browser
+        // remove any leading / so the image name doesn't start with _
+        const topicName = topic.replace(/^\/+/, "");
+        const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
+        void this.renderer.analytics?.logEvent(AppEvent.IMAGE_DOWNLOAD);
+        if (this.renderer.testOptions.onDownloadImage) {
+          this.renderer.testOptions.onDownloadImage(blob, fileName);
+        } else {
+          downloadFiles([{ blob, fileName }]);
+        }
+      } catch (error) {
+        log.error(error);
+        if (this.renderer.displayTemporaryError) {
+          this.renderer.displayTemporaryError((error as Error).toString());
+        }
+      }
+    };
+  };
+
+  public override getContextMenuItems = (): PanelContextMenuItem[] => {
+    return [
+      {
+        type: "item",
+        label: "Download image",
+        onclick: this.#getDownloadImageCallback(),
+        disabled: this.#latestImage == undefined,
+      },
+    ];
+  };
 }
 
 const createFallbackCameraInfoForImage = (options: {

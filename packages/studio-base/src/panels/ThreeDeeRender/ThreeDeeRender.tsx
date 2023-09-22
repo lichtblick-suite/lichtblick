@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as _ from "lodash-es";
+import { useSnackbar } from "notistack";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useLatest } from "react-use";
@@ -24,6 +25,7 @@ import {
 } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   DEFAULT_SCENE_EXTENSION_CONFIG,
   SceneExtensionConfig,
@@ -37,6 +39,7 @@ import type {
   RendererConfig,
   RendererEvents,
   RendererSubscription,
+  TestOptions,
 } from "./IRenderer";
 import type { PickedRenderable } from "./Picker";
 import { SELECTED_ID_VARIABLE } from "./Renderable";
@@ -101,15 +104,13 @@ function useRendererProperty<K extends keyof IRenderer>(
 export function ThreeDeeRender(props: {
   context: BuiltinPanelExtensionContext;
   interfaceMode: InterfaceMode;
-  /** Override default downloading behavior, used for Storybook */
-  onDownloadImage?: (blob: Blob, fileName: string) => void;
+  testOptions: TestOptions;
   /** Allow for injection or overriding of default extensions by custom extensions */
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
-  /** Enable hitmap debugging by default, used for picking stories */
-  debugPicking?: boolean;
 }): JSX.Element {
-  const { context, interfaceMode, onDownloadImage, debugPicking, customSceneExtensions } = props;
+  const { context, interfaceMode, testOptions, customSceneExtensions } = props;
   const { initialState, saveState, unstable_fetchAsset: fetchAsset } = context;
+  const analytics = useAnalytics();
 
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
@@ -148,6 +149,16 @@ export function ThreeDeeRender(props: {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
   const [renderer, setRenderer] = useState<IRenderer | undefined>(undefined);
   const rendererRef = useRef<IRenderer | undefined>(undefined);
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  const displayTemporaryError = useCallback(
+    (errorString: string) => {
+      enqueueSnackbar(errorString, { variant: "error" });
+    },
+    [enqueueSnackbar],
+  );
+
   useEffect(() => {
     const newRenderer = canvas
       ? new Renderer({
@@ -160,7 +171,8 @@ export function ThreeDeeRender(props: {
             DEFAULT_SCENE_EXTENSION_CONFIG,
             customSceneExtensions ?? {},
           ),
-          debugPicking,
+          displayTemporaryError,
+          testOptions,
         })
       : undefined;
     setRenderer(newRenderer);
@@ -176,8 +188,15 @@ export function ThreeDeeRender(props: {
     customSceneExtensions,
     interfaceMode,
     fetchAsset,
-    debugPicking,
+    testOptions,
+    displayTemporaryError,
   ]);
+
+  useEffect(() => {
+    if (renderer) {
+      renderer.setAnalytics(analytics);
+    }
+  }, [renderer, analytics]);
 
   useEffect(() => {
     context.EXPERIMENTAL_setMessagePathDropConfig(
@@ -800,7 +819,6 @@ export function ThreeDeeRender(props: {
               renderer?.publishClickTool.start();
             }}
             timezone={timezone}
-            onDownloadImage={onDownloadImage}
           />
         </RendererContext.Provider>
       </div>

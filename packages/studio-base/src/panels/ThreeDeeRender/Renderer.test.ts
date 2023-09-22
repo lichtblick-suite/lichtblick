@@ -124,6 +124,7 @@ const defaultRendererProps = {
   interfaceMode: "3d" as const,
   fetchAsset,
   sceneExtensionConfig: DEFAULT_SCENE_EXTENSION_CONFIG,
+  testOptions: {},
 };
 describe("3D Renderer", () => {
   let canvas = document.createElement("canvas");
