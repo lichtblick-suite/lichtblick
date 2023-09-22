@@ -2720,7 +2720,7 @@ __metadata:
     "@foxglove/rostime": 1.1.2
     "@foxglove/schemas": 1.5.1
     "@foxglove/studio": "workspace:*"
-    "@foxglove/three-text": 0.1.1
+    "@foxglove/three-text": 0.2.0
     "@foxglove/tsconfig": 2.0.0
     "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ulog": 2.1.2
@@ -2953,14 +2953,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/three-text@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@foxglove/three-text@npm:0.1.1"
+"@foxglove/three-text@npm:0.2.0":
+  version: 0.2.0
+  resolution: "@foxglove/three-text@npm:0.2.0"
   dependencies:
     "@mapbox/tiny-sdf": 2.0.6
   peerDependencies:
     three: ">=0.140.2"
-  checksum: b6f694a293827838a49f52b34b39ea112d0e26ac3ed116bb55226b74d1018089582f23165bb8aee69ef86b48bf59a561af3e1b7e463b044dcce0dbac517c4577
+  checksum: 5dcc517c8e893cac0ccf858658c1831ac011d0c8b6dd5238e7bd7643f4b16004fb995927db34a1b33d32cbdcab775fa0e44a5ea7e1ff619b3968b2525ba92cda
   languageName: node
   linkType: hard
 

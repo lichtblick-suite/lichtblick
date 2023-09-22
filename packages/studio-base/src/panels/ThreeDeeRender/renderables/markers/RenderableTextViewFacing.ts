@@ -36,19 +36,20 @@ export class RenderableTextViewFacing extends RenderableMarker {
     const marker = this.userData.marker;
 
     this.#label.setText(marker.text);
+    const alpha = marker.color.a;
     this.#label.setColor(
       SRGBToLinear(marker.color.r),
       SRGBToLinear(marker.color.g),
       SRGBToLinear(marker.color.b),
+      alpha,
     );
 
     const foregroundIsDark = getLuminance(marker.color.r, marker.color.g, marker.color.b) < 0.5;
     if (foregroundIsDark) {
-      this.#label.setBackgroundColor(1, 1, 1);
+      this.#label.setBackgroundColor(1, 1, 1, alpha);
     } else {
-      this.#label.setBackgroundColor(0, 0, 0);
+      this.#label.setBackgroundColor(0, 0, 0, alpha);
     }
-    this.#label.setOpacity(marker.color.a);
     this.#label.setLineHeight(marker.scale.z);
     this.#label.userData.pose = marker.pose;
   }
