@@ -199,7 +199,10 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     }
 
     const { points, outlineColor, outlineColors, thickness, style, fillColor } = this.#annotation;
-    const pointsLength = points.length;
+    let pointsLength = points.length;
+    if (style === "line_list" && pointsLength % 2 !== 0) {
+      pointsLength--;
+    }
     if (pointsLength < 2) {
       this.visible = false;
       return;
