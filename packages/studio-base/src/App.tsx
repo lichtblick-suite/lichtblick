@@ -73,7 +73,6 @@ export function App(props: AppProps): JSX.Element {
 
   const providers = [
     /* eslint-disable react/jsx-key */
-    <ProblemsContextProvider />,
     <TimelineInteractionStateProvider />,
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
@@ -99,6 +98,9 @@ export function App(props: AppProps): JSX.Element {
   // The toast and logs provider comes first so they are available to all downstream providers
   providers.unshift(<StudioToastProvider />);
   providers.unshift(<StudioLogsSettingsProvider />);
+
+  // Problems provider also must come before other, depdendent contexts.
+  providers.unshift(<ProblemsContextProvider />);
 
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 
