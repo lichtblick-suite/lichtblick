@@ -2770,7 +2770,7 @@ __metadata:
     "@types/use-sync-external-store": 0.0.4
     "@types/uuid": 9.0.4
     "@types/wicg-file-system-access": 2020.9.6
-    "@uiw/react-textarea-code-editor": 2.1.7
+    "@uiw/react-textarea-code-editor": 2.1.9
     async-mutex: 0.4.0
     babel-jest: 29.7.0
     babel-plugin-transform-import-meta: 2.2.1
@@ -7346,18 +7346,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/react-textarea-code-editor@npm:2.1.7":
-  version: 2.1.7
-  resolution: "@uiw/react-textarea-code-editor@npm:2.1.7"
+"@uiw/react-textarea-code-editor@npm:2.1.9":
+  version: 2.1.9
+  resolution: "@uiw/react-textarea-code-editor@npm:2.1.9"
   dependencies:
     "@babel/runtime": ^7.18.6
     rehype: ~12.0.1
-    rehype-prism-plus: 1.5.0
+    rehype-prism-plus: 1.6.3
   peerDependencies:
     "@babel/runtime": ">=7.10.0"
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: c338eeb5667e4fde0828d447d5cd69f831414d71d1416ebae8e80224b4ea71590b4fb59a00d916cf62c4eafe2779994bb37a476326c6f492088d33199221dc60
+  checksum: 06d4a81fc162a9ec3ebecdafe0074a19a23ec9f7f7a5324fd90fad568a5111c46c3eb6a06f06413670c7822e5593c50baea6c55899a129108f3099f149222e61
   languageName: node
   linkType: hard
 
@@ -18964,15 +18964,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"refractor@npm:^4.7.0":
-  version: 4.7.0
-  resolution: "refractor@npm:4.7.0"
+"refractor@npm:^4.8.0":
+  version: 4.8.1
+  resolution: "refractor@npm:4.8.1"
   dependencies:
     "@types/hast": ^2.0.0
     "@types/prismjs": ^1.0.0
     hastscript: ^7.0.0
     parse-entities: ^4.0.0
-  checksum: 85618d594b081c0954b8fea368811b1a5ceeb8b98d7ec689a5a982310d4123882d130a3f7bf1f6d8792aee0ec97e57bb1a3c8bdcd56199536f6dbb729f4dc453
+  checksum: 51762ed1d62523e3fb4b1ccec3f846965d497b7828e43d1668b2839dcbbe6b0d4edfd9113ad6e3679e5a6b6fb2f6983883123d762a7e46e3b5a8cd480a0a1930
   languageName: node
   linkType: hard
 
@@ -19063,17 +19063,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rehype-prism-plus@npm:1.5.0":
-  version: 1.5.0
-  resolution: "rehype-prism-plus@npm:1.5.0"
+"rehype-prism-plus@npm:1.6.3":
+  version: 1.6.3
+  resolution: "rehype-prism-plus@npm:1.6.3"
   dependencies:
     hast-util-to-string: ^2.0.0
     parse-numeric-range: ^1.3.0
-    refractor: ^4.7.0
+    refractor: ^4.8.0
     rehype-parse: ^8.0.2
     unist-util-filter: ^4.0.0
     unist-util-visit: ^4.0.0
-  checksum: b1b0af56c1cc2ae6091fda4989f2b8554fb58aff576a3a7566a39e40d5a2e735f13a0dceef0c7942b27b06b3a0061658908d705ae5174fc09d94a3bfe1a2964e
+  checksum: 418b31bce05131b86cb759a4789e1842e576f7f0642c8ed8ed43f42785271dd15997c7c4d34778586f656b66a7e09bda405019db006c1f552a284beda685adca
   languageName: node
   linkType: hard
 

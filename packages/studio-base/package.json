@@ -89,7 +89,7 @@
     "@types/use-sync-external-store": "0.0.4",
     "@types/uuid": "9.0.4",
     "@types/wicg-file-system-access": "2020.9.6",
-    "@uiw/react-textarea-code-editor": "2.1.7",
+    "@uiw/react-textarea-code-editor": "2.1.9",
     "async-mutex": "0.4.0",
     "babel-jest": "29.7.0",
     "babel-plugin-transform-import-meta": "2.2.1",
