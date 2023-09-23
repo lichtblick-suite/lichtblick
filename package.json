@@ -97,7 +97,7 @@
     "depcheck": "1.4.6",
     "electron": "25.5.0",
     "electron-builder": "24.6.4",
-    "eslint": "8.49.0",
+    "eslint": "8.50.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-import-resolver-webpack": "0.13.7",
     "eslint-plugin-es": "4.1.0",
