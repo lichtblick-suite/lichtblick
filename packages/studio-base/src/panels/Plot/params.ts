@@ -26,11 +26,6 @@ export function isSingleMessage(params: PlotParams): boolean {
   return xAxisVal === "currentCustom" || xAxisVal === "index";
 }
 
-export function isBounded(params: PlotParams): boolean {
-  const { followingViewWidth } = params;
-  return followingViewWidth != undefined && followingViewWidth > 0;
-}
-
 export function getParamPaths(params: PlotParams): readonly string[] {
   return getPaths(params.paths, params.xAxisPath);
 }

@@ -30,7 +30,7 @@ import {
   TypedData,
   Messages,
 } from "./internalTypes";
-import { isSingleMessage, isBounded, getParamPaths, getParamTopics } from "./params";
+import { isSingleMessage, getParamPaths, getParamTopics } from "./params";
 import {
   buildPlotData,
   resolvePath,
@@ -195,10 +195,7 @@ function getClientData(client: Client): PlotData | undefined {
   const { bounds: currentBounds } = currentData;
 
   let datasets: PlotData[] = [];
-  if (isSingleMessage(params) || isBounded(params)) {
-    // bounded and single-message plots _only_ use current data
-    datasets = [currentData];
-  } else if (blockBounds.x.min <= currentBounds.x.min && blockBounds.x.max > currentBounds.x.max) {
+  if (blockBounds.x.min <= currentBounds.x.min && blockBounds.x.max > currentBounds.x.max) {
     // ignore current data if block data covers it already
     datasets = [blockData];
   } else {
