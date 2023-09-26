@@ -295,7 +295,7 @@ export function pointCloudMaterial<T extends LayerSettingsPointExtension>(
   // Tell three.js to recompile the shader when `shape` or `encoding` change
   material.customProgramCacheKey = () => `${shape}-${encoding}`;
   material.onBeforeCompile = (shader) => {
-    const SEARCH = "#include <output_fragment>";
+    const SEARCH = "#include <opaque_fragment>";
     if (shape === "circle") {
       // Patch the fragment shader to render points as circles
       shader.fragmentShader = shader.fragmentShader.replace(SEARCH, FS_POINTCLOUD_CIRCLE + SEARCH);

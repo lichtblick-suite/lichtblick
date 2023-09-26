@@ -58,14 +58,16 @@ function makeSphereMarker(): Marker {
   };
 }
 
-export type PublishClickEvent =
-  | { type: "foxglove.publish-start" }
-  | { type: "foxglove.publish-end" }
-  | { type: "foxglove.publish-type-change" }
-  | { type: "foxglove.publish-submit"; publishClickType: "point"; point: Point }
-  | { type: "foxglove.publish-submit"; publishClickType: "pose" | "pose_estimate"; pose: Pose };
+export interface PublishClickEventMap extends THREE.Object3DEventMap {
+  "foxglove.publish-start": object;
+  "foxglove.publish-end": object;
+  "foxglove.publish-type-change": object;
+  "foxglove.publish-submit":
+    | { publishClickType: "point"; point: Point }
+    | { publishClickType: "pose" | "pose_estimate"; pose: Pose };
+}
 
-export class PublishClickTool extends SceneExtension<Renderable, PublishClickEvent> {
+export class PublishClickTool extends SceneExtension<Renderable, PublishClickEventMap> {
   #sphere: RenderableSphere;
   #arrow: RenderableArrow;
 

@@ -69,7 +69,6 @@ export class Picker {
       minFilter: THREE.NearestFilter,
       magFilter: THREE.NearestFilter,
       format: THREE.RGBAFormat, // stores objectIds as uint32
-      encoding: THREE.LinearEncoding,
       generateMipmaps: false,
     });
     this.#pixelBuffer = new Uint8Array(4);

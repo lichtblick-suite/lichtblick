@@ -48,7 +48,7 @@ export class RenderableCylinders extends RenderablePrimitive {
 
     this.#geometry = renderer.sharedGeometry
       .getGeometry(`${this.constructor.name}-cylinder`, createGeometry)
-      .clone() as THREE.CylinderGeometry;
+      .clone();
     this.#maxInstances = 16;
     this.#mesh = new THREE.InstancedMesh(this.#geometry, this.#material, this.#maxInstances);
     this.#mesh.userData.pickingMaterial = this.#pickingMaterial;
@@ -74,7 +74,8 @@ export class RenderableCylinders extends RenderablePrimitive {
       `${this.constructor.name}-edges`,
       () => createEdgesGeometry(this.#geometry),
     );
-    this.#outlineGeometry = new THREE.InstancedBufferGeometry().copy(this.#sharedEdgesGeometry);
+    this.#outlineGeometry = new THREE.InstancedBufferGeometry();
+    (this.#outlineGeometry as THREE.BufferGeometry).copy(this.#sharedEdgesGeometry);
     this.#outlineGeometry.setAttribute("instanceMatrix", this.#mesh.instanceMatrix);
     this.#outlineGeometry.setAttribute("instanceBottomScale", this.#instanceBottomScale);
     this.#outlineGeometry.setAttribute("instanceTopScale", this.#instanceTopScale);
@@ -119,7 +120,8 @@ export class RenderableCylinders extends RenderablePrimitive {
       // THREE.js doesn't correctly recompute the new max instance count when dynamically
       // reassigning the attribute of InstancedBufferGeometry, so we just create a new geometry
       this.#outlineGeometry.dispose();
-      this.#outlineGeometry = new THREE.InstancedBufferGeometry().copy(this.#sharedEdgesGeometry);
+      this.#outlineGeometry = new THREE.InstancedBufferGeometry();
+      (this.#outlineGeometry as THREE.BufferGeometry).copy(this.#sharedEdgesGeometry);
       this.#outlineGeometry.instanceCount = newCapacity;
       this.#outlineGeometry.setAttribute("instanceMatrix", this.#mesh.instanceMatrix);
       this.#outlineGeometry.setAttribute("instanceBottomScale", this.#instanceBottomScale);

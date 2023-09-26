@@ -57,7 +57,7 @@ export class RenderableArrows extends RenderablePrimitive {
 
     this.#shaftGeometry = renderer.sharedGeometry
       .getGeometry(`${this.constructor.name}-shaft`, createShaftGeometry)
-      .clone() as THREE.CylinderGeometry;
+      .clone();
     this.#shaftGeometry.setAttribute("instanceOpacity", this.#instanceOpacity);
     this.#shaftMesh = new THREE.InstancedMesh(
       this.#shaftGeometry,
@@ -69,7 +69,7 @@ export class RenderableArrows extends RenderablePrimitive {
 
     this.#headGeometry = renderer.sharedGeometry
       .getGeometry(`${this.constructor.name}-head`, createHeadGeometry)
-      .clone() as THREE.ConeGeometry;
+      .clone();
     this.#headGeometry.setAttribute("instanceOpacity", this.#instanceOpacity);
     this.#headMesh = new THREE.InstancedMesh(
       this.#headGeometry,
@@ -83,7 +83,8 @@ export class RenderableArrows extends RenderablePrimitive {
       `${this.constructor.name}-shaftedges`,
       () => createShaftEdgesGeometry(this.#shaftGeometry),
     );
-    this.#shaftOutlineGeometry = new THREE.InstancedBufferGeometry().copy(shaftEdgesGeometry);
+    this.#shaftOutlineGeometry = new THREE.InstancedBufferGeometry();
+    (this.#shaftOutlineGeometry as THREE.BufferGeometry).copy(shaftEdgesGeometry);
     this.#shaftOutlineGeometry.setAttribute("instanceMatrix", this.#shaftMesh.instanceMatrix);
     this.#shaftOutline = new THREE.LineSegments(
       this.#shaftOutlineGeometry,
@@ -97,7 +98,8 @@ export class RenderableArrows extends RenderablePrimitive {
       `${this.constructor.name}-headedges`,
       () => createHeadEdgesGeometry(this.#headGeometry),
     );
-    this.#headOutlineGeometry = new THREE.InstancedBufferGeometry().copy(headEdgesGeometry);
+    this.#headOutlineGeometry = new THREE.InstancedBufferGeometry();
+    (this.#headOutlineGeometry as THREE.BufferGeometry).copy(headEdgesGeometry);
     this.#headOutlineGeometry.setAttribute("instanceMatrix", this.#headMesh.instanceMatrix);
     this.#headOutline = new THREE.LineSegments(
       this.#headOutlineGeometry,
@@ -146,7 +148,8 @@ export class RenderableArrows extends RenderablePrimitive {
         `${this.constructor.name}-shaftedges`,
         () => createShaftEdgesGeometry(this.#shaftGeometry),
       );
-      this.#shaftOutlineGeometry = new THREE.InstancedBufferGeometry().copy(shaftEdgesGeometry);
+      this.#shaftOutlineGeometry = new THREE.InstancedBufferGeometry();
+      (this.#shaftOutlineGeometry as THREE.BufferGeometry).copy(shaftEdgesGeometry);
       this.#shaftOutlineGeometry.instanceCount = newCapacity;
       this.#shaftOutlineGeometry.setAttribute("instanceMatrix", this.#shaftMesh.instanceMatrix);
       this.#shaftOutline.geometry = this.#shaftOutlineGeometry;
@@ -156,7 +159,8 @@ export class RenderableArrows extends RenderablePrimitive {
         `${this.constructor.name}-headedges`,
         () => createHeadEdgesGeometry(this.#headGeometry),
       );
-      this.#headOutlineGeometry = new THREE.InstancedBufferGeometry().copy(headEdgesGeometry);
+      this.#headOutlineGeometry = new THREE.InstancedBufferGeometry();
+      (this.#headOutlineGeometry as THREE.BufferGeometry).copy(headEdgesGeometry);
       this.#headOutlineGeometry.instanceCount = newCapacity;
       this.#headOutlineGeometry.setAttribute("instanceMatrix", this.#headMesh.instanceMatrix);
       this.#headOutline.geometry = this.#headOutlineGeometry;

@@ -86,7 +86,9 @@ const DEFAULT_FOCAL_LENGTH = 500;
 
 const REMOVE_IMAGE_TIMEOUT_MS = 50;
 
-type ImageModeEvent = { type: "hasModifiedViewChanged" };
+interface ImageModeEventMap extends THREE.Object3DEventMap {
+  hasModifiedViewChanged: object;
+}
 
 const ALL_SUPPORTED_IMAGE_SCHEMAS = new Set([
   ...ROS_IMAGE_DATATYPES,
@@ -110,7 +112,7 @@ const DEFAULT_CONFIG = {
 
 type ConfigWithDefaults = ImageModeConfig & typeof DEFAULT_CONFIG;
 export class ImageMode
-  extends SceneExtension<ImageRenderable, ImageModeEvent>
+  extends SceneExtension<ImageRenderable, ImageModeEventMap>
   implements ICameraHandler
 {
   public static extensionId = "foxglove.ImageMode";

@@ -35,7 +35,7 @@ export type LoadedModel = THREE.Group | THREE.Scene;
 
 type ErrorCallback = (err: Error) => void;
 
-const DEFAULT_COLOR = new THREE.Color(0x248eff).convertSRGBToLinear();
+const DEFAULT_COLOR = new THREE.Color(0x248eff);
 
 const GLTF_MIME_TYPES = ["model/gltf", "model/gltf-binary", "model/gltf+json"];
 // Sourced from <https://github.com/Ultimaker/Cura/issues/4141>

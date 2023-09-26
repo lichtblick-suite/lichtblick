@@ -41,7 +41,7 @@ export type PartialMessageEvent<T> = MessageEvent<DeepPartial<T>>;
  */
 export class SceneExtension<
   TRenderable extends Renderable = Renderable,
-  E extends THREE.BaseEvent = THREE.Event,
+  E extends THREE.Object3DEventMap = THREE.Object3DEventMap,
 > extends THREE.Object3D<E> {
   /** A unique identifier for this SceneExtension, such as `foxglove.Markers`. */
   public readonly extensionId: string;

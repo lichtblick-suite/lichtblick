@@ -61,8 +61,6 @@ export class DynamicInstancedMesh<
       this.#expand();
     }
     this.count = count;
-    this.instanceMatrix.count = count;
-    this.instanceColor!.count = count;
   }
 
   #expand() {

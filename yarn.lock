@@ -2720,7 +2720,7 @@ __metadata:
     "@foxglove/rostime": 1.1.2
     "@foxglove/schemas": 1.5.1
     "@foxglove/studio": "workspace:*"
-    "@foxglove/three-text": 0.2.0
+    "@foxglove/three-text": 0.2.2
     "@foxglove/tsconfig": 2.0.0
     "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ulog": 2.1.2
@@ -2765,7 +2765,7 @@ __metadata:
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
     "@types/text-metrics": "workspace:*"
-    "@types/three": ^0.149.0
+    "@types/three": 0.156.0
     "@types/tinycolor2": 1.4.4
     "@types/use-sync-external-store": 0.0.4
     "@types/uuid": 9.0.4
@@ -2850,7 +2850,7 @@ __metadata:
     string-replace-loader: 3.1.0
     style-loader: 3.3.3
     text-metrics: 3.0.0
-    three: "patch:three@0.149.0#../../patches/three.patch"
+    three: "patch:three@0.156.1#../../patches/three.patch"
     tinycolor2: 1.6.0
     ts-essentials: 9.4.0
     ts-key-enum: 2.0.12
@@ -2953,14 +2953,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/three-text@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@foxglove/three-text@npm:0.2.0"
+"@foxglove/three-text@npm:0.2.2":
+  version: 0.2.2
+  resolution: "@foxglove/three-text@npm:0.2.2"
   dependencies:
     "@mapbox/tiny-sdf": 2.0.6
   peerDependencies:
     three: ">=0.140.2"
-  checksum: 5dcc517c8e893cac0ccf858658c1831ac011d0c8b6dd5238e7bd7643f4b16004fb995927db34a1b33d32cbdcab775fa0e44a5ea7e1ff619b3968b2525ba92cda
+  checksum: 9dc10c9adaa8c1ca1731bc133d4ab8f07345a4aa51197efc6c2bb899cbefa5ee8ccf69d16a93d2569429c2a53a921fe5d62281228a6ed6ebadd7b6fb117a0ce1
   languageName: node
   linkType: hard
 
@@ -6990,6 +6990,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/stats.js@npm:*":
+  version: 0.17.0
+  resolution: "@types/stats.js@npm:0.17.0"
+  checksum: ac8dc5e622fa3b7cc37b9e21663193a2f171a4f5896285e4dfc04f2874acbb75edc958f077bffbd85b0ae358daa5bf4ecbc71210386a4300bff05d09435e35f9
+  languageName: node
+  linkType: hard
+
 "@types/string-hash@npm:1.1.1":
   version: 1.1.1
   resolution: "@types/string-hash@npm:1.1.1"
@@ -7010,12 +7017,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/three@npm:^0.149.0":
-  version: 0.149.0
-  resolution: "@types/three@npm:0.149.0"
+"@types/three@npm:0.156.0":
+  version: 0.156.0
+  resolution: "@types/three@npm:0.156.0"
   dependencies:
+    "@types/stats.js": "*"
     "@types/webxr": "*"
-  checksum: 5def82bd5d4fb0eb6046e747eecced06d68fbf1747ab8f3e7657872e42e58ce7a92218d7c5e4ca26204257927638ad14da5d1cce7310aca15eb8a9bd484ea191
+    fflate: ~0.6.10
+    meshoptimizer: ~0.18.1
+  checksum: c81b3d656c22d400a180cd54af96b3dd7c3f41b7dba71f714a623474de43c77afe92395889e60765eb86221fd79d07a4730d4c4f1b441933daf9460b6bdba47f
   languageName: node
   linkType: hard
 
@@ -12318,6 +12328,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fflate@npm:~0.6.10":
+  version: 0.6.10
+  resolution: "fflate@npm:0.6.10"
+  checksum: 96384bc4090987fe565c0de8204e3830f538144ec950576fea50aee1b42adbe9fc3ed5e7905dfa7979faaa20979def330dbebce548f3dcafc3e118cc9838526d
+  languageName: node
+  linkType: hard
+
 "file-entry-cache@npm:^6.0.1":
   version: 6.0.1
   resolution: "file-entry-cache@npm:6.0.1"
@@ -16063,6 +16080,13 @@ __metadata:
   version: 0.19.0
   resolution: "meshoptimizer@npm:0.19.0"
   checksum: a0f19b0e51e80ee3e3ff72ee706a46bac84d501791716c837620d05e4a9398086b59d86d99a2caad15da08063da427d6b695a0398f9eb058b8d4f6f7db62e989
+  languageName: node
+  linkType: hard
+
+"meshoptimizer@npm:~0.18.1":
+  version: 0.18.1
+  resolution: "meshoptimizer@npm:0.18.1"
+  checksum: 101dbed8abd4cf167cdb7a0bc13db90dd0743332c689e43b18cc5254d238f0766750752432401fa63dc7e9e32399ef68daacf48f0d89db1484042c1761c7362d
   languageName: node
   linkType: hard
 
@@ -20777,17 +20801,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:0.149.0":
-  version: 0.149.0
-  resolution: "three@npm:0.149.0"
-  checksum: bb11e28054ce11ecfbe94150c2f253fe149cd7532b7b9253cf0806022d234ba3711944f42d65131d146193e7396b92c9965d88cd779b979f007795e13dfb44e9
+"three@npm:0.156.1":
+  version: 0.156.1
+  resolution: "three@npm:0.156.1"
+  checksum: 18b3381efadb6a2bb10ca09f6de0cea8f6f5369acc7bd5531dfdc80f60c3d075e28151f56194dd19144352e646a50664a243111060985e1f428bff9484461d08
   languageName: node
   linkType: hard
 
-"three@patch:three@0.149.0#../../patches/three.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
-  version: 0.149.0
-  resolution: "three@patch:three@npm%3A0.149.0#../../patches/three.patch::version=0.149.0&hash=752558&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
-  checksum: f8fb90a94def61dd5f7fc17a58ff133af92f43685761b9f40af8f524254e2475e59811fadcda0380436fba3889436fee8784ecda8a4ba687b6eb8f2b98c0683f
+"three@patch:three@0.156.1#../../patches/three.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
+  version: 0.156.1
+  resolution: "three@patch:three@npm%3A0.156.1#../../patches/three.patch::version=0.156.1&hash=752558&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  checksum: f27bd732af649aba7bed78db71882d6acb8ff1c8c48476514acd90aac57621ed29494ac51ea5315f9317f6188187e1e693b0b309473b1ddecf07503eb83f437a
   languageName: node
   linkType: hard
 

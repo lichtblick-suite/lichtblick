@@ -166,7 +166,6 @@ export class RenderableTriangles extends RenderablePrimitive {
           const array = new Uint32Array(Math.round(indices.length * 1.5) + 16);
           array.set(indices);
           geometry.index = new THREE.BufferAttribute(array, 1);
-          geometry.index.count = indices.length;
         } else {
           const array = geometry.index.array as Uint32Array;
           let needsUpdate = false;

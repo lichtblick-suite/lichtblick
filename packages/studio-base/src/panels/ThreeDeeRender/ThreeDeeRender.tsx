@@ -55,7 +55,7 @@ import {
   makePoseMessage,
 } from "./publish";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
-import { PublishClickEvent } from "./renderables/PublishClickTool";
+import { PublishClickEventMap } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
 import { InterfaceMode } from "./types";
 
@@ -689,7 +689,7 @@ export function ThreeDeeRender(props: {
     const onStart = () => {
       setPublishActive(true);
     };
-    const onSubmit = (event: PublishClickEvent & { type: "foxglove.publish-submit" }) => {
+    const onSubmit = (event: PublishClickEventMap["foxglove.publish-submit"]) => {
       const frameId = renderer?.followFrameId;
       if (frameId == undefined) {
         log.warn("Unable to publish, renderFrameId is not set");
