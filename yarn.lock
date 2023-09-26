@@ -2754,7 +2754,7 @@ __metadata:
     "@types/nearley": 2.11.2
     "@types/prettier": 3.0.0
     "@types/ramda": 0.29.4
-    "@types/react": 18.2.22
+    "@types/react": 18.2.23
     "@types/react-dom": 18.2.7
     "@types/react-hover-observer": "workspace:*"
     "@types/react-transition-group": ^4.4.6
@@ -6875,14 +6875,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:18.2.22, @types/react@npm:>=16":
-  version: 18.2.22
-  resolution: "@types/react@npm:18.2.22"
+"@types/react@npm:*, @types/react@npm:18.2.23, @types/react@npm:>=16":
+  version: 18.2.23
+  resolution: "@types/react@npm:18.2.23"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 44289523dabaadcd3fd85689abb98f9ebcc8492d7e978348d1c986138acef4801030b279e89a19e38a6319e294bcea77559e37e0c803e4bacf2b8ae3a56ba587
+  checksum: efb9d1ed1940c0e7ba08a21ffba5e266d8dbbb8fe618cfb97bc902dfc96385fdd8189e3f7f64b4aa13134f8e61947d60560deb23be151253c3a97b0d070897ca
   languageName: node
   linkType: hard
 
@@ -8609,7 +8609,7 @@ __metadata:
     "@foxglove/studio-base": "workspace:*"
     "@foxglove/tsconfig": 2.0.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
-    "@types/react": 18.2.22
+    "@types/react": 18.2.23
     "@types/react-dom": 18.2.7
     clean-webpack-plugin: 4.0.0
     html-webpack-plugin: 5.5.3
