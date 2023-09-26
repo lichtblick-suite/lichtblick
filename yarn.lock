@@ -2883,7 +2883,7 @@ __metadata:
     "@mcap/core": 1.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@storybook/react": 7.4.5
-    "@types/electron-devtools-installer": 2.2.2
+    "@types/electron-devtools-installer": 2.2.3
     "@types/plist": ^3.0.3
     "@types/pngjs": ^6.0.2
     "@types/tinycolor2": 1.4.4
@@ -6338,10 +6338,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/electron-devtools-installer@npm:2.2.2":
-  version: 2.2.2
-  resolution: "@types/electron-devtools-installer@npm:2.2.2"
-  checksum: c0f7dda591936838883a06f698790f464bcc3cdce995c7fddcc046e08d83b54a42d91c04d1377493d2719ff6092316883ba0f2790326ecd95446f17929ff0ae8
+"@types/electron-devtools-installer@npm:2.2.3":
+  version: 2.2.3
+  resolution: "@types/electron-devtools-installer@npm:2.2.3"
+  checksum: c46d7efce5f158acec931b0d2d9676844fd8ff78331d5654d62a74b489bd70f7be35a77b10cabb3dcb860114b749e3826e161e3ad49275e037c776c277031b30
   languageName: node
   linkType: hard
 
