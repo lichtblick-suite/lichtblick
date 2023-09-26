@@ -19,7 +19,7 @@
     "@storybook/react": "7.4.5",
     "@types/electron-devtools-installer": "2.2.2",
     "@types/plist": "^3.0.2",
-    "@types/pngjs": "^6.0.1",
+    "@types/pngjs": "^6.0.2",
     "@types/tinycolor2": "1.4.4",
     "@types/utif": "^3.0.2",
     "@xmldom/xmldom": "0.8.10",
