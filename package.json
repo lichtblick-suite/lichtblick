@@ -114,7 +114,7 @@
     "jest-environment-jsdom": "29.7.0",
     "license-checker": "25.0.1",
     "prettier": "3.0.3",
-    "rimraf": "5.0.1",
+    "rimraf": "5.0.4",
     "semver": "7.5.4",
     "storybook": "7.4.5",
     "ts-node": "10.9.1",
