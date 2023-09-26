@@ -2884,7 +2884,7 @@ __metadata:
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@storybook/react": 7.4.5
     "@types/electron-devtools-installer": 2.2.2
-    "@types/plist": ^3.0.2
+    "@types/plist": ^3.0.3
     "@types/pngjs": ^6.0.2
     "@types/tinycolor2": 1.4.4
     "@types/utif": ^3.0.2
@@ -6738,13 +6738,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/plist@npm:^3.0.1, @types/plist@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@types/plist@npm:3.0.2"
+"@types/plist@npm:^3.0.1, @types/plist@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "@types/plist@npm:3.0.3"
   dependencies:
     "@types/node": "*"
     xmlbuilder: ">=11.0.1"
-  checksum: b8f9e6b21fb41a7e8ea5250717da972cde40b120109d5d2ed79e0a25406a9f6793abcba048d9b8ecc3df4b25735d9e4223b4d8a56dff893665c4a8c8573b77ad
+  checksum: 3208f7ef600d7a8a223c1cae6a4ecf993bc4ba9fcb6910216d7a844f8d9f42a3423bc0f1200db1d748b9d2b1ceb207d254324d6db7d6bc9e0ede6339b205516e
   languageName: node
   linkType: hard
 
