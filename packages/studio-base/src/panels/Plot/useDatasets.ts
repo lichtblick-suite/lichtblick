@@ -287,6 +287,11 @@ function useData(id: string, params: PlotParams) {
         // changed; we have to rebuild the plots
         if (existing != undefined && lastSent != undefined && index < lastSent) {
           resetData.add(payload.topic);
+
+          // clear out the status of all subsequent blocks for this ref
+          for (let i = index + 1; i < blockStatus.length; i++) {
+            blockStatus[i] = R.omit([ref], blockStatus[i]);
+          }
         }
 
         status[ref] = first;
