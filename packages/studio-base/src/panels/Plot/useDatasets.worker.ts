@@ -452,8 +452,6 @@ function addCurrent(events: readonly MessageEvent[]): void {
     }
 
     const newData = buildPlot(params, newMessages);
-    client.addPartial?.(getProvidedData(newData));
-
     mutateClient(client.id, {
       ...client,
       current: {
