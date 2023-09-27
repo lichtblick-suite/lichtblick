@@ -66,7 +66,7 @@ const useStyles = makeStyles<void, "toggleButton">()((theme, _params, classes) =
     lineHeight: 1,
   },
   toggleButtonGroup: {
-    marginRight: theme.spacing(-1),
+    marginRight: theme.spacing(-0.5),
     gap: theme.spacing(0.25),
 
     [`.${classes.toggleButton}`]: {
@@ -303,12 +303,11 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
         </div>
       </Stack>
       <DialogActions>
-        <Button variant="outlined" size="large" onClick={onClose}>
+        <Button variant="outlined" onClick={onClose}>
           Cancel
         </Button>
         <Button
           variant="contained"
-          size="large"
           onClick={createEvent}
           disabled={!canSubmit || createdEvent.loading}
         >

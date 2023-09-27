@@ -1,0 +1,11 @@
+settings:
+  # UserNodePlayer uses `?raw` import syntax to invoke the webpack raw loader
+  # By default, eslint doesn't understand how to resolve this import and fails. The webpack
+  # resolver helps eslint understand this import syntax.
+  import/resolver:
+    webpack:
+      config:
+        resolve:
+          extensions:
+            - .ts
+            - .tsx

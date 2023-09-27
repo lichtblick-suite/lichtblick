@@ -47,7 +47,7 @@ import { SubscribePayload } from "@foxglove/studio-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { Bounds } from "@foxglove/studio-base/types/Bounds";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fontMonospace } from "@foxglove/theme";
 
 import messagesToDatasets from "./messagesToDatasets";
 import { useStateTransitionsPanelSettings } from "./settings";
@@ -68,7 +68,6 @@ export const transitionableRosTypes = [
   "json",
 ];
 
-const fontFamily = fonts.MONOSPACE;
 const fontSize = 10;
 const fontWeight = "bold";
 const EMPTY_ITEMS_BY_PATH: MessageDataItemsByPath = {};
@@ -125,7 +124,7 @@ const plugins: ChartOptions["plugins"] = {
     offset: 0,
     clip: true,
     font: {
-      family: fontFamily,
+      family: fontMonospace,
       size: fontSize,
       weight: fontWeight,
     },

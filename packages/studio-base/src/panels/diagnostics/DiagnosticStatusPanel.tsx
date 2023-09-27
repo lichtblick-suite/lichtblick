@@ -15,6 +15,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { compare } from "@foxglove/rostime";
 import { SettingsTreeAction } from "@foxglove/studio";
@@ -50,6 +51,12 @@ const ALLOWED_DATATYPES: string[] = [
   "ros.diagnostic_msgs.DiagnosticArray",
 ];
 
+const useStyles = makeStyles()({
+  toolbar: {
+    paddingBlock: 0,
+  },
+});
+
 // component to display a single diagnostic status from list
 function DiagnosticStatusPanel(props: Props) {
   const { saveConfig, config } = props;
@@ -63,6 +70,7 @@ function DiagnosticStatusPanel(props: Props) {
     numericPrecision,
     secondsUntilStale = DEFAULT_SECONDS_UNTIL_STALE,
   } = config;
+  const { classes } = useStyles();
 
   const staleTime = useStaleTime(secondsUntilStale);
 
@@ -168,7 +176,7 @@ function DiagnosticStatusPanel(props: Props) {
 
   return (
     <Stack flex="auto" overflow="hidden">
-      <PanelToolbar>
+      <PanelToolbar className={classes.toolbar}>
         <Autocomplete
           disablePortal
           blurOnSelect={true}

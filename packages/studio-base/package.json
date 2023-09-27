@@ -39,6 +39,7 @@
     "@foxglove/rostime": "1.1.2",
     "@foxglove/schemas": "1.5.1",
     "@foxglove/studio": "workspace:*",
+    "@foxglove/theme": "workspace:*",
     "@foxglove/three-text": "0.2.2",
     "@foxglove/tsconfig": "2.0.0",
     "@foxglove/typescript-transformers": "workspace:*",

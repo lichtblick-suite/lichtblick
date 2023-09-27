@@ -11,8 +11,8 @@ import { Configuration, WebpackPluginInstance } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
-import * as palette from "@foxglove/studio-base/src/theme/palette";
 import { makeConfig } from "@foxglove/studio-base/webpack";
+import * as palette from "@foxglove/theme/src/palette";
 
 export interface WebpackConfiguration extends Configuration {
   devServer?: WebpackDevServerConfiguration;

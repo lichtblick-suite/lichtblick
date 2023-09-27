@@ -41,7 +41,6 @@ import {
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";
@@ -119,7 +118,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
     },
     keyEquivalent: {
-      fontFamily: fonts.MONOSPACE,
+      fontFamily: theme.typography.fontMonospace,
       background: tc(theme.palette.common.white).darken(45).toString(),
       padding: theme.spacing(0, 0.5),
       aspectRatio: 1,

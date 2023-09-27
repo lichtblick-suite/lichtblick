@@ -18,7 +18,6 @@ import * as _ from "lodash-es";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
@@ -27,7 +26,7 @@ const useStyles = makeStyles()((theme) => ({
   editor: {
     backgroundColor: "transparent !important",
     font: "inherit !important",
-    fontFamily: `${fonts.MONOSPACE} !important`,
+    fontFamily: `${theme.typography.fontMonospace} !important`,
     overflow: "auto",
   },
   error: {

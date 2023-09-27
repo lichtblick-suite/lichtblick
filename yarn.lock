@@ -1598,11 +1598,11 @@ __metadata:
   linkType: hard
 
 "@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.19.4, @babel/runtime@npm:^7.22.15, @babel/runtime@npm:^7.22.5, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
-  version: 7.22.15
-  resolution: "@babel/runtime@npm:7.22.15"
+  version: 7.23.1
+  resolution: "@babel/runtime@npm:7.23.1"
   dependencies:
     regenerator-runtime: ^0.14.0
-  checksum: 793296df1e41599a935a3d77ec01eb6088410d3fd4dbe4e92f06c6b7bb2f8355024e6d78621a3a35f44e0e23b0b59107f23d585384df4f3123256a1e1492040e
+  checksum: 0cd0d43e6e7dc7f9152fda8c8312b08321cda2f56ef53d6c22ebdd773abdc6f5d0a69008de90aa41908d00e2c1facb24715ff121274e689305c858355ff02c70
   languageName: node
   linkType: hard
 
@@ -2720,6 +2720,7 @@ __metadata:
     "@foxglove/rostime": 1.1.2
     "@foxglove/schemas": 1.5.1
     "@foxglove/studio": "workspace:*"
+    "@foxglove/theme": "workspace:*"
     "@foxglove/three-text": 0.2.2
     "@foxglove/tsconfig": 2.0.0
     "@foxglove/typescript-transformers": "workspace:*"
@@ -2879,6 +2880,7 @@ __metadata:
     "@foxglove/rosbag": 0.4.0
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio-base": "workspace:*"
+    "@foxglove/theme": "workspace:*"
     "@foxglove/tsconfig": 2.0.0
     "@mcap/core": 1.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
@@ -2927,6 +2929,7 @@ __metadata:
     "@fluentui/react-icons": 2.0.218
     "@foxglove/log": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
+    "@foxglove/theme": "workspace:*"
     "@foxglove/tsconfig": 2.0.0
     "@mui/material": 5.14.10
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
@@ -2937,7 +2940,6 @@ __metadata:
     html-webpack-plugin: 5.5.3
     react: 18.2.0
     react-dom: 18.2.0
-    react-i18next: 13.2.2
     tss-react: 4.9.2
     webpack: 5.88.2
     webpack-dev-server: 4.15.1
@@ -2950,6 +2952,22 @@ __metadata:
   dependencies:
     "@foxglove/tsconfig": 2.0.0
     typescript: 5.2.2
+  languageName: unknown
+  linkType: soft
+
+"@foxglove/theme@workspace:*, @foxglove/theme@workspace:packages/theme":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/theme@workspace:packages/theme"
+  dependencies:
+    "@emotion/react": 11.11.1
+    "@emotion/styled": 11.11.0
+    "@fluentui/react-icons": 2.0.218
+    "@foxglove/tsconfig": 2.0.0
+    "@mui/icons-material": 5.14.9
+    "@mui/material": 5.14.10
+    "@storybook/react": 7.4.5
+    "@types/react": 18.2.23
+    react: 18.2.0
   languageName: unknown
   linkType: soft
 

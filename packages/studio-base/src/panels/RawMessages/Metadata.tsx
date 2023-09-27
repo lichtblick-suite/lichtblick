@@ -97,7 +97,7 @@ export default function Metadata({
           )}
           {` @ ${formatTimeRaw(message.receiveTime)} sec`}
         </Typography>
-        <CopyButton size="small" iconSize="inherit" className={classes.button} getText={copyData} />
+        <CopyButton size="small" iconSize="small" className={classes.button} getText={copyData} />
       </Stack>
 
       {diffMessage?.receiveTime && (
@@ -110,12 +110,12 @@ export default function Metadata({
             >{`diff @ ${formatTimeRaw(diffMessage.receiveTime)} sec `}</Typography>
             <CopyButton
               size="small"
-              iconSize="inherit"
+              iconSize="small"
               className={classes.button}
               getText={copyDiffData}
             />
           </Stack>
-          <CopyButton size="small" iconSize="inherit" className={classes.button} getText={copyDiff}>
+          <CopyButton size="small" iconSize="small" className={classes.button} getText={copyDiff}>
             Copy diff of msgs
           </CopyButton>
         </>

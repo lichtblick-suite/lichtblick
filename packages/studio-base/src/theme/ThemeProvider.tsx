@@ -6,10 +6,8 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material";
 import { useEffect, useLayoutEffect, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 
-import { Language } from "@foxglove/studio-base/i18n";
-import { createMuiTheme } from "@foxglove/studio-base/theme";
+import { createMuiTheme } from "@foxglove/theme";
 
 // Make sure mui styles are loaded first so that our makeStyles customizations
 // take precedence.
@@ -35,11 +33,7 @@ export default function ThemeProvider({
     document.querySelector("#loading-styles")?.remove();
   }, [isDark]);
 
-  const { i18n } = useTranslation();
-  const muiTheme = useMemo(
-    () => createMuiTheme(isDark ? "dark" : "light", i18n.language as Language | undefined),
-    [i18n.language, isDark],
-  );
+  const muiTheme = useMemo(() => createMuiTheme(isDark ? "dark" : "light"), [isDark]);
 
   useLayoutEffect(() => {
     // Set the theme color to match the sidebar and playback bar

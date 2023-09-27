@@ -11,7 +11,6 @@ import { PanelExtensionContext, SettingsTreeAction } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Config } from "@foxglove/studio-base/panels/CallService/types";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { defaultConfig, settingsActionReducer, useSettingsTree } from "./settings";
 
@@ -56,7 +55,7 @@ const useStyles = makeStyles<{ buttonColor?: string }>()((theme, { buttonColor }
         [`.${inputBaseClasses.input}`]: {
           height: "100% !important",
           lineHeight: 1.4,
-          fontFamily: fonts.MONOSPACE,
+          fontFamily: theme.typography.fontMonospace,
           overflow: "auto !important",
           resize: "none",
         },

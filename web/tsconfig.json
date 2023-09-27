@@ -2,6 +2,7 @@
   "extends": "@foxglove/tsconfig/base",
   "include": ["**/*"],
   "compilerOptions": {
+    "jsx": "react-jsx",
     "module": "commonjs",
     "noEmit": true,
     "experimentalDecorators": true

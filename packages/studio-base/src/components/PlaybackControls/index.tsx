@@ -14,7 +14,7 @@
 import {
   ArrowRepeatAll20Regular,
   ArrowRepeatAllOff20Regular,
-  Info24Regular,
+  Info20Regular,
   Next20Filled,
   Next20Regular,
   Pause20Filled,
@@ -185,7 +185,7 @@ export default function PlaybackControls(props: {
       <div className={classes.root}>
         <Scrubber onSeek={seek} />
         <Stack direction="row" alignItems="center" flex={1} gap={1} overflowX="auto">
-          <Stack direction="row" flex={1} gap={0.5}>
+          <Stack direction="row" alignItems="center" flex={1} gap={0.5}>
             {currentUser && eventsSupported && (
               <HoverableIconButton
                 size="small"
@@ -215,7 +215,7 @@ export default function PlaybackControls(props: {
                   [classes.disabled]: disableControls,
                 })}
                 size="small"
-                icon={<Info24Regular />}
+                icon={<Info20Regular />}
               />
             </Tooltip>
             <PlaybackTimeDisplay onSeek={seek} onPause={pause} />

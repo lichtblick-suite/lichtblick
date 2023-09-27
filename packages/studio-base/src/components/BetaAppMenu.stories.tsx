@@ -45,6 +45,8 @@ export default {
     anchorPosition: { top: 0, left: 0 },
     anchorReference: "anchorPosition",
     disablePortal: true,
+    disableAutoFocus: true,
+    disableAutoFocusItem: true,
     handleClose: _.noop,
   },
   decorators: [

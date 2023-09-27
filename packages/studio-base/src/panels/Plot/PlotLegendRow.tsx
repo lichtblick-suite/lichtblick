@@ -5,8 +5,8 @@
 import {
   Dismiss12Regular,
   ErrorCircle16Filled,
-  Square24Filled,
-  Square24Regular,
+  Square12Filled,
+  Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
@@ -21,7 +21,6 @@ import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteraction
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { plotPathDisplayName } from "@foxglove/studio-base/panels/Plot/types";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { PlotPath, TypedDataSet, TypedData } from "./internalTypes";
 
@@ -94,7 +93,7 @@ const useStyles = makeStyles<void, "plotName" | "removeButton">()((theme, _param
     height: ROW_HEIGHT,
     paddingInline: theme.spacing(0.75, 2.5),
     gridColumn: "span 2",
-    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
+    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
 
     ".MuiTypography-root": {
       whiteSpace: "nowrap",
@@ -186,8 +185,8 @@ export function PlotLegendRow({
           size="small"
           title="Toggle visibility"
           style={{ color: getLineColor(path.color, index) }}
-          icon={<Square24Regular />}
-          checkedIcon={<Square24Filled />}
+          icon={<Square12Regular />}
+          checkedIcon={<Square12Filled />}
           onClick={(event) => {
             event.stopPropagation();
           }} // prevent toggling from opening settings

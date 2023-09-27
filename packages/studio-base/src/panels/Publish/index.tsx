@@ -25,7 +25,6 @@ import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import { useDefaultPanelTitle } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { defaultConfig, usePublishPanelSettings } from "./settings";
 import { PublishConfig } from "./types";
@@ -65,7 +64,7 @@ const useStyles = makeStyles<{ buttonColor?: string }>()((theme, { buttonColor }
         [`.${inputBaseClasses.input}`]: {
           height: "100% !important",
           lineHeight: 1.4,
-          fontFamily: fonts.MONOSPACE,
+          fontFamily: theme.typography.fontMonospace,
           overflow: "auto !important",
           resize: "none",
         },

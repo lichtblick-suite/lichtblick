@@ -1,0 +1,26 @@
+{
+  "name": "@foxglove/theme",
+  "description": "Foxglove @mui/material theme",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "./src/index",
+  "devDependencies": {
+    "@emotion/react": "11.11.1",
+    "@emotion/styled": "11.11.0",
+    "@fluentui/react-icons": "2.0.218",
+    "@foxglove/tsconfig": "2.0.0",
+    "@mui/icons-material": "5.14.9",
+    "@mui/material": "5.14.10",
+    "@storybook/react": "7.4.5",
+    "@types/react": "18.2.23",
+    "react": "18.2.0"
+  }
+}

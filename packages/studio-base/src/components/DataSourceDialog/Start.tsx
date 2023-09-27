@@ -136,7 +136,6 @@ function DataSourceOption(props: DataSourceOptionProps): JSX.Element {
       fullWidth
       color="inherit"
       variant="outlined"
-      size="large"
       startIcon={icon}
       onClick={onClick}
     >

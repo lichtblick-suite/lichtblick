@@ -19,7 +19,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fontSansSerif } from "@foxglove/theme";
 
 const MAX_TAB_WIDTH = 120;
 const MIN_ACTIVE_TAB_WIDTH = 40;
@@ -87,7 +87,7 @@ const useStyles = makeStyles<void, "active">()((theme, _params, classes) => ({
   },
 }));
 
-const fontFamily = fonts.SANS_SERIF;
+const fontFamily = fontSansSerif;
 const fontSize = "12px";
 
 let textMeasure: undefined | textMetrics.TextMeasure;

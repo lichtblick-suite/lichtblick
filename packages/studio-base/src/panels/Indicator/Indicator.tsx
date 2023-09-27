@@ -12,7 +12,6 @@ import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/cons
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { getMatchingRule } from "./getMatchingRule";
 import { settingsActionReducer, useSettingsTree } from "./settings";
@@ -260,7 +259,7 @@ export function Indicator({ context }: Props): JSX.Element {
                   }).contrastText
                 : matchingRule?.color ?? fallbackColor
             }
-            fontFamily={fonts.MONOSPACE}
+            fontFamily="fontMonospace"
             variant="h1"
             whiteSpace="pre"
           >

@@ -34,8 +34,7 @@ import { LayerErrors } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerEr
 import { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
-import { dark, light } from "@foxglove/studio-base/theme/palette";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { palette, fontMonospace } from "@foxglove/theme";
 import { LabelMaterial, LabelPool } from "@foxglove/three-text";
 
 import {
@@ -96,8 +95,8 @@ const MAX_SELECTIONS = 10;
 
 // NOTE: These do not use .convertSRGBToLinear() since background color is not
 // affected by gamma correction
-const LIGHT_BACKDROP = new THREE.Color(light.background?.default);
-const DARK_BACKDROP = new THREE.Color(dark.background?.default);
+const LIGHT_BACKDROP = new THREE.Color(palette.light.background?.default);
+const DARK_BACKDROP = new THREE.Color(palette.dark.background?.default);
 
 // Define rendering layers for multipass rendering used for the selection effect
 const LAYER_DEFAULT = 0;
@@ -195,7 +194,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public fixedFrameId: string | undefined;
   public followFrameId: string | undefined;
 
-  public labelPool = new LabelPool({ fontFamily: fonts.MONOSPACE });
+  public labelPool = new LabelPool({ fontFamily: fontMonospace });
   public markerPool = new MarkerPool(this);
   public sharedGeometry = new SharedGeometry();
 

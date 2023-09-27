@@ -2,18 +2,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CheckIcon from "@mui/icons-material/Check";
-import CopyAllIcon from "@mui/icons-material/CopyAll";
+import {
+  Copy16Regular,
+  Copy20Regular,
+  Copy24Regular,
+  Checkmark16Filled,
+  Checkmark20Filled,
+  Checkmark24Filled,
+} from "@fluentui/react-icons";
 import {
   Button,
   ButtonProps,
   IconButton,
   IconButtonProps,
-  SvgIconProps,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
-import { useCallback, useState, PropsWithChildren } from "react";
+import { useCallback, useState, PropsWithChildren, useMemo } from "react";
 
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
@@ -21,8 +27,8 @@ function CopyButtonComponent(
   props: PropsWithChildren<{
     getText: () => string;
     size?: "small" | "medium" | "large";
-    iconSize?: SvgIconProps["fontSize"];
-    color?: ButtonProps["color"] | IconButtonProps["color"];
+    iconSize?: "small" | "medium" | "large";
+    color?: ButtonProps["color"];
     className?: string;
     edge?: IconButtonProps["edge"];
   }>,
@@ -36,7 +42,30 @@ function CopyButtonComponent(
     iconSize = "medium",
     getText,
   } = props;
+  const theme = useTheme();
   const [copied, setCopied] = useState(false);
+
+  const checkIcon = useMemo(() => {
+    switch (iconSize) {
+      case "small":
+        return <Checkmark16Filled primaryFill={theme.palette.success.main} />;
+      case "medium":
+        return <Checkmark20Filled primaryFill={theme.palette.success.main} />;
+      case "large":
+        return <Checkmark24Filled primaryFill={theme.palette.success.main} />;
+    }
+  }, [iconSize, theme.palette.success.main]);
+
+  const copyIcon = useMemo(() => {
+    switch (iconSize) {
+      case "small":
+        return <Copy16Regular />;
+      case "medium":
+        return <Copy20Regular />;
+      case "large":
+        return <Copy24Regular />;
+    }
+  }, [iconSize]);
 
   const handleCopy = useCallback(() => {
     clipboard
@@ -62,7 +91,7 @@ function CopyButtonComponent(
           onClick={handleCopy}
           color={copied ? "success" : color}
         >
-          {copied ? <CheckIcon fontSize={iconSize} /> : <CopyAllIcon fontSize={iconSize} />}
+          {copied ? checkIcon : copyIcon}
         </IconButton>
       </Tooltip>
     );
@@ -71,16 +100,10 @@ function CopyButtonComponent(
   return (
     <Button
       size={size}
-      color="inherit"
       className={className}
       onClick={handleCopy}
-      startIcon={
-        copied ? (
-          <CheckIcon fontSize={iconSize} color="success" />
-        ) : (
-          <CopyAllIcon fontSize={iconSize} color="primary" />
-        )
-      }
+      color="inherit"
+      startIcon={copied ? checkIcon : copyIcon}
     >
       <Typography color={copied ? "text.primary" : color} variant="body2">
         {children}

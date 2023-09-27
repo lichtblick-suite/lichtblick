@@ -47,7 +47,6 @@ import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/Pane
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { DiffSpan } from "./DiffSpan";
 import DiffStats from "./DiffStats";
@@ -89,7 +88,7 @@ function maybeDeepParse(val: unknown) {
 
 const useStyles = makeStyles()((theme) => ({
   topic: {
-    fontFamily: fonts.SANS_SERIF,
+    fontFamily: theme.typography.body1.fontFamily,
     fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
   },
   hoverObserver: {

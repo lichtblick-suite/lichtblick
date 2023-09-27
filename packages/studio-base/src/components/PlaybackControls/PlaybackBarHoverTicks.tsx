@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Tooltip, Typography } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
@@ -17,7 +17,6 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import HoverBar from "@foxglove/studio-base/components/TimeBasedChart/HoverBar";
 import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles()((theme) => ({
   tick: {
@@ -28,6 +27,14 @@ const useStyles = makeStyles()((theme) => ({
     top: 8,
     transform: "translate(-50%, 0)",
     backgroundColor: theme.palette.warning.main,
+  },
+  time: {
+    textAlign: "center",
+    fontFamily: theme.typography.fontMonospace,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    letterSpacing: theme.typography.caption.letterSpacing,
+    whiteSpace: "nowrap",
   },
   tooltip: {
     '&[data-popper-placement*="top"] .MuiTooltip-tooltip': {
@@ -111,11 +118,7 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
             disableInteractive
             TransitionProps={{ timeout: 0 }}
             open={displayHoverTime}
-            title={
-              <Typography align="center" variant="caption" fontFamily={fonts.MONOSPACE} noWrap>
-                {hoverTimeDisplay}
-              </Typography>
-            }
+            title={<div className={classes.time}>{hoverTimeDisplay}</div>}
           >
             <div className={classes.tick} />
           </Tooltip>

@@ -13,6 +13,7 @@
     "@foxglove/rosbag": "0.4.0",
     "@foxglove/rostime": "1.1.2",
     "@foxglove/studio-base": "workspace:*",
+    "@foxglove/theme": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
     "@mcap/core": "1.3.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",

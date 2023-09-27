@@ -21,7 +21,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   ToggleButtonGroupProps,
-  Typography,
 } from "@mui/material";
 import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
@@ -176,9 +175,7 @@ export function TimezoneSettings(): React.ReactElement {
 
   return (
     <FormControl fullWidth>
-      <Typography color="text.secondary" marginBottom={0.5}>
-        {t("displayTimestampsIn")}:
-      </Typography>
+      <FormLabel>{t("displayTimestampsIn")}:</FormLabel>
       <Autocomplete
         options={[...fixedItems, ...timezoneItems]}
         value={selectedItem}
@@ -316,9 +313,7 @@ export function AutoUpdate(): React.ReactElement {
 
   return (
     <>
-      <Typography color="text.secondary" marginBottom={0.5}>
-        Updates:
-      </Typography>
+      <FormLabel>Updates:</FormLabel>
       <FormControlLabel
         className={classes.formControlLabel}
         control={

@@ -10,8 +10,6 @@ import { ReactNode, useCallback, useRef } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-
 const Constants = {
   ScrubPrecision: 4,
 } as const;
@@ -37,7 +35,7 @@ const useStyles = makeStyles()((theme) => ({
     },
     ".MuiInputBase-input": {
       textAlign: "center",
-      fontFamily: fonts.MONOSPACE,
+      fontFamily: theme.typography.fontMonospace,
       cursor: "ew-resize",
 
       "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {

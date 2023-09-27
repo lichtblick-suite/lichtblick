@@ -29,7 +29,6 @@ import {
 } from "@foxglove/studio-base/context/ProblemsContext";
 import { PlayerProblem } from "@foxglove/studio-base/players/types";
 import { DetailsType, NotificationSeverity } from "@foxglove/studio-base/util/sendNotification";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles()((theme) => ({
   acccordion: {
@@ -47,7 +46,7 @@ const useStyles = makeStyles()((theme) => ({
   accordionDetails: {
     display: "flex",
     flexDirection: "column",
-    fontFamily: fonts.MONOSPACE,
+    fontFamily: theme.typography.fontMonospace,
     fontSize: "0.6875rem",
     padding: theme.spacing(1.125),
     gap: theme.spacing(1),

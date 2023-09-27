@@ -12,6 +12,7 @@
     "./package.json"
   ],
   "compilerOptions": {
+    "jsx": "react-jsx",
     "module": "commonjs",
     "noEmit": true
   }

@@ -2,16 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ArrowMinimize24Filled } from "@fluentui/react-icons";
-import {
-  Paper,
-  IconButton,
-  Tabs,
-  Tab,
-  svgIconClasses,
-  tabClasses,
-  tabsClasses,
-} from "@mui/material";
+import { ArrowMinimize20Filled } from "@fluentui/react-icons";
+import { Paper, IconButton, Tabs, Tab, tabClasses, tabsClasses } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -28,13 +20,6 @@ const useStyles = makeStyles()((theme) => ({
   content: {
     position: "relative",
   },
-  iconButton: {
-    fontSize: "1rem !important",
-
-    [`& svg:not(.${svgIconClasses.root})`]: {
-      fontSize: "1rem !important",
-    },
-  },
   tabs: {
     minHeight: "auto",
 
@@ -43,15 +28,19 @@ const useStyles = makeStyles()((theme) => ({
       height: 2,
     },
     [`.${tabClasses.root}`]: {
-      minHeight: "auto",
       minWidth: "auto",
-      padding: theme.spacing(1, 1.5, 1.125),
+      minHeight: "auto",
+      padding: theme.spacing(0.875, 1.5, 1),
       color: theme.palette.text.secondary,
 
       "&.Mui-selected": {
         color: theme.palette.text.primary,
       },
     },
+  },
+  minimizeButton: {
+    borderRadius: 0,
+    borderTopRightRadius: theme.shape.borderRadius,
   },
 }));
 
@@ -101,7 +90,7 @@ export default function ExpandingToolbar<T extends string>({
     return (
       <Paper square={false} elevation={4} style={{ pointerEvents: "auto" }}>
         <IconButton
-          className={classes.iconButton}
+          size="small"
           color={checked === true ? "info" : "default"}
           title={tooltip}
           data-testid={`ExpandingToolbar-${tooltip}`}
@@ -143,12 +132,13 @@ export default function ExpandingToolbar<T extends string>({
             ))}
           </Tabs>
           <IconButton
-            className={classes.iconButton}
+            size="small"
+            className={classes.minimizeButton}
             onClick={() => {
               onSelectTab(undefined);
             }}
           >
-            <ArrowMinimize24Filled />
+            <ArrowMinimize20Filled />
           </IconButton>
         </Stack>
       </Paper>

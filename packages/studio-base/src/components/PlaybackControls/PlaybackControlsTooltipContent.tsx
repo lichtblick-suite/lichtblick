@@ -17,7 +17,6 @@ import {
   useTimelineInteractionState,
 } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type PlaybackControlsTooltipItem =
   | { type: "divider" }
@@ -31,7 +30,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   tooltipWrapper: {
     fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
-    fontFamily: fonts.SANS_SERIF,
+    fontFamily: theme.typography.body1.fontFamily,
     whiteSpace: "nowrap",
     columnGap: theme.spacing(0.5),
     display: "grid",

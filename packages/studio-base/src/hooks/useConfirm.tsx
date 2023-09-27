@@ -65,7 +65,6 @@ function ConfirmModal(props: ConfirmModalProps) {
   const buttons = [
     props.cancel !== false && (
       <Button
-        size="large"
         variant="outlined"
         color="inherit"
         key="cancel"
@@ -79,7 +78,6 @@ function ConfirmModal(props: ConfirmModalProps) {
     <Button
       key="confirm"
       variant="contained"
-      size="large"
       color={props.variant === "danger" ? "error" : "primary"}
       type="submit"
     >

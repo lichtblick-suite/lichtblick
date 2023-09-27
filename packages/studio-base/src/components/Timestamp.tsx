@@ -9,7 +9,6 @@ import { makeStyles } from "tss-react/mui";
 import { Time } from "@foxglove/rostime";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { isAbsoluteTime, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 type Props = {
@@ -19,11 +18,11 @@ type Props = {
   title?: string;
 };
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()((theme) => ({
   numericValue: {
-    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
+    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
   },
-});
+}));
 
 export default function Timestamp(props: Props): JSX.Element {
   const { classes } = useStyles();

@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
+import { TextFieldProps } from "@mui/material";
 import * as _ from "lodash-es";
 import { CSSProperties, useCallback, useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { MessageDefinitionField } from "@foxglove/message-definition";
 import { Immutable } from "@foxglove/studio";
@@ -180,7 +181,12 @@ type MessagePathInputBaseProps = {
   disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
   readOnly?: boolean;
   prioritizedDatatype?: string;
+  variant?: TextFieldProps["variant"];
 };
+
+const useStyles = makeStyles()({
+  root: { flexGrow: 1 },
+});
 
 export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   props: MessagePathInputBaseProps,
@@ -198,8 +204,9 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     noMultiSlices,
     inputStyle,
     disableAutocomplete = false,
+    variant = "standard",
   } = props;
-
+  const { classes } = useStyles();
   const topicFields = useMemo(() => getFieldPaths(topics, datatypes), [datatypes, topics]);
 
   const onChangeProp = props.onChange;
@@ -478,33 +485,26 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     (autocompleteType != undefined && !disableAutocomplete && path.length > 0);
 
   return (
-    <Stack
-      direction="row"
-      justifyContent="space-between"
-      alignItems="center"
-      flexGrow={1}
-      flexShrink={0}
-      spacing={0.25}
-    >
-      <Autocomplete
-        items={orderedAutocompleteItems}
-        disabled={props.disabled}
-        readOnly={props.readOnly}
-        filterText={autocompleteFilterText}
-        value={path}
-        onChange={onChange}
-        onSelect={(value, autocomplete) => {
-          onSelect(value, autocomplete, autocompleteType, autocompleteRange);
-        }}
-        hasError={hasError}
-        placeholder={
-          placeholder != undefined && placeholder !== "" ? placeholder : "/some/topic.msgs[0].field"
-        }
-        autoSize={autoSize}
-        inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
-        // to have the entire input selected whenever you want to make a change to a part it.
-        disableAutoSelect
-      />
-    </Stack>
+    <Autocomplete
+      className={classes.root}
+      variant={variant}
+      items={orderedAutocompleteItems}
+      disabled={props.disabled}
+      readOnly={props.readOnly}
+      filterText={autocompleteFilterText}
+      value={path}
+      onChange={onChange}
+      onSelect={(value, autocomplete) => {
+        onSelect(value, autocomplete, autocompleteType, autocompleteRange);
+      }}
+      hasError={hasError}
+      placeholder={
+        placeholder != undefined && placeholder !== "" ? placeholder : "/some/topic.msgs[0].field"
+      }
+      autoSize={autoSize}
+      inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
+      // to have the entire input selected whenever you want to make a change to a part it.
+      disableAutoSelect
+    />
   );
 });

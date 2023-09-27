@@ -10,8 +10,6 @@ import { makeStyles } from "tss-react/mui";
 import "@foxglove/studio-base/styles/assets/inter.css";
 import "@foxglove/studio-base/styles/assets/plex-mono.css";
 
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-
 const useStyles = makeStyles()(({ palette, typography }) => ({
   root: {
     // container styling
@@ -41,7 +39,7 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
 
     /// --- child and element styling follows ---
     "code, pre, tt": {
-      fontFamily: fonts.MONOSPACE,
+      fontFamily: typography.fontMonospace,
       overflowWrap: "break-word",
     },
     mark: {

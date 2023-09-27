@@ -1,0 +1,14 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "include": ["./src/**/*", "./src/**/*.json", "../package.json"],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "es2022", "webworker"],
+    "declarationMap": false,
+    "sourceMap": false,
+    "experimentalDecorators": true,
+    "useUnknownInCatchVariables": false
+  }
+}

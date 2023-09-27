@@ -11,7 +11,6 @@ import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -47,7 +46,7 @@ type ColorPickerInputProps = {
 export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
   const { alphaType, onChange, value, onEnterKey } = props;
 
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
 
   const {
     swatchColor,
@@ -86,7 +85,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
           },
           role: "input",
           startAdornment: <TagIcon fontSize="small" />,
-          style: { fontFamily: fonts.MONOSPACE },
+          style: { fontFamily: theme.typography.fontMonospace },
         }}
         placeholder={alphaType === "alpha" ? "RRGGBBAA" : "RRGGBB"}
         value={editedValue}

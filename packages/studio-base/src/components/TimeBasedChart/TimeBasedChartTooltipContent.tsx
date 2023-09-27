@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Square24Filled } from "@fluentui/react-icons";
+import { Square12Filled } from "@fluentui/react-icons";
 import * as _ from "lodash-es";
 import { Fragment, PropsWithChildren, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export type TimeBasedChartTooltipData = {
   datasetIndex: number;
@@ -36,7 +35,7 @@ type Props = Immutable<{
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    fontFamily: fonts.MONOSPACE,
+    fontFamily: theme.typography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
@@ -46,7 +45,7 @@ const useStyles = makeStyles()((theme) => ({
     display: "grid",
     gridTemplateColumns: "auto minmax(0px, max-content) minmax(auto, max-content)",
     alignItems: "center",
-    fontFamily: fonts.MONOSPACE,
+    fontFamily: theme.typography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
@@ -164,7 +163,7 @@ export default function TimeBasedChartTooltipContent(
 
         return (
           <Fragment key={idx}>
-            <Square24Filled className={classes.icon} primaryFill={color} />
+            <Square12Filled className={classes.icon} primaryFill={color} />
             <div className={classes.path}>{label ?? ""}</div>
             <div className={classes.value}>
               {value}

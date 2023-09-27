@@ -4,7 +4,7 @@
 
 import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
-import { IconButton, TextField } from "@mui/material";
+import { IconButton, InputAdornment, TextField } from "@mui/material";
 import fuzzySort from "fuzzysort";
 import * as _ from "lodash-es";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
@@ -222,7 +222,11 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
           autoFocus
           data-testid="panel-list-textfield"
           InputProps={{
-            startAdornment: <SearchIcon fontSize="small" />,
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
             endAdornment: searchQuery && (
               <IconButton
                 size="small"

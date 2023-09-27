@@ -32,10 +32,25 @@ type Props = {
 };
 
 const useStyles = makeStyles()((theme) => ({
+  toolbar: {
+    paddingBlock: 0,
+    gap: theme.spacing(0.25),
+  },
   iconButton: {
-    "&.MuiIconButton-root": {
-      padding: theme.spacing(0.25),
+    padding: theme.spacing(0.25),
+
+    "&.Mui-selected": {
+      color: theme.palette.primary.main,
+      backgroundColor: theme.palette.action.selected,
     },
+  },
+  diffOptions: {
+    borderTop: `1px solid ${theme.palette.background.default}`,
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(0.25, 0.75),
+    paddingInlineEnd: theme.spacing(6.75),
+    gap: theme.spacing(0.25),
+    display: "flex",
   },
 }));
 
@@ -54,65 +69,66 @@ function ToolbarComponent(props: Props): JSX.Element {
     topicPath,
   } = props;
 
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
 
   return (
-    <PanelToolbar>
-      <IconButton
-        className={classes.iconButton}
-        title="Toggle diff"
-        onClick={onToggleDiff}
-        color={diffEnabled ? "default" : "inherit"}
-        size="small"
-      >
-        {diffEnabled ? <DiffIcon fontSize="small" /> : <DiffOutlinedIcon fontSize="small" />}
-      </IconButton>
-      <IconButton
-        className={classes.iconButton}
-        title={canExpandAll ? "Expand all" : "Collapse all"}
-        onClick={onToggleExpandAll}
-        data-testid="expand-all"
-        size="small"
-      >
-        {canExpandAll ? <UnfoldMoreIcon fontSize="small" /> : <UnfoldLessIcon fontSize="small" />}
-      </IconButton>
-      <Stack fullWidth paddingLeft={0.25}>
-        <MessagePathInput
-          index={0}
-          path={topicPath}
-          onChange={onTopicPathChange}
-          inputStyle={{ height: 20 }}
-        />
-        {diffEnabled && (
-          <Stack direction="row" flex="auto">
-            <Select
-              variant="filled"
-              size="small"
-              title="Diff method"
-              value={diffMethod}
-              MenuProps={{ MenuListProps: { dense: true } }}
-              onChange={(event: SelectChangeEvent) => {
-                saveConfig({
-                  diffMethod: event.target.value as RawMessagesPanelConfig["diffMethod"],
-                });
-              }}
-            >
-              <MenuItem value={Constants.PREV_MSG_METHOD}>{Constants.PREV_MSG_METHOD}</MenuItem>
-              <MenuItem value={Constants.CUSTOM_METHOD}>custom</MenuItem>
-            </Select>
-            {diffMethod === Constants.CUSTOM_METHOD && (
-              <MessagePathInput
-                index={1}
-                path={diffTopicPath}
-                onChange={onDiffTopicPathChange}
-                inputStyle={{ height: "100%" }}
-                {...(topic ? { prioritizedDatatype: topic.schemaName } : {})}
-              />
-            )}
-          </Stack>
-        )}
-      </Stack>
-    </PanelToolbar>
+    <>
+      <PanelToolbar className={classes.toolbar}>
+        <IconButton
+          className={cx(classes.iconButton, { "Mui-selected": diffEnabled })}
+          title="Toggle diff"
+          onClick={onToggleDiff}
+          color={diffEnabled ? "default" : "inherit"}
+          size="small"
+        >
+          {diffEnabled ? <DiffIcon fontSize="small" /> : <DiffOutlinedIcon fontSize="small" />}
+        </IconButton>
+        <IconButton
+          className={classes.iconButton}
+          title={canExpandAll ? "Expand all" : "Collapse all"}
+          onClick={onToggleExpandAll}
+          data-testid="expand-all"
+          size="small"
+        >
+          {canExpandAll ? <UnfoldMoreIcon fontSize="small" /> : <UnfoldLessIcon fontSize="small" />}
+        </IconButton>
+        <Stack fullWidth paddingLeft={0.25}>
+          <MessagePathInput
+            index={0}
+            path={topicPath}
+            onChange={onTopicPathChange}
+            inputStyle={{ height: 20 }}
+          />
+        </Stack>
+      </PanelToolbar>
+      {diffEnabled && (
+        <div className={classes.diffOptions}>
+          <Select
+            variant="filled"
+            size="small"
+            title="Diff method"
+            value={diffMethod}
+            MenuProps={{ MenuListProps: { dense: true } }}
+            onChange={(event: SelectChangeEvent) => {
+              saveConfig({
+                diffMethod: event.target.value as RawMessagesPanelConfig["diffMethod"],
+              });
+            }}
+          >
+            <MenuItem value={Constants.PREV_MSG_METHOD}>{Constants.PREV_MSG_METHOD}</MenuItem>
+            <MenuItem value={Constants.CUSTOM_METHOD}>custom</MenuItem>
+          </Select>
+          {diffMethod === Constants.CUSTOM_METHOD && (
+            <MessagePathInput
+              index={1}
+              path={diffTopicPath}
+              onChange={onDiffTopicPathChange}
+              {...(topic ? { prioritizedDatatype: topic.schemaName } : {})}
+            />
+          )}
+        </div>
+      )}
+    </>
   );
 }
 

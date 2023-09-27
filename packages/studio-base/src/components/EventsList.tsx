@@ -4,7 +4,14 @@
 
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import { AppBar, CircularProgress, IconButton, TextField, Typography } from "@mui/material";
+import {
+  AppBar,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -118,13 +125,18 @@ export function EventsList(): JSX.Element {
         <TextField
           variant="filled"
           fullWidth
+          size="small"
           value={filter}
           onChange={(event) => {
             setFilter(event.currentTarget.value);
           }}
           placeholder="Search by key, value, or key:value"
           InputProps={{
-            startAdornment: <SearchIcon fontSize="small" />,
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
             endAdornment: filter !== "" && (
               <IconButton edge="end" onClick={clearFilter} size="small">
                 <ClearIcon fontSize="small" />

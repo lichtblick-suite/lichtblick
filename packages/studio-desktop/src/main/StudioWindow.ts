@@ -22,7 +22,7 @@ import path from "path";
 import Logger from "@foxglove/log";
 import { APP_BAR_HEIGHT } from "@foxglove/studio-base/src/components/AppBar/constants";
 import { NativeAppMenuEvent } from "@foxglove/studio-base/src/context/NativeAppMenuContext";
-import * as palette from "@foxglove/studio-base/src/theme/palette";
+import { palette } from "@foxglove/theme";
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import getDevModeIcon from "./getDevModeIcon";

@@ -21,7 +21,7 @@ import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
 import Logger from "@foxglove/log";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fontMonospace } from "@foxglove/theme";
 
 import { lineSegmentLabelColor } from "./lineSegments";
 import { proxyTyped } from "./proxy";
@@ -126,7 +126,7 @@ export default class ChartJSManager {
     const fullOptions: ChartOptions = {
       ...this.#addFunctionsToConfig(options),
       devicePixelRatio,
-      font: { family: fonts.MONOSPACE },
+      font: { family: fontMonospace },
       // we force responsive off since we manually trigger width/height updates on the chart
       // responsive mode does not work properly with offscreen canvases and retina device pixel ratios
       // it results in a run-away canvas that keeps doubling in size!

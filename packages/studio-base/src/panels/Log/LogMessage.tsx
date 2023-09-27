@@ -16,13 +16,12 @@ import { makeStyles } from "tss-react/mui";
 
 import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import LevelToString from "./LevelToString";
 import Stamp from "./Stamp";
 import { NormalizedLogMessage } from "./types";
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()((theme) => ({
   root: {
     // Subsequent lines are indented bu using left padding, so we undo the padding for the first line
     // with textIndent
@@ -32,9 +31,9 @@ const useStyles = makeStyles()({
     paddingTop: 1,
     paddingBottom: 1,
     lineHeight: 1,
-    fontFamily: fonts.MONOSPACE,
+    fontFamily: theme.typography.fontMonospace,
   },
-});
+}));
 
 export default React.memo(function LogMessage(props: {
   value: NormalizedLogMessage;

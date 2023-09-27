@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Warning24Filled, Dismiss24Regular } from "@fluentui/react-icons";
+import { Warning24Filled, Dismiss20Filled } from "@fluentui/react-icons";
 import {
   IconButton,
   Typography,
@@ -11,13 +11,11 @@ import {
   ThemeProvider as MuiThemeProvider,
   Portal,
 } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { Language } from "@foxglove/studio-base/i18n";
-import { createMuiTheme } from "@foxglove/studio-base/theme";
+import { createMuiTheme } from "@foxglove/theme";
 
 const MINIMUM_CHROME_VERSION = 76;
 const BANNER_HEIGHT = 54;
@@ -136,7 +134,7 @@ function CompatibilityBannerBase({
 
         {isDismissable && (
           <IconButton edge="end" color="inherit" size="small" onClick={onDismiss}>
-            <Dismiss24Regular />
+            <Dismiss20Filled />
           </IconButton>
         )}
       </Stack>
@@ -154,11 +152,7 @@ export function CompatibilityBanner({
   isDismissable: boolean;
 }): JSX.Element | ReactNull {
   const { classes } = useStyles();
-  const { i18n } = useTranslation();
-  const muiTheme = useMemo(
-    () => createMuiTheme("dark", i18n.language as Language | undefined),
-    [i18n.language],
-  );
+  const muiTheme = createMuiTheme("dark");
   const [showBanner, setShowBanner] = useState(true);
 
   if (!showBanner || currentVersion >= MINIMUM_CHROME_VERSION) {

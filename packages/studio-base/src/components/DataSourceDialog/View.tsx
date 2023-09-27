@@ -47,14 +47,12 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
           onClick={() => {
             dialogActions.dataSource.open("start");
           }}
-          size="large"
         >
           Back
         </Button>
 
         <Stack direction="row" gap={2}>
           <Button
-            size="large"
             color="inherit"
             variant="outlined"
             onClick={() => {
@@ -63,7 +61,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
           >
             Cancel
           </Button>
-          <Button size="large" variant="contained" onClick={onOpen} disabled={onOpen == undefined}>
+          <Button variant="contained" onClick={onOpen} disabled={onOpen == undefined}>
             Open
           </Button>
         </Stack>

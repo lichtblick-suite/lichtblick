@@ -87,7 +87,6 @@ export function LaunchPreferenceScreen(): ReactElement {
                 fullWidth
                 color="inherit"
                 variant="outlined"
-                size="large"
                 onClick={action.onClick}
               >
                 <Stack flex="auto" zeroMinWidth>

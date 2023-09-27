@@ -58,6 +58,8 @@ export type BetaAppMenuProps = {
   anchorReference?: PopoverReference;
   anchorPosition?: PopoverPosition;
   disablePortal?: boolean;
+  disableAutoFocus?: boolean;
+  disableAutoFocusItem?: boolean;
   open: boolean;
 };
 

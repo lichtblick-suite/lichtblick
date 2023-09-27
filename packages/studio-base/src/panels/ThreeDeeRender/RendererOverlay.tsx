@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Ruler24Filled } from "@fluentui/react-icons";
+import { Ruler20Filled, Ruler20Regular } from "@fluentui/react-icons";
 import {
   Button,
   IconButton,
@@ -27,7 +27,6 @@ import PublishGoalIcon from "@foxglove/studio-base/components/PublishGoalIcon";
 import PublishPointIcon from "@foxglove/studio-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPoseEstimateIcon";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
@@ -39,27 +38,25 @@ import { PublishClickType } from "./renderables/PublishClickTool";
 import { InterfaceMode } from "./types";
 
 const PublishClickIcons: Record<PublishClickType, React.ReactNode> = {
-  pose: <PublishGoalIcon fontSize="inherit" />,
-  point: <PublishPointIcon fontSize="inherit" />,
-  pose_estimate: <PublishPoseEstimateIcon fontSize="inherit" />,
+  pose: <PublishGoalIcon fontSize="small" />,
+  point: <PublishPointIcon fontSize="small" />,
+  pose_estimate: <PublishPoseEstimateIcon fontSize="small" />,
 };
 
 const useStyles = makeStyles()((theme) => ({
   iconButton: {
     position: "relative",
-    fontSize: "1rem !important",
     pointerEvents: "auto",
-    aspectRatio: "1",
-
-    "& svg:not(.MuiSvgIcon-root)": {
-      fontSize: "1rem !important",
-    },
+    aspectRatio: "1/1",
   },
   rulerIcon: {
     transform: "rotate(45deg)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   threeDeeButton: {
-    fontFamily: fonts.MONOSPACE,
+    fontFamily: theme.typography.fontMonospace,
     fontFeatureSettings: theme.typography.caption.fontFeatureSettings,
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.typography.fontWeightBold,
@@ -207,12 +204,13 @@ export function RendererOverlay(props: {
     <>
       <IconButton
         {...longPressPublishEvent}
+        className={classes.iconButton}
+        size="small"
         color={props.publishActive ? "info" : "inherit"}
         title={props.publishActive ? "Click to cancel" : "Click to publish"}
         ref={publickClickButtonRef}
         onClick={props.onClickPublish}
         data-testid="publish-button"
-        style={{ fontSize: "1rem", pointerEvents: "auto" }}
       >
         {selectedPublishClickIcon}
         <div
@@ -324,6 +322,7 @@ export function RendererOverlay(props: {
           <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
             <IconButton
               className={classes.iconButton}
+              size="small"
               color={props.perspective ? "info" : "inherit"}
               title={props.perspective ? "Switch to 2D camera" : "Switch to 3D camera"}
               onClick={props.onTogglePerspective}
@@ -333,11 +332,14 @@ export function RendererOverlay(props: {
             <IconButton
               data-testid="measure-button"
               className={classes.iconButton}
+              size="small"
               color={props.measureActive ? "info" : "inherit"}
               title={props.measureActive ? "Cancel measuring" : "Measure distance"}
               onClick={props.onClickMeasure}
             >
-              <Ruler24Filled className={classes.rulerIcon} />
+              <div className={classes.rulerIcon}>
+                {props.measureActive ? <Ruler20Filled /> : <Ruler20Regular />}
+              </div>
             </IconButton>
 
             {publishControls}

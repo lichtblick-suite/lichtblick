@@ -119,8 +119,9 @@ function PlaybackTimeMethodMenu({
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
+        size="small"
       >
-        <ArrowDropDownIcon />
+        <ArrowDropDownIcon fontSize="small" />
       </IconButton>
       <Menu
         id="playback-time-display-toggle-menu"
@@ -309,8 +310,8 @@ export function UnconnectedPlaybackTimeDisplay({
           }
           InputProps={{
             endAdornment: (
-              <IconButton edge="end" disabled>
-                <ArrowDropDownIcon />
+              <IconButton edge="end" size="small" disabled>
+                <ArrowDropDownIcon fontSize="small" />
               </IconButton>
             ),
           }}

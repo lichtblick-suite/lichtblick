@@ -18,19 +18,18 @@ import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw, isAbsoluteTime } from "@foxglove/studio-base/util/time";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()((theme) => ({
   overline: {
     opacity: 0.6,
   },
   numericValue: {
-    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
+    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
   },
-});
+}));
 
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;

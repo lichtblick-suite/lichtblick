@@ -166,7 +166,10 @@ function StudioContextProviders({
 }
 
 function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
-  if ((ctx.parameters.fileName as string).includes("/packages/studio-base/")) {
+  if (
+    (ctx.parameters.fileName as string).includes("/packages/studio-base/") ||
+    (ctx.parameters.fileName as string).includes("/packages/theme/")
+  ) {
     return (
       <StudioContextProviders ctx={ctx}>
         <Child />

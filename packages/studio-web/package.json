@@ -9,6 +9,7 @@
   "devDependencies": {
     "@fluentui/react-icons": "2.0.218",
     "@foxglove/log": "workspace:*",
+    "@foxglove/theme": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
     "@mui/material": "5.14.10",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
@@ -19,7 +20,6 @@
     "html-webpack-plugin": "5.5.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-i18next": "13.2.2",
     "tss-react": "4.9.2",
     "webpack": "5.88.2",
     "webpack-dev-server": "4.15.1"
