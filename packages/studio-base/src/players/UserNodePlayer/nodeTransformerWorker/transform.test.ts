@@ -1177,6 +1177,63 @@ describe("pipeline", () => {
         outputDatatype: "foxglove.Color",
       },
       {
+        description: "Allows TypedArrays when output datatype is from @foxglove/schemas",
+        sourceCode: `
+          import { LaserScan } from "@foxglove/schemas";
+
+          export const inputs = [];
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
+
+          const publisher = (message: any): LaserScan => {
+            return {
+              timestamp: {sec: 0, nsec: 1},
+              frame_id: "",
+              pose: {
+                position: {x: 0, y: 0, z: 0},
+                orientation: {x: 0, y: 0, z: 0, w: 1},
+              },
+              start_angle: 0,
+              end_angle: 0,
+              ranges: new Float64Array([1, 2, 3]),
+              intensities: new Float32Array([1, 2, 3]),
+            };
+          };
+
+          export default publisher;`,
+        datatypes: basicDatatypes,
+        outputDatatype: "foxglove.LaserScan",
+      },
+      {
+        description:
+          "Rejects wrong kind of TypedArray when output datatype is from @foxglove/schemas",
+        sourceCode: `
+          import { LaserScan } from "@foxglove/schemas";
+
+          export const inputs = [];
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
+
+          const publisher = (message: any): LaserScan => {
+            return {
+              timestamp: {sec: 0, nsec: 1},
+              frame_id: "",
+              pose: {
+                position: {x: 0, y: 0, z: 0},
+                orientation: {x: 0, y: 0, z: 0, w: 1},
+              },
+              start_angle: 0,
+              end_angle: 0,
+              ranges: new Float64Array([1, 2, 3]),
+              intensities: new Uint32Array([1, 2, 3]),
+            };
+          };
+
+          export default publisher;`,
+        error: 2322,
+        errorMessage: expect.stringContaining(
+          `Type 'Uint32Array' is not assignable to type 'number[] | Float32Array | Float64Array'`,
+        ),
+      },
+      {
         description: "Should handle deep subtype lookup",
         sourceCode: `
           import { Input } from "ros";

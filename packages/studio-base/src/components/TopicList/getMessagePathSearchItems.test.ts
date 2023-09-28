@@ -295,7 +295,7 @@ describe("getMessagePathSearchItems", () => {
           "suffix": {
             "isLeaf": true,
             "pathSuffix": ".circles[:].timestamp.sec",
-            "type": "float64",
+            "type": "uint32",
           },
           "topic": {
             "name": "annotations",
@@ -308,7 +308,7 @@ describe("getMessagePathSearchItems", () => {
           "suffix": {
             "isLeaf": true,
             "pathSuffix": ".circles[:].timestamp.nsec",
-            "type": "float64",
+            "type": "uint32",
           },
           "topic": {
             "name": "annotations",
@@ -542,7 +542,7 @@ describe("getMessagePathSearchItems", () => {
           "suffix": {
             "isLeaf": true,
             "pathSuffix": ".points[:].timestamp.sec",
-            "type": "float64",
+            "type": "uint32",
           },
           "topic": {
             "name": "annotations",
@@ -555,7 +555,7 @@ describe("getMessagePathSearchItems", () => {
           "suffix": {
             "isLeaf": true,
             "pathSuffix": ".points[:].timestamp.nsec",
-            "type": "float64",
+            "type": "uint32",
           },
           "topic": {
             "name": "annotations",
@@ -854,7 +854,7 @@ describe("getMessagePathSearchItems", () => {
           "suffix": {
             "isLeaf": true,
             "pathSuffix": ".texts[:].timestamp.sec",
-            "type": "float64",
+            "type": "uint32",
           },
           "topic": {
             "name": "annotations",
@@ -867,7 +867,7 @@ describe("getMessagePathSearchItems", () => {
           "suffix": {
             "isLeaf": true,
             "pathSuffix": ".texts[:].timestamp.nsec",
-            "type": "float64",
+            "type": "uint32",
           },
           "topic": {
             "name": "annotations",

@@ -37,7 +37,7 @@
     "@foxglove/rosmsg-serialization": "2.0.2",
     "@foxglove/rosmsg2-serialization": "2.0.2",
     "@foxglove/rostime": "1.1.2",
-    "@foxglove/schemas": "1.5.1",
+    "@foxglove/schemas": "1.6.0",
     "@foxglove/studio": "workspace:*",
     "@foxglove/theme": "workspace:*",
     "@foxglove/three-text": "0.2.2",

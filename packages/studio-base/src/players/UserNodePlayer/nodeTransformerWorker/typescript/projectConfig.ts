@@ -28,7 +28,10 @@ import { UserScriptProjectConfig, UserScriptProjectFile } from "./types";
  * Generates virtual ts files for each type exported by the @foxglove/schemas package.
  */
 export function generateFoxgloveSchemaDeclarations(): UserScriptProjectFile[] {
-  const schemas = _.sortBy([...exportTypeScriptSchemas().entries()], ([name]) => name);
+  const schemas = _.sortBy(
+    [...exportTypeScriptSchemas({ includeTypedArrays: true }).entries()],
+    ([name]) => name,
+  );
   const files = schemas.map(([name, sourceCode]) => {
     return {
       fileName: `@foxglove/schemas/${name}.ts`,
