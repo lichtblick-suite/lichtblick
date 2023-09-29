@@ -41,7 +41,7 @@ function useFeatures(): Feature[] {
 
   const features: Feature[] = [
     {
-      key: AppSetting.ENABLE_NEW_APP_MENU,
+      key: AppSetting.ENABLE_UNIFIED_NAVIGATION,
       name: t("newAppMenu"),
       description: <>{t("newAppMenuDescription")}</>,
     },

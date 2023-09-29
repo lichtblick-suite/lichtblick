@@ -199,8 +199,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
-  const [enableNewAppMenu = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_NEW_APP_MENU,
+  const [enableUnifiedNavigation = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_UNIFIED_NAVIGATION,
   );
 
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
@@ -246,7 +246,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   primaryFill={theme.palette.common.white}
                 />
               </IconButton>
-              {enableNewAppMenu ? (
+              {enableUnifiedNavigation ? (
                 <BetaAppMenu
                   open={appMenuOpen}
                   anchorEl={appMenuEl}
