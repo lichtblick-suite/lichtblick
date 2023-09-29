@@ -20,6 +20,7 @@ import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables"
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
+import strPack from "@foxglove/studio-base/util/strPack";
 
 import { resolveTypedIndices } from "./datasets";
 import {
@@ -278,12 +279,12 @@ function unregister(id: string): void {
 }
 
 function receiveMetadata(topics: readonly Topic[], datatypes: Immutable<RosDatatypes>): void {
-  metadata = {
+  metadata = strPack({
     topics,
     datatypes,
     enumValues: enumValuesByDatatypeAndField(datatypes),
     structures: messagePathStructures(datatypes),
-  };
+  });
 }
 
 function refreshClient(id: string) {
@@ -356,7 +357,7 @@ function addBlock(block: Messages, resetTopics: string[]): void {
     // Remove data for any topics that have been reset
     R.omit(resetTopics),
     // Merge the new block into the existing blocks
-    (newBlocks) => R.mergeWith(R.concat, newBlocks, block),
+    (newBlocks) => R.mergeWith(R.concat, newBlocks, strPack(block)),
   )(blocks);
 
   for (const client of R.values(clients)) {
