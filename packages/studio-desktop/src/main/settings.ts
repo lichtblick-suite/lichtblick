@@ -14,9 +14,17 @@ import {
   SETTINGS_JSON_DATASTORE_KEY,
 } from "../common/storage";
 
-export function getAppSetting<T>(key: AppSetting): T | undefined {
+type Options = {
+  /** User data dir to use instead of `app.getPath("userData")`, used for tests */
+  overrideUserDataDir?: string;
+};
+
+export function getAppSetting<T>(
+  key: AppSetting,
+  { overrideUserDataDir }: Options = {},
+): T | undefined {
   const datastoreDir = path.join(
-    app.getPath("userData"),
+    overrideUserDataDir ?? app.getPath("userData"),
     DATASTORES_DIR_NAME,
     SETTINGS_DATASTORE_NAME,
   );
@@ -37,9 +45,13 @@ export function getAppSetting<T>(key: AppSetting): T | undefined {
   }
 }
 
-export function setAppSetting(key: AppSetting, value: unknown): void {
+export function setAppSetting(
+  key: AppSetting,
+  value: unknown,
+  { overrideUserDataDir }: Options = {},
+): void {
   const datastoreDir = path.join(
-    app.getPath("userData"),
+    overrideUserDataDir ?? app.getPath("userData"),
     DATASTORES_DIR_NAME,
     SETTINGS_DATASTORE_NAME,
   );
