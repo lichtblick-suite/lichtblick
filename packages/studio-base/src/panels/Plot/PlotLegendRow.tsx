@@ -162,9 +162,9 @@ export function PlotLegendRow({
       if (timeToCompare == undefined || pt.x > timeToCompare) {
         break;
       }
-      value = pt.y;
+      value = pt.value;
     }
-    return value;
+    return value?.toString();
   }, [showPlotValuesInLegend, hoverValue?.value, currentTime, correspondingData]);
 
   return (
