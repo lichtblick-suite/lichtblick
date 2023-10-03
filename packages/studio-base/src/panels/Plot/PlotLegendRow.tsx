@@ -4,12 +4,14 @@
 
 import {
   Dismiss12Regular,
+  Add12Regular,
   ErrorCircle16Filled,
   Square12Filled,
   Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
@@ -136,6 +138,7 @@ export function PlotLegendRow({
   const { id: panelId } = usePanelContext();
   const { setSelectedPanelIds } = useSelectedPanels();
   const { classes, cx } = useStyles();
+  const { t } = useTranslation("plot");
 
   const correspondingData = useMemo(() => {
     if (!showPlotValuesInLegend) {
@@ -166,6 +169,9 @@ export function PlotLegendRow({
     }
     return value?.toString();
   }, [showPlotValuesInLegend, hoverValue?.value, currentTime, correspondingData]);
+
+  // When there are no series configured we render an extra row to show an "add series" button.
+  const isAddSeriesRow = paths.length === 0;
 
   return (
     <div
@@ -211,7 +217,7 @@ export function PlotLegendRow({
           variant="body2"
           className={cx({ [classes.disabledPathLabel]: !path.enabled })}
         >
-          {plotPathDisplayName(path, index)}
+          {isAddSeriesRow ? t("clickToAddASeries") : plotPathDisplayName(path, index)}
         </Typography>
         {hasMismatchedDataLength && (
           <Tooltip
@@ -234,20 +240,31 @@ export function PlotLegendRow({
         </div>
       )}
       <div>
-        <ButtonBase
-          title="Delete series"
-          aria-label="Delete series"
-          className={classes.removeButton}
-          onClick={() => {
-            const newPaths = paths.slice();
-            if (newPaths.length > 0) {
-              newPaths.splice(index, 1);
-            }
-            savePaths(newPaths);
-          }}
-        >
-          <Dismiss12Regular />
-        </ButtonBase>
+        {index === paths.length ? (
+          <ButtonBase
+            title="Add series"
+            aria-label="Add series"
+            className={classes.removeButton}
+            onClick={onClickPath}
+          >
+            <Add12Regular />
+          </ButtonBase>
+        ) : (
+          <ButtonBase
+            title="Delete series"
+            aria-label="Delete series"
+            className={classes.removeButton}
+            onClick={() => {
+              const newPaths = paths.slice();
+              if (newPaths.length > 0) {
+                newPaths.splice(index, 1);
+              }
+              savePaths(newPaths);
+            }}
+          >
+            <Dismiss12Regular />
+          </ButtonBase>
+        )}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@
 export const plot = {
   accumulatedPath: "Path (accumulated)",
   addSeries: "Add series",
+  clickToAddASeries: "Click to add a series",
   color: "Color",
   currentPath: "Path (current)",
   deleteSeries: "Delete series",

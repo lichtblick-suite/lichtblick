@@ -36,7 +36,7 @@ const makeSeriesNode = memoizeWeak(
             },
           ]
         : [],
-      label: stateTransitionPathDisplayName(path, `Series ${index + 1}`),
+      label: stateTransitionPathDisplayName(path, index),
       fields: {
         value: {
           label: "Message path",

@@ -25,6 +25,7 @@ import { PlotConfig } from "@foxglove/studio-base/panels/Plot/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { TypedDataSet } from "./internalTypes";
+import { DEFAULT_PATH } from "./settings";
 
 const minLegendWidth = 25;
 const maxLegendWidth = 800;
@@ -251,7 +252,7 @@ function PlotLegendComponent(props: Props): JSX.Element {
             overflow={legendDisplay === "floating" ? "auto" : undefined}
           >
             <div className={classes.container}>
-              {paths.map((path, index) => (
+              {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
                 <PlotLegendRow
                   currentTime={currentTime}
                   datasets={datasets}

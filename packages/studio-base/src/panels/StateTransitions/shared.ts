@@ -19,7 +19,7 @@ function presence<T>(value: undefined | T): undefined | T {
 
 export function stateTransitionPathDisplayName(
   path: Readonly<StateTransitionPath>,
-  fallbackMessage: string,
+  index: number,
 ): string {
-  return presence(path.label) ?? presence(path.value) ?? fallbackMessage;
+  return presence(path.label) ?? presence(path.value) ?? `Series ${index + 1}`;
 }

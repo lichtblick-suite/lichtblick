@@ -396,6 +396,13 @@ export default {
   excludeStories: ["paths", "fixture"],
 };
 
+export const Empty: StoryObj = {
+  render: function Story() {
+    return <PlotWrapper includeSettings pauseFrame={() => () => {}} config={Plot.defaultConfig} />;
+  },
+  parameters: { colorScheme: "light" },
+};
+
 export const LineGraph: StoryObj = {
   render: function Story() {
     const readySignal = useReadySignal({ count: 3 });

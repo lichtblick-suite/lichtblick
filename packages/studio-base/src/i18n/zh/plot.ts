@@ -7,6 +7,7 @@ import { TypeOptions } from "i18next";
 export const plot: Partial<TypeOptions["resources"]["plot"]> = {
   accumulatedPath: "地址（累积）",
   addSeries: "添加数据系列",
+  clickToAddASeries: undefined,
   color: "颜色",
   currentPath: "地址（当前）",
   deleteSeries: "删除数据系列",

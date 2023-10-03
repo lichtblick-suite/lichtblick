@@ -17,18 +17,27 @@ import { lineColors } from "@foxglove/studio-base/util/plotColors";
 
 import { plotableRosTypes, PlotConfig, plotPathDisplayName } from "./types";
 
+export const DEFAULT_PATH: PlotPath = Object.freeze({
+  timestampMethod: "receiveTime",
+  value: "",
+  enabled: true,
+});
+
 const makeSeriesNode = memoizeWeak(
-  (path: PlotPath, index: number, t: TFunction<"plot">): SettingsTreeNode => {
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  (path: PlotPath, index: number, canDelete: boolean, t: TFunction<"plot">): SettingsTreeNode => {
     return {
-      actions: [
-        {
-          type: "action",
-          id: "delete-series",
-          label: t("deleteSeries"),
-          display: "inline",
-          icon: "Clear",
-        },
-      ],
+      actions: canDelete
+        ? [
+            {
+              type: "action",
+              id: "delete-series",
+              label: t("deleteSeries"),
+              display: "inline",
+              icon: "Clear",
+            },
+          ]
+        : [],
       label: plotPathDisplayName(path, index),
       visible: path.enabled,
       fields: {
@@ -71,7 +80,12 @@ const makeSeriesNode = memoizeWeak(
 const makeRootSeriesNode = memoizeWeak(
   (paths: PlotPath[], t: TFunction<"plot">): SettingsTreeNode => {
     const children = Object.fromEntries(
-      paths.map((path, index) => [`${index}`, makeSeriesNode(path, index, t)]),
+      paths.length === 0
+        ? [["0", makeSeriesNode(DEFAULT_PATH, 0, /*canDelete=*/ false, t)]]
+        : paths.map((path, index) => [
+            `${index}`,
+            makeSeriesNode(path, index, /*canDelete=*/ true, t),
+          ]),
     );
     return {
       label: t("series"),
@@ -225,6 +239,9 @@ export function usePlotPanelSettings(
         saveConfig(
           produce((draft) => {
             if (path[0] === "paths") {
+              if (draft.paths.length === 0) {
+                draft.paths.push({ ...DEFAULT_PATH });
+              }
               if (path[2] === "visible") {
                 _.set(draft, [...path.slice(0, 2), "enabled"], value);
               } else {
@@ -252,11 +269,10 @@ export function usePlotPanelSettings(
         if (action.payload.id === "add-series") {
           saveConfig(
             produce<PlotConfig>((draft) => {
-              draft.paths.push({
-                timestampMethod: "receiveTime",
-                value: "",
-                enabled: true,
-              });
+              if (draft.paths.length === 0) {
+                draft.paths.push({ ...DEFAULT_PATH });
+              }
+              draft.paths.push({ ...DEFAULT_PATH });
             }),
           );
         } else if (action.payload.id === "delete-series") {

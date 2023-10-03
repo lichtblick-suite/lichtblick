@@ -7,6 +7,7 @@ import { TypeOptions } from "i18next";
 export const plot: Partial<TypeOptions["resources"]["plot"]> = {
   accumulatedPath: "パス（累積）",
   addSeries: "シリーズを追加する",
+  clickToAddASeries: undefined,
   color: "カラー",
   currentPath: "パス（現在）",
   deleteSeries: "シリーズを削除する",

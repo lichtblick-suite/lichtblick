@@ -202,8 +202,6 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         saveConfig((prevConfig) => ({
           ...prevConfig,
           paths: [
-            // If there was only a single series and its path was empty (the default state of the
-            // panel), replace the series rather than adding to it
             ...prevConfig.paths,
             ...draggedPaths.map((path) => ({
               value: path.path,
@@ -461,7 +459,9 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
                   }}
                 >
                   <Typography variant="inherit" noWrap>
-                    {stateTransitionPathDisplayName(path, "Click to add a series")}
+                    {paths.length === 0
+                      ? "Click to add a series"
+                      : stateTransitionPathDisplayName(path, index)}
                   </Typography>
                 </Button>
               </div>
