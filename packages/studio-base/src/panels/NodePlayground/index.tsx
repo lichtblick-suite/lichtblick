@@ -19,12 +19,10 @@ import {
   Container,
   Divider,
   IconButton,
-  Input,
   Link,
   Typography,
-  inputClasses,
 } from "@mui/material";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ImperativePanelHandle,
   PanelGroup,
@@ -47,7 +45,7 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
-import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
+import { Sidebar } from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 
@@ -103,21 +101,6 @@ const useStyles = makeStyles()((theme) => ({
   emptyState: {
     backgroundColor: theme.palette.background.default,
   },
-  unsavedDot: {
-    width: 6,
-    height: 6,
-    borderRadius: "50%",
-    top: "50%",
-    position: "absolute",
-    right: theme.spacing(1),
-    transform: "translateY(-50%)",
-    backgroundColor: theme.palette.text.secondary,
-  },
-  input: {
-    [`.${inputClasses.input}`]: {
-      padding: theme.spacing(1),
-    },
-  },
   resizeHandle: {
     position: "relative",
     height: 10,
@@ -140,8 +123,6 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
 }));
-
-export type Explorer = undefined | "nodes" | "utils" | "templates";
 
 function buildSettingsTree(config: Config): SettingsTreeNodes {
   return {
@@ -204,8 +185,6 @@ function NodePlayground(props: Props) {
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
-  const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
-
   const userNodes = useCurrentLayoutSelector(userNodeSelector);
   const {
     state: { nodeStates: userNodeDiagnostics, rosLib, typesLib },
@@ -217,7 +196,7 @@ function NodePlayground(props: Props) {
     (selectedNodeId != undefined ? userNodeDiagnostics[selectedNodeId]?.diagnostics : undefined) ??
     [];
   const selectedNode = selectedNodeId != undefined ? userNodes[selectedNodeId] : undefined;
-  const [scriptBackStack, setScriptBackStack] = React.useState<Script[]>([]);
+  const [scriptBackStack, setScriptBackStack] = useState<Script[]>([]);
   // Holds the currently active script
   const currentScript =
     scriptBackStack.length > 0 ? scriptBackStack[scriptBackStack.length - 1] : undefined;
@@ -241,11 +220,6 @@ function NodePlayground(props: Props) {
 
   const prefersDarkMode = theme.palette.mode === "dark";
 
-  const inputStyle = {
-    backgroundColor: theme.palette.background[prefersDarkMode ? "default" : "paper"],
-    width: `${Math.max(inputTitle.length + 4, 10)}ch`, // Width based on character count of title + padding
-  };
-
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
       if (action.action !== "update") {
@@ -267,7 +241,7 @@ function NodePlayground(props: Props) {
     });
   }, [actionHandler, config, updatePanelSettingsTree]);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (selectedNode) {
       const testItems = props.config.additionalBackStackItems ?? [];
       setScriptBackStack([
@@ -277,7 +251,7 @@ function NodePlayground(props: Props) {
     }
   }, [props.config.additionalBackStackItems, selectedNode]);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     setInputTitle(() => {
       return currentScript
         ? currentScript.filePath + (currentScript.readOnly ? " (READONLY)" : "")
@@ -298,7 +272,7 @@ function NodePlayground(props: Props) {
     }
   }, [currentScript, isCurrentScriptSelectedNode, selectedNode, selectedNodeId, setUserNodes]);
 
-  const addNewNode = React.useCallback(
+  const addNewNode = useCallback(
     (code?: string) => {
       saveCurrentNode();
       const newNodeId = uuidv4();
@@ -314,7 +288,7 @@ function NodePlayground(props: Props) {
     [saveConfig, saveCurrentNode, setUserNodes],
   );
 
-  const saveNode = React.useCallback(
+  const saveNode = useCallback(
     (script: string | undefined) => {
       if (selectedNodeId == undefined || script == undefined || script === "" || !selectedNode) {
         return;
@@ -324,7 +298,7 @@ function NodePlayground(props: Props) {
     [selectedNode, selectedNodeId, setUserNodes],
   );
 
-  const setScriptOverride = React.useCallback(
+  const setScriptOverride = useCallback(
     (script: Script, maxDepth?: number) => {
       if (maxDepth != undefined && maxDepth > 0 && scriptBackStack.length >= maxDepth) {
         setScriptBackStack([...scriptBackStack.slice(0, maxDepth - 1), script]);
@@ -335,11 +309,11 @@ function NodePlayground(props: Props) {
     [scriptBackStack],
   );
 
-  const goBack = React.useCallback(() => {
+  const goBack = useCallback(() => {
     setScriptBackStack(scriptBackStack.slice(0, scriptBackStack.length - 1));
   }, [scriptBackStack]);
 
-  const setScriptCode = React.useCallback(
+  const setScriptCode = useCallback(
     (code: string) => {
       // update code at top of backstack
       const backStack = [...scriptBackStack];
@@ -384,20 +358,23 @@ function NodePlayground(props: Props) {
       <Divider />
       <Stack direction="row" fullHeight overflow="hidden">
         <Sidebar
-          explorer={explorer}
-          updateExplorer={updateExplorer}
           selectNode={(nodeId) => {
             saveCurrentNode();
             saveConfig({ selectedNodeId: nodeId });
           }}
           deleteNode={(nodeId) => {
             setUserNodes({ ...userNodes, [nodeId]: undefined });
-            saveConfig({ selectedNodeId: undefined });
+            saveConfig({
+              selectedNodeId:
+                Object.keys(userNodes).length > 1 ? Object.keys(userNodes)[0] : undefined,
+            });
           }}
           selectedNodeId={selectedNodeId}
           userNodes={userNodes}
           script={currentScript}
           setScriptOverride={setScriptOverride}
+          setUserNodes={setUserNodes}
+          selectedNode={selectedNode}
           addNewNode={addNewNode}
         />
         <Stack
@@ -408,45 +385,18 @@ function NodePlayground(props: Props) {
             backgroundColor: theme.palette.background[prefersDarkMode ? "paper" : "default"],
           }}
         >
-          <Stack direction="row" alignItems="center">
-            {scriptBackStack.length > 1 && (
-              <IconButton title="Go back" data-testid="go-back" size="small" onClick={goBack}>
-                <ArrowBackIcon />
-              </IconButton>
-            )}
-            {selectedNodeId != undefined && selectedNode && (
-              <div style={{ position: "relative" }}>
-                <Input
-                  className={classes.input}
-                  size="small"
-                  disableUnderline
-                  placeholder="script name"
-                  value={inputTitle}
-                  disabled={!currentScript || currentScript.readOnly}
-                  onChange={(ev) => {
-                    const newNodeName = ev.target.value;
-                    setInputTitle(newNodeName);
-                    setUserNodes({
-                      ...userNodes,
-                      [selectedNodeId]: { ...selectedNode, name: newNodeName },
-                    });
-                  }}
-                  inputProps={{ spellCheck: false, style: inputStyle }}
-                />
-                {!isNodeSaved && <div className={classes.unsavedDot} />}
-              </div>
-            )}
-            <IconButton
-              title="New node"
-              data-testid="new-node"
-              size="small"
-              onClick={() => {
-                addNewNode();
-              }}
-            >
-              <AddIcon />
-            </IconButton>
-          </Stack>
+          {scriptBackStack.length > 1 && (
+            <Stack direction="row" alignItems="center" gap={1}>
+              {scriptBackStack.length > 1 && (
+                <IconButton title="Go back" data-testid="go-back" size="small" onClick={goBack}>
+                  <ArrowBackIcon />
+                </IconButton>
+              )}
+              {selectedNodeId != undefined && selectedNode && (
+                <div style={{ position: "relative" }}>{inputTitle}</div>
+              )}
+            </Stack>
+          )}
 
           <PanelGroup direction="vertical" units="pixels">
             {selectedNodeId == undefined && <WelcomeScreen addNewNode={addNewNode} />}

@@ -17,6 +17,10 @@ export const MuiIconButton: OverrideComponentReturn<"MuiIconButton"> = {
       "&:hover": {
         backgroundColor: theme.palette.action.hover,
       },
+      "&:focus-visible": {
+        outline: "1px solid currentColor",
+        outlineOffset: -1,
+      },
     }),
   },
 };
