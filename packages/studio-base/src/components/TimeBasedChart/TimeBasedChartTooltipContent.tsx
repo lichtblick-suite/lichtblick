@@ -55,6 +55,9 @@ const useStyles = makeStyles()((theme) => ({
     height: 12,
     width: 12,
   },
+  colorIconReplacement: {
+    gridColumn: "1",
+  },
   path: {
     opacity: 0.9,
     whiteSpace: "nowrap",
@@ -151,7 +154,7 @@ export default function TimeBasedChartTooltipContent(
   return (
     <div className={cx(classes.root, classes.grid)} data-testid="TimeBasedChartTooltipContent">
       {sortedItems.map(([datasetIndex, item], idx) => {
-        const color = colorsByDatasetIndex?.[datasetIndex] ?? "auto";
+        const color = colorsByDatasetIndex?.[datasetIndex];
         const label = labelsByDatasetIndex?.[datasetIndex];
         const tooltip = item.tooltip;
         const value =
@@ -163,7 +166,11 @@ export default function TimeBasedChartTooltipContent(
 
         return (
           <Fragment key={idx}>
-            <Square12Filled className={classes.icon} primaryFill={color} />
+            {color ? (
+              <Square12Filled className={classes.icon} primaryFill={color} />
+            ) : (
+              <span className={classes.colorIconReplacement} />
+            )}
             <div className={classes.path}>{label ?? ""}</div>
             <div className={classes.value}>
               {value}

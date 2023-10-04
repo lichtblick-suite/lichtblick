@@ -45,12 +45,12 @@ type Args = {
  * dataset with different labels and colors applied per-point.
  */
 export default function messagesToDatasets(args: Args): ChartDatasets {
-  const { path, pathIndex, startTime, y, blocks } = args;
+  const { path, startTime, y, blocks } = args;
 
   const dataset: ChartDataset = {
     borderWidth: 10,
     data: [],
-    label: pathIndex.toString(),
+    label: path.label ? path.label : path.value,
     pointBackgroundColor: "rgba(0, 0, 0, 0.4)",
     pointBorderColor: "transparent",
     pointHoverRadius: 3,
