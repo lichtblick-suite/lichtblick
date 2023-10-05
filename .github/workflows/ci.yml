@@ -95,15 +95,13 @@ jobs:
 
       - run: yarn workspace @foxglove/studio-base run storybook:build
 
-      # Chromatic only runs on pushes or pulls to our source repo
       - uses: chromaui/action@v1
-        if: ${{ github.event.repository.full_name == 'foxglove/studio' }}
         with:
-          projectToken: f50040a29fb8
-          storybookBuildDir: storybook-static
           autoAcceptChanges: main
           exitOnceUploaded: true
           onlyChanged: true
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          storybookBuildDir: storybook-static
 
   integration:
     runs-on: ${{ matrix.os }}
