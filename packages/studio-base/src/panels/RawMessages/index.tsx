@@ -77,15 +77,6 @@ const dataWithoutWrappingArray = (data: unknown) => {
   return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
 };
 
-// lazy messages don't have own properties so we need to invoke "toJSON" to get the message
-// as a regular object
-function maybeDeepParse(val: unknown) {
-  if (typeof val === "object" && val != undefined && "toJSON" in val) {
-    return (val as { toJSON: () => unknown }).toJSON();
-  }
-  return val;
-}
-
 const useStyles = makeStyles()((theme) => ({
   topic: {
     fontFamily: theme.typography.body1.fontFamily,
@@ -172,7 +163,7 @@ function RawMessages(props: Props) {
   const nodes = useMemo(() => {
     if (baseItem) {
       const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
-      return generateDeepKeyPaths(maybeDeepParse(data), 5);
+      return generateDeepKeyPaths(data, 5);
     } else {
       return new Set<string>();
     }
@@ -405,12 +396,10 @@ function RawMessages(props: Props) {
     const diffData =
       diffItem && dataWithoutWrappingArray(diffItem.queriedData.map(({ value }) => value));
 
-    // json parse/stringify round trip is used to deep parse data and diff data which may be lazy messages
-    // lazy messages have non-enumerable getters but do have a toJSON method to turn themselves into an object
     const diff = diffEnabled
       ? getDiff({
-          before: maybeDeepParse(data),
-          after: maybeDeepParse(diffData),
+          before: data,
+          after: diffData,
           idLabel: undefined,
           showFullMessageForDiff,
         })
@@ -526,7 +515,7 @@ function RawMessages(props: Props) {
                 ) {
                   return addedValue ?? changedValue ?? deletedValue;
                 }
-                return maybeDeepParse(rawVal);
+                return rawVal;
               }}
               theme={{
                 ...jsonTreeTheme,

@@ -19,7 +19,7 @@ import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
 import roslib from "@foxglove/roslibjs";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { MessageReader as ROS1MessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 import { Time, fromMillis, toSec } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
@@ -96,7 +96,7 @@ export default class RosbridgePlayer implements Player {
   #subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
   #services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
   #messageReadersByDatatype: {
-    [datatype: string]: LazyMessageReader | ROS2MessageReader;
+    [datatype: string]: ROS1MessageReader | ROS2MessageReader;
   } = {};
   #start?: Time; // The time at which we started playing.
   #clockTime?: Time; // The most recent published `/clock` time, if available
@@ -248,7 +248,7 @@ export default class RosbridgePlayer implements Player {
       const topicsMissingDatatypes: string[] = [];
       const topics: TopicWithSchemaName[] = [];
       const datatypeDescriptions = [];
-      const messageReaders: Record<string, LazyMessageReader | ROS2MessageReader> = {};
+      const messageReaders: Record<string, ROS1MessageReader | ROS2MessageReader> = {};
 
       // Automatically detect the ROS version based on the datatypes.
       // The rosbridge server itself publishes /rosout so the topic should be reliably present.
@@ -284,7 +284,7 @@ export default class RosbridgePlayer implements Player {
         if (!messageReaders[type]) {
           messageReaders[type] =
             this.#rosVersion !== 2
-              ? new LazyMessageReader(parsedDefinition)
+              ? new ROS1MessageReader(parsedDefinition)
               : new ROS2MessageReader(parsedDefinition);
         }
       }
@@ -486,23 +486,6 @@ export default class RosbridgePlayer implements Player {
         try {
           const buffer = (message as { bytes: ArrayBuffer }).bytes;
           const bytes = new Uint8Array(buffer);
-
-          // This conditional can be removed when the ROS2 deserializer supports size()
-          if (messageReader instanceof LazyMessageReader) {
-            const msgSize = messageReader.size(bytes);
-            if (msgSize > bytes.byteLength) {
-              this.#problems.addProblem(problemId, {
-                severity: "error",
-                message: `Message buffer not large enough on ${topicName}`,
-                error: new Error(
-                  `Cannot read ${msgSize} byte message from ${bytes.byteLength} byte buffer`,
-                ),
-              });
-              this.#emitState();
-              return;
-            }
-          }
-
           const innerMessage = messageReader.readMessage(bytes);
 
           // handle clock messages before choosing receiveTime so the clock can set its own receive time

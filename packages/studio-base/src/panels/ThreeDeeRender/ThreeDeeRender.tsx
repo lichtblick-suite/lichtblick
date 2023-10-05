@@ -402,11 +402,9 @@ export function ThreeDeeRender(props: {
         setParameters(renderState.parameters);
 
         // currentFrame has messages on subscribed topics since the last render call
-        deepParseMessageEvents(renderState.currentFrame);
         setCurrentFrameMessages(renderState.currentFrame);
 
         // allFrames has messages on preloaded topics across all frames (as they are loaded)
-        deepParseMessageEvents(renderState.allFrames);
         setAllFrames(renderState.allFrames);
       });
     };
@@ -824,16 +822,4 @@ export function ThreeDeeRender(props: {
       </div>
     </ThemeProvider>
   );
-}
-
-function deepParseMessageEvents(messageEvents: ReadonlyArray<MessageEvent> | undefined): void {
-  if (!messageEvents) {
-    return;
-  }
-  for (const messageEvent of messageEvents) {
-    const maybeLazy = messageEvent.message as { toJSON?: () => unknown };
-    if ("toJSON" in maybeLazy) {
-      (messageEvent as { message: unknown }).message = maybeLazy.toJSON!();
-    }
-  }
 }

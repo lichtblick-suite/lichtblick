@@ -225,27 +225,7 @@ function useData(id: string, params: PlotParams) {
     }, []),
     addMessages: React.useCallback(
       (_: number | undefined, messages: readonly MessageEvent[]): number => {
-        void service?.addCurrent(
-          messages.map((event) => {
-            const { message } = event;
-
-            // Handle LazyMessageReader messages, which cannot be
-            // `postMessage`d otherwise
-            // https://github.com/foxglove/rosmsg-serialization/blob/2c15caf4f344012737f5aab01103e3c525889f2e/src/__snapshots__/LazyMessageReader.test.ts.snap#L304
-            if (
-              typeof message === "object" &&
-              message != undefined &&
-              "toObject" in message &&
-              typeof message.toObject === "function"
-            ) {
-              return {
-                ...event,
-                message: (message as { toObject: () => unknown }).toObject(),
-              };
-            }
-            return event;
-          }),
-        );
+        void service?.addCurrent(messages);
         return 1;
       },
       [],

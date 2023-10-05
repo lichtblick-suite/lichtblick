@@ -2551,9 +2551,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros1@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@foxglove/ros1@npm:2.0.0"
+"@foxglove/ros1@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@foxglove/ros1@npm:3.0.0"
   dependencies:
     "@foxglove/message-definition": ^0.2.0
     "@foxglove/rosmsg": ^4.0.0
@@ -2563,7 +2563,7 @@ __metadata:
     ipaddr.js: ^2.0.1
   bin:
     roscore: dist/nodejs/roscore.js
-  checksum: 87ba6c9749888ba2445575ae54efc0f042c917b439a56e31d1743f3b7e9d151754c1575e06fefc7b8e5fda5bbff52585e23d80bf7336582030bbb0a5140d7d44
+  checksum: 8fc81db65d042339302653e15ee3cde11ded6adc7ab2535da977c96cadbc3e15d26f4e000475b146dbb155c5347d751b8deb76fcda577b1b1f70d3fe043219cb
   languageName: node
   linkType: hard
 
@@ -2709,7 +2709,7 @@ __metadata:
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/message-definition": 0.3.0
-    "@foxglove/ros1": 2.0.0
+    "@foxglove/ros1": 3.0.0
     "@foxglove/rosbag": 0.4.0
     "@foxglove/rosbag2-web": 4.1.1
     "@foxglove/roslibjs": 0.0.3

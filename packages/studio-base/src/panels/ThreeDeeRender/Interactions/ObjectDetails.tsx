@@ -27,21 +27,11 @@ type Props = {
   readonly timezone: string | undefined;
 };
 
-function maybePlainObject(rawVal: unknown) {
-  if (typeof rawVal === "object" && rawVal && "toJSON" in rawVal) {
-    return (rawVal as { toJSON: () => unknown }).toJSON();
-  }
-  return rawVal;
-}
-
 function ObjectDetails({ interactionData, selectedObject, timezone }: Props): JSX.Element {
   const jsonTreeTheme = useJsonTreeTheme();
   const topic = interactionData?.topic ?? "";
 
-  // object to display may not be a plain-ole-data
-  // We need a plain object to sort the keys and omit interaction data
-  const plainObject = maybePlainObject(selectedObject);
-  const originalObject = _.omit(plainObject as Record<string, unknown>, "interactionData");
+  const originalObject = _.omit(selectedObject as Record<string, unknown>, "interactionData");
 
   if (topic.length === 0) {
     // show the original object directly if there is no interaction data
@@ -51,7 +41,6 @@ function ObjectDetails({ interactionData, selectedObject, timezone }: Props): JS
           data={selectedObject}
           shouldExpandNode={(_markerKeyPath, _data, level) => level < 2}
           invertTheme={false}
-          postprocessValue={maybePlainObject}
           theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
           hideRoot
         />
@@ -70,7 +59,6 @@ function ObjectDetails({ interactionData, selectedObject, timezone }: Props): JS
         getItemString={(nodeType, data, itemType, itemString, keyPath) =>
           getItemString(nodeType, data, itemType, itemString, keyPath, timezone)
         }
-        postprocessValue={maybePlainObject}
         labelRenderer={(markerKeyPath, _p1, _p2, _hasChildren) => {
           const label = _.first(markerKeyPath);
           return <span style={{ padding: "0 4px 0 0" }}>{label}</span>;

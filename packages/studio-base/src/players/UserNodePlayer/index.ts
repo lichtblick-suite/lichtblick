@@ -83,13 +83,6 @@ type NodeRegistrationCacheItem = {
   result: NodeRegistration;
 };
 
-function maybePlainObject(rawVal: unknown) {
-  if (typeof rawVal === "object" && rawVal && "toJSON" in rawVal) {
-    return (rawVal as { toJSON: () => unknown }).toJSON();
-  }
-  return rawVal;
-}
-
 /** Mutable state protected by a mutex lock */
 type ProtectedState = {
   nodeRegistrationCache: NodeRegistrationCacheItem[];
@@ -513,14 +506,11 @@ export default class UserNodePlayer implements Player {
           this.#addUserNodeLogs(nodeId, userNodeLogs);
         }
 
-        // To send the message over RPC we need to send a plain JS object. We invoke
-        // maybePlainObject which calls toJSON on the message and builds a plain js object of the
-        // entire message.
         const result = await rpc.send<ProcessMessageOutput>("processMessage", {
           message: {
             topic: msgEvent.topic,
             receiveTime: msgEvent.receiveTime,
-            message: maybePlainObject(msgEvent.message),
+            message: msgEvent.message,
             datatype: msgEvent.schemaName,
           },
           globalVariables,

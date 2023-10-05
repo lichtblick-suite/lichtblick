@@ -175,8 +175,7 @@ function Expander(info: CellContext<CellValue, unknown>) {
 }
 
 function getColumnsFromObject(val: CellValue, accessorPath: string) {
-  const obj = val.toJSON?.() ?? val;
-  if (isTypedArray(obj)) {
+  if (isTypedArray(val)) {
     return [
       columnHelper.accessor((row) => row, {
         id: "typedArray",
@@ -185,7 +184,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string) {
       }),
     ];
   }
-  const columns = Object.keys(obj).map((accessor) => {
+  const columns = Object.keys(val).map((accessor) => {
     const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
     return columnHelper.accessor(accessor, {
       header: accessor,
