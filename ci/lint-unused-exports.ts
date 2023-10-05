@@ -23,7 +23,7 @@ async function main(): Promise<void> {
       String.raw`packages/studio-base/src/index\.ts`,
       String.raw`packages/studio-base/src/panels/ThreeDeeRender/transforms/index\.ts`, // `export *` is not correctly analyzed <https://github.com/pzavolinsky/ts-unused-exports/issues/286>
       String.raw`packages/studio-base/src/test/`,
-      String.raw`packages/studio-base/src/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/`,
+      String.raw`packages/studio-base/src/players/UserScriptPlayer/transformerWorker/typescript/userUtils/`,
     ].join("|"),
   );
 

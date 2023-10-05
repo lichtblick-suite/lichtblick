@@ -121,7 +121,7 @@ export default function MockCurrentLayoutProvider({
       setGlobalVariables: (payload) => {
         performAction({ type: "SET_GLOBAL_DATA", payload });
       },
-      setUserNodes: (payload) => {
+      setUserScripts: (payload) => {
         performAction({ type: "SET_USER_NODES", payload });
       },
       setPlaybackConfig: (payload) => {

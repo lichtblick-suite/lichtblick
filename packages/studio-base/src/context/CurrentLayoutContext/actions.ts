@@ -17,7 +17,7 @@ import { VariableValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { TabLocation } from "@foxglove/studio-base/types/layouts";
 import {
-  UserNodes,
+  UserScripts,
   PlaybackConfig,
   SavedProps,
   PanelConfig,
@@ -30,7 +30,7 @@ export type LayoutData = {
   layout?: MosaicNode<string>;
   globalVariables: GlobalVariables;
   playbackConfig: PlaybackConfig;
-  userNodes: UserNodes;
+  userNodes: UserScripts;
   /** @deprecated renamed to configById */
   savedProps?: SavedProps;
   /**
@@ -89,7 +89,7 @@ export type SET_GLOBAL_DATA = {
   payload: Record<string, VariableValue>;
 };
 
-export type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: Partial<UserNodes> };
+export type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: Partial<UserScripts> };
 
 export type SET_PLAYBACK_CONFIG = { type: "SET_PLAYBACK_CONFIG"; payload: Partial<PlaybackConfig> };
 

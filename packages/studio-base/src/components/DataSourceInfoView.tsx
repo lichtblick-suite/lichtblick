@@ -15,7 +15,7 @@ import {
 import Stack from "@foxglove/studio-base/components/Stack";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
+import { subtractTimes } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { formatTimeRaw, isAbsoluteTime } from "@foxglove/studio-base/util/time";

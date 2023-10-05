@@ -40,12 +40,12 @@ import {
   usePanelStateStore,
 } from "@foxglove/studio-base/context/PanelStateContext";
 import {
-  UserNodeStateProvider,
-  useUserNodeState,
-} from "@foxglove/studio-base/context/UserNodeStateContext";
+  UserScriptStateProvider,
+  useUserScriptState,
+} from "@foxglove/studio-base/context/UserScriptStateContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import * as panels from "@foxglove/studio-base/panels";
-import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { Diagnostic, UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
 import {
   AdvertiseOptions,
   PlayerStateActiveData,
@@ -60,7 +60,7 @@ import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/Ti
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
+import { SavedProps, UserScripts } from "@foxglove/studio-base/types/panels";
 
 import "react-mosaic-component/react-mosaic-component.css";
 
@@ -80,11 +80,10 @@ export type Fixture = {
   datatypes?: RosDatatypes;
   globalVariables?: GlobalVariables;
   layout?: MosaicNode<string>;
-  userNodes?: UserNodes;
-  userNodeDiagnostics?: { [nodeId: string]: readonly Diagnostic[] };
-  userNodeFlags?: { id: string };
-  userNodeLogs?: { [nodeId: string]: readonly UserNodeLog[] };
-  userNodeRosLib?: string;
+  userScripts?: UserScripts;
+  userScriptDiagnostics?: { [scriptId: string]: readonly Diagnostic[] };
+  userScriptLogs?: { [scriptId: string]: readonly UserScriptLog[] };
+  userScriptRosLib?: string;
   savedProps?: SavedProps;
   publish?: (request: PublishPayload) => void;
   setPublishers?: (publisherId: string, advertisements: AdvertiseOptions[]) => void;
@@ -211,11 +210,11 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
   }));
 
   const actions = useCurrentLayoutActions();
-  const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
-  const userNodeActions = useShallowMemo({
-    setUserNodeDiagnostics,
-    addUserNodeLogs,
-    setUserNodeRosLib,
+  const { setUserScriptDiagnostics, addUserScriptLogs, setUserScriptRosLib } = useUserScriptState();
+  const userScriptActions = useShallowMemo({
+    setUserScriptDiagnostics,
+    addUserScriptLogs,
+    setUserScriptRosLib,
   });
 
   const [initialized, setInitialized] = useState(false);
@@ -225,34 +224,34 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     }
     const {
       globalVariables,
-      userNodes,
+      userScripts,
       layout,
-      userNodeDiagnostics,
-      userNodeLogs,
-      userNodeRosLib,
+      userScriptDiagnostics,
+      userScriptLogs,
+      userScriptRosLib,
       savedProps,
     } = props.fixture ?? {};
     if (globalVariables) {
       actions.overwriteGlobalVariables(globalVariables);
     }
-    if (userNodes) {
-      actions.setUserNodes(userNodes);
+    if (userScripts) {
+      actions.setUserScripts(userScripts);
     }
     if (layout != undefined) {
       actions.changePanelLayout({ layout });
     }
-    if (userNodeDiagnostics) {
-      for (const [nodeId, diagnostics] of Object.entries(userNodeDiagnostics)) {
-        userNodeActions.setUserNodeDiagnostics(nodeId, diagnostics);
+    if (userScriptDiagnostics) {
+      for (const [scriptId, diagnostics] of Object.entries(userScriptDiagnostics)) {
+        userScriptActions.setUserScriptDiagnostics(scriptId, diagnostics);
       }
     }
-    if (userNodeLogs) {
-      for (const [nodeId, logs] of Object.entries(userNodeLogs)) {
-        userNodeActions.addUserNodeLogs(nodeId, logs);
+    if (userScriptLogs) {
+      for (const [scriptId, logs] of Object.entries(userScriptLogs)) {
+        userScriptActions.addUserScriptLogs(scriptId, logs);
       }
     }
-    if (userNodeRosLib != undefined) {
-      userNodeActions.setUserNodeRosLib(userNodeRosLib);
+    if (userScriptRosLib != undefined) {
+      userScriptActions.setUserScriptRosLib(userScriptRosLib);
     }
     if (savedProps) {
       actions.savePanelConfigs({
@@ -260,7 +259,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
       });
     }
     setInitialized(true);
-  }, [initialized, props.fixture, actions, userNodeActions]);
+  }, [initialized, props.fixture, actions, userScriptActions]);
 
   const {
     frame = {},
@@ -346,7 +345,7 @@ export default function PanelSetup(props: Props): JSX.Element {
   const theme = useTheme();
   return (
     <WorkspaceContextProvider disablePersistenceForStorybook>
-      <UserNodeStateProvider>
+      <UserScriptStateProvider>
         <TimelineInteractionStateProvider>
           <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
             <PanelStateContextProvider initialState={props.fixture?.panelState}>
@@ -361,7 +360,7 @@ export default function PanelSetup(props: Props): JSX.Element {
             </PanelStateContextProvider>
           </MockCurrentLayoutProvider>
         </TimelineInteractionStateProvider>
-      </UserNodeStateProvider>
+      </UserScriptStateProvider>
     </WorkspaceContextProvider>
   );
 }

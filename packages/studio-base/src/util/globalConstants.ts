@@ -13,7 +13,7 @@
 import { useTheme } from "@mui/material";
 import type { Base16Theme } from "base16";
 
-export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_script/";
+export const DEFAULT_STUDIO_SCRIPT_PREFIX = "/studio_script/";
 
 export function useJsonTreeTheme(): Pick<
   Base16Theme,

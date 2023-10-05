@@ -26,7 +26,7 @@ import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigu
 import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
 import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
 import { IDataSourceFactory } from "./context/PlayerSelectionContext";
-import { UserNodeStateProvider } from "./context/UserNodeStateContext";
+import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
@@ -74,7 +74,7 @@ export function App(props: AppProps): JSX.Element {
   const providers = [
     /* eslint-disable react/jsx-key */
     <TimelineInteractionStateProvider />,
-    <UserNodeStateProvider />,
+    <UserScriptStateProvider />,
     <CurrentLayoutProvider />,
     <ExtensionMarketplaceProvider />,
     <ExtensionCatalogProvider loaders={extensionLoaders} />,
