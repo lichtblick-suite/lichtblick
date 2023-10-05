@@ -156,4 +156,32 @@ describe("remapVirtualSubscriptions", () => {
       },
     ]);
   });
+  it("should not coalesce sliced input subscriptions and whole message input subscriptions across preload types", () => {
+    const subscriptions: SubscribePayload[] = [
+      {
+        topic: "/output",
+        preloadType: "partial",
+      },
+      {
+        topic: "/input",
+        preloadType: "full",
+        fields: ["one", "two"],
+      },
+    ];
+    const inputsByOutputTopic = {
+      "/output": ["/input"],
+    };
+    const expected = [
+      {
+        topic: "/input",
+        preloadType: "full",
+        fields: ["one", "two"],
+      },
+      {
+        topic: "/input",
+        preloadType: "partial",
+      },
+    ];
+    expect(call(subscriptions, inputsByOutputTopic)).toEqual(expected);
+  });
 });

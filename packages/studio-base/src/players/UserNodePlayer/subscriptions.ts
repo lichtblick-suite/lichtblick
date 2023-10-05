@@ -52,30 +52,12 @@ export function remapVirtualSubscriptions(
     R.filter(([, topics]: SubscriberInputs) => topics?.length !== 0),
   )(subscriptions);
 
-  // An array of all of the input topics used by the user nodes referenced by
-  // `subscriptions`
-  const neededInputTopics = R.pipe(
-    R.chain(([, v]: SubscriberInputs): readonly string[] => v ?? []),
-    R.uniq,
-  )(payloadInputsPairs);
-
   return R.pipe(
     R.chain(([subscription, topics]: SubscriberInputs): SubscribePayload[] => {
       const preloadType = subscription.preloadType ?? "partial";
 
       // Leave the subscription unmodified if it is not a user script topic
       if (topics == undefined) {
-        // If this is an input to a user script, we need to upgrade it to a
-        // subscription of all the fields
-        if (neededInputTopics.includes(subscription.topic)) {
-          return [
-            {
-              topic: subscription.topic,
-              preloadType,
-            },
-          ];
-        }
-
         return [subscription];
       }
 

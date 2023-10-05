@@ -652,7 +652,7 @@ describe("UserNodePlayer", () => {
       // the message the script will use.
       expect(fakePlayer.subscriptions).toEqual([
         { topic: "/np_input", preloadType: "full" },
-        { topic: "/np_input", preloadType: "partial" },
+        { topic: "/np_input" },
       ]);
     });
 
