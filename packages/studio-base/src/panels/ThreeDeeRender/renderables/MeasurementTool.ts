@@ -62,6 +62,7 @@ interface MeasurementToolEventMap extends THREE.Object3DEventMap {
 }
 
 export class MeasurementTool extends SceneExtension<Renderable, MeasurementToolEventMap> {
+  public static extensionId = "foxglove.MeasurementTool";
   #circleGeometry = new THREE.CircleGeometry(5, 16);
   #circleMaterial = new FixedSizeMeshMaterial({
     color: 0xff0000,
@@ -101,8 +102,8 @@ export class MeasurementTool extends SceneExtension<Renderable, MeasurementToolE
 
   public state: MeasurementState = "idle";
 
-  public constructor(renderer: IRenderer) {
-    super("foxglove.MeasurementTool", renderer);
+  public constructor(renderer: IRenderer, name: string = MeasurementTool.extensionId) {
+    super(name, renderer);
 
     this.#line.userData.picking = false;
     this.#lineOccluded.userData.picking = false;

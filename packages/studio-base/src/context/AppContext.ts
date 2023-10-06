@@ -3,11 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { createContext, useContext } from "react";
+import { DeepPartial } from "ts-essentials";
 import { StoreApi } from "zustand";
 
 import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
+import { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
 
 interface IAppContext {
   appBarLayoutButton?: JSX.Element;
@@ -18,6 +20,7 @@ interface IAppContext {
     durationNanos: string;
     metadata: Record<string, string>;
   }) => Promise<void>;
+  injectedFeatures?: InjectedFeatures;
   importLayoutFile?: (fileName: string, data: LayoutData) => Promise<void>;
   layoutEmptyState?: JSX.Element;
   syncAdapters?: readonly JSX.Element[];
@@ -26,6 +29,20 @@ interface IAppContext {
     initialState?: Partial<WorkspaceContextStore>,
   ) => StoreApi<WorkspaceContextStore>;
 }
+
+export const INJECTED_FEATURE_KEYS = {
+  customSceneExtensions: "ThreeDeeRender.customSceneExtensions",
+} as const;
+
+export type InjectedFeatureMap = {
+  [INJECTED_FEATURE_KEYS.customSceneExtensions]?: {
+    customSceneExtensions: DeepPartial<SceneExtensionConfig>;
+  };
+};
+
+export type InjectedFeatures = {
+  availableFeatures: InjectedFeatureMap;
+};
 
 const AppContext = createContext<IAppContext>({});
 AppContext.displayName = "AppContext";

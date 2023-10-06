@@ -4,6 +4,7 @@
 
 import { StrictMode, useMemo } from "react";
 import ReactDOM from "react-dom";
+import { DeepPartial } from "ts-essentials";
 
 import { useCrash } from "@foxglove/hooks";
 import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
@@ -17,9 +18,11 @@ import {
   BuiltinPanelExtensionContext,
   PanelExtensionAdapter,
 } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { INJECTED_FEATURE_KEYS, useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { TestOptions } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
+import { SceneExtensionConfig } from "./SceneExtensionConfig";
 import { ThreeDeeRender } from "./ThreeDeeRender";
 import { InterfaceMode } from "./types";
 
@@ -28,10 +31,11 @@ type InitPanelArgs = {
   forwardedAnalytics: ForwardedAnalytics;
   interfaceMode: InterfaceMode;
   testOptions: TestOptions;
+  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
 };
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
-  const { crash, forwardedAnalytics, interfaceMode, testOptions } = args;
+  const { crash, forwardedAnalytics, interfaceMode, testOptions, customSceneExtensions } = args;
   // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
     <StrictMode>
@@ -41,6 +45,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
             context={context}
             interfaceMode={interfaceMode}
             testOptions={testOptions}
+            customSceneExtensions={customSceneExtensions}
           />
         </ForwardAnalyticsContextProvider>
       </CaptureErrorBoundary>
@@ -64,6 +69,17 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
 
   const forwardedAnalytics = useForwardAnalytics();
+  const { injectedFeatures } = useAppContext();
+  const customSceneExtensions = useMemo(() => {
+    if (injectedFeatures == undefined) {
+      return undefined;
+    }
+    const injectedSceneExtensions =
+      injectedFeatures.availableFeatures[INJECTED_FEATURE_KEYS.customSceneExtensions]
+        ?.customSceneExtensions;
+    return injectedSceneExtensions;
+  }, [injectedFeatures]);
+
   const boundInitPanel = useMemo(
     () =>
       initPanel.bind(undefined, {
@@ -71,8 +87,16 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
         forwardedAnalytics,
         interfaceMode,
         testOptions: { onDownloadImage: props.onDownloadImage, debugPicking: props.debugPicking },
+        customSceneExtensions,
       }),
-    [crash, forwardedAnalytics, interfaceMode, props.onDownloadImage, props.debugPicking],
+    [
+      crash,
+      forwardedAnalytics,
+      interfaceMode,
+      props.onDownloadImage,
+      props.debugPicking,
+      customSceneExtensions,
+    ],
   );
 
   return (

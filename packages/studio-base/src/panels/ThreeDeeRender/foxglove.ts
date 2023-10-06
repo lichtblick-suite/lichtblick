@@ -40,7 +40,7 @@ addFoxgloveSchema(IMAGE_ANNOTATIONS_DATATYPES, "foxglove.ImageAnnotations");
 
 // Expand a single Foxglove schema name into variations for ROS1, ROS2, and IDL and add
 // them to the output set.
-function addFoxgloveSchema(output: Set<string>, dataType: string): Set<string> {
+export function addFoxgloveSchema(output: Set<string>, dataType: string): Set<string> {
   // Add the Foxglove json, protobuf, and flatbuffer variation: foxglove.PointCloud
   output.add(dataType);
 

@@ -80,7 +80,7 @@ type RenderStateListener = (
  * is managing state in synchronized mode and ensuring that the a synchronized set of image and
  * annotations are handed off to the SceneExtension for rendering.
  */
-export class MessageHandler {
+export class MessageHandler implements IMessageHandler {
   /** settings that should reflect image mode config */
   #config: Immutable<Config>;
 
@@ -121,24 +121,24 @@ export class MessageHandler {
   }
 
   public handleRosRawImage = (messageEvent: PartialMessageEvent<RosImage>): void => {
-    this.#handleImage(messageEvent, normalizeRosImage(messageEvent.message));
+    this.handleImage(messageEvent, normalizeRosImage(messageEvent.message));
   };
 
   public handleRosCompressedImage = (
     messageEvent: PartialMessageEvent<RosCompressedImage>,
   ): void => {
-    this.#handleImage(messageEvent, normalizeRosCompressedImage(messageEvent.message));
+    this.handleImage(messageEvent, normalizeRosCompressedImage(messageEvent.message));
   };
 
   public handleRawImage = (messageEvent: PartialMessageEvent<RawImage>): void => {
-    this.#handleImage(messageEvent, normalizeRawImage(messageEvent.message));
+    this.handleImage(messageEvent, normalizeRawImage(messageEvent.message));
   };
 
   public handleCompressedImage = (messageEvent: PartialMessageEvent<CompressedImage>): void => {
-    this.#handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
+    this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
   };
 
-  #handleImage(message: PartialMessageEvent<AnyImage>, image: AnyImage) {
+  protected handleImage(message: PartialMessageEvent<AnyImage>, image: AnyImage): void {
     const normalizedImageMessage: MessageEvent<AnyImage> = {
       ...message,
       message: image,
@@ -323,6 +323,22 @@ export class MessageHandler {
     }
     return visibleAnnotations;
   }
+}
+
+export interface IMessageHandler {
+  handleRosRawImage: (messageEvent: PartialMessageEvent<RosImage>) => void;
+  handleRosCompressedImage: (messageEvent: PartialMessageEvent<RosCompressedImage>) => void;
+  handleRawImage: (messageEvent: PartialMessageEvent<RawImage>) => void;
+  handleCompressedImage: (messageEvent: PartialMessageEvent<CompressedImage>) => void;
+  handleCameraInfo: (message: PartialMessageEvent<CameraInfo>) => void;
+  handleAnnotations: (
+    messageEvent: MessageEvent<FoxgloveImageAnnotations | RosImageMarker | RosImageMarkerArray>,
+  ) => void;
+  addListener(listener: RenderStateListener): void;
+  removeListener(listener: RenderStateListener): void;
+  setConfig(newConfig: Immutable<Partial<ImageModeConfig>>): void;
+  clear(): void;
+  getRenderState(): Readonly<Partial<MessageHandlerState>>;
 }
 
 type SynchronizationResult =
