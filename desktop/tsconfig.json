@@ -1,9 +1,0 @@
-{
-  "extends": "@foxglove/tsconfig/base",
-  "include": ["*.ts", "common/**/*", "integration-test/**/*.ts", "../package.json"],
-  "compilerOptions": {
-    "lib": ["dom", "es2022", "esnext.disposable"],
-    "module": "commonjs",
-    "noEmit": true
-  }
-}

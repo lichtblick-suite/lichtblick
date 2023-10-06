@@ -16,19 +16,11 @@
 1. Launch the development environment:
 
 ```sh
-# To launch the desktop app (run both scripts concurrently):
-$ yarn desktop:serve        # start webpack
-$ yarn desktop:start        # launch electron
-
-# To launch the browser app:
+# To launch the app:
 $ yarn web:serve
 
 # To launch the storybook:
 $ yarn storybook
-
-# Advanced usage: running webpack and electron on different computers (or VMs) on the same network
-$ yarn desktop:serve --host 192.168.xxx.yyy         # the address where electron can reach the webpack dev server
-$ yarn dlx electron@22.1.0 .webpack # launch the version of electron for the current computer's platform
 ```
 
 ### Other useful commands

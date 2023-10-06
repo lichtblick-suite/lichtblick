@@ -1,8 +1,4 @@
 {
-  "//": "Our top level jest config to reference all the projects under our monorepo. We exclude the desktop test since it involves performing a webpack build and doesn't support 'watch' or 'debug' in the same way",
-  "projects": [
-    "<rootDir>/ci/jest.config.json",
-    "<rootDir>/desktop/jest.config.json",
-    "<rootDir>/packages/*/jest.config.json"
-  ]
+  "//": "Our top level jest config to reference all the projects under our monorepo",
+  "projects": ["<rootDir>/ci/jest.config.json", "<rootDir>/packages/*/jest.config.json"]
 }

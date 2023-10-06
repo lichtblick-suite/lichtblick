@@ -24,7 +24,7 @@
   <br />
   <br />
 
-[Foxglove Studio](https://foxglove.dev) is an integrated visualization and diagnosis tool for robotics, available [in your browser](https://studio.foxglove.dev/) or [as a desktop app](https://foxglove.dev/download) on Linux, Windows, and macOS.
+[Foxglove](https://foxglove.dev) is an integrated visualization and diagnosis tool for robotics.
 
   <p align="center">
     <a href="https://foxglove.dev"><img alt="Foxglove Studio screenshot" src="/resources/screenshot.png"></a>

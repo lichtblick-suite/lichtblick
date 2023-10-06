@@ -212,11 +212,8 @@ const fileSources: MockMessagePipelineProps[] = [
 }));
 
 const remoteSources: MockMessagePipelineProps[] = [
-  "ros1-socket",
-  "ros2-socket",
   "rosbridge-websocket",
   "foxglove-websocket",
-  "velodyne-device",
   "some other source type",
 ].map((sourceId) => ({
   name: "https://longexampleurlwith_specialcharaters-and-portnumber:3030",

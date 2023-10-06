@@ -70,7 +70,7 @@ const playerSelection: PlayerSelection = {
     { id: "2222", title: "http://localhost:11311", label: "ROS 1" },
     { id: "3333", title: "ws://localhost:9090/", label: "Rosbridge (ROS 1 & 2)" },
     { id: "4444", title: "ws://localhost:8765", label: "Foxglove WebSocket" },
-    { id: "5555", title: "2369", label: "Velodyne Lidar" },
+    { id: "5555", title: "ws://1.2.3.4:8765", label: "Foxglove WebSocket" },
     { id: "6666", title: "THIS ITEM SHOULD BE HIDDEN IN STORYBOOKS", label: "!!!!!!!!!!!!" },
   ],
   availableSources: [],

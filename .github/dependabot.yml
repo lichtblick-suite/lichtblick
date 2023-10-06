@@ -20,12 +20,6 @@ updates:
       emotion:
         patterns:
           - "@emotion/*"
-      electron:
-        patterns:
-          - "electron"
-          - "electron-*"
-          - "app-builder-lib"
-          - "builder-util"
       jest:
         patterns:
           - "jest"
