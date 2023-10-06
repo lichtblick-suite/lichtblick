@@ -8,7 +8,8 @@
 // See typings/index.d.ts for additional included references
 /// <reference types="./typings" />
 
-export { App } from "./App";
+export { SharedRoot } from "./SharedRoot";
+export { StudioApp } from "./StudioApp";
 export type { NetworkInterface, OsContext } from "./OsContext";
 export type {
   IAppConfiguration,
@@ -41,3 +42,4 @@ export { default as SampleNuscenesDataSourceFactory } from "./dataSources/Sample
 export { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 export { reportError, setReportErrorHandler } from "./reportError";
 export { makeWorkspaceContextInitialState } from "./providers/WorkspaceContextProvider";
+export type { AppMenuProps } from "./components/AppBar/AppMenu";

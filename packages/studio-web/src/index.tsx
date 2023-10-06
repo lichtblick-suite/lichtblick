@@ -6,7 +6,7 @@ import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
-import type { IDataSourceFactory } from "@foxglove/studio-base";
+import { IDataSourceFactory, StudioApp } from "@foxglove/studio-base";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 
 import { CompatibilityBanner } from "./CompatibilityBanner";
@@ -26,6 +26,7 @@ function LogAfterRender(props: React.PropsWithChildren): JSX.Element {
 export type MainParams = {
   dataSources?: IDataSourceFactory[];
   extraProviders?: JSX.Element[];
+  rootElement?: JSX.Element;
 };
 
 export async function main(getParams: () => Promise<MainParams> = async () => ({})): Promise<void> {
@@ -75,15 +76,20 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
   await waitForFonts();
   await initI18n();
 
-  const { Root } = await import("./Root");
+  const { WebRoot } = await import("./WebRoot");
   const params = await getParams();
+  const rootElement = params.rootElement ?? (
+    <WebRoot extraProviders={params.extraProviders} dataSources={params.dataSources}>
+      <StudioApp />
+    </WebRoot>
+  );
 
   // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
     <StrictMode>
       <LogAfterRender>
         {banner}
-        <Root extraProviders={params.extraProviders} dataSources={params.dataSources} />
+        {rootElement}
       </LogAfterRender>
     </StrictMode>,
     rootEl,

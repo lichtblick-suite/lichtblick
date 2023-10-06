@@ -8,7 +8,10 @@ import CopyPlugin from "copy-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, WebpackPluginInstance } from "webpack";
-import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
+import type {
+  ConnectHistoryApiFallbackOptions,
+  Configuration as WebpackDevServerConfiguration,
+} from "webpack-dev-server";
 
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
 import { makeConfig } from "@foxglove/studio-base/webpack";
@@ -27,6 +30,8 @@ export type ConfigParams = {
   prodSourceMap: string | false;
   /** Set the app version information */
   version: string;
+  /** Needs to be overridden for react-router */
+  historyApiFallback?: ConnectHistoryApiFallbackOptions;
 };
 
 export const devServerConfig = (params: ConfigParams): WebpackConfiguration => ({
@@ -43,6 +48,7 @@ export const devServerConfig = (params: ConfigParams): WebpackConfiguration => (
     static: {
       directory: params.outputPath,
     },
+    historyApiFallback: params.historyApiFallback,
     hot: true,
     // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
     // When running in dev mode two errors are logged to the dev console:

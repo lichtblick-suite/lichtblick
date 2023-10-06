@@ -30,7 +30,7 @@ import {
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
-type AppMenuProps = {
+export type AppMenuProps = {
   handleClose: () => void;
   anchorEl?: HTMLElement;
   anchorReference?: PopoverReference;

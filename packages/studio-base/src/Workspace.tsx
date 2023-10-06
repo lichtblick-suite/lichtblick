@@ -19,6 +19,7 @@ import { makeStyles } from "tss-react/mui";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppBar } from "@foxglove/studio-base/components/AppBar";
+import { AppMenuProps } from "@foxglove/studio-base/components/AppBar/AppMenu";
 import { CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
 import {
   DataSourceDialog,
@@ -87,6 +88,7 @@ type WorkspaceProps = CustomWindowControlsProps & {
   onAppBarDoubleClick?: () => void;
   // eslint-disable-next-line react/no-unused-prop-types
   disablePersistenceForStorybook?: boolean;
+  AppMenuComponent?: (props: AppMenuProps) => JSX.Element;
 };
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
@@ -462,6 +464,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
           onMaximizeWindow={props.onMaximizeWindow}
           onUnmaximizeWindow={props.onUnmaximizeWindow}
           onCloseWindow={props.onCloseWindow}
+          AppMenuComponent={props.AppMenuComponent}
         />
         <Sidebars
           leftItems={leftSidebarItems}

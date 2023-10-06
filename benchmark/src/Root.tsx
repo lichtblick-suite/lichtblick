@@ -4,7 +4,13 @@
 
 import { useMemo, useState } from "react";
 
-import { App, IDataSourceFactory, AppSetting, LaunchPreferenceValue } from "@foxglove/studio-base";
+import {
+  SharedRoot,
+  IDataSourceFactory,
+  AppSetting,
+  LaunchPreferenceValue,
+  StudioApp,
+} from "@foxglove/studio-base";
 
 import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
 import { LAYOUTS } from "./layouts";
@@ -52,12 +58,14 @@ export function Root(): JSX.Element {
   const url = new URL(window.location.href);
 
   return (
-    <App
+    <SharedRoot
       enableLaunchPreferenceScreen={false}
       deepLinks={[url.href]}
       dataSources={dataSources}
       appConfiguration={appConfiguration}
       extensionLoaders={extensionLoaders}
-    />
+    >
+      <StudioApp />
+    </SharedRoot>
   );
 }

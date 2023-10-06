@@ -6,47 +6,26 @@ import { Fragment, Suspense, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
+import { useSharedRootContext } from "@foxglove/studio-base/context/SharedRootContext";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
 import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 
 import Workspace from "./Workspace";
-import { CustomWindowControlsProps } from "./components/AppBar/CustomWindowControls";
-import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider";
-import CssBaseline from "./components/CssBaseline";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
-import ErrorBoundary from "./components/ErrorBoundary";
 import MultiProvider from "./components/MultiProvider";
 import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
-import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigurationContext";
-import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
-import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
-import { IDataSourceFactory } from "./context/PlayerSelectionContext";
+import NativeAppMenuContext from "./context/NativeAppMenuContext";
+import NativeWindowContext from "./context/NativeWindowContext";
 import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
-import { ExtensionLoader } from "./services/ExtensionLoader";
-
-type AppProps = CustomWindowControlsProps & {
-  deepLinks: string[];
-  appConfiguration: IAppConfiguration;
-  dataSources: IDataSourceFactory[];
-  extensionLoaders: readonly ExtensionLoader[];
-  nativeAppMenu?: INativeAppMenu;
-  nativeWindow?: INativeWindow;
-  enableLaunchPreferenceScreen?: boolean;
-  enableGlobalCss?: boolean;
-  appBarLeftInset?: number;
-  extraProviders?: JSX.Element[];
-  onAppBarDoubleClick?: () => void;
-};
 
 // Suppress context menu for the entire app except on inputs & textareas.
 function contextMenuHandler(event: MouseEvent) {
@@ -58,18 +37,20 @@ function contextMenuHandler(event: MouseEvent) {
   return false;
 }
 
-export function App(props: AppProps): JSX.Element {
+export function StudioApp(): JSX.Element {
   const {
-    appConfiguration,
     dataSources,
     extensionLoaders,
     nativeAppMenu,
     nativeWindow,
     deepLinks,
     enableLaunchPreferenceScreen,
-    enableGlobalCss = false,
     extraProviders,
-  } = props;
+    appBarLeftInset,
+    customWindowControlProps,
+    onAppBarDoubleClick,
+    AppMenuComponent,
+  } = useSharedRootContext();
 
   const providers = [
     /* eslint-disable react/jsx-key */
@@ -112,37 +93,29 @@ export function App(props: AppProps): JSX.Element {
   }, []);
 
   return (
-    <AppConfigurationContext.Provider value={appConfiguration}>
-      <ColorSchemeThemeProvider>
-        {enableGlobalCss && <GlobalCss />}
-        <CssBaseline>
-          <ErrorBoundary>
-            <MaybeLaunchPreference>
-              <MultiProvider providers={providers}>
-                <DocumentTitleAdapter />
-                <SendNotificationToastAdapter />
-                <DndProvider backend={HTML5Backend}>
-                  <Suspense fallback={<></>}>
-                    <PanelCatalogProvider>
-                      <Workspace
-                        deepLinks={deepLinks}
-                        appBarLeftInset={props.appBarLeftInset}
-                        onAppBarDoubleClick={props.onAppBarDoubleClick}
-                        showCustomWindowControls={props.showCustomWindowControls}
-                        isMaximized={props.isMaximized}
-                        onMinimizeWindow={props.onMinimizeWindow}
-                        onMaximizeWindow={props.onMaximizeWindow}
-                        onUnmaximizeWindow={props.onUnmaximizeWindow}
-                        onCloseWindow={props.onCloseWindow}
-                      />
-                    </PanelCatalogProvider>
-                  </Suspense>
-                </DndProvider>
-              </MultiProvider>
-            </MaybeLaunchPreference>
-          </ErrorBoundary>
-        </CssBaseline>
-      </ColorSchemeThemeProvider>
-    </AppConfigurationContext.Provider>
+    <MaybeLaunchPreference>
+      <MultiProvider providers={providers}>
+        <DocumentTitleAdapter />
+        <SendNotificationToastAdapter />
+        <DndProvider backend={HTML5Backend}>
+          <Suspense fallback={<></>}>
+            <PanelCatalogProvider>
+              <Workspace
+                deepLinks={deepLinks}
+                appBarLeftInset={appBarLeftInset}
+                onAppBarDoubleClick={onAppBarDoubleClick}
+                showCustomWindowControls={customWindowControlProps?.showCustomWindowControls}
+                isMaximized={customWindowControlProps?.isMaximized}
+                onMinimizeWindow={customWindowControlProps?.onMinimizeWindow}
+                onMaximizeWindow={customWindowControlProps?.onMaximizeWindow}
+                onUnmaximizeWindow={customWindowControlProps?.onUnmaximizeWindow}
+                onCloseWindow={customWindowControlProps?.onCloseWindow}
+                AppMenuComponent={AppMenuComponent}
+              />
+            </PanelCatalogProvider>
+          </Suspense>
+        </DndProvider>
+      </MultiProvider>
+    </MaybeLaunchPreference>
   );
 }
