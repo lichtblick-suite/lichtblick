@@ -10,6 +10,7 @@ import { Immutable as Im } from "@foxglove/studio";
 import { iterateTyped, getTypedLength } from "@foxglove/studio-base/components/Chart/datasets";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { getMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { ProviderState } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { getTypedBounds } from "@foxglove/studio-base/components/TimeBasedChart/useProvider";
 import {
   getDatasetsFromMessagePlotPath,
@@ -325,3 +326,18 @@ export const sortPlotDataByHeaderStamp = createPlotMapping((dataset: TypedDataSe
     data: resolved,
   };
 });
+
+export function getProvidedData(data: PlotData): ProviderState<TypedData[]> {
+  const { bounds } = data;
+  const datasets = [];
+  for (const dataset of data.datasets.values()) {
+    datasets.push(dataset);
+  }
+
+  return {
+    bounds,
+    data: {
+      datasets,
+    },
+  };
+}
