@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@foxglove/message-definition": "0.3.0",
-    "@foxglove/omgidl-parser": "1.0.1",
+    "@foxglove/omgidl-parser": "1.0.2",
     "@foxglove/omgidl-serialization": "1.0.1",
     "@foxglove/ros2idl-parser": "0.3.1",
     "@foxglove/rosmsg": "4.2.2",
