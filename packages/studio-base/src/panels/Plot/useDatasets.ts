@@ -25,17 +25,12 @@ import { TypedDataProvider } from "@foxglove/studio-base/components/TimeBasedCha
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { SubscribePayload, MessageEvent } from "@foxglove/studio-base/players/types";
 
-import { PlotParams, Messages } from "./internalTypes";
+import { initBlockState, refreshBlockTopics, processBlocks } from "./blocks";
+import { PlotParams } from "./internalTypes";
 import { getPaths } from "./params";
 import { PlotData } from "./plotData";
 
 type Service = Comlink.Remote<(typeof import("./useDatasets.worker"))["service"]>;
-
-// We need to keep track of the block data we've already sent to the worker and
-// detect when it has changed, which can happen when the user changes a user
-// script or they trigger a subscription to different fields.
-// mapping from topic -> the first message on that topic in the block
-type BlockStatus = Record<string, unknown>;
 type Client = {
   params: PlotParams | undefined;
   setter: (topics: SubscribePayload[]) => void;
@@ -44,8 +39,7 @@ type Client = {
 let worker: Worker | undefined;
 let service: Service | undefined;
 let numClients: number = 0;
-let blockStatus: BlockStatus[] = [];
-let lastBlockSent: Record<string, number> = {};
+let blockState = initBlockState();
 let clients: Record<string, Client> = {};
 
 const pending: ((service: Service) => void)[] = [];
@@ -59,9 +53,6 @@ async function waitService(): Promise<Service> {
 }
 
 const getIsLive = (ctx: MessagePipelineContext) => ctx.seekPlayback == undefined;
-
-const getPayloadString = (payload: SubscribePayload): string =>
-  `${payload.topic}:${(payload.fields ?? []).join(",")}`;
 
 /**
  * Get the SubscribePayload for a single path by subscribing to all fields
@@ -156,15 +147,7 @@ function chooseClient() {
     (v) => mergeSubscriptions(v) as SubscribePayload[],
   )(clientList);
   clientList[0]?.setter(subscriptions);
-
-  const blockTopics = R.pipe(
-    R.filter((v: SubscribePayload) => v.preloadType === "full"),
-    R.map(getPayloadString),
-  )(subscriptions);
-
-  // Also clear the status of any topics we're no longer using
-  blockStatus = blockStatus.map((block) => R.pick(blockTopics, block));
-  lastBlockSent = R.pick(blockTopics, lastBlockSent);
+  blockState = refreshBlockTopics(subscriptions, blockState);
 }
 
 // Subscribe to "current" messages (those near the seek head) and forward new
@@ -234,57 +217,24 @@ function useData(id: string, params: PlotParams) {
 
   const blocks = useBlocks(blockSubscriptions);
   useEffect(() => {
-    for (const [index, block] of blocks.entries()) {
-      if (R.isEmpty(block)) {
-        continue;
-      }
+    const {
+      state: newState,
+      resetTopics,
+      newData,
+    } = processBlocks(blocks, blockSubscriptions, blockState);
 
-      // Package any new messages into a single bundle to send to the worker
-      const messages: Messages = {};
-      // Make a note of any topics that had new data so we can clear out
-      // accumulated points in the worker
-      const resetData: Set<string> = new Set<string>();
-      const status: BlockStatus = blockStatus[index] ?? {};
-      for (const payload of blockSubscriptions) {
-        const ref = getPayloadString(payload);
-        const topicMessages = block[payload.topic];
-        if (topicMessages == undefined) {
-          continue;
-        }
+    blockState = newState;
 
-        const first = topicMessages[0]?.message;
-        const existing = status[ref];
+    void service?.addBlock(
+      R.pipe(
+        R.map((topic: string): [string, MessageEvent[]] => [topic, []]),
+        R.fromPairs,
+      )(resetTopics),
+      resetTopics,
+    );
 
-        // keep track of the block index that we last sent; if there's a new
-        // change BEFORE that index, we need to reset the plot data; otherwise
-        // we do not
-        const lastSent = lastBlockSent[ref];
-        if (R.equals(existing, first)) {
-          continue;
-        }
-
-        // we already had a message in this block, meaning the data itself has
-        // changed; we have to rebuild the plots
-        if (existing != undefined && lastSent != undefined && index < lastSent) {
-          resetData.add(payload.topic);
-
-          // clear out the status of all subsequent blocks for this ref
-          for (let i = index + 1; i < blockStatus.length; i++) {
-            blockStatus[i] = R.omit([ref], blockStatus[i]);
-          }
-        }
-
-        status[ref] = first;
-        messages[payload.topic] = topicMessages as MessageEvent[];
-        lastBlockSent[ref] = index;
-      }
-      blockStatus[index] = status;
-
-      if (R.isEmpty(messages)) {
-        continue;
-      }
-
-      void service?.addBlock(messages, Array.from(resetData));
+    for (const bundle of newData) {
+      void service?.addBlock(bundle, []);
     }
   }, [blockSubscriptions, blocks]);
 }
@@ -333,7 +283,7 @@ export default function useDatasets(params: PlotParams): {
       if (numClients === 0) {
         worker?.terminate();
         worker = service = undefined;
-        blockStatus = [];
+        blockState = initBlockState();
       }
     };
   }, []);
