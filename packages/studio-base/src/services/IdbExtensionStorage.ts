@@ -50,21 +50,27 @@ export class IdbExtensionStorage implements IExtensionStorage {
   }
 
   public async list(): Promise<ExtensionInfo[]> {
+    const start = performance.now();
     const records = await (await this.#db).getAll(METADATA_STORE_NAME);
 
-    log.debug(`Found ${records.length} extensions`);
+    log.debug(
+      `Loaded ${records.length} extensions in`,
+      (performance.now() - start).toFixed(1),
+      "ms",
+    );
 
     return records;
   }
 
   public async get(id: string): Promise<undefined | StoredExtension> {
-    log.debug("Getting extension", id);
-
-    return await (await this.#db).get(EXTENSION_STORE_NAME, id);
+    const start = performance.now();
+    const extension = await (await this.#db).get(EXTENSION_STORE_NAME, id);
+    log.debug("Getting extension", id, "took", (performance.now() - start).toFixed(1), "ms");
+    return extension;
   }
 
   public async put(extension: StoredExtension): Promise<StoredExtension> {
-    log.debug("Storing extension", { extension });
+    const start = performance.now();
 
     const transaction = (await this.#db).transaction(
       [METADATA_STORE_NAME, EXTENSION_STORE_NAME],
@@ -75,12 +81,19 @@ export class IdbExtensionStorage implements IExtensionStorage {
       transaction.db.put(EXTENSION_STORE_NAME, extension),
       transaction.done,
     ]);
+    log.debug(
+      "Stored extension",
+      { extension },
+      "in",
+      (performance.now() - start).toFixed(1),
+      "ms",
+    );
 
     return extension;
   }
 
   public async delete(id: string): Promise<void> {
-    log.debug("Deleting extension", id);
+    const start = performance.now();
 
     const transaction = (await this.#db).transaction(
       [METADATA_STORE_NAME, EXTENSION_STORE_NAME],
@@ -91,5 +104,6 @@ export class IdbExtensionStorage implements IExtensionStorage {
       transaction.db.delete(EXTENSION_STORE_NAME, id),
       transaction.done,
     ]);
+    log.debug("Deleted extension", id, "in", (performance.now() - start).toFixed(1), "ms");
   }
 }
