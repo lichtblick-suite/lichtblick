@@ -2465,7 +2465,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/message-definition": 0.3.0
+    "@foxglove/message-definition": 0.3.1
     "@foxglove/omgidl-parser": 1.0.2
     "@foxglove/omgidl-serialization": 1.0.1
     "@foxglove/ros2idl-parser": 0.3.1
@@ -2486,13 +2486,6 @@ __metadata:
     typescript: 5.2.2
   languageName: unknown
   linkType: soft
-
-"@foxglove/message-definition@npm:0.3.0":
-  version: 0.3.0
-  resolution: "@foxglove/message-definition@npm:0.3.0"
-  checksum: 48edc4e57b7b1152514fafe3eb0652ebd85032524d6a8c102db5e3a53b0311fde6200b5aeada6a76bafd6033d3d6ac1bd38e6aa331219f4421c356b8b6d7fd94
-  languageName: node
-  linkType: hard
 
 "@foxglove/message-definition@npm:0.3.1":
   version: 0.3.1
