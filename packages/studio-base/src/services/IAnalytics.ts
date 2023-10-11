@@ -66,6 +66,10 @@ enum AppEvent {
 
   // Experimental features
   EXPERIMENTAL_FEATURE_TOGGLE = "Studio: Experimental Feature Toggled",
+
+  // User engagement
+  USER_OBSERVATION = "Studio: User Makes Observation",
+  USER_ACTIVATION = "Studio: User Activated",
 }
 
 interface IAnalytics {
