@@ -2494,6 +2494,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/message-definition@npm:0.3.1":
+  version: 0.3.1
+  resolution: "@foxglove/message-definition@npm:0.3.1"
+  checksum: 71699bc9dafc90d07ce312bcaebbedc1f60a173c8ba66421d741cf713ea6bbf6b462b551fcfe6da86488814629639e1dc424e9664c7ea2474227a20ad88ac776
+  languageName: node
+  linkType: hard
+
 "@foxglove/message-definition@npm:^0.2.0":
   version: 0.2.0
   resolution: "@foxglove/message-definition@npm:0.2.0"
@@ -2669,7 +2676,7 @@ __metadata:
     "@foxglove/hooks": "workspace:*"
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/message-definition": 0.3.0
+    "@foxglove/message-definition": 0.3.1
     "@foxglove/rosbag": 0.4.0
     "@foxglove/rosbag2-web": 4.1.1
     "@foxglove/roslibjs": 0.0.3
