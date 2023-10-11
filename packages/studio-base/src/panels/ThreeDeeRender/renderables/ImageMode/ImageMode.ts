@@ -28,14 +28,9 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
 import {
   AnyImage,
-  DownloadImageInfo,
   getFrameIdFromImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
-import {
-  IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
-  decodeCompressedImageToBitmap,
-  decodeRawImage,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
+import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
@@ -69,7 +64,7 @@ import {
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
 import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "../Images/topicPrefixMatching";
-import { ColorModeSettings, colorModeSettingsFields } from "../colorMode";
+import { colorModeSettingsFields } from "../colorMode";
 
 const log = Logger.getLogger(__filename);
 
@@ -849,48 +844,28 @@ export class ImageMode
     this.updateSettingsTree();
   };
 
-  protected getLatestImage(): DownloadImageInfo | undefined {
-    if (!this.#latestImage) {
-      return undefined;
-    }
-    const settings = this.getImageModeSettings();
-    return {
-      ...this.#latestImage,
-      rotation: settings.rotation,
-      flipHorizontal: settings.flipHorizontal,
-      flipVertical: settings.flipVertical,
-      minValue: settings.minValue,
-      maxValue: settings.maxValue,
-      colorMode: settings.colorMode,
-      colorMap: settings.colorMap,
-      gradient: settings.gradient as ColorModeSettings["gradient"],
-      explicitAlpha: settings.explicitAlpha,
-      flatColor: settings.flatColor,
-    };
-  }
-
   #getDownloadImageCallback = (): (() => Promise<void>) => {
     return async () => {
-      const currentImage = this.getLatestImage();
+      if (!this.imageRenderable) {
+        return;
+      }
+      const currentImage = this.imageRenderable.getDecodedImage();
       if (!currentImage) {
         return;
       }
 
-      const { topic, image, rotation, flipHorizontal, flipVertical } = currentImage;
-      const stamp = "header" in image ? image.header.stamp : image.timestamp;
-      let bitmap: ImageBitmap;
+      const { topic, image: imageMessage } = this.imageRenderable.userData;
+      if (!imageMessage) {
+        return;
+      }
+      const settings = this.getImageModeSettings();
+      const { rotation, flipHorizontal, flipVertical } = settings;
+      const stamp = "header" in imageMessage ? imageMessage.header.stamp : imageMessage.timestamp;
       try {
-        if ("format" in image) {
-          bitmap = await decodeCompressedImageToBitmap(image);
-        } else {
-          const imageData = new ImageData(image.width, image.height);
-          // currentImage passed for color settings access
-          decodeRawImage(image, currentImage, imageData.data);
-          bitmap = await createImageBitmap(imageData);
-        }
-
-        const width = rotation === 90 || rotation === 270 ? bitmap.height : bitmap.width;
-        const height = rotation === 90 || rotation === 270 ? bitmap.width : bitmap.height;
+        const width =
+          rotation === 90 || rotation === 270 ? currentImage.height : currentImage.width;
+        const height =
+          rotation === 90 || rotation === 270 ? currentImage.width : currentImage.height;
 
         // re-render the image onto a new canvas to download the original image
         const canvas = document.createElement("canvas");
@@ -900,12 +875,15 @@ export class ImageMode
         if (!ctx) {
           throw new Error("Unable to create rendering context for image download");
         }
+        // Need to transform ImageData to bitmap because ctx.putImageData does not support canvas transformations
+        const bitmap =
+          currentImage instanceof ImageData ? await createImageBitmap(currentImage) : currentImage;
 
         // Draw the image in the selected orientation so it aligns with the canvas viewport
         ctx.translate(width / 2, height / 2);
         ctx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
         ctx.rotate((rotation / 180) * Math.PI);
-        ctx.translate(-bitmap.width / 2, -bitmap.height / 2);
+        ctx.translate(-currentImage.width / 2, -currentImage.height / 2);
         ctx.drawImage(bitmap, 0, 0);
 
         // read the canvas data as an image (png)

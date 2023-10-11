@@ -84,6 +84,10 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     return this.#disposed;
   }
 
+  public getDecodedImage(): ImageBitmap | ImageData | undefined {
+    return this.#decodedImage;
+  }
+
   public setTopic(topicName: string): void {
     this.name = topicName;
     this.userData.topic = topicName;

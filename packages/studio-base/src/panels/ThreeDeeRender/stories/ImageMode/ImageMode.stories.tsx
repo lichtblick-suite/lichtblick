@@ -441,8 +441,11 @@ export const DownloadRawImage: StoryObj<React.ComponentProps<typeof ImageModeFox
   args: { imageType: "raw" },
   play: async () => {
     const { click, pointer } = userEvent.setup();
+    // need to wait until the images are done decoding
+    await delay(300);
     await pointer({ target: document.querySelector("canvas")!, keys: "[MouseRight]" });
-    await click(await screen.findByText("Download image"));
+    const downloadButton = await screen.findByText("Download image");
+    await click(downloadButton);
   },
 };
 
