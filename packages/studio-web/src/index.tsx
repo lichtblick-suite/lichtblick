@@ -6,7 +6,7 @@ import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
-import { IDataSourceFactory, StudioApp } from "@foxglove/studio-base";
+import type { IDataSourceFactory } from "@foxglove/studio-base";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 
 import { CompatibilityBanner } from "./CompatibilityBanner";
@@ -67,9 +67,10 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     return;
   }
 
-  const { installDevtoolsFormatters, overwriteFetch, waitForFonts, initI18n } = await import(
-    "@foxglove/studio-base"
-  );
+  // Use an async import to delay loading the majority of studio-base code until the CompatibilityBanner
+  // can be displayed.
+  const { installDevtoolsFormatters, overwriteFetch, waitForFonts, initI18n, StudioApp } =
+    await import("@foxglove/studio-base");
   installDevtoolsFormatters();
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
