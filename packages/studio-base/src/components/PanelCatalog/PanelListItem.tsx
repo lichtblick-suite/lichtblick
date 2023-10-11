@@ -75,7 +75,13 @@ export function PanelListItem(props: Props): JSX.Element {
     },
     options: { dropEffect: "copy" },
     end: (_item, monitor) => {
-      const dropResult = monitor.getDropResult() ?? {};
+      const dropResult = monitor.getDropResult();
+
+      // do nothing when the user wants to cancel a dragged panel
+      if (dropResult == undefined || !monitor.didDrop()) {
+        return;
+      }
+
       const { position, path, tabId } = dropResult;
       // dropping outside mosaic does nothing. If we have a tabId, but no
       // position or path, we're dragging into an empty tab.
