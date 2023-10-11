@@ -397,7 +397,7 @@ function UserScriptEditor(props: Props) {
             </Stack>
           )}
 
-          <PanelGroup direction="vertical" units="pixels">
+          <PanelGroup direction="vertical" units="percentages">
             {selectedNodeId == undefined && <WelcomeScreen addNewNode={addNewNode} />}
             <ResizablePanel>
               <Suspense
@@ -434,9 +434,9 @@ function UserScriptEditor(props: Props) {
             <PanelResizeHandle className={classes.resizeHandle} />
             <ResizablePanel
               collapsible
-              minSize={38}
-              collapsedSize={38}
-              defaultSize={38}
+              collapsedSize={0}
+              defaultSize={30}
+              style={{ minHeight: "38px" }}
               ref={bottomBarRef}
             >
               <BottomBar
