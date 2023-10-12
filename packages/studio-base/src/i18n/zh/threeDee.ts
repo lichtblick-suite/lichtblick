@@ -112,10 +112,10 @@ export const threeDee: Partial<TypeOptions["resources"]["threeDee"]> = {
   decayTimeDefaultZeroSeconds: "0 秒",
 
   // Color Mode
-  colorBy: "颜色映射",
+  colorBy: "颜色映射值",
   colorModeBgraPacked: "BGRA （堆积）",
   colorModeBgrPacked: "BGR （堆积）",
-  colorModeColorMap: "颜色映射",
+  colorModeColorMap: "色板",
   colorModeFlat: "单色",
   colorModeRgbaSeparateFields: "RGBA （独立字段）",
   flatColor: "单色",
