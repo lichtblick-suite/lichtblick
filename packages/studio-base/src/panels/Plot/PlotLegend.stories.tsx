@@ -5,6 +5,7 @@
 import { StoryObj, StoryFn } from "@storybook/react";
 import { waitFor } from "@storybook/testing-library";
 import { useCallback } from "react";
+import { useAsync } from "react-use";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
@@ -47,9 +48,9 @@ const exampleConfig: PlotConfig = {
 function Wrapper(Wrapped: StoryFn): JSX.Element {
   const readySignal = useReadySignal({ count: 10 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
-
+  const delayedFixture = useAsync(async () => fixture, []);
   return (
-    <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
+    <PanelSetup fixture={delayedFixture.value} pauseFrame={pauseFrame}>
       <Wrapped />
     </PanelSetup>
   );
