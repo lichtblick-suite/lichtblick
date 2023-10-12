@@ -225,7 +225,7 @@ export function getMessagePathDataItems(
     path: string,
     structureItem: MessagePathStructureItem | undefined,
   ) {
-    if (value == undefined || structureItem == undefined) {
+    if (value == undefined) {
       return;
     }
     const pathItem = filledInPath.messagePath[pathIndex];
@@ -236,15 +236,21 @@ export function getMessagePathDataItems(
       const prevPathItem = filledInPath.messagePath[pathIndex - 1];
       if (prevPathItem && prevPathItem.type === "name") {
         const fieldName = prevPathItem.name;
-        const enumMap = enumValues[structureItem.datatype];
+        const enumMap = structureItem != undefined ? enumValues[structureItem.datatype] : undefined;
         constantName = enumMap?.[fieldName]?.[value];
       }
       queriedData.push({ value, path, constantName });
-    } else if (pathItem.type === "name" && structureItem.structureType === "message") {
+    } else if (
+      pathItem.type === "name" &&
+      (structureItem == undefined || structureItem.structureType === "message")
+    ) {
       // If the `pathItem` is a name, we're traversing down using that name.
-      const next = structureItem.nextByName[pathItem.name];
+      const next = structureItem?.nextByName[pathItem.name];
       traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, next);
-    } else if (pathItem.type === "slice" && structureItem.structureType === "array") {
+    } else if (
+      pathItem.type === "slice" &&
+      (structureItem == undefined || structureItem.structureType === "array")
+    ) {
       const { start, end } = pathItem;
       if (typeof start === "object" || typeof end === "object") {
         throw new Error(
@@ -291,7 +297,7 @@ export function getMessagePathDataItems(
           // (otherwise they wouldn't have chosen a negative slice).
           newPath = `${path}[${i}]`;
         }
-        traverse(arrayElement, pathIndex + 1, newPath, structureItem.next);
+        traverse(arrayElement, pathIndex + 1, newPath, structureItem?.next);
       }
     } else if (pathItem.type === "filter") {
       if (filterMatches(pathItem, value)) {
@@ -299,7 +305,7 @@ export function getMessagePathDataItems(
       }
     } else {
       console.warn(
-        `Unknown pathItem.type ${pathItem.type} for structureType: ${structureItem.structureType}`,
+        `Unknown pathItem.type ${pathItem.type} for structureType: ${structureItem?.structureType}`,
       );
     }
   }

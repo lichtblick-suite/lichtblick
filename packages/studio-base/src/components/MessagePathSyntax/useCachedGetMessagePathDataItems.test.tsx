@@ -173,6 +173,80 @@ describe("useCachedGetMessagePathDataItems", () => {
       ]);
     });
 
+    it("returns items even when a schema is not available", () => {
+      const messages: MessageEvent[] = [
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: { some_num: 1, some_array: [{ some_id: 10, some_message: { x: 10, y: 20 } }] },
+          schemaName: "datatype",
+          sizeInBytes: 0,
+        },
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: {
+            some_num: 2,
+            some_array: [
+              { some_id: 10, some_message: { x: 10, y: 20 } },
+              { some_id: 50, some_message: { x: 50, y: 60 } },
+            ],
+          },
+          schemaName: "datatype",
+          sizeInBytes: 0,
+        },
+      ];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: undefined }];
+      const datatypes: RosDatatypes = new Map();
+
+      expect(
+        addValuesWithPathsToItems(messages, "/some/topic.some_num", topics, datatypes),
+      ).toEqual([
+        [
+          {
+            value: 1,
+            path: "/some/topic.some_num",
+            constantName: undefined,
+          },
+        ],
+        [
+          {
+            value: 2,
+            path: "/some/topic.some_num",
+            constantName: undefined,
+          },
+        ],
+      ]);
+      expect(
+        addValuesWithPathsToItems(
+          messages,
+          "/some/topic.some_array[:].some_message",
+          topics,
+          datatypes,
+        ),
+      ).toEqual([
+        [
+          {
+            value: { x: 10, y: 20 },
+            path: "/some/topic.some_array[0].some_message",
+            constantName: undefined,
+          },
+        ],
+        [
+          {
+            value: { x: 10, y: 20 },
+            path: "/some/topic.some_array[0].some_message",
+            constantName: undefined,
+          },
+          {
+            value: { x: 50, y: 60 },
+            path: "/some/topic.some_array[1].some_message",
+            constantName: undefined,
+          },
+        ],
+      ]);
+    });
+
     it("works with negative slices", () => {
       const messages: MessageEvent[] = [
         {

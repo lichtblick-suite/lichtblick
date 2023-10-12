@@ -65,7 +65,6 @@ export const transitionableRosTypes = [
   "int64",
   "uint64",
   "string",
-  "json",
 ];
 
 const fontSize = 10;

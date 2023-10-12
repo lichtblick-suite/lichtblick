@@ -62,5 +62,4 @@ export const plotableRosTypes = [
   "time",
   "duration",
   "string",
-  "json",
 ];

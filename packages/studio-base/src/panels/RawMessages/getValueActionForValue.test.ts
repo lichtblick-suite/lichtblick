@@ -49,6 +49,15 @@ describe("getValueActionForValue", () => {
     });
   });
 
+  it("returns paths even when a schema is not available", () => {
+    expect(getValueActionForValue([{ some_id: 123 }], undefined, [0, "some_id"])).toEqual({
+      filterPath: "",
+      multiSlicePath: "[:].some_id",
+      primitiveType: "int32",
+      singleSlicePath: "[0].some_id",
+    });
+  });
+
   it("returns paths with bigints", () => {
     const structureItem: MessagePathStructureItem = {
       structureType: "array",
