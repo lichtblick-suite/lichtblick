@@ -139,6 +139,7 @@ function createExtensionRegistryStore(
         return;
       }
 
+      const start = performance.now();
       const extensionList: ExtensionInfo[] = [];
       const allContributionPoints: ContributionPoints = {
         panels: {},
@@ -165,7 +166,9 @@ function createExtensionRegistryStore(
           log.error("Error loading extension list", err);
         }
       }
-      log.debug(`Found ${extensionList.length} extension(s)`);
+      log.info(
+        `Loaded ${extensionList.length} extensions in ${(performance.now() - start).toFixed(1)}ms`,
+      );
       set({
         installedExtensions: extensionList,
         installedPanels: allContributionPoints.panels,

@@ -25,6 +25,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
   LayoutState,
@@ -188,10 +189,13 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
 }
 
-function LoadingState(): JSX.Element {
+function ExtensionsLoadingState(): JSX.Element {
   return (
     <EmptyState>
-      <CircularProgress size={28} />
+      <Stack gap={1} alignItems="center">
+        <CircularProgress size={28} />
+        <span>Loading extensions…</span>
+      </Stack>
     </EmptyState>
   );
 }
@@ -217,7 +221,7 @@ export default function PanelLayout(): JSX.Element {
   );
 
   if (registeredExtensions == undefined) {
-    return <LoadingState />;
+    return <ExtensionsLoadingState />;
   }
 
   if (layoutExists) {
