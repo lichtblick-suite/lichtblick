@@ -6,6 +6,7 @@ import { createContext, useContext } from "react";
 import { DeepPartial } from "ts-essentials";
 import { StoreApi } from "zustand";
 
+import { Immutable, SettingsTreeField, SettingsTreeNode } from "@foxglove/studio";
 import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
@@ -25,6 +26,9 @@ interface IAppContext {
   layoutEmptyState?: JSX.Element;
   syncAdapters?: readonly JSX.Element[];
   workspaceExtensions?: readonly JSX.Element[];
+  renderSettingsStatusButton?: (
+    nodeOrField: Immutable<SettingsTreeNode | SettingsTreeField>,
+  ) => JSX.Element | undefined;
   workspaceStoreCreator?: (
     initialState?: Partial<WorkspaceContextStore>,
   ) => StoreApi<WorkspaceContextStore>;

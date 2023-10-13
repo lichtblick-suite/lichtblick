@@ -22,6 +22,7 @@ import { v4 as uuid } from "uuid";
 import { Immutable, SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 
 import { ColorGradientInput, ColorPickerInput, NumberInput, Vec2Input, Vec3Input } from "./inputs";
 
@@ -497,6 +498,10 @@ function FieldEditorComponent({
   const paddingLeft = 0.75 + 2 * (indent - 1);
   const { classes, cx } = useStyles();
 
+  const { renderSettingsStatusButton } = useAppContext();
+
+  const statusButton = renderSettingsStatusButton ? renderSettingsStatusButton(field) : undefined;
+
   return (
     <>
       <Stack
@@ -507,6 +512,7 @@ function FieldEditorComponent({
         paddingLeft={paddingLeft}
         fullHeight
       >
+        {statusButton}
         {field.error && (
           <Tooltip
             arrow

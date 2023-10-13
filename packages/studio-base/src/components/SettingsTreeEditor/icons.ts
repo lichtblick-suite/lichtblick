@@ -5,6 +5,7 @@
 import Clock from "@mui/icons-material/AccessTime";
 import Add from "@mui/icons-material/Add";
 import Addchart from "@mui/icons-material/Addchart";
+import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import Points from "@mui/icons-material/BlurOn";
 import Check from "@mui/icons-material/Check";
 import Circle from "@mui/icons-material/Circle";
@@ -46,6 +47,7 @@ import { SettingsIcon } from "@foxglove/studio";
 const icons: Record<SettingsIcon, typeof Add> = {
   Add,
   Addchart,
+  AutoAwesome,
   Background,
   Camera,
   Cells,

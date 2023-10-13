@@ -497,6 +497,7 @@ export interface ExtensionModule {
 export type SettingsIcon =
   | "Add"
   | "Addchart"
+  | "AutoAwesome"
   | "Background"
   | "Camera"
   | "Cells"
