@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { CardActionArea, Typography } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { IconButton, Typography } from "@mui/material";
 
 import type { LayoutActions } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -20,9 +21,10 @@ import Stack from "@foxglove/studio-base/components/Stack";
 type Props = {
   topic: string;
   addPanel: LayoutActions["addPanel"];
+  onShowTopicSettings?: (topic: string) => void;
 };
 
-export default function TopicLink({ addPanel, topic }: Props): JSX.Element {
+export default function TopicLink({ addPanel, onShowTopicSettings, topic }: Props): JSX.Element {
   const openRawMessages = React.useCallback(() => {
     addPanel({
       position: "sibling",
@@ -36,11 +38,29 @@ export default function TopicLink({ addPanel, topic }: Props): JSX.Element {
   }, [addPanel, topic]);
 
   return (
-    <CardActionArea onClick={openRawMessages} title="Open in Raw Message panel">
-      <Stack direction="row" alignItems="center" justifyContent="space-between" padding={1}>
-        <Typography variant="body2">{topic}</Typography>
-        <OpenInNewIcon fontSize="small" color="primary" />
+    <Stack
+      direction="row"
+      alignItems="center"
+      justifyContent="space-between"
+      paddingInlineStart={1}
+      paddingBlock={0}
+    >
+      <Typography variant="body2">{topic}</Typography>
+      <Stack direction="row" padding={0}>
+        {onShowTopicSettings && (
+          <IconButton
+            onClick={() => {
+              onShowTopicSettings(topic);
+            }}
+            title="Show settings"
+          >
+            <SettingsIcon fontSize="small" color="primary" />
+          </IconButton>
+        )}
+        <IconButton onClick={openRawMessages} title="Open in Raw Message panel">
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
       </Stack>
-    </CardActionArea>
+    </Stack>
   );
 }

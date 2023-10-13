@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj } from "@storybook/react";
-import { screen, userEvent } from "@storybook/testing-library";
+import { screen, userEvent, waitFor } from "@storybook/testing-library";
 
 import { MessageEvent } from "@foxglove/studio";
 import { LayerSettingsOccupancyGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/OccupancyGrids";
@@ -119,37 +119,39 @@ function BaseStory({ includeSettings = false }: { includeSettings?: boolean }): 
   });
 
   return (
-    <PanelSetup fixture={fixture} includeSettings={includeSettings}>
-      <ThreeDeePanel
-        overrideConfig={{
-          followTf: "base_link",
-          topics: {
-            "/costmap": {
-              visible: true,
-              colorMode: "costmap",
-            } as LayerSettingsOccupancyGrid,
-            "/custom": {
-              visible: true,
-            } as LayerSettingsOccupancyGrid,
-          },
-          layers: {
-            grid: { layerId: "foxglove.Grid" },
-          },
-          cameraState: {
-            distance: 13.5,
-            perspective: true,
-            phi: 0.1,
-            targetOffset: [0.25, -0.5, 0],
-            thetaOffset: 0,
-            fovy: rad2deg(0.75),
-            near: 0.01,
-            far: 5000,
-            target: [0, 0, 0],
-            targetOrientation: [0, 0, 0, 1],
-          },
-        }}
-      />
-    </PanelSetup>
+    <div style={{ width: 1000, height: 800 }}>
+      <PanelSetup fixture={fixture} includeSettings={includeSettings}>
+        <ThreeDeePanel
+          overrideConfig={{
+            followTf: "base_link",
+            topics: {
+              "/costmap": {
+                visible: true,
+                colorMode: "costmap",
+              } as LayerSettingsOccupancyGrid,
+              "/custom": {
+                visible: true,
+              } as LayerSettingsOccupancyGrid,
+            },
+            layers: {
+              grid: { layerId: "foxglove.Grid" },
+            },
+            cameraState: {
+              distance: 13.5,
+              perspective: true,
+              phi: 0.1,
+              targetOffset: [0.25, -0.5, 0],
+              thetaOffset: 0,
+              fovy: rad2deg(0.75),
+              near: 0.01,
+              far: 5000,
+              target: [0, 0, 0],
+              targetOrientation: [0, 0, 0, 1],
+            },
+          }}
+        />
+      </PanelSetup>
+    </div>
   );
 }
 
@@ -159,22 +161,39 @@ export const Occupancy_Grid_Costmap: StoryObj = {
   },
 };
 
-export const Occupancy_Grid_Costmap_With_Settings: StoryObj = {
+export const Occupancy_Grid_Costmap_With_Pick_Settings: StoryObj = {
   render: function Story() {
     return <BaseStory includeSettings />;
   },
 
   play: async () => {
-    const label = await screen.findByText("/custom");
-    await userEvent.click(label);
+    const { click, hover, pointer } = userEvent.setup();
+    await hover(await screen.findByTestId(/panel-mouseenter-container/));
+    await click(screen.getByRole("button", { name: /inspect objects/i }));
+    const canvas = document.querySelector("canvas")!;
+
+    // only worked after two clicks, but I'm not sure why
+    await waitFor(
+      async () => {
+        await pointer({
+          target: canvas,
+          keys: "[MouseLeft]",
+          coords: { clientX: 800, clientY: 400 },
+        });
+        await screen.findByRole("button", { name: /show settings/i });
+      },
+      { timeout: 1000 },
+    );
+
+    await userEvent.click(await screen.findByRole("button", { name: /show settings/i }));
   },
 };
 
 export const OccupancyGridCostmapWithSettingsChinese: StoryObj = {
-  ...Occupancy_Grid_Costmap_With_Settings,
+  ...Occupancy_Grid_Costmap_With_Pick_Settings,
   parameters: { forceLanguage: "zh" },
 };
 export const OccupancyGridCostmapWithSettingsJapanese: StoryObj = {
-  ...Occupancy_Grid_Costmap_With_Settings,
+  ...Occupancy_Grid_Costmap_With_Pick_Settings,
   parameters: { forceLanguage: "ja" },
 };

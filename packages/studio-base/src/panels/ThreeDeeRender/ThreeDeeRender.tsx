@@ -318,14 +318,21 @@ export function ThreeDeeRender(props: {
   );
   useRendererEvent("selectedRenderable", updateSelectedRenderable, renderer);
 
+  const [focusedSettingsPath, setFocusedSettingsPath] = useState<undefined | readonly string[]>();
+
+  const onShowTopicSettings = useCallback((topic: string) => {
+    setFocusedSettingsPath(["topics", topic]);
+  }, []);
+
   // Rebuild the settings sidebar tree as needed
   useEffect(() => {
     context.updatePanelSettingsEditor({
       actionHandler,
       enableFilter: true,
+      focusedPath: focusedSettingsPath,
       nodes: settingsTree ?? {},
     });
-  }, [actionHandler, context, settingsTree]);
+  }, [actionHandler, context, focusedSettingsPath, settingsTree]);
 
   // Update the renderer's reference to `config` when it changes. Note that this does *not*
   // automatically update the settings tree.
@@ -811,6 +818,7 @@ export function ThreeDeeRender(props: {
             canPublish={canPublish}
             publishActive={publishActive}
             onClickPublish={onClickPublish}
+            onShowTopicSettings={onShowTopicSettings}
             publishClickType={renderer?.publishClickTool.publishClickType ?? "point"}
             onChangePublishClickType={(type) => {
               renderer?.publishClickTool.setPublishClickType(type);

@@ -37,10 +37,11 @@ export type SelectionObject = {
 };
 
 type Props = {
-  interactionsTabType?: TabType;
-  setInteractionsTabType: (arg0?: TabType) => void;
   addPanel: LayoutActions["addPanel"];
+  interactionsTabType?: TabType;
+  onShowTopicSettings?: (topic: string) => void;
   selectedObject?: SelectionObject;
+  setInteractionsTabType: (arg0?: TabType) => void;
   timezone: string | undefined;
 };
 
@@ -48,6 +49,7 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
   addPanel,
   selectedObject,
   interactionsTabType,
+  onShowTopicSettings,
   setInteractionsTabType,
   timezone,
 }: Props) {
@@ -69,7 +71,11 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
           {originalMessage ? (
             <>
               {selectedInteractionData.topic && (
-                <TopicLink addPanel={addPanel} topic={selectedInteractionData.topic} />
+                <TopicLink
+                  addPanel={addPanel}
+                  onShowTopicSettings={onShowTopicSettings}
+                  topic={selectedInteractionData.topic}
+                />
               )}
               {instanceDetails ? (
                 <ObjectDetails selectedObject={instanceDetails} timezone={timezone} />

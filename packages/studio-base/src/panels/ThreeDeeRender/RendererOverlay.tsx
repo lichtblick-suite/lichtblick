@@ -71,25 +71,28 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+type Props = {
+  addPanel: LayoutActions["addPanel"];
+  canPublish: boolean;
+  canvas: HTMLCanvasElement | ReactNull;
+  enableStats: boolean;
+  interfaceMode: InterfaceMode;
+  measureActive: boolean;
+  onChangePublishClickType: (_: PublishClickType) => void;
+  onClickMeasure: () => void;
+  onClickPublish: () => void;
+  onShowTopicSettings: (topic: string) => void;
+  onTogglePerspective: () => void;
+  perspective: boolean;
+  publishActive: boolean;
+  publishClickType: PublishClickType;
+  timezone: string | undefined;
+};
+
 /**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
  */
-export function RendererOverlay(props: {
-  interfaceMode: InterfaceMode;
-  canvas: HTMLCanvasElement | ReactNull;
-  addPanel: LayoutActions["addPanel"];
-  enableStats: boolean;
-  perspective: boolean;
-  onTogglePerspective: () => void;
-  measureActive: boolean;
-  onClickMeasure: () => void;
-  canPublish: boolean;
-  publishActive: boolean;
-  publishClickType: PublishClickType;
-  onChangePublishClickType: (_: PublishClickType) => void;
-  onClickPublish: () => void;
-  timezone: string | undefined;
-}): JSX.Element {
+export function RendererOverlay(props: Props): JSX.Element {
   const { t } = useTranslation("threeDee");
   const { classes } = useStyles();
   const [clickedPosition, setClickedPosition] = useState<{ clientX: number; clientY: number }>({
@@ -311,8 +314,9 @@ export function RendererOverlay(props: {
           (props.interfaceMode === "3d" || mousePresent) && (
             <Interactions
               addPanel={props.addPanel}
-              selectedObject={selectedObject}
               interactionsTabType={interactionsTabType}
+              onShowTopicSettings={props.onShowTopicSettings}
+              selectedObject={selectedObject}
               setInteractionsTabType={setInteractionsTabType}
               timezone={props.timezone}
             />
