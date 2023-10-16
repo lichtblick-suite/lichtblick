@@ -201,11 +201,11 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   React.useEffect(() => {
     setDatasetBounds((oldBounds) => {
-      if (provided != undefined && R.equals(oldBounds, provided.bounds)) {
+      if (provided != undefined && !R.equals(oldBounds, provided.bounds)) {
         return provided.bounds;
       }
 
-      if (typedProvided != undefined && R.equals(oldBounds, typedProvided.bounds)) {
+      if (typedProvided != undefined && !R.equals(oldBounds, typedProvided.bounds)) {
         return typedProvided.bounds;
       }
 
