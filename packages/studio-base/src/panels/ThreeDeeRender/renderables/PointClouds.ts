@@ -162,7 +162,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     );
     this.#pointsHistory = new RenderObjectHistory({
       initial: {
-        messageTime: userData.receiveTime,
+        messageTime: userData.messageTime,
         receiveTime: userData.receiveTime,
         renderable: points,
       },
@@ -191,7 +191,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     );
     this.#stixelsHistory = new RenderObjectHistory({
       initial: {
-        messageTime: userData.receiveTime,
+        messageTime: userData.messageTime,
         receiveTime: userData.receiveTime,
         renderable: stixels,
       },
