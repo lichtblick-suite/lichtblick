@@ -86,6 +86,16 @@ export function mergeSubscriptions(
   subscriptions: Immutable<SubscribePayload[]>,
 ): Immutable<SubscribePayload[]> {
   return R.pipe(
+    R.chain((v: Immutable<SubscribePayload>): Immutable<SubscribePayload>[] => {
+      const { preloadType } = v;
+      if (preloadType !== "full") {
+        return [v];
+      }
+
+      // a "full" subscription to all fields implies a "partial" subscription
+      // to those fields, too
+      return [v, { ...v, preloadType: "partial" }];
+    }),
     R.partition((v: Immutable<SubscribePayload>) => v.preloadType === "full"),
     ([full, partial]) => [...denormalizeSubscriptions(full), ...denormalizeSubscriptions(partial)],
   )(subscriptions);

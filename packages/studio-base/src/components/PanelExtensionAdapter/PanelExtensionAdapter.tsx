@@ -402,7 +402,6 @@ function PanelExtensionAdapter(
 
           return {
             topic: item.topic,
-            convertTo: item.convertTo,
             preloadType: item.preload === true ? "full" : "partial",
           };
         });
