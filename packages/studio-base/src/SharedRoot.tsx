@@ -15,19 +15,20 @@ import AppConfigurationContext from "./context/AppConfigurationContext";
 
 export function SharedRoot(props: ISharedRootContext & { children: JSX.Element }): JSX.Element {
   const {
-    appConfiguration,
-    dataSources,
-    extensionLoaders,
-    nativeAppMenu,
-    nativeWindow,
-    deepLinks,
-    enableLaunchPreferenceScreen,
-    enableGlobalCss = false,
     appBarLeftInset,
-    extraProviders,
-    onAppBarDoubleClick,
+    appConfiguration,
     AppMenuComponent,
     children,
+    customWindowControlProps,
+    dataSources,
+    deepLinks,
+    enableGlobalCss = false,
+    enableLaunchPreferenceScreen,
+    extensionLoaders,
+    extraProviders,
+    nativeAppMenu,
+    nativeWindow,
+    onAppBarDoubleClick,
   } = props;
 
   return (
@@ -38,17 +39,18 @@ export function SharedRoot(props: ISharedRootContext & { children: JSX.Element }
           <ErrorBoundary>
             <SharedRootContext.Provider
               value={{
+                appBarLeftInset,
                 appConfiguration,
-                deepLinks,
+                AppMenuComponent,
+                customWindowControlProps,
                 dataSources,
+                deepLinks,
+                enableLaunchPreferenceScreen,
                 extensionLoaders,
+                extraProviders,
                 nativeAppMenu,
                 nativeWindow,
-                enableLaunchPreferenceScreen,
-                appBarLeftInset,
-                extraProviders,
                 onAppBarDoubleClick,
-                AppMenuComponent,
               }}
             >
               {children}
