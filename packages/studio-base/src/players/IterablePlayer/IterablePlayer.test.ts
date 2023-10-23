@@ -805,4 +805,41 @@ describe("IterablePlayer", () => {
     player.close();
     await player.isClosed;
   });
+
+  it("should allow changing subscriptions when player in start-play state", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+
+    const store = new PlayerStateStore(3);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+    // Wait for player to be in start-play state
+    await store.done;
+    player.setSubscriptions([{ topic: "foo" }]);
+
+    // Wait for player's initial setup to complete (seek-backfill + idle)
+    store.reset(2);
+    await store.done;
+
+    expect(messageIteratorSpy.mock.calls).toEqual([
+      [
+        {
+          start: { sec: 0, nsec: 99000001 },
+          end: { sec: 1, nsec: 0 },
+          topics: mockTopicSelection("foo"),
+          consumptionType: "partial",
+        },
+      ],
+    ]);
+
+    player.close();
+    await player.isClosed;
+  });
 });

@@ -322,9 +322,14 @@ export class IterablePlayer implements Player {
     this.#blockLoader?.setTopics(this.#preloadTopics);
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
-    // iterators accordignly. However if we are idle or already seeking then we need to manually
+    // iterators accordingly. However if we are idle or already seeking then we need to manually
     // trigger the backfill.
-    if (this.#state === "idle" || this.#state === "seek-backfill" || this.#state === "play") {
+    if (
+      this.#state === "idle" ||
+      this.#state === "seek-backfill" ||
+      this.#state === "play" ||
+      this.#state === "start-play"
+    ) {
       if (!this.#isPlaying && this.#currentTime) {
         this.#seekTarget ??= this.#currentTime;
         this.#untilTime = undefined;
