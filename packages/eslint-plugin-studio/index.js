@@ -7,6 +7,7 @@ module.exports = {
     "link-target": require("./link-target"),
     "lodash-ramda-imports": require("./lodash-ramda-imports"),
     "ramda-usage": require("./ramda-usage"),
+    "no-map-type-argument": require("./no-map-type-argument"),
   },
 
   configs: {
@@ -16,6 +17,7 @@ module.exports = {
         "@foxglove/studio/link-target": "error",
         "@foxglove/studio/lodash-ramda-imports": "error",
         "@foxglove/studio/ramda-usage": "error",
+        "@foxglove/studio/no-map-type-argument": "error",
       },
     },
   },

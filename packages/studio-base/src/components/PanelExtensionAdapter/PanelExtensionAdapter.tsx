@@ -393,7 +393,7 @@ function PanelExtensionAdapter(
         if (!isMounted()) {
           return;
         }
-        const subscribePayloads = topics.map<SubscribePayload>((item) => {
+        const subscribePayloads = topics.map((item): SubscribePayload => {
           if (typeof item === "string") {
             // For backwards compatability with the topic-string-array api `subscribe(["/topic"])`
             // results in a topic subscription with full preloading
@@ -407,7 +407,7 @@ function PanelExtensionAdapter(
         });
 
         // ExtensionPanel-Facing subscription type
-        const localSubs = topics.map<Subscription>((item) => {
+        const localSubs = topics.map((item): Subscription => {
           if (typeof item === "string") {
             return { topic: item, preload: true };
           }
