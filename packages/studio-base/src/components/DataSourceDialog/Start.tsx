@@ -13,10 +13,7 @@ import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText"
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import {
-  useCurrentUser,
-  useCurrentUserType,
-} from "@foxglove/studio-base/context/CurrentUserContext";
+import { useCurrentUser } from "@foxglove/studio-base/context/BaseUserContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
@@ -170,8 +167,7 @@ function SidebarItems(props: {
   onSelectView: (newValue: DataSourceDialogItem) => void;
 }): JSX.Element {
   const { onSelectView } = props;
-  const { signIn } = useCurrentUser();
-  const currentUserType = useCurrentUserType();
+  const { currentUserType, signIn } = useCurrentUser();
   const analytics = useAnalytics();
   const { classes } = useStyles();
   const { t } = useTranslation("openDialog");
