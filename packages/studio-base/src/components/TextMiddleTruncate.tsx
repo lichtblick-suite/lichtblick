@@ -21,6 +21,7 @@ const useStyles = makeStyles()(() => ({
     display: "flex",
     justifyContent: "flex-start",
     overflow: "hidden",
+    userSelect: "all",
   },
   start: {
     overflow: "hidden",
