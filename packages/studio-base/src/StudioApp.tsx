@@ -49,7 +49,7 @@ export function StudioApp(): JSX.Element {
     appBarLeftInset,
     customWindowControlProps,
     onAppBarDoubleClick,
-    AppMenuComponent,
+    AppBarComponent,
   } = useSharedRootContext();
 
   const providers = [
@@ -110,7 +110,7 @@ export function StudioApp(): JSX.Element {
                 onMaximizeWindow={customWindowControlProps?.onMaximizeWindow}
                 onUnmaximizeWindow={customWindowControlProps?.onUnmaximizeWindow}
                 onCloseWindow={customWindowControlProps?.onCloseWindow}
-                AppMenuComponent={AppMenuComponent}
+                AppBarComponent={AppBarComponent}
               />
             </PanelCatalogProvider>
           </Suspense>

@@ -17,7 +17,8 @@ export function SharedRoot(props: ISharedRootContext & { children: JSX.Element }
   const {
     appBarLeftInset,
     appConfiguration,
-    AppMenuComponent,
+    onAppBarDoubleClick,
+    AppBarComponent,
     children,
     customWindowControlProps,
     dataSources,
@@ -28,7 +29,6 @@ export function SharedRoot(props: ISharedRootContext & { children: JSX.Element }
     extraProviders,
     nativeAppMenu,
     nativeWindow,
-    onAppBarDoubleClick,
   } = props;
 
   return (
@@ -40,8 +40,8 @@ export function SharedRoot(props: ISharedRootContext & { children: JSX.Element }
             <SharedRootContext.Provider
               value={{
                 appBarLeftInset,
+                AppBarComponent,
                 appConfiguration,
-                AppMenuComponent,
                 customWindowControlProps,
                 dataSources,
                 deepLinks,

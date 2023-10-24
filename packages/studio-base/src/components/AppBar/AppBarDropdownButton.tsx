@@ -8,9 +8,10 @@ import { forwardRef } from "react";
 import tinycolor2 from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-import { APP_BAR_HEIGHT } from "@foxglove/studio-base/components/AppBar/constants";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
+
+import { APP_BAR_HEIGHT } from "./constants";
 
 const useStyles = makeStyles()((theme) => ({
   textTruncate: {

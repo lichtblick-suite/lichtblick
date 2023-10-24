@@ -7,11 +7,12 @@ import { useState } from "react";
 
 import { Time } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { EndTimestamp } from "@foxglove/studio-base/components/AppBar/EndTimestamp";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
+
+import { EndTimestamp } from "./EndTimestamp";
 
 type StoryArgs = {
   time?: Time;

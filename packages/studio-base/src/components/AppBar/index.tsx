@@ -10,41 +10,35 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
-import { Avatar, Button, IconButton, Tooltip } from "@mui/material";
+import { Avatar, IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { AppBarIconButton } from "@foxglove/studio-base/components/AppBar/AppBarIconButton";
-import { AppMenu, AppMenuProps } from "@foxglove/studio-base/components/AppBar/AppMenu";
-import {
-  CustomWindowControls,
-  CustomWindowControlsProps,
-} from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
 import { FoxgloveLogo } from "@foxglove/studio-base/components/FoxgloveLogo";
 import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
   LayoutState,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import {
   WorkspaceContextStore,
   useWorkspaceStoreWithShallowSelector,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";
+import { AppBarIconButton } from "./AppBarIconButton";
+import { AppMenu } from "./AppMenu";
+import { CustomWindowControls, CustomWindowControlsProps } from "./CustomWindowControls";
 import { DataSource } from "./DataSource";
-import { UserMenu } from "./UserMenu";
+import { SettingsMenu } from "./SettingsMenu";
 
 const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
   theme,
@@ -152,25 +146,13 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
         },
       },
     },
-    button: {
-      marginInline: theme.spacing(1),
-      backgroundColor: theme.palette.appBar.primary,
-
-      "&:hover": {
-        backgroundColor: theme.palette.augmentColor({
-          color: { main: theme.palette.appBar.primary as string },
-        }).dark,
-      },
-    },
   };
 });
 
-type AppBarProps = CustomWindowControlsProps & {
+export type AppBarProps = CustomWindowControlsProps & {
   leftInset?: number;
   onDoubleClick?: () => void;
   debugDragRegion?: boolean;
-  disableSignIn?: boolean;
-  AppMenuComponent?: (props: AppMenuProps) => JSX.Element;
 };
 
 const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
@@ -179,7 +161,6 @@ const selectWorkspace = (store: WorkspaceContextStore) => store;
 export function AppBar(props: AppBarProps): JSX.Element {
   const {
     debugDragRegion,
-    disableSignIn = false,
     isMaximized,
     leftInset,
     onCloseWindow,
@@ -188,20 +169,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
     onMinimizeWindow,
     onUnmaximizeWindow,
     showCustomWindowControls = false,
-    AppMenuComponent,
   } = props;
   const { classes, cx, theme } = useStyles({ debugDragRegion });
-  const { currentUser, signIn } = useCurrentUser();
   const { t } = useTranslation("appBar");
 
   const { appBarLayoutButton } = useAppContext();
 
-  const analytics = useAnalytics();
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
-  );
-  const [enableUnifiedNavigation = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_UNIFIED_NAVIGATION,
   );
 
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
@@ -247,23 +222,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   primaryFill={theme.palette.common.white}
                 />
               </IconButton>
-              {enableUnifiedNavigation && AppMenuComponent ? (
-                <AppMenuComponent
-                  open={appMenuOpen}
-                  anchorEl={appMenuEl}
-                  handleClose={() => {
-                    setAppMenuEl(undefined);
-                  }}
-                />
-              ) : (
-                <AppMenu
-                  open={appMenuOpen}
-                  anchorEl={appMenuEl}
-                  handleClose={() => {
-                    setAppMenuEl(undefined);
-                  }}
-                />
-              )}
+              <AppMenu
+                open={appMenuOpen}
+                anchorEl={appMenuEl}
+                handleClose={() => {
+                  setAppMenuEl(undefined);
+                }}
+              />
               <AppBarIconButton
                 className={cx({ "Mui-selected": panelMenuOpen })}
                 color="inherit"
@@ -324,28 +289,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
                 </AppBarIconButton>
               </Stack>
-              {!disableSignIn && !currentUser && signIn != undefined && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className={classes.button}
-                  size="small"
-                  onClick={() => {
-                    signIn();
-                    void analytics.logEvent(AppEvent.APP_BAR_CLICK_CTA, {
-                      user: "unauthenticated",
-                      cta: "sign-in",
-                    });
-                  }}
-                >
-                  {t("signIn")}
-                </Button>
-              )}
-              <Tooltip
-                classes={{ tooltip: classes.tooltip }}
-                title={currentUser?.email ?? "Profile"}
-                arrow={false}
-              >
+              <Tooltip classes={{ tooltip: classes.tooltip }} title="Profile" arrow={false}>
                 <IconButton
                   className={cx(classes.iconButton, { "Mui-selected": userMenuOpen })}
                   aria-label="User profile menu button"
@@ -360,11 +304,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   }}
                   data-testid="user-button"
                 >
-                  <Avatar
-                    src={currentUser?.avatarImageUrl ?? undefined}
-                    className={classes.avatar}
-                    variant="rounded"
-                  />
+                  <Avatar className={classes.avatar} variant="rounded" />
                 </IconButton>
               </Tooltip>
               {showCustomWindowControls && (
@@ -387,7 +327,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           setPanelAnchorEl(undefined);
         }}
       />
-      <UserMenu
+      <SettingsMenu
         anchorEl={userAnchorEl}
         open={userMenuOpen}
         handleClose={() => {

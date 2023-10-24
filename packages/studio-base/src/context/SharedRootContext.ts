@@ -4,7 +4,7 @@
 
 import { createContext, useContext } from "react";
 
-import { AppMenuProps } from "@foxglove/studio-base/components/AppBar/AppMenu";
+import { AppBarProps } from "@foxglove/studio-base/components/AppBar";
 import { CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
 import { IAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { INativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
@@ -25,7 +25,7 @@ interface ISharedRootContext {
   extraProviders?: JSX.Element[];
   customWindowControlProps?: CustomWindowControlsProps;
   onAppBarDoubleClick?: () => void;
-  AppMenuComponent?: (props: AppMenuProps) => JSX.Element;
+  AppBarComponent?: (props: AppBarProps) => JSX.Element;
 }
 
 const SharedRootContext = createContext<ISharedRootContext>({

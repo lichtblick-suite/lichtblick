@@ -16,19 +16,17 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
-import { NestedMenuItem } from "@foxglove/studio-base/components/AppBar/NestedMenuItem";
-import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
-import { useCurrentUserType } from "@foxglove/studio-base/context/CurrentUserContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
   useWorkspaceStoreWithShallowSelector,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+
+import { NestedMenuItem } from "./NestedMenuItem";
+import { AppBarMenuItem } from "./types";
 
 export type AppMenuProps = {
   handleClose: () => void;
@@ -60,9 +58,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
 
   const [nestedMenu, setNestedMenu] = useState<string | undefined>();
 
-  const currentUserType = useCurrentUserType();
-  const analytics = useAnalytics();
-
   const { recentSources, selectRecent } = usePlayerSelection();
   const {
     sidebars: {
@@ -81,16 +76,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     setNestedMenu(id);
   }, []);
 
-  const handleAnalytics = useCallback(
-    (cta: string) => {
-      void analytics.logEvent(AppEvent.APP_MENU_CLICK, {
-        user: currentUserType,
-        cta,
-      });
-    },
-    [analytics, currentUserType],
-  );
-
   // FILE
 
   const fileItems = useMemo(() => {
@@ -101,7 +86,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         key: "open",
         onClick: () => {
           dialogActions.dataSource.open("start");
-          handleAnalytics("open-data-source-dialog");
           handleNestedMenuClose();
         },
       },
@@ -110,7 +94,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         label: t("openLocalFile"),
         key: "open-file",
         onClick: () => {
-          handleAnalytics("open-file");
           handleNestedMenuClose();
           dialogActions.openFile.open().catch(console.error);
         },
@@ -121,7 +104,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         key: "open-connection",
         onClick: () => {
           dialogActions.dataSource.open("connection");
-          handleAnalytics("open-connection");
           handleNestedMenuClose();
         },
       },
@@ -134,7 +116,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         type: "item",
         key: recent.id,
         onClick: () => {
-          handleAnalytics("open-recent");
           selectRecent(recent.id);
           handleNestedMenuClose();
         },
@@ -147,7 +128,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     classes.truncate,
     dialogActions.dataSource,
     dialogActions.openFile,
-    handleAnalytics,
     handleNestedMenuClose,
     recentSources,
     selectRecent,
@@ -215,27 +195,23 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
 
   const onAboutClick = useCallback(() => {
     dialogActions.preferences.open("about");
-    handleAnalytics("about");
     handleNestedMenuClose();
-  }, [dialogActions.preferences, handleAnalytics, handleNestedMenuClose]);
+  }, [dialogActions.preferences, handleNestedMenuClose]);
 
   const onDocsClick = useCallback(() => {
-    handleAnalytics("docs");
     window.open("https://foxglove.dev/docs", "_blank");
     handleNestedMenuClose();
-  }, [handleAnalytics, handleNestedMenuClose]);
+  }, [handleNestedMenuClose]);
 
   const onSlackClick = useCallback(() => {
-    handleAnalytics("join-slack");
     window.open("https://foxglove.dev/slack", "_blank");
     handleNestedMenuClose();
-  }, [handleAnalytics, handleNestedMenuClose]);
+  }, [handleNestedMenuClose]);
 
   const onDemoClick = useCallback(() => {
     dialogActions.dataSource.open("demo");
-    handleAnalytics("demo");
     handleNestedMenuClose();
-  }, [dialogActions.dataSource, handleAnalytics, handleNestedMenuClose]);
+  }, [dialogActions.dataSource, handleNestedMenuClose]);
 
   const helpItems = useMemo<AppBarMenuItem[]>(
     () => [

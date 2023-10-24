@@ -7,7 +7,6 @@ import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
-import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import { AppContext } from "@foxglove/studio-base/context/AppContext";
 import PlayerSelectionContext, {
   PlayerSelection,
@@ -16,6 +15,7 @@ import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLa
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { AppMenu } from "./AppMenu";
+import { AppBarMenuItem } from "./types";
 
 type StoryArgs = {
   handleClose: () => void;

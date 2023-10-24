@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 
 import {
-  AppMenuProps,
+  AppBarProps,
   AppSetting,
   IDataSourceFactory,
   Ros1LocalBagDataSourceFactory,
@@ -27,7 +27,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 export function WebRoot(props: {
   extraProviders: JSX.Element[] | undefined;
   dataSources: IDataSourceFactory[] | undefined;
-  AppMenuComponent?: (props: AppMenuProps) => JSX.Element;
+  AppBarComponent?: (props: AppBarProps) => JSX.Element;
   children: JSX.Element;
 }): JSX.Element {
   const appConfiguration = useMemo(
@@ -68,7 +68,7 @@ export function WebRoot(props: {
       extensionLoaders={extensionLoaders}
       enableGlobalCss
       extraProviders={props.extraProviders}
-      AppMenuComponent={props.AppMenuComponent}
+      AppBarComponent={props.AppBarComponent}
     >
       {props.children}
     </SharedRoot>
