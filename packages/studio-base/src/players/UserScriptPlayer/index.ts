@@ -529,7 +529,7 @@ export default class UserScriptPlayer implements Player {
         if (allDiagnostics.length > 0) {
           this.#problemStore.set(problemKey, {
             severity: "error",
-            message: `User Script ${scriptId} encountered an error.`,
+            message: `User Script ${scriptData.name} encountered an error.`,
             tip: "Open the User Scripts panel and check the Problems tab for errors.",
           });
 
@@ -540,7 +540,7 @@ export default class UserScriptPlayer implements Player {
         if (!result.message) {
           this.#problemStore.set(problemKey, {
             severity: "warn",
-            message: `User Script ${scriptId} did not produce a message.`,
+            message: `User Script ${scriptData.name} did not produce a message.`,
             tip: "Check that all code paths in the user script return a message.",
           });
           return;
