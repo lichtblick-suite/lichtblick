@@ -615,46 +615,60 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       for (const service of services) {
-        const requestType = `${service.type}_Request`;
-        const responseType = `${service.type}_Response`;
-        const parsedRequest = parseChannel({
-          messageEncoding: this.#serviceCallEncoding,
-          schema: {
-            name: requestType,
-            encoding: schemaEncoding,
-            data: textEncoder.encode(service.requestSchema),
-          },
-        });
-        const parsedResponse = parseChannel({
-          messageEncoding: this.#serviceCallEncoding,
-          schema: {
-            name: responseType,
-            encoding: schemaEncoding,
-            data: textEncoder.encode(service.responseSchema),
-          },
-        });
-        const requestMsgDef = rosDatatypesToMessageDefinition(parsedRequest.datatypes, requestType);
-        const requestMessageWriter = ROS_ENCODINGS.includes(this.#serviceCallEncoding)
-          ? this.#serviceCallEncoding === "ros1"
-            ? new Ros1MessageWriter(requestMsgDef)
-            : new Ros2MessageWriter(requestMsgDef)
-          : new JsonMessageWriter();
+        const serviceProblemId = `service:${service.id}`;
+        try {
+          const requestType = `${service.type}_Request`;
+          const responseType = `${service.type}_Response`;
+          const parsedRequest = parseChannel({
+            messageEncoding: this.#serviceCallEncoding,
+            schema: {
+              name: requestType,
+              encoding: schemaEncoding,
+              data: textEncoder.encode(service.requestSchema),
+            },
+          });
+          const parsedResponse = parseChannel({
+            messageEncoding: this.#serviceCallEncoding,
+            schema: {
+              name: responseType,
+              encoding: schemaEncoding,
+              data: textEncoder.encode(service.responseSchema),
+            },
+          });
+          const requestMsgDef = rosDatatypesToMessageDefinition(
+            parsedRequest.datatypes,
+            requestType,
+          );
+          const requestMessageWriter = ROS_ENCODINGS.includes(this.#serviceCallEncoding)
+            ? this.#serviceCallEncoding === "ros1"
+              ? new Ros1MessageWriter(requestMsgDef)
+              : new Ros2MessageWriter(requestMsgDef)
+            : new JsonMessageWriter();
 
-        // Add type definitions for service response and request
-        this.#updateDataTypes(parsedRequest.datatypes);
-        this.#updateDataTypes(parsedResponse.datatypes);
+          // Add type definitions for service response and request
+          this.#updateDataTypes(parsedRequest.datatypes);
+          this.#updateDataTypes(parsedResponse.datatypes);
 
-        const resolvedService: ResolvedService = {
-          service,
-          parsedResponse,
-          requestMessageWriter,
-        };
-        this.#servicesByName.set(service.name, resolvedService);
+          const resolvedService: ResolvedService = {
+            service,
+            parsedResponse,
+            requestMessageWriter,
+          };
+          this.#servicesByName.set(service.name, resolvedService);
+          this.#problems.removeProblem(serviceProblemId);
+        } catch (error) {
+          this.#problems.addProblem(serviceProblemId, {
+            severity: "error",
+            message: `Failed to parse service ${service.name}`,
+            error,
+          });
+        }
       }
       this.#emitState();
     });
 
     this.#client.on("unadvertiseServices", (serviceIds) => {
+      let needsStateUpdate = false;
       for (const serviceId of serviceIds) {
         const service: ResolvedService | undefined = Object.values(this.#servicesByName).find(
           (srv) => srv.service.id === serviceId,
@@ -662,6 +676,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
         if (service) {
           this.#servicesByName.delete(service.service.name);
         }
+        const serviceProblemId = `service:${serviceId}`;
+        needsStateUpdate = this.#problems.removeProblem(serviceProblemId) || needsStateUpdate;
+      }
+      if (needsStateUpdate) {
+        this.#emitState();
       }
     });
 
