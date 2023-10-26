@@ -152,7 +152,12 @@ export const PanelOverlay = forwardRef<HTMLDivElement, PanelOverlayProps>(
             actions && (
               <div className={classes.buttonGroup}>
                 {actions.map((action) => (
-                  <Paper key={action.key} elevation={0} className={classes.buttonPaper}>
+                  <Paper
+                    square={false}
+                    key={action.key}
+                    elevation={0}
+                    className={classes.buttonPaper}
+                  >
                     <Button
                       fullWidth
                       variant="outlined"
