@@ -78,7 +78,7 @@
     "@types/react-virtualized": "9.21.22",
     "@types/react-window": "^1.8.5",
     "@types/sanitize-html": "2.9.0",
-    "@types/seedrandom": "3.0.5",
+    "@types/seedrandom": "3.0.7",
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
     "@types/text-metrics": "workspace:*",
