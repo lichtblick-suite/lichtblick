@@ -38,7 +38,7 @@ type PlotLegendRowProps = Immutable<{
   showPlotValuesInLegend: boolean;
 }>;
 
-const ROW_HEIGHT = 28;
+const ROW_HEIGHT = 30;
 
 const useStyles = makeStyles<void, "plotName" | "removeButton">()((theme, _params, classes) => ({
   root: {
@@ -75,13 +75,10 @@ const useStyles = makeStyles<void, "plotName" | "removeButton">()((theme, _param
     left: 0,
   },
   checkbox: {
-    fontSize: "1em",
-    padding: theme.spacing(0.975),
+    height: ROW_HEIGHT,
+    width: ROW_HEIGHT,
     borderRadius: 0,
 
-    "svg:not(.MuiSvgIcon-root)": {
-      fontSize: "1em",
-    },
     ":hover": {
       backgroundColor: theme.palette.action.hover,
     },
