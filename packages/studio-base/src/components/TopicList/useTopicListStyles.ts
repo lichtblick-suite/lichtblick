@@ -12,7 +12,6 @@ import { makeStyles } from "tss-react/mui";
 
 type TreeClasses = "dragHandle" | "row" | "isDragging" | "selected";
 
-/* eslint-disable tss-unused-classes/unused-classes */
 export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, classes) => ({
   isDragging: {},
   selected: {},
@@ -28,6 +27,7 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
     paddingRight: theme.spacing(0.75),
     backgroundColor: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.action.selected}`,
+    boxShadow: `0 1px 0 0 ${theme.palette.action.selected}`,
     userSelect: "none",
 
     [`:not(:hover) .${classes.dragHandle}`]: {
@@ -56,10 +56,6 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
       }),
     },
   },
-  fieldRow: {
-    borderTop: `1px solid ${theme.palette.background.paper}`,
-    backgroundColor: theme.palette.action.hover,
-  },
   dragHandle: {
     opacity: 0.6,
     cursor: "grab",
@@ -68,6 +64,11 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
       color: theme.palette.primary.main,
       opacity: 1,
     },
+  },
+  /* eslint-disable tss-unused-classes/unused-classes */
+  fieldRow: {
+    borderTop: `1px solid ${theme.palette.background.paper}`,
+    backgroundColor: theme.palette.action.hover,
   },
   countBadge: {
     marginLeft: theme.spacing(-0.5),
