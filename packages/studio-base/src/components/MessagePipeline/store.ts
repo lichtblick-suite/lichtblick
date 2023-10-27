@@ -48,11 +48,19 @@ export type MessagePipelineInternalState = {
 
   /** used to keep track of whether we need to update public.startPlayback/playUntil/etc. */
   lastCapabilities: string[];
-  // Preserves reference equality of subscriptions to minimize player subscription churn.
+  /** Preserves reference equality of subscriptions to minimize player subscription churn. */
   subscriptionMemoizer: (sub: SubscribePayload) => SubscribePayload;
   subscriptionsById: Map<string, Immutable<SubscribePayload[]>>;
   publishersById: { [key: string]: AdvertiseOptions[] };
   allPublishers: AdvertiseOptions[];
+  /**
+   * A map of topic name to the IDs that are subscribed to that topic. Incoming messages
+   * are bucketed by ID so only the messages a panel subscribed to are sent to it.
+   *
+   * Note: Even though we avoid storing the same ID twice in the array, we use an array rather than
+   * a Set because iterating over array elements is faster than iterating a Set and the "hot" path
+   * for dispatching messages needs to iterate over the array of IDs.
+   */
   subscriberIdsByTopic: Map<string, string[]>;
   newTopicsBySubscriberId: Map<string, Set<string>>;
   lastMessageEventByTopic: Map<string, MessageEvent>;
@@ -239,7 +247,12 @@ function updateSubscriberAction(
       const topic = subscription.topic;
 
       const ids = subscriberIdsByTopic.get(topic) ?? [];
-      ids.push(id);
+      // If the id is already present in the array for the topic then we should not add it again.
+      // If we add it again it will be given frame messages again when bucketing incoming messages
+      // by subscriber id.
+      if (!ids.includes(id)) {
+        ids.push(id);
+      }
       subscriberIdsByTopic.set(topic, ids);
     }
   }
@@ -292,12 +305,12 @@ function updatePlayerStateAction(
       }
 
       for (const id of ids) {
-        let subscriberMessageEvents = messagesBySubscriberId.get(id);
+        const subscriberMessageEvents = messagesBySubscriberId.get(id);
         if (!subscriberMessageEvents) {
-          subscriberMessageEvents = [];
-          messagesBySubscriberId.set(id, subscriberMessageEvents);
+          messagesBySubscriberId.set(id, [messageEvent]);
+        } else {
+          subscriberMessageEvents.push(messageEvent);
         }
-        subscriberMessageEvents.push(messageEvent);
       }
     }
   }
