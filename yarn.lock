@@ -2740,7 +2740,7 @@ __metadata:
     "@types/react": 18.2.23
     "@types/react-dom": 18.2.7
     "@types/react-hover-observer": "workspace:*"
-    "@types/react-transition-group": ^4.4.6
+    "@types/react-transition-group": ^4.4.8
     "@types/react-virtualized": 9.21.22
     "@types/react-window": ^1.8.5
     "@types/sanitize-html": 2.9.3
@@ -6697,12 +6697,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/react-transition-group@npm:^4.4.6":
-  version: 4.4.6
-  resolution: "@types/react-transition-group@npm:4.4.6"
+"@types/react-transition-group@npm:^4.4.6, @types/react-transition-group@npm:^4.4.8":
+  version: 4.4.8
+  resolution: "@types/react-transition-group@npm:4.4.8"
   dependencies:
     "@types/react": "*"
-  checksum: 0872143821d7ee20a1d81e965f8b1e837837f11cd2206973f1f98655751992d9390304d58bac192c9cd923eca95bff107d8c9e3364a180240d5c2a6fd70fd7c3
+  checksum: ad7ba2bce97631fda9d89b4ed9772489bd050fec3ccd7563041b206dbe219d37d22e0d7731b1f90f56e89daf40e69ba16beba8066c42165bf8a584533feb6a2c
   languageName: node
   linkType: hard
 
