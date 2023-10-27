@@ -2730,7 +2730,7 @@ __metadata:
     "@types/foxglove__web": "workspace:*"
     "@types/geojson": 7946.0.11
     "@types/gl-matrix": 3.2.0
-    "@types/hammerjs": 2.0.42
+    "@types/hammerjs": 2.0.43
     "@types/leaflet": 1.9.6
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.3
@@ -6338,10 +6338,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/hammerjs@npm:2.0.42":
-  version: 2.0.42
-  resolution: "@types/hammerjs@npm:2.0.42"
-  checksum: 25dbaafbfb39e20dece86e60a1319697d518bd3b780b3ad5154766cc1dce39a33b95d338bff9dda631bbc43c8692967be91fad8f19e178e4095eb558b2a7ffa3
+"@types/hammerjs@npm:2.0.43":
+  version: 2.0.43
+  resolution: "@types/hammerjs@npm:2.0.43"
+  checksum: 615cec30b780044d3f171bf981e7f747bba5a218d3b56d15e92f3733375597d1993233c4496a3603c8b4d838f3f435ecc3de75f09f6fd498fd144cc3f01c3a11
   languageName: node
   linkType: hard
 
