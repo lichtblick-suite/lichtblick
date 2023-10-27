@@ -203,13 +203,39 @@ export class ModelCache {
     });
     const xmlText = xml.documentElement.outerHTML;
 
+    // Preload textures. We do this here since we can't pass in an async function in LoadingManager.setURLModifier
+    // which is supposed to be used for overriding loading behavior. See also
+    // https://threejs.org/docs/index.html#api/en/loaders/managers/LoadingManager.setURLModifier
+    const textureUrls = new Map<string, string>();
+    for await (const node of xml.querySelectorAll("init_from")) {
+      if (!node.textContent) {
+        continue;
+      }
+
+      try {
+        const textureUrl = new URL(node.textContent, baseUrl(url)).toString();
+        const textureAsset = await this.#fetchAsset(textureUrl);
+        const objectUrl = URL.createObjectURL(
+          new Blob([textureAsset.data], { type: textureAsset.mediaType }),
+        );
+        textureUrls.set(textureUrl, objectUrl);
+      } catch (e) {
+        log.error(e);
+        onError(node.textContent);
+      }
+    }
+
     const manager = new THREE.LoadingManager(undefined, undefined, onError);
-    manager.setURLModifier(rewriteUrl);
+    manager.setURLModifier((u) => textureUrls.get(u) ?? rewriteUrl(u));
     const daeLoader = new ColladaLoader(manager);
 
     manager.itemStart(url);
     const dae = daeLoader.parse(xmlText, baseUrl(url));
     manager.itemEnd(url);
+
+    for (const objectUrl of textureUrls.values()) {
+      URL.revokeObjectURL(objectUrl);
+    }
 
     // If the <up_axis> is Y_UP, rotate to the Studio convention of Z-up following
     // ROS [REP-0103](https://www.ros.org/reps/rep-0103.html)
