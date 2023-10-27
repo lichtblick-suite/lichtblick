@@ -2743,7 +2743,7 @@ __metadata:
     "@types/react-transition-group": ^4.4.6
     "@types/react-virtualized": 9.21.22
     "@types/react-window": ^1.8.5
-    "@types/sanitize-html": 2.9.0
+    "@types/sanitize-html": 2.9.3
     "@types/seedrandom": 3.0.7
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
@@ -6752,12 +6752,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sanitize-html@npm:2.9.0":
-  version: 2.9.0
-  resolution: "@types/sanitize-html@npm:2.9.0"
+"@types/sanitize-html@npm:2.9.3":
+  version: 2.9.3
+  resolution: "@types/sanitize-html@npm:2.9.3"
   dependencies:
     htmlparser2: ^8.0.0
-  checksum: b60f42b740bbfb1b1434ce8b43925a38ecc608b60aa654fd009d2e22e33f324b61d370768c55bd2fd98e03de08518ffa8911d61606c483526fb931bb8b59d1b0
+  checksum: 882a39ec767e0c5fd4402108db4b8e4f85ff555cf490ad8c7340d9c58c57c3ffefa33c0d248d5e67047df6f744ca60e125da5485efc18ac450783f3900178373
   languageName: node
   linkType: hard
 
