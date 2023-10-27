@@ -298,7 +298,6 @@ export class Images extends SceneExtension<ImageRenderable> {
 
     const renderable = this.#getImageRenderable(imageTopic, receiveTime, image, frameId);
 
-    renderable.setTopic(imageTopic);
     renderable.userData.receiveTime = receiveTime;
     renderable.setImage(image, DEFAULT_BITMAP_WIDTH);
     // Auto-select settings.cameraInfoTopic if it's not already set

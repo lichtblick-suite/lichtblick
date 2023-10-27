@@ -696,8 +696,8 @@ export const UnsupportedEncodingError: StoryObj = {
   play: async () => {
     const errorIcon = await waitFor(async () => {
       const icons = await screen.findAllByTestId("ErrorIcon");
-      if (icons.length !== 2) {
-        throw new Error("Expected 2 error icons");
+      if (icons.length !== 1) {
+        throw new Error("Expected 1 error icon. (unsupported encoding)");
       }
       return icons[0];
     });
@@ -739,8 +739,8 @@ export const DecompressionError: StoryObj = {
   play: async () => {
     const errorIcon = await waitFor(async () => {
       const icons = await screen.findAllByTestId("ErrorIcon");
-      if (icons.length !== 2) {
-        throw new Error("Expected 2 error icons");
+      if (icons.length !== 1) {
+        throw new Error("Expected 1 error icon (decompression error)");
       }
       return icons[0];
     });

@@ -320,7 +320,16 @@ export class ImageMode
       return;
     }
 
+    this.setImageTopic(imageTopic);
+  };
+
+  /** Sets specified image topic on the config and updates calibration topic if a match is found.
+   *  Does not check that image topic is different
+   **/
+  protected setImageTopic(imageTopic: Topic): void {
     const matchingCalibrationTopic = this.#getMatchingCalibrationTopic(imageTopic.name);
+    // clear renderables so that they can be reinstantiated
+    this.removeAllRenderables();
 
     this.renderer.updateConfig((draft) => {
       draft.imageMode.imageTopic = imageTopic.name;
@@ -331,7 +340,7 @@ export class ImageMode
     if (matchingCalibrationTopic) {
       this.renderer.disableImageOnlySubscriptionMode();
     }
-  };
+  }
 
   /** Choose a calibration topic that best matches the given `imageTopic`. */
   #getMatchingCalibrationTopic(imageTopic: string): Topic | undefined {
@@ -502,12 +511,9 @@ export class ImageMode
       }
       const imageTopicChanged = config.imageTopic !== prevImageModeConfig.imageTopic;
       if (imageTopicChanged && config.imageTopic != undefined) {
-        const calibrationTopic = this.#getMatchingCalibrationTopic(config.imageTopic);
-        if (calibrationTopic) {
-          this.renderer.updateConfig((draft) => {
-            draft.imageMode.calibrationTopic = calibrationTopic.name;
-          });
-          this.renderer.disableImageOnlySubscriptionMode();
+        const imageTopic = this.renderer.topics?.find((topic) => topic.name === config.imageTopic);
+        if (imageTopic) {
+          this.setImageTopic(imageTopic);
         }
       }
 
@@ -620,7 +626,6 @@ export class ImageMode
       renderable.setCameraModel(this.#cameraModel.model);
     }
 
-    renderable.setTopic(topic);
     renderable.userData.receiveTime = receiveTime;
     renderable.setImage(image, /*resizeWidth=*/ undefined, (size) => {
       if (this.#fallbackCameraModelActive()) {
@@ -750,7 +755,7 @@ export class ImageMode
    */
   #updateViewAndRenderables(): void {
     const cameraInfo = this.#cameraModel?.info;
-    if (!cameraInfo) {
+    if (!this.#fallbackCameraModelActive() && !cameraInfo) {
       this.renderer.settings.errors.add(
         CALIBRATION_TOPIC_PATH,
         MISSING_CAMERA_INFO,
