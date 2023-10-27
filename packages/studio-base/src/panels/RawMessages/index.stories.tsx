@@ -302,6 +302,7 @@ export const DiffSameMessages: StoryObj = {
           diffTopicPath: "/foo",
           diffEnabled: true,
           showFullMessageForDiff: false,
+          fontSize: undefined,
         }}
       />
     </PanelSetup>
@@ -319,6 +320,7 @@ export const DiffConsecutiveMessages: StoryObj = {
           diffEnabled: true,
           showFullMessageForDiff: true,
           expansion: "all",
+          fontSize: undefined,
         }}
       />
     </PanelSetup>
@@ -336,6 +338,7 @@ export const DiffConsecutiveMessagesWithFilter: StoryObj = {
           diffEnabled: true,
           showFullMessageForDiff: true,
           expansion: "all",
+          fontSize: undefined,
         }}
       />
     </PanelSetup>
@@ -353,6 +356,7 @@ export const DiffConsecutiveMessagesWithBigint: StoryObj = {
           diffEnabled: true,
           showFullMessageForDiff: true,
           expansion: "all",
+          fontSize: undefined,
         }}
       />
     </PanelSetup>
@@ -370,6 +374,7 @@ export const DisplayCorrectMessageWhenDiffIsDisabledEvenWithDiffMethodTopicSet: 
           diffEnabled: false,
           showFullMessageForDiff: true,
           expansion: "all",
+          fontSize: undefined,
         }}
       />
     </PanelSetup>

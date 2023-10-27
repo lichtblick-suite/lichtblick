@@ -17,6 +17,7 @@ export type RawMessagesPanelConfig = {
   expansion?: NodeExpansion;
   showFullMessageForDiff: boolean;
   topicPath: string;
+  fontSize: number | undefined;
 };
 
 export const Constants = {

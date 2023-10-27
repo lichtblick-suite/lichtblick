@@ -96,7 +96,8 @@ function RawMessages(props: Props) {
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
-  const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff } = config;
+  const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
+    config;
   const { topics, datatypes } = useDataSourceInfo();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
   const { setMessagePathDropConfig } = usePanelContext();
@@ -145,7 +146,6 @@ function RawMessages(props: Props) {
   }, [structures, topic, topicRosPath]);
 
   const [expansion, setExpansion] = useState(config.expansion);
-  const [customFontSize, setCustomFontSize] = useState<number | undefined>();
 
   // Pass an empty path to useMessageDataItem if our path doesn't resolve to a valid topic to avoid
   // spamming the message pipeline with useless subscription requests.
@@ -424,7 +424,7 @@ function RawMessages(props: Props) {
         {shouldDisplaySingleVal ? (
           <Typography
             variant="h1"
-            fontSize={customFontSize}
+            fontSize={fontSize}
             whiteSpace="pre-wrap"
             style={{ wordWrap: "break-word" }}
           >
@@ -524,7 +524,7 @@ function RawMessages(props: Props) {
                 nestedNode: ({ style }, keyPath: any) => {
                   const baseStyle = {
                     ...style,
-                    fontSize: customFontSize,
+                    fontSize,
                     paddingTop: 2,
                     paddingBottom: 2,
                     marginTop: 2,
@@ -576,7 +576,7 @@ function RawMessages(props: Props) {
                 value: ({ style }, _nodeType, keyPath: any) => {
                   const baseStyle = {
                     ...style,
-                    fontSize: customFontSize,
+                    fontSize,
                     textDecoration: "inherit",
                   };
                   if (!diffEnabled) {
@@ -616,7 +616,7 @@ function RawMessages(props: Props) {
   }, [
     baseItem,
     classes.topic,
-    customFontSize,
+    fontSize,
     diffEnabled,
     diffItem,
     diffMethod,
@@ -635,17 +635,21 @@ function RawMessages(props: Props) {
     valueRenderer,
   ]);
 
-  const actionHandler = useCallback((action: SettingsTreeAction) => {
-    if (action.action === "update") {
-      if (action.payload.path[0] === "general") {
-        if (action.payload.path[1] === "fontSize") {
-          setCustomFontSize(
-            action.payload.value != undefined ? (action.payload.value as number) : undefined,
-          );
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action === "update") {
+        if (action.payload.path[0] === "general") {
+          if (action.payload.path[1] === "fontSize") {
+            saveConfig({
+              fontSize:
+                action.payload.value != undefined ? (action.payload.value as number) : undefined,
+            });
+          }
         }
       }
-    }
-  }, []);
+    },
+    [saveConfig],
+  );
 
   useEffect(() => {
     updatePanelSettingsTree({
@@ -664,13 +668,13 @@ function RawMessages(props: Props) {
                   value,
                 })),
               ],
-              value: customFontSize,
+              value: fontSize,
             },
           },
         },
       },
     });
-  }, [actionHandler, customFontSize, updatePanelSettingsTree]);
+  }, [actionHandler, fontSize, updatePanelSettingsTree]);
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
@@ -697,6 +701,7 @@ const defaultConfig: RawMessagesPanelConfig = {
   diffTopicPath: "",
   showFullMessageForDiff: false,
   topicPath: "",
+  fontSize: undefined,
 };
 
 export default Panel(
