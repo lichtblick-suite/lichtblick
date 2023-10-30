@@ -1093,3 +1093,114 @@ export const OddLengthLineList: StoryObj = {
     );
   },
 };
+
+export const LinesWithAndWithoutVertexColors: StoryObj = {
+  render: function Story() {
+    const width = 60;
+    const height = 45;
+    const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({
+      width,
+      height,
+      frameId: "camera",
+      imageTopic: "camera",
+      calibrationTopic: "calibration",
+    });
+    const points = [
+      { x: 10 + 0, y: 10 + 0 },
+      { x: 10 - 5, y: 10 + 2 },
+      { x: 10 - 5, y: 10 + 8 },
+      { x: 10 + 0, y: 10 + 10 },
+      { x: 10 + 5, y: 10 + 8 },
+      { x: 10 + 5, y: 10 + 2 },
+    ];
+    const defaultPoints = {
+      timestamp: { sec: 0, nsec: 0 },
+      outline_color: { r: 0, g: 0, b: 0, a: 1 },
+      outline_colors: [
+        { r: 1, g: 0, b: 0, a: 1 },
+        { r: 0, g: 1, b: 0, a: 0.75 },
+        { r: 0, g: 0, b: 1, a: 0.75 },
+        { r: 1, g: 0, b: 1, a: 0.75 },
+      ],
+      fill_color: { r: 0, g: 0, b: 0, a: 0 },
+      thickness: 1,
+    };
+
+    const annotationsMessage: MessageEvent<Partial<ImageAnnotations>> = {
+      topic: "annotations",
+      receiveTime: { sec: 10, nsec: 0 },
+      message: {
+        points: [
+          {
+            ...defaultPoints,
+            type: PointsAnnotationType.LINE_LIST,
+            points,
+          },
+          {
+            ...defaultPoints,
+            type: PointsAnnotationType.LINE_LOOP,
+            points: points.map(({ x, y }) => ({ x: x + 20, y })),
+          },
+          {
+            ...defaultPoints,
+            type: PointsAnnotationType.LINE_STRIP,
+            points: points.map(({ x, y }) => ({ x: x + 40, y })),
+          },
+          {
+            ...defaultPoints,
+            type: PointsAnnotationType.LINE_LIST,
+            points: points.map(({ x, y }) => ({ x, y: y + 20 })),
+            outline_colors: [],
+          },
+          {
+            ...defaultPoints,
+            type: PointsAnnotationType.LINE_LOOP,
+            points: points.map(({ x, y }) => ({ x: x + 20, y: y + 20 })),
+            outline_colors: [],
+          },
+          {
+            ...defaultPoints,
+            type: PointsAnnotationType.LINE_STRIP,
+            points: points.map(({ x, y }) => ({ x: x + 40, y: y + 20 })),
+            outline_colors: [],
+          },
+        ],
+      },
+      schemaName: "foxglove.ImageAnnotations",
+      sizeInBytes: 0,
+    };
+
+    const fixture: Fixture = {
+      topics: [
+        { name: "calibration", schemaName: "foxglove.CameraCalibration" },
+        { name: "camera", schemaName: "foxglove.RawImage" },
+        { name: "annotations", schemaName: "foxglove.ImageAnnotations" },
+      ],
+      frame: {
+        calibration: [calibrationMessage],
+        camera: [cameraMessage],
+        annotations: [annotationsMessage],
+      },
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    };
+    return (
+      <div style={{ width: 1200, height: 900, flexShrink: 0 }}>
+        <PanelSetup fixture={fixture} includeSettings>
+          <ImagePanel
+            overrideConfig={{
+              ...ImagePanel.defaultConfig,
+              imageMode: {
+                calibrationTopic: "calibration",
+                imageTopic: "camera",
+                annotations: { annotations: { visible: true } },
+              },
+            }}
+          />
+        </PanelSetup>
+      </div>
+    );
+  },
+};

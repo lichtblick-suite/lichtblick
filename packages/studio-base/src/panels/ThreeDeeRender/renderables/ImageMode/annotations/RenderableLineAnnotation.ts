@@ -67,6 +67,8 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
   #style?: LineStyle;
   /** Number of points that was last used for configuring geometry */
   #numPoints?: number;
+  /** Wheter to use vertex colors, used for configuring geometry */
+  #useVertexColors?: boolean;
   #positionBuffer = new Float32Array();
   #colorBuffer = new Uint8Array();
 
@@ -212,6 +214,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     const isPolygon = style === "polygon";
     const isLineStrip = style === "line_strip";
     const isLineList = style === "line_list";
+    const useVertexColors = outlineColors.length > 0;
 
     // Update line width if thickness or scale has changed
     if (this.#annotationNeedsUpdate || this.#scaleNeedsUpdate) {
@@ -232,54 +235,48 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       this.#cameraModelNeedsUpdate = false;
       if (
         this.#numPoints == undefined ||
+        this.#useVertexColors == undefined ||
         !this.#geometry ||
         pointsLength > this.#numPoints ||
+        useVertexColors !== this.#useVertexColors ||
         this.#style !== style
       ) {
         // Need to recreate the geometry when length changes: https://github.com/mrdoob/three.js/issues/21488
         this.#geometry?.dispose();
         this.#numPoints = pointsLength;
+        this.#useVertexColors = useVertexColors;
         this.#style = style;
-        switch (style) {
-          case "polygon":
-            this.#positionBuffer = new Float32Array((pointsLength + 1) * 3);
-            // color buffer is unused (we don't use vertex colors)
-            this.#geometry = new LineGeometry();
-            break;
-          case "line_strip":
-            this.#positionBuffer = new Float32Array(pointsLength * 3);
-            // color buffer is unused (we don't use vertex colors)
-            this.#geometry = new LineGeometry();
-            break;
-          case "line_list": {
-            this.#positionBuffer = new Float32Array(pointsLength * 3);
-            this.#colorBuffer = new Uint8Array(pointsLength * 8);
-            this.#geometry = new LineSegmentsGeometry();
+        const positionBufferSize = isPolygon ? (pointsLength + 1) * 3 : pointsLength * 3;
+        this.#positionBuffer = new Float32Array(positionBufferSize);
+        this.#geometry = isLineList ? new LineSegmentsGeometry() : new LineGeometry();
 
-            // [rgba, rgba]
-            const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(
-              this.#colorBuffer,
-              8,
-              1,
-            );
-            this.#geometry.setAttribute(
-              "instanceColorStart",
-              new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0, true),
-            );
-            this.#geometry.setAttribute(
-              "instanceColorEnd",
-              new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 4, true),
-            );
-            break;
-          }
+        if (useVertexColors) {
+          this.#colorBuffer = new Uint8Array(pointsLength * 8);
+          // [rgba, rgba]
+          const instanceColorBuffer = new THREE.InstancedInterleavedBuffer(
+            this.#colorBuffer,
+            isLineList ? 8 : 4 /* stride */,
+            1,
+          );
+          this.#geometry.setAttribute(
+            "instanceColorStart",
+            new THREE.InterleavedBufferAttribute(instanceColorBuffer, 4, 0, true),
+          );
+          this.#geometry.setAttribute(
+            "instanceColorEnd",
+            new THREE.InterleavedBufferAttribute(
+              instanceColorBuffer,
+              4,
+              isLineList ? 4 : 0 /* offset */,
+              true,
+            ),
+          );
         }
         this.#linePrepass.geometry = this.#geometry;
         this.#line.geometry = this.#geometry;
       }
 
-      const useVertexColors = isLineList;
-      const hasExactColors = outlineColors.length === pointsLength / 2;
-
+      const hasExactColors = isLineList && outlineColors.length === pointsLength / 2;
       const shapeFillColor =
         (isPolygon || isLineStrip) && fillColor != undefined && fillColor.a > 0
           ? fillColor
@@ -289,16 +286,17 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
       const positions = this.#positionBuffer;
       const colors = this.#colorBuffer;
       for (let i = 0; i < pointsLength; i++) {
-        // Support the case where outline_colors is half the length of points, one color per line,
-        // and where outline_colors matches the length of points. Fall back to marker.outline_color
-        // as needed
         const point = points[i]!;
         this.#cameraModel.projectPixelTo3dPlane(tempVec3, point);
 
         positions[i * 3 + 0] = tempVec3.x;
         positions[i * 3 + 1] = tempVec3.y;
         positions[i * 3 + 2] = tempVec3.z;
+
         if (useVertexColors) {
+          // Support the case where outline_colors is half the length of points, one color per line (hasExactColors),
+          // and where outline_colors matches the length of points. Fall back to marker.outline_color
+          // as needed
           const color = hasExactColors
             ? outlineColors[i >>> 1]!
             : outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR;
