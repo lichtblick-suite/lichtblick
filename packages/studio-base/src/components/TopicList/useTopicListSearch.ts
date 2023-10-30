@@ -62,8 +62,8 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
             [string],
             FzfResultItem<MessagePathSearchItem>[]
           >(this, query);
-          // `offset` denotes the beginning of the `suffix` +1 also excludes results that match only the `.`
-          return results.filter((result) => result.end > result.item.offset + 1);
+          // `offset` denotes the beginning of the `suffix`
+          return results.filter((result) => result.end > result.item.offset);
         },
       }),
     [messagePathSearchItems],

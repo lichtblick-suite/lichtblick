@@ -59,4 +59,20 @@ describe("useTopicListSearch", () => {
     );
     expect(result.current.map(itemToString)).toEqual(["xyz", "xyz.foobar", "footballer"]);
   });
+
+  it("includes topic matches when there's a trailing dot", () => {
+    const topics: UseTopicListSearchParams["topics"] = [
+      { name: "abc", schemaName: "ABCD" },
+      { name: "abc2", schemaName: "ABCD" },
+      { name: "xyz", schemaName: "XYZW" },
+    ];
+    const datatypes: UseTopicListSearchParams["datatypes"] = new Map([
+      ["ABCD", { definitions: [{ name: "xyz", type: "string" }] }],
+      ["XYZW", { definitions: [{ name: "abcd", type: "string" }] }],
+    ]);
+    const { result } = renderHook(() =>
+      useTopicListSearch({ topics, datatypes, filterText: "abc." }),
+    );
+    expect(result.current.map(itemToString)).toEqual(["abc", "abc.xyz", "abc2", "abc2.xyz"]);
+  });
 });
