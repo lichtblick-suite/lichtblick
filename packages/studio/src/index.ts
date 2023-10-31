@@ -476,6 +476,17 @@ export interface ExtensionContext {
 
   registerPanel(params: ExtensionPanelRegistration): void;
 
+  /**
+   * Register a function to convert messages from one schema to another.
+   *
+   * A converter function is invoked when a panel subscribes to a topic with the `convertTo` option.
+   * The return value of the converter function is the converted message and is provided to the
+   * panel.
+   *
+   * If the converter function invocation returns _undefined_, the output of the converter for that
+   * message is ignored and no message is provided to the panel. This is useful in instances where
+   * you might want to selectively output a converted schema depending on the input message.
+   */
   registerMessageConverter<Src>(args: RegisterMessageConverterArgs<Src>): void;
 
   /**

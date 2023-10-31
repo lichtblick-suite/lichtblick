@@ -44,6 +44,10 @@ export function convertMessage(
   const matchedConverters = converters.get(key);
   for (const converter of matchedConverters ?? []) {
     const convertedMessage = converter.converter(messageEvent.message, messageEvent);
+    // If the converter returns _undefined_ or _null_ the message is skipped
+    if (convertedMessage == undefined) {
+      continue;
+    }
     convertedMessages.push({
       topic: messageEvent.topic,
       schemaName: converter.toSchemaName,
