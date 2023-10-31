@@ -7,6 +7,7 @@ import { TypeOptions } from "i18next";
 export const workspace: Partial<TypeOptions["resources"]["workspace"]> = {
   events: undefined,
   panel: undefined,
+  performance: undefined,
   problems: undefined,
   studioLogs: undefined,
   topics: undefined,

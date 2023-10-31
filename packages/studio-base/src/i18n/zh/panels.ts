@@ -35,8 +35,6 @@ export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   ROSDiagnosticSummaryDescription: "显示所有 ROS DiagnosticArray 消息的摘要。",
   stateTransitions: "状态转换",
   stateTransitionsDescription: "跟踪值随时间变化的情况。",
-  studioPlaybackPerformance: "Studio - 播放性能",
-  studioPlaybackPerformanceDescription: "显示回放和数据流式处理性能统计信息。",
   tab: "选项卡",
   tabDescription: "将面板分组在选项卡界面中。",
   table: "表格",

@@ -18,8 +18,6 @@ import { ReactElement } from "react";
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Sparkline";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
@@ -56,15 +54,11 @@ function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElem
   );
 }
 
-type UnconnectedPlaybackPerformanceProps = Immutable<{
-  timestamp: number;
-  activeData?: PlayerStateActiveData;
-}>;
-
-function UnconnectedPlaybackPerformance({
-  timestamp,
-  activeData,
-}: UnconnectedPlaybackPerformanceProps): JSX.Element {
+export function PlaybackPerformance(): JSX.Element {
+  const timestamp = Date.now();
+  const activeData = useMessagePipeline(
+    React.useCallback(({ playerState }) => playerState.activeData, []),
+  );
   const playbackInfo =
     React.useRef<Immutable<{ timestamp: number; activeData: PlayerStateActiveData } | undefined>>();
   const lastPlaybackInfo = playbackInfo.current;
@@ -118,7 +112,6 @@ function UnconnectedPlaybackPerformance({
 
   return (
     <Stack flex="auto">
-      <PanelToolbar />
       <Stack flex="auto" justifyContent="center" gap={2} padding={1}>
         <PlaybackPerformanceItem
           points={perfPoints.current.speed}
@@ -148,16 +141,3 @@ function UnconnectedPlaybackPerformance({
     </Stack>
   );
 }
-
-function PlaybackPerformance() {
-  const timestamp = Date.now();
-  const activeData = useMessagePipeline(
-    React.useCallback(({ playerState }) => playerState.activeData, []),
-  );
-  return <UnconnectedPlaybackPerformance timestamp={timestamp} activeData={activeData} />;
-}
-
-PlaybackPerformance.panelType = "PlaybackPerformance";
-PlaybackPerformance.defaultConfig = {};
-
-export default Panel(PlaybackPerformance);

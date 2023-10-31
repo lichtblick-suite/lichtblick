@@ -31,8 +31,8 @@ export const appSettings = {
   sendAnonymizedCrashReports: "Send anonymized crash reports",
   sendAnonymizedUsageData: "Send anonymized usage data to help us improve Foxglove Studio",
   settings: "Settings",
-  studioDebugPanels: "Studio debug panels",
-  studioDebugPanelsDescription: "Show Foxglove Studio debug panels in the “Add panel” list.",
+  studioDebugPanels: "Debug mode",
+  studioDebugPanelsDescription: "Enable panels and features for debugging Foxglove Studio.",
   timestampFormat: "Timestamp format",
   webApp: "Web app",
 };

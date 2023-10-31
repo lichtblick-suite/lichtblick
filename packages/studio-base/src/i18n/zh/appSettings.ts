@@ -31,8 +31,8 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   sendAnonymizedCrashReports: "发送匿名崩溃报告",
   sendAnonymizedUsageData: "发送匿名使用数据以帮助我们改进 Foxglove Studio",
   settings: "设置",
-  studioDebugPanels: "Studio 调试面板",
-  studioDebugPanelsDescription: "在“添加面板”列表中显示 Foxglove Studio 调试面板。",
+  studioDebugPanels: undefined,
+  studioDebugPanelsDescription: undefined,
   timestampFormat: "时间戳格式",
   webApp: "网页应用",
 };

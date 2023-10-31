@@ -32,8 +32,8 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   sendAnonymizedCrashReports: "匿名化されたクラッシュレポートを送信",
   sendAnonymizedUsageData: "匿名化された使用データを送信して、Foxglove Studioの改善に役立てる",
   settings: "設定",
-  studioDebugPanels: "Studioデバッグパネル",
-  studioDebugPanelsDescription: "「パネルを追加」リストにFoxglove Studioデバッグパネルを表示する。",
+  studioDebugPanels: undefined,
+  studioDebugPanelsDescription: undefined,
   timestampFormat: "タイムスタンプ形式",
   webApp: "ウェブアプリ",
 };

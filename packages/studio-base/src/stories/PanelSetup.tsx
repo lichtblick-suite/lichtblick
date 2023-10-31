@@ -110,7 +110,7 @@ type UnconnectedProps = {
 };
 
 function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
-  const allPanels = [...panels.getBuiltin(t), ...panels.getDebug(t)];
+  const allPanels = [...panels.getBuiltin(t)];
 
   const visiblePanels = [...panels.getBuiltin(t)];
 

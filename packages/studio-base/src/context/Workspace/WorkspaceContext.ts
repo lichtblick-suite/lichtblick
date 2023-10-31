@@ -15,7 +15,12 @@ import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectio
 export const LeftSidebarItemKeys = ["panel-settings", "topics", "problems"] as const;
 export type LeftSidebarItemKey = (typeof LeftSidebarItemKeys)[number];
 
-export const RightSidebarItemKeys = ["events", "variables", "studio-logs-settings"] as const;
+export const RightSidebarItemKeys = [
+  "events",
+  "variables",
+  "studio-logs-settings",
+  "performance",
+] as const;
 export type RightSidebarItemKey = (typeof RightSidebarItemKeys)[number];
 
 export type WorkspaceContextStore = {

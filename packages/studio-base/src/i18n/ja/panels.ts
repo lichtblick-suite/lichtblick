@@ -36,9 +36,6 @@ export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   ROSDiagnosticSummaryDescription: "すべてのROS DiagnosticArrayメッセージの概要を表示します。",
   stateTransitions: "ステートトランジション",
   stateTransitionsDescription: "時間とともに値が変化するときを追跡します。",
-  studioPlaybackPerformance: "Studio - 再生パフォーマンス",
-  studioPlaybackPerformanceDescription:
-    "再生およびデータストリーミングのパフォーマンス統計情報を表示します。",
   tab: "タブ",
   tabDescription: "複数のパネルをタブでグループ化して表示します。",
   table: "テーブル",

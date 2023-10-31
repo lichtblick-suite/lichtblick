@@ -181,12 +181,3 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     hasCustomToolbar: true,
   },
 ];
-
-export const getDebug: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
-  {
-    title: t("studioPlaybackPerformance"),
-    type: "PlaybackPerformance",
-    description: t("studioPlaybackPerformanceDescription"),
-    module: async () => await import("./PlaybackPerformance"),
-  },
-];
