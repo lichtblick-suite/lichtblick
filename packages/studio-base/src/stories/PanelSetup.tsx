@@ -41,6 +41,7 @@ import {
 } from "@foxglove/studio-base/context/PanelStateContext";
 import {
   UserScriptStateProvider,
+  UserScriptStore,
   useUserScriptState,
 } from "@foxglove/studio-base/context/UserScriptStateContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
@@ -194,6 +195,8 @@ const defaultFetchAsset: ComponentProps<typeof MockMessagePipelineProvider>["fet
   };
 };
 
+const selectUserScriptActions = (store: UserScriptStore) => store.actions;
+
 function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull {
   const { t } = useTranslation("panels");
   const mockPanelCatalog = useMemo(
@@ -210,7 +213,8 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
   }));
 
   const actions = useCurrentLayoutActions();
-  const { setUserScriptDiagnostics, addUserScriptLogs, setUserScriptRosLib } = useUserScriptState();
+  const { setUserScriptDiagnostics, addUserScriptLogs, setUserScriptRosLib } =
+    useUserScriptState(selectUserScriptActions);
   const userScriptActions = useShallowMemo({
     setUserScriptDiagnostics,
     addUserScriptLogs,

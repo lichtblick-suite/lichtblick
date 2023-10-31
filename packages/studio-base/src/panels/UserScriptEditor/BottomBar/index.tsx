@@ -17,7 +17,10 @@ import { ReactElement, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useUserScriptState } from "@foxglove/studio-base/context/UserScriptStateContext";
+import {
+  UserScriptStore,
+  useUserScriptState,
+} from "@foxglove/studio-base/context/UserScriptStateContext";
 import DiagnosticsSection from "@foxglove/studio-base/panels/UserScriptEditor/BottomBar/DiagnosticsSection";
 import LogsSection from "@foxglove/studio-base/panels/UserScriptEditor/BottomBar/LogsSection";
 import { Diagnostic, UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
@@ -73,6 +76,8 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+const selectUserScriptActions = (store: UserScriptStore) => store.actions;
+
 const BottomBar = ({
   diagnostics,
   isSaved,
@@ -84,7 +89,7 @@ const BottomBar = ({
   const { classes } = useStyles();
   const [bottomBarDisplay, setBottomBarDisplay] = useState<BottomBarModes>("diagnostics");
 
-  const { clearUserScriptLogs } = useUserScriptState();
+  const { clearUserScriptLogs } = useUserScriptState(selectUserScriptActions);
 
   const handleChange = (_event: React.SyntheticEvent, value: BottomBarModes) => {
     setBottomBarDisplay(value);

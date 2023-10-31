@@ -22,7 +22,7 @@ import {
 } from "react";
 import { useLatest, useMountedState } from "react-use";
 
-import { useShallowMemo, useWarnImmediateReRender } from "@foxglove/hooks";
+import { useWarnImmediateReRender } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
@@ -40,7 +40,10 @@ import PlayerSelectionContext, {
   IDataSourceFactory,
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { useUserScriptState } from "@foxglove/studio-base/context/UserScriptStateContext";
+import {
+  UserScriptStore,
+  useUserScriptState,
+} from "@foxglove/studio-base/context/UserScriptStateContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useIndexedDbRecents, { RecentRecord } from "@foxglove/studio-base/hooks/useIndexedDbRecents";
 import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
@@ -65,23 +68,14 @@ const globalVariablesSelector = (state: LayoutState) =>
 const selectTopicAliasFunctions = (catalog: ExtensionCatalog) =>
   catalog.installedTopicAliasFunctions;
 
+const selectUserScriptActions = (store: UserScriptStore) => store.actions;
+
 export default function PlayerManager(props: PropsWithChildren<PlayerManagerProps>): JSX.Element {
   const { children, playerSources } = props;
 
   useWarnImmediateReRender();
 
-  const {
-    setUserScriptDiagnostics,
-    addUserScriptLogs,
-    setUserScriptRosLib,
-    setUserScriptTypesLib,
-  } = useUserScriptState();
-  const userScriptActions = useShallowMemo({
-    setUserScriptDiagnostics,
-    addUserScriptLogs,
-    setUserScriptRosLib,
-    setUserScriptTypesLib,
-  });
+  const userScriptActions = useUserScriptState(selectUserScriptActions);
 
   const nativeWindow = useNativeWindow();
 
