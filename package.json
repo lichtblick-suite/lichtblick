@@ -82,7 +82,7 @@
     "@typescript-eslint/parser": "6.9.0",
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
-    "depcheck": "1.4.6",
+    "depcheck": "1.4.7",
     "eslint": "8.50.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-import-resolver-webpack": "0.13.7",
