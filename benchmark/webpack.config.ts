@@ -37,6 +37,11 @@ const devServerConfig: WebpackConfiguration = {
     //  "[WDS] Disconnected!"
     // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
     allowedHosts: "all",
+    headers: {
+      // Enable cross-origin isolation: https://resourcepolicy.fyi
+      "cross-origin-opener-policy": "same-origin",
+      "cross-origin-embedder-policy": "credentialless",
+    },
   },
 
   plugins: [new CleanWebpackPlugin()],
