@@ -27,7 +27,7 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   WorkspaceContextStore,
-  useWorkspaceStoreWithShallowSelector,
+  useWorkspaceStore,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
@@ -156,7 +156,8 @@ export type AppBarProps = CustomWindowControlsProps & {
 };
 
 const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
-const selectWorkspace = (store: WorkspaceContextStore) => store;
+const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
+const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 
 export function AppBar(props: AppBarProps): JSX.Element {
   const {
@@ -181,12 +182,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
 
-  const {
-    sidebars: {
-      left: { open: leftSidebarOpen },
-      right: { open: rightSidebarOpen },
-    },
-  } = useWorkspaceStoreWithShallowSelector(selectWorkspace);
+  const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
+  const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
+
   const { sidebarActions } = useWorkspaceActions();
 
   const [appMenuEl, setAppMenuEl] = useState<undefined | HTMLElement>(undefined);

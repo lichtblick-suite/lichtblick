@@ -21,7 +21,7 @@ import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
-  useWorkspaceStoreWithShallowSelector,
+  useWorkspaceStore,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 
@@ -47,7 +47,8 @@ const useStyles = makeStyles()({
   },
 });
 
-const selectWorkspace = (store: WorkspaceContextStore) => store;
+const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
+const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 
 export function AppMenu(props: AppMenuProps): JSX.Element {
   const { open, handleClose, anchorEl, anchorReference, anchorPosition, disablePortal } = props;
@@ -59,12 +60,9 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
   const [nestedMenu, setNestedMenu] = useState<string | undefined>();
 
   const { recentSources, selectRecent } = usePlayerSelection();
-  const {
-    sidebars: {
-      left: { open: leftSidebarOpen },
-      right: { open: rightSidebarOpen },
-    },
-  } = useWorkspaceStoreWithShallowSelector(selectWorkspace);
+
+  const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
+  const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
   const { sidebarActions, dialogActions, layoutActions } = useWorkspaceActions();
 
   const handleNestedMenuClose = useCallback(() => {
