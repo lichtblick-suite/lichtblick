@@ -71,7 +71,7 @@ const useStyles = makeStyles<void, "button" | "icon">()((theme, _params, classes
     height: BANNER_HEIGHT,
     flex: "none",
 
-    [theme.breakpoints.down("md")]: {
+    [theme.breakpoints.down("sm")]: {
       minHeight: BANNER_MOBILE_HEIGHT,
     },
   },
