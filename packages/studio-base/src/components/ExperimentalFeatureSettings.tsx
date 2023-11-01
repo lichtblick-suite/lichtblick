@@ -50,11 +50,6 @@ function useFeatures(): Feature[] {
       name: t("studioDebugPanels"),
       description: <>{t("studioDebugPanelsDescription")}</>,
     },
-    {
-      key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
-      name: t("memoryUseIndicator"),
-      description: <>{t("memoryUseIndicatorDescription")}</>,
-    },
   ];
 
   if (process.env.NODE_ENV === "development") {

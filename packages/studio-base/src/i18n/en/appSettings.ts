@@ -18,8 +18,6 @@ export const appSettings = {
   layoutDebugging: "Layout debugging",
   layoutDebuggingDescription: "Show extra controls for developing and debugging layout storage.",
   light: "Light",
-  memoryUseIndicator: "Memory use indicator",
-  memoryUseIndicatorDescription: "Show the app memory use in the sidebar.",
   messageRate: "Message rate",
   newAppMenu: "Enable unified navigation",
   newAppMenuDescription: "Show the new menu and navigation.",

@@ -17,8 +17,14 @@ type MemoryInfo = {
   usedJSHeapSize: number;
 };
 
+/** https://developer.mozilla.org/en-US/docs/Web/API/Performance/measureUserAgentSpecificMemory */
+type UserAgentSpecificMemory = {
+  bytes: number;
+};
+
 // Our DOM types don't have types for performance.memory since this is a chrome feature
 // We make our own version of Performance which optionally has MemoryInfo
 interface Performance {
   memory?: MemoryInfo;
+  measureUserAgentSpecificMemory?(): Promise<UserAgentSpecificMemory>;
 }

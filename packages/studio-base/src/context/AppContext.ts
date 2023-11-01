@@ -32,6 +32,7 @@ interface IAppContext {
   workspaceStoreCreator?: (
     initialState?: Partial<WorkspaceContextStore>,
   ) => StoreApi<WorkspaceContextStore>;
+  PerformanceSidebarComponent?: React.ComponentType;
 }
 
 export const INJECTED_FEATURE_KEYS = {

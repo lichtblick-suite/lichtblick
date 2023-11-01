@@ -16,9 +16,7 @@ import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { FoxgloveLogo } from "@foxglove/studio-base/components/FoxgloveLogo";
-import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
@@ -30,7 +28,6 @@ import {
   useWorkspaceStore,
 } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";
@@ -176,10 +173,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const { appBarLayoutButton } = useAppContext();
 
-  const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_MEMORY_USE_INDICATOR,
-  );
-
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
 
   const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
@@ -253,7 +246,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
           <div className={classes.end}>
             <div className={classes.endInner}>
-              {enableMemoryUseIndicator && <MemoryUseIndicator />}
               {appBarLayoutButton}
               <Stack direction="row" alignItems="center" data-tourid="sidebar-button-group">
                 <AppBarIconButton

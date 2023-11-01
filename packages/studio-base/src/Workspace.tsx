@@ -35,7 +35,6 @@ import {
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
-import { PlaybackPerformance } from "@foxglove/studio-base/components/PlaybackPerformance";
 import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { Sidebars, SidebarItem } from "@foxglove/studio-base/components/Sidebars";
@@ -114,6 +113,7 @@ const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
 
 function WorkspaceContent(props: WorkspaceProps): JSX.Element {
+  const { PerformanceSidebarComponent } = useAppContext();
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
@@ -357,13 +357,18 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     ]);
     if (enableDebugMode) {
       items.set("studio-logs-settings", { title: t("studioLogs"), component: StudioLogsSettings });
-      items.set("performance", { title: t("performance"), component: PlaybackPerformance });
+      if (PerformanceSidebarComponent) {
+        items.set("performance", {
+          title: t("performance"),
+          component: PerformanceSidebarComponent,
+        });
+      }
     }
     if (showEventsTab) {
       items.set("events", { title: t("events"), component: EventsList });
     }
     return items;
-  }, [enableDebugMode, showEventsTab, t]);
+  }, [enableDebugMode, showEventsTab, t, PerformanceSidebarComponent]);
 
   const keyboardEventHasModifier = (event: KeyboardEvent) =>
     navigator.userAgent.includes("Mac") ? event.metaKey : event.ctrlKey;

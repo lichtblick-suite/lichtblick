@@ -20,8 +20,6 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   layoutDebugging: "布局调试",
   layoutDebuggingDescription: "显示用于开发和调试布局存储的额外控件。",
   light: "亮色",
-  memoryUseIndicator: "内存使用指示器",
-  memoryUseIndicatorDescription: "在侧边栏显示应用程序的内存使用情况。",
   messageRate: "消息速率",
   noExperimentalFeatures: "目前没有实验性的功能。",
   openLinksIn: "打开链接",

@@ -29,5 +29,4 @@ export enum AppSetting {
 
   // Dev only
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
-  ENABLE_MEMORY_USE_INDICATOR = "dev.memory-use-indicator",
 }
