@@ -318,9 +318,9 @@ export class BlockLoader {
           if (totalBlockSizeBytes > this.#maxCacheSize) {
             this.#problemManager.addProblem("cache-full", {
               severity: "error",
-              message: `Cache is full. Preloading for topics [${Array.from(topicsToFetch).join(
-                ", ",
-              )}] has stopped on block ${currentBlockId + 1}/${this.#blocks.length}.`,
+              message: `Cache is full. Preloading for topics [${Array.from(
+                topicsToFetch.keys(),
+              ).join(", ")}] has stopped on block ${currentBlockId + 1}/${this.#blocks.length}.`,
               tip: "Try reducing the number of topics that require preloading at a given time (e.g. in plots), or try to reduce the time range of the file.",
             });
             // We need to emit progress here so the player will emit a new state
