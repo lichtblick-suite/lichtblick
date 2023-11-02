@@ -17,6 +17,7 @@ export const plot = {
   label: "Label",
   left: "Left",
   legend: "Legend",
+  lineSize: "Line size",
   max: "Max",
   maxXError: "X max must be greater than X min.",
   maxYError: "Y max must be greater than Y min.",

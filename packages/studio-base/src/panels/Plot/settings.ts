@@ -58,6 +58,14 @@ const makeSeriesNode = memoizeWeak(
           label: t("color"),
           value: path.color ?? lineColors[index % lineColors.length],
         },
+        lineSize: {
+          input: "number",
+          label: t("lineSize"),
+          value: path.lineSize,
+          step: 0.2,
+          min: 0,
+          placeholder: "auto",
+        },
         showLine: {
           label: t("showLine"),
           input: "boolean",

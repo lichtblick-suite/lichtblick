@@ -1670,3 +1670,43 @@ export const PreloadedDataAndItsAbsoluteValue: StoryObj = {
     await ctx.parameters.storyReady;
   },
 };
+
+export const DifferentLineSizes: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 3 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PlotWrapper
+        pauseFrame={pauseFrame}
+        config={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+              lineSize: 2.5,
+            },
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              showLine: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    );
+  },
+
+  name: "different line sizes",
+
+  parameters: {
+    useReadySignal: true,
+  },
+
+  play: async (ctx) => {
+    await ctx.parameters.storyReady;
+  },
+};
