@@ -10,8 +10,8 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
+  DialogTitle,
   TextField,
-  Typography,
   outlinedInputClasses,
 } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
@@ -38,6 +38,11 @@ const useStyles = makeStyles()((theme) => ({
       overflowY: "auto",
       padding: theme.spacing(0.25),
     },
+  },
+  dialogTitle: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 }));
 
@@ -71,23 +76,12 @@ export function ShareJsonModal({
 
   return (
     <Dialog open onClose={onRequestClose} maxWidth="sm" fullWidth>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        paddingX={3}
-        paddingTop={2}
-      >
-        <Stack>
-          <Typography variant="h4" fontWeight={600} gutterBottom>
-            {title}
-          </Typography>
-        </Stack>
-
+      <DialogTitle className={classes.dialogTitle}>
+        {title}
         <IconButton onClick={onRequestClose} edge="end">
           <CloseIcon />
         </IconButton>
-      </Stack>
+      </DialogTitle>
       <DialogContent>
         <TextField
           className={classes.textarea}

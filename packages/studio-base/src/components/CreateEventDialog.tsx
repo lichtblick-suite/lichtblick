@@ -7,17 +7,19 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import {
   Alert,
   Button,
+  ButtonGroup,
   CircularProgress,
   Dialog,
   DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormLabel,
+  IconButton,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  FormLabel,
-  FormControl,
-  IconButton,
-  ButtonGroup,
 } from "@mui/material";
 import * as _ from "lodash-es";
 import { KeyboardEvent, useCallback } from "react";
@@ -32,7 +34,6 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
@@ -196,10 +197,8 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <Stack paddingX={3} paddingTop={2}>
-        <Typography variant="h2">Create event</Typography>
-      </Stack>
-      <Stack paddingX={3} paddingTop={2}>
+      <DialogTitle>Create event</DialogTitle>
+      <DialogContent>
         <div className={classes.grid}>
           <FormControl>
             <FormLabel>Start Time</FormLabel>
@@ -249,59 +248,61 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
             </IconButton>
           </ButtonGroup>
         </div>
-      </Stack>
-      <Stack paddingX={3} paddingTop={2}>
-        <FormLabel>Metadata</FormLabel>
-        <div className={classes.grid}>
-          {event.metadataEntries.map(({ key, value }, index) => {
-            const hasDuplicate = ((key.length > 0 ? countedMetadata[key] : undefined) ?? 0) > 1;
-            return (
-              <div className={classes.row} key={index}>
-                <TextField
-                  fullWidth
-                  value={key}
-                  autoFocus={index === 0}
-                  placeholder="Key (string)"
-                  error={hasDuplicate}
-                  onKeyDown={onMetaDataKeyDown}
-                  onChange={(evt) => {
-                    updateMetadata(index, "key", evt.currentTarget.value);
-                  }}
-                />
-                <TextField
-                  fullWidth
-                  value={value}
-                  placeholder="Value (string)"
-                  error={hasDuplicate}
-                  onKeyDown={onMetaDataKeyDown}
-                  onChange={(evt) => {
-                    updateMetadata(index, "value", evt.currentTarget.value);
-                  }}
-                />
-                <ButtonGroup>
-                  <IconButton
-                    tabIndex={-1}
-                    onClick={() => {
-                      addRow(index);
+        <div>
+          <FormLabel>Metadata</FormLabel>
+          <div className={classes.grid}>
+            {event.metadataEntries.map(({ key, value }, index) => {
+              const hasDuplicate = ((key.length > 0 ? countedMetadata[key] : undefined) ?? 0) > 1;
+              return (
+                <div className={classes.row} key={index}>
+                  <TextField
+                    fullWidth
+                    value={key}
+                    autoFocus={index === 0}
+                    placeholder="Key (string)"
+                    error={hasDuplicate}
+                    onKeyDown={onMetaDataKeyDown}
+                    onChange={(evt) => {
+                      updateMetadata(index, "key", evt.currentTarget.value);
                     }}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                  <IconButton
-                    tabIndex={-1}
-                    onClick={() => {
-                      removeRow(index);
+                  />
+                  <TextField
+                    fullWidth
+                    value={value}
+                    placeholder="Value (string)"
+                    error={hasDuplicate}
+                    onKeyDown={onMetaDataKeyDown}
+                    onChange={(evt) => {
+                      updateMetadata(index, "value", evt.currentTarget.value);
                     }}
-                    style={{ visibility: event.metadataEntries.length > 1 ? "visible" : "hidden" }}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </ButtonGroup>
-              </div>
-            );
-          })}
+                  />
+                  <ButtonGroup>
+                    <IconButton
+                      tabIndex={-1}
+                      onClick={() => {
+                        addRow(index);
+                      }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                    <IconButton
+                      tabIndex={-1}
+                      onClick={() => {
+                        removeRow(index);
+                      }}
+                      style={{
+                        visibility: event.metadataEntries.length > 1 ? "visible" : "hidden",
+                      }}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  </ButtonGroup>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </Stack>
+      </DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={onClose}>
           Cancel

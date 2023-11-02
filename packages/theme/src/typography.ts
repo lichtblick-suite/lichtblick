@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TypographyOptions } from "@mui/material/styles/createTypography";
+import { TypographyOptions, TypographyStyle } from "@mui/material/styles/createTypography";
 
 declare module "@mui/material/styles/createTypography" {
   interface Typography {
@@ -28,6 +28,17 @@ export const fontMonospace = "'IBM Plex Mono'";
 
 export const fontFeatureSettings = "'tnum'";
 
+const headingFontStyles: TypographyStyle = {
+  fontFeatureSettings,
+  letterSpacing: "-0.025em",
+  fontWeight: 800,
+};
+
+const subtitleFontStyles: TypographyStyle = {
+  fontFeatureSettings,
+  fontWeight: 500,
+};
+
 export const typography: TypographyOptions = {
   fontMonospace,
   fontSansSerif,
@@ -47,10 +58,12 @@ export const typography: TypographyOptions = {
     letterSpacing: "0.05em",
     lineHeight: "1.5",
   },
-  h1: { fontFeatureSettings, fontSize: "2rem" },
-  h2: { fontFeatureSettings, fontSize: "1.8rem" },
-  h3: { fontFeatureSettings, fontSize: "1.6rem" },
-  h4: { fontFeatureSettings, fontSize: "1.2rem" },
-  h5: { fontFeatureSettings, fontSize: "1.1rem" },
-  h6: { fontFeatureSettings, fontSize: "1rem" },
+  h1: { ...headingFontStyles, fontSize: "2rem" },
+  h2: { ...headingFontStyles, fontSize: "1.8rem" },
+  h3: { ...headingFontStyles, fontSize: "1.6rem" },
+  h4: { ...headingFontStyles, fontSize: "1.2rem" },
+  h5: { ...headingFontStyles, fontSize: "1.1rem" },
+  h6: { ...headingFontStyles, fontSize: "1rem" },
+  subtitle1: { ...subtitleFontStyles },
+  subtitle2: { ...subtitleFontStyles },
 };

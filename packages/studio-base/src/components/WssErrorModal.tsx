@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CloseIcon from "@mui/icons-material/Close";
-import { Dialog, IconButton, Stack, Typography } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -15,6 +15,11 @@ import WssErrorModalScreenshot from "./WssErrorModal.png";
 const useStyles = makeStyles()({
   image: {
     maxWidth: "24rem",
+  },
+  dialogTitle: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
 
@@ -43,16 +48,8 @@ export default function WssErrorModal(
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        paddingX={3}
-        paddingTop={2}
-      >
-        <Typography variant="h3" paddingTop={1}>
-          WebSocket SSL Error
-        </Typography>
+      <DialogTitle className={classes.dialogTitle}>
+        WebSocket SSL Error
         <IconButton
           onClick={() => {
             setOpen(false);
@@ -61,19 +58,21 @@ export default function WssErrorModal(
         >
           <CloseIcon />
         </IconButton>
-      </Stack>
-      <Stack paddingX={3} paddingY={2} rowGap={2}>
-        <Typography variant="body1" color="text.secondary">
-          By default, Chrome prevents a secure <code>https://</code> page from connecting to an
-          insecure <code>ws://</code> WebSocket server. To allow the connection, enable &quot;Unsafe
-          Scripts&quot; for this page.
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Click the shield icon at the end of your address bar, and then click &quot;Load Unsafe
-          Scripts.&quot;
-        </Typography>
-        <img src={WssErrorModalScreenshot} alt="WSS screenshot" className={classes.image} />
-      </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <Stack gap={2}>
+          <Typography variant="body1" color="text.secondary">
+            By default, Chrome prevents a secure <code>https://</code> page from connecting to an
+            insecure <code>ws://</code> WebSocket server. To allow the connection, enable
+            &quot;Unsafe Scripts&quot; for this page.
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Click the shield icon at the end of your address bar, and then click &quot;Load Unsafe
+            Scripts.&quot;
+          </Typography>
+          <img src={WssErrorModalScreenshot} alt="WSS screenshot" className={classes.image} />
+        </Stack>
+      </DialogContent>
     </Dialog>
   );
 }

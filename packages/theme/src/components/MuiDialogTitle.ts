@@ -6,9 +6,6 @@ import { OverrideComponentReturn } from "../types";
 
 export const MuiDialogTitle: OverrideComponentReturn<"MuiDialogTitle"> = {
   styleOverrides: {
-    root: ({ theme }) => ({
-      ...theme.typography.h4,
-      fontWeight: 600,
-    }),
+    root: ({ theme }) => theme.typography.h4,
   },
 };
