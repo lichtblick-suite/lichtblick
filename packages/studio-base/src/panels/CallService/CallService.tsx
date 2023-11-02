@@ -180,7 +180,16 @@ function CallServiceContent(
         config.serviceName!,
         JSON.parse(config.requestPayload!),
       );
-      setState({ status: "success", value: JSON.stringify(response, undefined, 2) ?? "" });
+      setState({
+        status: "success",
+        value:
+          JSON.stringify(
+            response,
+            // handle stringify BigInt correctly
+            (_key, value) => (typeof value === "bigint" ? value.toString() : value),
+            2,
+          ) ?? "",
+      });
     } catch (err) {
       setState({ status: "error", value: (err as Error).message });
       log.error(err);
