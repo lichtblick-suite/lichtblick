@@ -19,7 +19,7 @@ import { openSiblingPlotPanel, plotableRosTypes } from "@foxglove/studio-base/pa
 import {
   openSiblingStateTransitionsPanel,
   transitionableRosTypes,
-} from "@foxglove/studio-base/panels/StateTransitions";
+} from "@foxglove/studio-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 

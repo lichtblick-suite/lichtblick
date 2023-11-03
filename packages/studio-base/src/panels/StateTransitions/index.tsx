@@ -46,26 +46,13 @@ import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/s
 import { SubscribePayload } from "@foxglove/studio-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { Bounds } from "@foxglove/studio-base/types/Bounds";
-import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fontMonospace } from "@foxglove/theme";
 
 import messagesToDatasets from "./messagesToDatasets";
 import { useStateTransitionsPanelSettings } from "./settings";
 import { DEFAULT_PATH, stateTransitionPathDisplayName } from "./shared";
 import { StateTransitionConfig } from "./types";
-
-export const transitionableRosTypes = [
-  "bool",
-  "int8",
-  "uint8",
-  "int16",
-  "uint16",
-  "int32",
-  "uint32",
-  "int64",
-  "uint64",
-  "string",
-];
 
 const fontSize = 10;
 const fontWeight = "bold";
@@ -143,26 +130,6 @@ const plugins: ChartOptions["plugins"] = {
     },
   },
 };
-
-export function openSiblingStateTransitionsPanel(
-  openSiblingPanel: OpenSiblingPanel,
-  topicName: string,
-): void {
-  openSiblingPanel({
-    panelType: "StateTransitions",
-    updateIfExists: true,
-    siblingConfigCreator: (config: PanelConfig) => {
-      return {
-        ...config,
-        paths: _.uniq(
-          (config as StateTransitionConfig).paths.concat([
-            { value: topicName, timestampMethod: "receiveTime" },
-          ]),
-        ),
-      };
-    },
-  });
-}
 
 function selectCurrentTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.currentTime;
