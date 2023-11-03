@@ -4,6 +4,7 @@
 
 import { simplify } from "intervals-fn";
 import * as _ from "lodash-es";
+import * as R from "ramda";
 
 import { Condvar } from "@foxglove/den/async";
 import { filterMap } from "@foxglove/den/collection";
@@ -179,7 +180,7 @@ export class BlockLoader {
   }
 
   async #load(args: { progress: LoadArgs["progress"] }): Promise<void> {
-    const topics = this.#topics;
+    const topics = new Map(this.#topics);
 
     // Ignore changing the blocks if the topic list is empty
     if (topics.size === 0) {
@@ -260,6 +261,12 @@ export class BlockLoader {
         // No results means cursor aborted or eof
         if (!results) {
           await cursor.end();
+          return;
+        }
+
+        // When topics change while loading, we need to wait for the next
+        // iteration
+        if (!R.equals(topics, this.#topics)) {
           return;
         }
 

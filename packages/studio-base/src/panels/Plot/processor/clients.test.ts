@@ -17,6 +17,8 @@ import {
 } from "./clients";
 import { initProcessor, initClient, rebuildClient } from "./state";
 import {
+  FAKE_TOPIC,
+  FAKE_SCHEMA,
   FAKE_PATH,
   CLIENT_ID,
   createClient,
@@ -89,12 +91,22 @@ describe("updateParams", () => {
     expect(after.clients[0]).toEqual(before.clients[0]);
   });
   it("updates client", () => {
-    const before = createState("/foo.bar");
+    const before = createState(FAKE_PATH);
     const params = createParams("/some.test");
     const [after, effects] = updateParams(CLIENT_ID, params, before);
     expect(after.clients[0]?.params).not.toEqual(before.clients[0]?.params);
     expect(after.clients[0]?.topics).toEqual(["/some"]);
     expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
+  });
+  it("moves data out of pending", () => {
+    const before = {
+      ...createState(),
+      pending: createMessages(FAKE_TOPIC, FAKE_SCHEMA, 1),
+    };
+    const [after, effects] = updateParams(CLIENT_ID, createParams(FAKE_PATH), before);
+    expect(after.pending[FAKE_TOPIC]).toEqual(undefined);
+    expect(after.blocks[FAKE_TOPIC]?.length).toEqual(1);
+    expect(effects[0]).toEqual(rebuildClient(CLIENT_ID));
   });
 });
 
@@ -113,7 +125,7 @@ describe("updateView", () => {
     expect(after.clients[0]).toEqual(before.clients[0]);
   });
   it("updates client", () => {
-    const before = createState("/foo.bar");
+    const before = createState(FAKE_PATH);
     const [after, effects] = updateView(CLIENT_ID, view, before);
     expect(after.clients[0]?.view).toEqual(view);
     expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
@@ -149,22 +161,22 @@ describe("compressClients", () => {
   });
   it("removes excess current messages", () => {
     const before = {
-      ...createState("/foo.data"),
+      ...createState(FAKE_PATH),
       isLive: true,
-      current: createMessages("/foo", "foo", MESSAGE_CULL_THRESHOLD + 1),
+      current: createMessages(FAKE_TOPIC, FAKE_SCHEMA, MESSAGE_CULL_THRESHOLD + 1),
     };
     const [after, effects] = compressClients(before);
-    expect(after.current["/foo"]?.length).toEqual(MESSAGE_CULL_THRESHOLD);
+    expect(after.current[FAKE_TOPIC]?.length).toEqual(MESSAGE_CULL_THRESHOLD);
     expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
   });
   it("does not remove messages < MESSAGE_CULL_THRESHOLD", () => {
     const before = {
-      ...createState("/foo.data"),
+      ...createState(FAKE_PATH),
       isLive: true,
-      current: createMessages("/foo", "foo", MESSAGE_CULL_THRESHOLD - 1),
+      current: createMessages(FAKE_TOPIC, FAKE_SCHEMA, MESSAGE_CULL_THRESHOLD - 1),
     };
     const [after, effects] = compressClients(before);
-    expect(after.current["/foo"]?.length).toEqual(MESSAGE_CULL_THRESHOLD - 1);
+    expect(after.current[FAKE_TOPIC]?.length).toEqual(MESSAGE_CULL_THRESHOLD - 1);
     expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
   });
 });

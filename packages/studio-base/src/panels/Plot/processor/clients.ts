@@ -18,7 +18,9 @@ import {
   mapClients,
   rebuildClient,
   keepEffects,
+  concatEffects,
   initClient,
+  getAllTopics,
 } from "./state";
 import { StateAndEffects, SideEffects, State, Client } from "./types";
 import { PlotParams } from "../internalTypes";
@@ -102,6 +104,35 @@ export function updateParams(id: string, params: PlotParams, state: State): Stat
       );
     }),
     keepEffects(evictCache),
+    concatEffects((newState: State): StateAndEffects => {
+      const { pending, blocks } = newState;
+
+      const allNewTopics = getAllTopics(newState);
+      const newData = R.pick(allNewTopics, pending);
+      if (R.isEmpty(newData)) {
+        return [newState, []];
+      }
+
+      const newTopics = R.keys(newData);
+
+      // Move new data now used by at least one client into the real block data
+      const migrated = {
+        ...newState,
+        pending: R.omit(allNewTopics, pending),
+        blocks: {
+          ...blocks,
+          ...newData,
+        },
+      };
+
+      return mapClients((client, nextState) => {
+        const { topics } = client;
+        if (R.intersection(newTopics, topics).length === 0) {
+          return noEffects(client);
+        }
+        return refreshClient(client, nextState);
+      })(migrated);
+    }),
   )(state);
 }
 

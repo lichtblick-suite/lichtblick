@@ -217,6 +217,9 @@ function useData(id: string, params: PlotParams) {
 
   const blocks = useBlocks(blockSubscriptions);
   useEffect(() => {
+    if (blockSubscriptions.length === 0) {
+      return;
+    }
     const {
       state: newState,
       resetTopics,

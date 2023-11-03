@@ -81,10 +81,10 @@ export function processBlocks(
       const currentCursor = cursors[topic] ?? 0;
 
       // 1. check for any new, non-empty unsent blocks
-      const lastNew = R.findLastIndex(
-        (block) => block[topic] != undefined,
-        blocks.slice(currentCursor),
-      );
+      const lastNew = R.findLastIndex((block) => {
+        const data = block[topic];
+        return data != undefined && data.length !== 0;
+      }, blocks.slice(currentCursor));
       const newCursor = lastNew === -1 ? currentCursor : lastNew + currentCursor + 1;
 
       // 2. check whether any blocks below the current cursor have changed

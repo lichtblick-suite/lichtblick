@@ -23,6 +23,8 @@ export type State = {
   clients: Client[];
   globalVariables: GlobalVariables;
   blocks: Messages;
+  // all block data that was sent, but has not yet been used by a client
+  pending: Messages;
   current: Messages;
   metadata: MetadataEnums;
 };

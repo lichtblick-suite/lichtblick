@@ -11,7 +11,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
 
 import { initAccumulated, accumulate, buildPlot } from "./accumulate";
-import { rebuildClient, sendData, mapClients, noEffects, keepEffects } from "./state";
+import { rebuildClient, sendData, mapClients, noEffects, keepEffects, getAllTopics } from "./state";
 import { State, StateAndEffects, Client, SideEffects } from "./types";
 import { Messages } from "../internalTypes";
 import { isSingleMessage } from "../params";
@@ -33,12 +33,8 @@ export function receiveMetadata(
 }
 
 export function evictCache(state: State): State {
-  const { clients, blocks, current } = state;
-  const topics = R.pipe(
-    R.chain(({ topics: clientTopics }: Client) => clientTopics),
-    R.uniq,
-  )(clients);
-
+  const { blocks, current } = state;
+  const topics = getAllTopics(state);
   return {
     ...state,
     blocks: R.pick(topics, blocks),
@@ -47,22 +43,31 @@ export function evictCache(state: State): State {
 }
 
 export function addBlock(block: Messages, resetTopics: string[], state: State): StateAndEffects {
-  const { blocks, metadata, globalVariables } = state;
-  const topics = R.keys(block);
+  const { blocks, pending, metadata, globalVariables } = state;
+
+  const blockTopics = R.keys(block);
+  const clientTopics = getAllTopics(state);
+  const [usedTopics, unusedTopics] = R.partition(
+    (topic) => clientTopics.includes(topic),
+    blockTopics,
+  );
+  const usedData = R.pick(usedTopics, block);
+  const unusedData = R.pick(unusedTopics, block);
 
   const newState = {
     ...state,
+    pending: R.mergeWith(R.concat, pending, unusedData),
     blocks: R.pipe(
       // Remove data for any topics that have been reset
       R.omit(resetTopics),
       // Merge the new block into the existing blocks
-      (newBlocks) => R.mergeWith(R.concat, newBlocks, block),
+      (newBlocks) => R.mergeWith(R.concat, newBlocks, usedData),
     )(blocks),
   };
 
   return mapClients((client, { blocks: newBlocks }): [Client, SideEffects] => {
     const { id, params } = client;
-    const relevantTopics = R.intersection(topics, client.topics);
+    const relevantTopics = R.intersection(blockTopics, client.topics);
     const shouldReset = R.intersection(relevantTopics, resetTopics).length > 0;
     if (params == undefined || isSingleMessage(params) || relevantTopics.length === 0) {
       return [client, []];

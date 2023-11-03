@@ -50,10 +50,15 @@ describe("addBlock", () => {
   });
   it("concatenates messages", () => {
     const [after] = addBlock(createMessages(FAKE_TOPIC, FAKE_SCHEMA, 1), [], {
-      ...initProcessor(),
+      ...createState(FAKE_PATH),
       blocks: createMessages(FAKE_TOPIC, FAKE_SCHEMA, 1),
     });
     expect(after.blocks[FAKE_TOPIC]?.length).toEqual(2);
+  });
+  it("adds messages to pending if no client matches", () => {
+    const [after] = addBlock(createMessages(FAKE_TOPIC, FAKE_SCHEMA, 1), [], initProcessor());
+    expect(after.blocks[FAKE_TOPIC]).toEqual(undefined);
+    expect(after.pending[FAKE_TOPIC]?.length).toEqual(1);
   });
   it("ignores client without params", () => {
     const before = {
