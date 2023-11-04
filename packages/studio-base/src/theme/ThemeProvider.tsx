@@ -5,6 +5,7 @@
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material";
+import * as React from "react";
 import { useEffect, useLayoutEffect, useMemo } from "react";
 
 import { createMuiTheme } from "@foxglove/theme";
