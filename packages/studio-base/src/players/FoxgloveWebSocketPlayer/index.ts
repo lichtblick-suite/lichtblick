@@ -78,6 +78,16 @@ type ResolvedService = {
 };
 type MessageDefinitionMap = Map<string, MessageDefinition>;
 
+/**
+ * When the tab is inactive setTimeout's are throttled to at most once per second.
+ * Because the MessagePipeline listener uses timeouts to resolve its promises, it throttles our ability to
+ * emit a frame more than once per second. In the websocket player this was causing
+ * an accumulation of messages that were waiting to be emitted, this could keep growing
+ * indefinitely if the rate at which we emit a frame is low enough.
+ * 1500MB
+ */
+const CURRENT_FRAME_MAXIMUM_SIZE_BYTES = 15e8;
+
 export default class FoxgloveWebSocketPlayer implements Player {
   readonly #sourceId: string;
 
@@ -94,6 +104,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #topicsStats = new Map<string, TopicStats>(); // Topic names to topic statistics.
   #datatypes: MessageDefinitionMap = new Map(); // Datatypes as published by the WebSocket.
   #parsedMessages: MessageEvent[] = []; // Queue of messages that we'll send in next _emitState() call.
+  #parsedMessagesBytes: number = 0;
   #receivedBytes: number = 0;
   #metricsCollector: PlayerMetricsCollectorInterface;
   #hasReceivedMessage = false;
@@ -524,6 +535,28 @@ export default class FoxgloveWebSocketPlayer implements Player {
           sizeInBytes: data.byteLength,
           schemaName: chanInfo.channel.schemaName,
         });
+        this.#parsedMessagesBytes += data.byteLength;
+        if (this.#parsedMessagesBytes > CURRENT_FRAME_MAXIMUM_SIZE_BYTES) {
+          this.#problems.addProblem(`webSocketPlayer:parsedMessageCacheFull`, {
+            severity: "error",
+            message: `WebSocketPlayer maximum frame size (${(
+              CURRENT_FRAME_MAXIMUM_SIZE_BYTES / 1_000_000
+            ).toFixed(
+              2,
+            )}MB) reached. Dropping old messages. This accumulation can occur if the browser tab has been inactive.`,
+          });
+          // Amortize cost of dropping messages by dropping parsedMessages size to
+          // 80% so that it doesn't happen for every message after reaching the limit
+          const evictUntilSize = 0.8 * CURRENT_FRAME_MAXIMUM_SIZE_BYTES;
+          let droppedBytes = 0;
+          let indexToCutBefore = 0;
+          while (this.#parsedMessagesBytes - droppedBytes > evictUntilSize) {
+            droppedBytes += this.#parsedMessages[indexToCutBefore]!.sizeInBytes;
+            indexToCutBefore++;
+          }
+          this.#parsedMessages.splice(0, indexToCutBefore);
+          this.#parsedMessagesBytes -= droppedBytes;
+        }
 
         // Update the message count for this topic
         const topicStats = new Map(this.#topicsStats);
@@ -553,6 +586,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       if (this.#clockTime != undefined && isLessThan(time, this.#clockTime)) {
         this.#numTimeSeeks++;
         this.#parsedMessages = [];
+        this.#parsedMessagesBytes = 0;
       }
 
       this.#clockTime = time;
@@ -796,6 +830,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     const messages = this.#parsedMessages;
     this.#parsedMessages = [];
+    this.#parsedMessagesBytes = 0;
     return this.#listener({
       name: this.#name,
       presence: this.#presence,
