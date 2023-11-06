@@ -64,6 +64,7 @@ export class RenderableArrows extends RenderablePrimitive {
       this.#material,
       this.#maxInstances,
     );
+    this.#shaftMesh.frustumCulled = false;
     this.#shaftMesh.count = 0;
     this.add(this.#shaftMesh);
 
@@ -76,6 +77,7 @@ export class RenderableArrows extends RenderablePrimitive {
       this.#material,
       this.#maxInstances,
     );
+    this.#headMesh.frustumCulled = false;
     this.#headMesh.count = 0;
     this.add(this.#headMesh);
 
@@ -127,6 +129,7 @@ export class RenderableArrows extends RenderablePrimitive {
         this.#material,
         this.#maxInstances,
       );
+      this.#shaftMesh.frustumCulled = false;
       this.#shaftGeometry.setAttribute("instanceOpacity", this.#instanceOpacity);
       this.add(this.#shaftMesh);
 
@@ -137,6 +140,7 @@ export class RenderableArrows extends RenderablePrimitive {
         this.#material,
         this.#maxInstances,
       );
+      this.#headMesh.frustumCulled = false;
       this.#headGeometry.setAttribute("instanceOpacity", this.#instanceOpacity);
       this.add(this.#headMesh);
 

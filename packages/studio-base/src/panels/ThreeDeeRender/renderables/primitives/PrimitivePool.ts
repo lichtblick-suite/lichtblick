@@ -38,7 +38,9 @@ export class PrimitivePool {
     if (this.#disposed) {
       throw new Error(`Attempt to acquire PrimitiveType.${type} after PrimitivePool was disposed`);
     }
-    const primitive = this.#primitivesByType.get(type)?.pop();
+    // Using shift allows renderables to be reused for the same entities after a seek
+    // This avoids unnecessary `ensureCapacity` calls for instanced renderables
+    const primitive = this.#primitivesByType.get(type)?.shift();
     if (primitive) {
       primitive.prepareForReuse();
       return primitive as InstanceType<(typeof CONSTRUCTORS)[T]>;

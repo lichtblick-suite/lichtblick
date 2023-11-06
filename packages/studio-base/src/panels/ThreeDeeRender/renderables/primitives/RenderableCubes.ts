@@ -53,6 +53,7 @@ export class RenderableCubes extends RenderablePrimitive {
 
     this.#maxInstances = 16;
     this.#mesh = new THREE.InstancedMesh(this.#geometry, this.#material, this.#maxInstances);
+    this.#mesh.frustumCulled = false;
     this.#instanceOpacity = new THREE.InstancedBufferAttribute(
       new Float32Array(this.#maxInstances),
       1,
@@ -86,6 +87,7 @@ export class RenderableCubes extends RenderablePrimitive {
       this.#mesh.removeFromParent();
       this.#mesh.dispose();
       this.#mesh = new THREE.InstancedMesh(this.#geometry, this.#material, this.#maxInstances);
+      this.#mesh.frustumCulled = false;
       this.#instanceOpacity = new THREE.InstancedBufferAttribute(
         new Float32Array(this.#maxInstances),
         1,
@@ -159,6 +161,7 @@ export class RenderableCubes extends RenderablePrimitive {
   }
 
   public override dispose(): void {
+    this.clear();
     this.#mesh.dispose();
     this.#geometry.dispose();
     this.#material.dispose();

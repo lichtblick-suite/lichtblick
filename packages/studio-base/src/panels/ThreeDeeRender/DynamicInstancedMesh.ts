@@ -25,6 +25,7 @@ export class DynamicInstancedMesh<
     super(geometry, material, 0);
 
     this.#capacity = initialCapacity;
+    this.frustumCulled = false;
     this.#resize();
   }
 

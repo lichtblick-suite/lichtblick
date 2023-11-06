@@ -51,6 +51,7 @@ export class RenderableCylinders extends RenderablePrimitive {
       .clone();
     this.#maxInstances = 16;
     this.#mesh = new THREE.InstancedMesh(this.#geometry, this.#material, this.#maxInstances);
+    this.#mesh.frustumCulled = false;
     this.#mesh.userData.pickingMaterial = this.#pickingMaterial;
     this.#instanceOpacity = new THREE.InstancedBufferAttribute(
       new Float32Array(this.#maxInstances),
@@ -114,6 +115,7 @@ export class RenderableCylinders extends RenderablePrimitive {
       this.#mesh.removeFromParent();
       this.#mesh.dispose();
       this.#mesh = new THREE.InstancedMesh(this.#geometry, this.#material, this.#maxInstances);
+      this.#mesh.frustumCulled = false;
       this.#mesh.userData.pickingMaterial = this.#pickingMaterial;
       this.add(this.#mesh);
 

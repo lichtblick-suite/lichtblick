@@ -42,6 +42,7 @@ export class Axis extends THREE.Object3D {
       () => createShaftGeometry(this.#renderer.maxLod),
     );
     this.#shaftMesh = new THREE.InstancedMesh(shaftGeometry, standardMaterial(COLOR_WHITE), 3);
+    this.#shaftMesh.frustumCulled = false;
     this.#shaftMesh.castShadow = true;
     this.#shaftMesh.receiveShadow = true;
 
@@ -52,6 +53,7 @@ export class Axis extends THREE.Object3D {
     );
 
     this.#headMesh = new THREE.InstancedMesh(headGeometry, standardMaterial(COLOR_WHITE), 3);
+    this.#headMesh.frustumCulled = false;
     this.#headMesh.castShadow = true;
     this.#headMesh.receiveShadow = true;
 
