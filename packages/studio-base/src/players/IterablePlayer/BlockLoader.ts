@@ -4,7 +4,6 @@
 
 import { simplify } from "intervals-fn";
 import * as _ from "lodash-es";
-import * as R from "ramda";
 
 import { Condvar } from "@foxglove/den/async";
 import { filterMap } from "@foxglove/den/collection";
@@ -264,9 +263,10 @@ export class BlockLoader {
           return;
         }
 
-        // When topics change while loading, we need to wait for the next
-        // iteration
-        if (!R.equals(topics, this.#topics)) {
+        // While we were waiting for cursor data the topics we need to be loading may have changed.
+        // Check whether the topics are changed and abort this loading instance because the results
+        // may no longer be valid for the data we should be loading.
+        if (!_.isEqual(topics, this.#topics)) {
           return;
         }
 
