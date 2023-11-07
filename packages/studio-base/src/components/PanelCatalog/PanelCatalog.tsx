@@ -197,7 +197,6 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
         onPanelSelect({
           type: highlightedPanel.type,
           config: highlightedPanel.config,
-          relatedConfigs: highlightedPanel.relatedConfigs,
         });
       }
     },

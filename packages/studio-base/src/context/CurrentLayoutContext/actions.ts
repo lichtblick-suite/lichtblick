@@ -117,7 +117,6 @@ export type SwapPanelPayload = {
   root: MosaicNode<string>;
   path: MosaicPath;
   config: PanelConfig;
-  relatedConfigs?: SavedProps;
 };
 export type SWAP_PANEL = { type: "SWAP_PANEL"; payload: SwapPanelPayload };
 
@@ -131,7 +130,6 @@ export type AddPanelPayload = {
   id: string;
   tabId?: string;
   config?: PanelConfig;
-  relatedConfigs?: SavedProps;
 };
 export type ADD_PANEL = { type: "ADD_PANEL"; payload: AddPanelPayload };
 
@@ -141,7 +139,6 @@ export type DropPanelPayload = {
   position?: "top" | "bottom" | "left" | "right";
   tabId?: string;
   config?: PanelConfig;
-  relatedConfigs?: SavedProps;
 };
 export type DROP_PANEL = { type: "DROP_PANEL"; payload: DropPanelPayload };
 

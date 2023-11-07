@@ -230,27 +230,28 @@ const replaceMaybeTabLayoutWithNewPanelIds = (panelIdMap: PanelIdMap) => {
 export const getSaveConfigsPayloadForAddedPanel = ({
   id,
   config,
-  relatedConfigs,
+  savedProps,
 }: {
   id: string;
   config: PanelConfig;
-  relatedConfigs?: SavedProps;
+  savedProps: SavedProps;
 }): SaveConfigsPayload => {
-  if (!relatedConfigs) {
-    return { configs: [{ id, config }] };
-  }
-  const templateIds = getPanelIdsInsideTabPanels([id], { [id]: config });
+  const templateIds = getPanelIdsInsideTabPanels(
+    [id],
+    // Merge the new config with existing configs in case the new panel is a Tab that references other existing panels
+    { ...savedProps, [id]: config },
+  );
   const panelIdMap = mapTemplateIdsToNewIds(templateIds);
   const newConfigs = filterMap(templateIds, (templateId) => {
     const panelId = panelIdMap[templateId];
-    const relatedConfig = relatedConfigs[templateId];
-    if (panelId == undefined || relatedConfig == undefined) {
+    const panelProps = savedProps[templateId];
+    if (panelId == undefined || panelProps == undefined) {
       return;
     }
 
     return {
       id: panelId,
-      config: relatedConfig,
+      config: panelProps,
     };
   });
   const allConfigs = [...newConfigs, { id, config }].map(

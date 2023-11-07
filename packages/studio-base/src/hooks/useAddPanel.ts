@@ -10,9 +10,9 @@ import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 export default function useAddPanel(): (selection: PanelSelection) => void {
   const { addPanel } = useCurrentLayoutActions();
   return useCallback(
-    ({ type, config, relatedConfigs }: PanelSelection) => {
+    ({ type, config }: PanelSelection) => {
       const id = getPanelIdForType(type);
-      addPanel({ id, config, relatedConfigs });
+      addPanel({ id, config });
     },
     [addPanel],
   );

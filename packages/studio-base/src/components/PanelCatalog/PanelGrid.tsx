@@ -35,14 +35,14 @@ export function PanelGrid(props: Props): JSX.Element {
 
   const displayPanelListItem = useCallback(
     (panelInfo: PanelInfo) => {
-      const { title, type, config, relatedConfigs } = panelInfo;
+      const { title, type, config } = panelInfo;
       return (
         <PanelGridCard
           key={`${type}-${title}`}
           panel={panelInfo}
           searchQuery={searchQuery}
           onClick={() => {
-            onPanelSelect({ type, config, relatedConfigs });
+            onPanelSelect({ type, config });
           }}
         />
       );

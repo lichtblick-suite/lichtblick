@@ -71,9 +71,9 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
   });
 
   const onPanelSelect = useCallback(
-    ({ type, config, relatedConfigs }: PanelSelection) => {
+    ({ type, config }: PanelSelection) => {
       const id = getPanelIdForType(type);
-      addPanel({ tabId, id, config, relatedConfigs });
+      addPanel({ tabId, id, config });
     },
     [addPanel, tabId],
   );

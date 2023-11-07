@@ -13,7 +13,7 @@ import { makeStyles } from "tss-react/mui";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
 import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { MosaicDropResult, PanelConfig, SavedProps } from "@foxglove/studio-base/types/panels";
+import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
 
 const useStyles = makeStyles<void, "dragIcon">()((theme, _params, classes) => {
   return {
@@ -36,7 +36,6 @@ const useStyles = makeStyles<void, "dragIcon">()((theme, _params, classes) => {
 export type DropDescription = {
   type: string;
   config?: PanelConfig;
-  relatedConfigs?: SavedProps;
   position?: MosaicDropTargetPosition;
   path?: MosaicPath;
   tabId?: string;
@@ -91,8 +90,8 @@ export function PanelListItem(props: Props): JSX.Element {
         onClick();
         return;
       }
-      const { type, config, relatedConfigs } = panel;
-      onDrop({ type, config, relatedConfigs, position, path, tabId });
+      const { type, config } = panel;
+      onDrop({ type, config, position, path, tabId });
     },
   });
 

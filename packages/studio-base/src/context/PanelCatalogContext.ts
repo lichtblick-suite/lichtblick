@@ -27,8 +27,6 @@ export type PanelInfo = {
    */
   module: () => Promise<{ default: PanelComponent }>;
   config?: PanelConfig;
-  relatedConfigs?: { [panelId: string]: PanelConfig };
-  preconfigured?: boolean;
   extensionNamespace?: ExtensionNamespace;
 };
 

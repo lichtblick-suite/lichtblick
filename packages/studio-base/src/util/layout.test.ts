@@ -43,7 +43,7 @@ describe("layout", () => {
       const configsSaved = getSaveConfigsPayloadForAddedPanel({
         id: "Tab!abc",
         config: { tabs: [tabConfig] },
-        relatedConfigs: { "Plot!1": firstPlotConfig, "Plot!2": secondPlotConfig },
+        savedProps: { "Plot!1": firstPlotConfig, "Plot!2": secondPlotConfig },
       }).configs;
       const newIdForFirstPlot = configsSaved[0]?.id;
       expect(configsSaved[0]?.config).toEqual(firstPlotConfig);
@@ -75,7 +75,7 @@ describe("layout", () => {
             { title: "2", layout: undefined },
           ],
         },
-        relatedConfigs: {},
+        savedProps: {},
       };
       const { configs } = getSaveConfigsPayloadForAddedPanel(inputConfig);
       expect(inputConfig.config.tabs.length).toEqual(
@@ -95,20 +95,8 @@ describe("layout", () => {
       };
       const { configs } = getSaveConfigsPayloadForAddedPanel({
         ...originalConfig,
-        relatedConfigs: {},
+        savedProps: {},
       });
-      expect(originalConfig).toEqual(configs[0]);
-    });
-    it("returns config when there are no related configs", () => {
-      const originalConfig = {
-        id: "Tab!abc",
-        config: { tabs: [{ title: "First tab", layout: undefined }] },
-      };
-      const { configs } = getSaveConfigsPayloadForAddedPanel({
-        ...originalConfig,
-        relatedConfigs: undefined,
-      });
-      expect(configs.length).toEqual(1);
       expect(originalConfig).toEqual(configs[0]);
     });
     it("returns configs when there are missing related configs", () => {
@@ -116,7 +104,7 @@ describe("layout", () => {
       const configsSaved = getSaveConfigsPayloadForAddedPanel({
         id: "Tab!abc",
         config: { tabs: [tabConfig] },
-        relatedConfigs: { "Plot!1": firstPlotConfig },
+        savedProps: { "Plot!1": firstPlotConfig },
       }).configs;
       expect(configsSaved.length).toEqual(2);
       const newIdForFirstPlot = configsSaved[0]?.id;

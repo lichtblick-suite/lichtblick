@@ -40,7 +40,7 @@ export default function ChangePanelMenu({
 
   const handleSwap = useCallback(
     (id?: string) =>
-      ({ type, config, relatedConfigs }: PanelSelection) => {
+      ({ type, config }: PanelSelection) => {
         // Reselecting current panel type is a no-op.
         if (type === panelContext?.type) {
           onClose();
@@ -54,7 +54,6 @@ export default function ChangePanelMenu({
           root: mosaicActions.getRoot() as MosaicNode<string>,
           path: mosaicWindowActions.getPath(),
           config: config ?? {},
-          relatedConfigs,
         });
       },
     [onClose, mosaicActions, mosaicWindowActions, panelContext?.type, swapPanel, tabId],

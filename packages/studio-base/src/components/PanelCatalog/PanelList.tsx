@@ -47,14 +47,13 @@ export function PanelList(props: Props): JSX.Element {
   // Update panel layout when a panel menu item is dropped;
   // actual operations to change layout supplied by react-mosaic-component
   const onPanelMenuItemDrop = useCallback(
-    ({ config, relatedConfigs, type, position, path, tabId }: DropDescription) => {
+    ({ config, type, position, path, tabId }: DropDescription) => {
       dropPanel({
         newPanelType: type,
         destinationPath: path,
         position,
         tabId,
         config,
-        relatedConfigs,
       });
       blurActiveElement();
     },
@@ -67,7 +66,7 @@ export function PanelList(props: Props): JSX.Element {
 
   const displayPanelListItem = useCallback(
     (panelInfo: PanelInfo) => {
-      const { title, type, config, relatedConfigs } = panelInfo;
+      const { title, type, config } = panelInfo;
       return (
         <PanelListItem
           key={`${type}-${title}`}
@@ -76,7 +75,7 @@ export function PanelList(props: Props): JSX.Element {
           onDragStart={onDragStart}
           onDrop={onPanelMenuItemDrop}
           onClick={() => {
-            onPanelSelect({ type, config, relatedConfigs });
+            onPanelSelect({ type, config });
             blurActiveElement();
           }}
           checked={type === selectedPanelType}
