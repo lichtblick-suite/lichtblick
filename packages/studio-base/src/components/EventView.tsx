@@ -112,7 +112,7 @@ function EventViewComponent(params: {
   const { classes, cx } = useStyles();
 
   const fields = _.compact([
-    ["timestamp", formattedTime],
+    ["start", formattedTime],
     Number(event.event.durationNanos) > 0 && ["duration", formatEventDuration(event.event)],
     ...Object.entries(event.event.metadata),
   ]);
