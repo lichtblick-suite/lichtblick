@@ -85,8 +85,8 @@ const fixture: Fixture = {
     { name: "/blocks", schemaName: "msgs/SystemState" },
   ],
   activeData: {
-    startTime: { sec: 1526191527, nsec: 202050 },
-    endTime: { sec: 1526191551, nsec: 999997069 },
+    startTime: { sec: 1526191539, nsec: 202050 },
+    endTime: { sec: 1526191542, nsec: 999997069 },
     isPlaying: false,
     speed: 0.2,
   },
@@ -230,8 +230,8 @@ export const WithXAxisMinMax: StoryObj = {
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame} includeSettings>
         <StateTransitions
           overrideConfig={{
-            xAxisMinValue: 11,
-            xAxisMaxValue: 15,
+            xAxisMinValue: 1,
+            xAxisMaxValue: 3,
             paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
             isSynced: true,
           }}

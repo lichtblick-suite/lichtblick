@@ -326,9 +326,18 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         x: { min: currentTimeSinceStart - config.xAxisRange, max: currentTimeSinceStart },
         y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
       };
-    } else {
-      return undefined;
+    } else if (endTimeSinceStart != undefined) {
+      // If we have no configured xAxis min/max or range, then we set the x axis max to end time
+      // This will mirror the plot behavior of showing the full x-axis for data time range rather
+      // than constantly adjusting the end time to the latest loaded state transition while data
+      // is loading.
+      return {
+        x: { min: 0, max: endTimeSinceStart },
+        y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
+      };
     }
+
+    return undefined;
   }, [
     config.xAxisMaxValue,
     config.xAxisMinValue,
