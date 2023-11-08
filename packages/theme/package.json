@@ -15,7 +15,7 @@
   "devDependencies": {
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
-    "@fluentui/react-icons": "2.0.218",
+    "@fluentui/react-icons": "2.0.222",
     "@foxglove/tsconfig": "2.0.0",
     "@mui/icons-material": "5.14.12",
     "@mui/material": "5.14.10",

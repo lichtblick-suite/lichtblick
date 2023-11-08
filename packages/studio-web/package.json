@@ -7,7 +7,7 @@
     "@foxglove/studio-base": "workspace:*"
   },
   "devDependencies": {
-    "@fluentui/react-icons": "2.0.218",
+    "@fluentui/react-icons": "2.0.222",
     "@foxglove/log": "workspace:*",
     "@foxglove/theme": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
