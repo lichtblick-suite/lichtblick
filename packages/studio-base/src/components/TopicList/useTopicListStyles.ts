@@ -65,6 +65,8 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
       opacity: 1,
     },
   },
+  // tss-unused-classes only looks within the same file to determine if classes are used. These ones
+  // are used in other files.
   /* eslint-disable tss-unused-classes/unused-classes */
   fieldRow: {
     borderTop: `1px solid ${theme.palette.background.paper}`,
@@ -86,4 +88,5 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
     display: "block",
     textAlign: "start",
   },
+  /* eslint-enable tss-unused-classes/unused-classes */
 }));
