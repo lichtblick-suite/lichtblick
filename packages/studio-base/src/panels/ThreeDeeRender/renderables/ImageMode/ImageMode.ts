@@ -10,14 +10,9 @@ import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import {
-  DraggedMessagePath,
-  Immutable,
-  SettingsTreeAction,
-  SettingsTreeFields,
-  Topic,
-} from "@foxglove/studio";
+import { Immutable, SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
 import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
+import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import { IMAGE_TOPIC_PATH } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 import {

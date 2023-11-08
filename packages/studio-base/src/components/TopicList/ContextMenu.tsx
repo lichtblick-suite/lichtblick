@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useCopyToClipboard } from "react-use";
 
-import { DraggedMessagePath } from "@foxglove/studio";
+import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 
 export function ContextMenu(props: {
   messagePaths: DraggedMessagePath[];

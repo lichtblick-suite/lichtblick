@@ -13,10 +13,8 @@ import Logger from "@foxglove/log";
 import { Time, fromNanoSec, isLessThan, toNanoSec } from "@foxglove/rostime";
 import type { FrameTransform, FrameTransforms, SceneUpdate } from "@foxglove/schemas";
 import {
-  DraggedMessagePath,
   Immutable,
   MessageEvent,
-  MessagePathDropStatus,
   ParameterValue,
   SettingsIcon,
   SettingsTreeAction,
@@ -29,6 +27,8 @@ import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelCont
 import {
   Asset,
   BuiltinPanelExtensionContext,
+  DraggedMessagePath,
+  MessagePathDropStatus,
 } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { LayerErrors } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";

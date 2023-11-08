@@ -13,7 +13,11 @@ import {
 } from "react-dnd";
 
 import Logger from "@foxglove/log";
-import { DraggedMessagePath, MessagePathDropConfig, MessagePathDropStatus } from "@foxglove/studio";
+import {
+  DraggedMessagePath,
+  MessagePathDropConfig,
+  MessagePathDropStatus,
+} from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { MessagePathSelectionContextInternal } from "@foxglove/studio-base/services/messagePathDragging/MessagePathSelectionProvider";
 
 import { MessagePathDragParams } from "./types";

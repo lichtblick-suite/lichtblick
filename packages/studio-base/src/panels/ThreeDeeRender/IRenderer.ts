@@ -6,17 +6,19 @@ import EventEmitter from "eventemitter3";
 import * as THREE from "three";
 
 import {
-  DraggedMessagePath,
   Immutable,
   MessageEvent,
-  MessagePathDropStatus,
   ParameterValue,
   SettingsIcon,
   Topic,
   VariableValue,
 } from "@foxglove/studio";
 import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
-import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import {
+  BuiltinPanelExtensionContext,
+  DraggedMessagePath,
+  MessagePathDropStatus,
+} from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 import { LabelPool } from "@foxglove/three-text";

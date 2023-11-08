@@ -6,8 +6,9 @@ import * as _ from "lodash-es";
 import * as THREE from "three";
 import { DeepPartial, Writable } from "ts-essentials";
 
-import { DraggedMessagePath, MessageEvent, SettingsTreeAction } from "@foxglove/studio";
+import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
 import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
+import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 
 import type { AnyRendererSubscription, IRenderer, RendererConfig } from "./IRenderer";
 import { Path } from "./LayerErrors";
