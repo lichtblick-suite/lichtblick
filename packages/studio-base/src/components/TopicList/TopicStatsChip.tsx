@@ -30,10 +30,10 @@ const useStyles = makeStyles<void, "selected">()((theme, _props, classes) => ({
     paddingBlock: theme.spacing(0.25),
     fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'tnum'`,
 
-    "&:nth-child(1)": {
+    "&:first-of-type": {
       paddingInlineStart: theme.spacing(0.75),
     },
-    "&:nth-last-child(1)": {
+    "&:last-of-type": {
       paddingInlineEnd: theme.spacing(0.75),
     },
   },
