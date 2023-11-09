@@ -30,7 +30,7 @@
     "@foxglove/omgidl-parser": "1.0.2",
     "@foxglove/omgidl-serialization": "1.0.1",
     "@foxglove/ros2idl-parser": "0.3.1",
-    "@foxglove/rosmsg": "5.0.1",
+    "@foxglove/rosmsg": "4.2.2",
     "@foxglove/rosmsg-serialization": "2.0.2",
     "@foxglove/rosmsg2-serialization": "2.0.2",
     "@foxglove/schemas": "1.6.0",
