@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Button, Fade, Tooltip, useTheme } from "@mui/material";
-import { ChartOptions, ScaleOptions } from "chart.js";
+import { ChartOptions, InteractionMode, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import * as _ from "lodash-es";
 import * as R from "ramda";
@@ -112,6 +112,7 @@ export type Props = {
   linesToHide?: {
     [key: string]: boolean;
   };
+  interactionMode?: InteractionMode;
   datasetId?: string;
   onClick?: ChartComponentProps["onClick"];
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
@@ -573,7 +574,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       elements: { line: { tension: 0 } },
       interaction: {
         intersect: false,
-        mode: "x",
+        mode: props.interactionMode ?? "x",
       },
       scales: {
         x: xScale,
@@ -581,7 +582,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       },
       plugins,
     };
-  }, [plugins, xScale, yScale]);
+  }, [plugins, xScale, yScale, props.interactionMode]);
 
   const onHover = useCallback(
     (elements: RpcElement[]) => {

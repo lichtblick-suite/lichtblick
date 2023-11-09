@@ -11,7 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Chart, ChartData, ChartOptions, ChartType } from "chart.js";
+import {
+  Chart,
+  ChartData,
+  ChartOptions,
+  ChartType,
+  Interaction,
+  InteractionModeFunction,
+  InteractionItem,
+} from "chart.js";
+import { getRelativePosition } from "chart.js/helpers";
 import type { Context as DatalabelContext } from "chartjs-plugin-datalabels";
 import DatalabelPlugin from "chartjs-plugin-datalabels";
 import { type Options as DatalabelsPluginOptions } from "chartjs-plugin-datalabels/types/options";
@@ -68,6 +77,39 @@ type ZoomableChart = Chart & {
     panEndHandler(event: HammerInput): void;
   };
 };
+
+declare module "chart.js" {
+  interface InteractionModeMap {
+    lastX: InteractionModeFunction;
+  }
+}
+
+// A custom interaction mode that returns the items before an x cursor position. This mode is
+// used by the state transition panel to show a tooltip of the current state "between" state datapoints.
+//
+// Built-in chartjs interaction of nearest is not sufficient because it snaps forward whereas we only
+// want to look backwards at the state we are currently in.
+//
+// See: https://www.chartjs.org/docs/latest/configuration/interactions.html#custom-interaction-modes
+const lastX: InteractionModeFunction = (chart, event, _options, useFinalPosition) => {
+  // Suppress the type error on the _chart_ type. Chartjs types are broken for the
+  // `getRelativePosition` function which seems to use a different declaration of the Chart type
+  // than what is exported from chart.js.
+  //
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+  const position = getRelativePosition(event, chart as any);
+
+  const datasetIndexToLastItem: InteractionItem[] = [];
+  Interaction.evaluateInteractionItems(chart, "x", position, (element, datasetIndex, index) => {
+    const center = element.getCenterPoint(useFinalPosition);
+    if (center.x <= position.x) {
+      datasetIndexToLastItem[datasetIndex] = { element, datasetIndex, index };
+    }
+  });
+  return datasetIndexToLastItem;
+};
+
+Interaction.modes.lastX = lastX;
 
 export default class ChartJSManager {
   #chartInstance?: Chart;
