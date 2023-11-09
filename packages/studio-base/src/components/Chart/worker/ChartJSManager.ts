@@ -99,6 +99,7 @@ const lastX: InteractionModeFunction = (chart, event, _options, useFinalPosition
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
   const position = getRelativePosition(event, chart as any);
 
+  // Create a sparse array to track the last datum for each dataset
   const datasetIndexToLastItem: InteractionItem[] = [];
   Interaction.evaluateInteractionItems(chart, "x", position, (element, datasetIndex, index) => {
     const center = element.getCenterPoint(useFinalPosition);
@@ -106,7 +107,8 @@ const lastX: InteractionModeFunction = (chart, event, _options, useFinalPosition
       datasetIndexToLastItem[datasetIndex] = { element, datasetIndex, index };
     }
   });
-  return datasetIndexToLastItem;
+  // Filter unused entries from the sparse array
+  return datasetIndexToLastItem.filter(Boolean);
 };
 
 Interaction.modes.lastX = lastX;
