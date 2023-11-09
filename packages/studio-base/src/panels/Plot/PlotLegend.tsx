@@ -17,7 +17,9 @@ import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@foxglove/studio";
-import { PlotLegendRow, ROW_HEIGHT } from "@foxglove/studio-base/panels/Plot/PlotLegendRow";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
+import { PlotLegendRow } from "@foxglove/studio-base/panels/Plot/PlotLegendRow";
 import { PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
 import { PlotConfig } from "@foxglove/studio-base/panels/Plot/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -41,30 +43,28 @@ type Props = Immutable<{
   sidebarDimension: number;
 }>;
 
-const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloating">()(
+const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonFloating">()(
   ({ palette, shadows, shape, spacing }, _params, classes) => ({
     root: {
       display: "flex",
       overflow: "hidden",
     },
     rootFloating: {
-      alignItems: "flex-start",
-      justifyContent: "flex-start",
+      padding: spacing(0.75), // pad the container to prevent shadow from being clipped
+      pointerEvents: "none",
       position: "absolute",
-      inset: "0 0 0 0",
-      height: "100%",
-      width: "100%",
-      overflow: "hidden",
+      top: spacing(4.5),
+      left: spacing(4),
       zIndex: 1000,
-      gap: spacing(0.75),
-      padding: spacing(1.5, 3.75, 4, 4.5),
+      backgroundColor: "transparent",
+      alignItems: "flex-start",
+      height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px - ${spacing(3.5)})`,
+      overflow: "hidden",
+      minWidth: 200,
 
-      [`.${classes.grid}`]: {
-        flex: "0 1 auto",
-        width: "max-content",
-        maxHeight: "100%",
+      [`.${classes.container}`]: {
+        pointerEvents: "auto",
         borderRadius: shape.borderRadius,
-        gridTemplateColumns: "auto repeat(2, minmax(max-content, auto)) auto",
         backgroundImage: `linear-gradient(${[
           "0deg",
           tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
@@ -72,6 +72,7 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
         ].join(" ,")})`,
         backgroundColor: tinycolor(palette.background.paper).setAlpha(0.8).toHex8String(),
         backdropFilter: "blur(3px)",
+        maxWidth: `calc(100% - ${spacing(1)})`,
         boxShadow: shadows[3],
       },
     },
@@ -86,7 +87,7 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
         borderTop: "none",
         borderBottom: "none",
       },
-      [`.${classes.grid}`]: {
+      [`.${classes.container}`]: {
         overflow: "auto",
         height: "100%",
         alignContent: "flex-start",
@@ -103,15 +104,12 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
         borderLeft: "none",
       },
     },
-    grid: {
+    container: {
       alignItems: "center",
-      display: "grid",
-      gridTemplateColumns: "auto repeat(2, minmax(max-content, 1fr)) auto",
-      gridAutoRows: ROW_HEIGHT,
-      width: "100%",
-      columnGap: 1,
       overflow: "auto",
-      justifyItems: "flex-start",
+      display: "grid",
+      gridTemplateColumns: "auto minmax(0, 1fr) auto auto",
+      columnGap: 1,
     },
     dragHandle: {
       userSelect: "none",
@@ -154,7 +152,7 @@ function PlotLegendComponent(props: Props): JSX.Element {
     showPlotValuesInLegend,
     sidebarDimension,
   } = props;
-  const { classes, cx } = useStyles();
+  const { classes, cx, theme } = useStyles();
 
   const dragStart = useRef({ x: 0, y: 0, sidebarDimension: 0 });
 
@@ -229,30 +227,44 @@ function PlotLegendComponent(props: Props): JSX.Element {
         {legendIcon}
       </IconButton>
       {showLegend && (
-        <div
-          className={classes.grid}
+        <Stack
+          flexGrow={1}
+          gap={0.5}
+          overflow="auto"
+          fullHeight={legendDisplay !== "top"}
           style={{
             height: legendDisplay === "top" ? Math.round(sidebarDimension) : undefined,
             width: legendDisplay === "left" ? Math.round(sidebarDimension) : undefined,
+            marginTop: legendDisplay === "floating" ? theme.spacing(-0.75) : undefined,
           }}
         >
-          {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
-            <PlotLegendRow
-              currentTime={currentTime}
-              datasets={datasets}
-              hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
-              index={index}
-              key={index}
-              onClickPath={() => {
-                onClickPath(index);
-              }}
-              path={path}
-              paths={paths}
-              savePaths={savePaths}
-              showPlotValuesInLegend={showPlotValuesInLegend}
-            />
-          ))}
-        </div>
+          <Stack
+            flex="auto"
+            fullWidth
+            fullHeight={legendDisplay !== "top"}
+            overflow={legendDisplay === "floating" ? "auto" : undefined}
+            padding={legendDisplay === "floating" ? 0.75 : undefined}
+          >
+            <div className={classes.container}>
+              {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
+                <PlotLegendRow
+                  currentTime={currentTime}
+                  datasets={datasets}
+                  hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
+                  index={index}
+                  key={index}
+                  onClickPath={() => {
+                    onClickPath(index);
+                  }}
+                  path={path}
+                  paths={paths}
+                  savePaths={savePaths}
+                  showPlotValuesInLegend={showPlotValuesInLegend}
+                />
+              ))}
+            </div>
+          </Stack>
+        </Stack>
       )}
       {legendDisplay !== "floating" && (
         <div
