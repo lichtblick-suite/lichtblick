@@ -13,8 +13,9 @@ const useStyles = makeStyles<void, "selected">()((theme, _props, classes) => ({
     color: theme.palette.action.selected,
     borderColor: "currentColor",
     backgroundColor: theme.palette.background.paper,
+    cursor: "grab",
 
-    [`@container (max-width: 320px)`]: {
+    [`@container (max-width: 180px)`]: {
       display: "none",
     },
     ...(theme.palette.mode === "dark" && {
@@ -32,14 +33,26 @@ const useStyles = makeStyles<void, "selected">()((theme, _props, classes) => ({
 
     "&:first-of-type": {
       paddingInlineStart: theme.spacing(0.75),
+
+      [`@container (max-width: 280px)`]: {
+        paddingInlineEnd: theme.spacing(0.75),
+      },
     },
     "&:last-of-type": {
       paddingInlineEnd: theme.spacing(0.75),
+
+      [`@container (max-width: 280px)`]: {
+        display: "none",
+      },
     },
   },
   divider: {
     borderColor: "currentColor",
     marginInline: theme.spacing(0.5),
+
+    [`@container (max-width: 280px)`]: {
+      display: "none",
+    },
   },
 }));
 

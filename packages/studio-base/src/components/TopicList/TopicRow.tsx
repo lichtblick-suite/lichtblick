@@ -56,11 +56,6 @@ export function TopicRow({
     [connectDragPreview, connectDragSource],
   );
 
-  const cancelDragEvent = useCallback((event: React.DragEvent<HTMLSpanElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
-  }, []);
-
   return (
     <div
       ref={combinedRef}
@@ -77,13 +72,7 @@ export function TopicRow({
       )}
       {/* Extra Stack wrapper to enable growing without the  */}
       <Stack flex="auto" alignItems="flex-start" overflow="hidden">
-        <Typography
-          variant="body2"
-          noWrap
-          draggable
-          onDragStart={cancelDragEvent}
-          className={classes.textContent}
-        >
+        <Typography variant="body2" noWrap className={classes.textContent}>
           <HighlightChars str={topic.name} indices={topicResult.positions} />
           {topic.aliasedFromName != undefined && (
             <Typography variant="caption" className={classes.aliasedTopicName}>
@@ -96,8 +85,6 @@ export function TopicRow({
             variant="caption"
             color="text.secondary"
             noWrap
-            draggable
-            onDragStart={cancelDragEvent}
             className={classes.textContent}
           >
             <HighlightChars
