@@ -8,6 +8,7 @@ import { FzfResultItem } from "fzf";
 import { useCallback, useMemo } from "react";
 
 import { HighlightChars } from "@foxglove/studio-base/components/HighlightChars";
+import { quoteTopicNameIfNeeded } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Topic } from "@foxglove/studio-base/players/types";
@@ -35,7 +36,7 @@ export function TopicRow({
 
   const item: DraggedMessagePath = useMemo(
     () => ({
-      path: topic.name,
+      path: quoteTopicNameIfNeeded(topic.name),
       rootSchemaName: topic.schemaName,
       isTopic: true,
       isLeaf: false,

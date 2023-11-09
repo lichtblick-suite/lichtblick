@@ -107,14 +107,14 @@ export const Basic: StoryObj<{ initialLayoutState: Partial<LayoutData> }> = {
   },
   render: (args) => {
     const fixture: Fixture = {
-      topics: [{ name: "foo", schemaName: "test.Foo" }],
+      topics: [{ name: "foo topic", schemaName: "test.Foo" }],
       datatypes: new Map([
         [
           "test.Foo",
           {
             definitions: [
-              { name: "bar", type: "string" },
-              { name: "baz", type: "string" },
+              { name: "bar field", type: "string" },
+              { name: "baz field", type: "string" },
             ],
           },
         ],
@@ -236,12 +236,14 @@ export const DragMultipleItems: typeof Basic = {
     });
     fireEvent.click(
       await screen.findByText(
-        (_content, element) => element instanceof HTMLSpanElement && element.textContent === ".bar",
+        (_content, element) =>
+          element instanceof HTMLSpanElement && element.textContent === '."bar field"',
       ),
     );
     fireEvent.click(
       await screen.findByText(
-        (_content, element) => element instanceof HTMLSpanElement && element.textContent === ".baz",
+        (_content, element) =>
+          element instanceof HTMLSpanElement && element.textContent === '."baz field"',
       ),
       { metaKey: true },
     );

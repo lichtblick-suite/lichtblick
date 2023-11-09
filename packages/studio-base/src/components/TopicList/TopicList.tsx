@@ -25,6 +25,7 @@ import { filterMap } from "@foxglove/den/collection";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import { quoteTopicNameIfNeeded } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -70,7 +71,7 @@ function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePath {
   switch (treeItem.type) {
     case "topic":
       return {
-        path: treeItem.item.item.name,
+        path: quoteTopicNameIfNeeded(treeItem.item.item.name),
         rootSchemaName: treeItem.item.item.schemaName,
         isTopic: true,
         isLeaf: false,
