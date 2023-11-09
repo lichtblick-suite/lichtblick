@@ -351,7 +351,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
             ],
           },
           url:
-            config.sourceType === "url"
+            (config.sourceType ?? DEFAULT_CUSTOM_SETTINGS.sourceType) === "url"
               ? {
                   label: "URL",
                   input: "string",
