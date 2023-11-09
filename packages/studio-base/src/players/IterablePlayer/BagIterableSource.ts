@@ -220,7 +220,6 @@ export class BagIterableSource implements IIterableSource {
 
         yield {
           type: "message-event",
-          connectionId,
           msgEvent: {
             topic: bagMsgEvent.topic,
             receiveTime: bagMsgEvent.timestamp,

@@ -398,7 +398,6 @@ describe("IterablePlayer", () => {
           sizeInBytes: 0,
           schemaName: "foo",
         },
-        connectionId: undefined,
       };
     };
 
@@ -484,7 +483,6 @@ describe("IterablePlayer", () => {
           sizeInBytes: 0,
           schemaName: "foo",
         },
-        connectionId: undefined,
       };
     };
 
@@ -691,7 +689,6 @@ describe("IterablePlayer", () => {
           sizeInBytes: 0,
           schemaName: "foo",
         },
-        connectionId: undefined,
       };
     };
 
@@ -741,7 +738,6 @@ describe("IterablePlayer", () => {
           sizeInBytes: 0,
           schemaName: "foo",
         },
-        connectionId: undefined,
       };
     };
 

@@ -141,6 +141,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       if (!channelInfo) {
         yield {
           type: "problem",
+          connectionId: message.channelId,
           problem: {
             message: `Received message on channel ${message.channelId} without prior channel info`,
             severity: "error",
@@ -169,6 +170,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       } catch (error) {
         yield {
           type: "problem",
+          connectionId: message.channelId,
           problem: {
             message: `Error decoding message on ${channelInfo.channel.topic}`,
             error,

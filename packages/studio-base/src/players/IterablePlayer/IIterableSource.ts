@@ -74,12 +74,15 @@ export type MessageIteratorArgs = {
 export type IteratorResult =
   | {
       type: "message-event";
-      connectionId?: number;
       msgEvent: MessageEvent;
     }
   | {
       type: "problem";
-      connectionId?: number;
+      /**
+       * An ID representing the channel/connection where this problem came from. The app may choose
+       * to display only a single problem from each connection to avoid overwhelming the user.
+       */
+      connectionId: number;
       problem: PlayerProblem;
     }
   | {
