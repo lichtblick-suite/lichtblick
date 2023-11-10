@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
+
 import { getNormalizedMessage, getNormalizedLevel } from "./conversion";
 import { LogMessageEvent } from "./types";
 
@@ -41,7 +43,7 @@ export default function filterMessages(
       return false;
     }
 
-    const maybeName = logMessage.name;
+    const maybeName = mightActuallyBePartial(logMessage).name;
     if (maybeName != undefined && nameFilter[maybeName]?.visible === false) {
       return false;
     }
@@ -50,7 +52,7 @@ export default function filterMessages(
       return true;
     }
 
-    const lowerCaseName = logMessage.name?.toLowerCase() ?? "";
+    const lowerCaseName = mightActuallyBePartial(logMessage).name?.toLowerCase() ?? "";
     const lowerCaseMsg = getNormalizedMessage(logMessage).toLowerCase();
     return searchTermsInLowerCase.some(
       (term) => lowerCaseName.includes(term) || lowerCaseMsg.includes(term),

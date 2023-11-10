@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { fromNanoSec } from "@foxglove/rostime";
+import { Log as FoxgloveLog } from "@foxglove/schemas";
 import { Time } from "@foxglove/studio";
-import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 
 import {
   Ros1RosgraphMsgs$Log,
@@ -15,23 +15,26 @@ import {
 } from "./types";
 
 // Get the log message string from the log message
-export function getNormalizedMessage(logMessage: LogMessageEvent["message"]): string {
+export function getNormalizedMessage(logMessage: Partial<LogMessageEvent["message"]>): string {
   if ("msg" in logMessage) {
-    return logMessage.msg;
+    return logMessage.msg ?? "";
   } else if ("message" in logMessage) {
-    return logMessage.message;
+    return logMessage.message ?? "";
   }
 
   return "";
 }
 
-export function getNormalizedLevel(datatype: string, raw: LogMessageEvent["message"]): number {
+export function getNormalizedLevel(
+  datatype: string,
+  raw: Partial<LogMessageEvent["message"]>,
+): number {
   switch (datatype) {
     case "foxglove_msgs/Log":
     case "foxglove_msgs/msg/Log":
     case "foxglove::Log":
     case "foxglove.Log":
-      return (raw as FoxgloveMessages["foxglove.Log"]).level;
+      return (raw as Partial<FoxgloveLog>).level ?? LogLevel.UNKNOWN;
     case "rosgraph_msgs/Log":
     case "rcl_interfaces/msg/Log":
       return rosLevelToLogLevel((raw as Ros1RosgraphMsgs$Log).level);
@@ -40,17 +43,17 @@ export function getNormalizedLevel(datatype: string, raw: LogMessageEvent["messa
   return LogLevel.UNKNOWN;
 }
 
-function getNormalizedStamp(datatype: string, raw: LogMessageEvent["message"]): Time {
+function getNormalizedStamp(datatype: string, raw: Partial<LogMessageEvent["message"]>): Time {
   switch (datatype) {
     case "foxglove_msgs/Log":
     case "foxglove_msgs/msg/Log":
     case "foxglove::Log":
     case "foxglove.Log": {
-      const timestamp = (raw as FoxgloveMessages["foxglove.Log"]).timestamp;
+      const timestamp = (raw as Partial<FoxgloveLog>).timestamp;
       if (typeof timestamp === "bigint") {
         return fromNanoSec(timestamp);
       }
-      return timestamp;
+      return timestamp ?? { sec: 0, nsec: 0 };
     }
     case "rosgraph_msgs/Log":
       return (raw as Ros1RosgraphMsgs$Log).header.stamp;

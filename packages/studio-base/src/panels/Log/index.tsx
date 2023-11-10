@@ -25,6 +25,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { FilterTagInput } from "@foxglove/studio-base/panels/Log/FilterTagInput";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import LogList from "./LogList";
 import { normalizedLogMessage } from "./conversion";
@@ -107,7 +108,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const seenNodeNames = useMemo(() => {
     for (const msgEvent of messages) {
-      const name = msgEvent.message.name;
+      const name = mightActuallyBePartial(msgEvent.message).name;
       if (name != undefined) {
         seenNodeNamesCache.current.add(name);
       }
