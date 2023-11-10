@@ -784,7 +784,7 @@ export function ThreeDeeRender(props: {
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (event.key === "3") {
+      if (event.key === "3" && !(event.metaKey || event.ctrlKey)) {
         onTogglePerspective();
         event.stopPropagation();
         event.preventDefault();
