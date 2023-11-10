@@ -4,7 +4,7 @@
   "compilerOptions": {
     "noEmit": true,
     "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "es2022", "webworker"],
+    "lib": ["dom", "dom.iterable", "es2022", "webworker", "ESNext.Disposable"],
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,
     "paths": {

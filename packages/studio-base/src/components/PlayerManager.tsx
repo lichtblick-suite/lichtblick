@@ -35,6 +35,7 @@ import {
   useExtensionCatalog,
 } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { useNativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
+import { usePerformance } from "@foxglove/studio-base/context/PerformanceContext";
 import PlayerSelectionContext, {
   DataSourceArgs,
   IDataSourceFactory,
@@ -72,6 +73,7 @@ const selectUserScriptActions = (store: UserScriptStore) => store.actions;
 
 export default function PlayerManager(props: PropsWithChildren<PlayerManagerProps>): JSX.Element {
   const { children, playerSources } = props;
+  const perfRegistry = usePerformance();
 
   useWarnImmediateReRender();
 
@@ -139,10 +141,14 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       return undefined;
     }
 
-    const userScriptPlayer = new UserScriptPlayer(topicAliasPlayer, userScriptActions);
+    const userScriptPlayer = new UserScriptPlayer(
+      topicAliasPlayer,
+      userScriptActions,
+      perfRegistry,
+    );
     userScriptPlayer.setGlobalVariables(globalVariablesRef.current);
     return userScriptPlayer;
-  }, [globalVariablesRef, topicAliasPlayer, userScriptActions]);
+  }, [globalVariablesRef, topicAliasPlayer, userScriptActions, perfRegistry]);
 
   useLayoutEffect(() => void player?.setUserScripts(userScripts), [player, userScripts]);
 

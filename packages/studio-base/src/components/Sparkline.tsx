@@ -14,12 +14,13 @@
 import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { Immutable } from "@foxglove/studio";
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 
 export type SparklinePoint = { value: number; timestamp: number };
 
 type SparklineProps = {
-  points: SparklinePoint[];
+  points: Immutable<SparklinePoint[]>;
   width: number;
   height: number;
   timeRange: number;
@@ -35,7 +36,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function draw(
-  points: SparklinePoint[],
+  points: Immutable<SparklinePoint[]>,
   maximum: number,
   timeRange: number,
   nowStamp: number,

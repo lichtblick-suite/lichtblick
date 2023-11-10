@@ -24,6 +24,10 @@ import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import {
+  IPerformanceRegistry,
+  PerformanceMetricID,
+} from "@foxglove/studio-base/context/PerformanceContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { MemoizedLibGenerator } from "@foxglove/studio-base/players/UserScriptPlayer/MemoizedLibGenerator";
 import { generateTypesLib } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
@@ -100,6 +104,8 @@ type ProtectedState = {
 
 export default class UserScriptPlayer implements Player {
   #player: Player;
+  #perfRegistry?: IPerformanceRegistry;
+  #totalTimeMetric?: PerformanceMetricID;
 
   // Datatypes and topics are derived from scriptRegistrations, but memoized so they only change when needed
   #memoizedScriptDatatypes: readonly RosDatatypes[] = [];
@@ -163,9 +169,14 @@ export default class UserScriptPlayer implements Player {
     });
   };
 
-  public constructor(player: Player, userScriptActions: UserScriptActions) {
+  public constructor(
+    player: Player,
+    userScriptActions: UserScriptActions,
+    perfRegistry?: IPerformanceRegistry,
+  ) {
     this.#player = player;
     this.#userScriptActions = userScriptActions;
+    this.#perfRegistry = perfRegistry;
     const { setUserScriptDiagnostics, addUserScriptLogs } = userScriptActions;
 
     this.#setUserScriptDiagnostics = (scriptId: string, diagnostics: readonly Diagnostic[]) => {
@@ -842,6 +853,17 @@ export default class UserScriptPlayer implements Player {
         return;
       }
 
+      if (this.#totalTimeMetric == undefined) {
+        this.#totalTimeMetric = this.#perfRegistry?.registerMetric({
+          name: "User scripts (total)",
+          unit: "ms per frame",
+        });
+      }
+      using $timer = this.#totalTimeMetric
+        ? this.#perfRegistry?.scopeTimer(this.#totalTimeMetric)
+        : undefined;
+      void $timer;
+
       const { messages, topics, datatypes } = activeData;
 
       // If we do not have active player data from a previous call, then our
@@ -1045,6 +1067,9 @@ export default class UserScriptPlayer implements Player {
       }
     });
     this.#player.close();
+    if (this.#totalTimeMetric != undefined) {
+      this.#perfRegistry?.unregisterMetric(this.#totalTimeMetric);
+    }
     if (this.#transformRpc) {
       void this.#transformRpc.send("close");
     }
