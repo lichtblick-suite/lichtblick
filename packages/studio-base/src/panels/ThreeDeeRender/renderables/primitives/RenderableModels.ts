@@ -132,7 +132,7 @@ export class RenderableModels extends RenderablePrimitive {
           this.#renderablesByDataCrc.set(dataCrc, newRenderables);
         }
         renderable = this.#removeMatchFromList(prevRenderables, (model) =>
-          crcPrimitivesMatch(model, primitive),
+          dataPrimitivesMatch(model, primitive),
         );
       } else {
         prevRenderables = prevRenderablesByUrl.get(primitive.url);
@@ -216,6 +216,7 @@ export class RenderableModels extends RenderablePrimitive {
       })
       .catch(console.error)
       .finally(() => {
+        // update for new models
         this.#updateOutlineVisibility();
       });
     // Only unused models should be left in the `prevRenderables` lists after
@@ -233,6 +234,8 @@ export class RenderableModels extends RenderablePrimitive {
       }
     }
 
+    // Necessary to have this twice because we want old models be synced with outline settings before the new models load
+    // update for existing models that haven't changed
     this.#updateOutlineVisibility();
   }
 
@@ -368,8 +371,8 @@ function cloneAndPrepareModel(cachedModel: LoadedModel) {
   return new THREE.Group().add(model);
 }
 
-/** Used to check that crc-data primitives are using the same model data */
-const crcPrimitivesMatch = (model1: ModelPrimitive, model2: ModelPrimitive) =>
+/** Used to check that data primitives are using the same model data */
+const dataPrimitivesMatch = (model1: ModelPrimitive, model2: ModelPrimitive) =>
   model1.media_type === model2.media_type && byteArraysEqual(model1.data, model2.data);
 
 /** Used to check that url-data primitives are using the same model data */
