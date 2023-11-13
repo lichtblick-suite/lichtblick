@@ -32,6 +32,7 @@ import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/Ex
 import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
   useWorkspaceStore,
   WorkspaceContextStore,
@@ -209,6 +210,8 @@ export function AppSettingsDialog(
   const { classes, cx, theme } = useStyles();
   const smUp = useMediaQuery(theme.breakpoints.up("sm"));
 
+  const { extensionSettings } = useAppContext();
+
   // automatic updates are a desktop-only setting
   //
   // electron-updater does not provide a way to detect if we are on a supported update platform
@@ -225,6 +228,8 @@ export function AppSettingsDialog(
       props.onClose(event, "backdropClick");
     }
   };
+
+  const extensionSettingsComponent = extensionSettings ?? <ExtensionsSettings />;
 
   return (
     <Dialog {...props} fullWidth maxWidth="md">
@@ -310,9 +315,7 @@ export function AppSettingsDialog(
               [classes.tabPanelActive]: activeTab === "extensions",
             })}
           >
-            <Stack gap={2}>
-              <ExtensionsSettings />
-            </Stack>
+            <Stack gap={2}>{extensionSettingsComponent}</Stack>
           </section>
 
           <section

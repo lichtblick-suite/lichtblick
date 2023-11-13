@@ -26,6 +26,7 @@ interface IAppContext {
   layoutEmptyState?: JSX.Element;
   syncAdapters?: readonly JSX.Element[];
   workspaceExtensions?: readonly JSX.Element[];
+  extensionSettings?: JSX.Element;
   renderSettingsStatusButton?: (
     nodeOrField: Immutable<SettingsTreeNode | SettingsTreeField>,
   ) => JSX.Element | undefined;
