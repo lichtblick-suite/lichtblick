@@ -23,7 +23,6 @@ import NativeWindowContext from "./context/NativeWindowContext";
 import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
-import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
 
@@ -56,7 +55,6 @@ export function StudioApp(): JSX.Element {
     /* eslint-disable react/jsx-key */
     <TimelineInteractionStateProvider />,
     <CurrentLayoutProvider />,
-    <ExtensionMarketplaceProvider />,
     <ExtensionCatalogProvider loaders={extensionLoaders} />,
     <UserScriptStateProvider />,
     <PlayerManager playerSources={dataSources} />,
