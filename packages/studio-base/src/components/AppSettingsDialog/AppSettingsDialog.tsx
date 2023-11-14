@@ -14,6 +14,7 @@ import {
   DialogProps,
   DialogTitle,
   FormControlLabel,
+  FormLabel,
   IconButton,
   Link,
   Tab,
@@ -206,6 +207,9 @@ export function AppSettingsDialog(
   const [telemetryEnabled, setTelemetryEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.TELEMETRY_ENABLED,
   );
+  const [debugModeEnabled = false, setDebugModeEnabled] = useAppConfigurationValue<boolean>(
+    AppSetting.SHOW_DEBUG_PANELS,
+  );
   const { classes, cx, theme } = useStyles();
   const smUp = useMediaQuery(theme.breakpoints.up("sm"));
 
@@ -270,6 +274,22 @@ export function AppSettingsDialog(
               {supportsAppUpdates && <AutoUpdate />}
               {!isDesktopApp() && <LaunchDefault />}
               {isDesktopApp() && <RosPackagePath />}
+              <Stack>
+                <FormLabel>{t("advanced")}:</FormLabel>
+                <FormControlLabel
+                  className={classes.formControlLabel}
+                  control={
+                    <Checkbox
+                      className={classes.checkbox}
+                      checked={debugModeEnabled}
+                      onChange={(_, checked) => {
+                        void setDebugModeEnabled(checked);
+                      }}
+                    />
+                  }
+                  label={t("debugModeDescription")}
+                />
+              </Stack>
             </Stack>
           </section>
 

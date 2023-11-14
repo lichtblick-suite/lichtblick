@@ -4,9 +4,11 @@
 
 export const appSettings = {
   about: "About",
+  advanced: "Advanced",
   askEachTime: "Ask each time",
   colorScheme: "Color scheme",
   dark: "Dark",
+  debugModeDescription: "Enable panels and features for debugging Foxglove",
   desktopApp: "Desktop app",
   displayTimestampsIn: "Display timestamps in",
   experimentalFeatures: "Experimental features",
@@ -29,8 +31,6 @@ export const appSettings = {
   sendAnonymizedCrashReports: "Send anonymized crash reports",
   sendAnonymizedUsageData: "Send anonymized usage data to help us improve Foxglove Studio",
   settings: "Settings",
-  studioDebugPanels: "Debug mode",
-  studioDebugPanelsDescription: "Enable panels and features for debugging Foxglove Studio.",
   timestampFormat: "Timestamp format",
   webApp: "Web app",
 };

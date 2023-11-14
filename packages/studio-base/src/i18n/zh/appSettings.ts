@@ -6,9 +6,11 @@ import { TypeOptions } from "i18next";
 
 export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   about: "关于",
+  advanced: undefined,
   askEachTime: "每次询问",
   colorScheme: "配色方案",
   dark: "暗色",
+  debugModeDescription: undefined,
   desktopApp: "桌面应用",
   displayTimestampsIn: "显示时间戳在",
   experimentalFeatures: "实验性功能",
@@ -29,8 +31,6 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   sendAnonymizedCrashReports: "发送匿名崩溃报告",
   sendAnonymizedUsageData: "发送匿名使用数据以帮助我们改进 Foxglove Studio",
   settings: "设置",
-  studioDebugPanels: undefined,
-  studioDebugPanelsDescription: undefined,
   timestampFormat: "时间戳格式",
   webApp: "网页应用",
 };

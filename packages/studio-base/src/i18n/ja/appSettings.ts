@@ -6,9 +6,11 @@ import { TypeOptions } from "i18next";
 
 export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   about: "情報",
+  advanced: undefined,
   askEachTime: "毎回確認する",
   colorScheme: "カラースキーム",
   dark: "ダーク",
+  debugModeDescription: undefined,
   desktopApp: "デスクトップアプリ",
   displayTimestampsIn: "タイムスタンプを表示",
   experimentalFeatures: "実験的機能",
@@ -30,8 +32,6 @@ export const appSettings: Partial<TypeOptions["resources"]["appSettings"]> = {
   sendAnonymizedCrashReports: "匿名化されたクラッシュレポートを送信",
   sendAnonymizedUsageData: "匿名化された使用データを送信して、Foxglove Studioの改善に役立てる",
   settings: "設定",
-  studioDebugPanels: undefined,
-  studioDebugPanelsDescription: undefined,
   timestampFormat: "タイムスタンプ形式",
   webApp: "ウェブアプリ",
 };

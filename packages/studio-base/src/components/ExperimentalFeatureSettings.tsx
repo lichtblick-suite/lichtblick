@@ -45,11 +45,6 @@ function useFeatures(): Feature[] {
       name: t("newAppMenu"),
       description: <>{t("newAppMenuDescription")}</>,
     },
-    {
-      key: AppSetting.SHOW_DEBUG_PANELS,
-      name: t("studioDebugPanels"),
-      description: <>{t("studioDebugPanelsDescription")}</>,
-    },
   ];
 
   if (process.env.NODE_ENV === "development") {
