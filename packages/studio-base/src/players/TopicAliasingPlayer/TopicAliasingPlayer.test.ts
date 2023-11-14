@@ -3,10 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
-import { TopicAliasingPlayer } from "@foxglove/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
-import { TopicAliasFunctions } from "@foxglove/studio-base/players/TopicAliasingPlayer/aliasing";
 import { PlayerProblem, PlayerState, Topic } from "@foxglove/studio-base/players/types";
 
+import { TopicAliasFunctions } from "./StateProcessorFactory";
+import { TopicAliasingPlayer } from "./TopicAliasingPlayer";
 import { mockMessage, mockPlayerState } from "./mocks";
 
 describe("TopicAliasingPlayer", () => {
@@ -201,6 +201,102 @@ describe("TopicAliasingPlayer", () => {
             ],
           },
         },
+      }),
+    );
+  });
+
+  it("provides global variables on startup", async () => {
+    const fakePlayer = new FakePlayer();
+    const mappers: TopicAliasFunctions = [
+      {
+        extensionId: "any",
+        aliasFunction: (args) => [
+          { sourceTopicName: "/original_topic_1", name: args.globalVariables["foo"] as string },
+        ],
+      },
+    ];
+    const player = new TopicAliasingPlayer(fakePlayer, mappers, {
+      foo: "/bar",
+    });
+    const listener = jest.fn();
+    player.setListener(listener);
+    await fakePlayer.emit(
+      mockPlayerState(undefined, {
+        topics: [{ name: "/original_topic_1", schemaName: "any.schema" }],
+      }),
+    );
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeData: expect.objectContaining({
+          topics: [
+            { name: "/original_topic_1", schemaName: "any.schema" },
+            {
+              name: "/bar",
+              aliasedFromName: "/original_topic_1",
+              schemaName: "any.schema",
+            },
+          ],
+        }),
+      }),
+    );
+  });
+
+  it("updates when global variables change", async () => {
+    const fakePlayer = new FakePlayer();
+    const mappers: TopicAliasFunctions = [
+      {
+        extensionId: "any",
+        aliasFunction: (args) => {
+          if (!("foo" in args.globalVariables)) {
+            return [];
+          }
+
+          return [
+            { sourceTopicName: "/original_topic_1", name: args.globalVariables["foo"] as string },
+          ];
+        },
+      },
+    ];
+    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const listener = jest.fn();
+    player.setListener(listener);
+    await fakePlayer.emit(
+      mockPlayerState(undefined, {
+        isPlaying: false,
+        topics: [{ name: "/original_topic_1", schemaName: "any.schema" }],
+      }),
+    );
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeData: expect.objectContaining({
+          topics: [{ name: "/original_topic_1", schemaName: "any.schema" }],
+        }),
+      }),
+    );
+
+    listener.mockClear();
+
+    // Setting should re-process the alias functions
+    player.setGlobalVariables({
+      foo: "/bar",
+    });
+
+    await Promise.resolve();
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeData: expect.objectContaining({
+          topics: [
+            { name: "/original_topic_1", schemaName: "any.schema" },
+            {
+              name: "/bar",
+              aliasedFromName: "/original_topic_1",
+              schemaName: "any.schema",
+            },
+          ],
+        }),
       }),
     );
   });

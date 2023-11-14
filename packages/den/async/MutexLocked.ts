@@ -17,4 +17,11 @@ export default class MutexLocked<T> {
   public async runExclusive<Result>(body: (value: T) => Promise<Result>): Promise<Result> {
     return await this.#mutex.runExclusive(async () => await body(this.value));
   }
+
+  /**
+   * @returns a boolean indicating if the mutex is currently locked. Does not block or wait.
+   */
+  public isLocked(): boolean {
+    return this.#mutex.isLocked();
+  }
 }
