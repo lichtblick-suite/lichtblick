@@ -446,6 +446,8 @@ export const DownloadRawImage: StoryObj<React.ComponentProps<typeof ImageModeFox
     await pointer({ target: document.querySelector("canvas")!, keys: "[MouseRight]" });
     const downloadButton = await screen.findByText("Download image");
     await click(downloadButton);
+    // Add an extra delay after rendering the downloaded image to avoid flaky stores
+    await delay(1000);
   },
 };
 
