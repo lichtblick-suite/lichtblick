@@ -53,8 +53,6 @@ export function Root(): JSX.Element {
     return sources;
   }, []);
 
-  const [extensionLoaders] = useState(() => []);
-
   const url = new URL(window.location.href);
 
   return (
@@ -63,7 +61,6 @@ export function Root(): JSX.Element {
       deepLinks={[url.href]}
       dataSources={dataSources}
       appConfiguration={appConfiguration}
-      extensionLoaders={extensionLoaders}
     >
       <StudioApp />
     </SharedRoot>

@@ -10,13 +10,11 @@ import { IAppConfiguration } from "@foxglove/studio-base/context/AppConfiguratio
 import { INativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
 import { INativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 
 interface ISharedRootContext {
   deepLinks: string[];
   appConfiguration?: IAppConfiguration;
   dataSources: IDataSourceFactory[];
-  extensionLoaders: readonly ExtensionLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;
   enableLaunchPreferenceScreen?: boolean;
@@ -31,7 +29,6 @@ interface ISharedRootContext {
 const SharedRootContext = createContext<ISharedRootContext>({
   deepLinks: [],
   dataSources: [],
-  extensionLoaders: [],
 });
 SharedRootContext.displayName = "SharedRootContext";
 
