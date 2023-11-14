@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 
 import { ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
 
@@ -31,15 +31,5 @@ export interface ExtensionMarketplace {
 
 const ExtensionMarketplaceContext = createContext<ExtensionMarketplace | undefined>(undefined);
 ExtensionMarketplaceContext.displayName = "ExtensionMarketplaceContext";
-
-export function useExtensionMarketplace(): ExtensionMarketplace {
-  const extensionMarketplace = useContext(ExtensionMarketplaceContext);
-  if (extensionMarketplace == undefined) {
-    throw new Error(
-      "An ExtensionMarketplaceContext provider is required to useExtensionMarketplace",
-    );
-  }
-  return extensionMarketplace;
-}
 
 export default ExtensionMarketplaceContext;

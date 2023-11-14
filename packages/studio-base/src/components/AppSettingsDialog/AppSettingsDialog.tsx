@@ -25,11 +25,10 @@ import { MouseEvent, SyntheticEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { AppSetting } from "@foxglove/studio-base";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
-import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
@@ -229,8 +228,6 @@ export function AppSettingsDialog(
     }
   };
 
-  const extensionSettingsComponent = extensionSettings ?? <ExtensionsSettings />;
-
   return (
     <Dialog {...props} fullWidth maxWidth="md">
       <DialogTitle className={classes.dialogTitle}>
@@ -248,7 +245,9 @@ export function AppSettingsDialog(
         >
           <Tab className={classes.tab} label={t("general")} value="general" />
           <Tab className={classes.tab} label={t("privacy")} value="privacy" />
-          <Tab className={classes.tab} label={t("extensions")} value="extensions" />
+          {extensionSettings && (
+            <Tab className={classes.tab} label={t("extensions")} value="extensions" />
+          )}
           <Tab
             className={classes.tab}
             label={t("experimentalFeatures")}
@@ -310,13 +309,15 @@ export function AppSettingsDialog(
             </Stack>
           </section>
 
-          <section
-            className={cx(classes.tabPanel, {
-              [classes.tabPanelActive]: activeTab === "extensions",
-            })}
-          >
-            <Stack gap={2}>{extensionSettingsComponent}</Stack>
-          </section>
+          {extensionSettings && (
+            <section
+              className={cx(classes.tabPanel, {
+                [classes.tabPanelActive]: activeTab === "extensions",
+              })}
+            >
+              <Stack gap={2}>{extensionSettings}</Stack>
+            </section>
+          )}
 
           <section
             className={cx(classes.tabPanel, {

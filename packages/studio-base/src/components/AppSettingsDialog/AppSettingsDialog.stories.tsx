@@ -4,70 +4,15 @@
 
 import { StoryFn, StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
-import * as _ from "lodash-es";
 
-import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
-import ExtensionMarketplaceContext, {
-  ExtensionMarketplace,
-} from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { AppSettingsDialog } from "./AppSettingsDialog";
 
-const installedExtensions: ExtensionInfo[] = _.range(1, 10).map((index) => ({
-  id: "publisher.storyextension",
-  name: "privatestoryextension",
-  qualifiedName: "storyextension",
-  displayName: `Private Extension Name ${index + 1}`,
-  description: "Private extension sample description",
-  publisher: "Private Publisher",
-  homepage: "https://foxglove.dev/",
-  license: "MIT",
-  version: `1.${index}`,
-  keywords: ["storybook", "testing"],
-  namespace: index % 2 === 0 ? "local" : "org",
-}));
-
-const marketplaceExtensions: ExtensionInfo[] = [
-  {
-    id: "publisher.storyextension",
-    name: "storyextension",
-    qualifiedName: "storyextension",
-    displayName: "Extension Name",
-    description: "Extension sample description",
-    publisher: "Publisher",
-    homepage: "https://foxglove.dev/",
-    license: "MIT",
-    version: "1.2.10",
-    keywords: ["storybook", "testing"],
-  },
-];
-
-const MockExtensionLoader: ExtensionLoader = {
-  namespace: "local",
-  getExtensions: async () => installedExtensions,
-  loadExtension: async (_id: string) => "",
-  installExtension: async (_foxeFileData: Uint8Array) => {
-    throw new Error("MockExtensionLoader cannot install extensions");
-  },
-  uninstallExtension: async (_id: string) => undefined,
-};
-
-const MockExtensionMarketplace: ExtensionMarketplace = {
-  getAvailableExtensions: async () => marketplaceExtensions,
-  getMarkdown: async (url: string) => `# Markdown
-Mock markdown rendering for URL [${url}](${url}).`,
-};
-
 function Wrapper(StoryComponent: StoryFn): JSX.Element {
   return (
     <WorkspaceContextProvider>
-      <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
-        <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
-          <StoryComponent />
-        </ExtensionMarketplaceContext.Provider>
-      </ExtensionCatalogProvider>
+      <StoryComponent />
     </WorkspaceContextProvider>
   );
 }
@@ -140,22 +85,6 @@ export const PrivacyChinese: StoryObj = {
 
 export const PrivacyJapanese: StoryObj = {
   ...Privacy,
-  parameters: { forceLanguage: "ja" },
-};
-
-export const Extensions: StoryObj = {
-  render: () => {
-    return <AppSettingsDialog open activeTab="extensions" />;
-  },
-};
-
-export const ExtensionsChinese: StoryObj = {
-  ...Extensions,
-  parameters: { forceLanguage: "zh" },
-};
-
-export const ExtensionsJapanese: StoryObj = {
-  ...Extensions,
   parameters: { forceLanguage: "ja" },
 };
 
