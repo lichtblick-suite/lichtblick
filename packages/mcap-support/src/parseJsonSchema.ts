@@ -37,9 +37,8 @@ export function parseJsonSchema(
         `Expected "type": "object" for schema ${typeName}, got ${JSON.stringify(schema.type)}`,
       );
     }
-    for (const [fieldName, fieldSchema] of Object.entries(
-      schema.properties as Record<string, Record<string, unknown>>,
-    )) {
+    const properties = (schema.properties ?? {}) as Record<string, Record<string, unknown>>;
+    for (const [fieldName, fieldSchema] of Object.entries(properties)) {
       if (Array.isArray(fieldSchema.oneOf)) {
         if (fieldSchema.oneOf.every((alternative) => typeof alternative.const === "number")) {
           for (const alternative of fieldSchema.oneOf) {

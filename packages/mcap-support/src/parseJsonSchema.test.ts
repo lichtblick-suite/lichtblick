@@ -285,4 +285,18 @@ describe("parseJsonSchema", () => {
   it.each(Object.values(foxgloveMessageSchemas))("handles Foxglove schema '$name'", (schema) => {
     expect(() => parseJsonSchema(generateJsonSchema(schema), schema.name)).not.toThrow();
   });
+
+  it("tolerates an 'any object' schema", () => {
+    const { datatypes } = parseJsonSchema({ type: "object" }, "Any object");
+    expect(datatypes).toEqual(
+      new Map([
+        [
+          "Any object",
+          {
+            definitions: [],
+          },
+        ],
+      ]),
+    );
+  });
 });
