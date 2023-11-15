@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import PanelCatalogContext, {
   PanelCatalog,
@@ -23,6 +24,7 @@ type PanelProps = {
 export default function PanelCatalogProvider(props: PropsWithChildren): React.ReactElement {
   const { t } = useTranslation("panels");
 
+  const { extraPanels } = useAppContext();
   const extensionPanels = useExtensionCatalog((state) => state.installedPanels);
 
   const wrappedExtensionPanels = useMemo<PanelInfo[]>(() => {
@@ -52,21 +54,11 @@ export default function PanelCatalogProvider(props: PropsWithChildren): React.Re
   }, [extensionPanels]);
 
   // Re-call the function when the language changes to ensure that the panel's information is successfully translated
-  const allPanelsInfo = useMemo(() => {
-    return {
-      builtin: panels.getBuiltin(t),
-    };
-  }, [t]);
+  const builtinPanelsInfo = useMemo(() => panels.getBuiltin(t), [t]);
 
   const allPanels = useMemo(() => {
-    return [...allPanelsInfo.builtin, ...wrappedExtensionPanels];
-  }, [wrappedExtensionPanels, allPanelsInfo]);
-
-  const visiblePanels = useMemo(() => {
-    const panelList = [...allPanelsInfo.builtin];
-    panelList.push(...wrappedExtensionPanels);
-    return panelList;
-  }, [wrappedExtensionPanels, allPanelsInfo]);
+    return [...builtinPanelsInfo, ...wrappedExtensionPanels, ...(extraPanels ?? [])];
+  }, [wrappedExtensionPanels, builtinPanelsInfo, extraPanels]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();
@@ -81,13 +73,13 @@ export default function PanelCatalogProvider(props: PropsWithChildren): React.Re
   const provider = useMemo<PanelCatalog>(() => {
     return {
       getPanels() {
-        return visiblePanels;
+        return allPanels;
       },
       getPanelByType(type: string) {
         return panelsByType.get(type);
       },
     };
-  }, [panelsByType, visiblePanels]);
+  }, [panelsByType, allPanels]);
 
   return (
     <PanelCatalogContext.Provider value={provider}>{props.children}</PanelCatalogContext.Provider>
