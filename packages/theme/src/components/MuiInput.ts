@@ -8,7 +8,6 @@ import { OverrideComponentReturn } from "../types";
 
 export const MuiInput: OverrideComponentReturn<"MuiInput"> = {
   defaultProps: {
-    color: "secondary",
     disableUnderline: true,
   },
   styleOverrides: {
@@ -19,14 +18,14 @@ export const MuiInput: OverrideComponentReturn<"MuiInput"> = {
         backgroundColor: theme.palette.action.hover,
       },
       "&.Mui-focused": {
-        backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.focusOpacity),
+        backgroundColor: theme.palette.action.focus,
 
-        [`&.${inputClasses.colorSecondary}`]: {
-          backgroundColor: alpha(theme.palette.secondary.main, theme.palette.action.focusOpacity),
-        },
         [`&.${inputClasses.error}`]: {
           backgroundColor: alpha(theme.palette.error.main, theme.palette.action.focusOpacity),
         },
+      },
+      "&.Mui-error": {
+        backgroundColor: alpha(theme.palette.error.main, theme.palette.action.hoverOpacity),
       },
     }),
     input: ({ theme }) => ({

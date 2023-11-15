@@ -9,7 +9,6 @@ import { OverrideComponentReturn } from "../types";
 export const MuiFilledInput: OverrideComponentReturn<"MuiFilledInput"> = {
   defaultProps: {
     disableUnderline: true,
-    color: "secondary",
   },
   styleOverrides: {
     input: ({ theme }) => ({
@@ -22,11 +21,8 @@ export const MuiFilledInput: OverrideComponentReturn<"MuiFilledInput"> = {
       borderRadius: theme.shape.borderRadius,
 
       "&.Mui-focused": {
-        backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.focusOpacity),
+        backgroundColor: theme.palette.action.focus,
 
-        [`&.${filledInputClasses.colorSecondary}`]: {
-          backgroundColor: alpha(theme.palette.secondary.main, theme.palette.action.focusOpacity),
-        },
         [`&.${filledInputClasses.error}`]: {
           backgroundColor: alpha(theme.palette.error.main, theme.palette.action.focusOpacity),
         },
@@ -35,7 +31,7 @@ export const MuiFilledInput: OverrideComponentReturn<"MuiFilledInput"> = {
         opacity: 0.5,
       },
       "&.Mui-error": {
-        backgroundColor: alpha(theme.palette.error.main, 0.06),
+        backgroundColor: alpha(theme.palette.error.main, theme.palette.action.hoverOpacity),
       },
     }),
   },
