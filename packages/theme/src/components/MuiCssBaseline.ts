@@ -5,12 +5,26 @@
 import { OverrideComponentReturn } from "../types";
 
 export const MuiCssBaseline: OverrideComponentReturn<"MuiCssBaseline"> = {
-  styleOverrides: {
-    "@global": {
-      svg: {
-        display: "block",
-        maxWidth: "100%",
-      },
+  styleOverrides: (theme) => ({
+    svg: {
+      display: "block",
+      maxWidth: "100%",
     },
-  },
+    a: {
+      color: "inherit",
+      textDecoration: "none",
+    },
+    pre: {
+      fontFamily: theme.typography.fontMonospace,
+      backgroundColor: theme.palette.background.default,
+      borderRadius: theme.shape.borderRadius,
+      padding: theme.spacing(2),
+      overflow: "auto",
+      color: theme.palette.text.secondary,
+      margin: 0,
+    },
+    code: {
+      fontFamily: theme.typography.fontMonospace,
+    },
+  }),
 };

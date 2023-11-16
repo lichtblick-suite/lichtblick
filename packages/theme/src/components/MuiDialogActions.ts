@@ -7,7 +7,12 @@ import { OverrideComponentReturn } from "../types";
 export const MuiDialogActions: OverrideComponentReturn<"MuiDialogActions"> = {
   styleOverrides: {
     root: ({ theme }) => ({
+      gap: theme.spacing(1),
       padding: theme.spacing(3),
+
+      "& > :not(:first-of-type)": {
+        marginLeft: "inherit",
+      },
     }),
   },
 };

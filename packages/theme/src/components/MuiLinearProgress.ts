@@ -4,13 +4,9 @@
 
 import { OverrideComponentReturn } from "../types";
 
-export const MuiLink: OverrideComponentReturn<"MuiLink"> = {
-  defaultProps: {
-    color: "primary",
-  },
+export const MuiLinearProgress: OverrideComponentReturn<"MuiLinearProgress"> = {
   styleOverrides: {
-    root: {
-      cursor: "pointer",
-    },
+    colorPrimary: ({ theme }) => ({ backgroundColor: theme.palette.divider }),
+    colorSecondary: ({ theme }) => ({ backgroundColor: theme.palette.divider }),
   },
 };

@@ -7,6 +7,9 @@ import { inputBaseClasses, selectClasses } from "@mui/material";
 import { OverrideComponentReturn } from "../types";
 
 export const MuiSelect: OverrideComponentReturn<"MuiSelect"> = {
+  defaultProps: {
+    variant: "outlined",
+  },
   styleOverrides: {
     root: {
       transition: "none",

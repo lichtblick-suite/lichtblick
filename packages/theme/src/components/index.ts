@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+export * from "./MuiAlert";
 export * from "./MuiAutocomplete";
 export * from "./MuiAvatar";
 export * from "./MuiBadge";
@@ -15,6 +16,7 @@ export * from "./MuiCardHeader";
 export * from "./MuiCheckbox";
 export * from "./MuiChip";
 export * from "./MuiCssBaseline";
+export * from "./MuiDataGrid";
 export * from "./MuiDialog";
 export * from "./MuiDialogActions";
 export * from "./MuiDialogContent";
@@ -29,6 +31,7 @@ export * from "./MuiInputAdornment";
 export * from "./MuiInputBase";
 export * from "./MuiInputLabel";
 export * from "./MuiLink";
+export * from "./MuiLinearProgress";
 export * from "./MuiListItemButton";
 export * from "./MuiListItemText";
 export * from "./MuiListSubheader";

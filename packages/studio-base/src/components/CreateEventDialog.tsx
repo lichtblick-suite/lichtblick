@@ -34,6 +34,7 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
@@ -303,6 +304,16 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
           </div>
         </div>
       </DialogContent>
+      {duplicateKey && (
+        <Stack paddingX={3}>
+          <Alert severity="error">Duplicate key {duplicateKey[0]}</Alert>
+        </Stack>
+      )}
+      {createdEvent.error?.message && (
+        <Stack paddingX={3}>
+          <Alert severity="error">{createdEvent.error.message}</Alert>
+        </Stack>
+      )}
       <DialogActions>
         <Button variant="outlined" onClick={onClose}>
           Cancel
@@ -318,8 +329,6 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
           Create Event
         </Button>
       </DialogActions>
-      {duplicateKey && <Alert severity="error">Duplicate key {duplicateKey[0]}</Alert>}
-      {createdEvent.error?.message && <Alert severity="error">{createdEvent.error.message}</Alert>}
     </Dialog>
   );
 }
