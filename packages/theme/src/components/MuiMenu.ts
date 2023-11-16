@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Fade } from "@mui/material";
+import { Fade, listSubheaderClasses } from "@mui/material";
 import { dividerClasses } from "@mui/material/Divider";
 import { listClasses } from "@mui/material/List";
 import { listItemClasses } from "@mui/material/ListItem";
@@ -27,6 +27,9 @@ export const MuiMenu: OverrideComponentReturn<"MuiMenu"> = {
       [`.${listItemClasses.root} + .${dividerClasses.root}`]: {
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
+      },
+      [`.${listSubheaderClasses.sticky}`]: {
+        backgroundColor: theme.palette.background.menu,
       },
     }),
   },

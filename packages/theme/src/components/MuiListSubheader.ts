@@ -5,6 +5,9 @@
 import { OverrideComponentReturn } from "../types";
 
 export const MuiListSubheader: OverrideComponentReturn<"MuiListSubheader"> = {
+  defaultProps: {
+    disableSticky: true,
+  },
   styleOverrides: {
     root: ({ theme }) => ({
       fontFamily: theme.typography.overline.fontFamily,
@@ -15,11 +18,7 @@ export const MuiListSubheader: OverrideComponentReturn<"MuiListSubheader"> = {
       textTransform: "uppercase",
     }),
     sticky: ({ theme }) => ({
-      borderBottom: `1px solid ${theme.palette.divider}`,
       backgroundColor: theme.palette.background.paper,
-      borderTop: `1px solid ${theme.palette.divider}`,
-      top: -1,
-      marginTop: -1,
     }),
   },
 };
