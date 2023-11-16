@@ -11,7 +11,8 @@ import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import type { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import type { Player } from "@foxglove/studio-base/players/types";
 
 interface IAppContext {
   appBarLayoutButton?: JSX.Element;
@@ -36,6 +37,7 @@ interface IAppContext {
   ) => StoreApi<WorkspaceContextStore>;
   PerformanceSidebarComponent?: React.ComponentType;
   extraPanels?: PanelInfo[];
+  wrapPlayer: (child: Player) => Player;
 }
 
 export const INJECTED_FEATURE_KEYS = {
@@ -52,7 +54,10 @@ export type InjectedFeatures = {
   availableFeatures: InjectedFeatureMap;
 };
 
-const AppContext = createContext<IAppContext>({});
+const AppContext = createContext<IAppContext>({
+  // Default wrapPlayer is a no-op and is a pass-through of the provided child player
+  wrapPlayer: (child) => child,
+});
 AppContext.displayName = "AppContext";
 
 export function useAppContext(): IAppContext {

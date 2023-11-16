@@ -58,6 +58,7 @@ export const PerformanceContext = createContext<IPerformanceRegistry>({
 
 PerformanceContext.displayName = "PerformanceContext";
 
+// ts-unused-exports:disable-next-line
 export function usePerformance(): IPerformanceRegistry {
   return useContext(PerformanceContext);
 }

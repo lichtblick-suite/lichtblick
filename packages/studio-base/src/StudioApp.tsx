@@ -20,7 +20,6 @@ import SendNotificationToastAdapter from "./components/SendNotificationToastAdap
 import StudioToastProvider from "./components/StudioToastProvider";
 import NativeAppMenuContext from "./context/NativeAppMenuContext";
 import NativeWindowContext from "./context/NativeWindowContext";
-import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
@@ -53,7 +52,6 @@ export function StudioApp(): JSX.Element {
     /* eslint-disable react/jsx-key */
     <TimelineInteractionStateProvider />,
     <CurrentLayoutProvider />,
-    <UserScriptStateProvider />,
     <PlayerManager playerSources={dataSources} />,
     <EventsProvider />,
     /* eslint-enable react/jsx-key */

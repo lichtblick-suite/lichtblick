@@ -13,7 +13,6 @@ import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import StudioToastProvider from "@foxglove/studio-base/components/StudioToastProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { UserScriptStateProvider } from "@foxglove/studio-base/context/UserScriptStateContext";
 import { initI18n, Language } from "@foxglove/studio-base/i18n";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 import ReadySignalContext from "@foxglove/studio-base/stories/ReadySignalContext";
@@ -81,7 +80,6 @@ function StudioContextProviders({
     <ReadySignalContext.Provider value={readySignal} />,
     <StudioToastProvider />,
     <TimelineInteractionStateProvider />,
-    <UserScriptStateProvider />,
     /* eslint-enable react/jsx-key */
   ];
   return (

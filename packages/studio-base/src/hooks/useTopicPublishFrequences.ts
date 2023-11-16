@@ -4,13 +4,12 @@
 
 import { useMemo, useRef } from "react";
 
-import { areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
+import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { subtractTimes } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
 
 const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();

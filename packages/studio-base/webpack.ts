@@ -117,7 +117,7 @@ export function makeConfig(
           ],
         },
         {
-          // "?raw" imports are used to load stringified typescript in User Scripts
+          // "?raw" imports are used to load the original un-modified source
           // https://webpack.js.org/guides/asset-modules/#replacing-inline-loader-syntax
           resourceQuery: /raw/,
           type: "asset/source",
