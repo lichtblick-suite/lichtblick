@@ -284,8 +284,9 @@ function Chart(props: Props): JSX.Element {
         const { current: queued } = queuedUpdates;
         queuedUpdates.current = [];
         for (const queuedUpdate of queued) {
-          const newScales = await sendWrapperRef.current<RpcScales>("update", queuedUpdate);
-          maybeUpdateScales(newScales);
+          // We do not want to block the rest of this function on these calls,
+          // which can take a while (particularly on weak devices)
+          void sendWrapperRef.current<RpcScales>("update", queuedUpdate).then(maybeUpdateScales);
         }
 
         // once we are initialized, we can allow other handlers to send to the rpc endpoint
