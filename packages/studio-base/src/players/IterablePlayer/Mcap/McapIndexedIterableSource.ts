@@ -16,6 +16,7 @@ import {
   IteratorResult,
   MessageIteratorArgs,
 } from "@foxglove/studio-base/players/IterablePlayer/IIterableSource";
+import { estimateMessageObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
 import { PlayerProblem, Topic, TopicStats } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -25,7 +26,13 @@ export class McapIndexedIterableSource implements IIterableSource {
   #reader: McapIndexedReader;
   #channelInfoById = new Map<
     number,
-    { channel: McapTypes.Channel; parsedChannel: ParsedChannel; schemaName: string | undefined }
+    {
+      channel: McapTypes.Channel;
+      parsedChannel: ParsedChannel;
+      schemaName: string | undefined;
+      // Guesstimate of the memory size in bytes of a deserialized message object
+      approxDeserializedMsgSize: number;
+    }
   >();
   #start?: Time;
   #end?: Time;
@@ -51,6 +58,7 @@ export class McapIndexedIterableSource implements IIterableSource {
     const datatypes: RosDatatypes = new Map();
     const problems: PlayerProblem[] = [];
     const publishersByTopic = new Map<string, Set<string>>();
+    const estimatedObjectSizeByType = new Map<string, number>();
 
     for (const channel of this.#reader.channelsById.values()) {
       const schema = this.#reader.schemasById.get(channel.schemaId);
@@ -63,8 +71,17 @@ export class McapIndexedIterableSource implements IIterableSource {
       }
 
       let parsedChannel;
+      let approxDeserializedMsgSize;
       try {
         parsedChannel = parseChannel({ messageEncoding: channel.messageEncoding, schema });
+        approxDeserializedMsgSize =
+          schema?.name != undefined
+            ? estimateMessageObjectSize(
+                parsedChannel.datatypes,
+                schema.name,
+                estimatedObjectSizeByType,
+              )
+            : 0;
       } catch (error) {
         problems.push({
           severity: "error",
@@ -73,7 +90,12 @@ export class McapIndexedIterableSource implements IIterableSource {
         });
         continue;
       }
-      this.#channelInfoById.set(channel.id, { channel, parsedChannel, schemaName: schema?.name });
+      this.#channelInfoById.set(channel.id, {
+        channel,
+        parsedChannel,
+        schemaName: schema?.name,
+        approxDeserializedMsgSize,
+      });
 
       let topic = topicsByName.get(channel.topic);
       if (!topic) {
@@ -153,6 +175,11 @@ export class McapIndexedIterableSource implements IIterableSource {
         const msg = channelInfo.parsedChannel.deserialize(message.data) as Record<string, unknown>;
         const spec = args.topics.get(channelInfo.channel.topic);
         const payload = spec?.fields != undefined ? pickFields(msg, spec.fields) : msg;
+        const sizeInBytes = Math.max(
+          message.data.byteLength,
+          channelInfo.approxDeserializedMsgSize,
+        );
+
         yield {
           type: "message-event",
           msgEvent: {
@@ -163,7 +190,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             // Treat sliced messages as zero bytes. This is a rough approximation of course but the
             // alternative is taking the performance hit of sizing the sliced fields for each
             // message.
-            sizeInBytes: spec?.fields == undefined ? message.data.byteLength : 0,
+            sizeInBytes: spec?.fields == undefined ? sizeInBytes : 0,
             schemaName: channelInfo.schemaName ?? "",
           },
         };
@@ -207,7 +234,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             receiveTime: fromNanoSec(message.logTime),
             publishTime: fromNanoSec(message.publishTime),
             message: channelInfo.parsedChannel.deserialize(message.data),
-            sizeInBytes: message.data.byteLength,
+            sizeInBytes: Math.max(message.data.byteLength, channelInfo.approxDeserializedMsgSize),
             schemaName: channelInfo.schemaName ?? "",
           });
         } catch (err) {
