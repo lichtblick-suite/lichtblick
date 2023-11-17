@@ -8,7 +8,6 @@ import { AppBarProps } from "@foxglove/studio-base/components/AppBar";
 import { CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
 import { IAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { INativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
-import { INativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 interface ISharedRootContext {
@@ -16,7 +15,6 @@ interface ISharedRootContext {
   appConfiguration?: IAppConfiguration;
   dataSources: IDataSourceFactory[];
   nativeAppMenu?: INativeAppMenu;
-  nativeWindow?: INativeWindow;
   enableLaunchPreferenceScreen?: boolean;
   enableGlobalCss?: boolean;
   appBarLeftInset?: number;

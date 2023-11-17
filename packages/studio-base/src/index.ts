@@ -20,8 +20,6 @@ export { AppContext } from "./context/AppContext";
 export type { IAppContext } from "./context/AppContext";
 export { migratePanelsState } from "./services/migrateLayout";
 export type { INativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
-export { default as NativeWindowContext } from "./context/NativeWindowContext";
-export type { INativeWindow, NativeWindowEvent } from "./context/NativeWindowContext";
 export type { IDataSourceFactory } from "./context/PlayerSelectionContext";
 export { default as installDevtoolsFormatters } from "./util/installDevtoolsFormatters";
 export { default as overwriteFetch } from "./util/overwriteFetch";

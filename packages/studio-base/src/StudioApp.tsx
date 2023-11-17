@@ -19,7 +19,6 @@ import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
 import NativeAppMenuContext from "./context/NativeAppMenuContext";
-import NativeWindowContext from "./context/NativeWindowContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
@@ -38,7 +37,6 @@ export function StudioApp(): JSX.Element {
   const {
     dataSources,
     nativeAppMenu,
-    nativeWindow,
     deepLinks,
     enableLaunchPreferenceScreen,
     extraProviders,
@@ -59,10 +57,6 @@ export function StudioApp(): JSX.Element {
 
   if (nativeAppMenu) {
     providers.push(<NativeAppMenuContext.Provider value={nativeAppMenu} />);
-  }
-
-  if (nativeWindow) {
-    providers.push(<NativeWindowContext.Provider value={nativeWindow} />);
   }
 
   if (extraProviders) {
