@@ -25,6 +25,8 @@ export type ParsedChannel = {
   datatypes: MessageDefinitionMap;
 };
 
+const KNOWN_EMPTY_SCHEMA_NAMES = ["std_msgs/Empty", "std_msgs/msg/Empty"];
+
 function parseIDLDefinitionsToDatatypes(
   parsedDefinitions: IDLMessageDefinition[],
   rootName?: string,
@@ -77,6 +79,16 @@ function parsedDefinitionsToDatatypes(
  * - https://github.com/foxglove/mcap/blob/main/docs/specification/well-known-schema-encodings.md
  */
 export function parseChannel(channel: Channel): ParsedChannel {
+  // For ROS schemas, we expect the schema to be non-empty unless the
+  // schema name is one of the well-known empty schema names.
+  if (
+    ["ros1msg", "ros2msg", "ros2idl"].includes(channel.schema?.encoding ?? "") &&
+    channel.schema?.data.length === 0 &&
+    !KNOWN_EMPTY_SCHEMA_NAMES.includes(channel.schema.name)
+  ) {
+    throw new Error(`Schema for ${channel.schema.name} is empty`);
+  }
+
   if (channel.messageEncoding === "json") {
     if (channel.schema != undefined && channel.schema.encoding !== "jsonschema") {
       throw new Error(
