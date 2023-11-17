@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as _ from "lodash-es";
+
 import { toNanoSec, toSec } from "@foxglove/rostime";
 import { NumericType, PointCloud as FoxglovePointCloud } from "@foxglove/schemas";
 import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
@@ -137,9 +139,36 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
       {
         type: "schema",
         schemaNames: VELODYNE_SCAN_DATATYPES,
-        subscription: { handler: this.#handleVelodyneScan },
+        subscription: {
+          handler: this.#handleVelodyneScan,
+          filterQueue: this.#processMessageQueue.bind(this),
+        },
       },
     ];
+  }
+
+  #processMessageQueue<T>(msgs: MessageEvent<T>[]): MessageEvent<T>[] {
+    if (msgs.length === 0) {
+      return msgs;
+    }
+    const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+    const finalQueue: MessageEvent<T>[] = [];
+    for (const topic in msgsByTopic) {
+      const topicMsgs = msgsByTopic[topic]!;
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsVelodyneScans>
+        | undefined;
+      // if the topic has a decaytime add all messages to queue for topic
+      if ((userSettings?.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
+        finalQueue.push(...topicMsgs);
+        continue;
+      }
+      const latestMsg = topicMsgs[topicMsgs.length - 1];
+      if (latestMsg) {
+        finalQueue.push(latestMsg);
+      }
+    }
+    return finalQueue;
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

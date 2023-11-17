@@ -361,6 +361,8 @@ describe("3D Renderer", () => {
     currentFrame.forEach((msg) => {
       renderer.addMessageEvent(msg);
     });
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -381,6 +383,8 @@ describe("3D Renderer", () => {
     currentFrame.forEach((msg) => {
       renderer.addMessageEvent(msg);
     });
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
   });
@@ -428,6 +432,8 @@ describe("3D Renderer", () => {
     currentFrame.forEach((msg) => {
       renderer.addMessageEvent(msg);
     });
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -449,6 +455,8 @@ describe("3D Renderer", () => {
     currentFrame.forEach((msg) => {
       renderer.addMessageEvent(msg);
     });
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
 
     expect(renderer.transformTree.frame("before")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -476,6 +484,8 @@ describe("3D Renderer", () => {
     let currentTime = 8n;
     renderer.setCurrentTime(currentTime);
     renderer.handleAllFramesMessages(allFrames);
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
     expect(renderer.transformTree.frame("before4")).not.toBeUndefined();
     expect(renderer.transformTree.frame("before2")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -497,6 +507,8 @@ describe("3D Renderer", () => {
 
     // repopulate up to current receiveTime from allFrames
     renderer.handleAllFramesMessages(allFrames);
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
     expect(renderer.transformTree.frame("before4")).not.toBeUndefined();
     expect(renderer.transformTree.frame("before2")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).toBeUndefined();
@@ -524,6 +536,8 @@ describe("3D Renderer", () => {
     let currentTime = 7n;
     renderer.setCurrentTime(currentTime);
     renderer.handleAllFramesMessages(allFrames);
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
     expect(renderer.transformTree.frame("before4")).not.toBeUndefined();
     expect(renderer.transformTree.frame("before2")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();
@@ -545,6 +559,8 @@ describe("3D Renderer", () => {
 
     // repopulate up to current receiveTime from allFrames
     renderer.handleAllFramesMessages(allFrames);
+    // messages processed by renderer on animation frame
+    renderer.animationFrame();
     expect(renderer.transformTree.frame("before4")).not.toBeUndefined();
     expect(renderer.transformTree.frame("before2")).not.toBeUndefined();
     expect(renderer.transformTree.frame("on")).not.toBeUndefined();

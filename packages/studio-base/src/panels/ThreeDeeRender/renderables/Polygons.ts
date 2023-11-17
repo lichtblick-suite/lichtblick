@@ -9,7 +9,12 @@ import type { RosValue } from "@foxglove/studio-base/players/types";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import {
+  PartialMessage,
+  PartialMessageEvent,
+  SceneExtension,
+  onlyLastByTopicMessage,
+} from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
 import { normalizeHeader, normalizeVector3s } from "../normalizeMessages";
@@ -71,7 +76,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
       {
         type: "schema",
         schemaNames: POLYGON_STAMPED_DATATYPES,
-        subscription: { handler: this.#handlePolygon },
+        subscription: { handler: this.#handlePolygon, filterQueue: onlyLastByTopicMessage },
       },
     ];
   }

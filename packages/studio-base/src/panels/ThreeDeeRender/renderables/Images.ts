@@ -28,7 +28,7 @@ import {
 import { getTopicMatchPrefix, sortPrefixMatchesToFront } from "./Images/topicPrefixMatching";
 import { cameraInfosEqual, normalizeCameraInfo } from "./projections";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
-import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { PartialMessageEvent, SceneExtension, onlyLastByTopicMessage } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import {
   CAMERA_CALIBRATION_DATATYPES,
@@ -106,22 +106,31 @@ export class Images extends SceneExtension<ImageRenderable> {
       {
         type: "schema",
         schemaNames: ROS_IMAGE_DATATYPES,
-        subscription: { handler: this.#handleRosRawImage },
+        subscription: { handler: this.#handleRosRawImage, filterQueue: onlyLastByTopicMessage },
       },
       {
         type: "schema",
         schemaNames: ROS_COMPRESSED_IMAGE_DATATYPES,
-        subscription: { handler: this.#handleRosCompressedImage },
+        subscription: {
+          handler: this.#handleRosCompressedImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
       },
       {
         type: "schema",
         schemaNames: RAW_IMAGE_DATATYPES,
-        subscription: { handler: this.#handleRawImage },
+        subscription: {
+          handler: this.#handleRawImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
       },
       {
         type: "schema",
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
-        subscription: { handler: this.#handleCompressedImage },
+        subscription: {
+          handler: this.#handleCompressedImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
       },
     ];
   }

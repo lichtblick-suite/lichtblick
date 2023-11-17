@@ -22,7 +22,12 @@ import {
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import {
+  PartialMessage,
+  PartialMessageEvent,
+  SceneExtension,
+  onlyLastByTopicMessage,
+} from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { rgbaToCssString, rgbaToLinear, stringToRgba } from "../color";
 import { normalizePose, normalizeTime, normalizeByteArray } from "../normalizeMessages";
@@ -397,7 +402,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       {
         type: "schema",
         schemaNames: GRID_DATATYPES,
-        subscription: { handler: this.#handleFoxgloveGrid },
+        subscription: { handler: this.#handleFoxgloveGrid, filterQueue: onlyLastByTopicMessage },
       },
     ];
   }

@@ -2,12 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as _ from "lodash-es";
 import * as THREE from "three";
 
 import { filterMap } from "@foxglove/den/collection";
 import { Time, toNanoSec } from "@foxglove/rostime";
 import { NumericType, PackedElementField, PointCloud } from "@foxglove/schemas";
-import { SettingsTreeAction } from "@foxglove/studio";
+import { SettingsTreeAction, MessageEvent } from "@foxglove/studio";
 import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
 import {
   autoSelectColorField,
@@ -707,14 +708,45 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
       {
         type: "schema",
         schemaNames: ROS_POINTCLOUD_DATATYPES,
-        subscription: { handler: this.#handleRosPointCloud },
+        subscription: {
+          handler: this.#handleRosPointCloud,
+          filterQueue: this.#processMessageQueue.bind(this),
+        },
       },
       {
         type: "schema",
         schemaNames: FOXGLOVE_POINTCLOUD_DATATYPES,
-        subscription: { handler: this.#handleFoxglovePointCloud },
+        subscription: {
+          handler: this.#handleFoxglovePointCloud,
+          filterQueue: this.#processMessageQueue.bind(this),
+        },
       },
     ];
+  }
+
+  #processMessageQueue<T>(msgs: MessageEvent<T>[]): MessageEvent<T>[] {
+    if (msgs.length === 0) {
+      return msgs;
+    }
+    const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+    const finalQueue: MessageEvent<T>[] = [];
+    for (const topic in msgsByTopic) {
+      const topicMsgs = msgsByTopic[topic]!;
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsPointClouds>
+        | undefined;
+      // if the topic has a decaytime add all messages to queue for topic
+      if ((userSettings?.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
+        finalQueue.push(...topicMsgs);
+        continue;
+      }
+      const latestMsg = topicMsgs[topicMsgs.length - 1];
+      if (latestMsg) {
+        finalQueue.push(latestMsg);
+      }
+    }
+
+    return finalQueue;
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {

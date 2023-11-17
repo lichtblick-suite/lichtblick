@@ -59,8 +59,8 @@ export type RendererEvents = {
   transformTreeUpdated: (renderer: IRenderer) => void;
   settingsTreeChange: (renderer: IRenderer) => void;
   configChange: (renderer: IRenderer) => void;
-  schemaHandlersChanged: (renderer: IRenderer) => void;
-  topicHandlersChanged: (renderer: IRenderer) => void;
+  schemaSubscriptionsChanged: (renderer: IRenderer) => void;
+  topicSubscriptionsChanged: (renderer: IRenderer) => void;
   topicsChanged: (renderer: IRenderer) => void;
   resetViewChanged: (renderer: IRenderer) => void;
   resetAllFramesCursor: (renderer: IRenderer) => void;
@@ -176,6 +176,10 @@ export type RendererSubscription<T = unknown> = {
   shouldSubscribe?: (topic: string) => boolean;
   /** Callback that will be fired for each matching incoming message */
   handler: (messageEvent: MessageEvent<T>) => void;
+  /** Queue of messages to be handled since last frame. Will be reassigned to new empty array each frame. */
+  queue?: MessageEvent<T>[] | undefined;
+  /** Optional callback to be called on `queue` to filter. Returns new queue. */
+  filterQueue?: (queue: MessageEvent<T>[]) => MessageEvent<T>[];
 };
 
 export type AnyRendererSubscription = Immutable<
@@ -222,9 +226,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   // extensionId -> SceneExtension
   sceneExtensions: Map<string, SceneExtension>;
   // datatype -> RendererSubscription[]
-  schemaHandlers: Map<string, RendererSubscription[]>;
+  schemaSubscriptions: Map<string, RendererSubscription[]>;
   // topicName -> RendererSubscription[]
-  topicHandlers: Map<string, RendererSubscription[]>;
+  topicSubscriptions: Map<string, RendererSubscription[]>;
   // layerId -> { action, handler }
   input: Input;
   readonly outlineMaterial: THREE.LineBasicMaterial;

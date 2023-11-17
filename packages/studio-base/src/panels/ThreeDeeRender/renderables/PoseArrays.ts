@@ -16,7 +16,12 @@ import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import {
+  onlyLastByTopicMessage,
+  PartialMessage,
+  PartialMessageEvent,
+  SceneExtension,
+} from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaGradient, rgbaToCssString, stringToRgba } from "../color";
 import { POSES_IN_FRAME_DATATYPES } from "../foxglove";
@@ -148,17 +153,17 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       {
         type: "schema",
         schemaNames: POSE_ARRAY_DATATYPES,
-        subscription: { handler: this.#handlePoseArray },
+        subscription: { handler: this.#handlePoseArray, filterQueue: onlyLastByTopicMessage },
       },
       {
         type: "schema",
         schemaNames: POSES_IN_FRAME_DATATYPES,
-        subscription: { handler: this.#handlePosesInFrame },
+        subscription: { handler: this.#handlePosesInFrame, filterQueue: onlyLastByTopicMessage },
       },
       {
         type: "schema",
         schemaNames: NAV_PATH_DATATYPES,
-        subscription: { handler: this.#handleNavPath },
+        subscription: { handler: this.#handleNavPath, filterQueue: onlyLastByTopicMessage },
       },
     ];
   }

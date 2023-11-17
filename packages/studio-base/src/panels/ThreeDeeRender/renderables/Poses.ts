@@ -15,7 +15,12 @@ import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import {
+  onlyLastByTopicMessage,
+  PartialMessage,
+  PartialMessageEvent,
+  SceneExtension,
+} from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
 import { POSE_IN_FRAME_DATATYPES } from "../foxglove";
@@ -107,17 +112,20 @@ export class Poses extends SceneExtension<PoseRenderable> {
       {
         type: "schema",
         schemaNames: POSE_STAMPED_DATATYPES,
-        subscription: { handler: this.#handlePoseStamped },
+        subscription: { handler: this.#handlePoseStamped, filterQueue: onlyLastByTopicMessage },
       },
       {
         type: "schema",
         schemaNames: POSE_IN_FRAME_DATATYPES,
-        subscription: { handler: this.#handlePoseInFrame },
+        subscription: { handler: this.#handlePoseInFrame, filterQueue: onlyLastByTopicMessage },
       },
       {
         type: "schema",
         schemaNames: POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
-        subscription: { handler: this.#handlePoseWithCovariance },
+        subscription: {
+          handler: this.#handlePoseWithCovariance,
+          filterQueue: onlyLastByTopicMessage,
+        },
       },
     ];
   }

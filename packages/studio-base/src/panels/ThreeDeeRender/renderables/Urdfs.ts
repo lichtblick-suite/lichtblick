@@ -29,7 +29,7 @@ import { RenderableSphere } from "./markers/RenderableSphere";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { PartialMessageEvent, SceneExtension, onlyLastByTopicMessage } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import {
   ColorRGBA,
@@ -205,7 +205,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       {
         type: "topic",
         topicName: TOPIC_NAME,
-        subscription: { handler: this.#handleRobotDescription },
+        subscription: {
+          handler: this.#handleRobotDescription,
+          filterQueue: onlyLastByTopicMessage,
+        },
       },
 
       // Note that this subscription will never happen because it does not appear as a topic in the
@@ -214,7 +217,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       {
         type: "schema",
         schemaNames: JOINTSTATE_DATATYPES,
-        subscription: { handler: this.#handleJointState },
+        subscription: { handler: this.#handleJointState, filterQueue: onlyLastByTopicMessage },
       },
 
       {
@@ -223,6 +226,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         subscription: {
           shouldSubscribe: this.#shouldSubscribe,
           handler: this.#handleRobotDescription,
+          filterQueue: onlyLastByTopicMessage,
         },
       },
     ];

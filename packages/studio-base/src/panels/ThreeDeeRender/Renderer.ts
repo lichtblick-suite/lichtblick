@@ -158,9 +158,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   // extensionId -> SceneExtension
   public sceneExtensions = new Map<string, SceneExtension>();
   // datatype -> RendererSubscription[]
-  public schemaHandlers = new Map<string, RendererSubscription[]>();
+  public schemaSubscriptions = new Map<string, RendererSubscription[]>();
   // topicName -> RendererSubscription[]
-  public topicHandlers = new Map<string, RendererSubscription[]>();
+  public topicSubscriptions = new Map<string, RendererSubscription[]>();
   // layerId -> { action, handler }
   #customLayerActions = new Map<string, CustomLayerAction>();
   #scene: THREE.Scene;
@@ -452,6 +452,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       resetAllFramesCursor: false,
     },
   ): void {
+    this.#clearSubscriptionQueues();
     if (clearTransforms === true) {
       this.#clearTransformTree();
     }
@@ -476,6 +477,19 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     lastReadMessage: undefined,
     cursorTimeReached: undefined,
   };
+
+  #clearSubscriptionQueues(): void {
+    for (const subscriptions of this.topicSubscriptions.values()) {
+      for (const subscription of subscriptions) {
+        subscription.queue = undefined;
+      }
+    }
+    for (const subscriptions of this.schemaSubscriptions.values()) {
+      for (const subscription of subscriptions) {
+        subscription.queue = undefined;
+      }
+    }
+  }
 
   #resetAllFramesCursor() {
     this.#allFramesCursor = {
@@ -615,10 +629,16 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       for (const subscription of subscriptions) {
         switch (subscription.type) {
           case "schema":
-            this.#addSchemaSubscriptions(subscription.schemaNames, subscription.subscription);
+            this.#addSchemaSubscriptions(
+              subscription.schemaNames,
+              subscription.subscription as RendererSubscription,
+            );
             break;
           case "topic":
-            this.#addTopicSubscription(subscription.topicName, subscription.subscription);
+            this.#addTopicSubscription(
+              subscription.topicName,
+              subscription.subscription as RendererSubscription,
+            );
             break;
         }
       }
@@ -627,10 +647,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   // Clear topic and schema subscriptions and emit change events for both
   #clearSubscriptions(): void {
-    this.topicHandlers.clear();
-    this.schemaHandlers.clear();
-    this.emit("topicHandlersChanged", this);
-    this.emit("schemaHandlersChanged", this);
+    this.topicSubscriptions.clear();
+    this.schemaSubscriptions.clear();
+    this.emit("topicSubscriptionsChanged", this);
+    this.emit("schemaSubscriptionsChanged", this);
   }
 
   #addSchemaSubscriptions<T>(
@@ -638,24 +658,24 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     subscription: RendererSubscription<T>,
   ): void {
     for (const schemaName of schemaNames) {
-      let handlers = this.schemaHandlers.get(schemaName);
+      let handlers = this.schemaSubscriptions.get(schemaName);
       if (!handlers) {
         handlers = [];
-        this.schemaHandlers.set(schemaName, handlers);
+        this.schemaSubscriptions.set(schemaName, handlers);
       }
       handlers.push(subscription as RendererSubscription);
     }
-    this.emit("schemaHandlersChanged", this);
+    this.emit("schemaSubscriptionsChanged", this);
   }
 
   #addTopicSubscription<T>(topic: string, subscription: RendererSubscription<T>): void {
-    let handlers = this.topicHandlers.get(topic);
+    let handlers = this.topicSubscriptions.get(topic);
     if (!handlers) {
       handlers = [];
-      this.topicHandlers.set(topic, handlers);
+      this.topicSubscriptions.set(topic, handlers);
     }
     handlers.push(subscription as RendererSubscription);
-    this.emit("topicHandlersChanged", this);
+    this.emit("topicSubscriptionsChanged", this);
   }
 
   /**
@@ -913,8 +933,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.addCoordinateFrame(maybeHasFrameId.frame_id);
     }
 
-    handleMessage(messageEvent, this.topicHandlers.get(messageEvent.topic));
-    handleMessage(messageEvent, this.schemaHandlers.get(messageEvent.schemaName));
+    queueMessage(messageEvent, this.topicSubscriptions.get(messageEvent.topic));
+    queueMessage(messageEvent, this.schemaSubscriptions.get(messageEvent.schemaName));
   }
 
   /** Match the behavior of `tf::Transformer` by stripping leading slashes from
@@ -1043,6 +1063,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #frameHandler = (currentTime: bigint): void => {
     this.#rendering = true;
     this.currentTime = currentTime;
+    this.#handleSubscriptionQueues();
     this.#updateFrameErrors();
     this.#updateFixedFrameId();
     this.#updateResolution();
@@ -1077,6 +1098,36 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.gl.info.reset();
   };
+
+  /** iterates through all subscription message queues, processes them, and calls their handler for each message in the frame */
+  #handleSubscriptionQueues(): void {
+    for (const subscriptions of this.topicSubscriptions.values()) {
+      for (const subscription of subscriptions) {
+        if (!subscription.queue) {
+          continue;
+        }
+        const { queue, filterQueue } = subscription;
+        const processedQueue = filterQueue ? filterQueue(queue) : queue;
+        subscription.queue = undefined;
+        for (const messageEvent of processedQueue) {
+          subscription.handler(messageEvent);
+        }
+      }
+    }
+    for (const subscriptions of this.schemaSubscriptions.values()) {
+      for (const subscription of subscriptions) {
+        if (!subscription.queue) {
+          continue;
+        }
+        const { queue, filterQueue } = subscription;
+        const processedQueue = filterQueue ? filterQueue(queue) : queue;
+        subscription.queue = undefined;
+        for (const messageEvent of processedQueue) {
+          subscription.handler(messageEvent);
+        }
+      }
+    }
+  }
 
   #updateFixedFrameId(): void {
     const frame =
@@ -1391,13 +1442,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 }
 
-function handleMessage(
+function queueMessage(
   messageEvent: Readonly<MessageEvent>,
   subscriptions: RendererSubscription[] | undefined,
 ): void {
   if (subscriptions) {
     for (const subscription of subscriptions) {
-      subscription.handler(messageEvent);
+      subscription.queue = subscription.queue ?? [];
+      subscription.queue.push(messageEvent);
     }
   }
 }

@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as _ from "lodash-es";
 import * as THREE from "three";
 
 import { Time, toNanoSec } from "@foxglove/rostime";
 import { LaserScan as FoxgloveLaserScan } from "@foxglove/schemas";
-import { SettingsTreeAction } from "@foxglove/studio";
+import { SettingsTreeAction, MessageEvent } from "@foxglove/studio";
 import {
   DEFAULT_POINT_SETTINGS,
   LayerSettingsPointExtension,
@@ -325,16 +326,45 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
       {
         type: "schema",
         schemaNames: ROS_LASERSCAN_DATATYPES,
-        subscription: { handler: this.#handleLaserScan },
+        subscription: {
+          handler: this.#handleLaserScan,
+          filterQueue: this.#processMessageQueue.bind(this),
+        },
       },
       {
         type: "schema",
         schemaNames: FOXGLOVE_LASERSCAN_DATATYPES,
-        subscription: { handler: this.#handleLaserScan },
+        subscription: {
+          handler: this.#handleLaserScan,
+          filterQueue: this.#processMessageQueue.bind(this),
+        },
       },
     ];
   }
 
+  #processMessageQueue<T>(msgs: MessageEvent<T>[]): MessageEvent<T>[] {
+    if (msgs.length === 0) {
+      return msgs;
+    }
+    const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+    const finalQueue: MessageEvent<T>[] = [];
+    for (const topic in msgsByTopic) {
+      const topicMsgs = msgsByTopic[topic]!;
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsLaserScan>
+        | undefined;
+      // if the topic has a decaytime add all messages to queue for topic
+      if ((userSettings?.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
+        finalQueue.push(...topicMsgs);
+        continue;
+      }
+      const latestMsg = topicMsgs[topicMsgs.length - 1];
+      if (latestMsg) {
+        finalQueue.push(latestMsg);
+      }
+    }
+    return finalQueue;
+  }
   public override settingsNodes(): SettingsTreeEntry[] {
     const configTopics = this.renderer.config.topics;
     const handler = this.handleSettingsAction;
