@@ -44,6 +44,7 @@ export * from "./MuiRadio";
 export * from "./MuiSelect";
 export * from "./MuiTab";
 export * from "./MuiTableCell";
+export * from "./MuiTableRow";
 export * from "./MuiTabs";
 export * from "./MuiTextField";
 export * from "./MuiToggleButton";

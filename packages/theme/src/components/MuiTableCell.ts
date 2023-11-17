@@ -6,6 +6,9 @@ import { OverrideComponentReturn } from "../types";
 
 export const MuiTableCell: OverrideComponentReturn<"MuiTableCell"> = {
   styleOverrides: {
+    head: {
+      fontWeight: 700,
+    },
     stickyHeader: ({ theme }) => ({
       backgroundColor: theme.palette.background.paper,
     }),
