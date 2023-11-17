@@ -18,7 +18,6 @@ import MultiProvider from "./components/MultiProvider";
 import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
-import NativeAppMenuContext from "./context/NativeAppMenuContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
@@ -36,7 +35,6 @@ function contextMenuHandler(event: MouseEvent) {
 export function StudioApp(): JSX.Element {
   const {
     dataSources,
-    nativeAppMenu,
     deepLinks,
     enableLaunchPreferenceScreen,
     extraProviders,
@@ -54,10 +52,6 @@ export function StudioApp(): JSX.Element {
     <EventsProvider />,
     /* eslint-enable react/jsx-key */
   ];
-
-  if (nativeAppMenu) {
-    providers.push(<NativeAppMenuContext.Provider value={nativeAppMenu} />);
-  }
 
   if (extraProviders) {
     providers.unshift(...extraProviders);

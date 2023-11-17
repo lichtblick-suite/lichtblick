@@ -58,7 +58,6 @@ import {
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useDefaultWebLaunchPreference } from "@foxglove/studio-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
-import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
@@ -171,56 +170,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       containerRef.current.focus();
     }
   }, []);
-
-  useNativeAppMenuEvent(
-    "open",
-    useCallback(async () => {
-      dialogActions.dataSource.open("start");
-    }, [dialogActions.dataSource]),
-  );
-
-  useNativeAppMenuEvent(
-    "open-file",
-    useCallback(async () => {
-      await dialogActions.openFile.open();
-    }, [dialogActions.openFile]),
-  );
-
-  useNativeAppMenuEvent(
-    "open-connection",
-    useCallback(() => {
-      dialogActions.dataSource.open("connection");
-    }, [dialogActions.dataSource]),
-  );
-
-  useNativeAppMenuEvent(
-    "open-demo",
-    useCallback(() => {
-      dialogActions.dataSource.open("demo");
-    }, [dialogActions.dataSource]),
-  );
-
-  useNativeAppMenuEvent(
-    "open-help-about",
-    useCallback(() => {
-      dialogActions.preferences.open("about");
-    }, [dialogActions.preferences]),
-  );
-
-  useNativeAppMenuEvent(
-    "open-help-general",
-    useCallback(() => {
-      dialogActions.preferences.open("general");
-    }, [dialogActions.preferences]),
-  );
-
-  useNativeAppMenuEvent("open-help-docs", () => {
-    window.open("https://foxglove.dev/docs", "_blank");
-  });
-
-  useNativeAppMenuEvent("open-help-slack", () => {
-    window.open("https://foxglove.dev/slack", "_blank");
-  });
 
   const { enqueueSnackbar } = useSnackbar();
 
