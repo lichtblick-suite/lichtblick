@@ -32,7 +32,7 @@
     "@foxglove/ros2idl-parser": "0.3.1",
     "@foxglove/rosmsg": "4.2.2",
     "@foxglove/rosmsg-serialization": "2.0.2",
-    "@foxglove/rosmsg2-serialization": "2.0.2",
+    "@foxglove/rosmsg2-serialization": "2.0.3",
     "@foxglove/schemas": "1.6.0",
     "@foxglove/wasm-bz2": "0.1.1",
     "@foxglove/wasm-lz4": "1.0.2",
