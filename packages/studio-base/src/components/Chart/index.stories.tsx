@@ -187,6 +187,12 @@ export const AllowsClickingOnDatalabels: StoryObj = {
       }
     }, [clickedDatalabel, readySignal]);
 
+    const debouncedOnFinish = React.useMemo(() => {
+      return _.debounce(() => {
+        doClick();
+      }, 3000);
+    }, [doClick]);
+
     return (
       <div style={divStyle}>
         <div style={{ padding: 6, fontSize: 16 }}>
@@ -196,7 +202,11 @@ export const AllowsClickingOnDatalabels: StoryObj = {
               )}`
             : "Have not clicked datalabel"}
         </div>
-        <ChartComponent {...propsWithDatalabels} onFinishRender={doClick} onClick={onClick} />
+        <ChartComponent
+          {...propsWithDatalabels}
+          onFinishRender={debouncedOnFinish}
+          onClick={onClick}
+        />
       </div>
     );
   },
