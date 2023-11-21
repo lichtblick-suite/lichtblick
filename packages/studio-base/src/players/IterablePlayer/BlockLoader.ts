@@ -91,7 +91,7 @@ export class BlockLoader {
 
     this.#abortController.abort();
     this.#activeChangeCondvar.notifyAll();
-    log.debug(`Preloaded topics: ${[...topics].join(", ")}`);
+    log.debug(`Preloaded topics: ${Array.from(topics.keys()).join(", ")}`);
 
     // Update all the blocks with any missing topics
     for (const block of this.#blocks) {

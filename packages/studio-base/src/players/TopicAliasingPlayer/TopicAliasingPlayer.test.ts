@@ -21,11 +21,21 @@ describe("TopicAliasingPlayer", () => {
     const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
     player.setListener(async () => {});
     player.setSubscriptions([{ topic: "/renamed_topic_1" }, { topic: "/topic_2" }]);
+
+    // Until topics are set we can't run alias functions so "setSubscriptions" passes the original
+    // topics through.
+    expect(fakePlayer.subscriptions).toEqual([
+      { topic: "/renamed_topic_1" },
+      { topic: "/topic_2" },
+    ]);
+
     await fakePlayer.emit(
       mockPlayerState(undefined, {
         topics: [{ name: "/original_topic_1", schemaName: "any.schema" }],
       }),
     );
+
+    // After the state emit we have a set of topics and have re-calculated the aliases
     expect(fakePlayer.subscriptions).toEqual([
       { topic: "/original_topic_1" },
       { topic: "/topic_2" },
@@ -299,5 +309,47 @@ describe("TopicAliasingPlayer", () => {
         }),
       }),
     );
+  });
+
+  it("updates subscriptions when global variable changes update aliases", async () => {
+    const fakePlayer = new FakePlayer();
+    const mappers: TopicAliasFunctions = [
+      {
+        extensionId: "some-id",
+        aliasFunction: (opt) => {
+          // This function skips returning aliases until doMap is set
+          if (opt.globalVariables["doMap"] !== true) {
+            return [];
+          }
+
+          return [{ sourceTopicName: "/original_topic_1", name: "/renamed_topic_1" }];
+        },
+      },
+    ];
+    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    player.setListener(async () => {});
+    player.setSubscriptions([{ topic: "/renamed_topic_1" }, { topic: "/topic_2" }]);
+
+    await fakePlayer.emit(
+      mockPlayerState(undefined, {
+        topics: [{ name: "/original_topic_1", schemaName: "any.schema" }],
+      }),
+    );
+
+    // After an emit the set of subscriptions is updated since we have a list of topics
+    expect(fakePlayer.subscriptions).toEqual([
+      { topic: "/renamed_topic_1" },
+      { topic: "/topic_2" },
+    ]);
+
+    // update the global variables to create an alias
+    player.setGlobalVariables({ doMap: true });
+
+    // The set of subscriptions should be updated to remove the aliased-out subscription and
+    // include the original topic subscription
+    expect(fakePlayer.subscriptions).toEqual([
+      { topic: "/original_topic_1" },
+      { topic: "/topic_2" },
+    ]);
   });
 });
