@@ -10,8 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-
 import { useTheme } from "@mui/material";
+import { expect } from "@storybook/jest";
 import { StoryObj, Meta } from "@storybook/react";
 import { fireEvent, within } from "@storybook/testing-library";
 
@@ -398,5 +398,55 @@ export const SupportsDraggingBetweenTabsAnywhereInTheLayout: Story = {
     const target = targetTab.querySelector(".drop-target.left");
 
     dragAndDrop(dragHandle[0]!, target!);
+  },
+};
+
+export const DraggingOntoTabRootDoesNotReplaceTabContents: Story = {
+  render: () => <PanelLayout />,
+  args: {
+    fixture: {
+      topics: [],
+      datatypes: new Map(),
+      frame: {},
+      layout: {
+        direction: "row",
+        splitPercentage: 50,
+        first: "Tab!a",
+        second: "Sample1!2xqjjqw",
+      },
+      savedProps: {
+        "Tab!a": {
+          activeTabIdx: 0,
+          tabs: [
+            {
+              title: "First",
+              layout: {
+                direction: "row",
+                splitPercentage: 50,
+                first: "unknown!inner1",
+                second: "unknown!inner2",
+              },
+            },
+          ],
+        },
+      },
+    } satisfies Fixture,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const sample1 = await canvas.findByTestId("panel-mouseenter-container Sample1!2xqjjqw");
+    const targetTab = await canvas.findByTestId("panel-mouseenter-container Tab!a");
+
+    const dragHandle = await within(sample1).findAllByTestId("panel-menu");
+
+    dragAndDrop(dragHandle[0]!, targetTab);
+
+    // Drag & drop should not have replaced existing tab contents
+    await expect(
+      await canvas.findByTestId("panel-mouseenter-container unknown!inner1"),
+    ).toBeInTheDocument();
+    await expect(
+      await canvas.findByTestId("panel-mouseenter-container unknown!inner2"),
+    ).toBeInTheDocument();
   },
 };

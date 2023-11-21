@@ -77,12 +77,15 @@ function TabMosaicWrapper({ tabId, children }: PropsWithChildren<{ tabId?: strin
     accept: MosaicDragType.WINDOW,
     drop: (_item, monitor) => {
       const nestedDropResult = monitor.getDropResult<MosaicDropResult>();
-      if (nestedDropResult) {
-        // The drop result may already have a tabId if it was dropped in a more deeply-nested Tab
-        // mosaic. Provide our tabId only if there wasn't one already.
-        return { tabId, ...nestedDropResult };
+      // MosaicWindow has a top-level drop target which can fire if something is dropped onto the
+      // tab bar or elsewhere inside the tab that doesn't correspond to one of the other mosaic drop
+      // targets. In this case we don't want to replace the tab's existing layout so we do nothing.
+      if (nestedDropResult?.path == undefined) {
+        return undefined;
       }
-      return undefined;
+      // The drop result may already have a tabId if it was dropped in a more deeply-nested Tab
+      // mosaic. Provide our tabId only if there wasn't one already.
+      return { tabId, ...nestedDropResult };
     },
   });
   return (
