@@ -85,13 +85,13 @@ export function* iterateTyped<T extends { [key: string]: Array<any> | Float32Arr
   let index = 0;
   for (const slice of dataset) {
     // Find a property for which we can check the length
-    const first = R.head(R.values(slice));
+    const first = R.head(Object.values(slice));
     if (first == undefined) {
       continue;
     }
 
     for (let j = 0; j < first.length; j++) {
-      for (const key of R.keys(slice)) {
+      for (const key of Object.keys(slice) as (keyof typeof slice)[]) {
         point[key] = slice[key]?.[j];
       }
 

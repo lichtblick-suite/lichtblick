@@ -45,7 +45,7 @@ export function evictCache(state: State): State {
 export function addBlock(block: Messages, resetTopics: string[], state: State): StateAndEffects {
   const { blocks, pending, metadata, globalVariables } = state;
 
-  const blockTopics = R.keys(block);
+  const blockTopics = Object.keys(block);
   const clientTopics = getAllTopics(state);
   const [usedTopics, unusedTopics] = R.partition(
     (topic) => clientTopics.includes(topic),

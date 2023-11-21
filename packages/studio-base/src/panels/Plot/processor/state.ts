@@ -83,7 +83,7 @@ export const concatEffects =
   };
 
 export const findClient = (state: State, id: string): Client | undefined =>
-  R.find((client) => client.id === id, state.clients);
+  state.clients.find((client) => client.id === id);
 
 export const mutateClient = (state: State, id: string, newClient: Client): State => ({
   ...state,

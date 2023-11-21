@@ -113,7 +113,7 @@ export function updateParams(id: string, params: PlotParams, state: State): Stat
         return [newState, []];
       }
 
-      const newTopics = R.keys(newData);
+      const newTopics = Object.keys(newData);
 
       // Move new data now used by at least one client into the real block data
       const migrated = {

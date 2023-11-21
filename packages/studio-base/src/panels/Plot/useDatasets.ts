@@ -65,7 +65,7 @@ export function pathToPayload(path: RosPath): SubscribePayload | undefined {
   // We want to take _all_ of the filters that start the path, since these can
   // be chained
   const filters = R.takeWhile((part: MessagePathPart) => part.type === "filter", parts);
-  const firstField = R.find((part: MessagePathPart) => part.type === "name", parts);
+  const firstField = parts.find((part: MessagePathPart) => part.type === "name");
   if (firstField == undefined || firstField.type !== "name") {
     return undefined;
   }
@@ -119,7 +119,7 @@ function chooseClient() {
     return;
   }
 
-  const clientList = R.values(clients);
+  const clientList = Object.values(clients);
   const subscriptions = R.pipe(
     R.chain((client: Client): SubscribePayload[] => {
       const { params } = client;

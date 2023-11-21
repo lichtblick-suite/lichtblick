@@ -57,9 +57,8 @@ function denormalizeSubscriptions(
         return true;
       }
 
-      return !R.all(
+      return !payloads.every(
         (v: Immutable<SubscribePayload>) => v.fields != undefined && v.fields.length === 0,
-        payloads,
       );
     }),
     // Now reduce them down to a single payload for each topic

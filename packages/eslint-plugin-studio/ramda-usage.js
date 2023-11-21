@@ -12,8 +12,9 @@ module.exports = {
     type: "problem",
     fixable: "code",
     messages: {
-      useMath: `Use built-in Math.{{name}} instead of R.{{name}} when applying arguments directly`,
-      useArrayMap: `Use built-in Array#map instead of R.map`,
+      useMath: `Use built-in Math.{{name}} instead of R.{{name}}`,
+      useObject: `Use built-in Object.{{name}} instead of R.{{name}}`,
+      useArrayMethod: `Use built-in Array#{{arrayName}} instead of R.{{ramdaName}}`,
     },
   },
   create: (context) => {
@@ -34,9 +35,59 @@ module.exports = {
         },
 
       /**
-       * Transform `R.map(fn, array)` to `array.map(fn)`
+       * Transform `R.keys/values(a)` to `Object.keys/values(a)`
        */
-      [`CallExpression[arguments.length=2] > MemberExpression.callee[object.name="R"][property.name="map"]`]:
+      [`CallExpression[arguments.length=1] > MemberExpression.callee[object.name="R"]:matches([property.name="keys"], [property.name="values"])`]:
+        (/** @type {import("estree").MemberExpression} */ node) => {
+          context.report({
+            node,
+            messageId: "useObject",
+            data: { name: node.property.name },
+            fix(fixer) {
+              return fixer.replaceText(node.object, "Object");
+            },
+          });
+        },
+
+      /**
+       * Transform `R.all/any(fn, array)` to `array.every/some(fn)`
+       */
+      [`CallExpression[arguments.length=2] > MemberExpression.callee[object.name="R"]:matches([property.name="all"], [property.name="any"])`]:
+        (/** @type {import("estree").MemberExpression} */ node) => {
+          /** @type {import("estree").CallExpression} */
+          const callExpr = node.parent;
+          const { esTreeNodeToTSNodeMap, program } = ESLintUtils.getParserServices(context);
+          const sourceCode = context.getSourceCode();
+          const checker = program.getTypeChecker();
+          const tsNode = esTreeNodeToTSNodeMap.get(callExpr.arguments[1]);
+          const type = checker.getTypeAtLocation(tsNode);
+          if (!checker.isArrayType(type) && !checker.isTupleType(type)) {
+            return;
+          }
+          const arrayName = node.property.name === "all" ? "every" : "some";
+          context.report({
+            node: callExpr,
+            messageId: "useArrayMethod",
+            data: {
+              arrayName,
+              ramdaName: node.property.name,
+            },
+            fix(fixer) {
+              return fixer.replaceText(
+                callExpr,
+                // Add parentheses indiscriminately, leave it to prettier to clean up
+                `(${sourceCode.getText(callExpr.arguments[1])}).${arrayName}(${sourceCode.getText(
+                  callExpr.arguments[0],
+                )})`,
+              );
+            },
+          });
+        },
+
+      /**
+       * Transform `R.map/find(fn, array)` to `array.map/find(fn)`
+       */
+      [`CallExpression[arguments.length=2] > MemberExpression.callee[object.name="R"]:matches([property.name="map"], [property.name="find"])`]:
         (/** @type {import("estree").MemberExpression} */ node) => {
           /** @type {import("estree").CallExpression} */
           const callExpr = node.parent;
@@ -50,14 +101,18 @@ module.exports = {
           }
           context.report({
             node: callExpr,
-            messageId: "useArrayMap",
+            messageId: "useArrayMethod",
+            data: {
+              arrayName: node.property.name,
+              ramdaName: node.property.name,
+            },
             fix(fixer) {
               return fixer.replaceText(
                 callExpr,
                 // Add parentheses indiscriminately, leave it to prettier to clean up
-                `(${sourceCode.getText(callExpr.arguments[1])}).map(${sourceCode.getText(
-                  callExpr.arguments[0],
-                )})`,
+                `(${sourceCode.getText(callExpr.arguments[1])}).${
+                  node.property.name
+                }(${sourceCode.getText(callExpr.arguments[0])})`,
               );
             },
           });
