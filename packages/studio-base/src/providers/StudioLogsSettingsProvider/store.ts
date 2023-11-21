@@ -117,7 +117,7 @@ function createStudioLogsSettingsStore(
     disableChannel(name: string) {
       log.debug(`Disable channel: ${name}`);
 
-      // Enable the underlying log channels
+      // Disable the underlying log channels
       const logChannels = channelByName.get(name) ?? [];
       for (const channel of logChannels) {
         channel.setLevel("warn");

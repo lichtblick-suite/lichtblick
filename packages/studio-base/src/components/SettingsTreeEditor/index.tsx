@@ -110,7 +110,8 @@ export default function SettingsTreeEditor({
     [saveConfig],
   );
 
-  const showTitleField = filterText.length === 0 && panelInfo?.hasCustomToolbar !== true;
+  const showTitleField =
+    filterText.length === 0 && panelInfo?.hasCustomToolbar !== true && variant !== "log";
 
   return (
     <Stack fullHeight>

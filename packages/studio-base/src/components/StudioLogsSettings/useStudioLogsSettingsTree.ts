@@ -54,7 +54,17 @@ function useStudioLogsSettingsTree(): SettingsTree {
       children: {},
     };
 
+    // When the global level is warn or error we don't allow suppressing individual files. This is
+    // to make sure you always see warning and errors go to console since they are also visible in
+    // prod.
+    const disableIndividualOverride =
+      logsConfig.globalLevel === "warn" || logsConfig.globalLevel === "error";
+
     for (const channel of logsConfig.channels) {
+      if (disableIndividualOverride) {
+        continue;
+      }
+
       const channelName = channel.name;
 
       const parts = channelName.split("/");
@@ -150,8 +160,10 @@ function useStudioLogsSettingsTree(): SettingsTree {
       }
     }
 
-    // Add misc nodes at the end of root
-    settingsRoot["misc"] = miscRoot;
+    if (!disableIndividualOverride) {
+      // Add misc nodes at the end of root
+      settingsRoot["misc"] = miscRoot;
+    }
 
     return {
       enableFilter: true,
