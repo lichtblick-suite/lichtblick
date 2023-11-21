@@ -7,7 +7,6 @@ import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
-import { AppContext } from "@foxglove/studio-base/context/AppContext";
 import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -15,11 +14,9 @@ import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLa
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { AppMenu } from "./AppMenu";
-import { AppBarMenuItem } from "./types";
 
 type StoryArgs = {
   handleClose: () => void;
-  appBarMenuItems?: AppBarMenuItem[];
   anchorEl?: HTMLElement;
   anchorReference?: PopoverReference;
   anchorPosition?: PopoverPosition;
@@ -40,17 +37,13 @@ export default {
   },
   decorators: [
     (Story, { args: { testId: _testId, ...args } }): JSX.Element => (
-      <AppContext.Provider
-        value={{ appBarMenuItems: args.appBarMenuItems, wrapPlayer: (child) => child }}
-      >
-        <MockCurrentLayoutProvider>
-          <WorkspaceContextProvider>
-            <PlayerSelectionContext.Provider value={playerSelection}>
-              <Story {...args} />
-            </PlayerSelectionContext.Provider>
-          </WorkspaceContextProvider>
-        </MockCurrentLayoutProvider>
-      </AppContext.Provider>
+      <MockCurrentLayoutProvider>
+        <WorkspaceContextProvider>
+          <PlayerSelectionContext.Provider value={playerSelection}>
+            <Story {...args} />
+          </PlayerSelectionContext.Provider>
+        </WorkspaceContextProvider>
+      </MockCurrentLayoutProvider>
     ),
   ],
   play: async ({ canvasElement, args }) => {
@@ -81,17 +74,6 @@ const playerSelection: PlayerSelection = {
 type Story = StoryObj<StoryArgs>;
 
 export const Default: Story = {};
-
-export const WithAppContextMenuItens: Story = {
-  args: {
-    appBarMenuItems: [
-      { type: "item", key: "item1", label: "App Context Item 1" },
-      { type: "divider" },
-      { type: "item", key: "item2", label: "App Context Item 2" },
-      { type: "divider" },
-    ],
-  },
-};
 
 export const FileMenuDark: Story = {
   args: { testId: "app-menu-file" },

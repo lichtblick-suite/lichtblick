@@ -2,22 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Divider,
-  ListSubheader,
-  Menu,
-  MenuItem,
-  PaperProps,
-  PopoverPosition,
-  PopoverReference,
-  Typography,
-} from "@mui/material";
+import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
@@ -54,8 +44,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
   const { open, handleClose, anchorEl, anchorReference, anchorPosition, disablePortal } = props;
   const { classes } = useStyles();
   const { t } = useTranslation("appBar");
-
-  const { appBarMenuItems } = useAppContext();
 
   const [nestedMenu, setNestedMenu] = useState<string | undefined>();
 
@@ -251,31 +239,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
           } as Partial<PaperProps & { "data-tourid"?: string }>
         }
       >
-        {(appBarMenuItems ?? []).map((item, idx) => {
-          switch (item.type) {
-            case "item":
-              return (
-                <MenuItem
-                  key={item.key}
-                  onClick={(event) => {
-                    item.onClick?.(event);
-                    handleClose();
-                  }}
-                >
-                  {item.label}
-                  {item.shortcut && <kbd>{item.shortcut}</kbd>}
-                </MenuItem>
-              );
-            case "divider":
-              return <Divider variant="middle" key={`divider${idx}`} />;
-            case "subheader":
-              return (
-                <ListSubheader key={item.key} disableSticky>
-                  <Typography variant="overline">{item.label}</Typography>
-                </ListSubheader>
-              );
-          }
-        })}
         <NestedMenuItem
           onPointerEnter={handleItemPointerEnter}
           items={fileItems}
