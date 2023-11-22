@@ -449,4 +449,119 @@ describe("BlockLoader", () => {
       },
     });
   });
+
+  it("should drop preloaded topics when subscription options change", async () => {
+    const source = new TestSource();
+    const maxBlockCount = 2;
+    const loader = new BlockLoader({
+      maxBlocks: maxBlockCount,
+      cacheSizeBytes: 60,
+      minBlockDurationNs: 1,
+      source,
+      start: { sec: 0, nsec: 0 },
+      end: { sec: 9, nsec: 0 },
+      problemManager: new PlayerProblemManager(),
+    });
+
+    const msgEvents: MessageEvent[] = [];
+    for (let i = 0; i < 10; i += 1) {
+      msgEvents.push({
+        topic: "a",
+        receiveTime: { sec: i, nsec: 0 },
+        message: undefined,
+        sizeInBytes: 10,
+        schemaName: "foo",
+      });
+    }
+    const slicedMsgEvents = msgEvents.map((msgEvent) => ({ ...msgEvent, sizeInBytes: 1 }));
+
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      const fields = args.topics.get("a")?.fields;
+      const events = fields ? slicedMsgEvents : msgEvents;
+      for (const msgEvent of events) {
+        yield {
+          type: "message-event",
+          msgEvent,
+        };
+      }
+    };
+
+    loader.setTopics(mockTopicSelection("a"));
+    await loader.startLoading({
+      progress: async (progress) => {
+        expect(progress).toEqual({
+          fullyLoadedFractionRanges: [
+            {
+              start: 0,
+              end: 0.5,
+            },
+          ],
+          messageCache: {
+            blocks: [
+              {
+                messagesByTopic: {
+                  a: msgEvents.slice(0, 5),
+                },
+                needTopics: new Map(),
+                sizeInBytes: 50,
+              },
+            ],
+            startTime: { sec: 0, nsec: 0 },
+          },
+        });
+
+        await loader.stopLoading();
+      },
+    });
+    expect(consoleErrorMock.mock.calls[0] ?? []).toContain("cache-full");
+    consoleErrorMock.mockClear();
+
+    // Load the same topic but with message slicing. Since messages are much smaller then,
+    // we expect that we can preload the full range.
+    loader.setTopics(new Map([["a", { topic: "a", fields: ["some_field"] }]]));
+    let count = 0;
+    await loader.startLoading({
+      progress: async (progress) => {
+        count += 1;
+        if (count > maxBlockCount) {
+          throw new Error("Too many progress callbacks");
+        }
+
+        if (count === maxBlockCount) {
+          // eslint-disable-next-line jest/no-conditional-expect
+          expect(progress).toEqual({
+            fullyLoadedFractionRanges: [
+              {
+                start: 0,
+                end: 1.0,
+              },
+            ],
+            messageCache: {
+              blocks: [
+                {
+                  messagesByTopic: {
+                    a: slicedMsgEvents.slice(0, 5),
+                  },
+                  needTopics: new Map(),
+                  sizeInBytes: 5,
+                },
+                {
+                  messagesByTopic: {
+                    a: slicedMsgEvents.slice(5, 10),
+                  },
+                  needTopics: new Map(),
+                  sizeInBytes: 5,
+                },
+              ],
+              startTime: { sec: 0, nsec: 0 },
+            },
+          });
+
+          await loader.stopLoading();
+        }
+      },
+    });
+  });
 });
