@@ -7,8 +7,8 @@ import { TypeOptions } from "i18next";
 export const panels: Partial<TypeOptions["resources"]["panels"]> = {
   "3D": "3D",
   "3DPanelDescription": "マーカーやカメラ映像、メッシュ、URDFなどを3Dシーンで表示します。",
-  callService: undefined,
-  callServiceDescription: undefined,
+  callService: "サービスを呼び出す",
+  callServiceDescription: "サービスを呼び出し、サービス呼び出し結果を表示する",
   dataSourceInfo: "データソース情報",
   dataSourceInfoDescription:
     "現在のデータソースに関するトピックやタイムスタンプなどの詳細を表示します。",

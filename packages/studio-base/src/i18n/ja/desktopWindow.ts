@@ -5,13 +5,13 @@
 import { TypeOptions } from "i18next";
 
 export const desktopWindow: Partial<TypeOptions["resources"]["desktopWindow"]> = {
-  advanced: undefined,
-  checkForUpdates: undefined,
-  edit: undefined,
-  file: undefined,
-  inspectSharedWorker: undefined,
-  newWindow: undefined,
-  noSharedWorkers: undefined,
-  settings: undefined,
-  view: undefined,
+  advanced: "高度な設定",
+  checkForUpdates: "更新を確認する…",
+  edit: "編集",
+  file: "ファイル",
+  inspectSharedWorker: "共有ワーカーを検査する…",
+  newWindow: "新しいウィンドウ",
+  noSharedWorkers: "共有ワーカーがありません",
+  settings: "設定…",
+  view: "表示",
 };

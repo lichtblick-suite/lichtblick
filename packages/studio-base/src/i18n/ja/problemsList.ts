@@ -5,6 +5,6 @@
 import { TypeOptions } from "i18next";
 
 export const problemsList: Partial<TypeOptions["resources"]["problemsList"]> = {
-  noDetailsProvided: undefined,
-  noProblemsFound: undefined,
+  noDetailsProvided: "詳細は提供されていません",
+  noProblemsFound: "問題は見つかりませんでした",
 };

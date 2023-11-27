@@ -5,10 +5,10 @@
 import { TypeOptions } from "i18next";
 
 export const panelToolbar: Partial<TypeOptions["resources"]["panelToolbar"]> = {
-  changePanel: undefined,
-  fullscreen: undefined,
-  more: undefined,
-  removePanel: undefined,
-  splitDown: undefined,
-  splitRight: undefined,
+  changePanel: "パネルを変更",
+  fullscreen: "全画面表示",
+  more: "もっと見る",
+  removePanel: "パネルを削除",
+  splitDown: "下に分割",
+  splitRight: "右に分割",
 };

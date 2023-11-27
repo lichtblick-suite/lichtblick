@@ -5,9 +5,9 @@
 import { TypeOptions } from "i18next";
 
 export const stateTransitions: Partial<TypeOptions["resources"]["stateTransitions"]> = {
-  max: undefined,
-  maxXError: undefined,
-  min: undefined,
-  secondsRange: undefined,
-  xAxis: undefined,
+  max: "最大",
+  maxXError: "Xの最大値はXの最小値より大きくなければなりません。",
+  min: "最小",
+  secondsRange: "範囲（秒）",
+  xAxis: "X軸",
 };

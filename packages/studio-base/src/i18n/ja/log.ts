@@ -5,10 +5,10 @@
 import { TypeOptions } from "i18next";
 
 export const log: Partial<TypeOptions["resources"]["log"]> = {
-  hideAll: undefined,
-  minLogLevel: undefined,
-  nameFilter: undefined,
-  showAll: undefined,
-  topic: undefined,
+  hideAll: "すべて隠す",
+  minLogLevel: "ログレベル",
+  nameFilter: "ネームスペース",
+  showAll: "すべて表示",
+  topic: "トピック",
   topicError: "{{topic}}というトピックは利用できません。",
 };

@@ -7,7 +7,9 @@ import { TypeOptions } from "i18next";
 export const incompatibleLayoutVersion: Partial<
   TypeOptions["resources"]["incompatibleLayoutVersion"]
 > = {
-  desktopText: undefined,
-  title: undefined,
-  webText: undefined,
+  desktopText:
+    "このレイアウトはFoxglove Studioの新しいバージョンで作成されました。最新バージョンに更新してください ",
+  title: "互換性のないレイアウトバージョン",
+  webText:
+    "このレイアウトはFoxglove Studioの新しいバージョンで作成されました。ブラウザを更新してください。",
 };

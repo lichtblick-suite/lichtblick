@@ -5,6 +5,6 @@ import { TypeOptions } from "i18next";
 
 export const panelConfigVersionGuard: Partial<TypeOptions["resources"]["panelConfigVersionGuard"]> =
   {
-    instructions: undefined,
-    warning: undefined,
+    instructions: "アプリを最新バージョンに更新してください。",
+    warning: "このレイアウトは、より新しいバージョンのパネルを必要とします。",
   };
