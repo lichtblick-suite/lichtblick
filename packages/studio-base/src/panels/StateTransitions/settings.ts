@@ -116,6 +116,12 @@ function buildSettingsTree(
       label: "General",
       fields: {
         isSynced: { label: "Sync with other plots", input: "boolean", value: config.isSynced },
+        showPoints: {
+          label: "Show points",
+          input: "boolean",
+          value: config.showPoints,
+          help: "Display a point for every state transition message",
+        },
       },
     },
     xAxis: {
@@ -161,6 +167,8 @@ export function useStateTransitionsPanelSettings(
         const { input, path, value } = action.payload;
         if (input === "boolean" && _.isEqual(path, ["general", "isSynced"])) {
           saveConfig({ isSynced: value });
+        } else if (input === "boolean" && _.isEqual(path, ["general", "showPoints"])) {
+          saveConfig({ showPoints: value });
         } else if (path[0] === "xAxis") {
           saveConfig(
             produce((draft) => {

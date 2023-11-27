@@ -18,4 +18,5 @@ export type StateTransitionConfig = {
   xAxisMaxValue?: number;
   xAxisMinValue?: number;
   xAxisRange?: number;
+  showPoints?: boolean;
 };

@@ -6,7 +6,7 @@ import stringHash from "string-hash";
 
 import { Time, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { ChartDataset, ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
+import { ChartDataset } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 import { getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
@@ -15,22 +15,7 @@ import positiveModulo from "./positiveModulo";
 import { StateTransitionPath } from "./types";
 
 const baseColors = [grey, ...expandedLineColors];
-
-/**
- * Returns a function that can be used to assign unique indexes to distinct values. Returns the
- * previous index if the value has been seen before otherwise a new index.
- */
-function makeValueIndexer() {
-  const seenValues = new Map<unknown, number>();
-  return (val: unknown) => {
-    const seen = seenValues.get(val);
-    if (seen != undefined) {
-      return seen;
-    }
-    seenValues.set(val, seenValues.size);
-    return seenValues.size - 1;
-  };
-}
+const baseColorsLength = Object.values(baseColors).length;
 
 type Args = {
   path: StateTransitionPath;
@@ -38,14 +23,15 @@ type Args = {
   y: number;
   pathIndex: number;
   blocks: readonly (readonly MessageAndData[] | undefined)[];
+  showPoints: boolean;
 };
 
 /**
  * Processes messages into datasets. For performance reasons all values are condensed into a single
  * dataset with different labels and colors applied per-point.
  */
-export default function messagesToDatasets(args: Args): ChartDatasets {
-  const { path, startTime, y, blocks } = args;
+export function messagesToDataset(args: Args): ChartDataset {
+  const { path, startTime, y, blocks, showPoints } = args;
 
   const dataset: ChartDataset = {
     borderWidth: 10,
@@ -54,15 +40,13 @@ export default function messagesToDatasets(args: Args): ChartDatasets {
     pointBackgroundColor: "rgba(0, 0, 0, 0.4)",
     pointBorderColor: "transparent",
     pointHoverRadius: 3,
-    pointRadius: 1.25,
+    pointRadius: showPoints ? 1.25 : 0,
     pointStyle: "circle",
     showLine: true,
   };
 
-  let previousTimestamp: Time | undefined;
-
-  const indexer = makeValueIndexer();
-  let lastDatasetIndex: undefined | number = undefined;
+  let lastValue: string | number | bigint | boolean | undefined = undefined;
+  let lastDatum: ChartDataset["data"][0] | undefined = undefined;
 
   for (const messages of blocks) {
     if (!messages) {
@@ -82,18 +66,6 @@ export default function messagesToDatasets(args: Args): ChartDatasets {
 
       const { constantName, value } = queriedData;
 
-      const datasetIndex = indexer(value);
-
-      // Skip duplicates.
-      if (
-        previousTimestamp &&
-        toSec(subtractTimes(previousTimestamp, timestamp)) === 0 &&
-        datasetIndex === lastDatasetIndex
-      ) {
-        continue;
-      }
-      previousTimestamp = timestamp;
-
       // Skip anything that cannot be cast to a number or is a string.
       if (Number.isNaN(value) && typeof value !== "string") {
         continue;
@@ -110,30 +82,39 @@ export default function messagesToDatasets(args: Args): ChartDatasets {
 
       const valueForColor =
         typeof value === "string" ? stringHash(value) : Math.round(Number(value));
-      const color =
-        baseColors[positiveModulo(valueForColor, Object.values(baseColors).length)] ?? "grey";
+      const color = baseColors[positiveModulo(valueForColor, baseColorsLength)] ?? "grey";
 
       const x = toSec(subtractTimes(timestamp, startTime));
 
       const label =
         constantName != undefined ? `${constantName} (${String(value)})` : String(value);
 
-      const isNewSegment = datasetIndex !== lastDatasetIndex;
+      const isNewSegment = lastValue !== value;
 
-      const elementWithLabel = {
+      lastValue = value;
+      lastDatum = {
         x,
         y,
-        label: isNewSegment ? label : "",
+        label: isNewSegment ? label : undefined,
         labelColor: color,
         value,
         constantName,
       };
 
-      dataset.data.push(elementWithLabel);
+      if (isNewSegment || showPoints) {
+        dataset.data.push(lastDatum);
 
-      lastDatasetIndex = datasetIndex;
+        // after we add a datum we clear the last datum so we don't try to add it again at the end
+        lastDatum = undefined;
+      }
     }
   }
 
-  return [dataset];
+  // If we never added the last datum (maybe because it was the same state as before), we add
+  // it to the data so the user sees the state going until this point.
+  if (lastDatum != undefined) {
+    dataset.data.push(lastDatum);
+  }
+
+  return dataset;
 }

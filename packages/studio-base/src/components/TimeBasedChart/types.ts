@@ -58,5 +58,3 @@ export type PlotDataProvider<T> = {
 
 export type ObjectDataProvider = PlotDataProvider<ObjectData>;
 export type TypedDataProvider = PlotDataProvider<TypedData[]>;
-
-export type { ChartData };
