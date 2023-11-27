@@ -905,6 +905,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
           updatedUserSettings.colorMap = settings.colorMap;
           draft.topics[topic] = updatedUserSettings;
         });
+        this.updateSettingsTree();
       }
 
       const material = pointCloudMaterial(settings);
