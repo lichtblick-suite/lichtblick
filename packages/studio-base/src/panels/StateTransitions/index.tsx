@@ -282,7 +282,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         }),
         R.uniq,
       )([...blocksForPath, items]);
-      const isArray = dataCounts.length > 0 && R.all((numPoints) => numPoints > 1, dataCounts);
+      const isArray = dataCounts.length > 0 && dataCounts.every((numPoints) => numPoints > 1);
 
       outPathState.push({
         path,
