@@ -402,6 +402,32 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     setUnappliedTime({ time: undefined });
   }, [playerPresence, seek, unappliedTime]);
 
+  const appBar = useMemo(
+    () => (
+      <AppBarComponent
+        leftInset={props.appBarLeftInset}
+        onDoubleClick={props.onAppBarDoubleClick}
+        showCustomWindowControls={props.showCustomWindowControls}
+        isMaximized={props.isMaximized}
+        onMinimizeWindow={props.onMinimizeWindow}
+        onMaximizeWindow={props.onMaximizeWindow}
+        onUnmaximizeWindow={props.onUnmaximizeWindow}
+        onCloseWindow={props.onCloseWindow}
+      />
+    ),
+    [
+      AppBarComponent,
+      props.appBarLeftInset,
+      props.isMaximized,
+      props.onAppBarDoubleClick,
+      props.onCloseWindow,
+      props.onMaximizeWindow,
+      props.onMinimizeWindow,
+      props.onUnmaximizeWindow,
+      props.showCustomWindowControls,
+    ],
+  );
+
   return (
     <PanelStateContextProvider>
       {dataSourceDialog.open && <DataSourceDialog />}
@@ -409,16 +435,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
-        <AppBarComponent
-          leftInset={props.appBarLeftInset}
-          onDoubleClick={props.onAppBarDoubleClick}
-          showCustomWindowControls={props.showCustomWindowControls}
-          isMaximized={props.isMaximized}
-          onMinimizeWindow={props.onMinimizeWindow}
-          onMaximizeWindow={props.onMaximizeWindow}
-          onUnmaximizeWindow={props.onUnmaximizeWindow}
-          onCloseWindow={props.onCloseWindow}
-        />
+        {appBar}
         <Sidebars
           leftItems={leftSidebarItems}
           selectedLeftKey={leftSidebarOpen ? leftSidebarItem : undefined}

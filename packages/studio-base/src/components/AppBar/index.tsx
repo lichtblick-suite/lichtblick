@@ -156,7 +156,7 @@ const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != u
 const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
 const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 
-export const AppBar = React.memo(function AppBar(props: AppBarProps): JSX.Element {
+export function AppBar(props: AppBarProps): JSX.Element {
   const {
     debugDragRegion,
     isMaximized,
@@ -326,4 +326,4 @@ export const AppBar = React.memo(function AppBar(props: AppBarProps): JSX.Elemen
       />
     </>
   );
-});
+}
