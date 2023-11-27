@@ -191,12 +191,12 @@ export default function useProvider<T>(
     }
 
     const bounds = getDatasetBounds(data.datasets);
-    if (bounds == undefined) {
-      return undefined;
-    }
 
     return {
-      bounds,
+      bounds: bounds ?? {
+        x: { min: 0, max: 0 },
+        y: { min: 0, max: 0 },
+      },
       data,
     };
   }, [data, state, getDatasetBounds, mergeState]);

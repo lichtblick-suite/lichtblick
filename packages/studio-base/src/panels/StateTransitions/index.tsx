@@ -15,6 +15,7 @@ import { Add16Filled, Edit16Filled } from "@fluentui/react-icons";
 import { Button, Typography } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import * as _ from "lodash-es";
+import * as R from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import tinycolor from "tinycolor2";
@@ -26,6 +27,7 @@ import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@fox
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import {
   MessageDataItemsByPath,
+  MessageAndData,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
@@ -50,7 +52,7 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fontMonospace } from "@foxglove/theme";
 
 import messagesToDatasets from "./messagesToDatasets";
-import { useStateTransitionsPanelSettings } from "./settings";
+import { PathState, useStateTransitionsPanelSettings } from "./settings";
 import { DEFAULT_PATH, stateTransitionPathDisplayName } from "./shared";
 import { StateTransitionConfig } from "./types";
 
@@ -235,17 +237,19 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     return _.isEmpty(newItemsNotInBlocks) ? EMPTY_ITEMS_BY_PATH : newItemsNotInBlocks;
   }, [decodedBlocks, itemsByPath]);
 
-  const { datasets, minY } = useMemo(() => {
+  const { pathState, datasets, minY } = useMemo(() => {
     // ignore all data when we don't have a start time
     if (!startTime) {
       return {
         datasets: [],
         minY: undefined,
+        pathState: [],
       };
     }
 
     let outMinY: number | undefined;
     let outDatasets: ChartDatasets = [];
+    const outPathState: PathState[] = [];
 
     paths.forEach((path, pathIndex) => {
       // y axis values are set based on the path we are rendering
@@ -263,26 +267,46 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         y,
       });
 
-      outDatasets = outDatasets.concat(newBlockDataSets);
-
       // We have already filtered out paths we can find in blocks so anything left here
       // should be included in the dataset.
       const items = newItemsByPath[path.value];
-      if (items) {
-        const newPathDataSets = messagesToDatasets({
-          blocks: [items],
-          path,
-          pathIndex,
-          startTime,
-          y,
-        });
-        outDatasets = outDatasets.concat(newPathDataSets);
+
+      // We need to detect when the path produces more than one data point,
+      // since that is invalid input
+      const dataCounts = R.pipe(
+        R.chain((data: readonly MessageAndData[] | undefined): number[] => {
+          if (data == undefined) {
+            return [];
+          }
+          return data.map((message: MessageAndData) => message.queriedData.length);
+        }),
+        R.uniq,
+      )([...blocksForPath, items]);
+      const isArray = dataCounts.length > 0 && R.all((numPoints) => numPoints > 1, dataCounts);
+
+      outPathState.push({
+        path,
+        isArray,
+      });
+      outDatasets = outDatasets.concat(newBlockDataSets);
+
+      if (items == undefined) {
+        return;
       }
+      const newPathDataSets = messagesToDatasets({
+        blocks: [items],
+        path,
+        pathIndex,
+        startTime,
+        y,
+      });
+      outDatasets = outDatasets.concat(newPathDataSets);
     });
 
     return {
       datasets: outDatasets,
       minY: outMinY,
+      pathState: outPathState,
     };
   }, [decodedBlocks, newItemsByPath, paths, startTime]);
 
@@ -405,7 +429,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   const data: ChartData = useShallowMemo({ datasets });
 
-  useStateTransitionsPanelSettings(config, saveConfig, focusedPath);
+  useStateTransitionsPanelSettings(config, saveConfig, pathState, focusedPath);
 
   return (
     <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>

@@ -21,9 +21,16 @@ import { StateTransitionConfig, StateTransitionPath } from "./types";
 // at the level of individual nodes in our tree. This keeps our DOM updates small since
 // the NodeEditor component is wrapped in a React.memo.
 
+export type PathState = {
+  path: StateTransitionPath;
+  // Whether the data the path refers to resolves to more than one value
+  isArray: boolean;
+};
 const makeSeriesNode = memoizeWeak(
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  (path: StateTransitionPath, index: number, canDelete: boolean): SettingsTreeNode => {
+  (
+    index: number,
+    { path, canDelete, isArray }: PathState & { canDelete: boolean },
+  ): SettingsTreeNode => {
     return {
       actions: canDelete
         ? [
@@ -43,6 +50,7 @@ const makeSeriesNode = memoizeWeak(
           input: "messagepath",
           value: path.value,
           validTypes: plotableRosTypes,
+          ...(isArray ? { error: "This path resolves to more than one value" } : {}),
         },
         label: {
           input: "string",
@@ -63,11 +71,18 @@ const makeSeriesNode = memoizeWeak(
   },
 );
 
-const makeRootSeriesNode = memoizeWeak((paths: StateTransitionPath[]): SettingsTreeNode => {
+const makeRootSeriesNode = memoizeWeak((paths: PathState[]): SettingsTreeNode => {
   const children = Object.fromEntries(
     paths.length === 0
-      ? [["0", makeSeriesNode(DEFAULT_PATH, 0, /*canDelete=*/ false)]]
-      : paths.map((path, index) => [`${index}`, makeSeriesNode(path, index, /*canDelete=*/ true)]),
+      ? [["0", makeSeriesNode(0, { path: DEFAULT_PATH, isArray: false, canDelete: false })]]
+      : paths.map(({ path, isArray }, index) => [
+          `${index}`,
+          makeSeriesNode(index, {
+            path,
+            isArray,
+            canDelete: true,
+          }),
+        ]),
   );
   return {
     label: "Series",
@@ -86,6 +101,7 @@ const makeRootSeriesNode = memoizeWeak((paths: StateTransitionPath[]): SettingsT
 
 function buildSettingsTree(
   config: StateTransitionConfig,
+  paths: PathState[],
   t: TFunction<"stateTransitions">,
 ): SettingsTreeNodes {
   const maxXError =
@@ -126,13 +142,14 @@ function buildSettingsTree(
         },
       },
     },
-    paths: makeRootSeriesNode(config.paths),
+    paths: makeRootSeriesNode(paths),
   };
 }
 
 export function useStateTransitionsPanelSettings(
   config: StateTransitionConfig,
   saveConfig: SaveConfig<StateTransitionConfig>,
+  paths: PathState[],
   focusedPath?: readonly string[],
 ): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -197,7 +214,7 @@ export function useStateTransitionsPanelSettings(
     updatePanelSettingsTree({
       actionHandler,
       focusedPath,
-      nodes: buildSettingsTree(config, t),
+      nodes: buildSettingsTree(config, paths, t),
     });
-  }, [actionHandler, config, focusedPath, t, updatePanelSettingsTree]);
+  }, [actionHandler, paths, config, focusedPath, t, updatePanelSettingsTree]);
 }
