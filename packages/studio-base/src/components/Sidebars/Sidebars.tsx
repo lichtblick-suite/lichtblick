@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
 
@@ -160,6 +160,45 @@ export function Sidebars<LeftKey extends string, RightKey extends string>(
     [setLeftSidebarSize, setRightSidebarSize],
   );
 
+  const childrenComponent = useMemo(
+    () => <ErrorBoundary>{children as JSX.Element}</ErrorBoundary>,
+    [children],
+  );
+
+  const leftSidebarComponent = useMemo(
+    () => (
+      <ErrorBoundary>
+        <Sidebar<LeftKey>
+          anchor="left"
+          onClose={() => {
+            onSelectLeftKey(undefined);
+          }}
+          items={leftItems}
+          activeTab={selectedLeftKey}
+          setActiveTab={onSelectLeftKey}
+        />
+      </ErrorBoundary>
+    ),
+    [leftItems, onSelectLeftKey, selectedLeftKey],
+  );
+
+  const rightSidebarComponent = useMemo(
+    () => (
+      <ErrorBoundary>
+        <Sidebar<RightKey>
+          anchor="right"
+          onClose={() => {
+            onSelectRightKey(undefined);
+          }}
+          items={rightItems}
+          activeTab={selectedRightKey}
+          setActiveTab={onSelectRightKey}
+        />
+      </ErrorBoundary>
+    ),
+    [onSelectRightKey, rightItems, selectedRightKey],
+  );
+
   return (
     <Stack direction="row" fullHeight overflow="hidden">
       {
@@ -174,35 +213,11 @@ export function Sidebars<LeftKey extends string, RightKey extends string>(
           renderTile={(id) => {
             switch (id) {
               case "children":
-                return <ErrorBoundary>{children as JSX.Element}</ErrorBoundary>;
+                return childrenComponent;
               case "leftbar":
-                return (
-                  <ErrorBoundary>
-                    <Sidebar<LeftKey>
-                      anchor="left"
-                      onClose={() => {
-                        onSelectLeftKey(undefined);
-                      }}
-                      items={leftItems}
-                      activeTab={selectedLeftKey}
-                      setActiveTab={onSelectLeftKey}
-                    />
-                  </ErrorBoundary>
-                );
+                return leftSidebarComponent;
               case "rightbar":
-                return (
-                  <ErrorBoundary>
-                    <Sidebar<RightKey>
-                      anchor="right"
-                      onClose={() => {
-                        onSelectRightKey(undefined);
-                      }}
-                      items={rightItems}
-                      activeTab={selectedRightKey}
-                      setActiveTab={onSelectRightKey}
-                    />
-                  </ErrorBoundary>
-                );
+                return rightSidebarComponent;
             }
           }}
           resize={{ minimumPaneSizePercentage: 10 }}
