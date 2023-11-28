@@ -51,7 +51,7 @@
     ]
   },
   "resolutions": {
-    "@types/node": "16.18.40",
+    "@types/node": "20.10.0",
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch",
     "react-dnd": "patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch"
   },

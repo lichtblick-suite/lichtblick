@@ -17,7 +17,14 @@ describe("McapIterableSource", () => {
     await writer.start({ library: "", profile: "" });
     await writer.end();
 
-    const source = new McapIterableSource({ type: "file", file: new Blob([tempBuffer.get()]) });
+    const source = new McapIterableSource({
+      type: "file",
+      // the global Blob definition exists in type definitions, but the constructor is
+      // not available at runtime. We use node:buffer's Blob to test here, but the
+      // type is technically not compatible with the global Blob type, so we cast
+      // to get around this.
+      file: new Blob([tempBuffer.get()]) as unknown as globalThis.Blob,
+    });
     const { problems } = await source.initialize();
     expect(problems).toEqual([
       {
