@@ -15,6 +15,7 @@ import {
   TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
 
 import {
   IIterableSource,
@@ -65,7 +66,8 @@ export class RosDb3IterableSource implements IIterableSource {
     const problems: PlayerProblem[] = [];
     const topics: Topic[] = [];
     const topicStats = new Map<string, TopicStats>();
-    const datatypes: RosDatatypes = new Map();
+    // ROS 2 .db3 files do not contain message definitions, so we can only support well-known ROS types.
+    const datatypes: RosDatatypes = new Map([...ROS2_TO_DEFINITIONS, ...basicDatatypes]);
     const messageDefinitionsByTopic: MessageDefinitionsByTopic = {};
     const parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
     const estimatedObjectSizeByType = new Map<string, number>();
@@ -78,7 +80,7 @@ export class RosDb3IterableSource implements IIterableSource {
         topicStats.set(topicDef.name, { numMessages });
       }
 
-      const parsedMsgdef = ROS2_TO_DEFINITIONS.get(topicDef.type);
+      const parsedMsgdef = datatypes.get(topicDef.type);
       if (parsedMsgdef == undefined) {
         problems.push({
           severity: "warn",
