@@ -44,7 +44,7 @@ const log = Logger.getLogger(__filename);
 const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
 
 type PlayerManagerProps = {
-  playerSources: IDataSourceFactory[];
+  playerSources: readonly IDataSourceFactory[];
 };
 
 const globalVariablesSelector = (state: LayoutState) =>

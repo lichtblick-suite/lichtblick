@@ -10,13 +10,13 @@ import { IAppConfiguration } from "@foxglove/studio-base/context/AppConfiguratio
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 interface ISharedRootContext {
-  deepLinks: string[];
+  deepLinks: readonly string[];
   appConfiguration?: IAppConfiguration;
-  dataSources: IDataSourceFactory[];
+  dataSources: readonly IDataSourceFactory[];
   enableLaunchPreferenceScreen?: boolean;
   enableGlobalCss?: boolean;
   appBarLeftInset?: number;
-  extraProviders?: JSX.Element[];
+  extraProviders?: readonly JSX.Element[];
   customWindowControlProps?: CustomWindowControlsProps;
   onAppBarDoubleClick?: () => void;
   AppBarComponent?: (props: AppBarProps) => JSX.Element;

@@ -11,7 +11,7 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 
-export function useOpenFile(sources: IDataSourceFactory[]): () => Promise<void> {
+export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promise<void> {
   const { selectSource } = usePlayerSelection();
 
   const allExtensions = useMemo(() => {
