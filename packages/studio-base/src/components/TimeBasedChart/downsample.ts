@@ -10,10 +10,26 @@ import type { PlotViewport } from "./types";
 
 type Dataset<T> = ChartDataset<"scatter", T>;
 
+// This is the desired number of data points for each plot across all signals
+// and data sources. Beyond this threshold, ChartJS can no longer render at
+// 60FPS.
+export const MAX_POINTS = 5_000;
+
+// Each interval can produce up to this many points
+const POINTS_PER_INTERVAL = 4;
+
+// Points that appear within this threshold are visually indistinguishable
+export const MINIMUM_PIXEL_DISTANCE = 3;
+
 /**
- * Downsample a timeseries dataset
+ * Downsample a timeseries dataset by returning the indices of a subset of
+ * points that are deemed to be representative of the original dataset when
+ * rendered with the given viewport.
  *
- * This function assumes the dataset x axis time and sorted.
+ * This function assumes that points are sorted and that x- values are
+ * monotonically increasing.
+ *
+ * If `maxPoints` is provided, downsampleTimeseries will return only up to `maxPoints` points.
  *
  * The downsampled data preserves the shape of the original data. The algorithm does this by
  * downsampling within an interval. Each interval tracks the first datum of the interval,
@@ -32,13 +48,27 @@ type Dataset<T> = ChartDataset<"scatter", T>;
  * dataset, and the interval connects to the next interval with the same slope line as the original
  * data. The min/max entries preserve spikes within the data.
  */
-export function downsampleTimeseries(points: Iterable<Point>, view: PlotViewport): number[] {
+export function downsampleTimeseries(
+  points: Iterable<Point>,
+  view: PlotViewport,
+  maxPoints?: number,
+): number[] {
   const { bounds, width, height } = view;
 
-  const pixelPerXValue = width / (bounds.x.max - bounds.x.min);
+  const numPixelIntervals = Math.trunc(width / MINIMUM_PIXEL_DISTANCE);
+  // When maxPoints is provided, we should take either that constant or
+  // the number of pixel-defined intervals, whichever is fewer
+  const numPoints = Math.min(
+    maxPoints ?? numPixelIntervals * POINTS_PER_INTERVAL,
+    numPixelIntervals * POINTS_PER_INTERVAL,
+  );
+  // We then calculate the number of intervals based on the number of points we
+  // decided on
+  const numIntervals = Math.trunc(numPoints / POINTS_PER_INTERVAL);
+  const pixelPerXValue = numIntervals / (bounds.x.max - bounds.x.min);
   const pixelPerYValue = height / (bounds.y.max - bounds.y.min);
 
-  const downsampled: number[] = [];
+  const indices: number[] = [];
 
   type IntervalItem = { xPixel: number; yPixel: number; label: string | undefined; index: number };
 
@@ -61,11 +91,11 @@ export function downsampleTimeseries(points: Iterable<Point>, view: PlotViewport
 
     // track the first point before our bounds
     if (datum.x < minX) {
-      if (downsampled.length === 0) {
-        downsampled.push(index);
+      if (indices.length === 0) {
+        indices.push(index);
       } else {
         // the first point outside our bounds will always be at index 0
-        downsampled[0] = index;
+        indices[0] = index;
       }
       continue;
     }
@@ -86,21 +116,21 @@ export function downsampleTimeseries(points: Iterable<Point>, view: PlotViewport
     if (intFirst?.xPixel !== x || (intLast?.label != undefined && intLast.label !== datum.label)) {
       // add the min value from previous interval if it doesn't match the first or last of that interval
       if (intMin && intMin.yPixel !== intFirst?.yPixel && intMin.yPixel !== intLast?.yPixel) {
-        downsampled.push(intMin.index);
+        indices.push(intMin.index);
       }
 
       // add the max value from previous interval if it doesn't match the first or last of that interval
       if (intMax && intMax.yPixel !== intFirst?.yPixel && intMax.yPixel !== intLast?.yPixel) {
-        downsampled.push(intMax.index);
+        indices.push(intMax.index);
       }
 
       // add the last value if it doesn't match the first
       if (intLast && intFirst?.yPixel !== intLast.yPixel) {
-        downsampled.push(intLast.index);
+        indices.push(intLast.index);
       }
 
       // always add the first datum of an new interval
-      downsampled.push(index);
+      indices.push(index);
 
       intFirst = { xPixel: x, yPixel: y, index, label };
       intLast = { xPixel: x, yPixel: y, index, label };
@@ -130,24 +160,24 @@ export function downsampleTimeseries(points: Iterable<Point>, view: PlotViewport
 
   // add the min value from previous interval if it doesn't match the first or last of that interval
   if (intMin && intMin.yPixel !== intFirst?.yPixel && intMin.yPixel !== intLast?.yPixel) {
-    downsampled.push(intMin.index);
+    indices.push(intMin.index);
   }
 
   // add the max value from previous interval if it doesn't match the first or last of that interval
   if (intMax && intMax.yPixel !== intFirst?.yPixel && intMax.yPixel !== intLast?.yPixel) {
-    downsampled.push(intMax.index);
+    indices.push(intMax.index);
   }
 
   // add the last value if it doesn't match the first
   if (intLast && intFirst?.yPixel !== intLast.yPixel) {
-    downsampled.push(intLast.index);
+    indices.push(intLast.index);
   }
 
   if (firstPastBounds != undefined) {
-    downsampled.push(firstPastBounds);
+    indices.push(firstPastBounds);
   }
 
-  return downsampled;
+  return indices;
 }
 
 export function downsampleScatter(points: Iterable<Point>, view: PlotViewport): number[] {
@@ -157,7 +187,7 @@ export function downsampleScatter(points: Iterable<Point>, view: PlotViewport): 
   const pixelPerYValue = height / (bounds.y.max - bounds.y.min);
   const pixelPerRow = width;
 
-  const downsampled: number[] = [];
+  const indices: number[] = [];
 
   // downsampling tracks a sparse array of x/y locations
   const sparse: boolean[] = [];
@@ -179,10 +209,10 @@ export function downsampleScatter(points: Iterable<Point>, view: PlotViewport): 
       continue;
     }
     sparse[locator] = true;
-    downsampled.push(datum.index);
+    indices.push(datum.index);
   }
 
-  return downsampled;
+  return indices;
 }
 
 /**
@@ -193,8 +223,9 @@ export function downsample<T>(
   dataset: Dataset<T>,
   points: Iterable<Point>,
   view: PlotViewport,
+  numPoints?: number,
 ): number[] {
   return dataset.showLine !== true
     ? downsampleScatter(points, view)
-    : downsampleTimeseries(points, view);
+    : downsampleTimeseries(points, view, numPoints);
 }

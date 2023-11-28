@@ -6,7 +6,7 @@ import * as Comlink from "comlink";
 
 import { Immutable } from "@foxglove/studio";
 import { iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
-import { downsample } from "@foxglove/studio-base/components/TimeBasedChart/downsample";
+import { downsample, MAX_POINTS } from "@foxglove/studio-base/components/TimeBasedChart/downsample";
 import {
   ProviderStateSetter,
   PlotViewport,
@@ -111,8 +111,9 @@ function rebuild(id: string) {
     return;
   }
 
+  const maxPoints = MAX_POINTS / Math.max(newData.datasets.size, 1);
   const downsampled = mapDatasets((dataset) => {
-    const indices = downsample(dataset, iterateTyped(dataset.data), view);
+    const indices = downsample(dataset, iterateTyped(dataset.data), view, maxPoints);
     const resolved = resolveTypedIndices(dataset.data, indices);
     if (resolved == undefined) {
       return dataset;

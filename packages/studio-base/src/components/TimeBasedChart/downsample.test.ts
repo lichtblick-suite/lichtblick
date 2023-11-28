@@ -4,7 +4,7 @@
 
 import { iterateObjects } from "@foxglove/studio-base/components/Chart/datasets";
 
-import { downsampleTimeseries, downsampleScatter } from "./downsample";
+import { MINIMUM_PIXEL_DISTANCE, downsampleTimeseries, downsampleScatter } from "./downsample";
 
 describe("downsampleTimeseries", () => {
   const bounds = {
@@ -65,7 +65,10 @@ describe("downsampleTimeseries", () => {
         { x: 1, y: 4, value: 4 },
         { x: 2, y: 5, value: 5 },
       ]),
-      bounds,
+      {
+        ...bounds,
+        width: bounds.width * MINIMUM_PIXEL_DISTANCE,
+      },
     );
     expect(result).toEqual([0, 1, 2, 3, 4]);
   });

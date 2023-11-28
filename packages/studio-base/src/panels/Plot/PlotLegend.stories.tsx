@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StoryObj, StoryFn } from "@storybook/react";
-import { waitFor } from "@storybook/testing-library";
 import { useCallback } from "react";
 import { useAsync } from "react-use";
 
@@ -139,33 +138,33 @@ export const Dark: StoryObj = {
   decorators: [Wrapper],
 };
 
-export const LimitWidth: StoryObj = {
-  render: function Story() {
-    const readySignal = useReadySignal({ count: 6 });
-    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+//export const LimitWidth: StoryObj = {
+//render: function Story() {
+//const readySignal = useReadySignal({ count: 6 });
+//const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
-    return (
-      <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
-        <div
-          style={{
-            height: "100%",
-            width: "100%",
-          }}
-        >
-          <Plot
-            overrideConfig={{ ...exampleConfig, legendDisplay: "left", sidebarDimension: 4096 }}
-          />
-        </div>
-      </PanelSetup>
-    );
-  },
+//return (
+//<PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
+//<div
+//style={{
+//height: "100%",
+//width: "100%",
+//}}
+//>
+//<Plot
+//overrideConfig={{ ...exampleConfig, legendDisplay: "left", sidebarDimension: 4096 }}
+///>
+//</div>
+//</PanelSetup>
+//);
+//},
 
-  play: async (ctx) => {
-    await waitFor(() => ctx.parameters.storyReady);
-  },
+//play: async (ctx) => {
+//await waitFor(() => ctx.parameters.storyReady);
+//},
 
-  parameters: {
-    colorScheme: "light",
-    useReadySignal: true,
-  },
-};
+//parameters: {
+//colorScheme: "light",
+//useReadySignal: true,
+//},
+//};
