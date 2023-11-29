@@ -15,6 +15,7 @@ import { useTheme } from "@mui/material";
 import * as _ from "lodash-es";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
 
+import { useDeepMemo } from "@foxglove/hooks";
 import {
   Time,
   add as addTimes,
@@ -242,6 +243,10 @@ function Plot(props: Props) {
     };
   }, [plotData, yAxisPaths]);
 
+  // We use a deep memo here as React's default equality check Object.is() returns false for
+  // two empty lists which causes unnecessary re-rendering of the PlotLegend component.
+  const memoizedPathsWithMismatchedDataLengths = useDeepMemo(pathsWithMismatchedDataLengths);
+
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
     ({ x: seekSeconds }: OnChartClickArgs) => {
@@ -319,7 +324,7 @@ function Plot(props: Props) {
             legendDisplay={legendDisplay}
             onClickPath={onClickPath}
             paths={yAxisPaths}
-            pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
+            pathsWithMismatchedDataLengths={memoizedPathsWithMismatchedDataLengths}
             saveConfig={saveConfig}
             showLegend={showLegend}
             showPlotValuesInLegend={showPlotValuesInLegend}
