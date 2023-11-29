@@ -302,8 +302,8 @@ const ImageModeFoxgloveImage = ({
 
   let mono16Raw: MessageEvent<Partial<RawImage>>;
   {
-    const width = 640;
-    const height = 480;
+    const width = 160;
+    const height = 120;
     const mono16Data = new DataView(new ArrayBuffer(width * height * 2));
     for (let r = 0; r < height; r++) {
       for (let c = 0; c < width; c++) {
