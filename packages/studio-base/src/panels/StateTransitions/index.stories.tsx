@@ -116,6 +116,7 @@ export default {
   title: "panels/StateTransitions",
   component: StateTransitions,
   parameters: {
+    colorScheme: "light",
     chromatic: { delay: 100 },
   },
 };
@@ -134,7 +135,7 @@ export const Empty: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };
 
 export const ColorPalette: StoryObj = {
@@ -218,7 +219,7 @@ export const OnePath: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };
 
 export const WithXAxisMinMax: StoryObj = {
@@ -291,7 +292,7 @@ export const WithSettings: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };
 
 export const MultiplePaths: StoryObj = {
@@ -316,7 +317,7 @@ export const MultiplePaths: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };
 
 export const LongPath: StoryObj = {
@@ -338,7 +339,7 @@ export const LongPath: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };
 
 export const ColorClash: StoryObj = {
@@ -362,7 +363,7 @@ export const ColorClash: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };
 
 const messageCache: BlockCache = {
@@ -436,5 +437,5 @@ export const Blocks: StoryObj = {
   play: async ({ parameters }) => {
     await parameters.storyReady;
   },
-  parameters: { useReadySignal: true },
+  parameters: { useReadySignal: true, colorScheme: "light" },
 };

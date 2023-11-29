@@ -241,10 +241,10 @@ function Chart(props: Props): JSX.Element {
     return out;
   }, [data, typedData, height, options, isBoundsReset, width]);
 
-  // Queue an update to the chart and process any outstanding requests.
-  const queueUpdate = useCallback(
-    async (send: RpcSend | undefined, update: PartialUpdate) => {
-      queuedUpdates.current = [...queuedUpdates.current, update];
+  // Flush all new updates to the worker, coalescing them together if there is
+  // more than one.
+  const flushUpdates = useCallback(
+    async (send: RpcSend | undefined) => {
       if (send == undefined || isSending.current) {
         return;
       }
@@ -276,7 +276,8 @@ function Chart(props: Props): JSX.Element {
   const updateChart = useCallback(
     async (update: PartialUpdate) => {
       if (initialized.current) {
-        await queueUpdate(rpcSendRef.current, update);
+        queuedUpdates.current = [...queuedUpdates.current, update];
+        await flushUpdates(rpcSendRef.current);
         return;
       }
 
@@ -321,11 +322,20 @@ function Chart(props: Props): JSX.Element {
       maybeUpdateScales(scales);
       onFinishRender?.();
 
+      // We cannot rely solely on the call to `initialize`, since it doesn't
+      // actually produce the first frame. However, if we append this update to
+      // the end, it will overwrite updates that have been queued _since we
+      // started initializing_. This is incorrect behavior and can set the
+      // scales incorrectly on weak devices.
+      //
+      // To prevent this from happening, we put this update at the beginning of
+      // the queue so that it gets coalesced properly.
+      queuedUpdates.current = [update, ...queuedUpdates.current];
+      await flushUpdates(sendWrapperRef.current);
       // once we are initialized, we can allow other handlers to send to the rpc endpoint
-      await queueUpdate(sendWrapperRef.current, update);
       rpcSendRef.current = sendWrapperRef.current;
     },
-    [maybeUpdateScales, onFinishRender, onStartRender, type, queueUpdate],
+    [maybeUpdateScales, onFinishRender, onStartRender, type, flushUpdates],
   );
 
   const [updateError, setUpdateError] = useState<Error | undefined>();

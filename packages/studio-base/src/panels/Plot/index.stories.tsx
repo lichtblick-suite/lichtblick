@@ -400,6 +400,7 @@ export default {
   title: "panels/Plot",
   component: Plot,
   parameters: {
+    colorScheme: "light",
     chromatic: { delay: 50 },
   },
   excludeStories: ["paths", "fixture"],
@@ -426,6 +427,7 @@ export const LineGraph: StoryObj = {
   name: "line graph",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 };
@@ -450,6 +452,7 @@ export const LineGraphWithValuesAndDisabledSeries: StoryObj = {
   name: "line graph with values and disabled series",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 };
@@ -517,6 +520,7 @@ export const LineGraphWithNoTitle: StoryObj = {
   name: "line graph with no title",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 };
@@ -561,6 +565,7 @@ export const LineGraphWithSettings: StoryObj = {
 export const LineGraphWithSettingsChinese: StoryObj = {
   ...LineGraphWithSettings,
   parameters: {
+    colorScheme: "light",
     ...LineGraphWithSettings.parameters,
     forceLanguage: "zh",
   },
@@ -568,6 +573,7 @@ export const LineGraphWithSettingsChinese: StoryObj = {
 export const LineGraphWithSettingsJapanese: StoryObj = {
   ...LineGraphWithSettings,
   parameters: {
+    colorScheme: "light",
     ...LineGraphWithSettings.parameters,
     forceLanguage: "ja",
   },
@@ -587,6 +593,7 @@ export const LineGraphWithLegendsHidden: StoryObj = {
   name: "line graph with legends hidden",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 };
@@ -641,6 +648,7 @@ export const InALineGraphWithMultiplePlotsXAxesAreSynced: StoryObj = {
   name: "in a line graph with multiple plots, x-axes are synced",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -689,8 +697,8 @@ export const LineGraphAfterZoom: StoryObj = {
   name: "line graph after zoom",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
-    colorScheme: "dark",
   },
 
   play: async (ctx) => {
@@ -724,6 +732,7 @@ export const TimestampMethodHeaderStamp: StoryObj = {
   name: "timestampMethod: headerStamp",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -758,6 +767,7 @@ export const LongPath: StoryObj = {
   name: "long path",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -796,6 +806,7 @@ export const DisabledPath: StoryObj = {
   name: "disabled path",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -836,6 +847,7 @@ export const HiddenConnectingLines: StoryObj = {
   name: "hidden connecting lines",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -870,6 +882,7 @@ export const ReferenceLine: StoryObj = {
   name: "reference line",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -943,6 +956,7 @@ export const WithJustMinYValueLessThanMinimumValue: StoryObj = {
   name: "with just min Y value less than minimum value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -977,6 +991,7 @@ export const WithJustMinYValueMoreThanMinimumValue: StoryObj = {
   name: "with just min Y value more than minimum value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1011,6 +1026,7 @@ export const WithJustMinYValueMoreThanMaximumValue: StoryObj = {
   name: "with just min Y value more than maximum value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1045,6 +1061,7 @@ export const WithJustMaxYValueLessThanMaximumValue: StoryObj = {
   name: "with just max Y value less than maximum value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1079,6 +1096,7 @@ export const WithJustMaxYValueMoreThanMaximumValue: StoryObj = {
   name: "with just max Y value more than maximum value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1113,6 +1131,7 @@ export const WithJustMaxYValueLessThanMinimumValue: StoryObj = {
   name: "with just max Y value less than minimum value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1152,6 +1171,7 @@ export const ScatterPlotPlusLineGraphPlusReferenceLine: StoryObj = {
   name: "scatter plot plus line graph plus reference line",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1187,6 +1207,7 @@ export const IndexBasedXAxisForArray: StoryObj = {
   name: "index-based x-axis for array",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1249,6 +1270,7 @@ export const IndexBasedXAxisForArrayWithUpdate: StoryObj = {
   name: "index-based x-axis for array with update",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1284,6 +1306,7 @@ export const CustomXAxisTopic: StoryObj = {
   name: "custom x-axis topic",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1358,6 +1381,7 @@ export const CurrentCustomXAxisTopic: StoryObj = {
   name: "current custom x-axis topic",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1404,6 +1428,7 @@ export const CustomXAxisTopicWithMismatchedDataLengths: StoryObj = {
   name: "custom x-axis topic with mismatched data lengths",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1465,6 +1490,7 @@ export const SuperCloseValues: StoryObj = {
   name: "super close values",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1500,6 +1526,7 @@ export const TimeValues: StoryObj = {
   name: "time values",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1531,6 +1558,7 @@ export const PreloadedDataInBinaryBlocks: StoryObj = {
   name: "preloaded data in binary blocks",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1566,6 +1594,7 @@ export const MixedStreamedAndPreloadedData: StoryObj = {
   name: "mixed streamed and preloaded data",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1601,6 +1630,7 @@ export const PreloadedDataAndItsDerivative: StoryObj = {
   name: "preloaded data and its derivative",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1636,6 +1666,7 @@ export const PreloadedDataAndItsNegative: StoryObj = {
   name: "preloaded data and its negative",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1671,6 +1702,7 @@ export const PreloadedDataAndItsAbsoluteValue: StoryObj = {
   name: "preloaded data and its absolute value",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
@@ -1711,6 +1743,7 @@ export const DifferentLineSizes: StoryObj = {
   name: "different line sizes",
 
   parameters: {
+    colorScheme: "light",
     useReadySignal: true,
   },
 
