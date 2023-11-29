@@ -8,7 +8,7 @@ import { MessageDefinitionMap } from "@foxglove/mcap-support/src/types";
  * Values of the contants below are a (more or less) informed guesses and not guaranteed to be accurate.
  */
 const COMPRESSED_POINTER_SIZE = 4; // Pointers use 4 bytes (also on 64-bit systems) due to pointer compression
-const OBJECT_BASE_SIZE = 3 * COMPRESSED_POINTER_SIZE; // 3 compressed pointers
+export const OBJECT_BASE_SIZE = 3 * COMPRESSED_POINTER_SIZE; // 3 compressed pointers
 const TYPED_ARRAY_BASE_SIZE = 25 * COMPRESSED_POINTER_SIZE; // byteLength, byteOffset, ..., see https://stackoverflow.com/a/45808835
 const SMALL_INTEGER_SIZE = COMPRESSED_POINTER_SIZE; // Small integers (up to 31 bits), pointer tagging
 const HEAP_NUMBER_SIZE = 8 + 2 * COMPRESSED_POINTER_SIZE; // 4-byte map pointer + 8-byte payload + property pointer
@@ -155,4 +155,34 @@ export function estimateMessageObjectSize(
   knownTypeSizes.set(typeName, sizeInBytes);
 
   return sizeInBytes;
+}
+
+/**
+ * Determine the size of each schema sub-field. This can be used for estimating
+ * the size of sliced messages.
+ *
+ * @param datatypes
+ * @param typeName
+ * @param knownTypeSizes
+ * @returns
+ */
+export function estimateMessageFieldSizes(
+  datatypes: MessageDefinitionMap,
+  typeName: string,
+  knownTypeSizes: Map<string, number>,
+): Record<string, number> {
+  const sizeByField: Record<string, number> = {};
+  datatypes.get(typeName)?.definitions.forEach((field) => {
+    const fieldSchemaName = `${typeName}-${field.name}`;
+    const fieldSizeInBytes = estimateMessageObjectSize(
+      new Map([[fieldSchemaName, { name: fieldSchemaName, definitions: [field] }], ...datatypes]),
+      fieldSchemaName,
+      knownTypeSizes,
+    );
+
+    // Subtract the object base size here, it will be added only once per sliced message object.
+    sizeByField[field.name] = fieldSizeInBytes - OBJECT_BASE_SIZE;
+  });
+
+  return sizeByField;
 }

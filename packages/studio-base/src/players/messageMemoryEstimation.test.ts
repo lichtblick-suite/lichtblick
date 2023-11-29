@@ -2,7 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { estimateMessageObjectSize } from "./messageMemoryEstimation";
+import {
+  estimateMessageObjectSize,
+  estimateMessageFieldSizes,
+  OBJECT_BASE_SIZE,
+} from "./messageMemoryEstimation";
 
 describe("memoryEstimation", () => {
   it("size for empty schema is greater than 0", () => {
@@ -99,4 +103,26 @@ describe("memoryEstimation", () => {
       );
     },
   );
+
+  it("sum of field sizes matches total object size", () => {
+    const datatypes = new Map([
+      [
+        "ComplexType",
+        {
+          definitions: [
+            { type: "int32", name: "field1" },
+            { type: "bool", name: "field2" },
+          ],
+        },
+      ],
+    ]);
+
+    const fieldSizes = estimateMessageFieldSizes(datatypes, "ComplexType", new Map());
+    const msgSizeInBytes = estimateMessageObjectSize(datatypes, "ComplexType", new Map());
+    const fieldSizesSum = Object.values(fieldSizes).reduce(
+      (acc, fieldSize) => acc + fieldSize,
+      OBJECT_BASE_SIZE,
+    );
+    expect(fieldSizesSum).toEqual(msgSizeInBytes);
+  });
 });
