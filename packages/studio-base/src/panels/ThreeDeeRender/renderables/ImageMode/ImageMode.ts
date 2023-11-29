@@ -303,6 +303,7 @@ export class ImageMode
       this.#removeImageTimeout = setTimeout(() => {
         this.#removeImageTimeout = undefined;
         this.#removeImageRenderable();
+        this.renderer.queueAnimationFrame();
       }, REMOVE_IMAGE_TIMEOUT_MS);
     }
     this.#clearCameraModel();
