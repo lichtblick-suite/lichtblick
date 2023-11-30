@@ -11,14 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Add16Filled, Edit16Filled } from "@fluentui/react-icons";
-import { Button, Typography } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import * as _ from "lodash-es";
 import * as R from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -26,8 +23,8 @@ import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@fox
 import { Immutable } from "@foxglove/studio";
 import { useBlocksSubscriptions } from "@foxglove/studio-base/PanelAPI";
 import {
-  MessageDataItemsByPath,
   MessageAndData,
+  MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
@@ -42,8 +39,7 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import { ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
+import { PathLegend } from "@foxglove/studio-base/panels/StateTransitions/PathLegend";
 import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
 import { SubscribePayload } from "@foxglove/studio-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
@@ -53,7 +49,6 @@ import { fontMonospace } from "@foxglove/theme";
 
 import { messagesToDataset } from "./messagesToDataset";
 import { PathState, useStateTransitionsPanelSettings } from "./settings";
-import { DEFAULT_PATH, stateTransitionPathDisplayName } from "./shared";
 import { StateTransitionConfig } from "./types";
 
 const fontSize = 10;
@@ -65,43 +60,6 @@ const useStyles = makeStyles()((theme) => ({
     position: "relative",
     marginTop: theme.spacing(0.5),
     height: "100%",
-  },
-  chartOverlay: {
-    top: 0,
-    left: 0,
-    right: 0,
-    pointerEvents: "none",
-  },
-  row: {
-    paddingInline: theme.spacing(0.5),
-    pointerEvents: "none",
-  },
-  button: {
-    minWidth: "auto",
-    textAlign: "left",
-    pointerEvents: "auto",
-    fontWeight: "normal",
-    padding: theme.spacing(0, 1),
-    maxWidth: "100%",
-
-    "&:hover": {
-      backgroundColor: tinycolor(theme.palette.background.paper).setAlpha(0.67).toString(),
-      backgroundImage: `linear-gradient(to right, ${theme.palette.action.focus}, ${theme.palette.action.focus})`,
-    },
-    ".MuiButton-endIcon": {
-      opacity: 0.8,
-      fontSize: 14,
-      marginLeft: theme.spacing(0.5),
-
-      svg: {
-        fontSize: "1em",
-        height: "1em",
-        width: "1em",
-      },
-    },
-    ":not(:hover) .MuiButton-endIcon": {
-      display: "none",
-    },
   },
 }));
 
@@ -173,9 +131,7 @@ function StateTransitions(props: Props) {
 
   const pathStrings = useMemo(() => paths.map(({ value }) => value), [paths]);
 
-  const { openPanelSettings } = useWorkspaceActions();
-  const { id: panelId, setMessagePathDropConfig } = usePanelContext();
-  const { setSelectedPanelIds } = useSelectedPanels();
+  const { setMessagePathDropConfig } = usePanelContext();
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
   useEffect(() => {
@@ -466,31 +422,11 @@ function StateTransitions(props: Props) {
             onClick={onClick}
             currentTime={currentTimeSinceStart}
           />
-
-          <Stack className={classes.chartOverlay} position="absolute" paddingTop={0.5}>
-            {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
-              <div className={classes.row} key={index} style={{ height: heightPerTopic }}>
-                <Button
-                  size="small"
-                  color="inherit"
-                  data-testid="edit-topic-button"
-                  className={classes.button}
-                  endIcon={paths.length === 0 ? <Add16Filled /> : <Edit16Filled />}
-                  onClick={() => {
-                    setSelectedPanelIds([panelId]);
-                    openPanelSettings();
-                    setFocusedPath(["paths", String(index)]);
-                  }}
-                >
-                  <Typography variant="inherit" noWrap>
-                    {paths.length === 0
-                      ? "Click to add a series"
-                      : stateTransitionPathDisplayName(path, index)}
-                  </Typography>
-                </Button>
-              </div>
-            ))}
-          </Stack>
+          <PathLegend
+            paths={paths}
+            heightPerTopic={heightPerTopic}
+            setFocusedPath={setFocusedPath}
+          />
         </div>
       </Stack>
     </Stack>
