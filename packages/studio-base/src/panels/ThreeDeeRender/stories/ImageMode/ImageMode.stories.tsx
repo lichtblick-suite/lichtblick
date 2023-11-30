@@ -197,7 +197,7 @@ const ImageModeFoxgloveImage = ({
   minValue,
   maxValue,
 }: {
-  imageType?: "raw" | "png" | "raw_mono16" | "error";
+  imageType?: "raw" | "png" | "raw_mono16";
   rotation?: 0 | 90 | 180 | 270;
   flipHorizontal?: boolean;
   flipVertical?: boolean;
@@ -209,7 +209,6 @@ const ImageModeFoxgloveImage = ({
     { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
     { name: "/cam2/info", schemaName: "foxglove.CameraCalibration" },
     { name: "/cam1/png", schemaName: "foxglove.CompressedImage" },
-    { name: "/cam2/error", schemaName: "foxglove.CompressedImage" },
     { name: "/cam2/raw", schemaName: "foxglove.RawImage" },
     { name: "/mono16/raw", schemaName: "foxglove.RawImage" },
   ];
@@ -267,19 +266,6 @@ const ImageModeFoxgloveImage = ({
       frame_id: SENSOR_FRAME_ID,
       format: "png",
       data: PNG_TEST_IMAGE,
-    },
-    schemaName: "foxglove.CompressedImage",
-    sizeInBytes: 0,
-  };
-
-  const cam1Error: MessageEvent<Partial<CompressedImage>> = {
-    topic: "/cam2/error",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      timestamp: { sec: 0, nsec: 0 },
-      frame_id: SENSOR_FRAME_ID,
-      format: "imaginary-format",
-      data: new Uint8Array(PNG_TEST_IMAGE).fill(255, 0),
     },
     schemaName: "foxglove.CompressedImage",
     sizeInBytes: 0,
@@ -353,7 +339,6 @@ const ImageModeFoxgloveImage = ({
       "/cam1/info": [cam1],
       "/cam2/info": [cam2],
       "/cam1/png": [cam1Png],
-      "/cam2/error": [cam1Error],
       "/cam2/raw": [cam2Raw],
       "/mono16/raw": [mono16Raw],
     },
@@ -376,10 +361,6 @@ const ImageModeFoxgloveImage = ({
       break;
     case "raw_mono16":
       imageTopic = "/mono16/raw";
-      break;
-    case "error":
-      imageTopic = "/cam2/error";
-      calibrationTopic = "/cam2/info";
       break;
   }
 
@@ -435,11 +416,6 @@ export const ImageModeFoxglovePngImage: StoryObj<
 > = {
   render: ImageModeFoxgloveImage,
   args: { imageType: "png" },
-};
-
-export const ImageModeErrorImage: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {
-  render: ImageModeFoxgloveImage,
-  args: { imageType: "error" },
 };
 
 export const DownloadRawImage: StoryObj<React.ComponentProps<typeof ImageModeFoxgloveImage>> = {

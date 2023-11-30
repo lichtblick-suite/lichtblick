@@ -306,7 +306,10 @@ export class ImageMode
         this.renderer.queueAnimationFrame();
       }, REMOVE_IMAGE_TIMEOUT_MS);
     }
-    this.#clearCameraModel();
+    // fallback camera model shouldn't ever be stale so we don't need to clear it
+    if (!this.#fallbackCameraModelActive()) {
+      this.#clearCameraModel();
+    }
     this.#annotations.removeAllRenderables();
     this.messageHandler.clear();
     super.removeAllRenderables();
