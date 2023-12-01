@@ -10,7 +10,7 @@ import {
   Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography, buttonBaseClasses } from "@mui/material";
-import { useMemo, useState } from "react";
+import { MouseEventHandler, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
@@ -180,7 +180,13 @@ export function PlotLegendRow({
   // When there are no series configured we render an extra row to show an "add series" button.
   const isAddSeriesRow = paths.length === 0;
 
-  const handleDeletePath = () => {
+  const handleDeletePath: MouseEventHandler<HTMLButtonElement> = (ev) => {
+    // Deleting a path is a "quick action" and we want to avoid opening the settings sidebar
+    // so whatever sidebar the user is already viewing says active.
+    //
+    // This prevents the click event from going up to the entire row and showing the sidebar.
+    ev.stopPropagation();
+
     const newPaths = paths.slice();
     if (newPaths.length > 0) {
       newPaths.splice(index, 1);
