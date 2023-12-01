@@ -29,8 +29,7 @@ export type { TopicAliasFunctions };
 
 /**
  * This is a player that wraps an underlying player and applies aliases to all topic names
- * in data emitted from the player. It is inserted into the player chain before
- * UserScriptPlayer so that UserScriptPlayer can use the aliased topics.
+ * in data emitted from the player.
  *
  * Aliases that alias input topics to other input topics or that request conflicting
  * aliases from multiple input topics to the same output topic are disallowed and flagged

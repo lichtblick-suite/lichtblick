@@ -70,8 +70,6 @@ export interface Player {
   // If the Player supports non-real-time speeds (i.e. PlayerState#capabilities contains
   // PlayerCapabilities.setSpeed), set that speed. E.g. 1.0 is real time, 0.2 is 20% of real time.
   setPlaybackSpeed?(speedFraction: number): void;
-  // Set the globalVariables for Players that support it.
-  // This is generally used to pass new globalVariables to the UserScriptPlayer
   setGlobalVariables(globalVariables: GlobalVariables): void;
 }
 
