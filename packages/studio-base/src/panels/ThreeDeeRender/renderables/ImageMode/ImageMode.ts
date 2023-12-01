@@ -512,59 +512,66 @@ export class ImageMode
     const path = action.payload.path;
     const category = path[0]!;
     const value = action.payload.value;
-    if (category === "imageMode") {
-      const prevImageModeConfig = this.getImageModeSettings();
-      this.saveSetting(path, value);
-      const config = this.getImageModeSettings();
-      const calibrationTopicChanged =
-        config.calibrationTopic !== prevImageModeConfig.calibrationTopic;
-      if (calibrationTopicChanged) {
-        const changingToUnselectedCalibration = config.calibrationTopic == undefined;
-        if (changingToUnselectedCalibration) {
-          this.renderer.enableImageOnlySubscriptionMode();
-        }
 
-        const changingFromUnselectedCalibration = prevImageModeConfig.calibrationTopic == undefined;
-        if (changingFromUnselectedCalibration) {
-          this.renderer.disableImageOnlySubscriptionMode();
-        }
-      }
-      const imageTopicChanged = config.imageTopic !== prevImageModeConfig.imageTopic;
-      if (imageTopicChanged && config.imageTopic != undefined) {
-        const imageTopic = this.renderer.topics?.find((topic) => topic.name === config.imageTopic);
-        if (imageTopic) {
-          this.setImageTopic(imageTopic);
-        }
-      }
-
-      if (config.rotation !== prevImageModeConfig.rotation) {
-        this.#camera.setRotation(config.rotation);
-      }
-      if (config.flipHorizontal !== prevImageModeConfig.flipHorizontal) {
-        this.#camera.setFlipHorizontal(config.flipHorizontal);
-      }
-      if (config.flipVertical !== prevImageModeConfig.flipVertical) {
-        this.#camera.setFlipVertical(config.flipVertical);
-      }
-      this.imageRenderable?.setSettings({
-        ...this.imageRenderable.userData.settings,
-        colorMode: config.colorMode,
-        flatColor: config.flatColor,
-        gradient: config.gradient as [string, string],
-        colorMap: config.colorMap,
-        explicitAlpha: config.explicitAlpha,
-        minValue: config.minValue,
-        maxValue: config.maxValue,
-      });
-      if (config.synchronize !== prevImageModeConfig.synchronize) {
-        this.removeAllRenderables();
-      }
-      this.messageHandler.setConfig(config);
-
-      this.#updateViewAndRenderables();
-    } else {
+    if (category !== "imageMode") {
       return;
     }
+
+    const prevImageModeConfig = this.getImageModeSettings();
+    this.saveSetting(path, value);
+    const config = this.getImageModeSettings();
+
+    const calibrationTopicChanged =
+      config.calibrationTopic !== prevImageModeConfig.calibrationTopic;
+    if (calibrationTopicChanged) {
+      this.#clearCameraModel();
+      const changingToUnselectedCalibration = config.calibrationTopic == undefined;
+      if (changingToUnselectedCalibration) {
+        this.renderer.enableImageOnlySubscriptionMode();
+        if (this.imageRenderable) {
+          this.#updateFallbackCameraModel(this.imageRenderable);
+        }
+      }
+
+      const changingFromUnselectedCalibration = prevImageModeConfig.calibrationTopic == undefined;
+      if (changingFromUnselectedCalibration) {
+        this.renderer.disableImageOnlySubscriptionMode();
+      }
+    }
+
+    const imageTopicChanged = config.imageTopic !== prevImageModeConfig.imageTopic;
+    if (imageTopicChanged && config.imageTopic != undefined) {
+      const imageTopic = this.renderer.topics?.find((topic) => topic.name === config.imageTopic);
+      if (imageTopic) {
+        this.setImageTopic(imageTopic);
+      }
+    }
+
+    if (config.rotation !== prevImageModeConfig.rotation) {
+      this.#camera.setRotation(config.rotation);
+    }
+    if (config.flipHorizontal !== prevImageModeConfig.flipHorizontal) {
+      this.#camera.setFlipHorizontal(config.flipHorizontal);
+    }
+    if (config.flipVertical !== prevImageModeConfig.flipVertical) {
+      this.#camera.setFlipVertical(config.flipVertical);
+    }
+    this.imageRenderable?.setSettings({
+      ...this.imageRenderable.userData.settings,
+      colorMode: config.colorMode,
+      flatColor: config.flatColor,
+      gradient: config.gradient as [string, string],
+      colorMap: config.colorMap,
+      explicitAlpha: config.explicitAlpha,
+      minValue: config.minValue,
+      maxValue: config.maxValue,
+    });
+    if (config.synchronize !== prevImageModeConfig.synchronize) {
+      this.removeAllRenderables();
+    }
+    this.messageHandler.setConfig(config);
+
+    this.#updateViewAndRenderables();
 
     // Update the settings sidebar
     this.updateSettingsTree();
@@ -645,23 +652,35 @@ export class ImageMode
     }
 
     renderable.userData.receiveTime = receiveTime;
-    renderable.setImage(image, /*resizeWidth=*/ undefined, (size) => {
+    renderable.setImage(image, /*resizeWidth=*/ undefined, () => {
       if (this.#fallbackCameraModelActive()) {
-        this.#updateFallbackCameraModel(size, getFrameIdFromImage(image));
+        this.#updateFallbackCameraModel(renderable);
+        this.#updateViewAndRenderables();
       }
     });
   };
 
-  #updateFallbackCameraModel = (size: { width: number; height: number }, frameId: string): void => {
-    const cameraInfo = createFallbackCameraInfoForImage({
-      frameId,
-      height: size.height,
-      width: size.width,
-      focalLength: DEFAULT_FOCAL_LENGTH,
-    });
-    this.#updateCameraModel(cameraInfo);
-    this.#updateViewAndRenderables();
-  };
+  /** Creates a fallback camera model based off of the renderable with a decoded image and updates the camera.
+   * Will no-op if there is not a decodedImage on the renderable.
+   * Be sure to call `#updateViewAndRenderables` after calling this method to update the camera and renderable.
+   */
+  #updateFallbackCameraModel(renderable: ImageRenderable) {
+    const decodedImage = renderable.getDecodedImage();
+    const lastImageMessage = renderable.userData.image;
+    // if we've already received an image, use it to create a fallback camera model
+    // otherwise we would need to wait for the next image
+    if (decodedImage && lastImageMessage) {
+      const frameId = getFrameIdFromImage(lastImageMessage);
+      const { width, height } = decodedImage;
+      const cameraInfo = createFallbackCameraInfoForImage({
+        frameId,
+        height,
+        width,
+        focalLength: DEFAULT_FOCAL_LENGTH,
+      });
+      this.#updateCameraModel(cameraInfo);
+    }
+  }
 
   #fallbackCameraModelActive = (): boolean => {
     // Don't use #getImageModeSettings here for performance reasons

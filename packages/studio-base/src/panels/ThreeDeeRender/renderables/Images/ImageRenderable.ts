@@ -171,11 +171,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.settings = newSettings;
   }
 
-  public setImage(
-    image: AnyImage,
-    resizeWidth?: number,
-    onDecoded?: (result: { width: number; height: number }) => void,
-  ): void {
+  public setImage(image: AnyImage, resizeWidth?: number, onDecoded?: () => void): void {
     this.userData.image = image;
 
     const seq = ++this.#receivedImageSequenceNumber;
@@ -196,7 +192,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         this.update();
         this.#showingErrorImage = false;
 
-        onDecoded?.(result);
+        onDecoded?.();
         this.removeError(DECODE_IMAGE_ERR_KEY);
         this.renderer.queueAnimationFrame();
       })
@@ -213,10 +209,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       });
   }
 
-  async #setErrorImage(
-    seq: number,
-    onDecoded?: (image: { width: number; height: number }) => void,
-  ): Promise<void> {
+  async #setErrorImage(seq: number, onDecoded?: () => void): Promise<void> {
     const errorBitmap = await getErrorImage(64, 64);
     if (this.isDisposed()) {
       return;
@@ -229,7 +222,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.update();
     this.#showingErrorImage = true;
     // call ondecoded to display the error image when calibration is None
-    onDecoded?.(this.#decodedImage);
+    onDecoded?.();
     this.renderer.queueAnimationFrame();
   }
 
