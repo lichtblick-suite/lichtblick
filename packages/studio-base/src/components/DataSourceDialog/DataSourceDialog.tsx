@@ -4,7 +4,7 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, IconButton } from "@mui/material";
-import { useCallback, useLayoutEffect, useMemo } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
@@ -63,7 +63,13 @@ export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
     dialogActions.dataSource.close();
   }, [analytics, activeDataSource, dialogActions.dataSource]);
 
+  const prevActiveViewRef = useRef<DataSourceDialogItem | undefined>();
   useLayoutEffect(() => {
+    if (activeView === prevActiveViewRef.current) {
+      // Only run actions below when the active view actually changed
+      return;
+    }
+    prevActiveViewRef.current = activeView;
     if (activeView === "file") {
       dialogActions.openFile
         .open()
