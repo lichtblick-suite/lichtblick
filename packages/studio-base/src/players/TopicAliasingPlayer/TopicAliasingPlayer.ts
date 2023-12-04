@@ -56,17 +56,13 @@ export class TopicAliasingPlayer implements Player {
   // mutex prevents invoking the listener concurrently.
   #listener?: MutexLocked<(state: PlayerState) => Promise<void>>;
 
-  public constructor(
-    player: Player,
-    aliasFunctions: Immutable<TopicAliasFunctions>,
-    variables: Immutable<GlobalVariables>,
-  ) {
+  public constructor(player: Player) {
     this.#player = player;
-    this.#skipAliasing = aliasFunctions.length === 0;
+    this.#skipAliasing = true;
     this.#inputs = {
-      aliasFunctions,
+      aliasFunctions: [],
       topics: undefined,
-      variables,
+      variables: {},
     };
   }
 

@@ -25,6 +25,7 @@ import {
   Topic,
   MessageEvent,
 } from "@foxglove/studio-base/players/types";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import * as PanelAPI from ".";
@@ -352,9 +353,9 @@ describe("useMessageReducer", () => {
       const [config] = useState(() => makeMockAppConfiguration());
       return (
         <AppConfigurationContext.Provider value={config}>
-          <MessagePipelineProvider player={player} globalVariables={{}}>
-            {children}
-          </MessagePipelineProvider>
+          <MockCurrentLayoutProvider>
+            <MessagePipelineProvider player={player}>{children}</MessagePipelineProvider>
+          </MockCurrentLayoutProvider>
         </AppConfigurationContext.Provider>
       );
     }

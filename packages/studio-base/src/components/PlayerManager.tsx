@@ -12,45 +12,34 @@
 //   You may not use this file except in compliance with the License.
 
 import { useSnackbar } from "notistack";
-import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
-import { useLatest, useMountedState } from "react-use";
+import { PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useMountedState } from "react-use";
 
 import { useWarnImmediateReRender } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
+import { Immutable } from "@foxglove/studio";
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
-import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import {
-  ExtensionCatalog,
-  useExtensionCatalog,
-} from "@foxglove/studio-base/context/ExtensionCatalogContext";
+import { ExtensionCatalogContext } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import PlayerSelectionContext, {
   DataSourceArgs,
   IDataSourceFactory,
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useIndexedDbRecents, { RecentRecord } from "@foxglove/studio-base/hooks/useIndexedDbRecents";
 import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
-import { TopicAliasingPlayer } from "@foxglove/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
+import {
+  TopicAliasFunctions,
+  TopicAliasingPlayer,
+} from "@foxglove/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 const log = Logger.getLogger(__filename);
 
-const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
-
 type PlayerManagerProps = {
   playerSources: readonly IDataSourceFactory[];
 };
-
-const globalVariablesSelector = (state: LayoutState) =>
-  state.selectedLayout?.data?.globalVariables ?? EMPTY_GLOBAL_VARIABLES;
-const selectTopicAliasFunctions = (catalog: ExtensionCatalog) =>
-  catalog.installedTopicAliasFunctions;
 
 export default function PlayerManager(props: PropsWithChildren<PlayerManagerProps>): JSX.Element {
   const { children, playerSources } = props;
@@ -66,62 +55,43 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const [basePlayer, setBasePlayer] = useState<Player | undefined>();
 
-  const globalVariables = useCurrentLayoutSelector(globalVariablesSelector);
-
-  const topicAliasFunctions = useExtensionCatalog(selectTopicAliasFunctions);
-
   const { recents, addRecent } = useIndexedDbRecents();
 
-  // We don't want to recreate the player when the these variables change, but we do want to
-  // initialize it with the right order, so make a variable for its initial value we can use in the
-  // dependency array to the player useMemo.
-  //
-  // Updating the player with new values in handled by effects below the player useMemo or within
-  // the message pipeline
-  const globalVariablesRef = useLatest(globalVariables);
-
-  // Initialize the topic aliasing player with the alias functions and global variables we
-  // have at first load. Any changes in alias functions caused by dynamically loaded
-  // extensions or new variables have to be set separately because we can only construct
-  // the wrapping player once since the underlying player doesn't allow us set a new
-  // listener after the initial listener is set.
-  const [initialTopicAliasFunctions] = useState(topicAliasFunctions);
-  const [initialGlobalVariables] = useState(globalVariables);
   const topicAliasPlayer = useMemo(() => {
     if (!basePlayer) {
       return undefined;
     }
 
-    return new TopicAliasingPlayer(
-      basePlayer,
-      initialTopicAliasFunctions ?? [],
-      initialGlobalVariables,
-    );
-  }, [basePlayer, initialGlobalVariables, initialTopicAliasFunctions]);
+    return new TopicAliasingPlayer(basePlayer);
+  }, [basePlayer]);
 
-  // Topic aliases can change if we hot load a new extension with new alias functions.
+  // Update the alias functions when they change. We do not need to re-render the player manager
+  // since nothing in the local state has changed.
+  const extensionCatalogContext = useContext(ExtensionCatalogContext);
   useEffect(() => {
-    if (topicAliasFunctions !== initialTopicAliasFunctions) {
-      topicAliasPlayer?.setAliasFunctions(topicAliasFunctions ?? []);
-    }
-  }, [initialTopicAliasFunctions, topicAliasPlayer, topicAliasFunctions]);
+    // Stable empty alias functions if we don't have any
+    const emptyAliasFunctions: Immutable<TopicAliasFunctions> = [];
 
-  // Topic alias player needs updated global variables.
-  useEffect(() => {
-    if (globalVariables !== initialGlobalVariables) {
-      topicAliasPlayer?.setGlobalVariables(globalVariables);
-    }
-  }, [globalVariables, initialGlobalVariables, topicAliasPlayer]);
+    // We only want to set alias functions on the player when the functions have changed
+    let topicAliasFunctions =
+      extensionCatalogContext.getState().installedTopicAliasFunctions ?? emptyAliasFunctions;
+    topicAliasPlayer?.setAliasFunctions(topicAliasFunctions);
+
+    return extensionCatalogContext.subscribe((state) => {
+      if (topicAliasFunctions !== state.installedTopicAliasFunctions) {
+        topicAliasFunctions = state.installedTopicAliasFunctions ?? emptyAliasFunctions;
+        topicAliasPlayer?.setAliasFunctions(topicAliasFunctions);
+      }
+    });
+  }, [extensionCatalogContext, topicAliasPlayer]);
 
   const player = useMemo(() => {
     if (!topicAliasPlayer) {
       return undefined;
     }
 
-    const wrappedPlayer = wrapPlayer(topicAliasPlayer);
-    wrappedPlayer.setGlobalVariables(globalVariablesRef.current);
-    return wrappedPlayer;
-  }, [topicAliasPlayer, wrapPlayer, globalVariablesRef]);
+    return wrapPlayer(topicAliasPlayer);
+  }, [topicAliasPlayer, wrapPlayer]);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -275,9 +245,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   return (
     <>
       <PlayerSelectionContext.Provider value={value}>
-        <MessagePipelineProvider player={player} globalVariables={globalVariablesRef.current}>
-          {children}
-        </MessagePipelineProvider>
+        <MessagePipelineProvider player={player}>{children}</MessagePipelineProvider>
       </PlayerSelectionContext.Provider>
     </>
   );

@@ -20,15 +20,12 @@ import { DeepPartial } from "ts-essentials";
 
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import {
-  EMPTY_GLOBAL_VARIABLES,
-  GlobalVariables,
-} from "@foxglove/studio-base/hooks/useGlobalVariables";
-import {
   Player,
   PlayerCapabilities,
   PlayerPresence,
   TopicStats,
 } from "@foxglove/studio-base/players/types";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import delay from "@foxglove/studio-base/util/delay";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
@@ -45,13 +42,7 @@ async function doubleAct(fn: () => Promise<void>) {
   await act(async () => await promise);
 }
 
-function makeTestHook({
-  player,
-  globalVariables,
-}: {
-  player?: Player;
-  globalVariables?: GlobalVariables;
-}) {
+function makeTestHook({ player }: { player?: Player }) {
   const all: MessagePipelineContext[] = [];
   function Hook() {
     const value = useMessagePipeline(useCallback((ctx) => ctx, []));
@@ -63,12 +54,9 @@ function makeTestHook({
     const [config] = useState(() => makeMockAppConfiguration());
     return (
       <AppConfigurationContext.Provider value={config}>
-        <MessagePipelineProvider
-          player={currentPlayer}
-          globalVariables={globalVariables ?? EMPTY_GLOBAL_VARIABLES}
-        >
-          {children}
-        </MessagePipelineProvider>
+        <MockCurrentLayoutProvider>
+          <MessagePipelineProvider player={currentPlayer}>{children}</MessagePipelineProvider>
+        </MockCurrentLayoutProvider>
       </AppConfigurationContext.Provider>
     );
   }

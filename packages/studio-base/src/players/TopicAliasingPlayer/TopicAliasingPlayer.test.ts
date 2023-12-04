@@ -18,7 +18,8 @@ describe("TopicAliasingPlayer", () => {
         aliasFunction: () => [{ sourceTopicName: "/original_topic_1", name: "/renamed_topic_1" }],
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     player.setListener(async () => {});
     player.setSubscriptions([{ topic: "/renamed_topic_1" }, { topic: "/topic_2" }]);
 
@@ -50,7 +51,8 @@ describe("TopicAliasingPlayer", () => {
         aliasFunction: () => [{ sourceTopicName: "/original_topic_1", name: "/renamed_topic_1" }],
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     player.setListener(async () => {});
     player.setSubscriptions([
       { topic: "/renamed_topic_1", fields: ["a", "b"] },
@@ -75,7 +77,8 @@ describe("TopicAliasingPlayer", () => {
         aliasFunction: () => [{ sourceTopicName: "/original_topic_1", name: "/renamed_topic_1" }],
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     const listener = jest.fn();
     player.setListener(listener);
     await fakePlayer.emit(
@@ -124,7 +127,8 @@ describe("TopicAliasingPlayer", () => {
         aliasFunction: () => [{ sourceTopicName: "/original_topic_2", name: "/renamed_topic_1" }],
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     let problems: undefined | PlayerProblem[] = [];
     const listener = async (state: PlayerState) => {
       problems = state.problems;
@@ -163,7 +167,8 @@ describe("TopicAliasingPlayer", () => {
       },
     ];
 
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     const listener = jest.fn();
     player.setListener(listener);
 
@@ -225,7 +230,9 @@ describe("TopicAliasingPlayer", () => {
         ],
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
+    player.setGlobalVariables({
       foo: "/bar",
     });
     const listener = jest.fn();
@@ -268,7 +275,8 @@ describe("TopicAliasingPlayer", () => {
         },
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     const listener = jest.fn();
     player.setListener(listener);
     await fakePlayer.emit(
@@ -326,7 +334,8 @@ describe("TopicAliasingPlayer", () => {
         },
       },
     ];
-    const player = new TopicAliasingPlayer(fakePlayer, mappers, {});
+    const player = new TopicAliasingPlayer(fakePlayer);
+    player.setAliasFunctions(mappers);
     player.setListener(async () => {});
     player.setSubscriptions([{ topic: "/renamed_topic_1" }, { topic: "/topic_2" }]);
 
