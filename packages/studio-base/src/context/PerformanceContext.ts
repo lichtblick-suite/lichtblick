@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { createContext, useContext } from "react";
+import { Opaque } from "ts-essentials";
 
 // Ensure Symbol.dispose and Symbol.asyncDispose are defined
 // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-2.html
@@ -11,7 +12,7 @@ import { createContext, useContext } from "react";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (Symbol as any).asyncDispose ??= Symbol("Symbol.asyncDispose");
 
-export type PerformanceMetricID = number & { __brand: "PerformanceMetricID" };
+export type PerformanceMetricID = Opaque<number, "PerformanceMetricID">;
 
 export type PerformanceMetric = {
   id: PerformanceMetricID;

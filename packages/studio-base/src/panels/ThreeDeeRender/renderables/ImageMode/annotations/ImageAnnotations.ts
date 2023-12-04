@@ -4,6 +4,7 @@
 
 import { t } from "i18next";
 import * as THREE from "three";
+import { Opaque } from "ts-essentials";
 
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { ImageAnnotations as FoxgloveImageAnnotations } from "@foxglove/schemas";
@@ -28,7 +29,7 @@ import { IMessageHandler, MessageRenderState } from "../MessageHandler";
 
 const MISSING_SYNCHRONIZED_ANNOTATION = "MISSING_SYNCHRONIZED_ANNOTATION";
 
-type TopicName = string & { __brand: "TopicName" };
+type TopicName = Opaque<string, "TopicName">;
 
 interface ImageAnnotationsContext {
   initialScale: number;
