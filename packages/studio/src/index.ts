@@ -193,7 +193,7 @@ export type RenderState = {
   /**
    * Map of current Studio variables. Variables are key/value pairs that are globally accessible
    * to panels and scripts in the current layout. See
-   * <https://foxglove.dev/docs/studio/app-concepts/variables> for more information.
+   * <https://docs.foxglove.dev/docs/visualization/variables> for more information.
    */
   variables?: Map<string, VariableValue>;
 

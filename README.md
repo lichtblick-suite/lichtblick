@@ -12,7 +12,7 @@
     <br />
     <a href="https://foxglove.dev/download">Download</a>
     <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-    <a href="https://foxglove.dev/docs/studio">Docs</a>
+    <a href="https://docs.foxglove.dev/docs">Docs</a>
     <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
     <a href="https://foxglove.dev/blog">Blog</a>
     <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
@@ -37,7 +37,7 @@ To learn more, visit the following resources:
 
 [About](https://foxglove.dev/about)
 &nbsp;•&nbsp;
-[Documentation](https://foxglove.dev/docs)
+[Documentation](https://docs.foxglove.dev/docs)
 &nbsp;•&nbsp;
 [Release notes](https://github.com/foxglove/studio/releases)
 &nbsp;•&nbsp;

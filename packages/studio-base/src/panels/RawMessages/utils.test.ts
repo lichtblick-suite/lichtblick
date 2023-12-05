@@ -10,13 +10,13 @@ describe("getMessageDocumentationLink", () => {
       "https://docs.ros.org/api/std_msgs/html/msg/String.html",
     );
     expect(getMessageDocumentationLink("foxglove_msgs/CircleAnnotation")).toEqual(
-      "https://foxglove.dev/docs/studio/messages/circle-annotation",
+      "https://docs.foxglove.dev/docs/visualization/message-schemas/circle-annotation",
     );
     expect(getMessageDocumentationLink("foxglove_msgs/msg/CircleAnnotation")).toEqual(
-      "https://foxglove.dev/docs/studio/messages/circle-annotation",
+      "https://docs.foxglove.dev/docs/visualization/message-schemas/circle-annotation",
     );
     expect(getMessageDocumentationLink("foxglove.CircleAnnotation")).toEqual(
-      "https://foxglove.dev/docs/studio/messages/circle-annotation",
+      "https://docs.foxglove.dev/docs/visualization/message-schemas/circle-annotation",
     );
     expect(getMessageDocumentationLink("foxglove.DoesNotExist")).toBeUndefined();
   });

@@ -55,7 +55,7 @@ export function SettingsMenu({
   );
 
   const onDocsClick = useCallback(() => {
-    window.open("https://foxglove.dev/docs", "_blank");
+    window.open("https://docs.foxglove.dev/docs", "_blank");
   }, []);
 
   const onSlackClick = useCallback(() => {

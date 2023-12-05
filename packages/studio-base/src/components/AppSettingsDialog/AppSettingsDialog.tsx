@@ -145,7 +145,7 @@ const aboutItems = new Map<
       subheader: "External resources",
       links: [
         ...(isDesktopApp() ? [] : [{ title: "Desktop app", url: "https://foxglove.dev/download" }]),
-        { title: "Browse docs", url: "https://foxglove.dev/docs" },
+        { title: "Browse docs", url: "https://docs.foxglove.dev/docs" },
         { title: "Join our community", url: "https://foxglove.dev/community" },
       ],
     },

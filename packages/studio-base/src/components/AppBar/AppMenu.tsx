@@ -185,7 +185,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
   }, [dialogActions.preferences, handleNestedMenuClose]);
 
   const onDocsClick = useCallback(() => {
-    window.open("https://foxglove.dev/docs", "_blank");
+    window.open("https://docs.foxglove.dev/docs", "_blank");
     handleNestedMenuClose();
   }, [handleNestedMenuClose]);
 

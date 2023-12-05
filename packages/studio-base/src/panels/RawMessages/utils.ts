@@ -127,7 +127,9 @@ export function getChangeCounts(
 
 const foxgloveDocsLinksByDatatype = new Map<string, string>();
 for (const schema of Object.values(foxgloveMessageSchemas)) {
-  const url = `https://foxglove.dev/docs/studio/messages/${_.kebabCase(schema.name)}`;
+  const url = `https://docs.foxglove.dev/docs/visualization/message-schemas/${_.kebabCase(
+    schema.name,
+  )}`;
   foxgloveDocsLinksByDatatype.set(`foxglove_msgs/${schema.name}`, url);
   foxgloveDocsLinksByDatatype.set(`foxglove_msgs/msg/${schema.name}`, url);
   foxgloveDocsLinksByDatatype.set(`foxglove.${schema.name}`, url);
