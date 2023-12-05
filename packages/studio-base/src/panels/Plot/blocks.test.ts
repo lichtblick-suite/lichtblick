@@ -205,4 +205,18 @@ describe("processBlocks", () => {
       expect(newData).toEqual([block]);
     }
   });
+
+  it("should start from beginning when blocks before cursor are emptied", () => {
+    // ssss| -> s|eee
+    const { state } = processBlocks([block, block, block, block], subscriptions, initial);
+    const {
+      state: { messages, cursors },
+      resetTopics,
+      newData,
+    } = processBlocks([block, {}, {}, {}], subscriptions, state);
+    expect(messages[0]?.[FAKE_TOPIC]).toEqual(1);
+    expect(cursors[FAKE_TOPIC]).toEqual(1);
+    expect(resetTopics).toEqual([FAKE_TOPIC]);
+    expect(newData).toEqual([block]);
+  });
 });

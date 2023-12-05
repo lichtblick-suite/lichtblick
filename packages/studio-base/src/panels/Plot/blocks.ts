@@ -58,6 +58,52 @@ type Update = {
   shouldReset: boolean;
 };
 
+function calculateUpdate(
+  payload: SubscribePayload,
+  cursors: Cursors,
+  blocks: readonly MessageBlock[],
+  blocksWithStatuses: [MessageBlock, FirstMessages][],
+): Update {
+  const { topic } = payload;
+  const currentCursor = cursors[topic] ?? 0;
+
+  // 1. check for any new, non-empty unsent blocks
+  const lastNew = R.findLastIndex(
+    (block) => block[topic] != undefined,
+    blocks.slice(currentCursor),
+  );
+  const newCursor = lastNew === -1 ? currentCursor : lastNew + currentCursor + 1;
+
+  // 2. check whether any blocks below the current cursor have changed
+  const changes = blocksWithStatuses.map(([block, status]) => {
+    const oldFirst = status[topic];
+    return !R.equals(oldFirst, block[topic]?.[0]?.message) && oldFirst != undefined;
+  });
+  const lastChanged = R.findLastIndex(R.identity, changes);
+  const haveChanged = lastChanged !== -1;
+
+  if (!haveChanged || lastChanged >= currentCursor) {
+    return {
+      topic,
+      range: [currentCursor, haveChanged ? Math.min(newCursor, lastChanged + 1) : newCursor],
+      shouldReset: false,
+    };
+  }
+
+  return {
+    ...calculateUpdate(
+      payload,
+      {
+        ...cursors,
+        [topic]: 0,
+      },
+      blocks,
+      blocksWithStatuses,
+    ),
+    shouldReset: true,
+  };
+}
+
 /**
  * Inspect the state of `blocks` to determine what data needs to be sent to the
  * plot worker.
@@ -76,38 +122,7 @@ export function processBlocks(
   const blocksWithStatuses = R.zip(blocks, messages);
 
   const updates: Update[] = R.pipe(
-    R.map((v: SubscribePayload): Update => {
-      const { topic } = v;
-      const currentCursor = cursors[topic] ?? 0;
-
-      // 1. check for any new, non-empty unsent blocks
-      const lastNew = R.findLastIndex((block) => {
-        const data = block[topic];
-        return data != undefined && data.length !== 0;
-      }, blocks.slice(currentCursor));
-      const newCursor = lastNew === -1 ? currentCursor : lastNew + currentCursor + 1;
-
-      // 2. check whether any blocks below the current cursor have changed
-      const changes = blocksWithStatuses.map(([block, status]) => {
-        const oldFirst = status[topic];
-        return !R.equals(oldFirst, block[topic]?.[0]?.message) && oldFirst != undefined;
-      });
-      const lastChanged = R.findLastIndex(R.identity, changes);
-      const haveChanged = lastChanged !== -1;
-
-      if (!haveChanged || lastChanged >= currentCursor) {
-        return {
-          topic,
-          range: [currentCursor, haveChanged ? Math.min(newCursor, lastChanged + 1) : newCursor],
-          shouldReset: false,
-        };
-      }
-      return {
-        topic,
-        range: [0, lastChanged + 1],
-        shouldReset: true,
-      };
-    }),
+    R.map((v: SubscribePayload): Update => calculateUpdate(v, cursors, blocks, blocksWithStatuses)),
     // filter out any topics that neither changed nor had new data
     R.filter(({ shouldReset, range: [start, end] }: Update) => shouldReset || start !== end),
   )(subscriptions);
