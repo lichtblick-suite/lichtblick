@@ -233,7 +233,7 @@ export function AppSettingsDialog(
   };
 
   return (
-    <Dialog {...props} fullWidth maxWidth="md">
+    <Dialog {...props} fullWidth maxWidth="md" data-testid={`AppSettingsDialog--${activeTab}`}>
       <DialogTitle className={classes.dialogTitle}>
         {t("settings")}
         <IconButton edge="end" onClick={handleClose}>
