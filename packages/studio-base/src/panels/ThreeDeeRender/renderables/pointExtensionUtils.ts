@@ -5,13 +5,11 @@
 import { t } from "i18next";
 import * as THREE from "three";
 
-import { PackedElementField, PointCloud } from "@foxglove/schemas";
 import { SettingsTreeNode, Topic } from "@foxglove/studio";
 import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
 import { IRenderer } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderable";
 import { rgbaToCssString } from "@foxglove/studio-base/panels/ThreeDeeRender/color";
-import { isSupportedField } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointClouds/fieldReaders";
 import {
   missingTransformMessage,
   MISSING_TRANSFORM,
@@ -26,11 +24,9 @@ import {
   colorHasTransparency,
   ColorModeSettings,
   FS_SRGB_TO_LINEAR,
-  INTENSITY_FIELDS,
-  RGBA_PACKED_FIELDS,
 } from "./colorMode";
 import { POINTCLOUD_DATATYPES as FOXGLOVE_POINTCLOUD_DATATYPES } from "../foxglove";
-import { PointCloud2, POINTCLOUD_DATATYPES as ROS_POINTCLOUD_DATATYPES, PointField } from "../ros";
+import { POINTCLOUD_DATATYPES as ROS_POINTCLOUD_DATATYPES } from "../ros";
 
 export type LayerSettingsPointExtension = BaseSettings &
   ColorModeSettings & {
@@ -131,65 +127,6 @@ export function pointSettingsNode(
   return node;
 }
 
-/**
- * Selects optimal color field for settings given point cloud message
- * @param output - settings object to apply auto selection of colorfield to
- * @param pointCloud - point cloud message
- * @param { supportsPackedRgbModes } - whether or not the point cloud message supports packed rgb modes
- * @returns - changes output object to have desired color field selected
- */
-export function autoSelectColorField(
-  output: LayerSettingsPointExtension,
-  pointCloud: PointCloud | PointCloud2,
-  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
-): void {
-  // Prefer color fields first
-  if (supportsPackedRgbModes) {
-    for (const field of pointCloud.fields) {
-      if (!isSupportedField(field)) {
-        continue;
-      }
-      const fieldNameLower = field.name.toLowerCase();
-      if (RGBA_PACKED_FIELDS.has(fieldNameLower)) {
-        output.colorField = field.name;
-        switch (fieldNameLower) {
-          case "rgb":
-            output.colorMode = "rgb";
-            break;
-          default:
-          case "rgba":
-            output.colorMode = "rgba";
-            break;
-        }
-        return;
-      }
-    }
-  }
-
-  // Intensity fields are second priority
-  for (const field of pointCloud.fields) {
-    if (!isSupportedField(field)) {
-      continue;
-    }
-    if (INTENSITY_FIELDS.has(field.name)) {
-      output.colorField = field.name;
-      output.colorMode = "colormap";
-      output.colorMap = "turbo";
-      return;
-    }
-  }
-
-  // Fall back to using the first point cloud field
-  const firstField = (pointCloud.fields as readonly (PackedElementField | PointField)[]).find(
-    (field) => isSupportedField(field),
-  );
-  if (firstField != undefined) {
-    output.colorField = firstField.name;
-    output.colorMode = "colormap";
-    output.colorMap = "turbo";
-    return;
-  }
-}
 /**
  * Creates a THREE.Points object for a point cloud and scan messages
  * @param topic - topic name string for naming geometry

@@ -16,8 +16,7 @@ import {
   getColorConverter,
   NEEDS_MIN_MAX,
   FS_SRGB_TO_LINEAR,
-  RGBA_PACKED_FIELDS,
-  hasSeparateRgbaFields,
+  autoSelectColorSettings,
 } from "./colorMode";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
@@ -493,6 +492,15 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       return;
     }
 
+    let fields = this.#fieldsByTopic.get(topic);
+    let fieldsUpdated = false;
+    if (!fields || fields.length !== foxgloveGrid.fields.length) {
+      fields = foxgloveGrid.fields.map((field) => field.name);
+      this.#fieldsByTopic.set(topic, fields);
+      this.updateSettingsTree();
+      fieldsUpdated = true;
+    }
+
     if (renderable) {
       renderable.visible = true;
     } else {
@@ -502,8 +510,11 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       // only want to autoselect if it's in flatcolor mode (without colorfield) and previously didn't have fields
-      if (settings.colorField == undefined && this.#fieldsByTopic.get(topic) == undefined) {
-        autoSelectColorField(settings, foxgloveGrid.fields, { supportsPackedRgbModes: false });
+      if (settings.colorField == undefined && fieldsUpdated) {
+        autoSelectColorSettings(settings, fields, {
+          supportsPackedRgbModes: false,
+          supportsRgbaFieldsMode: true,
+        });
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {
           const updatedUserSettings = { ...userSettings };
@@ -512,6 +523,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
           updatedUserSettings.colorMap = settings.colorMap;
           draft.topics[topic] = updatedUserSettings;
         });
+        this.updateSettingsTree();
       }
 
       // Check color
@@ -543,13 +555,6 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
 
       this.add(renderable);
       this.renderables.set(topic, renderable);
-    }
-
-    let fields = this.#fieldsByTopic.get(topic);
-    if (!fields || fields.length !== foxgloveGrid.fields.length) {
-      fields = foxgloveGrid.fields.map((field) => field.name);
-      this.#fieldsByTopic.set(topic, fields);
-      this.updateSettingsTree();
     }
 
     this.#updateFoxgloveGridRenderable(
@@ -923,43 +928,3 @@ const NumericTypeMinMaxValueMap: Record<NumericType, [number, number]> = {
   [NumericType.FLOAT32]: [0, 1.0],
   [NumericType.FLOAT64]: [0, 1.0],
 };
-
-function autoSelectColorField<Settings extends ColorModeSettings>(
-  output: Settings,
-  fields: PackedElementField[],
-  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
-): void {
-  // Prefer color fields first
-  if (supportsPackedRgbModes) {
-    for (const field of fields) {
-      const fieldNameLower = field.name.toLowerCase();
-      if (RGBA_PACKED_FIELDS.has(fieldNameLower)) {
-        output.colorField = field.name;
-        switch (fieldNameLower) {
-          case "rgb":
-            output.colorMode = "rgb";
-            break;
-          default:
-          case "rgba":
-            output.colorMode = "rgba";
-            break;
-        }
-        return;
-      }
-    }
-  }
-
-  if (hasSeparateRgbaFields(fields.map((f) => f.name))) {
-    output.colorMode = "rgba-fields";
-    return;
-  }
-
-  // Fall back to using the first field
-  if (fields.length > 0) {
-    const firstField = fields[0]!;
-    output.colorField = firstField.name;
-    output.colorMode = "colormap";
-    output.colorMap = "turbo";
-    return;
-  }
-}

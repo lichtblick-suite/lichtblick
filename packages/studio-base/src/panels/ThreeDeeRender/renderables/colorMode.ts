@@ -180,26 +180,73 @@ function turboLinearCached(output: ColorRGBA, pct: number): void {
 export const RGBA_PACKED_FIELDS = new Set<string>(["rgb", "rgba"]);
 export const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
+/**
+ * Mutates output to select optimal color settings given a list of fields
+ * @param output - settings object to apply auto selection of colorfield to
+ * @param fields - array of string field names. PointField names should already have been checked for support
+ * @param { supportsPackedRgbModes, supportsRgbaFieldsMode } - whether or not the message supports packed rgb modes or rgba fields mode
+ */
+
+export function autoSelectColorSettings<Settings extends ColorModeSettings>(
+  output: Settings,
+  fields: string[],
+  {
+    supportsPackedRgbModes,
+    supportsRgbaFieldsMode,
+  }: { supportsPackedRgbModes: boolean; supportsRgbaFieldsMode?: boolean },
+): void {
+  const bestField = bestColorByField(fields, { supportsPackedRgbModes });
+
+  if (!bestField) {
+    return;
+  }
+
+  output.colorField = bestField;
+  switch (bestField.toLowerCase()) {
+    case "rgb":
+      output.colorMode = "rgb";
+      break;
+    case "rgba":
+      output.colorMode = "rgba";
+      break;
+    default: // intensity, z, etc
+      output.colorMode = "colormap";
+      output.colorMap = "turbo";
+      break;
+  }
+
+  if (supportsRgbaFieldsMode === true) {
+    // does not depend on color field, so it's fine to leave as last was
+    if (hasSeparateRgbaFields(fields)) {
+      output.colorMode = "rgba-fields";
+      return;
+    }
+  }
+}
+
 function bestColorByField(
   fields: string[],
   { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
-): string {
+): string | undefined {
   if (supportsPackedRgbModes) {
+    // first priority is color fields
     for (const field of fields) {
-      if (RGBA_PACKED_FIELDS.has(field)) {
+      if (RGBA_PACKED_FIELDS.has(field.toLowerCase())) {
         return field;
       }
     }
   }
+  // second priority is intensity fields
   for (const field of fields) {
-    if (INTENSITY_FIELDS.has(field)) {
+    if (INTENSITY_FIELDS.has(field.toLowerCase())) {
       return field;
     }
   }
-  return fields.find((field) => field === "x") ?? fields[0] ?? "";
+  // third is 'z', then the first field
+  return fields.find((field) => field === "z") ?? fields[0];
 }
 
-export function hasSeparateRgbaFields(fields: string[]): boolean {
+function hasSeparateRgbaFields(fields: string[]): boolean {
   let r = false;
   let g = false;
   let b = false;

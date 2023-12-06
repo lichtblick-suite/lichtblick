@@ -22,8 +22,8 @@ import {
   Transformer,
 } from "@foxglove/velodyne-cloud";
 
+import { autoSelectColorSettings } from "./colorMode";
 import {
-  autoSelectColorField,
   createInstancePickingMaterial,
   createPickingMaterial,
   DEFAULT_POINT_SETTINGS,
@@ -247,6 +247,16 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
       return;
     }
 
+    // Update the mapping of topic to point cloud field names if necessary
+    let fields = this.#pointCloudFieldsByTopic.get(messageEvent.topic);
+    let fieldsUpdated = false;
+    if (!fields || fields.length !== pointCloud.fields.length) {
+      fields = pointCloud.fields.map((field) => field.name);
+      this.#pointCloudFieldsByTopic.set(messageEvent.topic, fields);
+      fieldsUpdated = true;
+      this.updateSettingsTree();
+    }
+
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
@@ -254,8 +264,8 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
         | Partial<LayerSettingsVelodyneScans>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
-      if (settings.colorField == undefined) {
-        autoSelectColorField(settings, pointCloud, { supportsPackedRgbModes: false });
+      if (settings.colorField == undefined && fieldsUpdated) {
+        autoSelectColorSettings(settings, fields, { supportsPackedRgbModes: false });
 
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {
@@ -292,15 +302,6 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
       this.add(renderable);
       this.renderables.set(topic, renderable);
     }
-
-    // Update the mapping of topic to point cloud field names if necessary
-    let fields = this.#pointCloudFieldsByTopic.get(messageEvent.topic);
-    if (!fields || fields.length !== pointCloud.fields.length) {
-      fields = pointCloud.fields.map((field) => field.name);
-      this.#pointCloudFieldsByTopic.set(messageEvent.topic, fields);
-      this.updateSettingsTree();
-    }
-
     renderable.updatePointCloud(
       pointCloud,
       messageEvent.message as RosObject,
