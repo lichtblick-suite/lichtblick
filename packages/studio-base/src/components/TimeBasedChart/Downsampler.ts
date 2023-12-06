@@ -5,7 +5,7 @@
 import { iterateObjects } from "@foxglove/studio-base/components/Chart/datasets";
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 
-import { downsample } from "./downsample";
+import { downsample, MAX_POINTS } from "./downsample";
 import { ChartDatasets, PlotViewport } from "./types";
 
 type UpdateParams = {
@@ -36,28 +36,23 @@ export class Downsampler {
    */
   public downsample(): ChartDatasets | undefined {
     const width = this.#datasetBounds?.width;
-    const height = this.#datasetBounds?.width;
+    const height = this.#datasetBounds?.height;
 
     const currentScales = this.#scales;
-    let bounds:
-      | {
-          width: number;
-          height: number;
-          x: { min: number; max: number };
-          y: { min: number; max: number };
-        }
-      | undefined = undefined;
+    let view: PlotViewport | undefined = undefined;
     if (currentScales?.x && currentScales.y) {
-      bounds = {
+      view = {
         width: width ?? 0,
         height: height ?? 0,
-        x: {
-          min: currentScales.x.min,
-          max: currentScales.x.max,
-        },
-        y: {
-          min: currentScales.y.min,
-          max: currentScales.y.max,
+        bounds: {
+          x: {
+            min: currentScales.x.min,
+            max: currentScales.x.max,
+          },
+          y: {
+            min: currentScales.y.min,
+            max: currentScales.y.max,
+          },
         },
       };
     }
@@ -66,19 +61,13 @@ export class Downsampler {
       return undefined;
     }
 
-    const { bounds: dataBounds } = this.#datasetBounds;
-    const view: PlotViewport = {
-      width: 0,
-      height: 0,
-      bounds: dataBounds,
-    };
-
+    const numPoints = MAX_POINTS / Math.max(this.#datasets.length, 1);
     return this.#datasets.map((dataset) => {
-      if (!bounds) {
+      if (!view) {
         return dataset;
       }
 
-      const downsampled = downsample(dataset, iterateObjects(dataset.data), view);
+      const downsampled = downsample(dataset, iterateObjects(dataset.data), view, numPoints);
       const resolved = downsampled.map((i) => dataset.data[i]);
 
       // NaN item values create gaps in the line

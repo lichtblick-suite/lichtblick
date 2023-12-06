@@ -207,7 +207,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   );
 
   const provided = useProvider(view, getBounds, mergeNormal, data, provider ?? downsampler);
-
   const typedProvided = useProvider(view, getTypedBounds, mergeTyped, typedData, typedProvider);
 
   React.useEffect(() => {

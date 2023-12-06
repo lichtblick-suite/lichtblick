@@ -85,7 +85,7 @@ export default function useDownsampler(datasets: ChartDataset[]): {
         // setSetter cannot take two arguments, so we can't just write
         // `register: setSetter`
         register: (newSetter) => {
-          setSetter(newSetter);
+          setSetter(() => newSetter);
         },
       },
       setScales,
