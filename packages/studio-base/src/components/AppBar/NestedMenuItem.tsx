@@ -35,7 +35,7 @@ const useStyles = makeStyles<void, "endIcon">()((theme, _params, classes) => ({
   },
   menuList: {
     minWidth: 180,
-    maxWidth: 220,
+    maxWidth: 280,
   },
   endIcon: {
     marginRight: theme.spacing(-0.75),
