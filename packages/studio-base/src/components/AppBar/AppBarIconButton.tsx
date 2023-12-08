@@ -47,9 +47,17 @@ export const AppBarIconButton = forwardRef<HTMLButtonElement, AppBarIconButtonPr
         arrow={false}
         enterDelay={200}
       >
-        <IconButton color={color} ref={ref} className={cx(classes.iconButton, className)} {...rest}>
-          {children}
-        </IconButton>
+        {/* Extra div to avoid issues with wrapping Tooltip around disabled buttons */}
+        <div>
+          <IconButton
+            color={color}
+            ref={ref}
+            className={cx(classes.iconButton, className)}
+            {...rest}
+          >
+            {children}
+          </IconButton>
+        </div>
       </Tooltip>
     );
   },
