@@ -76,6 +76,9 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
     canvas: {
       outline: "none",
     },
+    th: {
+      textAlign: "inherit",
+    },
 
     // mosaic styling
     ".mosaic": {

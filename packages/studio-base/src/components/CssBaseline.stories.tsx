@@ -27,28 +27,3 @@ export const Scrollbars: StoryObj = {
     );
   },
 };
-
-export const FontFeatureSettings: StoryObj = {
-  render: () => {
-    // See https://github.com/foxglove/studio/pull/5113#discussion_r1106619194
-    return (
-      <CssBaseline>
-        cv08: I
-        <br />
-        cv10: G
-        <br />
-        显示时间戳在
-      </CssBaseline>
-    );
-  },
-};
-
-export const FontFeatureSettingsChinese: StoryObj = {
-  ...FontFeatureSettings,
-  parameters: { forceLanguage: "zh" },
-};
-
-export const FontFeatureSettingsJapanese: StoryObj = {
-  ...FontFeatureSettings,
-  parameters: { forceLanguage: "ja" },
-};

@@ -26,7 +26,10 @@ declare module "@mui/material/styles/createTypography" {
 export const fontSansSerif = "'Inter'";
 export const fontMonospace = "'IBM Plex Mono'";
 
-export const fontFeatureSettings = "'tnum'";
+export const fontFeatureSettings = [
+  "'tnum'", // enable tabular-numerals
+  "'calt' 0", // disable contextual-alternates
+].join(",");
 
 const headingFontStyles: TypographyStyle = {
   fontFeatureSettings,
@@ -44,7 +47,7 @@ export const typography: TypographyOptions = {
   fontSansSerif,
   fontFamily: fontSansSerif,
   fontSize: 12,
-  fontFeatureSettings: "'tnum'",
+  fontFeatureSettings,
   body1: { fontFeatureSettings },
   body2: { fontFeatureSettings },
   button: {

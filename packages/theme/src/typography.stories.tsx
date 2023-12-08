@@ -7,14 +7,14 @@ import { StoryObj } from "@storybook/react";
 import { ReactNode } from "react";
 
 export default {
-  title: "Theme/Data Display",
+  title: "Theme/Data Display/Typography",
 };
 
 function Wrapper({ children }: { children: ReactNode }): JSX.Element {
   return <Stack sx={{ border: "1px dotted", borderColor: "info.main" }}>{children}</Stack>;
 }
 
-export const Typography: StoryObj = {
+export const Variants: StoryObj = {
   render: function Story() {
     return (
       <Stack gap={1} padding={1}>
@@ -92,6 +92,37 @@ export const Typography: StoryObj = {
       </Stack>
     );
   },
-
   parameters: { colorScheme: "light" },
+};
+
+const fontFeatures = [
+  { label: "tnum", text: "0123456789" },
+  { label: "calt", text: "=> == === 1x1 2*2 3xA ++ :=" },
+  // we don't currently use these ligatures but putting it in just so we never forget it exists
+  { label: "cv08 / cv10", text: "显示时间戳在" },
+];
+
+export const FontFeatureSettings: StoryObj = {
+  render: () => (
+    <table>
+      <tbody>
+        {fontFeatures.map(({ label, text }) => (
+          <tr key={label}>
+            <th style={{ width: 100 }}>{label}</th> <td>{text}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
+  parameters: { colorScheme: "light" },
+};
+
+export const FontFeatureSettingsChinese: StoryObj = {
+  ...FontFeatureSettings,
+  parameters: { forceLanguage: "zh", colorScheme: "light" },
+};
+
+export const FontFeatureSettingsJapanese: StoryObj = {
+  ...FontFeatureSettings,
+  parameters: { forceLanguage: "ja", colorScheme: "light" },
 };
