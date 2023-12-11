@@ -11,6 +11,7 @@ import {
   findIndices,
   getTypedLength,
 } from "@foxglove/studio-base/components/Chart/datasets";
+import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { format } from "@foxglove/studio-base/util/formatTime";
 import { darkColor, getLineColor, lightColor } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -346,8 +347,8 @@ function sliceSingle(slice: TypedData, start: number, end?: number): TypedData {
 
   return {
     receiveTime,
-    headerStamp: headerStamp.length > 0 ? headerStamp : undefined,
-    constantName: constantName.length > 0 ? constantName : undefined,
+    ...(headerStamp.length > 0 ? { headerStamp } : {}),
+    ...(constantName.length > 0 ? { constantName } : {}),
     value,
     x,
     y,
@@ -390,18 +391,18 @@ export function sliceTyped(dataset: TypedData[], start: number, end?: number): T
   return [sliceSingle(startSlice, offset0), ...between, sliceSingle(endSlice, 0, offset1)];
 }
 
-export function getXBounds(dataset: TypedData[]): [min: number, max: number] | undefined {
+export function getXBounds(dataset: TypedData[]): Bounds1D | undefined {
   const min = dataset.at(0)?.x.at(0);
   const max = dataset.at(-1)?.x.at(-1);
   if (min == undefined || max == undefined) {
     return undefined;
   }
 
-  return [min, max];
+  return { min, max };
 }
 
 export function mergeTyped(a: TypedData[], b: TypedData[]): TypedData[] {
-  const lastTime = getXBounds(a)?.[1] ?? Number.MIN_SAFE_INTEGER;
+  const lastTime = getXBounds(a)?.max ?? Number.MIN_SAFE_INTEGER;
 
   let startIndex = -1;
   for (const datum of iterateTyped(b)) {

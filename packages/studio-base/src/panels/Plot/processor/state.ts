@@ -5,6 +5,7 @@
 import * as R from "ramda";
 
 import { initAccumulated } from "./accumulate";
+import { initDownsampled } from "./downsample";
 import {
   Client,
   RebuildEffect,
@@ -25,6 +26,7 @@ export function initClient(id: string, params: PlotParams | undefined): Client {
     view: undefined,
     blocks: initAccumulated([]),
     current: initAccumulated([]),
+    downsampled: initDownsampled(),
   };
 }
 
@@ -85,6 +87,9 @@ export const concatEffects =
 export const findClient = (state: State, id: string): Client | undefined =>
   state.clients.find((client) => client.id === id);
 
+/**
+ * Replace the state of a client with the given ID with the provided client state.
+ */
 export const mutateClient = (state: State, id: string, newClient: Client): State => ({
   ...state,
   clients: state.clients.map((client) => (client.id === id ? newClient : client)),

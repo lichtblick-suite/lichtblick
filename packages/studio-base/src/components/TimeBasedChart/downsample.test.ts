@@ -2,9 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as R from "ramda";
+
 import { iterateObjects } from "@foxglove/studio-base/components/Chart/datasets";
 
-import { MINIMUM_PIXEL_DISTANCE, downsampleTimeseries, downsampleScatter } from "./downsample";
+import {
+  MINIMUM_PIXEL_DISTANCE,
+  downsampleTimeseries,
+  initDownsample,
+  continueDownsample,
+  finishDownsample,
+  downsampleScatter,
+  DownsampleState,
+} from "./downsample";
 
 describe("downsampleTimeseries", () => {
   const bounds = {
@@ -26,6 +36,43 @@ describe("downsampleTimeseries", () => {
       bounds,
     );
     expect(result).toEqual([0, 1, 2, 5]);
+  });
+
+  // This test ensures that splitting up the dataset into arbitrary pieces
+  // still results in the same downsampled points.
+  it("correctly pauses and resumes downsampling", () => {
+    const realBounds = {
+      width: 648,
+      height: 1466,
+      bounds: { x: { min: 0, max: 1785 }, y: { min: -1, max: 1 } },
+    };
+
+    const numPoints = 10_000;
+    const deltaX = realBounds.bounds.x.max / numPoints;
+    const dataset = R.range(0, numPoints).map((v) => {
+      const x = v * deltaX;
+      return {
+        x,
+        y: Math.cos(x),
+        value: 0,
+      };
+    });
+
+    const fullPoints = downsampleTimeseries(iterateObjects(dataset), realBounds);
+
+    const numSplits = 400;
+    const [indices, finalState] = R.reduce(
+      (a: [number[], DownsampleState], v) => {
+        const [oldIndices, oldState] = a;
+        const [newIndices, newState] = continueDownsample(iterateObjects(v), oldState);
+        return [[...oldIndices, ...newIndices], newState];
+      },
+      [[], initDownsample(realBounds)],
+      R.splitEvery(Math.trunc(numPoints / numSplits), dataset),
+    );
+
+    const partialPoints = [...indices, ...finishDownsample(finalState)];
+    expect(fullPoints).toEqual(partialPoints);
   });
 
   it("preserves distinctly labeled segments", () => {

@@ -77,21 +77,44 @@ export const createParams = (...paths: string[]): PlotParams => ({
 });
 
 /**
+ * Return a TypedDataSet with `count` points.
+ */
+export const createDataset = (count: number): TypedDataSet => ({
+  data: [
+    datumToTyped(
+      R.range(0, count).map((v) => ({
+        x: v,
+        y: v,
+        receiveTime: fromSec(v),
+      })),
+    ),
+  ],
+});
+
+/**
  * Initialize a PlotData with fake data for the given `path`.
  */
 export const createData = (path: PlotPath, count: number): PlotData => {
   const datasets = new Map<PlotPath, TypedDataSet>();
-  datasets.set(path, {
-    data: [
-      datumToTyped(
-        R.range(0, count).map((v) => ({
-          x: v,
-          y: v,
-          receiveTime: fromSec(v),
-        })),
-      ),
-    ],
-  });
+  datasets.set(path, createDataset(count));
+  return {
+    datasets,
+    bounds: {
+      x: { min: 0, max: 0 },
+      y: { min: 0, max: 0 },
+    },
+    pathsWithMismatchedDataLengths: [],
+  };
+};
+
+/**
+ * Initialize a PlotData with fake data for the given `path`.
+ */
+export const createDataMany = (count: number, ...paths: PlotPath[]): PlotData => {
+  const datasets = new Map<PlotPath, TypedDataSet>();
+  for (const path of paths) {
+    datasets.set(path, createDataset(count));
+  }
   return {
     datasets,
     bounds: {

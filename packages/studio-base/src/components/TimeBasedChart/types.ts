@@ -19,9 +19,10 @@ export type ChartDatum = ChartDataset["data"][0];
 export type TypedChartDatasets = TypedChartData["datasets"];
 export type TypedChartDataset = TypedChartDatasets[0];
 
+export type Bounds1D = { min: number; max: number };
 export type Bounds = {
-  x: { min: number; max: number };
-  y: { min: number; max: number };
+  x: Bounds1D;
+  y: Bounds1D;
 };
 
 /**

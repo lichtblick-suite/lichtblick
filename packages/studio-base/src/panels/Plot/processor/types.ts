@@ -6,6 +6,7 @@ import { PlotViewport } from "@foxglove/studio-base/components/TimeBasedChart/ty
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 
 import { Accumulated } from "./accumulate";
+import { Downsampled } from "./downsample";
 import { PlotParams, Messages, MetadataEnums } from "../internalTypes";
 import { PlotData } from "../plotData";
 
@@ -16,6 +17,7 @@ export type Client = {
   view: PlotViewport | undefined;
   blocks: Accumulated;
   current: Accumulated;
+  downsampled: Downsampled;
 };
 
 export type State = {

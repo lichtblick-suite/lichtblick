@@ -4,7 +4,7 @@
 
 export type { State, StateAndEffects } from "./types";
 export { SideEffectType } from "./types";
-export { initProcessor, findClient, setLive } from "./state";
+export { initProcessor, findClient, setLive, mutateClient } from "./state";
 export {
   register,
   unregister,

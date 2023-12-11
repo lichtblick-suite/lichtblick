@@ -10,6 +10,7 @@ import { PlotViewport } from "@foxglove/studio-base/components/TimeBasedChart/ty
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 
 import { initAccumulated, accumulate } from "./accumulate";
+import { initDownsampled } from "./downsample";
 import { evictCache } from "./messages";
 import {
   findClient,
@@ -26,11 +27,31 @@ import { StateAndEffects, SideEffects, State, Client } from "./types";
 import { PlotParams } from "../internalTypes";
 import { getParamTopics, getParamPaths } from "../params";
 import {
-  reducePlotData,
   PlotData,
   applyDerivativeToPlotData,
+  reducePlotData,
   sortPlotDataByHeaderStamp,
 } from "../plotData";
+
+/**
+ * Merge block and current data. If block data contains any portion of current
+ * data, we use that instead of current data.
+ */
+function mergeAllData(blockData: PlotData, currentData: PlotData): PlotData {
+  const { bounds: blockBounds } = blockData;
+  const { bounds: currentBounds } = currentData;
+
+  let datasets: PlotData[] = [];
+  if (blockBounds.x.min <= currentBounds.x.min && blockBounds.x.max > currentBounds.x.max) {
+    // ignore current data if block data covers it already
+    datasets = [blockData];
+  } else {
+    // unbounded plots should also use current data
+    datasets = [blockData, currentData];
+  }
+
+  return reducePlotData(datasets);
+}
 
 export function refreshClient(client: Client, state: State): [Client, SideEffects] {
   const { blocks, current, metadata, globalVariables } = state;
@@ -99,6 +120,7 @@ export function updateParams(id: string, params: PlotParams, state: State): Stat
           ...client,
           params,
           topics: getParamTopics(params),
+          downsampled: initDownsampled(),
         },
         state,
       );
@@ -201,17 +223,8 @@ export function getClientData(client: Client): PlotData | undefined {
     return undefined;
   }
 
-  const { bounds: blockBounds } = blockData;
-  const { bounds: currentBounds } = currentData;
-
-  let datasets: PlotData[] = [];
-  if (blockBounds.x.min <= currentBounds.x.min && blockBounds.x.max > currentBounds.x.max) {
-    // ignore current data if block data covers it already
-    datasets = [blockData];
-  } else {
-    // unbounded plots should also use current data
-    datasets = [blockData, currentData];
-  }
-
-  return R.pipe(reducePlotData, applyDerivativeToPlotData, sortPlotDataByHeaderStamp)(datasets);
+  return R.pipe(
+    sortPlotDataByHeaderStamp,
+    applyDerivativeToPlotData,
+  )(mergeAllData(blockData, currentData));
 }

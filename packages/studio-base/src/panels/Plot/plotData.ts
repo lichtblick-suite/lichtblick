@@ -96,7 +96,7 @@ function findXRanges(data: Im<PlotData>): {
   return { all: { start, end }, byPath };
 }
 
-export function mapDatasets(
+function mapDatasets(
   map: (dataset: TypedDataSet, path: PlotPath) => TypedDataSet,
   datasets: DatasetsByPath,
 ): DatasetsByPath {
@@ -288,6 +288,25 @@ export const applyDerivativeToPlotData = createPlotMapping((dataset, path) => {
   };
 });
 
+export const sortDataByHeaderStamp = (data: TypedData[]): TypedData[] => {
+  const indices: [index: number, timestamp: number][] = [];
+  for (const datum of iterateTyped(data)) {
+    indices.push([datum.index, datum.x]);
+  }
+
+  indices.sort(([, ax], [, bx]) => ax - bx);
+
+  const resolved = resolveTypedIndices(
+    data,
+    indices.map(([index]) => index),
+  );
+  if (resolved == undefined) {
+    return data;
+  }
+
+  return resolved;
+};
+
 /**
  * Sorts datsets by header stamp, which at this point in the processing chain is the x value of each point.
  * This has to be done on the complete dataset, not point by point.
@@ -304,26 +323,9 @@ export const sortPlotDataByHeaderStamp = createPlotMapping((dataset: TypedDataSe
   if (path.timestampMethod !== "headerStamp") {
     return dataset;
   }
-
-  const indices: [index: number, timestamp: number][] = [];
-  for (const datum of iterateTyped(dataset.data)) {
-    indices.push([datum.index, datum.x]);
-  }
-
-  indices.sort(([, ax], [, bx]) => ax - bx);
-
-  const resolved = resolveTypedIndices(
-    dataset.data,
-    indices.map(([index]) => index),
-  );
-
-  if (resolved == undefined) {
-    return dataset;
-  }
-
   return {
     ...dataset,
-    data: resolved,
+    data: sortDataByHeaderStamp(dataset.data),
   };
 });
 

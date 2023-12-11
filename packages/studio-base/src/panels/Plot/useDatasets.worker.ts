@@ -5,8 +5,6 @@
 import * as Comlink from "comlink";
 
 import { Immutable } from "@foxglove/studio";
-import { iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
-import { downsample, MAX_POINTS } from "@foxglove/studio-base/components/TimeBasedChart/downsample";
 import {
   ProviderStateSetter,
   PlotViewport,
@@ -16,10 +14,9 @@ import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import strPack from "@foxglove/studio-base/util/strPack";
 
-import { resolveTypedIndices } from "./datasets";
 import { PlotParams, TypedData, Messages } from "./internalTypes";
 import { isSingleMessage } from "./params";
-import { PlotData, StateHandler, mapDatasets, getProvidedData } from "./plotData";
+import { PlotData, StateHandler, getProvidedData } from "./plotData";
 import {
   SideEffectType,
   State,
@@ -38,7 +35,9 @@ import {
   updateParams,
   updateView,
   compressClients,
+  mutateClient,
 } from "./processor";
+import { updateDownsample } from "./processor/downsample";
 
 type Setter = ProviderStateSetter<TypedData[]>;
 
@@ -101,7 +100,7 @@ function rebuild(id: string) {
     return;
   }
 
-  const { params, view } = client;
+  const { params, blocks, current, view, downsampled } = client;
   if (params == undefined || view == undefined) {
     return;
   }
@@ -111,23 +110,20 @@ function rebuild(id: string) {
     return;
   }
 
-  const maxPoints = MAX_POINTS / Math.max(newData.datasets.size, 1);
-  const downsampled = mapDatasets((dataset) => {
-    const indices = downsample(dataset, iterateTyped(dataset.data), view, maxPoints);
-    const resolved = resolveTypedIndices(dataset.data, indices);
-    if (resolved == undefined) {
-      return dataset;
-    }
+  const newDownsampled = updateDownsample(view, blocks.data, current.data, downsampled);
 
-    return {
-      ...dataset,
-      data: resolved,
-    };
-  }, newData.datasets);
+  state = mutateClient(state, id, {
+    ...client,
+    downsampled: newDownsampled,
+  });
+
+  if (!newDownsampled.isValid) {
+    return;
+  }
 
   sendPlotData(clientCallbacks, {
     ...newData,
-    datasets: downsampled,
+    ...newDownsampled.data,
   });
 }
 
