@@ -32,6 +32,7 @@ const useStyles = makeStyles()((theme) => ({
     paddingBottom: 1,
     lineHeight: 1,
     fontFamily: theme.typography.fontMonospace,
+    wordBreak: "break-word",
   },
 }));
 
