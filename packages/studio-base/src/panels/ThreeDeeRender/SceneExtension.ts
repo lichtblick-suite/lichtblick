@@ -48,6 +48,8 @@ export class SceneExtension<
   public readonly extensionId: string;
   /** A reference to the parent `Renderer` instance. */
   protected readonly renderer: IRenderer;
+  /** HUD API to place things on the canvas*/
+  public readonly hud: IRenderer["hud"];
   /**
    * A map of string identifiers to Renderable instances. SceneExtensions are free to use any IDs
    * they choose, although topic names are a common choice for extensions display up to one
@@ -63,6 +65,7 @@ export class SceneExtension<
     super();
     this.extensionId = this.name = extensionId;
     this.renderer = renderer;
+    this.hud = renderer.hud;
     // updateSettingsTree() will call settingsNodes() which may be overridden in a child class.
     // The child class may not assign its members until after this constructor returns. This breaks
     // type assumptions, so we need to defer the call to updateSettingsTree()

@@ -19,8 +19,12 @@ import {
 } from "@foxglove/studio";
 import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
 import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { HUDItem } from "@foxglove/studio-base/panels/ThreeDeeRender/HUDItemManager";
 import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
-import { IMAGE_TOPIC_PATH } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
+import {
+  IMAGE_MODE_HUD_GROUP_ID,
+  IMAGE_TOPIC_PATH,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
@@ -36,6 +40,7 @@ import {
   cameraInfosEqual,
   normalizeCameraInfo,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
+import { t3D } from "@foxglove/studio-base/panels/ThreeDeeRender/t3D";
 import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
@@ -43,6 +48,11 @@ import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { ImageModeCamera } from "./ImageModeCamera";
 import { IMessageHandler, MessageHandler, MessageRenderState } from "./MessageHandler";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
+import {
+  BOTH_TOPICS_DO_NOT_EXIST_HUD_ITEM_ID,
+  IMAGE_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+  CALIBRATION_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+} from "./constants";
 import type {
   AnyRendererSubscription,
   IRenderer,
@@ -83,6 +93,12 @@ const DEFAULT_FOCAL_LENGTH = 500;
 
 const REMOVE_IMAGE_TIMEOUT_MS = 50;
 
+const NO_IMAGE_TOPICS_HUD_ITEM: HUDItem = {
+  id: "NO_IMAGE_TOPICS",
+  group: IMAGE_MODE_HUD_GROUP_ID,
+  getMessage: () => t3D("noImageTopicsAvailable"),
+  displayType: "notice",
+};
 interface ImageModeEventMap extends THREE.Object3DEventMap {
   hasModifiedViewChanged: object;
 }
@@ -213,7 +229,7 @@ export class ImageMode
   }
 
   protected initMessageHandler(config: Immutable<ConfigWithDefaults>): IMessageHandler {
-    return new MessageHandler(config);
+    return new MessageHandler(config, this.hud);
   }
 
   public hasModifiedView(): boolean {
@@ -333,11 +349,12 @@ export class ImageMode
     const imageTopic = this.renderer.topics?.find((topic) =>
       topicIsConvertibleToSchema(topic, this.supportedImageSchemas),
     );
-    if (imageTopic == undefined) {
-      return;
-    }
 
-    this.setImageTopic(imageTopic);
+    this.hud.displayIfTrue(imageTopic == undefined, NO_IMAGE_TOPICS_HUD_ITEM);
+
+    if (imageTopic) {
+      this.setImageTopic(imageTopic);
+    }
   };
 
   /** Sets specified image topic on the config and updates calibration topic if a match is found.
@@ -408,25 +425,48 @@ export class ImageMode
     // add unselected camera calibration option
     calibrationTopics.unshift({ label: "None", value: undefined });
 
-    if (imageTopic && !imageTopics.some((topic) => topic.value === imageTopic)) {
-      this.renderer.settings.errors.add(
-        IMAGE_TOPIC_PATH,
-        IMAGE_TOPIC_UNAVAILABLE,
-        `${imageTopic} is not available`,
-      );
-    } else {
-      this.renderer.settings.errors.remove(IMAGE_TOPIC_PATH, IMAGE_TOPIC_UNAVAILABLE);
-    }
+    const imageTopicExists = !(
+      imageTopic && !imageTopics.some((topic) => topic.value === imageTopic)
+    );
+    this.renderer.settings.errors.errorIfFalse(
+      imageTopicExists,
+      IMAGE_TOPIC_PATH,
+      IMAGE_TOPIC_UNAVAILABLE,
+      `${imageTopic} is not available`,
+    );
 
-    if (calibrationTopic && !calibrationTopics.some((topic) => topic.value === calibrationTopic)) {
-      this.renderer.settings.errors.add(
-        CALIBRATION_TOPIC_PATH,
-        CALIBRATION_TOPIC_UNAVAILABLE,
-        `${calibrationTopic} is not available`,
-      );
-    } else {
-      this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CALIBRATION_TOPIC_UNAVAILABLE);
-    }
+    const calibrationTopicExists = !(
+      calibrationTopic && !calibrationTopics.some((topic) => topic.value === calibrationTopic)
+    );
+
+    this.renderer.settings.errors.errorIfFalse(
+      calibrationTopicExists,
+      CALIBRATION_TOPIC_PATH,
+      CALIBRATION_TOPIC_UNAVAILABLE,
+      `${calibrationTopic} is not available`,
+    );
+
+    const bothTopicsDoNotExist = !imageTopicExists && !calibrationTopicExists;
+    this.hud.displayIfTrue(bothTopicsDoNotExist, {
+      id: BOTH_TOPICS_DO_NOT_EXIST_HUD_ITEM_ID,
+      displayType: "empty",
+      group: "IMAGE_MODE",
+      getMessage: () => t3D("imageAndCalibrationDNE"),
+    });
+
+    this.hud.displayIfTrue(!imageTopicExists && calibrationTopic == undefined, {
+      id: IMAGE_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+      displayType: "empty",
+      group: "IMAGE_MODE",
+      getMessage: () => t3D("imageTopicDNE"),
+    });
+
+    this.hud.displayIfTrue(imageTopicExists && !calibrationTopicExists, {
+      id: CALIBRATION_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+      displayType: "empty",
+      group: "IMAGE_MODE",
+      getMessage: () => t3D("calibrationTopicDNE"),
+    });
 
     const imageTopicError = this.renderer.settings.errors.errors.errorAtPath(IMAGE_TOPIC_PATH);
     const calibrationTopicError =
@@ -434,7 +474,7 @@ export class ImageMode
 
     const fields: SettingsTreeFields = {};
     fields.imageTopic = {
-      label: "Topic",
+      label: t3D("topic"),
       input: "select",
       value: imageTopic,
       options: imageTopics,
@@ -567,7 +607,11 @@ export class ImageMode
       maxValue: config.maxValue,
     });
     if (config.synchronize !== prevImageModeConfig.synchronize) {
-      this.removeAllRenderables();
+      this.hud.removeGroup(IMAGE_MODE_HUD_GROUP_ID);
+      this.#removeImageRenderable();
+      if (config.synchronize) {
+        this.#annotations.removeAllRenderables();
+      }
     }
     this.messageHandler.setConfig(config);
 
@@ -618,6 +662,9 @@ export class ImageMode
     newState: MessageRenderState,
     oldState: MessageRenderState | undefined,
   ): void => {
+    if (newState.missingAnnotationTopics) {
+      this.#removeImageRenderable();
+    }
     if (newState.image != undefined && newState.image !== oldState?.image) {
       this.#handleImageChange(newState.image, newState.image.message);
     }

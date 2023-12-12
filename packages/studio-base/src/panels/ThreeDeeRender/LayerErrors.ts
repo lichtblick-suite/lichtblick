@@ -111,6 +111,22 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     this.remove(TOPIC_PATH, errorId);
   }
 
+  /**
+   * If value is falsy then add error to path, otherwise remove error from settings path
+   * @param value - value to check, if false, add error, if true, remove error
+   * @param path  - path to add/remove error
+   * @param errorId - id unique to error
+   * @param errorMessage - error message
+   */
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  public errorIfFalse(value: boolean, path: Path, errorId: string, errorMessage: string): void {
+    if (!value) {
+      this.add(path, errorId, errorMessage);
+    } else {
+      this.remove(path, errorId);
+    }
+  }
+
   public clearPath(path: Path): void {
     const node = this.#getNode(path);
     if (!node) {

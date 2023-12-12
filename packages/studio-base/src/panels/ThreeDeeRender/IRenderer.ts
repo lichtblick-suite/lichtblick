@@ -19,10 +19,12 @@ import {
   DraggedMessagePath,
   MessagePathDropStatus,
 } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { HUDItemManager } from "@foxglove/studio-base/panels/ThreeDeeRender/HUDItemManager";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 import { LabelPool } from "@foxglove/three-text";
 
+import { HUDItem } from "./HUDItemManager";
 import { Input } from "./Input";
 import { MeshUpAxis, ModelCache } from "./ModelCache";
 import { PickedRenderable } from "./Picker";
@@ -64,6 +66,7 @@ export type RendererEvents = {
   topicsChanged: (renderer: IRenderer) => void;
   resetViewChanged: (renderer: IRenderer) => void;
   resetAllFramesCursor: (renderer: IRenderer) => void;
+  hudItemsChanged: (renderer: IRenderer) => void;
 };
 
 export type FollowMode = "follow-pose" | "follow-position" | "follow-none";
@@ -214,6 +217,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   maxLod: DetailLevel;
   config: Immutable<RendererConfig>;
   settings: SettingsManager;
+  hud: HUDItemManager;
   debugPicking: boolean;
   // [{ name, datatype }]
   topics: ReadonlyArray<Topic> | undefined;
@@ -380,6 +384,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
 
   /** Returns context menu items for active scene extensions. Takes Enqueue snackbar function for showing info that might result from option. */
   getContextMenuItems: () => PanelContextMenuItem[];
+
+  /** Items to render in an over-canvas Heads-up display*/
+  hudItems: HUDItem[];
 
   displayTemporaryError?: (message: string) => void;
 }

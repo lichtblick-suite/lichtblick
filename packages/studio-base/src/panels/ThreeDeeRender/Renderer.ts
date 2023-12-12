@@ -30,12 +30,14 @@ import {
   DraggedMessagePath,
   MessagePathDropStatus,
 } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { HUDItemManager } from "@foxglove/studio-base/panels/ThreeDeeRender/HUDItemManager";
 import { LayerErrors } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
 import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 import { palette, fontMonospace } from "@foxglove/theme";
 import { LabelMaterial, LabelPool } from "@foxglove/three-text";
 
+import { HUDItem } from "./HUDItemManager";
 import {
   IRenderer,
   InstancedLineMaterial,
@@ -161,6 +163,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public schemaSubscriptions = new Map<string, RendererSubscription[]>();
   // topicName -> RendererSubscription[]
   public topicSubscriptions = new Map<string, RendererSubscription[]>();
+
+  /** HUD manager instance */
+  public hud;
+  /** Items to display in the HUD */
+  public hudItems: HUDItem[] = [];
   // layerId -> { action, handler }
   #customLayerActions = new Map<string, CustomLayerAction>();
   #scene: THREE.Scene;
@@ -231,6 +238,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#fetchAsset = args.fetchAsset;
     this.testOptions = args.testOptions;
     this.debugPicking = args.testOptions.debugPicking ?? false;
+
+    this.hud = new HUDItemManager(this.#onHUDItemsChange);
 
     this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode));
     this.settings.on("update", () => this.emit("settingsTreeChange", this));
@@ -363,6 +372,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.animationFrame();
   }
 
+  #onHUDItemsChange = () => {
+    this.hudItems = this.hud.getHUDItems();
+    this.emit("hudItemsChanged", this);
+  };
+
   #onDevicePixelRatioChange = () => {
     log.debug(`devicePixelRatio changed to ${window.devicePixelRatio}`);
     this.#resizeHandler(this.input.canvasSize);
@@ -460,6 +474,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.#resetAllFramesCursor();
     }
     this.settings.errors.clear();
+    this.hud.clear();
 
     for (const extension of this.sceneExtensions.values()) {
       extension.removeAllRenderables();

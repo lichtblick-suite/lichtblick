@@ -37,14 +37,13 @@ import type {
   IRenderer,
   ImageModeConfig,
   RendererConfig,
-  RendererEvents,
   RendererSubscription,
   TestOptions,
 } from "./IRenderer";
 import type { PickedRenderable } from "./Picker";
 import { SELECTED_ID_VARIABLE } from "./Renderable";
 import { Renderer } from "./Renderer";
-import { RendererContext, useRendererEvent } from "./RendererContext";
+import { RendererContext, useRendererEvent, useRendererProperty } from "./RendererContext";
 import { RendererOverlay } from "./RendererOverlay";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
 import {
@@ -73,30 +72,6 @@ const PANEL_STYLE: React.CSSProperties = {
   display: "flex",
   position: "relative",
 };
-
-function useRendererProperty<K extends keyof IRenderer>(
-  renderer: IRenderer | undefined,
-  key: K,
-  event: keyof RendererEvents,
-  fallback: () => IRenderer[K],
-): IRenderer[K] {
-  const [value, setValue] = useState<IRenderer[K]>(() => renderer?.[key] ?? fallback());
-  useEffect(() => {
-    if (!renderer) {
-      return;
-    }
-    const onChange = () => {
-      setValue(() => renderer[key]);
-    };
-    onChange();
-
-    renderer.addListener(event, onChange);
-    return () => {
-      renderer.removeListener(event, onChange);
-    };
-  }, [renderer, event, key]);
-  return value;
-}
 
 /**
  * A panel that renders a 3D scene. This is a thin wrapper around a `Renderer` instance.
@@ -232,16 +207,16 @@ export function ThreeDeeRender(props: {
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   const schemaSubscriptions = useRendererProperty(
-    renderer,
     "schemaSubscriptions",
     "schemaSubscriptionsChanged",
     () => new Map(),
+    renderer,
   );
   const topicSubscriptions = useRendererProperty(
-    renderer,
     "topicSubscriptions",
     "topicSubscriptionsChanged",
     () => new Map(),
+    renderer,
   );
 
   // Config cameraState
