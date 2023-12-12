@@ -19,6 +19,7 @@ const MESH_FETCH_FAILED = "MESH_FETCH_FAILED";
 export class RenderableMeshResource extends RenderableMarker {
   #mesh: THREE.Group | THREE.Scene | undefined;
   #material: THREE.MeshStandardMaterial;
+  #referenceUrl: string | undefined;
 
   /** Track updates to avoid race conditions when asynchronously loading models */
   #updateId = 0;
@@ -28,10 +29,12 @@ export class RenderableMeshResource extends RenderableMarker {
     marker: Marker,
     receiveTime: bigint | undefined,
     renderer: IRenderer,
+    options?: { referenceUrl?: string },
   ) {
     super(topic, marker, receiveTime, renderer);
 
     this.#material = makeStandardMaterial(marker.color);
+    this.#referenceUrl = options?.referenceUrl;
     this.update(marker, receiveTime, true);
   }
 
@@ -122,13 +125,17 @@ export class RenderableMeshResource extends RenderableMarker {
     url: string,
     opts: { useEmbeddedMaterials: boolean },
   ): Promise<THREE.Group | THREE.Scene | undefined> {
-    const cachedModel = await this.renderer.modelCache.load(url, {}, (err) => {
-      this.renderer.settings.errors.add(
-        this.userData.settingsPath,
-        MESH_FETCH_FAILED,
-        `Error loading mesh from "${url}": ${err.message}`,
-      );
-    });
+    const cachedModel = await this.renderer.modelCache.load(
+      url,
+      { referenceUrl: this.#referenceUrl },
+      (err) => {
+        this.renderer.settings.errors.add(
+          this.userData.settingsPath,
+          MESH_FETCH_FAILED,
+          `Error loading mesh from "${url}": ${err.message}`,
+        );
+      },
+    );
 
     if (!cachedModel) {
       if (!this.renderer.settings.errors.hasError(this.userData.settingsPath, MESH_FETCH_FAILED)) {

@@ -1056,7 +1056,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.followFrameId = frameId;
   }
 
-  public async fetchAsset(uri: string, options?: { signal: AbortSignal }): Promise<Asset> {
+  public async fetchAsset(
+    uri: string,
+    options?: { signal?: AbortSignal; baseUrl?: string },
+  ): Promise<Asset> {
     return await this.#fetchAsset(uri, options);
   }
 

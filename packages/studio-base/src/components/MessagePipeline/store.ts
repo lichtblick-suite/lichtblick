@@ -166,29 +166,43 @@ export function createMessagePipelineStore({
         const { protocol } = new URL(uri);
         const player = get().player;
 
-        if (player?.fetchAsset && protocol === "package:") {
-          try {
-            return await player.fetchAsset(uri);
-          } catch (err) {
-            // Bail out if this is not a desktop app. For the desktop app, package:// is registered
-            // as a supported schema for builtin _fetch_ calls. Hence we fallback to a normal
-            // _fetch_ call if the asset couldn't be loaded through the player.
-            if (!isDesktopApp()) {
-              throw err;
+        if (protocol === "package:") {
+          // For the desktop app, package:// is registered as a supported schema for builtin _fetch_ calls.
+          const canBuiltinFetchPkgUri = isDesktopApp();
+          const pkgPath = uri.slice("package://".length);
+          const pkgName = pkgPath.split("/")[0];
+
+          if (player?.fetchAsset) {
+            try {
+              return await player.fetchAsset(uri);
+            } catch (err) {
+              if (canBuiltinFetchPkgUri) {
+                // Fallback to a builtin _fetch_ call if the asset couldn't be loaded through the player.
+                return await builtinFetch(uri, options);
+              }
+              throw err; // Bail out otherwise.
             }
+          } else if (canBuiltinFetchPkgUri) {
+            return await builtinFetch(uri, options);
+          } else if (
+            pkgName &&
+            options?.referenceUrl != undefined &&
+            !options.referenceUrl.startsWith("package://") &&
+            options.referenceUrl.includes(pkgName)
+          ) {
+            // As last resort to load the package://<pkgName>/<pkgPath> URL, we resolve the package URL to
+            // be relative of the base URL (which contains <pkgName> and is not a package:// URL itself).
+            // Example:
+            //   base URL: https://example.com/<pkgName>/urdf/robot.urdf
+            //   resolved: https://example.com/<pkgName>/<pkgPath>
+            const resolvedUrl =
+              options.referenceUrl.slice(0, options.referenceUrl.lastIndexOf(pkgName)) + pkgPath;
+            return await builtinFetch(resolvedUrl, options);
           }
         }
 
-        const response = await fetch(uri, options);
-        if (!response.ok) {
-          const errMsg = response.statusText;
-          throw new Error(`Error ${response.status}${errMsg ? ` (${errMsg})` : ``}`);
-        }
-        return {
-          uri,
-          data: new Uint8Array(await response.arrayBuffer()),
-          mediaType: response.headers.get("content-type") ?? undefined,
-        };
+        // Use a regular fetch for all other protocols
+        return await builtinFetch(uri, options);
       },
       startPlayback: undefined,
       playUntil: undefined,
@@ -412,4 +426,17 @@ export function reducer(
     action,
     `Unhandled message pipeline action type ${(action as MessagePipelineStateAction).type}`,
   );
+}
+
+async function builtinFetch(url: string, opts?: { signal?: AbortSignal }) {
+  const response = await fetch(url, opts);
+  if (!response.ok) {
+    const errMsg = response.statusText;
+    throw new Error(`Error ${response.status}${errMsg ? ` (${errMsg})` : ``}`);
+  }
+  return {
+    uri: url,
+    data: new Uint8Array(await response.arrayBuffer()),
+    mediaType: response.headers.get("content-type") ?? undefined,
+  };
 }
