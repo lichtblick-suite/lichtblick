@@ -241,7 +241,7 @@ export function Gauge({ context }: Props): JSX.Element {
 
   useEffect(() => {
     if (state.parsedPath?.topicName != undefined) {
-      context.subscribe([state.parsedPath.topicName]);
+      context.subscribe([{ topic: state.parsedPath.topicName, preload: false }]);
     }
     return () => {
       context.unsubscribeAll();
