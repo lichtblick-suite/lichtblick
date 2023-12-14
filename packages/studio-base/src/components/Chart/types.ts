@@ -18,6 +18,10 @@ type Datum = ScatterDataPoint & {
   value?: string | number | bigint | boolean;
   // Constant name for the datum (used by state transitions)
   constantName?: string | undefined;
+
+  // Contains all of the distinct states present in this line segment. Only for
+  // state transition data.
+  states?: string[];
 };
 export type ObjectData = (Datum | typeof ChartNull)[];
 export type ChartData = ChartJsChartData<"scatter", ObjectData>;

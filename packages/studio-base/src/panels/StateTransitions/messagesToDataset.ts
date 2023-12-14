@@ -14,7 +14,7 @@ import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 import positiveModulo from "./positiveModulo";
 import { StateTransitionPath } from "./types";
 
-const baseColors = [grey, ...expandedLineColors];
+const baseColors = [...expandedLineColors];
 const baseColorsLength = Object.values(baseColors).length;
 
 type Args = {
@@ -82,7 +82,7 @@ export function messagesToDataset(args: Args): ChartDataset {
 
       const valueForColor =
         typeof value === "string" ? stringHash(value) : Math.round(Number(value));
-      const color = baseColors[positiveModulo(valueForColor, baseColorsLength)] ?? "grey";
+      const color = baseColors[positiveModulo(valueForColor, baseColorsLength)] ?? grey;
 
       const x = toSec(subtractTimes(timestamp, startTime));
 

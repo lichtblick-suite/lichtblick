@@ -61,4 +61,4 @@ export const toolsColorScheme = {
   },
 };
 
-export const grey = tinycolor(`hsv(0, 0%, 75%)`).toHexString();
+export const grey = tinycolor(`hsv(0, 0%, 60%)`).toHexString();
