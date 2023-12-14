@@ -96,8 +96,7 @@ export function DataSource(): JSX.Element {
     playerProblems.some((problem) => problem.severity === "error");
   const loading = reconnecting || initializing;
 
-  const playerDisplayName =
-    initializing && playerName == undefined ? "Initializing..." : playerName;
+  const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;
 
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
     return <div className={classes.sourceName}>{t("noDataSource")}</div>;

@@ -370,7 +370,7 @@ function TopicGraph() {
     return (
       <>
         <PanelToolbar />
-        <EmptyState>Waiting for data...</EmptyState>
+        <EmptyState>Waiting for data…</EmptyState>
       </>
     );
   }

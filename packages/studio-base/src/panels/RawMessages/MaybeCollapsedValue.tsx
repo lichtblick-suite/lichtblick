@@ -43,7 +43,7 @@ export default function MaybeCollapsedValue({ itemLabel }: Props): JSX.Element {
       placement="top"
     >
       <span onClick={expandText} style={{ cursor: !showingEntireLabel ? "pointer" : "inherit" }}>
-        {`${truncatedItemText}${!showingEntireLabel ? "..." : ""}`}
+        {`${truncatedItemText}${!showingEntireLabel ? "…" : ""}`}
       </span>
     </Tooltip>
   );

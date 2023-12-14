@@ -61,7 +61,7 @@ export const Default: StoryObj = {
 
         <div>Whitespace handling</div>
         <div style={{ width: "12em" }}>
-          <TextMiddleTruncate text="Open a new connection..." endTextLength={18} />
+          <TextMiddleTruncate text="Open a new connection…" endTextLength={18} />
         </div>
       </div>
     );

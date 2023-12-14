@@ -152,8 +152,7 @@ function DiagnosticStatusPanel(props: Props) {
 
   // If there are available options but none match the user input we show a No matches
   // but if we don't have any options at all then we show waiting for diagnostics...
-  const noOptionsText =
-    autocompleteOptions.length > 0 ? "No matches" : "Waiting for diagnostics...";
+  const noOptionsText = autocompleteOptions.length > 0 ? "No matches" : "Waiting for diagnostics…";
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {

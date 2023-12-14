@@ -243,7 +243,7 @@ function RawMessages(props: Props) {
         const array = itemValue as Uint8Array;
         const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
         const length = array.length;
-        arrLabel = `(${length}) [${itemPart}${length >= DATA_ARRAY_PREVIEW_LIMIT ? ", ..." : ""}] `;
+        arrLabel = `(${length}) [${itemPart}${length >= DATA_ARRAY_PREVIEW_LIMIT ? ", …" : ""}] `;
         itemLabel = itemValue.constructor.name;
       }
       if (constantName != undefined) {
@@ -382,7 +382,7 @@ function RawMessages(props: Props) {
     }
 
     if (!baseItem) {
-      return <EmptyState>Waiting for next message</EmptyState>;
+      return <EmptyState>Waiting for next message…</EmptyState>;
     }
 
     const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));

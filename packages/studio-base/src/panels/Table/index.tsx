@@ -87,7 +87,7 @@ function TablePanel({ config, saveConfig }: Props) {
       </PanelToolbar>
       {topicPath.length === 0 && <EmptyState>No topic selected</EmptyState>}
       {topicPath.length !== 0 && cachedMessages.length === 0 && (
-        <EmptyState>Waiting for next message</EmptyState>
+        <EmptyState>Waiting for next message…</EmptyState>
       )}
       {topicPath.length !== 0 && firstCachedMessage && (
         <Stack overflow="auto" className={classes.monospace}>

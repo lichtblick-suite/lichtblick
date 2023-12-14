@@ -96,7 +96,7 @@ class BenchmarkPlayer implements Player {
     }
 
     do {
-      log.info("Waiting for topic subscriptions...");
+      log.info("Waiting for topic subscriptions…");
 
       // Allow the layout to subscribe to any messages it needs
       await delay(500);

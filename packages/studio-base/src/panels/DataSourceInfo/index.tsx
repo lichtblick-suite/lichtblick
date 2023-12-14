@@ -126,7 +126,7 @@ function SourceInfo(): JSX.Element {
     return (
       <>
         <PanelToolbar />
-        <EmptyState>Waiting for data...</EmptyState>
+        <EmptyState>Waiting for data…</EmptyState>
       </>
     );
   }
