@@ -100,7 +100,7 @@ describe("downsampleTimeseries", () => {
       ]),
       bounds,
     );
-    expect(result).toEqual([0, 2, 1, 3]);
+    expect(result).toEqual([0, 1, 2, 3]);
   });
 
   it("should keep entry/exit datum to an interval", () => {
@@ -118,6 +118,21 @@ describe("downsampleTimeseries", () => {
       },
     );
     expect(result).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it("should not produce out-of-order points", () => {
+    const result = downsampleTimeseries(
+      iterateObjects([
+        { x: 0, y: 15, value: 0 },
+        { x: 1, y: 100, value: 0 },
+        { x: 2, y: 10, value: 0 },
+        { x: 3, y: 15, value: 0 },
+      ]),
+      bounds,
+      6, // two intervals
+    );
+    expect(result).toEqual([...result].sort((a, b) => a - b));
+    expect(result).toEqual([0, 1, 2]);
   });
 });
 

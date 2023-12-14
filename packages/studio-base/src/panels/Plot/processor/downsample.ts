@@ -97,15 +97,27 @@ const ZOOM_RESET_FACTOR = 0.2;
 const downsampleDataset = (
   data: TypedData[],
   view: PlotViewport,
-  numPoints?: number,
-): TypedData[] | undefined => {
-  const indices = downsampleTimeseries(iterateTyped(data), view, numPoints);
+  maxPoints: number,
+): TypedDataSet | undefined => {
+  const numPoints = getTypedLength(data);
+  if (numPoints <= maxPoints) {
+    return {
+      data,
+    };
+  }
+
+  const indices = downsampleTimeseries(iterateTyped(data), view, maxPoints);
   const resolved = resolveTypedIndices(data, indices);
   if (resolved == undefined) {
     return undefined;
   }
 
-  return resolved;
+  return {
+    // When data is downsampled, we do not want to render points in order to
+    // make it clear to the user that we've downsampled
+    pointRadius: 0,
+    data: resolved,
+  };
 };
 
 /**
@@ -306,13 +318,13 @@ export function updateSource(
       ...initSource(),
       dataset: {
         ...raw,
-        data: downsampled,
+        ...downsampled,
       },
     };
   }
 
   // The downsampling algorithm only works for series plots, not scatter plots.
-  if (path.showLine === false) {
+  if (path.showLine === false || raw.showLine === false) {
     const indices = downsampleScatter(iterateTyped(raw.data), view);
     const resolved = resolveTypedIndices(raw.data, indices);
     if (resolved == undefined) {
@@ -408,15 +420,21 @@ function updatePartialView(path: PlotPath, params: PathParameters, state: PathSt
 
   const mergedData = mergeTyped(blockData?.data ?? [], currentData?.data ?? []);
   const data = applyTransforms(sliceBounds(mergedData, partialBounds), path);
-  const numSliced = getTypedLength(data);
-  if (numSliced <= maxPoints) {
+
+  // Scatter plots use a different downsampling algorithm
+  if (blockData?.showLine === false || currentData?.showLine === false) {
+    const indices = downsampleScatter(iterateTyped(data), view);
+    const resolved = resolveTypedIndices(data, indices);
+    if (resolved == undefined) {
+      return state;
+    }
+
     return {
       ...state,
       isPartial: true,
       dataset: {
         ...(blockData ?? currentData),
-        // pointRadius will be default
-        data,
+        data: resolved,
       },
     };
   }
@@ -431,8 +449,7 @@ function updatePartialView(path: PlotPath, params: PathParameters, state: PathSt
     isPartial: true,
     dataset: {
       ...(blockData ?? currentData),
-      pointRadius: 0,
-      data: downsampled,
+      ...downsampled,
     },
   };
 }

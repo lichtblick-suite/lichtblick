@@ -114,7 +114,9 @@ describe("updateSource", () => {
     expect(after.cursor).toEqual(10);
   });
 
-  it("uses scatter plot algorithm on scatter dataset", () => {
+  // Extremely small viewport, force downsampler to remove some
+  const scatterViewport = createViewport(50, 50, 0, 100);
+  it("uses scatter plot algorithm when showLine disabled", () => {
     const before = initSource();
     const after = updateSource(
       {
@@ -123,7 +125,7 @@ describe("updateSource", () => {
       },
       {
         raw: createDataset(50),
-        view: FAKE_VIEWPORT,
+        view: scatterViewport,
         viewBounds: FAKE_BOUNDS,
         maxPoints: MAX_POINTS,
       },
@@ -134,8 +136,30 @@ describe("updateSource", () => {
     if (dataset == undefined) {
       throw new Error("can't happen");
     }
-    expect(dataset.pointRadius).toEqual(undefined);
-    expect(getTypedLength(dataset.data)).toEqual(50);
+    expect(getTypedLength(dataset.data)).toBeLessThan(50);
+  });
+
+  it("uses scatter plot algorithm on scatter dataset", () => {
+    const before = initSource();
+    const after = updateSource(
+      createPath(FAKE_PATH),
+      {
+        raw: {
+          ...createDataset(50),
+          showLine: false,
+        },
+        view: scatterViewport,
+        viewBounds: FAKE_BOUNDS,
+        maxPoints: MAX_POINTS,
+      },
+      before,
+    );
+
+    const { dataset } = after;
+    if (dataset == undefined) {
+      throw new Error("can't happen");
+    }
+    expect(getTypedLength(dataset.data)).toBeLessThan(50);
   });
 });
 
@@ -229,6 +253,30 @@ describe("updatePath", () => {
     );
     expect(after.current.cursor).toEqual(15);
     expect(after.blocks.cursor).toEqual(10);
+  });
+
+  it("returns a partial view of a scatter dataset", () => {
+    const before = initPath();
+    const after = updatePath(
+      createPath(FAKE_PATH),
+      {
+        blockData: {
+          ...createDataset(100),
+          showLine: false,
+        },
+        currentData: undefined,
+        view: createViewport(25, 25, 0, 50),
+        viewBounds: createBounds(0, 50),
+        maxPoints: MAX_POINTS,
+      },
+      before,
+    );
+    expect(after.isPartial).toEqual(true);
+    const { dataset } = after;
+    if (dataset == undefined) {
+      throw new Error("can't happen");
+    }
+    expect(getTypedLength(dataset.data)).toBeLessThan(50);
   });
 });
 
