@@ -371,7 +371,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       return;
     }
 
-    // Apply any available datasource args
+    // Apply any available data source args
     if (unappliedSourceArgs.ds) {
       log.debug("Initialising source from url", unappliedSourceArgs);
       selectSource(unappliedSourceArgs.ds, {

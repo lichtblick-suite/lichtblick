@@ -284,13 +284,9 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
         alignItems="center"
         style={{ padding: "min(5%, 8px)", textAlign: "center" }}
       >
-        {!canPublish && (
-          <EmptyState>
-            Please connect to a datasource that supports publishing in order to use this panel
-          </EmptyState>
-        )}
+        {!canPublish && <EmptyState>Connect to a data source that supports publishing</EmptyState>}
         {canPublish && !hasTopic && (
-          <EmptyState>Please select a publish topic in the panel settings</EmptyState>
+          <EmptyState>Select a publish topic in the panel settings</EmptyState>
         )}
         {enabled && <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />}
       </Stack>

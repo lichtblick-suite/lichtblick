@@ -99,31 +99,31 @@ function parseInput(value: string): { error?: string; parsedObject?: unknown } {
   return { error, parsedObject };
 }
 
-function selectDatasourceProfile(ctx: MessagePipelineContext) {
+function selectDataSourceProfile(ctx: MessagePipelineContext) {
   return ctx.playerState.profile;
 }
 
 function Publish(props: Props) {
   const { saveConfig, config } = props;
-  const { topics, datatypes: datasourceDatatypes, capabilities } = useDataSourceInfo();
+  const { topics, datatypes: dataSourceDatatypes, capabilities } = useDataSourceInfo();
   const { classes } = useStyles({ buttonColor: config.buttonColor });
   const [debouncedTopicName] = useDebounce(config.topicName ?? "", 500);
-  const datasourceProfile = useMessagePipeline(selectDatasourceProfile);
+  const dataSourceProfile = useMessagePipeline(selectDataSourceProfile);
 
   const datatypes = useMemo(() => {
-    // Add common ROS datatypes, depending on the datasource profile.
+    // Add common ROS datatypes, depending on the data source profile.
     const commonTypes: Record<string, MessageDefinition> | undefined = {
       ros1: CommonRosTypes.ros1,
       ros2: CommonRosTypes.ros2galactic,
-    }[datasourceProfile ?? ""];
+    }[dataSourceProfile ?? ""];
 
     if (commonTypes == undefined) {
-      return datasourceDatatypes;
+      return dataSourceDatatypes;
     }
 
-    // datasourceDatatypes is added after commonTypes to take precedence (override) any commonTypes of the same name
-    return new Map([...Object.entries(commonTypes), ...datasourceDatatypes]);
-  }, [datasourceProfile, datasourceDatatypes]);
+    // dataSourceDatatypes is added after commonTypes to take precedence (override) any commonTypes of the same name
+    return new Map([...Object.entries(commonTypes), ...dataSourceDatatypes]);
+  }, [dataSourceProfile, dataSourceDatatypes]);
 
   const publish = usePublisher({
     name: "Publish",

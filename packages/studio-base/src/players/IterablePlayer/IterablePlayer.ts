@@ -590,7 +590,7 @@ export class IterablePlayer implements Player {
     this.#setState(this.#isPlaying ? "play" : "idle");
   }
 
-  // Read a small amount of data from the datasource with the hope of producing a message or two.
+  // Read a small amount of data from the data source with the hope of producing a message or two.
   // Without an initial read, the user would be looking at a blank layout since no messages have yet
   // been delivered.
   async #stateStartPlay() {
