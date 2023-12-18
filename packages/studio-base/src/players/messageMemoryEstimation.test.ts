@@ -134,6 +134,18 @@ describe("memoryEstimationByObject", () => {
     expect(sizeInBytes).toBeGreaterThan(0);
   });
 
+  it("estimates size of null object to be greater than 0", () => {
+    // eslint-disable-next-line no-restricted-syntax
+    const sizeInBytes = estimateObjectSize(null);
+    expect(sizeInBytes).toBeGreaterThan(0);
+  });
+
+  it("estimates size of undefined object to be greater than 0", () => {
+    // eslint-disable-next-line no-restricted-syntax
+    const sizeInBytes = estimateObjectSize(null);
+    expect(sizeInBytes).toBeGreaterThan(0);
+  });
+
   it("correctly estimates the size for a simple object", () => {
     const sizeInBytes = estimateObjectSize({
       field1: 1, // 4 bytes, SMI (fits in pointer)
