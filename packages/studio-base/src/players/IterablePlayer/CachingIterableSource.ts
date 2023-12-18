@@ -119,6 +119,10 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     return this.#loadedRangesCache;
   }
 
+  public getCacheSize(): number {
+    return this.#totalSizeBytes;
+  }
+
   public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {

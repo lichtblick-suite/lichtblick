@@ -25,6 +25,8 @@ import { IIterableSource, MessageIteratorArgs } from "./IIterableSource";
 
 const log = Log.getLogger(__filename);
 
+export const MEMORY_INFO_PRELOADED_MSGS = "Preloaded messages";
+
 type BlockLoaderArgs = {
   cacheSizeBytes: number;
   source: IIterableSource;
@@ -185,7 +187,7 @@ export class BlockLoader {
 
     // Ignore changing the blocks if the topic list is empty
     if (topics.size === 0) {
-      args.progress(this.#calculateProgress(topics));
+      args.progress(this.#calculateProgress(topics, this.#cacheSize()));
       return;
     }
 
@@ -334,7 +336,7 @@ export class BlockLoader {
             });
             // We need to emit progress here so the player will emit a new state
             // containing the problem.
-            progress(this.#calculateProgress(topics));
+            progress(this.#calculateProgress(topics, totalBlockSizeBytes));
             return;
           }
         }
@@ -367,7 +369,7 @@ export class BlockLoader {
         // (The size of new messages is already added above).
         totalBlockSizeBytes -= overridenBlockMessagesSize;
 
-        progress(this.#calculateProgress(topics));
+        progress(this.#calculateProgress(topics, totalBlockSizeBytes));
       }
 
       await cursor.end();
@@ -375,7 +377,7 @@ export class BlockLoader {
     }
   }
 
-  #calculateProgress(topics: TopicSelection): Progress {
+  #calculateProgress(topics: TopicSelection, currentCacheSize: number): Progress {
     const fullyLoadedFractionRanges = simplify(
       filterMap(this.#blocks, (thisBlock, blockIndex) => {
         if (!thisBlock) {
@@ -404,6 +406,9 @@ export class BlockLoader {
       messageCache: {
         blocks: this.#blocks.slice(),
         startTime: this.#start,
+      },
+      memoryInfo: {
+        [MEMORY_INFO_PRELOADED_MSGS]: currentCacheSize,
       },
     };
   }

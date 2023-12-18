@@ -274,6 +274,9 @@ export type Progress = Readonly<{
   // A raw view into the cached binary data stored by the MemoryCacheDataProvider. Only present when
   // using the RandomAccessPlayer.
   readonly messageCache?: BlockCache;
+
+  /** Memory usage information, e.g. the memory size occupied by preloaded or buffered messages. */
+  readonly memoryInfo?: Record<string, number>;
 }>;
 
 export type SubscriptionPreloadType =

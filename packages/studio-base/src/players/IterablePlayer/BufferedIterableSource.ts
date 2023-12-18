@@ -218,6 +218,10 @@ class BufferedIterableSource extends EventEmitter<EventTypes> implements IIterab
     return this.#source.loadedRanges();
   }
 
+  public getCacheSize(): number {
+    return this.#source.getCacheSize();
+  }
+
   public messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
