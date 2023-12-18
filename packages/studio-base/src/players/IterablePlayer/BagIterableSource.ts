@@ -7,7 +7,7 @@ import { BlobReader } from "@foxglove/rosbag/web";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { MessageReader } from "@foxglove/rosmsg-serialization";
 import { compare } from "@foxglove/rostime";
-import { estimateMessageObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
+import { estimateObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
 import {
   PlayerProblem,
   MessageEvent,
@@ -36,10 +36,8 @@ export class BagIterableSource implements IIterableSource {
 
   #bag: Bag | undefined;
   #readersByConnectionId = new Map<number, MessageReader>();
-  #datatypesByConnectionId = new Map<
-    number,
-    { schemaName: string; approxDeserializedMsgSize: number }
-  >();
+  #datatypesByConnectionId = new Map<number, string>();
+  #messageSizeEstimateByTopic: Record<string, number> = {};
 
   public constructor(source: BagSource) {
     this.#source = source;
@@ -111,7 +109,6 @@ export class BagIterableSource implements IIterableSource {
     const topics = new Map<string, Topic>();
     const topicStats = new Map<string, TopicStats>();
     const publishersByTopic: Initalization["publishersByTopic"] = new Map();
-    const estimatedObjectSizeByType = new Map<string, number>();
     for (const [id, connection] of this.#bag.connections) {
       const schemaName = connection.type;
       if (!schemaName) {
@@ -158,12 +155,7 @@ export class BagIterableSource implements IIterableSource {
         }
       }
 
-      const approxDeserializedMsgSize = estimateMessageObjectSize(
-        datatypes,
-        schemaName,
-        estimatedObjectSizeByType,
-      );
-      this.#datatypesByConnectionId.set(id, { schemaName, approxDeserializedMsgSize });
+      this.#datatypesByConnectionId.set(id, schemaName);
     }
 
     return {
@@ -208,8 +200,8 @@ export class BagIterableSource implements IIterableSource {
         return;
       }
 
-      const schemaNameAndApproxMsgSize = this.#datatypesByConnectionId.get(connectionId);
-      if (!schemaNameAndApproxMsgSize) {
+      const schemaName = this.#datatypesByConnectionId.get(connectionId);
+      if (!schemaName) {
         yield {
           type: "problem",
           connectionId,
@@ -229,17 +221,21 @@ export class BagIterableSource implements IIterableSource {
         const dataCopy = bagMsgEvent.data.slice();
         const parsedMessage = reader.readMessage(dataCopy);
 
+        // Lookup the size estimate for this topic or compute it if not found in the cache.
+        let msgSizeEstimate = this.#messageSizeEstimateByTopic[bagMsgEvent.topic];
+        if (msgSizeEstimate == undefined) {
+          msgSizeEstimate = estimateObjectSize(parsedMessage);
+          this.#messageSizeEstimateByTopic[bagMsgEvent.topic] = msgSizeEstimate;
+        }
+
         yield {
           type: "message-event",
           msgEvent: {
             topic: bagMsgEvent.topic,
             receiveTime: bagMsgEvent.timestamp,
-            sizeInBytes: Math.max(
-              bagMsgEvent.data.byteLength,
-              schemaNameAndApproxMsgSize.approxDeserializedMsgSize,
-            ),
+            sizeInBytes: Math.max(bagMsgEvent.data.byteLength, msgSizeEstimate),
             message: parsedMessage,
-            schemaName: schemaNameAndApproxMsgSize.schemaName,
+            schemaName,
           },
         };
       } else {
