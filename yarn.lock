@@ -2350,7 +2350,7 @@ __metadata:
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/wasm-zstd": 1.0.1
-    "@mcap/core": 2.0.1
+    "@mcap/core": 2.0.2
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
     flatbuffers: 23.5.26
@@ -2562,7 +2562,7 @@ __metadata:
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/ws-protocol": 0.7.2
-    "@mcap/core": 2.0.1
+    "@mcap/core": 2.0.2
     "@mui/icons-material": 5.14.12
     "@mui/material": 5.14.10
     "@popperjs/core": 2.11.8
@@ -3262,14 +3262,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:2.0.1":
-  version: 2.0.1
-  resolution: "@mcap/core@npm:2.0.1"
+"@mcap/core@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@mcap/core@npm:2.0.2"
   dependencies:
     "@foxglove/crc": ^0.0.3
     heap-js: ^2.2.0
     tslib: ^2.5.0
-  checksum: a5d0b524a01a90e8ed179b1d5dcffbb575c1433a4cd301af6daf38aaa7fac9696f16d4addf809af9d2addf22607f7e75b4ed558c0115955a77f2d69f234fcb69
+  checksum: 8c1f44edbcc9abf98eca6ca630c1012dac395892c8d368843045f7bcd3660cd2f9456211a13891437ef7055fa71b77863ca277a05b06f4b20f9c92eead89adbd
   languageName: node
   linkType: hard
 
