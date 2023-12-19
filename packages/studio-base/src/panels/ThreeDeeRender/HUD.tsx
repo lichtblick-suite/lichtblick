@@ -5,6 +5,7 @@
 import { Chip } from "@mui/material";
 import * as _ from "lodash-es";
 import * as React from "react";
+import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -26,6 +27,9 @@ const useStyles = makeStyles()((theme) => ({
     overflow: "hidden",
     maxHeight: "100%",
     gap: theme.spacing(1),
+  },
+  chip: {
+    backgroundColor: tc(theme.palette.background.paper).setAlpha(0.8).toString(),
   },
   empty: {
     backgroundColor: theme.palette.background.default,
@@ -64,7 +68,7 @@ export function HUD(props: HUDProps): React.ReactElement {
   return (
     <div className={classes.root}>
       {notices.map((item, index) => (
-        <Chip size="small" key={index} label={item.getMessage()} />
+        <Chip className={classes.chip} size="small" key={index} label={item.getMessage()} />
       ))}
     </div>
   );
