@@ -18,6 +18,7 @@ import { useDebounce } from "use-debounce";
 
 import { MessageDefinition } from "@foxglove/message-definition";
 import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
+import { Immutable } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import {
   MessagePipelineContext,
@@ -122,7 +123,10 @@ function Publish(props: Props) {
     }
 
     // dataSourceDatatypes is added after commonTypes to take precedence (override) any commonTypes of the same name
-    return new Map([...Object.entries(commonTypes), ...dataSourceDatatypes]);
+    return new Map<string, Immutable<MessageDefinition>>([
+      ...Object.entries(commonTypes),
+      ...dataSourceDatatypes,
+    ]);
   }, [dataSourceProfile, dataSourceDatatypes]);
 
   const publish = usePublisher({
