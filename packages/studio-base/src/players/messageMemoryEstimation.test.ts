@@ -141,8 +141,7 @@ describe("memoryEstimationByObject", () => {
   });
 
   it("estimates size of undefined object to be greater than 0", () => {
-    // eslint-disable-next-line no-restricted-syntax
-    const sizeInBytes = estimateObjectSize(null);
+    const sizeInBytes = estimateObjectSize(undefined);
     expect(sizeInBytes).toBeGreaterThan(0);
   });
 
