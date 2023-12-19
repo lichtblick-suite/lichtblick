@@ -972,6 +972,7 @@ export class IterablePlayer implements Player {
 
     // set the latest value of the loaded ranges for the next emit state
     this.#progress = {
+      ...this.#progress,
       fullyLoadedFractionRanges: this.#bufferedSource.loadedRanges(),
       messageCache: this.#progress.messageCache,
     };
