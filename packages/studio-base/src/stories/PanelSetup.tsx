@@ -80,7 +80,10 @@ export type Fixture = {
   topics?: Topic[];
   capabilities?: string[];
   profile?: string;
-  activeData?: Partial<PlayerStateActiveData>;
+  /** Do not include `messages` in player `activeData`.
+   * Use `frame` instead, as it will populate player `activeData` automatically as necessary.
+   */
+  activeData?: Omit<Partial<PlayerStateActiveData>, "messages">;
   progress?: Progress;
   datatypes?: RosDatatypes;
   globalVariables?: GlobalVariables;

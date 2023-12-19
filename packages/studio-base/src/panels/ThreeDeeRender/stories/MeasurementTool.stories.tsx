@@ -10,7 +10,6 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import delay from "@foxglove/studio-base/util/delay";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
-import useDelayedFixture from "./useDelayedFixture";
 import ThreeDeePanel from "../index";
 import { TransformStamped } from "../ros";
 
@@ -37,14 +36,14 @@ export const MeasurementTool: StoryObj = {
       sizeInBytes: 0,
     };
 
-    const fixture = useDelayedFixture({
+    const fixture = {
       topics,
       frame: { "/tf": [tf1] },
       capabilities: [],
       activeData: {
         currentTime: { sec: 0, nsec: 0 },
       },
-    });
+    };
     return (
       <PanelSetup fixture={fixture}>
         <ThreeDeePanel

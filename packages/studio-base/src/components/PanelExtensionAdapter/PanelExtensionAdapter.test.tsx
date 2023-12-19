@@ -124,7 +124,7 @@ describe("PanelExtensionAdapter", () => {
       await Promise.resolve();
     });
     expect(renderStates).toEqual([
-      { currentFrame: [message], didSeek: false },
+      { currentFrame: [], didSeek: false }, // first frame is empty because there are no subscribers yet
       { currentFrame: [message], didSeek: true },
       { currentFrame: [message], didSeek: false },
       { currentFrame: [message], didSeek: true },

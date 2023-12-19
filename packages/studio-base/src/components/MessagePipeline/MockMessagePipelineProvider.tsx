@@ -13,13 +13,18 @@
 
 import { Immutable } from "immer";
 import * as _ from "lodash-es";
-import { useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import shallowequal from "shallowequal";
 import { Writable } from "ts-essentials";
 import { createStore } from "zustand";
 
+import { Condvar } from "@foxglove/den/async";
 import { Time, isLessThan } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
+import {
+  FramePromise,
+  pauseFrameForPromises,
+} from "@foxglove/studio-base/components/MessagePipeline/pauseFrameForPromise";
 import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import {
   AdvertiseOptions,
@@ -90,6 +95,7 @@ function getPublicState(
   prevState: MockMessagePipelineState | undefined,
   props: MockMessagePipelineProps,
   dispatch: MockMessagePipelineState["dispatch"],
+  promisesToWaitForRef: MutableRefObject<FramePromise[]>,
 ): Omit<MessagePipelineInternalState["public"], "messageEventsBySubscriberId"> {
   let startTime = prevState?.public.playerState.activeData?.startTime;
   let currentTime = props.currentTime;
@@ -171,13 +177,22 @@ function getPublicState(
       props.capabilities?.includes(PlayerCapabilities.setSpeed) === true ? noop : undefined,
     seekPlayback: props.seekPlayback,
 
-    pauseFrame: props.pauseFrame ?? (() => noop),
+    pauseFrame:
+      props.pauseFrame ??
+      function (name) {
+        const condvar = new Condvar();
+        promisesToWaitForRef.current.push({ name, promise: condvar.wait() });
+        return () => {
+          condvar.notifyAll();
+        };
+      },
   };
 }
 
 export default function MockMessagePipelineProvider(
   props: React.PropsWithChildren<MockMessagePipelineProps>,
 ): React.ReactElement {
+  const promisesToWaitForRef = useRef<FramePromise[]>([]);
   const startTime = useRef<Time | undefined>();
   let currentTime = props.currentTime;
   if (!currentTime) {
@@ -191,22 +206,62 @@ export default function MockMessagePipelineProvider(
     }
   }
 
+  const [hasSubscribers, setHasSubscribers] = useState<boolean>(false);
+
+  const mockProps = useMemo(() => {
+    // only include messages in props once we have subscribers, to reflect actual behavior of player
+    // and to prevent messages from being emitted before subscribers are set, so that they can go to their respective subscribers
+    if (hasSubscribers) {
+      const propsNoChildren = _.omit(props, "children");
+      // mimic seek backfill behavior that happens after new subscribers are added.
+      // note that for the mock use-case that this will only happen the first time subscribers are added, since we don't reset `hasSubscribers`
+      if (props.noActiveData === true) {
+        return propsNoChildren;
+      }
+      const activeData = {
+        ...propsNoChildren.activeData,
+      };
+
+      activeData.lastSeekTime = (activeData.lastSeekTime ?? 0) + 1;
+
+      return {
+        ...propsNoChildren,
+        activeData,
+      };
+    }
+    return _.omit(props, ["children", "messages"]);
+  }, [props, hasSubscribers]);
+
   const [store] = useState(() =>
     createStore<MockMessagePipelineState>((set) => {
-      const dispatch: MockMessagePipelineState["dispatch"] = (action) => {
+      const dispatch: MockMessagePipelineState["dispatch"] = async (action) => {
+        const promisesToWaitFor = promisesToWaitForRef.current;
+        if (promisesToWaitFor.length > 0) {
+          await pauseFrameForPromises(promisesToWaitFor);
+          // normally in the player listener this comes before the await, but when working with stories this hasn't been enough
+          // so for this case we'll wait until all promises have resolved before clearing them
+          promisesToWaitForRef.current = [];
+        }
+
         if (action.type === "set-mock-props") {
           set((state) => {
-            if (shallowequal(state.mockProps, action.mockProps)) {
+            const actionMockProps = action.mockProps;
+            if (shallowequal(state.mockProps, actionMockProps)) {
               return state;
             }
-            const publicState = getPublicState(state, action.mockProps, state.dispatch);
+            const publicState = getPublicState(
+              state,
+              actionMockProps,
+              state.dispatch,
+              promisesToWaitForRef,
+            );
             const newState = reducer(state, {
               type: "update-player-state",
               playerState: publicState.playerState as Writable<PlayerState>,
             });
             return {
               ...newState,
-              mockProps: action.mockProps,
+              mockProps: actionMockProps,
               dispatch: state.dispatch,
               public: {
                 ...publicState,
@@ -216,39 +271,16 @@ export default function MockMessagePipelineProvider(
           });
         } else {
           set((state) => {
-            // In the real pipeline, the messageEventsBySubscriberId only change
-            // on player listener callback - not on subscriber changes
-            //
-            // In tests, the first setSubscriptions call happens after we've already set props.messages
-            // So we have some special logic to detect the change of subscriptions
-            // and update messageEventsBySubscriberId.
             const newState = reducer(state, action);
-            const messages = newState.public.playerState.activeData?.messages;
-            if (action.type === "update-subscriber" && messages && messages.length !== 0) {
-              let changed = false;
-              const messageEventsBySubscriberId = new Map<string, Immutable<MessageEvent[]>>();
-              for (const [id, subs] of newState.subscriptionsById) {
-                const existingMsgs = newState.public.messageEventsBySubscriberId.get(id);
-                const newMsgs = messages.filter(
-                  (msg) => subs.find((sub) => sub.topic === msg.topic) != undefined,
-                );
-                if (existingMsgs && shallowequal(existingMsgs, newMsgs)) {
-                  messageEventsBySubscriberId.set(id, existingMsgs);
-                } else {
-                  messageEventsBySubscriberId.set(id, newMsgs);
-                  changed = true;
-                  continue;
-                }
-              }
 
-              if (changed) {
-                newState.public = {
-                  ...newState.public,
-                  messageEventsBySubscriberId,
-                };
-              }
-              return { ...newState, dispatch: state.dispatch };
+            if (
+              !hasSubscribers &&
+              action.type === "update-subscriber" &&
+              action.payloads.length > 0
+            ) {
+              setHasSubscribers(true);
             }
+
             return { ...newState, dispatch: state.dispatch };
           });
         }
@@ -256,9 +288,15 @@ export default function MockMessagePipelineProvider(
       const reset = () => {
         throw new Error("not implemented");
       };
-      const initialPublicState = getPublicState(undefined, props, dispatch);
+
+      const initialPublicState = getPublicState(
+        undefined,
+        mockProps,
+        dispatch,
+        promisesToWaitForRef,
+      );
       return {
-        mockProps: _.omit(props, "children"),
+        mockProps,
         player: undefined,
         dispatch,
         reset,
@@ -278,9 +316,12 @@ export default function MockMessagePipelineProvider(
     }),
   );
 
+  // Can't be useLayoutEffect because we want child useEffect calls to resolve first to set subscribers
+  // That way we can call `set-mock-props` after subscribers have been set, and we can emit messages that were subscribed to
+  // If we `useLayoutEffect`, it will emit the initial messages with no subscribers set, which is not consistent with the real behavior
   useEffect(() => {
-    store.getState().dispatch({ type: "set-mock-props", mockProps: _.omit(props, "children") });
-  }, [props, store]);
+    store.getState().dispatch({ type: "set-mock-props", mockProps });
+  }, [mockProps, store]);
 
   return <ContextInternal.Provider value={store}>{props.children}</ContextInternal.Provider>;
 }

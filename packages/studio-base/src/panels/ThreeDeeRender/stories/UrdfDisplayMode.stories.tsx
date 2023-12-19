@@ -5,10 +5,9 @@
 import { StoryObj } from "@storybook/react";
 
 import { Topic } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor } from "./common";
-import useDelayedFixture from "./useDelayedFixture";
 import ThreeDeePanel from "../index";
 
 const GREEN = makeColorAttribute("#4caf50");
@@ -112,13 +111,11 @@ export const UrdfDisplayMode: StoryObj = {
       },
     };
 
-    const fixture = useDelayedFixture({
+    const fixture: Fixture = {
       topics,
       capabilities: [],
-      activeData: {
-        currentTime: { sec: 0, nsec: 0 },
-        parameters: new Map([[urdfParamName, URDF]]),
-        messages: [
+      frame: {
+        "/tf_static": [
           // Add transforms for the URDF instances that use a `framePrefix`, as these use the
           // same URDF and would otherwise displayed on top of each other.
           {
@@ -136,7 +133,11 @@ export const UrdfDisplayMode: StoryObj = {
           },
         ],
       },
-    });
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+        parameters: new Map([[urdfParamName, URDF]]),
+      },
+    };
 
     return (
       <PanelSetup fixture={fixture}>

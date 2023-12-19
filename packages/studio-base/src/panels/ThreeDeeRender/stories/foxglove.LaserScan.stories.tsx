@@ -395,7 +395,7 @@ function HistoryPickingStory(): JSX.Element {
     sizeInBytes: 0,
   };
 
-  const fixture = useDelayedFixture({
+  const fixture = {
     topics,
     frame: {
       "/scan": [laserScan1, laserScan2],
@@ -404,7 +404,7 @@ function HistoryPickingStory(): JSX.Element {
     activeData: {
       currentTime: fromSec(20),
     },
-  });
+  };
 
   return (
     <div style={{ width: 600, height: 400, flexShrink: 0 }}>

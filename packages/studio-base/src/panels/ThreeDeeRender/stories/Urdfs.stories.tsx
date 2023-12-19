@@ -9,7 +9,6 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, STL_CUBE_MESH_RESOURCE } from "./common";
-import useDelayedFixture from "./useDelayedFixture";
 import ThreeDeePanel from "../index";
 
 const RED = makeColorAttribute("#f44336");
@@ -164,27 +163,11 @@ export const Urdfs: StoryObj = {
     };
 
     const urdfParamName = "/some_ns/robot_description";
-    const fixture = useDelayedFixture({
+    const fixture = {
       topics,
       frame: {
-        "/robot_description": [robot_description],
-      },
-      capabilities: [],
-      activeData: {
-        currentTime: { sec: 0, nsec: 0 },
-        parameters: new Map([[urdfParamName, URDF3]]),
-        messages: [
-          // Add transforms for the URDF instances that use a `framePrefix`, as these use the
-          // same URDF and would otherwise displayed on top of each other.
-          {
-            topic: "/tf_static",
-            schemaName: "tf2_msgs/TFMessage",
-            receiveTime: { sec: 0, nsec: 0 },
-            sizeInBytes: 0,
-            message: {
-              transforms: [mesh_T_robot_1, mesh_T_robot_2],
-            },
-          },
+        "/robot_description": [
+          robot_description,
           {
             topic: "/some/robot_description",
             schemaName: "std_msgs/String",
@@ -195,8 +178,27 @@ export const Urdfs: StoryObj = {
             },
           },
         ],
+
+        // Add transforms for the URDF instances that use a `framePrefix`, as these use the
+        // same URDF and would otherwise displayed on top of each other.
+        "/tf_static": [
+          {
+            topic: "/tf_static",
+            schemaName: "tf2_msgs/TFMessage",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              transforms: [mesh_T_robot_1, mesh_T_robot_2],
+            },
+          },
+        ],
       },
-    });
+      capabilities: [],
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+        parameters: new Map([[urdfParamName, URDF3]]),
+      },
+    };
 
     return (
       <PanelSetup fixture={fixture}>

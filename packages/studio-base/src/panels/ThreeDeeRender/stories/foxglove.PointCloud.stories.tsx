@@ -183,7 +183,7 @@ function Foxglove_PointCloud({
     sizeInBytes: 0,
   };
 
-  const fixture = useDelayedFixture({
+  const fixture = {
     topics,
     frame: {
       "/pointcloud": [pointCloud],
@@ -193,7 +193,7 @@ function Foxglove_PointCloud({
     activeData: {
       currentTime: { sec: 0, nsec: 0 },
     },
-  });
+  };
 
   return (
     <PanelSetup fixture={fixture} includeSettings={includeSettings}>
@@ -551,7 +551,7 @@ function HistoryPickingStory(): JSX.Element {
     },
   };
 
-  const fixture = useDelayedFixture({
+  const fixture = {
     topics,
     frame: {
       "/pointcloud": [cloud1, cloud2],
@@ -560,7 +560,7 @@ function HistoryPickingStory(): JSX.Element {
     activeData: {
       currentTime: { sec: 21, nsec: 0 },
     },
-  });
+  };
 
   return (
     <div style={{ width: 600, height: 400, flexShrink: 0 }}>

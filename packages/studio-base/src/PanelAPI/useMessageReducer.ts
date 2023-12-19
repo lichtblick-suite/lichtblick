@@ -30,18 +30,37 @@ import {
 
 const log = Log.getLogger(__filename);
 
-type MessageReducer<T> = (arg0: T, message: MessageEvent) => T;
-type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent[]) => T;
+type MessageReducer<T> = (state: T, message: MessageEvent) => T;
+type MessagesReducer<T> = (state: T, messages: readonly MessageEvent[]) => T;
 
 type Params<T> = {
+  /**
+   * Topics to subscribe to. Can be a list of topic strings or `SubscribePayload` objects.
+   */
   topics: readonly string[] | SubscribePayload[];
+  /**
+   * Preload type to be used for topic string subscriptions.
+   * Has no effect on `SubscribePayload` topic subscriptions.
+   * @default "partial"
+   */
   preloadType?: SubscriptionPreloadType;
 
-  // Functions called when the reducers change and for each newly received message.
-  // The object is assumed to be immutable, so in order to trigger a re-render, the reducers must
-  // return a new object.
-  restore: (arg: T | undefined) => T;
+  /**
+   * Called on intialization, seek, and when reducers change.
+   * @param state - Immutable. `undefined` when called on initialization or seek. Otherwise, the current state.
+   * @returns - New state. Must be new reference to trigger rerender.
+   */
+  restore: (state: T | undefined) => T;
+
+  /**
+   * Called for each new message with the current state (Immutable).
+   * Return new reference to trigger rerender.
+   */
   addMessage?: MessageReducer<T>;
+  /**
+   * Called for all new messages with the current state (Immutable).
+   * Return new reference to trigger rerender.
+   */
   addMessages?: MessagesReducer<T>;
 };
 

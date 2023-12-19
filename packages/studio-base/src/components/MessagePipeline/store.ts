@@ -62,7 +62,8 @@ export type MessagePipelineInternalState = {
    * for dispatching messages needs to iterate over the array of IDs.
    */
   subscriberIdsByTopic: Map<string, string[]>;
-  newTopicsBySubscriberId: Map<string, Set<string>>;
+  /** This holds the last message emitted by the player on each topic. Attempt to use this before falling back to player backfill.
+   */
   lastMessageEventByTopic: Map<string, MessageEvent>;
   /** Function to call when react render has completed with the latest state */
   renderDone?: () => void;
@@ -220,43 +221,26 @@ export function createMessagePipelineStore({
     },
   }));
 }
-// Update state with a subscriber. Any new topics for the subscriber are tracked in newTopicsBySubscriberId
-// to receive the last message on their newly subscribed topics.
+/** Update subscriptions. New topics that have already emit messages previously we emit the last message on the topic to the subscriber */
 function updateSubscriberAction(
   prevState: MessagePipelineInternalState,
   action: UpdateSubscriberAction,
 ): MessagePipelineInternalState {
   const previousSubscriptionsById = prevState.subscriptionsById;
-  const newTopicsBySubscriberId = new Map(prevState.newTopicsBySubscriberId);
 
-  // Record any _new_ topics for this subscriber into newTopicsBySubscriberId
-  const newTopics = newTopicsBySubscriberId.get(action.id);
-  if (!newTopics) {
-    const actionTopics = action.payloads.map((sub) => sub.topic);
-    newTopicsBySubscriberId.set(action.id, new Set(actionTopics));
-  } else {
-    const previousSubscription = previousSubscriptionsById.get(action.id);
-    const prevTopics = new Set(previousSubscription?.map((sub) => sub.topic) ?? []);
-    for (const { topic: newTopic } of action.payloads) {
-      if (!prevTopics.has(newTopic)) {
-        newTopics.add(newTopic);
-      }
-    }
-  }
-
-  const newSubscriptionsById = new Map(previousSubscriptionsById);
+  const subscriptionsById = new Map(previousSubscriptionsById);
 
   if (action.payloads.length === 0) {
     // When a subscription id has no topics we removed it from our map
-    newSubscriptionsById.delete(action.id);
+    subscriptionsById.delete(action.id);
   } else {
-    newSubscriptionsById.set(action.id, action.payloads);
+    subscriptionsById.set(action.id, action.payloads);
   }
 
   const subscriberIdsByTopic = new Map<string, string[]>();
 
   // make a map of topics to subscriber ids
-  for (const [id, subs] of newSubscriptionsById) {
+  for (const [id, subs] of subscriptionsById) {
     for (const subscription of subs) {
       const topic = subscription.topic;
 
@@ -271,17 +255,63 @@ function updateSubscriberAction(
     }
   }
 
-  const subscriptions = mergeSubscriptions(Array.from(newSubscriptionsById.values()).flat());
+  // Record any _new_ topics for this subscriber so that we can emit last messages on these topics
+  const newTopicsForId = new Set<string>();
+
+  const prevSubsForId = previousSubscriptionsById.get(action.id);
+  const prevTopics = new Set(prevSubsForId?.map((sub) => sub.topic) ?? []);
+  for (const { topic: newTopic } of action.payloads) {
+    if (!prevTopics.has(newTopic)) {
+      newTopicsForId.add(newTopic);
+    }
+  }
+
+  const lastMessageEventByTopic = new Map(prevState.lastMessageEventByTopic);
+
+  for (const topic of prevTopics) {
+    // if this topic has no other subscribers, we want to remove it from the lastMessageEventByTopic.
+    // This fixes the case where if a panel unsubscribes, triggers playback, and then resubscribes,
+    // they won't get this old stale message when they resubscribe again before getting the message
+    // at the current time frome seek-backfill.
+    if (!subscriberIdsByTopic.has(topic)) {
+      lastMessageEventByTopic.delete(topic);
+    }
+  }
+
+  // Inject the last message on new topics for this subscriber
+  const messagesForSubscriber = [];
+  for (const topic of newTopicsForId) {
+    const msgEvent = lastMessageEventByTopic.get(topic);
+    if (msgEvent) {
+      messagesForSubscriber.push(msgEvent);
+    }
+  }
+
+  let newMessagesBySubscriberId;
+
+  if (messagesForSubscriber.length > 0) {
+    newMessagesBySubscriberId = new Map<string, readonly MessageEvent[]>(
+      prevState.public.messageEventsBySubscriberId,
+    );
+    // This should update only the panel that subscribed to the new topic
+    newMessagesBySubscriberId.set(action.id, messagesForSubscriber);
+  }
+
+  const subscriptions = mergeSubscriptions(Array.from(subscriptionsById.values()).flat());
+
+  const newPublicState = {
+    ...prevState.public,
+    subscriptions,
+    messageEventsBySubscriberId:
+      newMessagesBySubscriberId ?? prevState.public.messageEventsBySubscriberId,
+  };
 
   return {
     ...prevState,
-    subscriptionsById: newSubscriptionsById,
+    lastMessageEventByTopic,
+    subscriptionsById,
     subscriberIdsByTopic,
-    newTopicsBySubscriberId,
-    public: {
-      ...prevState.public,
-      subscriptions,
-    },
+    public: newPublicState,
   };
 }
 // Update with a player state.
@@ -299,11 +329,9 @@ function updatePlayerStateAction(
   // on object instance reference checks to determine if there are new messages
   const messagesBySubscriberId = new Map<string, MessageEvent[]>();
 
-  const subsById = prevState.subscriptionsById;
   const subscriberIdsByTopic = prevState.subscriberIdsByTopic;
 
   const lastMessageEventByTopic = prevState.lastMessageEventByTopic;
-  const newTopicsBySubscriberId = new Map(prevState.newTopicsBySubscriberId);
 
   // Put messages into per-subscriber queues
   if (messages && messages !== prevState.public.playerState.activeData?.messages) {
@@ -329,36 +357,11 @@ function updatePlayerStateAction(
     }
   }
 
-  // Inject the last message on a topic to all new subscribers of the topic
-  for (const id of subsById.keys()) {
-    const newTopics = newTopicsBySubscriberId.get(id);
-    if (!newTopics) {
-      continue;
-    }
-    for (const topic of newTopics) {
-      // If we had a message for this topic in the regular set of messages, we don't need to inject
-      // another message.
-      if (seenTopics.has(topic)) {
-        continue;
-      }
-      const msgEvent = lastMessageEventByTopic.get(topic);
-      if (msgEvent) {
-        const subscriberMessageEvents = messagesBySubscriberId.get(id) ?? [];
-        // the injected message is older than any new messages
-        subscriberMessageEvents.unshift(msgEvent);
-        messagesBySubscriberId.set(id, subscriberMessageEvents);
-      }
-    }
-    // We've processed all new subscriber topics into message queues
-    newTopics.clear();
-  }
-
   const newPublicState = {
     ...prevState.public,
     playerState: action.playerState,
     messageEventsBySubscriberId: messagesBySubscriberId,
   };
-
   const topics = action.playerState.activeData?.topics;
   if (topics !== prevState.public.playerState.activeData?.topics) {
     newPublicState.sortedTopics = topics
@@ -393,7 +396,6 @@ function updatePlayerStateAction(
 
   return {
     ...prevState,
-    newTopicsBySubscriberId,
     renderDone: action.renderDone,
     public: newPublicState,
     lastCapabilities: capabilities,
