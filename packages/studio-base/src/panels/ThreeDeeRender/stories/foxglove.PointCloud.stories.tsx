@@ -636,3 +636,110 @@ export const Foxglove_PointCloud_HistoryPickingInstances2: StoryObj = {
     });
   },
 };
+
+export const Foxglove_PointCloud_Distance: StoryObj = {
+  render: () => <Foxglove_PointCloud_Distance_Base />,
+};
+
+function Foxglove_PointCloud_Distance_Base(): JSX.Element {
+  const topics: Topic[] = [
+    { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+  ];
+  const tf1: MessageEvent<TransformStamped> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    schemaName: "geometry_msgs/TransformStamped",
+    sizeInBytes: 0,
+  };
+
+  const WIDTH = 100;
+  const SCALE = 10 / WIDTH;
+  const STEP = 12;
+  const HEIGHT = 0;
+
+  const HORIZONTAL_OFFSET = (WIDTH * SCALE) / 2;
+
+  const data = new Uint8Array(WIDTH * WIDTH * STEP);
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let xi = 0; xi < WIDTH; xi++) {
+    for (let yi = 0; yi < WIDTH; yi++) {
+      const i = (xi * WIDTH + yi) * STEP;
+      view.setFloat32(i + 0, xi * SCALE - HORIZONTAL_OFFSET, true);
+      view.setFloat32(i + 4, yi * SCALE - HORIZONTAL_OFFSET, true);
+      view.setFloat32(i + 8, HEIGHT, true);
+    }
+  }
+
+  const pointCloud: MessageEvent<PointCloud> = {
+    topic: "/pointcloud",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      timestamp: { sec: 0, nsec: 0 },
+      frame_id: "base_link",
+      point_stride: 12,
+      pose: { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
+      fields: [
+        { name: "x", offset: 0, type: 7 },
+        { name: "y", offset: 4, type: 7 },
+        { name: "z", offset: 8, type: 7 },
+      ],
+      data,
+    },
+    schemaName: "foxglove.PointCloud",
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    topics,
+    frame: {
+      "/pointcloud": [pointCloud],
+      "/tf": [tf1],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDeePanel
+        overrideConfig={{
+          followTf: "base_link",
+          topics: {
+            "/pointcloud": {
+              visible: true,
+              pointSize: 5,
+              colorMode: "colormap",
+              colorField: "_auto_distance",
+            },
+          },
+          layers: {
+            grid: { layerId: "foxglove.Grid" },
+          },
+          cameraState: {
+            distance: 20,
+            perspective: true,
+            phi: 60,
+            targetOffset: [0, 0, 0],
+            thetaOffset: 30,
+            fovy: rad2deg(0.75),
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}

@@ -24,7 +24,12 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
 import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
-import { autoSelectColorSettings, colorHasTransparency, getColorConverter } from "./colorMode";
+import {
+  autoSelectColorSettings,
+  colorHasTransparency,
+  getColorConverter,
+  colorFieldComputedPrefix,
+} from "./colorMode";
 import { FieldReader, getReader, isSupportedField } from "./pointClouds/fieldReaders";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
@@ -60,9 +65,14 @@ type PointCloudFieldReaders = {
 
 type LayerSettingsPointClouds = LayerSettingsPointExtension & {
   stixelsEnabled: boolean;
+  colorFieldComputed: "distance" | undefined;
 };
 
-const DEFAULT_SETTINGS = { ...DEFAULT_POINT_SETTINGS, stixelsEnabled: false };
+const DEFAULT_SETTINGS = {
+  ...DEFAULT_POINT_SETTINGS,
+  stixelsEnabled: false,
+  colorFieldComputed: undefined,
+};
 
 type PointCloudHistoryUserData = BaseUserData & {
   settings: LayerSettingsPointClouds;
@@ -255,6 +265,10 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       });
     } else {
       material.size = settings.pointSize;
+    }
+
+    if (settings.colorField === colorFieldComputedPrefix + "distance") {
+      settings.colorFieldComputed = "distance";
     }
 
     const stixelsEnabledChanged = prevSettings.stixelsEnabled !== settings.stixelsEnabled;
@@ -546,6 +560,15 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       }
     }
 
+    if (settings.colorFieldComputed === "distance") {
+      packedColorReader = (view: DataView, pointOffset: number) => {
+        return Math.hypot(
+          xReader?.(view, pointOffset) ?? 0,
+          yReader?.(view, pointOffset) ?? 0,
+          zReader?.(view, pointOffset) ?? 0,
+        );
+      };
+    }
     if (minBytesPerPoint > stride) {
       const message = `PointCloud stride ${stride} is less than minimum bytes per point ${minBytesPerPoint}`;
       this.#invalidError(message);

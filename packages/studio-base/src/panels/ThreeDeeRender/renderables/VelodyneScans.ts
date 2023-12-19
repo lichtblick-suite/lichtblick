@@ -42,7 +42,11 @@ import { makePose } from "../transforms";
 type LayerSettingsVelodyneScans = LayerSettingsPointExtension & {
   stixelsEnabled: boolean;
 };
-const DEFAULT_SETTINGS = { ...DEFAULT_POINT_SETTINGS, stixelsEnabled: false };
+const DEFAULT_SETTINGS = {
+  ...DEFAULT_POINT_SETTINGS,
+  stixelsEnabled: false,
+  colorFieldComputed: undefined,
+};
 
 function pointFieldDataTypeToNumericType(type: PointFieldDataType): NumericType {
   switch (type) {

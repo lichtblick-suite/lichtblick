@@ -119,6 +119,7 @@ export const threeDee = {
   colorModeColorMap: "Color map",
   colorModeFlat: "Flat",
   colorModeRgbaSeparateFields: "RGBA (separate fields)",
+  ColorFieldComputedDistance: "distance (auto)",
   flatColor: "Flat color",
   opacity: "Opacity",
   valueMax: "Value max",
