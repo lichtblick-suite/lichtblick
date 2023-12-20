@@ -564,7 +564,6 @@ export class ImageMode
     const calibrationTopicChanged =
       config.calibrationTopic !== prevImageModeConfig.calibrationTopic;
     if (calibrationTopicChanged) {
-      this.#clearCameraModel();
       const changingToUnselectedCalibration = config.calibrationTopic == undefined;
       if (changingToUnselectedCalibration) {
         this.renderer.enableImageOnlySubscriptionMode();

@@ -457,12 +457,19 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
    * @param {boolean} params.clearTransforms - whether to clear the transform tree. This should be set to true when a seek to a previous time is performed in order
    * order to flush potential future state to the newly set time.
    * @param {boolean} params.resetAllFramesCursor - whether to reset the cursor for the allFrames array.
+   * Order to clear ImageMode renderables or not. Defaults to true. Not relevant in 3D panel.
+   * @param {boolean} params.clearImageModeExtension - whether to reset ImageMode renderables in clear.
    */
   public clear(
     {
       clearTransforms,
       resetAllFramesCursor,
-    }: { clearTransforms?: boolean; resetAllFramesCursor?: boolean } = {
+      clearImageModeExtension = true,
+    }: {
+      clearTransforms?: boolean;
+      resetAllFramesCursor?: boolean;
+      clearImageModeExtension?: boolean;
+    } = {
       clearTransforms: false,
       resetAllFramesCursor: false,
     },
@@ -478,6 +485,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.hud.clear();
 
     for (const extension of this.sceneExtensions.values()) {
+      if (!clearImageModeExtension && extension === this.#imageModeExtension) {
+        continue;
+      }
       extension.removeAllRenderables();
     }
     this.queueAnimationFrame();
@@ -704,7 +714,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.#imageModeExtension,
       "Image mode extension should be defined when calling enable Image only mode",
     );
-    this.clear({ clearTransforms: true, resetAllFramesCursor: true });
+    this.clear({
+      clearTransforms: true,
+      resetAllFramesCursor: true,
+      clearImageModeExtension: false,
+    });
     this.#clearSubscriptions();
     this.#addSubscriptionsFromSceneExtensions(
       (extension) => extension === this.#imageModeExtension,
@@ -715,7 +729,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public disableImageOnlySubscriptionMode = (): void => {
     // .clear() will clean up remaining errors on topics
     this.settings.removeNodeValidator(this.#imageOnlyModeTopicSettingsValidator);
-    this.clear({ clearTransforms: true, resetAllFramesCursor: true });
+    this.clear({
+      clearTransforms: true,
+      resetAllFramesCursor: true,
+      clearImageModeExtension: false,
+    });
     this.#clearSubscriptions();
     this.#addSubscriptionsFromSceneExtensions();
     this.#addTransformSubscriptions();
