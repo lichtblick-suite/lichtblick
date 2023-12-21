@@ -67,7 +67,7 @@
     "@types/hammerjs": "2.0.43",
     "@types/leaflet": "1.9.7",
     "@types/memoize-weak": "workspace:*",
-    "@types/moment-duration-format": "2.2.3",
+    "@types/moment-duration-format": "2.2.6",
     "@types/nearley": "2.11.2",
     "@types/ramda": "0.29.4",
     "@types/react": "18.2.23",

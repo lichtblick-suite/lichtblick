@@ -2583,7 +2583,7 @@ __metadata:
     "@types/hammerjs": 2.0.43
     "@types/leaflet": 1.9.7
     "@types/memoize-weak": "workspace:*"
-    "@types/moment-duration-format": 2.2.3
+    "@types/moment-duration-format": 2.2.6
     "@types/nearley": 2.11.2
     "@types/ramda": 0.29.4
     "@types/react": 18.2.23
@@ -6393,12 +6393,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/moment-duration-format@npm:2.2.3":
-  version: 2.2.3
-  resolution: "@types/moment-duration-format@npm:2.2.3"
+"@types/moment-duration-format@npm:2.2.6":
+  version: 2.2.6
+  resolution: "@types/moment-duration-format@npm:2.2.6"
   dependencies:
     moment: ">=2.14.0"
-  checksum: 84fe8cf1582fb51f588ce46edaf876bbe92523062bb2750d7b8a60a853a5fd59cc8edcd6b2ca7db6c91e3d0479e36e86b52997adc472e3156ca51011be46a260
+  checksum: 497f2019c5aae19cd39768397da717864c1f3964a1ce5c5c5ababd47f3f6716801053e0d7d7a443c840c1c4fb3ac014a3e2ed34b9d3963f86656ba14ab823eaa
   languageName: node
   linkType: hard
 
