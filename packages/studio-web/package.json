@@ -11,7 +11,7 @@
     "@foxglove/log": "workspace:*",
     "@foxglove/theme": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
-    "@mui/material": "5.14.10",
+    "@mui/material": "5.15.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@storybook/react": "7.6.6",
     "@types/copy-webpack-plugin": "10.1.0",
