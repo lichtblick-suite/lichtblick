@@ -165,7 +165,7 @@
     "use-debounce": "9.0.4",
     "use-immer": "0.9.0",
     "uuid": "9.0.1",
-    "webpack": "5.88.2",
+    "webpack": "5.89.0",
     "zustand": "4.4.1"
   }
 }
