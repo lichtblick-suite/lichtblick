@@ -21,7 +21,7 @@
     "@mui/lab": "5.0.0-alpha.153",
     "@mui/material": "5.14.10",
     "@mui/x-data-grid": "6.18.5",
-    "@storybook/react": "7.5.3",
+    "@storybook/react": "7.6.6",
     "@types/react": "18.2.23",
     "react": "18.2.0"
   }
