@@ -74,7 +74,7 @@
     "@types/react-dom": "18.2.7",
     "@types/react-hover-observer": "workspace:*",
     "@types/react-transition-group": "^4.4.8",
-    "@types/react-virtualized": "9.21.22",
+    "@types/react-virtualized": "9.21.29",
     "@types/react-window": "^1.8.5",
     "@types/sanitize-html": "2.9.3",
     "@types/seedrandom": "3.0.8",

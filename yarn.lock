@@ -2566,7 +2566,7 @@ __metadata:
     "@types/react-dom": 18.2.7
     "@types/react-hover-observer": "workspace:*"
     "@types/react-transition-group": ^4.4.8
-    "@types/react-virtualized": 9.21.22
+    "@types/react-virtualized": 9.21.29
     "@types/react-window": ^1.8.5
     "@types/sanitize-html": 2.9.3
     "@types/seedrandom": 3.0.8
@@ -6371,13 +6371,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-virtualized@npm:9.21.22":
-  version: 9.21.22
-  resolution: "@types/react-virtualized@npm:9.21.22"
+"@types/react-virtualized@npm:9.21.29":
+  version: 9.21.29
+  resolution: "@types/react-virtualized@npm:9.21.29"
   dependencies:
     "@types/prop-types": "*"
     "@types/react": "*"
-  checksum: 1c3f8e3f93f3ff8fc80ea0cbf24507cfd40e51b2503a6fbae323b0aa39f192d56d83b9007897e787c2810398b84bfcdf90364f3517c3bc4679cee69462e4d4c6
+  checksum: df10e8847e20ac2b4bac647a9bfc027edbc73ff41e298024de7b8588e0d8e9b220ba7d65231fced9ca9eb5284a1d6a478ec934f950f33795baed586bd0e30ea0
   languageName: node
   linkType: hard
 
