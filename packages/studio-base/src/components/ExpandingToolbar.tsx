@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ArrowMinimize20Filled } from "@fluentui/react-icons";
-import { Paper, IconButton, Tabs, Tab, tabClasses, tabsClasses } from "@mui/material";
+import { Paper, IconButton, Tabs, Tab, tabClasses, tabsClasses, Tooltip } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -89,17 +89,18 @@ export default function ExpandingToolbar<T extends string>({
 
     return (
       <Paper square={false} elevation={4} style={{ pointerEvents: "auto" }}>
-        <IconButton
-          size="small"
-          color={checked === true ? "info" : "default"}
-          title={tooltip}
-          data-testid={`ExpandingToolbar-${tooltip}`}
-          onClick={() => {
-            onSelectTab(selectedTabLocal);
-          }}
-        >
-          {icon}
-        </IconButton>
+        <Tooltip placement="left" title={tooltip}>
+          <IconButton
+            size="small"
+            color={checked === true ? "info" : "default"}
+            data-testid={`ExpandingToolbar-${tooltip}`}
+            onClick={() => {
+              onSelectTab(selectedTabLocal);
+            }}
+          >
+            {icon}
+          </IconButton>
+        </Tooltip>
       </Paper>
     );
   }
