@@ -19,7 +19,7 @@ import {
   toRFC3339String,
   toString,
 } from "@foxglove/rostime";
-import { MessageEvent, ParameterValue } from "@foxglove/studio";
+import { Immutable, MessageEvent, ParameterValue } from "@foxglove/studio";
 import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
@@ -69,6 +69,8 @@ const MAX_BLOCKS = 400;
 const SEEK_ON_START_NS = BigInt(99 * 1e6);
 
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
+
+const EMPTY_ARRAY = Object.freeze([]);
 
 type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
@@ -140,7 +142,7 @@ export class IterablePlayer implements Player {
 
   #progress: Progress = {};
   #id: string = uuidv4();
-  #messages: MessageEvent[] = [];
+  #messages: Immutable<MessageEvent[]> = [];
   #receivedBytes: number = 0;
   #hasError = false;
   #lastRangeMillis?: number;
@@ -772,7 +774,10 @@ export class IterablePlayer implements Player {
     }
 
     const messages = this.#messages;
-    this.#messages = [];
+
+    // After we emit the messages we clear the outgoing message array so we do not emit the messages again
+    // Use a stable EMPTY_ARRAY so we don't keep emitting a new messages reference as if messages have changed
+    this.#messages = EMPTY_ARRAY;
 
     let activeData: PlayerStateActiveData | undefined;
     if (this.#start && this.#end && this.#currentTime) {
