@@ -9,12 +9,11 @@ import { TypedData, ObjectData } from "./types";
 
 export type Point = { index: number; x: number; y: number; label: string | undefined };
 
+const sumTypedDataLength = (prev: number, arr: TypedData) => prev + arr.x.length;
+
 // Get the length of a typed dataset.
 export function getTypedLength(data: TypedData[]): number {
-  return R.pipe(
-    R.map((v: TypedData) => v.x.length),
-    R.sum,
-  )(data);
+  return data.reduce(sumTypedDataLength, 0);
 }
 
 /**

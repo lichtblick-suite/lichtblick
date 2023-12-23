@@ -9,9 +9,7 @@ import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables"
 import { PlotParams, Messages, MetadataEnums, PlotDataItem, BasePlotPath } from "../internalTypes";
 import { PlotData, EmptyPlotData, appendPlotData, buildPlotData, resolvePath } from "../plotData";
 
-type Cursors = Record<string, number>;
 export type Accumulated = {
-  cursors: Cursors;
   data: PlotData;
 };
 
@@ -53,31 +51,10 @@ export function buildPlot(
   });
 }
 
-export function initAccumulated(topics: readonly string[]): Accumulated {
-  const cursors: Cursors = {};
-  for (const topic of topics) {
-    cursors[topic] = 0;
-  }
-
+export function initAccumulated(): Accumulated {
   return {
-    cursors,
     data: EmptyPlotData,
   };
-}
-
-export function getNewMessages(
-  cursors: Cursors,
-  messages: Messages,
-): [newCursors: Cursors, newMessages: Messages] {
-  const newCursors: Cursors = {};
-  const newMessages: Messages = {};
-
-  for (const [topic, cursor] of Object.entries(cursors)) {
-    newCursors[topic] = messages[topic]?.length ?? cursor;
-    newMessages[topic] = messages[topic]?.slice(cursor) ?? [];
-  }
-
-  return [newCursors, newMessages];
 }
 
 export function accumulate(
@@ -87,11 +64,9 @@ export function accumulate(
   params: PlotParams,
   messages: Messages,
 ): Accumulated {
-  const { cursors: oldCursors, data: oldData } = previous;
-  const [newCursors, newMessages] = getNewMessages(oldCursors, messages);
+  const { data: oldData } = previous;
 
   return {
-    cursors: newCursors,
-    data: appendPlotData(oldData, buildPlot(metadata, globalVariables, params, newMessages)),
+    data: appendPlotData(oldData, buildPlot(metadata, globalVariables, params, messages)),
   };
 }

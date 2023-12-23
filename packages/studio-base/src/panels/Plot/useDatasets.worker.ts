@@ -14,28 +14,28 @@ import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import strPack from "@foxglove/studio-base/util/strPack";
 
-import { PlotParams, TypedData, Messages } from "./internalTypes";
+import { BlockUpdate } from "./blocks";
+import { PlotParams, TypedData } from "./internalTypes";
 import { isSingleMessage } from "./params";
 import { PlotData, StateHandler, getProvidedData } from "./plotData";
 import {
   SideEffectType,
   State,
   StateAndEffects,
-  addBlock,
-  addCurrent,
-  clearCurrent,
+  addCurrentData,
+  clearCurrentData,
   findClient,
   getClientData,
   initProcessor,
-  receiveMetadata,
+  updateMetadata,
   updateVariables,
-  register,
+  registerClient,
   setLive,
-  unregister,
+  unregisterClient,
   updateParams,
   updateView,
-  compressClients,
   mutateClient,
+  addBlockData,
 } from "./processor";
 import { updateDownsample } from "./processor/downsample";
 
@@ -50,6 +50,7 @@ type Callbacks = {
 
 let state: State = initProcessor();
 let callbacks: Record<string, Callbacks> = {};
+let clearClient: ((id: string) => void) | undefined;
 
 // Throttle rebuilds to only occur at most every 100ms. This is slightly
 // different from the throttled/debounced functions we use elsewhere in our
@@ -141,6 +142,10 @@ function handleEffects([newState, effects]: StateAndEffects): void {
         clientCallbacks.queueRebuild();
         break;
       }
+      case SideEffectType.Clear: {
+        clearClient?.(effect.clientId);
+        break;
+      }
       case SideEffectType.Send: {
         sendPlotData(clientCallbacks, effect.data);
         break;
@@ -149,19 +154,18 @@ function handleEffects([newState, effects]: StateAndEffects): void {
   }
 }
 
-setInterval(() => {
-  handleEffects(compressClients(state));
-}, 2000);
-
 export const service = {
-  addBlock(block: Messages, resetTopics: string[]): void {
-    handleEffects(addBlock(strPack(block), resetTopics, state));
+  setClearClient(callback: (id: string) => void): void {
+    clearClient = callback;
   },
-  addCurrent(events: readonly MessageEvent[]): void {
-    handleEffects(addCurrent(events, state));
+  addBlockData(update: BlockUpdate): void {
+    handleEffects(addBlockData(update, state));
   },
-  clearCurrent(): void {
-    handleEffects(clearCurrent(state));
+  addCurrentData(events: readonly MessageEvent[], clientId?: string): void {
+    handleEffects(addCurrentData(events, clientId, state));
+  },
+  clearCurrentData(): void {
+    handleEffects(clearCurrentData(state));
   },
   getFullData(id: string): PlotData | undefined {
     const client = findClient(state, id);
@@ -171,13 +175,13 @@ export const service = {
 
     return getClientData(client);
   },
-  receiveMetadata(topics: readonly Topic[], datatypes: Immutable<RosDatatypes>): void {
-    state = receiveMetadata(topics, strPack(datatypes), state);
+  updateMetadata(topics: readonly Topic[], datatypes: Immutable<RosDatatypes>): void {
+    state = updateMetadata(topics, strPack(datatypes), state);
   },
-  receiveVariables(variables: GlobalVariables): void {
+  updateVariables(variables: GlobalVariables): void {
     handleEffects(updateVariables(variables, state));
   },
-  register(
+  registerClient(
     id: string,
     setProvided: Setter,
     setPanel: StateHandler,
@@ -191,16 +195,16 @@ export const service = {
       queueRebuild: makeRebuilder(id),
     };
 
-    handleEffects(register(id, params, state));
+    handleEffects(registerClient(id, params, state));
   },
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   setLive(value: boolean): void {
     state = setLive(value, state);
   },
-  unregister(id: string): void {
+  unregisterClient(id: string): void {
     const { [id]: _client, ...newCallbacks } = callbacks;
     callbacks = newCallbacks;
-    state = unregister(id, state);
+    state = unregisterClient(id, state);
   },
   updateParams(id: string, params: PlotParams): void {
     handleEffects(updateParams(id, params, state));

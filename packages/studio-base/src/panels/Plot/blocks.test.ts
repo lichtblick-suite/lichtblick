@@ -2,27 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromSec } from "@foxglove/rostime";
-import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksSubscriptions";
 import { SubscribePayload } from "@foxglove/studio-base/players/types";
 
-import { initBlockState, processBlocks, refreshBlockTopics } from "./blocks";
+import {
+  initBlockState,
+  processBlocks,
+  ClientUpdate,
+  Update,
+  prepareBlockUpdate,
+  refreshBlockTopics,
+} from "./blocks";
+import { FAKE_TOPIC } from "./processor/testing";
+import { createBlock } from "./testing";
 
-const FAKE_TOPIC = "/foo";
 const createSubscription = (topic: string): SubscribePayload => ({
   topic,
-});
-
-const createBlock = (value: unknown): MessageBlock => ({
-  [FAKE_TOPIC]: [
-    {
-      topic: FAKE_TOPIC,
-      schemaName: "",
-      sizeInBytes: 0,
-      message: value,
-      receiveTime: fromSec(0),
-    },
-  ],
 });
 
 describe("refreshBlockTopics", () => {
@@ -96,13 +90,12 @@ describe("processBlocks", () => {
     {
       const {
         state: { messages, cursors },
-        resetTopics,
-        newData,
+        updates,
       } = first;
       expect(messages[0]?.[FAKE_TOPIC]).toEqual(1);
       expect(cursors[FAKE_TOPIC]).toEqual(1);
-      expect(resetTopics).toEqual([]);
-      expect(newData).toEqual([block]);
+      expect(updates[0]?.shouldReset).toEqual(true);
+      expect(updates[0]?.blockRange).toEqual([0, 1]);
     }
 
     // s|n -> ss|
@@ -110,13 +103,12 @@ describe("processBlocks", () => {
     {
       const {
         state: { messages, cursors },
-        resetTopics,
-        newData,
+        updates,
       } = second;
       expect(messages[1]?.[FAKE_TOPIC]).toEqual(1);
       expect(cursors[FAKE_TOPIC]).toEqual(2);
-      expect(resetTopics).toEqual([]);
-      expect(newData).toEqual([block]);
+      expect(updates[0]?.shouldReset).toEqual(false);
+      expect(updates[0]?.blockRange).toEqual([1, 2]);
     }
   });
 
@@ -124,13 +116,12 @@ describe("processBlocks", () => {
     // |nene -> ses|e
     const {
       state: { messages, cursors },
-      resetTopics,
-      newData,
+      updates,
     } = processBlocks([block, {}, block, {}], subscriptions, initial);
     expect(messages[2]?.[FAKE_TOPIC]).toEqual(1);
     expect(cursors[FAKE_TOPIC]).toEqual(3);
-    expect(resetTopics).toEqual([]);
-    expect(newData).toEqual([block, block]);
+    expect(updates[0]?.shouldReset).toEqual(true);
+    expect(updates[0]?.blockRange).toEqual([0, 3]);
   });
 
   it("should not send data beyond changed data", () => {
@@ -146,13 +137,12 @@ describe("processBlocks", () => {
     {
       const {
         state: { messages, cursors },
-        resetTopics,
-        newData,
+        updates,
       } = first;
       expect(messages[1]?.[FAKE_TOPIC]).toEqual(2);
       expect(cursors[FAKE_TOPIC]).toEqual(2);
-      expect(resetTopics).toEqual([FAKE_TOPIC]);
-      expect(newData).toEqual([newBlock, newBlock]);
+      expect(updates[0]?.shouldReset).toEqual(true);
+      expect(updates[0]?.blockRange).toEqual([0, 2]);
     }
 
     // ss|c -> sss|
@@ -160,13 +150,12 @@ describe("processBlocks", () => {
     {
       const {
         state: { messages, cursors },
-        resetTopics,
-        newData,
+        updates,
       } = second;
       expect(messages[2]?.[FAKE_TOPIC]).toEqual(2);
       expect(cursors[FAKE_TOPIC]).toEqual(3);
-      expect(resetTopics).toEqual([]);
-      expect(newData).toEqual([newBlock]);
+      expect(updates[0]?.shouldReset).toEqual(false);
+      expect(updates[0]?.blockRange).toEqual([2, 3]);
     }
   });
 
@@ -181,13 +170,12 @@ describe("processBlocks", () => {
     {
       const {
         state: { messages, cursors },
-        resetTopics,
-        newData,
+        updates,
       } = first;
       expect(messages[1]?.[FAKE_TOPIC]).toEqual(2);
       expect(cursors[FAKE_TOPIC]).toEqual(2);
-      expect(resetTopics).toEqual([FAKE_TOPIC]);
-      expect(newData).toEqual([block, newBlock]);
+      expect(updates[0]?.shouldReset).toEqual(true);
+      expect(updates[0]?.blockRange).toEqual([0, 2]);
     }
 
     // if we get new blocks but there were no more changes, just send the rest
@@ -196,13 +184,62 @@ describe("processBlocks", () => {
     {
       const {
         state: { messages, cursors },
-        resetTopics,
-        newData,
+        updates,
       } = second;
       expect(messages[2]?.[FAKE_TOPIC]).toEqual(1);
       expect(cursors[FAKE_TOPIC]).toEqual(3);
-      expect(resetTopics).toEqual([]);
-      expect(newData).toEqual([block]);
+      expect(updates[0]?.shouldReset).toEqual(false);
+      expect(updates[0]?.blockRange).toEqual([2, 3]);
     }
+  });
+});
+
+describe("prepareBlockUpdate", () => {
+  const block = createBlock(1);
+  const blocks = [block, block, block, block];
+  const makeUpdate =
+    (id: string) =>
+    (update: Update): ClientUpdate => ({
+      id,
+      update,
+    });
+
+  const makeA = makeUpdate("a");
+  const makeB = makeUpdate("b");
+
+  it("rewrites an update back to 0", () => {
+    const { updates, messages } = prepareBlockUpdate(
+      [
+        makeA({
+          topic: FAKE_TOPIC,
+          shouldReset: false,
+          blockRange: [2, 4],
+        }),
+      ],
+      blocks,
+    );
+    expect(updates[0]?.update.blockRange).toEqual([0, 2]);
+    expect(messages[FAKE_TOPIC]?.length).toEqual(2);
+  });
+
+  it("rewrites range relative to other client", () => {
+    const { updates, messages } = prepareBlockUpdate(
+      [
+        makeA({
+          topic: FAKE_TOPIC,
+          shouldReset: false,
+          blockRange: [2, 4],
+        }),
+        makeB({
+          topic: FAKE_TOPIC,
+          shouldReset: false,
+          blockRange: [1, 4],
+        }),
+      ],
+      blocks,
+    );
+    expect(updates[0]?.update.blockRange).toEqual([1, 3]);
+    expect(updates[1]?.update.blockRange).toEqual([0, 3]);
+    expect(messages[FAKE_TOPIC]?.length).toEqual(3);
   });
 });

@@ -7,7 +7,8 @@ import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables"
 
 import { Accumulated } from "./accumulate";
 import { Downsampled } from "./downsample";
-import { PlotParams, Messages, MetadataEnums } from "../internalTypes";
+import { BlockUpdate } from "../blocks";
+import { PlotParams, MetadataEnums } from "../internalTypes";
 import { PlotData } from "../plotData";
 
 export type Client = {
@@ -24,16 +25,15 @@ export type State = {
   isLive: boolean;
   clients: Client[];
   globalVariables: GlobalVariables;
-  blocks: Messages;
   // all block data that was sent, but has not yet been used by a client
-  pending: Messages;
-  current: Messages;
+  pending: BlockUpdate[];
   metadata: MetadataEnums;
 };
 
 export enum SideEffectType {
   Rebuild = "rebuild",
   Send = "send",
+  Clear = "clear",
 }
 
 export type RebuildEffect = {
@@ -47,7 +47,12 @@ export type DataEffect = {
   data: PlotData;
 };
 
-type SideEffect = RebuildEffect | DataEffect;
+export type ClearEffect = {
+  type: SideEffectType.Clear;
+  clientId: string;
+};
+
+type SideEffect = RebuildEffect | DataEffect | ClearEffect;
 
 export type SideEffects = readonly SideEffect[];
 

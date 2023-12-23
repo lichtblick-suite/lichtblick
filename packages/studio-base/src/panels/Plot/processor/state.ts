@@ -9,6 +9,7 @@ import { initDownsampled } from "./downsample";
 import {
   Client,
   RebuildEffect,
+  ClearEffect,
   State,
   SideEffectType,
   DataEffect,
@@ -16,25 +17,46 @@ import {
   StateAndEffects,
 } from "./types";
 import { PlotParams } from "../internalTypes";
+import { getParamTopics } from "../params";
 import { PlotData } from "../plotData";
 
 export function initClient(id: string, params: PlotParams | undefined): Client {
+  const topics = params != undefined ? getParamTopics(params) : [];
   return {
     id,
     params,
-    topics: [],
+    topics,
     view: undefined,
-    blocks: initAccumulated([]),
-    current: initAccumulated([]),
+    blocks: initAccumulated(),
+    current: initAccumulated(),
     downsampled: initDownsampled(),
   };
 }
 
+/**
+ * A side effect that triggers a rebuild, which (after a debounce) will
+ * downsample and send the resulting plot dataset to the main thread.
+ */
 export const rebuildClient = (id: string): RebuildEffect => ({
   type: SideEffectType.Rebuild,
   clientId: id,
 });
 
+/**
+ * A side effect that tells the main thread to reset this client's block data
+ * (there is no per-client state for current data in the main thread) and
+ * resend all relevant raw messages.
+ */
+export const clearClient = (id: string): ClearEffect => ({
+  type: SideEffectType.Clear,
+  clientId: id,
+});
+
+/**
+ * A side effect that sends some plot data to the main thread for rendering
+ * immediately (without downsampling.) This is only used for single-message
+ * plots.
+ */
 export const sendData = (id: string, data: PlotData): DataEffect => ({
   type: SideEffectType.Send,
   clientId: id,
@@ -46,9 +68,7 @@ export function initProcessor(): State {
     isLive: false,
     clients: [],
     globalVariables: {},
-    blocks: {},
-    current: {},
-    pending: {},
+    pending: [],
     metadata: {
       topics: [],
       datatypes: new Map(),
@@ -64,18 +84,6 @@ export function noEffects<T>(state: T): [T, SideEffects] {
 
 // eslint-disable-next-line @foxglove/no-boolean-parameters
 export const setLive = (isLive: boolean, state: State): State => ({ ...state, isLive });
-
-export const getAllTopics = (state: State): string[] =>
-  R.pipe(
-    R.chain(({ topics: clientTopics }: Client) => clientTopics),
-    R.uniq,
-  )(state.clients);
-
-export const keepEffects =
-  (mutator: (state: State) => State) =>
-  ([state, effects]: StateAndEffects): StateAndEffects => {
-    return [mutator(state), effects];
-  };
 
 export const concatEffects =
   (mutator: (state: State) => StateAndEffects) =>

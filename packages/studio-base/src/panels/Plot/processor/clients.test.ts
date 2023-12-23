@@ -5,17 +5,15 @@
 import { PlotViewport } from "@foxglove/studio-base/components/TimeBasedChart/types";
 
 import {
-  unregister,
-  compressClients,
-  MESSAGE_CULL_THRESHOLD,
-  register,
-  refreshClient,
+  unregisterClient,
+  registerClient,
+  resetPlotData,
   updateVariables,
   updateParams,
   updateView,
   getClientData,
 } from "./clients";
-import { initProcessor, initClient, rebuildClient } from "./state";
+import { initProcessor, initClient, rebuildClient, clearClient } from "./state";
 import {
   FAKE_TOPIC,
   FAKE_SCHEMA,
@@ -25,7 +23,7 @@ import {
   createData,
   createPath,
   createState,
-  createMessages,
+  createBlockUpdate,
   createParams,
 } from "./testing";
 import { State } from "./types";
@@ -34,8 +32,7 @@ import { DatasetsByPath, PlotPath, TypedDataSet } from "../internalTypes";
 describe("refreshClient", () => {
   it("ignores client without params", () => {
     const client = initClient(CLIENT_ID, undefined);
-    const initial: State = { ...initProcessor(), clients: [client] };
-    const [newClient, effects] = refreshClient(client, initial);
+    const [newClient, effects] = resetPlotData(client);
     expect(newClient).toEqual(client);
     expect(effects).toEqual([]);
   });
@@ -48,8 +45,8 @@ describe("refreshClient", () => {
     if (client == undefined) {
       throw new Error("client missing somehow");
     }
-    const [newClient, effects] = refreshClient(client, initial);
-    expect(effects).toEqual([rebuildClient(client.id)]);
+    const [newClient, effects] = resetPlotData(client);
+    expect(effects).toEqual([clearClient(client.id)]);
     // we aren't testing accumulate(); just check whether the reference changed
     expect(newClient.blocks).not.toBe(client.blocks);
     expect(newClient.current).not.toBe(client.current);
@@ -80,7 +77,7 @@ describe("updateVariables", () => {
     const before = createState(`/topic.field[:]{id==$foo}`);
     const [after, effects] = updateVariables(vars, before);
     expect(after.clients[0]).not.toBe(before.clients[0]);
-    expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
+    expect(effects).toEqual([clearClient(CLIENT_ID)]);
   });
 });
 
@@ -96,17 +93,16 @@ describe("updateParams", () => {
     const [after, effects] = updateParams(CLIENT_ID, params, before);
     expect(after.clients[0]?.params).not.toEqual(before.clients[0]?.params);
     expect(after.clients[0]?.topics).toEqual(["/some"]);
-    expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
+    expect(effects).toEqual([clearClient(CLIENT_ID)]);
   });
   it("moves data out of pending", () => {
-    const before = {
+    const before: State = {
       ...createState(),
-      pending: createMessages(FAKE_TOPIC, FAKE_SCHEMA, 1),
+      pending: [createBlockUpdate(CLIENT_ID, FAKE_TOPIC, FAKE_SCHEMA, 1)],
     };
     const [after, effects] = updateParams(CLIENT_ID, createParams(FAKE_PATH), before);
-    expect(after.pending[FAKE_TOPIC]).toEqual(undefined);
-    expect(after.blocks[FAKE_TOPIC]?.length).toEqual(1);
-    expect(effects[0]).toEqual(rebuildClient(CLIENT_ID));
+    expect(after.pending.length).toEqual(0);
+    expect(effects[0]).toEqual(clearClient(CLIENT_ID));
   });
 });
 
@@ -134,50 +130,21 @@ describe("updateView", () => {
 
 describe("register", () => {
   it("ignores missing params", () => {
-    const [after, effects] = register(CLIENT_ID, undefined, initProcessor());
+    const [after, effects] = registerClient(CLIENT_ID, undefined, initProcessor());
     expect(after.clients.length).toEqual(1);
     expect(effects).toEqual([]);
   });
   it("updates the client's params after registration", () => {
-    const [after, effects] = register(CLIENT_ID, createParams(FAKE_PATH), initProcessor());
+    const [after, effects] = registerClient(CLIENT_ID, createParams(FAKE_PATH), initProcessor());
     expect(after.clients.length).toEqual(1);
-    expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
+    expect(effects).toEqual([clearClient(CLIENT_ID)]);
   });
 });
 
 describe("unregister", () => {
   it("removes an existing client", () => {
-    const after = unregister(CLIENT_ID, createState());
+    const after = unregisterClient(CLIENT_ID, createState());
     expect(after.clients.length).toEqual(0);
-  });
-});
-
-describe("compressClients", () => {
-  it("does nothing if not live", () => {
-    const before = { ...createState(), isLive: false };
-    const [after, effects] = compressClients(before);
-    expect(effects.length).toEqual(0);
-    expect(after).toEqual(before);
-  });
-  it("removes excess current messages", () => {
-    const before = {
-      ...createState(FAKE_PATH),
-      isLive: true,
-      current: createMessages(FAKE_TOPIC, FAKE_SCHEMA, MESSAGE_CULL_THRESHOLD + 1),
-    };
-    const [after, effects] = compressClients(before);
-    expect(after.current[FAKE_TOPIC]?.length).toEqual(MESSAGE_CULL_THRESHOLD);
-    expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
-  });
-  it("does not remove messages < MESSAGE_CULL_THRESHOLD", () => {
-    const before = {
-      ...createState(FAKE_PATH),
-      isLive: true,
-      current: createMessages(FAKE_TOPIC, FAKE_SCHEMA, MESSAGE_CULL_THRESHOLD - 1),
-    };
-    const [after, effects] = compressClients(before);
-    expect(after.current[FAKE_TOPIC]?.length).toEqual(MESSAGE_CULL_THRESHOLD - 1);
-    expect(effects).toEqual([rebuildClient(CLIENT_ID)]);
   });
 });
 

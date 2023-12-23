@@ -12,35 +12,37 @@ import { Immutable } from "@foxglove/studio";
 import { useMessageReducer as useCurrent, useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { useBlocksSubscriptions as useBlocks } from "@foxglove/studio-base/PanelAPI/useBlocksSubscriptions";
 import {
-  RosPath,
-  MessagePathPart,
-} from "@foxglove/studio-base/components/MessagePathSyntax/constants";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
-import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { mergeSubscriptions } from "@foxglove/studio-base/components/MessagePipeline/subscriptions";
 import { TypedDataProvider } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { SubscribePayload, MessageEvent } from "@foxglove/studio-base/players/types";
 
-import { initBlockState, refreshBlockTopics, processBlocks } from "./blocks";
+import {
+  DatasetsState,
+  getAllSubscriptions,
+  getClientPayloads,
+  initDatasets,
+  registerClient,
+  resetClientBlocks,
+  resetCurrent,
+  splitSubscriptions,
+  unregisterClient,
+  updateBlocks,
+  updateCurrent,
+  updateParams,
+} from "./clients";
 import { PlotParams } from "./internalTypes";
-import { getPaths } from "./params";
 import { PlotData } from "./plotData";
 
 type Service = Comlink.Remote<(typeof import("./useDatasets.worker"))["service"]>;
-type Client = {
-  params: PlotParams | undefined;
-  setter: (topics: SubscribePayload[]) => void;
-};
 
 let worker: Worker | undefined;
 let service: Service | undefined;
 let numClients: number = 0;
-let blockState = initBlockState();
-let clients: Record<string, Client> = {};
+let datasetsState: DatasetsState = initDatasets();
+let callbacks: Record<string, (topics: SubscribePayload[]) => void> = {};
 
 const pending: ((service: Service) => void)[] = [];
 async function waitService(): Promise<Service> {
@@ -54,134 +56,57 @@ async function waitService(): Promise<Service> {
 
 const getIsLive = (ctx: MessagePipelineContext) => ctx.seekPlayback == undefined;
 
-/**
- * Get the SubscribePayload for a single path by subscribing to all fields
- * referenced in leading MessagePathFilters and the first field of the
- * message.
- */
-export function pathToPayload(path: RosPath): SubscribePayload | undefined {
-  const { messagePath: parts, topicName: topic } = path;
-
-  // We want to take _all_ of the filters that start the path, since these can
-  // be chained
-  const filters = R.takeWhile((part: MessagePathPart) => part.type === "filter", parts);
-  const firstField = parts.find((part: MessagePathPart) => part.type === "name");
-  if (firstField == undefined || firstField.type !== "name") {
-    return undefined;
-  }
-
-  return {
-    topic,
-    fields: R.pipe(
-      R.chain((part: MessagePathPart): string[] => {
-        if (part.type !== "filter") {
-          return [];
-        }
-        const { path: filterPath } = part;
-        const field = filterPath[0];
-        if (field == undefined) {
-          return [];
-        }
-
-        return [field];
-      }),
-      // Always subscribe to the header field
-      (filterFields) => [...filterFields, firstField.name, "header"],
-      R.uniq,
-    )(filters),
-  };
-}
-
-function getPayloadsFromPaths(paths: readonly string[]): SubscribePayload[] {
-  return R.pipe(
-    R.chain((path: string): SubscribePayload[] => {
-      const parsed = parseRosPath(path);
-      if (parsed == undefined) {
-        return [];
-      }
-
-      const payload = pathToPayload(parsed);
-      if (payload == undefined) {
-        return [];
-      }
-
-      return [payload];
-    }),
-    // Then simplify
-    (v: SubscribePayload[]) => mergeSubscriptions(v) as SubscribePayload[],
-  )(paths);
-}
-
-// Calculate the list of unique topics that _all_ of the plots need and
-// nominate one panel to subscribe to the topics on behalf of the rest.
+// Nominate one panel to subscribe to the topics on behalf of the rest.
 function chooseClient() {
-  if (R.isEmpty(clients)) {
+  if (R.isEmpty(datasetsState.clients)) {
     return;
   }
 
-  const clientList = Object.values(clients);
-  const subscriptions = R.pipe(
-    R.chain((client: Client): SubscribePayload[] => {
-      const { params } = client;
-      if (params == undefined) {
-        return [];
-      }
-
-      const { xAxisPath, paths: yAxisPaths } = params;
-
-      return R.pipe(
-        getPayloadsFromPaths,
-        R.chain((v): SubscribePayload[] => {
-          const partial: SubscribePayload = {
-            ...v,
-            preloadType: "partial",
-          };
-
-          // Subscribe to both "partial" and "full" when using "full" In
-          // theory, "full" should imply "partial" but not doing this breaks
-          // MockMessagePipelineProvider
-          return [partial, { ...partial, preloadType: "full" }];
-        }),
-      )(getPaths(yAxisPaths, xAxisPath));
-    }),
-    (v) => mergeSubscriptions(v) as SubscribePayload[],
-  )(clientList);
-  clientList[0]?.setter(subscriptions);
-  blockState = refreshBlockTopics(subscriptions, blockState);
+  const clientList = Object.values(callbacks);
+  clientList[0]?.(getAllSubscriptions(datasetsState));
 }
 
-// Subscribe to "current" messages (those near the seek head) and forward new
-// messages to the worker as they arrive.
+function clearClient(id: string) {
+  const [newState, update] = resetClientBlocks(id, datasetsState);
+  const { current } = newState;
+  datasetsState = newState;
+  void service?.addBlockData(update);
+
+  const {
+    clients: { [id]: client },
+  } = newState;
+  if (client == undefined) {
+    return;
+  }
+
+  // Only send the current events that the client can actually use. This also
+  // saves us from having to `structuredClone` unused data
+  const topics = new Set(R.uniq(getClientPayloads(client).map(({ topic }) => topic)));
+  void service?.addCurrentData(
+    current.filter(({ topic }) => topics.has(topic)),
+    id,
+  );
+}
+
+// Subscribe to all of the data all plots require and forward it to the worker.
 function useData(id: string, params: PlotParams) {
   const [subscriptions, setSubscribed] = React.useState<SubscribePayload[]>([]);
   // Register client when the panel mounts and unregister when it unmounts
   useEffect(() => {
-    clients = {
-      ...clients,
-      [id]: {
-        params: undefined,
-        setter: setSubscribed,
-      },
-    };
+    datasetsState = registerClient(id, datasetsState);
+    callbacks[id] = setSubscribed;
     chooseClient();
     return () => {
-      const { [id]: _client, ...rest } = clients;
-      clients = rest;
+      datasetsState = unregisterClient(id, datasetsState);
+      const { [id]: _client, ...rest } = callbacks;
+      callbacks = rest;
       chooseClient();
     };
   }, [id]);
 
   // Update registration when params change
   useEffect(() => {
-    const { [id]: client } = clients;
-    if (client == undefined) {
-      return;
-    }
-
-    clients = {
-      ...clients,
-      [id]: { ...client, params },
-    };
+    datasetsState = updateParams(id, params, datasetsState);
     chooseClient();
   }, [id, params]);
 
@@ -194,7 +119,7 @@ function useData(id: string, params: PlotParams) {
   }, [isLive]);
 
   const [blockSubscriptions, currentSubscriptions] = React.useMemo(
-    () => R.partition((v) => v.preloadType === "full", subscriptions),
+    () => splitSubscriptions(subscriptions),
     [subscriptions],
   );
 
@@ -202,13 +127,15 @@ function useData(id: string, params: PlotParams) {
     topics: currentSubscriptions,
     restore: React.useCallback((state: number | undefined): number => {
       if (state == undefined) {
-        void service?.clearCurrent();
+        datasetsState = resetCurrent(datasetsState);
+        void service?.clearCurrentData();
       }
       return 0;
     }, []),
     addMessages: React.useCallback(
       (_: number | undefined, messages: readonly MessageEvent[]): number => {
-        void service?.addCurrent(messages);
+        datasetsState = updateCurrent(messages, datasetsState);
+        void service?.addCurrentData(messages);
         return 1;
       },
       [],
@@ -220,25 +147,10 @@ function useData(id: string, params: PlotParams) {
     if (blockSubscriptions.length === 0) {
       return;
     }
-    const {
-      state: newState,
-      resetTopics,
-      newData,
-    } = processBlocks(blocks, blockSubscriptions, blockState);
 
-    blockState = newState;
-
-    void service?.addBlock(
-      R.pipe(
-        R.map((topic: string): [string, MessageEvent[]] => [topic, []]),
-        R.fromPairs,
-      )(resetTopics),
-      resetTopics,
-    );
-
-    for (const bundle of newData) {
-      void service?.addBlock(bundle, []);
-    }
+    const [newState, blockUpdate] = updateBlocks(blocks, datasetsState);
+    datasetsState = newState;
+    void service?.addBlockData(blockUpdate);
   }, [blockSubscriptions, blocks]);
 }
 
@@ -246,12 +158,12 @@ function useData(id: string, params: PlotParams) {
 function useMetadata() {
   const { topics, datatypes } = useDataSourceInfo();
   useEffect(() => {
-    void service?.receiveMetadata(topics, datatypes);
+    void service?.updateMetadata(topics, datatypes);
   }, [topics, datatypes]);
 
   const { globalVariables } = useGlobalVariables();
   useEffect(() => {
-    void service?.receiveVariables(globalVariables);
+    void service?.updateVariables(globalVariables);
   }, [globalVariables]);
 }
 
@@ -274,6 +186,7 @@ export default function useDatasets(params: PlotParams): {
         new URL("./useDatasets.worker", import.meta.url),
       );
       service = Comlink.wrap(worker);
+      void service.setClearClient(Comlink.proxy(clearClient));
       for (const other of pending) {
         other(service);
       }
@@ -286,7 +199,6 @@ export default function useDatasets(params: PlotParams): {
       if (numClients === 0) {
         worker?.terminate();
         worker = service = undefined;
-        blockState = initBlockState();
       }
     };
   }, []);
@@ -296,7 +208,7 @@ export default function useDatasets(params: PlotParams): {
   const [state, setState] = React.useState<Immutable<PlotData> | undefined>();
   useEffect(() => {
     return () => {
-      void service?.unregister(id);
+      void service?.unregisterClient(id);
     };
   }, [id]);
 
@@ -317,7 +229,7 @@ export default function useDatasets(params: PlotParams): {
       register: (setter, setPartial) => {
         void (async () => {
           const s = await waitService();
-          void s.register(
+          void s.registerClient(
             id,
             Comlink.proxy(setter),
             Comlink.proxy(setState),

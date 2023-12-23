@@ -9,21 +9,21 @@ import { fillInGlobalVariablesInPath } from "@foxglove/studio-base/components/Me
 import { PlotViewport } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 
-import { initAccumulated, accumulate } from "./accumulate";
+import { initAccumulated } from "./accumulate";
 import { initDownsampled } from "./downsample";
-import { evictCache } from "./messages";
+import { applyBlockUpdate } from "./messages";
 import {
   findClient,
   noEffects,
   mutateClient,
   mapClients,
   rebuildClient,
-  keepEffects,
+  clearClient,
   concatEffects,
   initClient,
-  getAllTopics,
 } from "./state";
 import { StateAndEffects, SideEffects, State, Client } from "./types";
+import { BlockUpdate } from "../blocks";
 import { PlotParams } from "../internalTypes";
 import { getParamTopics, getParamPaths } from "../params";
 import {
@@ -53,23 +53,24 @@ function mergeAllData(blockData: PlotData, currentData: PlotData): PlotData {
   return reducePlotData(datasets);
 }
 
-export function refreshClient(client: Client, state: State): [Client, SideEffects] {
-  const { blocks, current, metadata, globalVariables } = state;
+/**
+ * Reset all accumulated plot data for the client and tell the main thread that
+ * it should resend any message data that it has.
+ */
+export function resetPlotData(client: Client): [Client, SideEffects] {
   const { id, params } = client;
   if (params == undefined) {
     return noEffects(client);
   }
 
-  const topics = getParamTopics(params);
-  const initialState = initAccumulated(topics);
   return [
     {
       ...client,
-      topics,
-      blocks: accumulate(metadata, globalVariables, initialState, params, blocks),
-      current: accumulate(metadata, globalVariables, initialState, params, current),
+      topics: getParamTopics(params),
+      current: initAccumulated(),
+      blocks: initAccumulated(),
     },
-    [rebuildClient(id)],
+    [clearClient(id)],
   ];
 }
 
@@ -103,7 +104,7 @@ export function updateVariables(variables: GlobalVariables, state: State): State
       return noEffects(client);
     }
 
-    return refreshClient(client, newState);
+    return resetPlotData(client);
   })(newState);
 }
 
@@ -115,45 +116,51 @@ export function updateParams(id: string, params: PlotParams, state: State): Stat
         return noEffects(client);
       }
 
-      return refreshClient(
-        {
-          ...client,
-          params,
-          topics: getParamTopics(params),
-          downsampled: initDownsampled(),
-        },
-        state,
-      );
+      return resetPlotData({
+        ...client,
+        params,
+        topics: getParamTopics(params),
+        downsampled: initDownsampled(),
+      });
     }),
-    keepEffects(evictCache),
     concatEffects((newState: State): StateAndEffects => {
-      const { pending, blocks } = newState;
+      const { pending } = newState;
 
-      const allNewTopics = getAllTopics(newState);
-      const newData = R.pick(allNewTopics, pending);
-      if (R.isEmpty(newData)) {
-        return [newState, []];
-      }
-
-      const newTopics = Object.keys(newData);
-
-      // Move new data now used by at least one client into the real block data
-      const migrated = {
-        ...newState,
-        pending: R.omit(allNewTopics, pending),
-        blocks: {
-          ...blocks,
-          ...newData,
+      // When we receive params for a client, we check to see whether any of
+      // the pending data we have in the queue applies to them.
+      const clientIds = newState.clients.map(({ id: clientId }) => clientId);
+      const allUpdates = pending.map(
+        (update: BlockUpdate): [next: BlockUpdate, applied: BlockUpdate] => {
+          const { updates } = update;
+          const [used, unused] = R.partition(
+            ({ id: clientId }) => clientIds.includes(clientId),
+            updates,
+          );
+          return [
+            { ...update, updates: unused },
+            { ...update, updates: used },
+          ];
         },
-      };
+      );
 
-      return mapClients((client, nextState) => {
-        const { topics } = client;
-        if (R.intersection(newTopics, topics).length === 0) {
-          return noEffects(client);
-        }
-        return refreshClient(client, nextState);
-      })(migrated);
+      const newPending: BlockUpdate[] = allUpdates
+        .filter(([unused]) => unused.updates.length > 0)
+        .map(([unused]) => unused);
+
+      const updatesToApply: BlockUpdate[] = allUpdates
+        .filter(([, used]) => used.updates.length > 0)
+        .map(([, used]) => used);
+
+      return R.reduce(
+        (a: StateAndEffects, update: BlockUpdate): StateAndEffects => {
+          return concatEffects((nextState) => applyBlockUpdate(update, nextState))(a);
+        },
+        noEffects({
+          ...newState,
+          pending: newPending,
+        }),
+        updatesToApply,
+      );
     }),
   )(state);
 }
@@ -166,7 +173,7 @@ export function updateView(id: string, view: PlotViewport, state: State): StateA
   return [mutateClient(state, id, { ...client, view }), [rebuildClient(id)]];
 }
 
-export function register(
+export function registerClient(
   id: string,
   params: PlotParams | undefined,
   state: State,
@@ -184,31 +191,11 @@ export function register(
   return updateParams(id, params, newState);
 }
 
-export function unregister(id: string, state: State): State {
-  return evictCache({
+export function unregisterClient(id: string, state: State): State {
+  return {
     ...state,
     clients: R.filter(({ id: clientId }: Client) => clientId !== id, state.clients),
-  });
-}
-
-export const MESSAGE_CULL_THRESHOLD = 15_000;
-
-export function compressClients(state: State): StateAndEffects {
-  const { isLive, current } = state;
-  if (!isLive) {
-    return noEffects(state);
-  }
-
-  return mapClients(refreshClient)({
-    ...state,
-    current: R.map(
-      (messages) =>
-        messages.length > MESSAGE_CULL_THRESHOLD
-          ? messages.slice(messages.length - MESSAGE_CULL_THRESHOLD)
-          : messages,
-      current,
-    ),
-  });
+  };
 }
 
 export function getClientData(client: Client): PlotData | undefined {

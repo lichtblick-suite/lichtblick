@@ -6,12 +6,11 @@ export type { State, StateAndEffects } from "./types";
 export { SideEffectType } from "./types";
 export { initProcessor, findClient, setLive, mutateClient } from "./state";
 export {
-  register,
-  unregister,
+  registerClient,
+  unregisterClient,
   updateParams,
   updateView,
   updateVariables,
   getClientData,
-  compressClients,
 } from "./clients";
-export { addBlock, addCurrent, clearCurrent, receiveMetadata } from "./messages";
+export { addBlockData, addCurrentData, clearCurrentData, updateMetadata } from "./messages";

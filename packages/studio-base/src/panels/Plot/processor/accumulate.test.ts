@@ -3,12 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { getPathData } from "./accumulate";
-import { receiveMetadata } from "./messages";
+import { updateMetadata } from "./messages";
 import { createState, createPath, FAKE_TOPICS, FAKE_PATH, FAKE_DATATYPES } from "./testing";
 
 describe("getPathData", () => {
   it("ignores invalid path", () => {
-    const before = receiveMetadata(FAKE_TOPICS, FAKE_DATATYPES, createState(FAKE_PATH));
+    const before = updateMetadata(FAKE_TOPICS, FAKE_DATATYPES, createState(FAKE_PATH));
     const pathData = getPathData(before.metadata, {}, {}, createPath("你好"));
     expect(pathData).toEqual([]);
   });
