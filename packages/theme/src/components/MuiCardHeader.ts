@@ -7,14 +7,20 @@ import { OverrideComponentReturn } from "../types";
 export const MuiCardHeader: OverrideComponentReturn<"MuiCardHeader"> = {
   defaultProps: {
     titleTypographyProps: {
-      variant: "h3",
+      variant: "h4",
     },
   },
   styleOverrides: {
-    action: {
-      alignSelf: undefined,
-      marginTop: undefined,
-      marginRight: undefined,
+    avatar: {
+      marginRight: 0,
     },
+    action: {
+      alignSelf: "auto",
+      marginTop: 0,
+      marginRight: 0,
+    },
+    root: ({ theme }) => ({
+      gap: theme.spacing(2),
+    }),
   },
 };
