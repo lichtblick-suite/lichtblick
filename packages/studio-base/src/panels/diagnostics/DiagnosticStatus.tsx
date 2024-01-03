@@ -31,7 +31,7 @@ import sanitizeHtml from "sanitize-html";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
+import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 

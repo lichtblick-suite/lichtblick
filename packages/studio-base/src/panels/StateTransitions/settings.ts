@@ -10,7 +10,7 @@ import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
-import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot";
+import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot/types";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 

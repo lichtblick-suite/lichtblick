@@ -40,7 +40,7 @@ import PanelToolbar, {
 import Stack from "@foxglove/studio-base/components/Stack";
 import { ChartDefaultView } from "@foxglove/studio-base/components/TimeBasedChart";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
-import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
 
 import PlotChart from "./PlotChart";
@@ -52,27 +52,9 @@ import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
 import useDatasets from "./useDatasets";
 
-export { plotableRosTypes } from "./types";
-export type { PlotConfig } from "./types";
-
 const defaultSidebarDimension = 240;
 
 const EmptyDatasets: TypedDataSet[] = [];
-
-export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicName: string): void {
-  openSiblingPanel({
-    panelType: "Plot",
-    updateIfExists: true,
-    siblingConfigCreator: (config: PanelConfig) => ({
-      ...config,
-      paths: _.uniq(
-        (config as PlotConfig).paths
-          .concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }])
-          .filter(({ value }) => value),
-      ),
-    }),
-  });
-}
 
 type Props = {
   config: PlotConfig;

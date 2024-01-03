@@ -20,7 +20,8 @@ import { useAsync } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
 import { fromSec } from "@foxglove/rostime";
-import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
+import Plot from "@foxglove/studio-base/panels/Plot";
+import { PlotConfig } from "@foxglove/studio-base/panels/Plot/types";
 import { BlockCache, MessageEvent } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal, ReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
