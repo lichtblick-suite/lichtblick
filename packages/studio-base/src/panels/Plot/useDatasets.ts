@@ -24,6 +24,7 @@ import {
   getAllSubscriptions,
   getClientPayloads,
   initDatasets,
+  pruneCurrent,
   registerClient,
   resetClientBlocks,
   resetCurrent,
@@ -35,6 +36,8 @@ import {
 } from "./clients";
 import { PlotParams } from "./internalTypes";
 import { PlotData } from "./plotData";
+
+const MAX_BYTE_SIZE_CURRENT_MESSAGES = 20971520; // 20 MB
 
 type Service = Comlink.Remote<(typeof import("./useDatasets.worker"))["service"]>;
 
@@ -83,7 +86,7 @@ function clearClient(id: string) {
   // saves us from having to `structuredClone` unused data
   const topics = new Set(R.uniq(getClientPayloads(client).map(({ topic }) => topic)));
   void service?.addCurrentData(
-    current.filter(({ topic }) => topics.has(topic)),
+    current.messages.filter(({ topic }) => topics.has(topic)),
     id,
   );
 }
@@ -135,6 +138,9 @@ function useData(id: string, params: PlotParams) {
     addMessages: React.useCallback(
       (_: number | undefined, messages: readonly MessageEvent[]): number => {
         datasetsState = updateCurrent(messages, datasetsState);
+        if (datasetsState.current.sizeInBytes > MAX_BYTE_SIZE_CURRENT_MESSAGES) {
+          datasetsState = pruneCurrent(datasetsState, MAX_BYTE_SIZE_CURRENT_MESSAGES);
+        }
         void service?.addCurrentData(messages);
         return 1;
       },

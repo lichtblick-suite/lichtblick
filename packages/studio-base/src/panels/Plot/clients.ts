@@ -41,14 +41,20 @@ export type Client = {
 export type DatasetsState = {
   clients: Record<string, Client>;
   blocks: readonly MessageBlock[];
-  current: MessageEvent[];
+  current: {
+    messages: MessageEvent[];
+    sizeInBytes: number;
+  };
 };
 
 export function initDatasets(): DatasetsState {
   return {
     clients: {},
     blocks: [],
-    current: [],
+    current: {
+      messages: [],
+      sizeInBytes: 0,
+    },
   };
 }
 
@@ -211,7 +217,34 @@ export function updateCurrent(
   const { current: oldCurrent } = state;
   return {
     ...state,
-    current: oldCurrent.concat(events),
+    current: {
+      messages: oldCurrent.messages.concat(events),
+      sizeInBytes: events.reduce((acc, msg) => acc + msg.sizeInBytes, oldCurrent.sizeInBytes),
+    },
+  };
+}
+
+/**
+ * Removes older current messages so that current data does not exceed the given upper byte size limit.
+ * Ensures that at least one message remains.
+ */
+export function pruneCurrent(state: DatasetsState, upperByteSizeLimit: number): DatasetsState {
+  const { current: oldCurrent } = state;
+  const minNumBytesToBeFreed = oldCurrent.sizeInBytes - upperByteSizeLimit;
+  let numBytesToBeFreed = 0;
+  let idx = 0;
+
+  while (idx < oldCurrent.messages.length - 1 && numBytesToBeFreed < minNumBytesToBeFreed) {
+    numBytesToBeFreed += oldCurrent.messages[idx]!.sizeInBytes;
+    idx++;
+  }
+
+  return {
+    ...state,
+    current: {
+      messages: oldCurrent.messages.slice(idx),
+      sizeInBytes: oldCurrent.sizeInBytes - numBytesToBeFreed,
+    },
   };
 }
 
@@ -221,7 +254,10 @@ export function updateCurrent(
 export function resetCurrent(state: DatasetsState): DatasetsState {
   return {
     ...state,
-    current: [],
+    current: {
+      messages: [],
+      sizeInBytes: 0,
+    },
   };
 }
 
