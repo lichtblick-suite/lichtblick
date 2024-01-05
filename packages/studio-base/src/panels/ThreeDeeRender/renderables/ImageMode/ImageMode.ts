@@ -97,7 +97,7 @@ const NO_IMAGE_TOPICS_HUD_ITEM: HUDItem = {
   id: "NO_IMAGE_TOPICS",
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("noImageTopicsAvailable"),
-  displayType: "notice",
+  displayType: "empty",
 };
 interface ImageModeEventMap extends THREE.Object3DEventMap {
   hasModifiedViewChanged: object;

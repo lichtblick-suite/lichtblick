@@ -303,12 +303,12 @@ const ImageWith3D = (initialConfig: ImageModeConfig): JSX.Element => {
   );
 };
 
-export const ImageOnlyModeOff: StoryObj<React.ComponentProps<typeof ImageWith3D>> = {
+export const ImageOnlyModeOff: StoryObj<typeof ImageWith3D> = {
   render: ImageWith3D,
   args: { imageTopic: "camera/img", calibrationTopic: "camera/calibration" },
 };
 
-export const ImageOnlyModeOn: StoryObj<React.ComponentProps<typeof ImageWith3D>> = {
+export const ImageOnlyModeOn: StoryObj<typeof ImageWith3D> = {
   render: ImageWith3D,
   args: { imageTopic: "camera/img", calibrationTopic: undefined },
   play: async ({ canvasElement }) => {
@@ -318,16 +318,12 @@ export const ImageOnlyModeOn: StoryObj<React.ComponentProps<typeof ImageWith3D>>
   },
 };
 
-export const ImageOnlyModeOffWithAutoSelectedTopics: StoryObj<
-  React.ComponentProps<typeof ImageWith3D>
-> = {
+export const ImageOnlyModeOffWithAutoSelectedTopics: StoryObj<typeof ImageWith3D> = {
   render: ImageWith3D,
   args: { imageTopic: undefined, calibrationTopic: undefined },
 };
 
-export const ImageOnlyModeOffWithAutoSelectedCalibration: StoryObj<
-  React.ComponentProps<typeof ImageWith3D>
-> = {
+export const ImageOnlyModeOffWithAutoSelectedCalibration: StoryObj<typeof ImageWith3D> = {
   render: ImageWith3D,
   args: { imageTopic: "abc", calibrationTopic: undefined },
   play: async () => {
