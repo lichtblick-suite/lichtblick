@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   Alert,
@@ -182,12 +181,7 @@ const aboutItems = new Map<
   ],
 ]);
 
-export type AppSettingsTab =
-  | "general"
-  | "privacy"
-  | "extensions"
-  | "experimental-features"
-  | "about";
+export type AppSettingsTab = "general" | "extensions" | "experimental-features" | "about";
 
 const selectWorkspaceInitialActiveTab = (store: WorkspaceContextStore) =>
   store.dialogs.preferences.initialTab;
@@ -200,12 +194,6 @@ export function AppSettingsDialog(
   const initialActiveTab = useWorkspaceStore(selectWorkspaceInitialActiveTab);
   const [activeTab, setActiveTab] = useState<AppSettingsTab>(
     _activeTab ?? initialActiveTab ?? "general",
-  );
-  const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
-    AppSetting.CRASH_REPORTING_ENABLED,
-  );
-  const [telemetryEnabled, setTelemetryEnabled] = useAppConfigurationValue<boolean>(
-    AppSetting.TELEMETRY_ENABLED,
   );
   const [debugModeEnabled = false, setDebugModeEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_DEBUG_PANELS,
@@ -248,7 +236,6 @@ export function AppSettingsDialog(
           onChange={handleTabChange}
         >
           <Tab className={classes.tab} label={t("general")} value="general" />
-          <Tab className={classes.tab} label={t("privacy")} value="privacy" />
           {extensionSettings && (
             <Tab className={classes.tab} label={t("extensions")} value="extensions" />
           )}
@@ -288,42 +275,6 @@ export function AppSettingsDialog(
                     />
                   }
                   label={t("debugModeDescription")}
-                />
-              </Stack>
-            </Stack>
-          </section>
-
-          <section
-            className={cx(classes.tabPanel, {
-              [classes.tabPanelActive]: activeTab === "privacy",
-            })}
-          >
-            <Stack gap={2}>
-              <Alert color="info" icon={<InfoOutlinedIcon />}>
-                {t("privacyDescription")}
-              </Alert>
-              <Stack gap={0.5} paddingLeft={2}>
-                <FormControlLabel
-                  className={classes.formControlLabel}
-                  control={
-                    <Checkbox
-                      className={classes.checkbox}
-                      checked={telemetryEnabled ?? true}
-                      onChange={(_event, checked) => void setTelemetryEnabled(checked)}
-                    />
-                  }
-                  label={t("sendAnonymizedUsageData")}
-                />
-                <FormControlLabel
-                  className={classes.formControlLabel}
-                  control={
-                    <Checkbox
-                      className={classes.checkbox}
-                      checked={crashReportingEnabled ?? true}
-                      onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
-                    />
-                  }
-                  label={t("sendAnonymizedCrashReports")}
                 />
               </Stack>
             </Stack>

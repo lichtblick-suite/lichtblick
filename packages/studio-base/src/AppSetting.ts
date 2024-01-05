@@ -14,10 +14,6 @@ export enum AppSetting {
   // ROS
   ROS_PACKAGE_PATH = "ros.ros_package_path",
 
-  // Privacy
-  TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
-  CRASH_REPORTING_ENABLED = "telemetry.crashReportingEnabled",
-
   // Experimental features
   SHOW_DEBUG_PANELS = "showDebugPanels",
 
