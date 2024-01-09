@@ -88,9 +88,9 @@ type MessageDefinitionMap = Map<string, MessageDefinition>;
  * emit a frame more than once per second. In the websocket player this was causing
  * an accumulation of messages that were waiting to be emitted, this could keep growing
  * indefinitely if the rate at which we emit a frame is low enough.
- * 1500MB
+ * 400MB
  */
-const CURRENT_FRAME_MAXIMUM_SIZE_BYTES = 15e8;
+const CURRENT_FRAME_MAXIMUM_SIZE_BYTES = 400 * 1024 * 1024;
 
 export default class FoxgloveWebSocketPlayer implements Player {
   readonly #sourceId: string;
