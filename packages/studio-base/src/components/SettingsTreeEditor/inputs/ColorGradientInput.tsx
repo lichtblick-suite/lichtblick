@@ -8,7 +8,7 @@ import tinycolor from "tinycolor2";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 
-import { ColorPickerControl } from "./ColorPickerControl";
+import { ColorPickerControl, useColorPickerControl } from "./ColorPickerControl";
 import { ColorSwatch } from "./ColorSwatch";
 
 export function ColorGradientInput({
@@ -19,7 +19,7 @@ export function ColorGradientInput({
 }: {
   colors: undefined | readonly [string, string];
   disabled?: boolean;
-  onChange: (colors: [string, string]) => void;
+  onChange: (colors: [left: string, right: string]) => void;
   readOnly?: boolean;
 }): JSX.Element {
   const [leftAnchor, setLeftAnchor] = useState<undefined | HTMLDivElement>(undefined);
@@ -61,6 +61,22 @@ export function ColorGradientInput({
 
   const theme = useTheme();
 
+  const leftSwatch = useColorPickerControl({
+    alphaType: "alpha",
+    onChange: (newValue) => {
+      onChange([newValue, rightColor]);
+    },
+    value: leftColor,
+  });
+
+  const rightSwatch = useColorPickerControl({
+    alphaType: "alpha",
+    onChange: (newValue) => {
+      onChange([leftColor, newValue]);
+    },
+    value: rightColor,
+  });
+
   return (
     <Stack
       direction="row"
@@ -95,14 +111,7 @@ export function ColorGradientInput({
           horizontal: "center",
         }}
       >
-        <ColorPickerControl
-          value={leftColor}
-          alphaType="alpha"
-          onChange={(newValue) => {
-            onChange([newValue, rightColor]);
-          }}
-          onEnterKey={handleClose}
-        />
+        <ColorPickerControl onEnterKey={handleClose} {...leftSwatch} />
       </Popover>
       <Popover
         open={rightAnchor != undefined}
@@ -117,14 +126,7 @@ export function ColorGradientInput({
           horizontal: "center",
         }}
       >
-        <ColorPickerControl
-          value={rightColor}
-          alphaType="alpha"
-          onChange={(newValue) => {
-            onChange([leftColor, newValue]);
-          }}
-          onEnterKey={handleClose}
-        />
+        <ColorPickerControl onEnterKey={handleClose} {...rightSwatch} />
       </Popover>
     </Stack>
   );

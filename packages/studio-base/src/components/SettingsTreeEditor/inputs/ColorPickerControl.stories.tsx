@@ -6,7 +6,7 @@ import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { useState } from "react";
 
-import { ColorPickerControl } from "./ColorPickerControl";
+import { ColorPickerControl, useColorPickerControl } from "./ColorPickerControl";
 
 export default {
   title: "components/ColorPickerControl",
@@ -17,7 +17,13 @@ export const Default: StoryObj = {
   render: function Story() {
     const [color, setColor] = useState("#ffaa00");
 
-    return <ColorPickerControl alphaType="none" value={color} onChange={setColor} />;
+    const colorPickerProps = useColorPickerControl({
+      alphaType: "none",
+      onChange: setColor,
+      value: color,
+    });
+
+    return <ColorPickerControl {...colorPickerProps} />;
   },
 };
 
@@ -25,7 +31,13 @@ export const WithAlpha: StoryObj = {
   render: function Story() {
     const [color, setColor] = useState("#ffaa0088");
 
-    return <ColorPickerControl alphaType="alpha" value={color} onChange={setColor} />;
+    const colorPickerProps = useColorPickerControl({
+      alphaType: "alpha",
+      onChange: setColor,
+      value: color,
+    });
+
+    return <ColorPickerControl {...colorPickerProps} />;
   },
 };
 
@@ -33,7 +45,13 @@ export const TextEntry: StoryObj = {
   render: function Story() {
     const [color, setColor] = useState("");
 
-    return <ColorPickerControl alphaType="none" value={color} onChange={setColor} />;
+    const colorPickerProps = useColorPickerControl({
+      alphaType: "none",
+      onChange: setColor,
+      value: color,
+    });
+
+    return <ColorPickerControl {...colorPickerProps} />;
   },
 
   play: async () => {

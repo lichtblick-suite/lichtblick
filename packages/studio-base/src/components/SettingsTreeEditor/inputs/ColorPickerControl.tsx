@@ -13,56 +13,67 @@ import { useDebouncedCallback } from "use-debounce";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 const useStyles = makeStyles()((theme) => ({
-  container: {
-    padding: theme.spacing(2),
-  },
   picker: {
     "&.react-colorful": {
       width: "100%",
-      gap: theme.spacing(0.75),
-    },
-    ".react-colorful__last-control": {
-      borderRadius: 0,
+      gap: theme.spacing(0.25),
     },
     ".react-colorful__saturation": {
-      borderRadius: 0,
+      borderBottom: 0,
+    },
+    ".react-colorful__saturation, .react-colorful__hue, .react-colorful__alpha": {
+      borderRadius: theme.shape.borderRadius,
     },
     ".react-colorful__hue": {
       order: -1,
     },
+    ".react-colorful__hue-pointer, .react-colorful__alpha-pointer": {
+      width: theme.spacing(1),
+      borderRadius: theme.shape.borderRadius,
+    },
     ".react-colorful__hue-pointer": {
       zIndex: 4,
+    },
+    ".react-colorful__saturation-pointer": {
+      width: theme.spacing(2),
+      height: theme.spacing(2),
     },
   },
 }));
 
-type ColorPickerInputProps = {
-  alphaType: "none" | "alpha";
+type ColorPickerProps = {
   value: undefined | string;
+  alphaType: "none" | "alpha";
   onChange: (value: string) => void;
-  onEnterKey?: () => void;
 };
 
+type ColorPickerInputProps = {
+  onEnterKey?: () => void;
+  swatchColor: string;
+  updatePrefixedColor: (newValue: string) => void;
+  editedValueIsInvalid: boolean;
+  editedValue: string;
+  updateEditedValue: (newValue: string) => void;
+  onInputBlur: () => void;
+} & Omit<ColorPickerProps, "value">;
+
 export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
-  const { alphaType, onChange, value, onEnterKey } = props;
-
-  const { classes, theme } = useStyles();
-
   const {
+    alphaType,
+    onChange,
+    onEnterKey,
     swatchColor,
     updatePrefixedColor,
     editedValueIsInvalid,
     editedValue,
     updateEditedValue,
     onInputBlur,
-  } = useColorPickerControl({
-    alphaType,
-    onChange,
-    value,
-  });
+  } = props;
+
+  const { classes, theme } = useStyles();
 
   return (
-    <Stack className={classes.container} gap={1}>
+    <Stack padding={1.5} gap={1}>
       {alphaType === "alpha" ? (
         <HexAlphaColorPicker
           className={classes.picker}
@@ -91,6 +102,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         value={editedValue}
         onKeyDown={(event) => event.key === "Enter" && onEnterKey?.()}
         onChange={(event) => {
+          onChange(event.target.value);
           updateEditedValue(event.target.value);
         }}
         onBlur={onInputBlur}
@@ -115,9 +127,7 @@ function isValidHexColor(color: string, alphaType: "none" | "alpha") {
 // hook is considered "internal" and we are ok inferring the return type
 //
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function useColorPickerControl(
-  props: Pick<ColorPickerInputProps, "alphaType" | "value" | "onChange">,
-) {
+export function useColorPickerControl(props: ColorPickerProps) {
   const { alphaType, onChange, value } = props;
 
   const parsedValue = useMemo(() => (value ? tinycolor(value) : undefined), [value]);
@@ -166,11 +176,14 @@ export function useColorPickerControl(
   }, [hex]);
 
   return {
+    alphaType,
     swatchColor,
+    displayValue,
     updatePrefixedColor,
     editedValueIsInvalid,
     editedValue,
     updateEditedValue,
     onInputBlur,
+    onChange,
   };
 }
