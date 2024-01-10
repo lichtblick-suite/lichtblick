@@ -8,6 +8,7 @@ export * from "./MuiAvatar";
 export * from "./MuiBadge";
 export * from "./MuiBackdrop";
 export * from "./MuiButton";
+export * from "./MuiButtonGroup";
 export * from "./MuiButtonBase";
 export * from "./MuiCard";
 export * from "./MuiCardActionArea";

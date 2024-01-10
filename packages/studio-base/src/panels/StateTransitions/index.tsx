@@ -426,6 +426,7 @@ function StateTransitions(props: Props) {
             paths={paths}
             heightPerTopic={heightPerTopic}
             setFocusedPath={setFocusedPath}
+            saveConfig={saveConfig}
           />
         </div>
       </Stack>

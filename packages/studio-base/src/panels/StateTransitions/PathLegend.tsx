@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Add16Filled, Edit16Filled } from "@fluentui/react-icons";
-import { Button, Stack, Typography } from "@mui/material";
+import { Add16Regular, Dismiss12Regular } from "@fluentui/react-icons";
+import { Button, ButtonGroup, Stack, buttonClasses } from "@mui/material";
+import { MouseEvent, useCallback } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
@@ -12,7 +13,11 @@ import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutCo
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 import { DEFAULT_PATH } from "@foxglove/studio-base/panels/Plot/settings";
 import { stateTransitionPathDisplayName } from "@foxglove/studio-base/panels/StateTransitions/shared";
-import { StateTransitionPath } from "@foxglove/studio-base/panels/StateTransitions/types";
+import {
+  StateTransitionConfig,
+  StateTransitionPath,
+} from "@foxglove/studio-base/panels/StateTransitions/types";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 const useStyles = makeStyles()((theme) => ({
   chartOverlay: {
@@ -22,34 +27,33 @@ const useStyles = makeStyles()((theme) => ({
     pointerEvents: "none",
   },
   row: {
-    paddingInline: theme.spacing(0.5),
+    paddingInline: theme.spacing(1, 0.5),
     pointerEvents: "none",
   },
-  button: {
+  dismissIcon: {
+    paddingInline: theme.spacing(0.5),
+    minWidth: "auto !important",
+  },
+  buttonGroup: {
     minWidth: "auto",
     textAlign: "left",
     pointerEvents: "auto",
     fontWeight: "normal",
-    padding: theme.spacing(0, 1),
     maxWidth: "100%",
 
-    "&:hover": {
+    [`.${buttonClasses.root}`]: {
       backgroundColor: tinycolor(theme.palette.background.paper).setAlpha(0.67).toString(),
-      backgroundImage: `linear-gradient(to right, ${theme.palette.action.focus}, ${theme.palette.action.focus})`,
-    },
-    ".MuiButton-endIcon": {
-      opacity: 0.8,
-      fontSize: 14,
-      marginLeft: theme.spacing(0.5),
+      paddingBlock: theme.spacing(0.25),
+      borderColor: theme.palette.background.paper,
 
-      svg: {
-        fontSize: "1em",
-        height: "1em",
-        width: "1em",
+      "&:hover": {
+        backgroundImage: `linear-gradient(to right, ${theme.palette.action.hover}, ${theme.palette.action.hover})`,
       },
     },
-    ":not(:hover) .MuiButton-endIcon": {
-      display: "none",
+    [`.${buttonClasses.endIcon}`]: {
+      opacity: 0.8,
+      marginLeft: theme.spacing(0.5),
+      marginRight: theme.spacing(-0.75),
     },
   },
 }));
@@ -58,35 +62,66 @@ export const PathLegend = React.memo(function PathLegend(props: {
   paths: StateTransitionPath[];
   heightPerTopic: number;
   setFocusedPath: (value: string[] | undefined) => void;
+  saveConfig: SaveConfig<StateTransitionConfig>;
 }) {
-  const { paths, heightPerTopic, setFocusedPath } = props;
+  const { paths, heightPerTopic, setFocusedPath, saveConfig } = props;
   const { setSelectedPanelIds } = useSelectedPanels();
   const { id: panelId } = usePanelContext();
   const { openPanelSettings } = useWorkspaceActions();
   const { classes } = useStyles();
 
+  const handleDeletePath = useCallback(
+    (event: MouseEvent<HTMLButtonElement>, index: number) => {
+      // Deleting a path is a "quick action" and we want to avoid opening the settings sidebar
+      // so whatever sidebar the user is already viewing says active.
+      //
+      // This prevents the click event from going up to the entire row and showing the sidebar.
+      event.stopPropagation();
+
+      const newPaths = paths.slice();
+      if (newPaths.length > 0) {
+        newPaths.splice(index, 1);
+      }
+      saveConfig({ paths: newPaths });
+    },
+    [paths, saveConfig],
+  );
+
   return (
     <Stack className={classes.chartOverlay} position="absolute" paddingTop={0.5}>
       {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
         <div className={classes.row} key={index} style={{ height: heightPerTopic }}>
-          <Button
+          <ButtonGroup
             size="small"
             color="inherit"
-            data-testid="edit-topic-button"
-            className={classes.button}
-            endIcon={paths.length === 0 ? <Add16Filled /> : <Edit16Filled />}
-            onClick={() => {
-              setSelectedPanelIds([panelId]);
-              openPanelSettings();
-              setFocusedPath(["paths", String(index)]);
-            }}
+            variant="contained"
+            className={classes.buttonGroup}
           >
-            <Typography variant="inherit" noWrap>
+            <Button
+              data-testid="edit-topic-button"
+              endIcon={paths.length === 0 && <Add16Regular />}
+              onClick={() => {
+                setSelectedPanelIds([panelId]);
+                openPanelSettings();
+                setFocusedPath(["paths", String(index)]);
+              }}
+            >
               {paths.length === 0
                 ? "Click to add a series"
                 : stateTransitionPathDisplayName(path, index)}
-            </Typography>
-          </Button>
+            </Button>
+            {paths.length > 0 && (
+              <Button
+                className={classes.dismissIcon}
+                size="small"
+                onClick={(event) => {
+                  handleDeletePath(event, index);
+                }}
+              >
+                <Dismiss12Regular />
+              </Button>
+            )}
+          </ButtonGroup>
         </div>
       ))}
     </Stack>
