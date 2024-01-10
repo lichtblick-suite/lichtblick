@@ -7,7 +7,30 @@ import { Transform } from "./Transform";
 import { Pose } from "./geometry";
 import { Duration, Time } from "./time";
 
-const DEFAULT_MAX_CAPACITY_PER_FRAME = 50_000;
+/**
+ * Defines the maximum number of transforms across time stored in a single
+ * `CoordinateFrame`.
+ * We store a history of transforms received so that Markers and other 3D elements
+ * can reference the state of a CoordinateFrame transform at a particular time rather than
+ * only storing the most recent frame.
+ * Considerations for the setting of this value are:
+ *  - the larger the value, the more memory is used per panel
+ *  - the larger the value, the longer it can take to set transforms within the history
+ *  - the larger the value, the more likely it is that objects will be able to reference transforms at older times.
+ *    Note that this is highly dependent on the frequency transforms for a given frame are published.
+ *    For example, for 50Hz transforms for a single frame and a value of 5,000 max capacity. The transform
+ *    history will contain 100 seconds of history for this frame.
+ *    For 1kHz transforms for a single frame and a value of 5,000 max capacity. The transform history would
+ *    only store 5 seconds of history for this frame.
+ *    If the object references a transform at a time older than the history, it will simply use the oldest transform for that frame
+ *    which is not guaranteed to be accurate.
+ *
+ * We generally want to keep this higher to allow for larger transform histories, but
+ * also want to be mindful to memory and performance concerns when doing so
+ *
+ * This number is mentioned in the docs. If changed docs must be updated.
+ */
+const DEFAULT_MAX_CAPACITY_PER_FRAME = 10_000;
 
 export enum AddTransformResult {
   NOT_UPDATED,
