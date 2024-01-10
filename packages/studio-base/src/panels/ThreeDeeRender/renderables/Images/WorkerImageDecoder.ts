@@ -20,8 +20,6 @@ import { Image as RosImage } from "../../ros";
 export class WorkerImageDecoder {
   #worker: Worker;
   #remote: Comlink.Remote<(typeof import("./WorkerImageDecoder.worker"))["service"]>;
-  /** Aborts the current decode promise. */
-  #abort?: () => void;
 
   public constructor() {
     this.#worker = new Worker(
@@ -38,25 +36,10 @@ export class WorkerImageDecoder {
     image: RosImage | RawImage,
     options: Partial<RawImageOptions>,
   ): Promise<ImageData> {
-    return await new Promise((resolve, reject) => {
-      // abort previous request
-      if (this.#abort) {
-        this.#abort();
-      }
-      this.#abort = reject;
-      void this.#remote.decode(image, options).then(resolve).catch(reject);
-    });
+    return await this.#remote.decode(image, options);
   }
 
   public terminate(): void {
-    /** Need to abort as well as terminate because the worker.terminate() call
-     * causes the promise to be neither resolved nor rejected. This creates a circular
-     * reference loop with the `.then` functions within the renderable, causing the
-     * Renderer to never be garbage collected because it's linked to this ongoing
-     * promise and worker.
-     */
-    this.#abort?.();
     this.#worker.terminate();
-    this.#abort = undefined;
   }
 }
