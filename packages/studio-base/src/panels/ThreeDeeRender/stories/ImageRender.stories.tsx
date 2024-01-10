@@ -4,16 +4,15 @@
 
 import { StoryObj } from "@storybook/react";
 import { userEvent, screen } from "@storybook/testing-library";
-import { useState } from "react";
-import { create } from "zustand";
+import { useEffect, useState } from "react";
 
 import { CompressedImage, RawImage } from "@foxglove/schemas";
 import { MessageEvent } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import { PNG_TEST_IMAGE, rad2deg, SENSOR_FRAME_ID } from "./common";
-import { useFixtureQueue } from "./useFixtureQueue";
 import ThreeDeePanel from "../index";
 import { CameraInfo, CompressedImage as RosCompressedImage, Image } from "../ros";
 
@@ -368,7 +367,11 @@ export const FoxgloveImage: StoryObj = {
 };
 
 export const ImageThenInfo: StoryObj = {
+  parameters: {
+    useReadySignal: true,
+  },
   render: function Story() {
+    const readySignal = useReadySignal();
     const topics: Topic[] = [
       { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
       { name: "/cam2/info", schemaName: "foxglove.CameraCalibration" },
@@ -412,33 +415,37 @@ export const ImageThenInfo: StoryObj = {
       sizeInBytes: 0,
     };
 
-    const [useFixture] = useState(() =>
-      create<Fixture>((set) => ({
-        topics,
-        capabilities: [],
-        frame: {
-          "/cam1/png": [cam1Png],
-        },
-        activeData: {
-          currentTime: { sec: 0, nsec: 0 },
-        },
-        setSubscriptions: (_id, payload) => {
-          if (payload.find((item) => item.topic === "/cam1/info")) {
-            set({
-              frame: {
-                "/cam1/info": [cam1],
-              },
-            });
-          }
-        },
-      })),
-    );
+    const [fixture, setFixture] = useState<Fixture>({
+      topics,
+      capabilities: [],
+      frame: {
+        // first, image
+        "/cam1/png": [cam1Png],
+      },
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    });
 
-    const fixture = useFixture();
-    const [activeFixture, pauseFrame] = useFixtureQueue(fixture);
+    useEffect(() => {
+      void (async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
+        setFixture((oldFixture) => ({
+          ...oldFixture,
+          // then info
+          frame: {
+            "/cam1/info": [cam1],
+          },
+        }));
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        readySignal();
+      })();
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [readySignal]);
     return (
-      <PanelSetup fixture={activeFixture} pauseFrame={pauseFrame}>
+      <PanelSetup fixture={fixture}>
         <ThreeDeePanel
           overrideConfig={{
             ...ThreeDeePanel.defaultConfig,
@@ -479,7 +486,11 @@ export const ImageThenInfo: StoryObj = {
 };
 
 export const InfoThenImage: StoryObj = {
+  parameters: {
+    useReadySignal: true,
+  },
   render: function Story() {
+    const readySignal = useReadySignal();
     const topics: Topic[] = [
       { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
       { name: "/cam2/info", schemaName: "foxglove.CameraCalibration" },
@@ -523,33 +534,38 @@ export const InfoThenImage: StoryObj = {
       sizeInBytes: 0,
     };
 
-    const [useFixture] = useState(() =>
-      create<Fixture>((set) => ({
-        topics,
-        capabilities: [],
-        frame: {
-          "/cam1/info": [cam1],
-        },
-        activeData: {
-          currentTime: { sec: 0, nsec: 0 },
-        },
-        setSubscriptions: (_id, payload) => {
-          if (payload.find((item) => item.topic === "/cam1/png")) {
-            set({
-              frame: {
-                "/cam1/png": [cam1Png],
-              },
-            });
-          }
-        },
-      })),
-    );
+    const [fixture, setFixture] = useState<Fixture>({
+      topics,
+      capabilities: [],
+      frame: {
+        //first, info
+        "/cam1/info": [cam1],
+      },
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    });
 
-    const fixture = useFixture();
-    const [activeFixture, pauseFrame] = useFixtureQueue(fixture);
+    useEffect(() => {
+      void (async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        setFixture((oldFixture) => ({
+          ...oldFixture,
+          // then image
+          frame: {
+            "/cam1/png": [cam1Png],
+          },
+        }));
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        readySignal();
+      })();
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [readySignal]);
 
     return (
-      <PanelSetup fixture={activeFixture} pauseFrame={pauseFrame}>
+      <PanelSetup fixture={fixture}>
         <ThreeDeePanel
           overrideConfig={{
             ...ThreeDeePanel.defaultConfig,
@@ -590,7 +606,11 @@ export const InfoThenImage: StoryObj = {
 };
 
 export const UpdateImageToGreen: StoryObj = {
+  parameters: {
+    useReadySignal: true,
+  },
   render: function Story() {
+    const readySignal = useReadySignal();
     const topics: Topic[] = [
       { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
       { name: "/cam1/raw", schemaName: "foxglove.RawImage" },
@@ -655,50 +675,53 @@ export const UpdateImageToGreen: StoryObj = {
       sizeInBytes: 0,
     };
 
-    const [useFixture] = useState(() =>
-      create<Fixture>((set) => ({
-        topics,
-        capabilities: [],
-        frame: {
-          "/cam1/info": [cam1],
-          "/cam1/raw": [cam1Raw],
-        },
-        activeData: {
-          currentTime: { sec: 0, nsec: 0 },
-        },
-        setSubscriptions: (_id, payload) => {
-          if (payload.find((item) => item.topic === "/cam1/raw")) {
-            set({
-              frame: {
-                "/cam1/raw": [
-                  {
-                    topic: "/cam1/raw",
-                    receiveTime: { sec: 10, nsec: 0 },
-                    message: {
-                      timestamp: { sec: 0, nsec: 0 },
-                      frame_id: SENSOR_FRAME_ID,
-                      height: SIZE,
-                      width: SIZE,
-                      encoding: "rgba8",
-                      step: SIZE * 4,
-                      data: rgba8_green,
-                    },
-                    schemaName: "foxglove.RawImage",
-                    sizeInBytes: 0,
-                  },
-                ],
-              },
-            });
-          }
-        },
-      })),
-    );
+    const [fixture, setFixture] = useState<Fixture>({
+      topics,
+      capabilities: [],
+      frame: {
+        "/cam1/info": [cam1],
+        "/cam1/raw": [cam1Raw],
+      },
+      activeData: {
+        currentTime: { sec: 0, nsec: 0 },
+      },
+    });
 
-    const fixture = useFixture();
-    const [activeFixture, pauseFrame] = useFixtureQueue(fixture);
+    useEffect(() => {
+      void (async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        setFixture((oldFixture) => ({
+          ...oldFixture,
+          // then image
+          frame: {
+            "/cam1/raw": [
+              {
+                topic: "/cam1/raw",
+                receiveTime: { sec: 10, nsec: 0 },
+                message: {
+                  timestamp: { sec: 0, nsec: 0 },
+                  frame_id: SENSOR_FRAME_ID,
+                  height: SIZE,
+                  width: SIZE,
+                  encoding: "rgba8",
+                  step: SIZE * 4,
+                  data: rgba8_green,
+                },
+                schemaName: "foxglove.RawImage",
+                sizeInBytes: 0,
+              },
+            ],
+          },
+        }));
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        readySignal();
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [readySignal]);
 
     return (
-      <PanelSetup fixture={activeFixture} pauseFrame={pauseFrame}>
+      <PanelSetup fixture={fixture}>
         <ThreeDeePanel
           overrideConfig={{
             ...ThreeDeePanel.defaultConfig,
