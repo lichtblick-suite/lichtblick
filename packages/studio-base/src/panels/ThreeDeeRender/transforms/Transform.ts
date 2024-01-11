@@ -16,8 +16,13 @@ export class Transform {
   #rotation: quat;
   #matrix: mat4;
 
-  public constructor(matrixOrPosition: mat4 | vec3, rotation?: quat) {
-    if (matrixOrPosition.length === 16) {
+  public constructor(matrixOrPosition?: mat4 | vec3, rotation?: quat) {
+    if (matrixOrPosition == undefined) {
+      this.#position = [0, 0, 0];
+      this.#rotation = [0, 0, 0, 1];
+      quat.normalize(this.#rotation, this.#rotation);
+      this.#matrix = mat4.fromRotationTranslation(mat4Identity(), this.#rotation, this.#position);
+    } else if (matrixOrPosition.length === 16) {
       this.#matrix = matrixOrPosition;
       this.#position = [0, 0, 0];
       this.#rotation = [0, 0, 0, 1];
@@ -62,7 +67,7 @@ export class Transform {
    * calling setPosition and setRotation separately, since we only need to
    * update the matrix once
    */
-  public setPositionRotation(position: ReadonlyVec3, rotation: ReadonlyQuat): this {
+  public setPositionRotation(position: vec3, rotation: quat): this {
     vec3.copy(this.#position, position);
     quat.normalize(this.#rotation, rotation);
     mat4.fromRotationTranslation(this.#matrix, this.#rotation, this.#position);
@@ -118,6 +123,10 @@ export class Transform {
 
   public static Identity(): Transform {
     return new Transform(vec3Identity(), quatIdentity());
+  }
+
+  public static Empty(): Transform {
+    return new Transform();
   }
 
   /**

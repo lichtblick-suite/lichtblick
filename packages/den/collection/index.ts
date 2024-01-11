@@ -7,4 +7,5 @@ export * from "./ArrayMap";
 export * from "./binarySearch";
 export * from "./minIndexBy";
 export * from "./MultiMap";
+export * from "./ObjectPool";
 export * from "./VecQueue";

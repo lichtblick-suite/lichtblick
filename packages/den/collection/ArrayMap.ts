@@ -15,8 +15,13 @@ export class ArrayMap<K, V> {
     return this.#list.length;
   }
 
-  public clear(): void {
-    this.#list.length = 0;
+  /** Clears array and returns removed elements */
+  public clear(): [K, V][] {
+    return this.#list.splice(0);
+  }
+
+  public [Symbol.iterator](): IterableIterator<[K, V]> {
+    return this.#list[Symbol.iterator]();
   }
 
   /** Retrieve the key/value tuple at the given index, if it exists. */
@@ -27,20 +32,24 @@ export class ArrayMap<K, V> {
   /**
    * Store a key/value tuple in the sorted list. If the key already exists, the
    * previous entry is overwritten.
+   * Returns replaced value if it exists.
    */
-  public set(key: K, value: V): void {
+  public set(key: K, value: V): V | undefined {
     const index = this.binarySearch(key);
     if (index >= 0) {
+      const existingEntry = this.#list[index]![1];
       this.#list[index]![1] = value;
+      return existingEntry;
     } else {
-      const greaterThanIndex = ~index;
       const newEntry: [K, V] = [key, value];
+      const greaterThanIndex = ~index;
       if (greaterThanIndex >= this.#list.length) {
         this.#list.push(newEntry);
       } else {
         this.#list.splice(greaterThanIndex, 0, newEntry);
       }
     }
+    return undefined;
   }
 
   /** Removes the first element and returns it, if available. */
@@ -53,26 +62,34 @@ export class ArrayMap<K, V> {
     return this.#list.pop();
   }
 
-  /** Removes the element with the given key, if it exists */
-  public remove(key: K): void {
+  /** Removes the element with the given key, if it exists.
+   * Returns element removed.
+   */
+  public remove(key: K): [K, V] | undefined {
     const index = this.binarySearch(key);
     if (index >= 0) {
-      this.#list.splice(index, 1);
+      return this.#list.splice(index, 1)[0];
     }
+    return undefined;
   }
 
-  /** Removes all elements with keys greater than the given key. */
-  public removeAfter(key: K): void {
+  /** Removes all elements with keys greater than the given key.
+   * Returns elements removed.
+   */
+  public removeAfter(key: K): [K, V][] {
     const index = this.binarySearch(key);
     const greaterThanIndex = index >= 0 ? index + 1 : ~index;
-    this.#list.length = greaterThanIndex;
+    const removed = this.#list.splice(greaterThanIndex);
+    return removed;
   }
 
-  /** Removes all elements with keys less than the given key. */
-  public removeBefore(key: K): void {
+  /** Removes all elements with keys less than the given key.
+   * Returns elements removed.
+   */
+  public removeBefore(key: K): [K, V][] {
     const index = this.binarySearch(key);
     const lessThanIndex = index >= 0 ? index : ~index;
-    this.#list.splice(0, lessThanIndex);
+    return this.#list.splice(0, lessThanIndex);
   }
 
   /** Access the first key/value tuple in the list, without modifying the list. */

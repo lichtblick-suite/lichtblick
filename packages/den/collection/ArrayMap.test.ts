@@ -154,4 +154,25 @@ describe("ArrayMap", () => {
     expect(list.binarySearch(8)).toBe(7);
     expect(list.binarySearch(9)).toBe(8);
   });
+
+  it("iterates properly", () => {
+    const list = new ArrayMap<number, string>();
+    const data = [...Array(10).keys()];
+    data.forEach((val) => {
+      list.set(val, String(val));
+    });
+    let i = 0;
+    for (const [k, v] of list) {
+      expect(k).toBe(data[i]);
+      expect(v).toBe(data[i]!.toString());
+      i++;
+    }
+  });
+
+  it("does not return referentially the same object from set when replacing", () => {
+    const list = new ArrayMap<number, { a: number }>();
+    list.set(1, { a: 1 });
+    const prev = list.set(1, { a: 2 });
+    expect(prev).not.toBe(list.at(list.binarySearch(1))![1]);
+  });
 });

@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { ObjectPool } from "@foxglove/den/collection";
 import { Transform } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms/Transform";
 
 import { AddTransformResult, TransformTree } from "./TransformTree";
@@ -9,20 +10,20 @@ import { AddTransformResult, TransformTree } from "./TransformTree";
 const tf = Transform.Identity();
 describe("TransformTree", () => {
   it("updates tree when adding a transform that would not create a cycle", () => {
-    const tfTree = new TransformTree();
+    const tfTree = new TransformTree(new ObjectPool(Transform.Empty));
     tfTree.addTransform("b", "a", 0n, tf);
     tfTree.addTransform("c", "b", 0n, tf);
     expect(tfTree.addTransform("d", "c", 0n, tf)).toEqual(AddTransformResult.UPDATED);
   });
   it("detects a cycle adding a transform that would create a cycle with 2 frames", () => {
-    const tfTree = new TransformTree();
+    const tfTree = new TransformTree(new ObjectPool(Transform.Empty));
     // a <- b
     tfTree.addTransform("b", "a", 0n, tf);
     // b <- a <- b ERROR - cycle created
     expect(tfTree.addTransform("a", "b", 0n, tf)).toEqual(AddTransformResult.CYCLE_DETECTED);
   });
   it("detects a cycle when adding a transform that would create a cycle with 3 frames", () => {
-    const tfTree = new TransformTree();
+    const tfTree = new TransformTree(new ObjectPool(Transform.Empty));
     // a <- b
     tfTree.addTransform("b", "a", 0n, tf);
     // a <- b <- c
@@ -31,12 +32,12 @@ describe("TransformTree", () => {
     expect(tfTree.addTransform("a", "c", 0n, tf)).toEqual(AddTransformResult.CYCLE_DETECTED);
   });
   it("detects a cycle when adding a transform with a parent as itself", () => {
-    const tfTree = new TransformTree();
+    const tfTree = new TransformTree(new ObjectPool(Transform.Empty));
     expect(tfTree.addTransform("a", "a", 0n, tf)).toEqual(AddTransformResult.CYCLE_DETECTED);
   });
 
   it("supports deleting frames", () => {
-    const tfTree = new TransformTree();
+    const tfTree = new TransformTree(new ObjectPool(Transform.Empty));
     tfTree.addTransform("b", "a", 0n, tf);
     tfTree.addTransform("c", "b", 0n, tf);
     tfTree.addTransform("c", "b", 1n, tf);
