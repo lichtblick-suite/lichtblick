@@ -10,32 +10,28 @@ import {
   Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography, buttonBaseClasses } from "@mui/material";
-import { MouseEventHandler, useMemo, useState } from "react";
+import { MouseEventHandler } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-import { v4 as uuidv4 } from "uuid";
 
+import { isTime, toSec } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
-import { iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { plotPathDisplayName } from "@foxglove/studio-base/panels/Plot/types";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
-import { PlotPath, TypedDataSet, TypedData } from "./internalTypes";
+import { PlotPath, plotPathDisplayName } from "./config";
 
 type PlotLegendRowProps = Immutable<{
-  currentTime?: number;
-  datasets: TypedDataSet[];
   hasMismatchedDataLength: boolean;
   index: number;
   onClickPath: () => void;
   path: PlotPath;
   paths: PlotPath[];
+  value?: unknown;
+  valueSource: "hover" | "current";
   savePaths: (paths: PlotPath[]) => void;
-  showPlotValuesInLegend: boolean;
 }>;
 
 export const ROW_HEIGHT = 30;
@@ -130,52 +126,39 @@ const useStyles = makeStyles<void, "plotName" | "actionButton">()((theme, _param
   },
 }));
 
+function renderValue(value: unknown): string | number | undefined {
+  switch (typeof value) {
+    case "bigint":
+    case "boolean":
+      return value.toString();
+    case "number":
+    case "string":
+      return value;
+    case "object":
+      if (isTime(value)) {
+        return toSec(value);
+      }
+      return undefined;
+    default:
+      return undefined;
+  }
+}
+
 export function PlotLegendRow({
-  currentTime,
-  datasets,
   hasMismatchedDataLength,
   index,
   onClickPath,
   path,
   paths,
   savePaths,
-  showPlotValuesInLegend,
+  value,
+  valueSource,
 }: PlotLegendRowProps): JSX.Element {
   const { openPanelSettings } = useWorkspaceActions();
   const { id: panelId } = usePanelContext();
   const { setSelectedPanelIds } = useSelectedPanels();
   const { classes, cx } = useStyles();
   const { t } = useTranslation("plot");
-
-  const correspondingData = useMemo(() => {
-    if (!showPlotValuesInLegend) {
-      return [];
-    }
-    return datasets[index]?.data ?? [];
-  }, [datasets, index, showPlotValuesInLegend]);
-
-  const [hoverComponentId] = useState<string>(() => uuidv4());
-  const hoverValue = useHoverValue({
-    componentId: hoverComponentId,
-    disableUpdates: !showPlotValuesInLegend,
-    isPlaybackSeconds: true,
-  });
-
-  const currentValue = useMemo(() => {
-    if (!showPlotValuesInLegend) {
-      return undefined;
-    }
-    const timeToCompare = hoverValue?.value ?? currentTime;
-
-    let value;
-    for (const pt of iterateTyped(correspondingData as TypedData[])) {
-      if (timeToCompare == undefined || pt.x > timeToCompare) {
-        break;
-      }
-      value = pt.value;
-    }
-    return value?.toString();
-  }, [showPlotValuesInLegend, hoverValue?.value, currentTime, correspondingData]);
 
   // When there are no series configured we render an extra row to show an "add series" button.
   const isAddSeriesRow = paths.length === 0;
@@ -193,6 +176,8 @@ export function PlotLegendRow({
     }
     savePaths(newPaths);
   };
+
+  const showPlotValuesInLegend = value != undefined;
 
   return (
     <div
@@ -254,10 +239,9 @@ export function PlotLegendRow({
           <Typography
             variant="body2"
             align="right"
-            color={hoverValue?.value != undefined ? "warning.main" : "text.secondary"}
+            color={valueSource === "hover" ? "warning.main" : "text.secondary"}
           >
-            {currentValue && !(+currentValue < 0) && " "}
-            {currentValue ?? ""}
+            {renderValue(value)}
           </Typography>
         </div>
       )}

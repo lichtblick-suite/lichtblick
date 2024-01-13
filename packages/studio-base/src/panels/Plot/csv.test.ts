@@ -13,10 +13,10 @@ describe("csv", () => {
             label: "label",
             data: [
               {
-                receiveTime: [{ sec: 0, nsec: 0 }],
-                x: new Float32Array([0]),
-                y: new Float32Array([0]),
-                value: [0],
+                receiveTime: { sec: 0, nsec: 0 },
+                x: 0,
+                y: 0,
+                value: 0,
               },
             ],
           },
@@ -35,11 +35,10 @@ describe("csv", () => {
             label: "label",
             data: [
               {
-                receiveTime: [{ sec: 0, nsec: 0 }],
-                x: new Float32Array([0]),
-                // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
-                y: new Float32Array([Number(9999999999999001)]),
-                value: [9999999999999001n],
+                receiveTime: { sec: 0, nsec: 0 },
+                x: 0,
+                y: Number(9999999999999001n),
+                value: 9999999999999001n,
               },
             ],
           },

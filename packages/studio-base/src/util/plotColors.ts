@@ -52,3 +52,7 @@ export const darkColor: (_: string) => string = _.memoize((color: string): strin
 export function getLineColor(color: string | undefined, index: number): string {
   return color ?? lineColors[index % lineColors.length]!;
 }
+
+export function getContrastColor(colorScheme: "light" | "dark", color: string): string {
+  return colorScheme === "light" ? darkColor(color) : lightColor(color);
+}

@@ -4,31 +4,31 @@
 
 import { Immutable } from "@foxglove/studio";
 
+export type Bounds1D = {
+  min: number;
+  max: number;
+};
+
 /**
  * Describes the limits of a rectangular area in 2d space.
  */
 export type Bounds = {
-  x: { min: number; max: number };
-  y: { min: number; max: number };
+  x: Bounds1D;
+  y: Bounds1D;
 };
 
 /**
- * Creates inverted bounds with values set to extremes to simplify calculating the union
- * with a series of other bounds.
+ * Return the union of two 1D bounds
  */
-export function makeInvertedBounds(): Bounds {
-  return {
-    x: { min: Number.MAX_SAFE_INTEGER, max: Number.MIN_SAFE_INTEGER },
-    y: { min: Number.MAX_SAFE_INTEGER, max: Number.MIN_SAFE_INTEGER },
-  };
+export function unionBounds1D(a: Immutable<Bounds1D>, b: Immutable<Bounds1D>): Bounds1D {
+  return { min: Math.min(a.min, b.min), max: Math.max(a.max, b.max) };
 }
 
 /**
- * Finds the union of two rectangular bounds.
+ * Update the bounds to include the value. The bounds are updated in-place. Returns the same bounds
+ * object.
  */
-export function unionBounds(a: Immutable<Bounds>, b: Immutable<Bounds>): Bounds {
-  return {
-    x: { min: Math.min(a.x.min, b.x.min), max: Math.max(a.x.max, b.x.max) },
-    y: { min: Math.min(a.y.min, b.y.min), max: Math.max(a.y.max, b.y.max) },
-  };
+export function extendBounds1D(bounds: Bounds1D, value: number): void {
+  bounds.min = Math.min(bounds.min, value);
+  bounds.max = Math.max(bounds.max, value);
 }

@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "@foxglove/studio";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { isTypedArray } from "@foxglove/studio-base/types/isTypedArray";
 
@@ -12,8 +13,8 @@ import { filterMatches } from "./filterMatches";
  * Execute the given message path to extract item(s) from the message.
  */
 export function simpleGetMessagePathDataItems(
-  message: MessageEvent,
-  filledInPath: RosPath,
+  message: Immutable<MessageEvent>,
+  filledInPath: Immutable<RosPath>,
 ): unknown[] {
   // We don't care about messages that don't match the topic we're looking for.
   if (message.topic !== filledInPath.topicName) {

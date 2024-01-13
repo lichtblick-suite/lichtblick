@@ -67,6 +67,21 @@ export function useMessagePipeline<T>(selector: (arg0: MessagePipelineContext) =
   );
 }
 
+export function useMessagePipelineSubscribe(): (
+  fn: (state: MessagePipelineContext) => void,
+) => () => void {
+  const store = useGuaranteedContext(ContextInternal);
+
+  return useCallback(
+    (fn: (state: MessagePipelineContext) => void) => {
+      return store.subscribe((state) => {
+        fn(state.public);
+      });
+    },
+    [store],
+  );
+}
+
 type ProviderProps = {
   children: React.ReactNode;
 

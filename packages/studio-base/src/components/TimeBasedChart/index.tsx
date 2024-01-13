@@ -98,7 +98,7 @@ const selectGlobalBounds = (store: TimelineInteractionStateStore) => store.globa
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
 // Calculation mode for the "reset view" view.
-export type ChartDefaultView =
+type ChartDefaultView =
   | { type: "fixed"; minXValue: number; maxXValue: number }
   | { type: "following"; width: number };
 

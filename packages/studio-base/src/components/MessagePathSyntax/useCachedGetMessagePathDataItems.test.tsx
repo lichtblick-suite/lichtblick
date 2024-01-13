@@ -698,6 +698,36 @@ describe("fillInGlobalVariablesInPath", () => {
       ],
     });
   });
+
+  // This test captures current behavior, but in the future we might want to add support for boolean values.
+  it("does not fill in boolean values", () => {
+    expect(
+      fillInGlobalVariablesInPath(
+        {
+          topicName: "/foo",
+          topicNameRepr: "/foo",
+          messagePath: [
+            {
+              type: "filter",
+              path: ["bar"],
+              value: { variableName: "var", startLoc: 0 },
+              nameLoc: 0,
+              valueLoc: 0,
+              repr: "",
+            },
+          ],
+          modifier: undefined,
+        },
+        { var: true },
+      ),
+    ).toEqual({
+      topicName: "/foo",
+      topicNameRepr: "/foo",
+      messagePath: [
+        { type: "filter", path: ["bar"], value: undefined, nameLoc: 0, valueLoc: 0, repr: "" },
+      ],
+    });
+  });
 });
 
 describe("useDecodeMessagePathsForMessagesByTopic", () => {

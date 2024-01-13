@@ -16,7 +16,7 @@ import { withStyles, makeStyles } from "tss-react/mui";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot/openSiblingPlotPanel";
-import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot/types";
+import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot/plotableRosTypes";
 import {
   openSiblingStateTransitionsPanel,
   transitionableRosTypes,

@@ -16,11 +16,15 @@ function supportsClassStaticInitialization() {
   }
 }
 
+const supportsOffscreenCanvas =
+  typeof HTMLCanvasElement.prototype.transferControlToOffscreen === "function";
+
 /** Returns true if JS syntax and APIs required for rendering the rest of the app are supported. */
 export function canRenderApp(): boolean {
   return (
     typeof BigInt64Array === "function" &&
     typeof BigUint64Array === "function" &&
-    supportsClassStaticInitialization()
+    supportsClassStaticInitialization() &&
+    supportsOffscreenCanvas
   );
 }

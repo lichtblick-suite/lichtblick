@@ -12,33 +12,31 @@ import {
 } from "@fluentui/react-icons";
 import { IconButton } from "@mui/material";
 import * as _ from "lodash-es";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@foxglove/studio";
-import { PlotLegendRow, ROW_HEIGHT } from "@foxglove/studio-base/panels/Plot/PlotLegendRow";
-import { PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
-import { PlotConfig } from "@foxglove/studio-base/panels/Plot/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import { TypedDataSet } from "./internalTypes";
+import type { PlotCoordinator } from "./PlotCoordinator";
+import { PlotLegendRow, ROW_HEIGHT } from "./PlotLegendRow";
+import { PlotPath, PlotConfig } from "./config";
 import { DEFAULT_PATH } from "./settings";
 
 const minLegendWidth = 25;
 const maxLegendWidth = 800;
 
 type Props = Immutable<{
-  currentTime?: number;
-  datasets: TypedDataSet[];
+  coordinator: PlotCoordinator | undefined;
   legendDisplay: "floating" | "top" | "left";
   onClickPath: (index: number) => void;
   paths: PlotPath[];
-  pathsWithMismatchedDataLengths: string[];
   saveConfig: SaveConfig<PlotConfig>;
   showLegend: boolean;
-  showPlotValuesInLegend: boolean;
   sidebarDimension: number;
+  showValues: boolean;
+  hoveredValuesBySeriesIndex?: string[];
 }>;
 
 const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloating">()(
@@ -143,18 +141,19 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
   }),
 );
 
+const emptyPaths: string[] = [];
+
 function PlotLegendComponent(props: Props): JSX.Element {
   const {
-    currentTime,
-    datasets,
+    coordinator,
     legendDisplay,
     onClickPath,
     paths,
-    pathsWithMismatchedDataLengths,
     saveConfig,
     showLegend,
-    showPlotValuesInLegend,
     sidebarDimension,
+    showValues,
+    hoveredValuesBySeriesIndex,
   } = props;
   const { classes, cx } = useStyles();
 
@@ -213,6 +212,42 @@ function PlotLegendComponent(props: Props): JSX.Element {
     [saveConfig],
   );
 
+  const [pathsWithMismatchedDataLengths, setPathsWithMismatchedDataLengths] =
+    useState<string[]>(emptyPaths);
+  useEffect(() => {
+    if (!coordinator) {
+      return;
+    }
+    const handler = (newPaths: readonly string[]) => {
+      setPathsWithMismatchedDataLengths(newPaths.slice());
+    };
+    coordinator.on("pathsWithMismatchedDataLengthsChanged", handler);
+    return () => {
+      coordinator.off("pathsWithMismatchedDataLengthsChanged", handler);
+      setPathsWithMismatchedDataLengths(emptyPaths);
+    };
+  }, [coordinator]);
+
+  const [currentValuesBySeriesIndex, setCurrentValuesBySeriesIndex] = useState<
+    unknown[] | undefined
+  >();
+  useEffect(() => {
+    if (!coordinator || !showValues) {
+      return;
+    }
+    const handler = (values: readonly unknown[]) => {
+      setCurrentValuesBySeriesIndex(values.slice());
+    };
+    coordinator.on("currentValuesChanged", handler);
+    return () => {
+      coordinator.off("currentValuesChanged", handler);
+      setCurrentValuesBySeriesIndex(undefined);
+    };
+  }, [coordinator, showValues]);
+
+  const valuesBySeriesIndex = hoveredValuesBySeriesIndex ?? currentValuesBySeriesIndex;
+  const valueSource = hoveredValuesBySeriesIndex ? "hover" : "current";
+
   return (
     <div
       className={cx(classes.root, {
@@ -240,8 +275,6 @@ function PlotLegendComponent(props: Props): JSX.Element {
         >
           {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
             <PlotLegendRow
-              currentTime={currentTime}
-              datasets={datasets}
               hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
               index={index}
               key={index}
@@ -251,7 +284,8 @@ function PlotLegendComponent(props: Props): JSX.Element {
               path={path}
               paths={paths}
               savePaths={savePaths}
-              showPlotValuesInLegend={showPlotValuesInLegend}
+              value={valuesBySeriesIndex?.[index]}
+              valueSource={valueSource}
             />
           ))}
         </div>

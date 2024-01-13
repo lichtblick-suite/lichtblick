@@ -2,19 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
 import * as R from "ramda";
 
 import { TypedData, ObjectData } from "./types";
 
-export type Point = { index: number; x: number; y: number; label: string | undefined };
-
-const sumTypedDataLength = (prev: number, arr: TypedData) => prev + arr.x.length;
-
-// Get the length of a typed dataset.
-export function getTypedLength(data: TypedData[]): number {
-  return data.reduce(sumTypedDataLength, 0);
-}
+export type Point = { index: number; x: number; y: number; label?: string | undefined };
 
 /**
  * iterateObjects iterates over ObjectData, yielding a `Point` for each entry.
@@ -133,78 +125,3 @@ export function findIndices(dataset: TypedData[], index: number): Indices | unde
 
   return undefined;
 }
-
-/**
- * fastFindIndices returns a faster version of findIndices in exchange for
- * doing some compute ahead of time.
- *
- * The "calculations ahead of time" refers to calculating the offsets of all of
- * the slices--in other words, the mapping from an index in the (conceptual)
- * list to the slice it falls into. Doing this ahead of time allows us to use
- * binary search to look up the slice and offset inside of that slice for a
- * given point; since the number of points is accumulative, we can't do this
- * efficiently when we're starting from nothing. In addition, we're also able
- * to "cache" the next offset to make reads of sequential points much faster.
- *
- * You use this in lieu of the slow version when you know you're about to do a
- * lot of reads from a dataset, such as when downsampling.
- */
-export const fastFindIndices = (dataset: TypedData[]): ((index: number) => Indices | undefined) => {
-  // Calculate the first index of each slice in `dataset`.
-  // For example, with two slices of 10 points each, this produces:
-  // [0, 10]
-  // In other words, the second slice begins at point index=10.
-  const sliceOffsets: number[] = R.pipe(
-    R.map(({ x: { length } }: TypedData) => length),
-    R.reduce(
-      (lengths: number[], length: number): number[] => [
-        ...lengths,
-        (R.last(lengths) ?? 0) + length,
-      ],
-      [],
-    ),
-    // remove the last one (can't resolve to greater than end of dataset)
-    (offsets) => offsets.slice(0, -1),
-  )(dataset);
-
-  // Given the index of a point, use binary search to find its slice and offset
-  // inside of that slice.
-  const getBinary = (index: number): Indices | undefined => {
-    const slice = _.sortedIndex(sliceOffsets, index);
-    if (slice === dataset.length) {
-      return undefined;
-    }
-
-    if (sliceOffsets[slice] === index) {
-      return [slice + 1, 0];
-    }
-
-    return [slice, index - (sliceOffsets[slice - 1] ?? 0)];
-  };
-
-  // Keep track of the last point this lookup returned. If the caller is just
-  // getting the next index in the sequence, we do not need to do any more
-  // expensive lookups.
-  let lastPoint: [index: number, location: Indices] = [0, [0, 0]];
-  return (offset: number): Indices | undefined => {
-    const [lastOffset, lastIndices] = lastPoint;
-    if (offset - 1 === lastOffset) {
-      const [slice, sliceOffset] = lastIndices;
-      const sliceLength = sliceOffsets[slice];
-      if (sliceLength != undefined && offset + 1 < sliceLength) {
-        const result: Indices = [slice, sliceOffset + 1];
-        lastPoint = [offset, result];
-        return result;
-      }
-    }
-
-    // Fall back to binary search if that optimization did not work
-    const result = getBinary(offset);
-    if (result == undefined) {
-      return undefined;
-    }
-
-    lastPoint = [offset, result];
-    return result;
-  };
-};
