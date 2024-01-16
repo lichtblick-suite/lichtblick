@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { Slider, Typography, useTheme } from "@mui/material";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -35,16 +36,27 @@ function VariableSliderPanel(props: Props): JSX.Element {
   const { min = 0, max = 10, step = 1 } = sliderProps;
   const globalVariableValue = globalVariables[globalVariableName];
   const theme = useTheme();
+  const [sliderValue, setSliderValue] = useState<number | number[]>(
+    typeof globalVariableValue === "number" ? globalVariableValue : 0,
+  );
 
   useVariableSliderSettings(config, saveConfig);
 
-  const sliderOnChange = useCallback(
-    (_event: Event, value: number | number[]) => {
+  const updateVariable = useCallback(
+    (value: number | number[]) => {
       if (value !== globalVariableValue) {
         setGlobalVariables({ [globalVariableName]: value });
       }
     },
     [globalVariableName, globalVariableValue, setGlobalVariables],
+  );
+  const updateVariableDebounced = useDebouncedCallback(updateVariable, 250);
+  const sliderOnChange = useCallback(
+    (_event: Event, value: number | number[]) => {
+      setSliderValue(value);
+      updateVariableDebounced(value);
+    },
+    [setSliderValue, updateVariableDebounced],
   );
 
   const marks = [
@@ -69,11 +81,11 @@ function VariableSliderPanel(props: Props): JSX.Element {
           max={max}
           step={step}
           marks={marks}
-          value={typeof globalVariableValue === "number" ? globalVariableValue : 0}
+          value={sliderValue}
           onChange={sliderOnChange}
         />
         <Typography variant="h5" style={{ marginTop: theme.spacing(-2.5) }}>
-          {typeof globalVariableValue === "number" ? globalVariableValue : 0}
+          {sliderValue}
         </Typography>
       </Stack>
     </Stack>
