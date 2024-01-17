@@ -31,15 +31,23 @@ export const MuiDataGrid: OverrideComponentReturn<"MuiDataGrid"> = {
     },
   },
   styleOverrides: {
-    root: {
+    root: {},
+    cell: {
       // Disable focus outline by default since most of our grids are used
       // as non-interactive display tables
-      "& .MuiDataGrid-cell:focus": {
+      "&:focus": {
         outline: "none",
       },
     },
     columnsPanel: {
       padding: 0,
+    },
+    columnHeader: {
+      // Disable focus outline by default since most of our grids are used
+      // as non-interactive display tables
+      "&:focus-within": {
+        outline: "none",
+      },
     },
     panelHeader: ({ theme }) => ({
       padding: theme.spacing(1.5),
