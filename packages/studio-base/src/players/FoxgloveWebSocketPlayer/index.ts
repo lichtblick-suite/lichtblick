@@ -111,7 +111,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #parsedMessagesBytes: number = 0;
   #receivedBytes: number = 0;
   #metricsCollector: PlayerMetricsCollectorInterface;
-  #hasReceivedMessage = false;
   #presence: PlayerPresence = PlayerPresence.INITIALIZING;
   #problems = new PlayerProblemManager();
   #numTimeSeeks = 0;
@@ -512,10 +511,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
 
     this.#client.on("message", ({ subscriptionId, data }) => {
-      if (!this.#hasReceivedMessage) {
-        this.#hasReceivedMessage = true;
-        this.#metricsCollector.recordTimeToFirstMsgs();
-      }
       const chanInfo = this.#resolvedSubscriptionsById.get(subscriptionId);
       if (!chanInfo) {
         const wasRecentlyCanceled = this.#recentlyCanceledSubscriptions.has(subscriptionId);
@@ -919,7 +914,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#closed = true;
     this.#client?.close();
     this.#metricsCollector.close();
-    this.#hasReceivedMessage = false;
     if (this.#openTimeout != undefined) {
       clearTimeout(this.#openTimeout);
       this.#openTimeout = undefined;
@@ -1298,7 +1292,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#topicsStats = new Map();
     this.#parsedMessages = [];
     this.#receivedBytes = 0;
-    this.#hasReceivedMessage = false;
     this.#problems.clear();
     this.#parameters = new Map();
     this.#fetchedAssets.clear();

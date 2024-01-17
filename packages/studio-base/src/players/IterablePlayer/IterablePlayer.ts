@@ -260,7 +260,6 @@ export class IterablePlayer implements Player {
   public setPlaybackSpeed(speed: number): void {
     this.#lastRangeMillis = undefined;
     this.#speed = speed;
-    this.#metricsCollector.setSpeed(speed);
 
     // Queue event state update to update speed in player state to UI
     this.#queueEmitState();
@@ -293,7 +292,6 @@ export class IterablePlayer implements Player {
       return;
     }
 
-    this.#metricsCollector.seek(targetTime);
     this.#seekTarget = targetTime;
     this.#untilTime = undefined;
     this.#lastTickMillis = undefined;
@@ -305,7 +303,6 @@ export class IterablePlayer implements Player {
   public setSubscriptions(newSubscriptions: SubscribePayload[]): void {
     log.debug("set subscriptions", newSubscriptions);
     this.#subscriptions = newSubscriptions;
-    this.#metricsCollector.setSubscriptions(newSubscriptions);
 
     const allTopics: TopicSelection = new Map(
       this.#subscriptions.map((subscription) => [subscription.topic, subscription]),

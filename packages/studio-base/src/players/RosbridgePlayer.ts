@@ -112,7 +112,6 @@ export default class RosbridgePlayer implements Player {
   #parsedTopics = new Set<string>();
   #receivedBytes: number = 0;
   #metricsCollector: PlayerMetricsCollectorInterface;
-  #hasReceivedMessage = false;
   #presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   #problems = new PlayerProblemManager();
   #emitTimer?: ReturnType<typeof setTimeout>;
@@ -436,7 +435,6 @@ export default class RosbridgePlayer implements Player {
       this.#emitTimer = undefined;
     }
     this.#metricsCollector.close();
-    this.#hasReceivedMessage = false;
   }
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {
@@ -501,11 +499,6 @@ export default class RosbridgePlayer implements Player {
             }
           }
           const receiveTime = this.#getCurrentTime();
-
-          if (!this.#hasReceivedMessage) {
-            this.#hasReceivedMessage = true;
-            this.#metricsCollector.recordTimeToFirstMsgs();
-          }
 
           if (this.#parsedTopics.has(topicName)) {
             const msg: MessageEvent = {

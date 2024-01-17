@@ -10,11 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { Time } from "@foxglove/rostime";
-import {
-  PlayerMetricsCollectorInterface,
-  SubscribePayload,
-} from "@foxglove/studio-base/players/types";
+import { PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
 
 export default class NoopMetricsCollector implements PlayerMetricsCollectorInterface {
   public setProperty(_key: string, _value: string | number | boolean): void {
@@ -26,40 +22,10 @@ export default class NoopMetricsCollector implements PlayerMetricsCollectorInter
   public play(_speed: number): void {
     // no-op
   }
-  public seek(_time: Time): void {
-    // no-op
-  }
-  public setSpeed(_speed: number): void {
-    // no-op
-  }
   public pause(): void {
     // no-op
   }
   public close(): void {
-    // no-op
-  }
-  public setSubscriptions(_subscriptions: SubscribePayload[]): void {
-    // no-op
-  }
-  public recordPlaybackTime(_time: Time): void {
-    // no-op
-  }
-  public recordBytesReceived(_bytes: number): void {
-    // no-op
-  }
-  public recordDataProviderPerformance(): void {
-    // no-op
-  }
-  public recordUncachedRangeRequest(): void {
-    // no-op
-  }
-  public recordTimeToFirstMsgs(): void {
-    // no-op
-  }
-  public recordDataProviderInitializePerformance(): void {
-    // no-op
-  }
-  public recordDataProviderStall(): void {
     // no-op
   }
 }
