@@ -20,6 +20,7 @@ import { Image as RosImage } from "../../ros";
 export class WorkerImageDecoder {
   #worker: Worker;
   #remote: Comlink.Remote<(typeof import("./WorkerImageDecoder.worker"))["service"]>;
+  #abort?: () => void;
 
   public constructor() {
     this.#worker = new Worker(
@@ -36,10 +37,39 @@ export class WorkerImageDecoder {
     image: RosImage | RawImage,
     options: Partial<RawImageOptions>,
   ): Promise<ImageData> {
-    return await this.#remote.decode(image, options);
+    return await new Promise((resolve, reject) => {
+      /** WARNING:
+       * Be careful with closures in this function as they can easily create memory leaks
+       * by keeping a promise from being GC'ed until the next promise is resolved.
+       * Always test that these promises are not keeping images in memory over time.
+       */
+
+      /** More decode requests can be made while the last one is being processed
+       * so we need to keep track of the previous abort function and abort if the
+       * next one finishes before the first. If it's already resolved, then the abort is a noop.
+       */
+      const prevAbort = this.#abort;
+      this.#abort = makeAbort(reject);
+      void this.#remote.decode(image, options).then(resolve).catch(reject).finally(prevAbort);
+    });
   }
 
   public terminate(): void {
+    /** Need to abort as well as terminate because the worker.terminate() call
+     * causes the promise to be neither resolved nor rejected. This creates a circular
+     * reference loop with the `.then` functions within the renderable, causing the
+     * Renderer to never be garbage collected because it's linked to this ongoing
+     * promise and worker.
+     */
+    this.#abort?.();
+    this.#abort = undefined;
     this.#worker.terminate();
   }
+}
+
+/** Creates a function that calls the reject function with an abort error */
+function makeAbort(reject: (reason?: unknown) => void): () => void {
+  return () => {
+    reject(new Error("Decode aborted."));
+  };
 }
