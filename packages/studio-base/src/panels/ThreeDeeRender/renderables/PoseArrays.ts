@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { t } from "i18next";
+import * as _ from "lodash-es";
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
@@ -25,7 +26,6 @@ import {
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaGradient, rgbaToCssString, stringToRgba } from "../color";
 import { POSES_IN_FRAME_DATATYPES } from "../foxglove";
-import { vecEqual } from "../math";
 import { normalizeHeader, normalizePose, normalizeTime } from "../normalizeMessages";
 import {
   PoseArray,
@@ -416,8 +416,8 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const axisOrArrowSettingsChanged =
       settings.type !== prevSettings.type ||
       settings.axisScale !== prevSettings.axisScale ||
-      !vecEqual(settings.arrowScale, prevSettings.arrowScale) ||
-      !vecEqual(settings.gradient, prevSettings.gradient) ||
+      !_.isEqual(settings.arrowScale, prevSettings.arrowScale) ||
+      !_.isEqual(settings.gradient, prevSettings.gradient) ||
       (renderable.userData.arrows.length === 0 && renderable.userData.axes.length === 0);
 
     renderable.userData.settings = settings;
