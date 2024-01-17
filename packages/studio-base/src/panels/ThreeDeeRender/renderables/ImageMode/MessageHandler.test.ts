@@ -364,6 +364,7 @@ describe("MessageHandler: synchronized = true", () => {
       },
       hud,
     );
+    messageHandler.setAvailableAnnotationTopics(["annotations1", "annotations2"]);
     const time = 2n;
 
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n, {
@@ -397,6 +398,43 @@ describe("MessageHandler: synchronized = true", () => {
     expect(state.missingAnnotationTopics).toEqual(["annotations2"]);
   });
 
+  it("shows state with image and annotation if one of two visible image annotation topics is unavailable", () => {
+    const hud = new HUDItemManager(() => {});
+    const messageHandler = new MessageHandler(
+      {
+        synchronize: true,
+        annotations: {
+          annotations1: { visible: true },
+          annotations2: { visible: true },
+        },
+      },
+      hud,
+    );
+    messageHandler.setAvailableAnnotationTopics(["annotations1"]);
+    const time = 2n;
+
+    const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n, {
+      timestamp: fromNanoSec(time),
+    });
+
+    const annotation1 = createCircleAnnotations([time]);
+    const annotationMessage1 = wrapInMessageEvent(
+      "annotations1",
+      "foxglove.ImageAnnotations",
+      0n,
+      annotation1,
+    );
+
+    messageHandler.handleRawImage(image);
+    messageHandler.handleAnnotations(annotationMessage1 as MessageEvent<ImageAnnotations>);
+    const state = messageHandler.getRenderStateAndUpdateHUD();
+
+    expect(state.image).not.toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations1")).not.toBeUndefined();
+    expect(state.annotationsByTopic?.get("annotations2")).toBeUndefined();
+    expect(state.presentAnnotationTopics).toBeUndefined();
+    expect(state.missingAnnotationTopics).toBeUndefined();
+  });
   it("shows most recent image and annotations with same timestamps", () => {
     const hud = new HUDItemManager(() => {});
     const messageHandler = new MessageHandler(
@@ -456,6 +494,7 @@ describe("MessageHandler: synchronized = true", () => {
       },
       hud,
     );
+    messageHandler.setAvailableAnnotationTopics(["annotations"]);
 
     const time = 2n;
 
@@ -507,6 +546,7 @@ describe("MessageHandler: synchronized = true", () => {
       },
       hud,
     );
+    messageHandler.setAvailableAnnotationTopics(["annotations1", "annotations2"]);
     const time = 2n;
 
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n, {
@@ -903,6 +943,7 @@ describe("MessageHandler: hud item display", () => {
       },
       hud,
     );
+    messageHandler.setAvailableAnnotationTopics(["annotations1", "annotations2"]);
     const time = 2n;
 
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n, {
@@ -946,6 +987,7 @@ describe("MessageHandler: hud item display", () => {
       },
       hud,
     );
+    messageHandler.setAvailableAnnotationTopics(["annotations1", "annotations2"]);
     const time = 2n;
 
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n, {

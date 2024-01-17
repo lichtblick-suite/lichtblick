@@ -342,6 +342,7 @@ export class ImageMode
    * Also auto-select a new calibration topic to match the new image topic.
    */
   #handleTopicsChanged = () => {
+    this.#annotations.handleTopicsChanged(this.renderer.topics);
     if (this.getImageModeSettings().imageTopic != undefined) {
       return;
     }

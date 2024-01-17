@@ -155,6 +155,13 @@ export class MessageHandler implements IMessageHandler {
   /** listener functions that are called when the state changes. */
   #listeners: RenderStateListener[] = [];
 
+  /** Holds what annotations are currently available on the given source. These are needed because annotations
+   * that are marked as visible may be present in the layout/config, but are not present on the source.
+   * This can cause synchronized annotations to never resolve if the source does not have the annotation topic
+   * with no indication to the user that the annotation is not available.
+   */
+  #availableAnnotationTopics: Set<string>;
+
   /**
    *
    * @param config - subset of ImageMode settings required for message handling
@@ -166,16 +173,13 @@ export class MessageHandler implements IMessageHandler {
       annotationsByTopic: new Map(),
     };
     this.#tree = new AVLTree<Time, SynchronizationItem>(compareTime);
+    this.#availableAnnotationTopics = new Set();
   }
-  /**
-   *  Add listener that will trigger every time the state changes
-   *  The listener will be called with the new state and the previous state.
-   */
+
   public addListener(listener: RenderStateListener): void {
     this.#listeners.push(listener);
   }
 
-  /** Remove listener from being called on state update */
   public removeListener(listener: RenderStateListener): void {
     this.#listeners = this.#listeners.filter((fn) => fn !== listener);
   }
@@ -340,6 +344,11 @@ export class MessageHandler implements IMessageHandler {
     }
   }
 
+  public setAvailableAnnotationTopics(topicNames: string[]): void {
+    this.#availableAnnotationTopics = new Set(topicNames);
+    this.#emitState();
+  }
+
   public clear(): void {
     this.#lastReceivedMessages = {
       annotationsByTopic: new Map(),
@@ -427,7 +436,7 @@ export class MessageHandler implements IMessageHandler {
   #visibleAnnotations(): Set<string> {
     const visibleAnnotations = new Set<string>();
     for (const [topic, settings] of Object.entries(this.#config.annotations ?? {})) {
-      if (settings?.visible === true) {
+      if (settings?.visible === true && this.#availableAnnotationTopics.has(topic)) {
         visibleAnnotations.add(topic);
       }
     }
@@ -444,11 +453,22 @@ export interface IMessageHandler {
   handleAnnotations: (
     messageEvent: MessageEvent<FoxgloveImageAnnotations | RosImageMarker | RosImageMarkerArray>,
   ) => void;
+  /**
+   *  Add listener that will trigger every time the state changes
+   *  The listener will be called with the new state and the previous state.
+   */
   addListener(listener: RenderStateListener): void;
+  /** Remove listener from being called on state update */
   removeListener(listener: RenderStateListener): void;
   setConfig(newConfig: Immutable<Partial<ImageModeConfig>>): void;
   clear(): void;
   getRenderStateAndUpdateHUD(): Readonly<Partial<MessageHandlerState>>;
+
+  /**
+   * Set what topics are available on the current source.
+   * This will prevent having to wait on annotations that are in the layout but not in the source.
+   */
+  setAvailableAnnotationTopics(availableAnnotations: string[]): void;
 }
 
 type SynchronizationResult =

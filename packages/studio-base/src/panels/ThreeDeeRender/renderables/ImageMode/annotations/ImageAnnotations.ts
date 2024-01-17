@@ -6,6 +6,7 @@ import { t } from "i18next";
 import * as THREE from "three";
 import { Opaque } from "ts-essentials";
 
+import { filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import { ImageAnnotations as FoxgloveImageAnnotations } from "@foxglove/schemas";
 import { Immutable, MessageEvent, SettingsTreeAction, Topic } from "@foxglove/studio";
@@ -99,6 +100,20 @@ export class ImageAnnotations extends THREE.Object3D {
         },
       },
     ];
+  }
+
+  public handleTopicsChanged(topics: readonly Topic[] | undefined): void {
+    if (!topics) {
+      return;
+    }
+    const availableAnnotationTopics = filterMap(topics, (topic) => {
+      if (topicIsConvertibleToSchema(topic, ALL_SUPPORTED_ANNOTATION_SCHEMAS)) {
+        return topic.name;
+      }
+      return undefined;
+    });
+
+    this.#context.messageHandler.setAvailableAnnotationTopics(availableAnnotationTopics);
   }
 
   #filterMessageQueue<T>(msgs: MessageEvent<T>[]): MessageEvent<T>[] {
