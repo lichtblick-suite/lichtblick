@@ -151,8 +151,10 @@ export function validTerminatingStructureItem(
   );
 }
 
-// Given a datatype, the array of datatypes, and a list of valid types,
-// list out all valid strings for a MessagePathStructure.
+/**
+ * Given a datatype, the array of datatypes, and a list of valid types, list out all valid strings
+ * for a MessagePathStructure and its corresponding structure item.
+ */
 export function messagePathsForStructure(
   structure: MessagePathStructureItemMessage,
   {
