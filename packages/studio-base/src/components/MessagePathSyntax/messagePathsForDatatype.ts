@@ -164,12 +164,12 @@ export function messagePathsForStructure(
     noMultiSlices?: boolean;
     messagePath?: MessagePathPart[];
   } = {},
-): string[] {
+): { path: string; terminatingStructureItem: MessagePathStructureItem }[] {
   let clonedMessagePath = [...messagePath];
-  const messagePaths: string[] = [];
+  const messagePaths: { path: string; terminatingStructureItem: MessagePathStructureItem }[] = [];
   function traverse(structureItem: MessagePathStructureItem, builtString: string) {
     if (validTerminatingStructureItem(structureItem, validTypes)) {
-      messagePaths.push(builtString);
+      messagePaths.push({ path: builtString, terminatingStructureItem: structureItem });
     }
     if (structureItem.structureType === "message") {
       for (const [name, item] of Object.entries(structureItem.nextByName)) {
@@ -198,16 +198,14 @@ export function messagePathsForStructure(
             clonedMessagePath = clonedMessagePath.filter(
               (pathPart) => pathPart !== matchingFilterPart,
             );
-            traverse(
-              structureItem.next,
-              `${builtString}[:]{${typicalFilterName}==${
-                typeof matchingFilterPart.value === "object"
-                  ? `$${matchingFilterPart.value.variableName}`
-                  : matchingFilterPart.value
-              }}`,
-            );
+            traverse(structureItem.next, `${builtString}[:]{${matchingFilterPart.repr}}`);
           } else if (structureItemIsIntegerPrimitive(typicalFilterValue)) {
             traverse(structureItem.next, `${builtString}[:]{${typicalFilterName}==0}`);
+          } else if (
+            typicalFilterValue.structureType === "primitive" &&
+            typicalFilterValue.primitiveType === "string"
+          ) {
+            traverse(structureItem.next, `${builtString}[:]{${typicalFilterName}==""}`);
           } else {
             traverse(structureItem.next, `${builtString}[0]`);
           }
@@ -225,7 +223,7 @@ export function messagePathsForStructure(
   }
 
   traverse(structure, "");
-  return messagePaths.sort(naturalSort());
+  return messagePaths.sort(naturalSort("path"));
 }
 
 export type StructureTraversalResult = {

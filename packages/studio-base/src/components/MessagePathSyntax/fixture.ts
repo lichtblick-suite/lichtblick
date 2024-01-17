@@ -72,12 +72,16 @@ export const MessagePathInputStoryFixture: Fixture = {
           { name: "foo_id", type: "uint32", isArray: false },
         ],
       },
+      "msgs/StateData": {
+        definitions: [{ name: "value", type: "float32", isArray: false }],
+      },
       "msgs/OtherState": {
         definitions: [
           { name: "id", type: "int32", isArray: false },
           { name: "speed", type: "float32", isArray: false },
           { name: "name", type: "string", isArray: false },
           { name: "valid", type: "bool", isArray: false },
+          { name: "data", type: "msgs/StateData", isArray: true },
         ],
       },
       "msgs/Log": {
