@@ -236,7 +236,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
      * is a bigger issue here than responsiveness. The longer time between updates also gives users
      * a chance read the numbers more clearly, though I don't think that's a big use case here.
      */
-  }, 50);
+  }, 500);
 
   public override startFrame(
     currentTime: bigint,
