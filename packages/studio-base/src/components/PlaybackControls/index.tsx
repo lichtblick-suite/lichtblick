@@ -64,6 +64,13 @@ const useStyles = makeStyles()((theme) => ({
     backgroundColor: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.divider}`,
     zIndex: 100000,
+    overflowX: "auto",
+  },
+  scrubberWrapper: {
+    position: "sticky",
+    top: 0,
+    right: 0,
+    left: 0,
   },
   disabled: {
     opacity: theme.palette.action.disabledOpacity,
@@ -183,8 +190,10 @@ export default function PlaybackControls(props: {
       <RepeatAdapter play={play} seek={seek} repeatEnabled={repeat} />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.root}>
-        <Scrubber onSeek={seek} />
-        <Stack direction="row" alignItems="center" flex={1} gap={1} overflowX="auto">
+        <div className={classes.scrubberWrapper}>
+          <Scrubber onSeek={seek} />
+        </div>
+        <Stack direction="row" alignItems="center" flex={1} gap={1}>
           <Stack direction="row" alignItems="center" flex={1} gap={0.5}>
             {currentUserType !== "unauthenticated" && eventsSupported && (
               <HoverableIconButton

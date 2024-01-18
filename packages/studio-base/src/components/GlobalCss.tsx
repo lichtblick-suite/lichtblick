@@ -37,6 +37,7 @@ export default function GlobalCss(): JSX.Element {
           // scrollable elements to be scrolled without the whole page moving (even if they don't
           // preventDefault on scroll events).
           overscrollBehavior: "none",
+          overflow: "hidden",
         },
         "#root": {
           height: "100%",
