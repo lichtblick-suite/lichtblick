@@ -209,6 +209,7 @@ describe("BlockLoader", () => {
     };
 
     loader.setTopics(mockTopicSelection("a"));
+    let progressCount = 0;
     await loader.startLoading({
       progress: async (progress) => {
         expect(progress).toMatchObject({
@@ -231,8 +232,10 @@ describe("BlockLoader", () => {
             startTime: { sec: 0, nsec: 0 },
           },
         });
-
-        await loader.stopLoading();
+        // need to wait for second progress call to receive cache full error
+        if (++progressCount > 1) {
+          await loader.stopLoading();
+        }
       },
     });
     expect(consoleErrorMock.mock.calls[0] ?? []).toContain("cache-full");
@@ -504,6 +507,7 @@ describe("BlockLoader", () => {
     };
 
     loader.setTopics(mockTopicSelection("a"));
+    let progressCount = 0;
     await loader.startLoading({
       progress: async (progress) => {
         expect(progress).toMatchObject({
@@ -527,7 +531,10 @@ describe("BlockLoader", () => {
           },
         });
 
-        await loader.stopLoading();
+        // need to wait for second progress call to receive cache full error
+        if (++progressCount > 1) {
+          await loader.stopLoading();
+        }
       },
     });
     expect(consoleErrorMock.mock.calls[0] ?? []).toContain("cache-full");
