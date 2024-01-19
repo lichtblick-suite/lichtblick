@@ -5,7 +5,7 @@
 import { AlertProps, AlertTitle, Alert as MuiAlert, Stack } from "@mui/material";
 import { Meta, StoryObj } from "@storybook/react";
 
-const colors = ["error", "info", "success", "warning", "primary"] as AlertProps["color"][];
+const severities = ["error", "info", "success", "warning", "primary"] as AlertProps["severity"][];
 
 export default {
   component: MuiAlert,
@@ -16,10 +16,10 @@ export default {
   decorators: [
     (_, { args: { showTitle, ...args } }) => (
       <Stack gap={2} padding={2}>
-        {colors.map((color) => (
-          <MuiAlert key={color} variant={args.variant} color={color}>
-            {showTitle === true && <AlertTitle>{color}</AlertTitle>}
-            This is a {color} alert — check it out!
+        {severities.map((severity) => (
+          <MuiAlert key={severity} variant={args.variant} severity={severity}>
+            {showTitle === true && <AlertTitle>{severity}</AlertTitle>}
+            This is a {severity} alert — check it out!
           </MuiAlert>
         ))}
       </Stack>
