@@ -29,9 +29,6 @@ enum AppEvent {
 
   // Player events
   PLAYER_CONSTRUCTED = "Studio: Player Constructed",
-  PLAYER_PLAY = "Studio: Player Played",
-  PLAYER_PAUSE = "Studio: Player Paused",
-  PLAYER_CLOSE = "Studio: Player Closed",
 
   // Layout events
   LAYOUT_UPDATE = "Studio: Layout Updated",

@@ -228,7 +228,6 @@ export class IterablePlayer implements Player {
       }
       this.#untilTime = clampTime(opt.untilTime, this.#start, this.#end);
     }
-    this.#metricsCollector.play(this.#speed);
     this.#isPlaying = true;
 
     // If we are idling we can start playing, if we have a next state queued we let that state
@@ -244,7 +243,6 @@ export class IterablePlayer implements Player {
     if (!this.#isPlaying) {
       return;
     }
-    this.#metricsCollector.pause();
     // clear out last tick millis so we don't read a huge chunk when we unpause
     this.#lastTickMillis = undefined;
     this.#isPlaying = false;
@@ -1075,7 +1073,6 @@ export class IterablePlayer implements Player {
 
   async #stateClose() {
     this.#isPlaying = false;
-    this.#metricsCollector.close();
     await this.#blockLoader?.stopLoading();
     await this.#blockLoadingProcess;
     await this.#bufferedSource.stopProducer();

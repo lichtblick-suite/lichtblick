@@ -434,7 +434,6 @@ export default class RosbridgePlayer implements Player {
       clearTimeout(this.#emitTimer);
       this.#emitTimer = undefined;
     }
-    this.#metricsCollector.close();
   }
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {

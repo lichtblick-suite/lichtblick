@@ -913,7 +913,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
   public close(): void {
     this.#closed = true;
     this.#client?.close();
-    this.#metricsCollector.close();
     if (this.#openTimeout != undefined) {
       clearTimeout(this.#openTimeout);
       this.#openTimeout = undefined;

@@ -30,16 +30,4 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
   public playerConstructed(): void {
     this.logEvent(AppEvent.PLAYER_CONSTRUCTED);
   }
-
-  public play(speed: number): void {
-    this.logEvent(AppEvent.PLAYER_PLAY, { speed });
-  }
-
-  public pause(): void {
-    this.logEvent(AppEvent.PLAYER_PAUSE);
-  }
-
-  public close(): void {
-    this.logEvent(AppEvent.PLAYER_CLOSE);
-  }
 }

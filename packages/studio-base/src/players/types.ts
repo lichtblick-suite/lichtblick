@@ -346,7 +346,4 @@ export const PlayerCapabilities = {
 export interface PlayerMetricsCollectorInterface {
   setProperty(key: string, value: string | number | boolean): void;
   playerConstructed(): void;
-  play(speed: number): void;
-  pause(): void;
-  close(): void;
 }
