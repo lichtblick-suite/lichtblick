@@ -529,4 +529,97 @@ describe("TimestampDatasetsBuilder", () => {
       expect(result.datasets[0]!.data[37_499]).toEqual({ x: 59_999, y: 59_999, value: 59_999 });
     }
   });
+
+  it("supports toggling series enabled state", async () => {
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/foo.val",
+        },
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/bar.val",
+        },
+      ]),
+    );
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 1,
+            },
+          },
+          {
+            topic: "/bar",
+            schemaName: "bar",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 2,
+            },
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasets: [
+        expect.objectContaining({
+          data: [{ x: 0, y: 1, value: 1 }],
+        }),
+        expect.objectContaining({
+          data: [{ x: 0, y: 2, value: 2 }],
+        }),
+      ],
+    });
+
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: false,
+          timestampMethod: "receiveTime",
+          value: "/foo.val",
+        },
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/bar.val",
+        },
+      ]),
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasets: [
+        expect.objectContaining({
+          data: [],
+        }),
+        expect.objectContaining({
+          data: [{ x: 0, y: 2, value: 2 }],
+        }),
+      ],
+    });
+  });
 });

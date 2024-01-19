@@ -171,10 +171,6 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
   public async getCsvData(): Promise<CsvDataset[]> {
     return await this.#datasetsBuilderRemote.getCsvData();
   }
-
-  public destroy(): void {
-    this.#datasetsBuilderWorker.terminate();
-  }
 }
 
 function readMessagePathItems(

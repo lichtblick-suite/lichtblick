@@ -157,6 +157,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
         };
       }
 
+      existingSeries.enabled = item.enabled;
       existingSeries.dataset = {
         ...existingSeries.dataset,
         borderColor: item.color,
@@ -182,6 +183,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
     const datasets: Dataset[] = [];
     for (const series of this.#seriesByKey.values()) {
       if (!series.enabled) {
+        datasets.push({ data: [] });
         continue;
       }
 
@@ -205,10 +207,6 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
     }
 
     return datasets;
-  }
-
-  public destroy(): void {
-    // no-op this builder does not use a worker
   }
 }
 

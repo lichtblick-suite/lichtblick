@@ -344,6 +344,7 @@ export function Plot(props: Props): JSX.Element {
 
     return () => {
       resizeObserver.disconnect();
+      plotCoordinator.destroy();
     };
   }, [canvasDiv, datasetsBuilder, renderer]);
 

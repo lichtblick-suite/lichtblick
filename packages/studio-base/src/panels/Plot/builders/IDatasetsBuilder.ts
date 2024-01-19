@@ -80,8 +80,6 @@ interface IDatasetsBuilder {
   getViewportDatasets(viewport: Immutable<Viewport>): Promise<GetViewportDatasetsResult>;
 
   getCsvData(): Promise<CsvDataset[]>;
-
-  destroy(): void;
 }
 
 export type { IDatasetsBuilder };

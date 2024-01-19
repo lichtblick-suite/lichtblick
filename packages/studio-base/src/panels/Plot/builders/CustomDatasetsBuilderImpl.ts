@@ -125,10 +125,6 @@ export class CustomDatasetsBuilderImpl {
     const datasets: Dataset[] = [];
     const pathsWithMismatchedDataLengths = new Set<string>();
     for (const series of this.#seriesByKey.values()) {
-      if (!series.config.enabled) {
-        continue;
-      }
-
       const { showLine, color, contrastColor } = series.config;
       const dataset: Dataset = {
         borderColor: color,
@@ -141,6 +137,12 @@ export class CustomDatasetsBuilderImpl {
         pointBorderColor: "transparent",
         data: [],
       };
+
+      datasets.push(dataset);
+
+      if (!series.config.enabled) {
+        continue;
+      }
 
       // Create the full dataset by pairing full y-values with their x-value peers
       // And then pairing current y-values with their x-value peers
@@ -230,8 +232,6 @@ export class CustomDatasetsBuilderImpl {
           });
         }
       }
-
-      datasets.push(dataset);
 
       if (
         this.#xValues.full.length !== series.full.length ||
