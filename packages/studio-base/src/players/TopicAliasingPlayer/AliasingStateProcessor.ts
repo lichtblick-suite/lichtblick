@@ -16,6 +16,7 @@ import {
   TopicStats,
 } from "@foxglove/studio-base/players/types";
 
+import { BlockTopicProcessor } from "./BlockTopicProcessor";
 import { IStateProcessor } from "./IStateProcessor";
 
 export type TopicAliasMap = Map<string, string[]>;
@@ -30,13 +31,23 @@ type MessageBlocks = readonly (undefined | MessageBlock)[];
  */
 export class AliasingStateProcessor implements IStateProcessor {
   #problems: PlayerProblem[] = [];
+
+  /** Source topic to a list of aliases for the topic */
   #mapping: Im<TopicAliasMap>;
+
+  /** Aliased topic back to the source topic */
   #inverseMapping: Im<TopicAliasMap>;
+
+  #blockProcessors: BlockTopicProcessor[] = [];
 
   public constructor(mapping: Im<TopicAliasMap>, problems?: PlayerProblem[]) {
     this.#mapping = mapping;
     this.#problems = problems ?? [];
     this.#inverseMapping = invertAliasMap(mapping);
+
+    this.#blockProcessors = Array.from(mapping.entries()).map(
+      ([topic, aliases]) => new BlockTopicProcessor(topic, aliases),
+    );
   }
 
   /**
@@ -101,29 +112,21 @@ export class AliasingStateProcessor implements IStateProcessor {
   );
 
   #aliasBlocks = memoizeWeak((blocks: MessageBlocks): MessageBlocks => {
-    return blocks.map((block) => {
-      if (block == undefined) {
+    return blocks.map((block, idx) => {
+      if (!block) {
         return undefined;
       }
 
+      const messagesByTopic = this.#blockProcessors.reduce((acc, processor) => {
+        return {
+          ...acc,
+          ...processor.aliasBlock(block, idx),
+        };
+      }, block.messagesByTopic);
+
       return {
         ...block,
-        messagesByTopic: _.transform(
-          block.messagesByTopic,
-          (acc, messages, topic) => {
-            const mappings = this.#mapping.get(topic);
-            if (mappings) {
-              for (const mappedTopic of mappings) {
-                acc[mappedTopic] = messages.map((msg) => ({
-                  ...msg,
-                  topic: mappedTopic,
-                }));
-              }
-            }
-            acc[topic] = messages;
-          },
-          {} as Record<string, MessageEvent[]>,
-        ),
+        messagesByTopic,
       };
     });
   });

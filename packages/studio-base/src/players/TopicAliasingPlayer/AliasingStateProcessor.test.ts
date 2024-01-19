@@ -222,4 +222,199 @@ describe("StateProcessor", () => {
     expect(mapped2).not.toBe(mapped);
     expect(mapped2.activeData?.subscribedTopics).toBe(mapped.activeData?.subscribedTopics);
   });
+
+  it("should keep existing topic message references in blocks", () => {
+    const topics: Topic[] = [
+      { name: "/topic_1", schemaName: "whatever" },
+      { name: "/topic_2", schemaName: "whatever" },
+    ];
+    const state = mockPlayerState(
+      {
+        progress: {
+          fullyLoadedFractionRanges: [],
+          messageCache: {
+            startTime: { sec: 0, nsec: 1 },
+            blocks: [
+              {
+                messagesByTopic: {
+                  "/topic_1": [
+                    {
+                      topic: "/topic_1",
+                      receiveTime: { sec: 0, nsec: 0 },
+                      message: undefined,
+                      schemaName: "whatever",
+                      sizeInBytes: 0,
+                    },
+                  ],
+                  "/topic_2": [
+                    {
+                      topic: "/topic_2",
+                      receiveTime: { sec: 0, nsec: 0 },
+                      message: undefined,
+                      schemaName: "whatever",
+                      sizeInBytes: 0,
+                    },
+                  ],
+                },
+                sizeInBytes: 0,
+              },
+            ],
+          },
+        },
+      },
+      {
+        topics,
+      },
+    );
+
+    const aliasMap = new Map(
+      Object.entries({
+        "/topic_1": ["/renamed_topic_1"],
+      }),
+    );
+    const processor = new AliasingStateProcessor(aliasMap);
+    const mapped = processor.process(state, []);
+    expect(mapped.progress).toMatchObject({
+      messageCache: {
+        blocks: [
+          {
+            messagesByTopic: {
+              "/topic_1": [{ topic: "/topic_1" }],
+              "/renamed_topic_1": [{ topic: "/renamed_topic_1" }],
+              "/topic_2": [{ topic: "/topic_2" }],
+            },
+            sizeInBytes: 0,
+          },
+        ],
+      },
+    });
+
+    expect(mapped.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_1"]).toBe(
+      state.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_1"],
+    );
+    expect(mapped.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_2"]).toBe(
+      state.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_2"],
+    );
+  });
+
+  it("should keep aliased block references when processing new blocks", () => {
+    const topics: Topic[] = [
+      { name: "/topic_1", schemaName: "whatever" },
+      { name: "/topic_2", schemaName: "whatever" },
+    ];
+    const state = mockPlayerState(
+      {
+        progress: {
+          fullyLoadedFractionRanges: [],
+          messageCache: {
+            startTime: { sec: 0, nsec: 1 },
+            blocks: [
+              {
+                messagesByTopic: {
+                  "/topic_1": [
+                    {
+                      topic: "/topic_1",
+                      receiveTime: { sec: 0, nsec: 0 },
+                      message: undefined,
+                      schemaName: "whatever",
+                      sizeInBytes: 0,
+                    },
+                  ],
+                  "/topic_2": [
+                    {
+                      topic: "/topic_2",
+                      receiveTime: { sec: 0, nsec: 0 },
+                      message: undefined,
+                      schemaName: "whatever",
+                      sizeInBytes: 0,
+                    },
+                  ],
+                },
+                sizeInBytes: 0,
+              },
+            ],
+          },
+        },
+      },
+      {
+        topics,
+      },
+    );
+
+    const aliasMap = new Map(
+      Object.entries({
+        "/topic_1": ["/renamed_topic_1"],
+      }),
+    );
+    const processor = new AliasingStateProcessor(aliasMap);
+    const mapped = processor.process(state, []);
+
+    const newState = mockPlayerState(
+      {
+        progress: {
+          fullyLoadedFractionRanges: [],
+          messageCache: {
+            startTime: { sec: 0, nsec: 1 },
+            blocks: [
+              ...state.progress.messageCache!.blocks,
+              {
+                messagesByTopic: {
+                  "/topic_1": [
+                    {
+                      topic: "/topic_1",
+                      receiveTime: { sec: 0, nsec: 0 },
+                      message: undefined,
+                      schemaName: "whatever",
+                      sizeInBytes: 0,
+                    },
+                  ],
+                },
+                sizeInBytes: 0,
+              },
+            ],
+          },
+        },
+      },
+      {
+        topics,
+      },
+    );
+
+    const newMapped = processor.process(newState, []);
+
+    expect(newMapped.progress).toMatchObject({
+      messageCache: {
+        blocks: [
+          {
+            messagesByTopic: {
+              "/topic_1": [{ topic: "/topic_1" }],
+              "/renamed_topic_1": [{ topic: "/renamed_topic_1" }],
+              "/topic_2": [{ topic: "/topic_2" }],
+            },
+            sizeInBytes: 0,
+          },
+          {
+            messagesByTopic: {
+              "/topic_1": [{ topic: "/topic_1" }],
+              "/renamed_topic_1": [{ topic: "/renamed_topic_1" }],
+            },
+            sizeInBytes: 0,
+          },
+        ],
+      },
+    });
+
+    expect(newMapped.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_1"]).toBe(
+      state.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_1"],
+    );
+    expect(newMapped.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_2"]).toBe(
+      state.progress.messageCache?.blocks[0]?.messagesByTopic["/topic_2"],
+    );
+
+    // The first block that we previously processed is unchanged and so the output topic messages
+    // for the aliased topic should be referentially stable.
+    expect(newMapped.progress.messageCache?.blocks[0]?.messagesByTopic["/renamed_topic_1"]).toBe(
+      mapped.progress.messageCache?.blocks[0]?.messagesByTopic["/renamed_topic_1"],
+    );
+  });
 });
