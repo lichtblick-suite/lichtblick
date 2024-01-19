@@ -97,18 +97,20 @@ export class BlockLoader {
 
     // Update all the blocks with any missing topics
     for (const block of this.#blocks) {
-      if (block) {
-        const blockTopics = Object.keys(block.messagesByTopic);
-        const needTopics = new Map(topics);
-        for (const topic of blockTopics) {
-          // We need the topic unless the subscription is identical to the subscription for this
-          // topic at the time the block was loaded.
-          if (this.#topics.get(topic) === topics.get(topic)) {
-            needTopics.delete(topic);
-          }
-        }
-        block.needTopics = needTopics;
+      if (!block) {
+        continue;
       }
+
+      const blockTopics = Object.keys(block.messagesByTopic);
+      const needTopics = new Map(topics);
+      for (const topic of blockTopics) {
+        // We need the topic unless the subscription is identical to the subscription for this
+        // topic at the time blocks were loaded.
+        if (_.isEqual(this.#topics.get(topic), topics.get(topic))) {
+          needTopics.delete(topic);
+        }
+      }
+      block.needTopics = needTopics;
     }
 
     this.#topics = topics;

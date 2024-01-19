@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent } from "@foxglove/studio";
+import { Immutable, MessageEvent } from "@foxglove/studio";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
+import { MessageBlock } from "@foxglove/studio-base/players/types";
 import { mockTopicSelection } from "@foxglove/studio-base/test/mocks/mockTopicSelection";
 
 import { BlockLoader, MEMORY_INFO_PRELOADED_MSGS } from "./BlockLoader";
@@ -588,5 +589,87 @@ describe("BlockLoader", () => {
         }
       },
     });
+  });
+
+  it("should keep existing topic message references when removing another topic", async () => {
+    const source = new TestSource();
+    const maxBlockCount = 2;
+    const loader = new BlockLoader({
+      maxBlocks: maxBlockCount,
+      cacheSizeBytes: 1_000,
+      minBlockDurationNs: 1,
+      source,
+      start: { sec: 0, nsec: 0 },
+      end: { sec: 9, nsec: 0 },
+      problemManager: new PlayerProblemManager(),
+    });
+
+    const msgEvents: MessageEvent[] = [];
+    for (let i = 0; i < 10; i += 1) {
+      msgEvents.push({
+        topic: "a",
+        receiveTime: { sec: i, nsec: 0 },
+        message: undefined,
+        sizeInBytes: 10,
+        schemaName: "foo",
+      });
+    }
+
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let i = 0; i < 10; ++i) {
+        for (const [topic] of args.topics) {
+          yield {
+            type: "message-event",
+            msgEvent: {
+              topic,
+              receiveTime: { sec: i, nsec: 0 },
+              message: undefined,
+              sizeInBytes: 10,
+              schemaName: "foo",
+            },
+          };
+        }
+      }
+    };
+
+    loader.setTopics(mockTopicSelection("a", "b"));
+    let lastBlocks: Immutable<(MessageBlock | undefined)[]> | undefined;
+    await loader.startLoading({
+      progress: async (progress) => {
+        lastBlocks = progress.messageCache?.blocks;
+
+        if (
+          progress.fullyLoadedFractionRanges?.[0]?.start === 0 &&
+          progress.fullyLoadedFractionRanges[0].end === 1
+        ) {
+          await loader.stopLoading();
+        }
+      },
+    });
+
+    const firstBlockLoad = lastBlocks;
+
+    loader.setTopics(mockTopicSelection("a"));
+    let count = 0;
+
+    setTimeout(async () => {
+      await loader.stopLoading();
+    }, 1000);
+    await loader.startLoading({
+      progress: async (progress) => {
+        lastBlocks = progress.messageCache?.blocks;
+        count += 1;
+      },
+    });
+
+    // There should not be any loading calls because the topic is already loaded
+    expect(count).toEqual(0);
+
+    // Topic _a_ does not change and should not be re-loaded into the blocks. The existing message
+    // arrays should be unchanged.
+    expect(firstBlockLoad?.[0]?.messagesByTopic["a"]).toBe(lastBlocks?.[0]?.messagesByTopic["a"]);
+    expect(firstBlockLoad?.[1]?.messagesByTopic["a"]).toBe(lastBlocks?.[1]?.messagesByTopic["a"]);
   });
 });
