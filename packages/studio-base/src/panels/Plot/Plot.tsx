@@ -153,7 +153,9 @@ export function Plot(props: Props): JSX.Element {
   const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
   const [renderer, setRenderer] = useState<OffscreenCanvasRenderer | undefined>(undefined);
   const [coordinator, setCoordinator] = useState<PlotCoordinator | undefined>(undefined);
-  const [showReset, setShowReset] = useState(false);
+
+  // When true the user can reset the plot back to the original view
+  const [canReset, setCanReset] = useState(false);
 
   const [activeTooltip, setActiveTooltip] = useState<{
     x: number;
@@ -364,7 +366,6 @@ export function Plot(props: Props): JSX.Element {
         clientY: event.clientY,
         boundingClientRect: boundingRect.toJSON(),
       });
-      setShowReset(true);
     },
     [coordinator],
   );
@@ -512,7 +513,6 @@ export function Plot(props: Props): JSX.Element {
     });
 
     hammerManager.on("panend", (event) => {
-      setShowReset(true);
       const boundingRect = event.target.getBoundingClientRect();
       coordinator.addInteractionEvent({
         type: "panend",
@@ -599,14 +599,19 @@ export function Plot(props: Props): JSX.Element {
       });
     };
     coordinator.on("timeseriesBounds", onTimeseriesBounds);
+    coordinator.on("viewportChange", setCanReset);
     return () => {
       coordinator.off("timeseriesBounds", onTimeseriesBounds);
+      coordinator.off("viewportChange", setCanReset);
     };
   }, [coordinator, setGlobalBounds, shouldSync, subscriberId]);
 
   const onResetView = useCallback(() => {
-    setShowReset(false);
-    coordinator?.resetBounds();
+    if (!coordinator) {
+      return;
+    }
+
+    coordinator.resetBounds();
 
     if (shouldSync) {
       setGlobalBounds(undefined);
@@ -650,10 +655,6 @@ export function Plot(props: Props): JSX.Element {
       },
     };
   }, [coordinator]);
-
-  // The reset view button is shown when we have interacted locally or if the global bounds are set
-  // and we are sync'd.
-  const showResetViewButton = shouldSync ? globalBounds != undefined : showReset;
 
   return (
     <Stack
@@ -713,7 +714,7 @@ export function Plot(props: Props): JSX.Element {
             />
           </div>
         </Tooltip>
-        {showResetViewButton && (
+        {canReset && (
           <div className={classes.resetZoomButton}>
             <Button
               variant="contained"
