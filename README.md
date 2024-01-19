@@ -7,7 +7,7 @@
     <a href="https://github.com/foxglove/studio/releases"><img src="https://img.shields.io/github/v/release/foxglove/studio?label=version" /></a>
     <a href="https://github.com/foxglove/studio/blob/main/LICENSE"><img src="https://img.shields.io/github/license/foxglove/studio" /></a>
     <a href="https://github.com/orgs/foxglove/discussions"><img src="https://img.shields.io/github/discussions/foxglove/community.svg?logo=github" /></a>
-    <a href="https://foxglove.dev/join-slack"><img src="https://img.shields.io/badge/chat-slack-purple.svg?logo=slack" /></a>
+    <a href="https://foxglove.dev/slack"><img src="https://img.shields.io/badge/chat-slack-purple.svg?logo=slack" /></a>
     <br />
     <br />
     <a href="https://foxglove.dev/download">Download</a>

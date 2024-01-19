@@ -6,4 +6,4 @@ See https://docs.foxglove.dev/docs/visualization/extensions/introduction
 
 ## Stay in touch
 
-Join us in [Slack](https://foxglove.dev/join-slack) to ask questions, share feedback, and stay up to date on what our team is working on.
+Join us in [Slack](https://foxglove.dev/slack) to ask questions, share feedback, and stay up to date on what our team is working on.
