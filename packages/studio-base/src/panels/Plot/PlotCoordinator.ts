@@ -8,7 +8,6 @@ import { debouncePromise } from "@foxglove/den/async";
 import { filterMap } from "@foxglove/den/collection";
 import { toSec, subtract as subtractTime } from "@foxglove/rostime";
 import { Immutable, Time } from "@foxglove/studio";
-import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyRosPath } from "@foxglove/studio-base/components/MessagePathSyntax/stringifyRosPath";
@@ -67,10 +66,10 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
 
   #lastSeekTime = NaN;
 
+  /** Normalized series from latest config */
+  #series: Immutable<SeriesItem[]> = [];
   /** Current value for each series to show in the legend */
-  #currentValues: unknown[] = [];
-  /** Path with variables filled in for each series */
-  #seriesPaths: (RosPath | undefined)[] = [];
+  #currentValuesByConfigIndex: unknown[] = [];
 
   /** Flag indicating that new Y bounds should be sent to the renderer because the bounds have been reset */
   #shouldResetY = false;
@@ -132,28 +131,31 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
     }
 
     if (lastSeekTime !== this.#lastSeekTime) {
-      this.#currentValues = [];
+      this.#currentValuesByConfigIndex = [];
       this.#lastSeekTime = lastSeekTime;
     }
 
-    this.#seriesPaths.forEach((path, idx) => {
-      if (!path) {
-        return;
+    for (const seriesItem of this.#series) {
+      if (seriesItem.timestampMethod === "headerStamp") {
+        // We currently do not support showing current values in the legend for header.stamp mode,
+        // which would require keeping a buffer of messages to sort (currently done in
+        // TimestampDatasetsBuilderImpl)
+        continue;
       }
       for (let i = messages.length - 1; i >= 0; --i) {
         const msgEvent = messages[i]!;
-        if (msgEvent.topic !== path.topicName) {
+        if (msgEvent.topic !== seriesItem.parsed.topicName) {
           continue;
         }
-        const items = simpleGetMessagePathDataItems(msgEvent, path);
+        const items = simpleGetMessagePathDataItems(msgEvent, seriesItem.parsed);
         if (items.length > 0) {
-          this.#currentValues[idx] = items[items.length - 1];
+          this.#currentValuesByConfigIndex[seriesItem.configIndex] = items[items.length - 1];
           break;
         }
       }
-    });
+    }
 
-    this.emit("currentValuesChanged", this.#currentValues);
+    this.emit("currentValuesChanged", this.#currentValuesByConfigIndex);
 
     this.#datasetRange = datasetsRange;
     this.#queueDispatchRender();
@@ -204,24 +206,6 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       };
     });
 
-    this.#seriesPaths = config.paths.map((path) => {
-      if (path.timestampMethod === "headerStamp") {
-        // We currently do not support showing current values in the legend for header.stamp mode
-        return undefined;
-      }
-      if (isReferenceLinePlotPathType(path)) {
-        return undefined;
-      }
-      const parsed = parseRosPath(path.value);
-      if (!parsed) {
-        return undefined;
-      }
-
-      return fillInGlobalVariablesInPath(parsed, globalVariables);
-    });
-    this.#currentValues = [];
-    this.emit("currentValuesChanged", this.#currentValues);
-
     this.#updateAction.showXAxisLabels = config.showXAxisLabels;
     this.#updateAction.showYAxisLabels = config.showYAxisLabels;
     this.#updateAction.referenceLines = referenceLines;
@@ -231,7 +215,8 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       this.#updateAction.yBounds = this.#configBounds.y;
     }
 
-    const seriesItems = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
+    const newCurrentValuesByConfigIndex: unknown[] = [];
+    this.#series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
       if (isReferenceLinePlotPathType(path)) {
         return;
       }
@@ -255,9 +240,17 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       // using a key instead of the path index lets us preserve loaded data when a path is removed
       const key = `${path.timestampMethod}:${stringifyRosPath(filledParsed)}` as SeriesConfigKey;
 
+      // Keep current values for paths that match existing ones
+      const existingSeries = this.#series.find((series) => series.key === key);
+      if (existingSeries != undefined) {
+        newCurrentValuesByConfigIndex[idx] =
+          this.#currentValuesByConfigIndex[existingSeries.configIndex];
+      }
+
       const color = getLineColor(path.color, idx);
       return {
         key,
+        configIndex: idx,
         messagePath: path.value,
         parsed: filledParsed,
         color,
@@ -269,7 +262,11 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       };
     });
 
-    this.#datasetsBuilder.setSeries(seriesItems);
+    this.#datasetsBuilder.setSeries(this.#series);
+
+    this.#currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
+    this.emit("currentValuesChanged", this.#currentValuesByConfigIndex);
+
     this.#queueDispatchRender();
   }
 

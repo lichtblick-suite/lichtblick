@@ -31,6 +31,8 @@ export type SeriesConfigKey = Opaque<string, "series-config-key">;
 
 export type SeriesItem = {
   key: SeriesConfigKey;
+  /** The original index of this series in config.paths */
+  configIndex: number;
   messagePath: string;
   parsed: RosPath;
   color: string;

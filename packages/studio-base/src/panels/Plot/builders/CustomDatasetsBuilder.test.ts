@@ -90,6 +90,7 @@ function buildSeriesItems(
     const key = (item.key ?? String(idx)) as SeriesConfigKey;
 
     return {
+      configIndex: idx,
       parsed,
       color: "red",
       contrastColor: "blue",
