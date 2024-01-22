@@ -40,6 +40,7 @@ export function TopicRow({
       rootSchemaName: topic.schemaName,
       isTopic: true,
       isLeaf: false,
+      topicName: topic.name,
     }),
     [topic.name, topic.schemaName],
   );

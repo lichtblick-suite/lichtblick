@@ -75,6 +75,7 @@ function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePath {
         rootSchemaName: treeItem.item.item.schemaName,
         isTopic: true,
         isLeaf: false,
+        topicName: treeItem.item.item.name,
       };
     case "schema":
       return {
@@ -82,6 +83,7 @@ function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePath {
         rootSchemaName: treeItem.item.item.topic.schemaName,
         isTopic: false,
         isLeaf: treeItem.item.item.suffix.isLeaf,
+        topicName: treeItem.item.item.topic.name,
       };
   }
 }

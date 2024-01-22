@@ -659,10 +659,10 @@ export class ImageMode
       return;
     }
     if (this.supportedImageSchemas.has(path.rootSchemaName)) {
-      draft.imageMode.imageTopic = path.path;
+      draft.imageMode.imageTopic = path.topicName;
     } else if (this.#annotations.supportedAnnotationSchemas.has(path.rootSchemaName)) {
       draft.imageMode.annotations ??= {};
-      draft.imageMode.annotations[path.path] = { visible: true };
+      draft.imageMode.annotations[path.topicName] = { visible: true };
     }
   };
 

@@ -25,6 +25,8 @@ export type DraggedMessagePath = {
   isTopic: boolean;
   /** True if the path represents a primitive value inside a message. */
   isLeaf: boolean;
+  /** The name of the top-level topic being dragged */
+  topicName: string;
 };
 
 export type MessagePathDropStatus = {

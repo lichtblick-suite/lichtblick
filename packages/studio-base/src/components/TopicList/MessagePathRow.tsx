@@ -42,8 +42,9 @@ export function MessagePathRow({
       rootSchemaName: topic.schemaName,
       isTopic: false,
       isLeaf,
+      topicName: topic.name,
     }),
-    [fullPath, isLeaf, topic.schemaName],
+    [fullPath, isLeaf, topic.name, topic.schemaName],
   );
 
   const { connectDragSource, connectDragPreview, cursor, isDragging, draggedItemCount } =
