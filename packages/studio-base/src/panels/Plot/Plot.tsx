@@ -399,7 +399,7 @@ export function Plot(props: Props): JSX.Element {
         const tooltipValue = typeof value === "object" && isTime(value) ? toSec(value) : value;
 
         tooltipItems.push({
-          datasetIndex: element.datasetIndex,
+          configIndex: element.configIndex,
           value: tooltipValue,
         });
       }
@@ -475,8 +475,8 @@ export function Plot(props: Props): JSX.Element {
       <TimeBasedChartTooltipContent
         content={activeTooltip.data}
         multiDataset={numSeries > 1}
-        colorsByDatasetIndex={colorsByDatasetIndex}
-        labelsByDatasetIndex={labelsByDatasetIndex}
+        colorsByConfigIndex={colorsByDatasetIndex}
+        labelsByConfigIndex={labelsByDatasetIndex}
       />
     ) : undefined;
   }, [activeTooltip, colorsByDatasetIndex, labelsByDatasetIndex, numSeries]);
@@ -635,7 +635,7 @@ export function Plot(props: Props): JSX.Element {
 
     const values = new Array(config.paths.length).fill(undefined);
     for (const item of activeTooltip.data) {
-      values[item.datasetIndex] ??= item.value;
+      values[item.configIndex] ??= item.value;
     }
 
     return values;

@@ -241,7 +241,7 @@ describe("CustomDatasetsBuilder", () => {
 
     expect(result).toEqual({
       pathsWithMismatchedDataLengths: new Set(["/baz.val.@negative"]),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 0, value: 0 },
@@ -368,7 +368,7 @@ describe("CustomDatasetsBuilder", () => {
 
     expect(result).toEqual({
       pathsWithMismatchedDataLengths: new Set(["/baz.val.@negative"]),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 0, value: 0 },
@@ -494,7 +494,7 @@ describe("CustomDatasetsBuilder", () => {
 
     expect(result).toEqual({
       pathsWithMismatchedDataLengths: new Set(["/baz.values[:].val"]),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 10, value: 10 },
@@ -568,7 +568,7 @@ describe("CustomDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [{ x: 1, y: 1, value: 1 }],
         }),
@@ -600,12 +600,63 @@ describe("CustomDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
-        expect.objectContaining({
-          data: [],
-        }),
+      datasetsByConfigIndex: [
+        undefined,
         expect.objectContaining({
           data: [{ x: 1, y: 2, value: 2 }],
+        }),
+      ],
+    });
+  });
+
+  it("leaves gaps in datasetsByConfigIndex for missing series", async () => {
+    const builder = new CustomDatasetsBuilder();
+
+    builder.setXPath(parseRosPath("/foo.val"));
+    builder.setSeries([
+      {
+        configIndex: 3,
+        parsed: parseRosPath("/foo.val")!,
+        color: "red",
+        contrastColor: "blue",
+        enabled: true,
+        timestampMethod: "receiveTime",
+        key: "x" as SeriesConfigKey,
+        lineSize: 1,
+        messagePath: "/foo.val",
+        showLine: true,
+      },
+    ]);
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 1,
+            },
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        undefined,
+        undefined,
+        undefined,
+        expect.objectContaining({
+          data: [{ x: 1, y: 1, value: 1 }],
         }),
       ],
     });

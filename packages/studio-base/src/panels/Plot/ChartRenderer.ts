@@ -55,7 +55,7 @@ type ChartType = Chart<"scatter", Datum[]>;
 
 export type HoverElement = {
   data: Datum;
-  datasetIndex: number;
+  configIndex: number;
 };
 
 export type Size = { width: number; height: number };
@@ -370,7 +370,7 @@ export class ChartRenderer {
 
       out.push({
         data,
-        datasetIndex: element.datasetIndex,
+        configIndex: element.datasetIndex,
       });
     }
 

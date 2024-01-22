@@ -358,7 +358,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
       tooltipItems.push({
         item: {
-          datasetIndex: element.datasetIndex,
+          configIndex: element.datasetIndex,
           value: value ?? (states ?? []).join(", "),
           constantName,
         },
@@ -731,8 +731,8 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       <TimeBasedChartTooltipContent
         content={activeTooltip.data}
         multiDataset={datasetsLength > 1}
-        colorsByDatasetIndex={colorsByDatasetIndex}
-        labelsByDatasetIndex={labelsByDatasetIndex}
+        colorsByConfigIndex={colorsByDatasetIndex}
+        labelsByConfigIndex={labelsByDatasetIndex}
       />
     ) : undefined;
   }, [activeTooltip, colorsByDatasetIndex, datasetsLength, labelsByDatasetIndex]);

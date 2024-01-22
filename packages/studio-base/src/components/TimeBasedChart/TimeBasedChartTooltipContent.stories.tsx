@@ -26,7 +26,7 @@ export default {
 export const SingleItemSingleDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
-      datasetIndex: 0,
+      configIndex: 0,
       value: 3,
       constantName: "ACTIVE",
     };
@@ -60,7 +60,7 @@ export const SingleItemSingleDatasetLight: StoryObj = {
 export const SingleItemMultiDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
-      datasetIndex: 0,
+      configIndex: 0,
       value: 3,
       constantName: "ACTIVE",
     };
@@ -71,7 +71,7 @@ export const SingleItemMultiDataset: StoryObj = {
           <TimeBasedChartTooltipContent
             multiDataset={true}
             content={[data]}
-            labelsByDatasetIndex={{ "0": "/some/topic.path", "1": "Series B" }}
+            labelsByConfigIndex={{ "0": "/some/topic.path", "1": "Series B" }}
           />
         }
         placement="top"
@@ -100,7 +100,7 @@ export const SingleItemMultiDatasetLight: StoryObj = {
 export const MultipleItemsSingleDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData = {
-      datasetIndex: 0,
+      configIndex: 0,
       value: 3,
       constantName: "ACTIVE",
     };
@@ -135,12 +135,12 @@ export const MultipleItemsMultipleDataset: StoryObj = {
   render: function Story() {
     const data: TimeBasedChartTooltipData[] = [
       {
-        datasetIndex: 0,
+        configIndex: 0,
         value: 3,
         constantName: "ACTIVE",
       },
       {
-        datasetIndex: 1,
+        configIndex: 1,
         value: 4,
         constantName: "ACTIVE",
       },
@@ -152,8 +152,8 @@ export const MultipleItemsMultipleDataset: StoryObj = {
           <TimeBasedChartTooltipContent
             multiDataset={true}
             content={data}
-            colorsByDatasetIndex={{ "0": "chartreuse", "1": "yellow" }}
-            labelsByDatasetIndex={{ "0": "Series A", "1": "Series B" }}
+            colorsByConfigIndex={{ "0": "chartreuse", "1": "yellow" }}
+            labelsByConfigIndex={{ "0": "Series A", "1": "Series B" }}
           />
         }
         placement="top"

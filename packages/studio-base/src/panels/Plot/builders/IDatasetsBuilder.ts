@@ -63,7 +63,11 @@ export type CsvDataset = {
 };
 
 export type GetViewportDatasetsResult = {
-  datasets: Dataset[];
+  /**
+   * Indices correspond to original indices of series in `config.paths`. Array may be sparse if
+   * series are invalid (parsing fails) or if they are disabled.
+   */
+  datasetsByConfigIndex: readonly (Dataset | undefined)[];
   pathsWithMismatchedDataLengths: ReadonlySet<string>;
 };
 

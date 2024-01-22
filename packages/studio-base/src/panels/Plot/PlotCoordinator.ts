@@ -19,7 +19,7 @@ import { Bounds } from "@foxglove/studio-base/types/Bounds";
 import delay from "@foxglove/studio-base/util/delay";
 import { getContrastColor, getLineColor } from "@foxglove/studio-base/util/plotColors";
 
-import { InteractionEvent, Scale, UpdateAction } from "./ChartRenderer";
+import { Dataset, InteractionEvent, Scale, UpdateAction } from "./ChartRenderer";
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import {
   CsvDataset,
@@ -45,6 +45,8 @@ type EventTypes = {
   /** Rendering updated the viewport. `canReset` is true if the viewport can be reset. */
   viewportChange(canReset: boolean): void;
 };
+
+const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => dataset ?? { data: [] };
 
 /**
  * PlotCoordinator interfaces commands and updates between the dataset builder and the chart
@@ -431,7 +433,11 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
     if (this.#isDestroyed()) {
       return;
     }
-    this.#latestXScale = await this.#renderer.updateDatasets(result.datasets);
+    this.#latestXScale = await this.#renderer.updateDatasets(
+      // Use Array.from to fill in any `undefined` entries with an empty dataset (`map` would not
+      // work for sparse arrays)
+      Array.from(result.datasetsByConfigIndex, replaceUndefinedWithEmptyDataset),
+    );
     if (this.#isDestroyed()) {
       return;
     }

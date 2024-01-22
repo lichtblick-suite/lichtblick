@@ -20,15 +20,15 @@ import { Immutable } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 export type TimeBasedChartTooltipData = {
-  datasetIndex: number;
+  configIndex: number;
   value: number | bigint | boolean | string;
   constantName?: string;
 };
 
 type Props = Immutable<{
-  colorsByDatasetIndex?: Record<string, undefined | string>;
+  colorsByConfigIndex?: Record<string, undefined | string>;
   content: TimeBasedChartTooltipData[];
-  labelsByDatasetIndex?: Record<string, undefined | string>;
+  labelsByConfigIndex?: Record<string, undefined | string>;
   // Flag indicating the containing chart has multiple datasets
   multiDataset: boolean;
 }>;
@@ -86,7 +86,12 @@ function OverflowMessage(): JSX.Element {
 export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
-  const { colorsByDatasetIndex, content, labelsByDatasetIndex, multiDataset } = props;
+  const {
+    colorsByConfigIndex: colorsByDatasetIndex,
+    content,
+    labelsByConfigIndex: labelsByDatasetIndex,
+    multiDataset,
+  } = props;
   const { classes, cx } = useStyles();
 
   // Compute whether there are multiple items for the dataset so we can show the user
@@ -106,7 +111,7 @@ export default function TimeBasedChartTooltipContent(
 
     // group items by path
     for (const item of content) {
-      const datasetIndex = item.datasetIndex;
+      const datasetIndex = item.configIndex;
       const existing = out.get(datasetIndex);
       if (existing) {
         existing.hasMultipleValues = true;
@@ -120,7 +125,7 @@ export default function TimeBasedChartTooltipContent(
     }
 
     // Sort by datasetIndex to keep the displayed values in the same order as the settings
-    return _.sortBy([...out.entries()], ([, items]) => items.tooltip.datasetIndex);
+    return _.sortBy([...out.entries()], ([, items]) => items.tooltip.configIndex);
   }, [content, multiDataset]);
 
   // If the chart contains only one dataset, we don't need to render the dataset label - saving space

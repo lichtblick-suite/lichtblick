@@ -201,7 +201,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 0, value: 0 },
@@ -291,7 +291,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 0, value: 0 },
@@ -373,7 +373,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 0, value: 0 },
@@ -401,7 +401,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0, y: 0, value: 0 },
@@ -429,7 +429,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 0.5, y: 1, value: 1 },
@@ -456,7 +456,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [
             { x: 1, y: 1.5, value: 1.5 },
@@ -512,9 +512,13 @@ describe("TimestampDatasetsBuilder", () => {
         bounds: {},
       });
 
-      expect(result.datasets[0]!.data.length).toEqual(40_000);
-      expect(result.datasets[0]!.data[0]).toEqual({ x: 0, y: 0, value: 0 });
-      expect(result.datasets[0]!.data[39_999]).toEqual({ x: 39_999, y: 39_999, value: 39_999 });
+      expect(result.datasetsByConfigIndex[0]!.data.length).toEqual(40_000);
+      expect(result.datasetsByConfigIndex[0]!.data[0]).toEqual({ x: 0, y: 0, value: 0 });
+      expect(result.datasetsByConfigIndex[0]!.data[39_999]).toEqual({
+        x: 39_999,
+        y: 39_999,
+        value: 39_999,
+      });
     }
 
     // Next batch goes over the limit so some of the previous will be culled
@@ -530,9 +534,17 @@ describe("TimestampDatasetsBuilder", () => {
         bounds: {},
       });
 
-      expect(result.datasets[0]!.data.length).toEqual(37500);
-      expect(result.datasets[0]!.data[0]).toEqual({ x: 22_500, y: 22_500, value: 22_500 });
-      expect(result.datasets[0]!.data[37_499]).toEqual({ x: 59_999, y: 59_999, value: 59_999 });
+      expect(result.datasetsByConfigIndex[0]!.data.length).toEqual(37500);
+      expect(result.datasetsByConfigIndex[0]!.data[0]).toEqual({
+        x: 22_500,
+        y: 22_500,
+        value: 22_500,
+      });
+      expect(result.datasetsByConfigIndex[0]!.data[37_499]).toEqual({
+        x: 59_999,
+        y: 59_999,
+        value: 59_999,
+      });
     }
   });
 
@@ -586,7 +598,7 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
+      datasetsByConfigIndex: [
         expect.objectContaining({
           data: [{ x: 0, y: 1, value: 1 }],
         }),
@@ -618,12 +630,62 @@ describe("TimestampDatasetsBuilder", () => {
       }),
     ).resolves.toEqual({
       pathsWithMismatchedDataLengths: new Set(),
-      datasets: [
-        expect.objectContaining({
-          data: [],
-        }),
+      datasetsByConfigIndex: [
+        undefined,
         expect.objectContaining({
           data: [{ x: 0, y: 2, value: 2 }],
+        }),
+      ],
+    });
+  });
+
+  it("leaves gaps in datasetsByConfigIndex for missing series", async () => {
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries([
+      {
+        configIndex: 3,
+        parsed: parseRosPath("/foo.val")!,
+        color: "red",
+        contrastColor: "blue",
+        enabled: true,
+        timestampMethod: "receiveTime",
+        key: "x" as SeriesConfigKey,
+        lineSize: 1,
+        messagePath: "/foo.val",
+        showLine: true,
+      },
+    ]);
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 1,
+            },
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        undefined,
+        undefined,
+        undefined,
+        expect.objectContaining({
+          data: [{ x: 0, y: 1, value: 1 }],
         }),
       ],
     });

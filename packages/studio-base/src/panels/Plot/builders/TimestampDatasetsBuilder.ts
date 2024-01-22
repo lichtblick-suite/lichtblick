@@ -193,7 +193,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     }
 
     const datasets = await this.#datasetsBuilderRemote.getViewportDatasets(viewport);
-    return { datasets, pathsWithMismatchedDataLengths: emptyPaths };
+    return { datasetsByConfigIndex: datasets, pathsWithMismatchedDataLengths: emptyPaths };
   }
 
   public async getCsvData(): Promise<CsvDataset[]> {
