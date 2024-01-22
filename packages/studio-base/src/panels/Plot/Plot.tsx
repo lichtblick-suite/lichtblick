@@ -544,6 +544,10 @@ export function Plot(props: Props): JSX.Element {
   // managing the lifecycle of the subscriptions. The renderer will correlate input message data to
   // the correct series.
   useEffect(() => {
+    // The index and currentCustom modes only need the latest message on each topic so we use
+    // partial subscribe mode for those to avoid preloading data that we don't need
+    const preloadType = xAxisMode === "index" || xAxisMode === "currentCustom" ? "partial" : "full";
+
     const subscriptions = filterMap(series, (item): SubscribePayload | undefined => {
       if (isReferenceLinePlotPathType(item)) {
         return;
@@ -554,13 +558,19 @@ export function Plot(props: Props): JSX.Element {
         return;
       }
 
-      return pathToSubscribePayload(fillInGlobalVariablesInPath(parsed, globalVariables));
+      return pathToSubscribePayload(
+        fillInGlobalVariablesInPath(parsed, globalVariables),
+        preloadType,
+      );
     });
 
     if ((xAxisMode === "custom" || xAxisMode === "currentCustom") && xAxisPath) {
       const parsed = parseRosPath(xAxisPath.value);
       if (parsed) {
-        const sub = pathToSubscribePayload(fillInGlobalVariablesInPath(parsed, globalVariables));
+        const sub = pathToSubscribePayload(
+          fillInGlobalVariablesInPath(parsed, globalVariables),
+          preloadType,
+        );
         if (sub) {
           subscriptions.push(sub);
         }

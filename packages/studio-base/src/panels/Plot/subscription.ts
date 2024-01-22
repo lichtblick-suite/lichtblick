@@ -7,11 +7,17 @@ import type {
   MessagePathPart,
   RosPath,
 } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
-import type { SubscribePayload } from "@foxglove/studio-base/players/types";
+import type {
+  SubscribePayload,
+  SubscriptionPreloadType,
+} from "@foxglove/studio-base/players/types";
 
 const typeIsName = (part: Immutable<MessagePathPart>) => part.type === "name";
 
-export function pathToSubscribePayload(path: Immutable<RosPath>): SubscribePayload | undefined {
+export function pathToSubscribePayload(
+  path: Immutable<RosPath>,
+  preloadType: SubscriptionPreloadType,
+): SubscribePayload | undefined {
   const { messagePath: parts, topicName: topic } = path;
 
   const firstField = parts.find(typeIsName);
@@ -40,7 +46,7 @@ export function pathToSubscribePayload(path: Immutable<RosPath>): SubscribePaylo
 
   return {
     topic,
-    preloadType: "full",
+    preloadType,
     fields: Array.from(fields),
   };
 }
