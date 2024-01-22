@@ -19,6 +19,7 @@ describe("subscription", () => {
 
     it("ignores path without a property", () => {
       expect(toPayload("/foo")).toEqual(undefined);
+      expect(toPayload("/foo.")).toEqual(undefined);
     });
 
     it("subscribes to one field", () => {

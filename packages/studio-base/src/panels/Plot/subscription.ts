@@ -15,7 +15,7 @@ export function pathToSubscribePayload(path: Immutable<RosPath>): SubscribePaylo
   const { messagePath: parts, topicName: topic } = path;
 
   const firstField = parts.find(typeIsName);
-  if (firstField == undefined || firstField.type !== "name") {
+  if (firstField == undefined || firstField.type !== "name" || firstField.name.length === 0) {
     return undefined;
   }
 
