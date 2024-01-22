@@ -6,6 +6,7 @@ import { Button, Tooltip, Fade, buttonClasses, useTheme } from "@mui/material";
 import Hammer from "hammerjs";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
@@ -148,6 +149,7 @@ export function Plot(props: Props): JSX.Element {
     });
   }, [saveConfig, setMessagePathDropConfig]);
 
+  const isMounted = useMountedState();
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
   const [subscriberId] = useState(() => uuidv4());
   const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
@@ -213,7 +215,7 @@ export function Plot(props: Props): JSX.Element {
         label: "Download plot data as CSV",
         onclick: async () => {
           const data = await coordinator?.getCsvData();
-          if (!data) {
+          if (!data || !isMounted()) {
             return;
           }
 
@@ -222,7 +224,7 @@ export function Plot(props: Props): JSX.Element {
       },
     ];
     return items;
-  }, [coordinator, customTitle, xAxisMode]);
+  }, [coordinator, customTitle, isMounted, xAxisMode]);
 
   const setSubscriptions = useMessagePipeline(
     useCallback(
@@ -379,6 +381,10 @@ export function Plot(props: Props): JSX.Element {
         y: args.canvasY,
       });
 
+      if (!isMounted()) {
+        return;
+      }
+
       // Looking up a tooltip is an async operation so the mouse might leave the component while
       // that is happening and we need to avoid showing a tooltip.
       if (!elements || elements.length === 0 || !mousePresentRef.current) {
@@ -409,7 +415,7 @@ export function Plot(props: Props): JSX.Element {
         data: tooltipItems,
       });
     });
-  }, [renderer]);
+  }, [renderer, isMounted]);
 
   // Extract the bounding client rect from currentTarget before calling the debounced function
   // because react re-uses the SyntheticEvent objects.

@@ -312,6 +312,9 @@ describe("CustomDatasetsBuilder", () => {
       ]),
     };
 
+    // Baz is empty in the first block
+    block0.messagesByTopic["/baz"] = [];
+
     const block1 = {
       sizeInBytes: 0,
       messagesByTopic: groupByTopic([
@@ -411,7 +414,13 @@ describe("CustomDatasetsBuilder", () => {
       } else {
         latestBlocks = [
           ...latestBlocks,
-          { sizeInBytes: 0, messagesByTopic: groupByTopic(messages) },
+          {
+            sizeInBytes: 0,
+            messagesByTopic: {
+              "/baz": [],
+              ...groupByTopic(messages),
+            },
+          },
         ];
         builder.handlePlayerState(buildPlayerState({}, latestBlocks));
       }

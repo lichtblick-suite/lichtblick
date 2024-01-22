@@ -54,13 +54,12 @@ export class BlockTopicCursor {
     }
 
     // if the block is not yet loaded we do not increment next
-    const block = blocks[idx];
-    if (!block) {
-      return;
+    const blockTopic = blocks[idx]?.messagesByTopic[this.#topic];
+    if (blockTopic == undefined) {
+      return undefined;
     }
 
-    ++this.#nextBlockIdx;
-    const blockTopic = block.messagesByTopic[this.#topic];
+    this.#nextBlockIdx += 1;
     this.#lastBlockRef = blockTopic;
     return blockTopic;
   }

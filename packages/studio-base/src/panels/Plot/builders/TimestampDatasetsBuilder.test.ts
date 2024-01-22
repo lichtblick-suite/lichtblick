@@ -250,32 +250,37 @@ describe("TimestampDatasetsBuilder", () => {
       ]),
     };
 
-    builder.handlePlayerState(
-      buildPlayerState(
-        {
-          messages: [
-            {
-              topic: "/foo",
-              schemaName: "foo",
-              receiveTime: { sec: 1, nsec: 0 },
-              sizeInBytes: 0,
-              message: {
-                val: 1.5,
-              },
+    const playerState = buildPlayerState(
+      {
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 1, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 1.5,
             },
-            {
-              topic: "/foo",
-              schemaName: "foo",
-              receiveTime: { sec: 2, nsec: 0 },
-              sizeInBytes: 0,
-              message: {
-                val: 2.5,
-              },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 2, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 2.5,
             },
-          ],
-        },
-        [block],
-      ),
+          },
+        ],
+      },
+      [block],
+    );
+
+    builder.handlePlayerState(playerState);
+    await builder.handleBlocks(
+      unwrap(playerState.activeData?.startTime),
+      unwrap(playerState.progress.messageCache?.blocks),
+      async () => await Promise.resolve(false),
     );
 
     await expect(

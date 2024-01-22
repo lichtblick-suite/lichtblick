@@ -69,12 +69,6 @@ const compareDatum = (a: Datum, b: Datum) => a.x - b.x;
 export class TimestampDatasetsBuilderImpl {
   #seriesByKey = new Map<SeriesConfigKey, Series>();
 
-  public updateData(actions: Immutable<UpdateDataAction[]>): void {
-    for (const action of actions) {
-      this.#applyAction(action);
-    }
-  }
-
   public setSeries(series: Immutable<SeriesItem[]>): void {
     // Make a new map so we drop series which are no longer present
     const newSeries = new Map();
@@ -279,7 +273,13 @@ export class TimestampDatasetsBuilderImpl {
     return datasets;
   }
 
-  #applyAction(action: Immutable<UpdateDataAction>): void {
+  public applyActions(actions: Immutable<UpdateDataAction[]>): void {
+    for (const action of actions) {
+      this.applyAction(action);
+    }
+  }
+
+  public applyAction(action: Immutable<UpdateDataAction>): void {
     switch (action.type) {
       case "reset-current": {
         const series = this.#seriesByKey.get(action.series);

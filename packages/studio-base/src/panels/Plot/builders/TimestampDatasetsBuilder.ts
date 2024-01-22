@@ -9,7 +9,7 @@ import { Immutable, MessageEvent, Time } from "@foxglove/studio";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { PlayerState } from "@foxglove/studio-base/players/types";
+import { MessageBlock, PlayerState } from "@foxglove/studio-base/players/types";
 import { TimestampMethod, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import { BlockTopicCursor } from "./BlockTopicCursor";
@@ -107,40 +107,68 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
       }
     }
 
-    const blocks = state.progress.messageCache?.blocks;
-    if (blocks) {
-      for (const series of this.#series) {
+    return { min: 0, max: toSec(subtractTime(activeData.endTime, activeData.startTime)) };
+  }
+
+  public async handleBlocks(
+    startTime: Immutable<Time>,
+    blocks: Immutable<(MessageBlock | undefined)[]>,
+    progress: () => Promise<boolean>,
+  ): Promise<void> {
+    // identify if series need resetting because
+    for (const series of this.#series) {
+      if (series.blockCursor.nextWillReset(blocks)) {
+        this.#pendingDataDispatch.push({
+          type: "reset-full",
+          series: series.config.key,
+        });
+      }
+    }
+
+    const seriesArr = this.#series;
+
+    // We loop through the series and only process one next block and keep doing this until
+    // there are no more updates. This processes the series "in parallel" so that all of them appear
+    // to be loading blocks at the same time.
+    let done = 0;
+    do {
+      done = 0;
+
+      for (const series of seriesArr) {
         const mathFn = series.config.parsed.modifier
           ? mathFunctions[series.config.parsed.modifier]
           : undefined;
 
-        if (series.blockCursor.nextWillReset(blocks)) {
-          this.#pendingDataDispatch.push({
-            type: "reset-full",
-            series: series.config.key,
-          });
+        const messageEvents = series.blockCursor.next(blocks);
+        if (!messageEvents) {
+          done += 1;
+          continue;
         }
 
-        let messageEvents = undefined;
-        while ((messageEvents = series.blockCursor.next(blocks)) != undefined) {
-          const pathItems = readMessagePathItems(
-            messageEvents,
-            series.config.parsed,
-            series.config.timestampMethod,
-            activeData.startTime,
-            mathFn,
-          );
+        const pathItems = readMessagePathItems(
+          messageEvents,
+          series.config.parsed,
+          series.config.timestampMethod,
+          startTime,
+          mathFn,
+        );
 
-          this.#pendingDataDispatch.push({
-            type: "append-full",
-            series: series.config.key,
-            items: pathItems,
-          });
+        if (pathItems.length === 0) {
+          continue;
+        }
+
+        this.#pendingDataDispatch.push({
+          type: "append-full",
+          series: series.config.key,
+          items: pathItems,
+        });
+
+        const abort = await progress();
+        if (abort) {
+          return;
         }
       }
-    }
-
-    return { min: 0, max: toSec(subtractTime(activeData.endTime, activeData.startTime)) };
+    } while (done < seriesArr.length);
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {
@@ -161,7 +189,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     const dispatch = this.#pendingDataDispatch;
     if (dispatch.length > 0) {
       this.#pendingDataDispatch = [];
-      await this.#datasetsBuilderRemote.updateData(dispatch);
+      await this.#datasetsBuilderRemote.applyActions(dispatch);
     }
 
     const datasets = await this.#datasetsBuilderRemote.getViewportDatasets(viewport);

@@ -7,7 +7,7 @@ import { Opaque } from "ts-essentials";
 import type { Immutable, Time } from "@foxglove/studio";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import type { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import type { PlayerState } from "@foxglove/studio-base/players/types";
+import type { MessageBlock, PlayerState } from "@foxglove/studio-base/players/types";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import type { Dataset } from "../ChartRenderer";
@@ -74,6 +74,20 @@ export type GetViewportDatasetsResult = {
  */
 interface IDatasetsBuilder {
   handlePlayerState(state: Immutable<PlayerState>): Bounds1D | undefined;
+
+  /**
+   * The builder can provide an implementation of this method to handle block data separately from
+   * current frame player state data.
+   *
+   * The method is provided a _progress_ callback to call when there is an opportunity to render
+   * some of the processed block data to provide feedback to the caller that work has happened. The
+   * progress callback returns false when further processing should stop.
+   */
+  handleBlocks?(
+    startTime: Immutable<Time>,
+    blocks: Immutable<(MessageBlock | undefined)[]>,
+    progress: () => Promise<boolean>,
+  ): Promise<void>;
 
   setSeries(series: Immutable<SeriesItem[]>): void;
 
