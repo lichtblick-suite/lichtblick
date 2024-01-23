@@ -2541,7 +2541,7 @@ __metadata:
     "@svgr/webpack": 8.1.0
     "@tanstack/react-table": 8.11.7
     "@testing-library/react": 14.0.0
-    "@types/base16": ^1.0.3
+    "@types/base16": ^1.0.5
     "@types/cytoscape": ^3.19.11
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/geojson": 7946.0.11
@@ -5756,10 +5756,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/base16@npm:^1.0.2, @types/base16@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@types/base16@npm:1.0.3"
-  checksum: a2c314d4a67d02d6c7e42ad1b148299b8e471645fc38a9fc7b742447b37e62d9fa8857725837844c57a2a2953d3687ed0f4b0c48aa089d47257c8856359b5f49
+"@types/base16@npm:^1.0.2, @types/base16@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "@types/base16@npm:1.0.5"
+  checksum: caa391944e9af95d395ad8a489ad7e6bc3b358f73f876215313e8a2f97a18d109d8ab3d6d92bd473d9a1c782639a82921a3c30124922f2492082b550a2e9f6a6
   languageName: node
   linkType: hard
 
