@@ -160,7 +160,7 @@
     "ts-key-enum": "2.0.12",
     "ts-loader": "9.4.4",
     "tss-react": "4.9.3",
-    "typescript": "5.2.2",
+    "typescript": "5.3.3",
     "use-debounce": "10.0.0",
     "use-immer": "0.9.0",
     "uuid": "9.0.1",

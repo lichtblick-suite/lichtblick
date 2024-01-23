@@ -2248,7 +2248,7 @@ __metadata:
   dependencies:
     "@foxglove/tsconfig": 2.0.0
     comlink: "github:foxglove/comlink#216a78c5fb08550fdef4a725f468999707fec5bd"
-    typescript: 5.2.2
+    typescript: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -2309,7 +2309,7 @@ __metadata:
     "@types/lodash-es": ^4
     lodash-es: 4.17.21
     shallowequal: 1.1.0
-    typescript: 5.2.2
+    typescript: 5.3.3
   peerDependencies:
     react: ^18.2.0
   languageName: unknown
@@ -2320,7 +2320,7 @@ __metadata:
   resolution: "@foxglove/log@workspace:packages/log"
   dependencies:
     "@foxglove/tsconfig": 2.0.0
-    typescript: 5.2.2
+    typescript: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -2346,7 +2346,7 @@ __metadata:
     flatbuffers: 23.5.26
     flatbuffers_reflection: 0.0.7
     protobufjs: "patch:protobufjs@7.2.4#../../patches/protobufjs.patch"
-    typescript: 5.2.2
+    typescript: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -2657,7 +2657,7 @@ __metadata:
     ts-key-enum: 2.0.12
     ts-loader: 9.4.4
     tss-react: 4.9.3
-    typescript: 5.2.2
+    typescript: 5.3.3
     use-debounce: 10.0.0
     use-immer: 0.9.0
     uuid: 9.0.1
@@ -2695,7 +2695,7 @@ __metadata:
   resolution: "@foxglove/studio@workspace:packages/studio"
   dependencies:
     "@foxglove/tsconfig": 2.0.0
-    typescript: 5.2.2
+    typescript: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -2740,7 +2740,7 @@ __metadata:
   resolution: "@foxglove/typescript-transformers@workspace:packages/typescript-transformers"
   dependencies:
     "@foxglove/tsconfig": 2.0.0
-    typescript: 5.2.2
+    typescript: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -11595,7 +11595,7 @@ __metadata:
     ts-node: 10.9.2
     ts-unused-exports: 10.0.1
     tslib: 2.6.2
-    typescript: 5.2.2
+    typescript: 5.3.3
     webpack: 5.89.0
     webpack-cli: 5.1.4
     webpack-dev-server: 4.15.1
@@ -19705,23 +19705,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.2.2, typescript@npm:^4 || ^5":
-  version: 5.2.2
-  resolution: "typescript@npm:5.2.2"
+"typescript@npm:5.3.3, typescript@npm:^4 || ^5":
+  version: 5.3.3
+  resolution: "typescript@npm:5.3.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 7912821dac4d962d315c36800fe387cdc0a6298dba7ec171b350b4a6e988b51d7b8f051317786db1094bd7431d526b648aba7da8236607febb26cf5b871d2d3c
+  checksum: 2007ccb6e51bbbf6fde0a78099efe04dc1c3dfbdff04ca3b6a8bc717991862b39fd6126c0c3ebf2d2d98ac5e960bcaa873826bb2bb241f14277034148f41f6a2
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@5.2.2#~builtin<compat/typescript>, typescript@patch:typescript@^4 || ^5#~builtin<compat/typescript>":
-  version: 5.2.2
-  resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=f3b441"
+"typescript@patch:typescript@5.3.3#~builtin<compat/typescript>, typescript@patch:typescript@^4 || ^5#~builtin<compat/typescript>":
+  version: 5.3.3
+  resolution: "typescript@patch:typescript@npm%3A5.3.3#~builtin<compat/typescript>::version=5.3.3&hash=f3b441"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 0f4da2f15e6f1245e49db15801dbee52f2bbfb267e1c39225afdab5afee1a72839cd86000e65ee9d7e4dfaff12239d28beaf5ee431357fcced15fb08583d72ca
+  checksum: f61375590b3162599f0f0d5b8737877ac0a7bc52761dbb585d67e7b8753a3a4c42d9a554c4cc929f591ffcf3a2b0602f65ae3ce74714fd5652623a816862b610
   languageName: node
   linkType: hard
 

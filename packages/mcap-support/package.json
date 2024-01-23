@@ -23,7 +23,7 @@
   "devDependencies": {
     "@foxglove/tsconfig": "2.0.0",
     "@types/protobufjs": "workspace:*",
-    "typescript": "5.2.2"
+    "typescript": "5.3.3"
   },
   "dependencies": {
     "@foxglove/message-definition": "0.3.1",

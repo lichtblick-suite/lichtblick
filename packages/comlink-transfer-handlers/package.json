@@ -22,6 +22,6 @@
   "devDependencies": {
     "@foxglove/tsconfig": "2.0.0",
     "comlink": "github:foxglove/comlink#216a78c5fb08550fdef4a725f468999707fec5bd",
-    "typescript": "5.2.2"
+    "typescript": "5.3.3"
   }
 }
