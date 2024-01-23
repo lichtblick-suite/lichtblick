@@ -7,8 +7,8 @@ import EventEmitter from "eventemitter3";
 import * as _ from "lodash-es";
 
 import { unwrap } from "@foxglove/den/monads";
+import { parseMessagePath } from "@foxglove/message-path";
 import { MessageEvent } from "@foxglove/studio";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessageBlock,
   PlayerPresence,
@@ -86,7 +86,7 @@ function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],
 ): SeriesItem[] {
   return paths.map((item, idx) => {
-    const parsed = unwrap(parseRosPath(item.value));
+    const parsed = unwrap(parseMessagePath(item.value));
     const key = (item.key ?? String(idx)) as SeriesConfigKey;
 
     return {
@@ -645,7 +645,7 @@ describe("TimestampDatasetsBuilder", () => {
     builder.setSeries([
       {
         configIndex: 3,
-        parsed: parseRosPath("/foo.val")!,
+        parsed: parseMessagePath("/foo.val")!,
         color: "red",
         contrastColor: "blue",
         enabled: true,

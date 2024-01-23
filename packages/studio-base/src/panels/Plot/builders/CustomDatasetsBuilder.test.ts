@@ -7,8 +7,8 @@ import EventEmitter from "eventemitter3";
 import * as _ from "lodash-es";
 
 import { unwrap } from "@foxglove/den/monads";
+import { parseMessagePath } from "@foxglove/message-path";
 import { MessageEvent } from "@foxglove/studio";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessageBlock,
   PlayerPresence,
@@ -86,7 +86,7 @@ function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],
 ): SeriesItem[] {
   return paths.map((item, idx) => {
-    const parsed = unwrap(parseRosPath(item.value));
+    const parsed = unwrap(parseMessagePath(item.value));
     const key = (item.key ?? String(idx)) as SeriesConfigKey;
 
     return {
@@ -141,7 +141,7 @@ describe("CustomDatasetsBuilder", () => {
   it("should dataset from current messages", async () => {
     const builder = new CustomDatasetsBuilder();
 
-    builder.setXPath(parseRosPath("/foo.val"));
+    builder.setXPath(parseMessagePath("/foo.val"));
     builder.setSeries(
       buildSeriesItems([
         {
@@ -262,7 +262,7 @@ describe("CustomDatasetsBuilder", () => {
   it("should build updates from blocks", async () => {
     const builder = new CustomDatasetsBuilder();
 
-    builder.setXPath(parseRosPath("/foo.val"));
+    builder.setXPath(parseMessagePath("/foo.val"));
     builder.setSeries(
       buildSeriesItems([
         {
@@ -392,7 +392,7 @@ describe("CustomDatasetsBuilder", () => {
   it.each(["current", "blocks"] as const)("combines all values from arrays (%s)", async (type) => {
     const builder = new CustomDatasetsBuilder();
 
-    builder.setXPath(parseRosPath("/foo.values[:].val"));
+    builder.setXPath(parseMessagePath("/foo.values[:].val"));
     builder.setSeries(
       buildSeriesItems([
         {
@@ -520,7 +520,7 @@ describe("CustomDatasetsBuilder", () => {
   it("supports toggling series enabled state", async () => {
     const builder = new CustomDatasetsBuilder();
 
-    builder.setXPath(parseRosPath("/foo.val"));
+    builder.setXPath(parseMessagePath("/foo.val"));
     builder.setSeries(
       buildSeriesItems([
         {
@@ -612,11 +612,11 @@ describe("CustomDatasetsBuilder", () => {
   it("leaves gaps in datasetsByConfigIndex for missing series", async () => {
     const builder = new CustomDatasetsBuilder();
 
-    builder.setXPath(parseRosPath("/foo.val"));
+    builder.setXPath(parseMessagePath("/foo.val"));
     builder.setSeries([
       {
         configIndex: 3,
-        parsed: parseRosPath("/foo.val")!,
+        parsed: parseMessagePath("/foo.val")!,
         color: "red",
         contrastColor: "blue",
         enabled: true,

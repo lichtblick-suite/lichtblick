@@ -18,19 +18,15 @@ import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
 
+import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@foxglove/message-path";
 import { Immutable, SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
 import {
-  MessagePathStructureItem,
-  RosPath,
-} from "@foxglove/studio-base/components/MessagePathSyntax/constants";
-import {
   messagePathStructures,
   traverseStructure,
 } from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { MessagePathDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessageDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useMessageDataItem";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -130,7 +126,10 @@ function RawMessages(props: Props) {
     [defaultGetItemString, diffEnabled],
   );
 
-  const topicRosPath: RosPath | undefined = useMemo(() => parseRosPath(topicPath), [topicPath]);
+  const topicRosPath: MessagePath | undefined = useMemo(
+    () => parseMessagePath(topicPath),
+    [topicPath],
+  );
   const topic: Topic | undefined = useMemo(
     () => topicRosPath && topics.find(({ name }) => name === topicRosPath.topicName),
     [topicRosPath, topics],

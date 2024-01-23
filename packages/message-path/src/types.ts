@@ -11,23 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-const RosPrimitives = {
-  bool: undefined,
-  int8: undefined,
-  uint8: undefined,
-  int16: undefined,
-  uint16: undefined,
-  int32: undefined,
-  uint32: undefined,
-  int64: undefined,
-  uint64: undefined,
-  float32: undefined,
-  float64: undefined,
-  string: undefined,
-};
-
-export type RosPrimitive = keyof typeof RosPrimitives;
-export const rosPrimitives = Object.keys(RosPrimitives) as RosPrimitive[];
+export type PrimitiveType =
+  | "bool"
+  | "int8"
+  | "uint8"
+  | "int16"
+  | "uint16"
+  | "int32"
+  | "uint32"
+  | "int64"
+  | "uint64"
+  | "float32"
+  | "float64"
+  | "string";
 
 export type MessagePathFilter = {
   type: "filter";
@@ -57,7 +53,7 @@ export type MessagePathPart =
     }
   | MessagePathFilter;
 
-export type RosPath = {
+export type MessagePath = {
   /** Referenced topic name */
   topicName: string;
   /**
@@ -85,7 +81,7 @@ type MessagePathStructureItemArray = {
 };
 type MessagePathStructureItemPrimitive = {
   structureType: "primitive";
-  primitiveType: RosPrimitive;
+  primitiveType: PrimitiveType;
   datatype: string;
 };
 export type MessagePathStructureItem =

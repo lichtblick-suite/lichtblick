@@ -6,8 +6,8 @@ import { ChartDataset } from "chart.js";
 import * as _ from "lodash-es";
 
 import { filterMap } from "@foxglove/den/collection";
+import { MessagePath } from "@foxglove/message-path";
 import { Immutable, Time, MessageEvent } from "@foxglove/studio";
-import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { PlayerState } from "@foxglove/studio-base/players/types";
@@ -31,7 +31,7 @@ type CurrentCustomSeriesItem = {
   configIndex: number;
   enabled: boolean;
   messagePath: string;
-  parsed: Immutable<RosPath>;
+  parsed: Immutable<MessagePath>;
   dataset: ChartDataset<"scatter", DatumWithReceiveTime[]>;
 };
 
@@ -40,7 +40,7 @@ type CurrentCustomSeriesItem = {
  * y-axis message path. It uses only the latest message for each path to build the datasets.
  */
 export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
-  #xParsedPath?: Immutable<RosPath>;
+  #xParsedPath?: Immutable<MessagePath>;
 
   #xValues: number[] = [];
 
@@ -128,7 +128,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
     return undefined;
   }
 
-  public setXPath(path: Immutable<RosPath> | undefined): void {
+  public setXPath(path: Immutable<MessagePath> | undefined): void {
     if (JSON.stringify(path) === JSON.stringify(this.#xParsedPath)) {
       return;
     }

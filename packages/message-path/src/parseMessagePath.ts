@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as _ from "lodash-es";
 import { Grammar, Parser } from "nearley";
 
-import { RosPath } from "./constants";
 import grammar from "./grammar.ne";
+import { MessagePath } from "./types";
 
 const grammarObj = Grammar.fromCompiled(grammar);
 
@@ -37,7 +36,7 @@ export function quoteFieldNameIfNeeded(name: string): string {
   return `"${name.replace(/[\\"]/g, (char) => `\\${char}`)}"`;
 }
 
-const parseRosPath = _.memoize((path: string): RosPath | undefined => {
+const parseMessagePath = (path: string): MessagePath | undefined => {
   // Need to create a new Parser object for every new string to parse (should be cheap).
   const parser = new Parser(grammarObj);
   try {
@@ -45,6 +44,6 @@ const parseRosPath = _.memoize((path: string): RosPath | undefined => {
   } catch (_err) {
     return undefined;
   }
-});
+};
 
-export default parseRosPath;
+export { parseMessagePath };

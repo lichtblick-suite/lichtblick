@@ -15,8 +15,8 @@
 import { renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
 
+import { parseMessagePath } from "@foxglove/message-path";
 import { messagePathStructures } from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
@@ -37,7 +37,7 @@ function addValuesWithPathsToItems(
   datatypes: RosDatatypes,
 ) {
   return messages.map((message) => {
-    const rosPath = parseRosPath(messagePath);
+    const rosPath = parseMessagePath(messagePath);
     if (!rosPath) {
       return undefined;
     }

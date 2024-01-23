@@ -4,8 +4,8 @@
 
 import * as Comlink from "comlink";
 
+import { MessagePath } from "@foxglove/message-path";
 import { Immutable, MessageEvent } from "@foxglove/studio";
-import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { PlayerState } from "@foxglove/studio-base/players/types";
@@ -39,7 +39,7 @@ const registry = new FinalizationRegistry<Worker>((worker) => {
 });
 
 export class CustomDatasetsBuilder implements IDatasetsBuilder {
-  #xParsedPath?: Immutable<RosPath>;
+  #xParsedPath?: Immutable<MessagePath>;
   #xValuesCursor?: BlockTopicCursor;
 
   #datasetsBuilderWorker: Worker;
@@ -183,7 +183,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
     return unionBounds1D(this.#xCurrentBounds, this.#xFullBounds);
   }
 
-  public setXPath(path: Immutable<RosPath> | undefined): void {
+  public setXPath(path: Immutable<MessagePath> | undefined): void {
     if (JSON.stringify(path) === JSON.stringify(this.#xParsedPath)) {
       return;
     }
@@ -235,7 +235,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
 
 function readMessagePathItems(
   events: Immutable<MessageEvent[]>,
-  path: Immutable<RosPath>,
+  path: Immutable<MessagePath>,
   mathFunction?: MathFunction,
 ): ValueItem[] {
   const out = [];

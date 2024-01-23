@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { unwrap } from "@foxglove/den/monads";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import { parseMessagePath } from "@foxglove/message-path";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import {
@@ -499,7 +499,7 @@ describe("messagePathsForStructure", () => {
   it("preserves existing filters matching isTypicalFilterName", () => {
     expect(
       messagePathsForStructure(unwrap(structures["tf/tfMessage"]), {
-        messagePath: parseRosPath('/tf.transforms[:]{child_frame_id=="foo"}')!.messagePath,
+        messagePath: parseMessagePath('/tf.transforms[:]{child_frame_id=="foo"}')!.messagePath,
       }).map(({ path }) => path),
     ).toEqual([
       "",
@@ -519,7 +519,7 @@ describe("messagePathsForStructure", () => {
 
     expect(
       messagePathsForStructure(unwrap(structures["tf/tfMessage"]), {
-        messagePath: parseRosPath("/tf.transforms[:]{header.stamp.sec==0}")!.messagePath,
+        messagePath: parseMessagePath("/tf.transforms[:]{header.stamp.sec==0}")!.messagePath,
       }).map(({ path }) => path),
     ).toEqual([
       "",

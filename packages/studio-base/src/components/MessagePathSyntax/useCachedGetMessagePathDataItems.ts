@@ -16,6 +16,13 @@ import { useCallback, useMemo } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useDeepMemo, useShallowMemo } from "@foxglove/hooks";
+import {
+  quoteTopicNameIfNeeded,
+  parseMessagePath,
+  MessagePathStructureItem,
+  MessagePathStructureItemMessage,
+  MessagePath,
+} from "@foxglove/message-path";
 import { Immutable } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import useGlobalVariables, {
@@ -28,11 +35,9 @@ import {
   extractTypeFromStudioEnumAnnotation,
 } from "@foxglove/studio-base/util/enums";
 
-import { MessagePathStructureItem, MessagePathStructureItemMessage, RosPath } from "./constants";
 import { filterMatches } from "./filterMatches";
 import { TypicalFilterNames } from "./isTypicalFilterName";
 import { messagePathStructures } from "./messagePathsForDatatype";
-import parseRosPath, { quoteTopicNameIfNeeded } from "./parseRosPath";
 
 type ValueInMapRecord<T> = T extends Map<unknown, infer I> ? I : never;
 
@@ -54,15 +59,15 @@ export function useCachedGetMessagePathDataItems(
 
   const parsedPaths = useMemo(() => {
     return filterMap(memoizedPaths, (path) => {
-      const rosPath = parseRosPath(path);
-      return rosPath ? ([path, rosPath] satisfies [string, RosPath]) : undefined;
+      const rosPath = parseMessagePath(path);
+      return rosPath ? ([path, rosPath] satisfies [string, MessagePath]) : undefined;
     });
   }, [memoizedPaths]);
 
   // We first fill in global variables in the paths, so we can later see which paths have really
   // changed when the global variables have changed.
   const unmemoizedFilledInPaths = useMemo(() => {
-    const filledInPaths: Record<string, RosPath> = {};
+    const filledInPaths: Record<string, MessagePath> = {};
     for (const [path, parsedPath] of parsedPaths) {
       filledInPaths[path] = fillInGlobalVariablesInPath(parsedPath, globalVariables);
     }
@@ -152,9 +157,9 @@ export function useCachedGetMessagePathDataItems(
 }
 
 export function fillInGlobalVariablesInPath(
-  rosPath: RosPath,
+  rosPath: MessagePath,
   globalVariables: GlobalVariables,
-): RosPath {
+): MessagePath {
   return {
     ...rosPath,
     messagePath: rosPath.messagePath.map((messagePathPart) => {
@@ -191,7 +196,7 @@ export function fillInGlobalVariablesInPath(
 // Exported for tests.
 export function getMessagePathDataItems(
   message: MessageEvent,
-  filledInPath: RosPath,
+  filledInPath: MessagePath,
   topicsByName: Record<string, Topic>,
   structures: Record<string, MessagePathStructureItemMessage>,
   enumValues: ReturnType<typeof enumValuesByDatatypeAndField>,
@@ -341,7 +346,7 @@ export function useDecodeMessagePathsForMessagesByTopic(
       const obj: { [path: string]: MessageAndData[] } = {};
       for (const path of memoizedPaths) {
         // Create an array for invalid paths, and valid paths with entries in messagesByTopic
-        const rosPath = parseRosPath(path);
+        const rosPath = parseMessagePath(path);
         if (!rosPath) {
           obj[path] = [];
           continue;

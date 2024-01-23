@@ -2,8 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessagePathPart } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import { parseMessagePath, MessagePathPart } from "@foxglove/message-path";
 
 import { SubscriptionPreloadType, SubscribePayload } from "./types";
 
@@ -15,7 +14,7 @@ export function subscribePayloadFromMessagePath(
   path: string,
   preloadType?: SubscriptionPreloadType,
 ): undefined | SubscribePayload {
-  const parsedPath = parseRosPath(path);
+  const parsedPath = parseMessagePath(path);
 
   if (!parsedPath) {
     return undefined;

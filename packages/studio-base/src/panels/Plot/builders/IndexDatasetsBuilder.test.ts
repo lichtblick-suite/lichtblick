@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { unwrap } from "@foxglove/den/monads";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import { parseMessagePath } from "@foxglove/message-path";
 import {
   MessageBlock,
   PlayerPresence,
@@ -19,7 +19,7 @@ function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],
 ): SeriesItem[] {
   return paths.map((item, idx) => {
-    const parsed = unwrap(parseRosPath(item.value));
+    const parsed = unwrap(parseMessagePath(item.value));
     const key = (item.key ?? String(idx)) as SeriesConfigKey;
 
     return {
@@ -295,7 +295,7 @@ describe("IndexDatasetsBuilder", () => {
     builder.setSeries([
       {
         configIndex: 3,
-        parsed: parseRosPath("/foo.val")!,
+        parsed: parseMessagePath("/foo.val")!,
         color: "red",
         contrastColor: "blue",
         enabled: true,

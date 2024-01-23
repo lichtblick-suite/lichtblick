@@ -7,8 +7,8 @@ import { Badge, Typography } from "@mui/material";
 import { FzfResultItem } from "fzf";
 import { useCallback, useMemo } from "react";
 
+import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
 import { HighlightChars } from "@foxglove/studio-base/components/HighlightChars";
-import { quoteTopicNameIfNeeded } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Topic } from "@foxglove/studio-base/players/types";

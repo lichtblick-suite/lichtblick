@@ -5,11 +5,8 @@
 import * as _ from "lodash-es";
 
 import { MessageDefinition } from "@foxglove/message-definition";
+import { quoteFieldNameIfNeeded, quoteTopicNameIfNeeded } from "@foxglove/message-path";
 import { Immutable } from "@foxglove/studio";
-import {
-  quoteFieldNameIfNeeded,
-  quoteTopicNameIfNeeded,
-} from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { Topic } from "@foxglove/studio-base/src/players/types";
 
 /**

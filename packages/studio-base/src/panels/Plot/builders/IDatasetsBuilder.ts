@@ -4,8 +4,8 @@
 
 import { Opaque } from "ts-essentials";
 
+import { MessagePath } from "@foxglove/message-path";
 import type { Immutable, Time } from "@foxglove/studio";
-import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import type { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import type { MessageBlock, PlayerState } from "@foxglove/studio-base/players/types";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -34,7 +34,7 @@ export type SeriesItem = {
   /** The original index of this series in config.paths */
   configIndex: number;
   messagePath: string;
-  parsed: RosPath;
+  parsed: MessagePath;
   color: string;
   /** Used for points when lines are also shown to provide extra contrast */
   contrastColor: string;

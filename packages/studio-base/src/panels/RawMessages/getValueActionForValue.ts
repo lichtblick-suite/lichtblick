@@ -11,10 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  MessagePathStructureItem,
-  RosPrimitive,
-} from "@foxglove/studio-base/components/MessagePathSyntax/constants";
+import { MessagePathStructureItem, PrimitiveType } from "@foxglove/message-path";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
 export type ValueAction = {
@@ -128,7 +125,7 @@ export function getValueActionForValue(
       };
     }
     // Otherwise, deduce a roughly-correct type from the runtime type of the value.
-    let primitiveType: RosPrimitive | undefined;
+    let primitiveType: PrimitiveType | undefined;
     switch (typeof value) {
       case "bigint":
         primitiveType = "int64";

@@ -12,10 +12,10 @@ import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
 import { filterMap } from "@foxglove/den/collection";
+import { parseMessagePath } from "@foxglove/message-path";
 import { add as addTimes, fromSec, isTime, toSec } from "@foxglove/rostime";
 import { Immutable } from "@foxglove/studio";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { fillInGlobalVariablesInPath } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
   MessagePipelineContext,
@@ -285,7 +285,7 @@ export function Plot(props: Props): JSX.Element {
         return;
       }
 
-      const parsed = parseRosPath(xAxisPath.value);
+      const parsed = parseMessagePath(xAxisPath.value);
       if (!parsed) {
         datasetsBuilder.setXPath(undefined);
         return;
@@ -553,7 +553,7 @@ export function Plot(props: Props): JSX.Element {
         return;
       }
 
-      const parsed = parseRosPath(item.value);
+      const parsed = parseMessagePath(item.value);
       if (!parsed) {
         return;
       }
@@ -565,7 +565,7 @@ export function Plot(props: Props): JSX.Element {
     });
 
     if ((xAxisMode === "custom" || xAxisMode === "currentCustom") && xAxisPath) {
-      const parsed = parseRosPath(xAxisPath.value);
+      const parsed = parseMessagePath(xAxisPath.value);
       if (parsed) {
         const sub = pathToSubscribePayload(
           fillInGlobalVariablesInPath(parsed, globalVariables),

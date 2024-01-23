@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessagePathFilter, MessagePathPart, MessagePath } from "@foxglove/message-path";
 import { Immutable } from "@foxglove/studio";
-
-import { MessagePathFilter, MessagePathPart, RosPath } from "./constants";
 
 type SlicePart = number | { variableName: string; startLoc: number };
 
@@ -16,7 +15,7 @@ type Slice = {
 /**
  * Return the string representation of the ros path
  */
-export function stringifyRosPath(path: Immutable<RosPath>): string {
+export function stringifyMessagePath(path: Immutable<MessagePath>): string {
   return (
     path.topicNameRepr +
     path.messagePath.map(stringifyMessagePathPart).join("") +
