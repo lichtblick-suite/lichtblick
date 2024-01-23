@@ -2574,7 +2574,7 @@ __metadata:
     "@types/react-window": ^1.8.5
     "@types/sanitize-html": 2.9.3
     "@types/seedrandom": 3.0.8
-    "@types/shallowequal": 1.1.1
+    "@types/shallowequal": 1.1.5
     "@types/string-hash": 1.1.1
     "@types/text-metrics": "workspace:*"
     "@types/three": 0.156.0
@@ -6454,10 +6454,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/shallowequal@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@types/shallowequal@npm:1.1.1"
-  checksum: ed724c42d61b42e52306dfeb8c1af913a97f616a2098831a3f0801db3d391f00470dfe47f76fb213a087e4277dbf80857098aa2e56acb700f156befe06f6431f
+"@types/shallowequal@npm:1.1.5":
+  version: 1.1.5
+  resolution: "@types/shallowequal@npm:1.1.5"
+  checksum: 9f7dde131fa006623836b4204ccb68154ae6d2a91f908c00f52f138f7fdcd198e471489f649d2f34d788fb82e717ac16b773dac280e1ab44a927f14b12f67f6c
   languageName: node
   linkType: hard
 
