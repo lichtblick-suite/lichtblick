@@ -2623,7 +2623,7 @@ __metadata:
     react-markdown: 8.0.7
     react-mosaic-component: 6.1.0
     react-refresh-typescript: 2.0.9
-    react-resize-detector: 9.1.0
+    react-resize-detector: 10.0.1
     react-transition-group: 4.4.5
     react-use: 17.4.2
     react-virtualized: 9.22.5
@@ -17196,15 +17196,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resize-detector@npm:9.1.0":
-  version: 9.1.0
-  resolution: "react-resize-detector@npm:9.1.0"
+"react-resize-detector@npm:10.0.1":
+  version: 10.0.1
+  resolution: "react-resize-detector@npm:10.0.1"
   dependencies:
     lodash: ^4.17.21
   peerDependencies:
-    react: ^16.0.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 05b263e141fd428eea433e399f88c3e1a379b4a2293958f59b5a5c75dd86c621ce60583724257cc3dc1f5c120a664666ff3fa53d41e6c283687676dc55afa02b
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: b30db305abc6c9e430c3b48b3dc729b42e06f3130365951bb82fe2cf8ac01fd3b897fe2a29b3e0dd148957065ab447d643e1e4123f2d24ec2646ec70574a5439
   languageName: node
   linkType: hard
 
