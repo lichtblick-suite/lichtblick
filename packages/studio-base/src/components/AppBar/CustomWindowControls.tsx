@@ -14,6 +14,10 @@ import Stack from "@foxglove/studio-base/components/Stack";
 export type CustomWindowControlsProps = {
   showCustomWindowControls?: boolean;
   isMaximized?: boolean;
+  // The initial zoom factor is set when the window is created/refreshed. This sets the baseline
+  // for the AppBar's counter-zoom behavior, so the AppBar can appear the same size while the rest
+  // of the browserWindow zooms in/out.
+  initialZoomFactor?: number;
   onMinimizeWindow?: () => void;
   onMaximizeWindow?: () => void;
   onUnmaximizeWindow?: () => void;

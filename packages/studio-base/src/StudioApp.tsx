@@ -87,6 +87,7 @@ export function StudioApp(): JSX.Element {
                 onAppBarDoubleClick={onAppBarDoubleClick}
                 showCustomWindowControls={customWindowControlProps?.showCustomWindowControls}
                 isMaximized={customWindowControlProps?.isMaximized}
+                initialZoomFactor={customWindowControlProps?.initialZoomFactor}
                 onMinimizeWindow={customWindowControlProps?.onMinimizeWindow}
                 onMaximizeWindow={customWindowControlProps?.onMaximizeWindow}
                 onUnmaximizeWindow={customWindowControlProps?.onUnmaximizeWindow}
