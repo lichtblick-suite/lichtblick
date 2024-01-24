@@ -106,7 +106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:7.23.7, @babel/core@npm:^7.0.0, @babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.18.9, @babel/core@npm:^7.21.3, @babel/core@npm:^7.23.0, @babel/core@npm:^7.23.2":
+"@babel/core@npm:7.23.7, @babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.18.9, @babel/core@npm:^7.21.3, @babel/core@npm:^7.23.0, @babel/core@npm:^7.23.2":
   version: 7.23.7
   resolution: "@babel/core@npm:7.23.7"
   dependencies:
@@ -2609,7 +2609,6 @@ __metadata:
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
     fake-indexeddb: 4.0.2
-    fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 9.0.2
     fuzzysort: 2.0.4
     fzf: 0.5.2
@@ -9036,13 +9035,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.0.0":
-  version: 3.19.2
-  resolution: "core-js@npm:3.19.2"
-  checksum: a605f7b0448a7aa13731fd9a13525460681e15ce60ec0e1ff45e88b18b71e74f6c625959200f0f8376ec0a1eb94b0f06e3d6807a01c5a46f3871d08a2c4f1d58
-  languageName: node
-  linkType: hard
-
 "core-util-is@npm:~1.0.0":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
@@ -11293,29 +11285,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fetch-mock@npm:9.11.0":
-  version: 9.11.0
-  resolution: "fetch-mock@npm:9.11.0"
-  dependencies:
-    "@babel/core": ^7.0.0
-    "@babel/runtime": ^7.0.0
-    core-js: ^3.0.0
-    debug: ^4.1.1
-    glob-to-regexp: ^0.4.0
-    is-subset: ^0.1.1
-    lodash.isequal: ^4.5.0
-    path-to-regexp: ^2.2.1
-    querystring: ^0.2.0
-    whatwg-url: ^6.5.0
-  peerDependencies:
-    node-fetch: "*"
-  peerDependenciesMeta:
-    node-fetch:
-      optional: true
-  checksum: debc4dd83bcda79b0aa71c38d08da6036906cdc49393343eb3426112314a7e57557255664f745d2e3f0b9b2a6e852bd3a564ae3f08332c27e422d3441bb865bd
-  languageName: node
-  linkType: hard
-
 "fetch-retry@npm:^5.0.2":
   version: 5.0.3
   resolution: "fetch-retry@npm:5.0.3"
@@ -11924,7 +11893,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob-to-regexp@npm:^0.4.0, glob-to-regexp@npm:^0.4.1":
+"glob-to-regexp@npm:^0.4.1":
   version: 0.4.1
   resolution: "glob-to-regexp@npm:0.4.1"
   checksum: e795f4e8f06d2a15e86f76e4d92751cf8bbfcf0157cea5c2f0f35678a8195a750b34096b1256e436f0cebc1883b5ff0888c47348443e69546a5a87f9e1eb1167
@@ -13376,13 +13345,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-subset@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "is-subset@npm:0.1.1"
-  checksum: 97b8d7852af165269b7495095691a6ce6cf20bdfa1f846f97b4560ee190069686107af4e277fbd93aa0845c4d5db704391460ff6e9014aeb73264ba87893df44
-  languageName: node
-  linkType: hard
-
 "is-symbol@npm:^1.0.2, is-symbol@npm:^1.0.3":
   version: 1.0.4
   resolution: "is-symbol@npm:1.0.4"
@@ -14493,13 +14455,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.isequal@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.isequal@npm:4.5.0"
-  checksum: da27515dc5230eb1140ba65ff8de3613649620e8656b19a6270afe4866b7bd461d9ba2ac8a48dcc57f7adac4ee80e1de9f965d89d4d81a0ad52bb3eec2609644
-  languageName: node
-  linkType: hard
-
 "lodash.kebabcase@npm:4.1.1":
   version: 4.1.1
   resolution: "lodash.kebabcase@npm:4.1.1"
@@ -14518,13 +14473,6 @@ __metadata:
   version: 4.1.1
   resolution: "lodash.snakecase@npm:4.1.1"
   checksum: 1685ed3e83dda6eae5a4dcaee161a51cd210aabb3e1c09c57150e7dd8feda19e4ca0d27d0631eabe8d0f4eaa51e376da64e8c018ae5415417c5890d42feb72a8
-  languageName: node
-  linkType: hard
-
-"lodash.sortby@npm:^4.7.0":
-  version: 4.7.0
-  resolution: "lodash.sortby@npm:4.7.0"
-  checksum: db170c9396d29d11fe9a9f25668c4993e0c1331bcb941ddbd48fb76f492e732add7f2a47cfdf8e9d740fa59ac41bbfaf931d268bc72aab3ab49e9f89354d718c
   languageName: node
   linkType: hard
 
@@ -16385,13 +16333,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^2.2.1":
-  version: 2.4.0
-  resolution: "path-to-regexp@npm:2.4.0"
-  checksum: 581175bf2968e51452f2b8c71f10e75c995693668b4ecf7d0b48962fbe0c56830661ca5dd5fd6d8e2f0cc9a045ce07e89af504ab133e1d21887c2712df85b1f4
-  languageName: node
-  linkType: hard
-
 "path-type@npm:^4.0.0":
   version: 4.0.0
   resolution: "path-type@npm:4.0.0"
@@ -16939,13 +16880,6 @@ __metadata:
   dependencies:
     side-channel: ^1.0.4
   checksum: e812f3c590b2262548647d62f1637b6989cc56656dc960b893fe2098d96e1bd633f36576f4cd7564dfbff9db42e17775884db96d846bebe4f37420d073ecdc0b
-  languageName: node
-  linkType: hard
-
-"querystring@npm:^0.2.0":
-  version: 0.2.1
-  resolution: "querystring@npm:0.2.1"
-  checksum: 7b83b45d641e75fd39cd6625ddfd44e7618e741c61e95281b57bbae8fde0afcc12cf851924559e5cc1ef9baa3b1e06e22b164ea1397d65dd94b801f678d9c8ce
   languageName: node
   linkType: hard
 
@@ -19547,15 +19481,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tr46@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "tr46@npm:1.0.1"
-  dependencies:
-    punycode: ^2.1.0
-  checksum: 96d4ed46bc161db75dbf9247a236ea0bfcaf5758baae6749e92afab0bc5a09cb59af21788ede7e55080f2bf02dce3e4a8f2a484cc45164e29f4b5e68f7cbcc1a
-  languageName: node
-  linkType: hard
-
 "tr46@npm:^2.1.0":
   version: 2.1.0
   resolution: "tr46@npm:2.1.0"
@@ -20943,17 +20868,6 @@ __metadata:
     tr46: ~0.0.3
     webidl-conversions: ^3.0.0
   checksum: b8daed4ad3356cc4899048a15b2c143a9aed0dfae1f611ebd55073310c7b910f522ad75d727346ad64203d7e6c79ef25eafd465f4d12775ca44b90fa82ed9e2c
-  languageName: node
-  linkType: hard
-
-"whatwg-url@npm:^6.5.0":
-  version: 6.5.0
-  resolution: "whatwg-url@npm:6.5.0"
-  dependencies:
-    lodash.sortby: ^4.7.0
-    tr46: ^1.0.1
-    webidl-conversions: ^4.0.2
-  checksum: a10bd5e29f4382cd19789c2a7bbce25416e606b6fefc241c7fe34a2449de5bc5709c165bd13634eda433942d917ca7386a52841780b82dc37afa8141c31a8ebd
   languageName: node
   linkType: hard
 
