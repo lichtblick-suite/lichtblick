@@ -4,6 +4,7 @@
 
 import * as Comlink from "comlink";
 
+import { ComlinkWrap } from "@foxglove/den/worker";
 import { RawImage } from "@foxglove/schemas";
 
 import type { RawImageOptions } from "./decodeImage";
@@ -17,17 +18,21 @@ import { Image as RosImage } from "../../ros";
  * [transferred](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects)
  * back to the main thread.
  */
+
+type WorkerService = (typeof import("./WorkerImageDecoder.worker"))["service"];
 export class WorkerImageDecoder {
-  #worker: Worker;
-  #remote: Comlink.Remote<(typeof import("./WorkerImageDecoder.worker"))["service"]>;
-  #abort?: () => void;
+  #remote: Comlink.Remote<WorkerService>;
+  #dispose: () => void;
 
   public constructor() {
-    this.#worker = new Worker(
-      // foxglove-depcheck-used: babel-plugin-transform-import-meta
-      new URL("./WorkerImageDecoder.worker", import.meta.url),
+    const { remote, dispose } = ComlinkWrap<WorkerService>(
+      new Worker(
+        // foxglove-depcheck-used: babel-plugin-transform-import-meta
+        new URL("./WorkerImageDecoder.worker", import.meta.url),
+      ),
     );
-    this.#remote = Comlink.wrap(this.#worker);
+    this.#remote = remote;
+    this.#dispose = dispose;
   }
 
   /**
@@ -37,39 +42,10 @@ export class WorkerImageDecoder {
     image: RosImage | RawImage,
     options: Partial<RawImageOptions>,
   ): Promise<ImageData> {
-    return await new Promise((resolve, reject) => {
-      /** WARNING:
-       * Be careful with closures in this function as they can easily create memory leaks
-       * by keeping a promise from being GC'ed until the next promise is resolved.
-       * Always test that these promises are not keeping images in memory over time.
-       */
-
-      /** More decode requests can be made while the last one is being processed
-       * so we need to keep track of the previous abort function and abort if the
-       * next one finishes before the first. If it's already resolved, then the abort is a noop.
-       */
-      const prevAbort = this.#abort;
-      this.#abort = makeAbort(reject);
-      void this.#remote.decode(image, options).then(resolve).catch(reject).finally(prevAbort);
-    });
+    return await this.#remote.decode(image, options);
   }
 
   public terminate(): void {
-    /** Need to abort as well as terminate because the worker.terminate() call
-     * causes the promise to be neither resolved nor rejected. This creates a circular
-     * reference loop with the `.then` functions within the renderable, causing the
-     * Renderer to never be garbage collected because it's linked to this ongoing
-     * promise and worker.
-     */
-    this.#abort?.();
-    this.#abort = undefined;
-    this.#worker.terminate();
+    this.#dispose();
   }
-}
-
-/** Creates a function that calls the reject function with an abort error */
-function makeAbort(reject: (reason?: unknown) => void): () => void {
-  return () => {
-    reject(new Error("Decode aborted."));
-  };
 }

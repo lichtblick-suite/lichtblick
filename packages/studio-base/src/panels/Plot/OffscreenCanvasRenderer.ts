@@ -5,6 +5,7 @@
 import type { Theme } from "@mui/material";
 import * as Comlink from "comlink";
 
+import { ComlinkWrap } from "@foxglove/den/worker";
 import { Immutable } from "@foxglove/studio";
 import { Bounds } from "@foxglove/studio-base/types/Bounds";
 
@@ -13,12 +14,11 @@ import type { Service } from "./ChartRenderer.worker";
 
 // If the datasets builder is garbage collected we also need to cleanup the worker
 // This registry ensures the worker is cleaned up when the builder is garbage collected
-const registry = new FinalizationRegistry<Worker>((worker) => {
-  worker.terminate();
+const registry = new FinalizationRegistry<() => void>((dispose) => {
+  dispose();
 });
 
 export class OffscreenCanvasRenderer {
-  #renderingWorker: Worker;
   #canvas: OffscreenCanvas;
   #remote: Promise<Comlink.RemoteObject<ChartRenderer>>;
 
@@ -27,14 +27,12 @@ export class OffscreenCanvasRenderer {
   public constructor(canvas: OffscreenCanvas, theme: Theme) {
     this.#theme = theme;
     this.#canvas = canvas;
-    this.#renderingWorker = new Worker(
+    const worker = new Worker(
       // foxglove-depcheck-used: babel-plugin-transform-import-meta
       new URL("./ChartRenderer.worker", import.meta.url),
     );
 
-    const remote = Comlink.wrap<Service<Comlink.RemoteObject<ChartRenderer>>>(
-      this.#renderingWorker,
-    );
+    const { remote, dispose } = ComlinkWrap<Service<Comlink.RemoteObject<ChartRenderer>>>(worker);
 
     // Set the promise without await so init creates only one instance of renderer even if called
     // twice.
@@ -50,7 +48,7 @@ export class OffscreenCanvasRenderer {
       ),
     );
 
-    registry.register(this, this.#renderingWorker);
+    registry.register(this, dispose);
   }
 
   public async update(action: Immutable<UpdateAction>): Promise<Bounds | undefined> {

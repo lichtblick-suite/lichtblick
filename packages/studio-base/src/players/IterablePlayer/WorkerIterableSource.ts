@@ -5,6 +5,7 @@
 import * as Comlink from "comlink";
 
 import { abortSignalTransferHandler } from "@foxglove/comlink-transfer-handlers";
+import { ComlinkWrap } from "@foxglove/den/worker";
 import { Immutable, MessageEvent, Time } from "@foxglove/studio";
 
 import type {
@@ -28,29 +29,33 @@ type ConstructorArgs = {
 export class WorkerIterableSource implements IIterableSource {
   readonly #args: ConstructorArgs;
 
-  #thread?: Worker;
-  #worker?: Comlink.Remote<WorkerIterableSourceWorker>;
+  #sourceWorkerRemote?: Comlink.Remote<WorkerIterableSourceWorker>;
+  #disposeRemote?: () => void;
 
   public constructor(args: ConstructorArgs) {
     this.#args = args;
   }
 
   public async initialize(): Promise<Initalization> {
+    this.#disposeRemote?.();
+
     // Note: this launches the worker.
-    this.#thread = this.#args.initWorker();
+    const worker = this.#args.initWorker();
 
-    const initialize = Comlink.wrap<
-      (args: IterableSourceInitializeArgs) => Comlink.Remote<WorkerIterableSourceWorker>
-    >(this.#thread);
+    const { remote: initializeWorker, dispose } =
+      ComlinkWrap<
+        (args: IterableSourceInitializeArgs) => Comlink.Remote<WorkerIterableSourceWorker>
+      >(worker);
 
-    const worker = (this.#worker = await initialize(this.#args.initArgs));
-    return await worker.initialize();
+    this.#disposeRemote = dispose;
+    this.#sourceWorkerRemote = await initializeWorker(this.#args.initArgs);
+    return await this.#sourceWorkerRemote.initialize();
   }
 
   public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
-    if (this.#worker == undefined) {
+    if (this.#sourceWorkerRemote == undefined) {
       throw new Error(`WorkerIterableSource is not initialized`);
     }
 
@@ -73,7 +78,7 @@ export class WorkerIterableSource implements IIterableSource {
   }
 
   public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
-    if (this.#worker == undefined) {
+    if (this.#sourceWorkerRemote == undefined) {
       throw new Error(`WorkerIterableSource is not initialized`);
     }
 
@@ -81,13 +86,13 @@ export class WorkerIterableSource implements IIterableSource {
     // to our worker getBackfillMessages call. Our installed Comlink handler for AbortSignal handles
     // making the abort signal available within the worker.
     const { abortSignal, ...rest } = args;
-    return await this.#worker.getBackfillMessages(rest, abortSignal);
+    return await this.#sourceWorkerRemote.getBackfillMessages(rest, abortSignal);
   }
 
   public getMessageCursor(
     args: Immutable<MessageIteratorArgs & { abort?: AbortSignal }>,
   ): IMessageCursor {
-    if (this.#worker == undefined) {
+    if (this.#sourceWorkerRemote == undefined) {
       throw new Error(`WorkerIterableSource is not initialized`);
     }
 
@@ -95,7 +100,7 @@ export class WorkerIterableSource implements IIterableSource {
     // to our worker getBackfillMessages call. Our installed Comlink handler for AbortSignal handles
     // making the abort signal available within the worker.
     const { abort, ...rest } = args;
-    const messageCursorPromise = this.#worker.getMessageCursor(rest, abort);
+    const messageCursorPromise = this.#sourceWorkerRemote.getMessageCursor(rest, abort);
 
     const cursor: IMessageCursor = {
       async next() {
@@ -127,6 +132,10 @@ export class WorkerIterableSource implements IIterableSource {
   }
 
   public async terminate(): Promise<void> {
-    this.#thread?.terminate();
+    this.#disposeRemote?.();
+    // shouldn't normally have to do this, but if `initialize` is called after again we don't want
+    // to reuse the old remote
+    this.#disposeRemote = undefined;
+    this.#sourceWorkerRemote = undefined;
   }
 }

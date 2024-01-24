@@ -4,6 +4,7 @@
 
 import * as Comlink from "comlink";
 
+import { ComlinkWrap } from "@foxglove/den/worker";
 import { MessagePath } from "@foxglove/message-path";
 import { Immutable, MessageEvent } from "@foxglove/studio";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
@@ -34,15 +35,14 @@ type CustomDatasetsSeriesItem = {
 
 // If the datasets builder is garbage collected we also need to cleanup the worker
 // This registry ensures the worker is cleaned up when the builder is garbage collected
-const registry = new FinalizationRegistry<Worker>((worker) => {
-  worker.terminate();
+const registry = new FinalizationRegistry<() => void>((dispose) => {
+  dispose();
 });
 
 export class CustomDatasetsBuilder implements IDatasetsBuilder {
   #xParsedPath?: Immutable<MessagePath>;
   #xValuesCursor?: BlockTopicCursor;
 
-  #datasetsBuilderWorker: Worker;
   #datasetsBuilderRemote: Comlink.Remote<Comlink.RemoteObject<CustomDatasetsBuilderImpl>>;
 
   #pendingDataDispatch: Immutable<UpdateDataAction>[] = [];
@@ -55,13 +55,15 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
   #xFullBounds?: Bounds1D;
 
   public constructor() {
-    this.#datasetsBuilderWorker = new Worker(
+    const worker = new Worker(
       // foxglove-depcheck-used: babel-plugin-transform-import-meta
       new URL("./CustomDatasetsBuilderImpl.worker", import.meta.url),
     );
-    this.#datasetsBuilderRemote = Comlink.wrap(this.#datasetsBuilderWorker);
+    const { remote, dispose } =
+      ComlinkWrap<Comlink.RemoteObject<CustomDatasetsBuilderImpl>>(worker);
 
-    registry.register(this, this.#datasetsBuilderWorker);
+    this.#datasetsBuilderRemote = remote;
+    registry.register(this, dispose);
   }
 
   public handlePlayerState(state: Immutable<PlayerState>): Bounds1D | undefined {
