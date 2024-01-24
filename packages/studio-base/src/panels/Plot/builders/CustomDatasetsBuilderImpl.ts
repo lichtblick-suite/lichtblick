@@ -75,7 +75,13 @@ type UpdateSeriesFullAction = {
   items: ValueItem[];
 };
 
+type UpdateSeriesConfigAction = {
+  type: "update-series-config";
+  seriesItems: SeriesItem[];
+};
+
 export type UpdateDataAction =
+  | UpdateSeriesConfigAction
   | ResetSeriesFullAction
   | ResetSeriesCurrentAction
   | ResetCurrentXAction
@@ -100,25 +106,6 @@ export class CustomDatasetsBuilderImpl {
     for (const action of actions) {
       this.#applyAction(action);
     }
-  }
-
-  public setSeries(series: Immutable<SeriesItem[]>): void {
-    // Make a new map so we drop series which are no longer present
-    const newSeries = new Map();
-
-    for (const config of series) {
-      let existingSeries = this.#seriesByKey.get(config.key);
-      if (!existingSeries) {
-        existingSeries = {
-          config,
-          current: [],
-          full: [],
-        };
-      }
-      newSeries.set(config.key, existingSeries);
-      existingSeries.config = config;
-    }
-    this.#seriesByKey = newSeries;
   }
 
   public getViewportDatasets(viewport: Immutable<Viewport>): GetViewportDatasetsResult {
@@ -417,7 +404,30 @@ export class CustomDatasetsBuilderImpl {
             series.current.splice(0, idx);
           }
         }
+        break;
       }
+      case "update-series-config":
+        this.#updateSeriesConfigAction(action.seriesItems);
+        break;
     }
+  }
+
+  #updateSeriesConfigAction(series: Immutable<SeriesItem[]>): void {
+    // Make a new map so we drop series which are no longer present
+    const newSeries = new Map();
+
+    for (const config of series) {
+      let existingSeries = this.#seriesByKey.get(config.key);
+      if (!existingSeries) {
+        existingSeries = {
+          config,
+          current: [],
+          full: [],
+        };
+      }
+      newSeries.set(config.key, existingSeries);
+      existingSeries.config = config;
+    }
+    this.#seriesByKey = newSeries;
   }
 }

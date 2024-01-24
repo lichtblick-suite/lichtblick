@@ -54,7 +54,13 @@ type UpdateSeriesFullAction = {
   items: DataItem[];
 };
 
+type UpdateSeriesConfigAction = {
+  type: "update-series-config";
+  seriesItems: SeriesItem[];
+};
+
 export type UpdateDataAction =
+  | UpdateSeriesConfigAction
   | ResetSeriesFullAction
   | ResetSeriesCurrentAction
   | UpdateSeriesCurrentAction
@@ -68,25 +74,6 @@ const compareDatum = (a: Datum, b: Datum) => a.x - b.x;
 
 export class TimestampDatasetsBuilderImpl {
   #seriesByKey = new Map<SeriesConfigKey, Series>();
-
-  public setSeries(series: Immutable<SeriesItem[]>): void {
-    // Make a new map so we drop series which are no longer present
-    const newSeries = new Map();
-
-    for (const config of series) {
-      let existingSeries = this.#seriesByKey.get(config.key);
-      if (!existingSeries) {
-        existingSeries = {
-          config,
-          current: [],
-          full: [],
-        };
-      }
-      newSeries.set(config.key, existingSeries);
-      existingSeries.config = config;
-    }
-    this.#seriesByKey = newSeries;
-  }
 
   public getViewportDatasets(viewport: Immutable<Viewport>): Dataset[] {
     const datasets: Dataset[] = [];
@@ -382,7 +369,30 @@ export class TimestampDatasetsBuilderImpl {
             series.current.splice(0, idx);
           }
         }
+        break;
       }
+      case "update-series-config":
+        this.#updateSeriesConfigAction(action.seriesItems);
+        break;
     }
+  }
+
+  #updateSeriesConfigAction(series: Immutable<SeriesItem[]>): void {
+    // Make a new map so we drop series which are no longer present
+    const newSeries = new Map();
+
+    for (const config of series) {
+      let existingSeries = this.#seriesByKey.get(config.key);
+      if (!existingSeries) {
+        existingSeries = {
+          config,
+          current: [],
+          full: [],
+        };
+      }
+      newSeries.set(config.key, existingSeries);
+      existingSeries.config = config;
+    }
+    this.#seriesByKey = newSeries;
   }
 }
