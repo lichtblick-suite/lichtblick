@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as Comlink from "comlink";
-import EventEmitter from "eventemitter3";
 import * as _ from "lodash-es";
 
 import { unwrap } from "@foxglove/den/monads";
+import { makeComlinkWorkerMock } from "@foxglove/den/testing";
 import { parseMessagePath } from "@foxglove/message-path";
 import { MessageEvent } from "@foxglove/studio";
 import {
@@ -21,61 +20,9 @@ import { CustomDatasetsBuilderImpl } from "./CustomDatasetsBuilderImpl";
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
 import { PlotPath } from "../config";
 
-class WorkerEndpoint extends EventEmitter {
-  #client: Worker;
-
-  public constructor(client: Worker) {
-    super();
-
-    this.#client = client;
-  }
-
-  public postMessage(msg: unknown): void {
-    this.#client.emit("message", {
-      data: msg,
-    });
-  }
-
-  public addEventListener(event: string, fn: () => void): void {
-    this.on(event, fn);
-  }
-
-  public removeEventListener(event: string, fn: () => void): void {
-    this.off(event, fn);
-  }
-}
-
-class Worker extends EventEmitter {
-  #server: WorkerEndpoint;
-  public constructor() {
-    super();
-
-    this.#server = new WorkerEndpoint(this);
-    Comlink.expose(new CustomDatasetsBuilderImpl(), this.#server);
-  }
-
-  public postMessage(msg: unknown): void {
-    this.#server.emit("message", {
-      data: msg,
-    });
-  }
-
-  public addEventListener(event: string, fn: () => void): void {
-    this.on(event, fn);
-  }
-
-  public removeEventListener(event: string, fn: () => void): void {
-    this.off(event, fn);
-  }
-
-  public terminate() {
-    // no-op
-  }
-}
-
 Object.defineProperty(global, "Worker", {
   writable: true,
-  value: Worker,
+  value: makeComlinkWorkerMock(() => new CustomDatasetsBuilderImpl()),
 });
 
 function groupByTopic(events: MessageEvent[]): Record<string, MessageEvent[]> {

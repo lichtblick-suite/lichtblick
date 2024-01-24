@@ -2265,6 +2265,7 @@ __metadata:
   dependencies:
     "@foxglove/tsconfig": 2.0.0
     async-mutex: 0.4.0
+    comlink: "github:foxglove/comlink#216a78c5fb08550fdef4a725f468999707fec5bd"
     xacro-parser: 0.3.9
   languageName: unknown
   linkType: soft
