@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useDebounce } from "use-debounce";
 
 import Log from "@foxglove/log";
+import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@foxglove/studio-base/constants/localStorageKeys";
 import {
   LayoutState,
   useCurrentLayoutActions,
@@ -22,8 +23,6 @@ function selectLayoutData(state: LayoutState) {
 }
 
 const log = Log.getLogger(__filename);
-
-const KEY = "studio.layout";
 
 export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
   const { selectedSource } = usePlayerSelection();
@@ -46,13 +45,13 @@ export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
 
     const serializedLayoutData = JSON.stringify(debouncedLayoutData);
     assert(serializedLayoutData);
-    localStorage.setItem(KEY, serializedLayoutData);
+    localStorage.setItem(LOCAL_STORAGE_STUDIO_LAYOUT_KEY, serializedLayoutData);
   }, [debouncedLayoutData]);
 
   useEffect(() => {
-    log.debug(`Reading layout from local storage: ${KEY}`);
+    log.debug(`Reading layout from local storage: ${LOCAL_STORAGE_STUDIO_LAYOUT_KEY}`);
 
-    const serializedLayoutData = localStorage.getItem(KEY);
+    const serializedLayoutData = localStorage.getItem(LOCAL_STORAGE_STUDIO_LAYOUT_KEY);
 
     if (serializedLayoutData) {
       log.debug("Restoring layout from local storage");
