@@ -14,7 +14,7 @@
   "homepage": "https://foxglove.dev/",
   "dependencies": {
     "async-mutex": "0.4.0",
-    "comlink": "github:foxglove/comlink#216a78c5fb08550fdef4a725f468999707fec5bd",
+    "comlink": "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307",
     "xacro-parser": "0.3.9"
   },
   "devDependencies": {
