@@ -24,7 +24,7 @@ import {
   PrimitiveType,
 } from "@foxglove/message-path";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
+import { Autocomplete, IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";

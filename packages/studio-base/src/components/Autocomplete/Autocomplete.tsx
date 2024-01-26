@@ -33,7 +33,8 @@ import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
 
 import { HighlightChars } from "@foxglove/studio-base/components/HighlightChars";
-import { ReactWindowListboxAdapter } from "@foxglove/studio-base/components/ReactWindowListboxAdapter";
+
+import { ReactWindowListboxAdapter } from "./ReactWindowListboxAdapter";
 
 const MAX_FZF_MATCHES = 200;
 
@@ -135,7 +136,7 @@ function itemToFzfResult<T>(item: T): FzfResultItem<T> {
  * for things like multiple autocompletes that seamlessly transition into each
  * other, e.g. when building more complex strings like in the Plot panel.
  */
-export default React.forwardRef(function Autocomplete<T = unknown>(
+export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
   props: AutocompleteProps<T>,
   ref: React.ForwardedRef<IAutocomplete>,
 ): JSX.Element {
