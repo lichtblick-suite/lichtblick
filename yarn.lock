@@ -2370,7 +2370,7 @@ __metadata:
   resolution: "@foxglove/message-path@workspace:packages/message-path"
   dependencies:
     "@foxglove/tsconfig": 2.0.0
-    "@types/nearley": 2.11.2
+    "@types/nearley": 2.11.5
     nearley: 2.20.1
     typescript: 5.3.3
   languageName: unknown
@@ -2577,7 +2577,7 @@ __metadata:
     "@types/leaflet": 1.9.7
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.6
-    "@types/nearley": 2.11.2
+    "@types/nearley": 2.11.5
     "@types/ramda": 0.29.4
     "@types/react": 18.2.23
     "@types/react-dom": 18.2.7
@@ -6269,10 +6269,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/nearley@npm:2.11.2":
-  version: 2.11.2
-  resolution: "@types/nearley@npm:2.11.2"
-  checksum: 478fe70ee79a414b848b49d4f2afd6d290890159b37cf38e635b2111ccc0fe7671a43284a4d465b1e75244eff7521c3aae29ad3094d1affb8b5d209d7896f0f6
+"@types/nearley@npm:2.11.5":
+  version: 2.11.5
+  resolution: "@types/nearley@npm:2.11.5"
+  checksum: 3a875522a2845187cd681d6c407d90dea8ef8d4a13e3dbe3e11c3024f7683dfe86d879c61329830f0c54ad8e45e3d4a2ff0dba720163efa8cbe129b172660113
   languageName: node
   linkType: hard
 
