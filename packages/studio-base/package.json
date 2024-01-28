@@ -49,7 +49,7 @@
     "@foxglove/ws-protocol": "0.7.2",
     "@mcap/core": "2.0.2",
     "@mui/icons-material": "5.15.5",
-    "@mui/material": "5.15.5",
+    "@mui/material": "5.15.6",
     "@popperjs/core": "^2.11.8",
     "@protobufjs/base64": "1.1.2",
     "@storybook/addon-actions": "7.6.10",
