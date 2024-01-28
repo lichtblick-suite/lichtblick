@@ -6164,10 +6164,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/license-checker@npm:^25.0.4":
-  version: 25.0.4
-  resolution: "@types/license-checker@npm:25.0.4"
-  checksum: 488c537562e5027050690aa16526c18b5f7bc07ed1dd5b34b9d4deccc17d84fd3d29af3e425f9131cb3e9f4e182909dd4ef7c5e2a7da95bc8a127460ddc20878
+"@types/license-checker@npm:^25.0.6":
+  version: 25.0.6
+  resolution: "@types/license-checker@npm:25.0.6"
+  checksum: 9446f2ed96dae685b9a0e018a5b5bf12ffba4aa59aaa4383f18158a9614f2f129612e6655b4419add12d388c5ee5cb2795e4bfbefecaafd1b4d5d701b7c06173
   languageName: node
   linkType: hard
 
@@ -11552,7 +11552,7 @@ __metadata:
     "@types/babel__preset-env": ^7.9.6
     "@types/case-sensitive-paths-webpack-plugin": 2.1.9
     "@types/jest": 29.5.11
-    "@types/license-checker": ^25.0.4
+    "@types/license-checker": ^25.0.6
     "@types/semver": ^7.5.3
     "@typescript-eslint/eslint-plugin": 6.10.0
     "@typescript-eslint/parser": 6.10.0
