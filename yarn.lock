@@ -2569,7 +2569,7 @@ __metadata:
     "@tanstack/react-table": 8.11.7
     "@testing-library/react": 14.0.0
     "@types/base16": ^1.0.5
-    "@types/cytoscape": ^3.19.11
+    "@types/cytoscape": ^3.19.16
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/geojson": 7946.0.11
     "@types/gl-matrix": 3.2.0
@@ -2605,7 +2605,7 @@ __metadata:
     comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
-    cytoscape: 3.26.0
+    cytoscape: 3.28.1
     cytoscape-dagre: 2.5.0
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
@@ -5868,10 +5868,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/cytoscape@npm:^3.19.11":
-  version: 3.19.11
-  resolution: "@types/cytoscape@npm:3.19.11"
-  checksum: 6c4a1ba52b416d70c6f8e00b5a5c474e1f2cae5150682c3e6976f6c8ac6b99cab99bcc5887640149901e6704f38627b58e3face8620bff8dac94404329164d8b
+"@types/cytoscape@npm:^3.19.16":
+  version: 3.19.16
+  resolution: "@types/cytoscape@npm:3.19.16"
+  checksum: 065c4b39f05888e65324bc517b6ac85adbfc4eb186ec9c9d5ff959a4a9628c0f9a99b60349c03600fcd6d0569e5a54980a8f18aa2b9ce6d85156da96c3095328
   languageName: node
   linkType: hard
 
@@ -9353,13 +9353,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:3.26.0":
-  version: 3.26.0
-  resolution: "cytoscape@npm:3.26.0"
+"cytoscape@npm:3.28.1":
+  version: 3.28.1
+  resolution: "cytoscape@npm:3.28.1"
   dependencies:
     heap: ^0.2.6
     lodash: ^4.17.21
-  checksum: c6a3b2fbe99009cde6e5e2eb6ff2e0469b37f3e12b0828d676aa3c25a7ce7b6ed689b6765e9d3975d51c718a7870e358c639c9128352813b95eb342ef64a26b8
+  checksum: d9fcb14e909931ebead0fffaf230be7302156166372b7f0d446fea96bc5dfed2c36024842a8d80cd8817d6120125422beaee4a1e9ece4ba53a9addc880116afd
   languageName: node
   linkType: hard
 
