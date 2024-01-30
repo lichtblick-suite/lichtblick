@@ -9,7 +9,6 @@ import { MessagePath } from "@foxglove/message-path";
 import { toSec, subtract as subtractTime } from "@foxglove/rostime";
 import { Immutable, MessageEvent, Time } from "@foxglove/studio";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
 import { MessageBlock, PlayerState } from "@foxglove/studio-base/players/types";
 import { TimestampMethod, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
@@ -17,6 +16,7 @@ import { BlockTopicCursor } from "./BlockTopicCursor";
 import {
   CsvDataset,
   GetViewportDatasetsResult,
+  HandlePlayerStateResult,
   IDatasetsBuilder,
   SeriesItem,
   Viewport,
@@ -70,7 +70,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     registry.register(this, dispose);
   }
 
-  public handlePlayerState(state: Immutable<PlayerState>): Bounds1D | undefined {
+  public handlePlayerState(state: Immutable<PlayerState>): HandlePlayerStateResult | undefined {
     const activeData = state.activeData;
     if (!activeData) {
       return;
@@ -80,6 +80,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     this.#lastSeekTime = activeData.lastSeekTime;
 
     const msgEvents = activeData.messages;
+    let datasetsChanged = false;
     if (msgEvents.length > 0) {
       for (const series of this.#series) {
         const mathFn = series.config.parsed.modifier
@@ -101,6 +102,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
           mathFn,
         );
 
+        datasetsChanged ||= pathItems.length > 0;
         this.#pendingDispatch.push({
           type: "append-current",
           series: series.config.key,
@@ -109,7 +111,10 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
       }
     }
 
-    return { min: 0, max: toSec(subtractTime(activeData.endTime, activeData.startTime)) };
+    return {
+      range: { min: 0, max: toSec(subtractTime(activeData.endTime, activeData.startTime)) },
+      datasetsChanged,
+    };
   }
 
   public async handleBlocks(

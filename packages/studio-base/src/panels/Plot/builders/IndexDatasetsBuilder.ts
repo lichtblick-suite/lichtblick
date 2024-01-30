@@ -14,6 +14,7 @@ import { PlayerState } from "@foxglove/studio-base/players/types";
 import {
   CsvDataset,
   GetViewportDatasetsResult,
+  HandlePlayerStateResult,
   IDatasetsBuilder,
   SeriesConfigKey,
   SeriesItem,
@@ -41,7 +42,7 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
 
   #range?: Bounds1D;
 
-  public handlePlayerState(state: Immutable<PlayerState>): Bounds1D | undefined {
+  public handlePlayerState(state: Immutable<PlayerState>): HandlePlayerStateResult | undefined {
     const activeData = state.activeData;
     if (!activeData) {
       return;
@@ -51,10 +52,14 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
     if (msgEvents.length === 0) {
       // When there are no new messages we keep returning the same bounds as before since our
       // datasets have not changed.
-      return this.#range;
+      return {
+        range: this.#range,
+        datasetsChanged: false,
+      };
     }
 
     const range: Bounds1D = { min: 0, max: 0 };
+    let datasetsChanged = false;
     for (const series of this.#seriesByKey.values()) {
       const mathFn = series.parsed.modifier ? mathFunctions[series.parsed.modifier] : undefined;
 
@@ -62,6 +67,10 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
       if (!msgEvent) {
         continue;
       }
+
+      // If there is an input message for the series, we consider the datasets changed regardless of
+      // how many points might be produced.
+      datasetsChanged = true;
 
       const items = simpleGetMessagePathDataItems(msgEvent, series.parsed);
       const pathItems = filterMap(items, (item, idx) => {
@@ -84,7 +93,11 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
       range.max = Math.max(range.max, series.dataset.data.length - 1);
     }
 
-    return (this.#range = range);
+    this.#range = range;
+    return {
+      range: this.#range,
+      datasetsChanged,
+    };
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {

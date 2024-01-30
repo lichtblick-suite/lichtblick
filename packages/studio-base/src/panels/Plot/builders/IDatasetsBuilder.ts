@@ -71,6 +71,18 @@ export type GetViewportDatasetsResult = {
   pathsWithMismatchedDataLengths: ReadonlySet<string>;
 };
 
+export type HandlePlayerStateResult = {
+  /**
+   * The x-axis range of the dataset if it is known.
+   *
+   * Setting the range to undefined indicates the builder does not know the range or does not want
+   * to impose a specific range.
+   */
+  range?: Immutable<Bounds1D>;
+  /** True if the datasets were changed (i.e. the builder extracted new data from the state) */
+  datasetsChanged: boolean;
+};
+
 /**
  * IDatasetBuilder defines methods for updating the building a dataset.
  *
@@ -79,7 +91,7 @@ export type GetViewportDatasetsResult = {
  * to happen on a worker.
  */
 interface IDatasetsBuilder {
-  handlePlayerState(state: Immutable<PlayerState>): Bounds1D | undefined;
+  handlePlayerState(state: Immutable<PlayerState>): HandlePlayerStateResult | undefined;
 
   /**
    * The builder can provide an implementation of this method to handle block data separately from

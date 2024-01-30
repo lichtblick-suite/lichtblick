@@ -21,6 +21,7 @@ import {
 import {
   CsvDataset,
   GetViewportDatasetsResult,
+  HandlePlayerStateResult,
   IDatasetsBuilder,
   SeriesItem,
   Viewport,
@@ -66,7 +67,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
     registry.register(this, dispose);
   }
 
-  public handlePlayerState(state: Immutable<PlayerState>): Bounds1D | undefined {
+  public handlePlayerState(state: Immutable<PlayerState>): HandlePlayerStateResult | undefined {
     const activeData = state.activeData;
     if (!activeData) {
       return;
@@ -74,6 +75,8 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
 
     const didSeek = activeData.lastSeekTime !== this.#lastSeekTime;
     this.#lastSeekTime = activeData.lastSeekTime;
+
+    let datasetsChanged = false;
 
     const msgEvents = activeData.messages;
     if (msgEvents.length > 0) {
@@ -97,6 +100,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
         });
 
         if (pathItems.length > 0) {
+          datasetsChanged = true;
           this.#xCurrentBounds = computeBounds(this.#xCurrentBounds, pathItems);
         }
       }
@@ -113,6 +117,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
         }
 
         const pathItems = readMessagePathItems(msgEvents, series.config.parsed, mathFn);
+        datasetsChanged ||= pathItems.length > 0;
         this.#pendingDispatch.push({
           type: "append-current",
           series: series.config.key,
@@ -144,6 +149,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
           });
 
           if (pathItems.length > 0) {
+            datasetsChanged = true;
             this.#xFullBounds = computeBounds(this.#xFullBounds, pathItems);
           }
         }
@@ -165,6 +171,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
         while ((messageEvents = series.blockCursor.next(blocks)) != undefined) {
           const pathItems = readMessagePathItems(messageEvents, series.config.parsed, mathFn);
 
+          datasetsChanged ||= pathItems.length > 0;
           this.#pendingDispatch.push({
             type: "append-full",
             series: series.config.key,
@@ -175,14 +182,23 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
     }
 
     if (!this.#xCurrentBounds) {
-      return this.#xFullBounds ?? { min: 0, max: 1 };
+      return {
+        range: this.#xFullBounds ?? { min: 0, max: 1 },
+        datasetsChanged,
+      };
     }
 
     if (!this.#xFullBounds) {
-      return this.#xCurrentBounds;
+      return {
+        range: this.#xCurrentBounds,
+        datasetsChanged,
+      };
     }
 
-    return unionBounds1D(this.#xCurrentBounds, this.#xFullBounds);
+    return {
+      range: unionBounds1D(this.#xCurrentBounds, this.#xFullBounds),
+      datasetsChanged,
+    };
   }
 
   public setXPath(path: Immutable<MessagePath> | undefined): void {
