@@ -50,7 +50,7 @@ export class ModelCache {
   #models = new Map<string, Promise<LoadedModel | undefined>>();
   #edgeMaterial: THREE.Material;
   #fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
-
+  #colladaTextureObjectUrls = new Map<string, string>();
   #dracoLoader?: DRACOLoader;
 
   public constructor(public readonly options: ModelCacheOptions) {
@@ -208,7 +208,6 @@ export class ModelCache {
     // Preload textures. We do this here since we can't pass in an async function in LoadingManager.setURLModifier
     // which is supposed to be used for overriding loading behavior. See also
     // https://threejs.org/docs/index.html#api/en/loaders/managers/LoadingManager.setURLModifier
-    const textureUrls = new Map<string, string>();
     for await (const node of xml.querySelectorAll("init_from")) {
       if (!node.textContent) {
         continue;
@@ -220,7 +219,7 @@ export class ModelCache {
         const objectUrl = URL.createObjectURL(
           new Blob([textureAsset.data], { type: textureAsset.mediaType }),
         );
-        textureUrls.set(textureUrl, objectUrl);
+        this.#colladaTextureObjectUrls.set(textureUrl, objectUrl);
       } catch (e) {
         log.error(e);
         onError(node.textContent);
@@ -228,16 +227,12 @@ export class ModelCache {
     }
 
     const manager = new THREE.LoadingManager(undefined, undefined, onError);
-    manager.setURLModifier((u) => textureUrls.get(u) ?? rewriteUrl(u));
+    manager.setURLModifier((u) => this.#colladaTextureObjectUrls.get(u) ?? rewriteUrl(u));
     const daeLoader = new ColladaLoader(manager);
 
     manager.itemStart(url);
     const dae = daeLoader.parse(xmlText, baseUrl(url));
     manager.itemEnd(url);
-
-    for (const objectUrl of textureUrls.values()) {
-      URL.revokeObjectURL(objectUrl);
-    }
 
     // If the <up_axis> is Y_UP, rotate to the Studio convention of Z-up following
     // ROS [REP-0103](https://www.ros.org/reps/rep-0103.html)
@@ -304,6 +299,9 @@ export class ModelCache {
   }
 
   public dispose(): void {
+    this.#colladaTextureObjectUrls.forEach((_key, objectUrl) => {
+      URL.revokeObjectURL(objectUrl);
+    });
     // DRACOLoader is only loader that needs to be disposed because it uses a webworker
     this.#dracoLoader?.dispose();
     this.#dracoLoader = undefined;
