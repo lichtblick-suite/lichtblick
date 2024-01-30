@@ -107,7 +107,6 @@ type MessagePathInputBaseProps = {
   onChange: (value: string, index?: number) => void;
   validTypes?: readonly string[]; // Valid types, like "message", "array", or "primitive", or a ROS primitive like "float64"
   noMultiSlices?: boolean; // Don't suggest slices with multiple values `[:]`, only single values like `[0]`.
-  autoSize?: boolean;
   placeholder?: string;
   inputStyle?: CSSProperties;
   disabled?: boolean;
@@ -150,7 +149,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     path,
     prioritizedDatatype,
     validTypes,
-    autoSize,
     placeholder,
     noMultiSlices,
     inputStyle,
@@ -479,7 +477,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       placeholder={
         placeholder != undefined && placeholder !== "" ? placeholder : "/some/topic.msgs[0].field"
       }
-      autoSize={autoSize}
       inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
       // to have the entire input selected whenever you want to make a change to a part it.
       disableAutoSelect

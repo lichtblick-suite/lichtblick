@@ -12,11 +12,11 @@
 //   You may not use this file except in compliance with the License.
 
 import {
-  MenuItem,
   Autocomplete as MuiAutocomplete,
+  Popper,
+  PopperProps,
   TextField,
   TextFieldProps,
-  alpha,
 } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
 import * as React from "react";
@@ -29,37 +29,30 @@ import {
   useRef,
   useState,
 } from "react";
-import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
 
-import { HighlightChars } from "@foxglove/studio-base/components/HighlightChars";
-
-import { ReactWindowListboxAdapter } from "./ReactWindowListboxAdapter";
+import { ListboxAdapterChild, ReactWindowListboxAdapter } from "./ReactWindowListboxAdapter";
 
 const MAX_FZF_MATCHES = 200;
 
 // Above this number of items we fall back to the faster fuzzy find algorithm.
 const FAST_FIND_ITEM_CUTOFF = 1_000;
 
-type AutocompleteProps<T> = {
+type AutocompleteProps = {
   className?: string;
-  autoSize?: boolean;
   disableAutoSelect?: boolean;
   disabled?: boolean;
   filterText?: string;
-  getItemText?: (item: T) => string;
-  getItemValue?: (item: T) => string;
   hasError?: boolean;
   inputStyle?: CSSProperties;
-  items: readonly T[];
+  items: readonly string[];
   menuStyle?: CSSProperties;
   minWidth?: number;
   onBlur?: () => void;
   onChange?: (event: React.SyntheticEvent, text: string) => void;
-  onSelect: (value: string | T, autocomplete: IAutocomplete) => void;
+  onSelect: (value: string, autocomplete: IAutocomplete) => void;
   placeholder?: string;
   readOnly?: boolean;
-  selectedItem?: T;
   selectOnFocus?: boolean;
   sortWhenFiltering?: boolean;
   value?: string;
@@ -78,46 +71,7 @@ const useStyles = makeStyles()((theme) => ({
       color: theme.palette.error.main,
     },
   },
-  item: {
-    padding: 6,
-    cursor: "pointer",
-    minHeight: "100%",
-    lineHeight: "calc(100% - 10px)",
-    overflowWrap: "break-word",
-    color: theme.palette.text.primary,
-
-    // re-establish the <mark /> styles because the autocomplete is in a Portal
-    mark: {
-      backgroundColor: "transparent",
-      color: theme.palette.info.main,
-      fontWeight: 700,
-    },
-  },
-  itemSelected: {
-    backgroundColor: alpha(
-      theme.palette.primary.main,
-      theme.palette.action.selectedOpacity + theme.palette.action.hoverOpacity,
-    ),
-  },
-  itemHighlighted: {
-    backgroundColor: theme.palette.action.hover,
-  },
 }));
-
-function defaultGetText(name: string): (item: unknown) => string {
-  return function (item: unknown) {
-    if (typeof item === "string") {
-      return item;
-    } else if (
-      item != undefined &&
-      typeof item === "object" &&
-      typeof (item as { value?: string }).value === "string"
-    ) {
-      return (item as { value: string }).value;
-    }
-    throw new Error(`you need to provide an implementation of ${name}`);
-  };
-}
 
 const EMPTY_SET = new Set<number>();
 
@@ -131,13 +85,31 @@ function itemToFzfResult<T>(item: T): FzfResultItem<T> {
   };
 }
 
+// We use fzf to filter the input items to make autocompleteItems so we don't need the
+// MuiAutocomplete to also filter the items. Using a passthrough function for filterOptions
+// disables the internal filtering of MuiAutocomplete
+//
+// https://mui.com/material-ui/react-autocomplete/#search-as-you-type
+const filterOptions = (options: FzfResultItem[]) => options;
+
+const getOptionLabel = (item: string | FzfResultItem) =>
+  typeof item === "string" ? item : item.item;
+
+// The builtin Popper in MuiAutocomplete uses the width hint from the parent Autocomplete to set
+// the width. We want to set the minWidth to allow the popper to grow wider than the input field width,
+// so we can show long topic paths and autocomplete entries.
+const CustomPopper = function (props: PopperProps) {
+  const width = props.style?.width ?? 0;
+  return <Popper {...props} style={{ minWidth: width }} placement="bottom-start" />;
+};
+
 /**
  * <Autocomplete> is a Studio-specific wrapper of MUI autocomplete with support
  * for things like multiple autocompletes that seamlessly transition into each
  * other, e.g. when building more complex strings like in the Plot panel.
  */
-export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
-  props: AutocompleteProps<T>,
+export const Autocomplete = React.forwardRef(function Autocomplete(
+  props: AutocompleteProps,
   ref: React.ForwardedRef<IAutocomplete>,
 ): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(ReactNull);
@@ -146,22 +118,9 @@ export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
 
   const [stateValue, setValue] = useState<string | undefined>(undefined);
 
-  const getItemText = useMemo(
-    () => props.getItemText ?? defaultGetText("getItemText"),
-    [props.getItemText],
-  );
-
-  const getItemValue = useMemo(
-    () => props.getItemValue ?? defaultGetText("getItemValue"),
-    [props.getItemValue],
-  );
-
-  // Props
   const {
     className,
-    selectedItem,
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    value = stateValue ?? (selectedItem ? getItemText(selectedItem) : undefined),
+    value = stateValue,
     disabled,
     filterText = value ?? "",
     items,
@@ -173,30 +132,27 @@ export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
     selectOnFocus,
     sortWhenFiltering = true,
     variant = "filled",
-  }: AutocompleteProps<T> = props;
+  }: AutocompleteProps = props;
 
   const fzfUnfiltered = useMemo(() => {
     return items.map((item) => itemToFzfResult(item));
   }, [items]);
 
   const fzf = useMemo(() => {
-    // @ts-expect-error Fzf selector TS type seems to be wrong?
     return new Fzf(items, {
       // v1 algorithm is significantly faster on long lists of items.
       fuzzy: items.length > FAST_FIND_ITEM_CUTOFF ? "v1" : "v2",
       sort: sortWhenFiltering,
       limit: MAX_FZF_MATCHES,
-      selector: getItemText,
     });
-  }, [getItemText, items, sortWhenFiltering]);
+  }, [items, sortWhenFiltering]);
 
-  const autocompleteItems: FzfResultItem<T>[] = useMemo(() => {
+  const autocompleteItems = useMemo(() => {
     return filterText ? fzf.find(filterText) : fzfUnfiltered;
   }, [filterText, fzf, fzfUnfiltered]);
 
-  const hasError = Boolean(props.hasError ?? (autocompleteItems.length === 0 && value?.length));
+  const hasError = props.hasError ?? (autocompleteItems.length === 0 && value?.length !== 0);
 
-  const selectedItemValue = selectedItem != undefined ? getItemValue(selectedItem) : undefined;
   const setSelectionRange = useCallback((selectionStart: number, selectionEnd: number): void => {
     inputRef.current?.focus();
     inputRef.current?.setSelectionRange(selectionStart, selectionEnd);
@@ -234,7 +190,7 @@ export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
   // To allow multiple completions in sequence, it's up to the parent component
   // to manually blur the input to finish a completion.
   const onSelect = useCallback(
-    (_event: SyntheticEvent, selectedValue: ReactNull | string | FzfResultItem<T>): void => {
+    (_event: SyntheticEvent, selectedValue: ReactNull | string | FzfResultItem): void => {
       if (selectedValue != undefined && typeof selectedValue !== "string") {
         setValue(undefined);
         onSelectCallback(selectedValue.item, { setSelectionRange, focus, blur });
@@ -243,37 +199,18 @@ export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
     [onSelectCallback, blur, focus, setSelectionRange],
   );
 
-  // Blur the input on resize to prevent misalignment of the input field and the
-  // autocomplete listbox. Debounce to prevent resize observer loop limit errors.
-  useResizeDetector<HTMLInputElement>({
-    handleHeight: false,
-    onResize: () => inputRef.current?.blur(),
-    refreshMode: "debounce",
-    refreshRate: 0,
-    skipOnMount: true,
-    targetRef: inputRef,
-  });
-
-  // Don't filter out options here because we assume that the parent
-  // component has already filtered them. This allows completing fragments.
-  const filterOptions = useCallback((options: FzfResultItem<T>[]) => options, []);
-
   return (
     <MuiAutocomplete
       className={className}
       componentsProps={{
         paper: { elevation: 8 },
       }}
+      getOptionLabel={getOptionLabel}
       disableCloseOnSelect
       disabled={disabled}
       freeSolo
       fullWidth
-      getOptionLabel={(item: string | FzfResultItem<T>) => {
-        if (typeof item === "string") {
-          return item;
-        }
-        return getItemValue(item.item);
-      }}
+      PopperComponent={CustomPopper}
       filterOptions={filterOptions}
       ListboxComponent={ReactWindowListboxAdapter}
       onChange={onSelect}
@@ -292,29 +229,18 @@ export const Autocomplete = React.forwardRef(function Autocomplete<T = unknown>(
           size="small"
         />
       )}
-      renderOption={(optProps, item: FzfResultItem<T>, { selected }) => {
-        const itemValue = getItemValue(item.item);
-        return (
-          <MenuItem
-            dense
-            {...optProps}
-            key={itemValue}
-            component="span"
-            data-highlighted={selected}
-            data-testid="autocomplete-item"
-            className={cx(classes.item, {
-              [classes.itemHighlighted]: selected,
-              [classes.itemSelected]:
-                selectedItemValue != undefined && itemValue === selectedItemValue,
-            })}
-          >
-            <HighlightChars str={getItemText(item.item)} indices={item.positions} />
-          </MenuItem>
-        );
+      renderOption={(optProps, option: FzfResultItem, state) => {
+        // The return values of renderOption are passed as the _child_ argument to the ListboxComponent.
+        // Our ReactWindowListboxAdapter expects a tuple for each item in the list and will itself manage
+        // when and which items to render using virtualization.
+        //
+        // The final as ReactNode cast is to appease the expected return type of renderOption because
+        // it does not understand that our ListboxAdapter needs a tuple and not a ReactNode
+        return [optProps, option, state] satisfies ListboxAdapterChild as React.ReactNode;
       }}
       selectOnFocus={selectOnFocus}
       size="small"
       value={value ?? ReactNull}
     />
   );
-}) as <T>(props: AutocompleteProps<T> & React.RefAttributes<IAutocomplete>) => JSX.Element; // https://stackoverflow.com/a/58473012/23649
+});

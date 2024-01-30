@@ -56,7 +56,6 @@ function MessagePathInputStory(props: {
     <PanelSetup fixture={props.heavy ?? false ? heavyFixture : MessagePathInputStoryFixture}>
       <Stack direction="row" flex="auto" margin={1.25}>
         <MessagePathInput
-          autoSize={false}
           path={path}
           validTypes={props.validTypes}
           prioritizedDatatype={props.prioritizedDatatype}

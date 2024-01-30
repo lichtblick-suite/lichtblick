@@ -61,25 +61,9 @@ export const FilteringToOLight: Story = {
   parameters: { colorScheme: "light" },
 };
 
-export const WithNonStringItemsAndLeadingWhitespace: Story = {
-  args: {
-    items: [
-      { value: "one", text: "ONE" },
-      { value: "two", text: "    TWO" },
-      { value: "three", text: "THREE" },
-    ],
-    getItemText: ({ text }: any) => text,
-    filterText: "o",
-    value: "o",
-  },
-  name: "with non-string items and leading whitespace",
-  play: clickInput,
-};
-
 export const UncontrolledValue: Story = {
   args: {
-    items: [{ value: "one" }, { value: "two" }, { value: "three" }],
-    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
+    items: ["one", "two", "three"],
     filterText: "h",
     value: "h",
   },
@@ -91,30 +75,9 @@ export const UncontrolledValueLight: Story = {
   parameters: { colorScheme: "light" },
 };
 
-export const UncontrolledValueWithSelectedItem: Story = {
-  args: {
-    items: [{ value: "one" }, { value: "two" }, { value: "three" }],
-    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
-    selectedItem: { value: "two" },
-  },
-  play: clickInput,
-};
-
-export const UncontrolledValueWithSelectedItemAndClearOnFocus: Story = {
-  args: {
-    items: [{ value: "one" }, { value: "two" }, { value: "three" }],
-    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
-    selectedItem: { value: "two" },
-    selectOnFocus: true,
-  },
-  name: "uncontrolled value with selected item and clearOnFocus",
-  play: clickInput,
-};
-
 export const SortWhenFilteringFalse: Story = {
   args: {
-    items: [{ value: "bab" }, { value: "bb" }, { value: "a2" }, { value: "a1" }],
-    getItemText: ({ value }: any) => `item: ${value.toUpperCase()}`,
+    items: ["bab", "bb", "a2", "a1"],
     sortWhenFiltering: false,
     value: "b",
     filterText: "b",
@@ -123,25 +86,27 @@ export const SortWhenFilteringFalse: Story = {
   play: clickInput,
 };
 
-export const WithALongTruncatedPathAndAutoSize: Story = {
+export const ManyItems: Story = {
+  args: {
+    items: _.range(1, 1000).map((i) => `item_${i}`),
+  },
+  play: clickInput,
+};
+
+export const LongPathInPopup: Story = {
   render: (args): JSX.Element => (
     <div style={{ width: 200 }}>
       <Autocomplete {...args} />
     </div>
   ),
   args: {
-    items: [],
+    items: [
+      "/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething",
+      "/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297194}.isSomething",
+      "/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297195}.isSomething",
+    ],
     value: "/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething",
-    autoSize: true,
-  },
-  name: "with a long truncated path (and autoSize)",
-  play: clickInput,
-};
-
-export const ManyItems: Story = {
-  args: {
-    items: _.range(1, 1000).map((i) => `item_${i}`),
-    autoSize: true,
+    filterText: "/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{",
   },
   play: clickInput,
 };

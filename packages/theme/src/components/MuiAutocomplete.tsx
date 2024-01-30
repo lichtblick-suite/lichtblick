@@ -32,7 +32,7 @@ export const MuiAutocomplete: OverrideComponentReturn<"MuiAutocomplete"> = {
         },
       },
       [`.${autocompleteClasses.input}.${inputClasses.inputAdornedEnd}`]: {
-        paddingRight: theme.spacing(0.75),
+        paddingRight: theme.spacing(2),
       },
     }),
     clearIndicator: ({ theme }) => ({
