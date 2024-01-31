@@ -215,6 +215,9 @@ export class ModelCache {
 
       try {
         const textureUrl = new URL(node.textContent, baseUrl(url)).toString();
+        if (this.#colladaTextureObjectUrls.has(textureUrl)) {
+          continue;
+        }
         const textureAsset = await this.#fetchAsset(textureUrl);
         const objectUrl = URL.createObjectURL(
           new Blob([textureAsset.data], { type: textureAsset.mediaType }),
