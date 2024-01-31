@@ -1,6 +1,6 @@
 {
   "name": "foxglove-studio",
-  "version": "1.85.0-dev",
+  "version": "1.86.0",
   "license": "MPL-2.0",
   "private": true,
   "packageManager": "yarn@3.6.3",
