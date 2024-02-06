@@ -14,19 +14,11 @@
 import { useTheme } from "@mui/material";
 import { TFunction } from "i18next";
 import * as _ from "lodash-es";
-import {
-  ComponentProps,
-  PropsWithChildren,
-  ReactNode,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ComponentProps, ReactNode, useLayoutEffect, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
-import { createStore } from "zustand";
 
 import {
   MessageEvent,
@@ -39,10 +31,6 @@ import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEdi
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import {
-  ExtensionCatalog,
-  ExtensionCatalogContext,
-} from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import PanelCatalogContext, {
   PanelCatalog,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
@@ -60,6 +48,7 @@ import {
   Topic,
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
@@ -126,31 +115,6 @@ function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
       return allPanels.find((panel) => panel.type === type);
     },
   };
-}
-
-type ExtensionCatalogProps = {
-  messageConverters: ExtensionCatalog["installedMessageConverters"];
-};
-
-function MockExtensionCatalogProvider(props: PropsWithChildren<ExtensionCatalogProps>) {
-  const value = useMemo(() => {
-    return createStore(
-      () =>
-        ({
-          installExtension: async () => await Promise.reject("unsupported"),
-          installedExtensions: [],
-          installedMessageConverters: props.messageConverters ?? [],
-          installedPanels: {},
-          installedTopicAliasFunctions: [],
-        }) satisfies ExtensionCatalog,
-    );
-  }, [props.messageConverters]);
-
-  return (
-    <ExtensionCatalogContext.Provider value={value}>
-      {props.children}
-    </ExtensionCatalogContext.Provider>
-  );
 }
 
 export function triggerWheel(target: HTMLElement, deltaX: number): void {
@@ -347,17 +311,22 @@ export default function PanelSetup(props: Props): JSX.Element {
   const theme = useTheme();
   return (
     <WorkspaceContextProvider disablePersistenceForStorybook>
-      <TimelineInteractionStateProvider>
-        <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
-          <PanelStateContextProvider initialState={props.fixture?.panelState}>
-            <MockExtensionCatalogProvider messageConverters={props.fixture?.messageConverters}>
-              <ThemeProvider isDark={theme.palette.mode === "dark"}>
-                <UnconnectedPanelSetup {...props} />
-              </ThemeProvider>
-            </MockExtensionCatalogProvider>
-          </PanelStateContextProvider>
-        </MockCurrentLayoutProvider>
-      </TimelineInteractionStateProvider>
+      <UserScriptStateProvider>
+        <TimelineInteractionStateProvider>
+          <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
+            <PanelStateContextProvider initialState={props.fixture?.panelState}>
+              <ExtensionCatalogProvider
+                loaders={[]}
+                mockMessageConverters={props.fixture?.messageConverters}
+              >
+                <ThemeProvider isDark={theme.palette.mode === "dark"}>
+                  <UnconnectedPanelSetup {...props} />
+                </ThemeProvider>
+              </ExtensionCatalogProvider>
+            </PanelStateContextProvider>
+          </MockCurrentLayoutProvider>
+        </TimelineInteractionStateProvider>
+      </UserScriptStateProvider>
     </WorkspaceContextProvider>
   );
 }

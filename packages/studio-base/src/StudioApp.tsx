@@ -6,6 +6,8 @@ import { Fragment, Suspense, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import NativeAppMenuContext from "@foxglove/studio-base/context/NativeAppMenuContext";
+import NativeWindowContext from "@foxglove/studio-base/context/NativeWindowContext";
 import { useSharedRootContext } from "@foxglove/studio-base/context/SharedRootContext";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
@@ -18,7 +20,9 @@ import MultiProvider from "./components/MultiProvider";
 import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
+import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
+import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
 
@@ -35,6 +39,9 @@ function contextMenuHandler(event: MouseEvent) {
 export function StudioApp(): JSX.Element {
   const {
     dataSources,
+    extensionLoaders,
+    nativeAppMenu,
+    nativeWindow,
     deepLinks,
     enableLaunchPreferenceScreen,
     extraProviders,
@@ -48,6 +55,8 @@ export function StudioApp(): JSX.Element {
     /* eslint-disable react/jsx-key */
     <TimelineInteractionStateProvider />,
     <CurrentLayoutProvider />,
+    <ExtensionCatalogProvider loaders={extensionLoaders} />,
+    <UserScriptStateProvider />,
     <PlayerManager playerSources={dataSources} />,
     <EventsProvider />,
     /* eslint-enable react/jsx-key */
@@ -55,6 +64,14 @@ export function StudioApp(): JSX.Element {
 
   if (extraProviders) {
     providers.unshift(...extraProviders);
+  }
+
+  if (nativeAppMenu) {
+    providers.push(<NativeAppMenuContext.Provider value={nativeAppMenu} />);
+  }
+
+  if (nativeWindow) {
+    providers.push(<NativeWindowContext.Provider value={nativeWindow} />);
   }
 
   // The toast and logs provider comes first so they are available to all downstream providers

@@ -2,9 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext, useContext } from "react";
-import { createStore, StoreApi, useStore } from "zustand";
+import { createContext } from "react";
+import { StoreApi, useStore } from "zustand";
 
+import { useGuaranteedContext } from "@foxglove/hooks";
 import {
   ExtensionPanelRegistration,
   Immutable,
@@ -20,10 +21,13 @@ export type RegisteredPanel = {
 };
 
 export type ExtensionCatalog = Immutable<{
+  downloadExtension: (url: string) => Promise<Uint8Array>;
   installExtension: (
     namespace: ExtensionNamespace,
     foxeFileData: Uint8Array,
   ) => Promise<ExtensionInfo>;
+  refreshExtensions: () => Promise<void>;
+  uninstallExtension: (namespace: ExtensionNamespace, id: string) => Promise<void>;
 
   installedExtensions: undefined | ExtensionInfo[];
   installedPanels: undefined | Record<string, RegisteredPanel>;
@@ -31,17 +35,11 @@ export type ExtensionCatalog = Immutable<{
   installedTopicAliasFunctions: undefined | TopicAliasFunctions;
 }>;
 
-export const ExtensionCatalogContext = createContext<StoreApi<ExtensionCatalog>>(
-  createStore(() => ({
-    installExtension: async () => await Promise.reject("Unsupported"),
-    installedExtensions: [],
-    installedPanels: {},
-    installedMessageConverters: [],
-    installedTopicAliasFunctions: [],
-  })),
+export const ExtensionCatalogContext = createContext<undefined | StoreApi<ExtensionCatalog>>(
+  undefined,
 );
 
 export function useExtensionCatalog<T>(selector: (registry: ExtensionCatalog) => T): T {
-  const context = useContext(ExtensionCatalogContext);
+  const context = useGuaranteedContext(ExtensionCatalogContext);
   return useStore(context, selector);
 }
