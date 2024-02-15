@@ -54,7 +54,6 @@ export function Root(): JSX.Element {
   }, []);
 
   const [extensionLoaders] = useState(() => []);
-
   const url = new URL(window.location.href);
 
   return (
