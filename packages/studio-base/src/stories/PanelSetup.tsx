@@ -38,6 +38,7 @@ import {
   PanelStateStore,
   usePanelStateStore,
 } from "@foxglove/studio-base/context/PanelStateContext";
+import { UserScriptStateProvider } from "@foxglove/studio-base/context/UserScriptStateContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import * as panels from "@foxglove/studio-base/panels";
 import {
