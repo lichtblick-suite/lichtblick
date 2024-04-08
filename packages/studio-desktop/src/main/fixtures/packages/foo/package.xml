@@ -1,0 +1,9 @@
+<package format="2">
+  <name>foo</name>
+  <version>1.2.3</version>
+  <description>
+    This package provides foo capability.
+  </description>
+  <maintainer email="john@example.com">John Doe</maintainer>
+  <license>MIT</license>
+</package>

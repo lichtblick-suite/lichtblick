@@ -41,9 +41,6 @@ export function EndTimestamp(): JSX.Element | ReactNull {
   }, [endTime, timeFormat, timezone]);
 
   return (
-    <div
-      style={{ fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"` }}
-      ref={timeRef}
-    />
+    <div style={{ fontFeatureSettings: `${theme.typography.fontFamily}, "zero"` }} ref={timeRef} />
   );
 }

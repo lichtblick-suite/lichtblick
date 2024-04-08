@@ -7,12 +7,13 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useShallowMemo } from "@foxglove/hooks";
 import CurrentLayoutContext, {
   ICurrentLayout,
+  LayoutID,
   LayoutState,
   SelectedLayout,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
-  PanelsActions,
   LayoutData,
+  PanelsActions,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 
@@ -40,6 +41,7 @@ export default function MockCurrentLayoutProvider({
 
   const [layoutState, setLayoutStateInternal] = useState<LayoutState>({
     selectedLayout: {
+      id: "mock-layout" as LayoutID,
       data: {
         configById: {},
         globalVariables: {},
@@ -98,6 +100,9 @@ export default function MockCurrentLayoutProvider({
 
   const actions: ICurrentLayout["actions"] = useMemo(
     () => ({
+      setSelectedLayoutId: () => {
+        throw new Error("Not implemented in MockCurrentLayoutProvider");
+      },
       getCurrentLayoutState: () => layoutStateRef.current,
 
       setCurrentLayout,

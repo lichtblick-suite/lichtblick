@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link } from "@mui/material";
-import { PropsWithChildren, CSSProperties, useCallback, useContext } from "react";
+import { CSSProperties, PropsWithChildren, useCallback, useContext } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { makeStyles } from "tss-react/mui";

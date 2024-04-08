@@ -7,18 +7,20 @@ import { useMemo, useState } from "react";
 import {
   AppBarProps,
   AppSetting,
+  FoxgloveWebSocketDataSourceFactory,
   IDataSourceFactory,
+  IdbExtensionLoader,
+  McapLocalDataSourceFactory,
+  RemoteDataSourceFactory,
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
-  RemoteDataSourceFactory,
-  FoxgloveWebSocketDataSourceFactory,
-  UlogLocalDataSourceFactory,
-  McapLocalDataSourceFactory,
   SampleNuscenesDataSourceFactory,
   SharedRoot,
-  IdbExtensionLoader,
+  UlogLocalDataSourceFactory,
 } from "@foxglove/studio-base";
+import { IdbLayoutStorage } from "@foxglove/studio-base/IdbLayoutStorage";
+import { ILayoutStorage } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
 
@@ -40,6 +42,7 @@ export function WebRoot(props: {
     [],
   );
 
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []) as unknown as ILayoutStorage;
   const [extensionLoaders] = useState(() => [
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
@@ -62,6 +65,7 @@ export function WebRoot(props: {
 
   return (
     <SharedRoot
+      layoutStorage={layoutStorage}
       enableLaunchPreferenceScreen
       deepLinks={[window.location.href]}
       dataSources={dataSources}

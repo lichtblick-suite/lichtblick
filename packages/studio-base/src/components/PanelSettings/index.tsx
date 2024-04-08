@@ -8,11 +8,13 @@ import { useTranslation } from "react-i18next";
 import { useUnmount } from "react-use";
 
 import { SettingsTree } from "@foxglove/studio";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { ActionMenu } from "@foxglove/studio-base/components/PanelSettings/ActionMenu";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import { ShareJsonModal } from "@foxglove/studio-base/components/ShareJsonModal";
+import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
 import {
   LayoutState,
@@ -25,6 +27,7 @@ import {
   PanelStateStore,
   usePanelStateStore,
 } from "@foxglove/studio-base/context/PanelStateContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
@@ -41,9 +44,28 @@ const EMPTY_SETTINGS_TREE: SettingsTree = Object.freeze({
   nodes: {},
 });
 
+const EmptyWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { t } = useTranslation("panelSettings");
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+
+  if (enableNewTopNav) {
+    return <EmptyState>{children}</EmptyState>;
+  }
+
+  return (
+    <SidebarContent title={t("panelSettings")}>
+      <Typography variant="body2" color="text.secondary">
+        {children}
+      </Typography>
+    </SidebarContent>
+  );
+};
+
 export default function PanelSettings({
+  disableToolbar = false,
   selectedPanelIdsForTests,
 }: React.PropsWithChildren<{
+  disableToolbar?: boolean;
   selectedPanelIdsForTests?: readonly string[];
 }>): JSX.Element {
   const { t } = useTranslation("panelSettings");
@@ -54,6 +76,8 @@ export default function PanelSettings({
     selectAllPanels,
   } = useSelectedPanels();
   const selectedPanelIds = selectedPanelIdsForTests ?? originalSelectedPanelIds;
+
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   // If no panel is selected and there is only one panel in the layout, select it
   useEffect(() => {
@@ -133,22 +157,37 @@ export default function PanelSettings({
   }, [incrementSequenceNumber, savePanelConfigs, selectedPanelId]);
 
   if (selectedPanelId == undefined) {
-    return <EmptyState>{t("selectAPanelToEditItsSettings")}</EmptyState>;
+    return <EmptyWrapper>{t("selectAPanelToEditItsSettings")}</EmptyWrapper>;
   }
 
   if (!config) {
-    return <EmptyState>{t("loadingPanelSettings")}</EmptyState>;
+    return <EmptyWrapper>{t("loadingPanelSettings")}</EmptyWrapper>;
   }
 
   const showTitleField = panelInfo != undefined && panelInfo.hasCustomToolbar !== true;
   const title = panelInfo?.title ?? t("unknown");
+  const isSettingTreeDefined = settingsTree != undefined;
 
   return (
-    <Stack fullHeight flex="auto" gap={1}>
+    <SidebarContent
+      disablePadding={enableNewTopNav || isSettingTreeDefined}
+      disableToolbar={disableToolbar}
+      title={t("currentSettingsPanelName", { title })}
+      trailingItems={[
+        <ActionMenu
+          key={1}
+          allowShare={panelType !== TAB_PANEL_TYPE}
+          onReset={resetToDefaults}
+          onShare={() => {
+            setShowShareModal(true);
+          }}
+        />,
+      ]}
+    >
       {shareModal}
       <Stack gap={2} justifyContent="flex-start" flex="auto">
         <Stack flex="auto">
-          {settingsTree && (
+          {settingsTree && enableNewTopNav && (
             <>
               <Stack
                 paddingLeft={0.75}
@@ -170,14 +209,19 @@ export default function PanelSettings({
               <Divider />
             </>
           )}
-          {settingsTree != undefined || showTitleField ? (
+          {settingsTree || showTitleField ? (
             <SettingsTreeEditor
-              variant="panel"
               key={selectedPanelId}
               settings={settingsTree ?? EMPTY_SETTINGS_TREE}
+              variant="log"
             />
           ) : (
-            <Stack flex="auto" alignItems="center" justifyContent="center" paddingX={1}>
+            <Stack
+              flex="auto"
+              alignItems="center"
+              justifyContent="center"
+              paddingX={enableNewTopNav ? 1 : 0}
+            >
               <Typography variant="body2" color="text.secondary" align="center">
                 {t("panelDoesNotHaveSettings")}
               </Typography>
@@ -185,6 +229,6 @@ export default function PanelSettings({
           )}
         </Stack>
       </Stack>
-    </Stack>
+    </SidebarContent>
   );
 }

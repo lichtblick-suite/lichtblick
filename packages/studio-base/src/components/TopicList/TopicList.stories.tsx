@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Meta, StoryObj } from "@storybook/react";
-import { fireEvent, userEvent, within, waitFor } from "@storybook/testing-library";
+import { fireEvent, userEvent, waitFor, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";

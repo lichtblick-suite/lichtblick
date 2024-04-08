@@ -1,0 +1,9 @@
+<package format="2">
+  <name>nested-child</name>
+  <version>3.2.1</version>
+  <description>
+    This package provides nested-child capability.
+  </description>
+  <maintainer email="john@example.com">John Doe</maintainer>
+  <license>MIT</license>
+</package>

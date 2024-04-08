@@ -17,11 +17,11 @@ import { VariableValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { TabLocation } from "@foxglove/studio-base/types/layouts";
 import {
-  UserScripts,
+  MosaicDropTargetPosition,
+  PanelConfig,
   PlaybackConfig,
   SavedProps,
-  PanelConfig,
-  MosaicDropTargetPosition,
+  UserScripts,
 } from "@foxglove/studio-base/types/panels";
 
 export type LayoutData = {

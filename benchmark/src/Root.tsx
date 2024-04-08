@@ -63,6 +63,7 @@ export function Root(): JSX.Element {
       dataSources={dataSources}
       appConfiguration={appConfiguration}
       extensionLoaders={extensionLoaders}
+      enableGlobalCss
     >
       <StudioApp />
     </SharedRoot>

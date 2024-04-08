@@ -2,9 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { AutocompleteRenderOptionState, MenuItem } from "@mui/material";
+import { AutocompleteRenderOptionState } from "@mui/material/Autocomplete";
+import MenuItem from "@mui/material/MenuItem";
 import { FzfResultItem } from "fzf";
-import { useMemo } from "react";
+import { useMemo, ReactNode } from "react";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import { makeStyles } from "tss-react/mui";
 
@@ -94,7 +95,7 @@ export const ReactWindowListboxAdapter = React.forwardRef<
 });
 
 /** Render an individual row for the FixedSizeList */
-function FixedSizeListRenderRow(props: ListChildComponentProps<ListboxAdapterChild[]>) {
+function FixedSizeListRenderRow(props: ListChildComponentProps<ListboxAdapterChild[]>): ReactNode {
   // data is the array of all items, index is the index of the current row (item), and style
   // is the position style for the specific item
   const { data, index, style } = props;

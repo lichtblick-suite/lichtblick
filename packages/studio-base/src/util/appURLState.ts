@@ -4,11 +4,13 @@
 
 import * as _ from "lodash-es";
 
-import { fromRFC3339String, toRFC3339String, Time } from "@foxglove/rostime";
+import { Time, fromRFC3339String, toRFC3339String } from "@foxglove/rostime";
+import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 export type AppURLState = {
   ds?: string;
   dsParams?: Record<string, string>;
+  layoutId?: LayoutID;
   time?: Time;
 };
 
@@ -84,4 +86,19 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
   );
 
   return _.isEmpty(state) ? undefined : state;
+}
+
+/**
+ * Tries to parse app url state from the window's current location.
+ */
+export function windowAppURLState(): AppURLState | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  try {
+    return parseAppURLState(new URL(window.location.href));
+  } catch {
+    return undefined;
+  }
 }

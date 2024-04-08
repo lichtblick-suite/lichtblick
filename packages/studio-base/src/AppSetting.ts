@@ -13,6 +13,11 @@ export enum AppSetting {
 
   // ROS
   ROS_PACKAGE_PATH = "ros.ros_package_path",
+  ENABLE_NEW_TOPNAV = "enableNewTopNav",
+
+  // Privacy
+  TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
+  CRASH_REPORTING_ENABLED = "telemetry.crashReportingEnabled",
 
   // Experimental features
   SHOW_DEBUG_PANELS = "showDebugPanels",
@@ -25,4 +30,5 @@ export enum AppSetting {
 
   // Dev only
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
+  ENABLE_MEMORY_USE_INDICATOR = "dev.memory-use-indicator",
 }

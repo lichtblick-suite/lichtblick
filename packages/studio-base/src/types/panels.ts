@@ -49,3 +49,8 @@ export type OpenSiblingPanel = (params: {
   siblingConfigCreator: (config: PanelConfig) => PanelConfig;
   updateIfExists: boolean;
 }) => void;
+
+export type UserNode = { name: string; sourceCode: string };
+export type UserNodes = {
+  [nodeId: string]: UserNode;
+};

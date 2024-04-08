@@ -74,8 +74,8 @@ const playerSelection: PlayerSelection = {
     },
     {
       id: "5555",
-      title: "ws://1.2.3.4:8765",
-      label: "Foxglove WebSocket",
+      title: "2369",
+      label: "Velodyne Lidar",
     },
     {
       id: "6666",

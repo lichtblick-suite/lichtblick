@@ -6,24 +6,24 @@ import { createContext, useCallback, useLayoutEffect, useReducer, useRef, useSta
 import { getLeaves } from "react-mosaic-component";
 
 import {
-  useShallowMemo,
   selectWithUnstableIdentityWarning,
   useGuaranteedContext,
+  useShallowMemo,
 } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
-import { VariableValue, RenderState } from "@foxglove/studio";
+import { RenderState, VariableValue } from "@foxglove/studio";
 import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import toggleSelectedPanel from "@foxglove/studio-base/providers/CurrentLayoutProvider/toggleSelectedPanel";
 import { PanelConfig, PlaybackConfig, UserScripts } from "@foxglove/studio-base/types/panels";
 
 import {
-  LayoutData,
   AddPanelPayload,
   ChangePanelLayoutPayload,
   ClosePanelPayload,
   CreateTabPanelPayload,
   DropPanelPayload,
   EndDragPayload,
+  LayoutData,
   MoveTabPayload,
   SaveConfigsPayload,
   SplitPanelPayload,
@@ -42,6 +42,7 @@ export type SelectedLayout = {
   name?: string;
   edited?: boolean;
 };
+export type LayoutID = string & { __brand: "LayoutID" };
 
 export type LayoutState = Readonly<{
   /**
@@ -49,7 +50,15 @@ export type LayoutState = Readonly<{
    */
   sharedPanelState?: Record<PanelType, SharedPanelState>;
 
-  selectedLayout: SelectedLayout | undefined;
+  selectedLayout:
+    | {
+        id: LayoutID;
+        loading?: boolean;
+        data: LayoutData | undefined;
+        name?: string;
+        edited?: boolean;
+      }
+    | undefined;
 }>;
 
 /**
@@ -79,6 +88,7 @@ export interface ICurrentLayout {
      * asynchronously and don't want to update every time the state changes.
      */
     getCurrentLayoutState: () => LayoutState;
+    setSelectedLayoutId: (id: LayoutID | undefined) => void;
 
     /**
      * Override any current layout. This will reset the layout state

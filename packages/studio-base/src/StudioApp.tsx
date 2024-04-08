@@ -6,13 +6,16 @@ import { Fragment, Suspense, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@foxglove/studio-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@foxglove/studio-base/context/NativeWindowContext";
 import { useSharedRootContext } from "@foxglove/studio-base/context/SharedRootContext";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
+import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
 import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
+import UserProfileLocalStorageProvider from "@foxglove/studio-base/providers/UserProfileLocalStorageProvider";
 
 import Workspace from "./Workspace";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
@@ -50,12 +53,12 @@ export function StudioApp(): JSX.Element {
     customWindowControlProps,
     onAppBarDoubleClick,
     AppBarComponent,
+    layoutStorage,
   } = useSharedRootContext();
 
   const providers = [
     /* eslint-disable react/jsx-key */
     <TimelineInteractionStateProvider />,
-    <CurrentLayoutProvider />,
     <ExtensionMarketplaceProvider />,
     <ExtensionCatalogProvider loaders={extensionLoaders} />,
     <UserScriptStateProvider />,
@@ -80,9 +83,12 @@ export function StudioApp(): JSX.Element {
   providers.unshift(<StudioToastProvider />);
   providers.unshift(<StudioLogsSettingsProvider />);
 
-  // Problems provider also must come before other, depdendent contexts.
+  // Problems provider also must come before other, dependent contexts.
   providers.unshift(<ProblemsContextProvider />);
-
+  providers.unshift(<CurrentLayoutProvider />);
+  providers.unshift(<UserProfileLocalStorageProvider />);
+  providers.unshift(<LayoutManagerProvider />);
+  providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 
   useEffect(() => {

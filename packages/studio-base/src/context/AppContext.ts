@@ -26,6 +26,8 @@ interface IAppContext {
   injectedFeatures?: InjectedFeatures;
   importLayoutFile?: (fileName: string, data: LayoutData) => Promise<void>;
   layoutEmptyState?: JSX.Element;
+  layoutBrowser?: () => JSX.Element;
+  sidebarItems?: readonly [[string, { iconName: string; title: string }]];
   syncAdapters?: readonly JSX.Element[];
   workspaceExtensions?: readonly JSX.Element[];
   extensionSettings?: JSX.Element;

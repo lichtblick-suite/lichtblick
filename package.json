@@ -3,6 +3,9 @@
   "version": "1.86.0-dev",
   "license": "MPL-2.0",
   "private": true,
+  "productName": "Foxglove",
+  "description": "Core components of Foxglove Studio",
+  "productDescription": "Foxglove Studio",
   "packageManager": "yarn@3.6.3",
   "repository": {
     "type": "git",
@@ -19,6 +22,11 @@
   "scripts": {
     "clean": "tsc --build --clean packages/**/tsconfig.json && rimraf .webpack */.webpack dist storybook-screenshots storybook-static",
     "build:packages": "tsc --build --verbose packages/**/tsconfig.json",
+    "desktop:build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
+    "desktop:build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
+    "desktop:serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",
+    "desktop:serve:quicklook": "webpack serve --mode development --progress --config desktop/webpack.quicklook.config.ts",
+    "desktop:start": "electron desktop/.webpack",
     "web:build:dev": "webpack --mode development --progress --config web/webpack.config.ts",
     "web:build:prod": "webpack --mode production --progress --config web/webpack.config.ts",
     "web:serve": "webpack serve --mode development --progress --config web/webpack.config.ts",
@@ -32,8 +40,14 @@
     "test": "jest",
     "test:debug": "cross-env NODE_OPTIONS='--inspect-brk' jest",
     "test:watch": "jest --watch",
+    "test:integration": "jest --forceExit --projects desktop/integration-test",
     "test:web-integration": "jest --forceExit --projects  web/integration-test",
     "test:web-integration:local": "BASE_URL=\"http://localhost:8080/\" jest --forceExit --projects  web/integration-test",
+    "package:win": "yarn package --win",
+    "package:darwin": "yarn package --mac",
+    "package:linux": "yarn package --linux",
+    "package": "cross-env NODE_OPTIONS='-r ts-node/register' electron-builder build --config desktop/electronBuilderConfig.js --publish never",
+    "package:e2e": "yarn && yarn clean && yarn desktop:build:prod && yarn package",
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
     "storybook": "storybook dev --port 9009 --config-dir .storybook",
     "storybook:build": "storybook build --config-dir .storybook --webpack-stats-json",
@@ -41,6 +55,7 @@
   },
   "workspaces": {
     "packages": [
+      "desktop",
       "packages/*",
       "packages/@types/*",
       "web",
@@ -57,6 +72,7 @@
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.1",
     "@babel/core": "7.23.7",
+    "@babel/plugin-proposal-decorators": "7.24.1",
     "@babel/plugin-proposal-explicit-resource-management": "7.23.3",
     "@babel/preset-env": "7.23.8",
     "@babel/preset-typescript": "7.23.3",
@@ -79,7 +95,9 @@
     "@typescript-eslint/parser": "6.10.0",
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
-    "depcheck": "1.4.7",
+    "depcheck": "1.4.6",
+    "electron": "25.5.0",
+    "electron-builder": "24.6.4",
     "eslint": "8.50.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-import-resolver-webpack": "0.13.8",
@@ -108,5 +126,13 @@
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "4.15.1",
     "webpack-hot-middleware": "2.26.0"
+  },
+  "dependencies": {
+    "@foxglove/hooks": "workspace:*",
+    "@foxglove/log": "workspace:*",
+    "@foxglove/studio": "workspace:*",
+    "@mui/material": "5.13.5",
+    "react-use": "17.4.0",
+    "rehype-raw": "6.1.1"
   }
 }

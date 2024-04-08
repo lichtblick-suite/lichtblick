@@ -11,11 +11,13 @@ import { INativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuConte
 import { INativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
+import { ILayoutStorage } from "@foxglove/studio-base/services/ILayoutStorage";
 
 interface ISharedRootContext {
   deepLinks: readonly string[];
   appConfiguration?: IAppConfiguration;
   dataSources: IDataSourceFactory[];
+  layoutStorage?: ILayoutStorage;
   extensionLoaders: readonly ExtensionLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;

@@ -54,7 +54,9 @@ export type WorkspaceActions = {
     finishTour: (tour: string) => void;
   };
 
+  openAccountSettings: () => void;
   openPanelSettings: () => void;
+  openLayoutBrowser: () => void;
 
   playbackControlActions: {
     setRepeat: Dispatch<SetStateAction<boolean>>;
@@ -235,11 +237,16 @@ export function useWorkspaceActions(): WorkspaceActions {
           });
         },
       },
-
+      openAccountSettings: () => {},
       openPanelSettings: () => {
         set((draft) => {
           draft.sidebars.left.item = "panel-settings";
           draft.sidebars.left.open = true;
+        });
+      },
+      openLayoutBrowser: () => {
+        set((draft) => {
+          draft.sidebars.left.item = "layouts";
         });
       },
 
