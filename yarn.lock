@@ -13191,9 +13191,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"foxglove-studio@workspace:.":
+"foxbox@workspace:.":
   version: 0.0.0-use.local
-  resolution: "foxglove-studio@workspace:."
+  resolution: "foxbox@workspace:."
   dependencies:
     "@actions/core": 1.10.1
     "@actions/exec": 1.1.1
@@ -13942,21 +13942,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hast-to-hyperscript@npm:^10.0.0":
-  version: 10.0.1
-  resolution: "hast-to-hyperscript@npm:10.0.1"
-  dependencies:
-    "@types/unist": ^2.0.0
-    comma-separated-tokens: ^2.0.0
-    property-information: ^6.0.0
-    space-separated-tokens: ^2.0.0
-    style-to-object: ^0.3.0
-    unist-util-is: ^5.0.0
-    web-namespaces: ^2.0.0
-  checksum: 0ec7a6f873312421c6cfa84f8c842fa00c74e96018c371ace4800fda6590e208db8e31d4e84b09e436fe6b9b87b2fd2968b30c27881ff82fc9fe466a0f59b922
-  languageName: node
-  linkType: hard
-
 "hast-util-from-html@npm:^2.0.0":
   version: 2.0.1
   resolution: "hast-util-from-html@npm:2.0.1"
@@ -14303,13 +14288,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html-void-elements@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "html-void-elements@npm:2.0.1"
-  checksum: 06d41f13b9d5d6e0f39861c4bec9a9196fa4906d56cd5cf6cf54ad2e52a85bf960cca2bf9600026bde16c8331db171bedba5e5a35e2e43630c8f1d497b2fb658
-  languageName: node
-  linkType: hard
-
 "html-void-elements@npm:^3.0.0":
   version: 3.0.0
   resolution: "html-void-elements@npm:3.0.0"
@@ -14623,20 +14601,6 @@ __metadata:
   version: 5.3.1
   resolution: "ignore@npm:5.3.1"
   checksum: 71d7bb4c1dbe020f915fd881108cbe85a0db3d636a0ea3ba911393c53946711d13a9b1143c7e70db06d571a5822c0a324a6bcde5c9904e7ca5047f01f1bf8cd3
-  languageName: node
-  linkType: hard
-
-"immediate@npm:~3.0.5":
-  version: 3.0.6
-  resolution: "immediate@npm:3.0.6"
-  checksum: f9b3486477555997657f70318cc8d3416159f208bec4cca3ff3442fd266bc23f50f0c9bd8547e1371a6b5e82b821ec9a7044a4f7b944798b25aa3cc6d5e63e62
-  languageName: node
-  linkType: hard
-
-"immediate@npm:~3.0.5":
-  version: 3.0.6
-  resolution: "immediate@npm:3.0.6"
-  checksum: f9b3486477555997657f70318cc8d3416159f208bec4cca3ff3442fd266bc23f50f0c9bd8547e1371a6b5e82b821ec9a7044a4f7b944798b25aa3cc6d5e63e62
   languageName: node
   linkType: hard
 
@@ -16252,30 +16216,6 @@ __metadata:
   dependencies:
     json-buffer: 3.0.1
   checksum: 74a24395b1c34bd44ad5cb2b49140d087553e170625240b86755a6604cd65aa16efdbdeae5cdb17ba1284a0fbb25ad06263755dbc71b8d8b06f74232ce3cdd72
-  languageName: node
-  linkType: hard
-
-"jszip@npm:3.10.0":
-  version: 3.10.0
-  resolution: "jszip@npm:3.10.0"
-  dependencies:
-    lie: ~3.3.0
-    pako: ~1.0.2
-    readable-stream: ~2.3.6
-    setimmediate: ^1.0.5
-  checksum: 80cc8e0e466467e9e21447f604f9262509b29a9c65170a3fee415ac0a403beb370840973cdc17f75d2b92ab3e60685f94d267706510d46bed2dd14858a38e459
-  languageName: node
-  linkType: hard
-
-"jszip@npm:3.10.0":
-  version: 3.10.0
-  resolution: "jszip@npm:3.10.0"
-  dependencies:
-    lie: ~3.3.0
-    pako: ~1.0.2
-    readable-stream: ~2.3.6
-    setimmediate: ^1.0.5
-  checksum: 80cc8e0e466467e9e21447f604f9262509b29a9c65170a3fee415ac0a403beb370840973cdc17f75d2b92ab3e60685f94d267706510d46bed2dd14858a38e459
   languageName: node
   linkType: hard
 
@@ -18266,13 +18206,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pako@npm:~1.0.2, pako@npm:~1.0.5":
-  version: 1.0.11
-  resolution: "pako@npm:1.0.11"
-  checksum: 1be2bfa1f807608c7538afa15d6f25baa523c30ec870a3228a89579e474a4d992f4293859524e46d5d87fd30fa17c5edf34dbef0671251d9749820b488660b16
-  languageName: node
-  linkType: hard
-
 "param-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "param-case@npm:3.0.4"
@@ -19266,9 +19199,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd@patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch::locator=foxglove-studio%40workspace%3A.":
+"react-dnd@patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch::locator=foxbox%40workspace%3A.":
   version: 16.0.1
-  resolution: "react-dnd@patch:react-dnd@npm%3A16.0.1#./patches/react-dnd.patch::version=16.0.1&hash=7ebec9&locator=foxglove-studio%40workspace%3A."
+  resolution: "react-dnd@patch:react-dnd@npm%3A16.0.1#./patches/react-dnd.patch::version=16.0.1&hash=7ebec9&locator=foxbox%40workspace%3A."
   dependencies:
     "@react-dnd/invariant": ^4.0.1
     "@react-dnd/shallowequal": ^4.0.1
@@ -19615,9 +19548,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-use@patch:react-use@17.4.0#./patches/react-use.patch::locator=foxglove-studio%40workspace%3A.":
+"react-use@patch:react-use@17.4.0#./patches/react-use.patch::locator=foxbox%40workspace%3A.":
   version: 17.4.0
-  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=16b4d0&locator=foxglove-studio%40workspace%3A."
+  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=16b4d0&locator=foxbox%40workspace%3A."
   dependencies:
     "@types/js-cookie": ^2.2.6
     "@xobotyi/scrollbar-width": ^1.9.5
