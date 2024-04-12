@@ -3,7 +3,7 @@
 <br/>
 
 <div align="center">
-    <h1>Foxglove Studio</h1>
+    <h1>Foxbox</h1>
     <a href="https://github.com/foxglove/studio/releases"><img src="https://img.shields.io/github/v/release/foxglove/studio?label=version" /></a>
     <a href="https://github.com/foxglove/studio/blob/main/LICENSE"><img src="https://img.shields.io/github/license/foxglove/studio" /></a>
     <a href="https://github.com/orgs/foxglove/discussions"><img src="https://img.shields.io/github/discussions/foxglove/community.svg?logo=github" /></a>
@@ -24,10 +24,10 @@
   <br />
   <br />
 
-[Foxglove Studio](https://foxglove.dev) is an integrated visualization and diagnosis tool for robotics, available [in your browser](https://studio.foxglove.dev/) or [as a desktop app](https://foxglove.dev/download) on Linux, Windows, and macOS.
+[Foxbox](https://foxglove.dev) is an integrated visualization and diagnosis tool for robotics, available [in your browser](https://studio.foxglove.dev/) or [as a desktop app](https://foxglove.dev/download) on Linux, Windows, and macOS.
 
   <p align="center">
-    <a href="https://foxglove.dev"><img alt="Foxglove Studio screenshot" src="/resources/screenshot.png"></a>
+    <a href="https://foxglove.dev"><img alt="Foxbox screenshot" src="/resources/screenshot.png"></a>
   </p>
 </div>
 
@@ -59,23 +59,23 @@ You can join us on the following platforms to ask questions, share feedback, and
 
 ## Installation
 
-Foxglove Studio is available online at [studio.foxglove.dev](https://studio.foxglove.dev/), or desktop releases can be downloaded from [foxglove.dev/download](https://foxglove.dev/download).
+Foxbox is available online at [studio.foxglove.dev](https://studio.foxglove.dev/), or desktop releases can be downloaded from [foxglove.dev/download](https://foxglove.dev/download).
 
 ## Open Source
 
-Foxglove Studio follows an open core licensing model. Most functionality is available in this repository, and can be reproduced or modified per the terms of the [Mozilla Public License v2.0](/LICENSE).
+Foxbox follows an open core licensing model. Most functionality is available in this repository, and can be reproduced or modified per the terms of the [Mozilla Public License v2.0](/LICENSE).
 
 The official binary distributions available at [studio.foxglove.dev](https://studio.foxglove.dev/) or [foxglove.dev/download](https://foxglove.dev/download) incorporate some closed-source functionality, such as integration with [Foxglove Data Platform](https://foxglove.dev/data-platform), multiple layouts, private extensions, and more. For more information on free and paid features, see our [Pricing](https://foxglove.dev/pricing).
 
 ## Self-hosting
 
-Foxglove Studio can be self-hosted using our [docker image](https://ghcr.io/foxglove/studio). Please note that this build does not contain any closed source functionality.
+Foxbox can be self-hosted using our [docker image](https://ghcr.io/foxglove/studio). Please note that this build does not contain any closed source functionality.
 
 ```sh
 docker run --rm -p "8080:8080" ghcr.io/foxglove/studio:latest
 ```
 
-Foxglove Studio will be accessible in your browser at [localhost:8080](http://localhost:8080/).
+Foxbox will be accessible in your browser at [localhost:8080](http://localhost:8080/).
 
 ### Overriding the default layout
 
@@ -87,10 +87,10 @@ docker run --rm -p "8080:8080" -v /path/to/custom_layout.json:/foxglove/default-
 
 ## Contributing
 
-Foxglove Studio is written in TypeScript – contributions are welcome!
+Foxbox is written in TypeScript – contributions are welcome!
 
 Note: All contributors must agree to our [Contributor License Agreement](https://github.com/foxglove/cla). See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## Credits
 
-Foxglove Studio originally began as a fork of [Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/). Most of the Webviz code has been rewritten, but some files still carry a Cruise license header where appropriate.
+Foxbox originally began as a fork of [Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/). Most of the Webviz code has been rewritten, but some files still carry a Cruise license header where appropriate.

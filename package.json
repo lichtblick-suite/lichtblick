@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "license": "MPL-2.0",
   "private": true,
-  "productName": "Foxglove",
-  "description": "Core components of Foxglove Studio",
-  "productDescription": "Foxglove Studio",
+  "productName": "Foxbox",
+  "description": "Core components of Foxbox",
+  "productDescription": "Foxbox",
   "packageManager": "yarn@3.6.3",
   "repository": {
     "type": "git",

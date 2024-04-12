@@ -1,10 +1,10 @@
 # @foxglove/studio-base &nbsp; [![npm version](https://img.shields.io/npm/v/@foxglove/studio-base.svg?style=flat)](https://www.npmjs.com/package/@foxglove/studio-base)
 
-This package contains core components used in [Foxglove Studio](https://github.com/foxglove/studio).
+This package contains core components used in [Foxbox](https://github.com/foxglove/studio).
 
 ## Quick start
 
-When contributing to the [Foxglove Studio](https://github.com/foxglove/studio) codebase, you can import from `@foxglove/studio-base` at its top-level or from lower in its directory:
+When contributing to the [Foxbox](https://github.com/foxglove/studio) codebase, you can import from `@foxglove/studio-base` at its top-level or from lower in its directory:
 
 ```
 import { ExtensionInfo, ExtensionLoaderContext, ExtensionLoader } from "@foxglove/studio-base";
