@@ -4,8 +4,7 @@
 
 export const incompatibleLayoutVersion = {
   desktopText:
-    "This layout was created with a newer version of Foxglove Studio. Please update to the latest version at ",
+    "This layout was created with a newer version of Foxbox. Please update to the latest version at ",
   title: "Incompatible layout version",
-  webText:
-    "This layout was created with a newer version of Foxglove Studio. Please refresh your browser.",
+  webText: "This layout was created with a newer version of Fobox. Please refresh your browser.",
 };

@@ -68,7 +68,7 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
     };
     const onNotAvailable = (info: UpdateInfo) => {
       void dialog.showMessageBox({
-        message: `Foxglove Studio is up to date (version ${info.version}).`,
+        message: `Foxbox is up to date (version ${info.version}).`,
       });
     };
     const onError = (error: Error) => {

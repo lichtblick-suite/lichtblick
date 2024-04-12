@@ -79,7 +79,7 @@ export function LaunchPreferenceScreen(): ReactElement {
 
   return (
     <Dialog open classes={{ paper: classes.paper }}>
-      <DialogTitle className={classes.dialogTitle}>Launch Foxglove Studio</DialogTitle>
+      <DialogTitle className={classes.dialogTitle}>Launch FoxBox</DialogTitle>
       <DialogContent>
         <Grid container spacing={1}>
           {actions.map((action) => (

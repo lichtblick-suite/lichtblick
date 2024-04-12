@@ -92,7 +92,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   <html>
     <head>
       <meta charset="utf-8">
-      <title>Foxglove Studio Benchmark</title>
+      <title>FoxBox Benchmark</title>
     </head>
     <script>
       global = globalThis;

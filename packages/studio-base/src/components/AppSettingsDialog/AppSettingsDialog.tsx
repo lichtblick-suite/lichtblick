@@ -30,7 +30,7 @@ import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
-import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
+import FoxBoxLogoText from "@foxglove/studio-base/components/FoxBoxLogoText";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
@@ -315,12 +315,10 @@ export function AppSettingsDialog(
           >
             <Stack gap={2} alignItems="flex-start">
               <header>
-                <FoxgloveLogoText color="primary" className={classes.logo} />
+                <FoxBoxLogoText color="primary" className={classes.logo} />
               </header>
               <Stack direction="row" alignItems="center" gap={1}>
-                <Typography variant="body2">
-                  Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}
-                </Typography>
+                <Typography variant="body2">FoxBox version {FOXGLOVE_STUDIO_VERSION}</Typography>
                 <CopyButton
                   size="small"
                   getText={() => FOXGLOVE_STUDIO_VERSION?.toString() ?? ""}
