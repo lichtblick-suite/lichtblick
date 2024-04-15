@@ -208,42 +208,6 @@ function SidebarItems(props: {
       teamOrEnterpriseUser: [
         demoItem,
         {
-          id: "join-community",
-          title: t("joinOurCommunity"),
-          text: t("joinOurCommunityDescription"),
-          actions: (
-            <>
-              <Button
-                href="https://foxglove.dev/slack"
-                target="_blank"
-                className={classes.button}
-                variant="outlined"
-                onClick={() => {
-                  void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
-                    user: currentUserType,
-                    cta: "join-slack",
-                  });
-                }}
-              >
-                {t("joinOurSlack")}
-              </Button>
-              <Button
-                href="https://github.com/foxglove/studio/issues/new/choose"
-                target="_blank"
-                className={classes.button}
-                onClick={() => {
-                  void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
-                    user: currentUserType,
-                    cta: "go-to-github",
-                  });
-                }}
-              >
-                {t("openAGitHubIssue")}
-              </Button>
-            </>
-          ),
-        },
-        {
           id: "need-help",
           title: t("needHelp"),
           text: t("needHelpDescription"),

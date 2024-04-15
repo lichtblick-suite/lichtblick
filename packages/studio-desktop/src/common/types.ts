@@ -10,8 +10,7 @@ export type ForwardedMenuEvent =
   | "open-demo"
   | "open-help-about"
   | "open-help-docs"
-  | "open-help-general"
-  | "open-help-slack";
+  | "open-help-general";
 
 export type ForwardedWindowEvent =
   | "enter-full-screen"
@@ -113,4 +112,4 @@ interface Desktop {
   updateLanguage(): void;
 }
 
-export type { NativeMenuBridge, Storage, StorageContent, Desktop, DesktopExtension };
+export type { Desktop, DesktopExtension, NativeMenuBridge, Storage, StorageContent };

@@ -11,8 +11,7 @@ export type NativeAppMenuEvent =
   | "open-demo"
   | "open-help-about"
   | "open-help-docs"
-  | "open-help-general"
-  | "open-help-slack";
+  | "open-help-general";
 
 type Handler = () => void;
 type UnregisterFn = () => void;

@@ -9,6 +9,3 @@ contact_links:
   - name: "📚 Stack Exchange"
     url: https://robotics.stackexchange.com/questions/ask
     about: Get help from the robotics community
-  - name: "💬 Live chat"
-    url: https://foxglove.dev/slack
-    about: Join the discussion in our Slack community

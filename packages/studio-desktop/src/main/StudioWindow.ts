@@ -368,12 +368,6 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
           sendNativeAppMenuEvent("open-help-docs", browserWindow);
         },
       },
-      {
-        label: t("appBar:joinOurSlack"),
-        click: () => {
-          sendNativeAppMenuEvent("open-help-slack", browserWindow);
-        },
-      },
       { type: "separator" },
       {
         label: t("appBar:exploreSampleData"),

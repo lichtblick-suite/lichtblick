@@ -2,13 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Cloud24Regular, SlideLayout24Regular } from "@fluentui/react-icons";
 import {
-  ChatBubblesQuestion24Regular,
-  Cloud24Regular,
-  SlideLayout24Regular,
-} from "@fluentui/react-icons";
-import {
-  Divider,
   ListItemText,
   ListSubheader,
   Menu,
@@ -124,28 +119,6 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
         <ListItemText
           primary="Data Platform"
           secondary="Scalable data management platform"
-          secondaryTypographyProps={{ className: classes.menuText }}
-        />
-      </MenuItem>
-      <Divider />
-      <ListSubheader className={classes.subheader}>Community</ListSubheader>
-      <MenuItem
-        href="https://foxglove.dev/slack"
-        className={classes.menuItem}
-        component="a"
-        target="_blank"
-        onClick={() => {
-          void analytics.logEvent(AppEvent.HELP_MENU_CLICK_CTA, {
-            user: currentUserType,
-            cta: "join-slack",
-          });
-          handleClose();
-        }}
-      >
-        <ChatBubblesQuestion24Regular className={classes.icon} />
-        <ListItemText
-          primary="Join us on Slack"
-          secondary="Give us feedback, ask questions, and collaborate with other users"
           secondaryTypographyProps={{ className: classes.menuText }}
         />
       </MenuItem>

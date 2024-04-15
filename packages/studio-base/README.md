@@ -12,7 +12,3 @@ import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 ```
 
 For a full list of the package's exports, reference its [`index.ts` file](https://github.com/foxglove/studio/blob/main/packages/studio-base/src/index.ts).
-
-## Stay in touch
-
-Join us in [Slack](https://foxglove.dev/slack) to ask questions, share feedback, and stay up to date on what our team is working on.
