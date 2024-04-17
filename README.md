@@ -6,7 +6,7 @@
   <br />
   <br />
 
-Foxbox is an integrated visualization and diagnosis tool for robotics, available in your browser or as a desktop app on Linux, Windows, and macOS. Feel free to contribute with our discussions on the <a href="https://ef-mattermost.bmwgroup.net/adp/channels/foxglove-studio">Mattermost Comunitty</a>
+Foxbox is an integrated visualization and diagnosis tool for robotics, available in your browser or as a desktop app on Linux, Windows, and macOS.
 
   <p align="center">
     <img alt="Foxbox screenshot" src="/resources/screenshot.png">
@@ -30,8 +30,6 @@ It can also be installed by using the desktop aplication versions available on [
 ## Open Source
 
 Foxbox follows an open core licensing model. Most functionality is available in this repository, and can be reproduced or modified per the terms of the [Mozilla Public License v2.0](/LICENSE).
-
-The official binary distributions available at [studio.foxglove.dev](https://studio.foxglove.dev/) or [foxglove.dev/download](https://foxglove.dev/download) incorporate some closed-source functionality, such as integration with [Foxglove Data Platform](https://foxglove.dev/data-platform), multiple layouts, private extensions, and more.
 
 ## Contributing
 
