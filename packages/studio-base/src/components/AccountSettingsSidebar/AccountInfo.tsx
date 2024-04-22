@@ -16,7 +16,7 @@ import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
 const log = Logger.getLogger(__filename);
 
-export const AVATAR_ICON_SIZE = 42;
+const AVATAR_ICON_SIZE = 42;
 
 const useStyles = makeStyles()((theme) => ({
   icon: {

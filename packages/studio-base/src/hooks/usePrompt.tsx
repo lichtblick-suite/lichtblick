@@ -77,11 +77,20 @@ function ModalPrompt({
   // Ensure we still call onComplete(undefined) when the component unmounts, if it hasn't been
   // called already
   useEffect(() => {
-    return () => { onComplete(undefined); };
+    return () => {
+      onComplete(undefined);
+    };
   }, [onComplete]);
 
   return (
-    <Dialog open maxWidth="xs" fullWidth onClose={() => { onComplete(undefined); }}>
+    <Dialog
+      open
+      maxWidth="xs"
+      fullWidth
+      onClose={() => {
+        onComplete(undefined);
+      }}
+    >
       <form onSubmit={onSubmitAction}>
         <Stack paddingX={3} paddingTop={2}>
           <Typography variant="h4" fontWeight={600} gutterBottom>
@@ -105,7 +114,9 @@ function ModalPrompt({
             FormHelperTextProps={{
               variant: "standard",
             }}
-            onChange={(event) => { setValue(event.target.value); }}
+            onChange={(event) => {
+              setValue(event.target.value);
+            }}
           />
         </DialogContent>
         <DialogActions>
@@ -113,7 +124,9 @@ function ModalPrompt({
             color="inherit"
             size="large"
             variant="outlined"
-            onClick={() => { onComplete(undefined); }}
+            onClick={() => {
+              onComplete(undefined);
+            }}
           >
             Cancel
           </Button>

@@ -188,24 +188,6 @@ function aliasTopicStats(
   return mappedStats;
 }
 
-// Inverts a mapping, used to reverse map incoming subscriptions to subscriptions we pass
-// through to the wrapped player.
-function invertAliasMap(aliasMap: Im<TopicAliasMap>): Im<TopicAliasMap> {
-  if (aliasMap === EmptyAliasMap) {
-    return EmptyAliasMap;
-  }
-
-  const inverted: TopicAliasMap = new Map();
-  for (const [key, values] of aliasMap.entries()) {
-    for (const value of values) {
-      const newValues = inverted.get(value) ?? [];
-      newValues.push(key);
-      inverted.set(value, newValues);
-    }
-  }
-  return inverted;
-}
-
 // Merges multiple aliases into a single unified alias map. Note that a single topic name
 // can alias to more than one renamed topic if multiple extensions provide an alias for it.
 // Also returns any problems caused by disallowed aliases.
@@ -327,34 +309,3 @@ export function aliasPlayerState(
 
   return newState;
 }
-
-/**
- * Maps an array of subscriptions to a new array with all topic aliases applied.
- *
- * @param inputs the inputs to the mapping function
- * @param subscriptions the subscription payloads to map
- * @returns a new array of subscription payloads with mapped topic names
- */
-export const aliasSubscriptions = memoizeWeak(
-  (inputs: Im<AliasingInputs>, subcriptions: SubscribePayload[]): SubscribePayload[] => {
-    const { aliasMap: mapping } = memos.buildAliases(inputs);
-
-    if (mapping === EmptyAliasMap) {
-      return subcriptions;
-    }
-
-    const inverseMapping = invertAliasMap(mapping);
-
-    return subcriptions.flatMap((sub) => {
-      const mappings = inverseMapping.get(sub.topic);
-      if (mappings) {
-        return mappings.map((topic) => ({
-          ...sub,
-          topic,
-        }));
-      } else {
-        return sub;
-      }
-    });
-  },
-);

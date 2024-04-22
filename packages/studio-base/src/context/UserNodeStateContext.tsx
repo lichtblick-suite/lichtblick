@@ -4,7 +4,7 @@
 
 import { createContext, useCallback, useState } from "react";
 
-import { useShallowMemo, useGuaranteedContext } from "@foxglove/hooks";
+import { useShallowMemo } from "@foxglove/hooks";
 import { generateEmptyTypesLib } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
 import { ros_lib_dts } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
 import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
@@ -103,9 +103,4 @@ export function UserNodeStateProvider({ children }: React.PropsWithChildren): JS
   });
 
   return <UserNodeStateContext.Provider value={value}>{children}</UserNodeStateContext.Provider>;
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function useUserNodeState() {
-  return useGuaranteedContext(UserNodeStateContext, "UserNodeStateContext");
 }

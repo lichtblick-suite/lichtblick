@@ -1,3 +1,4 @@
+/* eslint-disable @foxglove/no-boolean-parameters */
 import { FieldReader, getReader } from "./readers";
 import { Point, Header, RGBA } from "./types";
 
@@ -56,10 +57,12 @@ export const readPoints = (message: sensor_msgs__PointCloud2): Array<Field[]> =>
   return points;
 };
 
+// ts-unused-exports:disable-next-line
 export function norm({ x, y, z }: Point): number {
   return Math.sqrt(x * x + y * y + z * z);
 }
 
+// ts-unused-exports:disable-next-line
 export function setRayDistance(pt: Point, distance: number): Point {
   const { x, y, z } = pt;
   const scale = distance / norm(pt);
@@ -70,7 +73,7 @@ export function setRayDistance(pt: Point, distance: number): Point {
   };
 }
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// ts-unused-exports:disable-next-line
 export function convertToRangeView(points: Point[], range: number, makeColors: boolean): RGBA[] {
   const colors: RGBA[] = makeColors ? new Array(points.length) : [];
   // First pass to get min and max ranges

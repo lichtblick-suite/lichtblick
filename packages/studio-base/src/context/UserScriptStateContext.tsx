@@ -3,9 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { createContext, useState } from "react";
-import { StoreApi, createStore, useStore } from "zustand";
+import { StoreApi, createStore } from "zustand";
 
-import { useGuaranteedContext } from "@foxglove/hooks";
 import { generateEmptyTypesLib } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
 import { ros_lib_dts } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/ros";
 import { Diagnostic, UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
@@ -106,9 +105,4 @@ export function UserScriptStateProvider({ children }: React.PropsWithChildren): 
   return (
     <UserScriptStateContext.Provider value={value}>{children}</UserScriptStateContext.Provider>
   );
-}
-
-export function useUserScriptState<T>(selector: (arg: UserScriptStore) => T): T {
-  const store = useGuaranteedContext(UserScriptStateContext, "UserScriptStateContext");
-  return useStore(store, selector);
 }

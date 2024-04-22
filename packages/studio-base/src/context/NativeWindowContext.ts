@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 
 export type NativeWindowEvent = "enter-full-screen" | "leave-full-screen";
 
@@ -16,9 +16,5 @@ export interface INativeWindow {
 
 const NativeWindowContext = createContext<INativeWindow | undefined>(undefined);
 NativeWindowContext.displayName = "NativeWindowContext";
-
-export function useNativeWindow(): INativeWindow | undefined {
-  return useContext(NativeWindowContext);
-}
 
 export default NativeWindowContext;

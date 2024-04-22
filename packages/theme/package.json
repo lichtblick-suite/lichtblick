@@ -23,6 +23,9 @@
     "@mui/x-data-grid": "6.18.7",
     "@storybook/react": "7.6.10",
     "@types/react": "18.2.56",
-    "react": "18.2.0"
+    "i18next": "23.11.2",
+    "i18next-browser-languagedetector": "7.2.1",
+    "react": "18.2.0",
+    "react-i18next": "14.1.0"
   }
 }
