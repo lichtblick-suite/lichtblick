@@ -104,6 +104,7 @@ export function NestedMenuItem(
                   className={classes.menuItem}
                   key={item.key}
                   onClick={item.onClick}
+                  data-testid={item.dataTestId}
                   disabled={item.disabled}
                 >
                   {item.label}

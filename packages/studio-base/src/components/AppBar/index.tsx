@@ -198,6 +198,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 className={cx(classes.logo, { "Mui-selected": appMenuOpen })}
                 color="inherit"
                 id="app-menu-button"
+                data-testid="AppMenuButton"
                 title="Menu"
                 aria-controls={appMenuOpen ? "app-menu" : undefined}
                 aria-haspopup="true"

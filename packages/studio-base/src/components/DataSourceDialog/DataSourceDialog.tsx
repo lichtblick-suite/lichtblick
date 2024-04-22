@@ -135,7 +135,7 @@ export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
       }}
     >
       <IconButton className={classes.closeButton} onClick={onModalClose} edge="end">
-        <CloseIcon />
+        <CloseIcon data-testid="CloseIcon" />
       </IconButton>
       <Stack
         flexGrow={1}

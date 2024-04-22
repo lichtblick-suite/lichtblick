@@ -20,17 +20,17 @@ import { appPath } from "./build";
 
 const log = Logger.getLogger(__filename);
 
+export type AppType = {
+  main: ElectronApplication;
+  renderer: Page;
+} & AsyncDisposable;
+
 /**
  * Launch the app and wait for initial render.
  *
  * @returns An AsyncDisposable which automatically closes the app when it goes out of scope.
  */
-export async function launchApp(): Promise<
-  {
-    main: ElectronApplication;
-    renderer: Page;
-  } & AsyncDisposable
-> {
+export async function launchApp(): Promise<AppType> {
   // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
   const userDataDir = await mkdtemp(path.join(os.tmpdir(), "integration-test-"));
   const electronApp = await electron.launch({
