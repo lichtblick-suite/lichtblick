@@ -67,44 +67,6 @@ jobs:
 
       - run: ${{ matrix.config.command }}
 
-  storybook:
-    name: storybook (ubuntu-20.04)
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v4.1.1
-        with:
-          fetch-depth: 0 # Required for Chromatic
-          lfs: true
-
-      - uses: actions/setup-node@v4.0.1
-        with:
-          node-version: 16.17
-      - run: corepack enable yarn
-
-      - name: Restore cache
-        uses: actions/cache@v4.0.0
-        with:
-          path: |
-            .yarn/cache
-            **/node_modules
-          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: v5-${{ runner.os }}-yarn-
-
-      - run: yarn install --immutable
-
-      - run: yarn workspace @foxglove/studio-base run storybook:build
-
-      # Chromatic only runs on pushes or pulls to our source repo
-      - uses: chromaui/action@v10
-        if: ${{ github.event.repository.full_name == 'foxglove/studio' }}
-        with:
-          autoAcceptChanges: main
-          exitOnceUploaded: true
-          onlyChanged: true
-          projectToken: f50040a29fb8 # plaintext to allow building on PRs from forks
-          storybookBuildDir: storybook-static
-
   integration:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
