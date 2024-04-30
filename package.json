@@ -21,7 +21,7 @@
   },
   "scripts": {
     "clean": "tsc --build --clean packages/**/tsconfig.json && rimraf .webpack */.webpack dist storybook-screenshots storybook-static",
-    "build:packages": "tsc --build --verbose packages/**/tsconfig.json",
+    "build:packages": "tsc --build --verbose packages/*/tsconfig.json packages/*/src/*/tsconfig.json",
     "desktop:build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "desktop:build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
     "desktop:serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",

@@ -22,7 +22,6 @@ import {
   UlogLocalDataSourceFactory,
   VelodyneDataSourceFactory,
 } from "@foxglove/studio-base";
-import { IdbLayoutStorage } from "@foxglove/studio-base/IdbLayoutStorage";
 
 import { DesktopExtensionLoader } from "./services/DesktopExtensionLoader";
 import { NativeAppMenu } from "./services/NativeAppMenu";
@@ -141,8 +140,6 @@ export default function Root(props: {
     };
   }, []);
 
-  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
-
   return (
     <>
       <App
@@ -164,7 +161,6 @@ export default function Root(props: {
         onUnmaximizeWindow={onUnmaximizeWindow}
         onCloseWindow={onCloseWindow}
         extraProviders={props.extraProviders}
-        layoutStorage={layoutStorage}
       />
     </>
   );

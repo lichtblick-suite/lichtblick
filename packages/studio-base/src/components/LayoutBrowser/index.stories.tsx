@@ -188,15 +188,11 @@ export const MultiSelect: StoryObj = {
 
   play: async ({ canvasElement }) => {
     const layouts = await within(canvasElement).findAllByTestId("layout-list-item");
-
     await userEvent.click(layouts[0]!);
-
-    await userEvent.click(layouts[1]!, { metaKey: true });
-    await userEvent.click(layouts[3]!, { metaKey: true });
-
-    await userEvent.click(layouts[6]!, { shiftKey: true });
-
-    await userEvent.click(layouts[4]!, { metaKey: true });
+    await userEvent.click(layouts[1]!);
+    await userEvent.click(layouts[3]!);
+    await userEvent.click(layouts[6]!);
+    await userEvent.click(layouts[4]!);
   },
 };
 

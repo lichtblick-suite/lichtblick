@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Fragment, Suspense, useEffect } from "react";
+import { Fragment, Suspense, useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { IdbLayoutStorage } from "@foxglove/studio-base/IdbLayoutStorage";
 import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
@@ -14,7 +15,6 @@ import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsCon
 import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@foxglove/studio-base/providers/UserProfileLocalStorageProvider";
-import { ILayoutStorage } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import Workspace from "./Workspace";
 import { CustomWindowControlsProps } from "./components/AppBar/CustomWindowControls";
@@ -50,7 +50,6 @@ type AppProps = CustomWindowControlsProps & {
   appBarLeftInset?: number;
   extraProviders?: JSX.Element[];
   onAppBarDoubleClick?: () => void;
-  layoutStorage?: ILayoutStorage;
 };
 
 // Suppress context menu for the entire app except on inputs & textareas.
@@ -74,7 +73,6 @@ export function App(props: AppProps): JSX.Element {
     enableLaunchPreferenceScreen,
     enableGlobalCss = false,
     extraProviders,
-    layoutStorage,
   } = props;
 
   const providers = [
@@ -109,6 +107,8 @@ export function App(props: AppProps): JSX.Element {
   providers.unshift(<CurrentLayoutProvider />);
   providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
+
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
 
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;

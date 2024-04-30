@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Fragment, Suspense, useEffect } from "react";
+import { Fragment, Suspense, useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { IdbLayoutStorage } from "@foxglove/studio-base/IdbLayoutStorage";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@foxglove/studio-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@foxglove/studio-base/context/NativeWindowContext";
@@ -53,7 +54,6 @@ export function StudioApp(): JSX.Element {
     customWindowControlProps,
     onAppBarDoubleClick,
     AppBarComponent,
-    layoutStorage,
   } = useSharedRootContext();
 
   const providers = [
@@ -88,6 +88,9 @@ export function StudioApp(): JSX.Element {
   providers.unshift(<CurrentLayoutProvider />);
   providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
+
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
+
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 

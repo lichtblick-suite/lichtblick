@@ -66,7 +66,12 @@ export default function MockCurrentLayoutProvider({
   const setCurrentLayout = useCallback(
     (newLayout: SelectedLayout | undefined) => {
       setLayoutState({
-        selectedLayout: newLayout,
+        selectedLayout: {
+          data: newLayout?.data,
+          id: "mock-id" as LayoutID,
+          edited: newLayout?.edited,
+          name: newLayout?.name,
+        },
       });
     },
     [setLayoutState],
@@ -89,6 +94,7 @@ export default function MockCurrentLayoutProvider({
         ...layoutStateRef.current,
         selectedLayout: {
           ...layoutStateRef.current.selectedLayout,
+          id: layoutStateRef.current.selectedLayout?.id ?? ("mock-id" as LayoutID),
           data: layoutStateRef.current.selectedLayout?.data
             ? panelsReducer(layoutStateRef.current.selectedLayout.data, action)
             : undefined,
