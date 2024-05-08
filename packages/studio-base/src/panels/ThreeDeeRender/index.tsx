@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StrictMode, useMemo } from "react";
-import ReactDOM from "react-dom";
 import { DeepPartial } from "ts-essentials";
 
 import { useCrash } from "@foxglove/hooks";
@@ -20,6 +19,7 @@ import {
 } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { INJECTED_FEATURE_KEYS, useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { TestOptions } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
+import { createSyncRoot } from "@foxglove/studio-base/panels/createSyncRoot";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { SceneExtensionConfig } from "./SceneExtensionConfig";
@@ -36,8 +36,7 @@ type InitPanelArgs = {
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
   const { crash, forwardedAnalytics, interfaceMode, testOptions, customSceneExtensions } = args;
-  // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(
+  return createSyncRoot(
     <StrictMode>
       <CaptureErrorBoundary onError={crash}>
         <ForwardAnalyticsContextProvider forwardedAnalytics={forwardedAnalytics}>
@@ -52,10 +51,6 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
     </StrictMode>,
     context.panelElement,
   );
-  return () => {
-    // eslint-disable-next-line react/no-deprecated
-    ReactDOM.unmountComponentAtNode(context.panelElement);
-  };
 }
 
 type Props = {

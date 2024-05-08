@@ -6,12 +6,11 @@ import L from "leaflet";
 import LeafletRetinaIconUrl from "leaflet/dist/images/marker-icon-2x.png";
 import LeafletIconUrl from "leaflet/dist/images/marker-icon.png";
 import LeafletShadowIconUrl from "leaflet/dist/images/marker-shadow.png";
-import { StrictMode } from "react";
-import ReactDOM from "react-dom";
 
 import { useCrash } from "@foxglove/hooks";
 import { PanelExtensionContext } from "@foxglove/studio";
 import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
+import { createSyncRoot } from "@foxglove/studio-base/panels/createSyncRoot";
 
 import MapPanel from "./MapPanel";
 
@@ -34,17 +33,10 @@ export function initPanel(
   crash: ReturnType<typeof useCrash>,
   context: PanelExtensionContext,
 ): () => void {
-  // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(
-    <StrictMode>
-      <CaptureErrorBoundary onError={crash}>
-        <MapPanel context={context} />
-      </CaptureErrorBoundary>
-    </StrictMode>,
+  return createSyncRoot(
+    <CaptureErrorBoundary onError={crash}>
+      <MapPanel context={context} />
+    </CaptureErrorBoundary>,
     context.panelElement,
   );
-  return () => {
-    // eslint-disable-next-line react/no-deprecated
-    ReactDOM.unmountComponentAtNode(context.panelElement);
-  };
 }

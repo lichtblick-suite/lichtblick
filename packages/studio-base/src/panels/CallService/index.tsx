@@ -3,21 +3,20 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StrictMode, useMemo } from "react";
-import ReactDOM from "react-dom";
 
 import { useCrash } from "@foxglove/hooks";
 import { PanelExtensionContext } from "@foxglove/studio";
 import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { createSyncRoot } from "@foxglove/studio-base/panels/createSyncRoot";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { CallService } from "./CallService";
 import { Config } from "./types";
 
 function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionContext) {
-  // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(
+  return createSyncRoot(
     <StrictMode>
       <CaptureErrorBoundary onError={crash}>
         <CallService context={context} />
@@ -25,10 +24,6 @@ function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionCo
     </StrictMode>,
     context.panelElement,
   );
-  return () => {
-    // eslint-disable-next-line react/no-deprecated
-    ReactDOM.unmountComponentAtNode(context.panelElement);
-  };
 }
 
 type Props = {
