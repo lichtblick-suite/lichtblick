@@ -1,51 +1,75 @@
-# Contributing to Foxbox
+# Contributing Guidelines
 
-**Supported development environments:** Linux, Windows, macOS
+Welcome, and thank you for your interest in contributing to Foxbox! We value your contributions and want to make the contributing experience enjoyable and rewarding for you. Here’s how you can get started:
 
-**Dependencies:**
+## :rocket: Getting Started
 
-- [Node.js](https://nodejs.org/en/) v16.10+
-- [Git LFS](https://git-lfs.github.com/)
+Please check our [README.md](../README.md) and follow the installation steps.
 
-## Getting started
-
-1. Clone repo
-1. Run `git lfs pull` to ensure Git LFS objects are up to date
-1. Run `corepack enable` and `yarn install`
-   - If you still get errors about corepack after running `corepack enable`, try uninstalling and reinstalling Node.js. Ensure that Yarn is not separately installed from another source, but is installed _via_ corepack.
-1. Launch the development environment:
+#### Other useful commands
 
 ```sh
-# To launch the desktop app (run both scripts concurrently):
-$ yarn desktop:serve        # start webpack
-$ yarn desktop:start        # launch electron
-
-# To launch the browser app:
-$ yarn web:serve
-
-# To launch the storybook:
+# To launch the storybook
 $ yarn storybook
+```
 
+```sh
 # Advanced usage: running webpack and electron on different computers (or VMs) on the same network
-$ yarn desktop:serve --host 192.168.xxx.yyy         # the address where electron can reach the webpack dev server
+$ yarn desktop:serve --host 192.168.xxx.yyy # the address where electron can reach the webpack dev server
 $ yarn dlx electron@22.1.0 .webpack # launch the version of electron for the current computer's platform
 ```
 
-### Other useful commands
-
 ```sh
-$ yarn run          # list available commands
-$ yarn lint         # lint all files
-$ yarn test         # run all tests
-$ yarn test:watch   # run tests on changed files
+$ yarn run               # list available commands
+$ yarn lint              # lint all files
+$ yarn test              # run all tests
+$ yarn test:watch        # run tests on changed files
+$ yarn test:integration  # run all integration tests
 ```
 
-## Localization
+## :herb: Creating a new branch
 
-At this time, first-class support for Foxbox is provided in English only. Localization into other languages is available on a best-effort basis, with translations provided by community volunteers. Current community supported-languages are:
+To create a branch in this repository, please follow the guidelines below, ensuring that the purpose of each branch is clear and well-defined:
 
-- Chinese
-- Japanese
+- `feature` : Create this branch when adding new features, modifying existing features, or removing outdated functionality.
+- `bugfix` : This branch is for resolving bugs discovered in existing features.
+- `hotfix` : Use this for rapidly addressing critical issues. This typically involves implementing a temporary solution that requires immediate attention.
+- `test` : This is intended for experimental changes, where the main goal is to explore new ideas or test solutions without addressing a specific issue.
+- `docs` : Designate this branch for updates and improvements to documentation, ensuring that information is current and helpful to users.
+- `wip` (Work In Progress): Use this for ongoing development that is not yet ready for merging into the main branch.
+
+### Examples
+
+`feature/new-menu-foo`
+
+`test/create-unit-test-for-component-bar`
+
+## :label: Version increment
+
+Semantic Versioning has been chosen as our standard method for version increments, which is widely adopted across various software projects. The version format is structured as follows:
+`<major>.<minor>.<patch>[.<build number>]`.
+
+- _Note: Currently, the version increment process is manual. Developers are required to update the version number in the package.json file manually. An automated pipeline for this task is in development and will be implemented to streamline this process in the future._
+
+### Components
+
+MAJOR: Increasing the major version usually breaks compatibility, allowing developers to remove the deprecated API or rework the existing ones. Users know about it and do not expect a smooth update.
+
+MINOR: Version increment implies adding new functionality without breaking compatibility.
+
+PATCH: Also known as bugfix version that includes fixing security vulnerabilities, etc.
+
+BUILD NUMBER (Optional): Optionally, the build number can be additionally added.
+
+### Examples
+
+`1.20.11`
+
+`1.20.11.403`
+
+## :globe_with_meridians: Localization
+
+At this time, first-class support for Foxbox is provided in English only. Localization into other languages is available on a best-effort basis, with translations provided by community volunteers.
 
 Translation support is implemented using [`react-i18next`](https://react.i18next.com).
 

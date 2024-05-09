@@ -68,7 +68,7 @@ export function LaunchingInDesktopScreen(): ReactElement {
         style={{ maxWidth: 480 }}
       >
         <Typography align="center" variant="h2" fontWeight={600}>
-          Launching FoxBox…
+          Launching Foxbox…
         </Typography>
         <Typography align="center" fontWeight={600}>
           We’ve directed you to the desktop app.

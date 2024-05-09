@@ -8,8 +8,8 @@ import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLa
 /**
  * Overridden default layout that may have been provided when self-hosting via Docker
  * */
-const staticDefaultLayout = (globalThis as { FOXGLOVE_STUDIO_DEFAULT_LAYOUT?: LayoutData })
-  .FOXGLOVE_STUDIO_DEFAULT_LAYOUT;
+const staticDefaultLayout = (globalThis as { FOXBOX_STUDIO_DEFAULT_LAYOUT?: LayoutData })
+  .FOXBOX_STUDIO_DEFAULT_LAYOUT;
 
 /**
  * This is loaded when the user has no layout selected on application launch

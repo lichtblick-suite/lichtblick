@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-import { FoxBoxLogo } from "@foxglove/studio-base/components/FoxBoxLogo";
+import { FoxboxLogo } from "@foxglove/studio-base/components/FoxboxLogo";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import {
@@ -208,7 +208,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   setAppMenuEl(event.currentTarget);
                 }}
               >
-                <FoxBoxLogo fontSize="inherit" color="inherit" />
+                <FoxboxLogo fontSize="inherit" color="inherit" />
                 <ChevronDown12Regular
                   className={classes.dropDownIcon}
                   primaryFill={theme.palette.common.white}

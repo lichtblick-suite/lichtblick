@@ -8,7 +8,7 @@ export const appSettings = {
   askEachTime: "Ask each time",
   colorScheme: "Color scheme",
   dark: "Dark",
-  debugModeDescription: "Enable panels and features for debugging FoxBox",
+  debugModeDescription: "Enable panels and features for debugging Foxbox",
   desktopApp: "Desktop app",
   displayTimestampsIn: "Display timestamps in",
   experimentalFeatures: "Experimental features",

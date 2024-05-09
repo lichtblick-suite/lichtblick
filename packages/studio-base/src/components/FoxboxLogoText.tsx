@@ -4,10 +4,10 @@
 
 import { SvgIcon, SvgIconProps } from "@mui/material";
 
-export default function FoxBoxLogoText(props: SvgIconProps): JSX.Element {
+export default function FoxboxLogoText(props: SvgIconProps): JSX.Element {
   return (
     <SvgIcon viewBox="0 0 909 204" {...props}>
-      <title>FoxBox</title>
+      <title>Foxbox</title>
       <g>
         <svg
           width="909"

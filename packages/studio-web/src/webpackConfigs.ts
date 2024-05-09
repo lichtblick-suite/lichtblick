@@ -172,7 +172,7 @@ export const mainConfig =
     </head>
     <script>
       global = globalThis;
-      globalThis.FOXGLOVE_STUDIO_DEFAULT_LAYOUT = [/*FOXGLOVE_STUDIO_DEFAULT_LAYOUT_PLACEHOLDER*/][0];
+      globalThis.FOXBOX_STUDIO_DEFAULT_LAYOUT = [/*FOXBOX_STUDIO_DEFAULT_LAYOUT_PLACEHOLDER*/][0];
     </script>
     <body>
       <div id="root"></div>
@@ -180,7 +180,7 @@ export const mainConfig =
   </html>
   `,
           foxgloveExtraHeadTags: `
-            <title>FoxBox</title>
+            <title>Foxbox</title>
             <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
             <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
             <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
