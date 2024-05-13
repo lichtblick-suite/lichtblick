@@ -93,8 +93,4 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
       </LogAfterRender>
     </StrictMode>,
   );
-
-  setTimeout(() => {
-    root.unmount();
-  }, 5_000);
 }
