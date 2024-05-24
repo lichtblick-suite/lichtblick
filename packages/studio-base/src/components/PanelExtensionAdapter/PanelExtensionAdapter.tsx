@@ -7,7 +7,7 @@ import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } 
 import { useLatest } from "react-use";
 import { v4 as uuid } from "uuid";
 
-import { useValueChangedDebugLog, useSynchronousMountedState } from "@foxglove/hooks";
+import { useSynchronousMountedState, useValueChangedDebugLog } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
 import { fromSec, toSec } from "@foxglove/rostime";
 import {
@@ -42,11 +42,12 @@ import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
   PlayerCapabilities,
+  PlayerPresence,
   SubscribePayload,
 } from "@foxglove/studio-base/players/types";
 import {
-  usePanelSettingsTreeUpdate,
   useDefaultPanelTitle,
+  usePanelSettingsTreeUpdate,
 } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { assertNever } from "@foxglove/studio-base/util/assertNever";
@@ -118,7 +119,7 @@ function PanelExtensionAdapter(
   const { playerState, pauseFrame, setSubscriptions, seekPlayback, sortedTopics } =
     messagePipelineContext;
 
-  const { capabilities, profile: dataSourceProfile } = playerState;
+  const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
 
   const { openSiblingPanel, setMessagePathDropConfig } = usePanelContext();
 
@@ -547,6 +548,8 @@ function PanelExtensionAdapter(
     );
   }, [initialState, highestSupportedConfigVersion]);
 
+  const playerIsInitializing = playerPresence === PlayerPresence.INITIALIZING;
+
   // Manage extension lifecycle by calling initPanel() when the panel context changes.
   //
   // If we useEffect here instead of useLayoutEffect, the prevRenderState can get polluted with data
@@ -556,9 +559,12 @@ function PanelExtensionAdapter(
       throw new Error("Expected panel container to be mounted");
     }
 
-    // If the config is too new for this panel to support we bail and don't do any panel initialization
-    // We will instead show a warning message to the user
-    if (configTooNew) {
+    // Also don't show panel when the player is initializing. The initializing state is temporary for
+    // players to go through to load their sources. Once a player has completed initialization `initPanel` is called again (or even a few times),
+    // because parts of the player context have changed. This cleans up the old panel that was present
+    // during initialization. So there can be no state held between extension panels between initialization and
+    // whatever follows it. To prevent this unnecessary render, we do not render the panel during initialization.
+    if (configTooNew || playerIsInitializing) {
       return;
     }
 
@@ -596,7 +602,14 @@ function PanelExtensionAdapter(
       getMessagePipelineContext().setSubscriptions(panelId, []);
       getMessagePipelineContext().setPublishers(panelId, []);
     };
-  }, [initPanel, panelId, partialExtensionContext, getMessagePipelineContext, configTooNew]);
+  }, [
+    initPanel,
+    panelId,
+    partialExtensionContext,
+    getMessagePipelineContext,
+    configTooNew,
+    playerIsInitializing,
+  ]);
 
   const style: CSSProperties = {};
   if (slowRender) {

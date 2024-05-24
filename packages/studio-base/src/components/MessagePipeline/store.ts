@@ -21,15 +21,16 @@ import {
   PlayerState,
   SubscribePayload,
 } from "@foxglove/studio-base/players/types";
-import { assertNever } from "@foxglove/studio-base/util/assertNever";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import { FramePromise } from "./pauseFrameForPromise";
 import { MessagePipelineContext } from "./types";
 
-export function defaultPlayerState(): PlayerState {
+export function defaultPlayerState(player?: Player): PlayerState {
   return {
-    presence: PlayerPresence.NOT_PRESENT,
+    // when there is a player we default to initializing, to prevent thrashing in the UI when
+    // the player is initialized.
+    presence: player ? PlayerPresence.INITIALIZING : PlayerPresence.NOT_PRESENT,
     progress: {},
     capabilities: [],
     profile: undefined,
@@ -138,7 +139,7 @@ export function createMessagePipelineStore({
     },
 
     public: {
-      playerState: defaultPlayerState(),
+      playerState: defaultPlayerState(initialPlayer),
       messageEventsBySubscriberId: new Map(),
       subscriptions: [],
       sortedTopics: [],
@@ -423,11 +424,6 @@ export function reducer(
       };
     }
   }
-
-  assertNever(
-    action,
-    `Unhandled message pipeline action type ${(action as MessagePipelineStateAction).type}`,
-  );
 }
 
 async function builtinFetch(url: string, opts?: { signal?: AbortSignal }) {

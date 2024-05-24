@@ -14,7 +14,7 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
@@ -29,7 +29,7 @@ import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLa
 import delay from "@foxglove/studio-base/util/delay";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
-import { MessagePipelineProvider, useMessagePipeline, MessagePipelineContext } from ".";
+import { MessagePipelineContext, MessagePipelineProvider, useMessagePipeline } from ".";
 import FakePlayer from "./FakePlayer";
 import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
@@ -136,7 +136,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         playerState: {
           activeData: undefined,
           capabilities: [],
-          presence: PlayerPresence.NOT_PRESENT,
+          presence: PlayerPresence.INITIALIZING,
           playerId: "",
           progress: {},
         },
@@ -199,7 +199,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(all[0]!.playerState).toEqual({
       activeData: undefined,
       capabilities: [],
-      presence: PlayerPresence.NOT_PRESENT,
+      presence: PlayerPresence.INITIALIZING,
       playerId: "",
       progress: {},
     });
@@ -259,7 +259,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         playerState: {
           activeData: undefined,
           capabilities: [],
-          presence: PlayerPresence.NOT_PRESENT,
+          presence: PlayerPresence.INITIALIZING,
           playerId: "",
           progress: {},
         },
