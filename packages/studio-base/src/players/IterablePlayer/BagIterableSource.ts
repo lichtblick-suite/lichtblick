@@ -9,8 +9,8 @@ import { MessageReader } from "@foxglove/rosmsg-serialization";
 import { compare } from "@foxglove/rostime";
 import { estimateObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
 import {
-  PlayerProblem,
   MessageEvent,
+  PlayerProblem,
   Topic,
   TopicStats,
 } from "@foxglove/studio-base/players/types";
@@ -22,11 +22,11 @@ import Bzip2 from "@foxglove/wasm-bz2";
 import decompressLZ4 from "@foxglove/wasm-lz4";
 
 import {
-  IIterableSource,
-  IteratorResult,
-  Initalization,
-  MessageIteratorArgs,
   GetBackfillMessagesArgs,
+  IIterableSource,
+  Initalization,
+  IteratorResult,
+  MessageIteratorArgs,
 } from "./IIterableSource";
 
 type BagSource = { type: "file"; file: File } | { type: "remote"; url: string };
@@ -53,7 +53,7 @@ export class BagIterableSource implements IIterableSource {
       const fileReader = new BrowserHttpReader(bagUrl);
       const remoteReader = new CachedFilelike({
         fileReader,
-        cacheSizeInBytes: 1024 * 1024 * 200, // 200MiB
+        cacheSizeInBytes: 1024 * 1024 * 500, // 500MiB
         keepReconnectingCallback: (_reconnecting) => {
           // no-op?
         },

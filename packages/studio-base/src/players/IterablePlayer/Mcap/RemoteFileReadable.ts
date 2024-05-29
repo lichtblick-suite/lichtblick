@@ -12,7 +12,7 @@ export class RemoteFileReadable {
     const fileReader = new BrowserHttpReader(url);
     this.#remoteReader = new CachedFilelike({
       fileReader,
-      cacheSizeInBytes: 1024 * 1024 * 200, // 200MiB
+      cacheSizeInBytes: 1024 * 1024 * 500, // 500MiB
     });
   }
 
