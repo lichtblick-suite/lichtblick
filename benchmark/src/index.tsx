@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
 import { initI18n } from "@foxglove/studio-base";
@@ -29,8 +29,8 @@ async function main() {
 
   const { Root } = await import("./Root");
 
-  const root = createRoot(rootEl!);
-  root.render(<Root />);
+  // eslint-disable-next-line react/no-deprecated
+  ReactDOM.render(<Root />, rootEl);
 }
 
 void main();

@@ -13,7 +13,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { SnackbarProvider } from "notistack";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 import { act } from "react-dom/test-utils";
 
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
@@ -30,9 +30,8 @@ describe("<DocumentDropListener>", () => {
     wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
 
-    const root = createRoot(wrapper!);
-
-    root.render(
+    // eslint-disable-next-line react/no-deprecated
+    ReactDOM.render(
       <div>
         <SnackbarProvider>
           <ThemeProvider isDark={false}>
@@ -40,6 +39,7 @@ describe("<DocumentDropListener>", () => {
           </ThemeProvider>
         </SnackbarProvider>
       </div>,
+      wrapper,
     );
 
     (console.error as jest.Mock).mockClear();
@@ -62,8 +62,9 @@ describe("<DocumentDropListener>", () => {
     (event as any).dataTransfer = {
       types: ["Files"],
     };
-
-    document.dispatchEvent(event); // The event should NOT bubble up from the document to the window
+    act(() => {
+      document.dispatchEvent(event); // The event should NOT bubble up from the document to the window
+    });
 
     expect(windowDragoverHandler).not.toHaveBeenCalled();
   });

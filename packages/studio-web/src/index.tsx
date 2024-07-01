@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StrictMode, useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
 import type { IDataSourceFactory } from "@foxglove/studio-base";
@@ -41,8 +41,6 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     throw new Error("missing #root element");
   }
 
-  const root = createRoot(rootEl);
-
   const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
   const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
   const isChrome = chromeVersion !== 0;
@@ -57,12 +55,14 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
   );
 
   if (!canRender) {
-    root.render(
+    // eslint-disable-next-line react/no-deprecated
+    ReactDOM.render(
       <StrictMode>
         <LogAfterRender>
           <CssBaseline>{banner}</CssBaseline>
         </LogAfterRender>
       </StrictMode>,
+      rootEl,
     );
     return;
   }
@@ -85,12 +85,14 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     </WebRoot>
   );
 
-  root.render(
+  // eslint-disable-next-line react/no-deprecated
+  ReactDOM.render(
     <StrictMode>
       <LogAfterRender>
         {banner}
         {rootElement}
       </LogAfterRender>
     </StrictMode>,
+    rootEl,
   );
 }

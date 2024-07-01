@@ -6,7 +6,7 @@
 /// <reference types="electron" />
 
 import { StrictMode, useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
@@ -58,8 +58,8 @@ export async function main(params: MainParams): Promise<void> {
   await waitForFonts();
   await initI18n();
 
-  const root = createRoot(rootEl);
-  root.render(
+  // eslint-disable-next-line react/no-deprecated
+  ReactDOM.render(
     <StrictMode>
       <LogAfterRender>
         <Root
@@ -69,5 +69,6 @@ export async function main(params: MainParams): Promise<void> {
         />
       </LogAfterRender>
     </StrictMode>,
+    rootEl,
   );
 }
