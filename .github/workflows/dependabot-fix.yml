@@ -10,7 +10,7 @@
 name: Dependabot
 
 on:
-  - workflow_dispatch
+  - pull_request_target
 
 jobs:
   fix:
