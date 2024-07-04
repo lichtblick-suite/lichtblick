@@ -41,7 +41,7 @@ jobs:
           base: main
           head: release/${{ github.event.release.tag_name }}
         env:
-          GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.LITCHBLICK_GITHUB_TOKEN }}
 
   npm:
     name: Publish to NPM

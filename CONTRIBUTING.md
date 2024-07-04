@@ -37,6 +37,7 @@ To create a branch in this repository, please follow the guidelines below, ensur
 - `test` : This is intended for experimental changes, where the main goal is to explore new ideas or test solutions without addressing a specific issue.
 - `docs` : Designate this branch for updates and improvements to documentation, ensuring that information is current and helpful to users.
 - `wip` (Work In Progress): Use this for ongoing development that is not yet ready for merging into the main branch.
+- `cicd` : Use this for changes into pipeline ci/cd scripts
 
 ### Examples
 

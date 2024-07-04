@@ -10,7 +10,7 @@
 name: Dependabot
 
 on:
-  - pull_request_target
+  - workflow_dispatch
 
 jobs:
   fix:
@@ -30,7 +30,7 @@ jobs:
           # Using a Personal Access Token here is required to trigger workflows on our new commit.
           # The default GitHub token doesn't trigger any workflows.
           # See: https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854/2
-          token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+          token: ${{ secrets.LITCHBLICK_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
 
       - run: git lfs pull --include .yarn/
@@ -61,7 +61,7 @@ jobs:
       - uses: octokit/request-action@v2.1.9
         if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
         env:
-          GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.LITCHBLICK_GITHUB_TOKEN }}
         with:
           route: POST /repos/{owner_and_repo}/pulls/{pull_number}/reviews
           owner_and_repo: ${{ github.repository }}
@@ -71,7 +71,7 @@ jobs:
       - uses: octokit/request-action@v2.1.9
         if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
         env:
-          GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.LITCHBLICK_GITHUB_TOKEN }}
         with:
           route: POST /repos/{owner_and_repo}/issues/{pull_number}/comments
           owner_and_repo: ${{ github.repository }}
