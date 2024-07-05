@@ -45,7 +45,7 @@ Enable corepack:
 $ corepack enable
 ```
 
-Install packages from `package.json` :
+Install packages from `package.json`:
 
 ```sh
 $ yarn install
