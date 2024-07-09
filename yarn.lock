@@ -3000,7 +3000,7 @@ __metadata:
     readable-stream: 4.4.2
     rehype-raw: 6.1.1
     reselect: 4.1.8
-    sanitize-html: 2.11.0
+    sanitize-html: 2.12.1
     seedrandom: 3.0.5
     shallowequal: 1.1.0
     string-hash: 1.1.3
@@ -3050,11 +3050,11 @@ __metadata:
     async-mutex: 0.4.0
     builder-util: "*"
     clean-webpack-plugin: 4.0.0
-    electron: 25.5.0
+    electron: 25.8.4
     electron-builder: 24.6.4
     electron-devtools-installer: 3.2.0
     electron-squirrel-startup: 1.0.0
-    electron-updater: 6.1.4
+    electron-updater: 6.2.1
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
     fork-ts-checker-webpack-plugin: 9.0.2
@@ -10918,7 +10918,7 @@ __metadata:
     "@foxglove/studio-base": "workspace:*"
     "@foxglove/studio-desktop": "workspace:*"
     "@foxglove/tsconfig": 2.0.0
-    electron: 25.5.0
+    electron: 25.8.4
     playwright: 1.37.1
     webpack: 5.88.2
   languageName: unknown
@@ -11430,11 +11430,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-updater@npm:6.1.4":
-  version: 6.1.4
-  resolution: "electron-updater@npm:6.1.4"
+"electron-updater@npm:6.2.1":
+  version: 6.2.1
+  resolution: "electron-updater@npm:6.2.1"
   dependencies:
-    builder-util-runtime: 9.2.1
+    builder-util-runtime: 9.2.4
     fs-extra: ^10.1.0
     js-yaml: ^4.1.0
     lazy-val: ^1.0.5
@@ -11442,20 +11442,20 @@ __metadata:
     lodash.isequal: ^4.5.0
     semver: ^7.3.8
     tiny-typed-emitter: ^2.1.0
-  checksum: 39d67a24103c24c75e8f0dd172c6f3bae71aa3b9e7b120ba7ce1838981b92f55b616e05b97c529da3db4e28e9db4ac749de450c2fb4d25f119671adfb08e3bd9
+  checksum: 92a064610a3c9df747dce9c3eccd69c48adb2c8b37b9d7c13d1c39f7e2a9ffaef4e909ab50e6973d557566bde6de7ec9c64e2cc3a2cdef18b3220c5d91333e1c
   languageName: node
   linkType: hard
 
-"electron@npm:25.5.0":
-  version: 25.5.0
-  resolution: "electron@npm:25.5.0"
+"electron@npm:25.8.4":
+  version: 25.8.4
+  resolution: "electron@npm:25.8.4"
   dependencies:
     "@electron/get": ^2.0.0
     "@types/node": ^18.11.18
     extract-zip: ^2.0.1
   bin:
     electron: cli.js
-  checksum: 070e482de16420e1ea1372886426ff5fdbc7f87e171a2bf9de4df351fc90c7a32d56b26a577b4a4e3d95c0a98869faab8d59bf40ee77356912c05dda6d5fd678
+  checksum: 1e021cf83747d73d1629027a82a344ed22c9256309f712cf785eec622a9112c53936209a74ef8de546c28fa9961e831d03dc66a8115ce3835c7616dc7a6d2293
   languageName: node
   linkType: hard
 
@@ -13096,7 +13096,7 @@ __metadata:
     babel-plugin-transform-import-meta: 2.2.1
     cross-env: 7.0.3
     depcheck: 1.4.6
-    electron: 25.5.0
+    electron: 25.8.4
     electron-builder: 24.6.4
     eslint: 8.50.0
     eslint-config-prettier: 9.1.0
@@ -20280,9 +20280,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:2.11.0":
-  version: 2.11.0
-  resolution: "sanitize-html@npm:2.11.0"
+"sanitize-html@npm:2.12.1":
+  version: 2.12.1
+  resolution: "sanitize-html@npm:2.12.1"
   dependencies:
     deepmerge: ^4.2.2
     escape-string-regexp: ^4.0.0
@@ -20290,7 +20290,7 @@ __metadata:
     is-plain-object: ^5.0.0
     parse-srcset: ^1.0.2
     postcss: ^8.3.11
-  checksum: 44807f22b0feb5a6a883b4bc04bcd8690ec3bbd6dacb24d6e52226ffe0c0e4fad43d6a882ce60e3884a327fae2de01e67e566e3a211491add50ff0160be2e98a
+  checksum: fb96ea7170d51b5af2607f5cfd84464c78fc6f47e339407f55783e781c6a0288a8d40bbf97ea6a8758924ba9b2d33dcc4846bb94caacacd90d7f2de10ed8541a
   languageName: node
   linkType: hard
 
