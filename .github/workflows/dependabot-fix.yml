@@ -34,7 +34,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           lfs: true
 
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4.0.3
         with:
           node-version: 16.17
 
