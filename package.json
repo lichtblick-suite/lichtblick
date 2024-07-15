@@ -1,6 +1,6 @@
 {
   "name": "foxbox",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "license": "MPL-2.0",
   "private": true,
   "productName": "Foxbox",
@@ -95,7 +95,7 @@
     "@typescript-eslint/parser": "6.10.0",
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
-    "depcheck": "1.4.6",
+    "depcheck": "1.4.7",
     "electron": "25.8.4",
     "electron-builder": "24.6.4",
     "eslint": "8.50.0",
