@@ -24,7 +24,7 @@
     "@types/tinycolor2": "1.4.4",
     "@types/utif": "^3.0.2",
     "@xmldom/xmldom": "0.8.10",
-    "app-builder-lib": "*",
+    "app-builder-lib": "24.13.2",
     "async-mutex": "0.4.0",
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
@@ -32,7 +32,7 @@
     "electron-builder": "24.6.4",
     "electron-devtools-installer": "3.2.0",
     "electron-squirrel-startup": "1.0.0",
-    "electron-updater": "6.2.1",
+    "electron-updater": "6.3.0-alpha.6",
     "esbuild-loader": "2.21.0",
     "eventemitter3": "5.0.1",
     "fork-ts-checker-webpack-plugin": "9.0.2",
@@ -51,6 +51,6 @@
     "tss-react": "4.9.2",
     "utif": "3.1.0",
     "webpack": "5.90.0",
-    "webpack-dev-server": "4.15.1"
+    "webpack-dev-server": "5.0.4"
   }
 }

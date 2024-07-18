@@ -47,6 +47,7 @@ export function makeConfig(
         stream: require.resolve("readable-stream"),
         zlib: require.resolve("browserify-zlib"),
         crypto: require.resolve("crypto-browserify"),
+        vm: require.resolve("vm-browserify"),
 
         // TypeScript tries to use this when running in node
         perf_hooks: false,

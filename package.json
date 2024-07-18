@@ -1,6 +1,6 @@
 {
   "name": "foxbox",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MPL-2.0",
   "private": true,
   "productName": "Foxbox",
@@ -124,7 +124,7 @@
     "typescript": "5.3.3",
     "webpack": "5.90.0",
     "webpack-cli": "5.1.4",
-    "webpack-dev-server": "4.15.1",
+    "webpack-dev-server": "5.0.4",
     "webpack-hot-middleware": "2.26.0"
   },
   "dependencies": {
@@ -133,6 +133,7 @@
     "@foxglove/studio": "workspace:*",
     "@mui/material": "5.13.5",
     "react-use": "17.4.0",
-    "rehype-raw": "6.1.1"
+    "rehype-raw": "6.1.1",
+    "vm-browserify": "1.1.2"
   }
 }
