@@ -156,7 +156,7 @@
     "react-window": "1.8.9",
     "readable-stream": "4.4.2",
     "rehype-raw": "6.1.1",
-    "reselect": "4.1.8",
+    "reselect": "5.1.1",
     "sanitize-html": "2.12.1",
     "seedrandom": "3.0.5",
     "shallowequal": "1.1.0",
