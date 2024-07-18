@@ -35,6 +35,7 @@ class TestSource implements IIterableSource {
       problems: [],
       datatypes: new Map(),
       publishersByTopic: new Map(),
+      metadata: [{ name: "metadata1", metadata: { key: "value" } }],
     };
   }
 
@@ -754,6 +755,7 @@ describe("IterablePlayer", () => {
     player.close();
     await player.isClosed;
   });
+
   it("should make a new message iterator when topic subscriptions change", async () => {
     const source = new TestSource();
     const player = new IterablePlayer({
@@ -837,5 +839,34 @@ describe("IterablePlayer", () => {
 
     player.close();
     await player.isClosed;
+  });
+
+  it("should return the correct frozen metadata", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const metadata = player.getMetadata();
+
+    // At first, metadata is empty because it's initialized in an async way.
+    expect(metadata.length).toBe(0);
+
+    // Setup store to player update to be in start-play state
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+    // Wait for player to be in start-play state
+    await store.done;
+
+    const metadataInitialized = player.getMetadata();
+    expect(metadataInitialized.length).toBe(1);
+    expect(() => {
+      // @ts-expect-error because the array is type as readonly
+      metadataInitialized.pop();
+    }).toThrow();
   });
 });

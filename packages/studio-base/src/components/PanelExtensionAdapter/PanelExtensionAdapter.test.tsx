@@ -722,4 +722,47 @@ describe("PanelExtensionAdapter", () => {
       [expect.any(String), []],
     ]);
   });
+
+  it("should read metadata correctly", async () => {
+    expect.assertions(2);
+
+    const config = {};
+    const saveConfig = () => {};
+
+    const sig = signal();
+
+    const initPanel = (context: PanelExtensionContext) => {
+      expect(context.metadata).toBeDefined();
+      expect(context.metadata).toEqual([
+        {
+          name: "mockMetadata",
+          metadata: { key: "value" },
+        },
+      ]);
+      sig.resolve();
+    };
+
+    const Wrapper = () => {
+      return (
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter
+                config={config}
+                saveConfig={saveConfig}
+                initPanel={initPanel}
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>
+      );
+    };
+
+    await act(async () => undefined);
+    const handle = render(<Wrapper />);
+
+    // force a re-render to make sure we call init panel once
+    handle.rerender(<Wrapper />);
+    await sig;
+  });
 });

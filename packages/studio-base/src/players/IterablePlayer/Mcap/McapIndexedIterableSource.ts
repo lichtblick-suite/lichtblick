@@ -8,7 +8,7 @@ import { pickFields } from "@foxglove/den/records";
 import Logger from "@foxglove/log";
 import { ParsedChannel, parseChannel } from "@foxglove/mcap-support";
 import { Time, fromNanoSec, toNanoSec, compare } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
+import { MessageEvent, Metadata } from "@foxglove/studio";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
@@ -61,6 +61,8 @@ export class McapIndexedIterableSource implements IIterableSource {
     const topicsByName = new Map<string, Topic>();
     const datatypes: RosDatatypes = new Map();
     const problems: PlayerProblem[] = [];
+    const metadata: Metadata[] = [];
+
     const publishersByTopic = new Map<string, Set<string>>();
 
     for (const channel of this.#reader.channelsById.values()) {
@@ -121,6 +123,16 @@ export class McapIndexedIterableSource implements IIterableSource {
     this.#start = fromNanoSec(startTime ?? 0n);
     this.#end = fromNanoSec(endTime ?? startTime ?? 0n);
 
+    const metadataGenerator = this.#reader.readMetadata();
+    let metadataIterator = await metadataGenerator.next();
+    while (metadataIterator.done !== true) {
+      metadata.push({
+        name: metadataIterator.value.name,
+        metadata: Object.fromEntries(metadataIterator.value.metadata),
+      });
+      metadataIterator = await metadataGenerator.next();
+    }
+
     return {
       start: this.#start,
       end: this.#end,
@@ -128,6 +140,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       datatypes,
       profile: this.#reader.header.profile,
       problems,
+      metadata,
       publishersByTopic,
       topicStats,
     };

@@ -116,7 +116,7 @@ function PanelExtensionAdapter(
 
   const messagePipelineContext = useMessagePipeline(selectContext);
 
-  const { playerState, pauseFrame, setSubscriptions, seekPlayback, sortedTopics } =
+  const { playerState, pauseFrame, setSubscriptions, seekPlayback, getMetadata, sortedTopics } =
     messagePipelineContext;
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
@@ -290,6 +290,7 @@ function PanelExtensionAdapter(
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   type PartialPanelExtensionContext = Omit<BuiltinPanelExtensionContext, "panelElement">;
+
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
       addPanel({ position, type, updateIfExists, getState }) {
@@ -321,6 +322,8 @@ function PanelExtensionAdapter(
       },
 
       layout,
+
+      metadata: getMetadata(),
 
       seekPlayback: seekPlayback
         ? (stamp: number | Time) => {
@@ -513,6 +516,8 @@ function PanelExtensionAdapter(
         setMessagePathDropConfig(dropConfig);
       },
     };
+    // Disable this rule because the metadata function. If used, it will break.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     capabilities,
     clearHoverValue,

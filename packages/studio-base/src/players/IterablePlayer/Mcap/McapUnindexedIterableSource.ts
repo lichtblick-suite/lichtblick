@@ -17,7 +17,7 @@ import {
   toRFC3339String,
   compare,
 } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
+import { MessageEvent, Metadata } from "@foxglove/studio";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
@@ -55,6 +55,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
     const streamReader = this.#options.stream.getReader();
 
     const problems: PlayerProblem[] = [];
+    const metadata: Metadata[] = [];
     const channelIdsWithErrors = new Set<number>();
 
     let messageCount = 0;
@@ -90,6 +91,14 @@ export class McapUnindexedIterableSource implements IIterableSource {
 
         case "Header": {
           profile = record.profile;
+          break;
+        }
+
+        case "Metadata": {
+          metadata.push({
+            name: record.name,
+            metadata: Object.fromEntries(record.metadata),
+          });
           break;
         }
 
@@ -253,6 +262,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
       problems,
       publishersByTopic,
       topicStats,
+      metadata,
     };
   }
 

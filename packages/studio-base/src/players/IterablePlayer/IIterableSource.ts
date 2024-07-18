@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Time } from "@foxglove/rostime";
-import { Immutable, MessageEvent } from "@foxglove/studio";
+import { Immutable, MessageEvent, Metadata } from "@foxglove/studio";
 import {
   PlayerProblem,
   Topic,
@@ -20,6 +20,7 @@ export type Initalization = {
   datatypes: RosDatatypes;
   profile: string | undefined;
   name?: string;
+  metadata?: ReadonlyArray<Readonly<Metadata>>;
 
   /** Publisher names by topic **/
   publishersByTopic: Map<string, Set<string>>;

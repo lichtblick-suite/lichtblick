@@ -206,6 +206,10 @@ export function createMessagePipelineStore({
         // Use a regular fetch for all other protocols
         return await builtinFetch(uri, options);
       },
+      getMetadata() {
+        const player = get().player;
+        return player?.getMetadata?.() ?? Object.freeze([]);
+      },
       startPlayback: undefined,
       playUntil: undefined,
       pausePlayback: undefined,

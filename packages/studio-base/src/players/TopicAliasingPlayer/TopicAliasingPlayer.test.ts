@@ -361,4 +361,16 @@ describe("TopicAliasingPlayer", () => {
       { topic: "/topic_2" },
     ]);
   });
+
+  it("returs the correct metadata", () => {
+    const fakePlayer = new FakePlayer();
+    const player = new TopicAliasingPlayer(fakePlayer);
+
+    expect(player.getMetadata()).toEqual([
+      {
+        name: "metadataFake",
+        metadata: { key: "value" },
+      },
+    ]);
+  });
 });
