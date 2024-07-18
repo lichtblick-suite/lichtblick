@@ -3094,7 +3094,7 @@ __metadata:
     "@types/tinycolor2": 1.4.4
     "@types/utif": ^3.0.2
     "@xmldom/xmldom": 0.8.10
-    app-builder-lib: 24.13.2
+    app-builder-lib: 24.13.3
     async-mutex: 0.4.0
     builder-util: "*"
     clean-webpack-plugin: 4.0.0
@@ -8492,9 +8492,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"app-builder-lib@npm:24.13.2":
-  version: 24.13.2
-  resolution: "app-builder-lib@npm:24.13.2"
+"app-builder-lib@npm:24.13.3":
+  version: 24.13.3
+  resolution: "app-builder-lib@npm:24.13.3"
   dependencies:
     "@develar/schema-utils": ~2.6.5
     "@electron/notarize": 2.2.1
@@ -8524,9 +8524,9 @@ __metadata:
     tar: ^6.1.12
     temp-file: ^3.4.0
   peerDependencies:
-    dmg-builder: 24.13.2
-    electron-builder-squirrel-windows: 24.13.2
-  checksum: 70cd3e4bf0f1e82a26fb164c531d6cadce914e66c344d5764de313ccedcac06578d2b16bf6e473d75d2f478f01c72905cdf29eabd59c13f44e930a4e378fc6d9
+    dmg-builder: 24.13.3
+    electron-builder-squirrel-windows: 24.13.3
+  checksum: 68ea3295efe99b8e8d4f9a1e77f3eae34de01b9829f8907e467d658b9406aa04c95baa2c06142b29bd8184d4efdc69f176a53d62fec36e7eba80024c46ce5adc
   languageName: node
   linkType: hard
 

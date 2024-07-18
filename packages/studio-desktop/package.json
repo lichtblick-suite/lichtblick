@@ -24,7 +24,7 @@
     "@types/tinycolor2": "1.4.4",
     "@types/utif": "^3.0.2",
     "@xmldom/xmldom": "0.8.10",
-    "app-builder-lib": "24.13.2",
+    "app-builder-lib": "24.13.3",
     "async-mutex": "0.4.0",
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
