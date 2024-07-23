@@ -2739,15 +2739,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@foxglove/rosbag@npm:0.4.0"
+"@foxglove/rosbag@npm:0.4.1":
+  version: 0.4.1
+  resolution: "@foxglove/rosbag@npm:0.4.1"
   dependencies:
     "@foxglove/rosmsg": ^4.0.0
     "@foxglove/rosmsg-serialization": ^2.0.0
     "@foxglove/rostime": ^1.1.2
     heap: ^0.2.7
-  checksum: f577657455f06f2047dc1b47899ab555e7e72cfb78f4fe08514d7e80a42f1f6502e364ce51e7b340556970e305e3ba34a8618e23aee468374e781dcf4cd54b70
+  checksum: 3ecf550e62fd95caec14e2d37d6040b046144fbef91c4959b58122b4df6e38fffd652ca8d745abb00091f6b78d27cf2ec66175348104766a640395619aec43a6
   languageName: node
   linkType: hard
 
@@ -2889,7 +2889,7 @@ __metadata:
     "@foxglove/message-definition": 0.3.1
     "@foxglove/message-path": "workspace:*"
     "@foxglove/ros1": 3.0.0
-    "@foxglove/rosbag": 0.4.0
+    "@foxglove/rosbag": 0.4.1
     "@foxglove/rosbag2-web": 4.1.1
     "@foxglove/roslibjs": 0.0.3
     "@foxglove/rosmsg": 4.2.2
@@ -3047,7 +3047,7 @@ __metadata:
     "@foxglove/electron-socket": 2.1.1
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/rosbag": 0.4.0
+    "@foxglove/rosbag": 0.4.1
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio-base": "workspace:*"
     "@foxglove/theme": "workspace:*"
