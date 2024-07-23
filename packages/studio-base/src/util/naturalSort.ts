@@ -15,9 +15,10 @@ import natsort from "natsort";
 
 const sortFn = natsort({ insensitive: true });
 
-type StringOrNumberFields<T> = T extends Record<string, unknown>
-  ? { [K in keyof T]: T[K] extends string | number ? K : never }[keyof T]
-  : never;
+type StringOrNumberFields<T> =
+  T extends Record<string, unknown>
+    ? { [K in keyof T]: T[K] extends string | number ? K : never }[keyof T]
+    : never;
 
 function naturalSort(): typeof sortFn;
 function naturalSort<T, K extends StringOrNumberFields<T>>(key: K): (a: T, b: T) => number;

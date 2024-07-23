@@ -148,8 +148,8 @@ export function NumberInput(
     inputRef.current === document.activeElement
       ? value
       : value != undefined
-      ? _.round(value, precision)
-      : undefined;
+        ? _.round(value, precision)
+        : undefined;
 
   return (
     <TextField

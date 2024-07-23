@@ -292,8 +292,8 @@ export default class LayoutManager implements ILayoutManager {
       data == undefined
         ? localLayout.working
         : isLayoutEqual(localLayout.baseline.data, data)
-        ? undefined
-        : { data, savedAt: now };
+          ? undefined
+          : { data, savedAt: now };
 
     // Renames of shared layouts go directly to the server
     if (name != undefined && layoutIsShared(localLayout)) {

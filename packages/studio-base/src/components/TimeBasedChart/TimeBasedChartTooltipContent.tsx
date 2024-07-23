@@ -142,8 +142,8 @@ export default function TimeBasedChartTooltipContent(
       typeof tooltip.value === "string"
         ? tooltip.value
         : typeof tooltip.value === "bigint"
-        ? tooltip.value.toString()
-        : JSON.stringify(tooltip.value);
+          ? tooltip.value.toString()
+          : JSON.stringify(tooltip.value);
 
     return (
       <Stack className={classes.root} data-testid="TimeBasedChartTooltipContent">
@@ -166,8 +166,8 @@ export default function TimeBasedChartTooltipContent(
           typeof tooltip.value === "string"
             ? tooltip.value
             : typeof tooltip.value === "bigint"
-            ? tooltip.value.toString()
-            : JSON.stringify(tooltip.value);
+              ? tooltip.value.toString()
+              : JSON.stringify(tooltip.value);
 
         return (
           <Fragment key={idx}>

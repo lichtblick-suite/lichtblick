@@ -65,8 +65,8 @@ export class RenderableTriangles extends RenderablePrimitive {
       const singleColor = this.userData.settings.color
         ? stringToRgba(tempRgba, this.userData.settings.color)
         : primitive.colors.length === 0
-        ? primitive.color
-        : undefined;
+          ? primitive.color
+          : undefined;
 
       if (!singleColor && !geometry.attributes.color) {
         geometry.createAttribute("color", Uint8Array, 4, true);

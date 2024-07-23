@@ -27,8 +27,8 @@ export function ContextMenu(props: {
             ? t("copyMessagePath")
             : t("copyMessagePaths")
           : messagePaths.length === 1
-          ? t("copyTopicName")
-          : t("copyTopicNames"),
+            ? t("copyTopicName")
+            : t("copyTopicNames"),
         onClick: () => {
           onClose();
           copyToClipboard(messagePaths.map((item) => item.path).join("\n"));

@@ -321,8 +321,8 @@ export class RenderableModels extends RenderablePrimitive {
     const overrideColor = this.userData.settings.color
       ? stringToRgba(tempRgba, this.userData.settings.color)
       : primitive.override_color
-      ? primitive.color
-      : undefined;
+        ? primitive.color
+        : undefined;
     if (overrideColor) {
       if (!renderable.material) {
         renderable.material = new THREE.MeshStandardMaterial({

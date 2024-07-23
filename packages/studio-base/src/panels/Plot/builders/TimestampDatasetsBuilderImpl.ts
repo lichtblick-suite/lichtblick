@@ -194,8 +194,8 @@ export class TimestampDatasetsBuilderImpl {
         items.length < min
           ? items.map((item) => item.index)
           : dataset.showLine === true
-          ? downsampleTimeseries(items, downsampleViewport, maxPoints)
-          : downsampleScatter(items, downsampleViewport);
+            ? downsampleTimeseries(items, downsampleViewport, maxPoints)
+            : downsampleScatter(items, downsampleViewport);
 
       // When a series is downsampled the points are disabled as a visual indicator that
       // data is downsampled.

@@ -105,8 +105,8 @@ export function getDisplayName(hardwareId: string, name: string): string {
       ? `${hardwareId}: ${name}`
       : `${name}`
     : hardwareId.length > 0
-    ? `${hardwareId}`
-    : `(empty)`;
+      ? `${hardwareId}`
+      : `(empty)`;
 }
 
 // ensures the diagnostic status message's name consists of both the hardware id and the name

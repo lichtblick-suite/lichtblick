@@ -316,8 +316,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
         const rosDataTypes = isRos1
           ? CommonRosTypes.ros1
           : ["foxy", "galactic"].includes(rosDistro)
-          ? CommonRosTypes.ros2galactic
-          : CommonRosTypes.ros2humble;
+            ? CommonRosTypes.ros2galactic
+            : CommonRosTypes.ros2humble;
 
         const dataTypes: MessageDefinitionMap = new Map();
         for (const dataType in rosDataTypes) {

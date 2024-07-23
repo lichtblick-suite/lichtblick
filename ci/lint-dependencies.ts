@@ -116,8 +116,8 @@ async function getAllWorkspacePackages(roots: string[]) {
     const patterns: string[] = Array.isArray(workspaceInfo.workspaces)
       ? workspaceInfo.workspaces
       : Array.isArray(workspaceInfo.workspaces?.packages)
-      ? workspaceInfo.workspaces.packages
-      : [];
+        ? workspaceInfo.workspaces.packages
+        : [];
     for (const pattern of patterns) {
       for (const packagePath of await promisify(glob)(pattern)) {
         workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));

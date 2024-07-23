@@ -219,8 +219,8 @@ class LinePrimitiveRenderable extends THREE.Object3D {
       const singleColor = this.#color
         ? stringToRgba(tempRgba, this.#color)
         : this.#primitive.colors.length === 0
-        ? this.#primitive.color
-        : undefined;
+          ? this.#primitive.color
+          : undefined;
 
       if (singleColor == undefined) {
         assert(this.#geometry, "Line Group geometry must exist");

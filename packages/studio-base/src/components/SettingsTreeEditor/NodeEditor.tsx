@@ -268,8 +268,8 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     state.visibilityFilter === "visible"
       ? showVisibleFilter
       : state.visibilityFilter === "invisible"
-      ? showInvisibleFilter
-      : undefined;
+        ? showInvisibleFilter
+        : undefined;
   const childNodes = filterMap(prepareSettingsNodes(children ?? {}), ([key, child]) => {
     return !filterFn || filterFn(child) ? (
       <NodeEditor

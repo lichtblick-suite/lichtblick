@@ -57,8 +57,8 @@ function migrateLegacyToNew3DConfig(legacyConfig: Partial<Legacy3DConfig>): Rend
       legacyConfig.followMode === "follow-orientation"
         ? "follow-pose"
         : legacyConfig.followMode === "follow"
-        ? "follow-position"
-        : "follow-none",
+          ? "follow-position"
+          : "follow-none",
     cameraState: {
       ...DEFAULT_CAMERA_STATE,
       ...legacyConfig.cameraState,

@@ -57,8 +57,8 @@ function activateExtension(
     process.env.NODE_ENV === "production"
       ? "production"
       : process.env.NODE_ENV === "test"
-      ? "test"
-      : "development";
+        ? "test"
+        : "development";
 
   const ctx: ExtensionContext = {
     mode: extensionMode,

@@ -31,7 +31,7 @@ export const jumpSeek = (
     modifierKeys?.altKey === true
       ? ARROW_SEEK_BIG_MS
       : modifierKeys?.shiftKey === true
-      ? ARROW_SEEK_SMALL_MS
-      : ARROW_SEEK_DEFAULT_MS;
+        ? ARROW_SEEK_SMALL_MS
+        : ARROW_SEEK_DEFAULT_MS;
   return fromMillis(timeMs + deltaMs * directionSign);
 };
