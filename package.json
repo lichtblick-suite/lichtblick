@@ -132,7 +132,7 @@
     "@foxglove/log": "workspace:*",
     "@foxglove/studio": "workspace:*",
     "@mui/material": "5.13.5",
-    "react-use": "17.4.0",
+    "react-use": "17.5.1",
     "rehype-raw": "6.1.1",
     "vm-browserify": "1.1.2"
   }
