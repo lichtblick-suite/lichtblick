@@ -98,7 +98,7 @@
     "chart.js": "4.4.0",
     "chartjs-plugin-annotation": "3.0.1",
     "chartjs-plugin-datalabels": "2.2.0",
-    "chromatic": "7.2.0",
+    "chromatic": "11.5.6",
     "comlink": "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307",
     "crypto-browserify": "3.12.0",
     "css-loader": "6.8.1",

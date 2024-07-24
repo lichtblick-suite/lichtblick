@@ -2955,7 +2955,7 @@ __metadata:
     chart.js: 4.4.0
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
-    chromatic: 7.2.0
+    chromatic: 11.5.6
     comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
@@ -9873,14 +9873,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:7.2.0":
-  version: 7.2.0
-  resolution: "chromatic@npm:7.2.0"
+"chromatic@npm:11.5.6":
+  version: 11.5.6
+  resolution: "chromatic@npm:11.5.6"
+  peerDependencies:
+    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
+    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+  peerDependenciesMeta:
+    "@chromatic-com/cypress":
+      optional: true
+    "@chromatic-com/playwright":
+      optional: true
   bin:
     chroma: dist/bin.js
     chromatic: dist/bin.js
     chromatic-cli: dist/bin.js
-  checksum: 0f6bcd7e92137eee30690428737d19c539e4aacadd2227ec271b77f3803a9f1271f2deffaf234d362717923bef8c2f9e66f3f36585e358663e193ed49aa3886c
+  checksum: 968ff879301f963e25bed6f7be1f796dee90b06bbc1824004c97aa83dd83a959d39c4639e04e6cd947e5d4bcf0ab09d5908d0960dfb7b5f9483541f222a787ab
   languageName: node
   linkType: hard
 
