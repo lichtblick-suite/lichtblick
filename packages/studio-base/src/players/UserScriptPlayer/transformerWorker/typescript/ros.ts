@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-
+export const ros_lib_filename = "ros/index.d.ts";
 export const ros_lib_dts = `
   export declare interface Duration {
     sec: number;

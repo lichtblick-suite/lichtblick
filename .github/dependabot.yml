@@ -42,6 +42,11 @@ updates:
       babel:
         patterns:
           - "@babel/*"
+      monaco-editor:
+        patterns:
+          - "monaco-editor"
+          - "monaco-editor-webpack-plugin"
+          - "react-monaco-editor"
 
   - package-ecosystem: "github-actions"
     directory: "/"

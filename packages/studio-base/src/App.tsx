@@ -9,6 +9,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { IdbLayoutStorage } from "@foxglove/studio-base/IdbLayoutStorage";
 import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
+import { UserScriptStateProvider } from "@foxglove/studio-base/context/UserScriptStateContext";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
@@ -30,7 +31,6 @@ import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigu
 import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
 import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
 import { IDataSourceFactory } from "./context/PlayerSelectionContext";
-import { UserNodeStateProvider } from "./context/UserNodeStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
@@ -78,7 +78,7 @@ export function App(props: AppProps): JSX.Element {
   const providers = [
     /* eslint-disable react/jsx-key */
     <TimelineInteractionStateProvider />,
-    <UserNodeStateProvider />,
+    <UserScriptStateProvider />,
     <ExtensionMarketplaceProvider />,
     <ExtensionCatalogProvider loaders={extensionLoaders} />,
     <PlayerManager playerSources={dataSources} />,

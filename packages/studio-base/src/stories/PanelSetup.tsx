@@ -20,6 +20,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   MessageEvent,
   ParameterValue,
@@ -38,9 +39,14 @@ import {
   PanelStateStore,
   usePanelStateStore,
 } from "@foxglove/studio-base/context/PanelStateContext";
-import { UserScriptStateProvider } from "@foxglove/studio-base/context/UserScriptStateContext";
+import {
+  UserScriptStateProvider,
+  UserScriptStore,
+  useUserScriptState,
+} from "@foxglove/studio-base/context/UserScriptStateContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import * as panels from "@foxglove/studio-base/panels";
+import { Diagnostic, UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
 import {
   AdvertiseOptions,
   PlayerStateActiveData,
@@ -56,7 +62,6 @@ import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceC
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserScripts } from "@foxglove/studio-base/types/panels";
-
 import "react-mosaic-component/react-mosaic-component.css";
 
 function noop() {}
@@ -79,6 +84,9 @@ export type Fixture = {
   globalVariables?: GlobalVariables;
   layout?: MosaicNode<string>;
   userScripts?: UserScripts;
+  userScriptDiagnostics?: { [scriptId: string]: readonly Diagnostic[] };
+  userScriptLogs?: { [scriptId: string]: readonly UserScriptLog[] };
+  userScriptRosLib?: string;
   savedProps?: SavedProps;
   publish?: (request: PublishPayload) => void;
   setPublishers?: (publisherId: string, advertisements: AdvertiseOptions[]) => void;
@@ -189,6 +197,8 @@ const defaultFetchAsset: ComponentProps<typeof MockMessagePipelineProvider>["fet
   };
 };
 
+const selectUserScriptActions = (store: UserScriptStore) => store.actions;
+
 function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull {
   const { t } = useTranslation("panels");
   const mockPanelCatalog = useMemo(
@@ -205,12 +215,28 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
   }));
 
   const actions = useCurrentLayoutActions();
+  const { setUserScriptDiagnostics, addUserScriptLogs, setUserScriptRosLib } =
+    useUserScriptState(selectUserScriptActions);
+  const userScriptActions = useShallowMemo({
+    setUserScriptDiagnostics,
+    addUserScriptLogs,
+    setUserScriptRosLib,
+  });
+
   const [initialized, setInitialized] = useState(false);
   useLayoutEffect(() => {
     if (initialized) {
       return;
     }
-    const { globalVariables, userScripts, layout, savedProps } = props.fixture ?? {};
+    const {
+      globalVariables,
+      userScripts,
+      layout,
+      savedProps,
+      userScriptDiagnostics,
+      userScriptRosLib,
+      userScriptLogs,
+    } = props.fixture ?? {};
     if (globalVariables) {
       actions.overwriteGlobalVariables(globalVariables);
     }
@@ -220,13 +246,26 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     if (layout != undefined) {
       actions.changePanelLayout({ layout });
     }
+    if (userScriptDiagnostics) {
+      for (const [scriptId, diagnostics] of Object.entries(userScriptDiagnostics)) {
+        userScriptActions.setUserScriptDiagnostics(scriptId, diagnostics);
+      }
+    }
+    if (userScriptLogs) {
+      for (const [scriptId, logs] of Object.entries(userScriptLogs)) {
+        userScriptActions.addUserScriptLogs(scriptId, logs);
+      }
+    }
+    if (userScriptRosLib != undefined) {
+      userScriptActions.setUserScriptRosLib(userScriptRosLib);
+    }
     if (savedProps) {
       actions.savePanelConfigs({
         configs: Object.entries(savedProps).map(([id, config]) => ({ id, config })),
       });
     }
     setInitialized(true);
-  }, [initialized, props.fixture, actions]);
+  }, [initialized, props.fixture, actions, userScriptActions]);
 
   const {
     frame = {},
