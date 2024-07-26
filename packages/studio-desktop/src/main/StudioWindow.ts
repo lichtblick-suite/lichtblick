@@ -362,12 +362,6 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
           sendNativeAppMenuEvent("open-help-about", browserWindow);
         },
       },
-      {
-        label: t("appBar:viewOurDocs"),
-        click: () => {
-          sendNativeAppMenuEvent("open-help-docs", browserWindow);
-        },
-      },
       { type: "separator" },
       {
         label: t("appBar:exploreSampleData"),
@@ -455,7 +449,7 @@ class StudioWindow {
     const newMenu = buildMenu(browserWindow);
     const id = browserWindow.webContents.id;
 
-    log.info(`New Foxbox window ${id}`);
+    log.info(`New Lichtblick window ${id}`);
     StudioWindow.#windowsByContentId.set(id, this);
 
     browserWindow.once("closed", () => {

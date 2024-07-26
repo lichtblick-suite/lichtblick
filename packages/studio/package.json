@@ -1,16 +1,16 @@
 {
   "name": "@foxglove/studio",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/foxglove/studio/tree/main/packages/studio"
+    "url": "https://github.com/bmw-software-engineering/lichtblick/tree/main/packages/studio"
   },
   "author": {
-    "name": "Foxglove Technologies",
-    "email": "support@foxglove.dev"
+    "name": "Lichtblick",
+    "email": "lichtblick@bmwgroup.com"
   },
-  "homepage": "https://foxglove.dev/",
+  "homepage": "https://github.com/bmw-software-engineering",
   "main": "./src/index.ts",
   "files": [
     "src"

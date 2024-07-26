@@ -92,7 +92,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   <html>
     <head>
       <meta charset="utf-8">
-      <title>Foxbox Benchmark</title>
+      <title>Lichtblick Benchmark</title>
     </head>
     <script>
       global = globalThis;

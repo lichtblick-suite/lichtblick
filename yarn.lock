@@ -13128,78 +13128,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"foxbox@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "foxbox@workspace:."
-  dependencies:
-    "@actions/core": 1.10.1
-    "@actions/exec": 1.1.1
-    "@actions/tool-cache": 2.0.1
-    "@babel/core": 7.24.9
-    "@babel/plugin-proposal-decorators": 7.24.7
-    "@babel/plugin-proposal-explicit-resource-management": 7.24.7
-    "@babel/preset-env": 7.24.8
-    "@babel/preset-typescript": 7.24.7
-    "@foxglove/eslint-plugin": 1.0.0
-    "@foxglove/eslint-plugin-studio": "workspace:*"
-    "@foxglove/hooks": "workspace:*"
-    "@foxglove/log": "workspace:*"
-    "@foxglove/studio": "workspace:*"
-    "@foxglove/tsconfig": 2.0.0
-    "@mui/material": 5.13.5
-    "@octokit/rest": 20.0.2
-    "@storybook/addon-actions": 7.6.10
-    "@storybook/addon-essentials": 7.6.10
-    "@storybook/addon-interactions": 7.6.10
-    "@storybook/react": 7.6.10
-    "@storybook/react-webpack5": 7.6.10
-    "@types/babel__core": ^7.20.3
-    "@types/babel__preset-env": ^7.9.6
-    "@types/case-sensitive-paths-webpack-plugin": 2.1.9
-    "@types/jest": 29.5.11
-    "@types/license-checker": ^25.0.6
-    "@types/semver": ^7.5.3
-    "@typescript-eslint/eslint-plugin": 6.10.0
-    "@typescript-eslint/parser": 6.10.0
-    babel-plugin-transform-import-meta: 2.2.1
-    cross-env: 7.0.3
-    depcheck: 1.4.7
-    electron: 25.8.4
-    electron-builder: 24.13.3
-    eslint: 8.50.0
-    eslint-config-prettier: 9.1.0
-    eslint-import-resolver-webpack: 0.13.8
-    eslint-plugin-es: 4.1.0
-    eslint-plugin-file-progress: 1.3.0
-    eslint-plugin-filenames: 1.3.2
-    eslint-plugin-import: 2.28.1
-    eslint-plugin-jest: 27.6.3
-    eslint-plugin-prettier: 5.1.3
-    eslint-plugin-react: 7.33.2
-    eslint-plugin-react-hooks: 4.6.0
-    eslint-plugin-storybook: 0.6.15
-    eslint-plugin-tss-unused-classes: 1.0.2
-    jest: 29.7.0
-    jest-environment-jsdom: 29.7.0
-    license-checker: 25.0.1
-    prettier: 3.3.2
-    react-use: 17.5.1
-    rehype-raw: 6.1.1
-    rimraf: 5.0.5
-    semver: 7.5.4
-    storybook: 7.6.20
-    ts-node: 10.9.2
-    ts-unused-exports: 10.0.1
-    tslib: 2.6.2
-    typescript: 5.3.3
-    vm-browserify: 1.1.2
-    webpack: 5.93.0
-    webpack-cli: 5.1.4
-    webpack-dev-server: 5.0.4
-    webpack-hot-middleware: 2.26.0
-  languageName: unknown
-  linkType: soft
-
 "fraction.js@npm:4.3.4":
   version: 4.3.4
   resolution: "fraction.js@npm:4.3.4"
@@ -16303,6 +16231,78 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lichtblick@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "lichtblick@workspace:."
+  dependencies:
+    "@actions/core": 1.10.1
+    "@actions/exec": 1.1.1
+    "@actions/tool-cache": 2.0.1
+    "@babel/core": 7.24.9
+    "@babel/plugin-proposal-decorators": 7.24.7
+    "@babel/plugin-proposal-explicit-resource-management": 7.24.7
+    "@babel/preset-env": 7.24.8
+    "@babel/preset-typescript": 7.24.7
+    "@foxglove/eslint-plugin": 1.0.0
+    "@foxglove/eslint-plugin-studio": "workspace:*"
+    "@foxglove/hooks": "workspace:*"
+    "@foxglove/log": "workspace:*"
+    "@foxglove/studio": "workspace:*"
+    "@foxglove/tsconfig": 2.0.0
+    "@mui/material": 5.13.5
+    "@octokit/rest": 20.0.2
+    "@storybook/addon-actions": 7.6.10
+    "@storybook/addon-essentials": 7.6.10
+    "@storybook/addon-interactions": 7.6.10
+    "@storybook/react": 7.6.10
+    "@storybook/react-webpack5": 7.6.10
+    "@types/babel__core": ^7.20.3
+    "@types/babel__preset-env": ^7.9.6
+    "@types/case-sensitive-paths-webpack-plugin": 2.1.9
+    "@types/jest": 29.5.11
+    "@types/license-checker": ^25.0.6
+    "@types/semver": ^7.5.3
+    "@typescript-eslint/eslint-plugin": 6.10.0
+    "@typescript-eslint/parser": 6.10.0
+    babel-plugin-transform-import-meta: 2.2.1
+    cross-env: 7.0.3
+    depcheck: 1.4.7
+    electron: 25.8.4
+    electron-builder: 24.13.3
+    eslint: 8.50.0
+    eslint-config-prettier: 9.1.0
+    eslint-import-resolver-webpack: 0.13.8
+    eslint-plugin-es: 4.1.0
+    eslint-plugin-file-progress: 1.3.0
+    eslint-plugin-filenames: 1.3.2
+    eslint-plugin-import: 2.28.1
+    eslint-plugin-jest: 27.6.3
+    eslint-plugin-prettier: 5.1.3
+    eslint-plugin-react: 7.33.2
+    eslint-plugin-react-hooks: 4.6.0
+    eslint-plugin-storybook: 0.6.15
+    eslint-plugin-tss-unused-classes: 1.0.2
+    jest: 29.7.0
+    jest-environment-jsdom: 29.7.0
+    license-checker: 25.0.1
+    prettier: 3.3.2
+    react-use: 17.5.1
+    rehype-raw: 6.1.1
+    rimraf: 5.0.5
+    semver: 7.5.4
+    storybook: 7.6.20
+    ts-node: 10.9.2
+    ts-unused-exports: 10.0.1
+    tslib: 2.6.2
+    typescript: 5.3.3
+    vm-browserify: 1.1.2
+    webpack: 5.93.0
+    webpack-cli: 5.1.4
+    webpack-dev-server: 5.0.4
+    webpack-hot-middleware: 2.26.0
+  languageName: unknown
+  linkType: soft
+
 "lie@npm:~3.3.0":
   version: 3.3.0
   resolution: "lie@npm:3.3.0"
@@ -19302,9 +19302,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd@patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch::locator=foxbox%40workspace%3A.":
+"react-dnd@patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch::locator=lichtblick%40workspace%3A.":
   version: 16.0.1
-  resolution: "react-dnd@patch:react-dnd@npm%3A16.0.1#./patches/react-dnd.patch::version=16.0.1&hash=7ebec9&locator=foxbox%40workspace%3A."
+  resolution: "react-dnd@patch:react-dnd@npm%3A16.0.1#./patches/react-dnd.patch::version=16.0.1&hash=7ebec9&locator=lichtblick%40workspace%3A."
   dependencies:
     "@react-dnd/invariant": ^4.0.1
     "@react-dnd/shallowequal": ^4.0.1
@@ -19692,9 +19692,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-use@patch:react-use@17.4.0#./patches/react-use.patch::locator=foxbox%40workspace%3A.":
+"react-use@patch:react-use@17.4.0#./patches/react-use.patch::locator=lichtblick%40workspace%3A.":
   version: 17.4.0
-  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=16b4d0&locator=foxbox%40workspace%3A."
+  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=16b4d0&locator=lichtblick%40workspace%3A."
   dependencies:
     "@types/js-cookie": ^2.2.6
     "@xobotyi/scrollbar-width": ^1.9.5

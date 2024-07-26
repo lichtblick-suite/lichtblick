@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Cloud24Regular, SlideLayout24Regular } from "@fluentui/react-icons";
+import { Cloud24Regular } from "@fluentui/react-icons";
 import {
   ListItemText,
-  ListSubheader,
   Menu,
   MenuItem,
   PopoverOrigin,
@@ -19,10 +18,6 @@ import { useCurrentUserType } from "@foxglove/studio-base/context/CurrentUserCon
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 const useStyles = makeStyles()((theme) => ({
-  subheader: {
-    bgcolor: "transparent",
-    border: "none",
-  },
   paper: {
     width: 280,
   },
@@ -81,27 +76,6 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
         "aria-labelledby": "help-button",
       }}
     >
-      <ListSubheader className={classes.subheader}>Documentation</ListSubheader>
-      <MenuItem
-        href="https://foxglove.dev/docs/studio"
-        className={classes.menuItem}
-        component="a"
-        target="_blank"
-        onClick={() => {
-          void analytics.logEvent(AppEvent.HELP_MENU_CLICK_CTA, {
-            user: currentUserType,
-            cta: "docs-studio",
-          });
-          handleClose();
-        }}
-      >
-        <SlideLayout24Regular className={classes.icon} />
-        <ListItemText
-          primary="Studio"
-          secondary="Open source robotics visualization and debugging"
-          secondaryTypographyProps={{ className: classes.menuText }}
-        />
-      </MenuItem>
       <MenuItem
         href="https://foxglove.dev/docs/data-platform"
         className={classes.menuItem}

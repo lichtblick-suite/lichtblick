@@ -187,11 +187,6 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     handleNestedMenuClose();
   }, [dialogActions.preferences, handleNestedMenuClose]);
 
-  const onDocsClick = useCallback(() => {
-    window.open("https://docs.foxglove.dev/docs", "_blank");
-    handleNestedMenuClose();
-  }, [handleNestedMenuClose]);
-
   const onDemoClick = useCallback(() => {
     dialogActions.dataSource.open("demo");
     handleNestedMenuClose();
@@ -201,11 +196,9 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
     () => [
       { type: "item", key: "about", label: t("about"), onClick: onAboutClick },
       { type: "divider" },
-      { type: "item", key: "docs", label: t("viewOurDocs"), onClick: onDocsClick, external: true },
-      { type: "divider" },
       { type: "item", key: "demo", label: t("exploreSampleData"), onClick: onDemoClick },
     ],
-    [onAboutClick, onDemoClick, onDocsClick, t],
+    [onAboutClick, onDemoClick, t],
   );
 
   return (

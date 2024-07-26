@@ -5,7 +5,6 @@
 export const appBar = {
   about: "About",
   addPanel: "Add panel",
-  documentation: "Documentation",
   exploreSampleData: "Explore sample data",
   exportLayoutToFile: "Export layout to file…",
   extensions: "Extensions",
@@ -30,5 +29,4 @@ export const appBar = {
   userProfile: "User profile",
   view: "View",
   viewData: "View data",
-  viewOurDocs: "View our docs",
 };

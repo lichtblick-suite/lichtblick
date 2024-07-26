@@ -2,18 +2,18 @@
   "name": "@foxglove/studio-base",
   "description": "Core components of Foxglove Studio",
   "private": true,
-  "productName": "Foxglove",
-  "productDescription": "Foxglove Studio",
+  "productName": "Lichtblick",
+  "productDescription": "Lichtblick Suite",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/foxglove/studio/tree/main/packages/studio-base"
   },
   "author": {
-    "name": "Foxglove Technologies",
-    "email": "support@foxglove.dev"
+    "name": "Lichtblick",
+    "email": "lichtblick@bmwgroup.com"
   },
-  "homepage": "https://foxglove.dev/",
+  "homepage": "https://github.com/bmw-software-engineering",
   "main": "src/index",
   "devDependencies": {
     "@emotion/cache": "11.13.0",

@@ -1,21 +1,21 @@
 {
-  "name": "foxbox",
-  "version": "1.2.0",
+  "name": "lichtblick",
+  "version": "1.2.1",
   "license": "MPL-2.0",
   "private": true,
-  "productName": "Foxbox",
-  "description": "Core components of Foxbox",
-  "productDescription": "Foxbox",
+  "productName": "Lichtblick",
+  "description": "Core components of Lichtblick",
+  "productDescription": "Lichtblick Suite",
   "packageManager": "yarn@3.6.3",
   "repository": {
     "type": "git",
-    "url": "https://github.com/foxglove/studio.git"
+    "url": "https://github.com/bmw-software-engineering/lichtblick.git"
   },
   "author": {
-    "name": "Foxglove Technologies",
-    "email": "support@foxglove.dev"
+    "name": "Lichtblick",
+    "email": "lichtblick@bmwgroup.com"
   },
-  "homepage": "https://foxglove.dev/",
+  "homepage": "https://github.com/bmw-software-engineering",
   "engines": {
     "node": ">=16"
   },

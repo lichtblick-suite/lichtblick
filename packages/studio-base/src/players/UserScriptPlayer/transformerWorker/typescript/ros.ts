@@ -36,7 +36,7 @@ export const ros_lib_dts = `
    * Input<"/your_input_topic_2">'.
    *
    * These types are dynamically generated from the bag(s) currently in your
-   * Foxglove Studio session, so if a datatype changes, your User Script
+   * Lichtblick session, so if a datatype changes, your User Script
    * may not compile on the newly formatted bag.
    */
   export declare interface Input<T extends keyof TopicsToMessageDefinition> {

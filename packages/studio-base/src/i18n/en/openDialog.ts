@@ -4,7 +4,7 @@
 
 export const openDialog = {
   canBeShared: "Share data files, visualization layouts, and custom extensions with teammates",
-  collaborateTitle: "Accelerate development with Foxbox Data Platform",
+  collaborateTitle: "Accelerate development with Lichtblick Data Platform",
   convenientWebInterface:
     "Use a convenient web interface to tag, search, and retrieve data at lightning speed",
   createAFreeAccount: "Create a free account",
@@ -12,7 +12,7 @@ export const openDialog = {
   learnMore: "Learn more",
   needHelp: "Need help?",
   needHelpDescription: "View our documentation, or check out the tutorials on the Foxglove blog.",
-  newToFoxgloveStudio: "New to Foxbox?",
+  newToFoxgloveStudio: "New to Lichtblick?",
   newToFoxgloveStudioDescription:
     "Start by exploring a sample dataset or checking out our documentation.",
   openAGitHubIssue: "Open a GitHub issue",
@@ -32,5 +32,4 @@ export const openDialog = {
   startCollaboratingDescription:
     "Make the most of your Foxglove account – whether you want to dive deep on your data or share tools with your teammates.",
   uploadToDataPlatform: "Upload to Data Platform",
-  viewOurDocs: "View our docs",
 };

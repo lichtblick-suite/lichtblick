@@ -604,7 +604,7 @@ export default function LayoutBrowser({
         <LayoutSection
           disablePadding={enableNewTopNav}
           title={layoutManager.supportsSharing ? "Personal" : undefined}
-          emptyText="Add a new layout to get started with Foxglove Studio!"
+          emptyText="Add a new layout to get started with Lichtblick!"
           items={layouts.value?.personal}
           anySelectedModifiedLayouts={anySelectedModifiedLayouts}
           multiSelectedIds={state.selectedIds}

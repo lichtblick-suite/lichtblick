@@ -91,7 +91,7 @@ interface Desktop {
   // Load the source code for an extension
   loadExtension: (id: string) => Promise<string>;
 
-  // Install a Foxglove Studio extension (.foxe file) locally. The extension id is returned
+  // Install a Lichtblick extension (.foxe file) locally. The extension id is returned
   installExtension: (foxeFileData: Uint8Array) => Promise<DesktopExtension>;
 
   // Uninstall an extension. Returns true if the extension was found and uninstalled, or false if it

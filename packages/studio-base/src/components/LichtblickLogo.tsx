@@ -4,10 +4,10 @@
 
 import { SvgIcon, SvgIconProps } from "@mui/material";
 
-export function FoxboxLogo(props: SvgIconProps): JSX.Element {
+export function LichtblickLogo(props: SvgIconProps): JSX.Element {
   return (
     <SvgIcon viewBox="0 0 512 512" {...props}>
-      <title>Foxbox</title>
+      <title>Lichtblick</title>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"

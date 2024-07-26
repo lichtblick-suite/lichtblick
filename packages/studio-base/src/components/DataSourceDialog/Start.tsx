@@ -9,7 +9,7 @@ import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog/DataSourceDialog";
-import FoxboxLogoText from "@foxglove/studio-base/components/FoxboxLogoText";
+import LichtblickLogoText from "@foxglove/studio-base/components/LichtblickLogoText";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
@@ -186,20 +186,6 @@ function SidebarItems(props: {
           >
             {t("exploreSampleData")}
           </Button>
-          <Button
-            href="https://docs.foxglove.dev/docs/connecting-to-data/introduction"
-            target="_blank"
-            className={classes.button}
-            disabled
-            onClick={() => {
-              void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
-                user: currentUserType,
-                cta: "docs",
-              });
-            }}
-          >
-            {t("viewOurDocs")}
-          </Button>
         </>
       ),
     };
@@ -213,20 +199,6 @@ function SidebarItems(props: {
           text: t("needHelpDescription"),
           actions: (
             <>
-              <Button
-                href="https://docs.foxglove.dev/docs"
-                target="_blank"
-                className={classes.button}
-                variant="outlined"
-                onClick={() => {
-                  void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
-                    user: currentUserType,
-                    cta: "docs",
-                  });
-                }}
-              >
-                {t("viewOurDocs")}
-              </Button>
               <Button
                 href="https://foxglove.dev/tutorials"
                 target="_blank"
@@ -356,7 +328,7 @@ export default function Start(): JSX.Element {
   return (
     <Stack className={classes.grid}>
       <header className={classes.header}>
-        <FoxboxLogoText color="primary" className={classes.logo} />
+        <LichtblickLogoText color="primary" className={classes.logo} />
       </header>
       <Stack className={classes.content}>
         <Stack gap={4}>

@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Warning24Filled, Dismiss20Filled } from "@fluentui/react-icons";
+import { Dismiss20Filled, Warning24Filled } from "@fluentui/react-icons";
 import {
-  IconButton,
-  Typography,
-  Link,
   Button,
+  IconButton,
+  Link,
   ThemeProvider as MuiThemeProvider,
   Portal,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -100,7 +100,7 @@ function CompatibilityBannerBase({
 
         <div>
           <Typography variant="subtitle2">
-            {prompt} Foxbox currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
+            {prompt} Lichtblick currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
           </Typography>
 
           {!isChrome && (

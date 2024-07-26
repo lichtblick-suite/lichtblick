@@ -41,7 +41,7 @@ export const constantsByDatatype = (
 
 const extractTypeFromStudioEnumAnnotationRegex = /(.*)__(foxglove|webviz)_enum$/;
 
-// Foxglove Studio enum annotations are of the form: "Foo__foxglove_enum" (notice double underscore)
+// Lichtblick enum annotations are of the form: "Foo__foxglove_enum" (notice double underscore)
 // This method returns type name from "Foo" or undefined name doesn't match this format
 export function extractTypeFromStudioEnumAnnotation(name: string): string | undefined {
   const match = extractTypeFromStudioEnumAnnotationRegex.exec(name);
