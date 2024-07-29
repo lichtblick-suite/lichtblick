@@ -12,6 +12,7 @@ import { NetworkInterface, OsContext } from "@foxglove/studio-base/src/OsContext
 
 import LocalFileStorage from "./LocalFileStorage";
 import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
+import { fetchLayouts } from "./layouts";
 import { decodeRendererArg } from "../common/rendererArgs";
 import {
   Desktop,
@@ -135,6 +136,11 @@ export function main(): void {
       const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
       const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
       return await loadExtension(id, userExtensionRoot);
+    },
+    async fetchLayouts() {
+      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+      const userExtensionRoot = pathJoin(homePath, ".lichtblick", "layouts");
+      return await fetchLayouts(userExtensionRoot);
     },
     async installExtension(foxeFileData: Uint8Array) {
       const homePath = (await ipcRenderer.invoke("getHomePath")) as string;

@@ -67,6 +67,11 @@ type DesktopExtension = {
   directory: string;
 };
 
+type DesktopLayout = {
+  layoutJson: unknown;
+  from: string;
+};
+
 interface Desktop {
   /** https://www.electronjs.org/docs/tutorial/represented-file */
   setRepresentedFilename(path: string | undefined): Promise<void>;
@@ -91,6 +96,9 @@ interface Desktop {
   // Load the source code for an extension
   loadExtension: (id: string) => Promise<string>;
 
+  // Fetch default layouts from local folder
+  fetchLayouts: () => Promise<DesktopLayout[]>;
+
   // Install a Lichtblick extension (.foxe file) locally. The extension id is returned
   installExtension: (foxeFileData: Uint8Array) => Promise<DesktopExtension>;
 
@@ -112,4 +120,4 @@ interface Desktop {
   updateLanguage(): void;
 }
 
-export type { Desktop, DesktopExtension, NativeMenuBridge, Storage, StorageContent };
+export type { Desktop, DesktopExtension, DesktopLayout, NativeMenuBridge, Storage, StorageContent };

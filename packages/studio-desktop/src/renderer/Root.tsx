@@ -24,6 +24,7 @@ import {
 } from "@foxglove/studio-base";
 
 import { DesktopExtensionLoader } from "./services/DesktopExtensionLoader";
+import { DesktopLayoutLoader } from "./services/DesktopLayoutLoader";
 import { NativeAppMenu } from "./services/NativeAppMenu";
 import { NativeWindow } from "./services/NativeWindow";
 import { Desktop, NativeMenuBridge, Storage } from "../common/types";
@@ -68,6 +69,9 @@ export default function Root(props: {
     new IdbExtensionLoader("org"),
     new DesktopExtensionLoader(desktopBridge),
   ]);
+
+  const [layoutLoaders] = useState(() => [new DesktopLayoutLoader(desktopBridge)]);
+
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
 
@@ -147,6 +151,7 @@ export default function Root(props: {
         dataSources={dataSources}
         appConfiguration={appConfiguration}
         extensionLoaders={extensionLoaders}
+        layoutLoaders={layoutLoaders}
         nativeAppMenu={nativeAppMenu}
         nativeWindow={nativeWindow}
         enableGlobalCss

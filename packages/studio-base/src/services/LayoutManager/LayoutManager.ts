@@ -220,10 +220,12 @@ export default class LayoutManager implements ILayoutManager {
     name,
     data: unmigratedData,
     permission,
+    from,
   }: {
     name: string;
     data: LayoutData;
     permission: LayoutPermission;
+    from?: string;
   }): Promise<Layout> {
     const data = migratePanelsState(unmigratedData);
     if (layoutPermissionIsShared(permission)) {
@@ -260,6 +262,7 @@ export default class LayoutManager implements ILayoutManager {
         await local.put({
           id: uuidv4() as LayoutID,
           name,
+          from,
           permission,
           baseline: { data, savedAt: new Date().toISOString() as ISO8601Timestamp },
           working: undefined,

@@ -16,6 +16,7 @@ import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsCon
 import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@foxglove/studio-base/providers/UserProfileLocalStorageProvider";
+import { LayoutLoader } from "@foxglove/studio-base/services/ILayoutLoader";
 
 import Workspace from "./Workspace";
 import { CustomWindowControlsProps } from "./components/AppBar/CustomWindowControls";
@@ -43,6 +44,7 @@ type AppProps = CustomWindowControlsProps & {
   appConfiguration: IAppConfiguration;
   dataSources: IDataSourceFactory[];
   extensionLoaders: readonly ExtensionLoader[];
+  layoutLoaders: readonly LayoutLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;
   enableLaunchPreferenceScreen?: boolean;
@@ -67,6 +69,7 @@ export function App(props: AppProps): JSX.Element {
     appConfiguration,
     dataSources,
     extensionLoaders,
+    layoutLoaders,
     nativeAppMenu,
     nativeWindow,
     deepLinks,
@@ -106,7 +109,7 @@ export function App(props: AppProps): JSX.Element {
   providers.unshift(<ProblemsContextProvider />);
   providers.unshift(<CurrentLayoutProvider />);
   providers.unshift(<UserProfileLocalStorageProvider />);
-  providers.unshift(<LayoutManagerProvider />);
+  providers.unshift(<LayoutManagerProvider loaders={layoutLoaders} />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);

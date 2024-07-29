@@ -20,6 +20,7 @@ export type LayoutSyncStatus =
 export type Layout = {
   id: LayoutID;
   name: string;
+  from?: string;
   permission: LayoutPermission;
 
   /** @deprecated old field name, migrated to working/baseline */
