@@ -2,17 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { ProblemsList } from "@lichtblick/studio-base/components/ProblemsList";
+import { useProblemsActions } from "@lichtblick/studio-base/context/ProblemsContext";
+import { PlayerPresence, PlayerProblem, Topic } from "@lichtblick/studio-base/players/types";
+import ProblemsContextProvider from "@lichtblick/studio-base/providers/ProblemsContextProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
 import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
 import { fromDate } from "@foxglove/rostime";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
-import { useProblemsActions } from "@foxglove/studio-base/context/ProblemsContext";
-import { PlayerPresence, PlayerProblem, Topic } from "@foxglove/studio-base/players/types";
-import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 function makeProblems(): PlayerProblem[] {
   return [

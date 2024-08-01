@@ -11,18 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryObj } from "@storybook/react";
-import { useState } from "react";
-
-import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import { ExtensionDetails } from "@lichtblick/studio-base/components/ExtensionDetails";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
   ExtensionMarketplaceDetail,
-} from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
-import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
+} from "@lichtblick/studio-base/context/ExtensionMarketplaceContext";
+import ExtensionCatalogProvider from "@lichtblick/studio-base/providers/ExtensionCatalogProvider";
+import { ExtensionLoader } from "@lichtblick/studio-base/services/ExtensionLoader";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
+import { StoryObj } from "@storybook/react";
+import { useState } from "react";
 
 export default {
   title: "components/ExtensionDetails",

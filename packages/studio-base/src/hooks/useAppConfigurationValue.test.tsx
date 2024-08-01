@@ -3,14 +3,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { renderHook } from "@testing-library/react";
-import { PropsWithChildren } from "react";
-
 import AppConfigurationContext, {
   IAppConfiguration,
   AppConfigurationValue,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+} from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import { renderHook } from "@testing-library/react";
+import { PropsWithChildren } from "react";
 
 class FakeProvider implements IAppConfiguration {
   public get(key: string): AppConfigurationValue {

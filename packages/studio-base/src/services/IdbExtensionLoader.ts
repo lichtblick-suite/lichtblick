@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log from "@lichtblick/log";
+import { ExtensionLoader } from "@lichtblick/studio-base/services/ExtensionLoader";
+import { IExtensionStorage } from "@lichtblick/studio-base/services/IExtensionStorage";
+import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/studio-base/types/Extensions";
 import JSZip from "jszip";
-
-import Log from "@foxglove/log";
-import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
-import { IExtensionStorage } from "@foxglove/studio-base/services/IExtensionStorage";
-import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
 
 import { IdbExtensionStorage } from "./IdbExtensionStorage";
 

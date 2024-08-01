@@ -10,24 +10,23 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
+import { LichtblickLogo } from "@lichtblick/studio-base/components/LichtblickLogo";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppContext } from "@lichtblick/studio-base/context/AppContext";
+import {
+  LayoutState,
+  useCurrentLayoutSelector,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import {
+  WorkspaceContextStore,
+  useWorkspaceStore,
+} from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
 import { Avatar, IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import { LichtblickLogo } from "@foxglove/studio-base/components/LichtblickLogo";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
-import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import {
-  WorkspaceContextStore,
-  useWorkspaceStore,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";

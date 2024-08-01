@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import getPrettifiedCode from "@foxglove/studio-base/panels/UserScriptEditor/getPrettifiedCode";
-import { ScriptData } from "@foxglove/studio-base/players/UserScriptPlayer/types";
+import getPrettifiedCode from "@lichtblick/studio-base/panels/UserScriptEditor/getPrettifiedCode";
+import { ScriptData } from "@lichtblick/studio-base/players/UserScriptPlayer/types";
 
 import { generateTypesInterface, generateTypesLib } from "./generateTypesLib";
 import { compile } from "./transform";

@@ -2,12 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Condvar } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
+import { Immutable, MessageEvent } from "@lichtblick/studio";
+import { IteratorCursor } from "@lichtblick/studio-base/players/IterablePlayer/IteratorCursor";
+import PlayerProblemManager from "@lichtblick/studio-base/players/PlayerProblemManager";
+import { MessageBlock, Progress, TopicSelection } from "@lichtblick/studio-base/players/types";
 import { simplify } from "intervals-fn";
 import * as _ from "lodash-es";
 
-import { Condvar } from "@foxglove/den/async";
-import { filterMap } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
 import {
   Time,
   add,
@@ -16,10 +20,6 @@ import {
   subtract as subtractTimes,
   toNanoSec,
 } from "@foxglove/rostime";
-import { Immutable, MessageEvent } from "@foxglove/studio";
-import { IteratorCursor } from "@foxglove/studio-base/players/IterablePlayer/IteratorCursor";
-import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
-import { MessageBlock, Progress, TopicSelection } from "@foxglove/studio-base/players/types";
 
 import { IIterableSource, MessageIteratorArgs } from "./IIterableSource";
 

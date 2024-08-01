@@ -11,6 +11,24 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/studio";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  LayoutState,
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import {
+  UserScriptStore,
+  useUserScriptState,
+} from "@lichtblick/studio-base/context/UserScriptStateContext";
+import BottomBar from "@lichtblick/studio-base/panels/UserScriptEditor/BottomBar";
+import { Sidebar } from "@lichtblick/studio-base/panels/UserScriptEditor/Sidebar";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { SaveConfig, UserScripts } from "@lichtblick/studio-base/types/panels";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
@@ -33,30 +51,11 @@ import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
-import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  LayoutState,
-  useCurrentLayoutActions,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import {
-  UserScriptStore,
-  useUserScriptState,
-} from "@foxglove/studio-base/context/UserScriptStateContext";
-import BottomBar from "@foxglove/studio-base/panels/UserScriptEditor/BottomBar";
-import { Sidebar } from "@foxglove/studio-base/panels/UserScriptEditor/Sidebar";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { SaveConfig, UserScripts } from "@foxglove/studio-base/types/panels";
-
 import Config from "./Config";
 import { Script } from "./script";
 
 const Editor = React.lazy(
-  async () => await import("@foxglove/studio-base/panels/UserScriptEditor/Editor"),
+  async () => await import("@lichtblick/studio-base/panels/UserScriptEditor/Editor"),
 );
 
 const skeletonBody = `\

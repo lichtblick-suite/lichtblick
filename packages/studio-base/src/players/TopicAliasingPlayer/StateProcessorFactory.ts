@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { TopicAliasFunction, Immutable as Im } from "@lichtblick/studio";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { PlayerProblem, Topic } from "@lichtblick/studio-base/players/types";
 import * as _ from "lodash-es";
-
-import { TopicAliasFunction, Immutable as Im } from "@foxglove/studio";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { PlayerProblem, Topic } from "@foxglove/studio-base/players/types";
 
 import { AliasingStateProcessor, TopicAliasMap } from "./AliasingStateProcessor";
 import { IStateProcessor } from "./IStateProcessor";

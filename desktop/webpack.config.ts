@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { WebpackConfigParams } from "@lichtblick/studio-desktop/src/WebpackConfigParams";
+import { webpackDevServerConfig } from "@lichtblick/studio-desktop/src/webpackDevServerConfig";
+import { webpackMainConfig } from "@lichtblick/studio-desktop/src/webpackMainConfig";
+import { webpackPreloadConfig } from "@lichtblick/studio-desktop/src/webpackPreloadConfig";
+import { webpackQuicklookConfig } from "@lichtblick/studio-desktop/src/webpackQuicklookConfig";
+import { webpackRendererConfig } from "@lichtblick/studio-desktop/src/webpackRendererConfig";
 import path from "path";
-
-import { WebpackConfigParams } from "@foxglove/studio-desktop/src/WebpackConfigParams";
-import { webpackDevServerConfig } from "@foxglove/studio-desktop/src/webpackDevServerConfig";
-import { webpackMainConfig } from "@foxglove/studio-desktop/src/webpackMainConfig";
-import { webpackPreloadConfig } from "@foxglove/studio-desktop/src/webpackPreloadConfig";
-import { webpackQuicklookConfig } from "@foxglove/studio-desktop/src/webpackQuicklookConfig";
-import { webpackRendererConfig } from "@foxglove/studio-desktop/src/webpackRendererConfig";
 
 import packageJson from "../package.json";
 

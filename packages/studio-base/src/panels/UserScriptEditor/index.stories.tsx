@@ -11,18 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import NodePlayground from "@lichtblick/studio-base/panels/UserScriptEditor";
+import { generateFoxgloveSchemaDeclarations } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
+import rawUserUtils from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/rawUserUtils";
+import { UserScriptLog } from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
+import { ExpectedResult } from "@lichtblick/studio-base/stories/storyHelpers";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/studio-base/util/globalConstants";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { useCallback, useEffect } from "react";
-
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import NodePlayground from "@foxglove/studio-base/panels/UserScriptEditor";
-import { generateFoxgloveSchemaDeclarations } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
-import rawUserUtils from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/rawUserUtils";
-import { UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { ExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const userScripts = {
   nodeId1: { name: "/studio_script/script", sourceCode: "const someVariableName = 1;" },

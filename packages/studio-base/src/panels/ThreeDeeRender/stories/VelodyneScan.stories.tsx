@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Topic } from "@lichtblick/studio-base/players/types";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
+import { VelodyneScan } from "@lichtblick/studio-base/types/Messages";
 import { StoryObj } from "@storybook/react";
-
-import { Topic } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { VelodyneScan } from "@foxglove/studio-base/types/Messages";
 
 import { rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";

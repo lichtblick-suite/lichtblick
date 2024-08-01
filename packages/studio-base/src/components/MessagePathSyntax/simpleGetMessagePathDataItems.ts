@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "@lichtblick/studio";
+import { MessageEvent } from "@lichtblick/studio-base/players/types";
+import { isTypedArray } from "@lichtblick/studio-base/types/isTypedArray";
+
 import { MessagePath } from "@foxglove/message-path";
-import { Immutable } from "@foxglove/studio";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { isTypedArray } from "@foxglove/studio-base/types/isTypedArray";
 
 import { filterMatches } from "./filterMatches";
 

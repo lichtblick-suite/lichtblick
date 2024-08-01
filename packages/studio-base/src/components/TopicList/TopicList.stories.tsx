@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { PlayerCapabilities, TopicStats } from "@lichtblick/studio-base/players/types";
 import { Meta, StoryObj } from "@storybook/react";
 import { fireEvent, userEvent, waitFor, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
@@ -9,8 +11,6 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { ros2humble } from "@foxglove/rosmsg-msgs-common";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
 
 import { TopicList } from "./TopicList";
 

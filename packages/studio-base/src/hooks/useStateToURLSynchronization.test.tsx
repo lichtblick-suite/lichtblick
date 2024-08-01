@@ -12,15 +12,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMessagePipeline } from "@lichtblick/studio-base/components/MessagePipeline";
+import { useStateToURLSynchronization } from "@lichtblick/studio-base/hooks/useStateToURLSynchronization";
+import EventsProvider from "@lichtblick/studio-base/providers/EventsProvider";
 import { renderHook } from "@testing-library/react";
 import { ReactNode } from "react";
 
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import { useStateToURLSynchronization } from "@foxglove/studio-base/hooks/useStateToURLSynchronization";
-import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
-
-jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
-jest.mock("@foxglove/studio-base/components/MessagePipeline");
+jest.mock("@lichtblick/studio-base/context/CurrentLayoutContext");
+jest.mock("@lichtblick/studio-base/components/MessagePipeline");
 
 describe("useStateToURLSynchronization", () => {
   it("updates the url with a stable source & player state", () => {

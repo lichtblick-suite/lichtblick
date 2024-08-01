@@ -2,6 +2,31 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import SignInPrompt from "@lichtblick/studio-base/components/LayoutBrowser/SignInPrompt";
+import { useUnsavedChangesPrompt } from "@lichtblick/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
+import { SidebarContent } from "@lichtblick/studio-base/components/SidebarContent";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import {
+  LayoutID,
+  LayoutState,
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { useCurrentUser } from "@lichtblick/studio-base/context/CurrentUserContext";
+import { useLayoutManager } from "@lichtblick/studio-base/context/LayoutManagerContext";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import useCallbackWithToast from "@lichtblick/studio-base/hooks/useCallbackWithToast";
+import { useConfirm } from "@lichtblick/studio-base/hooks/useConfirm";
+import { usePrompt } from "@lichtblick/studio-base/hooks/usePrompt";
+import { defaultPlaybackConfig } from "@lichtblick/studio-base/providers/CurrentLayoutProvider/reducers";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
+import { Layout, layoutIsShared } from "@lichtblick/studio-base/services/ILayoutStorage";
+import { downloadTextFile } from "@lichtblick/studio-base/util/download";
+import showOpenFilePicker from "@lichtblick/studio-base/util/showOpenFilePicker";
 import AddIcon from "@mui/icons-material/Add";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
 import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
@@ -22,32 +47,6 @@ import { MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo } from "re
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 import { makeStyles } from "tss-react/mui";
-
-import Logger from "@foxglove/log";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import SignInPrompt from "@foxglove/studio-base/components/LayoutBrowser/SignInPrompt";
-import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import {
-  LayoutID,
-  LayoutState,
-  useCurrentLayoutActions,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
-import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
-import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
-import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
-import { downloadTextFile } from "@foxglove/studio-base/util/download";
-import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 
 import LayoutSection from "./LayoutSection";
 import { useLayoutBrowserReducer } from "./reducer";

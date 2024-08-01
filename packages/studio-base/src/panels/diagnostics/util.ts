@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Header } from "@lichtblick/studio-base/types/Messages";
+import fuzzyFilter from "@lichtblick/studio-base/util/fuzzyFilter";
 import * as _ from "lodash-es";
 
 import { Time, compare } from "@foxglove/rostime";
-import { Header } from "@foxglove/studio-base/types/Messages";
-import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
 // Trim the message if it's too long. We sometimes get crazy massive messages here that can
 // otherwise crash our entire UI. I looked at a bunch of messages manually and they are typically

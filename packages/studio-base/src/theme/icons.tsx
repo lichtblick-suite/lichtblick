@@ -21,10 +21,9 @@ import {
   Sparkle20Regular,
   TextBulletListLtr20Regular,
 } from "@fluentui/react-icons";
-
-import BlockheadFilledIcon from "@foxglove/studio-base/components/BlockheadFilledIcon";
-import BlockheadIcon from "@foxglove/studio-base/components/BlockheadIcon";
-import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
+import BlockheadFilledIcon from "@lichtblick/studio-base/components/BlockheadFilledIcon";
+import BlockheadIcon from "@lichtblick/studio-base/components/BlockheadIcon";
+import { RegisteredIconNames } from "@lichtblick/studio-base/types/Icons";
 
 import DatabaseSettings from "../assets/database-settings.svg";
 import PanelLayout from "../assets/panel-layout.svg";

@@ -1,5 +1,5 @@
 {
-  "name": "@foxglove/hooks",
+  "name": "@lichtblick/hooks",
   "license": "MPL-2.0",
   "private": true,
   "repository": {
@@ -27,7 +27,7 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
-    "@foxglove/log": "workspace:*",
+    "@lichtblick/log": "workspace:*",
     "lodash-es": "4.17.21",
     "shallowequal": "1.1.0"
   },

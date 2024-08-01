@@ -4,18 +4,17 @@
 
 /* eslint-disable storybook/story-exports */
 
-import { StoryFn } from "@storybook/react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import Panel from "@foxglove/studio-base/components/Panel";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import Panel from "@lichtblick/studio-base/components/Panel";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+} from "@lichtblick/studio-base/context/PanelCatalogContext";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import { StoryFn } from "@storybook/react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const SamplePanel1 = function () {
   return <div></div>;

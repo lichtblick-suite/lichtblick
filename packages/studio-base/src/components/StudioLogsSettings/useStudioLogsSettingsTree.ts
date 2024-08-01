@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log, { toLogLevel } from "@lichtblick/log";
+import { SettingsTree, SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/studio";
+import { useStudioLogsSettings } from "@lichtblick/studio-base/context/StudioLogsSettingsContext";
 import { extname } from "path";
 import { useMemo } from "react";
-
-import Log, { toLogLevel } from "@foxglove/log";
-import { SettingsTree, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
-import { useStudioLogsSettings } from "@foxglove/studio-base/context/StudioLogsSettingsContext";
 
 const log = Log.getLogger(__filename);
 

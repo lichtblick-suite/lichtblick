@@ -13,9 +13,9 @@
 import {
   processMessage,
   registerScript,
-} from "@foxglove/studio-base/players/UserScriptPlayer/runtimeWorker/registry";
-import Rpc from "@foxglove/studio-base/util/Rpc";
-import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove/studio-base/util/workers";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/runtimeWorker/registry";
+import Rpc from "@lichtblick/studio-base/util/Rpc";
+import { enforceFetchIsBlocked, inSharedWorker } from "@lichtblick/studio-base/util/workers";
 
 let unsentErrors: string[] = [];
 (global as unknown as SharedWorkerGlobalScope).onerror = (event: ErrorEvent) => {

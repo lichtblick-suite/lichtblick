@@ -2,9 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Logger from "@foxglove/log";
-import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
-import { RemoteLayout } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
+import Logger from "@lichtblick/log";
+import { Layout, layoutIsShared } from "@lichtblick/studio-base/services/ILayoutStorage";
+import { RemoteLayout } from "@lichtblick/studio-base/services/IRemoteLayoutStorage";
 
 const log = Logger.getLogger(__filename);
 

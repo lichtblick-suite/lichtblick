@@ -11,17 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ts from "typescript/lib/typescript";
-
-import stressTestDatatypes from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/fixtures/example-datatypes";
+import stressTestDatatypes from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/fixtures/example-datatypes";
 import generateRosLib, {
   generateTypeDefs,
   InterfaceDeclarations,
   typedArrayMap,
-} from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
-import { compile } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/transform";
-import { ScriptData } from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import { Topic } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
+import { compile } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/transform";
+import { ScriptData } from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import ts from "typescript/lib/typescript";
 
 const baseNodeData: ScriptData = {
   name: "/studio_script/main",

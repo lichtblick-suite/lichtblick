@@ -2,16 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MultiMap, filterMap } from "@lichtblick/den/collection";
+import { PinholeCameraModel } from "@lichtblick/den/image";
+import Logger from "@lichtblick/log";
+import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/studio";
+import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
 import { t } from "i18next";
 import { assert } from "ts-essentials";
 
-import { MultiMap, filterMap } from "@foxglove/den/collection";
-import { PinholeCameraModel } from "@foxglove/den/image";
-import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
-import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
+import { CompressedImage, RawImage } from "@foxglove/schemas";
 
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
@@ -36,12 +36,12 @@ import {
   RAW_IMAGE_DATATYPES,
 } from "../foxglove";
 import {
-  CameraInfo,
-  Image as RosImage,
-  CompressedImage as RosCompressedImage,
-  IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
-  COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
   CAMERA_INFO_DATATYPES,
+  CameraInfo,
+  COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
+  IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
+  CompressedImage as RosCompressedImage,
+  Image as RosImage,
 } from "../ros";
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
@@ -362,9 +362,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
   };
 
-  #handleCameraInfo = (
-    messageEvent: PartialMessageEvent<CameraInfo> & PartialMessageEvent<CameraCalibration>,
-  ): void => {
+  #handleCameraInfo = (messageEvent: PartialMessageEvent<CameraInfo>): void => {
     // Store the last camera info on each topic, when processing an image message we'll look up
     // the camera info by the info topic configured for the image
     const cameraInfo = normalizeCameraInfo(messageEvent.message);

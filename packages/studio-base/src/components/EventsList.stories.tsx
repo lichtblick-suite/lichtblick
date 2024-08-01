@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import EventsProvider from "@lichtblick/studio-base/providers/EventsProvider";
+import { makeMockEvents } from "@lichtblick/studio-base/test/mocks/makeMockEvents";
 import { StoryObj, StoryFn } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { useEffect } from "react";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { useEvents } from "@foxglove/studio-base/context/EventsContext";
-import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
-import { makeMockEvents } from "@foxglove/studio-base/test/mocks/makeMockEvents";
 
 import { EventsList } from "./EventsList";
 

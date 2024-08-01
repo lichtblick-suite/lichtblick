@@ -5,9 +5,9 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { McapIterableSource } from "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIterableSource";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import { McapIterableSource } from "@lichtblick/studio-base/players/IterablePlayer/Mcap/McapIterableSource";
+import { Player } from "@lichtblick/studio-base/players/types";
 
 import { BenchmarkPlayer } from "../players";
 

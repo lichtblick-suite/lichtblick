@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import LinkHandlerContext from "@lichtblick/studio-base/context/LinkHandlerContext";
 import { Link } from "@mui/material";
 import { CSSProperties, PropsWithChildren, useCallback, useContext } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { makeStyles } from "tss-react/mui";
-
-import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 
 const useStyles = makeStyles()(({ palette, shape, spacing, typography, shadows }) => {
   return {

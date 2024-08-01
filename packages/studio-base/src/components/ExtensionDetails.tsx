@@ -2,24 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "@lichtblick/studio";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TextContent from "@lichtblick/studio-base/components/TextContent";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { useExtensionCatalog } from "@lichtblick/studio-base/context/ExtensionCatalogContext";
+import {
+  ExtensionMarketplaceDetail,
+  useExtensionMarketplace,
+} from "@lichtblick/studio-base/context/ExtensionMarketplaceContext";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Button, Link, Tab, Tabs, Typography, Divider } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
-
-import { Immutable } from "@foxglove/studio";
-import Stack from "@foxglove/studio-base/components/Stack";
-import TextContent from "@foxglove/studio-base/components/TextContent";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import {
-  ExtensionMarketplaceDetail,
-  useExtensionMarketplace,
-} from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type Props = {
   installed: boolean;

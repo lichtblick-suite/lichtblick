@@ -11,6 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ParameterValue } from "@lichtblick/studio";
+import CopyButton from "@lichtblick/studio-base/components/CopyButton";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import JsonInput from "@lichtblick/studio-base/components/JsonInput";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -28,19 +40,6 @@ import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
-
-import { ParameterValue } from "@foxglove/studio";
-import CopyButton from "@foxglove/studio-base/components/CopyButton";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import JsonInput from "@foxglove/studio-base/components/JsonInput";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 // The minimum amount of time to wait between showing the parameter update animation again
 const ANIMATION_RESET_DELAY_MS = 3000;

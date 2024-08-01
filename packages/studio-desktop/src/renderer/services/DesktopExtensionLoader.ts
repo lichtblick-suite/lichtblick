@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Logger from "@foxglove/log";
-import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@foxglove/studio-base";
+import Logger from "@lichtblick/log";
+import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@lichtblick/studio-base";
 
 import { Desktop } from "../../common/types";
 

@@ -2,6 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@lichtblick/studio";
+import { useConfigById } from "@lichtblick/studio-base/PanelAPI";
+import { FieldEditor } from "@lichtblick/studio-base/components/SettingsTreeEditor/FieldEditor";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useSelectedPanels } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { usePanelCatalog } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import { usePanelStateStore } from "@lichtblick/studio-base/context/PanelStateContext";
+import { PANEL_TITLE_CONFIG_KEY, getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, TextField } from "@mui/material";
@@ -9,15 +17,6 @@ import memoizeWeak from "memoize-weak";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-
-import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
-import { useConfigById } from "@foxglove/studio-base/PanelAPI";
-import { FieldEditor } from "@foxglove/studio-base/components/SettingsTreeEditor/FieldEditor";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { usePanelStateStore } from "@foxglove/studio-base/context/PanelStateContext";
-import { PANEL_TITLE_CONFIG_KEY, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import { NodeEditor } from "./NodeEditor";
 import { filterTreeNodes, prepareSettingsNodes } from "./utils";

@@ -2,23 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import { useSnackbar } from "notistack";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getNodeAtPath } from "react-mosaic-component";
-import { useAsync, useAsyncFn, useMountedState } from "react-use";
-import shallowequal from "shallowequal";
-import { v4 as uuidv4 } from "uuid";
-
-import { useShallowMemo } from "@foxglove/hooks";
-import Logger from "@foxglove/log";
-import { VariableValue } from "@foxglove/studio";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import { useShallowMemo } from "@lichtblick/hooks";
+import Logger from "@lichtblick/log";
+import { VariableValue } from "@lichtblick/studio";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
 import CurrentLayoutContext, {
   ICurrentLayout,
   LayoutID,
   LayoutState,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import {
   AddPanelPayload,
   ChangePanelLayoutPayload,
@@ -32,16 +24,23 @@ import {
   SplitPanelPayload,
   StartDragPayload,
   SwapPanelPayload,
-} from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import { useUserProfileStorage } from "@foxglove/studio-base/context/UserProfileStorageContext";
-import { defaultLayout } from "@foxglove/studio-base/providers/CurrentLayoutProvider/defaultLayout";
-import panelsReducer from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { LayoutManagerEventTypes } from "@foxglove/studio-base/services/ILayoutManager";
-import { PanelConfig, PlaybackConfig, UserScripts } from "@foxglove/studio-base/types/panels";
-import { windowAppURLState } from "@foxglove/studio-base/util/appURLState";
-import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { useLayoutManager } from "@lichtblick/studio-base/context/LayoutManagerContext";
+import { useUserProfileStorage } from "@lichtblick/studio-base/context/UserProfileStorageContext";
+import { defaultLayout } from "@lichtblick/studio-base/providers/CurrentLayoutProvider/defaultLayout";
+import panelsReducer from "@lichtblick/studio-base/providers/CurrentLayoutProvider/reducers";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
+import { LayoutManagerEventTypes } from "@lichtblick/studio-base/services/ILayoutManager";
+import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/studio-base/types/panels";
+import { windowAppURLState } from "@lichtblick/studio-base/util/appURLState";
+import { getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
+import * as _ from "lodash-es";
+import { useSnackbar } from "notistack";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getNodeAtPath } from "react-mosaic-component";
+import { useAsync, useAsyncFn, useMountedState } from "react-use";
+import shallowequal from "shallowequal";
+import { v4 as uuidv4 } from "uuid";
 
 import { IncompatibleLayoutVersionAlert } from "./IncompatibleLayoutVersionAlert";
 

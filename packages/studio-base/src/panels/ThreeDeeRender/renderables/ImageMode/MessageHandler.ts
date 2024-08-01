@@ -2,6 +2,27 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable, MessageEvent } from "@lichtblick/studio";
+import {
+  HUDItem,
+  HUDItemManager,
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/HUDItemManager";
+import { ImageModeConfig } from "@lichtblick/studio-base/panels/ThreeDeeRender/IRenderer";
+import {
+  AnyImage,
+  getTimestampFromImage,
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import {
+  normalizeCompressedImage,
+  normalizeRawImage,
+  normalizeRosCompressedImage,
+  normalizeRosImage,
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Images/imageNormalizers";
+import { normalizeCameraInfo } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/projections";
+import {
+  ImageMarker as RosImageMarker,
+  ImageMarkerArray as RosImageMarkerArray,
+} from "@lichtblick/studio-base/types/Messages";
 import * as _ from "lodash-es";
 
 import { AVLTree } from "@foxglove/avl";
@@ -17,27 +38,6 @@ import {
   RawImage,
   ImageAnnotations as FoxgloveImageAnnotations,
 } from "@foxglove/schemas";
-import { Immutable, MessageEvent } from "@foxglove/studio";
-import {
-  HUDItem,
-  HUDItemManager,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/HUDItemManager";
-import { ImageModeConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
-import {
-  AnyImage,
-  getTimestampFromImage,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
-import {
-  normalizeCompressedImage,
-  normalizeRawImage,
-  normalizeRosCompressedImage,
-  normalizeRosImage,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/imageNormalizers";
-import { normalizeCameraInfo } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
-import {
-  ImageMarker as RosImageMarker,
-  ImageMarkerArray as RosImageMarkerArray,
-} from "@foxglove/studio-base/types/Messages";
 
 import { normalizeAnnotations } from "./annotations/normalizeAnnotations";
 import { Annotation } from "./annotations/types";

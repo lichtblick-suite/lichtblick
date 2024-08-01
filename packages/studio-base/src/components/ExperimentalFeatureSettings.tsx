@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
 import { Checkbox, FormControlLabel, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 const useStyles = makeStyles()({
   checkbox: {

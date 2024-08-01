@@ -3,11 +3,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { useTopicPublishFrequencies } from "@lichtblick/studio-base/hooks/useTopicPublishFrequences";
+import { PlayerCapabilities, PlayerState } from "@lichtblick/studio-base/players/types";
 import { renderHook } from "@testing-library/react";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { useTopicPublishFrequencies } from "@foxglove/studio-base/hooks/useTopicPublishFrequences";
-import { PlayerCapabilities, PlayerState } from "@foxglove/studio-base/players/types";
 
 describe("useTopicPublishFrequencies", () => {
   it("calculates frequences for a static source", () => {

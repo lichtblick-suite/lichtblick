@@ -11,6 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { filterMap } from "@lichtblick/den/collection";
+import { SettingsTreeAction } from "@lichtblick/studio";
+import { useDataSourceInfo } from "@lichtblick/studio-base/PanelAPI";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import useDiagnostics from "@lichtblick/studio-base/panels/diagnostics/useDiagnostics";
+import useStaleTime from "@lichtblick/studio-base/panels/diagnostics/useStaleTime";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import toggle from "@lichtblick/studio-base/util/toggle";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
   IconButton,
@@ -32,20 +45,6 @@ import { CSSProperties, useCallback, useEffect, useMemo } from "react";
 import { AutoSizer } from "react-virtualized";
 import { FixedSizeList as List } from "react-window";
 import { makeStyles } from "tss-react/mui";
-
-import { filterMap } from "@foxglove/den/collection";
-import { SettingsTreeAction } from "@foxglove/studio";
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
-import useStaleTime from "@foxglove/studio-base/panels/diagnostics/useStaleTime";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import toggle from "@foxglove/studio-base/util/toggle";
 
 import { buildSummarySettingsTree } from "./settings";
 import {

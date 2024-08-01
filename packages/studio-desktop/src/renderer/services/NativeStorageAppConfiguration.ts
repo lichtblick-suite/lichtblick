@@ -1,9 +1,8 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+import { IAppConfiguration, AppConfigurationValue, ChangeHandler } from "@lichtblick/studio-base";
 import { Mutex } from "async-mutex";
-
-import { IAppConfiguration, AppConfigurationValue, ChangeHandler } from "@foxglove/studio-base";
 
 import { SETTINGS_DATASTORE_NAME, SETTINGS_JSON_DATASTORE_KEY } from "../../common/storage";
 import { Storage } from "../../common/types";

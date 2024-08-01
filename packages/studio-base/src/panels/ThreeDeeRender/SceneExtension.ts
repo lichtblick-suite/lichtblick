@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent, SettingsTreeAction } from "@lichtblick/studio";
+import { PanelContextMenuItem } from "@lichtblick/studio-base/components/PanelContextMenu";
+import { DraggedMessagePath } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
 import * as _ from "lodash-es";
 import * as THREE from "three";
 import { DeepPartial, Writable } from "ts-essentials";
-
-import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
-import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
-import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 
 import type { AnyRendererSubscription, IRenderer, RendererConfig } from "./IRenderer";
 import { Path } from "./LayerErrors";

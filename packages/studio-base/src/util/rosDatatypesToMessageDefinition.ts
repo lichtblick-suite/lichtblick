@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+
 import { MessageDefinition } from "@foxglove/message-definition";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // For one datatype in the datatypes, find the MessageDefinition that we can use
 // to either write or parse it. `datatypes` should contain the root datatype and

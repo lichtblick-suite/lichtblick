@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useEffect } from "react";
-
-import { useSessionStorageValue } from "@foxglove/hooks";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { useSessionStorageValue } from "@lichtblick/hooks";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { LaunchPreferenceValue } from "@lichtblick/studio-base/types/LaunchPreferenceValue";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
+import { useEffect } from "react";
 
 const selectHasUrlState = (ctx: MessagePipelineContext) => ctx.playerState.urlState != undefined;
 

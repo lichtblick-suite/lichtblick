@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable, Time } from "@lichtblick/studio";
+import { downsampleScatter } from "@lichtblick/studio-base/components/TimeBasedChart/downsample";
+import { Bounds1D } from "@lichtblick/studio-base/components/TimeBasedChart/types";
+import { extendBounds1D } from "@lichtblick/studio-base/types/Bounds";
+
 import { compare } from "@foxglove/rostime";
-import { Immutable, Time } from "@foxglove/studio";
-import { downsampleScatter } from "@foxglove/studio-base/components/TimeBasedChart/downsample";
-import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { extendBounds1D } from "@foxglove/studio-base/types/Bounds";
 
 import {
   CsvDataset,

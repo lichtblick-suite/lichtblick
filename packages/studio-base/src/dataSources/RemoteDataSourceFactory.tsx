@@ -2,22 +2,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link } from "@mui/material";
-import path from "path";
-
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import {
+  IterablePlayer,
+  WorkerIterableSource,
+} from "@lichtblick/studio-base/players/IterablePlayer";
+import { Player } from "@lichtblick/studio-base/players/types";
+import { Link } from "@mui/material";
+import path from "path";
 
 const initWorkers: Record<string, () => Worker> = {
   ".bag": () => {
     return new Worker(
       // foxglove-depcheck-used: babel-plugin-transform-import-meta
       new URL(
-        "@foxglove/studio-base/players/IterablePlayer/BagIterableSourceWorker.worker",
+        "@lichtblick/studio-base/players/IterablePlayer/BagIterableSourceWorker.worker",
         import.meta.url,
       ),
     );
@@ -26,7 +28,7 @@ const initWorkers: Record<string, () => Worker> = {
     return new Worker(
       // foxglove-depcheck-used: babel-plugin-transform-import-meta
       new URL(
-        "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIterableSourceWorker.worker",
+        "@lichtblick/studio-base/players/IterablePlayer/Mcap/McapIterableSourceWorker.worker",
         import.meta.url,
       ),
     );

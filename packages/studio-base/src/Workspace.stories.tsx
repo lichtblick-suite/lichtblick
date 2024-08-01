@@ -2,24 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj } from "@storybook/react";
-import { fireEvent, screen, waitFor } from "@storybook/testing-library";
-import { useEffect, useState } from "react";
-
-import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import MultiProvider from "@lichtblick/studio-base/components/MultiProvider";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import { DraggedMessagePath } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
-import Tab from "@foxglove/studio-base/panels/Tab";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+} from "@lichtblick/studio-base/context/PanelCatalogContext";
+import Tab from "@lichtblick/studio-base/panels/Tab";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import EventsProvider from "@lichtblick/studio-base/providers/EventsProvider";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import { StoryObj } from "@storybook/react";
+import { fireEvent, screen, waitFor } from "@storybook/testing-library";
+import { useEffect, useState } from "react";
 
 import Workspace from "./Workspace";
 

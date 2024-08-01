@@ -16,7 +16,7 @@ import {
   DetailsType,
   NotificationType,
   NotificationSeverity,
-} from "@foxglove/studio-base/util/sendNotification";
+} from "@lichtblick/studio-base/util/sendNotification";
 
 import Rpc from "./Rpc";
 import overwriteFetch from "./overwriteFetch";

@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/studio";
 import { t } from "i18next";
 import * as _ from "lodash-es";
-
-import Logger from "@foxglove/log";
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
 import { RenderableLineList } from "./markers/RenderableLineList";
 import type { IRenderer } from "../IRenderer";

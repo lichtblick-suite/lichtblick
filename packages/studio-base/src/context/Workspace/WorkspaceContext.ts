@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { AppSettingsTab } from "@lichtblick/studio-base/components/AppSettingsDialog/AppSettingsDialog";
+import { DataSourceDialogItem } from "@lichtblick/studio-base/components/DataSourceDialog";
+import { IDataSourceFactory } from "@lichtblick/studio-base/context/PlayerSelectionContext";
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
-import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
-import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
-import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 export const SidebarItemKeys = [
   "account",

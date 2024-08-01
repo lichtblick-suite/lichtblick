@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import CopyButton from "@lichtblick/studio-base/components/CopyButton";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { MessageEvent } from "@lichtblick/studio-base/players/types";
+import { formatTimeRaw } from "@lichtblick/studio-base/util/time";
 import { Link, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
-
-import CopyButton from "@foxglove/studio-base/components/CopyButton";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { copyMessageReplacer } from "./copyMessageReplacer";
 import { getMessageDocumentationLink } from "./utils";

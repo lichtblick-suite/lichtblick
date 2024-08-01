@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { RosValue } from "@lichtblick/studio-base/players/types";
+import { getItemString } from "@lichtblick/studio-base/util/getItemString";
+import { useJsonTreeTheme } from "@lichtblick/studio-base/util/globalConstants";
 import * as _ from "lodash-es";
 import Tree from "react-json-tree";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { RosValue } from "@foxglove/studio-base/players/types";
-import { getItemString } from "@foxglove/studio-base/util/getItemString";
-import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
 import { InteractionData } from "./types";
 

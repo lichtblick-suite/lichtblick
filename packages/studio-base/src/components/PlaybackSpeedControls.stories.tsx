@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import PlaybackSpeedControls from "@lichtblick/studio-base/components/PlaybackSpeedControls";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { Meta, StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
 const CAPABILITIES = ["setSpeed", "playbackControl"];
 

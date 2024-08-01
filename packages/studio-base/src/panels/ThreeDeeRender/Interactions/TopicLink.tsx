@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { LayoutActions } from "@lichtblick/studio";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { IconButton, Typography } from "@mui/material";
-
-import type { LayoutActions } from "@foxglove/studio";
-import Stack from "@foxglove/studio-base/components/Stack";
 
 type Props = {
   topic: string;

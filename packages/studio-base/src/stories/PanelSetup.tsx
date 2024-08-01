@@ -11,6 +11,48 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useShallowMemo } from "@lichtblick/hooks";
+import {
+  MessageEvent,
+  ParameterValue,
+  RegisterMessageConverterArgs,
+  SettingsTree,
+} from "@lichtblick/studio";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import SettingsTreeEditor from "@lichtblick/studio-base/components/SettingsTreeEditor";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { PanelsActions } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import PanelCatalogContext, {
+  PanelCatalog,
+} from "@lichtblick/studio-base/context/PanelCatalogContext";
+import {
+  PanelStateStore,
+  usePanelStateStore,
+} from "@lichtblick/studio-base/context/PanelStateContext";
+import {
+  UserScriptStateProvider,
+  UserScriptStore,
+  useUserScriptState,
+} from "@lichtblick/studio-base/context/UserScriptStateContext";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import * as panels from "@lichtblick/studio-base/panels";
+import { Diagnostic, UserScriptLog } from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import {
+  AdvertiseOptions,
+  PlayerStateActiveData,
+  Progress,
+  PublishPayload,
+  Topic,
+} from "@lichtblick/studio-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import ExtensionCatalogProvider from "@lichtblick/studio-base/providers/ExtensionCatalogProvider";
+import { PanelStateContextProvider } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import TimelineInteractionStateProvider from "@lichtblick/studio-base/providers/TimelineInteractionStateProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import ThemeProvider from "@lichtblick/studio-base/theme/ThemeProvider";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { SavedProps, UserScripts } from "@lichtblick/studio-base/types/panels";
 import { useTheme } from "@mui/material";
 import { TFunction } from "i18next";
 import * as _ from "lodash-es";
@@ -20,48 +62,6 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
-import { useShallowMemo } from "@foxglove/hooks";
-import {
-  MessageEvent,
-  ParameterValue,
-  RegisterMessageConverterArgs,
-  SettingsTree,
-} from "@foxglove/studio";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import PanelCatalogContext, {
-  PanelCatalog,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
-import {
-  PanelStateStore,
-  usePanelStateStore,
-} from "@foxglove/studio-base/context/PanelStateContext";
-import {
-  UserScriptStateProvider,
-  UserScriptStore,
-  useUserScriptState,
-} from "@foxglove/studio-base/context/UserScriptStateContext";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import * as panels from "@foxglove/studio-base/panels";
-import { Diagnostic, UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import {
-  AdvertiseOptions,
-  PlayerStateActiveData,
-  Progress,
-  PublishPayload,
-  Topic,
-} from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
-import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { SavedProps, UserScripts } from "@foxglove/studio-base/types/panels";
 import "react-mosaic-component/react-mosaic-component.css";
 
 function noop() {}

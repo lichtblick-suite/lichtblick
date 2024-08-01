@@ -2,16 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import ExtensionMarketplaceContext, {
+  ExtensionMarketplace,
+} from "@lichtblick/studio-base/context/ExtensionMarketplaceContext";
+import ExtensionCatalogProvider from "@lichtblick/studio-base/providers/ExtensionCatalogProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
 import { StoryFn, StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
-import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
-import ExtensionMarketplaceContext, {
-  ExtensionMarketplace,
-} from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+import { ExtensionInfo, ExtensionLoader } from "@lichtblick/studio-base";
 
 import { AppSettingsDialog } from "./AppSettingsDialog";
 

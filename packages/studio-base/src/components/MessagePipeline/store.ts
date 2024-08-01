@@ -2,17 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import { MutableRefObject } from "react";
-import shallowequal from "shallowequal";
-import { createStore, StoreApi } from "zustand";
-
-import { Condvar } from "@foxglove/den/async";
-import { Immutable, MessageEvent } from "@foxglove/studio";
+import { Condvar } from "@lichtblick/den/async";
+import { Immutable, MessageEvent } from "@lichtblick/studio";
 import {
   makeSubscriptionMemoizer,
   mergeSubscriptions,
-} from "@foxglove/studio-base/components/MessagePipeline/subscriptions";
+} from "@lichtblick/studio-base/components/MessagePipeline/subscriptions";
 import {
   AdvertiseOptions,
   Player,
@@ -20,8 +15,12 @@ import {
   PlayerPresence,
   PlayerState,
   SubscribePayload,
-} from "@foxglove/studio-base/players/types";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+} from "@lichtblick/studio-base/players/types";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
+import * as _ from "lodash-es";
+import { MutableRefObject } from "react";
+import shallowequal from "shallowequal";
+import { createStore, StoreApi } from "zustand";
 
 import { FramePromise } from "./pauseFrameForPromise";
 import { MessagePipelineContext } from "./types";

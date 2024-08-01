@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
 import { set as idbSet, get as idbGet, createStore as idbCreateStore } from "idb-keyval";
 import * as _ from "lodash-es";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAsync } from "react-use";
 import { v4 as uuid } from "uuid";
-
-import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
 

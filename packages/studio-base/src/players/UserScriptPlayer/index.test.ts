@@ -12,21 +12,21 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { signal } from "@foxglove/den/async";
-import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
-import MockUserScriptPlayerWorker from "@foxglove/studio-base/players/UserScriptPlayer/MockUserScriptPlayerWorker";
+import { signal } from "@lichtblick/den/async";
+import FakePlayer from "@lichtblick/studio-base/components/MessagePipeline/FakePlayer";
+import MockUserScriptPlayerWorker from "@lichtblick/studio-base/players/UserScriptPlayer/MockUserScriptPlayerWorker";
 import {
   AdvertiseOptions,
   MessageEvent,
   PlayerState,
   PlayerStateActiveData,
   Topic,
-} from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { UserScript } from "@foxglove/studio-base/types/panels";
-import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
-import delay from "@foxglove/studio-base/util/delay";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+} from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { UserScript } from "@lichtblick/studio-base/types/panels";
+import { basicDatatypes } from "@lichtblick/studio-base/util/basicDatatypes";
+import delay from "@lichtblick/studio-base/util/delay";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/studio-base/util/globalConstants";
 
 import UserScriptPlayer from ".";
 import exampleDatatypes from "./transformerWorker/fixtures/example-datatypes";

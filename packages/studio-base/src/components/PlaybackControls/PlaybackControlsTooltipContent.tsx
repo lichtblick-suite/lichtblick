@@ -2,21 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import {
+  TimelineInteractionStateStore,
+  useTimelineInteractionState,
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
 import { Divider, Typography } from "@mui/material";
 import * as _ from "lodash-es";
 import { Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { subtract as subtractTimes, toSec, Time } from "@foxglove/rostime";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import {
-  TimelineInteractionStateStore,
-  useTimelineInteractionState,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 
 type PlaybackControlsTooltipItem =
   | { type: "divider" }

@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
 import { getNodeAtPath, MosaicRootActions, MosaicWindowActions } from "react-mosaic-component";
 import { MosaicKey } from "react-mosaic-component/lib/types";
-
-import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 export function getPanelTypeFromMosaic(
   mosaicWindowActions?: MosaicWindowActions,

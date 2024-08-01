@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { diffLabels, diffArrow } from "@foxglove/studio-base/panels/RawMessages/getDiff";
+import { diffLabels, diffArrow } from "@lichtblick/studio-base/panels/RawMessages/getDiff";
 
 import { DiffSpan } from "./DiffSpan";
 import MaybeCollapsedValue from "./MaybeCollapsedValue";

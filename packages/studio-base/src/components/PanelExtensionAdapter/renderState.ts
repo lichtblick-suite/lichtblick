@@ -2,11 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import memoizeWeak from "memoize-weak";
-import { Writable } from "ts-essentials";
-
-import { filterMap } from "@foxglove/den/collection";
-import { compare, toSec } from "@foxglove/rostime";
+import { filterMap } from "@lichtblick/den/collection";
 import {
   AppSettingValue,
   Immutable,
@@ -16,17 +12,21 @@ import {
   RenderState,
   Subscription,
   Topic,
-} from "@foxglove/studio";
+} from "@lichtblick/studio";
 import {
   EMPTY_GLOBAL_VARIABLES,
   GlobalVariables,
-} from "@foxglove/studio-base/hooks/useGlobalVariables";
+} from "@lichtblick/studio-base/hooks/useGlobalVariables";
 import {
   MessageBlock,
   PlayerState,
   Topic as PlayerTopic,
-} from "@foxglove/studio-base/players/types";
-import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
+} from "@lichtblick/studio-base/players/types";
+import { HoverValue } from "@lichtblick/studio-base/types/hoverValue";
+import memoizeWeak from "memoize-weak";
+import { Writable } from "ts-essentials";
+
+import { compare, toSec } from "@foxglove/rostime";
 
 import {
   collateTopicSchemaConversions,

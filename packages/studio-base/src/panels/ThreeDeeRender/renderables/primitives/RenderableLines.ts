@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LineMaterialWithAlphaVertex } from "@lichtblick/studio-base/panels/ThreeDeeRender/LineMaterialWithAlphaVertex";
 import * as THREE from "three";
 import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
@@ -11,7 +12,6 @@ import { assert } from "ts-essentials";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas";
-import { LineMaterialWithAlphaVertex } from "@foxglove/studio-base/panels/ThreeDeeRender/LineMaterialWithAlphaVertex";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { IRenderer } from "../../IRenderer";

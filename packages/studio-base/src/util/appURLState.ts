@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutID } from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import * as _ from "lodash-es";
 
 import { Time, fromRFC3339String, toRFC3339String } from "@foxglove/rostime";
-import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 export type AppURLState = {
   ds?: string;

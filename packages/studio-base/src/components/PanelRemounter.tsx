@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Fragment, ReactNode, useCallback } from "react";
-
 import {
   PanelStateStore,
   usePanelStateStore,
-} from "@foxglove/studio-base/context/PanelStateContext";
+} from "@lichtblick/studio-base/context/PanelStateContext";
+import { Fragment, ReactNode, useCallback } from "react";
 
 /**
  * Wrapper component used to force-remount the panel when key properties like the tabId

@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { filterMap } from "@lichtblick/den/collection";
+import { Immutable, Time, MessageEvent } from "@lichtblick/studio";
+import { simpleGetMessagePathDataItems } from "@lichtblick/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { Bounds1D } from "@lichtblick/studio-base/components/TimeBasedChart/types";
+import { PlayerState } from "@lichtblick/studio-base/players/types";
 import { ChartDataset } from "chart.js";
 
-import { filterMap } from "@foxglove/den/collection";
 import { MessagePath } from "@foxglove/message-path";
-import { Immutable, Time, MessageEvent } from "@foxglove/studio";
-import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { PlayerState } from "@foxglove/studio-base/players/types";
 
 import {
   CsvDataset,

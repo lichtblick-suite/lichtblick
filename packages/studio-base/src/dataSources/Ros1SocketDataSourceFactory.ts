@@ -2,16 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
-import { RosNode } from "@foxglove/ros1";
-import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
+import OsContextSingleton from "@lichtblick/studio-base/OsContextSingleton";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import Ros1Player from "@lichtblick/studio-base/players/Ros1Player";
+import { Player } from "@lichtblick/studio-base/players/types";
+import * as _ from "lodash-es";
+
+import { RosNode } from "@foxglove/ros1";
 
 class Ros1SocketDataSourceFactory implements IDataSourceFactory {
   public id = "ros1-socket";

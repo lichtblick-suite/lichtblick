@@ -11,22 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Immutable } from "immer";
-import * as _ from "lodash-es";
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import shallowequal from "shallowequal";
-import { Writable } from "ts-essentials";
-import { createStore } from "zustand";
-
-import { Condvar } from "@foxglove/den/async";
-import { Time, isLessThan } from "@foxglove/rostime";
-import { Metadata, ParameterValue } from "@foxglove/studio";
+import { Condvar } from "@lichtblick/den/async";
+import { Metadata, ParameterValue } from "@lichtblick/studio";
 import {
   FramePromise,
   pauseFrameForPromises,
-} from "@foxglove/studio-base/components/MessagePipeline/pauseFrameForPromise";
-import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { freezeMetadata } from "@foxglove/studio-base/players/IterablePlayer/freezeMetadata";
+} from "@lichtblick/studio-base/components/MessagePipeline/pauseFrameForPromise";
+import { BuiltinPanelExtensionContext } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { freezeMetadata } from "@lichtblick/studio-base/players/IterablePlayer/freezeMetadata";
 import {
   AdvertiseOptions,
   MessageEvent,
@@ -41,8 +33,16 @@ import {
   SubscribePayload,
   Topic,
   TopicStats,
-} from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+} from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { Immutable } from "immer";
+import * as _ from "lodash-es";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import shallowequal from "shallowequal";
+import { Writable } from "ts-essentials";
+import { createStore } from "zustand";
+
+import { Time, isLessThan } from "@foxglove/rostime";
 
 import { ContextInternal } from "./index";
 import { MessagePipelineInternalState, MessagePipelineStateAction, reducer } from "./store";

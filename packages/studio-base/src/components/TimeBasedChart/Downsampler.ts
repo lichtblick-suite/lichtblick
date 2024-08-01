@@ -2,9 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { iterateObjects } from "@foxglove/studio-base/components/Chart/datasets";
-import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
-import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
+import { iterateObjects } from "@lichtblick/studio-base/components/Chart/datasets";
+import { RpcScales } from "@lichtblick/studio-base/components/Chart/types";
+import { grey } from "@lichtblick/studio-base/util/toolsColorScheme";
 
 import { MAX_POINTS } from "./downsample";
 import { downsampleStates } from "./downsampleStates";

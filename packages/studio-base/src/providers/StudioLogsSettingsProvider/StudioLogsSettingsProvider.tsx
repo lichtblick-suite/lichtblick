@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log from "@lichtblick/log";
+import { StudioLogsSettingsContext } from "@lichtblick/studio-base/context/StudioLogsSettingsContext";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "react-use";
-
-import Log from "@foxglove/log";
-import { StudioLogsSettingsContext } from "@foxglove/studio-base/context/StudioLogsSettingsContext";
 
 import { createStudioLogsSettingsStore } from "./store";
 import { LocalStorageSaveState } from "./types";

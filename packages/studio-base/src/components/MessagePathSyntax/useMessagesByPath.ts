@@ -11,16 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useMemo } from "react";
-
-import { filterMap } from "@foxglove/den/collection";
-import { useShallowMemo } from "@foxglove/hooks";
-import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { filterMap } from "@lichtblick/den/collection";
+import { useShallowMemo } from "@lichtblick/hooks";
+import * as PanelAPI from "@lichtblick/studio-base/PanelAPI";
 import {
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
-} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
+} from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { subscribePayloadFromMessagePath } from "@lichtblick/studio-base/players/subscribePayloadFromMessagePath";
+import { useMemo } from "react";
 
 // Given a set of message paths, subscribe to the appropriate topics and return
 // messages with their queried data decoded for each path.

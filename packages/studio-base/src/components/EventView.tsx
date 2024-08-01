@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { HighlightedText } from "@lichtblick/studio-base/components/HighlightedText";
+import {
+  TimelinePositionedEvent,
+  DataSourceEvent,
+} from "@lichtblick/studio-base/context/EventsContext";
 import { alpha } from "@mui/material";
 import * as _ from "lodash-es";
 import { Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { HighlightedText } from "@foxglove/studio-base/components/HighlightedText";
-import {
-  TimelinePositionedEvent,
-  DataSourceEvent,
-} from "@foxglove/studio-base/context/EventsContext";
 
 const useStyles = makeStyles<void, "eventMetadata" | "eventSelected">()(
   (theme, _params, classes) => ({

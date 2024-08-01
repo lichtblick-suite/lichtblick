@@ -5,7 +5,7 @@
 /**
  * Performs a binary search on a sorted array of tuples to find the index of the entry with the given key.
  *
- * Copied from @foxglove/den/collection ArrayMap
+ * Copied from @lichtblick/den/collection ArrayMap
  *
  * @param key Key to search for.
  * @returns The index of the key/value tuple if an exact match is found; otherwise, a negative

@@ -5,8 +5,8 @@
 import { migrateLegacyToNew3DPanels } from "./migrateLegacyToNew3DPanels";
 
 let MOCK_ID = 0;
-jest.mock("@foxglove/studio-base/util/layout", () => ({
-  ...jest.requireActual("@foxglove/studio-base/util/layout"),
+jest.mock("@lichtblick/studio-base/util/layout", () => ({
+  ...jest.requireActual("@lichtblick/studio-base/util/layout"),
   getPanelIdForType(type: string) {
     return `${type}!${++MOCK_ID}`;
   },

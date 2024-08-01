@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Color, Point2D } from "@lichtblick/studio-base/types/Messages";
+
 import type { Time } from "@foxglove/rostime";
-import type { Color, Point2D } from "@foxglove/studio-base/types/Messages";
 
 export type PathKey = string | number;
 

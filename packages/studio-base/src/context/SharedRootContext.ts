@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppBarProps } from "@lichtblick/studio-base/components/AppBar";
+import { CustomWindowControlsProps } from "@lichtblick/studio-base/components/AppBar/CustomWindowControls";
+import { IAppConfiguration } from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { INativeAppMenu } from "@lichtblick/studio-base/context/NativeAppMenuContext";
+import { INativeWindow } from "@lichtblick/studio-base/context/NativeWindowContext";
+import { IDataSourceFactory } from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import { ExtensionLoader } from "@lichtblick/studio-base/services/ExtensionLoader";
 import { createContext, useContext } from "react";
-
-import { AppBarProps } from "@foxglove/studio-base/components/AppBar";
-import { CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
-import { IAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
-import { INativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
-import { INativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
-import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 
 interface ISharedRootContext {
   deepLinks: readonly string[];

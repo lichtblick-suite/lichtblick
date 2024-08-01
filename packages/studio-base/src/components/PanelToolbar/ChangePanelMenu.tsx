@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PanelCatalog, PanelSelection } from "@lichtblick/studio-base/components/PanelCatalog";
+import PanelContext from "@lichtblick/studio-base/components/PanelContext";
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import { ClickAwayListener, Grow, Paper, Popper } from "@mui/material";
 import { useCallback, useContext } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
-
-import { PanelCatalog, PanelSelection } from "@foxglove/studio-base/components/PanelCatalog";
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 const useStyles = makeStyles()((theme) => ({
   paper: {

@@ -2,20 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Alert, Link, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { useState, useMemo, useCallback, useLayoutEffect, FormEvent } from "react";
-import { makeStyles } from "tss-react/mui";
-
-import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { BuiltinIcon } from "@lichtblick/studio-base/components/BuiltinIcon";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { usePlayerSelection } from "@lichtblick/studio-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+} from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
+import { Alert, Link, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { useState, useMemo, useCallback, useLayoutEffect, FormEvent } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { FormField } from "./FormField";
 import View from "./View";

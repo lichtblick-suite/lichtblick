@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import useGlobalVariables from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { Slider, Typography, useTheme } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { useVariableSliderSettings } from "./settings";
 import { VariableSliderConfig } from "./types";

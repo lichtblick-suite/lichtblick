@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { toolsColorScheme } from "@lichtblick/studio-base/util/toolsColorScheme";
 import * as _ from "lodash-es";
 import tinycolor from "tinycolor2";
-
-import { toolsColorScheme } from "@foxglove/studio-base/util/toolsColorScheme";
 
 // Inspired by the "light" scheme from https://personal.sron.nl/~pault/#sec:qualitative
 // but using our standard tools colors.

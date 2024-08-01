@@ -3,6 +3,18 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ErrorCircle16Regular, Info16Regular, Warning16Regular } from "@fluentui/react-icons";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  ProblemsContextStore,
+  useProblemsStore,
+} from "@lichtblick/studio-base/context/ProblemsContext";
+import { PlayerProblem } from "@lichtblick/studio-base/players/types";
+import { DetailsType, NotificationSeverity } from "@lichtblick/studio-base/util/sendNotification";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
   Accordion,
@@ -16,19 +28,6 @@ import {
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  ProblemsContextStore,
-  useProblemsStore,
-} from "@foxglove/studio-base/context/ProblemsContext";
-import { PlayerProblem } from "@foxglove/studio-base/players/types";
-import { DetailsType, NotificationSeverity } from "@foxglove/studio-base/util/sendNotification";
 
 const useStyles = makeStyles()((theme) => ({
   acccordion: {

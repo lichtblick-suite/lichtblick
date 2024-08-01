@@ -3,16 +3,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ReOrderDotsVertical16Regular } from "@fluentui/react-icons";
+import { HighlightChars } from "@lichtblick/studio-base/components/HighlightChars";
+import { DraggedMessagePath } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import { useMessagePathDrag } from "@lichtblick/studio-base/services/messagePathDragging";
 import { Badge, Typography } from "@mui/material";
 import { FzfResultItem } from "fzf";
 import { useCallback, useMemo } from "react";
 
 import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
-import { HighlightChars } from "@foxglove/studio-base/components/HighlightChars";
-import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { Topic } from "@foxglove/studio-base/players/types";
-import { useMessagePathDrag } from "@foxglove/studio-base/services/messagePathDragging";
 
 import { TopicStatsChip } from "./TopicStatsChip";
 import { useTopicListStyles } from "./useTopicListStyles";

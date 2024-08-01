@@ -8,6 +8,13 @@
 /// <reference types="chartjs-plugin-datalabels" />
 /// <reference types="@foxglove/chartjs-plugin-zoom" />
 
+import Logger from "@lichtblick/log";
+import ChartJsMux, {
+  ChartUpdateMessage,
+} from "@lichtblick/studio-base/components/Chart/worker/ChartJsMux";
+import Rpc, { createLinkedChannels } from "@lichtblick/studio-base/util/Rpc";
+import WebWorkerManager from "@lichtblick/studio-base/util/WebWorkerManager";
+import { mightActuallyBePartial } from "@lichtblick/studio-base/util/mightActuallyBePartial";
 import { ChartOptions } from "chart.js";
 import Hammer from "hammerjs";
 import * as R from "ramda";
@@ -17,13 +24,6 @@ import { assert } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
 import { type ZoomPluginOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
-import Logger from "@foxglove/log";
-import ChartJsMux, {
-  ChartUpdateMessage,
-} from "@foxglove/studio-base/components/Chart/worker/ChartJsMux";
-import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
-import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
-import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { TypedChartData, ChartData, RpcElement, RpcScales } from "./types";
 

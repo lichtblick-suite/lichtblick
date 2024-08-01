@@ -2,6 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { IAppTimeFormat } from "@lichtblick/studio-base/hooks/useAppTimeFormat";
+import { TimeDisplayMethod } from "@lichtblick/studio-base/types/panels";
+import {
+  formatDate,
+  formatTime,
+  getValidatedTimeAndMethodFromString,
+} from "@lichtblick/studio-base/util/formatTime";
+import { formatTimeRaw } from "@lichtblick/studio-base/util/time";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CheckIcon from "@mui/icons-material/Check";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -20,15 +29,6 @@ import { useState, useCallback, useMemo, useEffect, MouseEvent, useRef } from "r
 import { makeStyles } from "tss-react/mui";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { IAppTimeFormat } from "@foxglove/studio-base/hooks/useAppTimeFormat";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import {
-  formatDate,
-  formatTime,
-  getValidatedTimeAndMethodFromString,
-} from "@foxglove/studio-base/util/formatTime";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 type PlaybackTimeDisplayMethodProps = {
   appTimeFormat: IAppTimeFormat;

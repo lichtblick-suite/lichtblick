@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { User } from "@lichtblick/studio-base/context/CurrentUserContext";
 import { StoryObj } from "@storybook/react";
-
-import { User } from "@foxglove/studio-base/context/CurrentUserContext";
 
 import AccountInfo from "./AccountInfo";
 

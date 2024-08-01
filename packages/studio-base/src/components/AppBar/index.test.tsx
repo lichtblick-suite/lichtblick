@@ -3,17 +3,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import MultiProvider from "@lichtblick/studio-base/components/MultiProvider";
+import StudioToastProvider from "@lichtblick/studio-base/components/StudioToastProvider";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import TimelineInteractionStateProvider from "@lichtblick/studio-base/providers/TimelineInteractionStateProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import ThemeProvider from "@lichtblick/studio-base/theme/ThemeProvider";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { render } from "@testing-library/react";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
-import StudioToastProvider from "@foxglove/studio-base/components/StudioToastProvider";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import { AppBar } from ".";
 

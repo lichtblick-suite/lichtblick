@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useMemo, useState } from "react";
-
 import {
   SharedRoot,
   IDataSourceFactory,
   AppSetting,
   LaunchPreferenceValue,
   StudioApp,
-} from "@foxglove/studio-base";
+} from "@lichtblick/studio-base";
+import { useMemo, useState } from "react";
 
 import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
 import { LAYOUTS } from "./layouts";

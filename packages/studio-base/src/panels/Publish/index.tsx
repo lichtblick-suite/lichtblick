@@ -11,6 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Immutable } from "@lichtblick/studio";
+import { useDataSourceInfo } from "@lichtblick/studio-base/PanelAPI";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import useCallbackWithToast from "@lichtblick/studio-base/hooks/useCallbackWithToast";
+import usePublisher from "@lichtblick/studio-base/hooks/usePublisher";
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import { useDefaultPanelTitle } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { Button, inputBaseClasses, TextField, Tooltip, Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -18,20 +32,6 @@ import { useDebounce } from "use-debounce";
 
 import { MessageDefinition } from "@foxglove/message-definition";
 import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
-import { Immutable } from "@foxglove/studio";
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
-import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import { useDefaultPanelTitle } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { defaultConfig, usePublishPanelSettings } from "./settings";
 import { PublishConfig } from "./types";

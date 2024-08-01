@@ -15,7 +15,7 @@ import sendNotification, {
   DetailsType,
   NotificationSeverity,
   NotificationType,
-} from "@foxglove/studio-base/util/sendNotification";
+} from "@lichtblick/studio-base/util/sendNotification";
 
 import Rpc from "./Rpc";
 

@@ -9,7 +9,7 @@
     "declarationMap": false,
     "sourceMap": false,
     "paths": {
-      "@foxglove/studio-base/*": ["./*"]
+      "@lichtblick/studio-base/*": ["./*"]
     },
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false

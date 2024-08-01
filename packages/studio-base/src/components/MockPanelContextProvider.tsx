@@ -10,10 +10,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { ReactNode } from "react";
 
-import PanelContext, { PanelContextType } from "@foxglove/studio-base/components/PanelContext";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import PanelContext, { PanelContextType } from "@lichtblick/studio-base/components/PanelContext";
+import { PanelConfig } from "@lichtblick/studio-base/types/panels";
+import { ReactNode } from "react";
 
 type MockProps = Partial<PanelContextType<PanelConfig>>;
 const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<PanelConfig> = {

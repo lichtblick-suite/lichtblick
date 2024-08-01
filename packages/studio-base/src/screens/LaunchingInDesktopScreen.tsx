@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useSessionStorageValue } from "@lichtblick/hooks";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { LaunchPreferenceValue } from "@lichtblick/studio-base/types/LaunchPreferenceValue";
 import { Link, Typography } from "@mui/material";
 import { ReactElement, useEffect } from "react";
-
-import { useSessionStorageValue } from "@foxglove/hooks";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 export function LaunchingInDesktopScreen(): ReactElement {
   const [, setLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);

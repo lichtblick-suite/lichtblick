@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Table from "@lichtblick/studio-base/panels/Table";
+import { mockMessage } from "@lichtblick/studio-base/players/TopicAliasingPlayer/mocks";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, userEvent, within } from "@storybook/testing-library";
-
-import Table from "@foxglove/studio-base/panels/Table";
-import { mockMessage } from "@foxglove/studio-base/players/TopicAliasingPlayer/mocks";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 const makeArrayData = ({
   length = 50,

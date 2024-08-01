@@ -2,28 +2,28 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { McapIndexedReader, McapTypes } from "@mcap/core";
-
-import { pickFields } from "@foxglove/den/records";
-import Logger from "@foxglove/log";
-import { ParsedChannel, parseChannel } from "@foxglove/mcap-support";
-import { Time, fromNanoSec, toNanoSec, compare } from "@foxglove/rostime";
-import { MessageEvent, Metadata } from "@foxglove/studio";
+import { pickFields } from "@lichtblick/den/records";
+import Logger from "@lichtblick/log";
+import { MessageEvent, Metadata } from "@lichtblick/studio";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
   Initalization,
   IteratorResult,
   MessageIteratorArgs,
-} from "@foxglove/studio-base/players/IterablePlayer/IIterableSource";
-import { estimateObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
+} from "@lichtblick/studio-base/players/IterablePlayer/IIterableSource";
+import { estimateObjectSize } from "@lichtblick/studio-base/players/messageMemoryEstimation";
 import {
   PlayerProblem,
   SubscribePayload,
   Topic,
   TopicStats,
-} from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+} from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { McapIndexedReader, McapTypes } from "@mcap/core";
+
+import { ParsedChannel, parseChannel } from "@foxglove/mcap-support";
+import { Time, fromNanoSec, toNanoSec, compare } from "@foxglove/rostime";
 
 const log = Logger.getLogger(__filename);
 

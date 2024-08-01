@@ -118,7 +118,7 @@ rules:
     - selector: "CallExpression[callee.object.name='Promise'][callee.property.name='race']"
       message: >
         Promise.race is banned
-          use `import { race } from "@foxglove/den/async"` instead
+          use `import { race } from "@lichtblick/den/async"` instead
 
         See:
           https://github.com/nodejs/node/issues/17469#issuecomment-685216777

@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutID } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
 
 // We use "brand" tags to prevent confusion between string types with distinct meanings
 // https://github.com/microsoft/TypeScript/issues/4895

@@ -12,17 +12,16 @@
 //   You may not use this file except in compliance with the License.
 
 import { Database20Filled } from "@fluentui/react-icons";
+import MockPanelContextProvider from "@lichtblick/studio-base/components/MockPanelContextProvider";
+import ToolbarIconButton from "@lichtblick/studio-base/components/PanelToolbar/ToolbarIconButton";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { PanelStateContextProvider } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
 import { useTheme } from "@mui/material";
 import { StoryObj, StoryFn } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { PropsWithChildren } from "react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
-
-import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import PanelToolbar from "./index";
 

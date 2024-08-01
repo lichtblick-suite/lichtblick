@@ -15,7 +15,7 @@ update-desktop-database /usr/share/applications || true
 
 # APT_SOURCE_PARTS is where apt looks for source.list files (i.e. /etc/apt/sources.list.d/)
 eval $(apt-config shell APT_SOURCE_PARTS Dir::Etc::sourceparts/d)
-APT_SOURCE_PART=${APT_SOURCE_PARTS}foxglove-studio.list
+APT_SOURCE_PART=${APT_SOURCE_PARTS}lichtblick-suite.list
 
 # APT_TRUSTED_PARTS is where apt looks for gpg keys for repos (i.e. /etc/apt/trusted.gpg.d/)
 eval $(apt-config shell APT_TRUSTED_PARTS Dir::Etc::trustedparts/d)

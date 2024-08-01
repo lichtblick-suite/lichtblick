@@ -3,6 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Cloud24Regular } from "@fluentui/react-icons";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { useCurrentUserType } from "@lichtblick/studio-base/context/CurrentUserContext";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
 import {
   ListItemText,
   Menu,
@@ -12,10 +15,6 @@ import {
   PopoverReference,
 } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
-
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useCurrentUserType } from "@foxglove/studio-base/context/CurrentUserContext";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 const useStyles = makeStyles()((theme) => ({
   paper: {

@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { generateEmptyTypesLib } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
+import { ros_lib_dts } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/ros";
+import { Diagnostic, UserScriptLog } from "@lichtblick/studio-base/players/UserScriptPlayer/types";
 import { createContext, useState } from "react";
 import { StoreApi, createStore, useStore } from "zustand";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
-import { generateEmptyTypesLib } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
-import { ros_lib_dts } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/ros";
-import { Diagnostic, UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
 
 type UserScriptState = {
   rosLib: string;

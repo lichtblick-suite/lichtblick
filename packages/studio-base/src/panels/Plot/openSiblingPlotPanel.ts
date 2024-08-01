@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { OpenSiblingPanel, PanelConfig } from "@lichtblick/studio-base/types/panels";
 import * as _ from "lodash-es";
-
-import type { OpenSiblingPanel, PanelConfig } from "@foxglove/studio-base/types/panels";
 
 import type { PlotConfig } from "./config";
 

@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Sparkline, SparklinePoint } from "@lichtblick/studio-base/components/Sparkline";
 import { StoryObj } from "@storybook/react";
-
-import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Sparkline";
 
 const points: SparklinePoint[] = [
   { value: 5, timestamp: 10 },

@@ -2,14 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { unwrap } from "@foxglove/den/monads";
-import { parseMessagePath } from "@foxglove/message-path";
+import { unwrap } from "@lichtblick/den/monads";
 import {
   MessageBlock,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
+
+import { parseMessagePath } from "@foxglove/message-path";
 
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
 import { IndexDatasetsBuilder } from "./IndexDatasetsBuilder";

@@ -2,20 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
-import { MutexLocked } from "@foxglove/den/async";
-import { Time } from "@foxglove/rostime";
-import { Immutable, Metadata, ParameterValue } from "@foxglove/studio";
-import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { MutexLocked } from "@lichtblick/den/async";
+import { Immutable, Metadata, ParameterValue } from "@lichtblick/studio";
+import { Asset } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
   Player,
   PlayerState,
   PublishPayload,
   SubscribePayload,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
+import * as _ from "lodash-es";
+
+import { Time } from "@foxglove/rostime";
 
 import { IStateProcessor } from "./IStateProcessor";
 import { NoopStateProcessor } from "./NoopStateProcessor";

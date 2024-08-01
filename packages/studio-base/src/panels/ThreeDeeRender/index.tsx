@@ -2,25 +2,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StrictMode, useMemo } from "react";
-import { DeepPartial } from "ts-essentials";
-
-import { useCrash } from "@foxglove/hooks";
-import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
+import { useCrash } from "@lichtblick/hooks";
+import { CaptureErrorBoundary } from "@lichtblick/studio-base/components/CaptureErrorBoundary";
 import {
   ForwardAnalyticsContextProvider,
   ForwardedAnalytics,
   useForwardAnalytics,
-} from "@foxglove/studio-base/components/ForwardAnalyticsContextProvider";
-import Panel from "@foxglove/studio-base/components/Panel";
+} from "@lichtblick/studio-base/components/ForwardAnalyticsContextProvider";
+import Panel from "@lichtblick/studio-base/components/Panel";
 import {
   BuiltinPanelExtensionContext,
   PanelExtensionAdapter,
-} from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { INJECTED_FEATURE_KEYS, useAppContext } from "@foxglove/studio-base/context/AppContext";
-import { TestOptions } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
-import { createSyncRoot } from "@foxglove/studio-base/panels/createSyncRoot";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+} from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { INJECTED_FEATURE_KEYS, useAppContext } from "@lichtblick/studio-base/context/AppContext";
+import { TestOptions } from "@lichtblick/studio-base/panels/ThreeDeeRender/IRenderer";
+import { createSyncRoot } from "@lichtblick/studio-base/panels/createSyncRoot";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { StrictMode, useMemo } from "react";
+import { DeepPartial } from "ts-essentials";
 
 import { SceneExtensionConfig } from "./SceneExtensionConfig";
 import { ThreeDeeRender } from "./ThreeDeeRender";

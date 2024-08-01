@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import PlusIcon from "@mui/icons-material/AddBoxOutlined";
 import MinusIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
@@ -31,9 +33,6 @@ import {
 } from "@tanstack/react-table";
 import memoizeWeak from "memoize-weak";
 import { makeStyles } from "tss-react/mui";
-
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Stack from "@foxglove/studio-base/components/Stack";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";

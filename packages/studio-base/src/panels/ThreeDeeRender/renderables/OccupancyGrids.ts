@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/studio";
+import type { RosValue } from "@lichtblick/studio-base/players/types";
 import { t } from "i18next";
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
-import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";

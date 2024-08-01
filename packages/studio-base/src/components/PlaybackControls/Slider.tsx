@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { scaleValue } from "@lichtblick/den/math";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useRef, ReactNode, useState, useLayoutEffect } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { scaleValue } from "@foxglove/den/math";
 
 export type HoverOverEvent = {
   /** Hovered `fraction` value */

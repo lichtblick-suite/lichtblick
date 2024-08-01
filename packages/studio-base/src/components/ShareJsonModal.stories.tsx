@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj } from "@storybook/react";
-import { fireEvent, screen } from "@storybook/testing-library";
-
 import {
   ShareJsonModal,
   ShareJsonModalProps,
-} from "@foxglove/studio-base/components/ShareJsonModal";
+} from "@lichtblick/studio-base/components/ShareJsonModal";
+import { StoryObj } from "@storybook/react";
+import { fireEvent, screen } from "@storybook/testing-library";
 
 export default {
   title: "components/ShareJsonModal",

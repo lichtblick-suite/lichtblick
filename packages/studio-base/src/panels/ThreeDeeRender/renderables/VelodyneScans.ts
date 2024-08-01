@@ -2,17 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent, SettingsTreeAction } from "@lichtblick/studio";
+import {
+  createStixelMaterial,
+  PointCloudHistoryRenderable,
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
+import type { RosObject } from "@lichtblick/studio-base/players/types";
+import { VelodyneScan } from "@lichtblick/studio-base/types/Messages";
 import * as _ from "lodash-es";
 
 import { toNanoSec, toSec } from "@foxglove/rostime";
 import { NumericType, PointCloud as FoxglovePointCloud } from "@foxglove/schemas";
-import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
-import {
-  createStixelMaterial,
-  PointCloudHistoryRenderable,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
-import type { RosObject } from "@foxglove/studio-base/players/types";
-import { VelodyneScan } from "@foxglove/studio-base/types/Messages";
 import {
   Calibration,
   Model,

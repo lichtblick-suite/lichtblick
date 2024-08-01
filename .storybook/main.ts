@@ -4,11 +4,10 @@
 
 /* eslint-disable filenames/match-exported */
 
+import { makeConfig } from "@lichtblick/studio-base/webpack";
 import { StorybookConfig } from "@storybook/react-webpack5";
 import path from "path";
 import { Configuration } from "webpack";
-
-import { makeConfig } from "@foxglove/studio-base/webpack";
 
 const storybookConfig: StorybookConfig = {
   // Workaround for https://github.com/storybookjs/storybook/issues/19446

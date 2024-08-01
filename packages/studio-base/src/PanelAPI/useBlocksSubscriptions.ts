@@ -11,20 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import memoizeWeak from "memoize-weak";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-
-import { Immutable } from "@foxglove/studio";
+import { Immutable } from "@lichtblick/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
+} from "@lichtblick/studio-base/components/MessagePipeline";
 import {
   MessageEvent,
   MessageBlock as PlayerMessageBlock,
   SubscribePayload,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
+import memoizeWeak from "memoize-weak";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export type MessageBlock = Immutable<{
   [topicName: string]: MessageEvent[];

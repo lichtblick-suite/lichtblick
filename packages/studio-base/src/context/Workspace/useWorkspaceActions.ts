@@ -2,27 +2,26 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { AppSettingsTab } from "@lichtblick/studio-base/components/AppSettingsDialog/AppSettingsDialog";
+import { DataSourceDialogItem } from "@lichtblick/studio-base/components/DataSourceDialog";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { useAppContext } from "@lichtblick/studio-base/context/AppContext";
+import {
+  LayoutData,
+  useCurrentLayoutActions,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import {
+  IDataSourceFactory,
+  usePlayerSelection,
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import useCallbackWithToast from "@lichtblick/studio-base/hooks/useCallbackWithToast";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
+import { downloadTextFile } from "@lichtblick/studio-base/util/download";
 import { Draft, produce } from "immer";
 import * as _ from "lodash-es";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { useMountedState } from "react-use";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
-import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
-import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
-import {
-  LayoutData,
-  useCurrentLayoutActions,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import {
-  IDataSourceFactory,
-  usePlayerSelection,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 import {
   LeftSidebarItemKey,

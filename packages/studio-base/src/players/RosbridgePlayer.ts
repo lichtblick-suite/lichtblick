@@ -11,19 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as _ from "lodash-es";
-import { v4 as uuidv4 } from "uuid";
-
-import { debouncePromise } from "@foxglove/den/async";
-import { filterMap } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
-import roslib from "@foxglove/roslibjs";
-import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { MessageReader as ROS1MessageReader } from "@foxglove/rosmsg-serialization";
-import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-import { Time, fromMillis, toSec } from "@foxglove/rostime";
-import { ParameterValue } from "@foxglove/studio";
-import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
+import { debouncePromise } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
+import { ParameterValue } from "@lichtblick/studio";
+import PlayerProblemManager from "@lichtblick/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
   MessageEvent,
@@ -37,9 +29,17 @@ import {
   PlayerMetricsCollectorInterface,
   TopicStats,
   TopicWithSchemaName,
-} from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
+} from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { bagConnectionsToDatatypes } from "@lichtblick/studio-base/util/bagConnectionsHelper";
+import * as _ from "lodash-es";
+import { v4 as uuidv4 } from "uuid";
+
+import roslib from "@foxglove/roslibjs";
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { MessageReader as ROS1MessageReader } from "@foxglove/rosmsg-serialization";
+import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
+import { Time, fromMillis, toSec } from "@foxglove/rostime";
 
 const log = Log.getLogger(__dirname);
 

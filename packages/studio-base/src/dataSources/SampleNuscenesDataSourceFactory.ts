@@ -5,8 +5,11 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import {
+  IterablePlayer,
+  WorkerIterableSource,
+} from "@lichtblick/studio-base/players/IterablePlayer";
 
 import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
@@ -28,7 +31,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
         return new Worker(
           // foxglove-depcheck-used: babel-plugin-transform-import-meta
           new URL(
-            "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIterableSourceWorker.worker",
+            "@lichtblick/studio-base/players/IterablePlayer/Mcap/McapIterableSourceWorker.worker",
             import.meta.url,
           ),
         );

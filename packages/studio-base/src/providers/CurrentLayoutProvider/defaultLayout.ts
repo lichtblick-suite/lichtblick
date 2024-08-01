@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { defaultPlaybackConfig } from "@lichtblick/studio-base/providers/CurrentLayoutProvider/reducers";
 
 /**
  * Overridden default layout that may have been provided when self-hosting via Docker
  * */
-const staticDefaultLayout = (globalThis as { FOXBOX_STUDIO_DEFAULT_LAYOUT?: LayoutData })
-  .FOXBOX_STUDIO_DEFAULT_LAYOUT;
+const staticDefaultLayout = (globalThis as { LICHTBLICK_STUDIO_DEFAULT_LAYOUT?: LayoutData })
+  .LICHTBLICK_STUDIO_DEFAULT_LAYOUT;
 
 /**
  * This is loaded when the user has no layout selected on application launch

@@ -2,20 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { filterMap } from "@lichtblick/den/collection";
+import { PinholeCameraModel } from "@lichtblick/den/image";
+import { Immutable, MessageEvent, SettingsTreeAction, Topic } from "@lichtblick/studio";
+import { Path } from "@lichtblick/studio-base/panels/ThreeDeeRender/LayerErrors";
+import { onlyLastByTopicMessage } from "@lichtblick/studio-base/panels/ThreeDeeRender/SceneExtension";
+import {
+  ImageMarker as RosImageMarker,
+  ImageMarkerArray as RosImageMarkerArray,
+} from "@lichtblick/studio-base/types/Messages";
 import { t } from "i18next";
 import * as THREE from "three";
 import { Opaque } from "ts-essentials";
 
-import { filterMap } from "@foxglove/den/collection";
-import { PinholeCameraModel } from "@foxglove/den/image";
 import { ImageAnnotations as FoxgloveImageAnnotations } from "@foxglove/schemas";
-import { Immutable, MessageEvent, SettingsTreeAction, Topic } from "@foxglove/studio";
-import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
-import { onlyLastByTopicMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtension";
-import {
-  ImageMarker as RosImageMarker,
-  ImageMarkerArray as RosImageMarkerArray,
-} from "@foxglove/studio-base/types/Messages";
 import { LabelPool } from "@foxglove/three-text";
 
 import { RenderableTopicAnnotations } from "./RenderableTopicAnnotations";

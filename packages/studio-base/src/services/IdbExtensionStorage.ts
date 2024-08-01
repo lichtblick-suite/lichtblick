@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as IDB from "idb/with-async-ittr";
-
-import Log from "@foxglove/log";
+import Log from "@lichtblick/log";
 import {
   IExtensionStorage,
   StoredExtension,
-} from "@foxglove/studio-base/services/IExtensionStorage";
-import { ExtensionInfo } from "@foxglove/studio-base/types/Extensions";
+} from "@lichtblick/studio-base/services/IExtensionStorage";
+import { ExtensionInfo } from "@lichtblick/studio-base/types/Extensions";
+import * as IDB from "idb/with-async-ittr";
 
 const log = Log.getLogger(__filename);
 

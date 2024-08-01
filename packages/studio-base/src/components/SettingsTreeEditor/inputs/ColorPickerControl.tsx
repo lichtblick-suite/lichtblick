@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
 import TagIcon from "@mui/icons-material/Tag";
 import { TextField } from "@mui/material";
 import { useCallback, useState, useMemo } from "react";
@@ -9,8 +10,6 @@ import { HexAlphaColorPicker, HexColorPicker } from "react-colorful";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
-
-import Stack from "@foxglove/studio-base/components/Stack";
 
 const useStyles = makeStyles()((theme) => ({
   picker: {

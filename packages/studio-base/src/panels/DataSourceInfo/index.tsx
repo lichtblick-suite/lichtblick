@@ -2,20 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Divider, Typography } from "@mui/material";
-import { makeStyles } from "tss-react/mui";
-
-import CopyButton from "@foxglove/studio-base/components/CopyButton";
-import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import CopyButton from "@lichtblick/studio-base/components/CopyButton";
+import { DirectTopicStatsUpdater } from "@lichtblick/studio-base/components/DirectTopicStatsUpdater";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { Topic } from "@foxglove/studio-base/src/players/types";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { Divider, Typography } from "@mui/material";
+import { makeStyles } from "tss-react/mui";
+
+import { Topic } from "@lichtblick/studio-base/src/players/types";
 
 const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
   copyIcon: {

@@ -2,19 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import EventEmitter from "eventemitter3";
-import * as _ from "lodash-es";
-import { v4 as uuidv4 } from "uuid";
-
-import { MutexLocked } from "@foxglove/den/async";
-import Logger from "@foxglove/log";
-import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { MutexLocked } from "@lichtblick/den/async";
+import Logger from "@lichtblick/log";
+import { LayoutID } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
 import {
   ILayoutManager,
   LayoutManagerChangeEvent,
   LayoutManagerEventTypes,
-} from "@foxglove/studio-base/services/ILayoutManager";
+} from "@lichtblick/studio-base/services/ILayoutManager";
 import {
   ILayoutStorage,
   ISO8601Timestamp,
@@ -23,11 +19,14 @@ import {
   layoutAppearsDeleted,
   layoutIsShared,
   layoutPermissionIsShared,
-} from "@foxglove/studio-base/services/ILayoutStorage";
+} from "@lichtblick/studio-base/services/ILayoutStorage";
 import {
   IRemoteLayoutStorage,
   RemoteLayout,
-} from "@foxglove/studio-base/services/IRemoteLayoutStorage";
+} from "@lichtblick/studio-base/services/IRemoteLayoutStorage";
+import EventEmitter from "eventemitter3";
+import * as _ from "lodash-es";
+import { v4 as uuidv4 } from "uuid";
 
 import { NamespacedLayoutStorage } from "./NamespacedLayoutStorage";
 import WriteThroughLayoutCache from "./WriteThroughLayoutCache";

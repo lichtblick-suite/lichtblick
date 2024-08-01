@@ -5,9 +5,9 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import VelodynePlayer from "@foxglove/studio-base/players/VelodynePlayer";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import VelodynePlayer from "@lichtblick/studio-base/players/VelodynePlayer";
+import { Player } from "@lichtblick/studio-base/players/types";
 
 class VelodyneDataSourceFactory implements IDataSourceFactory {
   public id = "velodyne-device";

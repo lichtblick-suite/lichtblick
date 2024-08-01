@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
 import { diff } from "just-diff";
-
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
 /**
  * isLayoutEqual compares two LayoutData instances for "equality". If the two instances are

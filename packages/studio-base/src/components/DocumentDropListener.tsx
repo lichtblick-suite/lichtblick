@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Logger from "@lichtblick/log";
+import DropOverlay from "@lichtblick/studio-base/components/DropOverlay";
 import { useSnackbar } from "notistack";
 import { extname } from "path";
 import { useCallback, useLayoutEffect, useState } from "react";
-
-import Logger from "@foxglove/log";
-import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
 
 const log = Logger.getLogger(__filename);
 

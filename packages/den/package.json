@@ -1,5 +1,5 @@
 {
-  "name": "@foxglove/den",
+  "name": "@lichtblick/den",
   "description": "Incubation area for code that may be released under future @foxglove packages",
   "license": "MPL-2.0",
   "private": true,

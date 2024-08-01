@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Dismiss20Filled, Warning24Filled } from "@fluentui/react-icons";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import {
   Button,
   IconButton,
@@ -14,7 +15,6 @@ import {
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import Stack from "@foxglove/studio-base/components/Stack";
 import { createMuiTheme } from "@foxglove/theme";
 
 const MINIMUM_CHROME_VERSION = 76;

@@ -11,24 +11,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@lichtblick/studio-base/components/PanelToolbar";
+import ToolbarIconButton from "@lichtblick/studio-base/components/PanelToolbar/ToolbarIconButton";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { DraggableToolbarTab } from "@lichtblick/studio-base/panels/Tab/DraggableToolbarTab";
+import {
+  DraggingTabItem,
+  TAB_DRAG_TYPE,
+  TabActions,
+} from "@lichtblick/studio-base/panels/Tab/TabDndContext";
+import { TabConfig } from "@lichtblick/studio-base/types/layouts";
 import AddIcon from "@mui/icons-material/Add";
 import { ButtonBase } from "@mui/material";
 import { useEffect } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { makeStyles } from "tss-react/mui";
-
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@foxglove/studio-base/components/PanelToolbar";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { DraggableToolbarTab } from "@foxglove/studio-base/panels/Tab/DraggableToolbarTab";
-import {
-  DraggingTabItem,
-  TAB_DRAG_TYPE,
-  TabActions,
-} from "@foxglove/studio-base/panels/Tab/TabDndContext";
-import { TabConfig } from "@foxglove/studio-base/types/layouts";
 
 const useStyles = makeStyles()((theme) => ({
   root: {

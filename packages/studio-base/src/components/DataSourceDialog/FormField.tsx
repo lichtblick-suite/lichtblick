@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Field } from "@lichtblick/studio-base/context/PlayerSelectionContext";
 import { FormHelperText, TextField } from "@mui/material";
 import { ChangeEvent, useState } from "react";
-
-import { Field } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 type Props = {
   disabled: boolean;

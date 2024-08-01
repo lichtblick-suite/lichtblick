@@ -13,7 +13,7 @@
 import {
   DiagnosticSeverity,
   ScriptData,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
 
 export const hasTransformerErrors = (scriptData: ScriptData): boolean =>
   scriptData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);

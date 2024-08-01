@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PanelCatalog } from "@lichtblick/studio-base/components/PanelCatalog";
+import useAddPanel from "@lichtblick/studio-base/hooks/useAddPanel";
 import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
-
-import { PanelCatalog } from "@foxglove/studio-base/components/PanelCatalog";
-import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 
 const useStyles = makeStyles()((theme) => ({
   menuList: {

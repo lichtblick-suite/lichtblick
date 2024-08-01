@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMessageReducer } from "@lichtblick/studio-base/PanelAPI";
+import { MessageEvent } from "@lichtblick/studio-base/players/types";
 import { useMemo } from "react";
-
-import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import { DiagnosticStatusArrayMsg, DiagnosticsById, computeDiagnosticInfo } from "./util";
 

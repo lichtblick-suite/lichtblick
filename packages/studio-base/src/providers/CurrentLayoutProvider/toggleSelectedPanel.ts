@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as _ from "lodash-es";
-
-import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import { SavedProps } from "@foxglove/studio-base/types/panels";
+import { TabPanelConfig } from "@lichtblick/studio-base/types/layouts";
+import { SavedProps } from "@lichtblick/studio-base/types/panels";
 import {
   getAllPanelIds,
   getParentTabPanelByPanelId,
   isTabPanel,
-} from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/util/layout";
+import * as _ from "lodash-es";
 
 export default function toggleSelectedPanel(
   panelId: string,

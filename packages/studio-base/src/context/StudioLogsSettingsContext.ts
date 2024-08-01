@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { LogLevel } from "@lichtblick/log";
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
-import { LogLevel } from "@foxglove/log";
 
 type StudioLogConfigChannel = { name: string; enabled: boolean };
 

@@ -3,19 +3,18 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ErrorCircle16Filled } from "@fluentui/react-icons";
-import { CircularProgress, IconButton } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
-
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
-import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TextMiddleTruncate from "@lichtblick/studio-base/components/TextMiddleTruncate";
+import WssErrorModal from "@lichtblick/studio-base/components/WssErrorModal";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
+import { CircularProgress, IconButton } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import { EndTimestamp } from "./EndTimestamp";
 

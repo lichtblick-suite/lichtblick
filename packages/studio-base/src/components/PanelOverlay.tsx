@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PANEL_ROOT_CLASS_NAME } from "@lichtblick/studio-base/components/PanelRoot";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/studio-base/components/PanelToolbar";
 import {
   Backdrop,
   Button,
@@ -16,9 +18,6 @@ import { forwardRef } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 
 const useStyles = makeStyles<void, "buttonGroup">()((theme, _params, classes) => {
   const transparentBackground = tc(theme.palette.background.default).setAlpha(0).toRgbString();

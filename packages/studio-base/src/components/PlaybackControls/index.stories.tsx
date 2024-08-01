@@ -11,26 +11,25 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { action } from "@storybook/addon-actions";
-import { StoryObj, StoryFn } from "@storybook/react";
-import { useEffect, useLayoutEffect } from "react";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   IAppConfiguration,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
-import { useEvents } from "@foxglove/studio-base/context/EventsContext";
-import { useSetHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
+} from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import { useSetHoverValue } from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
 import {
   PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
-} from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import { makeMockEvents } from "@foxglove/studio-base/test/mocks/makeMockEvents";
+} from "@lichtblick/studio-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import EventsProvider from "@lichtblick/studio-base/providers/EventsProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import { makeMockEvents } from "@lichtblick/studio-base/test/mocks/makeMockEvents";
+import { action } from "@storybook/addon-actions";
+import { StoryObj, StoryFn } from "@storybook/react";
+import { useEffect, useLayoutEffect } from "react";
 
 import PlaybackControls from "./index";
 

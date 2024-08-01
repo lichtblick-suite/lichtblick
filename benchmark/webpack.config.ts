@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { WebpackArgv } from "@lichtblick/studio-base/WebpackArgv";
+import { makeConfig } from "@lichtblick/studio-base/webpack";
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, WebpackPluginInstance } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
-
-import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
-import { makeConfig } from "@foxglove/studio-base/webpack";
 
 interface WebpackConfiguration extends Configuration {
   devServer?: WebpackDevServerConfiguration;

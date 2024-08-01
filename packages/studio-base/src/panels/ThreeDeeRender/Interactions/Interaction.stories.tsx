@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
+import { PointCloud2 } from "@lichtblick/studio-base/types/Messages";
 import { useTheme } from "@mui/material";
 import { StoryFn, StoryObj } from "@storybook/react";
 import { PropsWithChildren } from "react";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
 import Interactions, { OBJECT_TAB_TYPE } from "./Interactions";
 

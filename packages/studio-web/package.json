@@ -1,16 +1,16 @@
 {
-  "name": "@foxglove/studio-web",
+  "name": "@lichtblick/studio-web",
   "license": "MPL-2.0",
   "private": true,
   "main": "./src/index.tsx",
   "dependencies": {
-    "@foxglove/studio-base": "workspace:*"
+    "@lichtblick/studio-base": "workspace:*"
   },
   "devDependencies": {
     "@fluentui/react-icons": "2.0.224",
-    "@foxglove/log": "workspace:*",
     "@foxglove/theme": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
+    "@lichtblick/log": "workspace:*",
     "@mui/material": "5.13.5",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@storybook/react": "7.6.10",

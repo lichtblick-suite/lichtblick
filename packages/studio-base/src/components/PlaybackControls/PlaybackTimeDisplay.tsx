@@ -11,14 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time } from "@foxglove/rostime";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+
+import { Time } from "@foxglove/rostime";
 
 import { UnconnectedPlaybackTimeDisplay } from "./UnconnectedPlaybackTimeDisplay";
 

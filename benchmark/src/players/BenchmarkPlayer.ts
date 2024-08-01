@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { filterMap } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
-import { toRFC3339String } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { BlockLoader } from "@foxglove/studio-base/players/IterablePlayer/BlockLoader";
-import { IIterableSource } from "@foxglove/studio-base/players/IterablePlayer/IIterableSource";
-import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
+import { filterMap } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
+import { MessageEvent } from "@lichtblick/studio";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { BlockLoader } from "@lichtblick/studio-base/players/IterablePlayer/BlockLoader";
+import { IIterableSource } from "@lichtblick/studio-base/players/IterablePlayer/IIterableSource";
+import PlayerProblemManager from "@lichtblick/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
   Player,
@@ -19,8 +18,10 @@ import {
   Progress,
   PublishPayload,
   SubscribePayload,
-} from "@foxglove/studio-base/players/types";
-import delay from "@foxglove/studio-base/util/delay";
+} from "@lichtblick/studio-base/players/types";
+import delay from "@lichtblick/studio-base/util/delay";
+
+import { toRFC3339String } from "@foxglove/rostime";
 
 const log = Log.getLogger(__filename);
 

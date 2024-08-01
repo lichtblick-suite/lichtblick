@@ -8,9 +8,8 @@ import {
   TabDesktopMultiple20Regular,
   TableSimple20Regular,
 } from "@fluentui/react-icons";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import { Meta, StoryFn, StoryObj } from "@storybook/react";
-
-import Stack from "@foxglove/studio-base/components/Stack";
 
 import { PanelOverlay } from "./PanelOverlay";
 

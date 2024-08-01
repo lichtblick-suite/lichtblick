@@ -2,16 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { filterMap } from "@foxglove/den/collection";
-import { Time, fromNanoSec } from "@foxglove/rostime";
-import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
-import { RosObject } from "@foxglove/studio-base/players/types";
+import { filterMap } from "@lichtblick/den/collection";
+import { RosObject } from "@lichtblick/studio-base/players/types";
 import {
   ImageMarker,
   ImageMarkerArray,
   ImageMarkerType,
-} from "@foxglove/studio-base/types/Messages";
-import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
+} from "@lichtblick/studio-base/types/Messages";
+import { mightActuallyBePartial } from "@lichtblick/studio-base/util/mightActuallyBePartial";
+
+import { Time, fromNanoSec } from "@foxglove/rostime";
+import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
 
 import type { Annotation, PathKey, PointsAnnotation } from "./types";
 

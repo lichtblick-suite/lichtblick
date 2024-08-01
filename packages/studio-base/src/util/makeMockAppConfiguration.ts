@@ -5,7 +5,7 @@
 import {
   IAppConfiguration,
   AppConfigurationValue,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
+} from "@lichtblick/studio-base/context/AppConfigurationContext";
 
 export function makeMockAppConfiguration(
   entries?: [string, AppConfigurationValue][],

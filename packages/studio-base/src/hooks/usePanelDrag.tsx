@@ -11,16 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import {
+  useCurrentLayoutActions,
+  usePanelMosaicId,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { MosaicDropResult, SavedProps } from "@lichtblick/studio-base/types/panels";
 import * as _ from "lodash-es";
 import { useContext } from "react";
 import { useDrag, ConnectDragSource, ConnectDragPreview } from "react-dnd";
 import { MosaicDragType, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
-
-import {
-  useCurrentLayoutActions,
-  usePanelMosaicId,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { MosaicDropResult, SavedProps } from "@foxglove/studio-base/types/panels";
 
 type PanelDragObject = {
   deferredHide: number;

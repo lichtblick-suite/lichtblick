@@ -2,6 +2,42 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { debouncePromise } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import { Immutable } from "@lichtblick/studio";
+import KeyListener from "@lichtblick/studio-base/components/KeyListener";
+import { fillInGlobalVariablesInPath } from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+  useMessagePipelineGetter,
+  useMessagePipelineSubscribe,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import {
+  PanelContextMenu,
+  PanelContextMenuItem,
+} from "@lichtblick/studio-base/components/PanelContextMenu";
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TimeBasedChartTooltipContent, {
+  TimeBasedChartTooltipData,
+} from "@lichtblick/studio-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
+import { Bounds1D } from "@lichtblick/studio-base/components/TimeBasedChart/types";
+import {
+  TimelineInteractionStateStore,
+  useClearHoverValue,
+  useSetHoverValue,
+  useTimelineInteractionState,
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import useGlobalVariables from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { VerticalBars } from "@lichtblick/studio-base/panels/Plot/VerticalBars";
+import { SubscribePayload } from "@lichtblick/studio-base/players/types";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/studio-base/util/layout";
+import { getLineColor } from "@lichtblick/studio-base/util/plotColors";
 import { Button, Tooltip, Fade, buttonClasses, useTheme } from "@mui/material";
 import Hammer from "hammerjs";
 import * as _ from "lodash-es";
@@ -10,44 +46,8 @@ import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
-import { debouncePromise } from "@foxglove/den/async";
-import { filterMap } from "@foxglove/den/collection";
 import { parseMessagePath } from "@foxglove/message-path";
 import { add as addTimes, fromSec, isTime, toSec } from "@foxglove/rostime";
-import { Immutable } from "@foxglove/studio";
-import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import { fillInGlobalVariablesInPath } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-  useMessagePipelineGetter,
-  useMessagePipelineSubscribe,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import {
-  PanelContextMenu,
-  PanelContextMenuItem,
-} from "@foxglove/studio-base/components/PanelContextMenu";
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import TimeBasedChartTooltipContent, {
-  TimeBasedChartTooltipData,
-} from "@foxglove/studio-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
-import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import {
-  TimelineInteractionStateStore,
-  useClearHoverValue,
-  useSetHoverValue,
-  useTimelineInteractionState,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { VerticalBars } from "@foxglove/studio-base/panels/Plot/VerticalBars";
-import { SubscribePayload } from "@foxglove/studio-base/players/types";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
-import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";

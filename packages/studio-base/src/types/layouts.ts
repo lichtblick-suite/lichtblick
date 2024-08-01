@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import { MosaicNode } from "react-mosaic-component";
-
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 export type TabConfig = { title: string; layout?: MosaicNode<string> };
 

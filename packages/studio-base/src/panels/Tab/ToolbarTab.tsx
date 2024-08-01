@@ -11,14 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/studio-base/components/PanelToolbar";
+import { TabActions } from "@lichtblick/studio-base/panels/Tab/TabDndContext";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, InputBase } from "@mui/material";
 import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
 import { makeStyles } from "tss-react/mui";
 
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
-import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { fontSansSerif } from "@foxglove/theme";
 
 const MAX_TAB_WIDTH = 120;

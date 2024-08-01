@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import StudioToastProvider from "@lichtblick/studio-base/components/StudioToastProvider";
 import { StoryFn, StoryObj } from "@storybook/react";
 import { useSnackbar } from "notistack";
 import { useEffect } from "react";
-
-import StudioToastProvider from "@foxglove/studio-base/components/StudioToastProvider";
 
 export default {
   title: "components/StudioToastProvider",

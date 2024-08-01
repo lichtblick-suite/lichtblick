@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent, PlayerPresence, PlayerState } from "@foxglove/studio-base/players/types";
+import { MessageEvent, PlayerPresence, PlayerState } from "@lichtblick/studio-base/players/types";
 
 import MessageOrderTracker from "./MessageOrderTracker";
 

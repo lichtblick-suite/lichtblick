@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { Player, PlayerMetricsCollectorInterface } from "@lichtblick/studio-base/players/types";
+import { RegisteredIconNames } from "@lichtblick/studio-base/types/Icons";
 import { createContext, useContext } from "react";
-
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
-import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
 
 export type DataSourceFactoryInitializeArgs = {
   metricsCollector: PlayerMetricsCollectorInterface;

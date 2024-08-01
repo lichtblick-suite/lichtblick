@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TextHighlight from "@lichtblick/studio-base/components/TextHighlight";
+import { PanelInfo } from "@lichtblick/studio-base/context/PanelCatalogContext";
 import { Card, CardActionArea, CardContent, CardMedia, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
-import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 
 const useStyles = makeStyles()((theme) => {
   return {

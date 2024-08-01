@@ -1,10 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { TFunction } from "i18next";
 
-import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
+import { PanelInfo } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
+import { TFunction } from "i18next";
 
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import gaugeThumbnail from "./Gauge/thumbnail.png";

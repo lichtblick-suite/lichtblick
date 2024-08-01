@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { SettingsTreeNodeAction } from "@lichtblick/studio";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
 import { useState } from "react";
-
-import { SettingsTreeNodeAction } from "@foxglove/studio";
 
 import { icons } from "./icons";
 

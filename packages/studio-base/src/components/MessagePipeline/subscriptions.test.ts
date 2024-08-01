@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { mergeSubscriptions } from "@foxglove/studio-base/components/MessagePipeline/subscriptions";
-import { SubscribePayload } from "@foxglove/studio-base/players/types";
+import { mergeSubscriptions } from "@lichtblick/studio-base/components/MessagePipeline/subscriptions";
+import { SubscribePayload } from "@lichtblick/studio-base/players/types";
 
 describe("mergeSubscriptions", () => {
   it("combines full and partial subscriptions", () => {

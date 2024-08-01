@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { UserScript, UserScripts } from "@lichtblick/studio-base/types/panels";
 import AddIcon from "@mui/icons-material/Add";
 import { Button, List } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { UserScript, UserScripts } from "@foxglove/studio-base/types/panels";
 
 import { ScriptListItem } from "./ScriptListItem";
 import { SidebarHeader } from "./SidebarHeader";

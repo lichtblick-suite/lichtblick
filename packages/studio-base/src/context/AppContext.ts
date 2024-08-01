@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable, SettingsTreeField, SettingsTreeNode } from "@lichtblick/studio";
+import { AppBarMenuItem } from "@lichtblick/studio-base/components/AppBar/types";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { WorkspaceContextStore } from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import type { SceneExtensionConfig } from "@lichtblick/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import type { Player } from "@lichtblick/studio-base/players/types";
 import { createContext, useContext } from "react";
 import { DeepPartial } from "ts-essentials";
 import { StoreApi } from "zustand";
-
-import { Immutable, SettingsTreeField, SettingsTreeNode } from "@foxglove/studio";
-import { AppBarMenuItem } from "@foxglove/studio-base/components/AppBar/types";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { WorkspaceContextStore } from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import type { SceneExtensionConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
-import type { Player } from "@foxglove/studio-base/players/types";
 
 interface IAppContext {
   appBarLayoutButton?: JSX.Element;

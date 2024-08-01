@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import setImmediate from "@lichtblick/studio-base/util/setImmediate";
 import util from "util";
-
-import setImmediate from "@foxglove/studio-base/util/setImmediate";
 
 process.env.WASM_LZ4_ENVIRONMENT = "NODE";
 

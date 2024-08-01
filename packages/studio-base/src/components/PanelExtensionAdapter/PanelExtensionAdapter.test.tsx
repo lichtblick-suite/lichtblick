@@ -6,16 +6,16 @@
 
 /* eslint-disable jest/no-done-callback */
 
+import { Condvar, signal } from "@lichtblick/den/async";
+import { PanelExtensionContext, RenderState, MessageEvent, Immutable } from "@lichtblick/studio";
+import MockPanelContextProvider from "@lichtblick/studio-base/components/MockPanelContextProvider";
+import { AdvertiseOptions, PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import ThemeProvider from "@lichtblick/studio-base/theme/ThemeProvider";
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 
-import { Condvar, signal } from "@foxglove/den/async";
 import { Time } from "@foxglove/rostime";
-import { PanelExtensionContext, RenderState, MessageEvent, Immutable } from "@foxglove/studio";
-import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import { AdvertiseOptions, PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
 

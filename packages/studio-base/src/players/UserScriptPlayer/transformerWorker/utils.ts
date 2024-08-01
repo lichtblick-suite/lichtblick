@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ts from "typescript/lib/typescript";
-
 import {
   DiagnosticSeverity,
   Diagnostic,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import ts from "typescript/lib/typescript";
 
 const mapCategoryToDiagnosticSeverity = (
   category: ts.DiagnosticCategory,

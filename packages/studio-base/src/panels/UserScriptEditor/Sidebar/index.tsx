@@ -7,15 +7,14 @@ import {
   Script24Regular,
   Toolbox24Regular,
 } from "@fluentui/react-icons";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { Script } from "@lichtblick/studio-base/panels/UserScriptEditor/script";
+import { UserScript, UserScripts } from "@lichtblick/studio-base/types/panels";
 import { Divider, Paper, Tab, Tabs, tabClasses, tabsClasses } from "@mui/material";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 import { SyntheticEvent, useCallback, useMemo, useState } from "react";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { Script } from "@foxglove/studio-base/panels/UserScriptEditor/script";
-import { UserScript, UserScripts } from "@foxglove/studio-base/types/panels";
 
 import { ScriptsList } from "./ScriptsList";
 import { Templates } from "./Templates";

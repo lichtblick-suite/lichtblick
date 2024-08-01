@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
+import { isAbsoluteTime, formatTimeRaw } from "@lichtblick/studio-base/util/time";
 import { Typography } from "@mui/material";
 import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { Time } from "@foxglove/rostime";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { isAbsoluteTime, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 type Props = {
   disableDate?: boolean;

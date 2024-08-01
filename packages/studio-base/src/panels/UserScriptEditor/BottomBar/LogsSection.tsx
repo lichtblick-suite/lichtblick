@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { UserScriptLog } from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import { useJsonTreeTheme } from "@lichtblick/studio-base/util/globalConstants";
 import { Link, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { UserScriptLog } from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
 const useStyles = makeStyles()({
   list: {

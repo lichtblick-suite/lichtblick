@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import delay from "@lichtblick/studio-base/util/delay";
 import { expect } from "@storybook/jest";
 import { StoryContext, StoryFn, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
-
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import delay from "@foxglove/studio-base/util/delay";
 
 import CallServicePanel from "./index";
 import { Config } from "./types";

@@ -4,6 +4,21 @@
 
 /* eslint-disable @foxglove/no-restricted-imports */
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import { EventsList } from "@lichtblick/studio-base/components/EventsList";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { SidebarContent } from "@lichtblick/studio-base/components/SidebarContent";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { TopicList } from "@lichtblick/studio-base/components/TopicList";
+import WssErrorModal from "@lichtblick/studio-base/components/WssErrorModal";
+import { useCurrentUser } from "@lichtblick/studio-base/context/CurrentUserContext";
+import { EventsStore, useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
 import AddIcon from "@mui/icons-material/Add";
 import {
   CircularProgress,
@@ -16,22 +31,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { EventsList } from "@foxglove/studio-base/components/EventsList";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { TopicList } from "@foxglove/studio-base/components/TopicList";
-import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
-import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import { DataSourceInfoView } from "../DataSourceInfoView";
 import { ProblemsList } from "../ProblemsList";

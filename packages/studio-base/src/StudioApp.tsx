@@ -2,21 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { IdbLayoutStorage } from "@lichtblick/studio-base/IdbLayoutStorage";
+import LayoutStorageContext from "@lichtblick/studio-base/context/LayoutStorageContext";
+import NativeAppMenuContext from "@lichtblick/studio-base/context/NativeAppMenuContext";
+import NativeWindowContext from "@lichtblick/studio-base/context/NativeWindowContext";
+import { useSharedRootContext } from "@lichtblick/studio-base/context/SharedRootContext";
+import EventsProvider from "@lichtblick/studio-base/providers/EventsProvider";
+import LayoutManagerProvider from "@lichtblick/studio-base/providers/LayoutManagerProvider";
+import ProblemsContextProvider from "@lichtblick/studio-base/providers/ProblemsContextProvider";
+import { StudioLogsSettingsProvider } from "@lichtblick/studio-base/providers/StudioLogsSettingsProvider";
+import TimelineInteractionStateProvider from "@lichtblick/studio-base/providers/TimelineInteractionStateProvider";
+import UserProfileLocalStorageProvider from "@lichtblick/studio-base/providers/UserProfileLocalStorageProvider";
 import { Fragment, Suspense, useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-import { IdbLayoutStorage } from "@foxglove/studio-base/IdbLayoutStorage";
-import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
-import NativeAppMenuContext from "@foxglove/studio-base/context/NativeAppMenuContext";
-import NativeWindowContext from "@foxglove/studio-base/context/NativeWindowContext";
-import { useSharedRootContext } from "@foxglove/studio-base/context/SharedRootContext";
-import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
-import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
-import ProblemsContextProvider from "@foxglove/studio-base/providers/ProblemsContextProvider";
-import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
-import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
-import UserProfileLocalStorageProvider from "@foxglove/studio-base/providers/UserProfileLocalStorageProvider";
 
 import Workspace from "./Workspace";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";

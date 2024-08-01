@@ -2,20 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { t } from "i18next";
-import * as _ from "lodash-es";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
-import { SettingsTreeAction } from "@foxglove/studio";
-import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
+import { SettingsTreeAction } from "@lichtblick/studio";
+import { ICameraHandler } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import {
   AnyFrameId,
   CoordinateFrame,
   Pose,
   UserFrameId,
   makePose,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/transforms";
+import { t } from "i18next";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import type { FollowMode, IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";

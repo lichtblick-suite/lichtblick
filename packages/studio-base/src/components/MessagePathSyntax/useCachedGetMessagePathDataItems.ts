@@ -11,11 +11,22 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { filterMap } from "@lichtblick/den/collection";
+import { useDeepMemo, useShallowMemo } from "@lichtblick/hooks";
+import { Immutable } from "@lichtblick/studio";
+import * as PanelAPI from "@lichtblick/studio-base/PanelAPI";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { MessageEvent, Topic } from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import {
+  enumValuesByDatatypeAndField,
+  extractTypeFromStudioEnumAnnotation,
+} from "@lichtblick/studio-base/util/enums";
 import * as _ from "lodash-es";
 import { useCallback, useMemo } from "react";
 
-import { filterMap } from "@foxglove/den/collection";
-import { useDeepMemo, useShallowMemo } from "@foxglove/hooks";
 import {
   quoteTopicNameIfNeeded,
   parseMessagePath,
@@ -23,17 +34,6 @@ import {
   MessagePathStructureItemMessage,
   MessagePath,
 } from "@foxglove/message-path";
-import { Immutable } from "@foxglove/studio";
-import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import useGlobalVariables, {
-  GlobalVariables,
-} from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import {
-  enumValuesByDatatypeAndField,
-  extractTypeFromStudioEnumAnnotation,
-} from "@foxglove/studio-base/util/enums";
 
 import { filterMatches } from "./filterMatches";
 import { TypicalFilterNames } from "./isTypicalFilterName";

@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
 import * as _ from "lodash-es";
-
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import { basicDatatypes } from "./basicDatatypes";
 import rosDatatypesToMessageDefinition from "./rosDatatypesToMessageDefinition";

@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { SettingsTreeAction } from "@lichtblick/studio";
 import { t } from "i18next";
 import * as _ from "lodash-es";
 
 import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeAction } from "@foxglove/studio";
 
 import { LayerSettingsMarker, LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";

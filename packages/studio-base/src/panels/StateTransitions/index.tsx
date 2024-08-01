@@ -11,6 +11,31 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { filterMap } from "@lichtblick/den/collection";
+import { Immutable } from "@lichtblick/studio";
+import { useBlocksSubscriptions } from "@lichtblick/studio-base/PanelAPI";
+import {
+  MessageAndData,
+  MessageDataItemsByPath,
+  useDecodeMessagePathsForMessagesByTopic,
+} from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import useMessagesByPath from "@lichtblick/studio-base/components/MessagePathSyntax/useMessagesByPath";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+  useMessagePipelineGetter,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TimeBasedChart from "@lichtblick/studio-base/components/TimeBasedChart";
+import { ChartDatasets } from "@lichtblick/studio-base/components/TimeBasedChart/types";
+import { PathLegend } from "@lichtblick/studio-base/panels/StateTransitions/PathLegend";
+import { subscribePayloadFromMessagePath } from "@lichtblick/studio-base/players/subscribePayloadFromMessagePath";
+import { SubscribePayload } from "@lichtblick/studio-base/players/types";
+import { Bounds } from "@lichtblick/studio-base/types/Bounds";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import * as _ from "lodash-es";
 import * as R from "ramda";
@@ -18,34 +43,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
 
-import { filterMap } from "@foxglove/den/collection";
 import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { Immutable } from "@foxglove/studio";
-import { useBlocksSubscriptions } from "@foxglove/studio-base/PanelAPI";
-import {
-  MessageAndData,
-  MessageDataItemsByPath,
-  useDecodeMessagePathsForMessagesByTopic,
-} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-  useMessagePipelineGetter,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
-import { ChartDatasets } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { PathLegend } from "@foxglove/studio-base/panels/StateTransitions/PathLegend";
-import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
-import { SubscribePayload } from "@foxglove/studio-base/players/types";
-import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
-import { Bounds } from "@foxglove/studio-base/types/Bounds";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fontMonospace } from "@foxglove/theme";
+import { OnClickArg as OnChartClickArgs } from "@lichtblick/studio-base/src/components/Chart";
 
 import { messagesToDataset } from "./messagesToDataset";
 import { PathState, useStateTransitionsPanelSettings } from "./settings";

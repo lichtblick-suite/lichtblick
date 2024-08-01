@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { diffLabels, DiffObject } from "@lichtblick/studio-base/panels/RawMessages/getDiff";
+import { getChangeCounts } from "@lichtblick/studio-base/panels/RawMessages/utils";
 import { Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
-import { getChangeCounts } from "@foxglove/studio-base/panels/RawMessages/utils";
 
 const useStyles = makeStyles()((theme) => ({
   diff: {

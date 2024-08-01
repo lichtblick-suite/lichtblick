@@ -2,20 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useCallback, useMemo, useRef, useState } from "react";
-
-import { useShallowMemo } from "@foxglove/hooks";
+import { useShallowMemo } from "@lichtblick/hooks";
 import CurrentLayoutContext, {
   ICurrentLayout,
   LayoutID,
   LayoutState,
   SelectedLayout,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import {
   LayoutData,
   PanelsActions,
-} from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { defaultPlaybackConfig } from "@lichtblick/studio-base/providers/CurrentLayoutProvider/reducers";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import panelsReducer from "./reducers";
 

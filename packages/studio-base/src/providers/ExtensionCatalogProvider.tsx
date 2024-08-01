@@ -2,25 +2,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import React, { PropsWithChildren, useEffect, useState } from "react";
-import ReactDOM from "react-dom";
-import { StoreApi, createStore } from "zustand";
-
-import Logger from "@foxglove/log";
+import Logger from "@lichtblick/log";
 import {
   ExtensionContext,
   ExtensionModule,
   RegisterMessageConverterArgs,
   TopicAliasFunction,
-} from "@foxglove/studio";
+} from "@lichtblick/studio";
 import {
   ExtensionCatalog,
   ExtensionCatalogContext,
   RegisteredPanel,
-} from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { TopicAliasFunctions } from "@foxglove/studio-base/players/TopicAliasingPlayer/aliasing";
-import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
-import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
+} from "@lichtblick/studio-base/context/ExtensionCatalogContext";
+import { TopicAliasFunctions } from "@lichtblick/studio-base/players/TopicAliasingPlayer/aliasing";
+import { ExtensionLoader } from "@lichtblick/studio-base/services/ExtensionLoader";
+import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/studio-base/types/Extensions";
+import React, { PropsWithChildren, useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import { StoreApi, createStore } from "zustand";
 
 const log = Logger.getLogger(__filename);
 

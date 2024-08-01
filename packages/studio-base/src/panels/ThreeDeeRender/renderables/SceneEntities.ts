@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { SettingsTreeAction } from "@lichtblick/studio";
+
 import { toNanoSec } from "@foxglove/rostime";
 import {
   ArrowPrimitive,
@@ -18,7 +20,6 @@ import {
   TextPrimitive,
   TriangleListPrimitive,
 } from "@foxglove/schemas";
-import { SettingsTreeAction } from "@foxglove/studio";
 
 import { TopicEntities } from "./TopicEntities";
 import { PrimitivePool } from "./primitives/PrimitivePool";

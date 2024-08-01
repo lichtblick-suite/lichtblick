@@ -2,16 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { useTopicPublishFrequencies } from "@lichtblick/studio-base/hooks/useTopicPublishFrequences";
+import { PlayerCapabilities, TopicStats } from "@lichtblick/studio-base/players/types";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useLatest } from "react-use";
 
 import { Time } from "@foxglove/rostime";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { useTopicPublishFrequencies } from "@foxglove/studio-base/hooks/useTopicPublishFrequences";
-import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
 
 const EM_DASH = "\u2014";
 const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();

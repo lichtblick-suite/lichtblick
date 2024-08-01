@@ -2,9 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Time, MessageEvent } from "@lichtblick/studio";
+import { Header } from "@lichtblick/studio-base/types/Messages";
+
 import { Log as FoxgloveLog } from "@foxglove/schemas";
-import { Time, MessageEvent } from "@foxglove/studio";
-import { Header } from "@foxglove/studio-base/types/Messages";
 
 export type Config = {
   searchTerms: string[];

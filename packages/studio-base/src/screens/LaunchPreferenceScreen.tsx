@@ -2,6 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useSessionStorageValue } from "@lichtblick/hooks";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks";
+import { LaunchPreferenceValue } from "@lichtblick/studio-base/types/LaunchPreferenceValue";
 import {
   Button,
   Checkbox,
@@ -14,12 +19,6 @@ import {
 } from "@mui/material";
 import { ReactElement, useState } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { useSessionStorageValue } from "@foxglove/hooks";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 const useStyles = makeStyles()((theme) => ({
   button: {

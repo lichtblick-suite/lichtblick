@@ -3,26 +3,25 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useVisibilityState } from "@lichtblick/hooks";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { useLayoutStorage } from "@lichtblick/studio-base/context/LayoutStorageContext";
+import { useRemoteLayoutStorage } from "@lichtblick/studio-base/context/RemoteLayoutStorageContext";
+import LayoutManagerProvider from "@lichtblick/studio-base/providers/LayoutManagerProvider";
+import { LayoutLoader } from "@lichtblick/studio-base/services/ILayoutLoader";
+import MockLayoutManager from "@lichtblick/studio-base/services/LayoutManager/MockLayoutManager";
 import { render, waitFor } from "@testing-library/react";
 import { useNetworkState } from "react-use";
 
-import { useVisibilityState } from "@foxglove/hooks";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
-import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
-import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
-import { LayoutLoader } from "@foxglove/studio-base/services/ILayoutLoader";
-import MockLayoutManager from "@foxglove/studio-base/services/LayoutManager/MockLayoutManager";
-
 // Mock dependencies
 jest.mock("react-use");
-jest.mock("@foxglove/hooks");
-jest.mock("@foxglove/studio-base/context/LayoutStorageContext");
-jest.mock("@foxglove/studio-base/context/RemoteLayoutStorageContext");
+jest.mock("@lichtblick/hooks");
+jest.mock("@lichtblick/studio-base/context/LayoutStorageContext");
+jest.mock("@lichtblick/studio-base/context/RemoteLayoutStorageContext");
 
 const mockLayoutManager = new MockLayoutManager();
 
-jest.mock("@foxglove/studio-base/services/LayoutManager/LayoutManager", () =>
+jest.mock("@lichtblick/studio-base/services/LayoutManager/LayoutManager", () =>
   jest.fn(() => mockLayoutManager),
 );
 

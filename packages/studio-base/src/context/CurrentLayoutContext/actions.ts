@@ -11,18 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MosaicNode, MosaicPath } from "react-mosaic-component";
-
-import { VariableValue } from "@foxglove/studio";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { TabLocation } from "@foxglove/studio-base/types/layouts";
+import { VariableValue } from "@lichtblick/studio";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { TabLocation } from "@lichtblick/studio-base/types/layouts";
 import {
   MosaicDropTargetPosition,
   PanelConfig,
   PlaybackConfig,
   SavedProps,
   UserScripts,
-} from "@foxglove/studio-base/types/panels";
+} from "@lichtblick/studio-base/types/panels";
+import { MosaicNode, MosaicPath } from "react-mosaic-component";
 
 export type LayoutData = {
   // We store config for each panel in an object keyed by the panel id.

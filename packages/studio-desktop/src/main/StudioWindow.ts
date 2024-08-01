@@ -4,6 +4,9 @@
 
 /// <reference types="../typings/i18next" />
 
+import Logger from "@lichtblick/log";
+import { APP_BAR_HEIGHT } from "@lichtblick/studio-base/src/components/AppBar/constants";
+import { NativeAppMenuEvent } from "@lichtblick/studio-base/src/context/NativeAppMenuContext";
 import {
   BrowserWindow,
   BrowserWindowConstructorOptions,
@@ -19,9 +22,6 @@ import {
 import i18n, { t } from "i18next";
 import path from "path";
 
-import Logger from "@foxglove/log";
-import { APP_BAR_HEIGHT } from "@foxglove/studio-base/src/components/AppBar/constants";
-import { NativeAppMenuEvent } from "@foxglove/studio-base/src/context/NativeAppMenuContext";
 import { palette } from "@foxglove/theme";
 
 import StudioAppUpdater from "./StudioAppUpdater";
@@ -29,7 +29,7 @@ import getDevModeIcon from "./getDevModeIcon";
 import { simulateUserClick } from "./simulateUserClick";
 import { getTelemetrySettings } from "./telemetry";
 import { encodeRendererArg } from "../common/rendererArgs";
-import { FOXGLOVE_PRODUCT_NAME } from "../common/webpackDefines";
+import { LICHTBLICK_PRODUCT_NAME } from "../common/webpackDefines";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
@@ -73,7 +73,7 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     minWidth: 350,
     minHeight: 250,
     autoHideMenuBar: true,
-    title: FOXGLOVE_PRODUCT_NAME,
+    title: LICHTBLICK_PRODUCT_NAME,
     frame: isLinux ? false : true,
     titleBarStyle: "hidden",
     trafficLightPosition: isMac ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,

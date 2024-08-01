@@ -2,23 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { debouncePromise } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import { Immutable, Time } from "@lichtblick/studio";
+import { simpleGetMessagePathDataItems } from "@lichtblick/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { stringifyMessagePath } from "@lichtblick/studio-base/components/MessagePathSyntax/stringifyRosPath";
+import { fillInGlobalVariablesInPath } from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { Bounds1D } from "@lichtblick/studio-base/components/TimeBasedChart/types";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { MessageBlock, PlayerState } from "@lichtblick/studio-base/players/types";
+import { Bounds } from "@lichtblick/studio-base/types/Bounds";
+import delay from "@lichtblick/studio-base/util/delay";
+import { getContrastColor, getLineColor } from "@lichtblick/studio-base/util/plotColors";
 import EventEmitter from "eventemitter3";
 import * as _ from "lodash-es";
 
-import { debouncePromise } from "@foxglove/den/async";
-import { filterMap } from "@foxglove/den/collection";
 import { parseMessagePath } from "@foxglove/message-path";
 import { toSec, subtract as subtractTime } from "@foxglove/rostime";
-import { Immutable, Time } from "@foxglove/studio";
-import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { stringifyMessagePath } from "@foxglove/studio-base/components/MessagePathSyntax/stringifyRosPath";
-import { fillInGlobalVariablesInPath } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { Bounds1D } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { MessageBlock, PlayerState } from "@foxglove/studio-base/players/types";
-import { Bounds } from "@foxglove/studio-base/types/Bounds";
-import delay from "@foxglove/studio-base/util/delay";
-import { getContrastColor, getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import { Dataset, InteractionEvent, Scale, UpdateAction } from "./ChartRenderer";
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";

@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { iterateObjects, iterateTyped } from "@lichtblick/studio-base/components/Chart/datasets";
+import type { ObjectData, TypedData } from "@lichtblick/studio-base/components/Chart/types";
 import { ChartDataset, ChartData } from "chart.js";
 import * as R from "ramda";
 import { useEffect, useMemo, useCallback } from "react";
-
-import { iterateObjects, iterateTyped } from "@foxglove/studio-base/components/Chart/datasets";
-import type { ObjectData, TypedData } from "@foxglove/studio-base/components/Chart/types";
 
 import { PlotDataProvider, ProviderState, Bounds, PlotViewport } from "./types";
 

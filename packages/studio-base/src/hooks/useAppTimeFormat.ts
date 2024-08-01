@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Time } from "@lichtblick/studio";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import { TimeDisplayMethod } from "@lichtblick/studio-base/types/panels";
+import { formatDate, formatTime } from "@lichtblick/studio-base/util/formatTime";
+import { formatTimeRaw } from "@lichtblick/studio-base/util/time";
 import moment from "moment-timezone";
 import { useCallback, useMemo } from "react";
-
-import { Time } from "@foxglove/studio";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { formatDate, formatTime } from "@foxglove/studio-base/util/formatTime";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { useAppConfigurationValue } from "./useAppConfigurationValue";
 

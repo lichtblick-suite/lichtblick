@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
 import { Button } from "@mui/material";
 import * as _ from "lodash-es";
 import { useMemo, useRef, useState, ReactElement, useEffect } from "react";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import useGlobalVariables, {
-  GlobalVariables,
-} from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import Variable from "./Variable";
 

@@ -10,12 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { useDrag, useDrop, DropTargetMonitor, ConnectableElement } from "react-dnd";
 
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { TAB_DRAG_TYPE, TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
-import { ToolbarTab } from "@foxglove/studio-base/panels/Tab/ToolbarTab";
-import { TabLocation } from "@foxglove/studio-base/types/layouts";
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { TAB_DRAG_TYPE, TabActions } from "@lichtblick/studio-base/panels/Tab/TabDndContext";
+import { ToolbarTab } from "@lichtblick/studio-base/panels/Tab/ToolbarTab";
+import { TabLocation } from "@lichtblick/studio-base/types/layouts";
+import { useDrag, useDrop, DropTargetMonitor, ConnectableElement } from "react-dnd";
 
 type Props = {
   isActive: boolean;

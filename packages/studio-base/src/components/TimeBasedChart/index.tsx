@@ -11,6 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { filterMap } from "@lichtblick/den/collection";
+import Logger from "@lichtblick/log";
+import ChartComponent from "@lichtblick/studio-base/components/Chart/index";
+import { RpcElement, RpcScales } from "@lichtblick/studio-base/components/Chart/types";
+import KeyListener from "@lichtblick/studio-base/components/KeyListener";
+import { useMessagePipeline } from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  TimelineInteractionStateStore,
+  useClearHoverValue,
+  useSetHoverValue,
+  useTimelineInteractionState,
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { Bounds } from "@lichtblick/studio-base/types/Bounds";
 import { Button, Fade, Tooltip, buttonClasses } from "@mui/material";
 import { ChartOptions, InteractionMode, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
@@ -30,20 +44,6 @@ import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
 import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
-import { filterMap } from "@foxglove/den/collection";
-import Logger from "@foxglove/log";
-import ChartComponent from "@foxglove/studio-base/components/Chart/index";
-import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
-import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  TimelineInteractionStateStore,
-  useClearHoverValue,
-  useSetHoverValue,
-  useTimelineInteractionState,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { Bounds } from "@foxglove/studio-base/types/Bounds";
 import { fontMonospace } from "@foxglove/theme";
 
 import HoverBar from "./HoverBar";

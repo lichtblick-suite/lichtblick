@@ -2,9 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+
 import { ros1, ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas/internal";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 /**
  * basicDatatypes is a map containing definitions for ROS common datatypes and foxglove datatypes

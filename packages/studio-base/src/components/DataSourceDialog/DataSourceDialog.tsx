@@ -2,22 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Snow from "@lichtblick/studio-base/components/DataSourceDialog/Snow";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { usePlayerSelection } from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import {
+  WorkspaceContextStore,
+  useWorkspaceStore,
+} from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
 import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, IconButton } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
-
-import Snow from "@foxglove/studio-base/components/DataSourceDialog/Snow";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import {
-  WorkspaceContextStore,
-  useWorkspaceStore,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import Connection from "./Connection";
 import Start from "./Start";

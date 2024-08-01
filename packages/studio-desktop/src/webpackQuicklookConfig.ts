@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { WebpackArgv } from "@lichtblick/studio-base/WebpackArgv";
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
@@ -9,8 +10,6 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
 import { Configuration, ProvidePlugin } from "webpack";
-
-import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
 
 import { WebpackConfigParams } from "./WebpackConfigParams";
 import "webpack-dev-server";

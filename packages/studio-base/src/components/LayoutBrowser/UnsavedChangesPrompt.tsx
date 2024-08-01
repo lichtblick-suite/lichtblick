@@ -2,6 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useLayoutManager } from "@lichtblick/studio-base/context/LayoutManagerContext";
+import { Layout } from "@lichtblick/studio-base/services/ILayoutStorage";
 import {
   Button,
   Dialog,
@@ -16,10 +19,6 @@ import {
 } from "@mui/material";
 import { ChangeEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useUnmount } from "react-use";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 type UnsavedChangesResolution =
   | { type: "cancel" }

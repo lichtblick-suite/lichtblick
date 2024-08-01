@@ -2,6 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { filterMap } from "@lichtblick/den/collection";
+import { useDataSourceInfo } from "@lichtblick/studio-base/PanelAPI";
+import { DirectTopicStatsUpdater } from "@lichtblick/studio-base/components/DirectTopicStatsUpdater";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { DraggedMessagePath } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { ContextMenu } from "@lichtblick/studio-base/components/TopicList/ContextMenu";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
+import { MessagePathSelectionProvider } from "@lichtblick/studio-base/services/messagePathDragging/MessagePathSelectionProvider";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -21,19 +33,7 @@ import { ListChildComponentProps, VariableSizeList } from "react-window";
 import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
-import { filterMap } from "@foxglove/den/collection";
 import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { ContextMenu } from "@foxglove/studio-base/components/TopicList/ContextMenu";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { MessagePathSelectionProvider } from "@foxglove/studio-base/services/messagePathDragging/MessagePathSelectionProvider";
 
 import { MessagePathRow } from "./MessagePathRow";
 import { TopicRow } from "./TopicRow";

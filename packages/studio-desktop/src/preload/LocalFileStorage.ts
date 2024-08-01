@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
 import { ipcRenderer } from "electron";
 import { promises as fs } from "fs";
 import path from "path";
-
-import Logger from "@foxglove/log";
 
 import { DATASTORES_DIR_NAME } from "../common/storage";
 import type { Storage, StorageContent } from "../common/types";

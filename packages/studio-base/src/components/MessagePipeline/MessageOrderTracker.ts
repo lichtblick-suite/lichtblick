@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Logger from "@foxglove/log";
+import Logger from "@lichtblick/log";
+import { PlayerState, MessageEvent, PlayerProblem } from "@lichtblick/studio-base/players/types";
+import { formatFrame } from "@lichtblick/studio-base/util/time";
+
 import { Time, isLessThan, subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { PlayerState, MessageEvent, PlayerProblem } from "@foxglove/studio-base/players/types";
-import { formatFrame } from "@foxglove/studio-base/util/time";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
 const WAIT_FOR_SEEK_SEC = 1; // How long we wait for a change in `lastSeekTime` before warning.

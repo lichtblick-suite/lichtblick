@@ -2,6 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent } from "@lichtblick/studio";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  makeCompressedImageAndCalibration,
+  makeRawImageAndCalibration,
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import delay from "@lichtblick/studio-base/util/delay";
 import { Meta, StoryObj } from "@storybook/react";
 import { fireEvent, screen, userEvent, waitFor } from "@storybook/testing-library";
 import { useCallback, useMemo, useState } from "react";
@@ -16,15 +25,6 @@ import {
   PointsAnnotationType,
   RawImage,
 } from "@foxglove/schemas";
-import { MessageEvent } from "@foxglove/studio";
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  makeCompressedImageAndCalibration,
-  makeRawImageAndCalibration,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
-import { Topic } from "@foxglove/studio-base/players/types";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import delay from "@foxglove/studio-base/util/delay";
 
 import { ImagePanel } from "../../index";
 import { CameraInfo, CompressedImage as RosCompressedImage, Image as RosRawImage } from "../../ros";

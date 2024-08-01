@@ -11,20 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as _ from "lodash-es";
-import {
-  MosaicNode,
-  MosaicPath,
-  createDragToUpdates,
-  createHideUpdate,
-  createRemoveUpdate,
-  getLeaves,
-  getNodeAtPath,
-  updateTree,
-} from "react-mosaic-component";
-import { MarkOptional } from "ts-essentials";
-
-import { filterMap } from "@foxglove/den/collection";
+import { filterMap } from "@lichtblick/den/collection";
 import {
   AddPanelPayload,
   ChangePanelLayoutPayload,
@@ -41,10 +28,10 @@ import {
   SplitPanelPayload,
   StartDragPayload,
   SwapPanelPayload,
-} from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import { MosaicDropTargetPosition, PlaybackConfig } from "@foxglove/studio-base/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { TabPanelConfig } from "@lichtblick/studio-base/types/layouts";
+import { MosaicDropTargetPosition, PlaybackConfig } from "@lichtblick/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
 import {
   DEFAULT_TAB_PANEL_CONFIG,
   addPanelToTab,
@@ -62,7 +49,19 @@ import {
   reorderTabWithinTabPanel,
   replaceAndRemovePanels,
   updateTabPanelLayout,
-} from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/util/layout";
+import * as _ from "lodash-es";
+import {
+  MosaicNode,
+  MosaicPath,
+  createDragToUpdates,
+  createHideUpdate,
+  createRemoveUpdate,
+  getLeaves,
+  getNodeAtPath,
+  updateTree,
+} from "react-mosaic-component";
+import { MarkOptional } from "ts-essentials";
 
 import { isTabPanelConfig } from "../../util/layout";
 

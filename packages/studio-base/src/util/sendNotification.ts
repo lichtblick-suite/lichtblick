@@ -16,11 +16,11 @@
 // etc). We should generally prevent users from making mistakes in the first place, but sometimes
 // its unavoidable to bail out with a generic error message (e.g. when dragging in a malformed
 // ROS bag).
-import { ReactNode } from "react";
 
-import { reportError } from "@foxglove/studio-base/reportError";
-import { AppError } from "@foxglove/studio-base/util/errors";
-import { inWebWorker } from "@foxglove/studio-base/util/workers";
+import { reportError } from "@lichtblick/studio-base/reportError";
+import { AppError } from "@lichtblick/studio-base/util/errors";
+import { inWebWorker } from "@lichtblick/studio-base/util/workers";
+import { ReactNode } from "react";
 
 export type NotificationType = "app" | "user";
 export type DetailsType = string | Error | ReactNode;

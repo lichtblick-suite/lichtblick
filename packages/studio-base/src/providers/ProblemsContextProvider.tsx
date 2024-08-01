@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable } from "immer";
-import { ReactNode, useState } from "react";
-import { StoreApi, create } from "zustand";
-
 import {
   ProblemsContext,
   ProblemsContextStore,
   SessionProblem,
-} from "@foxglove/studio-base/context/ProblemsContext";
+} from "@lichtblick/studio-base/context/ProblemsContext";
+import { Immutable } from "immer";
+import { ReactNode, useState } from "react";
+import { StoreApi, create } from "zustand";
 
 function createProblemsStore(): StoreApi<ProblemsContextStore> {
   return create<ProblemsContextStore>((set, get) => {

@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { IRenderer } from "@lichtblick/studio-base/panels/ThreeDeeRender/IRenderer";
+import { BaseUserData, Renderable } from "@lichtblick/studio-base/panels/ThreeDeeRender/Renderable";
+import { RosValue } from "@lichtblick/studio-base/players/types";
+import { emptyPose } from "@lichtblick/studio-base/util/Pose";
+
 import { SceneEntity } from "@foxglove/schemas";
-import { IRenderer } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
-import { BaseUserData, Renderable } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderable";
-import { RosValue } from "@foxglove/studio-base/players/types";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { LayerSettingsEntity } from "../../settings";
 

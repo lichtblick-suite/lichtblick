@@ -2,6 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log from "@lichtblick/log";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppContext } from "@lichtblick/studio-base/context/AppContext";
+import { EventsStore, useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -28,16 +37,7 @@ import { keyframes } from "tss-react";
 import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
 
-import Log from "@foxglove/log";
 import { toDate, toNanoSec } from "@foxglove/rostime";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
-import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 
 const log = Log.getLogger(__filename);
 

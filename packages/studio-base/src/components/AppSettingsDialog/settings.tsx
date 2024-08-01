@@ -2,6 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { filterMap } from "@lichtblick/den/collection";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import OsContextSingleton from "@lichtblick/studio-base/OsContextSingleton";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import { Language } from "@lichtblick/studio-base/i18n";
+import { reportError } from "@lichtblick/studio-base/reportError";
+import { LaunchPreferenceValue } from "@lichtblick/studio-base/types/LaunchPreferenceValue";
+import { TimeDisplayMethod } from "@lichtblick/studio-base/types/panels";
+import { formatTime } from "@lichtblick/studio-base/util/formatTime";
+import { formatTimeRaw } from "@lichtblick/studio-base/util/time";
 import Brightness5Icon from "@mui/icons-material/Brightness5";
 import ComputerIcon from "@mui/icons-material/Computer";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
@@ -26,19 +38,6 @@ import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-
-import { filterMap } from "@foxglove/den/collection";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { Language } from "@foxglove/studio-base/i18n";
-import { reportError } from "@foxglove/studio-base/reportError";
-import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { formatTime } from "@foxglove/studio-base/util/formatTime";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 const LANGUAGE_OPTIONS: { key: Language; value: string }[] = [{ key: "en", value: "English" }];

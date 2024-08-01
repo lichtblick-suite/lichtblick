@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
 import CloseIcon from "@mui/icons-material/Close";
 import { Badge, BadgeProps, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
 
 const useStyles = makeStyles()((theme) => ({
   root: {

@@ -17,6 +17,34 @@ import {
   TabDesktopMultiple20Regular,
   TableSimple20Regular,
 } from "@fluentui/react-icons";
+import { useShallowMemo } from "@lichtblick/hooks";
+import { useConfigById } from "@lichtblick/studio-base/PanelAPI";
+import KeyListener from "@lichtblick/studio-base/components/KeyListener";
+import { MosaicPathContext } from "@lichtblick/studio-base/components/MosaicPathContext";
+import PanelContext from "@lichtblick/studio-base/components/PanelContext";
+import PanelErrorBoundary from "@lichtblick/studio-base/components/PanelErrorBoundary";
+import { PanelOverlay, PanelOverlayProps } from "@lichtblick/studio-base/components/PanelOverlay";
+import { PanelRoot } from "@lichtblick/studio-base/components/PanelRoot";
+import {
+  useCurrentLayoutActions,
+  useSelectedPanels,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { usePanelCatalog } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import {
+  useWorkspaceStore,
+  WorkspaceStoreSelectors,
+} from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import usePanelDrag from "@lichtblick/studio-base/hooks/usePanelDrag";
+import { useMessagePathDrop } from "@lichtblick/studio-base/services/messagePathDragging";
+import { TabPanelConfig } from "@lichtblick/studio-base/types/layouts";
+import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
+import {
+  getPanelIdForType,
+  getPanelTypeFromId,
+  getPathFromNode,
+  updateTabPanelLayout,
+} from "@lichtblick/studio-base/util/layout";
 import * as _ from "lodash-es";
 import React, {
   ComponentType,
@@ -41,35 +69,6 @@ import {
 import { Transition } from "react-transition-group";
 import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
-
-import { useShallowMemo } from "@foxglove/hooks";
-import { useConfigById } from "@foxglove/studio-base/PanelAPI";
-import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import { MosaicPathContext } from "@foxglove/studio-base/components/MosaicPathContext";
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
-import { PanelOverlay, PanelOverlayProps } from "@foxglove/studio-base/components/PanelOverlay";
-import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
-import {
-  useCurrentLayoutActions,
-  useSelectedPanels,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import {
-  useWorkspaceStore,
-  WorkspaceStoreSelectors,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
-import { useMessagePathDrop } from "@foxglove/studio-base/services/messagePathDragging";
-import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
-import {
-  getPanelIdForType,
-  getPanelTypeFromId,
-  getPathFromNode,
-  updateTabPanelLayout,
-} from "@foxglove/studio-base/util/layout";
 
 const useStyles = makeStyles()((theme) => ({
   perfInfo: {

@@ -11,16 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getLeaves, MosaicNode, MosaicParent } from "react-mosaic-component";
-
 import {
   CreateTabPanelPayload,
   LayoutData,
-} from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import { MosaicDropTargetPosition } from "@foxglove/studio-base/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
-import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { TabPanelConfig } from "@lichtblick/studio-base/types/layouts";
+import { MosaicDropTargetPosition } from "@lichtblick/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
+import { getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
+import { getLeaves, MosaicNode, MosaicParent } from "react-mosaic-component";
 
 import panelsReducer, { defaultPlaybackConfig } from "./reducers";
 

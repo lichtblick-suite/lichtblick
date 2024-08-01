@@ -2,21 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj } from "@storybook/react";
-import { ReactElement, useLayoutEffect, useState } from "react";
-import ReactDOM from "react-dom";
-
-import { toSec } from "@foxglove/rostime";
 import {
   Immutable,
   PanelExtensionContext,
   ParameterValue,
   RenderState,
   Time,
-} from "@foxglove/studio";
-import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
-import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+} from "@lichtblick/studio";
+import ErrorBoundary from "@lichtblick/studio-base/components/ErrorBoundary";
+import MockPanelContextProvider from "@lichtblick/studio-base/components/MockPanelContextProvider";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
+import { StoryObj } from "@storybook/react";
+import { ReactElement, useLayoutEffect, useState } from "react";
+import ReactDOM from "react-dom";
+
+import { toSec } from "@foxglove/rostime";
 
 import PanelExtensionAdapter, { VERSION_CONFIG_KEY } from "./PanelExtensionAdapter";
 

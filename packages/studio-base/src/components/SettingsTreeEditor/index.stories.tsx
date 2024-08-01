@@ -2,24 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import {
+  SettingsTreeNode,
+  SettingsTreeNodes,
+  SettingsTreeFieldValue,
+  SettingsTreeAction,
+} from "@lichtblick/studio";
+import { MessagePathInputStoryFixture } from "@lichtblick/studio-base/components/MessagePathSyntax/fixture";
+import SettingsTreeEditor from "@lichtblick/studio-base/components/SettingsTreeEditor";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { useTheme } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { useCallback, useMemo, useState, useEffect } from "react";
-
-import Logger from "@foxglove/log";
-import {
-  SettingsTreeNode,
-  SettingsTreeNodes,
-  SettingsTreeFieldValue,
-  SettingsTreeAction,
-} from "@foxglove/studio";
-import { MessagePathInputStoryFixture } from "@foxglove/studio-base/components/MessagePathSyntax/fixture";
-import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
-import Stack from "@foxglove/studio-base/components/Stack";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "components/SettingsTreeEditor",

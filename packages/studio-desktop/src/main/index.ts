@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
+import Logger from "@lichtblick/log";
+import { AppSetting } from "@lichtblick/studio-base/src/AppSetting";
+import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
 import fs from "fs";
 import i18n from "i18next";
-
-import Logger from "@foxglove/log";
-import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
@@ -20,9 +19,9 @@ import {
 } from "./rosPackageResources";
 import { getAppSetting } from "./settings";
 import {
-  FOXGLOVE_PRODUCT_HOMEPAGE,
-  FOXGLOVE_PRODUCT_NAME,
-  FOXGLOVE_PRODUCT_VERSION,
+  LICHTBLICK_PRODUCT_HOMEPAGE,
+  LICHTBLICK_PRODUCT_NAME,
+  LICHTBLICK_PRODUCT_VERSION,
 } from "../common/webpackDefines";
 
 const log = Logger.getLogger(__filename);
@@ -69,7 +68,7 @@ export async function main(): Promise<void> {
   app.commandLine.appendSwitch("enable-experimental-web-platform-features");
 
   const start = Date.now();
-  log.info(`${FOXGLOVE_PRODUCT_NAME} ${FOXGLOVE_PRODUCT_VERSION}`);
+  log.info(`${LICHTBLICK_PRODUCT_NAME} ${LICHTBLICK_PRODUCT_VERSION}`);
 
   const isProduction = process.env.NODE_ENV === "production";
 
@@ -94,7 +93,7 @@ export async function main(): Promise<void> {
   // If another instance of the app is already open, this call triggers the "second-instance" event
   // in the original instance and returns false.
   if (!app.requestSingleInstanceLock()) {
-    log.info(`Another instance of ${FOXGLOVE_PRODUCT_NAME} is already running. Quitting.`);
+    log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
     app.quit();
     return;
   }
@@ -229,18 +228,18 @@ export async function main(): Promise<void> {
     // Only production builds check for automatic updates
     if (process.env.NODE_ENV !== "production") {
       log.info("Automatic updates disabled (development environment)");
-    } else if (/-(dev|nightly)/.test(FOXGLOVE_PRODUCT_VERSION)) {
+    } else if (/-(dev|nightly)/.test(LICHTBLICK_PRODUCT_VERSION)) {
       log.info("Automatic updates disabled (development version)");
     }
 
     StudioAppUpdater.Instance().start();
 
     app.setAboutPanelOptions({
-      applicationName: FOXGLOVE_PRODUCT_NAME,
-      applicationVersion: FOXGLOVE_PRODUCT_VERSION,
+      applicationName: LICHTBLICK_PRODUCT_NAME,
+      applicationVersion: LICHTBLICK_PRODUCT_VERSION,
       version: process.platform,
       copyright: undefined,
-      website: FOXGLOVE_PRODUCT_HOMEPAGE,
+      website: LICHTBLICK_PRODUCT_HOMEPAGE,
       iconPath: undefined,
     });
 

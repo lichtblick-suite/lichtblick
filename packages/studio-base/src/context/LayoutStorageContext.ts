@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { ILayoutStorage } from "@lichtblick/studio-base/services/ILayoutStorage";
 import { createContext, useContext } from "react";
-
-import { ILayoutStorage } from "@foxglove/studio-base/services/ILayoutStorage";
 
 const LayoutStorageContext = createContext<ILayoutStorage | undefined>(undefined);
 LayoutStorageContext.displayName = "LayoutStorageContext";

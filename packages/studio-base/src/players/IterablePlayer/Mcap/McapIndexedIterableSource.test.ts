@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { BlobReadable } from "@lichtblick/studio-base/players/IterablePlayer/Mcap/BlobReadable";
+import { McapIndexedIterableSource } from "@lichtblick/studio-base/players/IterablePlayer/Mcap/McapIndexedIterableSource";
 import { McapIndexedReader, McapWriter, TempBuffer } from "@mcap/core";
 import { Blob } from "node:buffer";
 
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
-import { BlobReadable } from "@foxglove/studio-base/players/IterablePlayer/Mcap/BlobReadable";
-import { McapIndexedIterableSource } from "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIndexedIterableSource";
 
 describe("McapIndexedIterableSource", () => {
   it("returns the correct metadata", async () => {

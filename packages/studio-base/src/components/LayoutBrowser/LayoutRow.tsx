@@ -4,6 +4,9 @@
 
 /* eslint-disable @foxglove/no-restricted-imports */
 
+import { useLayoutManager } from "@lichtblick/studio-base/context/LayoutManagerContext";
+import { useConfirm } from "@lichtblick/studio-base/hooks/useConfirm";
+import { Layout, layoutIsShared } from "@lichtblick/studio-base/services/ILayoutStorage";
 import ErrorIcon from "@mui/icons-material/Error";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
@@ -29,10 +32,6 @@ import {
   useState,
 } from "react";
 import { useMountedState } from "react-use";
-
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
-import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 
 const StyledListItem = muiStyled(ListItem, {
   shouldForwardProp: (prop) =>

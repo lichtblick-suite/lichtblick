@@ -2,18 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { PanelExtensionAdapter } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { useExtensionCatalog } from "@lichtblick/studio-base/context/ExtensionCatalogContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
-import * as panels from "@foxglove/studio-base/panels";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+} from "@lichtblick/studio-base/context/PanelCatalogContext";
+import * as panels from "@lichtblick/studio-base/panels";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { PropsWithChildren, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type PanelProps = {
   config: unknown;

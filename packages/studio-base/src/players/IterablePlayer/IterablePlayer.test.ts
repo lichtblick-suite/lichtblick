@@ -3,24 +3,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
-import { signal } from "@foxglove/den/async";
-import { fromSec } from "@foxglove/rostime";
+import { signal } from "@lichtblick/den/async";
 import {
   MessageEvent,
   PlayerCapabilities,
   PlayerPresence,
   PlayerState,
-} from "@foxglove/studio-base/players/types";
-import { mockTopicSelection } from "@foxglove/studio-base/test/mocks/mockTopicSelection";
+} from "@lichtblick/studio-base/players/types";
+import { mockTopicSelection } from "@lichtblick/studio-base/test/mocks/mockTopicSelection";
+import * as _ from "lodash-es";
+
+import { fromSec } from "@foxglove/rostime";
 
 import {
+  GetBackfillMessagesArgs,
   IIterableSource,
   Initalization,
-  MessageIteratorArgs,
   IteratorResult,
-  GetBackfillMessagesArgs,
+  MessageIteratorArgs,
 } from "./IIterableSource";
 import { IterablePlayer } from "./IterablePlayer";
 

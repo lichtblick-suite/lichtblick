@@ -2,15 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import Timestamp from "@lichtblick/studio-base/components/Timestamp";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { Stack } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { PropsWithChildren, useState } from "react";
 
 import { Time } from "@foxglove/rostime";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Timestamp from "@foxglove/studio-base/components/Timestamp";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 const ABSOLUTE_TIME = { sec: 1643800942, nsec: 222222222 };
 const RELATIVE_TIME = { sec: 630720000, nsec: 597648236 };

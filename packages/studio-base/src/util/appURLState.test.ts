@@ -2,15 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time, toRFC3339String } from "@foxglove/rostime";
 import {
   AppURLState,
   updateAppURLState,
   parseAppURLState,
-} from "@foxglove/studio-base/util/appURLState";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+} from "@lichtblick/studio-base/util/appURLState";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
 
-jest.mock("@foxglove/studio-base/util/isDesktopApp", () => ({
+import { Time, toRFC3339String } from "@foxglove/rostime";
+
+jest.mock("@lichtblick/studio-base/util/isDesktopApp", () => ({
   __esModule: true,
   default: jest.fn(),
 }));

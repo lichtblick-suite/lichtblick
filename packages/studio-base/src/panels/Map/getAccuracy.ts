@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MathNumericType, atan2, eigs, isNumber } from "mathjs";
-
 import {
   NavSatFixMsg,
   NavSatFixPositionCovarianceType,
-} from "@foxglove/studio-base/panels/Map/types";
+} from "@lichtblick/studio-base/panels/Map/types";
+import { MathNumericType, atan2, eigs, isNumber } from "mathjs";
 
 type NumericPair = [MathNumericType, MathNumericType];
 

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
+import { mightActuallyBePartial } from "@lichtblick/studio-base/util/mightActuallyBePartial";
 
 function fallbackCopy(text: string) {
   const body = document.body;

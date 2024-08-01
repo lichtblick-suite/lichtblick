@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Layout } from "@lichtblick/studio-base/services/ILayoutStorage";
 import * as _ from "lodash-es";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
-
-import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 type MultiAction = "delete" | "duplicate" | "revert" | "save";
 

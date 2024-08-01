@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
 import {
   decodeBGR8,
   decodeBGRA8,
@@ -18,7 +16,9 @@ import {
   decodeRGBA8,
   decodeUYVY,
   decodeYUYV,
-} from "@foxglove/den/image";
+} from "@lichtblick/den/image";
+import * as _ from "lodash-es";
+
 import { RawImage } from "@foxglove/schemas";
 
 import { CompressedImageTypes } from "./ImageTypes";

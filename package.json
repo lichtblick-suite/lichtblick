@@ -128,9 +128,9 @@
     "webpack-hot-middleware": "2.26.0"
   },
   "dependencies": {
-    "@foxglove/hooks": "workspace:*",
-    "@foxglove/log": "workspace:*",
-    "@foxglove/studio": "workspace:*",
+    "@lichtblick/hooks": "workspace:*",
+    "@lichtblick/log": "workspace:*",
+    "@lichtblick/studio": "workspace:*",
     "@mui/material": "5.13.5",
     "react-use": "17.5.1",
     "rehype-raw": "6.1.1",

@@ -14,10 +14,10 @@
 // Custom formatters for Chrome dev tools. See documentation: http://bit.ly/object-formatters
 // Note that the "Enable custom formatters" setting must be turned on in order to use these formatters.
 
+import { mightActuallyBePartial } from "@lichtblick/studio-base/util/mightActuallyBePartial";
 import seedrandom from "seedrandom";
 
 import { isTime } from "@foxglove/rostime";
-import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 type HtmlTemplate = unknown;
 type DevtoolFormatterConfig = {

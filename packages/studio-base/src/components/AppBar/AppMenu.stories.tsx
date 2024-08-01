@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import PlayerSelectionContext, {
+  PlayerSelection,
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
 import { PopoverPosition, PopoverReference } from "@mui/material";
 import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
-
-import PlayerSelectionContext, {
-  PlayerSelection,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { AppMenu } from "./AppMenu";
 

@@ -5,9 +5,12 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import {
+  IterablePlayer,
+  WorkerIterableSource,
+} from "@lichtblick/studio-base/players/IterablePlayer";
+import { Player } from "@lichtblick/studio-base/players/types";
 
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
   public id = "ulog-local-file";
@@ -27,7 +30,7 @@ class UlogLocalDataSourceFactory implements IDataSourceFactory {
         return new Worker(
           // foxglove-depcheck-used: babel-plugin-transform-import-meta
           new URL(
-            "@foxglove/studio-base/players/IterablePlayer/ulog/UlogIterableSourceWorker.worker",
+            "@lichtblick/studio-base/players/IterablePlayer/ulog/UlogIterableSourceWorker.worker",
             import.meta.url,
           ),
         );

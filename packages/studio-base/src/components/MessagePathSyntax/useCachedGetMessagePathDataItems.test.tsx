@@ -12,16 +12,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { messagePathStructures } from "@lichtblick/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { MessageEvent, Topic } from "@lichtblick/studio-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { enumValuesByDatatypeAndField } from "@lichtblick/studio-base/util/enums";
 import { renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
 
 import { parseMessagePath } from "@foxglove/message-path";
-import { messagePathStructures } from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
 
 import {
   fillInGlobalVariablesInPath,

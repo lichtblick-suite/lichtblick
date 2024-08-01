@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PanelSetup, { Fixture, triggerWheel } from "@lichtblick/studio-base/stories/PanelSetup";
+import delay from "@lichtblick/studio-base/util/delay";
 import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { produce } from "immer";
 import { useEffect, useState } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
-import delay from "@foxglove/studio-base/util/delay";
 
 import { PlotConfig } from "./config";
 import Plot from "./index";

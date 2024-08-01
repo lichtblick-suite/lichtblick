@@ -2,27 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import assert from "assert";
-import * as _ from "lodash-es";
-import { v4 as uuidv4 } from "uuid";
-
-import { debouncePromise } from "@foxglove/den/async";
-import { filterMap } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
-import {
-  Time,
-  add,
-  clampTime,
-  compare,
-  fromMillis,
-  fromNanoSec,
-  toRFC3339String,
-  toString,
-} from "@foxglove/rostime";
-import { Immutable, MessageEvent, Metadata, ParameterValue } from "@foxglove/studio";
-import { freezeMetadata } from "@foxglove/studio-base/players/IterablePlayer/freezeMetadata";
-import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
-import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
+import { debouncePromise } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
+import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/studio";
+import { freezeMetadata } from "@lichtblick/studio-base/players/IterablePlayer/freezeMetadata";
+import NoopMetricsCollector from "@lichtblick/studio-base/players/NoopMetricsCollector";
+import PlayerProblemManager from "@lichtblick/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
   Player,
@@ -37,9 +23,23 @@ import {
   Topic,
   TopicSelection,
   TopicStats,
-} from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import delay from "@foxglove/studio-base/util/delay";
+} from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import delay from "@lichtblick/studio-base/util/delay";
+import assert from "assert";
+import * as _ from "lodash-es";
+import { v4 as uuidv4 } from "uuid";
+
+import {
+  Time,
+  add,
+  clampTime,
+  compare,
+  fromMillis,
+  fromNanoSec,
+  toRFC3339String,
+  toString,
+} from "@foxglove/rostime";
 
 import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";

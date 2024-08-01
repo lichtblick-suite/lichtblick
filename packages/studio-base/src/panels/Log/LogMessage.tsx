@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import useLogStyles from "@lichtblick/studio-base/panels/Log/useLogStyles";
+import { TimeDisplayMethod } from "@lichtblick/studio-base/types/panels";
 import * as _ from "lodash-es";
 import { makeStyles } from "tss-react/mui";
-
-import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 
 import LevelToString from "./LevelToString";
 import Stamp from "./Stamp";

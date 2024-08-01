@@ -2,16 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import { useSnackbar } from "notistack";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import ReactDOM from "react-dom";
-import { useLatest } from "react-use";
-import { DeepPartial } from "ts-essentials";
-import { useDebouncedCallback } from "use-debounce";
-
-import Logger from "@foxglove/log";
-import { Time, toNanoSec } from "@foxglove/rostime";
+import Logger from "@lichtblick/log";
 import {
   Immutable,
   LayoutActions,
@@ -22,15 +13,24 @@ import {
   SettingsTreeNodes,
   Subscription,
   Topic,
-} from "@foxglove/studio";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { BuiltinPanelExtensionContext } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+} from "@lichtblick/studio";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import { BuiltinPanelExtensionContext } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
 import {
   DEFAULT_SCENE_EXTENSION_CONFIG,
   SceneExtensionConfig,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import ThemeProvider from "@lichtblick/studio-base/theme/ThemeProvider";
+import * as _ from "lodash-es";
+import { useSnackbar } from "notistack";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import ReactDOM from "react-dom";
+import { useLatest } from "react-use";
+import { DeepPartial } from "ts-essentials";
+import { useDebouncedCallback } from "use-debounce";
+
+import { Time, toNanoSec } from "@foxglove/rostime";
 
 import type {
   FollowMode,

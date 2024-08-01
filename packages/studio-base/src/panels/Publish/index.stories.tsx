@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Publish from "@lichtblick/studio-base/panels/Publish";
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
 import { action } from "@storybook/addon-actions";
 import { expect } from "@storybook/jest";
 import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
-
-import Publish from "@foxglove/studio-base/panels/Publish";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import { PublishConfig } from "./types";
 

@@ -2,18 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { produce } from "immer";
-import * as _ from "lodash-es";
-import memoizeWeak from "memoize-weak";
-import { useMemo } from "react";
-
-import { useShallowMemo } from "@foxglove/hooks";
+import { useShallowMemo } from "@lichtblick/hooks";
 import {
   SettingsTreeAction,
   SettingsTreeNode,
   SettingsTreeNodeAction,
   SettingsTreeNodes,
-} from "@foxglove/studio";
+} from "@lichtblick/studio";
+import { produce } from "immer";
+import * as _ from "lodash-es";
+import memoizeWeak from "memoize-weak";
+import { useMemo } from "react";
 
 import { Config, Rule } from "./types";
 

@@ -10,12 +10,11 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { useReadySignal } from "@lichtblick/studio-base/stories/ReadySignalContext";
 import { StoryObj } from "@storybook/react";
 import * as _ from "lodash-es";
 import { useState, useCallback, ComponentProps, useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
-
-import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import ChartComponent, { OnClickArg } from ".";
 

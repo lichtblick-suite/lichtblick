@@ -10,6 +10,20 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { filterMap } from "@lichtblick/den/collection";
+import Logger from "@lichtblick/log";
+import {
+  ConfigsPayload,
+  SaveConfigsPayload,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { reportError } from "@lichtblick/studio-base/reportError";
+import { TabConfig, TabLocation, TabPanelConfig } from "@lichtblick/studio-base/types/layouts";
+import {
+  PanelConfig,
+  MosaicDropTargetPosition,
+  SavedProps,
+} from "@lichtblick/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
 import * as _ from "lodash-es";
 import {
   createRemoveUpdate,
@@ -22,21 +36,6 @@ import {
   MosaicPath,
 } from "react-mosaic-component";
 import { MosaicDirection, MosaicKey } from "react-mosaic-component/lib/types";
-
-import { filterMap } from "@foxglove/den/collection";
-import Logger from "@foxglove/log";
-import {
-  ConfigsPayload,
-  SaveConfigsPayload,
-} from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { reportError } from "@foxglove/studio-base/reportError";
-import { TabConfig, TabLocation, TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import {
-  PanelConfig,
-  MosaicDropTargetPosition,
-  SavedProps,
-} from "@foxglove/studio-base/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 
 const log = Logger.getLogger(__filename);
 

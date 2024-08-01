@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent } from "@foxglove/studio";
+import { MessageEvent } from "@lichtblick/studio";
 import {
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
 
 export function mockMessage<T>(message: T, fields?: Partial<MessageEvent<T>>): MessageEvent<T> {
   return {

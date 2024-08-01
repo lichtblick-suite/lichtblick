@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import withPanel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import withPanel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 
 // Since the unknown panel never saves its config, the config fields here are used with `overrideConfig`
 // to the connected Panel component (returned from withPanel).

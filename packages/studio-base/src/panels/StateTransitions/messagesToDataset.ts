@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageAndData } from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { ChartDataset } from "@lichtblick/studio-base/components/TimeBasedChart/types";
+import { expandedLineColors } from "@lichtblick/studio-base/util/plotColors";
+import { getTimestampForMessageEvent } from "@lichtblick/studio-base/util/time";
+import { grey } from "@lichtblick/studio-base/util/toolsColorScheme";
 import stringHash from "string-hash";
 
 import { Time, subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { ChartDataset } from "@foxglove/studio-base/components/TimeBasedChart/types";
-import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
-import { getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
-import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import positiveModulo from "./positiveModulo";
 import { StateTransitionPath } from "./types";

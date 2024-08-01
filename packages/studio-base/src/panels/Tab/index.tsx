@@ -11,24 +11,26 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback, useMemo, useState } from "react";
-import { MosaicNode } from "react-mosaic-component";
-import { makeStyles } from "tss-react/mui";
-
-import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import { UnconnectedPanelLayout } from "@foxglove/studio-base/components/PanelLayout";
-import Stack from "@foxglove/studio-base/components/Stack";
+import { EmptyPanelLayout } from "@lichtblick/studio-base/components/EmptyPanelLayout";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import { UnconnectedPanelLayout } from "@lichtblick/studio-base/components/PanelLayout";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import {
   DraggingTabPanelState,
   TabDndContext,
-} from "@foxglove/studio-base/panels/Tab/TabDndContext";
-import { TabbedToolbar } from "@foxglove/studio-base/panels/Tab/TabbedToolbar";
-import { TabPanelConfig as Config } from "@foxglove/studio-base/types/layouts";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
-import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/panels/Tab/TabDndContext";
+import { TabbedToolbar } from "@lichtblick/studio-base/panels/Tab/TabbedToolbar";
+import { TabPanelConfig as Config } from "@lichtblick/studio-base/types/layouts";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
+import {
+  DEFAULT_TAB_PANEL_CONFIG,
+  updateTabPanelLayout,
+} from "@lichtblick/studio-base/util/layout";
+import { useCallback, useMemo, useState } from "react";
+import { MosaicNode } from "react-mosaic-component";
+import { makeStyles } from "tss-react/mui";
 
 const useStyles = makeStyles()((theme) => ({
   panelCover: {

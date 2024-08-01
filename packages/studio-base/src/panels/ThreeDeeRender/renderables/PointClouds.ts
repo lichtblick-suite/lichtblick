@@ -2,13 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import * as THREE from "three";
-
-import { Time, toNanoSec } from "@foxglove/rostime";
-import { NumericType, PackedElementField, PointCloud } from "@foxglove/schemas";
-import { SettingsTreeAction, MessageEvent } from "@foxglove/studio";
-import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
+import { SettingsTreeAction, MessageEvent } from "@lichtblick/studio";
+import { DynamicBufferGeometry } from "@lichtblick/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
 import {
   createGeometry,
   createInstancePickingMaterial,
@@ -21,8 +16,13 @@ import {
   POINT_CLOUD_REQUIRED_FIELDS,
   RenderObjectHistory,
   PointsRenderable,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
-import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
+import type { RosObject, RosValue } from "@lichtblick/studio-base/players/types";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+
+import { Time, toNanoSec } from "@foxglove/rostime";
+import { NumericType, PackedElementField, PointCloud } from "@foxglove/schemas";
 
 import {
   autoSelectColorSettings,

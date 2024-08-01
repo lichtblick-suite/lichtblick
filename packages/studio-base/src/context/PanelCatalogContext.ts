@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PanelStatics } from "@lichtblick/studio-base/components/Panel";
+import { ExtensionNamespace } from "@lichtblick/studio-base/types/Extensions";
+import { PanelConfig } from "@lichtblick/studio-base/types/panels";
 import { ComponentType, createContext, useContext } from "react";
-
-import { PanelStatics } from "@foxglove/studio-base/components/Panel";
-import { ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
 export type PanelComponent = ComponentType<{ childId?: string; tabId?: string }> &
   PanelStatics<PanelConfig>;

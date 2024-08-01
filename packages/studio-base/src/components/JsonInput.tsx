@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { validationErrorToString, ValidationResult } from "@lichtblick/studio-base/util/validators";
 import ErrorIcon from "@mui/icons-material/Error";
 import { Typography } from "@mui/material";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import * as _ from "lodash-es";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 

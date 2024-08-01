@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
 import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
 
 import Slider from "./Slider";
 

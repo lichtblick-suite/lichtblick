@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
+import GlobalCss from "@lichtblick/studio-base/components/GlobalCss";
 import {
   ISharedRootContext,
   SharedRootContext,
-} from "@foxglove/studio-base/context/SharedRootContext";
+} from "@lichtblick/studio-base/context/SharedRootContext";
 
 import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider";
 import CssBaseline from "./components/CssBaseline";

@@ -2,6 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import {
+  DraggedMessagePath,
+  MessagePathDropConfig,
+  MessagePathDropStatus,
+} from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { MessagePathSelectionContextInternal } from "@lichtblick/studio-base/services/messagePathDragging/MessagePathSelectionProvider";
 import { CSSProperties, useCallback, useContext, useLayoutEffect, useRef, useState } from "react";
 import {
   ConnectDragPreview,
@@ -11,14 +18,6 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-
-import Logger from "@foxglove/log";
-import {
-  DraggedMessagePath,
-  MessagePathDropConfig,
-  MessagePathDropStatus,
-} from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { MessagePathSelectionContextInternal } from "@foxglove/studio-base/services/messagePathDragging/MessagePathSelectionProvider";
 
 import { MessagePathDragParams } from "./types";
 

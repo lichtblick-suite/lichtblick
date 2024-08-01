@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useCrash } from "@lichtblick/hooks";
+import { PanelExtensionContext } from "@lichtblick/studio";
+import { CaptureErrorBoundary } from "@lichtblick/studio-base/components/CaptureErrorBoundary";
+import { createSyncRoot } from "@lichtblick/studio-base/panels/createSyncRoot";
 import L from "leaflet";
 import LeafletRetinaIconUrl from "leaflet/dist/images/marker-icon-2x.png";
 import LeafletIconUrl from "leaflet/dist/images/marker-icon.png";
 import LeafletShadowIconUrl from "leaflet/dist/images/marker-shadow.png";
-
-import { useCrash } from "@foxglove/hooks";
-import { PanelExtensionContext } from "@foxglove/studio";
-import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
-import { createSyncRoot } from "@foxglove/studio-base/panels/createSyncRoot";
 
 import MapPanel from "./MapPanel";
 

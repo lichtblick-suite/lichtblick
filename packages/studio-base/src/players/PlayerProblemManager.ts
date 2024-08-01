@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { PlayerProblem } from "@lichtblick/studio-base/players/types";
 
 /**
  * Manages a set of PlayerProblems keyed by ID. Calls to problems() will return the same object as

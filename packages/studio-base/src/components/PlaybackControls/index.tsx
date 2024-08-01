@@ -24,31 +24,31 @@ import {
   Previous20Filled,
   Previous20Regular,
 } from "@fluentui/react-icons";
+import { CreateEventDialog } from "@lichtblick/studio-base/components/CreateEventDialog";
+import { DataSourceInfoView } from "@lichtblick/studio-base/components/DataSourceInfoView";
+import EventIcon from "@lichtblick/studio-base/components/EventIcon";
+import EventOutlinedIcon from "@lichtblick/studio-base/components/EventOutlinedIcon";
+import HoverableIconButton from "@lichtblick/studio-base/components/HoverableIconButton";
+import KeyListener from "@lichtblick/studio-base/components/KeyListener";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import PlaybackSpeedControls from "@lichtblick/studio-base/components/PlaybackSpeedControls";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useCurrentUser } from "@lichtblick/studio-base/context/BaseUserContext";
+import { EventsStore, useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import {
+  WorkspaceContextStore,
+  useWorkspaceStore,
+} from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { Player, PlayerPresence } from "@lichtblick/studio-base/players/types";
 import { Tooltip } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { Time, compare } from "@foxglove/rostime";
-import { CreateEventDialog } from "@foxglove/studio-base/components/CreateEventDialog";
-import { DataSourceInfoView } from "@foxglove/studio-base/components/DataSourceInfoView";
-import EventIcon from "@foxglove/studio-base/components/EventIcon";
-import EventOutlinedIcon from "@foxglove/studio-base/components/EventOutlinedIcon";
-import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
-import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useCurrentUser } from "@foxglove/studio-base/context/BaseUserContext";
-import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
-import {
-  WorkspaceContextStore,
-  useWorkspaceStore,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";

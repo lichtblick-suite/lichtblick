@@ -2,17 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useTheme } from "@mui/material";
-import { useEffect, useRef } from "react";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { useAppConfigurationValue, useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { format } from "@foxglove/studio-base/util/formatTime";
-import { formatTimeRaw, isAbsoluteTime } from "@foxglove/studio-base/util/time";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { useAppConfigurationValue, useAppTimeFormat } from "@lichtblick/studio-base/hooks";
+import { format } from "@lichtblick/studio-base/util/formatTime";
+import { formatTimeRaw, isAbsoluteTime } from "@lichtblick/studio-base/util/time";
+import { useTheme } from "@mui/material";
+import { useEffect, useRef } from "react";
 
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 

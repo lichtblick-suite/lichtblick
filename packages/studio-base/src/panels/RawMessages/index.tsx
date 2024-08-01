@@ -11,6 +11,30 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Immutable, SettingsTreeAction } from "@lichtblick/studio";
+import { useDataSourceInfo } from "@lichtblick/studio-base/PanelAPI";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import useGetItemStringWithTimezone from "@lichtblick/studio-base/components/JsonTree/useGetItemStringWithTimezone";
+import {
+  messagePathStructures,
+  traverseStructure,
+} from "@lichtblick/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
+import { MessagePathDataItem } from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { useMessageDataItem } from "@lichtblick/studio-base/components/MessagePathSyntax/useMessageDataItem";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { Toolbar } from "@lichtblick/studio-base/panels/RawMessages/Toolbar";
+import getDiff, {
+  DiffObject,
+  diffLabels,
+  diffLabelsByLabelText,
+} from "@lichtblick/studio-base/panels/RawMessages/getDiff";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { enumValuesByDatatypeAndField } from "@lichtblick/studio-base/util/enums";
+import { useJsonTreeTheme } from "@lichtblick/studio-base/util/globalConstants";
 import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,30 +43,6 @@ import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@foxglove/message-path";
-import { Immutable, SettingsTreeAction } from "@foxglove/studio";
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
-import {
-  messagePathStructures,
-  traverseStructure,
-} from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
-import { MessagePathDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { useMessageDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useMessageDataItem";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { Toolbar } from "@foxglove/studio-base/panels/RawMessages/Toolbar";
-import getDiff, {
-  DiffObject,
-  diffLabels,
-  diffLabelsByLabelText,
-} from "@foxglove/studio-base/panels/RawMessages/getDiff";
-import { Topic } from "@foxglove/studio-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/enums";
-import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
 import { DiffSpan } from "./DiffSpan";
 import DiffStats from "./DiffStats";

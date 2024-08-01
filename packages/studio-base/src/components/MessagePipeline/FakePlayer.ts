@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Metadata, ParameterValue } from "@foxglove/studio";
-import { freezeMetadata } from "@foxglove/studio-base/players/IterablePlayer/freezeMetadata";
+import { Metadata, ParameterValue } from "@lichtblick/studio";
+import { freezeMetadata } from "@lichtblick/studio-base/players/IterablePlayer/freezeMetadata";
 import {
   PlayerCapabilities,
   PlayerStateActiveData,
@@ -21,7 +21,7 @@ import {
   SubscribePayload,
   AdvertiseOptions,
   PlayerPresence,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
 
 export default class FakePlayer implements Player {
   #listener?: (arg0: PlayerState) => Promise<void>;

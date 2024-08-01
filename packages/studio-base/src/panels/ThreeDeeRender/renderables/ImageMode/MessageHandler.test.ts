@@ -2,6 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent } from "@lichtblick/studio";
+import { HUDItemManager } from "@lichtblick/studio-base/panels/ThreeDeeRender/HUDItemManager";
+import {
+  MessageHandler,
+  WAITING_FOR_BOTH_HUD_ITEM,
+  WAITING_FOR_CALIBRATION_HUD_ITEM,
+  WAITING_FOR_IMAGE_EMPTY_HUD_ITEM,
+  WAITING_FOR_IMAGE_NOTICE_HUD_ITEM,
+  WAITING_FOR_SYNC_EMPTY_HUD_ITEM,
+  WAITING_FOR_SYNC_NOTICE_HUD_ITEM,
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/ImageMode/MessageHandler";
 import * as _ from "lodash-es";
 import { DeepPartial } from "ts-essentials";
 
@@ -14,17 +25,6 @@ import {
   RawImage,
   TextAnnotation,
 } from "@foxglove/schemas";
-import { MessageEvent } from "@foxglove/studio";
-import { HUDItemManager } from "@foxglove/studio-base/panels/ThreeDeeRender/HUDItemManager";
-import {
-  MessageHandler,
-  WAITING_FOR_BOTH_HUD_ITEM,
-  WAITING_FOR_CALIBRATION_HUD_ITEM,
-  WAITING_FOR_IMAGE_EMPTY_HUD_ITEM,
-  WAITING_FOR_IMAGE_NOTICE_HUD_ITEM,
-  WAITING_FOR_SYNC_EMPTY_HUD_ITEM,
-  WAITING_FOR_SYNC_NOTICE_HUD_ITEM,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/MessageHandler";
 
 import { PartialMessageEvent } from "../../SceneExtension";
 

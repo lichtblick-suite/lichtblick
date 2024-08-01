@@ -17,6 +17,13 @@ import {
   Diamond20Filled,
   RectangleLandscape20Regular,
 } from "@fluentui/react-icons";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import ExpandingToolbar, { ToolGroup } from "@lichtblick/studio-base/components/ExpandingToolbar";
+import { useMessagePipeline } from "@lichtblick/studio-base/components/MessagePipeline";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@lichtblick/studio-base/components/PanelToolbar";
 import {
   FormControlLabel,
   IconButton,
@@ -29,14 +36,6 @@ import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
 import { makeStyles } from "tss-react/mui";
-
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@foxglove/studio-base/components/PanelToolbar";
 
 import Graph, { GraphMutation } from "./Graph";
 

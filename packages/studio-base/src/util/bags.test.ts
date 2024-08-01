@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import permutations from "@lichtblick/studio-base/test/permutations";
+
 import { Time, fromSec } from "@foxglove/rostime";
-import permutations from "@foxglove/studio-base/test/permutations";
 
 import { getBagChunksOverlapCount } from "./bags";
 

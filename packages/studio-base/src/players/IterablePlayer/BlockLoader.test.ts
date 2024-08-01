@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable, MessageEvent } from "@foxglove/studio";
-import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
-import { MessageBlock } from "@foxglove/studio-base/players/types";
-import { mockTopicSelection } from "@foxglove/studio-base/test/mocks/mockTopicSelection";
+import { Immutable, MessageEvent } from "@lichtblick/studio";
+import PlayerProblemManager from "@lichtblick/studio-base/players/PlayerProblemManager";
+import { MessageBlock } from "@lichtblick/studio-base/players/types";
+import { mockTopicSelection } from "@lichtblick/studio-base/test/mocks/mockTopicSelection";
 
 import { BlockLoader, MEMORY_INFO_PRELOADED_MSGS } from "./BlockLoader";
 import {

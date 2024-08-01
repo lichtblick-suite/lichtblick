@@ -5,8 +5,8 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import { Player } from "@lichtblick/studio-base/players/types";
 
 type PlayerConstructor = new () => Player;
 

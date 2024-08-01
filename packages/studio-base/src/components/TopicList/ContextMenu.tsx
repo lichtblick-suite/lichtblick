@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { DraggedMessagePath } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
 import { Menu, MenuItem, MenuItemProps, MenuProps } from "@mui/material";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useCopyToClipboard } from "react-use";
-
-import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 
 export function ContextMenu(props: {
   messagePaths: DraggedMessagePath[];

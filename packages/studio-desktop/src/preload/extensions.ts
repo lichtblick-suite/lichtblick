@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
 import { existsSync } from "fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import JSZip from "jszip";
 import { dirname, join as pathJoin } from "path";
-
-import Logger from "@foxglove/log";
 
 import { DesktopExtension } from "../common/types";
 

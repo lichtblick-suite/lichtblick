@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { Time, clampTime, subtract } from "@foxglove/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
   useMessagePipelineGetter,
-} from "@foxglove/studio-base/components/MessagePipeline";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Time, clampTime, subtract } from "@foxglove/rostime";
 
 const DEFAULT_UPDATE_INTERVAL_MS = 1_000;
 

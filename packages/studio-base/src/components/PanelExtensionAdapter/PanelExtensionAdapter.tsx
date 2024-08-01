@@ -2,14 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useTheme } from "@mui/material";
-import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useLatest } from "react-use";
-import { v4 as uuid } from "uuid";
-
-import { useSynchronousMountedState, useValueChangedDebugLog } from "@foxglove/hooks";
-import Logger from "@foxglove/log";
-import { fromSec, toSec } from "@foxglove/rostime";
+import { useSynchronousMountedState, useValueChangedDebugLog } from "@lichtblick/hooks";
+import Logger from "@lichtblick/log";
 import {
   AppSettingValue,
   ExtensionPanelRegistration,
@@ -20,37 +14,43 @@ import {
   Subscription,
   Time,
   VariableValue,
-} from "@foxglove/studio";
+} from "@lichtblick/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
   useMessagePipelineGetter,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import { useAppConfiguration } from "@lichtblick/studio-base/context/AppConfigurationContext";
 import {
   ExtensionCatalog,
   useExtensionCatalog,
-} from "@foxglove/studio-base/context/ExtensionCatalogContext";
+} from "@lichtblick/studio-base/context/ExtensionCatalogContext";
 import {
   useClearHoverValue,
   useHoverValue,
   useSetHoverValue,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import useGlobalVariables from "@lichtblick/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
   PlayerCapabilities,
   PlayerPresence,
   SubscribePayload,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
 import {
   useDefaultPanelTitle,
   usePanelSettingsTreeUpdate,
-} from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
-import { assertNever } from "@foxglove/studio-base/util/assertNever";
+} from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { PanelConfig, SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { assertNever } from "@lichtblick/studio-base/util/assertNever";
+import { useTheme } from "@mui/material";
+import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLatest } from "react-use";
+import { v4 as uuid } from "uuid";
+
+import { fromSec, toSec } from "@foxglove/rostime";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import { initRenderStateBuilder } from "./renderState";

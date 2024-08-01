@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 type DatatypeDescription = {
   messageDefinition: string;

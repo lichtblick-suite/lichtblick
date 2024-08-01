@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isTypedArray } from "@foxglove/studio-base/types/isTypedArray";
+import { isTypedArray } from "@lichtblick/studio-base/types/isTypedArray";
 
 /** A JSON.stringify replacer to support bigints and typed arrays */
 export function copyMessageReplacer(_key: unknown, value: unknown): unknown {

@@ -2,16 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import { NetworkInterface, OsContext } from "@lichtblick/studio-base/src/OsContext";
 import { contextBridge, ipcRenderer } from "electron";
 import os from "os";
 import { join as pathJoin } from "path";
 
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
-import Logger from "@foxglove/log";
-import { NetworkInterface, OsContext } from "@foxglove/studio-base/src/OsContext";
 
 import LocalFileStorage from "./LocalFileStorage";
-import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
+import { getExtensions, installExtension, loadExtension, uninstallExtension } from "./extensions";
 import { fetchLayouts } from "./layouts";
 import { decodeRendererArg } from "../common/rendererArgs";
 import {
@@ -21,7 +21,7 @@ import {
   NativeMenuBridge,
   Storage,
 } from "../common/types";
-import { FOXGLOVE_PRODUCT_NAME, FOXGLOVE_PRODUCT_VERSION } from "../common/webpackDefines";
+import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/webpackDefines";
 
 // Since we have no way of modifying `window.process.argv` we use a sentinel cookie and reload
 // hack to reset the page without deep links. By setting a session cookie and reloading
@@ -35,7 +35,7 @@ export function main(): void {
   const log = Logger.getLogger(__filename);
 
   log.debug(`Start Preload`);
-  log.info(`${FOXGLOVE_PRODUCT_NAME} ${FOXGLOVE_PRODUCT_VERSION}`);
+  log.info(`${LICHTBLICK_PRODUCT_NAME} ${LICHTBLICK_PRODUCT_VERSION}`);
   log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
   window.onerror = (ev) => {
@@ -88,7 +88,7 @@ export function main(): void {
       return output;
     },
     getAppVersion: (): string => {
-      return FOXGLOVE_PRODUCT_VERSION;
+      return LICHTBLICK_PRODUCT_VERSION;
     },
   };
 

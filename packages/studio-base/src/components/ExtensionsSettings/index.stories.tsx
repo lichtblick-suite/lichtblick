@@ -11,17 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import ExtensionsSettings from "@lichtblick/studio-base/components/ExtensionsSettings";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import ExtensionMarketplaceContext, {
+  ExtensionMarketplace,
+} from "@lichtblick/studio-base/context/ExtensionMarketplaceContext";
+import ExtensionCatalogProvider from "@lichtblick/studio-base/providers/ExtensionCatalogProvider";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 
-import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
-import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import ExtensionMarketplaceContext, {
-  ExtensionMarketplace,
-} from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
+import { ExtensionInfo, ExtensionLoader } from "@lichtblick/studio-base";
 
 export default {
   title: "components/ExtensionsSettings",

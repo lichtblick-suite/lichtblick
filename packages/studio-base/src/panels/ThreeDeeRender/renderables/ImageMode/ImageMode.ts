@@ -2,48 +2,48 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import * as THREE from "three";
-import { Writable } from "ts-essentials";
-
-import { filterMap } from "@foxglove/den/collection";
-import { PinholeCameraModel } from "@foxglove/den/image";
-import Logger from "@foxglove/log";
-import { toNanoSec } from "@foxglove/rostime";
+import { filterMap } from "@lichtblick/den/collection";
+import { PinholeCameraModel } from "@lichtblick/den/image";
+import Logger from "@lichtblick/log";
 import {
   Immutable,
   MessageEvent,
   SettingsTreeAction,
   SettingsTreeFields,
   Topic,
-} from "@foxglove/studio";
-import { PanelContextMenuItem } from "@foxglove/studio-base/components/PanelContextMenu";
-import { DraggedMessagePath } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { HUDItem } from "@foxglove/studio-base/panels/ThreeDeeRender/HUDItemManager";
-import { Path } from "@foxglove/studio-base/panels/ThreeDeeRender/LayerErrors";
+} from "@lichtblick/studio";
+import { PanelContextMenuItem } from "@lichtblick/studio-base/components/PanelContextMenu";
+import { DraggedMessagePath } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { HUDItem } from "@lichtblick/studio-base/panels/ThreeDeeRender/HUDItemManager";
+import { Path } from "@lichtblick/studio-base/panels/ThreeDeeRender/LayerErrors";
 import {
   IMAGE_MODE_HUD_GROUP_ID,
   IMAGE_TOPIC_PATH,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
   ImageRenderableSettings,
   ImageUserData,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
 import {
   AnyImage,
   getFrameIdFromImage,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
-import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
-import { t3D } from "@foxglove/studio-base/panels/ThreeDeeRender/t3D";
-import { makePose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { downloadFiles } from "@foxglove/studio-base/util/download";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/projections";
+import { t3D } from "@lichtblick/studio-base/panels/ThreeDeeRender/t3D";
+import { makePose } from "@lichtblick/studio-base/panels/ThreeDeeRender/transforms";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
+import { downloadFiles } from "@lichtblick/studio-base/util/download";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+import { Writable } from "ts-essentials";
+
+import { toNanoSec } from "@foxglove/rostime";
 
 import { ImageModeCamera } from "./ImageModeCamera";
 import { IMessageHandler, MessageHandler, MessageRenderState } from "./MessageHandler";

@@ -2,17 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import { ReactNode, useState } from "react";
-import { createStore, StoreApi } from "zustand";
-
-import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
+import { TimelinePositionedEvent } from "@lichtblick/studio-base/context/EventsContext";
 import {
   TimelineInteractionStateContext,
   TimelineInteractionStateStore,
   SyncBounds,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { HoverValue } from "@lichtblick/studio-base/types/hoverValue";
+import * as _ from "lodash-es";
+import { ReactNode, useState } from "react";
+import { createStore, StoreApi } from "zustand";
 
 function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStateStore> {
   return createStore((set) => {

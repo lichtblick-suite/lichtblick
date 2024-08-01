@@ -2,21 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { DataSourceDialogItem } from "@lichtblick/studio-base/components/DataSourceDialog/DataSourceDialog";
+import LichtblickLogoText from "@lichtblick/studio-base/components/LichtblickLogoText";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TextMiddleTruncate from "@lichtblick/studio-base/components/TextMiddleTruncate";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import { useCurrentUser } from "@lichtblick/studio-base/context/BaseUserContext";
+import { usePlayerSelection } from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { AppEvent } from "@lichtblick/studio-base/services/IAnalytics";
 import { Button, Link, List, ListItem, ListItemButton, SvgIcon, Typography } from "@mui/material";
 import { ReactNode, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog/DataSourceDialog";
-import LichtblickLogoText from "@foxglove/studio-base/components/LichtblickLogoText";
-import Stack from "@foxglove/studio-base/components/Stack";
-import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useCurrentUser } from "@foxglove/studio-base/context/BaseUserContext";
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 const useStyles = makeStyles()((theme) => ({
   logo: {

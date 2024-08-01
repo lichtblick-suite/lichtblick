@@ -11,27 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Mutex } from "async-mutex";
-import * as _ from "lodash-es";
-import memoizeWeak from "memoize-weak";
-import ReactDOM from "react-dom";
-import shallowequal from "shallowequal";
-import { v4 as uuidv4 } from "uuid";
-
-import { MutexLocked } from "@foxglove/den/async";
-import { filterMap } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
-import { Time, compare } from "@foxglove/rostime";
-import { Metadata, ParameterValue } from "@foxglove/studio";
-import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { MutexLocked } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
+import { Metadata, ParameterValue } from "@lichtblick/studio";
+import { Asset } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
 import {
   IPerformanceRegistry,
   PerformanceMetricID,
-} from "@foxglove/studio-base/context/PerformanceContext";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { MemoizedLibGenerator } from "@foxglove/studio-base/players/UserScriptPlayer/MemoizedLibGenerator";
-import { generateTypesLib } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
-import { TransformArgs } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/types";
+} from "@lichtblick/studio-base/context/PerformanceContext";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { MemoizedLibGenerator } from "@lichtblick/studio-base/players/UserScriptPlayer/MemoizedLibGenerator";
+import { generateTypesLib } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
+import { TransformArgs } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/types";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -42,8 +34,8 @@ import {
   RegistrationOutput,
   Sources,
   UserScriptLog,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import { hasTransformerErrors } from "@foxglove/studio-base/players/UserScriptPlayer/utils";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import { hasTransformerErrors } from "@lichtblick/studio-base/players/UserScriptPlayer/utils";
 import {
   AdvertiseOptions,
   Player,
@@ -55,12 +47,20 @@ import {
   MessageEvent,
   PlayerProblem,
   MessageBlock,
-} from "@foxglove/studio-base/players/types";
-import { reportError } from "@foxglove/studio-base/reportError";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { UserScript, UserScripts } from "@foxglove/studio-base/types/panels";
-import Rpc from "@foxglove/studio-base/util/Rpc";
-import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
+} from "@lichtblick/studio-base/players/types";
+import { reportError } from "@lichtblick/studio-base/reportError";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { UserScript, UserScripts } from "@lichtblick/studio-base/types/panels";
+import Rpc from "@lichtblick/studio-base/util/Rpc";
+import { basicDatatypes } from "@lichtblick/studio-base/util/basicDatatypes";
+import { Mutex } from "async-mutex";
+import * as _ from "lodash-es";
+import memoizeWeak from "memoize-weak";
+import ReactDOM from "react-dom";
+import shallowequal from "shallowequal";
+import { v4 as uuidv4 } from "uuid";
+
+import { Time, compare } from "@foxglove/rostime";
 
 import { remapVirtualSubscriptions, getPreloadTypes } from "./subscriptions";
 

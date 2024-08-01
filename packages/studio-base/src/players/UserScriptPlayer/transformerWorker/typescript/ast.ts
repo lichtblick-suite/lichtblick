@@ -11,9 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ts from "typescript/lib/typescript";
-
-import { MessageDefinitionField } from "@foxglove/message-definition";
 import {
   noFuncError,
   nonFuncError,
@@ -29,14 +26,17 @@ import {
   noTuples,
   limitedUnionsError,
   noNestedAny,
-} from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/errors";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/errors";
 import {
   DiagnosticSeverity,
   Sources,
   ErrorCodes,
   Diagnostic,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import type { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import type { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import ts from "typescript/lib/typescript";
+
+import { MessageDefinitionField } from "@foxglove/message-definition";
 
 type TypeParam = {
   parent?: TypeParam;

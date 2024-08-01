@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { NotificationMessage } from "@lichtblick/studio-base/util/sendNotification";
 import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
 
 const useStyles = makeStyles()((theme) => ({
   container: {

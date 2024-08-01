@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
+import { NormalizedLogMessage } from "@lichtblick/studio-base/panels/Log/types";
 import DoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { Fab } from "@mui/material";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -19,9 +21,6 @@ import { useLatest } from "react-use";
 import { AutoSizer } from "react-virtualized";
 import { VariableSizeList as List } from "react-window";
 import { makeStyles } from "tss-react/mui";
-
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { NormalizedLogMessage } from "@foxglove/studio-base/panels/Log/types";
 
 import LogMessage from "./LogMessage";
 

@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Rpc, { Channel } from "@lichtblick/studio-base/util/Rpc";
+import { setupMainThreadRpc } from "@lichtblick/studio-base/util/RpcMainThreadUtils";
 import * as _ from "lodash-es";
-
-import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
-import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtils";
 
 // This file provides a convenient way to set up and tear down workers as needed. It will create only a single worker
 // of each class, and terminate the worker when all listeners are unregistered.

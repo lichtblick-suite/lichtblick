@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks";
 import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 import Sidebars, { SidebarItem } from ".";
 import { NewSidebarItem } from "./NewSidebar";

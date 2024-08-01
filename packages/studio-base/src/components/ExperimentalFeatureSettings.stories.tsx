@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ExperimentalFeatureSettings } from "@lichtblick/studio-base/components/ExperimentalFeatureSettings";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { StoryObj } from "@storybook/react";
 import { useState } from "react";
-
-import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export default {
   title: "components/ExperimentalFeatureSettings",

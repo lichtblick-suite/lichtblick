@@ -11,22 +11,21 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-
-import { useShallowMemo } from "@foxglove/hooks";
-import Log from "@foxglove/log";
+import { useShallowMemo } from "@lichtblick/hooks";
+import Log from "@lichtblick/log";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import useShouldNotChangeOften from "@lichtblick/studio-base/hooks/useShouldNotChangeOften";
 import {
   MessageEvent,
   PlayerStateActiveData,
   SubscribePayload,
   SubscriptionPreloadType,
-} from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/players/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 const log = Log.getLogger(__filename);
 

@@ -2,25 +2,31 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { filterMap } from "@lichtblick/den/collection";
+import {
+  UrdfGeometryMesh,
+  UrdfRobot,
+  UrdfVisual,
+  parseRobot,
+  UrdfJoint,
+} from "@lichtblick/den/urdf";
+import Logger from "@lichtblick/log";
+import {
+  SettingsTreeAction,
+  SettingsTreeChildren,
+  SettingsTreeField,
+  SettingsTreeFields,
+} from "@lichtblick/studio";
+import { makeRgba, stringToRgba } from "@lichtblick/studio-base/panels/ThreeDeeRender/color";
+import { eulerToQuaternion } from "@lichtblick/studio-base/util/geometry";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
 import { vec3 } from "gl-matrix";
 import i18next from "i18next";
 import * as _ from "lodash-es";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
-import { filterMap } from "@foxglove/den/collection";
-import { UrdfGeometryMesh, UrdfRobot, UrdfVisual, parseRobot, UrdfJoint } from "@foxglove/den/urdf";
-import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import {
-  SettingsTreeAction,
-  SettingsTreeChildren,
-  SettingsTreeField,
-  SettingsTreeFields,
-} from "@foxglove/studio";
-import { makeRgba, stringToRgba } from "@foxglove/studio-base/panels/ThreeDeeRender/color";
-import { eulerToQuaternion } from "@foxglove/studio-base/util/geometry";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCylinder } from "./markers/RenderableCylinder";

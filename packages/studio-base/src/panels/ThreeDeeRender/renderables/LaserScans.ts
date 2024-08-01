@@ -2,21 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import * as THREE from "three";
-
-import { Time, toNanoSec } from "@foxglove/rostime";
-import { LaserScan as FoxgloveLaserScan } from "@foxglove/schemas";
-import { SettingsTreeAction, MessageEvent } from "@foxglove/studio";
+import { SettingsTreeAction, MessageEvent } from "@lichtblick/studio";
 import {
   DEFAULT_POINT_SETTINGS,
   LayerSettingsPointExtension,
   pointSettingsNode,
   PointsRenderable,
   RenderObjectHistory,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
-import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
+} from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
+import type { RosObject, RosValue } from "@lichtblick/studio-base/players/types";
+import { emptyPose } from "@lichtblick/studio-base/util/Pose";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+
+import { Time, toNanoSec } from "@foxglove/rostime";
+import { LaserScan as FoxgloveLaserScan } from "@foxglove/schemas";
 
 import { colorHasTransparency, getColorConverter } from "./colorMode";
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";

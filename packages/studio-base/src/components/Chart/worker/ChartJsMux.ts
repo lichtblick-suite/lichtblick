@@ -11,6 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PlexMono from "@lichtblick/studio-base/styles/assets/PlexMono.woff2";
+import Rpc from "@lichtblick/studio-base/util/Rpc";
+import { setupWorker } from "@lichtblick/studio-base/util/RpcWorkerUtils";
 import {
   CategoryScale,
   Chart,
@@ -30,10 +33,6 @@ import {
   Tooltip,
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
-
-import PlexMono from "@foxglove/studio-base/styles/assets/PlexMono.woff2";
-import Rpc from "@foxglove/studio-base/util/Rpc";
-import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import ChartJSManager, { InitOpts } from "./ChartJSManager";
 import { TypedChartData } from "../types";

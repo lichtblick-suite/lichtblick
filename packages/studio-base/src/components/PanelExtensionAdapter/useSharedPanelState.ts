@@ -2,17 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useCallback, useMemo } from "react";
-
-import { Immutable } from "@foxglove/studio";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import { Immutable } from "@lichtblick/studio";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
 import {
   LayoutState,
   SharedPanelState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
+import { useCallback, useMemo } from "react";
 
 const EmptySharedPanelState: Record<string, SharedPanelState> = Object.freeze({});
 const selectSharedState = (state: LayoutState) => state.sharedPanelState ?? EmptySharedPanelState;

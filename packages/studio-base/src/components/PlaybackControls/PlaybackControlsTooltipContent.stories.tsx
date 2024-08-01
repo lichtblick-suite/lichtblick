@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { PlaybackControlsTooltipContent } from "@lichtblick/studio-base/components/PlaybackControls/PlaybackControlsTooltipContent";
+import { useTimelineInteractionState } from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import TimelineInteractionStateProvider from "@lichtblick/studio-base/providers/TimelineInteractionStateProvider";
 import { useTheme } from "@mui/material";
 import { StoryObj, StoryFn } from "@storybook/react";
 import { useEffect } from "react";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { PlaybackControlsTooltipContent } from "@foxglove/studio-base/components/PlaybackControls/PlaybackControlsTooltipContent";
-import { useTimelineInteractionState } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 
 function Wrapper(Wrapped: StoryFn): JSX.Element {
   const theme = useTheme();

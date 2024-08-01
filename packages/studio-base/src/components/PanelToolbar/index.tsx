@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PanelContext from "@lichtblick/studio-base/components/PanelContext";
+import ToolbarIconButton from "@lichtblick/studio-base/components/PanelToolbar/ToolbarIconButton";
+import { useDefaultPanelTitle } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/studio-base/util/layout";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Typography } from "@mui/material";
 import { useContext, useMemo, CSSProperties } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import { useDefaultPanelTitle } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
 
 import { PanelToolbarControls } from "./PanelToolbarControls";
 

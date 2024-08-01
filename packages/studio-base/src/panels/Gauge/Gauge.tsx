@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@lichtblick/studio";
+import { simpleGetMessagePathDataItems } from "@lichtblick/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { turboColorString } from "@lichtblick/studio-base/util/colorUtils";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { parseMessagePath, MessagePath } from "@foxglove/message-path";
-import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@foxglove/studio";
-import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { turboColorString } from "@foxglove/studio-base/util/colorUtils";
 
 import { settingsActionReducer, useSettingsTree } from "./settings";
 import type { Config } from "./types";

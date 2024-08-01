@@ -2,13 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useMessagePipelineSubscribe } from "@lichtblick/studio-base/components/MessagePipeline";
+import { useHoverValue } from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
 import { toSec } from "@foxglove/rostime";
-import { useMessagePipelineSubscribe } from "@foxglove/studio-base/components/MessagePipeline";
-import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 
 import type { Scale } from "./ChartRenderer";
 import type { PlotCoordinator } from "./PlotCoordinator";

@@ -11,23 +11,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { filterMap } from "@lichtblick/den/collection";
+import * as PanelAPI from "@lichtblick/studio-base/PanelAPI";
+import { Autocomplete, IAutocomplete } from "@lichtblick/studio-base/components/Autocomplete";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@lichtblick/studio-base/hooks/useGlobalVariables";
 import { TextFieldProps } from "@mui/material";
 import * as _ from "lodash-es";
 import { CSSProperties, useCallback, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { filterMap } from "@foxglove/den/collection";
 import {
   quoteTopicNameIfNeeded,
   parseMessagePath,
   MessagePath,
   PrimitiveType,
 } from "@foxglove/message-path";
-import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { Autocomplete, IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
-import useGlobalVariables, {
-  GlobalVariables,
-} from "@foxglove/studio-base/hooks/useGlobalVariables";
 
 import {
   traverseStructure,

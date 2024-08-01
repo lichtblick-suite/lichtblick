@@ -5,9 +5,9 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
-import { Player } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import RosbridgePlayer from "@lichtblick/studio-base/players/RosbridgePlayer";
+import { Player } from "@lichtblick/studio-base/players/types";
 
 class RosbridgeDataSourceFactory implements IDataSourceFactory {
   public id = "rosbridge-websocket";

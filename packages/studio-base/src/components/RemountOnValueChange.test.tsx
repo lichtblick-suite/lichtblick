@@ -3,10 +3,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import RemountOnValueChange from "@lichtblick/studio-base/components/RemountOnValueChange";
 import { render } from "@testing-library/react";
 import { useLayoutEffect } from "react";
-
-import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 
 describe("RemountOnValueChange", () => {
   it("should render once with an initial value", () => {

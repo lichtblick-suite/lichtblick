@@ -3,21 +3,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Panel from "@lichtblick/studio-base/components/Panel";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import PanelCatalogContext, {
+  PanelCatalog,
+  PanelInfo,
+} from "@lichtblick/studio-base/context/PanelCatalogContext";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { PanelStateContextProvider } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { render, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import PanelCatalogContext, {
-  PanelCatalog,
-  PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import { UnconnectedPanelLayout } from "./PanelLayout";
 

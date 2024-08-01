@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import PlexMono from "@lichtblick/studio-base/styles/assets/PlexMono.woff2";
 import {
   CategoryScale,
   Chart,
@@ -17,8 +18,6 @@ import {
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
 import * as Comlink from "comlink";
-
-import PlexMono from "@foxglove/studio-base/styles/assets/PlexMono.woff2";
 
 import { ChartRenderer } from "./ChartRenderer";
 

@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { TimelinePositionedEvent } from "@lichtblick/studio-base/context/EventsContext";
 import * as _ from "lodash-es";
 
 import { add, toNanoSec, toSec } from "@foxglove/rostime";
-import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
 
 export function makeMockEvents(
   count: number,

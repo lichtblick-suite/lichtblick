@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { action } from "@storybook/addon-actions";
 import { StoryFn, StoryContext, StoryObj } from "@storybook/react";
-
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import TeleopPanel from "./index";
 

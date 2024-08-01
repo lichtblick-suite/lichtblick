@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
+import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/studio-base/types/Extensions";
 
 /**
  * An extension loader is an object used by studio to list, install, and uninstall extensions

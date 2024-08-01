@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent } from "@lichtblick/studio";
+import { PlayerCapabilities, Topic } from "@lichtblick/studio-base/players/types";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
+import delay from "@lichtblick/studio-base/util/delay";
 import { StoryObj } from "@storybook/react";
 import { userEvent, screen } from "@storybook/testing-library";
-
-import { MessageEvent } from "@foxglove/studio";
-import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import delay from "@foxglove/studio-base/util/delay";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";

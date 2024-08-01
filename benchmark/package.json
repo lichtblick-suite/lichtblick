@@ -2,15 +2,15 @@
   "name": "benchmark",
   "private": true,
   "dependencies": {
-    "@foxglove/studio-base": "workspace:*"
+    "@lichtblick/studio-base": "workspace:*"
   },
   "devDependencies": {
-    "@foxglove/den": "workspace:*",
-    "@foxglove/log": "workspace:*",
     "@foxglove/rostime": "1.1.2",
     "@foxglove/schemas": "1.6.3",
-    "@foxglove/studio": "workspace:*",
     "@foxglove/tsconfig": "2.0.0",
+    "@lichtblick/den": "workspace:*",
+    "@lichtblick/log": "workspace:*",
+    "@lichtblick/studio": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@types/react": "18.2.56",
     "@types/react-dom": "18.2.7",

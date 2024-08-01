@@ -3,11 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ArrowMinimize20Filled } from "@fluentui/react-icons";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import { Paper, IconButton, Tabs, Tab, tabClasses, tabsClasses, Tooltip } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
 
 const PANE_HEIGHT = 240;
 

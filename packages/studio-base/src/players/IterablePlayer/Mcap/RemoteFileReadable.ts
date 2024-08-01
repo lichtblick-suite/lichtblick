@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
-import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
+import BrowserHttpReader from "@lichtblick/studio-base/util/BrowserHttpReader";
+import CachedFilelike from "@lichtblick/studio-base/util/CachedFilelike";
 
 export class RemoteFileReadable {
   #remoteReader: CachedFilelike;

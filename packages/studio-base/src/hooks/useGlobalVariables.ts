@@ -11,12 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import type { VariableValue } from "@foxglove/studio";
+import type { VariableValue } from "@lichtblick/studio";
 import {
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
 
 export type GlobalVariables = { [key: string]: VariableValue };
 

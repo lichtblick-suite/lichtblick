@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Panel from "@lichtblick/studio-base/components/Panel";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import { PanelCatalog, PanelInfo } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import PanelLayout from "./PanelLayout";
 

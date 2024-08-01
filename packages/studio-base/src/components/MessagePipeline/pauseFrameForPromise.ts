@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PromiseTimeoutError, promiseTimeout } from "@foxglove/den/async";
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { PromiseTimeoutError, promiseTimeout } from "@lichtblick/den/async";
+import sendNotification from "@lichtblick/studio-base/util/sendNotification";
 
 export type FramePromise = { name: string; promise: Promise<void> };
 

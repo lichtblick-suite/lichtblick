@@ -14,7 +14,7 @@ import {
   DiagnosticSeverity,
   Sources,
   ErrorCodes,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
 
 export const noFuncError = {
   severity: DiagnosticSeverity.Error,

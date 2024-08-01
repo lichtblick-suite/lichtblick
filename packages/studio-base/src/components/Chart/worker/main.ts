@@ -13,8 +13,8 @@
 
 // Entrypoint for chartjs worker
 
-import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
-import { inWebWorker } from "@foxglove/studio-base/util/workers";
+import Rpc, { Channel } from "@lichtblick/studio-base/util/Rpc";
+import { inWebWorker } from "@lichtblick/studio-base/util/workers";
 
 import ChartJsMux from "./ChartJsMux";
 

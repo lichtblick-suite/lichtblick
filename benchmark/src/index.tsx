@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import { initI18n } from "@lichtblick/studio-base";
 import ReactDOM from "react-dom";
-
-import Logger from "@foxglove/log";
-import { initI18n } from "@foxglove/studio-base";
 
 const log = Logger.getLogger(__filename);
 log.debug("initializing");
@@ -20,7 +19,7 @@ if (!rootEl) {
 }
 
 async function main() {
-  const { overwriteFetch, waitForFonts } = await import("@foxglove/studio-base");
+  const { overwriteFetch, waitForFonts } = await import("@lichtblick/studio-base");
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();

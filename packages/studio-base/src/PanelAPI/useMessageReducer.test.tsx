@@ -12,21 +12,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderHook, act } from "@testing-library/react";
-import { PropsWithChildren, useState } from "react";
-
-import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
-import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import { MessagePipelineProvider } from "@lichtblick/studio-base/components/MessagePipeline";
+import FakePlayer from "@lichtblick/studio-base/components/MessagePipeline/FakePlayer";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
 import {
   Player,
   PlayerStateActiveData,
   Topic,
   MessageEvent,
-} from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
+} from "@lichtblick/studio-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
+import { renderHook, act } from "@testing-library/react";
+import { PropsWithChildren, useState } from "react";
 
 import * as PanelAPI from ".";
 

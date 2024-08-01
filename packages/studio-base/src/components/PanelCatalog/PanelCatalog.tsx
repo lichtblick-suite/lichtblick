@@ -2,6 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { PanelInfo, usePanelCatalog } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import { mightActuallyBePartial } from "@lichtblick/studio-base/util/mightActuallyBePartial";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
@@ -10,11 +14,6 @@ import * as _ from "lodash-es";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
-
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { PanelInfo, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { PanelGrid } from "./PanelGrid";
 import { PanelList } from "./PanelList";

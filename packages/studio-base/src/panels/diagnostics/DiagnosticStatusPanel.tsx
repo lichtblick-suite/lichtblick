@@ -11,6 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { SettingsTreeAction } from "@lichtblick/studio";
+import { useDataSourceInfo } from "@lichtblick/studio-base/PanelAPI";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import useStaleTime from "@lichtblick/studio-base/panels/diagnostics/useStaleTime";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { Autocomplete, TextField } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
@@ -18,16 +28,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { compare } from "@foxglove/rostime";
-import { SettingsTreeAction } from "@foxglove/studio";
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import useStaleTime from "@foxglove/studio-base/panels/diagnostics/useStaleTime";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import DiagnosticStatus from "./DiagnosticStatus";
 import { buildStatusPanelSettingsTree } from "./settings";

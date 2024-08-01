@@ -8,7 +8,7 @@
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,
     "paths": {
-      "@foxglove/studio-base/*": ["../packages/studio-base/src/*"]
+      "@lichtblick/studio-base/*": ["../packages/studio-base/src/*"]
     }
   }
 }

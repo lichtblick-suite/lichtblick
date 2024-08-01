@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { ChartData as AbstractChartData } from "chart.js";
-
 import type {
   ObjectData,
   ChartData,
   TypedChartData,
   TypedData,
-} from "@foxglove/studio-base/components/Chart/types";
+} from "@lichtblick/studio-base/components/Chart/types";
+import type { ChartData as AbstractChartData } from "chart.js";
 
 // alias types for convenience
 export type ChartDatasets = ChartData["datasets"];

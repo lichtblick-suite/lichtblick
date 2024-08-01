@@ -13,12 +13,12 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
-import exampleDatatypes from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/fixtures/example-datatypes";
-import generateRosLib from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
+import exampleDatatypes from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/fixtures/example-datatypes";
+import generateRosLib from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
 import {
   generateEmptyTypesLib,
   generateTypesLib,
-} from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
 import {
   getOutputTopic,
   validateInputTopics,
@@ -27,16 +27,16 @@ import {
   extractGlobalVariables,
   compose,
   getInputTopics,
-} from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/transform";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/transform";
 import {
   DiagnosticSeverity,
   ErrorCodes,
   Sources,
   ScriptData,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { basicDatatypes } from "@lichtblick/studio-base/util/basicDatatypes";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/studio-base/util/globalConstants";
 
 // Exported for use in other tests.
 const baseNodeData: ScriptData = {

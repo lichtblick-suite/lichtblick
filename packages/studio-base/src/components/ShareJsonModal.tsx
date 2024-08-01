@@ -3,6 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ArrowDownload20Filled, Delete20Regular } from "@fluentui/react-icons";
+import CopyButton from "@lichtblick/studio-base/components/CopyButton";
+import HoverableIconButton from "@lichtblick/studio-base/components/HoverableIconButton";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { downloadTextFile } from "@lichtblick/studio-base/util/download";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -16,11 +20,6 @@ import {
 } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import CopyButton from "@foxglove/studio-base/components/CopyButton";
-import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 export type ShareJsonModalProps = {
   onRequestClose: () => void;

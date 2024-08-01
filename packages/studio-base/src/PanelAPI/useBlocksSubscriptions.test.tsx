@@ -12,12 +12,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { SubscribePayload } from "@lichtblick/studio-base/players/types";
+import { mockMessage } from "@lichtblick/studio-base/test/mocks/mockMessage";
 import { renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { SubscribePayload } from "@foxglove/studio-base/players/types";
-import { mockMessage } from "@foxglove/studio-base/test/mocks/mockMessage";
 
 import * as PanelAPI from ".";
 

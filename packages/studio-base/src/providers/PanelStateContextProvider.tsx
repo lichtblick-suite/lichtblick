@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
-import { StoreApi, createStore } from "zustand";
-
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
 import {
   ImmutableSettingsTree,
   PanelStateContext,
   PanelStateStore,
   usePanelStateStore,
-} from "@foxglove/studio-base/context/PanelStateContext";
+} from "@lichtblick/studio-base/context/PanelStateContext";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { StoreApi, createStore } from "zustand";
 
 function createPanelStateStore(initialState?: Partial<PanelStateStore>): StoreApi<PanelStateStore> {
   return createStore((set) => {

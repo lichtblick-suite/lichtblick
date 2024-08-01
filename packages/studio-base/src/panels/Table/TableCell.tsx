@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { CellValue } from "@lichtblick/studio-base/panels/Table/types";
 import MinusIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import { IconButton } from "@mui/material";
 import { Row } from "@tanstack/react-table";
 import { PropsWithChildren } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { CellValue } from "@foxglove/studio-base/panels/Table/types";
 
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 

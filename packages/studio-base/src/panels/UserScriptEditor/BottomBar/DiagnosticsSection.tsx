@@ -2,6 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  Diagnostic,
+  DiagnosticSeverity,
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
 import ErrorIcon from "@mui/icons-material/Error";
 import HelpIcon from "@mui/icons-material/Help";
 import InfoIcon from "@mui/icons-material/Info";
@@ -10,12 +15,6 @@ import { List, ListItem, ListItemIcon, ListItemText, Typography } from "@mui/mat
 import * as _ from "lodash-es";
 import { ReactElement } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  Diagnostic,
-  DiagnosticSeverity,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
 
 const severityIcons = {
   Hint: <HelpIcon fontSize="small" />,

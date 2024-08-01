@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // eslint-disable-next-line filenames/match-exported
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
 
 const datatypes: RosDatatypes = new Map(
   Object.entries({

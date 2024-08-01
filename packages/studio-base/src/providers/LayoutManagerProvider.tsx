@@ -2,17 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useVisibilityState } from "@lichtblick/hooks";
+import Logger from "@lichtblick/log";
+import LayoutManagerContext from "@lichtblick/studio-base/context/LayoutManagerContext";
+import { useLayoutStorage } from "@lichtblick/studio-base/context/LayoutStorageContext";
+import { useRemoteLayoutStorage } from "@lichtblick/studio-base/context/RemoteLayoutStorageContext";
+import { LayoutLoader } from "@lichtblick/studio-base/services/ILayoutLoader";
+import LayoutManager from "@lichtblick/studio-base/services/LayoutManager/LayoutManager";
+import delay from "@lichtblick/studio-base/util/delay";
 import { useEffect, useMemo } from "react";
 import { useNetworkState } from "react-use";
-
-import { useVisibilityState } from "@foxglove/hooks";
-import Logger from "@foxglove/log";
-import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerContext";
-import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
-import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
-import { LayoutLoader } from "@foxglove/studio-base/services/ILayoutLoader";
-import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
-import delay from "@foxglove/studio-base/util/delay";
 
 const log = Logger.getLogger(__filename);
 

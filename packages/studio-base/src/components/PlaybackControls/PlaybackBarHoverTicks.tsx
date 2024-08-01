@@ -2,21 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { RpcScales } from "@lichtblick/studio-base/components/Chart/types";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import HoverBar from "@lichtblick/studio-base/components/TimeBasedChart/HoverBar";
+import { useHoverValue } from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
 import { Tooltip } from "@mui/material";
 import { useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
 
 import { add, fromSec, toSec } from "@foxglove/rostime";
-import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import HoverBar from "@foxglove/studio-base/components/TimeBasedChart/HoverBar";
-import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 
 const useStyles = makeStyles()((theme) => ({
   tick: {

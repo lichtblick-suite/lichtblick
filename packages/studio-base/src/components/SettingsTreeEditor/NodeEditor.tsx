@@ -2,6 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { filterMap } from "@lichtblick/den/collection";
+import {
+  Immutable,
+  SettingsTreeAction,
+  SettingsTreeNode,
+  SettingsTreeNodeActionItem,
+} from "@lichtblick/studio";
+import { HighlightedText } from "@lichtblick/studio-base/components/HighlightedText";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppContext } from "@lichtblick/studio-base/context/AppContext";
 import ArrowDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CheckIcon from "@mui/icons-material/Check";
@@ -17,17 +27,6 @@ import tinycolor from "tinycolor2";
 import { keyframes } from "tss-react";
 import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
-
-import { filterMap } from "@foxglove/den/collection";
-import {
-  Immutable,
-  SettingsTreeAction,
-  SettingsTreeNode,
-  SettingsTreeNodeActionItem,
-} from "@foxglove/studio";
-import { HighlightedText } from "@foxglove/studio-base/components/HighlightedText";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 
 import { FieldEditor } from "./FieldEditor";
 import { NodeActionsMenu } from "./NodeActionsMenu";

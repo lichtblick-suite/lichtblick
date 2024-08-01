@@ -2,19 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { PanelCatalog as PanelCatalogComponent } from "@lichtblick/studio-base/components/PanelCatalog";
+import PanelCatalogContext, {
+  PanelCatalog,
+  PanelInfo,
+} from "@lichtblick/studio-base/context/PanelCatalogContext";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { useTheme } from "@mui/material";
 import { Meta, StoryFn, StoryObj } from "@storybook/react";
 import { userEvent } from "@storybook/testing-library";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import { PanelCatalog as PanelCatalogComponent } from "@foxglove/studio-base/components/PanelCatalog";
-import PanelCatalogContext, {
-  PanelCatalog,
-  PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
 const SamplePanel1 = () => <div />;
 SamplePanel1.panelType = "sample";

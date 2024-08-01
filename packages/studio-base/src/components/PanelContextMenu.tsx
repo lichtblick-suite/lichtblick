@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "@lichtblick/studio";
+import { PANEL_ROOT_CLASS_NAME } from "@lichtblick/studio-base/components/PanelRoot";
 import { Divider, Menu, MenuItem } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import { Immutable } from "@foxglove/studio";
-import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
 
 /**
  * Types of items that can be included in a context menu. Either a clickable item

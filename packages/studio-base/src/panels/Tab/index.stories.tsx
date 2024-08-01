@@ -10,23 +10,24 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { PanelCatalog as PanelCatalogComponent } from "@lichtblick/studio-base/components/PanelCatalog";
+import PanelLayout from "@lichtblick/studio-base/components/PanelLayout";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import { PanelCatalog, PanelInfo } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import {
+  nestedTabLayoutFixture,
+  nestedTabLayoutFixture2,
+} from "@lichtblick/studio-base/panels/Tab/nestedTabLayoutFixture";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import { ExpectedResult } from "@lichtblick/studio-base/stories/storyHelpers";
 import { useTheme } from "@mui/material";
 import { expect } from "@storybook/jest";
 import { StoryObj, Meta } from "@storybook/react";
 import { fireEvent, within } from "@storybook/testing-library";
 
-import Panel from "@foxglove/studio-base/components/Panel";
-import { PanelCatalog as PanelCatalogComponent } from "@foxglove/studio-base/components/PanelCatalog";
-import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
-import {
-  nestedTabLayoutFixture,
-  nestedTabLayoutFixture2,
-} from "@foxglove/studio-base/panels/Tab/nestedTabLayoutFixture";
-import { TabPanelConfig } from "@foxglove/studio-base/src/types/layouts";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { ExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
+import { TabPanelConfig } from "@lichtblick/studio-base/src/types/layouts";
 
 import Tab from "./index";
 

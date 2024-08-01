@@ -11,6 +11,38 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useWarnImmediateReRender } from "@lichtblick/hooks";
+import Logger from "@lichtblick/log";
+import { Immutable } from "@lichtblick/studio";
+import { MessagePipelineProvider } from "@lichtblick/studio-base/components/MessagePipeline";
+import { useAnalytics } from "@lichtblick/studio-base/context/AnalyticsContext";
+import {
+  LayoutState,
+  useCurrentLayoutSelector,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { ExtensionCatalogContext } from "@lichtblick/studio-base/context/ExtensionCatalogContext";
+import { usePerformance } from "@lichtblick/studio-base/context/PerformanceContext";
+import PlayerSelectionContext, {
+  DataSourceArgs,
+  IDataSourceFactory,
+  PlayerSelection,
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import {
+  UserScriptStore,
+  useUserScriptState,
+} from "@lichtblick/studio-base/context/UserScriptStateContext";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import useIndexedDbRecents, {
+  RecentRecord,
+} from "@lichtblick/studio-base/hooks/useIndexedDbRecents";
+import AnalyticsMetricsCollector from "@lichtblick/studio-base/players/AnalyticsMetricsCollector";
+import {
+  TopicAliasFunctions,
+  TopicAliasingPlayer,
+} from "@lichtblick/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
+import UserScriptPlayer from "@lichtblick/studio-base/players/UserScriptPlayer";
+import { Player } from "@lichtblick/studio-base/players/types";
+import { UserScripts } from "@lichtblick/studio-base/types/panels";
 import { useSnackbar } from "notistack";
 import {
   PropsWithChildren,
@@ -22,37 +54,6 @@ import {
   useState,
 } from "react";
 import { useLatest, useMountedState } from "react-use";
-
-import { useWarnImmediateReRender } from "@foxglove/hooks";
-import Logger from "@foxglove/log";
-import { Immutable } from "@foxglove/studio";
-import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { ExtensionCatalogContext } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { usePerformance } from "@foxglove/studio-base/context/PerformanceContext";
-import PlayerSelectionContext, {
-  DataSourceArgs,
-  IDataSourceFactory,
-  PlayerSelection,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import {
-  UserScriptStore,
-  useUserScriptState,
-} from "@foxglove/studio-base/context/UserScriptStateContext";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import useIndexedDbRecents, { RecentRecord } from "@foxglove/studio-base/hooks/useIndexedDbRecents";
-import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
-import {
-  TopicAliasFunctions,
-  TopicAliasingPlayer,
-} from "@foxglove/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
-import UserScriptPlayer from "@foxglove/studio-base/players/UserScriptPlayer";
-import { Player } from "@foxglove/studio-base/players/types";
-import { UserScripts } from "@foxglove/studio-base/types/panels";
 
 const log = Logger.getLogger(__filename);
 

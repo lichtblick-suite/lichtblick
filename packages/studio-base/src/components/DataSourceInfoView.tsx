@@ -2,22 +2,22 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import Timestamp from "@lichtblick/studio-base/components/Timestamp";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
+import { formatDuration } from "@lichtblick/studio-base/util/formatTime";
+import { formatTimeRaw, isAbsoluteTime } from "@lichtblick/studio-base/util/time";
 import { Skeleton, Typography } from "@mui/material";
 import { MutableRefObject, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import { subtract as subtractTimes, Time } from "@foxglove/rostime";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import Timestamp from "@foxglove/studio-base/components/Timestamp";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { formatDuration } from "@foxglove/studio-base/util/formatTime";
-import { formatTimeRaw, isAbsoluteTime } from "@foxglove/studio-base/util/time";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
 

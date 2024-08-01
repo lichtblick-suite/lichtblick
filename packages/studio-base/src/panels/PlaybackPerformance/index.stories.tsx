@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { StoryObj } from "@storybook/react";
-
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import PlaybackPerformance from "./index";
 

@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Rpc, { Channel, createLinkedChannels } from "@lichtblick/studio-base/util/Rpc";
 import * as _ from "lodash-es";
-
-import Rpc, { Channel, createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 
 import { processMessage, registerScript } from "./runtimeWorker/registry";
 import generateRosLib from "./transformerWorker/generateRosLib";

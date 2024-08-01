@@ -6,11 +6,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // fil
 
+import { PanelInfo } from "@lichtblick/studio-base/context/PanelCatalogContext";
 import { Container } from "@mui/material";
 import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 
 import { PanelGridCard } from "./PanelGridCard";
 import { PanelSelection } from "./types";

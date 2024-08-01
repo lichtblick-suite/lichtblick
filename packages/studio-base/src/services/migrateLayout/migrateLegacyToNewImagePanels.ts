@@ -2,15 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import type { RendererConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
-import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
-import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import type { RendererConfig } from "@lichtblick/studio-base/panels/ThreeDeeRender/IRenderer";
+import { DEFAULT_CAMERA_STATE } from "@lichtblick/studio-base/panels/ThreeDeeRender/camera";
+import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import {
   getAllPanelIds,
   getPanelIdForType,
   getPanelTypeFromId,
-} from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/util/layout";
 
 import { replacePanel } from "./replacePanel";
 

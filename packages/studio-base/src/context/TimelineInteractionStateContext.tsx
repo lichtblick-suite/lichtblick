@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { Immutable } from "@lichtblick/studio";
+import { TimelinePositionedEvent } from "@lichtblick/studio-base/context/EventsContext";
+import type { HoverValue } from "@lichtblick/studio-base/types/hoverValue";
 import { createContext, useCallback } from "react";
 import { StoreApi, useStore } from "zustand";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
-import { Immutable } from "@foxglove/studio";
-import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
-import type { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 /**
  * Represents the global bounds to which synced plots conform, including the id of the

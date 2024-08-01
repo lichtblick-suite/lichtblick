@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutID } from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import { createContext, useContext } from "react";
-
-import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 export type UserProfile = {
   /** The id of the layout the user is currently working with. */

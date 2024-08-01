@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useMustNotChange } from "@lichtblick/hooks";
+import AnalyticsContext from "@lichtblick/studio-base/context/AnalyticsContext";
+import IAnalytics from "@lichtblick/studio-base/services/IAnalytics";
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { StoreApi, createStore, useStore } from "zustand";
-
-import { useMustNotChange } from "@foxglove/hooks";
-import AnalyticsContext from "@foxglove/studio-base/context/AnalyticsContext";
-import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 
 export type ForwardedAnalytics = StoreApi<{ value: IAnalytics }>;
 

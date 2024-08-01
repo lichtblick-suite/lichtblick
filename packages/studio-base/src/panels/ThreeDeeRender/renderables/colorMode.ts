@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { SettingsTreeFields, SettingsTreeNode } from "@lichtblick/studio";
+import { BaseSettings } from "@lichtblick/studio-base/panels/ThreeDeeRender/settings";
 import { t } from "i18next";
 import * as THREE from "three";
-
-import { SettingsTreeFields, SettingsTreeNode } from "@foxglove/studio";
-import { BaseSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/settings";
 
 import { rgbaGradient, rgbaToLinear, SRGBToLinear, stringToRgba } from "../color";
 import { clamp } from "../math";

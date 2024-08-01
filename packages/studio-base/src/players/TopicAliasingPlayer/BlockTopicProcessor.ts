@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Immutable as Im, MessageEvent } from "@foxglove/studio";
-import type { MessageBlock } from "@foxglove/studio-base/players/types";
+import type { Immutable as Im, MessageEvent } from "@lichtblick/studio";
+import type { MessageBlock } from "@lichtblick/studio-base/players/types";
 
 type BlockItem = { inputEvents: Im<MessageEvent[]>; aliased: Record<string, MessageEvent[]> };
 type SparseArray<T> = (T | undefined)[];

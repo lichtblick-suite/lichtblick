@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Topic } from "@lichtblick/studio-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import { basicDatatypes } from "@lichtblick/studio-base/util/basicDatatypes";
 import { Stack } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, screen, userEvent, waitFor, within } from "@storybook/testing-library";
 import { useState } from "react";
-
-import { Topic } from "@foxglove/studio-base/players/types";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
 
 import MessagePathInput from "./MessagePathInput";
 import { MessagePathInputStoryFixture } from "./fixture";

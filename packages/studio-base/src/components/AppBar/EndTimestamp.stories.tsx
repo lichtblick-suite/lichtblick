@@ -2,15 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { Meta, StoryFn, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 import { Time } from "@foxglove/rostime";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import { EndTimestamp } from "./EndTimestamp";
 

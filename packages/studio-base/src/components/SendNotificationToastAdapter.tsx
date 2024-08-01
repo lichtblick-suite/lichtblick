@@ -2,11 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link } from "@mui/material";
-import { useSnackbar, VariantType } from "notistack";
-import { useLayoutEffect, useState } from "react";
-
-import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
+import NotificationModal from "@lichtblick/studio-base/components/NotificationModal";
 import {
   DetailsType,
   NotificationType,
@@ -14,7 +10,10 @@ import {
   unsetNotificationHandler,
   NotificationSeverity,
   NotificationMessage,
-} from "@foxglove/studio-base/util/sendNotification";
+} from "@lichtblick/studio-base/util/sendNotification";
+import { Link } from "@mui/material";
+import { useSnackbar, VariantType } from "notistack";
+import { useLayoutEffect, useState } from "react";
 
 const severityToToastAppearance = (severity: NotificationSeverity): VariantType => {
   switch (severity) {

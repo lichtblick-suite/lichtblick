@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useCallback } from "react";
-
-import { useShallowMemo } from "@foxglove/hooks";
+import { useShallowMemo } from "@lichtblick/hooks";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplaceDetail,
-} from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
+} from "@lichtblick/studio-base/context/ExtensionMarketplaceContext";
+import { useCallback } from "react";
 
 const MARKETPLACE_URL =
   "https://raw.githubusercontent.com/foxglove/studio-extension-marketplace/main/extensions.json";

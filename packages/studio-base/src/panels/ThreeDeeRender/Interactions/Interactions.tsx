@@ -12,13 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { Cursor20Regular } from "@fluentui/react-icons";
-import { Typography } from "@mui/material";
-
-import type { LayoutActions } from "@foxglove/studio";
+import type { LayoutActions } from "@lichtblick/studio";
 import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
-} from "@foxglove/studio-base/components/ExpandingToolbar";
+} from "@lichtblick/studio-base/components/ExpandingToolbar";
+import { Typography } from "@mui/material";
 
 import ObjectDetails from "./ObjectDetails";
 import TopicLink from "./TopicLink";

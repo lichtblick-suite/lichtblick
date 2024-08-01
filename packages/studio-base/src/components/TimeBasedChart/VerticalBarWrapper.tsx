@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { RpcScales } from "@lichtblick/studio-base/components/Chart/types";
 import { CSSProperties, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 
 const useStyles = makeStyles()(() => ({
   root: {

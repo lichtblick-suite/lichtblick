@@ -2,6 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent, Metadata } from "@lichtblick/studio";
+import {
+  GetBackfillMessagesArgs,
+  IIterableSource,
+  Initalization,
+  IteratorResult,
+  MessageIteratorArgs,
+} from "@lichtblick/studio-base/players/IterablePlayer/IIterableSource";
+import { estimateObjectSize } from "@lichtblick/studio-base/players/messageMemoryEstimation";
+import { PlayerProblem, Topic, TopicStats } from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
 import { McapStreamReader, McapTypes } from "@mcap/core";
 import * as _ from "lodash-es";
 
@@ -17,17 +28,6 @@ import {
   toRFC3339String,
   compare,
 } from "@foxglove/rostime";
-import { MessageEvent, Metadata } from "@foxglove/studio";
-import {
-  GetBackfillMessagesArgs,
-  IIterableSource,
-  Initalization,
-  IteratorResult,
-  MessageIteratorArgs,
-} from "@foxglove/studio-base/players/IterablePlayer/IIterableSource";
-import { estimateObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
-import { PlayerProblem, Topic, TopicStats } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 const DURATION_YEAR_SEC = 365 * 24 * 60 * 60;
 

@@ -2,35 +2,34 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Divider, Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useUnmount } from "react-use";
-
-import { SettingsTree } from "@foxglove/studio";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { useConfigById } from "@foxglove/studio-base/PanelAPI";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import { ActionMenu } from "@foxglove/studio-base/components/PanelSettings/ActionMenu";
-import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
-import { ShareJsonModal } from "@foxglove/studio-base/components/ShareJsonModal";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
-import Stack from "@foxglove/studio-base/components/Stack";
+import { SettingsTree } from "@lichtblick/studio";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import { useConfigById } from "@lichtblick/studio-base/PanelAPI";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import { ActionMenu } from "@lichtblick/studio-base/components/PanelSettings/ActionMenu";
+import SettingsTreeEditor from "@lichtblick/studio-base/components/SettingsTreeEditor";
+import { ShareJsonModal } from "@lichtblick/studio-base/components/ShareJsonModal";
+import { SidebarContent } from "@lichtblick/studio-base/components/SidebarContent";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import {
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
   useSelectedPanels,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { usePanelCatalog } from "@lichtblick/studio-base/context/PanelCatalogContext";
 import {
   PanelStateStore,
   usePanelStateStore,
-} from "@foxglove/studio-base/context/PanelStateContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
-import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
+} from "@lichtblick/studio-base/context/PanelStateContext";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks";
+import { PanelConfig } from "@lichtblick/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@lichtblick/studio-base/util/globalConstants";
+import { getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
+import { Divider, Typography } from "@mui/material";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useUnmount } from "react-use";
 
 const singlePanelIdSelector = (state: LayoutState) =>
   typeof state.selectedLayout?.data?.layout === "string"

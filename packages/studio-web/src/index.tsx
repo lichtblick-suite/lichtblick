@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Logger from "@lichtblick/log";
+import type { IDataSourceFactory } from "@lichtblick/studio-base";
+import CssBaseline from "@lichtblick/studio-base/components/CssBaseline";
 import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom";
-
-import Logger from "@foxglove/log";
-import type { IDataSourceFactory } from "@foxglove/studio-base";
-import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 
 import { CompatibilityBanner } from "./CompatibilityBanner";
 import { canRenderApp } from "./canRenderApp";
@@ -70,7 +69,7 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
   // Use an async import to delay loading the majority of studio-base code until the CompatibilityBanner
   // can be displayed.
   const { installDevtoolsFormatters, overwriteFetch, waitForFonts, initI18n, StudioApp } =
-    await import("@foxglove/studio-base");
+    await import("@lichtblick/studio-base");
   installDevtoolsFormatters();
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen

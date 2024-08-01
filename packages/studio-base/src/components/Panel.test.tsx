@@ -12,13 +12,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { PanelsActions } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { render, renderHook, act } from "@testing-library/react";
 import { useEffect } from "react";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 type DummyConfig = { someString: string };
 type DummyProps = { config: DummyConfig; saveConfig: (arg0: Partial<DummyConfig>) => void };

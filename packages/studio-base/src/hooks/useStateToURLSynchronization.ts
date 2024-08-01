@@ -2,18 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-import { useEffect } from "react";
-import { useDebounce } from "use-debounce";
-
-import { useDeepMemo } from "@foxglove/hooks";
+import { useDeepMemo } from "@lichtblick/hooks";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import { AppURLState, updateAppURLState } from "@foxglove/studio-base/util/appURLState";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { EventsStore, useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import { AppURLState, updateAppURLState } from "@lichtblick/studio-base/util/appURLState";
+import * as _ from "lodash-es";
+import { useEffect } from "react";
+import { useDebounce } from "use-debounce";
 
 const selectCanSeek = (ctx: MessagePipelineContext) =>
   ctx.playerState.capabilities.includes(PlayerCapabilities.playbackControl);

@@ -2,19 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { alpha } from "@mui/material";
-import * as _ from "lodash-es";
-import { makeStyles } from "tss-react/mui";
-
 import {
   EventsStore,
   TimelinePositionedEvent,
   useEvents,
-} from "@foxglove/studio-base/context/EventsContext";
+} from "@lichtblick/studio-base/context/EventsContext";
 import {
   TimelineInteractionStateStore,
   useTimelineInteractionState,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { alpha } from "@mui/material";
+import * as _ from "lodash-es";
+import { makeStyles } from "tss-react/mui";
 
 const useStyles = makeStyles()(({ transitions, palette }) => ({
   root: {

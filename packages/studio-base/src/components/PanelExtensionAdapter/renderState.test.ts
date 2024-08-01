@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
 import { produce } from "immer";
-
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import { BuilderRenderStateInput, initRenderStateBuilder } from "./renderState";
 

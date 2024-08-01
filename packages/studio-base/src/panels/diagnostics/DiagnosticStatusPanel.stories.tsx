@@ -1,12 +1,12 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { StoryObj } from "@storybook/react";
 
-import DiagnosticStatusPanel from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
-import { makeDiagnosticMessage } from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.stories";
-import { LEVELS } from "@foxglove/studio-base/panels/diagnostics/util";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import DiagnosticStatusPanel from "@lichtblick/studio-base/panels/diagnostics/DiagnosticStatusPanel";
+import { makeDiagnosticMessage } from "@lichtblick/studio-base/panels/diagnostics/DiagnosticSummary.stories";
+import { LEVELS } from "@lichtblick/studio-base/panels/diagnostics/util";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import { StoryObj } from "@storybook/react";
 
 export default {
   title: "panels/diagnostics/DiagnosticStatusPanel",

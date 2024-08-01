@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent } from "@lichtblick/studio";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import { vec3 } from "gl-matrix";
 
 import type { PointCloud } from "@foxglove/schemas";
-import { MessageEvent } from "@foxglove/studio";
-import { Topic } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { QUAT_IDENTITY, rad2deg, VEC3_ZERO } from "./common";
 import useDelayedFixture from "./useDelayedFixture";

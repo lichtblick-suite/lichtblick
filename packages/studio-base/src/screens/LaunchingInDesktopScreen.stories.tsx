@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LaunchingInDesktopScreen } from "@lichtblick/studio-base/screens/LaunchingInDesktopScreen";
 import { StoryObj } from "@storybook/react";
 import { ReactElement } from "react";
-
-import { LaunchingInDesktopScreen } from "@foxglove/studio-base/screens/LaunchingInDesktopScreen";
 
 export default {
   title: "LaunchingInDesktopScreen",

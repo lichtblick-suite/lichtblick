@@ -3,13 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ChevronDown12Filled } from "@fluentui/react-icons";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import TextMiddleTruncate from "@lichtblick/studio-base/components/TextMiddleTruncate";
 import { ButtonBase, ButtonBaseProps, Typography } from "@mui/material";
 import { forwardRef } from "react";
 import tinycolor2 from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 
 import { APP_BAR_HEIGHT } from "./constants";
 

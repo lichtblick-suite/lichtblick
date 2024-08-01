@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Log from "@lichtblick/studio-base/panels/Log";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
 import { StoryObj } from "@storybook/react";
 import * as _ from "lodash-es";
-
-import Log from "@foxglove/studio-base/panels/Log";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture: Fixture = {
   topics: [{ name: "/rosout", schemaName: "rosgraph_msgs/Log" }],

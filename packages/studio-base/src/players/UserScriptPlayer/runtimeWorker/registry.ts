@@ -10,9 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import path from "path";
 
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -21,8 +20,9 @@ import {
   RegistrationOutput,
   Sources,
   UserScriptLog,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/studio-base/util/globalConstants";
+import path from "path";
 
 // Each script runtime worker runs one script at a time, hence why we have one
 // global declaration of 'nodeCallback'.

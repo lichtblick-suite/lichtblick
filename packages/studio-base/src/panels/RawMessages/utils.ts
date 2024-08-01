@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { diffLabels, DiffObject } from "@lichtblick/studio-base/panels/RawMessages/getDiff";
 import * as _ from "lodash-es";
 
 import { ros1 } from "@foxglove/rosmsg-msgs-common";
 import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
-import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 
 import type { NodeExpansion } from "./types";
 import { NodeState } from "./types";

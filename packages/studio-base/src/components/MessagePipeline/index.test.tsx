@@ -14,20 +14,19 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
-import { act, renderHook } from "@testing-library/react";
-import { PropsWithChildren, useCallback, useState } from "react";
-import { DeepPartial } from "ts-essentials";
-
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
 import {
   Player,
   PlayerCapabilities,
   PlayerPresence,
   TopicStats,
-} from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import delay from "@foxglove/studio-base/util/delay";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
+} from "@lichtblick/studio-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import delay from "@lichtblick/studio-base/util/delay";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
+import { act, renderHook } from "@testing-library/react";
+import { PropsWithChildren, useCallback, useState } from "react";
+import { DeepPartial } from "ts-essentials";
 
 import { MessagePipelineContext, MessagePipelineProvider, useMessagePipeline } from ".";
 import FakePlayer from "./FakePlayer";

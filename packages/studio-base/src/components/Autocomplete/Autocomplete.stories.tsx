@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
 import { Meta, StoryFn, StoryObj } from "@storybook/react";
 import { fireEvent, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
-
-import Stack from "@foxglove/studio-base/components/Stack";
 
 import { Autocomplete } from "./Autocomplete";
 

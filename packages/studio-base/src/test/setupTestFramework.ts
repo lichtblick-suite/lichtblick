@@ -11,15 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { initI18n } from "@foxglove/studio-base/i18n";
+import { initI18n } from "@lichtblick/studio-base/i18n";
 import {
   setupMockSendNotification,
   mockSendNotification,
   mockSetNotificationHandler,
-} from "@foxglove/studio-base/test/MockSendNotification";
+} from "@lichtblick/studio-base/test/MockSendNotification";
 
 // Mock out sendNotification for all tests
-jest.mock("@foxglove/studio-base/util/sendNotification", () => {
+jest.mock("@lichtblick/studio-base/util/sendNotification", () => {
   return {
     __esModule: true,
     default: mockSendNotification,

@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { action } from "@storybook/addon-actions";
-import { Meta, StoryFn, StoryObj } from "@storybook/react";
-
 import MockMessagePipelineProvider, {
   MockMessagePipelineProps,
-} from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
+import { action } from "@storybook/addon-actions";
+import { Meta, StoryFn, StoryObj } from "@storybook/react";
 
 import { AppBar } from ".";
 import { StorybookDecorator } from "./StorybookDecorator.stories";

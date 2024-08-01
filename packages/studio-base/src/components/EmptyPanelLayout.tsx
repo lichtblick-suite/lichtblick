@@ -11,18 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { PanelCatalog, PanelSelection } from "@lichtblick/studio-base/components/PanelCatalog";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { MosaicDropResult } from "@lichtblick/studio-base/types/panels";
+import { getPanelIdForType } from "@lichtblick/studio-base/util/layout";
 import { Link, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { MosaicDragType } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
-
-import { PanelCatalog, PanelSelection } from "@foxglove/studio-base/components/PanelCatalog";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
-import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 
 type Props = {
   tabId?: string;

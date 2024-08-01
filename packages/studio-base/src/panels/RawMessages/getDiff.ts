@@ -10,9 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { isTypicalFilterName } from "@lichtblick/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import * as _ from "lodash-es";
-
-import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
 export const diffArrow = "->";
 export const diffLabels = {

@@ -2,6 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { Immutable } from "@lichtblick/studio";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import CurrentLayoutContext, {
+  LayoutState,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import {
+  Player,
+  PlayerProblem,
+  PlayerState,
+  SubscribePayload,
+} from "@lichtblick/studio-base/players/types";
 import * as _ from "lodash-es";
 import {
   createContext,
@@ -13,21 +27,6 @@ import {
   useRef,
 } from "react";
 import { StoreApi, useStore } from "zustand";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
-import { Immutable } from "@foxglove/studio";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import CurrentLayoutContext, {
-  LayoutState,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import {
-  Player,
-  PlayerProblem,
-  PlayerState,
-  SubscribePayload,
-} from "@foxglove/studio-base/players/types";
 
 import MessageOrderTracker from "./MessageOrderTracker";
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";

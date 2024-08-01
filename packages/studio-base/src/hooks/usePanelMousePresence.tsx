@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PANEL_ROOT_CLASS_NAME } from "@lichtblick/studio-base/components/PanelRoot";
 import { MutableRefObject, useCallback, useEffect, useState } from "react";
-
-import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
 
 /**
  * Tracks the presence of the mouse in the parent panel.

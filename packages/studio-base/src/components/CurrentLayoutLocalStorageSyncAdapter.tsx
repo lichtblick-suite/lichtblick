@@ -2,23 +2,22 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import assert from "assert";
-import { useEffect } from "react";
-import { useAsync } from "react-use";
-import { useDebounce } from "use-debounce";
-
-import Log from "@foxglove/log";
-import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@foxglove/studio-base/constants/localStorageKeys";
+import Log from "@lichtblick/log";
+import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@lichtblick/studio-base/constants/localStorageKeys";
 import {
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { defaultLayout } from "@foxglove/studio-base/providers/CurrentLayoutProvider/defaultLayout";
-import { migratePanelsState } from "@foxglove/studio-base/services/migrateLayout";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { useLayoutManager } from "@lichtblick/studio-base/context/LayoutManagerContext";
+import { usePlayerSelection } from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import { defaultLayout } from "@lichtblick/studio-base/providers/CurrentLayoutProvider/defaultLayout";
+import { migratePanelsState } from "@lichtblick/studio-base/services/migrateLayout";
+import assert from "assert";
+import { useEffect } from "react";
+import { useAsync } from "react-use";
+import { useDebounce } from "use-debounce";
 
 function selectLayoutData(state: LayoutState) {
   return state.selectedLayout?.data;

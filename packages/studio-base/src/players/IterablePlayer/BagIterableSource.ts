@@ -2,22 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Bag, Filelike } from "@foxglove/rosbag";
-import { BlobReader } from "@foxglove/rosbag/web";
-import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { MessageReader } from "@foxglove/rosmsg-serialization";
-import { compare } from "@foxglove/rostime";
-import { estimateObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
+import { estimateObjectSize } from "@lichtblick/studio-base/players/messageMemoryEstimation";
 import {
   MessageEvent,
   PlayerProblem,
   Topic,
   TopicStats,
-} from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
-import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
-import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
+} from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import BrowserHttpReader from "@lichtblick/studio-base/util/BrowserHttpReader";
+import CachedFilelike from "@lichtblick/studio-base/util/CachedFilelike";
+import { getBagChunksOverlapCount } from "@lichtblick/studio-base/util/bags";
+
+import { Bag, Filelike } from "@foxglove/rosbag";
+import { BlobReader } from "@foxglove/rosbag/web";
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { MessageReader } from "@foxglove/rosmsg-serialization";
+import { compare } from "@foxglove/rostime";
 import Bzip2 from "@foxglove/wasm-bz2";
 import decompressLZ4 from "@foxglove/wasm-lz4";
 

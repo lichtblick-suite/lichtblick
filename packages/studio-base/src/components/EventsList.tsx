@@ -2,6 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  EventsStore,
+  TimelinePositionedEvent,
+  useEvents,
+} from "@lichtblick/studio-base/context/EventsContext";
+import {
+  TimelineInteractionStateStore,
+  useTimelineInteractionState,
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { useAppTimeFormat } from "@lichtblick/studio-base/hooks";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -14,22 +29,6 @@ import {
 } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  EventsStore,
-  TimelinePositionedEvent,
-  useEvents,
-} from "@foxglove/studio-base/context/EventsContext";
-import {
-  TimelineInteractionStateStore,
-  useTimelineInteractionState,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 
 import { EventView } from "./EventView";
 

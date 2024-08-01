@@ -2,25 +2,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
+import { LayoutID } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import CurrentUserContext from "@lichtblick/studio-base/context/CurrentUserContext";
+import LayoutStorageContext from "@lichtblick/studio-base/context/LayoutStorageContext";
+import { UserProfileStorageContext } from "@lichtblick/studio-base/context/UserProfileStorageContext";
+import CurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider";
+import { defaultPlaybackConfig } from "@lichtblick/studio-base/providers/CurrentLayoutProvider/reducers";
+import LayoutManagerProvider from "@lichtblick/studio-base/providers/LayoutManagerProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import { ISO8601Timestamp, Layout } from "@lichtblick/studio-base/services/ILayoutStorage";
+import LayoutManager from "@lichtblick/studio-base/services/LayoutManager/LayoutManager";
+import MockLayoutStorage from "@lichtblick/studio-base/services/MockLayoutStorage";
+import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
 import { StoryObj, StoryContext, StoryFn } from "@storybook/react";
 import { fireEvent, screen, userEvent, within } from "@storybook/testing-library";
 import { useMemo, useState } from "react";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { LayoutID } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import CurrentUserContext from "@foxglove/studio-base/context/CurrentUserContext";
-import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
-import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
-import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
-import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import { ISO8601Timestamp, Layout } from "@foxglove/studio-base/services/ILayoutStorage";
-import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
-import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
-import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import LayoutBrowser from "./index";
 

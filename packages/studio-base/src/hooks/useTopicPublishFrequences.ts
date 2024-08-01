@@ -2,15 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useMemo, useRef } from "react";
-
-import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
-import { Immutable } from "@foxglove/studio";
+import { Immutable } from "@lichtblick/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { PlayerCapabilities, TopicStats } from "@lichtblick/studio-base/players/types";
+import { useMemo, useRef } from "react";
+
+import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
 
 const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();
 

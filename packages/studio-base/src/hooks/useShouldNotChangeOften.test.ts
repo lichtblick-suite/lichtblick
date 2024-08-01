@@ -12,9 +12,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import useShouldNotChangeOften from "@lichtblick/studio-base/hooks/useShouldNotChangeOften";
 import { renderHook } from "@testing-library/react";
-
-import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 
 describe("useShouldNotChangeOften", () => {
   it("logs when value changes twice in a row", () => {

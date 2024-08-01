@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { getMessageDocumentationLink } from "@foxglove/studio-base/panels/RawMessages/utils";
+import { getMessageDocumentationLink } from "@lichtblick/studio-base/panels/RawMessages/utils";
 
 describe("getMessageDocumentationLink", () => {
   it("links to ROS and Foxglove docs", () => {

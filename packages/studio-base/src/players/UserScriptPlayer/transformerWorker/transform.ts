@@ -11,21 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ts from "typescript/lib/typescript";
-
-import { filterMap } from "@foxglove/den/collection";
-import { formatInterfaceName } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
+import { filterMap } from "@lichtblick/den/collection";
+import { formatInterfaceName } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
 import {
   constructDatatypes,
   DatatypeExtractionError,
   findDefaultExportFunction,
   findReturnType,
-} from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/ast";
-import { getUserScriptProjectConfig } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/ast";
+import { getUserScriptProjectConfig } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
 import {
   baseCompilerOptions,
   transformDiagnosticToMarkerData,
-} from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/utils";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/utils";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -33,9 +31,10 @@ import {
   ScriptData,
   ScriptDataTransformer,
   Sources,
-} from "@foxglove/studio-base/players/UserScriptPlayer/types";
-import { Topic } from "@foxglove/studio-base/players/types";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+} from "@lichtblick/studio-base/players/UserScriptPlayer/types";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/studio-base/util/globalConstants";
+import ts from "typescript/lib/typescript";
 
 import { TransformArgs } from "./types";
 import generatedTypesLibSrc from "./typescript/userUtils/generatedTypes.ts?raw";

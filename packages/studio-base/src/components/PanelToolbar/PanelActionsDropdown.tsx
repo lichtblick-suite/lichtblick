@@ -11,6 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PanelContext from "@lichtblick/studio-base/components/PanelContext";
+import ChangePanelMenu from "@lichtblick/studio-base/components/PanelToolbar/ChangePanelMenu";
+import ToolbarIconButton from "@lichtblick/studio-base/components/PanelToolbar/ToolbarIconButton";
+import { getPanelTypeFromMosaic } from "@lichtblick/studio-base/components/PanelToolbar/utils";
+import { useCurrentLayoutActions } from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Divider, Menu, MenuItem } from "@mui/material";
@@ -18,12 +23,6 @@ import { MouseEvent, useCallback, useContext, useMemo, useRef, useState } from "
 import { useTranslation } from "react-i18next";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
-
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import ChangePanelMenu from "@foxglove/studio-base/components/PanelToolbar/ChangePanelMenu";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import { getPanelTypeFromMosaic } from "@foxglove/studio-base/components/PanelToolbar/utils";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 type Props = {
   isUnknownPanel: boolean;

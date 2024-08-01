@@ -2,6 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import HoverableIconButton from "@lichtblick/studio-base/components/HoverableIconButton";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { openSiblingPlotPanel } from "@lichtblick/studio-base/panels/Plot/openSiblingPlotPanel";
+import { plotableRosTypes } from "@lichtblick/studio-base/panels/Plot/plotableRosTypes";
+import {
+  openSiblingStateTransitionsPanel,
+  transitionableRosTypes,
+} from "@lichtblick/studio-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
+import { OpenSiblingPanel } from "@lichtblick/studio-base/types/panels";
+import clipboard from "@lichtblick/studio-base/util/clipboard";
 import CheckIcon from "@mui/icons-material/Check";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -12,17 +22,6 @@ import LineChartIcon from "@mui/icons-material/ShowChart";
 import { IconButtonProps, Tooltip, TooltipProps } from "@mui/material";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { withStyles, makeStyles } from "tss-react/mui";
-
-import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot/openSiblingPlotPanel";
-import { plotableRosTypes } from "@foxglove/studio-base/panels/Plot/plotableRosTypes";
-import {
-  openSiblingStateTransitionsPanel,
-  transitionableRosTypes,
-} from "@foxglove/studio-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
-import clipboard from "@foxglove/studio-base/util/clipboard";
 
 import HighlightedValue from "./HighlightedValue";
 import { copyMessageReplacer } from "./copyMessageReplacer";

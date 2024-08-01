@@ -2,22 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as base64 from "@protobufjs/base64";
-import * as _ from "lodash-es";
-import { v4 as uuidv4 } from "uuid";
-
-import { debouncePromise } from "@foxglove/den/async";
-import Log from "@foxglove/log";
-import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import { MessageDefinition, isMsgDefEqual } from "@foxglove/message-definition";
-import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
-import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
-import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
-import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
-import { ParameterValue } from "@foxglove/studio";
-import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
-import { estimateObjectSize } from "@foxglove/studio-base/players/messageMemoryEstimation";
+import { debouncePromise } from "@lichtblick/den/async";
+import Log from "@lichtblick/log";
+import { ParameterValue } from "@lichtblick/studio";
+import { Asset } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import PlayerProblemManager from "@lichtblick/studio-base/players/PlayerProblemManager";
+import { estimateObjectSize } from "@lichtblick/studio-base/players/messageMemoryEstimation";
 import {
   AdvertiseOptions,
   MessageEvent,
@@ -31,8 +21,18 @@ import {
   SubscribePayload,
   Topic,
   TopicStats,
-} from "@foxglove/studio-base/players/types";
-import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
+} from "@lichtblick/studio-base/players/types";
+import rosDatatypesToMessageDefinition from "@lichtblick/studio-base/util/rosDatatypesToMessageDefinition";
+import * as base64 from "@protobufjs/base64";
+import * as _ from "lodash-es";
+import { v4 as uuidv4 } from "uuid";
+
+import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
+import { MessageDefinition, isMsgDefEqual } from "@foxglove/message-definition";
+import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
+import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
+import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
+import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
 import {
   Channel,
   ChannelId,

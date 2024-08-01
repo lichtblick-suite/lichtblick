@@ -11,6 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { openSiblingPlotPanel } from "@lichtblick/studio-base/panels/Plot/openSiblingPlotPanel";
+import { openSiblingStateTransitionsPanel } from "@lichtblick/studio-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
+import { OpenSiblingPanel } from "@lichtblick/studio-base/types/panels";
 import PowerInputIcon from "@mui/icons-material/PowerInput";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import {
@@ -29,11 +33,6 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 import { makeStyles } from "tss-react/mui";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot/openSiblingPlotPanel";
-import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 
 import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage, LEVELS } from "./util";
 

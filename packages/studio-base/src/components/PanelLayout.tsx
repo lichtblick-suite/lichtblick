@@ -11,6 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { EmptyPanelLayout } from "@lichtblick/studio-base/components/EmptyPanelLayout";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppContext } from "@lichtblick/studio-base/context/AppContext";
+import {
+  LayoutState,
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+  usePanelMosaicId,
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { useExtensionCatalog } from "@lichtblick/studio-base/context/ExtensionCatalogContext";
+import { usePanelCatalog } from "@lichtblick/studio-base/context/PanelCatalogContext";
+import { MosaicDropResult, PanelConfig } from "@lichtblick/studio-base/types/panels";
+import { getPanelIdForType, getPanelTypeFromId } from "@lichtblick/studio-base/util/layout";
 import { CircularProgress } from "@mui/material";
 import React, { PropsWithChildren, Suspense, useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
@@ -22,21 +36,6 @@ import {
   MosaicWithoutDragDropContext,
 } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
-
-import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
-import {
-  LayoutState,
-  useCurrentLayoutActions,
-  useCurrentLayoutSelector,
-  usePanelMosaicId,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
-import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";

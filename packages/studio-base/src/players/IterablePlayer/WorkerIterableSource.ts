@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { ComlinkWrap } from "@lichtblick/den/worker";
+import { Immutable, MessageEvent, Time } from "@lichtblick/studio";
 import * as Comlink from "comlink";
 
 import { abortSignalTransferHandler } from "@foxglove/comlink-transfer-handlers";
-import { ComlinkWrap } from "@foxglove/den/worker";
-import { Immutable, MessageEvent, Time } from "@foxglove/studio";
 
 import type {
   GetBackfillMessagesArgs,

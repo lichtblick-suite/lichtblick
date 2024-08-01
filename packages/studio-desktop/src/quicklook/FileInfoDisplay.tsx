@@ -4,10 +4,10 @@
 
 /// <reference types="./extensions" />
 
+import Logger from "@lichtblick/log";
 import { useEffect, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import Logger from "@foxglove/log";
 import { Time, toDate } from "@foxglove/rostime";
 
 import Flash from "./Flash";

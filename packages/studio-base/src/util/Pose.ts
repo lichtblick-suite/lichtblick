@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MutablePose } from "@foxglove/studio-base/types/Messages";
+import { MutablePose } from "@lichtblick/studio-base/types/Messages";
 
 // Create a new empty pose object
 export function emptyPose(): MutablePose {

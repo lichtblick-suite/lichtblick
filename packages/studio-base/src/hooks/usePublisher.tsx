@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Immutable } from "@lichtblick/studio";
+import { useMessagePipeline } from "@lichtblick/studio-base/components/MessagePipeline";
+import { PlayerCapabilities } from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
 import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-
-import { Immutable } from "@foxglove/studio";
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 type Props = Immutable<{
   topic: string;

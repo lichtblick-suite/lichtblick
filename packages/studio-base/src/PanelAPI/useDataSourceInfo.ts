@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useMemo } from "react";
-
-import { Immutable, Time } from "@foxglove/studio";
+import { Immutable, Time } from "@lichtblick/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { Topic } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { Topic } from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { useMemo } from "react";
 
 function selectDatatypes(ctx: MessagePipelineContext) {
   return ctx.datatypes;

@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { BlockCache } from "@lichtblick/studio-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import { useReadySignal } from "@lichtblick/studio-base/stories/ReadySignalContext";
+import { expandedLineColors } from "@lichtblick/studio-base/util/plotColors";
 import { StoryObj } from "@storybook/react";
 import { produce } from "immer";
 import { useCallback } from "react";
-
-import Stack from "@foxglove/studio-base/components/Stack";
-import { BlockCache } from "@foxglove/studio-base/players/types";
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
-import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 
 import StateTransitions from "./index";
 

@@ -10,64 +10,56 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, Typography } from "@mui/material";
-import { t } from "i18next";
-import { useSnackbar } from "notistack";
-import { extname } from "path";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
-
-import Logger from "@foxglove/log";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
-import { AppBar, AppBarProps } from "@foxglove/studio-base/components/AppBar";
-import { CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
+import Logger from "@lichtblick/log";
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import AccountSettings from "@lichtblick/studio-base/components/AccountSettingsSidebar/AccountSettings";
+import { AppBar, AppBarProps } from "@lichtblick/studio-base/components/AppBar";
+import { CustomWindowControlsProps } from "@lichtblick/studio-base/components/AppBar/CustomWindowControls";
 import {
   DataSourceDialog,
   DataSourceDialogItem,
-} from "@foxglove/studio-base/components/DataSourceDialog";
-import DataSourceSidebar from "@foxglove/studio-base/components/DataSourceSidebar/DataSourceSidebar";
-import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
-import { EventsList } from "@foxglove/studio-base/components/EventsList";
-import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
-import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
+} from "@lichtblick/studio-base/components/DataSourceDialog";
+import DataSourceSidebar from "@lichtblick/studio-base/components/DataSourceSidebar/DataSourceSidebar";
+import DocumentDropListener from "@lichtblick/studio-base/components/DocumentDropListener";
+import { EventsList } from "@lichtblick/studio-base/components/EventsList";
+import ExtensionsSettings from "@lichtblick/studio-base/components/ExtensionsSettings";
+import KeyListener from "@lichtblick/studio-base/components/KeyListener";
+import LayoutBrowser from "@lichtblick/studio-base/components/LayoutBrowser";
 import {
   MessagePipelineContext,
   useMessagePipeline,
   useMessagePipelineGetter,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import { PanelCatalog } from "@foxglove/studio-base/components/PanelCatalog";
-import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
-import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
-import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
-import { ProblemsList } from "@foxglove/studio-base/components/ProblemsList";
-import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
-import Sidebars, { SidebarItem } from "@foxglove/studio-base/components/Sidebars";
-import { NewSidebarItem } from "@foxglove/studio-base/components/Sidebars/NewSidebar";
-import Stack from "@foxglove/studio-base/components/Stack";
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import { PanelCatalog } from "@lichtblick/studio-base/components/PanelCatalog";
+import PanelLayout from "@lichtblick/studio-base/components/PanelLayout";
+import PanelSettings from "@lichtblick/studio-base/components/PanelSettings";
+import PlaybackControls from "@lichtblick/studio-base/components/PlaybackControls";
+import { ProblemsList } from "@lichtblick/studio-base/components/ProblemsList";
+import RemountOnValueChange from "@lichtblick/studio-base/components/RemountOnValueChange";
+import { SidebarContent } from "@lichtblick/studio-base/components/SidebarContent";
+import Sidebars, { SidebarItem } from "@lichtblick/studio-base/components/Sidebars";
+import { NewSidebarItem } from "@lichtblick/studio-base/components/Sidebars/NewSidebar";
+import Stack from "@lichtblick/studio-base/components/Stack";
 import {
   StudioLogsSettings,
   StudioLogsSettingsSidebar,
-} from "@foxglove/studio-base/components/StudioLogsSettings";
-import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
-import { TopicList } from "@foxglove/studio-base/components/TopicList";
-import VariablesList from "@foxglove/studio-base/components/VariablesList";
-import { WorkspaceDialogs } from "@foxglove/studio-base/components/WorkspaceDialogs";
-import { useAppContext } from "@foxglove/studio-base/context/AppContext";
+} from "@lichtblick/studio-base/components/StudioLogsSettings";
+import { SyncAdapters } from "@lichtblick/studio-base/components/SyncAdapters";
+import { TopicList } from "@lichtblick/studio-base/components/TopicList";
+import VariablesList from "@lichtblick/studio-base/components/VariablesList";
+import { WorkspaceDialogs } from "@lichtblick/studio-base/components/WorkspaceDialogs";
+import { useAppContext } from "@lichtblick/studio-base/context/AppContext";
 import {
   LayoutState,
   useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
 import {
   useCurrentUser,
   useCurrentUserType,
-} from "@foxglove/studio-base/context/CurrentUserContext";
-import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
-import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+} from "@lichtblick/studio-base/context/CurrentUserContext";
+import { EventsStore, useEvents } from "@lichtblick/studio-base/context/EventsContext";
+import { useExtensionCatalog } from "@lichtblick/studio-base/context/ExtensionCatalogContext";
+import { usePlayerSelection } from "@lichtblick/studio-base/context/PlayerSelectionContext";
 import {
   LeftSidebarItemKey,
   RightSidebarItemKey,
@@ -75,17 +67,24 @@ import {
   SidebarItemKeys,
   WorkspaceContextStore,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
-import { useDefaultWebLaunchPreference } from "@foxglove/studio-base/hooks/useDefaultWebLaunchPreference";
-import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
-import ICONS from "@foxglove/studio-base/theme/icons";
-import { parseAppURLState } from "@foxglove/studio-base/util/appURLState";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+} from "@lichtblick/studio-base/context/Workspace/WorkspaceContext";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks";
+import useAddPanel from "@lichtblick/studio-base/hooks/useAddPanel";
+import { useDefaultWebLaunchPreference } from "@lichtblick/studio-base/hooks/useDefaultWebLaunchPreference";
+import useElectronFilesToOpen from "@lichtblick/studio-base/hooks/useElectronFilesToOpen";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
+import { PanelStateContextProvider } from "@lichtblick/studio-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import ICONS from "@lichtblick/studio-base/theme/icons";
+import { parseAppURLState } from "@lichtblick/studio-base/util/appURLState";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
+import { Link, Typography } from "@mui/material";
+import { t } from "i18next";
+import { useSnackbar } from "notistack";
+import { extname } from "path";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 

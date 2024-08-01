@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks/useAppConfigurationValue";
+import { getItemString } from "@lichtblick/studio-base/util/getItemString";
 import { ReactNode, useCallback } from "react";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { getItemString } from "@foxglove/studio-base/util/getItemString";
 
 export default function useGetItemStringWithTimezone(): (
   type: string,

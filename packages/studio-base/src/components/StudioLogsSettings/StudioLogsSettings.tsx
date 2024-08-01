@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import SettingsTreeEditor from "@lichtblick/studio-base/components/SettingsTreeEditor";
+import { SidebarContent } from "@lichtblick/studio-base/components/SidebarContent";
 
 import { useStudioLogsSettingsTree } from "./useStudioLogsSettingsTree";
 

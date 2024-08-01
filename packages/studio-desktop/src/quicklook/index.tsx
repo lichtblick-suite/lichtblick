@@ -4,11 +4,10 @@
 
 /// <reference types="quicklookjs" />
 
+import Logger from "@lichtblick/log";
 import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useAsync } from "react-use";
-
-import Logger from "@foxglove/log";
 
 import FileInfoDisplay from "./FileInfoDisplay";
 import Flash from "./Flash";

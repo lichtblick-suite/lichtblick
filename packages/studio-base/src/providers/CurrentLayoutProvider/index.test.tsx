@@ -3,28 +3,27 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook } from "@testing-library/react";
-import { SnackbarProvider } from "notistack";
-import { useEffect } from "react";
-
-import { Condvar } from "@foxglove/den/async";
-import { CurrentLayoutSyncAdapter } from "@foxglove/studio-base/components/CurrentLayoutSyncAdapter";
+import { Condvar } from "@lichtblick/den/async";
+import { CurrentLayoutSyncAdapter } from "@lichtblick/studio-base/components/CurrentLayoutSyncAdapter";
 import {
   CurrentLayoutActions,
   LayoutData,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerContext";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import LayoutManagerContext from "@lichtblick/studio-base/context/LayoutManagerContext";
 import {
   UserProfileStorage,
   UserProfileStorageContext,
-} from "@foxglove/studio-base/context/UserProfileStorageContext";
+} from "@lichtblick/studio-base/context/UserProfileStorageContext";
 import CurrentLayoutProvider, {
   MAX_SUPPORTED_LAYOUT_VERSION,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider";
-import { ILayoutManager } from "@foxglove/studio-base/services/ILayoutManager";
+} from "@lichtblick/studio-base/providers/CurrentLayoutProvider";
+import { ILayoutManager } from "@lichtblick/studio-base/services/ILayoutManager";
+import { act, renderHook } from "@testing-library/react";
+import { SnackbarProvider } from "notistack";
+import { useEffect } from "react";
 
 const TEST_LAYOUT: LayoutData = {
   layout: "ExamplePanel!1",

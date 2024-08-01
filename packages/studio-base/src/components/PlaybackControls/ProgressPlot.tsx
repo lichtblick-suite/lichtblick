@@ -3,16 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { keyframes } from "@emotion/react";
+import { filterMap } from "@lichtblick/den/collection";
+import { Immutable } from "@lichtblick/studio";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { Range } from "@lichtblick/studio-base/util/ranges";
 import { simplify } from "intervals-fn";
 import * as _ from "lodash-es";
 import { useMemo } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import { filterMap } from "@foxglove/den/collection";
-import { Immutable } from "@foxglove/studio";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { Range } from "@foxglove/studio-base/util/ranges";
 
 type ProgressProps = Immutable<{
   loading: boolean;

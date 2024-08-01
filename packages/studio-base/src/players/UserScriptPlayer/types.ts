@@ -10,11 +10,11 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import type { SourceFile, TypeChecker } from "typescript";
 
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { MessageEvent, Topic } from "@lichtblick/studio-base/players/types";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import type { SourceFile, TypeChecker } from "typescript";
 
 // make sure to use import type to avoid bringing in the actual implementations to the bundle
 

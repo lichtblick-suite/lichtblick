@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { MessageEvent } from "@lichtblick/studio-base/players/types";
+import { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
 
 export const datatypes: RosDatatypes = new Map(
   Object.entries({

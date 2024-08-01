@@ -2,6 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppSetting } from "@lichtblick/studio-base/AppSetting";
+import { HelpMenu } from "@lichtblick/studio-base/components/AppBar/HelpMenu";
+import { BuiltinIcon } from "@lichtblick/studio-base/components/BuiltinIcon";
+import ErrorBoundary from "@lichtblick/studio-base/components/ErrorBoundary";
+import { MemoryUseIndicator } from "@lichtblick/studio-base/components/MemoryUseIndicator";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { useAppConfigurationValue } from "@lichtblick/studio-base/hooks";
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Badge, Paper, Tab, Tabs } from "@mui/material";
 import {
@@ -15,15 +23,6 @@ import {
 } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
-
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { HelpMenu } from "@foxglove/studio-base/components/AppBar/HelpMenu";
-import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
-import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
-import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import "react-mosaic-component/react-mosaic-component.css";
 import { NewSidebar, NewSidebarItem } from "./NewSidebar";

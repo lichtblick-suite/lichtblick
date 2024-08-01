@@ -3,21 +3,20 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Add16Regular, Dismiss12Regular } from "@fluentui/react-icons";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import { useSelectedPanels } from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { useWorkspaceActions } from "@lichtblick/studio-base/context/Workspace/useWorkspaceActions";
+import { DEFAULT_PATH } from "@lichtblick/studio-base/panels/Plot/settings";
+import { stateTransitionPathDisplayName } from "@lichtblick/studio-base/panels/StateTransitions/shared";
+import {
+  StateTransitionConfig,
+  StateTransitionPath,
+} from "@lichtblick/studio-base/panels/StateTransitions/types";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { Button, ButtonGroup, Stack, buttonClasses } from "@mui/material";
 import { MouseEvent, useCallback } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
-import { DEFAULT_PATH } from "@foxglove/studio-base/panels/Plot/settings";
-import { stateTransitionPathDisplayName } from "@foxglove/studio-base/panels/StateTransitions/shared";
-import {
-  StateTransitionConfig,
-  StateTransitionPath,
-} from "@foxglove/studio-base/panels/StateTransitions/types";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 const useStyles = makeStyles()((theme) => ({
   chartOverlay: {

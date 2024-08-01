@@ -10,16 +10,15 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { triggerWheel } from "@lichtblick/studio-base/stories/PanelSetup";
+import { useReadySignal } from "@lichtblick/studio-base/stories/ReadySignalContext";
+import delay from "@lichtblick/studio-base/util/delay";
 import { StoryObj } from "@storybook/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";
 import { useImmer } from "use-immer";
-
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
-import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
-import delay from "@foxglove/studio-base/util/delay";
 
 import type { Props } from "./index";
 import TimeBasedChart from "./index";

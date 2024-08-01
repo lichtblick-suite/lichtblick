@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Channel } from "@foxglove/studio-base/util/Rpc";
+import { Channel } from "@lichtblick/studio-base/util/Rpc";
 
 import WebWorkerManager from "./WebWorkerManager";
 
-jest.mock("@foxglove/studio-base/util/Rpc", () => {
+jest.mock("@lichtblick/studio-base/util/Rpc", () => {
   return class FakeRpc {
     public terminate() {}
     public receive() {

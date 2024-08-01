@@ -2,24 +2,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Cameras } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Cameras";
-import { FoxgloveGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
-import { FrameAxes } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FrameAxes";
-import { Grids } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Grids";
-import { ImageMode } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
-import { Images } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images";
-import { LaserScans } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/LaserScans";
-import { Markers } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Markers";
-import { OccupancyGrids } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/OccupancyGrids";
-import { PointClouds } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
-import { Polygons } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Polygons";
-import { PoseArrays } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PoseArrays";
-import { Poses } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Poses";
-import { PublishSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
-import { FoxgloveSceneEntities } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/SceneEntities";
-import { SceneSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/SceneSettings";
-import { Urdfs } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Urdfs";
-import { VelodyneScans } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/VelodyneScans";
+import { Cameras } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Cameras";
+import { FoxgloveGrid } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
+import { FrameAxes } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/FrameAxes";
+import { Grids } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Grids";
+import { ImageMode } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
+import { Images } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Images";
+import { LaserScans } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/LaserScans";
+import { Markers } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Markers";
+import { OccupancyGrids } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/OccupancyGrids";
+import { PointClouds } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
+import { Polygons } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Polygons";
+import { PoseArrays } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/PoseArrays";
+import { Poses } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Poses";
+import { PublishSettings } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
+import { FoxgloveSceneEntities } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/SceneEntities";
+import { SceneSettings } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/SceneSettings";
+import { Urdfs } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/Urdfs";
+import { VelodyneScans } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/VelodyneScans";
 
 import { IRenderer } from "./IRenderer";
 import { SceneExtension } from "./SceneExtension";

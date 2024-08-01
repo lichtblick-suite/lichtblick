@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useDeepMemo } from "@lichtblick/hooks";
+import { MessageEvent, SubscribePayload } from "@lichtblick/studio-base/players/types";
+import concatAndTruncate from "@lichtblick/studio-base/util/concatAndTruncate";
 import * as _ from "lodash-es";
 import { useCallback } from "react";
-
-import { useDeepMemo } from "@foxglove/hooks";
-import { MessageEvent, SubscribePayload } from "@foxglove/studio-base/players/types";
-import concatAndTruncate from "@foxglove/studio-base/util/concatAndTruncate";
 
 import { useMessageReducer } from "./useMessageReducer";
 

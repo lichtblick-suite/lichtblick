@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import isDesktopApp from "@lichtblick/studio-base/util/isDesktopApp";
 import {
   Button,
   Dialog,
@@ -12,8 +13,6 @@ import {
   Link,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type Props = {
   isDesktop?: boolean;

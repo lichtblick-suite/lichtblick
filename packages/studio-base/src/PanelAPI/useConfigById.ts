@@ -2,16 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useCallback } from "react";
-import { DeepPartial } from "ts-essentials";
-
 import {
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
+} from "@lichtblick/studio-base/context/CurrentLayoutContext";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
+import { maybeCast } from "@lichtblick/studio-base/util/maybeCast";
+import { useCallback } from "react";
+import { DeepPartial } from "ts-essentials";
 
 /**
  * Like `useConfig`, but for a specific panel id. This generally shouldn't be used by panels

@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "@lichtblick/studio";
+import { PlayerProblem } from "@lichtblick/studio-base/players/types";
 import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
-
-import { Immutable } from "@foxglove/studio";
-import { PlayerProblem } from "@foxglove/studio-base/players/types";
 
 import WssErrorModalScreenshot from "./WssErrorModal.png";
 

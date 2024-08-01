@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useSessionStorageValue } from "@lichtblick/hooks";
+import { LaunchPreferenceValue } from "@lichtblick/studio-base/types/LaunchPreferenceValue";
 import { PropsWithChildren } from "react";
-
-import { useSessionStorageValue } from "@foxglove/hooks";
-import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 import { LaunchPreferenceScreen } from "./LaunchPreferenceScreen";
 import { LaunchingInDesktopScreen } from "./LaunchingInDesktopScreen";

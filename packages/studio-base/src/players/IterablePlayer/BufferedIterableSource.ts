@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Condvar } from "@lichtblick/den/async";
+import { VecQueue } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
+import { Time, MessageEvent } from "@lichtblick/studio";
+import { Range } from "@lichtblick/studio-base/util/ranges";
 import EventEmitter from "eventemitter3";
 
-import { Condvar } from "@foxglove/den/async";
-import { VecQueue } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
 import { add as addTime, compare, clampTime } from "@foxglove/rostime";
-import { Time, MessageEvent } from "@foxglove/studio";
-import { Range } from "@foxglove/studio-base/util/ranges";
 
 import { CachingIterableSource } from "./CachingIterableSource";
 import {

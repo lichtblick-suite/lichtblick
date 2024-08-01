@@ -12,17 +12,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { act, renderHook } from "@testing-library/react";
-import React, { PropsWithChildren } from "react";
-
-import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import useMessagesByPath from "@lichtblick/studio-base/components/MessagePathSyntax/useMessagesByPath";
+import MockMessagePipelineProvider from "@lichtblick/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import useGlobalVariables, {
   GlobalVariables,
-} from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { PlayerStateActiveData, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+} from "@lichtblick/studio-base/hooks/useGlobalVariables";
+import { PlayerStateActiveData, Topic, MessageEvent } from "@lichtblick/studio-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
+import { act, renderHook } from "@testing-library/react";
+import React, { PropsWithChildren } from "react";
 
 import * as fixture from "./fixture";
 

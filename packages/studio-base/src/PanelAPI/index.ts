@@ -13,7 +13,7 @@
 
 // This file contains hooks and components comprising the public API for
 // Lichtblick panel development.
-// Recommended use: import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+// Recommended use: import * as PanelAPI from "@lichtblick/studio-base/PanelAPI";
 
 export { useDataSourceInfo } from "./useDataSourceInfo";
 

@@ -10,9 +10,9 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import Logger from "@lichtblick/log";
 import * as _ from "lodash-es";
 
-import Logger from "@foxglove/log";
 import { Filelike } from "@foxglove/rosbag";
 
 import VirtualLRUBuffer from "./VirtualLRUBuffer";

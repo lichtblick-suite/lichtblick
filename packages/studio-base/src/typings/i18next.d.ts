@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { translations, defaultNS } from "@foxglove/studio-base/i18n";
+import { translations, defaultNS } from "@lichtblick/studio-base/i18n";
 
 declare module "i18next" {
   interface CustomTypeOptions {

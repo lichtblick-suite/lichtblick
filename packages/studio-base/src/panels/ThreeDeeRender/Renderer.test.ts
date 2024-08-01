@@ -3,17 +3,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessageEvent } from "@lichtblick/studio";
+import { Asset } from "@lichtblick/studio-base/components/PanelExtensionAdapter";
+import { Renderer } from "@lichtblick/studio-base/panels/ThreeDeeRender/Renderer";
+import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import { DEFAULT_CAMERA_STATE } from "@lichtblick/studio-base/panels/ThreeDeeRender/camera";
+import { CameraStateSettings } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
+import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
+import { TFMessage } from "@lichtblick/studio-base/panels/ThreeDeeRender/ros";
 import { setupJestCanvasMock } from "jest-canvas-mock";
 
 import { fromNanoSec, toNanoSec } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
-import { Asset } from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
-import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtensionConfig";
-import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
-import { CameraStateSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
-import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
-import { TFMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
 
 import { RendererConfig } from "./IRenderer";
 

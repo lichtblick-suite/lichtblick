@@ -11,19 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMessagesByTopic } from "@lichtblick/studio-base/PanelAPI";
+import EmptyState from "@lichtblick/studio-base/components/EmptyState";
+import MessagePathInput from "@lichtblick/studio-base/components/MessagePathSyntax/MessagePathInput";
+import { useCachedGetMessagePathDataItems } from "@lichtblick/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import Panel from "@lichtblick/studio-base/components/Panel";
+import { usePanelContext } from "@lichtblick/studio-base/components/PanelContext";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { useEffect } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath, MessagePath } from "@foxglove/message-path";
-import { useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
-import { useCachedGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import Table from "./Table";
 

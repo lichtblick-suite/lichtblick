@@ -2,6 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/studio-base/components/MessagePipeline";
+import Stack from "@lichtblick/studio-base/components/Stack";
+import {
+  useClearHoverValue,
+  useSetHoverValue,
+} from "@lichtblick/studio-base/context/TimelineInteractionStateContext";
+import { PlayerPresence } from "@lichtblick/studio-base/players/types";
 import { Fade, PopperProps, Tooltip } from "@mui/material";
 import type { Instance } from "@popperjs/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,16 +26,6 @@ import {
   fromSec,
   Time,
 } from "@foxglove/rostime";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@foxglove/studio-base/components/MessagePipeline";
-import Stack from "@foxglove/studio-base/components/Stack";
-import {
-  useClearHoverValue,
-  useSetHoverValue,
-} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import { EventsOverlay } from "./EventsOverlay";
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";

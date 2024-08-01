@@ -3,11 +3,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useExtensionCatalog } from "@lichtblick/studio-base/context/ExtensionCatalogContext";
+import { ExtensionLoader } from "@lichtblick/studio-base/services/ExtensionLoader";
+import { ExtensionInfo } from "@lichtblick/studio-base/types/Extensions";
 import { renderHook, waitFor } from "@testing-library/react";
-
-import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
-import { ExtensionInfo } from "@foxglove/studio-base/types/Extensions";
 
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
 

@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMessageReducer } from "@lichtblick/studio-base/PanelAPI";
+import { subscribePayloadFromMessagePath } from "@lichtblick/studio-base/players/subscribePayloadFromMessagePath";
+import { MessageEvent, SubscribePayload } from "@lichtblick/studio-base/players/types";
 import { useCallback, useMemo } from "react";
-
-import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
-import { subscribePayloadFromMessagePath } from "@foxglove/studio-base/players/subscribePayloadFromMessagePath";
-import { MessageEvent, SubscribePayload } from "@foxglove/studio-base/players/types";
 
 import {
   MessageAndData,

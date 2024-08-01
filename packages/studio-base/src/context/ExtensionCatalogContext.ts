@@ -2,17 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext } from "react";
-import { StoreApi, useStore } from "zustand";
-
-import { useGuaranteedContext } from "@foxglove/hooks";
+import { useGuaranteedContext } from "@lichtblick/hooks";
 import {
   ExtensionPanelRegistration,
   Immutable,
   RegisterMessageConverterArgs,
-} from "@foxglove/studio";
-import { TopicAliasFunctions } from "@foxglove/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
-import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
+} from "@lichtblick/studio";
+import { TopicAliasFunctions } from "@lichtblick/studio-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
+import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/studio-base/types/Extensions";
+import { createContext } from "react";
+import { StoreApi, useStore } from "zustand";
 
 export type RegisteredPanel = {
   extensionName: string;

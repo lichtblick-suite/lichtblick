@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import PanelSetup, { Fixture } from "@lichtblick/studio-base/stories/PanelSetup";
+import delay from "@lichtblick/studio-base/util/delay";
 import { StoryObj } from "@storybook/react";
 import { useEffect, useState } from "react";
 import { useAsync } from "react-use";
-
-import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import delay from "@foxglove/studio-base/util/delay";
 
 import TopicGraph, { TopicVisibility } from "./index";
 

@@ -10,14 +10,13 @@ import {
   TextBulletListLtr20Filled,
   ArrowMinimize20Filled,
 } from "@fluentui/react-icons";
+import { Immutable } from "@lichtblick/studio";
+import { SaveConfig } from "@lichtblick/studio-base/types/panels";
 import { IconButton } from "@mui/material";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
-
-import { Immutable } from "@foxglove/studio";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import type { PlotCoordinator } from "./PlotCoordinator";
 import { PlotLegendRow, ROW_HEIGHT } from "./PlotLegendRow";

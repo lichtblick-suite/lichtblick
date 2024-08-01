@@ -2,18 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryFn, StoryObj } from "@storybook/react";
-import { ReactNode } from "react";
-
 import BaseUserContext, {
   CurrentUser,
   UserType,
-} from "@foxglove/studio-base/context/BaseUserContext";
+} from "@lichtblick/studio-base/context/BaseUserContext";
 import PlayerSelectionContext, {
   PlayerSelection,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
+} from "@lichtblick/studio-base/context/PlayerSelectionContext";
+import MockCurrentLayoutProvider from "@lichtblick/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import WorkspaceContextProvider from "@lichtblick/studio-base/providers/WorkspaceContextProvider";
+import { StoryFn, StoryObj } from "@storybook/react";
+import { ReactNode } from "react";
 
 import { DataSourceDialog } from "./DataSourceDialog";
 

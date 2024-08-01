@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { isTypicalFilterName } from "@lichtblick/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+
 import { MessagePathStructureItem, PrimitiveType } from "@foxglove/message-path";
-import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
 export type ValueAction = {
   singleSlicePath: string; // Path that will only return one value per unit of time (for line charts).

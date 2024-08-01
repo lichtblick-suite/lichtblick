@@ -11,6 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import getPrettifiedCode from "@lichtblick/studio-base/panels/UserScriptEditor/getPrettifiedCode";
+import { Script } from "@lichtblick/studio-base/panels/UserScriptEditor/script";
+import { getUserScriptProjectConfig } from "@lichtblick/studio-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
+import inScreenshotTests from "@lichtblick/studio-base/stories/inScreenshotTests";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/studio-base/util/globalConstants";
+import { mightActuallyBePartial } from "@lichtblick/studio-base/util/mightActuallyBePartial";
 import { useTheme } from "@mui/material";
 // @ts-expect-error ICodeEditorService does not have type information in the monaco-editor package
 import { ICodeEditorService } from "monaco-editor/esm/vs/editor/browser/services/codeEditorService";
@@ -23,13 +29,6 @@ import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-edit
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import { ModuleResolutionKind } from "typescript";
-
-import getPrettifiedCode from "@foxglove/studio-base/panels/UserScriptEditor/getPrettifiedCode";
-import { Script } from "@foxglove/studio-base/panels/UserScriptEditor/script";
-import { getUserScriptProjectConfig } from "@foxglove/studio-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
-import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@foxglove/studio-base/util/globalConstants";
-import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { themes } from "./theme";
 

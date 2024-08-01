@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { LayoutData } from "@lichtblick/studio-base/context/CurrentLayoutContext/actions";
+import { isTabPanel, isTabPanelConfig } from "@lichtblick/studio-base/util/layout";
 import { MosaicNode } from "react-mosaic-component";
-
-import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { isTabPanel, isTabPanelConfig } from "@foxglove/studio-base/util/layout";
 
 function replacePanelInLayout(
   layout: MosaicNode<string>,

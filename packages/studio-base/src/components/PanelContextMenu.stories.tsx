@@ -2,18 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Panel from "@lichtblick/studio-base/components/Panel";
+import {
+  PanelContextMenu,
+  PanelContextMenuItem,
+} from "@lichtblick/studio-base/components/PanelContextMenu";
+import PanelToolbar from "@lichtblick/studio-base/components/PanelToolbar";
+import PanelSetup from "@lichtblick/studio-base/stories/PanelSetup";
 import { StoryObj } from "@storybook/react";
 import { userEvent } from "@storybook/testing-library";
 import { useCallback } from "react";
 import { v4 as uuid } from "uuid";
-
-import Panel from "@foxglove/studio-base/components/Panel";
-import {
-  PanelContextMenu,
-  PanelContextMenuItem,
-} from "@foxglove/studio-base/components/PanelContextMenu";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "components/PanelContextMenu",
