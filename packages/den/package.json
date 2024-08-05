@@ -1,6 +1,6 @@
 {
   "name": "@lichtblick/den",
-  "description": "Incubation area for code that may be released under future @foxglove packages",
+  "description": "Incubation area for code that may be released under future @lichtblick packages",
   "license": "MPL-2.0",
   "private": true,
   "repository": {

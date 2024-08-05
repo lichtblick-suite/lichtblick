@@ -5,8 +5,8 @@
     "@foxglove/tsconfig": "2.0.0",
     "@lichtblick/den": "workspace:*",
     "@lichtblick/log": "workspace:*",
-    "@lichtblick/studio-base": "workspace:*",
-    "@lichtblick/studio-desktop": "workspace:*",
+    "@lichtblick/suite-base": "workspace:*",
+    "@lichtblick/suite-desktop": "workspace:*",
     "electron": "25.8.4",
     "playwright": "1.37.1",
     "webpack": "5.93.0"

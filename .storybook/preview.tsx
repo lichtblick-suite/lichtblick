@@ -3,17 +3,17 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Condvar } from "@lichtblick/den/async";
-import CssBaseline from "@lichtblick/studio-base/components/CssBaseline";
-import GlobalCss from "@lichtblick/studio-base/components/GlobalCss";
-import MultiProvider from "@lichtblick/studio-base/components/MultiProvider";
-import StudioToastProvider from "@lichtblick/studio-base/components/StudioToastProvider";
-import AppConfigurationContext from "@lichtblick/studio-base/context/AppConfigurationContext";
-import { initI18n, Language } from "@lichtblick/studio-base/i18n";
-import TimelineInteractionStateProvider from "@lichtblick/studio-base/providers/TimelineInteractionStateProvider";
-import ReadySignalContext from "@lichtblick/studio-base/stories/ReadySignalContext";
-import ThemeProvider from "@lichtblick/studio-base/theme/ThemeProvider";
-import { makeMockAppConfiguration } from "@lichtblick/studio-base/util/makeMockAppConfiguration";
-import waitForFonts from "@lichtblick/studio-base/util/waitForFonts";
+import CssBaseline from "@lichtblick/suite-base/components/CssBaseline";
+import GlobalCss from "@lichtblick/suite-base/components/GlobalCss";
+import MultiProvider from "@lichtblick/suite-base/components/MultiProvider";
+import StudioToastProvider from "@lichtblick/suite-base/components/StudioToastProvider";
+import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
+import { initI18n, Language } from "@lichtblick/suite-base/i18n";
+import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
+import ReadySignalContext from "@lichtblick/suite-base/stories/ReadySignalContext";
+import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
+import waitForFonts from "@lichtblick/suite-base/util/waitForFonts";
 import { GlobalStyles } from "@mui/material";
 import { Story, StoryContext } from "@storybook/react";
 import { useMemo, useRef, useEffect } from "react";
@@ -164,7 +164,7 @@ function StudioContextProviders({
 
 function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
   if (
-    (ctx.parameters.fileName as string).includes("/packages/studio-base/") ||
+    (ctx.parameters.fileName as string).includes("/packages/suite-base/") ||
     (ctx.parameters.fileName as string).includes("/packages/theme/")
   ) {
     return (

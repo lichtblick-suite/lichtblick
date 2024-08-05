@@ -8,7 +8,7 @@ import {
   AppSetting,
   LaunchPreferenceValue,
   StudioApp,
-} from "@lichtblick/studio-base";
+} from "@lichtblick/suite-base";
 import { useMemo, useState } from "react";
 
 import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@lichtblick/log";
-import { initI18n } from "@lichtblick/studio-base";
+import { initI18n } from "@lichtblick/suite-base";
 import ReactDOM from "react-dom";
 
 const log = Logger.getLogger(__filename);
@@ -19,7 +19,7 @@ if (!rootEl) {
 }
 
 async function main() {
-  const { overwriteFetch, waitForFonts } = await import("@lichtblick/studio-base");
+  const { overwriteFetch, waitForFonts } = await import("@lichtblick/suite-base");
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();

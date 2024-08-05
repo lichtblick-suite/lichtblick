@@ -22,7 +22,7 @@
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "es2022", "esnext.disposable"],
     "paths": {
-      "@lichtblick/studio-base/*": ["./packages/studio-base/src/*"]
+      "@lichtblick/suite-base/*": ["./packages/suite-base/src/*"]
     }
   }
 }

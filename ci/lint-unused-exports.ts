@@ -13,16 +13,16 @@ import tsUnusedExports from "ts-unused-exports";
 // Note: use the "// ts-unused-exports:disable-next-line" comment above an export if you would like to mark it
 // as used even though it appears unused. This might happen for exports which are injected via webpack.
 async function main(): Promise<void> {
-  const results = tsUnusedExports(path.join(__dirname, "../packages/studio-base/tsconfig.json"), [
+  const results = tsUnusedExports(path.join(__dirname, "../packages/suite-base/tsconfig.json"), [
     "--findCompletelyUnusedFiles",
     "--ignoreLocallyUsed",
   ]);
   const ignorePathsRegex = new RegExp(
     [
       String.raw`\.stories\.tsx?$`,
-      String.raw`packages/studio-base/src/index\.ts`,
-      String.raw`packages/studio-base/src/panels/ThreeDeeRender/transforms/index\.ts`, // `export *` is not correctly analyzed <https://github.com/pzavolinsky/ts-unused-exports/issues/286>
-      String.raw`packages/studio-base/src/test/`,
+      String.raw`packages/suite-base/src/index\.ts`,
+      String.raw`packages/suite-base/src/panels/ThreeDeeRender/transforms/index\.ts`, // `export *` is not correctly analyzed <https://github.com/pzavolinsky/ts-unused-exports/issues/286>
+      String.raw`packages/suite-base/src/test/`,
     ].join("|"),
   );
 

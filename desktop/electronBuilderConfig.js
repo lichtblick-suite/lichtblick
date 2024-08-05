@@ -4,7 +4,7 @@
 
 const {
   makeElectronBuilderConfig,
-} = require("@lichtblick/studio-desktop/src/electronBuilderConfig");
+} = require("@lichtblick/suite-desktop/src/electronBuilderConfig");
 const path = require("path");
 
 module.exports = makeElectronBuilderConfig({

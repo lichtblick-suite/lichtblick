@@ -62,7 +62,7 @@ jobs:
 
       - run: yarn install --immutable
 
-      - run: npm publish ./packages/studio
+      - run: npm publish ./packages/suite
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 

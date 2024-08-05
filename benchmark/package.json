@@ -2,7 +2,7 @@
   "name": "benchmark",
   "private": true,
   "dependencies": {
-    "@lichtblick/studio-base": "workspace:*"
+    "@lichtblick/suite-base": "workspace:*"
   },
   "devDependencies": {
     "@foxglove/rostime": "1.1.2",
@@ -10,7 +10,7 @@
     "@foxglove/tsconfig": "2.0.0",
     "@lichtblick/den": "workspace:*",
     "@lichtblick/log": "workspace:*",
-    "@lichtblick/studio": "workspace:*",
+    "@lichtblick/suite": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@types/react": "18.2.56",
     "@types/react-dom": "18.2.7",

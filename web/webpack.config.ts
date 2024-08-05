@@ -6,7 +6,7 @@ import {
   ConfigParams,
   devServerConfig,
   mainConfig,
-} from "@lichtblick/studio-web/src/webpackConfigs";
+} from "@lichtblick/suite-web/src/webpackConfigs";
 import path from "path";
 
 import packageJson from "../package.json";

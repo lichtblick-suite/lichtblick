@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Log from "@lichtblick/log";
-import { MessageEvent } from "@lichtblick/studio";
-import { GlobalVariables } from "@lichtblick/studio-base/hooks/useGlobalVariables";
-import { normalizeFrameTransform } from "@lichtblick/studio-base/panels/ThreeDeeRender/normalizeMessages";
+import { MessageEvent } from "@lichtblick/suite";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { normalizeFrameTransform } from "@lichtblick/suite-base/panels/ThreeDeeRender/normalizeMessages";
 import {
   AdvertiseOptions,
   BlockCache,
@@ -18,9 +18,9 @@ import {
   SubscribePayload,
   Topic,
   TopicStats,
-} from "@lichtblick/studio-base/players/types";
-import { RosDatatypes } from "@lichtblick/studio-base/types/RosDatatypes";
-import delay from "@lichtblick/studio-base/util/delay";
+} from "@lichtblick/suite-base/players/types";
+import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import delay from "@lichtblick/suite-base/util/delay";
 
 import { Time, compare } from "@foxglove/rostime";
 import { FrameTransform, Vector3 } from "@foxglove/schemas";

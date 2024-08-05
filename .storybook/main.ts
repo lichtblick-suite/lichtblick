@@ -4,7 +4,7 @@
 
 /* eslint-disable filenames/match-exported */
 
-import { makeConfig } from "@lichtblick/studio-base/webpack";
+import { makeConfig } from "@lichtblick/suite-base/webpack";
 import { StorybookConfig } from "@storybook/react-webpack5";
 import path from "path";
 import { Configuration } from "webpack";

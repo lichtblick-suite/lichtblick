@@ -5,8 +5,8 @@
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
-} from "@lichtblick/studio-base/context/PlayerSelectionContext";
-import { Player } from "@lichtblick/studio-base/players/types";
+} from "@lichtblick/suite-base/context/PlayerSelectionContext";
+import { Player } from "@lichtblick/suite-base/players/types";
 
 type PlayerConstructor = new () => Player;
 

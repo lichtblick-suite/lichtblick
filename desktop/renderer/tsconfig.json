@@ -9,7 +9,7 @@
     "useUnknownInCatchVariables": false,
     "lib": ["dom", "dom.iterable", "es2022", "webworker"],
     "paths": {
-      "@lichtblick/studio-base/*": ["../../packages/studio-base/src/*"]
+      "@lichtblick/suite-base/*": ["../../packages/suite-base/src/*"]
     }
   }
 }
