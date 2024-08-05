@@ -5,4 +5,4 @@
 // Should match DefinePlugin in webpack configuration
 declare const ReactNull: ReactNull;
 
-declare const LICHTBLICK_STUDIO_VERSION: string | undefined;
+declare const LICHTBLICK_SUITE_VERSION: string | undefined;

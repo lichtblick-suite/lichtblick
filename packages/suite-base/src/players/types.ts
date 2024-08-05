@@ -22,7 +22,7 @@ import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotificati
 import { MessageDefinition } from "@foxglove/message-definition";
 import { Time } from "@foxglove/rostime";
 
-// re-exported until other import sites are updated from players/types to @lichtblick/studio
+// re-exported until other import sites are updated from players/types to @lichtblick/suite
 export type { MessageEvent };
 
 export type MessageDefinitionsByTopic = {

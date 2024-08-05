@@ -5,7 +5,7 @@ The `PanelAPI` namespace contains React [Hooks](https://reactjs.org/docs/hooks-i
 To use PanelAPI, it's recommended that you import the whole namespace, so that all usage sites look consistent, like `PanelAPI.useSomething()`.
 
 ```js
-import * as PanelAPI from "@lichtblick/studio-base/PanelAPI";
+import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 ```
 
 ## [`PanelAPI.useDataSourceInfo()`](useDataSourceInfo.js)

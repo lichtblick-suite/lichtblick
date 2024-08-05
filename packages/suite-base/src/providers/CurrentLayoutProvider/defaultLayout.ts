@@ -8,8 +8,8 @@ import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentL
 /**
  * Overridden default layout that may have been provided when self-hosting via Docker
  * */
-const staticDefaultLayout = (globalThis as { LICHTBLICK_STUDIO_DEFAULT_LAYOUT?: LayoutData })
-  .LICHTBLICK_STUDIO_DEFAULT_LAYOUT;
+const staticDefaultLayout = (globalThis as { LICHTBLICK_SUITE_DEFAULT_LAYOUT?: LayoutData })
+  .LICHTBLICK_SUITE_DEFAULT_LAYOUT;
 
 /**
  * This is loaded when the user has no layout selected on application launch

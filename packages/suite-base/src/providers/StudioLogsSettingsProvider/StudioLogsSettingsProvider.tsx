@@ -12,7 +12,7 @@ import { LocalStorageSaveState } from "./types";
 
 function StudioLogsSettingsProvider(props: PropsWithChildren): JSX.Element {
   const [studioLogsSettingsSavedState, setStudioLogsSettingsSavedState] =
-    useLocalStorage<LocalStorageSaveState>("fox.studio-logs-settings", {});
+    useLocalStorage<LocalStorageSaveState>("blick.logs-settings", {});
 
   const [studioLogsSettingsStore, setStudioLogsSettingsStore] = useState(() =>
     createStudioLogsSettingsStore(studioLogsSettingsSavedState),

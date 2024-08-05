@@ -242,7 +242,7 @@ export function makeConfig(
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
         ReactNull: null, // eslint-disable-line no-restricted-syntax
-        LICHTBLICK_STUDIO_VERSION: JSON.stringify(version),
+        LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales
       new webpack.IgnorePlugin({

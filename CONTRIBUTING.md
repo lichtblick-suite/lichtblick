@@ -81,9 +81,9 @@ Translation support is implemented using [`react-i18next`](https://react.i18next
 
 ### Add translations to the `i18n` directory
 
-The [`i18n` directory](packages/studio-base/src/i18n) contains translated (localized) strings for all languages supported by Lichtblick.
+The [`i18n` directory](packages/suite-base/src/i18n) contains translated (localized) strings for all languages supported by Lichtblick.
 
-Translated strings are organized into _namespaces_ — e.g. [`i18n/[language]/appSettings.ts`](packages/studio-base/src/i18n/en/appSettings.ts) contains translations for the app's Settings tab.
+Translated strings are organized into _namespaces_ — e.g. [`i18n/[language]/appSettings.ts`](packages/suite-base/src/i18n/en/appSettings.ts) contains translations for the app's Settings tab.
 
 ### Use `useTranslation()` and `t()` to access translated strings
 

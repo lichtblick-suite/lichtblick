@@ -19,7 +19,7 @@ export const SidebarItemKeys = [
   "help",
   "layouts",
   "panel-settings",
-  "studio-logs-settings",
+  "logs-settings",
   "variables",
 ] as const;
 export type SidebarItemKey = (typeof SidebarItemKeys)[number];
@@ -30,7 +30,7 @@ export type LeftSidebarItemKey = (typeof LeftSidebarItemKeys)[number];
 export const RightSidebarItemKeys = [
   "events",
   "variables",
-  "studio-logs-settings",
+  "logs-settings",
   "performance",
 ] as const;
 export type RightSidebarItemKey = (typeof RightSidebarItemKeys)[number];

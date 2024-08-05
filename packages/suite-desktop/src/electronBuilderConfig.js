@@ -169,7 +169,7 @@ function makeElectronBuilderConfig(params) {
       },
     },
     appx: {
-      applicationId: "FoxgloveStudio",
+      applicationId: "LichtblickSuite",
       backgroundColor: "#f7def6",
       displayName: "Lichtblick",
       identityName: "Lichtblick.Suite",

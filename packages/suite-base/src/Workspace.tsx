@@ -390,7 +390,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       });
     }
     if (enableStudioLogsSidebar) {
-      topItems.set("studio-logs-settings", {
+      topItems.set("logs-settings", {
         iconName: "BacklogList",
         title: "Studio logs settings",
         component: StudioLogsSettingsSidebar,
@@ -475,7 +475,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
           component: PerformanceSidebarComponent,
         });
       }
-      items.set("studio-logs-settings", {
+      items.set("logs-settings", {
         title: t("workspace:studioLogs"),
         component: StudioLogsSettings,
       });

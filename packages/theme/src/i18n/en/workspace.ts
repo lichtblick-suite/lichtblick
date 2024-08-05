@@ -7,7 +7,7 @@ export const workspace = {
   panel: "Panel",
   performance: "Performance",
   problems: "Problems",
-  studioLogs: "Logs",
+  logs: "Logs",
   topics: "Topics",
   variables: "Variables",
 };
