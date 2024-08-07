@@ -4,12 +4,12 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
+import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import usePublisher from "@lichtblick/suite-base/hooks/usePublisher";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { useCodeServerSettings } from "./settings";
 import { Joysetting } from "./types";

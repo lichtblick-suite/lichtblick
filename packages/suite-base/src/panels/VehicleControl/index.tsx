@@ -15,14 +15,14 @@ import { Slider } from "antd";
 import { fabric } from "fabric";
 import { useRef, useEffect, useState, Ref } from "react";
 
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import { useMessageDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useMessageDataItem";
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
-import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
+import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem";
+import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
+import usePublisher from "@lichtblick/suite-base/hooks/usePublisher";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import map from "./map.json";
 import image from "./map.png";

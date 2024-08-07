@@ -6,14 +6,14 @@ import { produce } from "immer";
 import { isEqual, set } from "lodash";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
-import { Topic } from "@foxglove/studio-base/players/types";
+import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
+import { Topic } from "@lichtblick/suite-base/players/types";
 import {
   useDefaultPanelTitle,
   usePanelSettingsTreeUpdate,
-} from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+} from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { VehicleControlConfig } from "./types";
 

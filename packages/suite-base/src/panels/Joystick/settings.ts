@@ -10,11 +10,11 @@ import { produce } from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect } from "react";
 
-import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
-import { Topic } from "@foxglove/studio-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-// import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
+import { Topic } from "@lichtblick/suite-base/players/types";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+// import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { Joysetting } from "./types";
 

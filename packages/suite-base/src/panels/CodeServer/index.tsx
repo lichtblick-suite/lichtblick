@@ -13,10 +13,10 @@
 
 import { useRef, useEffect, useState, Ref } from "react";
 
-import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { useCodeServerSettings } from "./settings";
 import { CodeServerConfig } from "./types";

@@ -6,9 +6,9 @@ import { produce } from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect } from "react";
 
-import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { CodeServerConfig } from "./types";
 

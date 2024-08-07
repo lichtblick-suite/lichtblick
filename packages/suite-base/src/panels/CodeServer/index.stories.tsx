@@ -13,8 +13,8 @@
 
 import { StoryObj } from "@storybook/react";
 
-import CodeServerPanel from "@foxglove/studio-base/panels/CodeServer/index";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import CodeServerPanel from "@lichtblick/suite-base/panels/CodeServer/index";
+import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 
 const fixture = {
   topics: [],

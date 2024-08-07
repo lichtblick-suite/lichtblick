@@ -326,7 +326,7 @@ export default function Start(): React.JSX.Element {
   return (
     <Stack className={classes.grid}>
       <header className={classes.header}>
-        {/* <FoxboxLogoText color="primary" className={classes.logo} /> */}
+        <LichtblickLogoText color="primary" />
       </header>
       <Stack className={classes.content}>
         <Stack gap={4}>

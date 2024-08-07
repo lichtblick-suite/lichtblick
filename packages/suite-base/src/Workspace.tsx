@@ -26,7 +26,7 @@ import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
 import { AppBar, AppBarProps } from "@lichtblick/suite-base/components/AppBar";
 import { CustomWindowControlsProps } from "@lichtblick/suite-base/components/AppBar/CustomWindowControls";
-import VerticalAppBar from "@lichtblick/studio-base/components/AppBar/VerticalAppBar";
+// import VerticalAppBar from "@lichtblick/studio-base/components/AppBar/VerticalAppBar";
 // import Logger from "@foxglove/log";
 // import { AppSetting } from "@foxglove/studio-base/AppSetting";
 // import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
@@ -96,8 +96,10 @@ import ICONS from "@lichtblick/suite-base/theme/icons";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
+
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
-import { ConfigProvider , theme} from "antd";
+import { ConfigProvider, theme } from "antd";
+import VerticalAppBar from "./components/AppBar/VerticalAppBar";
 
 const log = Logger.getLogger(__filename);
 

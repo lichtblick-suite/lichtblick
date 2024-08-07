@@ -4,19 +4,17 @@
 
 import { AppstoreAddOutlined, SettingFilled } from "@ant-design/icons";
 import { PanelLeft24Filled, PanelLeft24Regular } from "@fluentui/react-icons";
-import { Button, Layout } from "antd";
-import React, { useState } from "react";
-
-import { AddPanelMenu } from "@foxglove/studio-base/components/AppBar/AddPanelMenu";
-import { DataSource } from "@foxglove/studio-base/components/AppBar/DataSource";
+import { AddPanelMenu } from "@lichtblick/suite-base/components/AppBar/AddPanelMenu";
+import { DataSource } from "@lichtblick/suite-base/components/AppBar/DataSource";
 import {
   WorkspaceContextStore,
   useWorkspaceStore,
-} from "@foxglove/studio-base/context/Workspace/WorkspaceContext";
-import { useWorkspaceActions } from "@foxglove/studio-base/context/Workspace/useWorkspaceActions";
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { Button, Layout } from "antd";
+import React, { useState } from "react";
 
 const { Sider } = Layout;
-
 
 const VerticalAppBar: React.FC = () => {
   const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
@@ -86,7 +84,7 @@ const VerticalAppBar: React.FC = () => {
             type="text"
             // type="primary"
             icon={leftSidebarOpen ? <PanelLeft24Filled /> : <PanelLeft24Regular />}
-            onClick={() =>  sidebarActions.left.setOpen(!leftSidebarOpen)}
+            onClick={() => sidebarActions.left.setOpen(!leftSidebarOpen)}
           />
         </div>
       </div>
@@ -118,7 +116,9 @@ const VerticalAppBar: React.FC = () => {
       <AddPanelMenu
         anchorEl={panelAnchorEl}
         open={panelMenuOpen}
-        handleClose={() => setPanelAnchorEl(undefined)}
+        handleClose={() => {
+          setPanelAnchorEl(undefined);
+        }}
       />
     </Sider>
   );
