@@ -22,11 +22,6 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
 const useStyles = makeStyles()((theme) => ({
-  logo: {
-    width: 212,
-    height: "auto",
-    marginLeft: theme.spacing(-1),
-  },
   grid: {
     [theme.breakpoints.up("md")]: {
       display: "grid",
@@ -331,7 +326,7 @@ export default function Start(): React.JSX.Element {
   return (
     <Stack className={classes.grid}>
       <header className={classes.header}>
-        <LichtblickLogoText color="primary" className={classes.logo} />
+        {/* <FoxboxLogoText color="primary" className={classes.logo} /> */}
       </header>
       <Stack className={classes.content}>
         <Stack gap={4}>

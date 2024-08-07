@@ -39,12 +39,12 @@ export const dark: PaletteOptions = {
     primary: "#808080",
     text: "#ffffff",
   },
-  primary: { main: "#EF833A" },
-  secondary: { main: "#b1b1b1" },
-  error: { main: "#f54966" },
+  primary: { main: "#1677ff" },
+  secondary: { main: "#bae0ff" },
+  error: { main: "#db3553" },
   warning: { main: "#eba800" },
-  success: { main: "#92c353" },
-  info: { main: "#29bee7" },
+  success: { main: "#107c10" },
+  info: { main: "#fa8c16" },
   text: {
     primary: "#e1e1e4",
     secondary: "#a7a6af",
@@ -72,7 +72,7 @@ export const dark: PaletteOptions = {
     A700: "#d2d5df",
   },
 };
-
+// Anaple Theme Color
 export const light: PaletteOptions = {
   name: "light",
   mode: "light",
@@ -82,8 +82,8 @@ export const light: PaletteOptions = {
     primary: "#404040",
     text: "#ffffff",
   },
-  primary: { main: "#EF833A" },
-  secondary: { main: "#404040" },
+  primary: { main: "#002766" },
+  secondary: { main: "#808080" },
   error: { main: "#db3553" },
   warning: { main: "#eba800" },
   success: { main: "#107c10" },

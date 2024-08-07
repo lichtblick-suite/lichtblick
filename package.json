@@ -139,6 +139,10 @@
     "webpack-hot-middleware": "2.26.0"
   },
   "dependencies": {
+    "@ant-design/icons": "5.2.5",
+    "@ant-design/pro-components": "2.6.10",
+    "@fluentui/react-components": "9.54.9",
+    "@fluentui/react-icons": "2.0.252",
     "@lichtblick/hooks": "workspace:*",
     "@lichtblick/log": "workspace:*",
     "@lichtblick/omgidl-parser": "1.0.0",
@@ -146,8 +150,8 @@
     "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
-    "react-use": "17.5.1",
-    "rehype-raw": "6.1.1",
-    "vm-browserify": "1.1.2"
+    "antd": "5.20.0",
+    "react-use": "17.4.0",
+    "rehype-raw": "6.1.1"
   }
 }

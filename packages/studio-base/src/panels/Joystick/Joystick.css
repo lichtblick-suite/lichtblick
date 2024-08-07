@@ -1,0 +1,17 @@
+.joystick {
+  width: 200px;
+  height: 200px;
+  background-color: #ccc;
+  border-radius: 50%;
+  position: relative;
+}
+
+.handle {
+  width: 80px;
+  height: 80px;
+  background-color: #333;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}

@@ -313,5 +313,13 @@ export type StackProps = {
   onPointerLeave?: React.DOMAttributes<HTMLDivElement>["onPointerLeave"];
   onPointerMove?: React.DOMAttributes<HTMLDivElement>["onPointerMove"];
   onPointerOver?: React.DOMAttributes<HTMLDivElement>["onPointerOver"];
+  onTouchCancel?: React.DOMAttributes<HTMLDivElement>["onTouchCancel"];
+  onTouchCancelCapture?: React.DOMAttributes<HTMLDivElement>["onTouchCancelCapture"];
+  onTouchEnd?: React.DOMAttributes<HTMLDivElement>["onTouchEnd"];
+  onTouchEndCapture?: React.DOMAttributes<HTMLDivElement>["onTouchEndCapture"];
+  onTouchMove?: React.DOMAttributes<HTMLDivElement>["onTouchMove"];
+  onTouchStart?: React.DOMAttributes<HTMLDivElement>["onTouchStart"];
+  onTouchStartCapture?: React.DOMAttributes<HTMLDivElement>["onTouchStartCapture"];
+  onTouchMoveCapture?: React.DOMAttributes<HTMLDivElement>["onTouchMoveCapture"];
   onPointerUp?: React.DOMAttributes<HTMLDivElement>["onPointerUp"];
 };

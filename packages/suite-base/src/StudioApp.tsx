@@ -113,6 +113,7 @@ export function StudioApp(): React.JSX.Element {
           <Suspense fallback={<></>}>
             <PanelCatalogProvider>
               <Workspace
+
                 deepLinks={deepLinks}
                 appBarLeftInset={appBarLeftInset}
                 onAppBarDoubleClick={onAppBarDoubleClick}

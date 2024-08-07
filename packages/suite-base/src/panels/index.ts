@@ -33,6 +33,24 @@ import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summ
 
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
+    title: "Joystick",
+    type: "Joystick",
+    description: "Joystick",
+    module: async () => await import("./Joystick"),
+  },
+  {
+    title: "沙盘/车辆控制",
+    type: "VehicleControl",
+    description: "",
+    module: async () => await import("./VehicleControl"),
+  },
+  {
+    title: "vscode",
+    type: "CodeServer",
+    description: "",
+    module: async () => await import("./CodeServer"),
+  },
+  {
     title: t("3D"),
     type: "3D",
     description: t("3DPanelDescription"),
