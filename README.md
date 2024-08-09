@@ -5,7 +5,7 @@
   <a href="https://github.com/bmw-software-engineering/lichtblick/network/members"><img src="https://img.shields.io/github/forks/bmw-software-engineering/lichtblick" alt="Forks Badge"/></a>
   <a href="https://github.com/bmw-software-engineering/lichtblick/pulls"><img src="https://img.shields.io/github/issues-pr/bmw-software-engineering/lichtblick" alt="Pull Requests Badge"/></a>
   <a href="https://github.com/bmw-software-engineering/lichtblick/issues"><img src="https://img.shields.io/github/issues/bmw-software-engineering/lichtblick" alt="Issues Badge"/></a>
-  <a href="https://github.com/bmw-software-engineering/lichtblick/issues"><img src="https://img.shields.io/github/issues/bmw-software-engineering/lichtblick" alt="Version"/></a>
+  <a href="https://github.com/bmw-software-engineering/lichtblick/issues"><img src="https://img.shields.io/github/package-json/v/bmw-software-engineering/lichtblick" alt="Version"/></a>
   <a href="https://github.com/bmw-software-engineering/lichtblick/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bmw-software-engineering/lichtblick?color=2b9348"></a>
  <img alt="GitHub License" src="https://img.shields.io/github/license/bmw-software-engineering/lichtblick">
 
