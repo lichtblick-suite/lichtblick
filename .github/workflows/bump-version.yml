@@ -1,0 +1,55 @@
+name: Auto Bump Version
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            lfs: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '14'
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --mode skip-build
+        env:
+          # yarn runs in immutable mode "by default" in CI -- turning this off requires an
+          # undocumented env var
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Bump version in root package.json
+        run: yarn version patch
+
+      - name: Bump version in packages/suite
+        working-directory: packages/suite
+        run: yarn version patch
+
+      - name: Commit version bumps
+        run: |
+          git add package.json yarn.lock packages/suite/package.json
+          git commit -m "chore: bump versions in root and suite package.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes
+        run: |
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
