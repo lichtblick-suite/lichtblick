@@ -8,12 +8,12 @@ on:
 jobs:
   bump:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-            lfs: true
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          lfs: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -22,11 +22,19 @@ jobs:
 
       - run: corepack enable
 
+      - name: Cache yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
       - name: Install dependencies
         run: yarn install --mode skip-build
         env:
-          # yarn runs in immutable mode "by default" in CI -- turning this off requires an
-          # undocumented env var
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
       - name: Set up Git
@@ -42,14 +50,12 @@ jobs:
         run: yarn version patch
 
       - name: Commit version bumps
+        id: commit_version_bumps
         run: |
           git add package.json yarn.lock packages/suite/package.json
-          git commit -m "chore: bump versions in root and suite package.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git commit -m "chore: bump versions in root and suite package.json [skip actions]"
+          echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Push changes
         run: |
           git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
