@@ -1,5 +1,5 @@
 # Build stage
-FROM node:16 as build
+FROM node:16 AS build
 WORKDIR /src
 COPY . ./
 
