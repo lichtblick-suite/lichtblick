@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "lts" # 使用 LTS 版本的 Node.js
+          node-version: 18.17 # 使用 LTS 版本的 Node.js
       - name: Enable Corepack
         run: corepack enable
 
