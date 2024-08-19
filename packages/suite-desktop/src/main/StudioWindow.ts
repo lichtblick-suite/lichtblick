@@ -34,6 +34,8 @@ import { getTelemetrySettings } from "./telemetry";
 import { encodeRendererArg } from "../common/rendererArgs";
 import { LICHTBLICK_PRODUCT_NAME } from "../common/webpackDefines";
 
+import dgram from "dgram"; // 导入 dgram 模块
+
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const isMac = process.platform === "darwin";
@@ -67,6 +69,22 @@ function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
 function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
+  const udpServer = dgram.createSocket("udp4");
+
+  udpServer.on("error", (err) => {
+    console.error(`UDP server error:\n${err.stack}`);
+    udpServer.close();
+  });
+
+  udpServer.on("message", (msg) => {
+    // console.log(`UDP server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+    browserWindow.webContents.send("udp-message", msg.toString());
+    // 处理接收到的广播消息
+  });
+
+  udpServer.bind(9999, () => {
+    udpServer.setBroadcast(true); // 设置为接收广播消息
+  });
 
   const macTrafficLightInset =
     Math.floor((APP_BAR_HEIGHT - /*button size*/ 12) / 2) - /*for good measure*/ 1;

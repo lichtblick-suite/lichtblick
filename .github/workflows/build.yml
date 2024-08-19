@@ -1,0 +1,54 @@
+name: Build and Package Desktop Apps
+
+on:
+  push:
+    branches:
+      - main # 你可以根据需要修改为你的主分支名称
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16" # 根据需要选择 Node.js 版本
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Compile project
+        run: yarn run desktop:build:prod
+
+      - name: Package for Windows
+        if: matrix.os == 'windows-latest'
+        run: yarn run package:win
+
+      - name: Package for macOS
+        if: matrix.os == 'macos-latest'
+        run: yarn run package:darwin
+
+      - name: Package for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: yarn run package:linux
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: packaged-app
+          path: |
+            dist/**/*.exe
+            dist/**/*.deb
+            dist/**/*.dmg

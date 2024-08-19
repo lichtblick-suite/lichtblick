@@ -26,6 +26,7 @@ import {
   Storage,
 } from "../common/types";
 import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/webpackDefines";
+import { shell } from "electron";
 
 // Since we have no way of modifying `window.process.argv` we use a sentinel cookie and reload
 // hack to reset the page without deep links. By setting a session cookie and reloading
@@ -35,6 +36,35 @@ document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
 
 const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
 
+// 定义用于暴露到渲染进程的类型
+interface ElectronAPI {
+  ipcRenderer: {
+    send: (channel: string, data?: any) => void;
+    on: (channel: string, func: (event: IpcRendererEvent, ...args: any[]) => void) => void;
+    removeAllListeners: (channel: string) => void;
+  };
+  shell2: {
+    openExternal: (url: string) => Promise<void>;
+  };
+}
+
+// 将 ipcRenderer 暴露到渲染进程中
+contextBridge.exposeInMainWorld("electron", {
+  ipcRenderer: {
+    send: (channel, data) => {
+      ipcRenderer.send(channel, data);
+    },
+    on: (channel: string, func: (event: IpcRendererEvent, ...args: any[]) => void) => {
+      ipcRenderer.on(channel, func);
+    },
+    removeAllListeners: (channel) => {
+      ipcRenderer.removeAllListeners(channel);
+    },
+  },
+  shell2: {
+    openExternal: (url: string) => shell.openExternal(url),
+  },
+} as ElectronAPI);
 export function main(): void {
   const log = Logger.getLogger(__filename);
 

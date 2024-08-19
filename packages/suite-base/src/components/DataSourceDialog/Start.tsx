@@ -15,6 +15,7 @@ import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSour
 import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
+import UdpMessageComponent from "@lichtblick/suite-base/components/UdpMessage";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/BaseUserContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
@@ -114,6 +115,9 @@ type DataSourceOptionProps = {
   href?: string;
   target: "_blank";
 };
+function isRunningInElectron() {
+  return typeof window !== "undefined" && typeof window.electron !== "undefined";
+}
 
 function DataSourceOption(props: DataSourceOptionProps): React.JSX.Element {
   const { icon, onClick, text, secondaryText, href, target } = props;
@@ -374,6 +378,8 @@ export default function Start(): React.JSX.Element {
       </Stack>
       <div className={classes.spacer} />
       <Stack gap={4} className={classes.sidebar}>
+        {isRunningInElectron() && <UdpMessageComponent />}
+
         <SidebarItems onSelectView={dialogActions.dataSource.open} />
       </Stack>
     </Stack>

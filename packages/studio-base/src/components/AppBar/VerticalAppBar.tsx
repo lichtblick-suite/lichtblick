@@ -52,7 +52,7 @@ const VerticalAppBar: React.FC = () => {
             shape="circle"
             icon={<DataSource />}
             onClick={() => {
-              dialogActions.dataSource.open("connection");
+              dialogActions.dataSource.open("start");
             }}
           />
         </div>
