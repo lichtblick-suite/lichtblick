@@ -44,16 +44,20 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build and Package for OS
-        run: |
-          yarn run desktop:build:prod
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            yarn run package:win
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            yarn run package:darwin
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            yarn run package:linux
-          fi
+      - name: Build for All OS
+        run: yarn run desktop:build:prod
+
+      - name: Package for Windows
+        if: matrix.os == 'windows-latest'
+        run: yarn run package:win
+
+      - name: Package for macOS
+        if: matrix.os == 'macos-latest'
+        run: yarn run package:darwin
+
+      - name: Package for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: yarn run package:linux
       - name: Upload artifacts
         if: success()
         uses: actions/upload-artifact@v3
