@@ -15,21 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        config:
-          - name: build and package for windows
-            command: |
-              yarn run desktop:build:prod
-              yarn run package:win
-          - name: build and package for macOS
-            command: |
-              yarn run desktop:build:prod
-              yarn run package:darwin
-          - name: build and package for linux
-            command: |
-              yarn run desktop:build:prod
-              yarn run package:linux
 
-    name: ${{ matrix.config.name }} (${{ matrix.os }})
+    name: (${{ matrix.os }})
 
     steps:
       - name: Checkout code
@@ -57,8 +44,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - run: ${{ matrix.config.command }}
-
+      - name: Build and Package for OS
+        run: |
+          yarn run desktop:build:prod
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            yarn run package:win
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            yarn run package:darwin
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            yarn run package:linux
+          fi
       - name: Upload artifacts
         if: success()
         uses: actions/upload-artifact@v3
