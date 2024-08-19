@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -20,10 +19,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16" # 根据需要选择 Node.js 版本
-
+          node-version: "lts" # 使用 LTS 版本的 Node.js
       - name: Enable Corepack
         run: corepack enable
+
+      - name: Install Yarn v3
+        run: npm install -g yarn@3
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
