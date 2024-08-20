@@ -1,6 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Label } from "@foxglove/three-text";
+import { t } from "i18next";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+import { Line2 } from "three/examples/jsm/lines/Line2";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
 import {
   Immutable,
@@ -9,14 +20,6 @@ import {
   SettingsTreeFields,
 } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
-import { t } from "i18next";
-import * as _ from "lodash-es";
-import * as THREE from "three";
-import { Line2 } from "three/examples/jsm/lines/Line2";
-import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
-import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
-
-import { Label } from "@foxglove/three-text";
 
 import { Axis, AXIS_LENGTH } from "./Axis";
 import { DEFAULT_LABEL_SCALE_FACTOR } from "./SceneSettings";
@@ -351,7 +354,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
 
-    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    // eslint-disable-next-line @lichtblick/no-boolean-parameters
     const toggleFrameVisibility = (value: boolean) => {
       for (const renderable of this.renderables.values()) {
         renderable.userData.settings.visible = value;

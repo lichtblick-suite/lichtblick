@@ -1,7 +1,15 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { render, waitFor } from "@testing-library/react";
+import { useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import Panel from "@lichtblick/suite-base/components/Panel";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
@@ -13,10 +21,6 @@ import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentL
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
-import { render, waitFor } from "@testing-library/react";
-import { useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { UnconnectedPanelLayout } from "./PanelLayout";
 

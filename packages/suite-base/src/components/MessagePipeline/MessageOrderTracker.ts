@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,11 +14,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Time, isLessThan, subtract as subtractTimes, toSec } from "@foxglove/rostime";
+
 import Logger from "@lichtblick/log";
 import { PlayerState, MessageEvent, PlayerProblem } from "@lichtblick/suite-base/players/types";
 import { formatFrame } from "@lichtblick/suite-base/util/time";
-
-import { Time, isLessThan, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
 const WAIT_FOR_SEEK_SEC = 1; // How long we wait for a change in `lastSeekTime` before warning.

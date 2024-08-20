@@ -1,15 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-import { MessageEvent, SettingsTreeAction } from "@lichtblick/suite";
-import {
-  createStixelMaterial,
-  PointCloudHistoryRenderable,
-} from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PointClouds";
-import type { RosObject } from "@lichtblick/suite-base/players/types";
-import { VelodyneScan } from "@lichtblick/suite-base/types/Messages";
-import * as _ from "lodash-es";
 
 import { toNanoSec, toSec } from "@foxglove/rostime";
 import { NumericType, PointCloud as FoxglovePointCloud } from "@foxglove/schemas";
@@ -21,6 +15,15 @@ import {
   RawPacket,
   Transformer,
 } from "@foxglove/velodyne-cloud";
+import * as _ from "lodash-es";
+
+import { MessageEvent, SettingsTreeAction } from "@lichtblick/suite";
+import {
+  createStixelMaterial,
+  PointCloudHistoryRenderable,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PointClouds";
+import type { RosObject } from "@lichtblick/suite-base/players/types";
+import { VelodyneScan } from "@lichtblick/suite-base/types/Messages";
 
 import { autoSelectColorSettings } from "./colorMode";
 import {

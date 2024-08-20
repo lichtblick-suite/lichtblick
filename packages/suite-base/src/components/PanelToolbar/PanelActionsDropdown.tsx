@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,11 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import PanelContext from "@lichtblick/suite-base/components/PanelContext";
-import ChangePanelMenu from "@lichtblick/suite-base/components/PanelToolbar/ChangePanelMenu";
-import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
-import { getPanelTypeFromMosaic } from "@lichtblick/suite-base/components/PanelToolbar/utils";
-import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Divider, Menu, MenuItem } from "@mui/material";
@@ -23,6 +21,12 @@ import { MouseEvent, useCallback, useContext, useMemo, useRef, useState } from "
 import { useTranslation } from "react-i18next";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
+
+import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import ChangePanelMenu from "@lichtblick/suite-base/components/PanelToolbar/ChangePanelMenu";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
+import { getPanelTypeFromMosaic } from "@lichtblick/suite-base/components/PanelToolbar/utils";
+import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 
 type Props = {
   isUnknownPanel: boolean;

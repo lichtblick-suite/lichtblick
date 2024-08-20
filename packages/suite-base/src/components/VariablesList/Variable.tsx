@@ -1,16 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { VariableValue } from "@lichtblick/suite";
-import CopyButton from "@lichtblick/suite-base/components/CopyButton";
-import JsonInput from "@lichtblick/suite-base/components/JsonInput";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import useGlobalVariables, {
-  GlobalVariables,
-} from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ErrorIcon from "@mui/icons-material/Error";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -30,6 +24,16 @@ import {
 import * as _ from "lodash-es";
 import { useMemo, useCallback, useState, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
+
+import { VariableValue } from "@lichtblick/suite";
+import CopyButton from "@lichtblick/suite-base/components/CopyButton";
+import JsonInput from "@lichtblick/suite-base/components/JsonInput";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
 const useStyles = makeStyles<void, "copyButton">()((theme, _params, classes) => ({
   root: {

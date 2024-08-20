@@ -1,4 +1,7 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -14,6 +17,10 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
+import { act, renderHook } from "@testing-library/react";
+import { PropsWithChildren, useCallback, useState } from "react";
+import { DeepPartial } from "ts-essentials";
+
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import {
   Player,
@@ -24,9 +31,6 @@ import {
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import delay from "@lichtblick/suite-base/util/delay";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
-import { act, renderHook } from "@testing-library/react";
-import { PropsWithChildren, useCallback, useState } from "react";
-import { DeepPartial } from "ts-essentials";
 
 import { MessagePipelineContext, MessagePipelineProvider, useMessagePipeline } from ".";
 import FakePlayer from "./FakePlayer";

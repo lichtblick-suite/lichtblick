@@ -1,11 +1,15 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import * as _ from "lodash-es";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
+
+import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 type MultiAction = "delete" | "duplicate" | "revert" | "save";
 

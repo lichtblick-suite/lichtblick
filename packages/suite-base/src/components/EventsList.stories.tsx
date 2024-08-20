@@ -1,14 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { StoryObj, StoryFn } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
+import { useEffect } from "react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { useEvents } from "@lichtblick/suite-base/context/EventsContext";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import { makeMockEvents } from "@lichtblick/suite-base/test/mocks/makeMockEvents";
-import { StoryObj, StoryFn } from "@storybook/react";
-import { screen, userEvent } from "@storybook/testing-library";
-import { useEffect } from "react";
 
 import { EventsList } from "./EventsList";
 

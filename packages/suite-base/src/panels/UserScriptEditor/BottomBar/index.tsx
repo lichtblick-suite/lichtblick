@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -12,6 +15,10 @@
 //   You may not use this file except in compliance with the License.
 //
 
+import { Badge, Button, Divider, Paper, Tab, Tabs, badgeClasses, tabClasses } from "@mui/material";
+import { ReactElement, useState } from "react";
+import { makeStyles } from "tss-react/mui";
+
 import Stack from "@lichtblick/suite-base/components/Stack";
 import {
   UserScriptStore,
@@ -20,9 +27,6 @@ import {
 import DiagnosticsSection from "@lichtblick/suite-base/panels/UserScriptEditor/BottomBar/DiagnosticsSection";
 import LogsSection from "@lichtblick/suite-base/panels/UserScriptEditor/BottomBar/LogsSection";
 import { Diagnostic, UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
-import { Badge, Button, Divider, Paper, Tab, Tabs, badgeClasses, tabClasses } from "@mui/material";
-import { ReactElement, useState } from "react";
-import { makeStyles } from "tss-react/mui";
 
 type Props = {
   diagnostics: readonly Diagnostic[];

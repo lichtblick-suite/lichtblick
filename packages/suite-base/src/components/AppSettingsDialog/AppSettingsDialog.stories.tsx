@@ -1,17 +1,20 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ExtensionMarketplaceContext, {
-  ExtensionMarketplace,
-} from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
-import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import { StoryFn, StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
 import { ExtensionInfo, ExtensionLoader } from "@lichtblick/suite-base";
+import ExtensionMarketplaceContext, {
+  ExtensionMarketplace,
+} from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
+import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
+import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 
 import { AppSettingsDialog } from "./AppSettingsDialog";
 

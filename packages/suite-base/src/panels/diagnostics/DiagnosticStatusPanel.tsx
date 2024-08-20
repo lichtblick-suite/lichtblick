@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,6 +14,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { compare } from "@foxglove/rostime";
+import { Autocomplete, TextField } from "@mui/material";
+import { produce } from "immer";
+import * as _ from "lodash-es";
+import { useCallback, useEffect, useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
+
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
@@ -21,13 +31,6 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { Autocomplete, TextField } from "@mui/material";
-import { produce } from "immer";
-import * as _ from "lodash-es";
-import { useCallback, useEffect, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
-
-import { compare } from "@foxglove/rostime";
 
 import DiagnosticStatus from "./DiagnosticStatus";
 import { buildStatusPanelSettingsTree } from "./settings";

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,6 +13,12 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
+import { Avatar, IconButton, Tooltip } from "@mui/material";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import tc from "tinycolor2";
+import { makeStyles } from "tss-react/mui";
+
 import { LichtblickLogo } from "@lichtblick/suite-base/components/LichtblickLogo";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
@@ -22,11 +31,6 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
-import { Avatar, IconButton, Tooltip } from "@mui/material";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import tc from "tinycolor2";
-import { makeStyles } from "tss-react/mui";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";

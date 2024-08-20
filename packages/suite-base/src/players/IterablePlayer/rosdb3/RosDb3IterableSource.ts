@@ -1,6 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { ROS2_TO_DEFINITIONS, Rosbag2, SqliteSqljs } from "@foxglove/rosbag2-web";
+import { stringify } from "@foxglove/rosmsg";
+import { Time, add as addTime } from "@foxglove/rostime";
 
 import { MessageEvent } from "@lichtblick/suite";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
@@ -13,10 +20,6 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
-
-import { ROS2_TO_DEFINITIONS, Rosbag2, SqliteSqljs } from "@foxglove/rosbag2-web";
-import { stringify } from "@foxglove/rosmsg";
-import { Time, add as addTime } from "@foxglove/rostime";
 
 import {
   GetBackfillMessagesArgs,

@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { enqueueSnackbar } from "notistack";
+import { useEffect, useState } from "react";
+import { useAsync, useMountedState } from "react-use";
+import { useDebounce } from "use-debounce";
 
 import Logger from "@lichtblick/log";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
@@ -11,10 +19,6 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import { enqueueSnackbar } from "notistack";
-import { useEffect, useState } from "react";
-import { useAsync, useMountedState } from "react-use";
-import { useDebounce } from "use-debounce";
 
 type UpdatedLayout = NonNullable<LayoutState["selectedLayout"]>;
 

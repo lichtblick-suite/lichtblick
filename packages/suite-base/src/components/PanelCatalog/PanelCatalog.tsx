@@ -1,11 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { PanelInfo, usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
-import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
@@ -14,6 +13,11 @@ import * as _ from "lodash-es";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
+
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { PanelInfo, usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
+import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
 import { PanelGrid } from "./PanelGrid";
 import { PanelList } from "./PanelList";

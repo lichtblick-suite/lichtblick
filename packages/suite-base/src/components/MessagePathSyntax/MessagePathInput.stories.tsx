@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,13 +14,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Topic } from "@lichtblick/suite-base/players/types";
-import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
-import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import { Stack } from "@mui/material";
 import { StoryObj } from "@storybook/react";
 import { fireEvent, screen, userEvent, waitFor, within } from "@storybook/testing-library";
 import { useState } from "react";
+
+import { Topic } from "@lichtblick/suite-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
+import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 
 import MessagePathInput from "./MessagePathInput";
 import { MessagePathInputStoryFixture } from "./fixture";

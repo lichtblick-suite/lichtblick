@@ -1,15 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Time, subtract as subtractTimes, toSec } from "@foxglove/rostime";
+import stringHash from "string-hash";
 
 import { MessageAndData } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDataset } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { expandedLineColors } from "@lichtblick/suite-base/util/plotColors";
 import { getTimestampForMessageEvent } from "@lichtblick/suite-base/util/time";
 import { grey } from "@lichtblick/suite-base/util/toolsColorScheme";
-import stringHash from "string-hash";
-
-import { Time, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 
 import positiveModulo from "./positiveModulo";
 import { StateTransitionPath } from "./types";

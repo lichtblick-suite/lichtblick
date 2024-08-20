@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,19 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { filterMap } from "@lichtblick/den/collection";
-import { SettingsTreeAction } from "@lichtblick/suite";
-import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Panel from "@lichtblick/suite-base/components/Panel";
-import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/useDiagnostics";
-import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import toggle from "@lichtblick/suite-base/util/toggle";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
   IconButton,
@@ -45,6 +35,20 @@ import { CSSProperties, useCallback, useEffect, useMemo } from "react";
 import { AutoSizer } from "react-virtualized";
 import { FixedSizeList as List } from "react-window";
 import { makeStyles } from "tss-react/mui";
+
+import { filterMap } from "@lichtblick/den/collection";
+import { SettingsTreeAction } from "@lichtblick/suite";
+import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import Panel from "@lichtblick/suite-base/components/Panel";
+import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/useDiagnostics";
+import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import toggle from "@lichtblick/suite-base/util/toggle";
 
 import { buildSummarySettingsTree } from "./settings";
 import {

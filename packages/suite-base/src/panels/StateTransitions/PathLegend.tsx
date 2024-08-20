@@ -1,8 +1,16 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Add16Regular, Dismiss12Regular } from "@fluentui/react-icons";
+import { Button, ButtonGroup, Stack, buttonClasses } from "@mui/material";
+import { MouseEvent, useCallback } from "react";
+import tinycolor from "tinycolor2";
+import { makeStyles } from "tss-react/mui";
+
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
@@ -13,10 +21,6 @@ import {
   StateTransitionPath,
 } from "@lichtblick/suite-base/panels/StateTransitions/types";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { Button, ButtonGroup, Stack, buttonClasses } from "@mui/material";
-import { MouseEvent, useCallback } from "react";
-import tinycolor from "tinycolor2";
-import { makeStyles } from "tss-react/mui";
 
 const useStyles = makeStyles()((theme) => ({
   chartOverlay: {

@@ -1,16 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { IAppTimeFormat } from "@lichtblick/suite-base/hooks/useAppTimeFormat";
-import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
-import {
-  formatDate,
-  formatTime,
-  getValidatedTimeAndMethodFromString,
-} from "@lichtblick/suite-base/util/formatTime";
-import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CheckIcon from "@mui/icons-material/Check";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -28,7 +23,15 @@ import {
 import { useState, useCallback, useMemo, useEffect, MouseEvent, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { IAppTimeFormat } from "@lichtblick/suite-base/hooks/useAppTimeFormat";
+import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
+import {
+  formatDate,
+  formatTime,
+  getValidatedTimeAndMethodFromString,
+} from "@lichtblick/suite-base/util/formatTime";
+import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 
 type PlaybackTimeDisplayMethodProps = {
   appTimeFormat: IAppTimeFormat;

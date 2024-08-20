@@ -1,15 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { MessagePath } from "@foxglove/message-path";
+import { ChartDataset } from "chart.js";
+import * as _ from "lodash-es";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { Immutable, Time, MessageEvent } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
-import { ChartDataset } from "chart.js";
-import * as _ from "lodash-es";
-
-import { MessagePath } from "@foxglove/message-path";
 
 import {
   CsvDataset,

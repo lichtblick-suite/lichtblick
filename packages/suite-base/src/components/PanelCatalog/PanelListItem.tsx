@@ -1,18 +1,22 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ReOrderDotsVertical16Filled } from "@fluentui/react-icons";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import TextHighlight from "@lichtblick/suite-base/components/TextHighlight";
-import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
-import { MosaicDropResult, PanelConfig } from "@lichtblick/suite-base/types/panels";
 import { Fade, ListItem, ListItemButton, ListItemText, Tooltip, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef } from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 import { MosaicDropTargetPosition } from "react-mosaic-component/lib/internalTypes";
 import { makeStyles } from "tss-react/mui";
+
+import Stack from "@lichtblick/suite-base/components/Stack";
+import TextHighlight from "@lichtblick/suite-base/components/TextHighlight";
+import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
+import { MosaicDropResult, PanelConfig } from "@lichtblick/suite-base/types/panels";
 
 const useStyles = makeStyles<void, "dragIcon">()((theme, _params, classes) => {
   return {

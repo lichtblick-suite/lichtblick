@@ -1,17 +1,21 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Button, CircularProgress, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { useCallback } from "react";
+import { useAsyncFn } from "react-use";
+import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
 import BlockheadFilledIcon from "@lichtblick/suite-base/components/BlockheadFilledIcon";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useCurrentUser, User } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
-import { Button, CircularProgress, Typography } from "@mui/material";
-import { useSnackbar } from "notistack";
-import { useCallback } from "react";
-import { useAsyncFn } from "react-use";
-import { makeStyles } from "tss-react/mui";
 
 const log = Logger.getLogger(__filename);
 

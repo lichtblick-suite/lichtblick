@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,11 +14,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Header } from "@lichtblick/suite-base/types/Messages";
-import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
+import { Time, compare } from "@foxglove/rostime";
 import * as _ from "lodash-es";
 
-import { Time, compare } from "@foxglove/rostime";
+import { Header } from "@lichtblick/suite-base/types/Messages";
+import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 
 // Trim the message if it's too long. We sometimes get crazy massive messages here that can
 // otherwise crash our entire UI. I looked at a bunch of messages manually and they are typically

@@ -1,6 +1,16 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { useTheme } from "@mui/material";
+import { StoryObj } from "@storybook/react";
+import { userEvent, within } from "@storybook/testing-library";
+import { produce } from "immer";
+import * as _ from "lodash-es";
+import { useCallback, useMemo, useState, useEffect } from "react";
 
 import Logger from "@lichtblick/log";
 import {
@@ -13,12 +23,6 @@ import { MessagePathInputStoryFixture } from "@lichtblick/suite-base/components/
 import SettingsTreeEditor from "@lichtblick/suite-base/components/SettingsTreeEditor";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-import { useTheme } from "@mui/material";
-import { StoryObj } from "@storybook/react";
-import { userEvent, within } from "@storybook/testing-library";
-import { produce } from "immer";
-import * as _ from "lodash-es";
-import { useCallback, useMemo, useState, useEffect } from "react";
 
 export default {
   title: "components/SettingsTreeEditor",

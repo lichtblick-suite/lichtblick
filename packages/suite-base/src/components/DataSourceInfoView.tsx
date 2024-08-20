@@ -1,6 +1,15 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { subtract as subtractTimes, Time } from "@foxglove/rostime";
+import { Skeleton, Typography } from "@mui/material";
+import { MutableRefObject, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import {
   MessagePipelineContext,
@@ -12,12 +21,6 @@ import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { formatDuration } from "@lichtblick/suite-base/util/formatTime";
 import { formatTimeRaw, isAbsoluteTime } from "@lichtblick/suite-base/util/time";
-import { Skeleton, Typography } from "@mui/material";
-import { MutableRefObject, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
-
-import { subtract as subtractTimes, Time } from "@foxglove/rostime";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
 

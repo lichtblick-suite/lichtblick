@@ -1,6 +1,23 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import {
+  CameraCalibration,
+  CompressedImage,
+  ImageAnnotations,
+  PointsAnnotation,
+  PointsAnnotationType,
+  RawImage,
+} from "@foxglove/schemas";
+import { Meta, StoryObj } from "@storybook/react";
+import { fireEvent, screen, userEvent, waitFor } from "@storybook/testing-library";
+import { useCallback, useMemo, useState } from "react";
+import { useAsync } from "react-use";
+import tinycolor from "tinycolor2";
 
 import { MessageEvent } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -11,20 +28,6 @@ import {
 import { Topic } from "@lichtblick/suite-base/players/types";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import delay from "@lichtblick/suite-base/util/delay";
-import { Meta, StoryObj } from "@storybook/react";
-import { fireEvent, screen, userEvent, waitFor } from "@storybook/testing-library";
-import { useCallback, useMemo, useState } from "react";
-import { useAsync } from "react-use";
-import tinycolor from "tinycolor2";
-
-import {
-  CameraCalibration,
-  CompressedImage,
-  ImageAnnotations,
-  PointsAnnotation,
-  PointsAnnotationType,
-  RawImage,
-} from "@foxglove/schemas";
 
 import { ImagePanel } from "../../index";
 import { CameraInfo, CompressedImage as RosCompressedImage, Image as RosRawImage } from "../../ros";

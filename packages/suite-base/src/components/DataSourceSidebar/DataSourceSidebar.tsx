@@ -1,8 +1,24 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/* eslint-disable @foxglove/no-restricted-imports */
+/* eslint-disable @lichtblick/no-restricted-imports */
+
+import AddIcon from "@mui/icons-material/Add";
+import {
+  CircularProgress,
+  Divider,
+  IconButton,
+  Tab,
+  Tabs,
+  styled as muiStyled,
+} from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { EventsList } from "@lichtblick/suite-base/components/EventsList";
@@ -19,18 +35,6 @@ import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsCon
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import AddIcon from "@mui/icons-material/Add";
-import {
-  CircularProgress,
-  Divider,
-  IconButton,
-  Tab,
-  Tabs,
-  styled as muiStyled,
-} from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import { DataSourceInfoView } from "../DataSourceInfoView";
 import { ProblemsList } from "../ProblemsList";

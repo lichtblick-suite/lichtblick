@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { SettingsIcon } from "@lichtblick/suite";
 import Clock from "@mui/icons-material/AccessTime";
 import Add from "@mui/icons-material/Add";
 import Addchart from "@mui/icons-material/Addchart";
@@ -42,6 +44,8 @@ import Expand from "@mui/icons-material/UnfoldMore";
 import Cells from "@mui/icons-material/ViewComfy";
 import Cube from "@mui/icons-material/ViewInAr";
 import ImageProjection from "@mui/icons-material/Vrpano";
+
+import { SettingsIcon } from "@lichtblick/suite";
 
 const icons: Record<SettingsIcon, typeof Add> = {
   Add,

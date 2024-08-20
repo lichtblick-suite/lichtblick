@@ -1,6 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import * as _ from "lodash-es";
+import { ReactNode, useState } from "react";
+import { createStore, StoreApi } from "zustand";
 
 import { TimelinePositionedEvent } from "@lichtblick/suite-base/context/EventsContext";
 import {
@@ -9,9 +16,6 @@ import {
   SyncBounds,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { HoverValue } from "@lichtblick/suite-base/types/hoverValue";
-import * as _ from "lodash-es";
-import { ReactNode, useState } from "react";
-import { createStore, StoreApi } from "zustand";
 
 function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStateStore> {
   return createStore((set) => {

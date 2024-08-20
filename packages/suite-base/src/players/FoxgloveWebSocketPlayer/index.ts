@@ -1,31 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-import { debouncePromise } from "@lichtblick/den/async";
-import Log from "@lichtblick/log";
-import { ParameterValue } from "@lichtblick/suite";
-import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
-import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
-import {
-  AdvertiseOptions,
-  MessageEvent,
-  Player,
-  PlayerCapabilities,
-  PlayerMetricsCollectorInterface,
-  PlayerPresence,
-  PlayerProblem,
-  PlayerState,
-  PublishPayload,
-  SubscribePayload,
-  Topic,
-  TopicStats,
-} from "@lichtblick/suite-base/players/types";
-import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
-import * as base64 from "@protobufjs/base64";
-import * as _ from "lodash-es";
-import { v4 as uuidv4 } from "uuid";
 
 import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
 import { MessageDefinition, isMsgDefEqual } from "@foxglove/message-definition";
@@ -50,6 +28,31 @@ import {
   FetchAssetResponse,
   BinaryOpcode,
 } from "@foxglove/ws-protocol";
+import * as base64 from "@protobufjs/base64";
+import * as _ from "lodash-es";
+import { v4 as uuidv4 } from "uuid";
+
+import { debouncePromise } from "@lichtblick/den/async";
+import Log from "@lichtblick/log";
+import { ParameterValue } from "@lichtblick/suite";
+import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
+import {
+  AdvertiseOptions,
+  MessageEvent,
+  Player,
+  PlayerCapabilities,
+  PlayerMetricsCollectorInterface,
+  PlayerPresence,
+  PlayerProblem,
+  PlayerState,
+  PublishPayload,
+  SubscribePayload,
+  Topic,
+  TopicStats,
+} from "@lichtblick/suite-base/players/types";
+import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
 import { MessageWriter } from "./MessageWriter";

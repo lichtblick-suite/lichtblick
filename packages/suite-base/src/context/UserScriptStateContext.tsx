@@ -1,13 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { createContext, useState } from "react";
+import { StoreApi, createStore, useStore } from "zustand";
 
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import { generateEmptyTypesLib } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
 import { ros_lib_dts } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/ros";
 import { Diagnostic, UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
-import { createContext, useState } from "react";
-import { StoreApi, createStore, useStore } from "zustand";
 
 type UserScriptState = {
   rosLib: string;

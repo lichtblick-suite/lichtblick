@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,6 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MosaicNode, MosaicPath } from "react-mosaic-component";
+
 import { VariableValue } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { TabLocation } from "@lichtblick/suite-base/types/layouts";
@@ -21,7 +26,6 @@ import {
   SavedProps,
   UserScripts,
 } from "@lichtblick/suite-base/types/panels";
-import { MosaicNode, MosaicPath } from "react-mosaic-component";
 
 export type LayoutData = {
   // We store config for each panel in an object keyed by the panel id.

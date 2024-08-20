@@ -1,5 +1,5 @@
 {
-  "name": "@foxglove/eslint-plugin-studio",
+  "name": "@lichtblick/eslint-plugin-suite",
   "license": "MPL-2.0",
   "private": true,
   "repository": {

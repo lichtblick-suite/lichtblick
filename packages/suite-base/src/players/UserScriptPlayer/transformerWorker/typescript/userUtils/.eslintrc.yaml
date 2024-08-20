@@ -1,3 +1,3 @@
 rules:
   # do not require license header for userUtils
-  "@foxglove/license-header": off
+  "@lichtblick/license-header": off

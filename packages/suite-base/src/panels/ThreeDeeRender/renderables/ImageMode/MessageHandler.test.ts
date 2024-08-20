@@ -1,6 +1,21 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { fromNanoSec } from "@foxglove/rostime";
+import {
+  CameraCalibration,
+  CircleAnnotation,
+  ImageAnnotations,
+  PointsAnnotation,
+  RawImage,
+  TextAnnotation,
+} from "@foxglove/schemas";
+import * as _ from "lodash-es";
+import { DeepPartial } from "ts-essentials";
 
 import { MessageEvent } from "@lichtblick/suite";
 import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
@@ -13,18 +28,6 @@ import {
   WAITING_FOR_SYNC_EMPTY_HUD_ITEM,
   WAITING_FOR_SYNC_NOTICE_HUD_ITEM,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/MessageHandler";
-import * as _ from "lodash-es";
-import { DeepPartial } from "ts-essentials";
-
-import { fromNanoSec } from "@foxglove/rostime";
-import {
-  CameraCalibration,
-  CircleAnnotation,
-  ImageAnnotations,
-  PointsAnnotation,
-  RawImage,
-  TextAnnotation,
-} from "@foxglove/schemas";
 
 import { PartialMessageEvent } from "../../SceneExtension";
 

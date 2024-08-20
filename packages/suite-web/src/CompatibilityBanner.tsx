@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Dismiss20Filled, Warning24Filled } from "@fluentui/react-icons";
-import Stack from "@lichtblick/suite-base/components/Stack";
+import { createMuiTheme } from "@foxglove/theme";
 import {
   Button,
   IconButton,
@@ -15,7 +18,7 @@ import {
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { createMuiTheme } from "@foxglove/theme";
+import Stack from "@lichtblick/suite-base/components/Stack";
 
 const MINIMUM_CHROME_VERSION = 76;
 const BANNER_HEIGHT = 54;

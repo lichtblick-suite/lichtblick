@@ -1,6 +1,30 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import AddIcon from "@mui/icons-material/Add";
+import CloudOffIcon from "@mui/icons-material/CloudOff";
+import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
+import {
+  CircularProgress,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+} from "@mui/material";
+import * as _ from "lodash-es";
+import moment from "moment";
+import { useSnackbar } from "notistack";
+import path from "path";
+import { MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import { useMountedState } from "react-use";
+import useAsyncFn from "react-use/lib/useAsyncFn";
+import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
@@ -27,26 +51,6 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
-import AddIcon from "@mui/icons-material/Add";
-import CloudOffIcon from "@mui/icons-material/CloudOff";
-import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
-import {
-  CircularProgress,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-} from "@mui/material";
-import * as _ from "lodash-es";
-import moment from "moment";
-import { useSnackbar } from "notistack";
-import path from "path";
-import { MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
-import { useMountedState } from "react-use";
-import useAsyncFn from "react-use/lib/useAsyncFn";
-import { makeStyles } from "tss-react/mui";
 
 import LayoutSection from "./LayoutSection";
 import { useLayoutBrowserReducer } from "./reducer";

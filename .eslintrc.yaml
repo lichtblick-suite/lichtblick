@@ -14,21 +14,21 @@ ignorePatterns:
 plugins:
   - file-progress
   - tss-unused-classes
-  - "@foxglove/eslint-plugin-studio"
+  - "@lichtblick/eslint-plugin-suite"
 
 extends:
-  - plugin:@foxglove/base
-  - plugin:@foxglove/react
-  - plugin:@foxglove/jest
+  - plugin:@lichtblick/base
+  - plugin:@lichtblick/react
+  - plugin:@lichtblick/jest
   - plugin:storybook/recommended
-  - plugin:@foxglove/studio/all
+  - plugin:@lichtblick/suite/all
 
 settings:
-  import/internal-regex: "^@foxglove"
+  import/internal-regex: "^@lichtblick"
 
 rules:
-  "@foxglove/license-header": error
-  "@foxglove/prefer-hash-private": error
+  "@lichtblick/license-header": error
+  "@lichtblick/prefer-hash-private": error
 
   tss-unused-classes/unused-classes: error
 
@@ -130,7 +130,7 @@ rules:
 overrides:
   - files: ["*.ts", "*.tsx"]
     extends:
-      - plugin:@foxglove/typescript
+      - plugin:@lichtblick/typescript
     parserOptions:
       project: ./tsconfig.eslint.json
     rules:
@@ -160,7 +160,7 @@ overrides:
       # https://eslint.org/docs/latest/rules/no-loop-func
       "no-loop-func": error
 
-      # unused vars must have `_` prefix, but `_` alone is not ignored (see @foxglove/studio/lodash-imports)
+      # unused vars must have `_` prefix, but `_` alone is not ignored (see @lichtblick/suite/lodash-imports)
       "@typescript-eslint/no-unused-vars":
         - error
         - vars: all

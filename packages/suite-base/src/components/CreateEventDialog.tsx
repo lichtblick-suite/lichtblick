@@ -1,16 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Log from "@lichtblick/log";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@lichtblick/suite-base/components/MessagePipeline";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
-import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsContext";
-import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
+import { toDate, toNanoSec } from "@foxglove/rostime";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -37,7 +32,15 @@ import { keyframes } from "tss-react";
 import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
 
-import { toDate, toNanoSec } from "@foxglove/rostime";
+import Log from "@lichtblick/log";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/suite-base/components/MessagePipeline";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
+import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsContext";
+import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 
 const log = Log.getLogger(__filename);
 

@@ -1,6 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { produce } from "immer";
+import * as _ from "lodash-es";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
 import buildSampleMessage from "@lichtblick/suite-base/panels/Publish/buildSampleMessage";
@@ -8,9 +15,6 @@ import { Topic } from "@lichtblick/suite-base/players/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { produce } from "immer";
-import * as _ from "lodash-es";
-import { useCallback, useEffect, useMemo } from "react";
 
 import { PublishConfig } from "./types";
 

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -17,13 +20,6 @@ import {
   Diamond20Filled,
   RectangleLandscape20Regular,
 } from "@fluentui/react-icons";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import ExpandingToolbar, { ToolGroup } from "@lichtblick/suite-base/components/ExpandingToolbar";
-import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import Panel from "@lichtblick/suite-base/components/Panel";
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@lichtblick/suite-base/components/PanelToolbar";
 import {
   FormControlLabel,
   IconButton,
@@ -36,6 +32,14 @@ import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
 import { makeStyles } from "tss-react/mui";
+
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import ExpandingToolbar, { ToolGroup } from "@lichtblick/suite-base/components/ExpandingToolbar";
+import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@lichtblick/suite-base/components/PanelToolbar";
 
 import Graph, { GraphMutation } from "./Graph";
 

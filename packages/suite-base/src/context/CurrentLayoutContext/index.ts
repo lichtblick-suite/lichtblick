@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { createContext, useCallback, useLayoutEffect, useReducer, useRef, useState } from "react";
+import { getLeaves } from "react-mosaic-component";
 
 import {
   selectWithUnstableIdentityWarning,
@@ -12,8 +18,6 @@ import { RenderState, VariableValue } from "@lichtblick/suite";
 import useShouldNotChangeOften from "@lichtblick/suite-base/hooks/useShouldNotChangeOften";
 import toggleSelectedPanel from "@lichtblick/suite-base/providers/CurrentLayoutProvider/toggleSelectedPanel";
 import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
-import { createContext, useCallback, useLayoutEffect, useReducer, useRef, useState } from "react";
-import { getLeaves } from "react-mosaic-component";
 
 import {
   AddPanelPayload,

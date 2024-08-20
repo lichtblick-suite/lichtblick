@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -9,6 +12,14 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { Link, Typography } from "@mui/material";
+import { t } from "i18next";
+import { useSnackbar } from "notistack";
+import { extname } from "path";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
@@ -78,13 +89,6 @@ import WorkspaceContextProvider from "@lichtblick/suite-base/providers/Workspace
 import ICONS from "@lichtblick/suite-base/theme/icons";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
-import { Link, Typography } from "@mui/material";
-import { t } from "i18next";
-import { useSnackbar } from "notistack";
-import { extname } from "path";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 

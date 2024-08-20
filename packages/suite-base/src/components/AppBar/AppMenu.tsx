@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
+import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
@@ -9,10 +17,6 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
-import { Menu, PaperProps, PopoverPosition, PopoverReference } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import { NestedMenuItem } from "./NestedMenuItem";
 import { AppBarMenuItem } from "./types";

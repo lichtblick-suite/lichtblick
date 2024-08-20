@@ -1,6 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Bag, Filelike } from "@foxglove/rosbag";
+import { BlobReader } from "@foxglove/rosbag/web";
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { MessageReader } from "@foxglove/rosmsg-serialization";
+import { compare } from "@foxglove/rostime";
+import Bzip2 from "@foxglove/wasm-bz2";
+import decompressLZ4 from "@foxglove/wasm-lz4";
 
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
 import {
@@ -13,14 +24,6 @@ import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import BrowserHttpReader from "@lichtblick/suite-base/util/BrowserHttpReader";
 import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
 import { getBagChunksOverlapCount } from "@lichtblick/suite-base/util/bags";
-
-import { Bag, Filelike } from "@foxglove/rosbag";
-import { BlobReader } from "@foxglove/rosbag/web";
-import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { MessageReader } from "@foxglove/rosmsg-serialization";
-import { compare } from "@foxglove/rostime";
-import Bzip2 from "@foxglove/wasm-bz2";
-import decompressLZ4 from "@foxglove/wasm-lz4";
 
 import {
   GetBackfillMessagesArgs,

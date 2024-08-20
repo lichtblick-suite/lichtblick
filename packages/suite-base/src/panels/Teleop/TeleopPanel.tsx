@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { ros1 } from "@foxglove/rosmsg-msgs-common";
+import * as _ from "lodash-es";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { DeepPartial } from "ts-essentials";
 
 import {
   PanelExtensionContext,
@@ -12,11 +20,6 @@ import {
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
-import * as _ from "lodash-es";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
-import { DeepPartial } from "ts-essentials";
-
-import { ros1 } from "@foxglove/rosmsg-msgs-common";
 
 import DirectionalPad, { DirectionalPadAction } from "./DirectionalPad";
 

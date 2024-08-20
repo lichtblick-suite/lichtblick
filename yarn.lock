@@ -2368,35 +2368,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/eslint-plugin-studio@workspace:*, @foxglove/eslint-plugin-studio@workspace:packages/eslint-plugin-studio":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/eslint-plugin-studio@workspace:packages/eslint-plugin-studio"
-  dependencies:
-    "@foxglove/tsconfig": 2.0.0
-    "@typescript-eslint/rule-tester": 6.10.0
-    "@typescript-eslint/utils": 6.10.0
-  languageName: unknown
-  linkType: soft
-
-"@foxglove/eslint-plugin@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/eslint-plugin@npm:1.0.0"
-  dependencies:
-    "@typescript-eslint/utils": ^6
-    tsutils: ^3
-    typescript: ^4 || ^5
-  peerDependencies:
-    eslint: ^7 || ^8
-    eslint-config-prettier: ^8
-    eslint-plugin-es: ^4
-    eslint-plugin-filenames: ^1
-    eslint-plugin-import: ^2
-    eslint-plugin-prettier: ^5
-    prettier: ^3
-  checksum: 455819c6d2a0de3901fee957688433d631dd7ecd5ad691c838b853cd63a1e2e94362b0b065e83410d979deccabea5959b46d5de994006d80d287c3afc3e4aed0
-  languageName: node
-  linkType: hard
-
 "@foxglove/just-fetch@npm:^1.2.4":
   version: 1.3.1
   resolution: "@foxglove/just-fetch@npm:1.3.1"
@@ -3245,6 +3216,35 @@ __metadata:
     xacro-parser: 0.3.9
   languageName: unknown
   linkType: soft
+
+"@lichtblick/eslint-plugin-suite@workspace:*, @lichtblick/eslint-plugin-suite@workspace:packages/eslint-plugin-suite":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/eslint-plugin-suite@workspace:packages/eslint-plugin-suite"
+  dependencies:
+    "@foxglove/tsconfig": 2.0.0
+    "@typescript-eslint/rule-tester": 6.10.0
+    "@typescript-eslint/utils": 6.10.0
+  languageName: unknown
+  linkType: soft
+
+"@lichtblick/eslint-plugin@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@lichtblick/eslint-plugin@npm:1.0.1"
+  dependencies:
+    "@typescript-eslint/utils": ^6
+    tsutils: ^3
+    typescript: ^4 || ^5
+  peerDependencies:
+    eslint: ^7 || ^8
+    eslint-config-prettier: ^8 || ^9
+    eslint-plugin-es: ^4
+    eslint-plugin-filenames: ^1
+    eslint-plugin-import: ^2
+    eslint-plugin-prettier: ^5
+    prettier: ^3
+  checksum: 340226c47435888692a4e0f0f8d6a525dffc29ad0b9619d8c38836f8ab19603c032ba5f2205b1d3d21b6718b069a1ab93fa6100a438bde3c7757fee0d0cdbf1e
+  languageName: node
+  linkType: hard
 
 "@lichtblick/hooks@workspace:*, @lichtblick/hooks@workspace:packages/hooks":
   version: 0.0.0-use.local
@@ -16212,9 +16212,9 @@ __metadata:
     "@babel/plugin-proposal-explicit-resource-management": 7.24.7
     "@babel/preset-env": 7.25.3
     "@babel/preset-typescript": 7.24.7
-    "@foxglove/eslint-plugin": 1.0.0
-    "@foxglove/eslint-plugin-studio": "workspace:*"
     "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/eslint-plugin": 1.0.1
+    "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite": "workspace:*"

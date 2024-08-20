@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Time, toNanoSec } from "@foxglove/rostime";
+import { LaserScan as FoxgloveLaserScan } from "@foxglove/schemas";
+import * as _ from "lodash-es";
+import * as THREE from "three";
 
 import { SettingsTreeAction, MessageEvent } from "@lichtblick/suite";
 import {
@@ -12,11 +20,6 @@ import {
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
 import type { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
 import { emptyPose } from "@lichtblick/suite-base/util/Pose";
-import * as _ from "lodash-es";
-import * as THREE from "three";
-
-import { Time, toNanoSec } from "@foxglove/rostime";
-import { LaserScan as FoxgloveLaserScan } from "@foxglove/schemas";
 
 import { colorHasTransparency, getColorConverter } from "./colorMode";
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";

@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { t } from "i18next";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";
@@ -11,10 +19,6 @@ import {
   UserFrameId,
   makePose,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/transforms";
-import { t } from "i18next";
-import * as _ from "lodash-es";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import type { FollowMode, IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";

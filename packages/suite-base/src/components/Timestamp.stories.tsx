@@ -1,16 +1,19 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Time } from "@foxglove/rostime";
+import { Stack } from "@mui/material";
+import { StoryObj } from "@storybook/react";
+import { PropsWithChildren, useState } from "react";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import Timestamp from "@lichtblick/suite-base/components/Timestamp";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
-import { Stack } from "@mui/material";
-import { StoryObj } from "@storybook/react";
-import { PropsWithChildren, useState } from "react";
-
-import { Time } from "@foxglove/rostime";
 
 const ABSOLUTE_TIME = { sec: 1643800942, nsec: 222222222 };
 const RELATIVE_TIME = { sec: 630720000, nsec: 597648236 };

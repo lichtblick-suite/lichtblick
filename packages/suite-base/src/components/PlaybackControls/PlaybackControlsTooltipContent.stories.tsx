@@ -1,14 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { useTheme } from "@mui/material";
+import { StoryObj, StoryFn } from "@storybook/react";
+import { useEffect } from "react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { PlaybackControlsTooltipContent } from "@lichtblick/suite-base/components/PlaybackControls/PlaybackControlsTooltipContent";
 import { useTimelineInteractionState } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
-import { useTheme } from "@mui/material";
-import { StoryObj, StoryFn } from "@storybook/react";
-import { useEffect } from "react";
 
 function Wrapper(Wrapped: StoryFn): JSX.Element {
   const theme = useTheme();

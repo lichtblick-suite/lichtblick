@@ -1,9 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Logger from "@lichtblick/log";
-import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { MeshoptDecoder } from "meshoptimizer";
 import * as THREE from "three";
 import dracoDecoderWasmUrl from "three/examples/jsm/libs/draco/draco_decoder.wasm";
@@ -13,6 +14,9 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+
+import Logger from "@lichtblick/log";
+import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 
 const log = Logger.getLogger(__filename);
 
@@ -182,7 +186,7 @@ export class ModelCache {
   async #loadCollada(
     url: string,
     text: string,
-    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    // eslint-disable-next-line @lichtblick/no-boolean-parameters
     ignoreUpAxis: boolean,
     reportError: ErrorCallback,
   ): Promise<LoadedModel> {

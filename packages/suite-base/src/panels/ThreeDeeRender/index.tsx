@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { StrictMode, useMemo } from "react";
+import { DeepPartial } from "ts-essentials";
 
 import { useCrash } from "@lichtblick/hooks";
 import { CaptureErrorBoundary } from "@lichtblick/suite-base/components/CaptureErrorBoundary";
@@ -18,8 +24,6 @@ import { INJECTED_FEATURE_KEYS, useAppContext } from "@lichtblick/suite-base/con
 import { TestOptions } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { createSyncRoot } from "@lichtblick/suite-base/panels/createSyncRoot";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { StrictMode, useMemo } from "react";
-import { DeepPartial } from "ts-essentials";
 
 import { SceneExtensionConfig } from "./SceneExtensionConfig";
 import { ThreeDeeRender } from "./ThreeDeeRender";

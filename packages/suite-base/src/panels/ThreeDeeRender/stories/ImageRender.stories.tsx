@@ -1,16 +1,19 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { CompressedImage, RawImage } from "@foxglove/schemas";
+import { StoryObj } from "@storybook/react";
+import { userEvent, screen } from "@storybook/testing-library";
+import { useEffect, useState } from "react";
 
 import { MessageEvent } from "@lichtblick/suite";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import { useReadySignal } from "@lichtblick/suite-base/stories/ReadySignalContext";
-import { StoryObj } from "@storybook/react";
-import { userEvent, screen } from "@storybook/testing-library";
-import { useEffect, useState } from "react";
-
-import { CompressedImage, RawImage } from "@foxglove/schemas";
 
 import { PNG_TEST_IMAGE, rad2deg, SENSOR_FRAME_ID } from "./common";
 import ThreeDeePanel from "../index";

@@ -1,17 +1,20 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
+import { fontMonospace } from "@foxglove/theme";
+import { Chart, ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
+import { AnnotationOptions } from "chartjs-plugin-annotation";
+import EventEmitter from "eventemitter3";
 
 import { unwrap } from "@lichtblick/den/monads";
 import { Immutable } from "@lichtblick/suite";
 import { Bounds, Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
-import { Chart, ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
-import { AnnotationOptions } from "chartjs-plugin-annotation";
-import EventEmitter from "eventemitter3";
-
-import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
-import { fontMonospace } from "@foxglove/theme";
 
 import { OriginalValue } from "./datum";
 

@@ -1,21 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
-import CopyButton from "@lichtblick/suite-base/components/CopyButton";
-import { ExperimentalFeatureSettings } from "@lichtblick/suite-base/components/ExperimentalFeatureSettings";
-import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
-import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
-import {
-  useWorkspaceStore,
-  WorkspaceContextStore,
-} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
-import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
@@ -38,6 +27,21 @@ import {
 import { MouseEvent, SyntheticEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
+
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
+import CopyButton from "@lichtblick/suite-base/components/CopyButton";
+import { ExperimentalFeatureSettings } from "@lichtblick/suite-base/components/ExperimentalFeatureSettings";
+import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
+import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
+import {
+  useWorkspaceStore,
+  WorkspaceContextStore,
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
+import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import {
   AutoUpdate,

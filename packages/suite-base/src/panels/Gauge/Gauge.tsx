@@ -1,15 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
-import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { turboColorString } from "@lichtblick/suite-base/util/colorUtils";
+import { parseMessagePath, MessagePath } from "@foxglove/message-path";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { parseMessagePath, MessagePath } from "@foxglove/message-path";
+import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
+import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { turboColorString } from "@lichtblick/suite-base/util/colorUtils";
 
 import { settingsActionReducer, useSettingsTree } from "./settings";
 import type { Config } from "./types";

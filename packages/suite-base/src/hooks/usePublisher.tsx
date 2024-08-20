@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,12 +14,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useCallback, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+
 import { Immutable } from "@lichtblick/suite";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
-import { useCallback, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 type Props = Immutable<{
   topic: string;

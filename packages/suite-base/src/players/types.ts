@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,6 +14,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MessageDefinition } from "@foxglove/message-definition";
+import { Time } from "@foxglove/rostime";
+
 import type { MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
 import { Immutable } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
@@ -18,9 +24,6 @@ import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { Range } from "@lichtblick/suite-base/util/ranges";
 import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
-
-import { MessageDefinition } from "@foxglove/message-definition";
-import { Time } from "@foxglove/rostime";
 
 // re-exported until other import sites are updated from players/types to @lichtblick/suite
 export type { MessageEvent };

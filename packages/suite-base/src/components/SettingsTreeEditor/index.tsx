@@ -1,6 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import CancelIcon from "@mui/icons-material/Cancel";
+import SearchIcon from "@mui/icons-material/Search";
+import { IconButton, TextField } from "@mui/material";
+import memoizeWeak from "memoize-weak";
+import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
@@ -10,13 +21,6 @@ import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutC
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { usePanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
 import { PANEL_TITLE_CONFIG_KEY, getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
-import CancelIcon from "@mui/icons-material/Cancel";
-import SearchIcon from "@mui/icons-material/Search";
-import { IconButton, TextField } from "@mui/material";
-import memoizeWeak from "memoize-weak";
-import { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import { NodeEditor } from "./NodeEditor";
 import { filterTreeNodes, prepareSettingsNodes } from "./utils";

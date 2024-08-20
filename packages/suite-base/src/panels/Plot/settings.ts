@@ -1,17 +1,21 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 import { TFunction } from "i18next";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
+import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 
 import { PlotPath, PlotConfig, plotPathDisplayName } from "./config";
 import { plotableRosTypes } from "./plotableRosTypes";
@@ -23,7 +27,7 @@ export const DEFAULT_PATH: PlotPath = Object.freeze({
 });
 
 const makeSeriesNode = memoizeWeak(
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  // eslint-disable-next-line @lichtblick/no-boolean-parameters
   (path: PlotPath, index: number, canDelete: boolean, t: TFunction<"plot">): SettingsTreeNode => {
     return {
       actions: canDelete

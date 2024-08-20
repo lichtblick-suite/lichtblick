@@ -1,9 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PANEL_ROOT_CLASS_NAME } from "@lichtblick/suite-base/components/PanelRoot";
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar";
 import {
   Backdrop,
   Button,
@@ -18,6 +19,9 @@ import { forwardRef } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
+
+import { PANEL_ROOT_CLASS_NAME } from "@lichtblick/suite-base/components/PanelRoot";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar";
 
 const useStyles = makeStyles<void, "buttonGroup">()((theme, _params, classes) => {
   const transparentBackground = tc(theme.palette.background.default).setAlpha(0).toRgbString();

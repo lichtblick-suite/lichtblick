@@ -1,14 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useGuaranteedContext } from "@lichtblick/hooks";
-import { Immutable } from "@lichtblick/suite";
+import { Time } from "@foxglove/rostime";
 import { createContext } from "react";
 import { AsyncState } from "react-use/lib/useAsyncFn";
 import { StoreApi, useStore } from "zustand";
 
-import { Time } from "@foxglove/rostime";
+import { useGuaranteedContext } from "@lichtblick/hooks";
+import { Immutable } from "@lichtblick/suite";
 
 /**
  * DataSourceEvent representings a single event within a data source.
@@ -73,7 +76,7 @@ export type EventsStore = Immutable<{
   setEvents: (events: AsyncState<TimelinePositionedEvent[]>) => void;
 
   /** Set the flag indicating support for events. */
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  // eslint-disable-next-line @lichtblick/no-boolean-parameters
   setEventsSupported: (supported: boolean) => void;
 
   /** Update the current filter expression. */

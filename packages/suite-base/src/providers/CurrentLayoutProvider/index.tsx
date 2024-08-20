@@ -1,6 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import * as _ from "lodash-es";
+import { useSnackbar } from "notistack";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getNodeAtPath } from "react-mosaic-component";
+import { useAsync, useAsyncFn, useMountedState } from "react-use";
+import shallowequal from "shallowequal";
+import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@lichtblick/hooks";
 import Logger from "@lichtblick/log";
@@ -34,13 +45,6 @@ import { LayoutManagerEventTypes } from "@lichtblick/suite-base/services/ILayout
 import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
 import { windowAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
-import * as _ from "lodash-es";
-import { useSnackbar } from "notistack";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getNodeAtPath } from "react-mosaic-component";
-import { useAsync, useAsyncFn, useMountedState } from "react-use";
-import shallowequal from "shallowequal";
-import { v4 as uuidv4 } from "uuid";
 
 import { IncompatibleLayoutVersionAlert } from "./IncompatibleLayoutVersionAlert";
 

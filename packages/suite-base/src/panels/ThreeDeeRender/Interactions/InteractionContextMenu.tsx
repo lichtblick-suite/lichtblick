@@ -1,10 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { BaseMarker, InstancedLineListMarker } from "@lichtblick/suite-base/types/Messages";
 import { Menu, MenuItem, MenuProps } from "@mui/material";
 import { useCallback } from "react";
+
+import { BaseMarker, InstancedLineListMarker } from "@lichtblick/suite-base/types/Messages";
 
 import { Interactive, SelectedObject } from "./types";
 import { MouseEventObject } from "../camera";

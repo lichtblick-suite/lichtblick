@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
+import { useMemo, useRef } from "react";
 
 import { Immutable } from "@lichtblick/suite";
 import {
@@ -8,9 +14,6 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { PlayerCapabilities, TopicStats } from "@lichtblick/suite-base/players/types";
-import { useMemo, useRef } from "react";
-
-import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
 
 const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();
 

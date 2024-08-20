@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { StoryObj } from "@storybook/react";
+import { userEvent } from "@storybook/testing-library";
+import { useCallback } from "react";
+import { v4 as uuid } from "uuid";
 
 import Panel from "@lichtblick/suite-base/components/Panel";
 import {
@@ -9,10 +17,6 @@ import {
 } from "@lichtblick/suite-base/components/PanelContextMenu";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-import { StoryObj } from "@storybook/react";
-import { userEvent } from "@storybook/testing-library";
-import { useCallback } from "react";
-import { v4 as uuid } from "uuid";
 
 export default {
   title: "components/PanelContextMenu",

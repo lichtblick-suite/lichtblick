@@ -1,4 +1,7 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -12,12 +15,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { render, renderHook, act } from "@testing-library/react";
+import { useEffect } from "react";
+
 import Panel from "@lichtblick/suite-base/components/Panel";
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { PanelsActions } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-import { render, renderHook, act } from "@testing-library/react";
-import { useEffect } from "react";
 
 type DummyConfig = { someString: string };
 type DummyProps = { config: DummyConfig; saveConfig: (arg0: Partial<DummyConfig>) => void };

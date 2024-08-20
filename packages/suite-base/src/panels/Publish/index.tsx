@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,6 +13,13 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { MessageDefinition } from "@foxglove/message-definition";
+import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
+import { Button, inputBaseClasses, TextField, Tooltip, Typography } from "@mui/material";
+import { useEffect, useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
+import { useDebounce } from "use-debounce";
 
 import { Immutable } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
@@ -25,13 +35,6 @@ import usePublisher from "@lichtblick/suite-base/hooks/usePublisher";
 import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
 import { useDefaultPanelTitle } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { Button, inputBaseClasses, TextField, Tooltip, Typography } from "@mui/material";
-import { useEffect, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
-import { useDebounce } from "use-debounce";
-
-import { MessageDefinition } from "@foxglove/message-definition";
-import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
 
 import { defaultConfig, usePublishPanelSettings } from "./settings";
 import { PublishConfig } from "./types";

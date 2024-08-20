@@ -1,10 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable } from "@lichtblick/suite";
-
 import { MessagePathFilter } from "@foxglove/message-path";
+
+import { Immutable } from "@lichtblick/suite";
 
 export function filterMatches(filter: Immutable<MessagePathFilter>, value: unknown): boolean {
   if (typeof filter.value === "object") {
@@ -27,6 +30,6 @@ export function filterMatches(filter: Immutable<MessagePathFilter>, value: unkno
 
   // Test equality using `==` so we can be forgiving for comparing booleans with integers,
   // comparing numbers with strings, bigints with numbers, and so on.
-  // eslint-disable-next-line @foxglove/strict-equality
+  // eslint-disable-next-line @lichtblick/strict-equality
   return currentValue != undefined && currentValue == filter.value;
 }

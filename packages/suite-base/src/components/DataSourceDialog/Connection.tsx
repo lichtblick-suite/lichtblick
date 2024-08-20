@@ -1,6 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Alert, Link, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { useState, useMemo, useCallback, useLayoutEffect, FormEvent } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { BuiltinIcon } from "@lichtblick/suite-base/components/BuiltinIcon";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -12,9 +19,6 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import { Alert, Link, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { useState, useMemo, useCallback, useLayoutEffect, FormEvent } from "react";
-import { makeStyles } from "tss-react/mui";
 
 import { FormField } from "./FormField";
 import View from "./View";

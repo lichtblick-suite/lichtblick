@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,6 +13,15 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
+import { fontMonospace } from "@foxglove/theme";
+import { ChartOptions, ScaleOptions } from "chart.js";
+import * as _ from "lodash-es";
+import * as R from "ramda";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useResizeDetector } from "react-resize-detector";
+import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { Immutable } from "@lichtblick/suite";
@@ -34,18 +46,9 @@ import { ChartDatasets } from "@lichtblick/suite-base/components/TimeBasedChart/
 import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathLegend";
 import { subscribePayloadFromMessagePath } from "@lichtblick/suite-base/players/subscribePayloadFromMessagePath";
 import { SubscribePayload } from "@lichtblick/suite-base/players/types";
+import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { ChartOptions, ScaleOptions } from "chart.js";
-import * as _ from "lodash-es";
-import * as R from "ramda";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useResizeDetector } from "react-resize-detector";
-import { makeStyles } from "tss-react/mui";
-
-import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { fontMonospace } from "@foxglove/theme";
-import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 
 import { messagesToDataset } from "./messagesToDataset";
 import { PathState, useStateTransitionsPanelSettings } from "./settings";

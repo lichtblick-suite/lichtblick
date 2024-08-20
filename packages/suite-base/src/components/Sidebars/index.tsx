@@ -1,15 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import { HelpMenu } from "@lichtblick/suite-base/components/AppBar/HelpMenu";
-import { BuiltinIcon } from "@lichtblick/suite-base/components/BuiltinIcon";
-import ErrorBoundary from "@lichtblick/suite-base/components/ErrorBoundary";
-import { MemoryUseIndicator } from "@lichtblick/suite-base/components/MemoryUseIndicator";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Badge, Paper, Tab, Tabs } from "@mui/material";
 import {
@@ -23,6 +18,15 @@ import {
 } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
+
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { HelpMenu } from "@lichtblick/suite-base/components/AppBar/HelpMenu";
+import { BuiltinIcon } from "@lichtblick/suite-base/components/BuiltinIcon";
+import ErrorBoundary from "@lichtblick/suite-base/components/ErrorBoundary";
+import { MemoryUseIndicator } from "@lichtblick/suite-base/components/MemoryUseIndicator";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
+import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import "react-mosaic-component/react-mosaic-component.css";
 import { NewSidebar, NewSidebarItem } from "./NewSidebar";

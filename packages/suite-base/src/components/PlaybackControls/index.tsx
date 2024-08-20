@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -24,6 +27,11 @@ import {
   Previous20Filled,
   Previous20Regular,
 } from "@fluentui/react-icons";
+import { Time, compare } from "@foxglove/rostime";
+import { Tooltip } from "@mui/material";
+import { useCallback, useMemo, useState } from "react";
+import { makeStyles } from "tss-react/mui";
+
 import { CreateEventDialog } from "@lichtblick/suite-base/components/CreateEventDialog";
 import { DataSourceInfoView } from "@lichtblick/suite-base/components/DataSourceInfoView";
 import EventIcon from "@lichtblick/suite-base/components/EventIcon";
@@ -44,11 +52,6 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { Player, PlayerPresence } from "@lichtblick/suite-base/players/types";
-import { Tooltip } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
-import { makeStyles } from "tss-react/mui";
-
-import { Time, compare } from "@foxglove/rostime";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";

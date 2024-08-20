@@ -1,11 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Cloud24Regular } from "@fluentui/react-icons";
-import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { useCurrentUserType } from "@lichtblick/suite-base/context/CurrentUserContext";
-import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import {
   ListItemText,
   Menu,
@@ -15,6 +15,10 @@ import {
   PopoverReference,
 } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
+
+import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
+import { useCurrentUserType } from "@lichtblick/suite-base/context/CurrentUserContext";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
 const useStyles = makeStyles()((theme) => ({
   paper: {

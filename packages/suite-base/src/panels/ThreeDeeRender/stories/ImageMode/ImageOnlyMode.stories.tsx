@@ -1,16 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-import { MessageEvent } from "@lichtblick/suite";
-import { ImageModeConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
-import { makeRawImageAndCalibration } from "@lichtblick/suite-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
-import { xyzrpyToPose } from "@lichtblick/suite-base/panels/ThreeDeeRender/transforms";
-import { Topic } from "@lichtblick/suite-base/players/types";
-import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
-import { StoryObj } from "@storybook/react";
-import { screen, userEvent, within } from "@storybook/testing-library";
-import tinycolor from "tinycolor2";
 
 import {
   FrameTransforms,
@@ -19,6 +12,16 @@ import {
   PointsAnnotationType,
   SceneUpdate,
 } from "@foxglove/schemas";
+import { StoryObj } from "@storybook/react";
+import { screen, userEvent, within } from "@storybook/testing-library";
+import tinycolor from "tinycolor2";
+
+import { MessageEvent } from "@lichtblick/suite";
+import { ImageModeConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
+import { makeRawImageAndCalibration } from "@lichtblick/suite-base/panels/ThreeDeeRender/stories/ImageMode/imageCommon";
+import { xyzrpyToPose } from "@lichtblick/suite-base/panels/ThreeDeeRender/transforms";
+import { Topic } from "@lichtblick/suite-base/players/types";
+import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 
 import { ImagePanel } from "../../index";
 import { QUAT_IDENTITY, makeColor } from "../common";

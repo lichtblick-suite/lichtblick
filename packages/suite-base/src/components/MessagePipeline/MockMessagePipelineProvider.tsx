@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,6 +13,14 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { Time, isLessThan } from "@foxglove/rostime";
+import { Immutable } from "immer";
+import * as _ from "lodash-es";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import shallowequal from "shallowequal";
+import { Writable } from "ts-essentials";
+import { createStore } from "zustand";
 
 import { Condvar } from "@lichtblick/den/async";
 import { Metadata, ParameterValue } from "@lichtblick/suite";
@@ -35,14 +46,6 @@ import {
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
-import { Immutable } from "immer";
-import * as _ from "lodash-es";
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import shallowequal from "shallowequal";
-import { Writable } from "ts-essentials";
-import { createStore } from "zustand";
-
-import { Time, isLessThan } from "@foxglove/rostime";
 
 import { ContextInternal } from "./index";
 import { MessagePipelineInternalState, MessagePipelineStateAction, reducer } from "./store";

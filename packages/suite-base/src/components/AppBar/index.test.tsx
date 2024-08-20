@@ -1,7 +1,12 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { render } from "@testing-library/react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import MultiProvider from "@lichtblick/suite-base/components/MultiProvider";
@@ -12,7 +17,6 @@ import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/T
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
-import { render } from "@testing-library/react";
 
 import { AppBar } from ".";
 

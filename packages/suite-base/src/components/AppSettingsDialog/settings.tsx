@@ -1,19 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { filterMap } from "@lichtblick/den/collection";
-import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
-import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
-import { Language } from "@lichtblick/suite-base/i18n";
-import { reportError } from "@lichtblick/suite-base/reportError";
-import { LaunchPreferenceValue } from "@lichtblick/suite-base/types/LaunchPreferenceValue";
-import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
-import { formatTime } from "@lichtblick/suite-base/util/formatTime";
-import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 import Brightness5Icon from "@mui/icons-material/Brightness5";
 import ComputerIcon from "@mui/icons-material/Computer";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
@@ -38,6 +29,19 @@ import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
+
+import { filterMap } from "@lichtblick/den/collection";
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
+import { Language } from "@lichtblick/suite-base/i18n";
+import { reportError } from "@lichtblick/suite-base/reportError";
+import { LaunchPreferenceValue } from "@lichtblick/suite-base/types/LaunchPreferenceValue";
+import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
+import { formatTime } from "@lichtblick/suite-base/util/formatTime";
+import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 const LANGUAGE_OPTIONS: { key: Language; value: string }[] = [{ key: "en", value: "English" }];

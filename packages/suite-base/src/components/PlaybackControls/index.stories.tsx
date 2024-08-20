@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,6 +13,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { action } from "@storybook/addon-actions";
+import { StoryObj, StoryFn } from "@storybook/react";
+import { useEffect, useLayoutEffect } from "react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
@@ -27,9 +34,6 @@ import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentL
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import { makeMockEvents } from "@lichtblick/suite-base/test/mocks/makeMockEvents";
-import { action } from "@storybook/addon-actions";
-import { StoryObj, StoryFn } from "@storybook/react";
-import { useEffect, useLayoutEffect } from "react";
 
 import PlaybackControls from "./index";
 

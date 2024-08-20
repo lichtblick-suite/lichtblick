@@ -1,4 +1,7 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -12,16 +15,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { parseMessagePath } from "@foxglove/message-path";
+import { renderHook } from "@testing-library/react";
+import * as _ from "lodash-es";
+
 import { messagePathStructures } from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
-import { renderHook } from "@testing-library/react";
-import * as _ from "lodash-es";
-
-import { parseMessagePath } from "@foxglove/message-path";
 
 import {
   fillInGlobalVariablesInPath,

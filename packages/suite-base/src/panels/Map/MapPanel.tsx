@@ -1,22 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { filterMap } from "@lichtblick/den/collection";
-import {
-  MessageEvent,
-  PanelExtensionContext,
-  SettingsTreeAction,
-  Subscription,
-  Topic,
-} from "@lichtblick/suite";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import FilteredPointLayer, {
-  POINT_MARKER_RADIUS,
-} from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
-import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
-import { darkColor, lightColor, lineColors } from "@lichtblick/suite-base/util/plotColors";
+import { toSec } from "@foxglove/rostime";
 import { Feature } from "geojson";
 import { produce } from "immer";
 import {
@@ -35,7 +24,21 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
 
-import { toSec } from "@foxglove/rostime";
+import { filterMap } from "@lichtblick/den/collection";
+import {
+  MessageEvent,
+  PanelExtensionContext,
+  SettingsTreeAction,
+  Subscription,
+  Topic,
+} from "@lichtblick/suite";
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import FilteredPointLayer, {
+  POINT_MARKER_RADIUS,
+} from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
+import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { darkColor, lightColor, lineColors } from "@lichtblick/suite-base/util/plotColors";
 
 import { buildSettingsTree, Config, validateCustomUrl } from "./config";
 import {

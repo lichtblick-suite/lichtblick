@@ -1,15 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { add as addTime, compare, clampTime } from "@foxglove/rostime";
+import EventEmitter from "eventemitter3";
 
 import { Condvar } from "@lichtblick/den/async";
 import { VecQueue } from "@lichtblick/den/collection";
 import Log from "@lichtblick/log";
 import { Time, MessageEvent } from "@lichtblick/suite";
 import { Range } from "@lichtblick/suite-base/util/ranges";
-import EventEmitter from "eventemitter3";
-
-import { add as addTime, compare, clampTime } from "@foxglove/rostime";
 
 import { CachingIterableSource } from "./CachingIterableSource";
 import {

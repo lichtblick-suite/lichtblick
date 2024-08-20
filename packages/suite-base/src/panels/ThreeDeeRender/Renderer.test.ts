@@ -1,7 +1,13 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { fromNanoSec, toNanoSec } from "@foxglove/rostime";
+import { setupJestCanvasMock } from "jest-canvas-mock";
 
 import { MessageEvent } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
@@ -11,9 +17,6 @@ import { DEFAULT_CAMERA_STATE } from "@lichtblick/suite-base/panels/ThreeDeeRend
 import { CameraStateSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
-import { setupJestCanvasMock } from "jest-canvas-mock";
-
-import { fromNanoSec, toNanoSec } from "@foxglove/rostime";
 
 import { RendererConfig } from "./IRenderer";
 

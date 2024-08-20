@@ -1,18 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Ruler20Filled, Ruler20Regular } from "@fluentui/react-icons";
-import { LayoutActions } from "@lichtblick/suite";
-import {
-  PanelContextMenu,
-  PanelContextMenuItem,
-} from "@lichtblick/suite-base/components/PanelContextMenu";
-import PublishGoalIcon from "@lichtblick/suite-base/components/PublishGoalIcon";
-import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon";
-import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
-import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
-import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 import {
   Button,
   IconButton,
@@ -29,6 +22,17 @@ import { useTranslation } from "react-i18next";
 import { useLongPress } from "react-use";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
+
+import { LayoutActions } from "@lichtblick/suite";
+import {
+  PanelContextMenu,
+  PanelContextMenuItem,
+} from "@lichtblick/suite-base/components/PanelContextMenu";
+import PublishGoalIcon from "@lichtblick/suite-base/components/PublishGoalIcon";
+import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon";
+import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
+import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
+import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";

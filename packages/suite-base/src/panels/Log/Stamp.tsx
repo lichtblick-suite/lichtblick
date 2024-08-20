@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,10 +14,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import * as _ from "lodash-es";
+
 import { Time } from "@lichtblick/suite";
 import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
 import { formatTime } from "@lichtblick/suite-base/util/formatTime";
-import * as _ from "lodash-es";
 
 // pad the start of `val` with 0's to make the total string length `count` size
 function PadStart(val: unknown, count: number) {

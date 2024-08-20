@@ -1,15 +1,19 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import L from "leaflet";
+import LeafletRetinaIconUrl from "leaflet/dist/images/marker-icon-2x.png";
+import LeafletIconUrl from "leaflet/dist/images/marker-icon.png";
+import LeafletShadowIconUrl from "leaflet/dist/images/marker-shadow.png";
 
 import { useCrash } from "@lichtblick/hooks";
 import { PanelExtensionContext } from "@lichtblick/suite";
 import { CaptureErrorBoundary } from "@lichtblick/suite-base/components/CaptureErrorBoundary";
 import { createSyncRoot } from "@lichtblick/suite-base/panels/createSyncRoot";
-import L from "leaflet";
-import LeafletRetinaIconUrl from "leaflet/dist/images/marker-icon-2x.png";
-import LeafletIconUrl from "leaflet/dist/images/marker-icon.png";
-import LeafletShadowIconUrl from "leaflet/dist/images/marker-shadow.png";
 
 import MapPanel from "./MapPanel";
 

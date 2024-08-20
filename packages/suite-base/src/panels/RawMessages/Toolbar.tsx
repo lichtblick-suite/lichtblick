@@ -1,18 +1,22 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Topic } from "@lichtblick/suite";
-import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import DiffIcon from "@mui/icons-material/Difference";
 import DiffOutlinedIcon from "@mui/icons-material/DifferenceOutlined";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
+
+import { Topic } from "@lichtblick/suite";
+import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { Constants, RawMessagesPanelConfig } from "./types";
 

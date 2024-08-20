@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,20 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { filterMap } from "@lichtblick/den/collection";
-import Logger from "@lichtblick/log";
-import ChartComponent from "@lichtblick/suite-base/components/Chart/index";
-import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
-import KeyListener from "@lichtblick/suite-base/components/KeyListener";
-import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  TimelineInteractionStateStore,
-  useClearHoverValue,
-  useSetHoverValue,
-  useTimelineInteractionState,
-} from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
-import { Bounds } from "@lichtblick/suite-base/types/Bounds";
+import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
+import { fontMonospace } from "@foxglove/theme";
 import { Button, Fade, Tooltip, buttonClasses } from "@mui/material";
 import { ChartOptions, InteractionMode, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
@@ -43,8 +34,20 @@ import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
-import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
-import { fontMonospace } from "@foxglove/theme";
+import { filterMap } from "@lichtblick/den/collection";
+import Logger from "@lichtblick/log";
+import ChartComponent from "@lichtblick/suite-base/components/Chart/index";
+import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
+import KeyListener from "@lichtblick/suite-base/components/KeyListener";
+import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import {
+  TimelineInteractionStateStore,
+  useClearHoverValue,
+  useSetHoverValue,
+  useTimelineInteractionState,
+} from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
+import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent, {

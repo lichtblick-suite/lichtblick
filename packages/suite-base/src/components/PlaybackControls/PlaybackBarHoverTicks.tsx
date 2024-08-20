@@ -1,6 +1,15 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { add, fromSec, toSec } from "@foxglove/rostime";
+import { Tooltip } from "@mui/material";
+import { useMemo } from "react";
+import { useResizeDetector } from "react-resize-detector";
+import { makeStyles } from "tss-react/mui";
 
 import { RpcScales } from "@lichtblick/suite-base/components/Chart/types";
 import {
@@ -11,12 +20,6 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import HoverBar from "@lichtblick/suite-base/components/TimeBasedChart/HoverBar";
 import { useHoverValue } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
-import { Tooltip } from "@mui/material";
-import { useMemo } from "react";
-import { useResizeDetector } from "react-resize-detector";
-import { makeStyles } from "tss-react/mui";
-
-import { add, fromSec, toSec } from "@foxglove/rostime";
 
 const useStyles = makeStyles()((theme) => ({
   tick: {

@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import assert from "assert";
+import { useEffect } from "react";
+import { useAsync } from "react-use";
+import { useDebounce } from "use-debounce";
 
 import Log from "@lichtblick/log";
 import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@lichtblick/suite-base/constants/localStorageKeys";
@@ -14,10 +22,6 @@ import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerCo
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
 import { migratePanelsState } from "@lichtblick/suite-base/services/migrateLayout";
-import assert from "assert";
-import { useEffect } from "react";
-import { useAsync } from "react-use";
-import { useDebounce } from "use-debounce";
 
 function selectLayoutData(state: LayoutState) {
   return state.selectedLayout?.data;

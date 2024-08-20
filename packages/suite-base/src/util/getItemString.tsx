@@ -1,13 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { ReactNode } from "react";
+import tinycolor from "tinycolor2";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
 import { format, formatDuration } from "@lichtblick/suite-base/util/formatTime";
 import { quatToEuler } from "@lichtblick/suite-base/util/quatToEuler";
-import { ReactNode } from "react";
-import tinycolor from "tinycolor2";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
 

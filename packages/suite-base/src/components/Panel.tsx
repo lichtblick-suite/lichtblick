@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -17,6 +20,31 @@ import {
   TabDesktopMultiple20Regular,
   TableSimple20Regular,
 } from "@fluentui/react-icons";
+import * as _ from "lodash-es";
+import React, {
+  ComponentType,
+  MouseEventHandler,
+  Profiler,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  getNodeAtPath,
+  getOtherBranch,
+  MosaicContext,
+  MosaicNode,
+  MosaicWindowActions,
+  MosaicWindowContext,
+  updateTree,
+} from "react-mosaic-component";
+import { Transition } from "react-transition-group";
+import { useMountedState } from "react-use";
+import { makeStyles } from "tss-react/mui";
+
 import { useShallowMemo } from "@lichtblick/hooks";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
 import KeyListener from "@lichtblick/suite-base/components/KeyListener";
@@ -45,30 +73,6 @@ import {
   getPathFromNode,
   updateTabPanelLayout,
 } from "@lichtblick/suite-base/util/layout";
-import * as _ from "lodash-es";
-import React, {
-  ComponentType,
-  MouseEventHandler,
-  Profiler,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  getNodeAtPath,
-  getOtherBranch,
-  MosaicContext,
-  MosaicNode,
-  MosaicWindowActions,
-  MosaicWindowContext,
-  updateTree,
-} from "react-mosaic-component";
-import { Transition } from "react-transition-group";
-import { useMountedState } from "react-use";
-import { makeStyles } from "tss-react/mui";
 
 const useStyles = makeStyles()((theme) => ({
   perfInfo: {
@@ -417,7 +421,7 @@ export default function Panel<
     );
 
     const setHasFullscreenDescendant = useCallback(
-      // eslint-disable-next-line @foxglove/no-boolean-parameters
+      // eslint-disable-next-line @lichtblick/no-boolean-parameters
       (value: boolean) => {
         _setHasFullscreenDescendant(value);
         parentPanelContext?.setHasFullscreenDescendant(value);

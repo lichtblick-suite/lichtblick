@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Draft, produce } from "immer";
+import * as _ from "lodash-es";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
+import { useMountedState } from "react-use";
 
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog";
@@ -18,10 +26,6 @@ import {
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
-import { Draft, produce } from "immer";
-import * as _ from "lodash-es";
-import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
-import { useMountedState } from "react-use";
 
 import {
   LeftSidebarItemKey,

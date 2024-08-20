@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { RosNode } from "@foxglove/ros1";
+import * as _ from "lodash-es";
 
 import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
 import {
@@ -9,9 +15,6 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import Ros1Player from "@lichtblick/suite-base/players/Ros1Player";
 import { Player } from "@lichtblick/suite-base/players/types";
-import * as _ from "lodash-es";
-
-import { RosNode } from "@foxglove/ros1";
 
 class Ros1SocketDataSourceFactory implements IDataSourceFactory {
   public id = "ros1-socket";

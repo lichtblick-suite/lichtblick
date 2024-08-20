@@ -1,17 +1,21 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { keyframes } from "@emotion/react";
-import { filterMap } from "@lichtblick/den/collection";
-import { Immutable } from "@lichtblick/suite";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { Range } from "@lichtblick/suite-base/util/ranges";
 import { simplify } from "intervals-fn";
 import * as _ from "lodash-es";
 import { useMemo } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
+
+import { filterMap } from "@lichtblick/den/collection";
+import { Immutable } from "@lichtblick/suite";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { Range } from "@lichtblick/suite-base/util/ranges";
 
 type ProgressProps = Immutable<{
   loading: boolean;

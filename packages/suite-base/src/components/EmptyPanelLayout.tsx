@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,17 +14,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PanelCatalog, PanelSelection } from "@lichtblick/suite-base/components/PanelCatalog";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
-import { MosaicDropResult } from "@lichtblick/suite-base/types/panels";
-import { getPanelIdForType } from "@lichtblick/suite-base/util/layout";
 import { Typography } from "@mui/material";
 import { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { MosaicDragType } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
+
+import { PanelCatalog, PanelSelection } from "@lichtblick/suite-base/components/PanelCatalog";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import { MosaicDropResult } from "@lichtblick/suite-base/types/panels";
+import { getPanelIdForType } from "@lichtblick/suite-base/util/layout";
 
 type Props = {
   tabId?: string;

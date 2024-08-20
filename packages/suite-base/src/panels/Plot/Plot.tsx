@@ -1,6 +1,19 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { parseMessagePath } from "@foxglove/message-path";
+import { add as addTimes, fromSec, isTime, toSec } from "@foxglove/rostime";
+import { Button, Tooltip, Fade, buttonClasses, useTheme } from "@mui/material";
+import Hammer from "hammerjs";
+import * as _ from "lodash-es";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMountedState } from "react-use";
+import { makeStyles } from "tss-react/mui";
+import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import { filterMap } from "@lichtblick/den/collection";
@@ -38,16 +51,6 @@ import { SubscribePayload } from "@lichtblick/suite-base/players/types";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
-import { Button, Tooltip, Fade, buttonClasses, useTheme } from "@mui/material";
-import Hammer from "hammerjs";
-import * as _ from "lodash-es";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useMountedState } from "react-use";
-import { makeStyles } from "tss-react/mui";
-import { v4 as uuidv4 } from "uuid";
-
-import { parseMessagePath } from "@foxglove/message-path";
-import { add as addTimes, fromSec, isTime, toSec } from "@foxglove/rostime";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";

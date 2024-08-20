@@ -1,6 +1,23 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import {
+  subtract as subtractTimes,
+  add as addTimes,
+  toSec,
+  fromSec,
+  Time,
+} from "@foxglove/rostime";
+import { Fade, PopperProps, Tooltip } from "@mui/material";
+import type { Instance } from "@popperjs/core";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLatest } from "react-use";
+import { makeStyles } from "tss-react/mui";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   MessagePipelineContext,
@@ -12,20 +29,6 @@ import {
   useSetHoverValue,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import { Fade, PopperProps, Tooltip } from "@mui/material";
-import type { Instance } from "@popperjs/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLatest } from "react-use";
-import { makeStyles } from "tss-react/mui";
-import { v4 as uuidv4 } from "uuid";
-
-import {
-  subtract as subtractTimes,
-  add as addTimes,
-  toSec,
-  fromSec,
-  Time,
-} from "@foxglove/rostime";
 
 import { EventsOverlay } from "./EventsOverlay";
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";

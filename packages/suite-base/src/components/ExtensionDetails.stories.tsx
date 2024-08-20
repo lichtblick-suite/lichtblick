@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,6 +14,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { StoryObj } from "@storybook/react";
+import { useState } from "react";
+
 import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import ExtensionMarketplaceContext, {
@@ -20,8 +26,6 @@ import ExtensionMarketplaceContext, {
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
 import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
-import { StoryObj } from "@storybook/react";
-import { useState } from "react";
 
 export default {
   title: "components/ExtensionDetails",

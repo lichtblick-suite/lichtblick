@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -7,14 +10,15 @@ import {
   Script24Regular,
   Toolbox24Regular,
 } from "@fluentui/react-icons";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { Script } from "@lichtblick/suite-base/panels/UserScriptEditor/script";
-import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 import { Divider, Paper, Tab, Tabs, tabClasses, tabsClasses } from "@mui/material";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 import { SyntheticEvent, useCallback, useMemo, useState } from "react";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
+
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { Script } from "@lichtblick/suite-base/panels/UserScriptEditor/script";
+import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 
 import { ScriptsList } from "./ScriptsList";
 import { Templates } from "./Templates";

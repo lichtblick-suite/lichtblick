@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { useEffect, useMemo } from "react";
+import { useNetworkState } from "react-use";
 
 import { useVisibilityState } from "@lichtblick/hooks";
 import Logger from "@lichtblick/log";
@@ -10,8 +16,6 @@ import { useRemoteLayoutStorage } from "@lichtblick/suite-base/context/RemoteLay
 import { LayoutLoader } from "@lichtblick/suite-base/services/ILayoutLoader";
 import LayoutManager from "@lichtblick/suite-base/services/LayoutManager/LayoutManager";
 import delay from "@lichtblick/suite-base/util/delay";
-import { useEffect, useMemo } from "react";
-import { useNetworkState } from "react-use";
 
 const log = Logger.getLogger(__filename);
 

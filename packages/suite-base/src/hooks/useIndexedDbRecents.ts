@@ -1,13 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Logger from "@lichtblick/log";
 import { set as idbSet, get as idbGet, createStore as idbCreateStore } from "idb-keyval";
 import * as _ from "lodash-es";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAsync } from "react-use";
 import { v4 as uuid } from "uuid";
+
+import Logger from "@lichtblick/log";
 
 const log = Logger.getLogger(__filename);
 

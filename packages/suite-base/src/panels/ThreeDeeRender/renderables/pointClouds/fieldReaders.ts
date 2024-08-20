@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -8,7 +11,7 @@ import { PointField, PointFieldType } from "../../ros";
 
 export type FieldReader = (view: DataView, pointOffset: number) => number;
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// eslint-disable-next-line @lichtblick/no-boolean-parameters
 function int8Reader(fieldOffset: number, normalize: boolean): FieldReader {
   return (view: DataView, pointOffset: number) => {
     const value = view.getInt8(pointOffset + fieldOffset);
@@ -19,7 +22,7 @@ function int8Reader(fieldOffset: number, normalize: boolean): FieldReader {
   };
 }
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// eslint-disable-next-line @lichtblick/no-boolean-parameters
 function uint8Reader(fieldOffset: number, normalize: boolean): FieldReader {
   return (view: DataView, pointOffset: number) => {
     const value = view.getUint8(pointOffset + fieldOffset);
@@ -30,7 +33,7 @@ function uint8Reader(fieldOffset: number, normalize: boolean): FieldReader {
   };
 }
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// eslint-disable-next-line @lichtblick/no-boolean-parameters
 function int16Reader(fieldOffset: number, normalize: boolean): FieldReader {
   return (view: DataView, pointOffset: number) => {
     const value = view.getInt16(pointOffset + fieldOffset, true);
@@ -41,7 +44,7 @@ function int16Reader(fieldOffset: number, normalize: boolean): FieldReader {
   };
 }
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// eslint-disable-next-line @lichtblick/no-boolean-parameters
 function uint16Reader(fieldOffset: number, normalize: boolean): FieldReader {
   return (view: DataView, pointOffset: number) => {
     const value = view.getUint16(pointOffset + fieldOffset, true);
@@ -52,7 +55,7 @@ function uint16Reader(fieldOffset: number, normalize: boolean): FieldReader {
   };
 }
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// eslint-disable-next-line @lichtblick/no-boolean-parameters
 function int32Reader(fieldOffset: number, normalize: boolean): FieldReader {
   return (view: DataView, pointOffset: number) => {
     const value = view.getInt32(pointOffset + fieldOffset, true);
@@ -63,7 +66,7 @@ function int32Reader(fieldOffset: number, normalize: boolean): FieldReader {
   };
 }
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
+// eslint-disable-next-line @lichtblick/no-boolean-parameters
 function uint32Reader(fieldOffset: number, normalize: boolean): FieldReader {
   return (view: DataView, pointOffset: number) => {
     const value = view.getUint32(pointOffset + fieldOffset, true);
@@ -95,7 +98,7 @@ export function getReader(
   stride: number,
   /** @see https://www.khronos.org/opengl/wiki/Normalized_Integer */
   // Performance-sensitive: this code is called for every point cloud message
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  // eslint-disable-next-line @lichtblick/no-boolean-parameters
   normalize = false,
   forceType?: PointFieldType | NumericType,
 ): FieldReader | undefined {

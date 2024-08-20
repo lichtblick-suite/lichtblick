@@ -1,11 +1,15 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Stack from "@lichtblick/suite-base/components/Stack";
 import { Popover, TextField, useTheme } from "@mui/material";
 import { useCallback, useState } from "react";
 import tinycolor from "tinycolor2";
+
+import Stack from "@lichtblick/suite-base/components/Stack";
 
 import { ColorPickerControl, useColorPickerControl } from "./ColorPickerControl";
 import { ColorSwatch } from "./ColorSwatch";

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,10 +13,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import Logger from "@lichtblick/log";
+import { Filelike } from "@foxglove/rosbag";
 import * as _ from "lodash-es";
 
-import { Filelike } from "@foxglove/rosbag";
+import Logger from "@lichtblick/log";
 
 import VirtualLRUBuffer from "./VirtualLRUBuffer";
 import { getNewConnection } from "./getNewConnection";
@@ -78,7 +81,7 @@ export default class CachedFilelike implements Filelike {
   #virtualBuffer: VirtualLRUBuffer;
   #log: ILogger;
   #closed: boolean = false;
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  // eslint-disable-next-line @lichtblick/no-boolean-parameters
   #keepReconnectingCallback?: (reconnecting: boolean) => void;
 
   // The current active connection, if there is one. `remainingRange.start` gets updated whenever
@@ -103,7 +106,7 @@ export default class CachedFilelike implements Filelike {
     fileReader: FileReader;
     cacheSizeInBytes?: number;
     log?: ILogger;
-    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    // eslint-disable-next-line @lichtblick/no-boolean-parameters
     keepReconnectingCallback?: (reconnecting: boolean) => void;
   }) {
     this.#fileReader = options.fileReader;

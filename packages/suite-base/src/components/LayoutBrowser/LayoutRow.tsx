@@ -1,12 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/* eslint-disable @foxglove/no-restricted-imports */
+/* eslint-disable @lichtblick/no-restricted-imports */
 
-import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
-import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
-import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 import ErrorIcon from "@mui/icons-material/Error";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
@@ -32,6 +32,10 @@ import {
   useState,
 } from "react";
 import { useMountedState } from "react-use";
+
+import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
+import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 const StyledListItem = muiStyled(ListItem, {
   shouldForwardProp: (prop) =>

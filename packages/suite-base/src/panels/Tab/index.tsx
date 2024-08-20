@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,6 +13,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { useCallback, useMemo, useState } from "react";
+import { MosaicNode } from "react-mosaic-component";
+import { makeStyles } from "tss-react/mui";
 
 import { EmptyPanelLayout } from "@lichtblick/suite-base/components/EmptyPanelLayout";
 import Panel from "@lichtblick/suite-base/components/Panel";
@@ -25,9 +32,6 @@ import { TabPanelConfig as Config } from "@lichtblick/suite-base/types/layouts";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@lichtblick/suite-base/util/layout";
-import { useCallback, useMemo, useState } from "react";
-import { MosaicNode } from "react-mosaic-component";
-import { makeStyles } from "tss-react/mui";
 
 const useStyles = makeStyles()((theme) => ({
   panelCover: {

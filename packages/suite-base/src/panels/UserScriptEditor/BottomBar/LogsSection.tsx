@@ -1,14 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
-import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 import { Link, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
+
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
+import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 
 const useStyles = makeStyles()({
   list: {

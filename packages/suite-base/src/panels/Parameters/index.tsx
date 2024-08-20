@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,18 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ParameterValue } from "@lichtblick/suite";
-import CopyButton from "@lichtblick/suite-base/components/CopyButton";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import JsonInput from "@lichtblick/suite-base/components/JsonInput";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@lichtblick/suite-base/components/MessagePipeline";
-import Panel from "@lichtblick/suite-base/components/Panel";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -40,6 +31,19 @@ import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
+
+import { ParameterValue } from "@lichtblick/suite";
+import CopyButton from "@lichtblick/suite-base/components/CopyButton";
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import JsonInput from "@lichtblick/suite-base/components/JsonInput";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/suite-base/components/MessagePipeline";
+import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
 
 // The minimum amount of time to wait between showing the parameter update animation again
 const ANIMATION_RESET_DELAY_MS = 3000;

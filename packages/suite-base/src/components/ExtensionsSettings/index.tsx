@@ -1,16 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Log from "@lichtblick/log";
-import { Immutable } from "@lichtblick/suite";
-import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import {
-  ExtensionMarketplaceDetail,
-  useExtensionMarketplace,
-} from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import {
   Alert,
   AlertTitle,
@@ -25,6 +19,16 @@ import * as _ from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
 import { makeStyles } from "tss-react/mui";
+
+import Log from "@lichtblick/log";
+import { Immutable } from "@lichtblick/suite";
+import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import {
+  ExtensionMarketplaceDetail,
+  useExtensionMarketplace,
+} from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
 const log = Log.getLogger(__filename);
 

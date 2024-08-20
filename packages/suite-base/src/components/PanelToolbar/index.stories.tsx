@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -12,16 +15,17 @@
 //   You may not use this file except in compliance with the License.
 
 import { Database20Filled } from "@fluentui/react-icons";
-import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
-import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
-import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import { useTheme } from "@mui/material";
 import { StoryObj, StoryFn } from "@storybook/react";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { PropsWithChildren } from "react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
+
+import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
+import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 
 import PanelToolbar from "./index";
 

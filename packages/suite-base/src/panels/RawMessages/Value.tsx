@@ -1,6 +1,20 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import CheckIcon from "@mui/icons-material/Check";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
+import ErrorIcon from "@mui/icons-material/Error";
+import FilterIcon from "@mui/icons-material/FilterAlt";
+import StateTransitionsIcon from "@mui/icons-material/PowerInput";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import LineChartIcon from "@mui/icons-material/ShowChart";
+import { IconButtonProps, Tooltip, TooltipProps } from "@mui/material";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { withStyles, makeStyles } from "tss-react/mui";
 
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -12,16 +26,6 @@ import {
 } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import clipboard from "@lichtblick/suite-base/util/clipboard";
-import CheckIcon from "@mui/icons-material/Check";
-import CopyAllIcon from "@mui/icons-material/CopyAll";
-import ErrorIcon from "@mui/icons-material/Error";
-import FilterIcon from "@mui/icons-material/FilterAlt";
-import StateTransitionsIcon from "@mui/icons-material/PowerInput";
-import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
-import LineChartIcon from "@mui/icons-material/ShowChart";
-import { IconButtonProps, Tooltip, TooltipProps } from "@mui/material";
-import { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { withStyles, makeStyles } from "tss-react/mui";
 
 import HighlightedValue from "./HighlightedValue";
 import { copyMessageReplacer } from "./copyMessageReplacer";

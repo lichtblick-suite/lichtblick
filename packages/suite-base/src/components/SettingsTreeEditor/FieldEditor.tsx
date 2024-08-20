@@ -1,11 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
-import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ErrorIcon from "@mui/icons-material/Error";
 import {
@@ -22,6 +21,11 @@ import {
 } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuid } from "uuid";
+
+import { Immutable, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
+import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 
 import { ColorGradientInput, ColorPickerInput, NumberInput, Vec2Input, Vec3Input } from "./inputs";
 

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,12 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import getPrettifiedCode from "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode";
-import { Script } from "@lichtblick/suite-base/panels/UserScriptEditor/script";
-import { getUserScriptProjectConfig } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
-import inScreenshotTests from "@lichtblick/suite-base/stories/inScreenshotTests";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
-import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 import { useTheme } from "@mui/material";
 // @ts-expect-error ICodeEditorService does not have type information in the monaco-editor package
 import { ICodeEditorService } from "monaco-editor/esm/vs/editor/browser/services/codeEditorService";
@@ -29,6 +26,13 @@ import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-edit
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import { ModuleResolutionKind } from "typescript";
+
+import getPrettifiedCode from "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode";
+import { Script } from "@lichtblick/suite-base/panels/UserScriptEditor/script";
+import { getUserScriptProjectConfig } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
+import inScreenshotTests from "@lichtblick/suite-base/stories/inScreenshotTests";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
 import { themes } from "./theme";
 

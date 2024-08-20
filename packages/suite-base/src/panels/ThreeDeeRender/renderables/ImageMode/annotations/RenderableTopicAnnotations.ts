@@ -1,12 +1,15 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
-import { RosObject } from "@lichtblick/suite-base/players/types";
+import { LabelPool } from "@foxglove/three-text";
 import * as THREE from "three";
 
-import { LabelPool } from "@foxglove/three-text";
+import { PinholeCameraModel } from "@lichtblick/den/image";
+import { RosObject } from "@lichtblick/suite-base/players/types";
 
 import { RenderableLineAnnotation } from "./RenderableLineAnnotation";
 import { RenderablePointsAnnotation } from "./RenderablePointsAnnotation";

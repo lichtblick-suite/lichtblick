@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -10,13 +13,14 @@ import {
   TextBulletListLtr20Filled,
   ArrowMinimize20Filled,
 } from "@fluentui/react-icons";
-import { Immutable } from "@lichtblick/suite";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { IconButton } from "@mui/material";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
+
+import { Immutable } from "@lichtblick/suite";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import type { PlotCoordinator } from "./PlotCoordinator";
 import { PlotLegendRow, ROW_HEIGHT } from "./PlotLegendRow";

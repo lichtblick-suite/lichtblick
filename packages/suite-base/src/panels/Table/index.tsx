@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,6 +14,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { parseMessagePath, MessagePath } from "@foxglove/message-path";
+import { useEffect } from "react";
+import { makeStyles } from "tss-react/mui";
+
 import { useMessagesByTopic } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
@@ -20,10 +27,6 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { useEffect } from "react";
-import { makeStyles } from "tss-react/mui";
-
-import { parseMessagePath, MessagePath } from "@foxglove/message-path";
 
 import Table from "./Table";
 

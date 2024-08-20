@@ -1,12 +1,16 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/* eslint-disable @foxglove/no-boolean-parameters */
+/* eslint-disable @lichtblick/no-boolean-parameters */
+
+import { mat4, quat, vec3, vec4 } from "gl-matrix";
 
 import { ArrayMap } from "@lichtblick/den/collection";
 import { ObjectPool } from "@lichtblick/den/collection/ObjectPool";
-import { mat4, quat, vec3, vec4 } from "gl-matrix";
 
 import { Transform } from "./Transform";
 import { Pose, mat4Identity } from "./geometry";

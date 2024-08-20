@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { t } from "i18next";
+import * as THREE from "three";
 
 import { SettingsTreeNode, Topic } from "@lichtblick/suite";
 import { DynamicBufferGeometry } from "@lichtblick/suite-base/panels/ThreeDeeRender/DynamicBufferGeometry";
@@ -14,8 +20,6 @@ import {
 import { BaseSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/settings";
 import { MAX_DURATION } from "@lichtblick/suite-base/panels/ThreeDeeRender/transforms";
 import { updatePose } from "@lichtblick/suite-base/panels/ThreeDeeRender/updatePose";
-import { t } from "i18next";
-import * as THREE from "three";
 
 import { LaserScanMaterial } from "./LaserScans";
 import {

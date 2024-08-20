@@ -1,10 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+
 import Stack from "@lichtblick/suite-base/components/Stack";
 import templates from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/templates";
-import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 import { SidebarHeader } from "./SidebarHeader";
 

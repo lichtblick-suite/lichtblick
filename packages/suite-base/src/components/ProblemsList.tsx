@@ -1,20 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ErrorCircle16Regular, Info16Regular, Warning16Regular } from "@fluentui/react-icons";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@lichtblick/suite-base/components/MessagePipeline";
-import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  ProblemsContextStore,
-  useProblemsStore,
-} from "@lichtblick/suite-base/context/ProblemsContext";
-import { PlayerProblem } from "@lichtblick/suite-base/players/types";
-import { DetailsType, NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
   Accordion,
@@ -28,6 +19,19 @@ import {
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
+
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/suite-base/components/MessagePipeline";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import {
+  ProblemsContextStore,
+  useProblemsStore,
+} from "@lichtblick/suite-base/context/ProblemsContext";
+import { PlayerProblem } from "@lichtblick/suite-base/players/types";
+import { DetailsType, NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 const useStyles = makeStyles()((theme) => ({
   acccordion: {

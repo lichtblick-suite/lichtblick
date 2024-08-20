@@ -1,19 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { filterMap } from "@lichtblick/den/collection";
-import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
-import { DirectTopicStatsUpdater } from "@lichtblick/suite-base/components/DirectTopicStatsUpdater";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@lichtblick/suite-base/components/MessagePipeline";
-import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { ContextMenu } from "@lichtblick/suite-base/components/TopicList/ContextMenu";
-import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import { MessagePathSelectionProvider } from "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider";
+import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -33,7 +25,18 @@ import { ListChildComponentProps, VariableSizeList } from "react-window";
 import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
-import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
+import { filterMap } from "@lichtblick/den/collection";
+import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
+import { DirectTopicStatsUpdater } from "@lichtblick/suite-base/components/DirectTopicStatsUpdater";
+import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/suite-base/components/MessagePipeline";
+import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import { ContextMenu } from "@lichtblick/suite-base/components/TopicList/ContextMenu";
+import { PlayerPresence } from "@lichtblick/suite-base/players/types";
+import { MessagePathSelectionProvider } from "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider";
 
 import { MessagePathRow } from "./MessagePathRow";
 import { TopicRow } from "./TopicRow";

@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { toNanoSec } from "@foxglove/rostime";
+import * as _ from "lodash-es";
+import * as THREE from "three";
+import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { PinholeCameraModel } from "@lichtblick/den/image";
@@ -39,11 +47,6 @@ import { t3D } from "@lichtblick/suite-base/panels/ThreeDeeRender/t3D";
 import { makePose } from "@lichtblick/suite-base/panels/ThreeDeeRender/transforms";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { downloadFiles } from "@lichtblick/suite-base/util/download";
-import * as _ from "lodash-es";
-import * as THREE from "three";
-import { Writable } from "ts-essentials";
-
-import { toNanoSec } from "@foxglove/rostime";
 
 import { ImageModeCamera } from "./ImageModeCamera";
 import { IMessageHandler, MessageHandler, MessageRenderState } from "./MessageHandler";

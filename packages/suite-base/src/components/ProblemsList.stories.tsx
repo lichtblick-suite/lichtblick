@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { fromDate } from "@foxglove/rostime";
+import { useTheme } from "@mui/material";
+import { StoryFn, StoryObj } from "@storybook/react";
+import { useEffect } from "react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { ProblemsList } from "@lichtblick/suite-base/components/ProblemsList";
@@ -8,11 +16,6 @@ import { useProblemsActions } from "@lichtblick/suite-base/context/ProblemsConte
 import { PlayerPresence, PlayerProblem, Topic } from "@lichtblick/suite-base/players/types";
 import ProblemsContextProvider from "@lichtblick/suite-base/providers/ProblemsContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
-import { useTheme } from "@mui/material";
-import { StoryFn, StoryObj } from "@storybook/react";
-import { useEffect } from "react";
-
-import { fromDate } from "@foxglove/rostime";
 
 function makeProblems(): PlayerProblem[] {
   return [

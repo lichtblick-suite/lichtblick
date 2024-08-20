@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,9 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Logger from "@lichtblick/log";
-import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
-import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
+import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
+import { fontMonospace } from "@foxglove/theme";
 import {
   Chart,
   ChartData,
@@ -29,8 +31,9 @@ import DatalabelPlugin from "chartjs-plugin-datalabels";
 import { type Options as DatalabelsPluginOptions } from "chartjs-plugin-datalabels/types/options";
 import EventEmitter from "eventemitter3";
 
-import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
-import { fontMonospace } from "@foxglove/theme";
+import Logger from "@lichtblick/log";
+import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
+import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 import { lineSegmentLabelColor } from "./lineSegments";
 import { proxyTyped } from "./proxy";

@@ -1,12 +1,16 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Link, Button, Typography } from "@mui/material";
+import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
+
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { reportError } from "@lichtblick/suite-base/reportError";
 import { AppError } from "@lichtblick/suite-base/util/errors";
-import { Link, Button, Typography } from "@mui/material";
-import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
 import ErrorDisplay from "./ErrorDisplay";
 

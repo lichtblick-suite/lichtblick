@@ -1,6 +1,15 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
+import { StoryObj } from "@storybook/react";
+import { screen, userEvent } from "@storybook/testing-library";
+import * as _ from "lodash-es";
+import { useEffect, useState } from "react";
 
 import { MessageEvent } from "@lichtblick/suite";
 import { ImageModeConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
@@ -8,12 +17,6 @@ import { makeRawImageAndCalibration } from "@lichtblick/suite-base/panels/ThreeD
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import { useReadySignal } from "@lichtblick/suite-base/stories/ReadySignalContext";
 import delay from "@lichtblick/suite-base/util/delay";
-import { StoryObj } from "@storybook/react";
-import { screen, userEvent } from "@storybook/testing-library";
-import * as _ from "lodash-es";
-import { useEffect, useState } from "react";
-
-import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
 
 import { ImagePanel } from "../../index";
 
