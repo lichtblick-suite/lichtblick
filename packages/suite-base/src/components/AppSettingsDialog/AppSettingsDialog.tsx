@@ -281,7 +281,8 @@ export function AppSettingsDialog(
           >
             <Stack gap={2} alignItems="flex-start">
               <header>
-                {/* <FoxboxLogoText color="primary" className={classes.logo} /> */}
+                {/* <LichtblickLogoText color="primary" className={classes.logo} /> */}
+                Linctblick
               </header>
               <Stack direction="row" alignItems="center" gap={1}>
                 <Typography variant="body2">

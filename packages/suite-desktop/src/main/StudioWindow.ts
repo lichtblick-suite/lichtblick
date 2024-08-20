@@ -66,9 +66,7 @@ function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
   return {};
 }
 
-function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
-  const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
-  const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
+function createUdpServer() {
   const udpServer = dgram.createSocket("udp4");
 
   udpServer.on("error", (err) => {
@@ -78,13 +76,19 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
 
   udpServer.on("message", (msg) => {
     // console.log(`UDP server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    browserWindow.webContents.send("udp-message", msg.toString());
-    // 处理接收到的广播消息
+    BrowserWindow.getAllWindows().forEach((win) => {
+      win.webContents.send("udp-message", msg.toString());
+    }); // 处理接收到的广播消息
   });
 
   udpServer.bind(9999, () => {
     udpServer.setBroadcast(true); // 设置为接收广播消息
   });
+}
+
+function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void): BrowserWindow {
+  const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
+  const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
 
   const macTrafficLightInset =
     Math.floor((APP_BAR_HEIGHT - /*button size*/ 12) / 2) - /*for good measure*/ 1;
@@ -466,6 +470,7 @@ class StudioWindow {
   }
 
   #buildBrowserWindow(): [BrowserWindow, Menu] {
+    createUdpServer();
     const browserWindow = newStudioWindow(this.#deepLinks, () => {
       this.#reloadMainWindow();
     });

@@ -14,6 +14,7 @@ import {
   IDataSourceFactory,
   IdbExtensionLoader,
   McapLocalDataSourceFactory,
+  MQTTDataSourceFactory,
   RemoteDataSourceFactory,
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
@@ -58,6 +59,7 @@ export function WebRoot(props: {
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
       new RemoteDataSourceFactory(),
+      new MQTTDataSourceFactory(),
     ];
 
     return props.dataSources ?? sources;

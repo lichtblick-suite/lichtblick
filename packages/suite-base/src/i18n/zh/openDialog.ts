@@ -2,11 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-
-
-export const openDialog  = {
+export const openDialog = {
   // Start
-  newToFoxgloveStudio: "第一次使用 Studio？",
+  newToFoxgloveStudio: "第一次使用  Lichtblick？",
   newToFoxgloveStudioDescription: "从探索一个样本数据集开始，或查看我们的文档。",
   exploreSampleData: "探索样本数据",
   viewOurDocs: "查看我们的文档",
@@ -21,17 +19,18 @@ export const openDialog  = {
   createAFreeAccount: "创建免费帐户",
   signIn: "登录",
   learnMore: "了解更多",
-  startCollaborating: "与您的 Foxglove 组织开始合作",
+  startCollaborating: "与您的  Lichtblick 组织开始合作",
   startCollaboratingDescription:
-    "充分利用你的 Foxglove 账户——无论你想深入研究你的数据还是与你的团队成员分享工具。",
+    "充分利用你的  Lichtblick 账户——无论你想深入研究你的数据还是与你的团队成员分享工具。",
   uploadToDataPlatform: "上传到数据平台",
   shareLayouts: "分享布局",
   openLocalFile: "打开本地文件",
   openLocalFileDescription: "直接从本地文件系统可视化数据。",
   openUrl: "上传和共享数据",
-  openUrlDescription: "使用 Foxglove 数据平台与您的团队共享数据。",
+  openUrlDescription: "使用  Lichtblick 数据平台与您的团队共享数据。",
   openConnection: "打开连接",
   openConnectionDescription: "连接到实时机器人或服务器。",
   openDataSource: "打开数据源",
+  activeClients: "当前活跃设备",
   recentDataSources: "最近使用的数据源",
 };

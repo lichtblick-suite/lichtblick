@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-
-
 export const appBar = {
   about: "关于",
   addPanel: "添加面板",
@@ -20,6 +18,7 @@ export const appBar = {
   open: "打开…",
   openConnection: "打开连接…",
   openDataSources: "打开数据源",
+  activeClients: "当前活跃设备",
   openLocalFile: "打开本地文件…",
   recentDataSources: "最近的数据源",
   recentlyViewed: "最近查看",

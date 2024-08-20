@@ -39,17 +39,17 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     module: async () => await import("./Joystick"),
   },
   {
-    title: "沙盘/车辆控制",
+    title: t("VehicleControl"),
     type: "VehicleControl",
     description: "",
     module: async () => await import("./VehicleControl"),
   },
-  {
-    title: "vscode",
-    type: "CodeServer",
-    description: "",
-    module: async () => await import("./CodeServer"),
-  },
+  // {
+  //   title: t("VehicleControl"),
+  //   type: "CodeServer",
+  //   description: "",
+  //   module: async () => await import("./CodeServer"),
+  // },
   {
     title: t("3D"),
     type: "3D",

@@ -329,9 +329,7 @@ export default function Start(): React.JSX.Element {
 
   return (
     <Stack className={classes.grid}>
-      <header className={classes.header}>
-        <LichtblickLogoText color="primary" />
-      </header>
+      <header className={classes.header}>{/* <LichtblickLogoText color="primary" /> */}</header>
       <Stack className={classes.content}>
         <Stack gap={4}>
           <Stack gap={1}>
@@ -366,6 +364,10 @@ export default function Start(): React.JSX.Element {
                     >
                       <TextMiddleTruncate
                         className={classes.recentSourceSecondary}
+                        text={recent.label ?? ""}
+                      />
+                      <TextMiddleTruncate
+                        className={classes.recentSourceSecondary}
                         text={recent.title}
                       />
                     </ListItemButton>
@@ -378,6 +380,9 @@ export default function Start(): React.JSX.Element {
       </Stack>
       <div className={classes.spacer} />
       <Stack gap={4} className={classes.sidebar}>
+        <Typography variant="h5" gutterBottom>
+          {t("activeClients")}
+        </Typography>
         {isRunningInElectron() && <UdpMessageComponent />}
 
         <SidebarItems onSelectView={dialogActions.dataSource.open} />

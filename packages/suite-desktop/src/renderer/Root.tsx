@@ -15,6 +15,7 @@ import {
   IDataSourceFactory,
   IdbExtensionLoader,
   McapLocalDataSourceFactory,
+  MQTTDataSourceFactory,
   OsContext,
   RemoteDataSourceFactory,
   Ros1LocalBagDataSourceFactory,
@@ -97,6 +98,7 @@ export default function Root(props: RootProps): React.JSX.Element {
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
       new RemoteDataSourceFactory(),
+      new MQTTDataSourceFactory(),
     ];
 
     return sources;

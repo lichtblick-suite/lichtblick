@@ -140,6 +140,7 @@
     "monaco-editor": "0.52.2",
     "monaco-editor-webpack-plugin": "7.1.0",
     "nanoid": "5.0.9",
+    "mqtt": "5.3.5",
     "natsort": "2.0.3",
     "nearley": "2.20.1",
     "nearley-loader": "2.0.0",

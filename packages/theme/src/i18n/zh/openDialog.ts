@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-
 export const openDialog = {
   // Start
   newToFoxgloveStudio: "第一次使用 Studio？",
@@ -32,5 +31,6 @@ export const openDialog = {
   openConnection: "打开连接",
   openConnectionDescription: "连接到实时机器人或服务器。",
   openDataSource: "打开数据源",
+  activeClients: "当前活跃设备",
   recentDataSources: "最近使用的数据源",
 };

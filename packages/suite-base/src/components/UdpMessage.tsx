@@ -65,17 +65,13 @@ const UdpMessageComponent: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom>
-        Received Active Client:
-      </Typography>
-
       <List disablePadding>
         {udpIp.map((message, index) => (
           <ListItem disablePadding key={index}>
             <TextMiddleTruncate text={message} />
 
-            <Button onClick={() => openCode(message)}>OpenCode</Button>
-            <Button onClick={() => createNewPlayer(message)}>LinkStudio</Button>
+            <Button onClick={() => openCode(message)}>open code</Button>
+            <Button onClick={() => createNewPlayer(message)}>open connection</Button>
           </ListItem>
         ))}
       </List>
