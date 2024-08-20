@@ -9,22 +9,33 @@
 // import { CircularProgress, IconButton } from "@mui/material";
 // import { useTranslation } from "react-i18next";
 // import { makeStyles } from "tss-react/mui";
-import { CheckOutlined, DisconnectOutlined, LoadingOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  DisconnectOutlined,
+  InfoCircleOutlined,
+  LoadingOutlined,
+} from "@ant-design/icons";
+import { ErrorCircle20Filled } from "@fluentui/react-icons";
 // import { ErrorCircle16Filled } from "@fluentui/react-icons";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 // import Stack from "@lichtblick/suite-base/components/Stack";
 // import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 // import WssErrorModal from "@lichtblick/suite-base/components/WssErrorModal";
 // import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
+import { Button, Popover } from "antd";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 // import { CircularProgress, IconButton } from "@mui/material";
 // import { useTranslation } from "react-i18next";
 // import { makeStyles } from "tss-react/mui";
 
-// import { EndTimestamp } from "./EndTimestamp";
+import { EndTimestamp } from "./EndTimestamp";
 
 // const ICON_SIZE = 18;
 
@@ -77,19 +88,20 @@ import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 //   },
 // }));
 
-// const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
+const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
-// const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
+const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 
 export function DataSource(): React.JSX.Element {
   // const { t } = useTranslation("appBar");
   // const { classes, cx } = useStyles();
 
-  // const playerName = useMessagePipeline(selectPlayerName);
+  const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  // const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
+  const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
   const seek = useMessagePipeline(selectSeek);
+  const { dialogActions, sidebarActions } = useWorkspaceActions();
 
   // const { sidebarActions } = useWorkspaceActions();
 
@@ -98,29 +110,120 @@ export function DataSource(): React.JSX.Element {
 
   const reconnecting = playerPresence === PlayerPresence.RECONNECTING;
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
-  // const error =
-  //   playerPresence === PlayerPresence.ERROR ||
-  //   playerProblems.some((problem) => problem.severity === "error");
+  const error =
+    playerPresence === PlayerPresence.ERROR ||
+    playerProblems.some((problem) => problem.severity === "error");
   const loading = reconnecting || initializing;
 
-  // const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;
-  if (playerPresence === PlayerPresence.NOT_PRESENT) {
-    return <DisconnectOutlined rev={undefined} />;
-  }
-  if (loading) {
-    return <LoadingOutlined rev={undefined} />;
-  }
+  const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;
 
+  const [clicked, setClicked] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const hide = () => {
+    setClicked(false);
+    setHovered(false);
+  };
+
+  const handleHoverChange = (open: boolean) => {
+    setHovered(open);
+    setClicked(false);
+  };
+
+  const handleClickChange = (open: boolean) => {
+    setHovered(false);
+    setClicked(open);
+  };
+  const InfoContent = () => {
+    if (playerPresence === PlayerPresence.NOT_PRESENT) {
+      return <div> {t("noDataSource")}</div>;
+    } else {
+      return (
+        <div>
+          <TextMiddleTruncate text={playerDisplayName ?? `<${t("unknown")}>`} />
+          {isLiveConnection && (
+            <>
+              <EndTimestamp />
+            </>
+          )}
+          {error && (
+            <Button
+              type="text"
+              danger
+              icon={<ErrorCircle20Filled />}
+              onClick={() => {
+                sidebarActions.left.setOpen(true);
+                sidebarActions.left.selectItem("problems");
+              }}
+            ></Button>
+          )}
+        </div>
+      );
+    }
+  };
+
+  const ICON = () => {
+    if (playerPresence === PlayerPresence.NOT_PRESENT) {
+      return <DisconnectOutlined rev={undefined} />;
+    }
+    if (loading) {
+      return <LoadingOutlined rev={undefined} />;
+    }
+    if (error) {
+      return <ErrorCircle20Filled />;
+    }
+
+    return (
+      <>
+        {isLiveConnection && (
+          <>
+            <CheckOutlined rev={undefined} />
+            {/* <EndTimestamp /> */}
+          </>
+        )}
+      </>
+    );
+  };
   return (
     <>
-      {isLiveConnection && (
-        <>
-          <CheckOutlined rev={undefined} />
-          {/* <EndTimestamp /> */}
-        </>
-      )}
+      <Button
+        style={{ boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)" }}
+        type="primary"
+        shape="circle"
+        icon={<ICON />}
+        onClick={() => {
+          dialogActions.dataSource.open("start");
+        }}
+      />
+      <Popover
+        style={{ width: 500 }}
+        content={InfoContent}
+        trigger="hover"
+        open={hovered}
+        onOpenChange={handleHoverChange}
+      >
+        <Popover
+          content={
+            <div>
+              <InfoContent />
+              <a onClick={hide}>Close</a>
+            </div>
+          }
+          trigger="click"
+          open={clicked}
+          onOpenChange={handleClickChange}
+        >
+          <Button
+            style={{ marginTop: 20 }}
+            type="text"
+            shape="circle"
+            icon={<InfoCircleOutlined />}
+          />
+        </Popover>
+      </Popover>
     </>
   );
+
   // if (playerPresence === PlayerPresence.NOT_PRESENT) {
   //   return <div className={classes.sourceName}>{t("noDataSource")}</div>;
   // }

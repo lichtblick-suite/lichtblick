@@ -65,7 +65,6 @@ function VehicleControlPanel(props: Props): JSX.Element {
   const { config, saveConfig } = props;
   const {
     run,
-    car_id,
     pass_mode,
     nodeTopicName,
     nodeDatatype,
@@ -74,6 +73,7 @@ function VehicleControlPanel(props: Props): JSX.Element {
     pathSource,
     rfidSource,
   } = config;
+  const car_id = 1;
   const { topics, datatypes } = useDataSourceInfo();
   useVehicleControlSettings(config, saveConfig, topics, datatypes);
   const parentDivRef = useRef<HTMLDivElement>();
@@ -125,7 +125,7 @@ function VehicleControlPanel(props: Props): JSX.Element {
       const newCanvas = new fabric.Canvas(id, {
         width: parentDivRef.current.offsetWidth, //初始宽度
         height: parentDivRef.current.offsetHeight, //初始高度
-        backgroundColor: "#fff", // 初始背景色
+        // backgroundColor: "#fff", // 初始背景色
         fireMiddleClick: true, //启用中键 button为2
         selection: false,
       });

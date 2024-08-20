@@ -41,25 +41,17 @@ const VerticalAppBar: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            top: 40,
+            top: 60,
             left: "50%",
             transform: "translate(-50%, -50%)",
           }}
         >
-          <Button
-            style={{ boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)" }}
-            type="primary"
-            shape="circle"
-            icon={<DataSource />}
-            onClick={() => {
-              dialogActions.dataSource.open("start");
-            }}
-          />
+          <DataSource />
         </div>
         <div
           style={{
             position: "absolute",
-            top: 30 + 40 + 40,
+            top: 30 + 40 + 40 + 20,
             left: "50%",
             transform: "translate(-50%, -50%)",
           }}
@@ -75,7 +67,7 @@ const VerticalAppBar: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            top: 30 + 40 + 40 + 32 + 20,
+            top: 30 + 40 + 40 + 32 + 20 + 20,
             left: "50%",
             transform: "translate(-50%, -50%)",
           }}
