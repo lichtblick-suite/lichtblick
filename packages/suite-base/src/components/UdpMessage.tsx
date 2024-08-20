@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, List, ListItem, Typography } from "@mui/material";
+import { Button, List, ListItem } from "@mui/material";
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 import { IpcRendererEvent } from "electron"; // 导入正确的类型定义
 import {
