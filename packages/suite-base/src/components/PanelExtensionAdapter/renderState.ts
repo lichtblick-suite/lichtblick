@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { compare, toSec } from "@foxglove/rostime";
+import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { Writable } from "ts-essentials";
 
@@ -41,6 +42,10 @@ import {
 
 const EmptyParameters = new Map<string, ParameterValue>();
 
+export type RenderStateConfig = {
+  topics: Record<string, unknown>;
+};
+
 export type BuilderRenderStateInput = Immutable<{
   appSettings: Map<string, AppSettingValue> | undefined;
   colorScheme: RenderState["colorScheme"] | undefined;
@@ -53,6 +58,7 @@ export type BuilderRenderStateInput = Immutable<{
   sortedTopics: readonly PlayerTopic[];
   subscriptions: Subscription[];
   watchedFields: Set<string>;
+  config?: RenderStateConfig | undefined;
 }>;
 
 type BuildRenderStateFn = (input: BuilderRenderStateInput) => Immutable<RenderState> | undefined;
@@ -98,7 +104,13 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       sortedTopics,
       subscriptions,
       watchedFields,
+      config,
     } = input;
+
+    const topicToSchemaNameMap = _.mapValues(
+      _.keyBy(sortedTopics, "name"),
+      ({ schemaName }) => schemaName,
+    );
 
     // Should render indicates whether any fields of render state are updated
     let shouldRender = false;
@@ -204,7 +216,15 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
             postProcessedFrame.push(messageEvent);
           }
-          convertMessage(messageEvent, topicSchemaConverters, postProcessedFrame);
+
+          const schemaName = topicToSchemaNameMap[messageEvent.topic];
+          if (schemaName) {
+            convertMessage(
+              { ...messageEvent, topicConfig: config?.topics[messageEvent.topic] },
+              topicSchemaConverters,
+              postProcessedFrame,
+            );
+          }
           lastMessageByTopic.set(messageEvent.topic, messageEvent);
         }
         renderState.currentFrame = postProcessedFrame;
@@ -214,7 +234,14 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         // only the new conversions on our most recent message on each topic.
         const postProcessedFrame: MessageEvent[] = [];
         for (const messageEvent of lastMessageByTopic.values()) {
-          convertMessage(messageEvent, newConverters, postProcessedFrame);
+          const schemaName = topicToSchemaNameMap[messageEvent.topic];
+          if (schemaName) {
+            convertMessage(
+              { ...messageEvent, topicConfig: config?.topics[messageEvent.topic] },
+              newConverters,
+              postProcessedFrame,
+            );
+          }
         }
         renderState.currentFrame = postProcessedFrame;
         shouldRender = true;
@@ -262,7 +289,15 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
                 frames.push(messageEvent);
               }
-              convertMessage(messageEvent, topicSchemaConverters, frames);
+
+              const schemaName = topicToSchemaNameMap[messageEvent.topic];
+              if (schemaName) {
+                convertMessage(
+                  { ...messageEvent, topicConfig: config?.topics[messageEvent.topic] },
+                  topicSchemaConverters,
+                  frames,
+                );
+              }
             },
           );
         }

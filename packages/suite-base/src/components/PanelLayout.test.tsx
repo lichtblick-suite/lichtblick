@@ -11,6 +11,7 @@ import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { MessagePipelineProvider } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import PanelCatalogContext, {
@@ -18,6 +19,7 @@ import PanelCatalogContext, {
   PanelInfo,
 } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
@@ -45,7 +47,7 @@ describe("UnconnectedPanelLayout", () => {
   });
 
   it("does not remount panels when changing split percentage", async () => {
-    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    // jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     const renderA = jest.fn().mockReturnValue(<>A</>);
     const moduleA = jest.fn().mockResolvedValue({
@@ -87,11 +89,15 @@ describe("UnconnectedPanelLayout", () => {
               <WorkspaceContextProvider>
                 <AppConfigurationContext.Provider value={config}>
                   <MockCurrentLayoutProvider>
-                    <PanelStateContextProvider>
-                      <PanelCatalogContext.Provider value={panelCatalog}>
-                        {children}
-                      </PanelCatalogContext.Provider>
-                    </PanelStateContextProvider>
+                    <MessagePipelineProvider>
+                      <PanelStateContextProvider>
+                        <ExtensionCatalogProvider loaders={[]}>
+                          <PanelCatalogContext.Provider value={panelCatalog}>
+                            {children}
+                          </PanelCatalogContext.Provider>
+                        </ExtensionCatalogProvider>
+                      </PanelStateContextProvider>
+                    </MessagePipelineProvider>
                   </MockCurrentLayoutProvider>
                 </AppConfigurationContext.Provider>
               </WorkspaceContextProvider>

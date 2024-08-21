@@ -148,6 +148,8 @@ export type MessageEvent<T = unknown> = {
    * un-converted message event.
    */
   originalMessageEvent?: MessageEvent;
+
+  topicConfig?: unknown;
 };
 
 export interface LayoutActions {
@@ -440,10 +442,30 @@ export type ExtensionPanelRegistration = {
   initPanel: (context: PanelExtensionContext) => void | (() => void);
 };
 
+export interface PanelSettings<ExtensionSettings> {
+  /**
+   * @param config value of the custom settings. It's type is the type of the object defined in the *defaultConfig* property
+   * @returns
+   * a settings tree node defined as it would be defined in an extension.
+   * That node will be merged with the node belonging to the concerned topic (path = ["topics", "__topic_name__"])
+   */
+  settings: (config?: ExtensionSettings) => SettingsTreeNode;
+  /**
+   * Simple settings handler run right after the default handler for settings.
+   * @param config is mutated, modifying it allows the state value to be modified and then sent to the converter
+   */
+  handler: (action: SettingsTreeAction, config?: ExtensionSettings) => void;
+  defaultConfig?: ExtensionSettings;
+}
+
 export type RegisterMessageConverterArgs<Src> = {
   fromSchemaName: string;
   toSchemaName: string;
   converter: (msg: Src, event: Immutable<MessageEvent<Src>>) => unknown;
+  /**
+   * Custom settings for the topics using the schema specified in the *toSchemaName* property
+   */
+  panelSettings?: Record<string, PanelSettings<unknown>>;
 };
 
 type BaseTopic = { name: string; schemaName?: string };

@@ -6,10 +6,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { renderHook, waitFor } from "@testing-library/react";
+import { render, renderHook, waitFor } from "@testing-library/react";
+import { useEffect } from "react";
 
+import { PanelSettings } from "@lichtblick/suite";
+import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
+import Panel from "@lichtblick/suite-base/components/Panel";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
+import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
@@ -197,6 +202,70 @@ describe("ExtensionCatalogProvider", () => {
     ]);
   });
 
+  it("should register panel settings", async () => {
+    const source = `
+        module.exports = {
+            activate: function(ctx) {
+              ctx.registerMessageConverter({
+              fromSchemaName: "from.Schema",
+              toSchemaName: "to.Schema",
+              converter: (msg) => msg,
+              panelSettings: {
+                Dummy: {
+                  settings: (config) => ({
+                    fields: {
+                      test: {
+                        input: "boolean",
+                        value: config?.test,
+                        label: "Nope",
+                      },
+                    },
+                  }),
+                  handler: () => {},
+                  defaultConfig: {
+                    test: true,
+                  },
+                },
+              },
+            });
+            }
+        }
+    `;
+
+    const loadExtension = jest.fn().mockResolvedValue(source);
+    const mockPrivateLoader: ExtensionLoader = {
+      namespace: "org",
+      getExtensions: jest
+        .fn()
+        .mockResolvedValue([fakeExtension({ namespace: "org", name: "sample", version: "1" })]),
+      loadExtension,
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+    };
+
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+      initialProps: {},
+      wrapper: ({ children }) => (
+        <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>
+          {children}
+        </ExtensionCatalogProvider>
+      ),
+    });
+
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
+    expect(result.current.panelSettings).toEqual({
+      Dummy: {
+        "from.Schema": {
+          defaultConfig: { test: true },
+          handler: expect.any(Function),
+          settings: expect.any(Function),
+        },
+      },
+    });
+  });
+
   it("should register topic aliases", async () => {
     const source = `
         module.exports = {
@@ -234,5 +303,70 @@ describe("ExtensionCatalogProvider", () => {
     expect(result.current.installedTopicAliasFunctions).toEqual([
       { extensionId: "id", aliasFunction: expect.any(Function) },
     ]);
+  });
+
+  it("should register a default config", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+
+    function getDummyPanel(updatedConfig: jest.Mock, childId: string) {
+      function DummyComponent(): ReactNull {
+        const [config] = useConfigById(childId);
+
+        useEffect(() => updatedConfig(config), [config]);
+        return ReactNull;
+      }
+      DummyComponent.panelType = "Dummy";
+      DummyComponent.defaultConfig = { someString: "hello world" };
+      return Panel(DummyComponent);
+    }
+
+    const updatedConfig = jest.fn();
+    const childId = "Dummy!1my2ydk";
+    const DummyPanel = getDummyPanel(updatedConfig, childId);
+    const generatePanelSettings = <T,>(obj: PanelSettings<T>) => obj as PanelSettings<unknown>;
+
+    render(
+      <PanelSetup
+        fixture={{
+          topics: [{ name: "myTopic", schemaName: "from.Schema" }],
+          messageConverters: [
+            {
+              fromSchemaName: "from.Schema",
+              toSchemaName: "to.Schema",
+              converter: (msg) => msg,
+              panelSettings: {
+                Dummy: generatePanelSettings({
+                  settings: (config) => ({
+                    fields: {
+                      test: {
+                        input: "boolean",
+                        value: config?.test,
+                        label: "Nope",
+                      },
+                    },
+                  }),
+                  handler: () => {},
+                  defaultConfig: {
+                    test: true,
+                  },
+                }),
+              },
+            },
+          ],
+        }}
+      >
+        <DummyPanel childId={childId} />
+      </PanelSetup>,
+    );
+
+    await waitFor(() => {
+      expect(updatedConfig).toHaveBeenCalled();
+    });
+
+    expect(updatedConfig.mock.calls.at(-1)).toEqual([
+      { someString: "hello world", topics: { myTopic: { test: true } } },
+    ]);
+
+    (console.error as jest.Mock).mockRestore();
   });
 });

@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Divider, Typography } from "@mui/material";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useUnmount } from "react-use";
@@ -14,6 +15,8 @@ import { SettingsTree } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
+import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { ActionMenu } from "@lichtblick/suite-base/components/PanelSettings/ActionMenu";
 import SettingsTreeEditor from "@lichtblick/suite-base/components/SettingsTreeEditor";
 import { ShareJsonModal } from "@lichtblick/suite-base/components/ShareJsonModal";
@@ -25,6 +28,10 @@ import {
   useCurrentLayoutSelector,
   useSelectedPanels,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import {
+  getExtensionPanelSettings,
+  useExtensionCatalog,
+} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import {
   PanelStateStore,
@@ -34,6 +41,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
+import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 const singlePanelIdSelector = (state: LayoutState) =>
   typeof state.selectedLayout?.data?.layout === "string"
@@ -146,9 +154,34 @@ export default function PanelSettings({
 
   const [config] = useConfigById(selectedPanelId);
 
-  const settingsTree = usePanelStateStore((state) =>
-    selectedPanelId ? state.settingsTrees[selectedPanelId] : undefined,
-  );
+  const extensionSettings = useExtensionCatalog(getExtensionPanelSettings);
+
+  const topicToSchemaNameMap = useMessagePipeline(getTopicToSchemaNameMap);
+
+  const settingsTree = usePanelStateStore((state) => {
+    if (selectedPanelId) {
+      const set = state.settingsTrees[selectedPanelId];
+      if (set && panelType) {
+        const topics = Object.keys(set.nodes.topics?.children ?? {});
+        const topicsConfig = maybeCast<{ topics: Record<string, unknown> }>(config)?.topics;
+        const topicsSettings = _.merge(
+          {},
+          ...topics.map((topic) => {
+            const schemaName = topicToSchemaNameMap[topic];
+            if (schemaName == undefined) {
+              return {};
+            }
+            return {
+              [topic]: extensionSettings[panelType]?.[schemaName]?.settings(topicsConfig?.[topic]),
+            };
+          }),
+        );
+
+        return { ...set, nodes: _.merge({}, set.nodes, { topics: { children: topicsSettings } }) };
+      }
+    }
+    return undefined;
+  });
 
   const resetToDefaults = useCallback(() => {
     if (selectedPanelId) {
