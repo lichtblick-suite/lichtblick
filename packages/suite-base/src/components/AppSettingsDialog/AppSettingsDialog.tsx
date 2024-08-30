@@ -149,7 +149,7 @@ const aboutItems = new Map<
       links: [
         {
           title: "License terms",
-          url: "https://github.com/bmw-software-engineering/lichtblick/blob/main/LICENSE",
+          url: "https://github.com/lichtblick-suite/lichtblick/blob/main/LICENSE",
         },
       ],
     },

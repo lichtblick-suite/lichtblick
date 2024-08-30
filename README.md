@@ -1,13 +1,13 @@
 <h1 align="center">Lichtblick</h1>
 
 <div align="center">
-  <a href="https://github.com/bmw-software-engineering/lichtblick/stargazers"><img src="https://img.shields.io/github/stars/bmw-software-engineering/lichtblick" alt="Stars Badge"/></a>
-  <a href="https://github.com/bmw-software-engineering/lichtblick/network/members"><img src="https://img.shields.io/github/forks/bmw-software-engineering/lichtblick" alt="Forks Badge"/></a>
-  <a href="https://github.com/bmw-software-engineering/lichtblick/pulls"><img src="https://img.shields.io/github/issues-pr/bmw-software-engineering/lichtblick" alt="Pull Requests Badge"/></a>
-  <a href="https://github.com/bmw-software-engineering/lichtblick/issues"><img src="https://img.shields.io/github/issues/bmw-software-engineering/lichtblick" alt="Issues Badge"/></a>
-  <a href="https://github.com/bmw-software-engineering/lichtblick/issues"><img src="https://img.shields.io/github/package-json/v/bmw-software-engineering/lichtblick" alt="Versions Badge"/></a>
-  <a href="https://github.com/bmw-software-engineering/lichtblick/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bmw-software-engineering/lichtblick?color=2b9348"></a>
- <img alt="GitHub License" src="https://img.shields.io/github/license/bmw-software-engineering/lichtblick">
+  <a href="https://github.com/lichtblick-suite/lichtblick/stargazers"><img src="https://img.shields.io/github/stars/lichtblick-suite/lichtblick" alt="Stars Badge"/></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/network/members"><img src="https://img.shields.io/github/forks/lichtblick-suite/lichtblick" alt="Forks Badge"/></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/pulls"><img src="https://img.shields.io/github/issues-pr/lichtblick-suite/lichtblick" alt="Pull Requests Badge"/></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/issues"><img src="https://img.shields.io/github/issues/lichtblick-suite/lichtblick" alt="Issues Badge"/></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/issues"><img src="https://img.shields.io/github/package-json/v/lichtblick-suite/lichtblick" alt="Versions Badge"/></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/lichtblick-suite/lichtblick?color=2b9348"></a>
+ <img alt="GitHub License" src="https://img.shields.io/github/license/lichtblick-suite/lichtblick">
 
   <br />
 <p  align="center">
@@ -30,7 +30,7 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, avail
 Clone the repository:
 
 ```sh
-$ git clone https://github.com/bmw-software-engineering/lichtblick.git
+$ git clone https://github.com/lichtblick-suite/lichtblick.git
 ```
 
 Pull large files with Git LFS:

@@ -1,10 +1,10 @@
 blank_issues_enabled: false
 contact_links:
   - name: "🙋‍♀️ Question"
-    url: https://github.com/bmw-software-engineering/lichtblick/discussions/new/choose
+    url: https://github.com/lichtblick-suite/lichtblick/discussions/new/choose
     about: Search discussions or ask our community for help
   - name: "🚀 Feature request"
-    url: https://github.com/bmw-software-engineering/lichtblick/discussions/new/choose
+    url: https://github.com/lichtblick-suite/lichtblick/discussions/new/choose
     about: Search existing feature requests or share a new idea
   - name: "📚 Stack Exchange"
     url: https://robotics.stackexchange.com/questions/ask

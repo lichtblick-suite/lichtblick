@@ -89,7 +89,7 @@ export function LaunchingInDesktopScreen(): ReactElement {
             <Link
               color="primary"
               underline="hover"
-              href="https://github.com/bmw-software-engineering/lichtblick/releases"
+              href="https://github.com/lichtblick-suite/lichtblick/releases"
               target="_blank"
             >
               Download Lichtblick

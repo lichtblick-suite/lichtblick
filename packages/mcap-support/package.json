@@ -5,13 +5,13 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/bmw-software-engineering/lichtblick.git"
+    "url": "https://github.com/lichtblick-suite/lichtblick.git"
   },
   "author": {
     "name": "Lichtblick",
     "email": "lichtblick@bmwgroup.com"
   },
-  "homepage": "https://github.com/bmw-software-engineering",
+  "homepage": "https://github.com/lichtblick-suite",
   "main": "./src/index.ts",
   "files": [
     "dist",
