@@ -229,6 +229,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 color="inherit"
                 disabled={!hasCurrentLayout}
                 id="add-panel-button"
+                data-testid="AddPanelButton"
                 data-tourid="add-panel-button"
                 title={t("addPanel")}
                 aria-label="Add panel button"
