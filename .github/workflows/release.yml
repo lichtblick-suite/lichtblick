@@ -44,11 +44,14 @@ jobs:
         run: |
           yarn run desktop:build:prod
 
-      - name: Build release binaries for multiple OS
-        run: |
-          yarn run package:win
-          yarn run package:linux
-          yarn run package:darwin
+      - name: Build windows version
+        run: yarn run package:win
+
+      - name: Build linux version
+        run: yarn run package:linux
+
+      - name: Build macOS version
+        run: yarn run package:darwin
 
       # Important to use [skip actions] to avoid triggering other verisoning workflows
       # https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/skipping-workflow-runs
