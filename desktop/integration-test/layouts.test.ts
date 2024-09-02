@@ -13,7 +13,10 @@ describe("layouts", () => {
   async function accessLayout(app: AppType) {
     await closeDataSourceDialogAfterAppLaunch(app);
     await app.renderer.getByTestId("layouts-left").click();
-    await app.renderer.getByTestId("layout-list-item").click();
+    await app.renderer
+      .getByTestId("layout-list-item")
+      .getByText("Default", { exact: true })
+      .click();
   }
 
   it("should open 3D panel when clicking on Layouts > default", async () => {
