@@ -2,6 +2,11 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      pre_release:
+        type: boolean
+        description: "Pre-release"
+        default: true
 
 jobs:
   build:
@@ -63,6 +68,7 @@ jobs:
           name: "v${{ env.new_version }}"
           commit: main
           generateReleaseNotes: true
+          prerelease: ${{ github.event.inputs.pre_release }}
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
           artifacts: |
             dist/lichtblick-${{ env.new_version }}-linux-amd64.deb
