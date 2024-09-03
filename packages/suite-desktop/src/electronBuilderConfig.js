@@ -27,8 +27,8 @@ function makeElectronBuilderConfig(params) {
     icon: path.join(__dirname, "../resources/icon/icon.icns"),
     protocols: [
       {
-        name: "foxglove",
-        schemes: ["foxglove"],
+        name: "lichtblick",
+        schemes: ["lichtblick"],
       },
     ],
     linux: {

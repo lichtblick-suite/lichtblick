@@ -142,7 +142,7 @@ export function main(): void {
     },
     async fetchLayouts() {
       const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionRoot = pathJoin(homePath, ".lichtblick", "layouts");
+      const userExtensionRoot = pathJoin(homePath, ".lichtblick-suite", "layouts");
       return await fetchLayouts(userExtensionRoot);
     },
     async installExtension(foxeFileData: Uint8Array) {
