@@ -56,9 +56,9 @@ $ yarn install
 Launch the development environment:
 
 ```sh
-# To launch the desktop app (run both scripts concurrently):
-$ yarn desktop:serve        # start webpack
-$ yarn desktop:start        # launch electron
+# To launch the desktop app (run scripts in different terminals):
+$ yarn desktop:serve        # start webpack dev server
+$ yarn desktop:start        # launch electron (make sure the desktop:serve finished to build)
 
 # To launch the web app:
 $ yarn run web:serve        # it will be avaiable in http://localhost:8080
