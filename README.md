@@ -64,6 +64,11 @@ $ yarn desktop:start        # launch electron (make sure the desktop:serve finis
 $ yarn run web:serve        # it will be avaiable in http://localhost:8080
 ```
 
+:warning: Ubuntu users: the application may present some issues using GPU. In order to bypass the GPU and process it using directly the CPU (software), please run lichtblick using the variable `LIBGL_ALWAYS_SOFTWARE` set to `1`:
+```sh
+$ LIBGL_ALWAYS_SOFTWARE=1 yarn desktop:start
+```
+
 ## :hammer_and_wrench: Building Lichtblick
 
 Build the application for production using these commands:
