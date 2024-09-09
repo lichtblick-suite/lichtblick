@@ -12,4 +12,4 @@
 
 - [ ] The web version was tested and it is running ok
 - [ ] The desktop version was tested and it is running ok
-- [ ] I've updated/created the storybook file(s)
+- [ ] This change is covered by unit tests
