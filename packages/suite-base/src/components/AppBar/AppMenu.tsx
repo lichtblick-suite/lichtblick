@@ -17,6 +17,7 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { formatKeyboardShortcut } from "@lichtblick/suite-base/util/formatKeyboardShortcut";
 
 import { NestedMenuItem } from "./NestedMenuItem";
 import { AppBarMenuItem } from "./types";
@@ -83,6 +84,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         type: "item",
         label: t("openLocalFile"),
         key: "open-file",
+        shortcut: formatKeyboardShortcut("O", ["Meta"]),
         dataTestId: "menu-item-open-local-file",
         onClick: () => {
           handleNestedMenuClose();
@@ -93,6 +95,7 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         type: "item",
         label: t("openConnection"),
         key: "open-connection",
+        shortcut: formatKeyboardShortcut("O", ["Meta", "Shift"]),
         dataTestId: "menu-item-open-connection",
         onClick: () => {
           dialogActions.dataSource.open("connection");

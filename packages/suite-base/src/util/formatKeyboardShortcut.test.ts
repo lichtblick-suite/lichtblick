@@ -18,15 +18,21 @@ describe("formatKeyboardShortcut", () => {
   it("formats shortcuts correctly for Windows", () => {
     userAgent.mockReturnValue("Windows");
     expect(formatKeyboardShortcut("O", ["Shift", "Meta"])).toBe("Shift+Ctrl+O");
+    expect(formatKeyboardShortcut("O", ["Shift", "Shift", "Shift"])).toBe("Shift+Shift+Shift+O");
+    expect(formatKeyboardShortcut("O", [])).toBe("O");
   });
 
   it("formats shortcuts correctly Linux", () => {
     userAgent.mockReturnValue("Linux");
     expect(formatKeyboardShortcut("O", ["Shift", "Meta"])).toBe("Shift+Ctrl+O");
+    expect(formatKeyboardShortcut("O", ["Shift", "Shift", "Shift"])).toBe("Shift+Shift+Shift+O");
+    expect(formatKeyboardShortcut("O", [])).toBe("O");
   });
 
   it("formats shortcuts correctly Mac", () => {
     userAgent.mockReturnValue("Mac");
     expect(formatKeyboardShortcut("O", ["Shift", "Meta"])).toBe("⇧⌘O");
+    expect(formatKeyboardShortcut("O", ["Shift", "Shift", "Shift"])).toBe("⇧⇧⇧O");
+    expect(formatKeyboardShortcut("O", [])).toBe("O");
   });
 });

@@ -32,7 +32,7 @@ function callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent): 
     return;
   }
 
-  const handler = handlers[event.key] ?? handlers[event.code];
+  const handler = handlers[event.key.toLowerCase()] ?? handlers[event.code];
 
   if (typeof handler === "function") {
     let preventDefault = true;
