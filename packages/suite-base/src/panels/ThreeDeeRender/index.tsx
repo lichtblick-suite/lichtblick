@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StrictMode, useMemo } from "react";
+import { useMemo } from "react";
 import { DeepPartial } from "ts-essentials";
 
 import { useCrash } from "@lichtblick/hooks";
@@ -40,18 +40,16 @@ type InitPanelArgs = {
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
   const { crash, forwardedAnalytics, interfaceMode, testOptions, customSceneExtensions } = args;
   return createSyncRoot(
-    <StrictMode>
-      <CaptureErrorBoundary onError={crash}>
-        <ForwardAnalyticsContextProvider forwardedAnalytics={forwardedAnalytics}>
-          <ThreeDeeRender
-            context={context}
-            interfaceMode={interfaceMode}
-            testOptions={testOptions}
-            customSceneExtensions={customSceneExtensions}
-          />
-        </ForwardAnalyticsContextProvider>
-      </CaptureErrorBoundary>
-    </StrictMode>,
+    <CaptureErrorBoundary onError={crash}>
+      <ForwardAnalyticsContextProvider forwardedAnalytics={forwardedAnalytics}>
+        <ThreeDeeRender
+          context={context}
+          interfaceMode={interfaceMode}
+          testOptions={testOptions}
+          customSceneExtensions={customSceneExtensions}
+        />
+      </ForwardAnalyticsContextProvider>
+    </CaptureErrorBoundary>,
     context.panelElement,
   );
 }

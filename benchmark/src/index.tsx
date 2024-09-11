@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import Logger from "@lichtblick/log";
 import { initI18n } from "@lichtblick/suite-base";
@@ -17,11 +17,6 @@ window.onerror = (...args) => {
   console.error(...args);
 };
 
-const rootEl = document.getElementById("root");
-if (!rootEl) {
-  throw new Error("missing #root element");
-}
-
 async function main() {
   const { overwriteFetch, waitForFonts } = await import("@lichtblick/suite-base");
   overwriteFetch();
@@ -32,8 +27,13 @@ async function main() {
 
   const { Root } = await import("./Root");
 
-  // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(<Root />, rootEl);
+  const rootEl = document.getElementById("root");
+  if (!rootEl) {
+    throw new Error("missing #root element");
+  }
+
+  const root = createRoot(rootEl);
+  root.render(<Root />);
 }
 
 void main();

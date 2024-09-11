@@ -8,7 +8,7 @@
 /// <reference types="quicklookjs" />
 
 import { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { useAsync } from "react-use";
 
 import Logger from "@lichtblick/log";
@@ -128,12 +128,12 @@ export function main(): void {
       </div>
     );
   }
-  // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(
+
+  const root = createRoot(rootEl);
+  root.render(
     <>
       <GlobalStyle />
       <Root />
     </>,
-    rootEl,
   );
 }

@@ -200,7 +200,7 @@ function StateTransitions(props: Props) {
     const xAxisHeight = 30;
     return {
       height: Math.max(80, onlyTopicsHeight + xAxisHeight),
-      heightPerTopic: onlyTopicsHeight / paths.length,
+      heightPerTopic: paths.length === 0 ? 0 : onlyTopicsHeight / paths.length,
     };
   }, [paths.length]);
 

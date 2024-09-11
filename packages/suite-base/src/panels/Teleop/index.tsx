@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StrictMode, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useCrash } from "@lichtblick/hooks";
 import { PanelExtensionContext } from "@lichtblick/suite";
@@ -19,11 +19,9 @@ import TeleopPanel from "./TeleopPanel";
 
 function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionContext) {
   return createSyncRoot(
-    <StrictMode>
-      <CaptureErrorBoundary onError={crash}>
-        <TeleopPanel context={context} />
-      </CaptureErrorBoundary>
-    </StrictMode>,
+    <CaptureErrorBoundary onError={crash}>
+      <TeleopPanel context={context} />
+    </CaptureErrorBoundary>,
     context.panelElement,
   );
 }

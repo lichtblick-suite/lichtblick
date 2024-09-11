@@ -9,8 +9,8 @@
 /// <reference types="electron" />
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
-import { StrictMode, useEffect } from "react";
-import ReactDOM from "react-dom";
+import { useEffect } from "react";
+import { createRoot } from "react-dom/client";
 
 import Logger from "@lichtblick/log";
 import {
@@ -61,17 +61,14 @@ export async function main(params: MainParams): Promise<void> {
   await waitForFonts();
   await initI18n();
 
-  // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(
-    <StrictMode>
-      <LogAfterRender>
-        <Root
-          appConfiguration={params.appConfiguration}
-          extraProviders={params.extraProviders}
-          dataSources={params.dataSources}
-        />
-      </LogAfterRender>
-    </StrictMode>,
-    rootEl,
+  const root = createRoot(rootEl);
+  root.render(
+    <LogAfterRender>
+      <Root
+        appConfiguration={params.appConfiguration}
+        extraProviders={params.extraProviders}
+        dataSources={params.dataSources}
+      />
+    </LogAfterRender>,
   );
 }

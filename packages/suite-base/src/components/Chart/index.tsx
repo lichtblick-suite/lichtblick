@@ -304,39 +304,47 @@ function Chart(props: Props): JSX.Element {
         typeof canvas.transferControlToOffscreen === "function"
           ? canvas.transferControlToOffscreen()
           : canvas;
-      const scales = await sendWrapperRef.current<RpcScales>(
-        "initialize",
-        {
-          node: offscreenCanvas,
-          type,
-          data: update.data,
-          typedData: update.typedData,
-          options: update.options,
-          devicePixelRatio,
-          width: update.width,
-          height: update.height,
-        },
-        [
-          // If this is actually a HTMLCanvasElement then it will not be transferred because we
-          // don't use a worker
-          offscreenCanvas as OffscreenCanvas,
-        ],
-      );
-      maybeUpdateScales(scales);
-      onFinishRender?.();
 
-      // We cannot rely solely on the call to `initialize`, since it doesn't
-      // actually produce the first frame. However, if we append this update to
-      // the end, it will overwrite updates that have been queued _since we
-      // started initializing_. This is incorrect behavior and can set the
-      // scales incorrectly on weak devices.
-      //
-      // To prevent this from happening, we put this update at the beginning of
-      // the queue so that it gets coalesced properly.
-      queuedUpdates.current = [update, ...queuedUpdates.current];
-      await flushUpdates(sendWrapperRef.current);
-      // once we are initialized, we can allow other handlers to send to the rpc endpoint
-      rpcSendRef.current = sendWrapperRef.current;
+      // Using queueMicrotask to ensure the canvas is completely inserted into the DOM
+      // before sending the initialization request to the worker.
+      queueMicrotask(async () => {
+        if (!sendWrapperRef.current) {
+          return;
+        }
+        const scales = await sendWrapperRef.current<RpcScales>(
+          "initialize",
+          {
+            node: offscreenCanvas,
+            type,
+            data: update.data,
+            typedData: update.typedData,
+            options: update.options,
+            devicePixelRatio,
+            width: update.width,
+            height: update.height,
+          },
+          [
+            // If this is actually a HTMLCanvasElement then it will not be transferred because we
+            // don't use a worker
+            offscreenCanvas as OffscreenCanvas,
+          ],
+        );
+        maybeUpdateScales(scales);
+        onFinishRender?.();
+
+        // We cannot rely solely on the call to `initialize`, since it doesn't
+        // actually produce the first frame. However, if we append this update to
+        // the end, it will overwrite updates that have been queued _since we
+        // started initializing_. This is incorrect behavior and can set the
+        // scales incorrectly on weak devices.
+        //
+        // To prevent this from happening, we put this update at the beginning of
+        // the queue so that it gets coalesced properly.
+        queuedUpdates.current = [update, ...queuedUpdates.current];
+        await flushUpdates(sendWrapperRef.current);
+        // once we are initialized, we can allow other handlers to send to the rpc endpoint
+        rpcSendRef.current = sendWrapperRef.current;
+      });
     },
     [maybeUpdateScales, onFinishRender, onStartRender, type, flushUpdates],
   );
