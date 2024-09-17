@@ -23,9 +23,9 @@ const mockIsDesktop = isDesktopApp as jest.MockedFunction<typeof isDesktopApp>;
 
 describe("app state url parser", () => {
   // Note that the foxglove URL here is different from actual foxglove URLs because Node's URL parser
-  // interprets foxglove:// URLs differently than the browser does.
+  // interprets lichtblick:// URLs differently than the browser does.
   describe.each([
-    { isDesktop: true, urlBuilder: () => new URL("foxglove://host/open") },
+    { isDesktop: true, urlBuilder: () => new URL("lichtblick://host/open") },
     { isDesktop: false, urlBuilder: () => new URL("https://studio.foxglove.dev/") },
   ])("url tests", ({ isDesktop, urlBuilder }) => {
     beforeEach(() => mockIsDesktop.mockReturnValue(isDesktop));

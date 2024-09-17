@@ -9,10 +9,10 @@ import { decodeRendererArg, encodeRendererArg } from "./rendererArgs";
 
 describe("encodeRendererArg & decodeRendererArg", () => {
   it("encodes and decodes", () => {
-    const encoded = encodeRendererArg("deepLinks", ["foxglove://example"]);
-    expect(encoded).toEqual("--deepLinks=WyJmb3hnbG92ZTovL2V4YW1wbGUiXQ==");
+    const encoded = encodeRendererArg("deepLinks", ["lichtblick://example"]);
+    expect(encoded).toEqual("--deepLinks=WyJsaWNodGJsaWNrOi8vZXhhbXBsZSJd");
     expect(decodeRendererArg("deepLinks", ["arg1", encoded, "arg2"])).toEqual([
-      "foxglove://example",
+      "lichtblick://example",
     ]);
   });
 });

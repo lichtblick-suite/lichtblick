@@ -25,7 +25,7 @@ export function LaunchingInDesktopScreen(): ReactElement {
   }
 
   useEffect(() => {
-    const desktopURL = new URL("foxglove://open");
+    const desktopURL = new URL("lichtblick://open");
     cleanWebURL.searchParams.forEach((v, k) => {
       if (k && v) {
         desktopURL.searchParams.set(k, v);

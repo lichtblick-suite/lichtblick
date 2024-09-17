@@ -112,7 +112,7 @@ export async function main(): Promise<void> {
     someWindow?.restore();
     someWindow?.focus();
 
-    const deepLinks = argv.slice(1).filter((arg) => arg.startsWith("foxglove://"));
+    const deepLinks = argv.slice(1).filter((arg) => arg.startsWith("lichtblick://"));
     for (const link of deepLinks) {
       app.emit("open-url", { preventDefault() {} }, link);
     }
@@ -132,7 +132,7 @@ export async function main(): Promise<void> {
 
   if (!app.isDefaultProtocolClient("foxglove")) {
     if (!app.setAsDefaultProtocolClient("foxglove")) {
-      log.warn("Could not set app as handler for foxglove://");
+      log.warn("Could not set app as handler for lichtblick://");
     }
   }
 
@@ -183,13 +183,13 @@ export async function main(): Promise<void> {
   // tho it is a bit strange since it isn't clear when this runs...
   app.on("open-url", (ev, url) => {
     log.debug("open-url handler", url);
-    if (!url.startsWith("foxglove://")) {
+    if (!url.startsWith("lichtblick://")) {
       return;
     }
 
     ev.preventDefault();
 
-    if (url.startsWith("foxglove://signin-complete")) {
+    if (url.startsWith("lichtblick://signin-complete")) {
       // When completing sign in from Console, the browser can launch this URL to re-focus the app.
       app.focus({ steal: true });
     } else if (app.isReady()) {
@@ -220,7 +220,7 @@ export async function main(): Promise<void> {
   app.on("ready", async () => {
     updateNativeColorScheme();
     const argv = process.argv;
-    const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
+    const deepLinks = argv.filter((arg) => arg.startsWith("lichtblick://"));
 
     // create the initial window now to display to the user immediately
     // loading the app url happens at the end of ready to ensure we've setup all the handlers, settings, etc
