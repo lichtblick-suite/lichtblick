@@ -14,9 +14,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Copy20Filled } from "@fluentui/react-icons";
 import { Divider } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
+import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,10 +26,14 @@ import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo, useMessagesByTopic } from "@lichtblick/suite-base/PanelAPI";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppTimeFormat } from "@lichtblick/suite-base/hooks/useAppTimeFormat";
 import { FilterTagInput } from "@lichtblick/suite-base/panels/Log/FilterTagInput";
+import formatMessages from "@lichtblick/suite-base/panels/Log/formatMessages";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import clipboard from "@lichtblick/suite-base/util/clipboard";
 import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
 import LogList from "./LogList";
@@ -74,6 +80,7 @@ const SUPPORTED_DATATYPES = [
 ];
 
 const LogPanel = React.memo(({ config, saveConfig }: Props) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { topics } = useDataSourceInfo();
   const { minLogLevel, searchTerms, nameFilter } = config;
 
@@ -187,13 +194,39 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 
   const normalizedMessages = useMemo(
-    () => filteredMessages.map((msg) => normalizedLogMessage(msg.schemaName, msg["message"])),
+    () =>
+      filteredMessages.map((logMessage) =>
+        normalizedLogMessage(logMessage.schemaName, logMessage["message"]),
+      ),
     [filteredMessages],
+  );
+
+  const { timeZone } = useAppTimeFormat();
+
+  const handleCopy = useCallback(async () => {
+    const messagesToCopy: string[] = formatMessages(normalizedMessages, timeZone);
+    if (messagesToCopy.length === 0) {
+      enqueueSnackbar(t("nothingToCopy"), { variant: "warning" });
+      return;
+    }
+
+    try {
+      await clipboard.copy(messagesToCopy.join("\n"));
+    } catch (error) {
+      console.warn(error);
+    }
+    enqueueSnackbar(t("logsCopied"), { variant: "success" });
+  }, [enqueueSnackbar, normalizedMessages, t, timeZone]);
+
+  const copyLogIcon = (
+    <ToolbarIconButton title={t("copyLogs")} onClick={handleCopy}>
+      <Copy20Filled />
+    </ToolbarIconButton>
   );
 
   return (
     <Stack fullHeight>
-      <PanelToolbar />
+      <PanelToolbar additionalIcons={copyLogIcon} />
       <Stack flexGrow={0} padding={0.5}>
         <FilterBar
           searchTerms={searchTermsSet}

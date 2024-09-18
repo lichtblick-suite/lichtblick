@@ -105,12 +105,16 @@ function LogList({ items }: Props): JSX.Element {
       scrollOffset: number;
       scrollUpdateWasRequested: boolean;
     }) => {
-      const isAtEnd =
-        scrollOffset + (outerRef.current?.offsetHeight ?? 0) === outerRef.current?.scrollHeight;
-      if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
-        setAutoscrollToEnd(false);
-      } else if (scrollDirection === "forward" && isAtEnd) {
-        setAutoscrollToEnd(true);
+      try {
+        const isAtEnd =
+          scrollOffset + (outerRef.current?.offsetHeight ?? 0) === outerRef.current?.scrollHeight;
+        if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
+          setAutoscrollToEnd(false);
+        } else if (scrollDirection === "forward" && isAtEnd) {
+          setAutoscrollToEnd(true);
+        }
+      } catch (error) {
+        console.error("Error while handling scroll", error);
       }
     },
     [],
