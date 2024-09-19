@@ -93,7 +93,8 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
     if (subMenuAnchorEl !== event.currentTarget) {
       setSubmenuAnchorEl(event.currentTarget);
     }
-    setMenuAnchorEl(undefined);
+    // 触摸屏测试
+    // setMenuAnchorEl(undefined);
   };
 
   const handleSubmenuClose = useCallback(() => {

@@ -89,6 +89,7 @@
     "@storybook/addon-interactions": "8.5.2",
     "@storybook/react": "8.5.2",
     "@storybook/react-webpack5": "8.5.2",
+    "@tauri-apps/cli": "next",
     "@types/babel__core": "^7.20.3",
     "@types/babel__preset-env": "^7.9.6",
     "@types/case-sensitive-paths-webpack-plugin": "2.1.9",
@@ -153,6 +154,7 @@
     "@lichtblick/log": "workspace:*",
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
+    "@tauri-apps/api": "1.6.0",
     "antd": "5.20.0",
     "react-use": "17.4.0",
     "rehype-raw": "6.1.1"

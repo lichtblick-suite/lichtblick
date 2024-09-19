@@ -38,12 +38,12 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: "Joystick",
     module: async () => await import("./Joystick"),
   },
-  {
-    title: t("VehicleControl"),
-    type: "VehicleControl",
-    description: "",
-    module: async () => await import("./VehicleControl"),
-  },
+  // {
+  //   title: t("VehicleControl"),
+  //   type: "VehicleControl",
+  //   description: "",
+  //   module: async () => await import("./VehicleControl"),
+  // },
   // {
   //   title: t("VehicleControl"),
   //   type: "CodeServer",
