@@ -6,9 +6,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { parseChannel } from "@foxglove/mcap-support";
-import { MessageDefinition } from "@foxglove/message-definition";
 import { ImageAnnotations } from "@foxglove/schemas/jsonschema";
 
+import { MessageDefinition } from "@lichtblick/message-definition";
 import { getMessagePathSearchItems } from "@lichtblick/suite-base/components/TopicList/getMessagePathSearchItems";
 import { Topic } from "@lichtblick/suite-base/players/types";
 

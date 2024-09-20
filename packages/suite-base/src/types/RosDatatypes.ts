@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageDefinition, MessageDefinitionField } from "@foxglove/message-definition";
+import { MessageDefinition, MessageDefinitionField } from "@lichtblick/message-definition";
 
 /**
  * Extend the standard ROS message definition with an optional flag.

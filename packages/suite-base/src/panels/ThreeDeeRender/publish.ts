@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageDefinition } from "@foxglove/message-definition";
 import { ros1, ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { fromDate } from "@foxglove/rostime";
 
+import { MessageDefinition } from "@lichtblick/message-definition";
 import { Point, makeCovarianceArray } from "@lichtblick/suite-base/util/geometry";
 
 import { Pose } from "./transforms/geometry";

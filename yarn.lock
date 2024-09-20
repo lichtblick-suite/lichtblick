@@ -2381,7 +2381,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/message-definition": 0.3.1
     "@foxglove/omgidl-parser": 1.0.3
     "@foxglove/omgidl-serialization": 1.0.3
     "@foxglove/ros2idl-parser": 0.3.2
@@ -2393,6 +2392,7 @@ __metadata:
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/wasm-zstd": 1.0.1
+    "@lichtblick/message-definition": 1.0.0
     "@mcap/core": 2.0.2
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
@@ -2403,17 +2403,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/message-definition@npm:0.3.1, @foxglove/message-definition@npm:^0.3.1":
-  version: 0.3.1
-  resolution: "@foxglove/message-definition@npm:0.3.1"
-  checksum: 71699bc9dafc90d07ce312bcaebbedc1f60a173c8ba66421d741cf713ea6bbf6b462b551fcfe6da86488814629639e1dc424e9664c7ea2474227a20ad88ac776
-  languageName: node
-  linkType: hard
-
 "@foxglove/message-definition@npm:^0.2.0":
   version: 0.2.0
   resolution: "@foxglove/message-definition@npm:0.2.0"
   checksum: 8f972dd52cf2f44e8357c8f13ee2136b23548d49d9251fc47c68569a33effe5d082c0681e3b0761751dd27759ac778f1e45de9f52d5925298ccc80e607784159
+  languageName: node
+  linkType: hard
+
+"@foxglove/message-definition@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "@foxglove/message-definition@npm:0.3.1"
+  checksum: 71699bc9dafc90d07ce312bcaebbedc1f60a173c8ba66421d741cf713ea6bbf6b462b551fcfe6da86488814629639e1dc424e9664c7ea2474227a20ad88ac776
   languageName: node
   linkType: hard
 
@@ -3283,6 +3283,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lichtblick/message-definition@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/message-definition@npm:1.0.0"
+  checksum: 2046b4fd7781cd088aeebb84e9e3b742868df9d79fc915ee484ed027e48b306a5c8151c327e2e205124c23fd1dd90d8f007d87e22fe363e79db3602d4d2a06b4
+  languageName: node
+  linkType: hard
+
 "@lichtblick/suite-base@workspace:*, @lichtblick/suite-base@workspace:packages/suite-base":
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite-base@workspace:packages/suite-base"
@@ -3297,7 +3304,6 @@ __metadata:
     "@foxglove/crc": 0.0.3
     "@foxglove/electron-socket": 2.1.1
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/message-definition": 0.3.1
     "@foxglove/message-path": "workspace:*"
     "@foxglove/ros1": 3.0.0
     "@foxglove/rosbag": 0.4.1
@@ -3322,6 +3328,7 @@ __metadata:
     "@lichtblick/den": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/message-definition": 1.0.0
     "@lichtblick/suite": "workspace:*"
     "@mcap/core": 2.0.2
     "@mui/icons-material": 5.15.5
