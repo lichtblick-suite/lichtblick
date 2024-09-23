@@ -15,7 +15,7 @@ export async function loadDecompressHandlers(): Promise<McapTypes.DecompressHand
 // eslint-disable-next-line no-underscore-dangle
 async function _loadDecompressHandlers(): Promise<McapTypes.DecompressHandlers> {
   const [decompressZstd, decompressLZ4, bzip2] = await Promise.all([
-    import("@foxglove/wasm-zstd").then(async (mod) => {
+    import("@lichtblick/wasm-zstd").then(async (mod) => {
       await mod.isLoaded;
       return mod.decompress;
     }),

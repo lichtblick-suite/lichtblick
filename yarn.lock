@@ -2379,8 +2379,8 @@ __metadata:
     "@foxglove/tsconfig": 2.0.0
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
-    "@foxglove/wasm-zstd": 1.0.1
     "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/wasm-zstd": 1.0.0
     "@mcap/core": 2.0.2
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
@@ -2700,13 +2700,6 @@ __metadata:
   version: 1.0.2
   resolution: "@foxglove/wasm-lz4@npm:1.0.2"
   checksum: 1148ae84be22830382995ef19912dd033f009c0f16690dd942acce2efee02035b035f5910690c7e37c9435e7636b94006ef33220f86e98bc281129e50445bb19
-  languageName: node
-  linkType: hard
-
-"@foxglove/wasm-zstd@npm:1.0.1":
-  version: 1.0.1
-  resolution: "@foxglove/wasm-zstd@npm:1.0.1"
-  checksum: 91fffc0970e4dad0550e054ae1647730e09876ef0d6fb15c70d800e9027e38d8372e990dde98542a95eb00d88d483c9e1227be0ea958f9d3f41693dc78311027
   languageName: node
   linkType: hard
 
@@ -3557,6 +3550,13 @@ __metadata:
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
+
+"@lichtblick/wasm-zstd@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/wasm-zstd@npm:1.0.0"
+  checksum: 7ccfb840ff467b405ebdf889fb6a7092025be1898f9a0d97511fa579562960cde6b80fa0efc8d0570f6f319cdab9ee98b2e67bf54db4a0fed7700f85e682d613
+  languageName: node
+  linkType: hard
 
 "@malept/cross-spawn-promise@npm:^1.1.0":
   version: 1.1.1
