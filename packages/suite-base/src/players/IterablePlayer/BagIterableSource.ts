@@ -9,8 +9,6 @@ import { Bag, Filelike } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { MessageReader } from "@foxglove/rosmsg-serialization";
-import Bzip2 from "@foxglove/wasm-bz2";
-import decompressLZ4 from "@foxglove/wasm-lz4";
 
 import { compare } from "@lichtblick/rostime";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
@@ -24,6 +22,8 @@ import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import BrowserHttpReader from "@lichtblick/suite-base/util/BrowserHttpReader";
 import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
 import { getBagChunksOverlapCount } from "@lichtblick/suite-base/util/bags";
+import Bzip2 from "@lichtblick/wasm-bz2";
+import decompressLZ4 from "@lichtblick/wasm-lz4";
 
 import {
   GetBackfillMessagesArgs,

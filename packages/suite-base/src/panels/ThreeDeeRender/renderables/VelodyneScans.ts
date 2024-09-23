@@ -6,14 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { NumericType, PointCloud as FoxglovePointCloud } from "@foxglove/schemas";
-import {
-  Calibration,
-  Model,
-  PointCloud,
-  PointFieldDataType,
-  RawPacket,
-  Transformer,
-} from "@foxglove/velodyne-cloud";
 import * as _ from "lodash-es";
 
 import { toNanoSec, toSec } from "@lichtblick/rostime";
@@ -24,6 +16,14 @@ import {
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PointClouds";
 import type { RosObject } from "@lichtblick/suite-base/players/types";
 import { VelodyneScan } from "@lichtblick/suite-base/types/Messages";
+import {
+  Calibration,
+  Model,
+  PointCloud,
+  PointFieldDataType,
+  RawPacket,
+  Transformer,
+} from "@lichtblick/velodyne-cloud";
 
 import { autoSelectColorSettings } from "./colorMode";
 import {

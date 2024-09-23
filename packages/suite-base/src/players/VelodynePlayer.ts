@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Model, RawPacket, ReturnMode, packetRate } from "@foxglove/velodyne-cloud";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
@@ -35,6 +34,7 @@ import {
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { Model, RawPacket, ReturnMode, packetRate } from "@lichtblick/velodyne-cloud";
 
 const log = Logger.getLogger(__filename);
 
