@@ -6,9 +6,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromNanoSec, toNanoSec } from "@foxglove/rostime";
 import { setupJestCanvasMock } from "jest-canvas-mock";
 
+import { fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { Renderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderer";

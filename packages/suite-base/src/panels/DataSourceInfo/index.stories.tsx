@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromDate } from "@foxglove/rostime";
 import { StoryObj } from "@storybook/react";
 
+import { fromDate } from "@lichtblick/rostime";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import DataSourceInfoPanel from "@lichtblick/suite-base/panels/DataSourceInfo";
 import { PlayerPresence, Topic } from "@lichtblick/suite-base/players/types";

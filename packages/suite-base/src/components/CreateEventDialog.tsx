@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { toDate, toNanoSec } from "@foxglove/rostime";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -33,6 +32,7 @@ import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
 
 import Log from "@lichtblick/log";
+import { toDate, toNanoSec } from "@lichtblick/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,

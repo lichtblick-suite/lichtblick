@@ -5,6 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { simplify } from "intervals-fn";
+import * as _ from "lodash-es";
+
+import { Condvar } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import Log from "@lichtblick/log";
 import {
   Time,
   add,
@@ -12,13 +18,7 @@ import {
   fromNanoSec,
   subtract as subtractTimes,
   toNanoSec,
-} from "@foxglove/rostime";
-import { simplify } from "intervals-fn";
-import * as _ from "lodash-es";
-
-import { Condvar } from "@lichtblick/den/async";
-import { filterMap } from "@lichtblick/den/collection";
-import Log from "@lichtblick/log";
+} from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { IteratorCursor } from "@lichtblick/suite-base/players/IterablePlayer/IteratorCursor";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";

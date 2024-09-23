@@ -7,8 +7,8 @@
 
 import { ROS2_TO_DEFINITIONS, Rosbag2, SqliteSqljs } from "@foxglove/rosbag2-web";
 import { stringify } from "@foxglove/rosmsg";
-import { Time, add as addTime } from "@foxglove/rostime";
 
+import { Time, add as addTime } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
 import {

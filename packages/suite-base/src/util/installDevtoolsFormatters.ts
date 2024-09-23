@@ -17,9 +17,9 @@
 // Custom formatters for Chrome dev tools. See documentation: http://bit.ly/object-formatters
 // Note that the "Enable custom formatters" setting must be turned on in order to use these formatters.
 
-import { isTime } from "@foxglove/rostime";
 import seedrandom from "seedrandom";
 
+import { isTime } from "@lichtblick/rostime";
 import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
 type HtmlTemplate = unknown;

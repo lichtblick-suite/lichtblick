@@ -9,11 +9,11 @@
 
 /* eslint-disable jest/no-done-callback */
 
-import { Time } from "@foxglove/rostime";
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 
 import { Condvar, signal } from "@lichtblick/den/async";
+import { Time } from "@lichtblick/rostime";
 import { PanelExtensionContext, RenderState, MessageEvent, Immutable } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { AdvertiseOptions, PlayerCapabilities } from "@lichtblick/suite-base/players/types";

@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { toNanoSec } from "@foxglove/rostime";
 import { CompressedImage, RawImage } from "@foxglove/schemas";
 import { t } from "i18next";
 import { assert } from "ts-essentials";
@@ -13,6 +12,7 @@ import { assert } from "ts-essentials";
 import { MultiMap, filterMap } from "@lichtblick/den/collection";
 import { PinholeCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
+import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
 

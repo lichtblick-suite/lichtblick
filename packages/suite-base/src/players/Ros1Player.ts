@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { RosNode, TcpSocket } from "@foxglove/ros1";
-import { Time, fromMillis, isGreaterThan, toSec } from "@foxglove/rostime";
 import { HttpServer } from "@foxglove/xmlrpc";
 import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
@@ -15,6 +14,7 @@ import { debouncePromise } from "@lichtblick/den/async";
 import { Sockets } from "@lichtblick/electron-socket/renderer";
 import Logger from "@lichtblick/log";
 import { MessageDefinition } from "@lichtblick/message-definition";
+import { Time, fromMillis, isGreaterThan, toSec } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";

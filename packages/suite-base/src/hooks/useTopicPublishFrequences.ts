@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
 import { useMemo, useRef } from "react";
 
+import { subtract as subtractTimes, areEqual, fromMillis, Time, toSec } from "@lichtblick/rostime";
 import { Immutable } from "@lichtblick/suite";
 import {
   MessagePipelineContext,

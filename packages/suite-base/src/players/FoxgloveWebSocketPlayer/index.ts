@@ -9,7 +9,6 @@ import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
 import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
 import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
-import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
 import {
   Channel,
   ChannelId,
@@ -34,6 +33,7 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@lichtblick/den/async";
 import Log from "@lichtblick/log";
 import { MessageDefinition, isMsgDefEqual } from "@lichtblick/message-definition";
+import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";

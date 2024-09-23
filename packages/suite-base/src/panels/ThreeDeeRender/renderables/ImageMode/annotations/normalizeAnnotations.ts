@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time, fromNanoSec } from "@foxglove/rostime";
 import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
 
 import { filterMap } from "@lichtblick/den/collection";
+import { Time, fromNanoSec } from "@lichtblick/rostime";
 import { RosObject } from "@lichtblick/suite-base/players/types";
 import {
   ImageMarker,

@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { compare, Time } from "@foxglove/rostime";
 import { useLayoutEffect } from "react";
 
+import { compare, Time } from "@lichtblick/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,

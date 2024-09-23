@@ -5,8 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time, fromNanoSec, isLessThan, isGreaterThan } from "@foxglove/rostime";
 import { McapTypes } from "@mcap/core";
+
+import { Time, fromNanoSec, isLessThan, isGreaterThan } from "@lichtblick/rostime";
 
 import { TopicInfo, FileInfo } from "./types";
 

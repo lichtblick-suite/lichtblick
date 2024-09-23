@@ -6,10 +6,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessagePath } from "@foxglove/message-path";
-import { toSec, subtract as subtractTime } from "@foxglove/rostime";
 import * as Comlink from "comlink";
 
 import { ComlinkWrap } from "@lichtblick/den/worker";
+import { toSec, subtract as subtractTime } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";

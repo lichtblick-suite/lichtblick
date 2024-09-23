@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, toMillis, fromMillis } from "@foxglove/rostime";
+import { Time, toMillis, fromMillis } from "@lichtblick/rostime";
 
 const ARROW_SEEK_BIG_MS = 500;
 const ARROW_SEEK_DEFAULT_MS = 100;

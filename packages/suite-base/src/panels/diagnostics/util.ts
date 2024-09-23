@@ -14,9 +14,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, compare } from "@foxglove/rostime";
 import * as _ from "lodash-es";
 
+import { Time, compare } from "@lichtblick/rostime";
 import { Header } from "@lichtblick/suite-base/types/Messages";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 

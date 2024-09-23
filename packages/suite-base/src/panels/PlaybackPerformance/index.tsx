@@ -14,11 +14,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { Typography } from "@mui/material";
 import * as _ from "lodash-es";
 import { ReactElement } from "react";
 
+import { subtract as subtractTimes, toSec } from "@lichtblick/rostime";
 import { Immutable } from "@lichtblick/suite";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";

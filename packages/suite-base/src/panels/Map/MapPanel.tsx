@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { toSec } from "@foxglove/rostime";
 import { Feature } from "geojson";
 import { produce } from "immer";
 import {
@@ -25,6 +24,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
+import { toSec } from "@lichtblick/rostime";
 import {
   MessageEvent,
   PanelExtensionContext,

@@ -18,13 +18,13 @@ import roslib from "@foxglove/roslibjs";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { MessageReader as ROS1MessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-import { Time, fromMillis, toSec } from "@foxglove/rostime";
 import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import { filterMap } from "@lichtblick/den/collection";
 import Log from "@lichtblick/log";
+import { Time, fromMillis, toSec } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
 import {

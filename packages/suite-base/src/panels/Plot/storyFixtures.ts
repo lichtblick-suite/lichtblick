@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromSec, toSec } from "@foxglove/rostime";
 import * as _ from "lodash-es";
 
+import { fromSec, toSec } from "@lichtblick/rostime";
 import { BlockCache, MessageBlock, MessageEvent } from "@lichtblick/suite-base/players/types";
 import { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";

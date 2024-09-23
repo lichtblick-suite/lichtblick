@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time, toNanoSec } from "@foxglove/rostime";
 import * as _ from "lodash-es";
 import { useSnackbar } from "notistack";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -15,6 +14,7 @@ import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@lichtblick/log";
+import { Time, toNanoSec } from "@lichtblick/rostime";
 import {
   Immutable,
   LayoutActions,

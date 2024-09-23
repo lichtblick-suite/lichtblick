@@ -5,13 +5,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time, fromMillis, add as addTimes, toDate, fromDate, fromMicros } from "@foxglove/rostime";
 import { Model, RawPacket, ReturnMode, packetRate } from "@foxglove/velodyne-cloud";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import { Sockets, UdpRemoteInfo, UdpSocketRenderer } from "@lichtblick/electron-socket/renderer";
 import Logger from "@lichtblick/log";
+import {
+  Time,
+  fromMillis,
+  add as addTimes,
+  toDate,
+  fromDate,
+  fromMicros,
+} from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import {

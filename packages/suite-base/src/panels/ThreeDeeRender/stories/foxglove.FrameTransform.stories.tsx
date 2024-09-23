@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromSec } from "@foxglove/rostime";
 import type { FrameTransform } from "@foxglove/schemas";
 import { StoryObj } from "@storybook/react";
 
+import { fromSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";

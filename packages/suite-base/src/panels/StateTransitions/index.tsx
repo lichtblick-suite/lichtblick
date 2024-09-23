@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { fontMonospace } from "@foxglove/theme";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import * as _ from "lodash-es";
@@ -24,6 +23,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@lichtblick/den/collection";
+import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@lichtblick/rostime";
 import { Immutable } from "@lichtblick/suite";
 import { useBlocksSubscriptions } from "@lichtblick/suite-base/PanelAPI";
 import {

@@ -17,7 +17,7 @@
 // All message types supported by Rviz
 // http://wiki.ros.org/rviz/DisplayTypes
 
-import { Time } from "@foxglove/rostime";
+import { Time } from "@lichtblick/rostime";
 
 export type MutablePoint = {
   x: number;

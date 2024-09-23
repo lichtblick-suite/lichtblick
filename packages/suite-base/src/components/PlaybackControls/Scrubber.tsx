@@ -5,13 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  subtract as subtractTimes,
-  add as addTimes,
-  toSec,
-  fromSec,
-  Time,
-} from "@foxglove/rostime";
 import { Fade, PopperProps, Tooltip } from "@mui/material";
 import type { Instance } from "@popperjs/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,6 +12,13 @@ import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
+import {
+  subtract as subtractTimes,
+  add as addTimes,
+  toSec,
+  fromSec,
+  Time,
+} from "@lichtblick/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,

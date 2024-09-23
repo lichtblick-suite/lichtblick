@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isTime, toSec } from "@foxglove/rostime";
 import { ScatterDataPoint } from "chart.js";
 
+import { isTime, toSec } from "@lichtblick/rostime";
 import { Time } from "@lichtblick/suite";
 
 // In addition to the base datum, we also add receiveTime and optionally header stamp to our datums

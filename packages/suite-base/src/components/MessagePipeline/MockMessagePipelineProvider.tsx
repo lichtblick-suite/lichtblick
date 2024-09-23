@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, isLessThan } from "@foxglove/rostime";
 import { Immutable } from "immer";
 import * as _ from "lodash-es";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
@@ -23,6 +22,7 @@ import { Writable } from "ts-essentials";
 import { createStore } from "zustand";
 
 import { Condvar } from "@lichtblick/den/async";
+import { Time, isLessThan } from "@lichtblick/rostime";
 import { Metadata, ParameterValue } from "@lichtblick/suite";
 import {
   FramePromise,

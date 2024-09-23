@@ -6,9 +6,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ros1, ros2galactic } from "@foxglove/rosmsg-msgs-common";
-import { fromDate } from "@foxglove/rostime";
 
 import { MessageDefinition } from "@lichtblick/message-definition";
+import { fromDate } from "@lichtblick/rostime";
 import { Point, makeCovarianceArray } from "@lichtblick/suite-base/util/geometry";
 
 import { Pose } from "./transforms/geometry";

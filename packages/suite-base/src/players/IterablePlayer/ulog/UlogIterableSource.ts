@@ -6,11 +6,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ros1 } from "@foxglove/rosmsg-msgs-common";
-import { Time, fromMicros, isTimeInRangeInclusive, toMicroSec } from "@foxglove/rostime";
 import { MessageType, ULog } from "@foxglove/ulog";
 import { BlobReader } from "@foxglove/ulog/web";
 
 import Logger from "@lichtblick/log";
+import { Time, fromMicros, isTimeInRangeInclusive, toMicroSec } from "@lichtblick/rostime";
 import { MessageEvent, ParameterValue } from "@lichtblick/suite";
 import {
   MessageDefinitionsByTopic,

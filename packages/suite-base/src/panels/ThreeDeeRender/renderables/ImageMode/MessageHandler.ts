@@ -7,19 +7,19 @@
 
 import { AVLTree } from "@foxglove/avl";
 import {
-  Time,
-  fromNanoSec,
-  toNanoSec,
-  compare as compareTime,
-  isLessThan,
-} from "@foxglove/rostime";
-import {
   CompressedImage,
   RawImage,
   ImageAnnotations as FoxgloveImageAnnotations,
 } from "@foxglove/schemas";
 import * as _ from "lodash-es";
 
+import {
+  Time,
+  fromNanoSec,
+  toNanoSec,
+  compare as compareTime,
+  isLessThan,
+} from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import {
   HUDItem,

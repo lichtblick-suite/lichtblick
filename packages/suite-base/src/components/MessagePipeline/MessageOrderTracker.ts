@@ -14,9 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, isLessThan, subtract as subtractTimes, toSec } from "@foxglove/rostime";
-
 import Logger from "@lichtblick/log";
+import { Time, isLessThan, subtract as subtractTimes, toSec } from "@lichtblick/rostime";
 import { PlayerState, MessageEvent, PlayerProblem } from "@lichtblick/suite-base/players/types";
 import { formatFrame } from "@lichtblick/suite-base/util/time";
 

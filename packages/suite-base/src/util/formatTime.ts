@@ -14,10 +14,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, toDate, fromDate } from "@foxglove/rostime";
 import momentDurationFormatSetup from "moment-duration-format";
 import moment from "moment-timezone";
 
+import { Time, toDate, fromDate } from "@lichtblick/rostime";
 import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
 
 import parseFuzzyRosTime from "./parseFuzzyRosTime";

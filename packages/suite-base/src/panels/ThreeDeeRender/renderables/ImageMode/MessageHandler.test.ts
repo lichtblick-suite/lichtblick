@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromNanoSec } from "@foxglove/rostime";
 import {
   CameraCalibration,
   CircleAnnotation,
@@ -17,6 +16,7 @@ import {
 import * as _ from "lodash-es";
 import { DeepPartial } from "ts-essentials";
 
+import { fromNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
 import {

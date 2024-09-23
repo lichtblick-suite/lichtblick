@@ -7,11 +7,11 @@
 
 /// <reference types="./extensions" />
 
-import { Time, toDate } from "@foxglove/rostime";
 import { useEffect, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
+import { Time, toDate } from "@lichtblick/rostime";
 
 import Flash from "./Flash";
 import formatByteSize from "./formatByteSize";

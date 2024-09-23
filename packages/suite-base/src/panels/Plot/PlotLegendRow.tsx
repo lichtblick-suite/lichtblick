@@ -12,12 +12,12 @@ import {
   Square12Filled,
   Square12Regular,
 } from "@fluentui/react-icons";
-import { isTime, toSec } from "@foxglove/rostime";
 import { ButtonBase, Checkbox, Tooltip, Typography, buttonBaseClasses } from "@mui/material";
 import { MouseEventHandler } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
+import { isTime, toSec } from "@lichtblick/rostime";
 import { Immutable } from "@lichtblick/suite";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";

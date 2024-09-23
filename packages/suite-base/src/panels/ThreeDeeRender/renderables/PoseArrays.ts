@@ -5,12 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { toNanoSec } from "@foxglove/rostime";
 import { PosesInFrame } from "@foxglove/schemas";
 import { t } from "i18next";
 import * as _ from "lodash-es";
 import * as THREE from "three";
 
+import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields, Topic } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
