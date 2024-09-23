@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Sockets } from "@foxglove/electron-socket/renderer";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { Time, fromMillis, isGreaterThan, toSec } from "@foxglove/rostime";
 import { HttpServer } from "@foxglove/xmlrpc";
@@ -13,6 +12,7 @@ import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
+import { Sockets } from "@lichtblick/electron-socket/renderer";
 import Logger from "@lichtblick/log";
 import { MessageDefinition } from "@lichtblick/message-definition";
 import { ParameterValue } from "@lichtblick/suite";

@@ -8,10 +8,10 @@
 // Make Electron type definitions available globally, such as extensions to File and other built-ins
 /// <reference types="electron" />
 
-import { Sockets } from "@foxglove/electron-socket/renderer";
 import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
+import { Sockets } from "@lichtblick/electron-socket/renderer";
 import Logger from "@lichtblick/log";
 import {
   installDevtoolsFormatters,

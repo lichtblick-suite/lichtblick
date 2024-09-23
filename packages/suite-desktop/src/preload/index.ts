@@ -5,11 +5,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import { contextBridge, ipcRenderer } from "electron";
 import os from "os";
 import { join as pathJoin } from "path";
 
+import { PreloaderSockets } from "@lichtblick/electron-socket/preloader";
 import Logger from "@lichtblick/log";
 import { NetworkInterface, OsContext } from "@lichtblick/suite-base/src/OsContext";
 
