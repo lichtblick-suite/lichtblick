@@ -9,9 +9,8 @@
 // Since we don't use the modules directly in this file, we need to load the types as references
 // so typescript will have the merged declarations.
 /// <reference types="chartjs-plugin-datalabels" />
-/// <reference types="@foxglove/chartjs-plugin-zoom" />
+/// <reference types="@lichtblick/chartjs-plugin-zoom" />
 
-import { type ZoomPluginOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import { ChartOptions } from "chart.js";
 import Hammer from "hammerjs";
 import * as R from "ramda";
@@ -20,6 +19,7 @@ import { useMountedState } from "react-use";
 import { assert } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
+import { type ZoomPluginOptions } from "@lichtblick/chartjs-plugin-zoom/types/options";
 import Logger from "@lichtblick/log";
 import ChartJsMux, {
   ChartUpdateMessage,

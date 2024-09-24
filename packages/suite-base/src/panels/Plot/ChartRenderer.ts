@@ -5,12 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
 import { fontMonospace } from "@foxglove/theme";
 import { Chart, ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import EventEmitter from "eventemitter3";
 
+import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import { unwrap } from "@lichtblick/den/monads";
 import { Immutable } from "@lichtblick/suite";
 import { Bounds, Bounds1D } from "@lichtblick/suite-base/types/Bounds";

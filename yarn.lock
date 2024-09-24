@@ -2314,28 +2314,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/avl@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/avl@npm:1.0.0"
-  checksum: 6d25573e0ce50dc9217a13fcb88ac07acdf3d2d6fcf570f268b449d3e010a1bab133c0dc604b102ebfbf31c55215726b34b0aa794d2b43b2451828f4010eaf1c
-  languageName: node
-  linkType: hard
-
 "@foxglove/cdr@npm:^3.0.0, @foxglove/cdr@npm:^3.2.1":
   version: 3.3.0
   resolution: "@foxglove/cdr@npm:3.3.0"
   checksum: f1c5479474bbd94a9992f788b52092d9938095014df4983eb6099741dc390c2168ff77c5e8431a8fa3bbf437b34cb74f2c73a0a97331166c837788711f5d501d
-  languageName: node
-  linkType: hard
-
-"@foxglove/chartjs-plugin-zoom@npm:2.0.4":
-  version: 2.0.4
-  resolution: "@foxglove/chartjs-plugin-zoom@npm:2.0.4"
-  dependencies:
-    hammerjs: ^2.0.8
-  peerDependencies:
-    chart.js: ^3.0.0-beta.13
-  checksum: f7456c75aefef6de44522fb872a1b716714df7a8b70f4f2605f5cc98670b14779b0958c63c09fa6582520fcbec2abe9e396503b854eee31fbfcd1a6c4dd5fff3
   languageName: node
   linkType: hard
 
@@ -2349,7 +2331,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/crc@npm:0.0.3, @foxglove/crc@npm:^0.0.3":
+"@foxglove/crc@npm:^0.0.3":
   version: 0.0.3
   resolution: "@foxglove/crc@npm:0.0.3"
   checksum: 2eee0e45780e3289c4a190fa909e5977643667e19a21b945a109977b89427b877d8e12ebf91821653d69bdb0390e58540e1c9bb906aefcc7dd818c64f131f071
@@ -3168,6 +3150,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lichtblick/avl@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/avl@npm:1.0.0"
+  checksum: 4c8d15f84e4e5076b4c49b224305f53aa79f26b274b1bf6305c7b0022b4b5a8b9288ea58f92385e73b0579fa09928479901edb2dcf192814f1328937ba64f3a4
+  languageName: node
+  linkType: hard
+
+"@lichtblick/chartjs-plugin-zoom@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/chartjs-plugin-zoom@npm:1.0.0"
+  dependencies:
+    hammerjs: ^2.0.8
+  peerDependencies:
+    chart.js: ^3.0.0-beta.13
+  checksum: 25083297e7c8726db97159963a89ef0ceee06457911e6a4201c8a71ee7008dba8bec38ddee5d5cec0bcc54ee03573b4c116cf98c984178f6ed694cf0da52630c
+  languageName: node
+  linkType: hard
+
+"@lichtblick/crc@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/crc@npm:1.0.0"
+  checksum: 1e41587edde77f95701f7e0e0a80de1bc370ab17f1057242587da27911fb6348cc42455ef41e60cf0eeb1c2cd56a2f959053c597ccd18136e39c89ade87b9e2b
+  languageName: node
+  linkType: hard
+
 "@lichtblick/den@workspace:*, @lichtblick/den@workspace:packages/den":
   version: 0.0.0-use.local
   resolution: "@lichtblick/den@workspace:packages/den"
@@ -3268,10 +3275,7 @@ __metadata:
     "@emotion/react": 11.13.0
     "@emotion/styled": 11.13.0
     "@fluentui/react-icons": 2.0.224
-    "@foxglove/avl": 1.0.0
-    "@foxglove/chartjs-plugin-zoom": 2.0.4
     "@foxglove/comlink-transfer-handlers": "workspace:*"
-    "@foxglove/crc": 0.0.3
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/message-path": "workspace:*"
     "@foxglove/ros1": 3.0.0
@@ -3289,6 +3293,9 @@ __metadata:
     "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ws-protocol": 0.7.2
     "@foxglove/xmlrpc": 1.3.0
+    "@lichtblick/avl": 1.0.0
+    "@lichtblick/chartjs-plugin-zoom": 1.0.0
+    "@lichtblick/crc": 1.0.0
     "@lichtblick/den": "workspace:*"
     "@lichtblick/electron-socket": 1.0.0
     "@lichtblick/hooks": "workspace:*"

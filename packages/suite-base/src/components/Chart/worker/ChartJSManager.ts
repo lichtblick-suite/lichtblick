@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
 import { fontMonospace } from "@foxglove/theme";
 import {
   Chart,
@@ -31,6 +30,7 @@ import DatalabelPlugin from "chartjs-plugin-datalabels";
 import { type Options as DatalabelsPluginOptions } from "chartjs-plugin-datalabels/types/options";
 import EventEmitter from "eventemitter3";
 
+import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import Logger from "@lichtblick/log";
 import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";

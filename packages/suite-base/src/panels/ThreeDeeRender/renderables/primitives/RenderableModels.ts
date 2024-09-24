@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { crc32 } from "@foxglove/crc";
 import { ModelPrimitive, SceneEntity } from "@foxglove/schemas";
 import * as THREE from "three";
 
+import { crc32 } from "@lichtblick/crc";
 import { toNanoSec } from "@lichtblick/rostime";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
