@@ -130,6 +130,9 @@
   "dependencies": {
     "@lichtblick/hooks": "workspace:*",
     "@lichtblick/log": "workspace:*",
+    "@lichtblick/omgidl-parser": "1.0.0",
+    "@lichtblick/omgidl-serialization": "1.0.0",
+    "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
     "react-use": "17.5.1",
