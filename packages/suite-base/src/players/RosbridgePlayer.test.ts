@@ -125,7 +125,7 @@ class MockRosTopic {
   }
 }
 
-jest.mock("@foxglove/roslibjs", () => {
+jest.mock("@lichtblick/roslibjs", () => {
   return {
     __esModule: true,
     default: {

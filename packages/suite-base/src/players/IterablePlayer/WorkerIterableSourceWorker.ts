@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { abortSignalTransferHandler } from "@foxglove/comlink-transfer-handlers";
 import * as Comlink from "comlink";
 
+import { abortSignalTransferHandler } from "@lichtblick/comlink-transfer-handlers";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 
 import type {

@@ -14,7 +14,7 @@
   "homepage": "https://github.com/lichtblick-suite",
   "dependencies": {
     "async-mutex": "0.4.0",
-    "comlink": "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307",
+    "comlink": "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e",
     "xacro-parser": "0.3.9"
   },
   "devDependencies": {

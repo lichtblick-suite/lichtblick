@@ -2415,16 +2415,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/comlink-transfer-handlers@workspace:*, @foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
-  dependencies:
-    "@lichtblick/tsconfig": 1.0.0
-    comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
-    typescript: 5.3.3
-  languageName: unknown
-  linkType: soft
-
 "@foxglove/crc@npm:^0.0.3":
   version: 0.0.3
   resolution: "@foxglove/crc@npm:0.0.3"
@@ -2528,30 +2518,6 @@ __metadata:
     "@foxglove/schemas": ^1.3.1
     js-yaml: ^4.1.0
   checksum: ff9f11834451b676d5a9c4fb257e701c3e742ea8770d3489a4bf307e19fdcc109162c3b485c90a9fa5f59da274cf8eb66547863881fbb6b8bb3bb199f84acc95
-  languageName: node
-  linkType: hard
-
-"@foxglove/rosbag@npm:0.4.1":
-  version: 0.4.1
-  resolution: "@foxglove/rosbag@npm:0.4.1"
-  dependencies:
-    "@foxglove/rosmsg": ^4.0.0
-    "@foxglove/rosmsg-serialization": ^2.0.0
-    "@foxglove/rostime": ^1.1.2
-    heap: ^0.2.7
-  checksum: 3ecf550e62fd95caec14e2d37d6040b046144fbef91c4959b58122b4df6e38fffd652ca8d745abb00091f6b78d27cf2ec66175348104766a640395619aec43a6
-  languageName: node
-  linkType: hard
-
-"@foxglove/roslibjs@npm:0.0.3":
-  version: 0.0.3
-  resolution: "@foxglove/roslibjs@npm:0.0.3"
-  dependencies:
-    cbor-js: ^0.1.0
-    eventemitter2: ^6.4.0
-    object-assign: ^4.0.1
-    webworkify: ^1.5.0
-  checksum: 01ade8dfe88fbcbc94d3ee1375b9c9f0a1bcc28d067eeaf3e7c49a5496315948fb43d6cf8987707edf2b20ab52889ddcc53d1ec411d58831d955d150f74c197c
   languageName: node
   linkType: hard
 
@@ -3202,6 +3168,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lichtblick/comlink-transfer-handlers@workspace:*, @lichtblick/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
+  dependencies:
+    "@lichtblick/tsconfig": 1.0.0
+    comlink: "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e"
+    typescript: 5.3.3
+  languageName: unknown
+  linkType: soft
+
 "@lichtblick/crc@npm:1.0.0":
   version: 1.0.0
   resolution: "@lichtblick/crc@npm:1.0.0"
@@ -3215,7 +3191,7 @@ __metadata:
   dependencies:
     "@lichtblick/tsconfig": 1.0.0
     async-mutex: 0.4.0
-    comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
+    comlink: "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e"
     xacro-parser: 0.3.9
   languageName: unknown
   linkType: soft
@@ -3324,6 +3300,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lichtblick/rosbag@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/rosbag@npm:1.0.0"
+  dependencies:
+    heap: ^0.2.7
+  checksum: 40032e64ecae854e39c05cdac4783f284d590c45cff316740a8d6ebfed0a75d391c66e9c6aab688fab623016cacdad4def8e8b20c3dddf16030f9410c7a5f2c0
+  languageName: node
+  linkType: hard
+
+"@lichtblick/roslibjs@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/roslibjs@npm:1.0.0"
+  dependencies:
+    cbor-js: ^0.1.0
+    eventemitter2: ^6.4.0
+    object-assign: ^4.0.1
+    webworkify: ^1.5.0
+  checksum: 5b835149db3b1f86061d328ae9c3a22deef3ba7015e006a60cbda71c8609f909490a9cb2a656f0327ab3789dbd748dabed6e2a9dcbba524e276fdfb6f85de3c8
+  languageName: node
+  linkType: hard
+
 "@lichtblick/rosmsg-msgs-common@npm:1.0.1":
   version: 1.0.1
   resolution: "@lichtblick/rosmsg-msgs-common@npm:1.0.1"
@@ -3372,13 +3369,10 @@ __metadata:
     "@emotion/react": 11.13.0
     "@emotion/styled": 11.13.0
     "@fluentui/react-icons": 2.0.224
-    "@foxglove/comlink-transfer-handlers": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/message-path": "workspace:*"
     "@foxglove/ros1": 3.0.0
-    "@foxglove/rosbag": 0.4.1
     "@foxglove/rosbag2-web": 4.1.1
-    "@foxglove/roslibjs": 0.0.3
     "@foxglove/schemas": 1.6.3
     "@foxglove/theme": "workspace:*"
     "@foxglove/three-text": 0.2.2
@@ -3387,12 +3381,15 @@ __metadata:
     "@foxglove/xmlrpc": 1.3.0
     "@lichtblick/avl": 1.0.0
     "@lichtblick/chartjs-plugin-zoom": 1.0.0
+    "@lichtblick/comlink-transfer-handlers": "workspace:*"
     "@lichtblick/crc": 1.0.0
     "@lichtblick/den": "workspace:*"
     "@lichtblick/electron-socket": 1.0.0
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/rosbag": 1.0.0
+    "@lichtblick/roslibjs": 1.0.0
     "@lichtblick/rosmsg": 1.0.0
     "@lichtblick/rosmsg-msgs-common": 1.0.1
     "@lichtblick/rosmsg-serialization": 1.0.0
@@ -3418,11 +3415,11 @@ __metadata:
     "@testing-library/react": 16.0.0
     "@types/base16": ^1.0.5
     "@types/cytoscape": ^3.19.16
-    "@types/foxglove__roslibjs": "workspace:*"
     "@types/geojson": 7946.0.11
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.45
     "@types/leaflet": 1.9.7
+    "@types/lichtblick__roslibjs": "workspace:*"
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.6
     "@types/nearley": 2.11.5
@@ -3451,7 +3448,7 @@ __metadata:
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
     chromatic: 11.5.6
-    comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
+    comlink: "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e"
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
     cytoscape: 3.28.1
@@ -3544,11 +3541,11 @@ __metadata:
     "@actions/exec": 1.1.1
     "@actions/tool-cache": 2.0.1
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/rosbag": 0.4.1
     "@foxglove/theme": "workspace:*"
     "@lichtblick/den": "workspace:*"
     "@lichtblick/electron-socket": 1.0.0
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/rosbag": 1.0.0
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
@@ -6830,12 +6827,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/foxglove__roslibjs@workspace:*, @types/foxglove__roslibjs@workspace:packages/@types/foxglove__roslibjs":
-  version: 0.0.0-use.local
-  resolution: "@types/foxglove__roslibjs@workspace:packages/@types/foxglove__roslibjs"
-  languageName: unknown
-  linkType: soft
-
 "@types/foxglove__web@workspace:*, @types/foxglove__web@workspace:packages/@types/foxglove__web":
   version: 0.0.0-use.local
   resolution: "@types/foxglove__web@workspace:packages/@types/foxglove__web"
@@ -7049,6 +7040,12 @@ __metadata:
   checksum: 9446f2ed96dae685b9a0e018a5b5bf12ffba4aa59aaa4383f18158a9614f2f129612e6655b4419add12d388c5ee5cb2795e4bfbefecaafd1b4d5d701b7c06173
   languageName: node
   linkType: hard
+
+"@types/lichtblick__roslibjs@workspace:*, @types/lichtblick__roslibjs@workspace:packages/@types/lichtblick__roslibjs":
+  version: 0.0.0-use.local
+  resolution: "@types/lichtblick__roslibjs@workspace:packages/@types/lichtblick__roslibjs"
+  languageName: unknown
+  linkType: soft
 
 "@types/lodash-es@npm:^4":
   version: 4.17.12
@@ -10088,10 +10085,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"comlink@github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307":
+"comlink@github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e":
   version: 4.4.1
-  resolution: "comlink@https://github.com/foxglove/comlink.git#commit=9181fa505671b35b1e66e0a8361a6fc1bdd03307"
-  checksum: 1d89d5dee814e71f1cf5d46b5d4b8223bbc598d5b9a82ed53791b4127d35a3473d9cb1a4984e1d034ac6322de0a4dfb72d131529f870604efe79b42f4462dc98
+  resolution: "comlink@https://github.com/lichtblick-suite/comlink.git#commit=1f0271445730e68172b4d5d1dc9b9e74d0db241e"
+  checksum: d8fe91d88a7b07395c371ae365a08e142310438a42fdf0cf28a05f5a29a4f09fff6d08192e95b38574d0230e7e89ad2f4f8b748cf289fd601602bf0ff889c536
   languageName: node
   linkType: hard
 

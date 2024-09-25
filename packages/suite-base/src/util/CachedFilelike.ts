@@ -13,10 +13,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { Filelike } from "@foxglove/rosbag";
 import * as _ from "lodash-es";
 
 import Logger from "@lichtblick/log";
+import { Filelike } from "@lichtblick/rosbag";
 
 import VirtualLRUBuffer from "./VirtualLRUBuffer";
 import { getNewConnection } from "./getNewConnection";

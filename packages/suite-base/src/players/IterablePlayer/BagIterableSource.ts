@@ -5,9 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Bag, Filelike } from "@foxglove/rosbag";
-import { BlobReader } from "@foxglove/rosbag/web";
-
+import { Bag, Filelike } from "@lichtblick/rosbag";
+import { BlobReader } from "@lichtblick/rosbag/web";
 import { parse as parseMessageDefinition } from "@lichtblick/rosmsg";
 import { MessageReader } from "@lichtblick/rosmsg-serialization";
 import { compare } from "@lichtblick/rostime";
