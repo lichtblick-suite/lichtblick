@@ -9,8 +9,8 @@
   "devDependencies": {
     "@fluentui/react-icons": "2.0.224",
     "@foxglove/theme": "workspace:*",
-    "@foxglove/tsconfig": "2.0.0",
     "@lichtblick/log": "workspace:*",
+    "@lichtblick/tsconfig": "1.0.0",
     "@mui/material": "5.13.5",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@storybook/react": "7.6.10",

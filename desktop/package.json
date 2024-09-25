@@ -2,12 +2,12 @@
   "name": "desktop",
   "private": true,
   "devDependencies": {
-    "@foxglove/tsconfig": "2.0.0",
     "@foxglove/ws-protocol": "0.7.4",
     "@lichtblick/den": "workspace:*",
     "@lichtblick/log": "workspace:*",
     "@lichtblick/suite-base": "workspace:*",
     "@lichtblick/suite-desktop": "workspace:*",
+    "@lichtblick/tsconfig": "1.0.0",
     "@types/ws": "^8",
     "electron": "25.8.4",
     "playwright": "1.37.1",

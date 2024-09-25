@@ -6,11 +6,11 @@
   },
   "devDependencies": {
     "@foxglove/schemas": "1.6.3",
-    "@foxglove/tsconfig": "2.0.0",
     "@lichtblick/den": "workspace:*",
     "@lichtblick/log": "workspace:*",
     "@lichtblick/rostime": "1.0.0",
     "@lichtblick/suite": "workspace:*",
+    "@lichtblick/tsconfig": "1.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@types/react": "18.2.56",
     "@types/react-dom": "18.2.7",

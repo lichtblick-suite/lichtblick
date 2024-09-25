@@ -1,5 +1,5 @@
 {
-  "extends": "@foxglove/tsconfig/base",
+  "extends": "@lichtblick/tsconfig/base",
   "compilerOptions": {
     "lib": ["es2020", "dom"],
     "noEmit": true

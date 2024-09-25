@@ -16,7 +16,7 @@
 // More detailed discussion at:
 // https://github.com/typescript-eslint/typescript-eslint/issues/1192#issuecomment-846491212
 {
-  "extends": "@foxglove/tsconfig/base",
+  "extends": "@lichtblick/tsconfig/base",
   "include": ["**/*", "**/.storybook/**/*"],
   "compilerOptions": {
     "jsx": "react-jsx",

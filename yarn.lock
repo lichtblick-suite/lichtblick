@@ -2419,7 +2419,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
     typescript: 5.3.3
   languageName: unknown
@@ -2449,11 +2449,11 @@ __metadata:
     "@foxglove/rosmsg-serialization": 2.0.2
     "@foxglove/rosmsg2-serialization": 2.0.3
     "@foxglove/schemas": 1.6.3
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/message-definition": 1.0.0
     "@lichtblick/omgidl-parser": 1.0.0
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
+    "@lichtblick/tsconfig": 1.0.0
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
     "@lichtblick/wasm-zstd": 1.0.0
@@ -2485,7 +2485,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/message-path@workspace:packages/message-path"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     "@types/nearley": 2.11.5
     nearley: 2.20.1
     typescript: 5.3.3
@@ -2668,7 +2668,7 @@ __metadata:
     "@emotion/react": 11.13.0
     "@emotion/styled": 11.13.0
     "@fluentui/react-icons": 2.0.224
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     "@mui/icons-material": 5.15.5
     "@mui/lab": 5.0.0-alpha.161
     "@mui/material": 5.13.5
@@ -2693,18 +2693,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/tsconfig@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@foxglove/tsconfig@npm:2.0.0"
-  checksum: c6d581ff4e6e75e4c22d909a51f377b6f9b296805234009ca6950f86c76bbefc5f4f95eef92e24ede3134cb411c0d08e73d484a30c448d8e248414dcc98c1400
-  languageName: node
-  linkType: hard
-
 "@foxglove/typescript-transformers@workspace:*, @foxglove/typescript-transformers@workspace:packages/typescript-transformers":
   version: 0.0.0-use.local
   resolution: "@foxglove/typescript-transformers@workspace:packages/typescript-transformers"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -3240,7 +3233,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/den@workspace:packages/den"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     async-mutex: 0.4.0
     comlink: "github:foxglove/comlink#9181fa505671b35b1e66e0a8361a6fc1bdd03307"
     xacro-parser: 0.3.9
@@ -3263,7 +3256,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/eslint-plugin-suite@workspace:packages/eslint-plugin-suite"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     "@typescript-eslint/rule-tester": 6.10.0
     "@typescript-eslint/utils": 6.10.0
   languageName: unknown
@@ -3292,8 +3285,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/hooks@workspace:packages/hooks"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@testing-library/react": 16.0.0
     "@types/foxglove__web": "workspace:*"
     "@types/lodash-es": ^4
@@ -3309,7 +3302,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/log@workspace:packages/log"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -3398,7 +3391,6 @@ __metadata:
     "@foxglove/schemas": 1.6.3
     "@foxglove/theme": "workspace:*"
     "@foxglove/three-text": 0.2.2
-    "@foxglove/tsconfig": 2.0.0
     "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ws-protocol": 0.7.2
     "@foxglove/xmlrpc": 1.3.0
@@ -3413,6 +3405,7 @@ __metadata:
     "@lichtblick/rosmsg-msgs-common": 1.0.1
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@lichtblick/ulog": 1.0.0
     "@lichtblick/velodyne-cloud": 1.0.0
     "@lichtblick/wasm-bz2": 1.0.0
@@ -3559,12 +3552,12 @@ __metadata:
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/rosbag": 0.4.1
     "@foxglove/theme": "workspace:*"
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/den": "workspace:*"
     "@lichtblick/electron-socket": 1.0.0
     "@lichtblick/log": "workspace:*"
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@mcap/core": 1.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@storybook/react": 7.6.10
@@ -3611,9 +3604,9 @@ __metadata:
   dependencies:
     "@fluentui/react-icons": 2.0.224
     "@foxglove/theme": "workspace:*"
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@mui/material": 5.13.5
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@storybook/react": 7.6.10
@@ -3633,10 +3626,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite@workspace:packages/suite"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
+    "@lichtblick/tsconfig": 1.0.0
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
+
+"@lichtblick/tsconfig@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/tsconfig@npm:1.0.0"
+  checksum: f3215bb523b8c84643332bfc12dc9d392d273b1beab0674999c730ebaee246c29aec788140d5ba4aefe493d4488bbef5b31d50ba7abf0dd869a06ab00ef42add
+  languageName: node
+  linkType: hard
 
 "@lichtblick/ulog@npm:1.0.0":
   version: 1.0.0
@@ -9116,12 +9116,12 @@ __metadata:
   resolution: "benchmark@workspace:benchmark"
   dependencies:
     "@foxglove/schemas": 1.6.3
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/den": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@types/react": 18.2.56
     "@types/react-dom": 18.2.7
@@ -11108,12 +11108,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
     "@foxglove/ws-protocol": 0.7.4
     "@lichtblick/den": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/suite-desktop": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@types/ws": ^8
     electron: 25.8.4
     playwright: 1.37.1
@@ -16327,7 +16327,6 @@ __metadata:
     "@babel/plugin-proposal-explicit-resource-management": 7.24.7
     "@babel/preset-env": 7.25.3
     "@babel/preset-typescript": 7.24.7
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/eslint-plugin": 1.0.1
     "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
@@ -16336,6 +16335,7 @@ __metadata:
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
     "@lichtblick/suite": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@mui/material": 5.13.5
     "@octokit/rest": 20.0.2
     "@storybook/addon-actions": 7.6.10
@@ -23270,9 +23270,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web@workspace:web"
   dependencies:
-    "@foxglove/tsconfig": 2.0.0
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-web": "workspace:*"
+    "@lichtblick/tsconfig": 1.0.0
     "@types/serve-handler": ^6
     playwright: 1.37.1
     serve-handler: 6.1.5

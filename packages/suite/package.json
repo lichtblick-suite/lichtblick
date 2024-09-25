@@ -19,7 +19,7 @@
     "prepack": "tsc -b tsconfig.json"
   },
   "devDependencies": {
-    "@foxglove/tsconfig": "2.0.0",
+    "@lichtblick/tsconfig": "1.0.0",
     "typescript": "5.3.3"
   }
 }
