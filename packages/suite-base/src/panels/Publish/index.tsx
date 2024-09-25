@@ -14,13 +14,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
 import { Button, inputBaseClasses, TextField, Tooltip, Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
 import { MessageDefinition } from "@lichtblick/message-definition";
+import CommonRosTypes from "@lichtblick/rosmsg-msgs-common";
 import { Immutable } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import {

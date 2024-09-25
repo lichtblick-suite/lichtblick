@@ -4,12 +4,11 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-import { ros1 } from "@foxglove/rosmsg-msgs-common";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
+import { ros1 } from "@lichtblick/rosmsg-msgs-common";
 import {
   PanelExtensionContext,
   SettingsTreeAction,

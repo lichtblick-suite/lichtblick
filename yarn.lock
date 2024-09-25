@@ -2555,16 +2555,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-msgs-common@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@foxglove/rosmsg-msgs-common@npm:3.1.0"
-  dependencies:
-    "@foxglove/message-definition": ^0.2.0
-    "@foxglove/rosmsg": ^4.0.0
-  checksum: d353ec1177af057a6d558d084aab1ab6d31ff382e5f9ff85ecd87cc8293305e1f7701122e3ac409c4f30d3f5b81b05debce0bbad8a35d463e351d4d078ba0a51
-  languageName: node
-  linkType: hard
-
 "@foxglove/rosmsg-msgs-common@npm:^3.0.0":
   version: 3.2.1
   resolution: "@foxglove/rosmsg-msgs-common@npm:3.2.1"
@@ -3361,6 +3351,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lichtblick/rosmsg-msgs-common@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@lichtblick/rosmsg-msgs-common@npm:1.0.1"
+  dependencies:
+    "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/rosmsg": 1.0.0
+  checksum: 5c912980c094d3b87274ed27dacebb98cc35c89eb61f396a4f65b762a6efbd5cf91b86b78ecd1a029836b706ef6d5f68c25db4c5e06607008d365b030c4bd7ee
+  languageName: node
+  linkType: hard
+
+"@lichtblick/rosmsg@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/rosmsg@npm:1.0.0"
+  dependencies:
+    md5-typescript: ^1.0.5
+  checksum: 440ae7432ba8b390a74d075e5083943ccd786bb6e3e512f3bdc2f15613ee88c5f7af8f56fdc7ecde7a6b906ca0d74f8093dd8323ebd8a12fbc6b1411c14e5f8d
+  languageName: node
+  linkType: hard
+
 "@lichtblick/rostime@npm:1.0.0":
   version: 1.0.0
   resolution: "@lichtblick/rostime@npm:1.0.0"
@@ -3384,7 +3393,6 @@ __metadata:
     "@foxglove/rosbag2-web": 4.1.1
     "@foxglove/roslibjs": 0.0.3
     "@foxglove/rosmsg": 4.2.2
-    "@foxglove/rosmsg-msgs-common": 3.1.0
     "@foxglove/rosmsg-serialization": 2.0.2
     "@foxglove/rosmsg2-serialization": 2.0.3
     "@foxglove/schemas": 1.6.3
@@ -3402,6 +3410,7 @@ __metadata:
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/rosmsg-msgs-common": 1.0.1
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/ulog": 1.0.0

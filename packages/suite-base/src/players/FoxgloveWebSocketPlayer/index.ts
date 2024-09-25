@@ -4,9 +4,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
 import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
 import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
 import {
@@ -33,6 +31,7 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@lichtblick/den/async";
 import Log from "@lichtblick/log";
 import { MessageDefinition, isMsgDefEqual } from "@lichtblick/message-definition";
+import CommonRosTypes from "@lichtblick/rosmsg-msgs-common";
 import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
