@@ -26,14 +26,14 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
-    "@foxglove/rosmsg": "4.2.2",
-    "@foxglove/rosmsg-serialization": "2.0.2",
-    "@foxglove/rosmsg2-serialization": "2.0.3",
     "@foxglove/schemas": "1.6.3",
     "@lichtblick/message-definition": "1.0.0",
     "@lichtblick/omgidl-parser": "1.0.0",
     "@lichtblick/omgidl-serialization": "1.0.0",
     "@lichtblick/ros2idl-parser": "1.0.0",
+    "@lichtblick/rosmsg": "1.0.0",
+    "@lichtblick/rosmsg-serialization": "1.0.0",
+    "@lichtblick/rosmsg2-serialization": "1.0.0",
     "@lichtblick/wasm-bz2": "1.0.0",
     "@lichtblick/wasm-lz4": "1.0.0",
     "@lichtblick/wasm-zstd": "1.0.0",

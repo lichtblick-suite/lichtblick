@@ -2445,14 +2445,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/rosmsg": 4.2.2
-    "@foxglove/rosmsg-serialization": 2.0.2
-    "@foxglove/rosmsg2-serialization": 2.0.3
     "@foxglove/schemas": 1.6.3
     "@lichtblick/message-definition": 1.0.0
     "@lichtblick/omgidl-parser": 1.0.0
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
+    "@lichtblick/rosmsg": 1.0.0
+    "@lichtblick/rosmsg-serialization": 1.0.0
+    "@lichtblick/rosmsg2-serialization": 1.0.0
     "@lichtblick/tsconfig": 1.0.0
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
@@ -2565,32 +2565,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:2.0.2":
-  version: 2.0.2
-  resolution: "@foxglove/rosmsg-serialization@npm:2.0.2"
-  dependencies:
-    "@foxglove/message-definition": ^0.2.0
-  checksum: 066172af1ab659379ce50735f4627ecb45f2d75313fe3bba4e19f1e7c9f3f17f265492558c80669aa60ce1aa76539e5be3433b1ce59c0f78743d773e21a0c947
-  languageName: node
-  linkType: hard
-
 "@foxglove/rosmsg-serialization@npm:^2.0.0":
   version: 2.0.3
   resolution: "@foxglove/rosmsg-serialization@npm:2.0.3"
   dependencies:
     "@foxglove/message-definition": ^0.2.0
   checksum: d2ad60e625e819b6373fe32216118e510858decddb65b14590191cea3ba114a6f0941d445a048e8f6a3c0cbdb69a977b7e2ecb910166eecbece1666c57b932a3
-  languageName: node
-  linkType: hard
-
-"@foxglove/rosmsg2-serialization@npm:2.0.3":
-  version: 2.0.3
-  resolution: "@foxglove/rosmsg2-serialization@npm:2.0.3"
-  dependencies:
-    "@foxglove/cdr": ^3.0.0
-    "@foxglove/message-definition": ^0.2.0
-    "@foxglove/rostime": ^1.1.2
-  checksum: 24fb27ca90db82a868b752c0b904b766f8ff26254b1f42609c318001f0fb94fd32b056745fa12fa575c72a4d5be60413b9055d88afd94a9a5867aeb7f2420675
   languageName: node
   linkType: hard
 
@@ -2605,7 +2585,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg@npm:4.2.2, @foxglove/rosmsg@npm:^4.0.0":
+"@foxglove/rosmsg@npm:^4.0.0":
   version: 4.2.2
   resolution: "@foxglove/rosmsg@npm:4.2.2"
   dependencies:
@@ -3354,6 +3334,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lichtblick/rosmsg-serialization@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/rosmsg-serialization@npm:1.0.0"
+  checksum: 0be7992d75ade1b68b9e51a22a82d78f114b3cf3b51ec9b99cc77c8f1675d23ee9ba636c1a6b40f2c6962f60b92d7d0cf576985b6fd544ebb02a67646fa1c2d4
+  languageName: node
+  linkType: hard
+
+"@lichtblick/rosmsg2-serialization@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/rosmsg2-serialization@npm:1.0.0"
+  checksum: c83bbc22d7233e5750fb6035e47b9a45ce41540fbfac6ce32aeb12cb2fcec17c5546300e3fcc84572bdfd5d2a9cefe8139a0e32831d4c8de8603b4ac97b17449
+  languageName: node
+  linkType: hard
+
 "@lichtblick/rosmsg@npm:1.0.0":
   version: 1.0.0
   resolution: "@lichtblick/rosmsg@npm:1.0.0"
@@ -3385,9 +3379,6 @@ __metadata:
     "@foxglove/rosbag": 0.4.1
     "@foxglove/rosbag2-web": 4.1.1
     "@foxglove/roslibjs": 0.0.3
-    "@foxglove/rosmsg": 4.2.2
-    "@foxglove/rosmsg-serialization": 2.0.2
-    "@foxglove/rosmsg2-serialization": 2.0.3
     "@foxglove/schemas": 1.6.3
     "@foxglove/theme": "workspace:*"
     "@foxglove/three-text": 0.2.2
@@ -3402,7 +3393,10 @@ __metadata:
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/rosmsg": 1.0.0
     "@lichtblick/rosmsg-msgs-common": 1.0.1
+    "@lichtblick/rosmsg-serialization": 1.0.0
+    "@lichtblick/rosmsg2-serialization": 1.0.0
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
@@ -4176,11 +4170,11 @@ __metadata:
   linkType: hard
 
 "@octokit/types@npm:^13.0.0, @octokit/types@npm:^13.1.0":
-  version: 13.5.0
-  resolution: "@octokit/types@npm:13.5.0"
+  version: 13.5.1
+  resolution: "@octokit/types@npm:13.5.1"
   dependencies:
     "@octokit/openapi-types": ^22.2.0
-  checksum: 8e92f2b145b3c28a35312f93714245824a7b6b7353caa88edfdc85fc2ed4108321ed0c3988001ea53449fbb212febe0e8e9582744e85c3574dabe9d0441af5a0
+  checksum: d6af524cdd16a831117443d602ff99719eb1676880dc4236de568d968566135a93b4ab2b6e692893a79dc0323b12a63a97836371632c3fd39318a36b4a0c56fd
   languageName: node
   linkType: hard
 
@@ -6299,90 +6293,90 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-arm64@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-darwin-arm64@npm:1.7.26"
+"@swc/core-darwin-arm64@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-darwin-arm64@npm:1.7.28"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-x64@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-darwin-x64@npm:1.7.26"
+"@swc/core-darwin-x64@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-darwin-x64@npm:1.7.28"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm-gnueabihf@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.7.26"
+"@swc/core-linux-arm-gnueabihf@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.7.28"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-gnu@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-linux-arm64-gnu@npm:1.7.26"
+"@swc/core-linux-arm64-gnu@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-linux-arm64-gnu@npm:1.7.28"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-musl@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-linux-arm64-musl@npm:1.7.26"
+"@swc/core-linux-arm64-musl@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-linux-arm64-musl@npm:1.7.28"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-gnu@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-linux-x64-gnu@npm:1.7.26"
+"@swc/core-linux-x64-gnu@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-linux-x64-gnu@npm:1.7.28"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-musl@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-linux-x64-musl@npm:1.7.26"
+"@swc/core-linux-x64-musl@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-linux-x64-musl@npm:1.7.28"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-win32-arm64-msvc@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-win32-arm64-msvc@npm:1.7.26"
+"@swc/core-win32-arm64-msvc@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-win32-arm64-msvc@npm:1.7.28"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-win32-ia32-msvc@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-win32-ia32-msvc@npm:1.7.26"
+"@swc/core-win32-ia32-msvc@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-win32-ia32-msvc@npm:1.7.28"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@swc/core-win32-x64-msvc@npm:1.7.26":
-  version: 1.7.26
-  resolution: "@swc/core-win32-x64-msvc@npm:1.7.26"
+"@swc/core-win32-x64-msvc@npm:1.7.28":
+  version: 1.7.28
+  resolution: "@swc/core-win32-x64-msvc@npm:1.7.28"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
 "@swc/core@npm:^1.3.82":
-  version: 1.7.26
-  resolution: "@swc/core@npm:1.7.26"
+  version: 1.7.28
+  resolution: "@swc/core@npm:1.7.28"
   dependencies:
-    "@swc/core-darwin-arm64": 1.7.26
-    "@swc/core-darwin-x64": 1.7.26
-    "@swc/core-linux-arm-gnueabihf": 1.7.26
-    "@swc/core-linux-arm64-gnu": 1.7.26
-    "@swc/core-linux-arm64-musl": 1.7.26
-    "@swc/core-linux-x64-gnu": 1.7.26
-    "@swc/core-linux-x64-musl": 1.7.26
-    "@swc/core-win32-arm64-msvc": 1.7.26
-    "@swc/core-win32-ia32-msvc": 1.7.26
-    "@swc/core-win32-x64-msvc": 1.7.26
+    "@swc/core-darwin-arm64": 1.7.28
+    "@swc/core-darwin-x64": 1.7.28
+    "@swc/core-linux-arm-gnueabihf": 1.7.28
+    "@swc/core-linux-arm64-gnu": 1.7.28
+    "@swc/core-linux-arm64-musl": 1.7.28
+    "@swc/core-linux-x64-gnu": 1.7.28
+    "@swc/core-linux-x64-musl": 1.7.28
+    "@swc/core-win32-arm64-msvc": 1.7.28
+    "@swc/core-win32-ia32-msvc": 1.7.28
+    "@swc/core-win32-x64-msvc": 1.7.28
     "@swc/counter": ^0.1.3
     "@swc/types": ^0.1.12
   peerDependencies:
@@ -6411,7 +6405,7 @@ __metadata:
   peerDependenciesMeta:
     "@swc/helpers":
       optional: true
-  checksum: 8249f2af001f2b5b312ccace4e3a8575bf286bb0f67f029eb58ef8b144f73e37f766800859161ef87c0993e586055238c000ab17dddf9d3760edcfa63ffd22e6
+  checksum: 75576dc115cce55c130eb54fd7db2927906979fc887cc7306bcafd2a6b0ff0b9e5b2ef9c547e16e405992422119c2c5302ae630357095b21a7393ffd64a0116f
   languageName: node
   linkType: hard
 
@@ -7316,12 +7310,12 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:*, @types/react@npm:>=16":
-  version: 18.3.8
-  resolution: "@types/react@npm:18.3.8"
+  version: 18.3.9
+  resolution: "@types/react@npm:18.3.9"
   dependencies:
     "@types/prop-types": "*"
     csstype: ^3.0.2
-  checksum: a2cc2034746cde564a49a9d7f1ae57214bc83adb0daafd4724dc400569adc54c5a489c0e7d8656752b8748908a364d6811e4d7a2adc7f18a7f7179728d20147a
+  checksum: ac8c7cf6f9c5c2ecef790f3db6f98c672fdec0884f4e4730777fd18823207231cdd1d2e4673f473ef17a096c73c87bff309e83b026fb2602ba068371f0dc54fe
   languageName: node
   linkType: hard
 
@@ -9385,16 +9379,16 @@ __metadata:
   linkType: hard
 
 "browserslist@npm:^4.21.10, browserslist@npm:^4.23.1, browserslist@npm:^4.23.3":
-  version: 4.23.3
-  resolution: "browserslist@npm:4.23.3"
+  version: 4.24.0
+  resolution: "browserslist@npm:4.24.0"
   dependencies:
-    caniuse-lite: ^1.0.30001646
-    electron-to-chromium: ^1.5.4
+    caniuse-lite: ^1.0.30001663
+    electron-to-chromium: ^1.5.28
     node-releases: ^2.0.18
     update-browserslist-db: ^1.1.0
   bin:
     browserslist: cli.js
-  checksum: 7906064f9970aeb941310b2fcb8b4ace4a1b50aa657c986677c6f1553a8cabcc94ee9c5922f715baffbedaa0e6cf0831b6fed7b059dde6873a4bfadcbe069c7e
+  checksum: de200d3eb8d6ed819dad99719099a28fb6ebeb88016a5ac42fbdc11607e910c236a84ca1b0bbf232477d4b88ab64e8ab6aa67557cdd40a73ca9c2834f92ccce0
   languageName: node
   linkType: hard
 
@@ -9656,7 +9650,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001646":
+"caniuse-lite@npm:^1.0.30001663":
   version: 1.0.30001663
   resolution: "caniuse-lite@npm:1.0.30001663"
   checksum: 489a642feb6826a0fc7cfd7dbc35a3341cc1439eafdf0dae79338cf9033c5d9eddaedacbef7935acaddbb3c226a51097ed53d66dc6d8128cd6938c6763e1bbc4
@@ -11606,7 +11600,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-to-chromium@npm:^1.5.4":
+"electron-to-chromium@npm:^1.5.28":
   version: 1.5.28
   resolution: "electron-to-chromium@npm:1.5.28"
   checksum: f997385e8f8a25900c6b04a666b65550b1592c5d2a11db94b4eebcc8921e942c7249b87e0eb33229ea156d79b5e0d5f3e0e1b0ac548c2de51d9e1d6fda097335
@@ -23490,8 +23484,8 @@ __metadata:
   linkType: hard
 
 "webpack@npm:5":
-  version: 5.94.0
-  resolution: "webpack@npm:5.94.0"
+  version: 5.95.0
+  resolution: "webpack@npm:5.95.0"
   dependencies:
     "@types/estree": ^1.0.5
     "@webassemblyjs/ast": ^1.12.1
@@ -23521,7 +23515,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 6a3d667be304a69cd6dcb8d676bc29f47642c0d389af514cfcd646eaaa809961bc6989fc4b2621a717dfc461130f29c6e20006d62a32e012dafaa9517813a4e6
+  checksum: 0c3dfe288de4d62f8f3dc25478a618894883cab739121330763b7847e43304630ea2815ae2351a5f8ff6ab7c9642caf530d503d89bda261fe2cd220e524dd5d1
   languageName: node
   linkType: hard
 

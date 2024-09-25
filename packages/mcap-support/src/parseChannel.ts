@@ -5,14 +5,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { MessageReader } from "@foxglove/rosmsg-serialization";
-import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-
 import { MessageDefinition, MessageDefinitionField } from "@lichtblick/message-definition";
 import { IDLMessageDefinition, parseIDL } from "@lichtblick/omgidl-parser";
 import { MessageReader as OmgidlMessageReader } from "@lichtblick/omgidl-serialization";
 import { parseRos2idl } from "@lichtblick/ros2idl-parser";
+import { parse as parseMessageDefinition } from "@lichtblick/rosmsg";
+import { MessageReader } from "@lichtblick/rosmsg-serialization";
+import { MessageReader as ROS2MessageReader } from "@lichtblick/rosmsg2-serialization";
 
 import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
 import { parseJsonSchema } from "./parseJsonSchema";
