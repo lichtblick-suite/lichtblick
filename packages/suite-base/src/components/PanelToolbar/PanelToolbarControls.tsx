@@ -21,6 +21,7 @@ import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import PanelCatalogContext from "@lichtblick/suite-base/context/PanelCatalogContext";
 import {
   PanelStateStore,
@@ -29,6 +30,7 @@ import {
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
+import { CloseOutlined } from "@ant-design/icons";
 
 type PanelToolbarControlsProps = {
   additionalIcons?: React.ReactNode;
@@ -39,9 +41,22 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
   (props, ref) => {
     const { additionalIcons, isUnknownPanel } = props;
     const { id: panelId, type: panelType } = useContext(PanelContext) ?? {};
+    const panelContext = useContext(PanelContext);
+    const tabId = panelContext?.tabId;
     const panelCatalog = useContext(PanelCatalogContext);
     const { setSelectedPanelIds } = useSelectedPanels();
     const { openPanelSettings } = useWorkspaceActions();
+    const { mosaicActions } = useContext(MosaicContext);
+    const { mosaicWindowActions } = useContext(MosaicWindowContext);
+    const { closePanel } = useCurrentLayoutActions();
+
+    const close = useCallback(() => {
+      closePanel({
+        tabId,
+        root: mosaicActions.getRoot() as MosaicNode<string>,
+        path: mosaicWindowActions.getPath(),
+      });
+    }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
     const hasSettingsSelector = useCallback(
       (store: PanelStateStore) => (panelId ? store.settingsTrees[panelId] != undefined : false),
@@ -75,6 +90,9 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
           </ToolbarIconButton>
         )}
         <PanelActionsDropdown isUnknownPanel={isUnknownPanel} />
+        <ToolbarIconButton title="Close" onClick={close}>
+          <CloseOutlined />
+        </ToolbarIconButton>
       </Stack>
     );
   },

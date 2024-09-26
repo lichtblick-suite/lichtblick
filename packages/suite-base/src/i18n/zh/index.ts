@@ -18,6 +18,11 @@ export * from "./panelToolbar";
 export * from "./plot";
 export * from "./settingsEditor";
 
+export * from "./problemsList";
+
 export * from "./threeDee";
 export * from "./topicList";
 export * from "./workspace";
+
+export * from "./layoutsList";
+export * from "./playerMethodInfo";

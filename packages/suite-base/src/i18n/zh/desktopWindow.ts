@@ -7,10 +7,9 @@ export const desktopWindow = {
   checkForUpdates: "检查更新…",
   edit: "编辑",
   file: "文件",
-  inspectSharedWorker: "检查共享工作者…",
-  newWindow: "新窗口",
-  noSharedWorkers: "没有共享工作者",
+  inspectSharedWorker: "检查共享工作线程…",
+  newWindow: "新建窗口",
+  noSharedWorkers: "无共享工作线程",
   settings: "设置…",
   view: "视图",
-
 };

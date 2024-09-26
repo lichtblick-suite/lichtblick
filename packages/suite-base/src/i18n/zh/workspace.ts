@@ -4,10 +4,12 @@
 
 export const workspace = {
   events: "事件",
-  panel: "面板",
+  panel: "面板设置",
   performance: "性能",
   problems: "问题",
   studioLogs: "日志",
   topics: "主题",
   variables: "变量",
+  layouts: "布局",
+  vehiclesState: "车辆状态",
 };

@@ -3,7 +3,7 @@
     "width": 500,
     "height": 500,
     "image": "/static/map.58887dfc.png",
-    "color": "#f4f4f5",
+    "color": "#0B0B0BFF",
     "rfid": "1",
     "rfidScale": 1,
     "rfidStroke": "#262626",

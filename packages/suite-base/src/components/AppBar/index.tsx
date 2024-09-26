@@ -31,6 +31,20 @@ import { AppBarContainer } from "./AppBarContainer";
 import { CustomWindowControls, CustomWindowControlsProps } from "./CustomWindowControls";
 
 import { SettingsMenu } from "./SettingsMenu";
+import { Button, Tag } from "antd";
+import {
+  LayoutColumnOneThirdLeft24Regular,
+  LayoutColumnOneThirdLeft24Filled,
+  LayoutColumnOneThirdRight24Filled,
+  LayoutColumnOneThirdRight24Regular,
+} from "@fluentui/react-icons";
+import {
+  useWorkspaceStore,
+  WorkspaceContextStore,
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { isRunningInElectron } from "@lichtblick/suite-base/components/DataSourceDialog/Start";
+import { InfoContent } from "@lichtblick/suite-base/components/AppBar/DataSource";
 
 const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
   theme,
@@ -89,6 +103,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       justifySelf: "center",
       overflow: "hidden",
       maxWidth: "100%",
+      margin: 2,
       ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
     },
     end: {
@@ -178,6 +193,11 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
 
   const userMenuOpen = Boolean(userAnchorEl);
   const panelMenuOpen = Boolean(panelAnchorEl);
+  const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
+  const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
+  const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
+  const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
+  const { sidebarActions } = useWorkspaceActions();
 
   return (
     <>
@@ -185,6 +205,20 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
         <div className={classes.toolbar}>
           <div className={classes.start}>
             <div className={classes.startInner}>
+              <Button
+                type="text"
+                style={{ marginTop: 5, marginLeft: 10, marginRight: 3, height: 22 }}
+                // type="primary"
+                icon={
+                  leftSidebarOpen ? (
+                    <LayoutColumnOneThirdLeft24Filled />
+                  ) : (
+                    <LayoutColumnOneThirdLeft24Regular />
+                  )
+                }
+                onClick={() => sidebarActions.left.setOpen(!leftSidebarOpen)}
+              ></Button>
+
               {/* <IconButton
                 className={cx(classes.logo, { "Mui-selected": appMenuOpen })}
                 color="inherit"
@@ -234,7 +268,32 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
           </div>
 
           <div className={classes.middle}>
-            {/* <DataSource /> */}
+            <Tag
+              style={{
+                minWidth: 300,
+                height: 26,
+                marginTop: 2,
+                paddingLeft: 15,
+                paddingRight: 15,
+                paddingTop: 1,
+                paddingBottom: 1,
+                textAlign: "center",
+              }}
+              // bordered={false}
+            >
+              <InfoContent />
+            </Tag>
+            {/* <Input
+              style={{
+                minWidth: 300,
+
+                height: 22,
+                marginTop: 5,
+                textAlign: "center",
+              }}
+              placeholder={InfoContent()}
+              variant="filled"
+            /> */}
           </div>
 
           <div className={classes.end}>
@@ -291,6 +350,37 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                   <Avatar className={classes.avatar} variant="rounded" />
                 </IconButton>
               </Tooltip> */}
+              <Button
+                type="text"
+                style={{ marginTop: 5, marginLeft: 10, marginRight: 10, height: 22 }}
+                // type="primary"
+                icon={
+                  leftSidebarOpen ? (
+                    <LayoutColumnOneThirdLeft24Filled />
+                  ) : (
+                    <LayoutColumnOneThirdLeft24Regular />
+                  )
+                }
+                onClick={() => sidebarActions.left.setOpen(!leftSidebarOpen)}
+              ></Button>
+              <Button
+                type="text"
+                style={{
+                  marginTop: 5,
+                  marginRight: showCustomWindowControls && isRunningInElectron() ? 0 : 67,
+                  width: 22,
+                  height: 22,
+                }}
+                // type="primary"
+                icon={
+                  rightSidebarOpen ? (
+                    <LayoutColumnOneThirdRight24Filled />
+                  ) : (
+                    <LayoutColumnOneThirdRight24Regular />
+                  )
+                }
+                onClick={() => sidebarActions.right.setOpen(!rightSidebarOpen)}
+              />
               {showCustomWindowControls && (
                 <CustomWindowControls
                   onMinimizeWindow={onMinimizeWindow}

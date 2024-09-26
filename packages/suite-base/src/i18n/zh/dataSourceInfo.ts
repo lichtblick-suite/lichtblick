@@ -2,13 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-
-
 export const dataSourceInfo = {
-  dataSource: "数据源",
   currentSource: "当前源",
-  waitingForConnection: "等待连接……",
-  startTime: "开始时间",
-  endTime: "结束时间",
+  dataSource: "数据源",
   duration: "持续时间",
+  endTime: "结束时间",
+  startTime: "开始时间",
+  waitingForConnection: "等待连接…",
 };

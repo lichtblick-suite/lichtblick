@@ -50,6 +50,11 @@ function buildSettingsTree(config: Joysetting, topics: readonly Topic[]): Settin
           value: config.angle,
           placeholder: "0.8",
         },
+        mode: {
+          label: "分离模式",
+          input: "boolean",
+          value: config.mode,
+        },
       },
     },
   };

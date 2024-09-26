@@ -30,20 +30,31 @@ import userScriptEditorThumbnail from "./UserScriptEditor/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
 import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-status.png";
 import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summary.png";
-
+import vehicleControlSummaryThumbnail from "./VehicleControl/thumbnail.png";
+import joystickSummaryThumbnail from "./joystick/thumbnail.png";
+import deviceSettingSummaryThumbnail from "./deviceSetting/thumbnail.png";
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
-    title: "Joystick",
+    title: t("joystick"),
     type: "Joystick",
     description: "Joystick",
+    thumbnail: joystickSummaryThumbnail,
     module: async () => await import("./Joystick"),
   },
-  // {
-  //   title: t("VehicleControl"),
-  //   type: "VehicleControl",
-  //   description: "",
-  //   module: async () => await import("./VehicleControl"),
-  // },
+  {
+    title: t("deviceSetting"),
+    type: "DeviceSetting",
+    description: "配置沙盘设备",
+    thumbnail: deviceSettingSummaryThumbnail,
+    module: async () => await import("./DeviceSetting"),
+  },
+  {
+    title: t("VehicleControl"),
+    type: "VehicleControl",
+    description: t("VehicleControl"),
+    thumbnail: vehicleControlSummaryThumbnail,
+    module: async () => await import("./VehicleControl"),
+  },
   // {
   //   title: t("VehicleControl"),
   //   type: "CodeServer",
@@ -202,10 +213,10 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     module: async () => await import("./Tab"),
     hasCustomToolbar: true,
   },
-  {
-    title: t("studioPlaybackPerformance"),
-    type: "PlaybackPerformance",
-    description: t("studioPlaybackPerformanceDescription"),
-    module: async () => await import("./PlaybackPerformance"),
-  },
+  // {
+  //   title: t("studioPlaybackPerformance"),
+  //   type: "PlaybackPerformance",
+  //   description: t("studioPlaybackPerformanceDescription"),
+  //   module: async () => await import("./PlaybackPerformance"),
+  // },
 ];

@@ -6,6 +6,7 @@ import {
   DataSourceArgs,
   usePlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
+import { useTranslation } from "react-i18next";
 
 // 声明 Electron API 类型
 declare global {
@@ -23,7 +24,7 @@ declare global {
   }
 }
 
-const openCode = (ip: string) => {
+export const openCode = (ip: string) => {
   window.electron.shell2
     .openExternal("http://" + ip + ":8080")
     .then(() => {
@@ -36,6 +37,8 @@ const openCode = (ip: string) => {
 const UdpMessageComponent: React.FC = () => {
   const [udpIp, setUdpIp] = useState<string[]>([]);
   const { selectSource } = usePlayerSelection();
+
+  const { t } = useTranslation("openDialog");
 
   useEffect(() => {
     const handleUdpMessage = (_event: IpcRendererEvent, message: string) => {
@@ -70,8 +73,8 @@ const UdpMessageComponent: React.FC = () => {
           <ListItem disablePadding key={index}>
             <TextMiddleTruncate text={message} />
 
-            <Button onClick={() => openCode(message)}>open code</Button>
-            <Button onClick={() => createNewPlayer(message)}>open connection</Button>
+            <Button onClick={() => openCode(message)}>{t("open")} Code</Button>
+            <Button onClick={() => createNewPlayer(message)}>{t("openConnection")}</Button>
           </ListItem>
         ))}
       </List>

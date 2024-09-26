@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows-app
-          path: dist/**/*.exe
+          path: dist/**/*win-x64.exe
 
       - name: Upload macOS artifacts
         if: matrix.os == 'macos-latest' && success()

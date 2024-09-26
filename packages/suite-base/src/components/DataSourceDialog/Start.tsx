@@ -115,7 +115,7 @@ type DataSourceOptionProps = {
   href?: string;
   target: "_blank";
 };
-function isRunningInElectron() {
+export function isRunningInElectron() {
   return typeof window !== "undefined" && typeof window.electron !== "undefined";
 }
 
@@ -380,10 +380,15 @@ export default function Start(): React.JSX.Element {
       </Stack>
       <div className={classes.spacer} />
       <Stack gap={4} className={classes.sidebar}>
-        <Typography variant="h5" gutterBottom>
-          {t("activeClients")}
-        </Typography>
-        {isRunningInElectron() && <UdpMessageComponent />}
+        {isRunningInElectron() && (
+          <>
+            {" "}
+            <Typography variant="h5" gutterBottom>
+              {t("activeClients")}
+            </Typography>{" "}
+            <UdpMessageComponent />
+          </>
+        )}
 
         <SidebarItems onSelectView={dialogActions.dataSource.open} />
       </Stack>

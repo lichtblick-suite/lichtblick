@@ -22,6 +22,7 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
 import { FormField } from "./FormField";
 import View from "./View";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles()((theme) => ({
   grid: {
@@ -89,6 +90,7 @@ const useStyles = makeStyles()((theme) => ({
 const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 
 export default function Connection(): React.JSX.Element {
+  const { t } = useTranslation("openDialog");
   const { classes } = useStyles();
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up("md"));
@@ -182,7 +184,7 @@ export default function Connection(): React.JSX.Element {
       <Stack className={classes.grid} data-testid="OpenConnection">
         <header className={classes.header}>
           <Typography variant="h3" fontWeight={600} gutterBottom>
-            Open a new connection
+            {t("openNewConnection")}
           </Typography>
         </header>
         <div className={classes.sidebar}>

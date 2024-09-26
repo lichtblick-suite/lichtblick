@@ -31,6 +31,12 @@ function Joystick(props: Props): JSX.Element {
   const [viewPosition, setVPosition] = useState<Position>({ x1: 0, y: 0 });
   const { topics, datatypes } = useDataSourceInfo();
   const { config, saveConfig } = props;
+
+  const [leaveMode, setLeaveMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLeaveMode(config.mode);
+  }, [config]);
   useCodeServerSettings(config, saveConfig, topics);
 
   const cmdPublish = usePublisher({
@@ -128,25 +134,30 @@ function Joystick(props: Props): JSX.Element {
     <Stack fullHeight>
       <PanelToolbar />
       <Stack flex="auto" alignItems="center" justifyContent="center">
-        <div
-          className="joystick"
-          ref={joystickRef}
-          onTouchStart={startDrag}
-          onTouchMove={drag}
-          onTouchEnd={endDrag}
-          onMouseDown={startDragMouse}
-          onMouseMove={dragMouse}
-          onMouseUp={endDragMouse}
-        >
-          <div
-            className="handle"
-            style={{
-              transform: `translate(-50%, -50%) translate(${viewPosition.x1 * 50}%, ${
-                viewPosition.y * 50
-              }%)`,
-            }}
-          ></div>
-        </div>
+        {!leaveMode && (
+          <>
+            <div
+              className="joystick"
+              ref={joystickRef}
+              onTouchStart={startDrag}
+              onTouchMove={drag}
+              onTouchEnd={endDrag}
+              onMouseDown={startDragMouse}
+              onMouseMove={dragMouse}
+              onMouseUp={endDragMouse}
+            >
+              <div
+                className="handle"
+                style={{
+                  transform: `translate(-50%, -50%) translate(${viewPosition.x1 * 50}%, ${
+                    viewPosition.y * 50
+                  }%)`,
+                }}
+              ></div>
+            </div>
+          </>
+        )}
+        {leaveMode && <div>1111111</div>}
       </Stack>
     </Stack>
   );
@@ -160,6 +171,7 @@ const defaultConfig: Joysetting = {
   vel: 0.2,
   topic: "/cmd_vel",
   angle: 0.8,
+  mode: false,
 };
 export default Panel(
   Object.assign(TeleopPanelAdapter, {

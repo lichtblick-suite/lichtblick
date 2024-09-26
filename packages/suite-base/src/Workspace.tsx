@@ -100,6 +100,7 @@ import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 import { ConfigProvider, theme } from "antd";
 import VerticalAppBar from "./components/AppBar/VerticalAppBar";
+import VehiclesStateList from "@lichtblick/suite-base/components/VehiclesStateList";
 
 const log = Logger.getLogger(__filename);
 
@@ -452,13 +453,13 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const showEventsTab = currentUserType !== "unauthenticated" && eventsSupported;
 
   const leftSidebarItems = useMemo(() => {
-    const items = new Map<LeftSidebarItemKey, SidebarItem>([
-      ["panel-settings", { title: "Panel", component: PanelSettingsSidebar }],
-      ["topics", { title: "Topics", component: TopicList }],
+    const items = new Map<LeftSidebarItemKey, NewSidebarItem>([
+      ["panel-settings", { title: t("workspace:panel"), component: PanelSettingsSidebar }],
+      ["topics", { title: t("workspace:topics"), component: TopicList }],
       [
         "problems",
         {
-          title: "Problems",
+          title: t("workspace:problems"),
           component: ProblemsList,
           badge:
             playerProblems && playerProblems.length > 0
@@ -469,7 +470,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
               : undefined,
         },
       ],
-      ["layouts", { title: "Layouts", component: LayoutBrowser }],
+      ["layouts", { title: t("workspace:layouts"), component: LayoutBrowser }],
     ]);
     return items;
   }, [PanelSettingsSidebar, playerProblems]);
@@ -481,6 +482,13 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         {
           title: t("workspace:variables"),
           component: VariablesList,
+        },
+      ],
+      [
+        "vehiclesState",
+        {
+          title: t("workspace:vehiclesState"),
+          component: VehiclesStateList,
         },
       ],
     ]);

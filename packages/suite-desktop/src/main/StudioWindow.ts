@@ -95,10 +95,10 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
 
   const windowOptions: BrowserWindowConstructorOptions = {
     backgroundColor: getWindowBackgroundColor(),
-    height: 800,
-    width: 1200,
-    minWidth: 350,
-    minHeight: 250,
+    height: 768,
+    width: 1024,
+    minWidth: 800,
+    minHeight: 600,
     autoHideMenuBar: true,
     title: LICHTBLICK_PRODUCT_NAME,
     frame: isLinux ? false : true,

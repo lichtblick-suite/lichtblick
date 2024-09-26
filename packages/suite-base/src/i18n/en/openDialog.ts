@@ -36,4 +36,8 @@ export const openDialog = {
     "Make the most of your Foxglove account – whether you want to dive deep on your data or share tools with your teammates.",
   uploadToDataPlatform: "Upload to Data Platform",
   activeClients: "Active Clients",
+  openNewConnection: "Open New Connection",
+  back: "Back",
+  cancel: "Cancel",
+  open: "Open",
 };

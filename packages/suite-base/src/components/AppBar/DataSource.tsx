@@ -9,33 +9,29 @@
 // import { CircularProgress, IconButton } from "@mui/material";
 // import { useTranslation } from "react-i18next";
 // import { makeStyles } from "tss-react/mui";
-import {
-  CheckOutlined,
-  DisconnectOutlined,
-  InfoCircleOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
-import { ErrorCircle20Filled } from "@fluentui/react-icons";
+import { CheckOutlined, DisconnectOutlined, LoadingOutlined } from "@ant-design/icons";
+import { DocumentAdd24Regular, ErrorCircle20Filled } from "@fluentui/react-icons";
 // import { ErrorCircle16Filled } from "@fluentui/react-icons";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 // import Stack from "@lichtblick/suite-base/components/Stack";
 // import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 // import WssErrorModal from "@lichtblick/suite-base/components/WssErrorModal";
 // import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import { Button, Popover } from "antd";
+import { Popover, Row } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 // import { CircularProgress, IconButton } from "@mui/material";
+import { Button } from "@mui/material";
 // import { useTranslation } from "react-i18next";
 // import { makeStyles } from "tss-react/mui";
 
 import { EndTimestamp } from "./EndTimestamp";
+import AppBarButton from "@lichtblick/suite-base/components/AppBar/AppBarButton";
 
 // const ICON_SIZE = 18;
 
@@ -92,16 +88,38 @@ const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
-
-export function DataSource(): React.JSX.Element {
-  // const { t } = useTranslation("appBar");
-  // const { classes, cx } = useStyles();
+export const InfoContent = () => {
+  const { t } = useTranslation("appBar");
 
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
+  const initializing = playerPresence === PlayerPresence.INITIALIZING;
+  const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;
+  // const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
+  const seek = useMessagePipeline(selectSeek);
+  const isLiveConnection = seek == undefined;
+
+  if (playerPresence === PlayerPresence.NOT_PRESENT) {
+    return t("noDataSource");
+  } else {
+    return (
+      <div>
+        <Row>
+          {playerDisplayName ?? `<${t("unknown")}>`}
+          {isLiveConnection && <EndTimestamp />}
+        </Row>
+      </div>
+    );
+  }
+};
+export function DataSource(): JSX.Element {
+  // const { classes, cx } = useStyles();
+
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
   const seek = useMessagePipeline(selectSeek);
-  const { dialogActions, sidebarActions } = useWorkspaceActions();
+  const { dialogActions } = useWorkspaceActions();
+  const { t } = useTranslation("appBar");
 
   // const { sidebarActions } = useWorkspaceActions();
 
@@ -115,58 +133,24 @@ export function DataSource(): React.JSX.Element {
     playerProblems.some((problem) => problem.severity === "error");
   const loading = reconnecting || initializing;
 
-  const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;
-
-  const [clicked, setClicked] = useState(false);
   const [hovered, setHovered] = useState(false);
-
-  const hide = () => {
-    setClicked(false);
-    setHovered(false);
-  };
 
   const handleHoverChange = (open: boolean) => {
     setHovered(open);
-    setClicked(false);
-  };
-
-  const handleClickChange = (open: boolean) => {
-    setHovered(false);
-    setClicked(open);
-  };
-  const InfoContent = () => {
-    if (playerPresence === PlayerPresence.NOT_PRESENT) {
-      return <div> {t("noDataSource")}</div>;
-    } else {
-      return (
-        <div>
-          <TextMiddleTruncate text={playerDisplayName ?? `<${t("unknown")}>`} />
-          {isLiveConnection && (
-            <>
-              <EndTimestamp />
-            </>
-          )}
-          {error && (
-            <Button
-              type="text"
-              danger
-              icon={<ErrorCircle20Filled />}
-              onClick={() => {
-                sidebarActions.left.setOpen(true);
-                sidebarActions.left.selectItem("problems");
-              }}
-            ></Button>
-          )}
-        </div>
-      );
-    }
   };
 
   const ICON = () => {
+    console.log(playerPresence);
+    if (isLiveConnection) {
+      <CheckOutlined rev={undefined} />;
+    }
+    if (playerPresence === PlayerPresence.PRESENT && !isLiveConnection) {
+      return <DocumentAdd24Regular />;
+    }
     if (playerPresence === PlayerPresence.NOT_PRESENT) {
       return <DisconnectOutlined rev={undefined} />;
     }
-    if (loading) {
+    if (loading || playerPresence === PlayerPresence.BUFFERING) {
       return <LoadingOutlined rev={undefined} />;
     }
     if (error) {
@@ -186,7 +170,7 @@ export function DataSource(): React.JSX.Element {
   };
   return (
     <>
-      <Button
+      {/* <Button
         style={{ boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)" }}
         type="primary"
         shape="circle"
@@ -194,15 +178,15 @@ export function DataSource(): React.JSX.Element {
         onClick={() => {
           dialogActions.dataSource.open("start");
         }}
-      />
+      /> */}
       <Popover
-        style={{ width: 500 }}
-        content={InfoContent}
+        content={EndTimestamp}
+        // content={({InfoContent})}
         trigger="hover"
         open={hovered}
         onOpenChange={handleHoverChange}
       >
-        <Popover
+        {/* <Popover
           content={
             <div>
               <InfoContent />
@@ -212,15 +196,31 @@ export function DataSource(): React.JSX.Element {
           trigger="click"
           open={clicked}
           onOpenChange={handleClickChange}
-        >
-          <Button
-            style={{ marginTop: 20 }}
-            type="text"
-            shape="circle"
-            icon={<InfoCircleOutlined />}
-          />
-        </Popover>
+        > */}
+        <AppBarButton
+          icon={
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                borderRadius: "50%", // 设置圆形
+                minWidth: "30px", // 最小宽度
+                minHeight: "30px", // 最小高度
+                padding: 0, // 去除默认内边距
+                width: "30px", // 固定宽度
+                height: "30px", // 固定高度
+                boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              <ICON />
+              {/* <AddIcon /> */}
+            </Button>
+          }
+          onClick={() => dialogActions.dataSource.open("start")}
+          text={t("start")}
+        ></AppBarButton>
       </Popover>
+      {/* </Popover> */}
     </>
   );
 

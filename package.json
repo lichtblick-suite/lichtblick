@@ -53,7 +53,9 @@
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
     "storybook": "storybook dev --port 9009 --config-dir .storybook",
     "storybook:build": "storybook build --config-dir .storybook --webpack-stats-json",
-    "version:all": "yarn workspaces foreach version"
+    "version:all": "yarn workspaces foreach version",
+    "tauri:dev": "yarn tauri dev",
+    "tauri:build": "yarn tauri build"
   },
   "workspaces": {
     "packages": [
@@ -157,6 +159,8 @@
     "@tauri-apps/api": "1.6.0",
     "antd": "5.20.0",
     "react-use": "17.4.0",
-    "rehype-raw": "6.1.1"
+    "rehype-raw": "6.1.1",
+    "umi-request": "1.4.0",
+    "vm-browserify": "1.1.2"
   }
 }

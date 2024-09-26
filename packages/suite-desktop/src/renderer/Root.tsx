@@ -19,12 +19,12 @@ import {
   OsContext,
   RemoteDataSourceFactory,
   Ros1LocalBagDataSourceFactory,
-  Ros1SocketDataSourceFactory,
+  // Ros1SocketDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
-  RosbridgeDataSourceFactory,
+  // RosbridgeDataSourceFactory,
   SampleNuscenesDataSourceFactory,
   UlogLocalDataSourceFactory,
-  VelodyneDataSourceFactory,
+  // VelodyneDataSourceFactory,
 } from "@lichtblick/suite-base";
 
 import { DesktopExtensionLoader } from "./services/DesktopExtensionLoader";
@@ -89,12 +89,12 @@ export default function Root(props: RootProps): React.JSX.Element {
 
     const sources = [
       new FoxgloveWebSocketDataSourceFactory(),
-      new RosbridgeDataSourceFactory(),
-      new Ros1SocketDataSourceFactory(),
+      // new RosbridgeDataSourceFactory(),
+      // new Ros1SocketDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
-      new VelodyneDataSourceFactory(),
+      // new VelodyneDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
       new RemoteDataSourceFactory(),

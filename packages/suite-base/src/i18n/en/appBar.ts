@@ -32,4 +32,7 @@ export const appBar = {
   userProfile: "User profile",
   view: "View",
   viewData: "View data",
+  start: "Start",
+  panels: "Panels",
+  general: "General",
 };

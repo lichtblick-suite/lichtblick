@@ -11,14 +11,14 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import FoxgloveWebSocketPlayer from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer";
 import { Player } from "@lichtblick/suite-base/players/types";
+import i18n from "i18next";
 
 export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFactory {
   public id = "foxglove-websocket";
   public type: IDataSourceFactory["type"] = "connection";
-  public displayName = "ROS2 WebSocket";
+  public displayName = i18n.t("playerMethodInfo:ros2");
   public iconName: IDataSourceFactory["iconName"] = "ROS";
-  public description =
-    "Connect to a ROS 1, ROS 2, or custom system using the Foxglove WebSocket protocol. For ROS systems, be sure to first install the foxglove_bridge ROS package.";
+  public description = i18n.t("playerMethodInfo:ros2Description");
   public docsLinks = [
     // {
     //   label: "ROS 1",
@@ -34,11 +34,12 @@ export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFa
     fields: [
       {
         id: "url",
-        label: "WebSocket IP or Hostname",
-        defaultValue: "localhost",
+        label: i18n.t("playerMethodInfo:displayRos2label"),
+        defaultValue: "ws://localhost:8765",
         validate: (newValue: string): Error | undefined => {
           try {
-            const url = new URL("ws://" + newValue + ":8765");
+            // const url = new URL("ws://" + newValue + ":8765");
+            const url = new URL(newValue);
             if (url.protocol !== "ws:" && url.protocol !== "wss:") {
               return new Error(`Invalid protocol: ${url.protocol}`);
             }

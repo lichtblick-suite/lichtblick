@@ -13,4 +13,6 @@ export const workspace = {
   studioLogs: "Logs",
   topics: "Topics",
   variables: "Variables",
+  layouts: "Layouts",
+  vehiclesState: "Vehicles State",
 };

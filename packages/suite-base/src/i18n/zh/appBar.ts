@@ -5,8 +5,7 @@
 export const appBar = {
   about: "关于",
   addPanel: "添加面板",
-  documentation: "文档",
-  exploreSampleData: "探索示例数据",
+  exploreSampleData: "浏览示例数据",
   exportLayoutToFile: "导出布局到文件…",
   extensions: "扩展",
   file: "文件",
@@ -18,7 +17,6 @@ export const appBar = {
   open: "打开…",
   openConnection: "打开连接…",
   openDataSources: "打开数据源",
-  activeClients: "当前活跃设备",
   openLocalFile: "打开本地文件…",
   recentDataSources: "最近的数据源",
   recentlyViewed: "最近查看",
@@ -31,5 +29,7 @@ export const appBar = {
   userProfile: "用户资料",
   view: "视图",
   viewData: "查看数据",
-  viewOurDocs: "查看我们的文档",
+  start: "开始",
+  panels: "面板",
+  general: "通用",
 };

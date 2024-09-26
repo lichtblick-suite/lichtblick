@@ -25,6 +25,7 @@ export const SidebarItemKeys = [
   "panel-settings",
   "logs-settings",
   "variables",
+  "vehiclesState",
 ] as const;
 export type SidebarItemKey = (typeof SidebarItemKeys)[number];
 
@@ -36,6 +37,7 @@ export const RightSidebarItemKeys = [
   "variables",
   "logs-settings",
   "performance",
+  "vehiclesState",
 ] as const;
 export type RightSidebarItemKey = (typeof RightSidebarItemKeys)[number];
 

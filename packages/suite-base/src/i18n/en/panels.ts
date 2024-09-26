@@ -6,6 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panels = {
+  joystick: "Joystick",
+  deviceSetting: "Device Setting",
   VsCode: "VsCode",
   vscodeEditer: "Remotely link to the VsCode editor",
   VehicleControl: "VehicleControl",

@@ -5,6 +5,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import CopyButton from "@lichtblick/suite-base/components/CopyButton";
+import { ExperimentalFeatureSettings } from "@lichtblick/suite-base/components/ExperimentalFeatureSettings";
+import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
+// import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
+import Stack from "@lichtblick/suite-base/components/Stack";
+import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
+
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
@@ -37,7 +45,6 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppCon
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import {
-  AutoUpdate,
   ColorSchemeSettings,
   LanguageSettings,
   LaunchDefault,
@@ -181,7 +188,6 @@ export function AppSettingsDialog(
   // electron-updater does not provide a way to detect if we are on a supported update platform
   // so we hard-code linux as an _unsupported_ auto-update platform since we cannot auto-update
   // with our .deb package install method on linux.
-  const supportsAppUpdates = isDesktopApp() && OsContextSingleton?.platform !== "linux";
 
   const handleTabChange = (_event: SyntheticEvent, newValue: AppSettingsTab) => {
     setActiveTab(newValue);
@@ -211,12 +217,12 @@ export function AppSettingsDialog(
           onChange={handleTabChange}
         >
           <Tab className={classes.tab} label={t("general")} value="general" />
-          <Tab className={classes.tab} label={t("extensions")} value="extensions" />
-          <Tab
+          {/* <Tab className={classes.tab} label={t("extensions")} value="extensions" /> */}
+          {/* <Tab
             className={classes.tab}
             label={t("experimentalFeatures")}
             value="experimental-features"
-          />
+          /> */}
           <Tab className={classes.tab} label={t("about")} value="about" />
         </Tabs>
         <Stack direction="row" fullHeight overflowY="auto">
@@ -231,7 +237,7 @@ export function AppSettingsDialog(
               <TimeFormat orientation={smUp ? "horizontal" : "vertical"} />
               <MessageFramerate />
               <LanguageSettings />
-              {supportsAppUpdates && <AutoUpdate />}
+              {/* {supportsAppUpdates && <AutoUpdate />} */}
               {!isDesktopApp() && <LaunchDefault />}
               {isDesktopApp() && <RosPackagePath />}
               <Stack>

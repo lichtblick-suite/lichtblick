@@ -9,4 +9,5 @@ export type Joysetting = {
   vel: number;
   angle: number;
   topic: string;
+  mode: boolean;
 };
