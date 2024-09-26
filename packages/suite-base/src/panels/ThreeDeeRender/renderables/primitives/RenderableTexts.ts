@@ -6,9 +6,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { SceneEntity, TextPrimitive } from "@foxglove/schemas";
-import { Label, LabelPool } from "@foxglove/three-text";
 
 import { toNanoSec } from "@lichtblick/rostime";
+import { Label, LabelPool } from "@lichtblick/three-text";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { IRenderer } from "../../IRenderer";

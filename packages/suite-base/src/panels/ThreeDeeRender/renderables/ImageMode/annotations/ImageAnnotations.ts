@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ImageAnnotations as FoxgloveImageAnnotations } from "@foxglove/schemas";
-import { LabelPool } from "@foxglove/three-text";
 import { t } from "i18next";
 import * as THREE from "three";
 import { Opaque } from "ts-essentials";
@@ -20,6 +19,7 @@ import {
   ImageMarker as RosImageMarker,
   ImageMarkerArray as RosImageMarkerArray,
 } from "@lichtblick/suite-base/types/Messages";
+import { LabelPool } from "@lichtblick/three-text";
 
 import { RenderableTopicAnnotations } from "./RenderableTopicAnnotations";
 import { Annotation } from "./types";

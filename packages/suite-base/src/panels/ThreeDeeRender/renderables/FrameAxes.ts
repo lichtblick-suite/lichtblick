@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Label } from "@foxglove/three-text";
 import { t } from "i18next";
 import * as _ from "lodash-es";
 import * as THREE from "three";
@@ -20,6 +19,7 @@ import {
   SettingsTreeFields,
 } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
+import { Label } from "@lichtblick/three-text";
 
 import { Axis, AXIS_LENGTH } from "./Axis";
 import { DEFAULT_LABEL_SCALE_FACTOR } from "./SceneSettings";
