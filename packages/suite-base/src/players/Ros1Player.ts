@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { RosNode, TcpSocket } from "@foxglove/ros1";
-import { HttpServer } from "@foxglove/xmlrpc";
 import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
@@ -35,6 +34,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
+import { HttpServer } from "@lichtblick/xmlrpc";
 
 const log = Logger.getLogger(__filename);
 const rosLog = Logger.getLogger("ROS1");
