@@ -37,6 +37,10 @@ function makeElectronBuilderConfig(params) {
           target: "deb",
           arch: ["x64", "arm64"],
         },
+        {
+          target: "tar.gz",
+          arch: ["x64"],
+        },
       ],
       fileAssociations: [
         {
