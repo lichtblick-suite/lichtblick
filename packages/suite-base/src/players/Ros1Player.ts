@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { RosNode, TcpSocket } from "@foxglove/ros1";
 import * as _ from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,6 +12,7 @@ import { debouncePromise } from "@lichtblick/den/async";
 import { Sockets } from "@lichtblick/electron-socket/renderer";
 import Logger from "@lichtblick/log";
 import { MessageDefinition } from "@lichtblick/message-definition";
+import { RosNode, TcpSocket } from "@lichtblick/ros1";
 import { Time, fromMillis, isGreaterThan, toSec } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
@@ -60,7 +60,7 @@ type Ros1PlayerOpts = {
   sourceId: string;
 };
 
-// Connects to `rosmaster` instance using `@foxglove/ros1`
+// Connects to `rosmaster` instance using `@lichtblick/ros1`
 export default class Ros1Player implements Player {
   #url: string; // rosmaster URL.
   #hostname?: string; // ROS_HOSTNAME

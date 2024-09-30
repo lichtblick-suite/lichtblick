@@ -2450,13 +2450,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/message-definition@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@foxglove/message-definition@npm:0.2.0"
-  checksum: 8f972dd52cf2f44e8357c8f13ee2136b23548d49d9251fc47c68569a33effe5d082c0681e3b0761751dd27759ac778f1e45de9f52d5925298ccc80e607784159
-  languageName: node
-  linkType: hard
-
 "@foxglove/message-definition@npm:^0.3.1":
   version: 0.3.1
   resolution: "@foxglove/message-definition@npm:0.3.1"
@@ -2475,22 +2468,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/ros1@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@foxglove/ros1@npm:3.0.0"
-  dependencies:
-    "@foxglove/message-definition": ^0.2.0
-    "@foxglove/rosmsg": ^4.0.0
-    "@foxglove/rosmsg-serialization": ^2.0.0
-    "@foxglove/xmlrpc": ^1.3.0
-    eventemitter3: ^5.0.0
-    ipaddr.js: ^2.0.1
-  bin:
-    roscore: dist/nodejs/roscore.js
-  checksum: 8fc81db65d042339302653e15ee3cde11ded6adc7ab2535da977c96cadbc3e15d26f4e000475b146dbb155c5347d751b8deb76fcda577b1b1f70d3fe043219cb
-  languageName: node
-  linkType: hard
-
 "@foxglove/rosmsg-msgs-common@npm:^3.0.0":
   version: 3.2.1
   resolution: "@foxglove/rosmsg-msgs-common@npm:3.2.1"
@@ -2498,27 +2475,6 @@ __metadata:
     "@foxglove/message-definition": ^0.3.1
     "@foxglove/rosmsg": ^5.0.4
   checksum: 40d567087c0d7b7bb496a6e2623efd76f3a86465ad9b91cfff3517b285a5d4621b1c77b054865ac6f1b8ffe61608f5755693798c601d521b8b51438e0963bd78
-  languageName: node
-  linkType: hard
-
-"@foxglove/rosmsg-serialization@npm:^2.0.0":
-  version: 2.0.3
-  resolution: "@foxglove/rosmsg-serialization@npm:2.0.3"
-  dependencies:
-    "@foxglove/message-definition": ^0.2.0
-  checksum: d2ad60e625e819b6373fe32216118e510858decddb65b14590191cea3ba114a6f0941d445a048e8f6a3c0cbdb69a977b7e2ecb910166eecbece1666c57b932a3
-  languageName: node
-  linkType: hard
-
-"@foxglove/rosmsg@npm:^4.0.0":
-  version: 4.2.2
-  resolution: "@foxglove/rosmsg@npm:4.2.2"
-  dependencies:
-    "@foxglove/message-definition": ^0.2.0
-    md5-typescript: ^1.0.5
-  bin:
-    gendeps2: bin/gendeps2
-  checksum: b982a6d03e3552b24fc4188e3cf08daddf2054b16c39073068749df2e754d26622ce7548ea0bf9dc424db2b1cec5e76f02e9cb9823e5a4da10b672d6606118f2
   languageName: node
   linkType: hard
 
@@ -2608,18 +2564,6 @@ __metadata:
     eventemitter3: ^5.0.1
     tslib: ^2.6.3
   checksum: 6ff8544afca80f344e4d4cb393d6d8d55cb3a9d1e336e097a9f01e80fe7fa1ec707ba792d61a7d665274558aa61b7519fc3abab0cdd1d24fceb54be00dec5652
-  languageName: node
-  linkType: hard
-
-"@foxglove/xmlrpc@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@foxglove/xmlrpc@npm:1.3.0"
-  dependencies:
-    "@foxglove/just-fetch": ^1.2.4
-    byte-base64: ^1.1.0
-    sax: ^1.2.4
-    xmlbuilder2: ^3.0.2
-  checksum: 9f772e147581081426d1353512b59b80e3335973920a305a6086dde2189627a74d227f6d54f9e85bccdc2843797f7a0eeeaedc5762e695c2da04bf7bfdff7246
   languageName: node
   linkType: hard
 
@@ -3230,6 +3174,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lichtblick/ros1@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@lichtblick/ros1@npm:1.0.0"
+  dependencies:
+    "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/rosmsg": 1.0.0
+    "@lichtblick/rosmsg-serialization": 1.0.0
+    "@lichtblick/xmlrpc": 1.0.0
+    eventemitter3: ^5.0.0
+    ipaddr.js: ^2.0.1
+  bin:
+    roscore: dist/nodejs/roscore.js
+  checksum: f25d967e6192814d5a8cfa813188f8e7c9130d95cd4fd08ae672d1391d20ec488803abacd9ea9f1c88961b1927d44da99b8208eb4600fb23bbc2283862f1e474
+  languageName: node
+  linkType: hard
+
 "@lichtblick/ros2idl-parser@npm:1.0.0":
   version: 1.0.0
   resolution: "@lichtblick/ros2idl-parser@npm:1.0.0"
@@ -3337,7 +3297,6 @@ __metadata:
     "@fluentui/react-icons": 2.0.224
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/message-path": "workspace:*"
-    "@foxglove/ros1": 3.0.0
     "@foxglove/schemas": 1.6.3
     "@foxglove/theme": "workspace:*"
     "@foxglove/typescript-transformers": "workspace:*"
@@ -3351,6 +3310,7 @@ __metadata:
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/ros1": 1.0.0
     "@lichtblick/rosbag": 1.0.0
     "@lichtblick/rosbag2-web": 1.0.0
     "@lichtblick/roslibjs": 1.0.0
