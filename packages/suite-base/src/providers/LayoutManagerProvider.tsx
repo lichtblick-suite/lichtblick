@@ -13,7 +13,6 @@ import Logger from "@lichtblick/log";
 import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useLayoutStorage } from "@lichtblick/suite-base/context/LayoutStorageContext";
 import { useRemoteLayoutStorage } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
-import { LayoutLoader } from "@lichtblick/suite-base/services/ILayoutLoader";
 import LayoutManager from "@lichtblick/suite-base/services/LayoutManager/LayoutManager";
 import delay from "@lichtblick/suite-base/util/delay";
 
@@ -22,18 +21,7 @@ const log = Logger.getLogger(__filename);
 const SYNC_INTERVAL_BASE_MS = 30_000;
 const SYNC_INTERVAL_MAX_MS = 3 * 60_000;
 
-const isFulfilled = <T,>(result: PromiseSettledResult<T>): result is PromiseFulfilledResult<T> =>
-  result.status === "fulfilled";
-
-const isRejected = (result: PromiseSettledResult<unknown>): result is PromiseRejectedResult =>
-  result.status === "rejected";
-
-export default function LayoutManagerProvider({
-  children,
-  loaders = [],
-}: React.PropsWithChildren<{
-  loaders?: readonly LayoutLoader[];
-}>): JSX.Element {
+export default function LayoutManagerProvider({ children }: React.PropsWithChildren): JSX.Element {
   const layoutStorage = useLayoutStorage();
   const remoteLayoutStorage = useRemoteLayoutStorage();
 
@@ -47,51 +35,6 @@ export default function LayoutManagerProvider({
   useEffect(() => {
     layoutManager.setOnline(online);
   }, [layoutManager, online]);
-
-  useEffect(() => {
-    if (loaders.length === 0) {
-      return;
-    }
-
-    const loadAndSaveLayouts = async () => {
-      try {
-        const currentLayouts = await layoutManager.getLayouts();
-        const currentLayoutsFroms = new Set(currentLayouts.map((layout) => layout.from));
-
-        const loaderPromises = loaders.map(async (loader) => await loader.fetchLayouts());
-        const loaderResults = await Promise.allSettled(loaderPromises);
-
-        const newLayouts = loaderResults
-          .filter(isFulfilled)
-          .flatMap((result) => result.value)
-          .filter((layout) => !currentLayoutsFroms.has(layout.from));
-
-        // Log errors cause failed to fetch some layout from a specific loader
-        loaderResults.filter(isRejected).forEach((result) => {
-          log.error(`Failed to fetch layouts from loader: ${result.reason}`);
-        });
-
-        const savedPromises = newLayouts.map(
-          async (layout) =>
-            await layoutManager.saveNewLayout({
-              ...layout,
-              permission: "CREATOR_WRITE",
-            }),
-        );
-
-        // Try to save all layouts
-        const saveResults = await Promise.allSettled(savedPromises);
-
-        // Log errors cause failed to save a layout
-        saveResults.filter(isRejected).forEach((result) => {
-          log.error(`Failed to save layout: ${result.reason}`);
-        });
-      } catch (err) {
-        log.error(`Loading default layouts failed: ${err}`);
-      }
-    };
-    void loadAndSaveLayouts();
-  }, [layoutManager, loaders]);
 
   // Sync periodically when logged in, online, and the app is not hidden
   const enableSyncing = remoteLayoutStorage != undefined && online && visibilityState === "visible";

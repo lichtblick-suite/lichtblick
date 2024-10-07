@@ -39,8 +39,10 @@ import {
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
+import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
+import { LayoutLoader } from "@lichtblick/suite-base/services/ILayoutLoader";
 import { LayoutManagerEventTypes } from "@lichtblick/suite-base/services/ILayoutManager";
 import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
 import { windowAppURLState } from "@lichtblick/suite-base/util/appURLState";
@@ -56,7 +58,12 @@ export const MAX_SUPPORTED_LAYOUT_VERSION = 1;
  * Concrete implementation of CurrentLayoutContext.Provider which handles
  * automatically restoring the current layout from LayoutStorage.
  */
-export default function CurrentLayoutProvider({ children }: React.PropsWithChildren): JSX.Element {
+export default function CurrentLayoutProvider({
+  children,
+  loaders = [],
+}: React.PropsWithChildren<{
+  loaders?: readonly LayoutLoader[];
+}>): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { getUserProfile, setUserProfile } = useUserProfileStorage();
   const layoutManager = useLayoutManager();
@@ -259,20 +266,33 @@ export default function CurrentLayoutProvider({ children }: React.PropsWithChild
       return;
     }
 
+    // Try to load default layouts, before checking to add the fallback "Default".
+    await loadDefaultLayouts(layoutManager, loaders);
+
     // Retreive the selected layout id from the user's profile. If there's no layout specified
     // or we can't load it then save and select a default layout.
     const { currentLayoutId } = await getUserProfile();
     const layout = currentLayoutId ? await layoutManager.getLayout(currentLayoutId) : undefined;
+
     if (layout) {
       await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
-    } else {
-      const newLayout = await layoutManager.saveNewLayout({
-        name: "Default",
-        data: defaultLayout,
-        permission: "CREATOR_WRITE",
-      });
-      await setSelectedLayoutId(newLayout.id);
+      return;
     }
+
+    const layouts = await layoutManager.getLayouts();
+    if (layouts[0]) {
+      await setSelectedLayoutId(layouts[0].id);
+      return;
+    }
+
+    const newLayout = await layoutManager.saveNewLayout({
+      name: "Default",
+      data: defaultLayout,
+      permission: "CREATOR_WRITE",
+    });
+    await setSelectedLayoutId(newLayout.id);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getUserProfile, layoutManager, setSelectedLayoutId]);
 
   const actions: ICurrentLayout["actions"] = useMemo(

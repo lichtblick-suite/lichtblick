@@ -110,9 +110,9 @@ export function App(props: AppProps): JSX.Element {
 
   // Problems provider also must come before other, dependent contexts.
   providers.unshift(<ProblemsContextProvider />);
-  providers.unshift(<CurrentLayoutProvider />);
+  providers.unshift(<CurrentLayoutProvider loaders={layoutLoaders} />);
   providers.unshift(<UserProfileLocalStorageProvider />);
-  providers.unshift(<LayoutManagerProvider loaders={layoutLoaders} />);
+  providers.unshift(<LayoutManagerProvider />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);

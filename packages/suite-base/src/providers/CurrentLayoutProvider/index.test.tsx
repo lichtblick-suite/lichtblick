@@ -56,7 +56,7 @@ function makeMockLayoutManager() {
     off: jest.fn(/*noop*/),
     setError: jest.fn(/*noop*/),
     setOnline: jest.fn(/*noop*/),
-    getLayouts: jest.fn().mockImplementation(mockThrow("getLayouts")),
+    getLayouts: jest.fn(),
     getLayout: jest.fn().mockImplementation(mockThrow("getLayout")),
     saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
     updateLayout: jest.fn().mockImplementation(mockThrow("updateLayout")),
@@ -106,7 +106,7 @@ function renderTest({
           <SnackbarProvider>
             <LayoutManagerContext.Provider value={mockLayoutManager}>
               <UserProfileStorageContext.Provider value={mockUserProfile}>
-                <CurrentLayoutProvider>
+                <CurrentLayoutProvider loaders={[]}>
                   {children}
                   <CurrentLayoutSyncAdapter />
                 </CurrentLayoutProvider>
@@ -119,6 +119,7 @@ function renderTest({
   );
   return { result, all };
 }
+
 describe("CurrentLayoutProvider", () => {
   it("uses currentLayoutId from UserProfile to load from LayoutStorage", async () => {
     const expectedState: LayoutData = {
