@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { parseChannel } from "@foxglove/mcap-support";
 import { ImageAnnotations } from "@foxglove/schemas/jsonschema";
 
+import { parseChannel } from "@lichtblick/mcap-support";
 import { MessageDefinition } from "@lichtblick/message-definition";
 import { getMessagePathSearchItems } from "@lichtblick/suite-base/components/TopicList/getMessagePathSearchItems";
 import { Topic } from "@lichtblick/suite-base/players/types";

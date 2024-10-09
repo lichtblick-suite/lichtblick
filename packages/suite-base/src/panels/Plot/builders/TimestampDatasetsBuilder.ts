@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessagePath } from "@foxglove/message-path";
 import * as Comlink from "comlink";
 
 import { ComlinkWrap } from "@lichtblick/den/worker";
+import { MessagePath } from "@lichtblick/message-path";
 import { toSec, subtract as subtractTime } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";

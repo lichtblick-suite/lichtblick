@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { fontMonospace } from "@foxglove/theme";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import * as _ from "lodash-es";
 import * as R from "ramda";
@@ -49,6 +48,7 @@ import { SubscribePayload } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { fontMonospace } from "@lichtblick/theme";
 
 import { messagesToDataset } from "./messagesToDataset";
 import { PathState, useStateTransitionsPanelSettings } from "./settings";

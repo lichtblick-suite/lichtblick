@@ -2424,49 +2424,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/mcap-support@workspace:*, @foxglove/mcap-support@workspace:packages/mcap-support":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
-  dependencies:
-    "@foxglove/schemas": 1.6.3
-    "@lichtblick/message-definition": 1.0.0
-    "@lichtblick/omgidl-parser": 1.0.0
-    "@lichtblick/omgidl-serialization": 1.0.0
-    "@lichtblick/ros2idl-parser": 1.0.0
-    "@lichtblick/rosmsg": 1.0.0
-    "@lichtblick/rosmsg-serialization": 1.0.0
-    "@lichtblick/rosmsg2-serialization": 1.0.0
-    "@lichtblick/tsconfig": 1.0.0
-    "@lichtblick/wasm-bz2": 1.0.0
-    "@lichtblick/wasm-lz4": 1.0.0
-    "@lichtblick/wasm-zstd": 1.0.0
-    "@mcap/core": 2.0.2
-    "@protobufjs/base64": 1.1.2
-    "@types/protobufjs": "workspace:*"
-    flatbuffers: 23.5.26
-    flatbuffers_reflection: 0.0.7
-    protobufjs: "patch:protobufjs@7.2.5#../../patches/protobufjs.patch"
-    typescript: 5.3.3
-  languageName: unknown
-  linkType: soft
-
 "@foxglove/message-definition@npm:^0.3.1":
   version: 0.3.1
   resolution: "@foxglove/message-definition@npm:0.3.1"
   checksum: 71699bc9dafc90d07ce312bcaebbedc1f60a173c8ba66421d741cf713ea6bbf6b462b551fcfe6da86488814629639e1dc424e9664c7ea2474227a20ad88ac776
   languageName: node
   linkType: hard
-
-"@foxglove/message-path@workspace:*, @foxglove/message-path@workspace:packages/message-path":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/message-path@workspace:packages/message-path"
-  dependencies:
-    "@lichtblick/tsconfig": 1.0.0
-    "@types/nearley": 2.11.5
-    nearley: 2.20.1
-    typescript: 5.3.3
-  languageName: unknown
-  linkType: soft
 
 "@foxglove/rosmsg-msgs-common@npm:^3.0.0":
   version: 3.2.1
@@ -2514,36 +2477,6 @@ __metadata:
   checksum: f750c68f0bb9d6854dfbb872d960ab499ce653899eaea48e2e9a5edcdc12bf2e89fb1b3e25a0e8696cd2ea75cc5ad56b673053cca3e4c2f950640bd9c08164cb
   languageName: node
   linkType: hard
-
-"@foxglove/theme@workspace:*, @foxglove/theme@workspace:packages/theme":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/theme@workspace:packages/theme"
-  dependencies:
-    "@emotion/react": 11.13.0
-    "@emotion/styled": 11.13.0
-    "@fluentui/react-icons": 2.0.224
-    "@lichtblick/tsconfig": 1.0.0
-    "@mui/icons-material": 5.15.5
-    "@mui/lab": 5.0.0-alpha.161
-    "@mui/material": 5.13.5
-    "@mui/x-data-grid": 6.18.7
-    "@storybook/react": 7.6.10
-    "@types/react": 18.2.56
-    i18next: 23.11.2
-    i18next-browser-languagedetector: 7.2.1
-    react: 18.2.0
-    react-i18next: 14.1.0
-  languageName: unknown
-  linkType: soft
-
-"@foxglove/typescript-transformers@workspace:*, @foxglove/typescript-transformers@workspace:packages/typescript-transformers":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/typescript-transformers@workspace:packages/typescript-transformers"
-  dependencies:
-    "@lichtblick/tsconfig": 1.0.0
-    typescript: 5.3.3
-  languageName: unknown
-  linkType: soft
 
 "@foxglove/ws-protocol@npm:0.7.2":
   version: 0.7.2
@@ -3148,12 +3081,49 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lichtblick/mcap-support@workspace:*, @lichtblick/mcap-support@workspace:packages/mcap-support":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/mcap-support@workspace:packages/mcap-support"
+  dependencies:
+    "@foxglove/schemas": 1.6.3
+    "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/omgidl-parser": 1.0.0
+    "@lichtblick/omgidl-serialization": 1.0.0
+    "@lichtblick/ros2idl-parser": 1.0.0
+    "@lichtblick/rosmsg": 1.0.0
+    "@lichtblick/rosmsg-serialization": 1.0.0
+    "@lichtblick/rosmsg2-serialization": 1.0.0
+    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/wasm-bz2": 1.0.0
+    "@lichtblick/wasm-lz4": 1.0.0
+    "@lichtblick/wasm-zstd": 1.0.0
+    "@mcap/core": 2.0.2
+    "@protobufjs/base64": 1.1.2
+    "@types/protobufjs": "workspace:*"
+    flatbuffers: 23.5.26
+    flatbuffers_reflection: 0.0.7
+    protobufjs: "patch:protobufjs@7.2.5#../../patches/protobufjs.patch"
+    typescript: 5.3.3
+  languageName: unknown
+  linkType: soft
+
 "@lichtblick/message-definition@npm:1.0.0, @lichtblick/message-definition@npm:^1.0.0":
   version: 1.0.0
   resolution: "@lichtblick/message-definition@npm:1.0.0"
   checksum: 2046b4fd7781cd088aeebb84e9e3b742868df9d79fc915ee484ed027e48b306a5c8151c327e2e205124c23fd1dd90d8f007d87e22fe363e79db3602d4d2a06b4
   languageName: node
   linkType: hard
+
+"@lichtblick/message-path@workspace:*, @lichtblick/message-path@workspace:packages/message-path":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/message-path@workspace:packages/message-path"
+  dependencies:
+    "@lichtblick/tsconfig": 1.0.0
+    "@types/nearley": 2.11.5
+    nearley: 2.20.1
+    typescript: 5.3.3
+  languageName: unknown
+  linkType: soft
 
 "@lichtblick/omgidl-parser@npm:1.0.0":
   version: 1.0.0
@@ -3295,11 +3265,7 @@ __metadata:
     "@emotion/react": 11.13.0
     "@emotion/styled": 11.13.0
     "@fluentui/react-icons": 2.0.224
-    "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/message-path": "workspace:*"
     "@foxglove/schemas": 1.6.3
-    "@foxglove/theme": "workspace:*"
-    "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ws-protocol": 0.7.2
     "@lichtblick/avl": 1.0.0
     "@lichtblick/chartjs-plugin-zoom": 1.0.0
@@ -3309,7 +3275,9 @@ __metadata:
     "@lichtblick/electron-socket": 1.0.0
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/mcap-support": "workspace:*"
     "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/message-path": "workspace:*"
     "@lichtblick/ros1": 1.0.0
     "@lichtblick/rosbag": 1.0.0
     "@lichtblick/rosbag2-web": 1.0.0
@@ -3320,8 +3288,10 @@ __metadata:
     "@lichtblick/rosmsg2-serialization": 1.0.0
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
+    "@lichtblick/theme": "workspace:*"
     "@lichtblick/three-text": 1.0.0
     "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/typescript-transformers": "workspace:*"
     "@lichtblick/ulog": 1.0.0
     "@lichtblick/velodyne-cloud": 1.0.0
     "@lichtblick/wasm-bz2": 1.0.0
@@ -3466,14 +3436,14 @@ __metadata:
   dependencies:
     "@actions/exec": 1.1.1
     "@actions/tool-cache": 2.0.1
-    "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/theme": "workspace:*"
     "@lichtblick/den": "workspace:*"
     "@lichtblick/electron-socket": 1.0.0
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/mcap-support": "workspace:*"
     "@lichtblick/rosbag": 1.0.0
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
     "@mcap/core": 1.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
@@ -3520,9 +3490,9 @@ __metadata:
   resolution: "@lichtblick/suite-web@workspace:packages/suite-web"
   dependencies:
     "@fluentui/react-icons": 2.0.224
-    "@foxglove/theme": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
     "@mui/material": 5.13.5
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
@@ -3548,6 +3518,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lichtblick/theme@workspace:*, @lichtblick/theme@workspace:packages/theme":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/theme@workspace:packages/theme"
+  dependencies:
+    "@emotion/react": 11.13.0
+    "@emotion/styled": 11.13.0
+    "@fluentui/react-icons": 2.0.224
+    "@lichtblick/tsconfig": 1.0.0
+    "@mui/icons-material": 5.15.5
+    "@mui/lab": 5.0.0-alpha.161
+    "@mui/material": 5.13.5
+    "@mui/x-data-grid": 6.18.7
+    "@storybook/react": 7.6.10
+    "@types/react": 18.2.56
+    i18next: 23.11.2
+    i18next-browser-languagedetector: 7.2.1
+    react: 18.2.0
+    react-i18next: 14.1.0
+  languageName: unknown
+  linkType: soft
+
 "@lichtblick/three-text@npm:1.0.0":
   version: 1.0.0
   resolution: "@lichtblick/three-text@npm:1.0.0"
@@ -3565,6 +3556,15 @@ __metadata:
   checksum: f3215bb523b8c84643332bfc12dc9d392d273b1beab0674999c730ebaee246c29aec788140d5ba4aefe493d4488bbef5b31d50ba7abf0dd869a06ab00ef42add
   languageName: node
   linkType: hard
+
+"@lichtblick/typescript-transformers@workspace:*, @lichtblick/typescript-transformers@workspace:packages/typescript-transformers":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/typescript-transformers@workspace:packages/typescript-transformers"
+  dependencies:
+    "@lichtblick/tsconfig": 1.0.0
+    typescript: 5.3.3
+  languageName: unknown
+  linkType: soft
 
 "@lichtblick/ulog@npm:1.0.0":
   version: 1.0.0
@@ -18939,9 +18939,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@patch:protobufjs@7.2.5#../../patches/protobufjs.patch::locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
+"protobufjs@patch:protobufjs@7.2.5#../../patches/protobufjs.patch::locator=%40lichtblick%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
   version: 7.2.5
-  resolution: "protobufjs@patch:protobufjs@npm%3A7.2.5#../../patches/protobufjs.patch::version=7.2.5&hash=b342bd&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
+  resolution: "protobufjs@patch:protobufjs@npm%3A7.2.5#../../patches/protobufjs.patch::version=7.2.5&hash=b342bd&locator=%40lichtblick%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
   dependencies:
     "@protobufjs/aspromise": ^1.1.2
     "@protobufjs/base64": ^1.1.2

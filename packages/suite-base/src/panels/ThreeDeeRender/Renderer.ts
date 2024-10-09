@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { FrameTransform, FrameTransforms, SceneUpdate } from "@foxglove/schemas";
-import { palette, fontMonospace } from "@foxglove/theme";
 import EventEmitter from "eventemitter3";
 import { quat, vec3 } from "gl-matrix";
 import i18next from "i18next";
@@ -40,6 +39,7 @@ import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD
 import { LayerErrors } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
+import { palette, fontMonospace } from "@lichtblick/theme";
 import { LabelMaterial, LabelPool } from "@lichtblick/three-text";
 
 import { HUDItem } from "./HUDItemManager";

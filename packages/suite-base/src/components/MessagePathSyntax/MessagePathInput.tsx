@@ -14,12 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  quoteTopicNameIfNeeded,
-  parseMessagePath,
-  MessagePath,
-  PrimitiveType,
-} from "@foxglove/message-path";
 import { TextFieldProps } from "@mui/material";
 import * as _ from "lodash-es";
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
@@ -27,6 +21,12 @@ import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
+import {
+  quoteTopicNameIfNeeded,
+  parseMessagePath,
+  MessagePath,
+  PrimitiveType,
+} from "@lichtblick/message-path";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import { Autocomplete, IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete";
 import useGlobalVariables, {

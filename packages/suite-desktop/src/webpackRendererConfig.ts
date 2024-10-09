@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as palette from "@foxglove/theme/src/palette";
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import HtmlWebpackPlugin from "html-webpack-plugin";
@@ -14,6 +13,7 @@ import { Configuration, WebpackPluginInstance } from "webpack";
 
 import type { WebpackArgv } from "@lichtblick/suite-base/WebpackArgv";
 import { makeConfig } from "@lichtblick/suite-base/webpack";
+import * as palette from "@lichtblick/theme/src/palette";
 
 import { WebpackConfigParams } from "./WebpackConfigParams";
 

@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { fontMonospace } from "@foxglove/theme";
 import {
   Chart,
   ChartData,
@@ -34,6 +33,7 @@ import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import Logger from "@lichtblick/log";
 import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
+import { fontMonospace } from "@lichtblick/theme";
 
 import { lineSegmentLabelColor } from "./lineSegments";
 import { proxyTyped } from "./proxy";

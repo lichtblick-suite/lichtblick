@@ -14,6 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import * as _ from "lodash-es";
+
 import {
   MessagePathFilter,
   quoteFieldNameIfNeeded,
@@ -21,9 +23,7 @@ import {
   PrimitiveType,
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
-} from "@foxglove/message-path";
-import * as _ from "lodash-es";
-
+} from "@lichtblick/message-path";
 import { Immutable } from "@lichtblick/suite";
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
@@ -281,7 +281,7 @@ export const traverseStructure = (
         return { valid: false, msgPathPart, structureItem };
       }
       structureItem = structureItem.next;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      //eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (msgPathPart.type === "filter") {
       if (
         structureItem.structureType !== "message" ||
@@ -303,7 +303,7 @@ export const traverseStructure = (
     } else {
       assertNever(
         msgPathPart,
-        `Invalid msgPathPart.type: ${(msgPathPart as MessagePathPart).type}`,
+        `Invalid msgPathPart.type: ${(msgPathPart as MessagePathPart).type} `,
       );
     }
   }

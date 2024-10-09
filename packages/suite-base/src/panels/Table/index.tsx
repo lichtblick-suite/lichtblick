@@ -14,10 +14,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { parseMessagePath, MessagePath } from "@foxglove/message-path";
 import { useEffect } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { parseMessagePath, MessagePath } from "@lichtblick/message-path";
 import { useMessagesByTopic } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";

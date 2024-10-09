@@ -6,11 +6,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ReOrderDotsVertical16Regular } from "@fluentui/react-icons";
-import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
 import { Badge, Typography } from "@mui/material";
 import { FzfResultItem } from "fzf";
 import { useCallback, useMemo } from "react";
 
+import { quoteTopicNameIfNeeded } from "@lichtblick/message-path";
 import { HighlightChars } from "@lichtblick/suite-base/components/HighlightChars";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import Stack from "@lichtblick/suite-base/components/Stack";

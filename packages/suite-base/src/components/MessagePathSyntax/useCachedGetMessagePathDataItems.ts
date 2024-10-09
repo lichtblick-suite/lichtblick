@@ -14,18 +14,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import * as _ from "lodash-es";
+import { useCallback, useMemo } from "react";
+
+import { filterMap } from "@lichtblick/den/collection";
+import { useDeepMemo, useShallowMemo } from "@lichtblick/hooks";
 import {
   quoteTopicNameIfNeeded,
   parseMessagePath,
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
   MessagePath,
-} from "@foxglove/message-path";
-import * as _ from "lodash-es";
-import { useCallback, useMemo } from "react";
-
-import { filterMap } from "@lichtblick/den/collection";
-import { useDeepMemo, useShallowMemo } from "@lichtblick/hooks";
+} from "@lichtblick/message-path";
 import { Immutable } from "@lichtblick/suite";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import useGlobalVariables, {

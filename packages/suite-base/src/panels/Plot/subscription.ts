@@ -5,8 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { MessagePathPart, MessagePath } from "@foxglove/message-path";
-
+import type { MessagePathPart, MessagePath } from "@lichtblick/message-path";
 import type { Immutable } from "@lichtblick/suite";
 import type {
   SubscribePayload,

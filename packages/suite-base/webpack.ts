@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createTssReactNameTransformer } from "@foxglove/typescript-transformers";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import monacoPkg from "monaco-editor/package.json";
@@ -14,6 +13,8 @@ import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
 import ts from "typescript";
 import webpack, { Configuration } from "webpack";
+
+import { createTssReactNameTransformer } from "@lichtblick/typescript-transformers";
 
 import { WebpackArgv } from "./WebpackArgv";
 

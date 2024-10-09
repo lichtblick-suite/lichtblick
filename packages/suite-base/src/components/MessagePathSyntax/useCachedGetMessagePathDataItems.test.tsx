@@ -15,10 +15,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { parseMessagePath } from "@foxglove/message-path";
 import { renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
 
+import { parseMessagePath } from "@lichtblick/message-path";
 import { messagePathStructures } from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";

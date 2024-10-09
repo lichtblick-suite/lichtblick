@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@foxglove/message-path";
 import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -22,6 +21,7 @@ import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
 
+import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@lichtblick/message-path";
 import { Immutable, SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";

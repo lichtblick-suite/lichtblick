@@ -1,5 +1,5 @@
 {
-  "name": "@foxglove/mcap-support",
+  "name": "@lichtblick/mcap-support",
   "description": "Common schema and message parsing logic for use with MCAP and related protocols",
   "license": "MPL-2.0",
   "private": true,

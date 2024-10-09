@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { McapIndexedReader, McapTypes } from "@mcap/core";
 
 import Log from "@lichtblick/log";
+import { loadDecompressHandlers } from "@lichtblick/mcap-support";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";

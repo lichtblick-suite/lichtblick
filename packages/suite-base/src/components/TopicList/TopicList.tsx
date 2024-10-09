@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { quoteTopicNameIfNeeded } from "@foxglove/message-path";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -26,6 +25,7 @@ import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
+import { quoteTopicNameIfNeeded } from "@lichtblick/message-path";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import { DirectTopicStatsUpdater } from "@lichtblick/suite-base/components/DirectTopicStatsUpdater";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";

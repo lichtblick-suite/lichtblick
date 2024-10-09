@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { fontMonospace } from "@foxglove/theme";
 import { Button, Fade, Tooltip, buttonClasses } from "@mui/material";
 import { ChartOptions, InteractionMode, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
@@ -48,6 +47,7 @@ import {
   useTimelineInteractionState,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
+import { fontMonospace } from "@lichtblick/theme";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent, {

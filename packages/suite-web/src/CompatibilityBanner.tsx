@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Dismiss20Filled, Warning24Filled } from "@fluentui/react-icons";
-import { createMuiTheme } from "@foxglove/theme";
 import {
   Button,
   IconButton,
@@ -19,6 +18,7 @@ import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { createMuiTheme } from "@lichtblick/theme";
 
 const MINIMUM_CHROME_VERSION = 76;
 const BANNER_HEIGHT = 54;
