@@ -10,6 +10,7 @@ ignorePatterns:
   - "packages/**/wasm/*.js"
   - "!.storybook"
   - storybook-static
+  - coverage
 
 plugins:
   - file-progress

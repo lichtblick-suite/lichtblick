@@ -19,3 +19,8 @@ coverage/
 
 # Extensions
 *.foxe
+
+# SonarQube files
+.sonar_lock
+.scannerwork
+eslint-report.json

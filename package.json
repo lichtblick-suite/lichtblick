@@ -20,7 +20,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "clean": "tsc --build --clean packages/**/tsconfig.json && rimraf .webpack */.webpack dist storybook-screenshots storybook-static",
+    "clean": "tsc --build --clean packages/**/tsconfig.json && rimraf .webpack */.webpack dist storybook-screenshots storybook-static coverage",
     "build:packages": "tsc --build --verbose packages/*/tsconfig.json packages/*/src/*/tsconfig.json",
     "desktop:build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "desktop:build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
@@ -35,9 +35,11 @@
     "license-check": "ts-node ci/license-check.ts",
     "lint": "TIMING=1 eslint --report-unused-disable-directives --fix .",
     "lint:ci": "TIMING=1 eslint --report-unused-disable-directives --config .eslintrc.ci.yaml .",
+    "lint:ci:report": "yarn lint:ci -f json -o eslint-report.json --quiet",
     "lint:unused-exports": "ts-node ./ci/lint-unused-exports.ts",
     "lint:dependencies": "ts-node ./ci/lint-dependencies.ts .",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "test:debug": "cross-env NODE_OPTIONS='--inspect-brk' jest",
     "test:watch": "jest --watch",
     "test:integration": "jest --forceExit --projects desktop/integration-test",
