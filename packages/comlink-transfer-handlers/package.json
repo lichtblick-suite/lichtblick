@@ -20,8 +20,8 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
+    "@lichtblick/comlink": "1.0.3",
     "@lichtblick/tsconfig": "1.0.0",
-    "comlink": "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e",
     "typescript": "5.3.3"
   }
 }

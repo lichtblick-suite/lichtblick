@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { Theme } from "@mui/material";
-import * as Comlink from "comlink";
 
+import * as Comlink from "@lichtblick/comlink";
 import { ComlinkWrap } from "@lichtblick/den/worker";
 import { Immutable } from "@lichtblick/suite";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";

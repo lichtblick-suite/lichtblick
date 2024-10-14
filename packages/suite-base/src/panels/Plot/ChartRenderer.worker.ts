@@ -19,8 +19,8 @@ import {
   Tooltip,
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
-import * as Comlink from "comlink";
 
+import * as Comlink from "@lichtblick/comlink";
 import PlexMono from "@lichtblick/suite-base/styles/assets/PlexMono.woff2";
 
 import { ChartRenderer } from "./ChartRenderer";

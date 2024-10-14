@@ -2990,11 +2990,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
+    "@lichtblick/comlink": 1.0.3
     "@lichtblick/tsconfig": 1.0.0
-    comlink: "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e"
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
+
+"@lichtblick/comlink@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@lichtblick/comlink@npm:1.0.3"
+  checksum: 9c70e38325624932205e7d7a634f714fc84ce3b14c4dfbba22d9a909d9cc82bedff1a39159e8491c16a6c34f5825240f1ae5ad08b7ee7d525a3ca361ec5f7433
+  languageName: node
+  linkType: hard
 
 "@lichtblick/crc@npm:1.0.0":
   version: 1.0.0
@@ -3007,9 +3014,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/den@workspace:packages/den"
   dependencies:
+    "@lichtblick/comlink": 1.0.3
     "@lichtblick/tsconfig": 1.0.0
     async-mutex: 0.4.0
-    comlink: "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e"
     xacro-parser: 0.3.9
   languageName: unknown
   linkType: soft
@@ -3269,6 +3276,7 @@ __metadata:
     "@foxglove/ws-protocol": 0.7.2
     "@lichtblick/avl": 1.0.0
     "@lichtblick/chartjs-plugin-zoom": 1.0.0
+    "@lichtblick/comlink": 1.0.3
     "@lichtblick/comlink-transfer-handlers": "workspace:*"
     "@lichtblick/crc": 1.0.0
     "@lichtblick/den": "workspace:*"
@@ -3344,7 +3352,6 @@ __metadata:
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
     chromatic: 11.5.6
-    comlink: "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e"
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
     cytoscape: 3.28.1
@@ -10011,13 +10018,6 @@ __metadata:
   dependencies:
     delayed-stream: ~1.0.0
   checksum: 49fa4aeb4916567e33ea81d088f6584749fc90c7abec76fd516bf1c5aa5c79f3584b5ba3de6b86d26ddd64bae5329c4c7479343250cfe71c75bb366eae53bb7c
-  languageName: node
-  linkType: hard
-
-"comlink@github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e":
-  version: 4.4.1
-  resolution: "comlink@https://github.com/lichtblick-suite/comlink.git#commit=1f0271445730e68172b4d5d1dc9b9e74d0db241e"
-  checksum: d8fe91d88a7b07395c371ae365a08e142310438a42fdf0cf28a05f5a29a4f09fff6d08192e95b38574d0230e7e89ad2f4f8b748cf289fd601602bf0ff889c536
   languageName: node
   linkType: hard
 

@@ -13,8 +13,8 @@
   },
   "homepage": "https://github.com/lichtblick-suite",
   "dependencies": {
+    "@lichtblick/comlink": "1.0.3",
     "async-mutex": "0.4.0",
-    "comlink": "github:lichtblick-suite/comlink#1f0271445730e68172b4d5d1dc9b9e74d0db241e",
     "xacro-parser": "0.3.9"
   },
   "devDependencies": {

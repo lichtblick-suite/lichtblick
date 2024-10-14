@@ -6,7 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { RawImage } from "@foxglove/schemas";
-import * as Comlink from "comlink";
+
+import * as Comlink from "@lichtblick/comlink";
 
 import { decodeRawImage, RawImageOptions } from "./decodeImage";
 import type { Image as RosImage } from "../../ros";
