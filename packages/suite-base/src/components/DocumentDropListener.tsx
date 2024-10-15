@@ -134,7 +134,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
 
       // Check for no supported files
       if (filteredFiles.length === 0 && filteredHandles?.length === 0) {
-        enqueueSnackbar("The file format is unsupported.", { variant: "error" });
+        enqueueSnackbar("The file format is not supported.", { variant: "error" });
         return;
       }
 
