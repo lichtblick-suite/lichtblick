@@ -8,6 +8,7 @@
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
 import fs from "fs";
 import i18n from "i18next";
+import path from "path";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/src/AppSetting";
@@ -138,7 +139,10 @@ export async function main(): Promise<void> {
 
   // files our app should open - either from user double-click on a supported fileAssociation
   // or command line arguments.
-  const filesToOpen: string[] = process.argv.slice(1).filter(isFileToOpen);
+  const filesToOpen: string[] = process.argv
+    .slice(1)
+    .map((filePath) => path.resolve(filePath)) // Convert to absolute path, linux has some problems to resolve relative paths
+    .filter(isFileToOpen);
 
   // indicates the preloader has setup the file input used to inject which files to open
   let preloaderFileInputIsReady = false;
@@ -172,9 +176,9 @@ export async function main(): Promise<void> {
     preloaderFileInputIsReady = true;
   });
 
-  ipcMain.handle("setRepresentedFilename", (ev, path: string | undefined) => {
+  ipcMain.handle("setRepresentedFilename", (ev, filePath: string | undefined) => {
     const browserWindow = BrowserWindow.fromId(ev.sender.id);
-    browserWindow?.setRepresentedFilename(path ?? "");
+    browserWindow?.setRepresentedFilename(filePath ?? "");
   });
 
   const openUrls: string[] = [];
