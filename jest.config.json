@@ -5,12 +5,5 @@
     "<rootDir>/desktop/jest.config.json",
     "<rootDir>/packages/*/jest.config.json"
   ],
-  "collectCoverage": true,
-  "coverageReporters": [
-    "text",
-    "lcov",
-    "json",
-    "xml"
-  ],
   "coverageDirectory": "coverage"
 }
