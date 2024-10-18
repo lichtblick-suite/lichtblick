@@ -28,5 +28,8 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "jest.autoRun": { "watch": false, "onSave": "test-file" },
   "jest.jestCommandLine": "yarn test",
-  "eslint.lintTask.enable": true
+  "eslint.lintTask.enable": true,
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  }
 }
