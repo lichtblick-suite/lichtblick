@@ -57,7 +57,7 @@ function makeMockLayoutManager() {
     setError: jest.fn(/*noop*/),
     setOnline: jest.fn(/*noop*/),
     getLayouts: jest.fn(),
-    getLayout: jest.fn().mockImplementation(mockThrow("getLayout")),
+    getLayout: jest.fn(),
     saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
     updateLayout: jest.fn().mockImplementation(mockThrow("updateLayout")),
     deleteLayout: jest.fn().mockImplementation(mockThrow("deleteLayout")),
@@ -121,6 +121,10 @@ function renderTest({
 }
 
 describe("CurrentLayoutProvider", () => {
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
   it("uses currentLayoutId from UserProfile to load from LayoutStorage", async () => {
     const expectedState: LayoutData = {
       layout: "Foo!bar",
@@ -161,7 +165,6 @@ describe("CurrentLayoutProvider", () => {
         },
       },
     ]);
-    (console.warn as jest.Mock).mockClear();
   });
 
   it("refuses to load an incompatible layout", async () => {
@@ -199,7 +202,6 @@ describe("CurrentLayoutProvider", () => {
       { selectedLayout: undefined },
       { selectedLayout: undefined },
     ]);
-    (console.warn as jest.Mock).mockClear();
   });
 
   it("keeps identity of action functions when modifying layout", async () => {
@@ -238,6 +240,42 @@ describe("CurrentLayoutProvider", () => {
     });
 
     expect(result.current.actions.savePanelConfigs).toBe(actions.savePanelConfigs);
-    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("selects the first layout in alphabetic order, when there is no selected layout", async () => {
+    const mockLayoutManager = makeMockLayoutManager();
+    mockLayoutManager.getLayout.mockImplementation(async () => undefined);
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "layout1",
+          name: "LAYOUT 1",
+          data: { data: TEST_LAYOUT },
+        },
+        {
+          id: "layout2",
+          name: "ABC Layout 2",
+          data: { data: TEST_LAYOUT },
+        },
+      ];
+    });
+
+    const mockUserProfile = makeMockUserProfile();
+    mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBeDefined();
+    expect(selectedLayout).toBe("layout2");
   });
 });

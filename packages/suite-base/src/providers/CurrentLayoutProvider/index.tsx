@@ -280,8 +280,9 @@ export default function CurrentLayoutProvider({
     }
 
     const layouts = await layoutManager.getLayouts();
-    if (layouts[0]) {
-      await setSelectedLayoutId(layouts[0].id);
+    if (layouts.length > 0) {
+      const sortedLayouts = [...layouts].sort((a, b) => a.name.localeCompare(b.name));
+      await setSelectedLayoutId(sortedLayouts[0]!.id);
       return;
     }
 
