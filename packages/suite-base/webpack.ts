@@ -65,6 +65,7 @@ export function makeConfig(
       fallback: {
         path: require.resolve("path-browserify"),
         stream: require.resolve("readable-stream"),
+        assert: false,
         zlib: require.resolve("browserify-zlib"),
         crypto: require.resolve("crypto-browserify"),
         vm: require.resolve("vm-browserify"),
