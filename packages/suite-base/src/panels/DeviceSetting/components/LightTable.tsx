@@ -23,6 +23,7 @@ type Props = {
 export const LightTable = (props: Props) => {
   const { config } = props;
   const [data, setData] = useState<Light[]>([]);
+  const [deafultData, setDeafultData] = useState<Light[]>([]);
   const currentMqtt = useRef<MQTT>(MQTT.getInstance());
   const [editingLight, setEditingLight] = useState<Light>({
     id: 0,
@@ -33,6 +34,8 @@ export const LightTable = (props: Props) => {
     redTime: 0,
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const [showEditTable, setShowEditTable] = useState(false);
 
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -47,13 +50,13 @@ export const LightTable = (props: Props) => {
   };
   const saveLightSettings = async (data: Light) => {
     try {
-      console.log(data);
       let sendData = {
         id: data.id,
-
         greenTime: data.greenTime,
         yellowTime: data.yellowTime,
         redTime: data.redTime,
+        time: data.time,
+        state: Number(data.state),
       };
 
       const response = await request("http://" + config.mqttHost + ":8081/setting/light/save", {
@@ -67,6 +70,8 @@ export const LightTable = (props: Props) => {
       if (response.code === 200) {
         message.success("Light updated successfully");
         fetchLightSettings();
+
+        currentMqtt.current.publish(`device/light/update`, JSON.stringify(sendData) || "");
       } else {
         message.error("Failed to update light" + response.message);
       }
@@ -81,28 +86,9 @@ export const LightTable = (props: Props) => {
   const handleOk = (values: Omit<Light, "id">) => {
     if (editingLight) {
       const updatedLight = { ...editingLight, ...values };
-      const mqUpdate = {
-        greenTime: updatedLight.greenTime,
-        id: updatedLight.id,
-        redTime: updatedLight.redTime,
-        state: updatedLight.state,
-        time: updatedLight.time,
-        yellowTime: updatedLight.yellowTime,
-      };
-      let data = "";
-      if (mqUpdate === undefined) {
-        return;
-      } else {
-        console.log("mqUpdate:", mqUpdate);
-        data = JSON.stringify(mqUpdate) ?? "";
-      }
 
-      currentMqtt.current.publish(`device/light/publish/${editingLight.id}`, data);
+      // currentMqtt.current.publish(`device/light/publish/${editingLight.id}`, data);
       saveLightSettings(updatedLight);
-
-      setData((prevValue) =>
-        prevValue!.map((item) => (item.id === editingLight.id ? updatedLight : item)),
-      );
 
       //   message.success("Light updated successfully");
       setIsModalVisible(false);
@@ -123,6 +109,7 @@ export const LightTable = (props: Props) => {
         method: "GET",
       });
       console.log("Response:", response);
+      setDeafultData(response.data);
       setData(response.data);
     } catch (error) {
       console.error("Request failed:", error);
@@ -184,10 +171,10 @@ export const LightTable = (props: Props) => {
             <TableCell>编号</TableCell>
             <TableCell>时间</TableCell>
             <TableCell>状态</TableCell>
-            <TableCell>红灯时间</TableCell>
+            {/* <TableCell>红灯时间</TableCell>
             <TableCell>绿灯时间</TableCell>
             <TableCell>黄灯时间</TableCell>
-            <TableCell>操作</TableCell>
+            <TableCell>操作</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -201,18 +188,61 @@ export const LightTable = (props: Props) => {
                 {light.state === 3 && "YELLOW"}
                 {isNaN(Number(light.state)) && light.state}
               </TableCell>
-              <TableCell>{light.redTime}</TableCell>
+              {/* <TableCell>{light.redTime}</TableCell>
               <TableCell>{light.greenTime}</TableCell>
               <TableCell>{light.yellowTime}</TableCell>
               <TableCell>
                 <Button variant="contained" onClick={() => showModal(light)}>
                   编辑
                 </Button>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <Button
+        onClick={() => setShowEditTable(!showEditTable)}
+        sx={{ marginTop: "20px", width: "100%" }}
+      >
+        展示/隐藏 编辑红绿灯
+      </Button>
+      {showEditTable && (
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>编号</TableCell>
+              <TableCell>时间</TableCell>
+              <TableCell>状态</TableCell>
+              <TableCell>红灯时间</TableCell>
+              <TableCell>绿灯时间</TableCell>
+              <TableCell>黄灯时间</TableCell>
+              <TableCell>操作</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {deafultData.map((light) => (
+              <TableRow key={light.id}>
+                <TableCell>{light.id}</TableCell>
+                <TableCell>{light.time}</TableCell>
+                <TableCell>
+                  {light.state === 1 && "RED"}
+                  {light.state === 2 && "GREEN"}
+                  {light.state === 3 && "YELLOW"}
+                  {isNaN(Number(light.state)) && light.state}
+                </TableCell>
+                <TableCell>{light.redTime}</TableCell>
+                <TableCell>{light.greenTime}</TableCell>
+                <TableCell>{light.yellowTime}</TableCell>
+                <TableCell>
+                  <Button variant="contained" onClick={() => showModal(light)}>
+                    编辑
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
       <LightEditDialog
         isModalVisible={isModalVisible}
         editingLight={editingLight}

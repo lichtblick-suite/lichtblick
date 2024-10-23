@@ -35,7 +35,7 @@ function buildSettingsTree(config: DeviceSetting): SettingsTreeNodes {
           placeholder: "MQTT主机端口",
         },
         save: {
-          label: "Save",
+          label: "连接",
           input: "boolean",
           value: config.save,
         },
