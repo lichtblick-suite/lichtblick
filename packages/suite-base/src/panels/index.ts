@@ -32,7 +32,7 @@ import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-statu
 import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summary.png";
 import vehicleControlSummaryThumbnail from "./VehicleControl/thumbnail.png";
 import joystickSummaryThumbnail from "./Joystick/thumbnail.png";
-import deviceSettingSummaryThumbnail from "./deviceSetting/thumbnail.png";
+import deviceSettingSummaryThumbnail from "./DeviceSetting/thumbnail.png";
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
     title: t("joystick"),
