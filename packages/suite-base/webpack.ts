@@ -42,7 +42,7 @@ export function makeConfig(
 
   return {
     resolve: {
-      extensions: [".js", ".ts", ".jsx", ".tsx"],
+      extensions: [".js", ".ts", ".jsx", ".tsx", ".png", ".json", ".jpg"],
       alias: {
         "@lichtblick/suite-base": path.resolve(__dirname, "src"),
       },
