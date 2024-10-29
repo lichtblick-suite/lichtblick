@@ -40,9 +40,12 @@ export default function useConfigById<Config extends Record<string, unknown>>(
       if (panelId == undefined) {
         return undefined;
       }
+
       const stateConfig = maybeCast<Config>(state.selectedLayout?.data?.configById?.[panelId]);
       const panelType = getPanelTypeFromId(panelId);
-      const customSettingsByTopic: Record<string, unknown> = _.merge(
+
+      // Create the customSettingsByTopic object manually without hooks
+      const newCustomSettingsByTopic: Record<string, unknown> = _.merge(
         {},
         ...sortedTopics.map(({ name: topic, schemaName }) => {
           if (schemaName == undefined) {
@@ -52,16 +55,23 @@ export default function useConfigById<Config extends Record<string, unknown>>(
           if (defaultConfig == undefined) {
             return {};
           }
-          return {
-            [topic]: defaultConfig,
-          };
+          return { [topic]: defaultConfig };
         }),
         stateConfig?.topics,
       );
-      if (Object.keys(customSettingsByTopic).length === 0) {
+
+      // Avoid returning a new object if nothing has changed
+      const hasCustomSettingsChanged =
+        Object.keys(newCustomSettingsByTopic).length !== 0 &&
+        !_.isEqual(newCustomSettingsByTopic, stateConfig?.topics);
+
+      // If custom settings haven't changed, return the existing stateConfig
+      if (!hasCustomSettingsChanged) {
         return stateConfig;
       }
-      return maybeCast<Config>({ ...stateConfig, topics: customSettingsByTopic });
+
+      // Only return a new object if there's a change
+      return maybeCast<Config>({ ...stateConfig, topics: newCustomSettingsByTopic });
     },
     [panelId, extensionSettings, sortedTopics],
   );

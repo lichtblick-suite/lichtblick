@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Divider, Typography } from "@mui/material";
-import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useUnmount } from "react-use";
@@ -14,10 +13,11 @@ import { useUnmount } from "react-use";
 import { SettingsTree } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
-import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { ActionMenu } from "@lichtblick/suite-base/components/PanelSettings/ActionMenu";
+import { EmptyWrapper } from "@lichtblick/suite-base/components/PanelSettings/EmptyWrapper";
+import { buildSettingsTree } from "@lichtblick/suite-base/components/PanelSettings/settingsTree";
 import SettingsTreeEditor from "@lichtblick/suite-base/components/SettingsTreeEditor";
 import { ShareJsonModal } from "@lichtblick/suite-base/components/ShareJsonModal";
 import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent";
@@ -41,7 +41,6 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
-import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 const singlePanelIdSelector = (state: LayoutState) =>
   typeof state.selectedLayout?.data?.layout === "string"
@@ -55,30 +54,15 @@ const EMPTY_SETTINGS_TREE: SettingsTree = Object.freeze({
   nodes: {},
 });
 
-const EmptyWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { t } = useTranslation("panelSettings");
-  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
-
-  if (enableNewTopNav) {
-    return <EmptyState>{children}</EmptyState>;
-  }
-
-  return (
-    <SidebarContent title={t("panelSettings")}>
-      <Typography variant="body2" color="text.secondary">
-        {children}
-      </Typography>
-    </SidebarContent>
-  );
-};
+type PanelSettingsProps = React.PropsWithChildren<{
+  disableToolbar?: boolean;
+  selectedPanelIdsForTests?: readonly string[];
+}>;
 
 export default function PanelSettings({
   disableToolbar = false,
   selectedPanelIdsForTests,
-}: React.PropsWithChildren<{
-  disableToolbar?: boolean;
-  selectedPanelIdsForTests?: readonly string[];
-}>): JSX.Element {
+}: PanelSettingsProps): JSX.Element {
   const { t } = useTranslation("panelSettings");
   const singlePanelId = useCurrentLayoutSelector(singlePanelIdSelector);
   const {
@@ -153,35 +137,18 @@ export default function PanelSettings({
   ]);
 
   const [config] = useConfigById(selectedPanelId);
-
   const extensionSettings = useExtensionCatalog(getExtensionPanelSettings);
-
   const topicToSchemaNameMap = useMessagePipeline(getTopicToSchemaNameMap);
-
-  const settingsTree = usePanelStateStore((state) => {
-    if (selectedPanelId) {
-      const set = state.settingsTrees[selectedPanelId];
-      if (set && panelType) {
-        const topics = Object.keys(set.nodes.topics?.children ?? {});
-        const topicsConfig = maybeCast<{ topics: Record<string, unknown> }>(config)?.topics;
-        const topicsSettings = _.merge(
-          {},
-          ...topics.map((topic) => {
-            const schemaName = topicToSchemaNameMap[topic];
-            if (schemaName == undefined) {
-              return {};
-            }
-            return {
-              [topic]: extensionSettings[panelType]?.[schemaName]?.settings(topicsConfig?.[topic]),
-            };
-          }),
-        );
-
-        return { ...set, nodes: _.merge({}, set.nodes, { topics: { children: topicsSettings } }) };
-      }
-    }
-    return undefined;
-  });
+  const settingsTree = usePanelStateStore((state) =>
+    buildSettingsTree({
+      config,
+      extensionSettings,
+      panelType,
+      selectedPanelId,
+      state,
+      topicToSchemaNameMap,
+    }),
+  );
 
   const resetToDefaults = useCallback(() => {
     if (selectedPanelId) {
@@ -193,11 +160,11 @@ export default function PanelSettings({
   }, [incrementSequenceNumber, savePanelConfigs, selectedPanelId]);
 
   if (selectedPanelId == undefined) {
-    return <EmptyWrapper>{t("selectAPanelToEditItsSettings")}</EmptyWrapper>;
+    return <EmptyWrapper enableNewTopNav>{t("selectAPanelToEditItsSettings")}</EmptyWrapper>;
   }
 
   if (!config) {
-    return <EmptyWrapper>{t("loadingPanelSettings")}</EmptyWrapper>;
+    return <EmptyWrapper enableNewTopNav>{t("loadingPanelSettings")}</EmptyWrapper>;
   }
 
   const showTitleField = panelInfo != undefined && panelInfo.hasCustomToolbar !== true;

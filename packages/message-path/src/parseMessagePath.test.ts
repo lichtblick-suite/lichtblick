@@ -14,6 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Parser } from "nearley";
+
 import { parseMessagePath } from "./parseMessagePath";
 
 // Nearley parser returns nulls
@@ -519,5 +521,24 @@ describe("parseRosPath", () => {
     expect(parseMessagePath("/topic.foo[bar]")).toBeUndefined();
     expect(parseMessagePath("/topic.foo{bar==}")).toBeUndefined();
     expect(parseMessagePath("/topic.foo{bar==baz}")).toBeUndefined();
+  });
+
+  it("uses the cached value instead of parse the path again", () => {
+    jest.mock("nearley");
+    const parserFeedSpy = jest.spyOn(Parser.prototype, "feed");
+
+    const path = "/some/topic";
+
+    const firstResult = parseMessagePath(path);
+    const secondResult = parseMessagePath(path);
+    const thirdResult = parseMessagePath(path);
+
+    expect(secondResult).toEqual(firstResult);
+    expect(thirdResult).toEqual(firstResult);
+
+    // Verify that the Parser constructor was only called once
+    expect(parserFeedSpy).toHaveBeenCalledTimes(1);
+
+    jest.unmock("nearley");
   });
 });

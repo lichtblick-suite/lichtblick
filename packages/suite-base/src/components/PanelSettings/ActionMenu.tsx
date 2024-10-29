@@ -10,6 +10,13 @@ import { IconButton, Menu, MenuItem, SvgIconProps } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
+export type ActionMenuProps = {
+  allowShare: boolean;
+  onReset: () => void;
+  onShare: () => void;
+  fontSize?: SvgIconProps["fontSize"];
+};
+
 const useStyles = makeStyles()((theme) => ({
   iconButtonSmall: {
     padding: theme.spacing(0.91125), // round out the overall height to 30px
@@ -22,12 +29,7 @@ export function ActionMenu({
   onReset,
   onShare,
   fontSize = "medium",
-}: {
-  allowShare: boolean;
-  onReset: () => void;
-  onShare: () => void;
-  fontSize?: SvgIconProps["fontSize"];
-}): JSX.Element {
+}: ActionMenuProps): JSX.Element {
   const { classes, cx } = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>();
   const { t } = useTranslation("panelSettings");
@@ -43,6 +45,7 @@ export function ActionMenu({
     <div>
       <IconButton
         className={cx({ [classes.iconButtonSmall]: fontSize === "small" })}
+        data-testid="basic-button"
         id="basic-button"
         aria-controls={open ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -52,6 +55,7 @@ export function ActionMenu({
         <MoreVertIcon fontSize={fontSize} />
       </IconButton>
       <Menu
+        data-testid="basic-menu"
         id="basic-menu"
         anchorEl={anchorEl}
         open={open}

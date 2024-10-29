@@ -20,6 +20,7 @@
     "prepack": "tsc -b"
   },
   "dependencies": {
+    "babel-jest": "29.7.0",
     "nearley": "2.20.1"
   },
   "devDependencies": {

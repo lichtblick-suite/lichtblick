@@ -16,9 +16,8 @@
 
 import { TextFieldProps } from "@mui/material";
 import * as _ from "lodash-es";
-import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
+import { CSSProperties, useCallback, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
-import { useDebounce } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
 import {
@@ -193,13 +192,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     [messagePathStructuresForDataype, noMultiSlices, topics, validTypes],
   );
 
-  const [currentPath, setCurrentPath] = useState<string>(path);
-  const [debouncedPath] = useDebounce(currentPath, 250);
-
-  useEffect(() => {
-    props.onChange(debouncedPath, props.index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedPath, props.index]);
+  const onChangeProp = props.onChange;
 
   const onChange = useCallback(
     (event: React.SyntheticEvent, rawValue: string) => {
@@ -214,10 +207,10 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
           target.setSelectionRange(newCursorPosition, newCursorPosition);
         });
       }
-      setCurrentPath(value);
+
+      onChangeProp(value, props.index);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.index],
+    [onChangeProp, props.index],
   );
 
   const onSelect = useCallback(
@@ -227,8 +220,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
       autocompleteRange: { start: number; end: number },
     ) => {
-      const completeStart = currentPath.slice(0, autocompleteRange.start);
-      const completeEnd = currentPath.slice(autocompleteRange.end);
+      const completeStart = path.slice(0, autocompleteRange.start);
+      const completeEnd = path.slice(autocompleteRange.end);
 
       // Check if accepting this completion would result in a path to a non-complex field.
       const completedPath = completeStart + rawValue + completeEnd;
@@ -243,7 +236,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         autocompleteType === "topicName" && !messageIsValidType && !isSimpleField;
       const value = keepGoingAfterTopicName ? rawValue + "." : rawValue;
 
-      setCurrentPath(completeStart + value + completeEnd);
+      onChangeProp(completeStart + value + completeEnd);
 
       // We want to continue typing if we're dealing with a topic name,
       // or if we just autocompleted something with a filter (because we might want to
@@ -258,7 +251,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         autocomplete.blur();
       }
     },
-    [currentPath, allStructureItemsByPath, validTypes, path],
+    [path, allStructureItemsByPath, validTypes, onChangeProp],
   );
 
   const rosPath = useMemo(() => parseMessagePath(path), [path]);
