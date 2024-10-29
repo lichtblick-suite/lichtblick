@@ -6,48 +6,35 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Topic } from "@lichtblick/suite-base/players/types";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import { AliasingStateProcessor } from "./AliasingStateProcessor";
 import { mockPlayerState } from "./mocks";
 
 describe("StateProcessor", () => {
   it("should map messages", () => {
-    const topics: Topic[] = [
-      { name: "/topic_1", schemaName: "whatever" },
-      { name: "/topic_2", schemaName: "whatever" },
-    ];
-    const state = mockPlayerState(undefined, {
+    const topics = PlayerBuilder.topics(2);
+    const activeData = PlayerBuilder.activeData({
       topics,
       messages: [
-        {
-          topic: "/topic_1",
-          receiveTime: { sec: 0, nsec: 0 },
-          message: undefined,
-          schemaName: "whatever",
-          sizeInBytes: 0,
-        },
-        {
-          topic: "/topic_2",
-          receiveTime: { sec: 0, nsec: 0 },
-          message: undefined,
-          schemaName: "whatever",
-          sizeInBytes: 0,
-        },
+        PlayerBuilder.messageEvent({ topic: topics[0]?.name }),
+        PlayerBuilder.messageEvent({ topic: topics[1]?.name }),
       ],
     });
-
+    const state = PlayerBuilder.playerState({ activeData });
     const aliasMap = new Map(
       Object.entries({
         "/absent_topic": ["renamed_absent_topic"],
-        "/topic_1": ["/renamed_topic_1"],
+        [topics[0]!.name]: ["/renamedTopic"],
       }),
     );
     const processor = new AliasingStateProcessor(aliasMap);
+
     const mapped = processor.process(state, []);
     expect(mapped.activeData?.messages).toEqual([
-      expect.objectContaining({ topic: "/topic_1" }),
-      expect.objectContaining({ topic: "/renamed_topic_1" }),
-      expect.objectContaining({ topic: "/topic_2" }),
+      expect.objectContaining({ topic: topics[0]?.name }),
+      expect.objectContaining({ topic: "/renamedTopic" }),
+      expect.objectContaining({ topic: topics[1]?.name }),
     ]);
 
     // Should keep same instance if input is unchanged

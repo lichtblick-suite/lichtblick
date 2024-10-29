@@ -76,6 +76,7 @@
     "@types/moment-duration-format": "2.2.6",
     "@types/nearley": "2.11.5",
     "@types/ramda": "0.29.4",
+    "@types/randomstring": "^1",
     "@types/react": "18.2.56",
     "@types/react-dom": "18.2.7",
     "@types/react-hover-observer": "workspace:*",
@@ -182,5 +183,8 @@
     "vm-browserify": "1.1.2",
     "webpack": "5.95.0",
     "zustand": "4.4.1"
+  },
+  "dependencies": {
+    "randomstring": "1.3.0"
   }
 }
