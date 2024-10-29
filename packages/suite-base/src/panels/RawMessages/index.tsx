@@ -53,11 +53,17 @@ import MaybeCollapsedValue from "./MaybeCollapsedValue";
 import Metadata from "./Metadata";
 import Value from "./Value";
 import {
+  PREV_MSG_METHOD,
+  CUSTOM_METHOD,
+  FONT_SIZE_OPTIONS,
+  PATH_NAME_AGGREGATOR,
+} from "./constants";
+import {
   ValueAction,
   getStructureItemForPath,
   getValueActionForValue,
 } from "./getValueActionForValue";
-import { Constants, NodeState, RawMessagesPanelConfig } from "./types";
+import { NodeState, RawMessagesPanelConfig } from "./types";
 import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths, toggleExpansion } from "./utils";
 
 type Props = {
@@ -113,6 +119,7 @@ function RawMessages(props: Props) {
         const path = paths[0];
         if (path) {
           saveConfig({ topicPath: path.path });
+          setExpansion("none");
         }
       },
     });
@@ -158,14 +165,14 @@ function RawMessages(props: Props) {
   const currTickObj = matchedMessages[matchedMessages.length - 1];
   const prevTickObj = matchedMessages[matchedMessages.length - 2];
 
-  const inTimetickDiffMode = diffEnabled && diffMethod === Constants.PREV_MSG_METHOD;
+  const inTimetickDiffMode = diffEnabled && diffMethod === PREV_MSG_METHOD;
   const baseItem = inTimetickDiffMode ? prevTickObj : currTickObj;
   const diffItem = inTimetickDiffMode ? currTickObj : diffTopicObj;
 
   const nodes = useMemo(() => {
     if (baseItem) {
       const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
-      return generateDeepKeyPaths(data, 5);
+      return generateDeepKeyPaths(data);
     } else {
       return new Set<string>();
     }
@@ -190,7 +197,7 @@ function RawMessages(props: Props) {
 
   const onTopicPathChange = useCallback(
     (newTopicPath: string) => {
-      setExpansion(undefined);
+      setExpansion("none");
       saveConfig({ topicPath: newTopicPath });
     },
     [saveConfig],
@@ -213,7 +220,9 @@ function RawMessages(props: Props) {
 
   const onLabelClick = useCallback(
     (keypath: (string | number)[]) => {
-      setExpansion((old) => toggleExpansion(old ?? "all", nodes, keypath.join("~")));
+      setExpansion((old) =>
+        toggleExpansion(old ?? "none", nodes, keypath.join(PATH_NAME_AGGREGATOR)),
+      );
     },
     [nodes],
   );
@@ -363,7 +372,7 @@ function RawMessages(props: Props) {
         return false;
       }
 
-      const joinedPath = keypath.join("~");
+      const joinedPath = keypath.join(PATH_NAME_AGGREGATOR);
       if (expansion && expansion[joinedPath] === NodeState.Collapsed) {
         return false;
       }
@@ -377,7 +386,7 @@ function RawMessages(props: Props) {
     if (topicPath.length === 0) {
       return <EmptyState>No topic selected</EmptyState>;
     }
-    if (diffEnabled && diffMethod === Constants.CUSTOM_METHOD && (!baseItem || !diffItem)) {
+    if (diffEnabled && diffMethod === CUSTOM_METHOD && (!baseItem || !diffItem)) {
       return (
         <EmptyState>{`Waiting to diff next messages from "${topicPath}" and "${diffTopicPath}"`}</EmptyState>
       );
@@ -665,7 +674,7 @@ function RawMessages(props: Props) {
               input: "select",
               options: [
                 { label: "auto", value: undefined },
-                ...Constants.FONT_SIZE_OPTIONS.map((value) => ({
+                ...FONT_SIZE_OPTIONS.map((value) => ({
                   label: `${value} px`,
                   value,
                 })),
@@ -699,7 +708,7 @@ function RawMessages(props: Props) {
 
 const defaultConfig: RawMessagesPanelConfig = {
   diffEnabled: false,
-  diffMethod: Constants.CUSTOM_METHOD,
+  diffMethod: CUSTOM_METHOD,
   diffTopicPath: "",
   showFullMessageForDiff: false,
   topicPath: "",

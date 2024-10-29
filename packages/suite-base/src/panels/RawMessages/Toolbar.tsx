@@ -18,7 +18,8 @@ import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
-import { Constants, RawMessagesPanelConfig } from "./types";
+import { PREV_MSG_METHOD, CUSTOM_METHOD } from "./constants";
+import { RawMessagesPanelConfig } from "./types";
 
 type Props = {
   canExpandAll: boolean;
@@ -118,10 +119,10 @@ function ToolbarComponent(props: Props): JSX.Element {
               });
             }}
           >
-            <MenuItem value={Constants.PREV_MSG_METHOD}>{Constants.PREV_MSG_METHOD}</MenuItem>
-            <MenuItem value={Constants.CUSTOM_METHOD}>custom</MenuItem>
+            <MenuItem value={PREV_MSG_METHOD}>{PREV_MSG_METHOD}</MenuItem>
+            <MenuItem value={CUSTOM_METHOD}>custom</MenuItem>
           </Select>
-          {diffMethod === Constants.CUSTOM_METHOD && (
+          {diffMethod === CUSTOM_METHOD && (
             <MessagePathInput
               index={1}
               path={diffTopicPath}

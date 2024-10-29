@@ -32,6 +32,9 @@ describe("websocket connection", () => {
 
     const rawMessagesPanel = app.renderer.getByTestId(/RawMessages/);
 
+    //Expanding the data parent to check for attributes
+    await rawMessagesPanel.getByText("data").click();
+
     // Check if message is correctly beeing displayed
     const attributesToCheck = ["hello", '"world"', "foo", "42"];
 

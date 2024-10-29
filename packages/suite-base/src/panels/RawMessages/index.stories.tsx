@@ -19,6 +19,7 @@ import { StoryObj } from "@storybook/react";
 import RawMessages from "@lichtblick/suite-base/panels/RawMessages";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 
+import { PREV_MSG_METHOD } from "./constants";
 import {
   enumAdvancedFixture,
   enumFixture,
@@ -30,7 +31,7 @@ import {
   withMissingData,
 } from "./fixture";
 import type { RawMessagesPanelConfig } from "./types";
-import { Constants, NodeState } from "./types";
+import { NodeState } from "./types";
 
 const noDiffConfig = {
   diffMethod: "custom",
@@ -318,7 +319,7 @@ export const DiffConsecutiveMessages: StoryObj = {
       <RawMessages
         overrideConfig={{
           topicPath: "/foo",
-          diffMethod: Constants.PREV_MSG_METHOD,
+          diffMethod: PREV_MSG_METHOD,
           diffTopicPath: "",
           diffEnabled: true,
           showFullMessageForDiff: true,
@@ -336,7 +337,7 @@ export const DiffConsecutiveMessagesWithFilter: StoryObj = {
       <RawMessages
         overrideConfig={{
           topicPath: "/foo{type==2}",
-          diffMethod: Constants.PREV_MSG_METHOD,
+          diffMethod: PREV_MSG_METHOD,
           diffTopicPath: "",
           diffEnabled: true,
           showFullMessageForDiff: true,
@@ -354,7 +355,7 @@ export const DiffConsecutiveMessagesWithBigint: StoryObj = {
       <RawMessages
         overrideConfig={{
           topicPath: "/baz/bigint",
-          diffMethod: Constants.PREV_MSG_METHOD,
+          diffMethod: PREV_MSG_METHOD,
           diffTopicPath: "",
           diffEnabled: true,
           showFullMessageForDiff: true,
@@ -372,7 +373,7 @@ export const DisplayCorrectMessageWhenDiffIsDisabledEvenWithDiffMethodTopicSet: 
       <RawMessages
         overrideConfig={{
           topicPath: "/foo",
-          diffMethod: Constants.PREV_MSG_METHOD,
+          diffMethod: PREV_MSG_METHOD,
           diffTopicPath: "/another/baz/enum_advanced",
           diffEnabled: false,
           showFullMessageForDiff: true,
