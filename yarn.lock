@@ -3416,7 +3416,6 @@ __metadata:
     eventemitter3: 5.0.1
     fork-ts-checker-webpack-plugin: 9.0.2
     html-webpack-plugin: 5.5.3
-    i18next: 23.5.1
     jszip: 3.10.1
     path-browserify: 1.0.1
     plist: 3.1.0
@@ -12515,15 +12514,6 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.23.2
   checksum: c465b9bacf3066b6d112982deb03fa8a2578be38cf1e973749c884401ba1165431655e1a4438f0da08c978ce5525170ec3809968691190c194af80b20e496538
-  languageName: node
-  linkType: hard
-
-"i18next@npm:23.5.1":
-  version: 23.5.1
-  resolution: "i18next@npm:23.5.1"
-  dependencies:
-    "@babel/runtime": ^7.22.5
-  checksum: 4be043bd72287bfae9777a3252b9458d2e3f5e9a97ea62cf434e6e3767b45df4365d8780d0dd14efd4e9da5eb0f90534510b138f1372d1cb9012000a69bbedaf
   languageName: node
   linkType: hard
 

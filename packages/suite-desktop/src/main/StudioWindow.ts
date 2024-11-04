@@ -19,12 +19,12 @@ import {
   shell,
   systemPreferences,
 } from "electron";
-import i18n, { t } from "i18next";
 import path from "path";
 
 import Logger from "@lichtblick/log";
 import { APP_BAR_HEIGHT } from "@lichtblick/suite-base/src/components/AppBar/constants";
 import { NativeAppMenuEvent } from "@lichtblick/suite-base/src/context/NativeAppMenuContext";
+import { sharedI18nObject as i18n } from "@lichtblick/suite-base/src/i18n";
 import { palette } from "@lichtblick/theme";
 
 import StudioAppUpdater from "./StudioAppUpdater";
@@ -44,6 +44,8 @@ const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
 
 const closeMenuItem: MenuItemConstructorOptions = isMac ? { role: "close" } : { role: "quit" };
 const log = Logger.getLogger(__filename);
+
+const { t } = i18n;
 
 function getWindowBackgroundColor(): string | undefined {
   const theme = palette[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
