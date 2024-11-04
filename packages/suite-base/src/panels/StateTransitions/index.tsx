@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ChartOptions, ScaleOptions } from "chart.js";
+import { ScaleOptions } from "chart.js";
 import * as _ from "lodash-es";
 import * as R from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -27,7 +27,6 @@ import { Immutable } from "@lichtblick/suite";
 import { useBlocksSubscriptions } from "@lichtblick/suite-base/PanelAPI";
 import {
   MessageAndData,
-  MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";
@@ -43,20 +42,18 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChart from "@lichtblick/suite-base/components/TimeBasedChart";
 import { ChartDatasets } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathLegend";
+import {
+  EMPTY_ITEMS_BY_PATH,
+  STATE_TRANSITION_PLUGINS,
+} from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { subscribePayloadFromMessagePath } from "@lichtblick/suite-base/players/subscribePayloadFromMessagePath";
 import { SubscribePayload } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { fontMonospace } from "@lichtblick/theme";
 
 import { messagesToDataset } from "./messagesToDataset";
 import { PathState, useStateTransitionsPanelSettings } from "./settings";
-import { StateTransitionConfig } from "./types";
-
-const fontSize = 10;
-const fontWeight = "bold";
-const EMPTY_ITEMS_BY_PATH: MessageDataItemsByPath = {};
+import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
 
 const useStyles = makeStyles()((theme) => ({
   chartWrapper: {
@@ -65,35 +62,6 @@ const useStyles = makeStyles()((theme) => ({
     height: "100%",
   },
 }));
-
-const plugins: ChartOptions["plugins"] = {
-  datalabels: {
-    display: "auto",
-    anchor: "center",
-    align: -45,
-    offset: 0,
-    clip: true,
-    font: {
-      family: fontMonospace,
-      size: fontSize,
-      weight: fontWeight,
-    },
-  },
-  zoom: {
-    zoom: {
-      enabled: true,
-      mode: "x",
-      sensitivity: 3,
-      speed: 0.1,
-    },
-    pan: {
-      mode: "x",
-      enabled: true,
-      speed: 20,
-      threshold: 10,
-    },
-  },
-};
 
 function selectCurrentTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.currentTime;
@@ -122,12 +90,7 @@ function datasetContainsArray(dataset: Immutable<(MessageAndData[] | undefined)[
   return dataCounts.length > 0 && dataCounts.every((numPoints) => numPoints > 1);
 }
 
-type Props = {
-  config: StateTransitionConfig;
-  saveConfig: SaveConfig<StateTransitionConfig>;
-};
-
-function StateTransitions(props: Props) {
+function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
   const { paths } = config;
   const { classes } = useStyles();
@@ -420,7 +383,7 @@ function StateTransitions(props: Props) {
             xAxes={xScale}
             xAxisIsPlaybackTime
             yAxes={yScale}
-            plugins={plugins}
+            plugins={STATE_TRANSITION_PLUGINS}
             interactionMode="lastX"
             onClick={onClick}
             currentTime={currentTimeSinceStart}

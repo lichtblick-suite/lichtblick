@@ -14,10 +14,11 @@ import { useTranslation } from "react-i18next";
 
 import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
 import { plotableRosTypes } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
+import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
-import { DEFAULT_PATH, stateTransitionPathDisplayName } from "./shared";
+import { stateTransitionPathDisplayName } from "./shared";
 import { StateTransitionConfig, StateTransitionPath } from "./types";
 
 // Note - we use memoizeWeak here instead of react memoization to allow us to memoize
@@ -77,7 +78,16 @@ const makeSeriesNode = memoizeWeak(
 const makeRootSeriesNode = memoizeWeak((paths: PathState[]): SettingsTreeNode => {
   const children = Object.fromEntries(
     paths.length === 0
-      ? [["0", makeSeriesNode(0, { path: DEFAULT_PATH, isArray: false, canDelete: false })]]
+      ? [
+          [
+            "0",
+            makeSeriesNode(0, {
+              path: DEFAULT_STATE_TRANSITION_PATH,
+              isArray: false,
+              canDelete: false,
+            }),
+          ],
+        ]
       : paths.map(({ path, isArray }, index) => [
           `${index}`,
           makeSeriesNode(index, {
@@ -190,7 +200,7 @@ export function useStateTransitionsPanelSettings(
           saveConfig(
             produce((draft: StateTransitionConfig): void => {
               if (draft.paths.length === 0) {
-                draft.paths.push({ ...DEFAULT_PATH });
+                draft.paths.push({ ...DEFAULT_STATE_TRANSITION_PATH });
               }
               _.set(draft, path, value);
             }),
@@ -203,9 +213,9 @@ export function useStateTransitionsPanelSettings(
           saveConfig(
             produce((draft) => {
               if (draft.paths.length === 0) {
-                draft.paths.push({ ...DEFAULT_PATH });
+                draft.paths.push({ ...DEFAULT_STATE_TRANSITION_PATH });
               }
-              draft.paths.push({ ...DEFAULT_PATH });
+              draft.paths.push({ ...DEFAULT_STATE_TRANSITION_PATH });
             }),
           );
         } else if (action.payload.id === "delete-series") {

@@ -7,11 +7,6 @@
 
 import { StateTransitionPath } from "./types";
 
-export const DEFAULT_PATH: StateTransitionPath = Object.freeze({
-  value: "",
-  timestampMethod: "receiveTime",
-});
-
 function presence<T>(value: undefined | T): undefined | T {
   if (value === "") {
     return undefined;

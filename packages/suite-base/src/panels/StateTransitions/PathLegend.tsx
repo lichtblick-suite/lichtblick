@@ -14,7 +14,7 @@ import { makeStyles } from "tss-react/mui";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
-import { DEFAULT_PATH } from "@lichtblick/suite-base/panels/Plot/settings";
+import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { stateTransitionPathDisplayName } from "@lichtblick/suite-base/panels/StateTransitions/shared";
 import {
   StateTransitionConfig,
@@ -92,7 +92,7 @@ export const PathLegend = React.memo(function PathLegend(props: {
 
   return (
     <Stack className={classes.chartOverlay} position="absolute" paddingTop={0.5}>
-      {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
+      {(paths.length === 0 ? [DEFAULT_STATE_TRANSITION_PATH] : paths).map((path, index) => (
         <div className={classes.row} key={index} style={{ height: heightPerTopic }}>
           <ButtonGroup
             size="small"
