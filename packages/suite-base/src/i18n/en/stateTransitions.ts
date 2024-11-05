@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const stateTransitions = {
+  addSeriesButton: "Click to add a series",
   max: "Max",
   maxXError: "X max must be greater than X min.",
   min: "Min",

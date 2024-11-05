@@ -29,3 +29,10 @@ export type StateTransitionPanelProps = {
   config: StateTransitionConfig;
   saveConfig: SaveConfig<StateTransitionConfig>;
 };
+
+export type PathLegendProps = {
+  paths: StateTransitionPath[];
+  heightPerTopic: number;
+  setFocusedPath: (value: string[] | undefined) => void;
+  saveConfig: SaveConfig<StateTransitionConfig>;
+};

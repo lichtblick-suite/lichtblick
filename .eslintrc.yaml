@@ -180,3 +180,8 @@ overrides:
       react/forbid-component-props: off
     files:
       - "**/*.stories.tsx"
+
+  - files:
+      - "**/*.style.ts"
+    rules:
+      tss-unused-classes/unused-classes: "off"

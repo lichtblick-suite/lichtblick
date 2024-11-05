@@ -6,67 +6,23 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Add16Regular, Dismiss12Regular } from "@fluentui/react-icons";
-import { Button, ButtonGroup, Stack, buttonClasses } from "@mui/material";
+import { Button, ButtonGroup, Stack } from "@mui/material";
 import { MouseEvent, useCallback } from "react";
-import tinycolor from "tinycolor2";
-import { makeStyles } from "tss-react/mui";
+import { useTranslation } from "react-i18next";
 
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import useStyles from "@lichtblick/suite-base/panels/StateTransitions/PathLegend.style";
 import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { stateTransitionPathDisplayName } from "@lichtblick/suite-base/panels/StateTransitions/shared";
 import {
-  StateTransitionConfig,
+  PathLegendProps,
   StateTransitionPath,
 } from "@lichtblick/suite-base/panels/StateTransitions/types";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
-const useStyles = makeStyles()((theme) => ({
-  chartOverlay: {
-    top: 0,
-    left: 0,
-    right: 0,
-    pointerEvents: "none",
-  },
-  row: {
-    paddingInline: theme.spacing(1, 0.5),
-    pointerEvents: "none",
-  },
-  dismissIcon: {
-    paddingInline: theme.spacing(0.5),
-    minWidth: "auto !important",
-  },
-  buttonGroup: {
-    minWidth: "auto",
-    textAlign: "left",
-    pointerEvents: "auto",
-    fontWeight: "normal",
-    maxWidth: "100%",
-
-    [`.${buttonClasses.root}`]: {
-      backgroundColor: tinycolor(theme.palette.background.paper).setAlpha(0.67).toString(),
-      paddingBlock: theme.spacing(0.25),
-      borderColor: theme.palette.background.paper,
-
-      "&:hover": {
-        backgroundImage: `linear-gradient(to right, ${theme.palette.action.hover}, ${theme.palette.action.hover})`,
-      },
-    },
-    [`.${buttonClasses.endIcon}`]: {
-      opacity: 0.8,
-      marginLeft: theme.spacing(0.5),
-      marginRight: theme.spacing(-0.75),
-    },
-  },
-}));
-
-export const PathLegend = React.memo(function PathLegend(props: {
-  paths: StateTransitionPath[];
-  heightPerTopic: number;
-  setFocusedPath: (value: string[] | undefined) => void;
-  saveConfig: SaveConfig<StateTransitionConfig>;
-}) {
+export const PathLegend = React.memo(function PathLegend(props: PathLegendProps) {
+  const { t } = useTranslation("stateTransitions");
   const { paths, heightPerTopic, setFocusedPath, saveConfig } = props;
   const { setSelectedPanelIds } = useSelectedPanels();
   const { id: panelId } = usePanelContext();
@@ -90,43 +46,58 @@ export const PathLegend = React.memo(function PathLegend(props: {
     [paths, saveConfig],
   );
 
+  const handleEditTopic = useCallback(
+    (index: number) => {
+      setSelectedPanelIds([panelId]);
+      openPanelSettings();
+      setFocusedPath(["paths", String(index)]);
+    },
+    [openPanelSettings, panelId, setFocusedPath, setSelectedPanelIds],
+  );
+
   return (
     <Stack className={classes.chartOverlay} position="absolute" paddingTop={0.5}>
-      {(paths.length === 0 ? [DEFAULT_STATE_TRANSITION_PATH] : paths).map((path, index) => (
-        <div className={classes.row} key={index} style={{ height: heightPerTopic }}>
-          <ButtonGroup
-            size="small"
-            color="inherit"
-            variant="contained"
-            className={classes.buttonGroup}
+      {(paths.length === 0 ? [DEFAULT_STATE_TRANSITION_PATH] : paths).map(
+        (path: StateTransitionPath, index: number) => (
+          <div
+            data-testid={`row-${index}`}
+            className={classes.row}
+            key={index}
+            style={{ height: heightPerTopic }}
           >
-            <Button
-              data-testid="edit-topic-button"
-              endIcon={paths.length === 0 && <Add16Regular />}
-              onClick={() => {
-                setSelectedPanelIds([panelId]);
-                openPanelSettings();
-                setFocusedPath(["paths", String(index)]);
-              }}
+            <ButtonGroup
+              size="small"
+              color="inherit"
+              variant="contained"
+              className={classes.buttonGroup}
             >
-              {paths.length === 0
-                ? "Click to add a series"
-                : stateTransitionPathDisplayName(path, index)}
-            </Button>
-            {paths.length > 0 && (
               <Button
-                className={classes.dismissIcon}
-                size="small"
-                onClick={(event) => {
-                  handleDeletePath(event, index);
+                data-testid={`edit-topic-button-${index}`}
+                endIcon={paths.length === 0 && <Add16Regular />}
+                onClick={() => {
+                  handleEditTopic(index);
                 }}
               >
-                <Dismiss12Regular />
+                {paths.length === 0
+                  ? t("addSeriesButton")
+                  : stateTransitionPathDisplayName(path, index)}
               </Button>
-            )}
-          </ButtonGroup>
-        </div>
-      ))}
+              {paths.length > 0 && (
+                <Button
+                  data-testid={`delete-topic-button-${index}`}
+                  className={classes.dismissIcon}
+                  size="small"
+                  onClick={(event) => {
+                    handleDeletePath(event, index);
+                  }}
+                >
+                  <Dismiss12Regular />
+                </Button>
+              )}
+            </ButtonGroup>
+          </div>
+        ),
+      )}
     </Stack>
   );
 });
