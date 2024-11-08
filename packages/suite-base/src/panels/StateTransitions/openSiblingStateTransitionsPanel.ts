@@ -5,23 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
 import { OpenSiblingPanel, PanelConfig } from "@lichtblick/suite-base/types/panels";
-
-export const transitionableRosTypes = [
-  "bool",
-  "int8",
-  "uint8",
-  "int16",
-  "uint16",
-  "int32",
-  "uint32",
-  "int64",
-  "uint64",
-  "string",
-];
 
 export function openSiblingStateTransitionsPanel(
   openSiblingPanel: OpenSiblingPanel,
@@ -31,13 +16,18 @@ export function openSiblingStateTransitionsPanel(
     panelType: "StateTransitions",
     updateIfExists: true,
     siblingConfigCreator: (config: PanelConfig) => {
+      const existingPath = (config as StateTransitionConfig).paths.find(
+        (path) => path.value === topicName,
+      );
+      if (existingPath) {
+        return config;
+      }
       return {
         ...config,
-        paths: _.uniq(
-          (config as StateTransitionConfig).paths.concat([
-            { value: topicName, timestampMethod: "receiveTime" },
-          ]),
-        ),
+        paths: [
+          ...(config as StateTransitionConfig).paths,
+          { value: topicName, timestampMethod: "receiveTime" },
+        ],
       };
     },
   });

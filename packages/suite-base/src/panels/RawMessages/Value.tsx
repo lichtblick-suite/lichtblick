@@ -20,16 +20,14 @@ import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIcon
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/openSiblingPlotPanel";
 import { plotableRosTypes } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
-import {
-  openSiblingStateTransitionsPanel,
-  transitionableRosTypes,
-} from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
+import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import clipboard from "@lichtblick/suite-base/util/clipboard";
 
 import HighlightedValue from "./HighlightedValue";
 import { copyMessageReplacer } from "./copyMessageReplacer";
 import { ValueAction } from "./getValueActionForValue";
+import { transitionableRosTypes } from "../StateTransitions/constants";
 
 const StyledIconButton = withStyles(HoverableIconButton, (theme) => ({
   root: {
