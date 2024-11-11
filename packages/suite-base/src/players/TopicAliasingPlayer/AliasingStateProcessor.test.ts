@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Topic } from "@lichtblick/suite-base/players/types";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import { AliasingStateProcessor } from "./AliasingStateProcessor";
@@ -17,8 +18,8 @@ describe("StateProcessor", () => {
     const activeData = PlayerBuilder.activeData({
       topics,
       messages: [
-        PlayerBuilder.messageEvent({ topic: topics[0]?.name }),
-        PlayerBuilder.messageEvent({ topic: topics[1]?.name }),
+        MessageEventBuilder.messageEvent({ topic: topics[0]?.name }),
+        MessageEventBuilder.messageEvent({ topic: topics[1]?.name }),
       ],
     });
     const state = PlayerBuilder.playerState({ activeData });

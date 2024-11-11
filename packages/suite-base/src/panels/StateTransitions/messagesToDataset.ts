@@ -7,33 +7,26 @@
 
 import stringHash from "string-hash";
 
-import { Time, subtract as subtractTimes, toSec } from "@lichtblick/rostime";
-import { MessageAndData } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { subtract as subtractTimes, toSec } from "@lichtblick/rostime";
+import {
+  MessageAndData,
+  MessagePathDataItem,
+} from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDataset } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { expandedLineColors } from "@lichtblick/suite-base/util/plotColors";
 import { getTimestampForMessageEvent } from "@lichtblick/suite-base/util/time";
-import { grey } from "@lichtblick/suite-base/util/toolsColorScheme";
 
 import positiveModulo from "./positiveModulo";
-import { StateTransitionPath } from "./types";
+import { MessageDatasetArgs, ValidQueriedDataValue } from "./types";
 
-const baseColors = [...expandedLineColors];
+export const baseColors = [...expandedLineColors];
 const baseColorsLength = Object.values(baseColors).length;
-
-type Args = {
-  path: StateTransitionPath;
-  startTime: Time;
-  y: number;
-  pathIndex: number;
-  blocks: readonly (readonly MessageAndData[] | undefined)[];
-  showPoints: boolean;
-};
 
 /**
  * Processes messages into datasets. For performance reasons all values are condensed into a single
  * dataset with different labels and colors applied per-point.
  */
-export function messagesToDataset(args: Args): ChartDataset {
+export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
   const { path, startTime, y, blocks, showPoints } = args;
 
   const dataset: ChartDataset = {
@@ -62,35 +55,20 @@ export function messagesToDataset(args: Args): ChartDataset {
         continue;
       }
 
-      const queriedData = itemByPath.queriedData[0];
-      if (itemByPath.queriedData.length !== 1 || !queriedData) {
+      const queriedData = extractQueriedData(itemByPath);
+      if (!queriedData) {
         continue;
       }
 
       const { constantName, value } = queriedData;
 
-      // Skip anything that cannot be cast to a number or is a string.
-      if (Number.isNaN(value) && typeof value !== "string") {
+      if (!isValidValue(value)) {
         continue;
       }
 
-      if (
-        typeof value !== "number" &&
-        typeof value !== "bigint" &&
-        typeof value !== "boolean" &&
-        typeof value !== "string"
-      ) {
-        continue;
-      }
-
-      const valueForColor =
-        typeof value === "string" ? stringHash(value) : Math.round(Number(value));
-      const color = baseColors[positiveModulo(valueForColor, baseColorsLength)] ?? grey;
-
+      const color = getColor(value);
       const x = toSec(subtractTimes(timestamp, startTime));
-
-      const label =
-        constantName != undefined ? `${constantName} (${String(value)})` : String(value);
+      const label = createLabel(constantName, value);
 
       const isNewSegment = lastValue !== value;
 
@@ -120,4 +98,33 @@ export function messagesToDataset(args: Args): ChartDataset {
   }
 
   return dataset;
+}
+
+export function extractQueriedData(itemByPath: MessageAndData): MessagePathDataItem | undefined {
+  if (itemByPath.queriedData.length === 1) {
+    return itemByPath.queriedData[0];
+  }
+  return undefined;
+}
+
+export function isValidValue(value: unknown): value is number | string | bigint | boolean {
+  // Check if the type of `value` is one of the desired types and that it's not `NaN`
+  return (
+    (typeof value === "number" && !Number.isNaN(value)) ||
+    typeof value === "string" ||
+    typeof value === "bigint" ||
+    typeof value === "boolean"
+  );
+}
+
+export function getColor(value: ValidQueriedDataValue): string {
+  const valueForColor = typeof value === "string" ? stringHash(value) : Math.round(Number(value));
+  return baseColors[positiveModulo(valueForColor, baseColorsLength)]!;
+}
+
+export function createLabel(
+  constantName: string | undefined,
+  value: ValidQueriedDataValue,
+): string {
+  return constantName != undefined ? `${constantName} (${String(value)})` : String(value);
 }

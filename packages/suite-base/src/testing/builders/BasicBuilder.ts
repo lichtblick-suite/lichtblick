@@ -49,6 +49,12 @@ export default class BasicBuilder {
     return _.random(min, max, true);
   }
 
+  public static bigInt(min: bigint = 1n, max: bigint = 20n): bigint {
+    const range = max - min + 1n;
+    const randomBigInt = BigInt(Math.floor(Math.random() * Number(range)));
+    return min + randomBigInt;
+  }
+
   public static string({
     length = 6,
     charset = "alphabetic",
