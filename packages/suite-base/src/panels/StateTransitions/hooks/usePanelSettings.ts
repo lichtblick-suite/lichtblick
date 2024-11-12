@@ -24,7 +24,7 @@ import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/Sta
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
-import { stateTransitionPathDisplayName } from "./shared";
+import { stateTransitionPathDisplayName } from "../shared";
 import {
   AxisTreeField,
   IUsePanelSettings,
@@ -32,7 +32,7 @@ import {
   SeriesAction,
   SeriesActionId,
   StateTransitionConfig,
-} from "./types";
+} from "../types";
 
 // Note - we use memoizeWeak here instead of react memoization to allow us to memoize
 // at the level of individual nodes in our tree. This keeps our DOM updates small since
