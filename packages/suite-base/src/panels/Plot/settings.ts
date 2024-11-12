@@ -18,7 +18,7 @@ import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 
 import { PlotPath, PlotConfig, plotPathDisplayName } from "./config";
-import { plotableRosTypes } from "./plotableRosTypes";
+import { PLOTABLE_ROS_TYPES } from "./plotableRosTypes";
 
 export const DEFAULT_PATH: PlotPath = Object.freeze({
   timestampMethod: "receiveTime",
@@ -48,7 +48,7 @@ const makeSeriesNode = memoizeWeak(
           label: t("messagePath"),
           input: "messagepath",
           value: path.value,
-          validTypes: plotableRosTypes,
+          validTypes: PLOTABLE_ROS_TYPES,
           supportsMathModifiers: true,
         },
         label: {
@@ -202,7 +202,7 @@ function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): SettingsTr
                 label: t("messagePath"),
                 input: "messagepath",
                 value: config.xAxisPath?.value ?? "",
-                validTypes: plotableRosTypes,
+                validTypes: PLOTABLE_ROS_TYPES,
               }
             : undefined,
         showXAxisLabels: {

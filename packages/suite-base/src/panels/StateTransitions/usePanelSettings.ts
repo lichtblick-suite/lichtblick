@@ -12,179 +12,194 @@ import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
-import { plotableRosTypes } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
+import {
+  SettingsTreeAction,
+  SettingsTreeField,
+  SettingsTreeNode,
+  SettingsTreeNodeActionItem,
+  SettingsTreeNodes,
+} from "@lichtblick/suite";
+import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
 import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { stateTransitionPathDisplayName } from "./shared";
-import { StateTransitionConfig, StateTransitionPath } from "./types";
+import {
+  AxisTreeField,
+  IUsePanelSettings,
+  PathState,
+  SeriesAction,
+  SeriesActionId,
+  StateTransitionConfig,
+} from "./types";
 
 // Note - we use memoizeWeak here instead of react memoization to allow us to memoize
 // at the level of individual nodes in our tree. This keeps our DOM updates small since
 // the NodeEditor component is wrapped in a React.memo.
 
-export type PathState = {
-  path: StateTransitionPath;
-  // Whether the data the path refers to resolves to more than one value
-  isArray: boolean;
-};
-const makeSeriesNode = memoizeWeak(
+export function setSeriesAction({ label, icon, id }: SeriesAction): SettingsTreeNodeActionItem {
+  return {
+    display: "inline",
+    icon,
+    id,
+    label,
+    type: "action",
+  };
+}
+
+export const makeSeriesNode = memoizeWeak(
   (
     index: number,
     { path, canDelete, isArray }: PathState & { canDelete: boolean },
+    t: TFunction<"stateTransitions">,
   ): SettingsTreeNode => {
+    const action = setSeriesAction({
+      label: t("labels.deleteSeries"),
+      id: SeriesActionId.DELETE,
+      icon: "Clear",
+    });
     return {
-      actions: canDelete
-        ? [
-            {
-              type: "action",
-              id: "delete-series",
-              label: "Delete series",
-              display: "inline",
-              icon: "Clear",
-            },
-          ]
-        : [],
+      actions: canDelete ? [action] : [],
       label: stateTransitionPathDisplayName(path, index),
       fields: {
         value: {
-          label: "Message path",
+          ...(isArray ? { error: t("pathErrorMessage") } : {}),
           input: "messagepath",
+          label: t("labels.messagePath"),
+          validTypes: PLOTABLE_ROS_TYPES,
           value: path.value,
-          validTypes: plotableRosTypes,
-          ...(isArray ? { error: "This path resolves to more than one value" } : {}),
         },
         label: {
           input: "string",
-          label: "Label",
+          label: t("labels.label"),
           value: path.label,
         },
         timestampMethod: {
           input: "select",
-          label: "Timestamp",
-          value: path.timestampMethod,
+          label: t("labels.timestamp"),
           options: [
-            { label: "Receive Time", value: "receiveTime" },
-            { label: "Header Stamp", value: "headerStamp" },
+            { label: t("labels.timestampReceiveTime"), value: "receiveTime" },
+            { label: t("labels.timestampHeaderStamp"), value: "headerStamp" },
           ],
+          value: path.timestampMethod,
         },
       },
     };
   },
 );
 
-const makeRootSeriesNode = memoizeWeak((paths: PathState[]): SettingsTreeNode => {
-  const children = Object.fromEntries(
-    paths.length === 0
-      ? [
-          [
-            "0",
-            makeSeriesNode(0, {
-              path: DEFAULT_STATE_TRANSITION_PATH,
-              isArray: false,
-              canDelete: false,
-            }),
-          ],
-        ]
-      : paths.map(({ path, isArray }, index) => [
-          `${index}`,
-          makeSeriesNode(index, {
-            path,
-            isArray,
-            canDelete: true,
-          }),
-        ]),
-  );
-  return {
-    label: "Series",
-    children,
-    actions: [
-      {
-        type: "action",
-        id: "add-series",
-        label: "Add series",
-        display: "inline",
-        icon: "Addchart",
-      },
-    ],
-  };
-});
+export const makeRootSeriesNode = memoizeWeak(
+  (paths: PathState[], t: TFunction<"stateTransitions">): SettingsTreeNode => {
+    const children = Object.fromEntries(
+      paths.length === 0
+        ? [
+            [
+              "0",
+              makeSeriesNode(
+                0,
+                {
+                  path: DEFAULT_STATE_TRANSITION_PATH,
+                  isArray: false,
+                  canDelete: false,
+                },
+                t,
+              ),
+            ],
+          ]
+        : paths.map(({ path, isArray }, index) => [
+            `${index}`,
+            makeSeriesNode(
+              index,
+              {
+                path,
+                isArray,
+                canDelete: true,
+              },
+              t,
+            ),
+          ]),
+    );
+    return {
+      label: t("labels.series"),
+      children,
+      actions: [
+        setSeriesAction({
+          label: t("labels.addSeries"),
+          id: SeriesActionId.ADD,
+          icon: "Addchart",
+        }),
+      ],
+    };
+  },
+);
 
-function buildSettingsTree(
-  config: StateTransitionConfig,
+export function buildSettingsTree(
+  { isSynced, xAxisMaxValue, xAxisMinValue, xAxisRange, showPoints }: StateTransitionConfig,
   paths: PathState[],
   t: TFunction<"stateTransitions">,
 ): SettingsTreeNodes {
   const maxXError =
-    _.isNumber(config.xAxisMinValue) &&
-    _.isNumber(config.xAxisMaxValue) &&
-    config.xAxisMinValue >= config.xAxisMaxValue
+    _.isNumber(xAxisMinValue) && _.isNumber(xAxisMaxValue) && xAxisMinValue >= xAxisMaxValue
       ? t("maxXError")
       : undefined;
 
+  function setAxis({ value, label, error = undefined }: AxisTreeField): SettingsTreeField {
+    return {
+      label,
+      input: "number",
+      value,
+      placeholder: "auto",
+      error,
+    };
+  }
+
   return {
     general: {
-      label: "General",
+      label: t("labels.general"),
       fields: {
-        isSynced: { label: "Sync with other plots", input: "boolean", value: config.isSynced },
+        isSynced: { label: t("labels.sync"), input: "boolean", value: isSynced },
         showPoints: {
-          label: "Show points",
+          help: t("labels.helpGeneral"),
           input: "boolean",
-          value: config.showPoints,
-          help: "Display a point for every state transition message",
+          label: t("labels.showPoints"),
+          value: showPoints,
         },
       },
     },
     xAxis: {
       label: t("xAxis"),
       fields: {
-        xAxisMinValue: {
-          label: t("min"),
-          input: "number",
-          value: config.xAxisMinValue != undefined ? Number(config.xAxisMinValue) : undefined,
-          placeholder: "auto",
-        },
-        xAxisMaxValue: {
-          label: t("max"),
-          input: "number",
-          error: maxXError,
-          value: config.xAxisMaxValue != undefined ? Number(config.xAxisMaxValue) : undefined,
-          placeholder: "auto",
-        },
-        xAxisRange: {
-          label: t("secondsRange"),
-          input: "number",
-          placeholder: "auto",
-          value: config.xAxisRange,
-        },
+        xAxisMaxValue: setAxis({ label: t("max"), value: xAxisMaxValue, error: maxXError }),
+        xAxisMinValue: setAxis({ label: t("min"), value: xAxisMinValue }),
+        xAxisRange: setAxis({ label: t("secondsRange"), value: xAxisRange }),
       },
     },
-    paths: makeRootSeriesNode(paths),
+    paths: makeRootSeriesNode(paths, t),
   };
 }
 
-export function useStateTransitionsPanelSettings(
+export function usePanelSettings(
   config: StateTransitionConfig,
   saveConfig: SaveConfig<StateTransitionConfig>,
   paths: PathState[],
   focusedPath?: readonly string[],
-): void {
+): IUsePanelSettings {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
   const { t } = useTranslation("stateTransitions");
 
   const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action === "update") {
-        const { input, path, value } = action.payload;
+    ({ action, payload }: SettingsTreeAction) => {
+      if (action === "update") {
+        const { input, path, value } = payload;
+
         if (input === "boolean" && _.isEqual(path, ["general", "isSynced"])) {
           saveConfig({ isSynced: value });
         } else if (input === "boolean" && _.isEqual(path, ["general", "showPoints"])) {
           saveConfig({ showPoints: value });
         } else if (path[0] === "xAxis") {
           saveConfig(
-            produce((draft) => {
+            produce((draft: StateTransitionConfig) => {
               _.set(draft, path.slice(1), value);
 
               // X min/max and range are mutually exclusive.
@@ -198,7 +213,7 @@ export function useStateTransitionsPanelSettings(
           );
         } else {
           saveConfig(
-            produce((draft: StateTransitionConfig): void => {
+            produce((draft: StateTransitionConfig) => {
               if (draft.paths.length === 0) {
                 draft.paths.push({ ...DEFAULT_STATE_TRANSITION_PATH });
               }
@@ -208,18 +223,18 @@ export function useStateTransitionsPanelSettings(
         }
       }
 
-      if (action.action === "perform-node-action") {
-        if (action.payload.id === "add-series") {
+      if (action === "perform-node-action") {
+        if (payload.id === SeriesActionId.ADD) {
           saveConfig(
-            produce((draft) => {
+            produce((draft: StateTransitionConfig) => {
               if (draft.paths.length === 0) {
                 draft.paths.push({ ...DEFAULT_STATE_TRANSITION_PATH });
               }
               draft.paths.push({ ...DEFAULT_STATE_TRANSITION_PATH });
             }),
           );
-        } else if (action.payload.id === "delete-series") {
-          const index = action.payload.path[1];
+        } else if (payload.id === SeriesActionId.DELETE) {
+          const index = payload.path[1];
           saveConfig(
             produce((draft) => {
               draft.paths.splice(Number(index), 1);
@@ -238,4 +253,6 @@ export function useStateTransitionsPanelSettings(
       nodes: buildSettingsTree(config, paths, t),
     });
   }, [actionHandler, paths, config, focusedPath, t, updatePanelSettingsTree]);
+
+  return { actionHandler };
 }

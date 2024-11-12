@@ -7,9 +7,24 @@
 
 export const stateTransitions = {
   addSeriesButton: "Click to add a series",
+  labels: {
+    addSeries: "Add series",
+    deleteSeries: "Delete series",
+    general: "General",
+    helpGeneral: "Display a point for every state transition message",
+    label: "Label",
+    messagePath: "Message path",
+    series: "Series",
+    showPoints: "Show points",
+    sync: "Sync with other plots",
+    timestamp: "Timestamp",
+    timestampHeaderStamp: "Header Stamp",
+    timestampReceiveTime: "Receive Time",
+  },
   max: "Max",
   maxXError: "X max must be greater than X min.",
   min: "Min",
+  pathErrorMessage: "This path resolves to more than one value",
   secondsRange: "Range (seconds)",
   xAxis: "X Axis",
 };

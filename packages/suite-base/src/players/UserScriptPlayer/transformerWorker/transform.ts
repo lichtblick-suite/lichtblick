@@ -79,7 +79,6 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
 
   const inputsExport = typeChecker
     .getExportsOfModule(symbol)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
     .find((node) => node.escapedName === "inputs");
   if (!inputsExport) {
     const error: Diagnostic = {

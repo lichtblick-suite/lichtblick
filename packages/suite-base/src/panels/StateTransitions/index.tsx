@@ -46,14 +46,14 @@ import {
   EMPTY_ITEMS_BY_PATH,
   STATE_TRANSITION_PLUGINS,
 } from "@lichtblick/suite-base/panels/StateTransitions/constants";
+import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions/usePanelSettings";
 import { subscribePayloadFromMessagePath } from "@lichtblick/suite-base/players/subscribePayloadFromMessagePath";
 import { SubscribePayload } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 
 import { messagesToDataset } from "./messagesToDataset";
-import { PathState, useStateTransitionsPanelSettings } from "./settings";
-import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
+import { PathState, StateTransitionConfig, StateTransitionPanelProps } from "./types";
 
 const useStyles = makeStyles()((theme) => ({
   chartWrapper: {
@@ -363,7 +363,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     [messagePipeline],
   );
 
-  useStateTransitionsPanelSettings(config, saveConfig, pathState, focusedPath);
+  usePanelSettings(config, saveConfig, pathState, focusedPath);
 
   return (
     <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>

@@ -168,6 +168,7 @@ overrides:
           args: after-used
           varsIgnorePattern: "^_."
           argsIgnorePattern: "^_."
+      "@typescript-eslint/no-unsafe-enum-comparison": off
 
   - rules:
       "@typescript-eslint/no-explicit-any": off

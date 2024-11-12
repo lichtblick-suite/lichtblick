@@ -5,19 +5,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export const plotableRosTypes = [
+export const PLOTABLE_ROS_TYPES = [
   "bool",
-  "int8",
-  "uint8",
-  "int16",
-  "uint16",
-  "int32",
-  "uint32",
-  "int64",
-  "uint64",
+  "duration",
   "float32",
   "float64",
-  "time",
-  "duration",
+  "int16",
+  "int32",
+  "int64",
+  "int8",
   "string",
+  "time",
+  "uint16",
+  "uint32",
+  "uint64",
+  "uint8",
 ];
