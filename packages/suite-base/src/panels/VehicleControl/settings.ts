@@ -22,6 +22,7 @@ export const defaultConfig: VehicleControlConfig = {
   lights: false,
   rain: false,
   run: true,
+  uploadMap: true,
   pass_mode: false,
   nodeTopicName: "/nav_select",
   nodeDatatype: "msg_interfaces/msg/NavSelectInterface",
@@ -111,42 +112,48 @@ function buildSettingsTree(
         },
       },
     },
-    // control: {
-    //   label: "Control",
-    //   fields: {
-    //     car_id: {
-    //       label: "Car ID",
-    //       input: "select",
-    //       value: config.car_id,
-    //       options: [
-    //         { label: "1", value: 1 },
-    //         { label: "2", value: 2 },
-    //         { label: "3", value: 3 },
-    //         { label: "4", value: 4 },
-    //       ],
-    //     },
-    //     pass_mode: {
-    //       label: "PassMode",
-    //       input: "boolean",
-    //       value: config.pass_mode,
-    //     },
-    //     run: {
-    //       label: "Run",
-    //       input: "boolean",
-    //       value: config.run,
-    //     },
-    //     // lights: {
-    //     //   label: "lights",
-    //     //   input: "boolean",
-    //     //   value: config.lights,
-    //     // },
-    //     // rain: {
-    //     //   label: "rain",
-    //     //   input: "boolean",
-    //     //   value: config.rain,
-    //     // },
-    //   },
-    // },
+
+    control: {
+      label: "Control",
+      fields: {
+        // car_id: {
+        //   label: "Car ID",
+        //   input: "select",
+        //   value: config.car_id,
+        //   options: [
+        //     { label: "1", value: 1 },
+        //     { label: "2", value: 2 },
+        //     { label: "3", value: 3 },
+        //     { label: "4", value: 4 },
+        //   ],
+        // },
+        pass_mode: {
+          label: "PassMode",
+          input: "boolean",
+          value: config.pass_mode,
+        },
+        run: {
+          label: "Run",
+          input: "boolean",
+          value: config.run,
+        },
+        // upload_map: {
+        //   label: "UploadMap",
+        //   input: "boolean",
+        //   value: config.uploadMap,
+        // },
+        lights: {
+          label: "UploadMap",
+          input: "boolean",
+          value: config.lights,
+        },
+        // rain: {
+        //   label: "rain",
+        //   input: "boolean",
+        //   value: config.rain,
+        // },
+      },
+    },
   };
 }
 

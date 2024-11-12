@@ -110,6 +110,7 @@ function makeElectronBuilderConfig(params) {
         { from: path.join(__dirname, "../resources/icon/FoxeIcon.png"), to: "FoxeIcon.png" },
       ],
       extendInfo: {
+        NSLocalNetworkUsageDescription: "应用需要访问本地网络以扫描设备。",
         CFBundleDocumentTypes: [
           {
             CFBundleTypeExtensions: ["bag"],

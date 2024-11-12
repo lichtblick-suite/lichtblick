@@ -10,6 +10,7 @@ export type VehicleControlConfig = {
   lights: boolean;
   rain: boolean;
   run: boolean;
+  uploadMap: boolean;
   pass_mode: boolean;
   nodeTopicName: string;
   nodeDatatype: string;

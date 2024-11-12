@@ -64,6 +64,7 @@ let touchStartPointer: Pointer = { x: NaN, y: NaN };
 function VehicleControlPanel(props: Props): JSX.Element {
   const { config, saveConfig } = props;
   const {
+    lights,
     run,
     pass_mode,
     nodeTopicName,
@@ -110,6 +111,37 @@ function VehicleControlPanel(props: Props): JSX.Element {
   const [canvas, setCanvas] = useState<fabric.Canvas | undefined>();
   const [init, setInit] = useState<boolean>(false);
 
+  const [selectedJson, setSelectedJson] = useState<any>(map);
+  const [selectedImage, setSelectedImage] = useState<any>(image);
+
+  const handleJsonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const jsonContent = JSON.parse(reader.result as string);
+        setSelectedJson(jsonContent);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.src = reader.result as string;
+        image.onload = () => {
+          const fabricImage = new fabric.Image(image);
+          setSelectedImage(fabricImage);
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   //检测到父元素宽高发生变化时跟随变化
   useEffect(() => {
     if (canvas && parentDivRef.current) {
@@ -121,20 +153,40 @@ function VehicleControlPanel(props: Props): JSX.Element {
 
   //画板初始化
   useEffect(() => {
-    if (!canvas && parentDivRef.current) {
+    if (canvas) {
+      // 销毁旧的 canvas 对象
+      canvas.dispose();
+    }
+
+    if (parentDivRef.current) {
       const newCanvas = new fabric.Canvas(id, {
-        width: parentDivRef.current.offsetWidth, //初始宽度
-        height: parentDivRef.current.offsetHeight, //初始高度
-        // backgroundColor: "#fff", // 初始背景色
-        fireMiddleClick: true, //启用中键 button为2
+        width: parentDivRef.current.offsetWidth,
+        height: parentDivRef.current.offsetHeight,
+        fireMiddleClick: true,
         selection: false,
       });
+
+      // 更新 canvas 状态
       setCanvas(newCanvas);
       setInit(true);
+
+      // 加载 JSON 和图片
+      newCanvas.loadFromJSON(selectedJson.canvas, () => {
+        newCanvas.setBackgroundImage(selectedImage, newCanvas.renderAll.bind(newCanvas));
+        newCanvas.perPixelTargetFind = true;
+        newCanvas.hoverCursor = "default";
+
+        // 遍历对象进行设置
+        newCanvas.getObjects().forEach((obj) => {
+          obj.lockMovementX = true;
+          obj.lockMovementY = true;
+          obj.hasControls = false;
+          obj.selectable = obj.name !== "path";
+          if (obj.name === "rfid") obj.hoverCursor = "pointer";
+        });
+      });
     }
-    //为实现加载后执行一次，必须为空数组，这违反了eslint策略，故而注释
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedJson, selectedImage]);
 
   // 途径点列表
   const [passList, setPassList] = useState<{ id: number; left: number; top: number }[]>([]);
@@ -153,11 +205,16 @@ function VehicleControlPanel(props: Props): JSX.Element {
 
   //画板加载与静态事件写入 init为true时执行一次
   useEffect(() => {
+    console.log(init);
+    console.log(canvas);
     //加载
     if (init && canvas) {
+      console.log("init");
+      console.log(selectedImage);
+      console.log(selectedJson);
       //画板反序列化
-      canvas.loadFromJSON(map.canvas, () => {
-        canvas.setBackgroundImage(image, canvas.renderAll.bind(canvas));
+      canvas.loadFromJSON(selectedJson.canvas, () => {
+        canvas.setBackgroundImage(selectedImage, canvas.renderAll.bind(canvas));
         //像素选择
         canvas.perPixelTargetFind = true;
 
@@ -713,9 +770,36 @@ function VehicleControlPanel(props: Props): JSX.Element {
     // 为了达成第一次不运行发布，故而不监听runSwitch，这违反了hook规则，故而注释
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run, setRun]);
+
   return (
     <Stack fullHeight>
       <PanelToolbar />
+      {lights ? (
+        <>
+          <Button variant="contained" component="label">
+            Upload JSON
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleJsonChange}
+              style={{ display: "none" }}
+            />
+          </Button>
+
+          <Button variant="contained" component="label" color="secondary">
+            Upload Image
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+          </Button>
+        </>
+      ) : (
+        <></>
+      )}
+
       <Stack
         ref={parentDivRef as Ref<HTMLDivElement>}
         flex="auto"

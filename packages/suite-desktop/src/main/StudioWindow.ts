@@ -103,7 +103,9 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     title: LICHTBLICK_PRODUCT_NAME,
     frame: isLinux ? false : true,
     titleBarStyle: "hidden",
-    trafficLightPosition: isMac ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
+    trafficLightPosition: isMac
+      ? { x: macTrafficLightInset + 65, y: macTrafficLightInset }
+      : undefined,
     titleBarOverlay: getTitleBarOverlayOptions(),
     webPreferences: {
       contextIsolation: true,
