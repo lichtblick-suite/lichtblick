@@ -8,35 +8,18 @@
 import Log from "@lichtblick/log";
 import { MessageDefinitionMap } from "@lichtblick/mcap-support/src/types";
 
+import {
+  COMPRESSED_POINTER_SIZE,
+  OBJECT_BASE_SIZE,
+  ARRAY_BASE_SIZE,
+  TYPED_ARRAY_BASE_SIZE,
+  SMALL_INTEGER_SIZE,
+  HEAP_NUMBER_SIZE,
+  FIELD_SIZE_BY_PRIMITIVE,
+  MAX_NUM_FAST_PROPERTIES,
+} from "./constants";
+
 const log = Log.getLogger(__filename);
-/**
- * Values of the contants below are a (more or less) informed guesses and not guaranteed to be accurate.
- */
-const COMPRESSED_POINTER_SIZE = 4; // Pointers use 4 bytes (also on 64-bit systems) due to pointer compression
-export const OBJECT_BASE_SIZE = 3 * COMPRESSED_POINTER_SIZE; // 3 compressed pointers
-// Arrays have an additional length property (1 pointer) and a backing store header (2 pointers)
-// See https://stackoverflow.com/a/70550693.
-const ARRAY_BASE_SIZE = OBJECT_BASE_SIZE + 3 * COMPRESSED_POINTER_SIZE;
-const TYPED_ARRAY_BASE_SIZE = 25 * COMPRESSED_POINTER_SIZE; // byteLength, byteOffset, ..., see https://stackoverflow.com/a/45808835
-const SMALL_INTEGER_SIZE = COMPRESSED_POINTER_SIZE; // Small integers (up to 31 bits), pointer tagging
-const HEAP_NUMBER_SIZE = 8 + 2 * COMPRESSED_POINTER_SIZE; // 4-byte map pointer + 8-byte payload + property pointer
-const FIELD_SIZE_BY_PRIMITIVE: Record<string, number> = {
-  bool: SMALL_INTEGER_SIZE,
-  int8: SMALL_INTEGER_SIZE,
-  uint8: SMALL_INTEGER_SIZE,
-  int16: SMALL_INTEGER_SIZE,
-  uint16: SMALL_INTEGER_SIZE,
-  int32: SMALL_INTEGER_SIZE,
-  uint32: SMALL_INTEGER_SIZE,
-  float32: HEAP_NUMBER_SIZE,
-  float64: HEAP_NUMBER_SIZE,
-  int64: HEAP_NUMBER_SIZE,
-  uint64: HEAP_NUMBER_SIZE,
-  time: OBJECT_BASE_SIZE + 2 * HEAP_NUMBER_SIZE + COMPRESSED_POINTER_SIZE,
-  duration: OBJECT_BASE_SIZE + 2 * HEAP_NUMBER_SIZE + COMPRESSED_POINTER_SIZE,
-  string: 20, // we don't know the length upfront, assume a fixed length
-};
-const MAX_NUM_FAST_PROPERTIES = 1020;
 
 /**
  * Estimates the memory size of a deserialized message object based on the schema definition.
@@ -206,69 +189,88 @@ export function estimateObjectSize(obj: unknown): number {
   if (obj == undefined) {
     return SMALL_INTEGER_SIZE;
   }
+
+  const estimateArraySize = (array: unknown[]): number =>
+    COMPRESSED_POINTER_SIZE +
+    ARRAY_BASE_SIZE +
+    array.reduce(
+      (accumulator: number, value: unknown) => accumulator + estimateObjectSize(value),
+      0,
+    );
+
+  const estimateMapSize = (map: Map<unknown, unknown>): number =>
+    COMPRESSED_POINTER_SIZE +
+    OBJECT_BASE_SIZE +
+    Array.from(map.entries()).reduce(
+      (accumulator: number, [key, value]: [unknown, unknown]) =>
+        accumulator + estimateObjectSize(key) + estimateObjectSize(value),
+      0,
+    );
+
+  const estimateSetSize = (set: Set<unknown>): number =>
+    COMPRESSED_POINTER_SIZE +
+    OBJECT_BASE_SIZE +
+    Array.from(set.values()).reduce(
+      (accumulator: number, value: unknown) => accumulator + estimateObjectSize(value),
+      0,
+    );
+
+  const estimateObjectPropertiesSize = (object: Record<string, unknown>): number => {
+    const valuesSize = Object.values(object).reduce(
+      (accumulator: number, value: unknown) => accumulator + estimateObjectSize(value),
+      0,
+    );
+    const numProps = Object.keys(obj).length;
+
+    if (numProps > MAX_NUM_FAST_PROPERTIES) {
+      // If there are too many properties, V8 stores Objects in dictionary mode (slow properties)
+      // with each object having a self-contained dictionary. This dictionary contains the key, value
+      // and details of properties. Below we estimate the size of this additional dictionary. Formula
+      // adapted from medium.com/@bpmxmqd/v8-engine-jsobject-structure-analysis-and-memory-optimization-ideas-be30cfcdcd16
+      const propertiesDictSize =
+        16 + 5 * 8 + 2 ** Math.ceil(Math.log2((numProps + 2) * 1.5)) * 3 * 4;
+      return (
+        OBJECT_BASE_SIZE + valuesSize + propertiesDictSize - numProps * COMPRESSED_POINTER_SIZE
+      );
+    }
+
+    return OBJECT_BASE_SIZE + valuesSize;
+  };
+
   switch (typeof obj) {
     case "undefined":
-    case "boolean": {
+    case "boolean":
       return SMALL_INTEGER_SIZE;
-    }
-    case "number": {
+
+    case "number":
       return Number.isInteger(obj) ? SMALL_INTEGER_SIZE : HEAP_NUMBER_SIZE;
-    }
-    case "bigint": {
+
+    case "bigint":
       return HEAP_NUMBER_SIZE;
-    }
-    case "string": {
-      // The string length is rounded up to the next multiple of 4.
+
+    case "string":
       return COMPRESSED_POINTER_SIZE + OBJECT_BASE_SIZE + Math.ceil(obj.length / 4) * 4;
-    }
-    case "object": {
+
+    case "object":
       if (Array.isArray(obj)) {
-        return (
-          COMPRESSED_POINTER_SIZE +
-          ARRAY_BASE_SIZE +
-          Object.values(obj).reduce((acc, val) => acc + estimateObjectSize(val), 0)
-        );
-      } else if (ArrayBuffer.isView(obj)) {
+        return estimateArraySize(obj);
+      }
+      if (ArrayBuffer.isView(obj)) {
         return TYPED_ARRAY_BASE_SIZE + obj.byteLength;
-      } else if (obj instanceof Set) {
-        return (
-          COMPRESSED_POINTER_SIZE +
-          OBJECT_BASE_SIZE +
-          Array.from(obj.values()).reduce((acc, val) => acc + estimateObjectSize(val), 0)
-        );
-      } else if (obj instanceof Map) {
-        return (
-          COMPRESSED_POINTER_SIZE +
-          OBJECT_BASE_SIZE +
-          Array.from(obj.entries()).reduce(
-            (acc, [key, val]) => acc + estimateObjectSize(key) + estimateObjectSize(val),
-            0,
-          )
-        );
       }
-
-      let propertiesSize = 0;
-      const numProps = Object.keys(obj).length;
-      if (numProps > MAX_NUM_FAST_PROPERTIES) {
-        // If there are too many properties, V8 stores Objects in dictionary mode (slow properties)
-        // with each object having a self-contained dictionary. This dictionary contains the key, value
-        // and details of properties. Below we estimate the size of this additional dictionary. Formula
-        // adapted from
-        // medium.com/@bpmxmqd/v8-engine-jsobject-structure-analysis-and-memory-optimization-ideas-be30cfcdcd16
-        const propertiesDictSize =
-          16 + 5 * 8 + 2 ** Math.ceil(Math.log2((numProps + 2) * 1.5)) * 3 * 4;
-        // In return, properties are no longer stored in the properties array, so we subtract that.
-        propertiesSize = propertiesDictSize - numProps * COMPRESSED_POINTER_SIZE;
+      if (obj instanceof Set) {
+        return estimateSetSize(obj);
       }
+      if (obj instanceof Map) {
+        return estimateMapSize(obj);
+      }
+      return estimateObjectPropertiesSize(obj as Record<string, unknown>);
 
-      const valuesSize = Object.values(obj).reduce((acc, val) => acc + estimateObjectSize(val), 0);
-      return OBJECT_BASE_SIZE + propertiesSize + valuesSize;
-    }
     case "symbol":
-    case "function": {
+    case "function":
       throw new Error(`Can't estimate size of type '${typeof obj}'`);
-    }
   }
+
   log.error(`Can't estimate size of type '${typeof obj}'`);
   return SMALL_INTEGER_SIZE;
 }

@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { OBJECT_BASE_SIZE } from "./constants";
 import {
   estimateMessageObjectSize,
   estimateMessageFieldSizes,
-  OBJECT_BASE_SIZE,
   estimateObjectSize,
 } from "./messageMemoryEstimation";
 
@@ -146,6 +146,29 @@ describe("memoryEstimationByObject", () => {
   it("estimates size of undefined object to be greater than 0", () => {
     const sizeInBytes = estimateObjectSize(undefined);
     expect(sizeInBytes).toBeGreaterThan(0);
+  });
+
+  it("correctly estimates the size for a large object with more than 1020 fields", () => {
+    const largeObject: Record<string, unknown> = {};
+    const numProps = 1021;
+    const propertiesDictSize = 24632;
+    let valueSize = 0;
+
+    for (let i = 0; i < numProps; i++) {
+      if (i % 3 === 0) {
+        largeObject[`field${i}`] = i;
+        valueSize += 4;
+      } else if (i % 3 === 1) {
+        largeObject[`field${i}`] = true;
+        valueSize += 4;
+      } else {
+        largeObject[`field${i}`] = 1.23;
+        valueSize += 16;
+      }
+    }
+    const expectedSize = 12 + valueSize + propertiesDictSize - numProps * 4;
+    const sizeInBytes = estimateObjectSize(largeObject);
+    expect(sizeInBytes).toEqual(expectedSize);
   });
 
   it("correctly estimates the size for a simple object", () => {

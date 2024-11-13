@@ -6,7 +6,6 @@ import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class MessageEventBuilder {
   public static messageEvent<T>(props: Partial<MessageEvent<T>> = {}): MessageEvent<T> {
     return defaults<MessageEvent<T>>(props, {
