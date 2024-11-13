@@ -14,7 +14,7 @@ const AppBarButton: React.FC<Prop> = (props: Prop) => {
       icon={props.icon}
       style={{
         width: "50px",
-        height: "50px",
+        height: "70px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
