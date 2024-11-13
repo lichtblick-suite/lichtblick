@@ -6,7 +6,6 @@ import MessageDefinitionBuilder from "@lichtblick/suite-base/testing/builders/Me
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { OptionalMessageDefinition } from "@lichtblick/suite-base/types/RosDatatypes";
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class RosDatatypesBuilder {
   public static optionalMessageDefinition(
     props: Partial<OptionalMessageDefinition> = {},

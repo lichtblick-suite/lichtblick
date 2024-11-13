@@ -22,7 +22,6 @@ import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuild
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { Range } from "@lichtblick/suite-base/util/ranges";
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class PlayerBuilder {
   public static subscribePayload(props: Partial<SubscribePayload> = {}): SubscribePayload {
     return defaults<SubscribePayload>(props, {

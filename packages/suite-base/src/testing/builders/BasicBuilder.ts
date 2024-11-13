@@ -13,7 +13,6 @@ import {
 } from "@lichtblick/suite-base/testing/builders/types";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class BasicBuilder {
   public static date(
     props: Partial<{

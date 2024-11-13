@@ -186,3 +186,8 @@ overrides:
       - "**/*.style.ts"
     rules:
       tss-unused-classes/unused-classes: "off"
+
+  - files:
+      - "packages/suite-base/src/testing/**"
+    rules:
+      "@typescript-eslint/no-extraneous-class": "off"

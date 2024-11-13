@@ -5,7 +5,6 @@ import { MessageDefinition, MessageDefinitionField } from "@lichtblick/message-d
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class MessageDefinitionBuilder {
   public static messageDefinitionField(
     props: Partial<MessageDefinitionField> = {},
