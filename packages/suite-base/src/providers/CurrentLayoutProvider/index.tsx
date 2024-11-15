@@ -215,11 +215,16 @@ export default function CurrentLayoutProvider({
     [setLayoutState],
   );
 
-  // Changes to the layout storage from external user actions (such as resetting a layout to a
-  // previous saved state) need to trigger setLayoutState.
+  /**
+   * Changes to the layout storage from external user actions need to trigger setLayoutState.
+   * Before it was beeing trigged on every change. Now it is triggered only when the layout
+   * is reverted, otherize it has some toggling issues when resizing panels.
+   */
   useEffect(() => {
-    const listener: LayoutManagerEventTypes["change"] = ({ updatedLayout }) => {
+    const listener: LayoutManagerEventTypes["change"] = (event) => {
+      const { updatedLayout } = event;
       if (
+        event.type === "revert" &&
         updatedLayout &&
         layoutStateRef.current.selectedLayout &&
         updatedLayout.id === layoutStateRef.current.selectedLayout.id
