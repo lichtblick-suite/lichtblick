@@ -434,7 +434,7 @@ function RawMessages(props: Props) {
         />
         {shouldDisplaySingleVal ? (
           <Typography
-            variant="h1"
+            variant="body1"
             fontSize={fontSize}
             whiteSpace="pre-wrap"
             style={{ wordWrap: "break-word" }}
