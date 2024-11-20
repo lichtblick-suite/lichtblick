@@ -66,7 +66,7 @@ const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9;
 // Preloading algorithms slow when there are too many blocks.
 // Adaptive block sizing is simpler than using a tree structure for immutable updates but
 // less flexible, so we may want to move away from a single-level block structure in the future.
-const MAX_BLOCKS = 400;
+const MAX_BLOCKS = 100;
 
 // Amount to seek into the data source from the start when loading the player. The purpose of this
 // is to provide some initial data to subscribers.
