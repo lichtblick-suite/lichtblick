@@ -3325,7 +3325,7 @@ __metadata:
     moment: 2.29.4
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.43
-    monaco-editor: 0.40.0
+    monaco-editor: 0.52.0
     monaco-editor-webpack-plugin: 7.1.0
     natsort: 2.0.3
     nearley: 2.20.1
@@ -3344,7 +3344,7 @@ __metadata:
     react-i18next: 14.0.1
     react-json-tree: "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch"
     react-markdown: 8.0.7
-    react-monaco-editor: 0.54.0
+    react-monaco-editor: 0.56.2
     react-mosaic-component: 6.1.0
     react-refresh-typescript: 2.0.9
     react-resizable-panels: 0.0.55
@@ -15475,10 +15475,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:0.40.0":
-  version: 0.40.0
-  resolution: "monaco-editor@npm:0.40.0"
-  checksum: 9f879c254bfb9907cc0b23d26bd4bcaaabf9a2cfbd9926574e06ea94f4b9e5807299db9cae1f35820da6242d5d13d9382cb9db48b1340c54ba06620c242c25c7
+"monaco-editor@npm:0.52.0":
+  version: 0.52.0
+  resolution: "monaco-editor@npm:0.52.0"
+  checksum: 76ab4ea38dfd2bc5687a2d777d7fc14fd7182ac6ed1ed6819b76a47924434bf3a08bcb75c68cd5aff20db86a7633ac46b335a6971ae21a8723a7dcf3e8289931
   languageName: node
   linkType: hard
 
@@ -17242,16 +17242,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-monaco-editor@npm:0.54.0":
-  version: 0.54.0
-  resolution: "react-monaco-editor@npm:0.54.0"
+"react-monaco-editor@npm:0.56.2":
+  version: 0.56.2
+  resolution: "react-monaco-editor@npm:0.56.2"
   dependencies:
     prop-types: ^15.8.1
   peerDependencies:
     "@types/react": ">=16 <= 18"
-    monaco-editor: ^0.39.0
+    monaco-editor: ^0.52.0
     react: ">=16 <= 18"
-  checksum: 86ae96e92964f6f999ff5090482b76df412775edc51868f2b255005d5bf3c53c9193de3a398e48a2ba46c990d83d64cace8a3183f3121d79b21b4bc3fc5abed3
+  checksum: c25e77276c86e50719209dd213baff41852dafc687f00538b0faab9fcb7fd9173012ca73f6a4c9a85c479f880598eaee89e3563b24c4ce233af7d226303a0e9c
   languageName: node
   linkType: hard
 

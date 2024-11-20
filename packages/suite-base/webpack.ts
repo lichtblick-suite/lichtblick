@@ -7,7 +7,6 @@
 
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import monacoPkg from "monaco-editor/package.json";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
@@ -17,21 +16,6 @@ import webpack, { Configuration } from "webpack";
 import { createTssReactNameTransformer } from "@lichtblick/typescript-transformers";
 
 import { WebpackArgv } from "./WebpackArgv";
-
-if (monacoPkg.version !== "0.40.0") {
-  throw new Error(`
-    It looks like you are trying to change the version of Monaco.
-
-    Please make a User Script and confirm that loading a data source properly updates
-    the "ros" library and that Input and Message interfaces are usable:
-      - Messages. should autocomplete
-      - Input<""> should autocomplete
-
-    See:
-    - https://github.com/foxglove/studio/issues/2646
-    - https://github.com/microsoft/monaco-editor/issues/2866
-  `);
-}
 
 type Options = {
   // During hot reloading and development it is useful to comment out code while iterating.
