@@ -403,7 +403,7 @@ function UserScriptEditor(props: Props) {
             </Stack>
           )}
 
-          <PanelGroup direction="vertical" units="percentages">
+          <PanelGroup direction="vertical">
             {selectedNodeId == undefined && <WelcomeScreen addNewNode={addNewNode} />}
             <ResizablePanel>
               <Suspense
