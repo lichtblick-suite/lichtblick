@@ -10,7 +10,7 @@
 /* eslint-disable jest/no-done-callback */
 
 import { render } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
+import { act } from "react";
 
 import { Condvar, signal } from "@lichtblick/den/async";
 import { Time } from "@lichtblick/rostime";

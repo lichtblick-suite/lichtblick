@@ -16,8 +16,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { SnackbarProvider } from "notistack";
+import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { act } from "react-dom/test-utils";
 
 import DocumentDropListener from "@lichtblick/suite-base/components/DocumentDropListener";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";

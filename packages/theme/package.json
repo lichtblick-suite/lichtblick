@@ -22,10 +22,10 @@
     "@mui/material": "5.13.5",
     "@mui/x-data-grid": "6.18.7",
     "@storybook/react": "8.4.0",
-    "@types/react": "18.2.56",
+    "@types/react": "18.3.12",
     "i18next": "23.11.2",
     "i18next-browser-languagedetector": "7.2.1",
-    "react": "18.2.0",
+    "react": "18.3.1",
     "react-i18next": "14.1.0"
   }
 }

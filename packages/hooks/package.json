@@ -32,6 +32,6 @@
     "shallowequal": "1.1.0"
   },
   "peerDependencies": {
-    "react": "^18.2.0"
+    "react": "^18.3.1"
   }
 }

@@ -598,15 +598,7 @@ export default function Panel<
     return (
       <Profiler
         id={childId}
-        onRender={(
-          _id,
-          _phase,
-          actualDuration,
-          _baseDuration,
-          _startTime,
-          _commitTime,
-          _interactions,
-        ) => {
+        onRender={(_id, _phase, actualDuration, _baseDuration, _startTime, _commitTime) => {
           if (perfInfo.current) {
             perfInfo.current.innerText = `${++renderCount.current}\n${actualDuration.toFixed(1)}ms`;
           }
