@@ -40,6 +40,8 @@ export type { LayoutData };
 
 export type SharedPanelState = RenderState["sharedPanelState"];
 
+export type UpdatePanelState = (type: PanelType, data: SharedPanelState) => void;
+
 export type SelectedLayout = {
   data: LayoutData | undefined;
   name?: string;
@@ -101,7 +103,7 @@ export interface ICurrentLayout {
     /**
      * Update the transient state associated with a particular panel type.
      */
-    updateSharedPanelState: (type: PanelType, data: SharedPanelState) => void;
+    updateSharedPanelState: UpdatePanelState;
 
     savePanelConfigs: (payload: SaveConfigsPayload) => void;
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;

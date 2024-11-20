@@ -39,6 +39,7 @@ import {
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
+import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
@@ -301,9 +302,11 @@ export default function CurrentLayoutProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getUserProfile, layoutManager, setSelectedLayoutId]);
 
+  const { updateSharedPanelState } = useUpdateSharedPanelState(layoutStateRef, setLayoutState);
+
   const actions: ICurrentLayout["actions"] = useMemo(
     () => ({
-      updateSharedPanelState: () => {},
+      updateSharedPanelState,
       setCurrentLayout: () => {},
       setSelectedLayoutId,
       getCurrentLayoutState: () => layoutStateRef.current,
@@ -394,7 +397,7 @@ export default function CurrentLayoutProvider({
         performAction({ type: "END_DRAG", payload });
       },
     }),
-    [analytics, performAction, setSelectedLayoutId, setSelectedPanelIds],
+    [analytics, performAction, setSelectedLayoutId, setSelectedPanelIds, updateSharedPanelState],
   );
 
   const value: ICurrentLayout = useShallowMemo({
