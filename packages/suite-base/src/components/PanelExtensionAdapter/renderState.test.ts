@@ -6,9 +6,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
+import * as _ from "lodash-es";
 
 import { PanelSettings } from "@lichtblick/suite";
+import { RosTime } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import { BuilderRenderStateInput, initRenderStateBuilder } from "./renderState";
 
@@ -79,21 +83,42 @@ function makeInitialState(): BuilderRenderStateInput {
     ],
   };
 }
+const setup = (inputOverride: Partial<BuilderRenderStateInput> = {}) => {
+  const buildRenderState = initRenderStateBuilder();
+  const input: BuilderRenderStateInput = {
+    appSettings: undefined,
+    colorScheme: undefined,
+    currentFrame: undefined,
+    globalVariables: {},
+    hoverValue: undefined,
+    playerState: undefined,
+    sharedPanelState: {},
+    watchedFields: new Set(BasicBuilder.strings()),
+    sortedTopics: [],
+    subscriptions: [],
+    ...inputOverride,
+  };
+
+  return {
+    buildRenderState,
+    input,
+  };
+};
 
 describe("renderState", () => {
+  function makeBlock(topic: string, receiveTime: RosTime): any {
+    return {
+      topic,
+      schemaName: "schema",
+      receiveTime,
+      sizeInBytes: 1,
+      message: { from: "allFrames" },
+    };
+  }
   it("should include convertibleTo when there are message converters", () => {
-    const buildRenderState = initRenderStateBuilder();
-    const state = buildRenderState({
-      watchedFields: new Set(["topics"]),
-      playerState: undefined,
-      appSettings: undefined,
-      currentFrame: undefined,
-      colorScheme: undefined,
+    const { buildRenderState, input } = setup();
+    _.merge(input, {
       globalVariables: {},
-      hoverValue: undefined,
-      sharedPanelState: {},
-      sortedTopics: [{ name: "test", schemaName: "schema" }],
-      subscriptions: [],
       messageConverters: [
         {
           fromSchemaName: "schema",
@@ -101,39 +126,45 @@ describe("renderState", () => {
           converter: () => {},
         },
       ],
+      sortedTopics: [{ name: "test", schemaName: "schema" }],
+      watchedFields: new Set(["topics"]),
     });
+    const state = buildRenderState(input);
 
     expect(state).toEqual({
       topics: [{ name: "test", schemaName: "schema", datatype: "schema", convertibleTo: ["more"] }],
     });
   });
 
+  it("should not include convertibleTo when there are no message converters", () => {
+    const { buildRenderState, input } = setup();
+    const playerState = PlayerBuilder.playerState();
+    _.merge(input, {
+      playerState,
+      sortedTopics: [{ name: "test", schemaName: "schema" }],
+      subscriptions: [BasicBuilder.genericMap],
+      watchedFields: new Set(["topics"]),
+    });
+    const state = buildRenderState(input);
+
+    expect(state).toEqual({
+      topics: [{ name: "test", schemaName: "schema", datatype: "schema" }],
+    });
+  });
+
   it("should provide stable time values", () => {
     const buildRenderState = initRenderStateBuilder();
+    const playerState = PlayerBuilder.playerState();
+
+    playerState.activeData!.currentTime = { sec: 33, nsec: 1 };
+    playerState.activeData!.startTime = { sec: 1, nsec: 1 };
+    playerState.activeData!.endTime = { sec: 100, nsec: 1 };
+
     const initialState: Parameters<typeof buildRenderState>[0] = {
       watchedFields: new Set(["currentTime", "endTime", "previewTime", "startTime"]),
       appSettings: undefined,
       currentFrame: [],
-      playerState: {
-        presence: PlayerPresence.PRESENT,
-        progress: {},
-        capabilities: [],
-        profile: "test",
-        playerId: "123",
-        activeData: {
-          datatypes: new Map(),
-          lastSeekTime: 1,
-          currentTime: { sec: 33, nsec: 1 },
-          endTime: { sec: 100, nsec: 1 },
-          startTime: { sec: 1, nsec: 1 },
-          isPlaying: true,
-          messages: [],
-          speed: 1,
-          topics: [],
-          topicStats: new Map(),
-          totalBytesReceived: 0,
-        },
-      },
+      playerState,
       colorScheme: undefined,
       globalVariables: {},
       hoverValue: {
@@ -258,86 +289,34 @@ describe("renderState", () => {
 
   it("should make allFrames sorted receive time across sorted messagesInTopic", () => {
     const buildRenderState = initRenderStateBuilder();
+    const playerState = PlayerBuilder.playerState();
+    playerState.progress = {
+      messageCache: {
+        startTime: { sec: 0, nsec: 0 },
+        blocks: [
+          {
+            sizeInBytes: 0,
+            messagesByTopic: {
+              test1: [
+                makeBlock("test1", { nsec: 0, sec: 1 }),
+                makeBlock("test1", { nsec: 0, sec: 3 }),
+                makeBlock("test1", { nsec: 0, sec: 5 }),
+                makeBlock("test1", { nsec: 0, sec: 6 }),
+              ],
+              test2: [
+                makeBlock("test2", { nsec: 0, sec: 2 }),
+                makeBlock("test2", { nsec: 0, sec: 4 }),
+                makeBlock("test2", { nsec: 0, sec: 7 }),
+                makeBlock("test2", { nsec: 0, sec: 8 }),
+              ],
+            },
+          },
+        ],
+      },
+    };
     const state = buildRenderState({
       watchedFields: new Set(["topics", "allFrames"]),
-      playerState: {
-        presence: PlayerPresence.INITIALIZING,
-        capabilities: [],
-        profile: undefined,
-        playerId: "test",
-        progress: {
-          messageCache: {
-            startTime: { sec: 0, nsec: 0 },
-            blocks: [
-              {
-                sizeInBytes: 0,
-                messagesByTopic: {
-                  test1: [
-                    {
-                      topic: "test1",
-                      schemaName: "schema",
-                      receiveTime: { sec: 1, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                    {
-                      topic: "test1",
-                      schemaName: "schema",
-                      receiveTime: { sec: 3, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                    {
-                      topic: "test1",
-                      schemaName: "schema",
-                      receiveTime: { sec: 5, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                    {
-                      topic: "test1",
-                      schemaName: "schema",
-                      receiveTime: { sec: 6, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                  ],
-                  test2: [
-                    {
-                      topic: "test2",
-                      schemaName: "schema",
-                      receiveTime: { sec: 2, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                    {
-                      topic: "test2",
-                      schemaName: "schema",
-                      receiveTime: { sec: 4, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                    {
-                      topic: "test2",
-                      schemaName: "schema",
-                      receiveTime: { sec: 7, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                    {
-                      topic: "test2",
-                      schemaName: "schema",
-                      receiveTime: { sec: 8, nsec: 0 },
-                      sizeInBytes: 1,
-                      message: { from: "allFrames" },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
+      playerState,
       appSettings: undefined,
       currentFrame: [],
       colorScheme: undefined,
@@ -361,62 +340,14 @@ describe("renderState", () => {
         { name: "test2", schemaName: "schema", datatype: "schema" },
       ],
       allFrames: [
-        {
-          topic: "test1",
-          receiveTime: { nsec: 0, sec: 1 },
-          schemaName: "schema",
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test2",
-          schemaName: "schema",
-          receiveTime: { nsec: 0, sec: 2 },
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test1",
-          receiveTime: { nsec: 0, sec: 3 },
-          schemaName: "schema",
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test2",
-          schemaName: "schema",
-          receiveTime: { nsec: 0, sec: 4 },
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test1",
-          receiveTime: { nsec: 0, sec: 5 },
-          schemaName: "schema",
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test1",
-          schemaName: "schema",
-          receiveTime: { nsec: 0, sec: 6 },
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test2",
-          receiveTime: { nsec: 0, sec: 7 },
-          schemaName: "schema",
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
-        {
-          topic: "test2",
-          schemaName: "schema",
-          receiveTime: { nsec: 0, sec: 8 },
-          sizeInBytes: 1,
-          message: { from: "allFrames" },
-        },
+        makeBlock("test1", { nsec: 0, sec: 1 }),
+        makeBlock("test2", { nsec: 0, sec: 2 }),
+        makeBlock("test1", { nsec: 0, sec: 3 }),
+        makeBlock("test2", { nsec: 0, sec: 4 }),
+        makeBlock("test1", { nsec: 0, sec: 5 }),
+        makeBlock("test1", { nsec: 0, sec: 6 }),
+        makeBlock("test2", { nsec: 0, sec: 7 }),
+        makeBlock("test2", { nsec: 0, sec: 8 }),
       ],
     });
   });
@@ -1124,5 +1055,75 @@ describe("renderState", () => {
 
     expect(checkRenderedConfig).toHaveBeenCalled();
     expect(checkRenderedConfig.mock.calls.at(-1)).toEqual([{ test: false }]);
+  });
+
+  it("should update renderStateField when watchedFields contains parameters", async () => {
+    const { buildRenderState, input } = setup();
+    _.merge(input, {
+      subscriptions: [BasicBuilder.genericMap],
+      watchedFields: new Set(["parameters"]),
+    });
+    const state = buildRenderState(input);
+    expect(state).toEqual({
+      parameters: new Map(),
+    });
+  });
+
+  it("should renderStateField when activeData contains parameters", async () => {
+    const { buildRenderState, input } = setup();
+    const activeData = PlayerBuilder.activeData({
+      parameters: BasicBuilder.genericMap<string>(BasicBuilder.string),
+    });
+    const playerState = PlayerBuilder.playerState({ activeData });
+    _.merge(input, {
+      playerState,
+      subscriptions: [BasicBuilder.genericMap],
+      watchedFields: new Set(["parameters"]),
+    });
+    const state = buildRenderState(input);
+
+    expect(state).toEqual({
+      parameters: activeData.parameters,
+    });
+  });
+
+  it("should update renderStateField when watchedFields contains sharedPanelState", async () => {
+    const { buildRenderState, input } = setup();
+    _.merge(input, {
+      subscriptions: [BasicBuilder.genericMap],
+      watchedFields: new Set(["sharedPanelState"]),
+    });
+    const state = buildRenderState(input);
+
+    expect(state).toEqual({
+      sharedPanelState: {},
+    });
+  });
+
+  it("should update renderStateField when watchedFields contains colorscheme", async () => {
+    const { buildRenderState, input } = setup();
+    _.merge(input, {
+      colorScheme: "dark",
+      subscriptions: [BasicBuilder.genericMap],
+      watchedFields: new Set(["colorScheme"]),
+    });
+    const state = buildRenderState(input);
+
+    expect(state).toEqual({
+      colorScheme: "dark",
+    });
+  });
+  it("should update renderStateField when watchedFields contains appSettings", async () => {
+    const { buildRenderState, input } = setup();
+    _.merge(input, {
+      appSettings: new Map(),
+      subscriptions: [BasicBuilder.genericMap],
+      watchedFields: new Set(["appSettings"]),
+    });
+    const state = buildRenderState(input);
+
+    expect(state).toEqual({
+      appSettings: new Map(),
+    });
   });
 });
