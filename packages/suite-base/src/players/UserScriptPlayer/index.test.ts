@@ -32,8 +32,8 @@ import delay from "@lichtblick/suite-base/util/delay";
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
 
 import UserScriptPlayer from ".";
+import { DIAGNOSTIC_SEVERITY, SOURCES, ERROR_CODES } from "./constants";
 import exampleDatatypes from "./transformerWorker/fixtures/example-datatypes";
-import { DiagnosticSeverity, ErrorCodes, Sources } from "./types";
 
 const nodeId = "nodeId";
 
@@ -313,10 +313,10 @@ describe("UserScriptPlayer", () => {
           nodeId,
           [
             {
-              code: ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL,
+              code: ERROR_CODES.InputTopicsChecker.NO_TOPIC_AVAIL,
               message: `Input "/np_input" is not yet available`,
-              severity: DiagnosticSeverity.Error,
-              source: Sources.InputTopicsChecker,
+              severity: DIAGNOSTIC_SEVERITY.Error,
+              source: SOURCES.InputTopicsChecker,
             },
           ],
         ],
@@ -1020,10 +1020,10 @@ describe("UserScriptPlayer", () => {
       // to read.
       expect(setUserNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
         {
-          code: ErrorCodes.RUNTIME,
+          code: ERROR_CODES.RUNTIME,
           message: "Error: Error!",
-          severity: DiagnosticSeverity.Error,
-          source: Sources.Runtime,
+          severity: DIAGNOSTIC_SEVERITY.Error,
+          source: SOURCES.Runtime,
         },
       ]);
     });
@@ -1133,10 +1133,10 @@ describe("UserScriptPlayer", () => {
       expect(mockSetNodeDiagnostics).toHaveBeenCalledWith(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, []);
       expect(mockSetNodeDiagnostics).toHaveBeenCalledWith(`${DEFAULT_STUDIO_SCRIPT_PREFIX}2`, [
         {
-          source: Sources.OutputTopicChecker,
-          severity: DiagnosticSeverity.Error,
+          source: SOURCES.OutputTopicChecker,
+          severity: DIAGNOSTIC_SEVERITY.Error,
           message: `Output "${DEFAULT_STUDIO_SCRIPT_PREFIX}1" must be unique`,
-          code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
+          code: ERROR_CODES.OutputTopicChecker.NOT_UNIQUE,
         },
       ]);
     });
@@ -1182,10 +1182,10 @@ describe("UserScriptPlayer", () => {
       ]);
       expect(mockSetNodeDiagnostics).toHaveBeenCalledWith(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, [
         {
-          source: Sources.OutputTopicChecker,
-          severity: DiagnosticSeverity.Error,
+          source: SOURCES.OutputTopicChecker,
+          severity: DIAGNOSTIC_SEVERITY.Error,
           message: `Output topic "${DEFAULT_STUDIO_SCRIPT_PREFIX}1" is already present in the data source`,
-          code: ErrorCodes.OutputTopicChecker.EXISTING_TOPIC,
+          code: ERROR_CODES.OutputTopicChecker.EXISTING_TOPIC,
         },
       ]);
     });
@@ -1418,10 +1418,10 @@ describe("UserScriptPlayer", () => {
       const { topicNames, messages } = (await done)!;
       expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
         {
-          source: Sources.Runtime,
-          severity: DiagnosticSeverity.Error,
+          source: SOURCES.Runtime,
+          severity: DIAGNOSTIC_SEVERITY.Error,
           message: error,
-          code: ErrorCodes.RUNTIME,
+          code: ERROR_CODES.RUNTIME,
         },
       ]);
       // Sanity check to ensure none of the user node messages made it through if there was an error.
@@ -1497,10 +1497,10 @@ describe("UserScriptPlayer", () => {
       await done;
       expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
         {
-          severity: DiagnosticSeverity.Error,
+          severity: DIAGNOSTIC_SEVERITY.Error,
           message: expect.any(String),
-          source: Sources.InputTopicsChecker,
-          code: ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL,
+          source: SOURCES.InputTopicsChecker,
+          code: ERROR_CODES.InputTopicsChecker.NO_TOPIC_AVAIL,
         },
       ]);
     });

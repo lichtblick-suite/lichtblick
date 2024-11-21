@@ -14,7 +14,7 @@ import { RenderablePrimitive } from "./RenderablePrimitive";
 import { RenderableSpheres } from "./RenderableSpheres";
 import { RenderableTexts } from "./RenderableTexts";
 import { RenderableTriangles } from "./RenderableTriangles";
-import { PrimitiveType } from "./types";
+import { PrimitiveType } from "./constants";
 import type { IRenderer } from "../../IRenderer";
 
 const CONSTRUCTORS = {

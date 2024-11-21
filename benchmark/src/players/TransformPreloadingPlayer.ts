@@ -12,12 +12,12 @@ import { Time, compare } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { normalizeFrameTransform } from "@lichtblick/suite-base/panels/ThreeDeeRender/normalizeMessages";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   BlockCache,
   MessageBlock,
   Player,
-  PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PublishPayload,
@@ -30,7 +30,7 @@ import delay from "@lichtblick/suite-base/util/delay";
 
 const log = Log.getLogger(__filename);
 
-const CAPABILITIES: string[] = [PlayerCapabilities.playbackControl];
+const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
 class TransformPreloadingPlayer implements Player {
   #name: string = "transformpreloading";

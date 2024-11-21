@@ -20,6 +20,7 @@ import type { MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
 import { Immutable } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { Range } from "@lichtblick/suite-base/util/ranges";
 import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
@@ -107,7 +108,7 @@ export type PlayerState = {
 
   // Capabilities of this particular `Player`, which are not shared across all players.
   // See `const PlayerCapabilities` for more details.
-  capabilities: (typeof PlayerCapabilities)[keyof typeof PlayerCapabilities][];
+  capabilities: (typeof PLAYER_CAPABILITIES)[keyof typeof PLAYER_CAPABILITIES][];
 
   /**
    * Identifies the semantics of the data being played back, such as which topics or parameters are
@@ -320,30 +321,6 @@ export type AdvertiseOptions = {
 
 // The actual message to publish.
 export type PublishPayload = { topic: string; msg: Record<string, unknown> };
-
-// Capabilities that are not shared by all players.
-export const PlayerCapabilities = {
-  // Publishing messages. Need to be connected to some sort of live robotics system (e.g. ROS).
-  advertise: "advertise",
-
-  // Fetching assets.
-  assets: "assets",
-
-  // Calling services
-  callServices: "callServices",
-
-  // Setting speed to something that is not real time.
-  setSpeed: "setSpeed",
-
-  // Ability to play, pause, and seek in time.
-  playbackControl: "playbackControl",
-
-  // List and retrieve values for configuration key/value pairs
-  getParameters: "getParameters",
-
-  // Set values for configuration key/value pairs
-  setParameters: "setParameters",
-};
 
 // A metrics collector is an interface passed into a `Player`, which will get called when certain
 // events happen, so we can track those events in some metrics system.

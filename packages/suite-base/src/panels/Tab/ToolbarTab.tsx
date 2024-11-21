@@ -20,7 +20,7 @@ import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useSta
 import textMetrics from "text-metrics";
 import { makeStyles } from "tss-react/mui";
 
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import { TabActions } from "@lichtblick/suite-base/panels/Tab/TabDndContext";
 import { fontSansSerif } from "@lichtblick/theme";
 

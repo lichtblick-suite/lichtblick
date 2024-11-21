@@ -24,8 +24,8 @@ import AppConfigurationContext, {
 } from "@lichtblick/suite-base/context/AppConfigurationContext";
 import { useEvents } from "@lichtblick/suite-base/context/EventsContext";
 import { useSetHoverValue } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
-  PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
@@ -43,7 +43,7 @@ function getPlayerState(): PlayerState {
   const player: PlayerState = {
     presence: PlayerPresence.PRESENT,
     progress: {},
-    capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
+    capabilities: [PLAYER_CAPABILITIES.setSpeed, PLAYER_CAPABILITIES.playbackControl],
     profile: undefined,
     playerId: "1",
     activeData: {

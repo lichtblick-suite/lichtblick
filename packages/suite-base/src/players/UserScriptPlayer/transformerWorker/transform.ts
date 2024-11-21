@@ -17,6 +17,11 @@
 import ts from "typescript/lib/typescript";
 
 import { filterMap } from "@lichtblick/den/collection";
+import {
+  DIAGNOSTIC_SEVERITY,
+  SOURCES,
+  ERROR_CODES,
+} from "@lichtblick/suite-base/players/UserScriptPlayer/constants";
 import { formatInterfaceName } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
 import {
   constructDatatypes,
@@ -31,11 +36,8 @@ import {
 } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/utils";
 import {
   Diagnostic,
-  DiagnosticSeverity,
-  ErrorCodes,
   ScriptData,
   ScriptDataTransformer,
-  Sources,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
@@ -44,17 +46,17 @@ import { TransformArgs } from "./types";
 import generatedTypesLibSrc from "./typescript/userUtils/generatedTypes.ts?raw";
 
 export const hasTransformerErrors = (scriptData: ScriptData): boolean =>
-  scriptData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);
+  scriptData.diagnostics.some(({ severity }) => severity === DIAGNOSTIC_SEVERITY.Error);
 
 export const getInputTopics = (scriptData: ScriptData): ScriptData => {
   const { sourceFile, typeChecker } = scriptData;
   if (!sourceFile || !typeChecker) {
     const error = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message:
         "Either the 'sourceFile' or 'typeChecker' is absent. There is a problem with the `compile` step.",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
     };
 
     return {
@@ -66,10 +68,10 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
   const symbol = typeChecker.getSymbolAtLocation(sourceFile);
   if (!symbol) {
     const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: "Must export an input topics array. E.g. 'export const inputs = ['/some_topics']'",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.NO_INPUTS_EXPORT,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.NO_INPUTS_EXPORT,
     };
     return {
       ...scriptData,
@@ -82,10 +84,10 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
     .find((node) => node.escapedName === "inputs");
   if (!inputsExport) {
     const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: "Must export a non-empty inputs array.",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.EMPTY_INPUTS_EXPORT,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.EMPTY_INPUTS_EXPORT,
     };
     return {
       ...scriptData,
@@ -96,10 +98,10 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
   const decl = inputsExport.declarations?.[0];
   if (!decl || !ts.isVariableDeclaration(decl)) {
     const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: "inputs export must be an array variable.",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
     };
     return {
       ...scriptData,
@@ -109,10 +111,10 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
 
   if (!decl.initializer || !ts.isArrayLiteralExpression(decl.initializer)) {
     const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: "inputs export must be an array variable.",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
     };
     return {
       ...scriptData,
@@ -123,11 +125,11 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
   const inputTopicElements = decl.initializer.elements;
   if (inputTopicElements.some(({ kind }) => kind !== ts.SyntaxKind.StringLiteral)) {
     const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message:
         "The exported 'inputs' variable must be an array of string literals. E.g. 'export const inputs = ['/some_topics']'",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
     };
     return {
       ...scriptData,
@@ -144,11 +146,11 @@ export const getInputTopics = (scriptData: ScriptData): ScriptData => {
 
   if (inputTopics.length === 0) {
     const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message:
         'Must include non-empty inputs array, e.g. export const inputs = ["/some_input_topic"];',
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.EMPTY_INPUTS_EXPORT,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.EMPTY_INPUTS_EXPORT,
     };
 
     return {
@@ -173,10 +175,10 @@ export const getOutputTopic = (scriptData: ScriptData): ScriptData => {
 
   if (outputTopic == undefined) {
     const error = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: `Must include an output, e.g. export const output = "${DEFAULT_STUDIO_SCRIPT_PREFIX}your_output_topic";`,
-      source: Sources.OutputTopicChecker,
-      code: ErrorCodes.OutputTopicChecker.NO_OUTPUTS,
+      source: SOURCES.OutputTopicChecker,
+      code: ERROR_CODES.OutputTopicChecker.NO_OUTPUTS,
     };
 
     return {
@@ -198,10 +200,10 @@ export const validateInputTopics = (scriptData: ScriptData, topics: Topic[]): Sc
   for (const inputTopic of inputTopics) {
     if (!activeTopics.includes(inputTopic)) {
       diagnostics.push({
-        severity: DiagnosticSeverity.Error,
+        severity: DIAGNOSTIC_SEVERITY.Error,
         message: `Input "${inputTopic}" is not yet available`,
-        source: Sources.InputTopicsChecker,
-        code: ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL,
+        source: SOURCES.InputTopicsChecker,
+        code: ERROR_CODES.InputTopicsChecker.NO_TOPIC_AVAIL,
       });
     }
   }
@@ -287,10 +289,10 @@ export const compile = (scriptData: ScriptData): ScriptData => {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!codeEmitted) {
     const error = {
-      severity: DiagnosticSeverity.Error,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: "Program code was not emitted.",
-      source: Sources.InputTopicsChecker,
-      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+      source: SOURCES.InputTopicsChecker,
+      code: ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
     };
 
     return {
@@ -405,9 +407,9 @@ export const extractDatatypes = (scriptData: ScriptData): ScriptData => {
         ...scriptData.diagnostics,
         {
           message: error.message,
-          severity: DiagnosticSeverity.Error,
-          source: Sources.DatatypeExtraction,
-          code: ErrorCodes.DatatypeExtraction.UNKNOWN_ERROR,
+          severity: DIAGNOSTIC_SEVERITY.Error,
+          source: SOURCES.DatatypeExtraction,
+          code: ERROR_CODES.DatatypeExtraction.UNKNOWN_ERROR,
         },
       ],
     };

@@ -26,10 +26,10 @@ import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/s
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   Player,
-  PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
@@ -137,7 +137,7 @@ export class IterablePlayer implements Player {
   #providerTopicStats = new Map<string, TopicStats>();
   #providerDatatypes: RosDatatypes = new Map();
 
-  #capabilities: string[] = [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl];
+  #capabilities: string[] = [PLAYER_CAPABILITIES.setSpeed, PLAYER_CAPABILITIES.playbackControl];
   #profile: string | undefined;
   #metricsCollector: PlayerMetricsCollectorInterface;
   #subscriptions: SubscribePayload[] = [];

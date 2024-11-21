@@ -16,8 +16,8 @@
 
 import { Metadata, ParameterValue } from "@lichtblick/suite";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
-  PlayerCapabilities,
   PlayerStateActiveData,
   PlayerState,
   Player,
@@ -31,7 +31,7 @@ export default class FakePlayer implements Player {
   public playerId: string = "test";
   public subscriptions: SubscribePayload[] = [];
   public publishers: AdvertiseOptions[] | undefined;
-  #capabilities: (typeof PlayerCapabilities)[keyof typeof PlayerCapabilities][] = [];
+  #capabilities: (typeof PLAYER_CAPABILITIES)[keyof typeof PLAYER_CAPABILITIES][] = [];
   #profile: string | undefined;
 
   public setListener(listener: (arg0: PlayerState) => Promise<void>): void {
@@ -88,7 +88,7 @@ export default class FakePlayer implements Player {
     this.subscriptions = subs;
   };
   public setCapabilities = (
-    capabilities: (typeof PlayerCapabilities)[keyof typeof PlayerCapabilities][],
+    capabilities: (typeof PLAYER_CAPABILITIES)[keyof typeof PLAYER_CAPABILITIES][],
   ): void => {
     this.#capabilities = capabilities;
   };

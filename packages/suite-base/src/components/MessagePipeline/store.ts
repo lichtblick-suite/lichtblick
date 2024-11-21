@@ -16,10 +16,10 @@ import {
   makeSubscriptionMemoizer,
   mergeSubscriptions,
 } from "@lichtblick/suite-base/components/MessagePipeline/subscriptions";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   Player,
-  PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   SubscribePayload,
@@ -385,19 +385,19 @@ function updatePlayerStateAction(
   const capabilities = action.playerState.capabilities;
   const player = prevState.player;
   if (player && !shallowequal(capabilities, prevState.lastCapabilities)) {
-    newPublicState.startPlayback = capabilities.includes(PlayerCapabilities.playbackControl)
+    newPublicState.startPlayback = capabilities.includes(PLAYER_CAPABILITIES.playbackControl)
       ? player.startPlayback?.bind(player)
       : undefined;
-    newPublicState.playUntil = capabilities.includes(PlayerCapabilities.playbackControl)
+    newPublicState.playUntil = capabilities.includes(PLAYER_CAPABILITIES.playbackControl)
       ? player.playUntil?.bind(player)
       : undefined;
-    newPublicState.pausePlayback = capabilities.includes(PlayerCapabilities.playbackControl)
+    newPublicState.pausePlayback = capabilities.includes(PLAYER_CAPABILITIES.playbackControl)
       ? player.pausePlayback?.bind(player)
       : undefined;
-    newPublicState.setPlaybackSpeed = capabilities.includes(PlayerCapabilities.setSpeed)
+    newPublicState.setPlaybackSpeed = capabilities.includes(PLAYER_CAPABILITIES.setSpeed)
       ? player.setPlaybackSpeed?.bind(player)
       : undefined;
-    newPublicState.seekPlayback = capabilities.includes(PlayerCapabilities.playbackControl)
+    newPublicState.seekPlayback = capabilities.includes(PLAYER_CAPABILITIES.playbackControl)
       ? player.seekPlayback?.bind(player)
       : undefined;
   }

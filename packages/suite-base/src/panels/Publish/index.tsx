@@ -32,7 +32,7 @@ import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import usePublisher from "@lichtblick/suite-base/hooks/usePublisher";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { useDefaultPanelTitle } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -162,7 +162,7 @@ function Publish(props: Props) {
   }, [config.topicName, setDefaultPanelTitle]);
 
   const canPublish = Boolean(
-    capabilities.includes(PlayerCapabilities.advertise) &&
+    capabilities.includes(PLAYER_CAPABILITIES.advertise) &&
       config.value &&
       config.topicName &&
       config.datatype &&
@@ -170,7 +170,7 @@ function Publish(props: Props) {
   );
 
   const statusMessage = useMemo(() => {
-    if (!capabilities.includes(PlayerCapabilities.advertise)) {
+    if (!capabilities.includes(PLAYER_CAPABILITIES.advertise)) {
       return "Connect to a data source that supports publishing";
     }
     if (!config.topicName || !config.datatype) {

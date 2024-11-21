@@ -24,9 +24,8 @@ import {
   UserProfileStorage,
   UserProfileStorageContext,
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
-import CurrentLayoutProvider, {
-  MAX_SUPPORTED_LAYOUT_VERSION,
-} from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
+import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
+import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 
 const TEST_LAYOUT: LayoutData = {

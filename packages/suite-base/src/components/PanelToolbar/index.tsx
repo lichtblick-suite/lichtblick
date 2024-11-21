@@ -21,12 +21,11 @@ import { makeStyles } from "tss-react/mui";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import { useDefaultPanelTitle } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 
 import { PanelToolbarControls } from "./PanelToolbarControls";
-
-export const PANEL_TOOLBAR_MIN_HEIGHT = 30;
 
 type Props = {
   additionalIcons?: React.ReactNode;

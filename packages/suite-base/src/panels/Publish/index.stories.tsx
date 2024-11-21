@@ -11,7 +11,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 
 import Publish from "@lichtblick/suite-base/panels/Publish";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 
 import { PublishConfig } from "./types";
@@ -23,7 +23,7 @@ const getFixture = ({ allowPublish }: { allowPublish: boolean }): Fixture => {
       Object.entries({ "std_msgs/String": { definitions: [{ name: "data", type: "string" }] } }),
     ),
     frame: {},
-    capabilities: allowPublish ? [PlayerCapabilities.advertise] : [],
+    capabilities: allowPublish ? [PLAYER_CAPABILITIES.advertise] : [],
     publish: action("publish"),
     setPublishers: action("setPublishers"),
   };
@@ -33,7 +33,7 @@ const emptyFixture: Fixture = {
   topics: [],
   datatypes: new Map(),
   frame: {},
-  capabilities: [PlayerCapabilities.advertise],
+  capabilities: [PLAYER_CAPABILITIES.advertise],
 };
 
 const advancedJSON = `{\n  "data": ""\n}`;

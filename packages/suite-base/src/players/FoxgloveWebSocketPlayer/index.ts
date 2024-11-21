@@ -36,12 +36,12 @@ import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@licht
 import { ParameterValue } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
 import {
   AdvertiseOptions,
   MessageEvent,
   Player,
-  PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerProblem,
@@ -102,7 +102,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #client?: FoxgloveClient; // The client when we're connected.
   #id: string = uuidv4(); // Unique ID for this player session.
   #serverCapabilities: string[] = [];
-  #playerCapabilities: (typeof PlayerCapabilities)[keyof typeof PlayerCapabilities][] = [];
+  #playerCapabilities: (typeof PLAYER_CAPABILITIES)[keyof typeof PLAYER_CAPABILITIES][] = [];
   #supportedEncodings?: string[];
   #listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   #closed: boolean = false; // Whether the player has been completely closed using close().
@@ -330,7 +330,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       if (event.capabilities.includes(ServerCapability.clientPublish)) {
-        this.#playerCapabilities = this.#playerCapabilities.concat(PlayerCapabilities.advertise);
+        this.#playerCapabilities = this.#playerCapabilities.concat(PLAYER_CAPABILITIES.advertise);
         this.#setupPublishers();
       }
       if (event.capabilities.includes(ServerCapability.services)) {
@@ -341,7 +341,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         const problemId = "callService:unsupportedEncoding";
         if (this.#serviceCallEncoding) {
           this.#playerCapabilities = this.#playerCapabilities.concat(
-            PlayerCapabilities.callServices,
+            PLAYER_CAPABILITIES.callServices,
           );
           this.#problems.removeProblem(problemId);
         } else {
@@ -356,8 +356,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       if (event.capabilities.includes(ServerCapability.parameters)) {
         this.#playerCapabilities = this.#playerCapabilities.concat(
-          PlayerCapabilities.getParameters,
-          PlayerCapabilities.setParameters,
+          PLAYER_CAPABILITIES.getParameters,
+          PLAYER_CAPABILITIES.setParameters,
         );
 
         // Periodically request all available parameters.
@@ -373,7 +373,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       if (event.capabilities.includes(ServerCapability.assets)) {
-        this.#playerCapabilities = this.#playerCapabilities.concat(PlayerCapabilities.assets);
+        this.#playerCapabilities = this.#playerCapabilities.concat(PLAYER_CAPABILITIES.assets);
       }
 
       this.#emitState();
@@ -993,7 +993,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     if (
       !this.#client ||
       this.#closed ||
-      !this.#playerCapabilities.includes(PlayerCapabilities.advertise)
+      !this.#playerCapabilities.includes(PLAYER_CAPABILITIES.advertise)
     ) {
       this.#unresolvedPublications = uniquePublications;
       return;

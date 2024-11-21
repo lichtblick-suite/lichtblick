@@ -15,10 +15,8 @@ import { ReactElement } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  Diagnostic,
-  DiagnosticSeverity,
-} from "@lichtblick/suite-base/players/UserScriptPlayer/types";
+import { DIAGNOSTIC_SEVERITY } from "@lichtblick/suite-base/players/UserScriptPlayer/constants";
+import { Diagnostic } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 
 const severityIcons = {
   Hint: <HelpIcon fontSize="small" />,
@@ -66,7 +64,7 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
     <List dense disablePadding>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
         const severityLabel =
-          (_.invert(DiagnosticSeverity) as Record<string, keyof typeof DiagnosticSeverity>)[
+          (_.invert(DIAGNOSTIC_SEVERITY) as Record<string, keyof typeof DIAGNOSTIC_SEVERITY>)[
             severity
           ] ?? "Error";
 

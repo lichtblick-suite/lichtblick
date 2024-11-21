@@ -15,11 +15,11 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsContext";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AppURLState, updateAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
 const selectCanSeek = (ctx: MessagePipelineContext) =>
-  ctx.playerState.capabilities.includes(PlayerCapabilities.playbackControl);
+  ctx.playerState.capabilities.includes(PLAYER_CAPABILITIES.playbackControl);
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 const selectUrlState = (ctx: MessagePipelineContext) => ctx.playerState.urlState;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;

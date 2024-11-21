@@ -38,6 +38,7 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
+import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
@@ -52,8 +53,6 @@ import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 import { IncompatibleLayoutVersionAlert } from "./IncompatibleLayoutVersionAlert";
 
 const log = Logger.getLogger(__filename);
-
-export const MAX_SUPPORTED_LAYOUT_VERSION = 1;
 
 /**
  * Concrete implementation of CurrentLayoutContext.Provider which handles

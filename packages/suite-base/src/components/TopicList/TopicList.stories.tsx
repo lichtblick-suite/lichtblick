@@ -13,7 +13,8 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { ros2humble } from "@lichtblick/rosmsg-msgs-common";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { PlayerCapabilities, TopicStats } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
+import { TopicStats } from "@lichtblick/suite-base/players/types";
 
 import { TopicList } from "./TopicList";
 
@@ -44,7 +45,7 @@ const topicStats = new Map<string, TopicStats>([
 export default {
   title: "components/TopicList",
   args: {
-    capabilities: [PlayerCapabilities.playbackControl],
+    capabilities: [PLAYER_CAPABILITIES.playbackControl],
     topics,
     datatypes: new Map(Object.entries(ros2humble)),
     topicStats,

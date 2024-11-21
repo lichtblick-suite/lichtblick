@@ -9,7 +9,7 @@ import { expect } from "@storybook/jest";
 import { StoryContext, StoryFn, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/testing-library";
 
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import delay from "@lichtblick/suite-base/util/delay";
 
@@ -38,7 +38,7 @@ const getFixture = ({ allowCallService }: { allowCallService: boolean }): Fixtur
       }),
     ),
     frame: {},
-    capabilities: allowCallService ? [PlayerCapabilities.callServices] : [],
+    capabilities: allowCallService ? [PLAYER_CAPABILITIES.callServices] : [],
     callService,
   };
 };

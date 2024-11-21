@@ -13,10 +13,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import {
-  DiagnosticSeverity,
-  ScriptData,
-} from "@lichtblick/suite-base/players/UserScriptPlayer/types";
+import { DIAGNOSTIC_SEVERITY } from "@lichtblick/suite-base/players/UserScriptPlayer/constants";
+import { ScriptData } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 
 export const hasTransformerErrors = (scriptData: ScriptData): boolean =>
-  scriptData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);
+  scriptData.diagnostics.some(({ severity }) => severity === DIAGNOSTIC_SEVERITY.Error);

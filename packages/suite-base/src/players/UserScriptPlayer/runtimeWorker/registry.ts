@@ -18,12 +18,14 @@ import path from "path";
 
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import {
+  DIAGNOSTIC_SEVERITY,
+  SOURCES,
+  ERROR_CODES,
+} from "@lichtblick/suite-base/players/UserScriptPlayer/constants";
+import {
   Diagnostic,
-  DiagnosticSeverity,
-  ErrorCodes,
   ProcessMessageOutput,
   RegistrationOutput,
-  Sources,
   UserScriptLog,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
@@ -165,10 +167,10 @@ export const processMessage = ({
   } catch (err) {
     const error: string = err.toString();
     const diagnostic: Diagnostic = {
-      source: Sources.Runtime,
-      severity: DiagnosticSeverity.Error,
+      source: SOURCES.Runtime,
+      severity: DIAGNOSTIC_SEVERITY.Error,
       message: error.length > 0 ? error : "Unknown error encountered running this node.",
-      code: ErrorCodes.RUNTIME,
+      code: ERROR_CODES.RUNTIME,
     };
 
     return {

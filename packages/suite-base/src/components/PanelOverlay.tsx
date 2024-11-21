@@ -21,7 +21,7 @@ import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { PANEL_ROOT_CLASS_NAME } from "@lichtblick/suite-base/components/PanelRoot";
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 
 const useStyles = makeStyles<void, "buttonGroup">()((theme, _params, classes) => {
   const transparentBackground = tc(theme.palette.background.default).setAlpha(0).toRgbString();

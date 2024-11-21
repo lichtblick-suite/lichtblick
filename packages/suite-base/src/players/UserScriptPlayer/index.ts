@@ -37,13 +37,10 @@ import { generateTypesLib } from "@lichtblick/suite-base/players/UserScriptPlaye
 import { TransformArgs } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/types";
 import {
   Diagnostic,
-  DiagnosticSeverity,
-  ErrorCodes,
   ScriptData,
   ScriptRegistration,
   ProcessMessageOutput,
   RegistrationOutput,
-  Sources,
   UserScriptLog,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { hasTransformerErrors } from "@lichtblick/suite-base/players/UserScriptPlayer/utils";
@@ -65,6 +62,7 @@ import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 import Rpc from "@lichtblick/suite-base/util/Rpc";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 
+import { DIAGNOSTIC_SEVERITY, SOURCES, ERROR_CODES } from "./constants";
 import { remapVirtualSubscriptions, getPreloadTypes } from "./subscriptions";
 
 const log = Log.getLogger(__filename);
@@ -507,10 +505,10 @@ export default class UserScriptPlayer implements Player {
             this.#setUserScriptDiagnostics(scriptId, [
               ...userScriptDiagnostics,
               {
-                source: Sources.Runtime,
-                severity: DiagnosticSeverity.Error,
+                source: SOURCES.Runtime,
+                severity: DIAGNOSTIC_SEVERITY.Error,
                 message: error,
-                code: ErrorCodes.RUNTIME,
+                code: ERROR_CODES.RUNTIME,
               },
             ]);
             return;
@@ -531,10 +529,10 @@ export default class UserScriptPlayer implements Player {
         const allDiagnostics = result.userScriptDiagnostics;
         if (result.error) {
           allDiagnostics.push({
-            source: Sources.Runtime,
-            severity: DiagnosticSeverity.Error,
+            source: SOURCES.Runtime,
+            severity: DIAGNOSTIC_SEVERITY.Error,
             message: result.error,
-            code: ErrorCodes.RUNTIME,
+            code: ERROR_CODES.RUNTIME,
           });
         }
 
@@ -700,10 +698,10 @@ export default class UserScriptPlayer implements Player {
         this.#setUserScriptDiagnostics(scriptId, [
           ...scriptData.diagnostics,
           {
-            severity: DiagnosticSeverity.Error,
+            severity: DIAGNOSTIC_SEVERITY.Error,
             message: `Output topic cannot be an empty string.`,
-            source: Sources.OutputTopicChecker,
-            code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
+            source: SOURCES.OutputTopicChecker,
+            code: ERROR_CODES.OutputTopicChecker.NOT_UNIQUE,
           },
         ]);
         continue;
@@ -714,10 +712,10 @@ export default class UserScriptPlayer implements Player {
         this.#setUserScriptDiagnostics(scriptId, [
           ...scriptData.diagnostics,
           {
-            severity: DiagnosticSeverity.Error,
+            severity: DIAGNOSTIC_SEVERITY.Error,
             message: `Output "${scriptData.outputTopic}" must be unique`,
-            source: Sources.OutputTopicChecker,
-            code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
+            source: SOURCES.OutputTopicChecker,
+            code: ERROR_CODES.OutputTopicChecker.NOT_UNIQUE,
           },
         ]);
         continue;
@@ -731,10 +729,10 @@ export default class UserScriptPlayer implements Player {
         this.#setUserScriptDiagnostics(scriptId, [
           ...scriptData.diagnostics,
           {
-            severity: DiagnosticSeverity.Error,
+            severity: DIAGNOSTIC_SEVERITY.Error,
             message: `Output topic "${scriptData.outputTopic}" is already present in the data source`,
-            source: Sources.OutputTopicChecker,
-            code: ErrorCodes.OutputTopicChecker.EXISTING_TOPIC,
+            source: SOURCES.OutputTopicChecker,
+            code: ERROR_CODES.OutputTopicChecker.EXISTING_TOPIC,
           },
         ]);
         continue;

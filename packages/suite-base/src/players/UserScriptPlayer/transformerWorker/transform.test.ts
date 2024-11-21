@@ -16,6 +16,11 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
+import {
+  DIAGNOSTIC_SEVERITY,
+  SOURCES,
+  ERROR_CODES,
+} from "@lichtblick/suite-base/players/UserScriptPlayer/constants";
 import exampleDatatypes from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/fixtures/example-datatypes";
 import generateRosLib from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateRosLib";
 import {
@@ -31,12 +36,7 @@ import {
   compose,
   getInputTopics,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/transform";
-import {
-  DiagnosticSeverity,
-  ErrorCodes,
-  Sources,
-  ScriptData,
-} from "@lichtblick/suite-base/players/UserScriptPlayer/types";
+import { ScriptData } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
@@ -115,34 +115,34 @@ describe("pipeline", () => {
         },
         [],
       );
-      expect(nodeData.diagnostics.map(({ source }) => source)).toEqual([Sources.Typescript]);
+      expect(nodeData.diagnostics.map(({ source }) => source)).toEqual([SOURCES.Typescript]);
       expect(nodeData.inputTopics).toEqual(["foo"]);
     });
 
     it.each([
-      ["const inputs = '/some_topic'", ErrorCodes.InputTopicsChecker.NO_INPUTS_EXPORT],
-      ["const x = 'no inputs here'", ErrorCodes.InputTopicsChecker.NO_INPUTS_EXPORT],
-      ["", ErrorCodes.InputTopicsChecker.NO_INPUTS_EXPORT],
+      ["const inputs = '/some_topic'", ERROR_CODES.InputTopicsChecker.NO_INPUTS_EXPORT],
+      ["const x = 'no inputs here'", ERROR_CODES.InputTopicsChecker.NO_INPUTS_EXPORT],
+      ["", ERROR_CODES.InputTopicsChecker.NO_INPUTS_EXPORT],
       [
         "// export const inputs = [ '/some_topic' ];",
-        ErrorCodes.InputTopicsChecker.NO_INPUTS_EXPORT,
+        ERROR_CODES.InputTopicsChecker.NO_INPUTS_EXPORT,
       ],
-      ["export const inputs = []", ErrorCodes.InputTopicsChecker.EMPTY_INPUTS_EXPORT],
-      ["export const inputs = [ 1, '/some_topic']", ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE],
-      ["export const inputs = 2", ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE],
-      ["export const inputs = 'hello'", ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE],
+      ["export const inputs = []", ERROR_CODES.InputTopicsChecker.EMPTY_INPUTS_EXPORT],
+      ["export const inputs = [ 1, '/some_topic']", ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE],
+      ["export const inputs = 2", ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE],
+      ["export const inputs = 'hello'", ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE],
       [
         "export const inputs = { 1: 'some_input', 2: 'some_other_input' }",
-        ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+        ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
       ],
       [
         "const input = '/some_topic';\nexport const inputs = [ input ]",
-        ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+        ERROR_CODES.InputTopicsChecker.BAD_INPUTS_TYPE,
       ],
     ])("returns errors for badly formatted input: %s", (sourceCode, errorCategory) => {
       const { diagnostics } = compose(compile, getInputTopics)({ ...baseNodeData, sourceCode }, []);
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
+      expect(diagnostics[0]?.severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
       expect(diagnostics[0]?.code).toEqual(errorCategory);
     });
   });
@@ -157,12 +157,12 @@ describe("pipeline", () => {
     it.each([
       "const output = ['/my_topic']",
       "const output = 42",
-      String(ErrorCodes.OutputTopicChecker.NO_OUTPUTS),
+      String(ERROR_CODES.OutputTopicChecker.NO_OUTPUTS),
     ])("returns errors for badly formatted output topics", (sourceCode) => {
       const { diagnostics } = getOutputTopic({ ...baseNodeData, sourceCode });
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0]?.code).toEqual(ErrorCodes.OutputTopicChecker.NO_OUTPUTS);
+      expect(diagnostics[0]?.severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
+      expect(diagnostics[0]?.code).toEqual(ERROR_CODES.OutputTopicChecker.NO_OUTPUTS);
     });
   });
   describe("validateInputTopics", () => {
@@ -175,8 +175,8 @@ describe("pipeline", () => {
         topics.map((name) => ({ name, schemaName: "" })),
       );
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0]?.code).toEqual(ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL);
+      expect(diagnostics[0]?.severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
+      expect(diagnostics[0]?.code).toEqual(ERROR_CODES.InputTopicsChecker.NO_TOPIC_AVAIL);
     });
   });
 
@@ -240,8 +240,8 @@ describe("pipeline", () => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
         expect(diagnostics.length).toEqual(1);
         const { source, severity } = diagnostics[0]!;
-        expect(source).toEqual(Sources.Typescript);
-        expect(severity).toEqual(DiagnosticSeverity.Error);
+        expect(source).toEqual(SOURCES.Typescript);
+        expect(severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
       });
     });
 
@@ -268,7 +268,7 @@ describe("pipeline", () => {
       expect(code).toEqual(errorCode);
       expect(source).toEqual("Typescript");
       expect(typeof message).toEqual("string");
-      expect(severity).toEqual(DiagnosticSeverity.Error);
+      expect(severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
     });
     it.each([
       { sourceCode: "const x = ';", errorCode: 1002 },
@@ -280,7 +280,7 @@ describe("pipeline", () => {
       expect(code).toEqual(errorCode);
       expect(source).toEqual("Typescript");
       expect(typeof message).toEqual("string");
-      expect(severity).toEqual(DiagnosticSeverity.Error);
+      expect(severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
     });
 
     describe("generated types", () => {
@@ -395,14 +395,14 @@ describe("pipeline", () => {
         },
         [],
       );
-      expect(nodeData.diagnostics.map(({ source }) => source)).toEqual([Sources.Typescript]);
+      expect(nodeData.diagnostics.map(({ source }) => source)).toEqual([SOURCES.Typescript]);
     });
 
     type TestCase = {
       sourceCode: string;
       description: string;
       datatypes?: RosDatatypes;
-      error?: (typeof ErrorCodes.DatatypeExtraction)[keyof typeof ErrorCodes.DatatypeExtraction];
+      error?: (typeof ERROR_CODES.DatatypeExtraction)[keyof typeof ERROR_CODES.DatatypeExtraction];
       errorMessage?: string;
       outputDatatype?: string;
       only?: boolean;
@@ -1335,19 +1335,19 @@ describe("pipeline", () => {
         sourceCode: `
           export const inputs = [];
           export const output = "/hello";`,
-        error: ErrorCodes.DatatypeExtraction.NO_DEFAULT_EXPORT,
+        error: ERROR_CODES.DatatypeExtraction.NO_DEFAULT_EXPORT,
       },
       {
         description: "Exporting a publisher function without a type return",
         sourceCode: `
           export default () => {};`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Exporting a publisher function with a return type 'any'",
         sourceCode: `
           export default (): any => {};`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Exporting a publisher function with a return type alias of 'any'",
@@ -1356,7 +1356,7 @@ describe("pipeline", () => {
           export default (msg: any): MyAny => {
             return 'BAD MSG';
           };`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Multiple declarations (type, const)",
@@ -1367,7 +1367,7 @@ describe("pipeline", () => {
           export default (msg: any): MyAny => {
             return 42;
           };`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Exporting a publisher function with a return type alias of 'any'",
@@ -1377,7 +1377,7 @@ describe("pipeline", () => {
           export default (msg: any): MyAny => {
             return 'BAD MSG';
           };`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Nested 'any' in the return type",
@@ -1386,7 +1386,7 @@ describe("pipeline", () => {
           export default (msg: any): NestedAny => {
             return { prop: 1 };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_NESTED_ANY,
+        error: ERROR_CODES.DatatypeExtraction.NO_NESTED_ANY,
       },
       {
         description: "Complex nested 'any' in the return type",
@@ -1395,7 +1395,7 @@ describe("pipeline", () => {
           export default (msg: any): NestedAny => {
             return { prop: [ 1 ] };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_NESTED_ANY,
+        error: ERROR_CODES.DatatypeExtraction.NO_NESTED_ANY,
       },
       {
         description: "Exporting a Record type",
@@ -1404,7 +1404,7 @@ describe("pipeline", () => {
           export default (msg: any): RecordType => {
             return { foo: "bar" };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_MAPPED_TYPES,
+        error: ERROR_CODES.DatatypeExtraction.NO_MAPPED_TYPES,
       },
       {
         description: "Exporting a mapped type",
@@ -1417,45 +1417,45 @@ describe("pipeline", () => {
           export default (msg: any): MappedType => {
             return { foo: "bar" };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_MAPPED_TYPES,
+        error: ERROR_CODES.DatatypeExtraction.NO_MAPPED_TYPES,
       },
       {
         description: "Exporting a publisher function with a return type 'void'",
         sourceCode: `
           export default (): void => {};`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Exporting a type reference as default export",
         sourceCode: `
           type orange = { [name: string]: number };
           export default orange;`,
-        error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
+        error: ERROR_CODES.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {
         description: "Export an object as default export.",
         sourceCode: `
           export default {};`,
-        error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
+        error: ERROR_CODES.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {
         description: "Export a number as default export.",
         sourceCode: `
           export default 42;`,
-        error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
+        error: ERROR_CODES.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {
         description: "Export a number reference as default export.",
         sourceCode: `
           const num = 42;
           export default num;`,
-        error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
+        error: ERROR_CODES.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {
         description: "Export a string as default export.",
         sourceCode: `
           export default 'hello foxglove';`,
-        error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
+        error: ERROR_CODES.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {
         description: "unions",
@@ -1463,7 +1463,7 @@ describe("pipeline", () => {
           export default (msg: any): { num: number | string } => {
             return { num: 42 };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_UNIONS,
+        error: ERROR_CODES.DatatypeExtraction.NO_UNIONS,
       },
       {
         description: "functions expression",
@@ -1471,7 +1471,7 @@ describe("pipeline", () => {
           export default (msg: any): { func: () => void } => {
             return { func: () => {} };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_FUNCTIONS,
+        error: ERROR_CODES.DatatypeExtraction.NO_FUNCTIONS,
       },
       {
         description: "functions expression",
@@ -1480,7 +1480,7 @@ describe("pipeline", () => {
           export default (msg: any): { func: Func } => {
             return { func: () => {} };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_FUNCTIONS,
+        error: ERROR_CODES.DatatypeExtraction.NO_FUNCTIONS,
       },
       {
         description: "number literals",
@@ -1488,7 +1488,7 @@ describe("pipeline", () => {
           export default (msg: any): { num: 42 } => {
             return { num: 42 };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_TYPE_LITERALS,
+        error: ERROR_CODES.DatatypeExtraction.NO_TYPE_LITERALS,
       },
       {
         description: "string literals",
@@ -1496,7 +1496,7 @@ describe("pipeline", () => {
           export default (msg: any): { str: 'type_1' } => {
             return { str: 'type_1' };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_TYPE_LITERALS,
+        error: ERROR_CODES.DatatypeExtraction.NO_TYPE_LITERALS,
       },
       {
         description: "Tuples",
@@ -1504,7 +1504,7 @@ describe("pipeline", () => {
           export default (msg: any): { pos: [ number, number ] } => {
             return { pos: [ 1, 2 ] };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_TUPLES,
+        error: ERROR_CODES.DatatypeExtraction.NO_TUPLES,
       },
       {
         description: "Array keyword",
@@ -1513,7 +1513,7 @@ describe("pipeline", () => {
           export default (msg: any): { pos: Array<Pos> } => {
             return { pos: [{ x: 1, y: 2 }] };
           };`,
-        error: ErrorCodes.DatatypeExtraction.PREFER_ARRAY_LITERALS,
+        error: ERROR_CODES.DatatypeExtraction.PREFER_ARRAY_LITERALS,
       },
       {
         description: "Nested intersection types",
@@ -1523,7 +1523,7 @@ describe("pipeline", () => {
           export default (msg: any): { pos: A & B } => {
             return { pos: { x: 1, y: 2, z: 3 } };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_INTERSECTION_TYPES,
+        error: ERROR_CODES.DatatypeExtraction.NO_INTERSECTION_TYPES,
       },
       {
         description: "Intersection types",
@@ -1533,7 +1533,7 @@ describe("pipeline", () => {
           export default (msg: any): A & B => {
             return { x: 1, y: 2, z: 3 };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_INTERSECTION_TYPES,
+        error: ERROR_CODES.DatatypeExtraction.NO_INTERSECTION_TYPES,
       },
       {
         description: "Imported intersection types",
@@ -1555,7 +1555,7 @@ describe("pipeline", () => {
           };
           export default publisher;`,
 
-        error: ErrorCodes.DatatypeExtraction.NO_INTERSECTION_TYPES,
+        error: ERROR_CODES.DatatypeExtraction.NO_INTERSECTION_TYPES,
       },
       {
         description: "Class types",
@@ -1564,7 +1564,7 @@ describe("pipeline", () => {
           export default (msg: any): MyClass => {
             return new MyClass();
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_CLASSES,
+        error: ERROR_CODES.DatatypeExtraction.NO_CLASSES,
       },
       {
         description: "Nested class types",
@@ -1574,7 +1574,7 @@ describe("pipeline", () => {
           export default (msg: any): { myClass: MyClass } => {
             return { myClass: new MyClass() };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_CLASSES,
+        error: ERROR_CODES.DatatypeExtraction.NO_CLASSES,
       },
       {
         description: "typeof func",
@@ -1585,7 +1585,7 @@ describe("pipeline", () => {
           export default (msg: any): MyAny => {
             return () => 1;
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_FUNCTIONS,
+        error: ERROR_CODES.DatatypeExtraction.NO_FUNCTIONS,
       },
       {
         description: "Nested typeof func",
@@ -1596,7 +1596,7 @@ describe("pipeline", () => {
           export default (msg: any): MyAny => {
             return { func: () => 1 };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_TYPEOF,
+        error: ERROR_CODES.DatatypeExtraction.NO_TYPEOF,
       },
       {
         description: "typeof string literals",
@@ -1605,7 +1605,7 @@ describe("pipeline", () => {
           export default (msg: any): { str: typeof constant_1 } => {
             return { str: 'type_1' };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_TYPEOF,
+        error: ERROR_CODES.DatatypeExtraction.NO_TYPEOF,
       },
       {
         description: "typeof number literals",
@@ -1614,7 +1614,7 @@ describe("pipeline", () => {
           export default (msg: any): { num: typeof constant_1 } => {
             return { num: 42 };
           };`,
-        error: ErrorCodes.DatatypeExtraction.NO_TYPEOF,
+        error: ERROR_CODES.DatatypeExtraction.NO_TYPEOF,
       },
       {
         description: "Bad union return type",
@@ -1626,7 +1626,7 @@ describe("pipeline", () => {
             return { num: 1 };
           };
           export default publisher;`,
-        error: ErrorCodes.DatatypeExtraction.LIMITED_UNIONS,
+        error: ERROR_CODES.DatatypeExtraction.LIMITED_UNIONS,
       },
       {
         description: "Return type member with no type",
@@ -1636,7 +1636,7 @@ describe("pipeline", () => {
             throw new Error();
           };
           `,
-        error: ErrorCodes.DatatypeExtraction.INVALID_PROPERTY,
+        error: ERROR_CODES.DatatypeExtraction.INVALID_PROPERTY,
       },
       {
         description: "Return type member with no name",
@@ -1645,7 +1645,7 @@ describe("pipeline", () => {
             throw new Error();
           };
           `,
-        error: ErrorCodes.DatatypeExtraction.INVALID_PROPERTY,
+        error: ERROR_CODES.DatatypeExtraction.INVALID_PROPERTY,
       },
       {
         description: "Indexed access type with non-literal index",
@@ -1654,7 +1654,7 @@ describe("pipeline", () => {
           export default (msg: any): Pos[keyof Pos] => {
             return { pos: { x: 1, y: 2 } };
           };`,
-        error: ErrorCodes.DatatypeExtraction.LIMITED_UNIONS,
+        error: ERROR_CODES.DatatypeExtraction.LIMITED_UNIONS,
       },
       {
         description: "Indexed access type with non-string index",
@@ -1663,7 +1663,7 @@ describe("pipeline", () => {
           export default (msg: any): Pos[3] => {
             throw new Error();
           };`,
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
       {
         description: "Generic type that's just too difficult :(",
@@ -1677,7 +1677,7 @@ describe("pipeline", () => {
           };`,
         datatypes: new Map([["Foo", { definitions: [] }]]),
         errorMessage: "Unsupported type for member 'foo'.",
-        error: ErrorCodes.DatatypeExtraction.BAD_TYPE_RETURN,
+        error: ERROR_CODES.DatatypeExtraction.BAD_TYPE_RETURN,
       },
     ];
 

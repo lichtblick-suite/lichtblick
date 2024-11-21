@@ -16,23 +16,21 @@
 
 import ts from "typescript/lib/typescript";
 
-import {
-  DiagnosticSeverity,
-  Diagnostic,
-} from "@lichtblick/suite-base/players/UserScriptPlayer/types";
+import { DIAGNOSTIC_SEVERITY } from "@lichtblick/suite-base/players/UserScriptPlayer/constants";
+import { Diagnostic } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 
 const mapCategoryToDiagnosticSeverity = (
   category: ts.DiagnosticCategory,
-): (typeof DiagnosticSeverity)[keyof typeof DiagnosticSeverity] => {
+): (typeof DIAGNOSTIC_SEVERITY)[keyof typeof DIAGNOSTIC_SEVERITY] => {
   switch (category) {
     case ts.DiagnosticCategory.Error:
-      return DiagnosticSeverity.Error;
+      return DIAGNOSTIC_SEVERITY.Error;
     case ts.DiagnosticCategory.Warning:
-      return DiagnosticSeverity.Warning;
+      return DIAGNOSTIC_SEVERITY.Warning;
     case ts.DiagnosticCategory.Message:
-      return DiagnosticSeverity.Info;
+      return DIAGNOSTIC_SEVERITY.Info;
     case ts.DiagnosticCategory.Suggestion:
-      return DiagnosticSeverity.Hint;
+      return DIAGNOSTIC_SEVERITY.Hint;
     default:
       throw new Error("Diagnostic category not recognized");
   }

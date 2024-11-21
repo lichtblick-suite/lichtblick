@@ -30,10 +30,10 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline/pauseFrameForPromise";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   MessageEvent,
-  PlayerCapabilities,
   PlayerPresence,
   PlayerProblem,
   PlayerState,
@@ -178,7 +178,7 @@ function getPublicState(
     playUntil: noop,
     pausePlayback: props.pausePlayback,
     setPlaybackSpeed:
-      props.capabilities?.includes(PlayerCapabilities.setSpeed) === true ? noop : undefined,
+      props.capabilities?.includes(PLAYER_CAPABILITIES.setSpeed) === true ? noop : undefined,
     seekPlayback: props.seekPlayback,
     getMetadata: () => {
       const mockMetadata: ReadonlyArray<Readonly<Metadata>> = [

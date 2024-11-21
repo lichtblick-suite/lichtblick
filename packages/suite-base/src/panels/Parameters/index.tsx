@@ -43,7 +43,7 @@ import {
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 
 // The minimum amount of time to wait between showing the parameter update animation again
 const ANIMATION_RESET_DELAY_MS = 3000;
@@ -191,8 +191,8 @@ function Parameters(): ReactElement {
 
   const [changedParameters, setChangedParameters] = useState<string[]>([]);
 
-  const canGetParams = capabilities.includes(PlayerCapabilities.getParameters);
-  const canSetParams = capabilities.includes(PlayerCapabilities.setParameters);
+  const canGetParams = capabilities.includes(PLAYER_CAPABILITIES.getParameters);
+  const canSetParams = capabilities.includes(PLAYER_CAPABILITIES.setParameters);
 
   const parameterNames = useMemo(() => Array.from(parameters.keys()), [parameters]);
 

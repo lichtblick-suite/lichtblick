@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   BlockCache,
   MessageBlock,
-  PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
@@ -112,7 +112,7 @@ class PlayerBuilder {
   public static playerState(props: Partial<PlayerState> = {}): PlayerState {
     return defaults<PlayerState>(props, {
       activeData: PlayerBuilder.activeData(),
-      capabilities: BasicBuilder.sample(PlayerCapabilities, 3),
+      capabilities: BasicBuilder.sample(PLAYER_CAPABILITIES, 3),
       name: BasicBuilder.string(),
       playerId: BasicBuilder.string(),
       presence: BasicBuilder.sample(PlayerPresence),

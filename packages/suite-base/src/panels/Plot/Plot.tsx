@@ -31,9 +31,8 @@ import {
   PanelContextMenu,
   PanelContextMenuItem,
 } from "@lichtblick/suite-base/components/PanelContextMenu";
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@lichtblick/suite-base/components/PanelToolbar";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent, {
   TimeBasedChartTooltipData,

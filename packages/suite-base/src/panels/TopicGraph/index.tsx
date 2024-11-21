@@ -37,9 +37,8 @@ import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import ExpandingToolbar, { ToolGroup } from "@lichtblick/suite-base/components/ExpandingToolbar";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@lichtblick/suite-base/components/PanelToolbar";
+import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 
 import Graph, { GraphMutation } from "./Graph";
 

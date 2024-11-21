@@ -9,7 +9,8 @@ import { StoryObj } from "@storybook/react";
 import { userEvent, screen } from "@storybook/testing-library";
 
 import { MessageEvent } from "@lichtblick/suite";
-import { PlayerCapabilities, Topic } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
+import { Topic } from "@lichtblick/suite-base/players/types";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import delay from "@lichtblick/suite-base/util/delay";
 
@@ -162,7 +163,7 @@ function PublishClickToolTemplate({
   const fixture = useDelayedFixture({
     topics,
     frame: { "/tf": [tf1] },
-    capabilities: [PlayerCapabilities.advertise],
+    capabilities: [PLAYER_CAPABILITIES.advertise],
     profile: "ros1",
     activeData: {
       currentTime: { sec: 0, nsec: 0 },

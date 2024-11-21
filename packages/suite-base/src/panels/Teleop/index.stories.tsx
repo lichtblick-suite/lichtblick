@@ -8,7 +8,7 @@
 import { action } from "@storybook/addon-actions";
 import { StoryFn, StoryContext, StoryObj } from "@storybook/react";
 
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 
 import TeleopPanel from "./index";
@@ -20,7 +20,7 @@ export default {
     (StoryComponent: StoryFn, context: StoryContext): JSX.Element => {
       return (
         <PanelSetup
-          fixture={{ capabilities: [PlayerCapabilities.advertise], publish: action("publish") }}
+          fixture={{ capabilities: [PLAYER_CAPABILITIES.advertise], publish: action("publish") }}
           includeSettings={context.parameters.includeSettings}
         >
           <StoryComponent />

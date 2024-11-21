@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Immutable } from "@lichtblick/suite";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
 type Props = Immutable<{
@@ -39,7 +39,7 @@ export default function usePublisher({
 }: Props): (msg: Record<string, unknown>) => void {
   const [id] = useState(() => uuidv4());
   const canPublish = useMessagePipeline((context) =>
-    context.playerState.capabilities.includes(PlayerCapabilities.advertise),
+    context.playerState.capabilities.includes(PLAYER_CAPABILITIES.advertise),
   );
   const publish = useMessagePipeline((context) => context.publish);
   const setPublishers = useMessagePipeline((context) => context.setPublishers);

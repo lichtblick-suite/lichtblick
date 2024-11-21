@@ -27,11 +27,11 @@ import { MessageReader as ROS2MessageReader } from "@lichtblick/rosmsg2-serializ
 import { Time, fromMillis, toSec } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   MessageEvent,
   Player,
-  PlayerCapabilities,
   PlayerState,
   PublishPayload,
   SubscribePayload,
@@ -46,7 +46,7 @@ import { bagConnectionsToDatatypes } from "@lichtblick/suite-base/util/bagConnec
 
 const log = Log.getLogger(__dirname);
 
-const CAPABILITIES = [PlayerCapabilities.advertise, PlayerCapabilities.callServices];
+const CAPABILITIES = [PLAYER_CAPABILITIES.advertise, PLAYER_CAPABILITIES.callServices];
 
 type RosNodeDetails = Record<
   "subscriptions" | "publications" | "services",

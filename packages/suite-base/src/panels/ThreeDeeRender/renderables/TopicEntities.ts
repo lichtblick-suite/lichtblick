@@ -18,7 +18,7 @@ import { RenderableModels } from "./primitives/RenderableModels";
 import { RenderableSpheres } from "./primitives/RenderableSpheres";
 import { RenderableTexts } from "./primitives/RenderableTexts";
 import { RenderableTriangles } from "./primitives/RenderableTriangles";
-import { ALL_PRIMITIVE_TYPES, PrimitiveType } from "./primitives/types";
+import { ALL_PRIMITIVE_TYPES, PrimitiveType } from "./primitives/constants";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";

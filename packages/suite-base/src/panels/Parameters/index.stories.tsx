@@ -9,7 +9,7 @@ import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 import { ParameterValue } from "@lichtblick/suite";
-import { PlayerCapabilities } from "@lichtblick/suite-base/players/types";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 
 import Parameters from "./index";
@@ -39,10 +39,10 @@ const getFixture = ({
 }) => {
   const capabilities: string[] = [];
   if (getParameters) {
-    capabilities.push(PlayerCapabilities.getParameters);
+    capabilities.push(PLAYER_CAPABILITIES.getParameters);
   }
   if (setParameters) {
-    capabilities.push(PlayerCapabilities.setParameters);
+    capabilities.push(PLAYER_CAPABILITIES.setParameters);
   }
 
   return {

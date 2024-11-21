@@ -45,9 +45,9 @@ import {
   useSetHoverValue,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
-  PlayerCapabilities,
   PlayerPresence,
   SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
@@ -449,7 +449,7 @@ function PanelExtensionAdapter(
         setSubscriptions(panelId, subscribePayloads);
       },
 
-      advertise: capabilities.includes(PlayerCapabilities.advertise)
+      advertise: capabilities.includes(PLAYER_CAPABILITIES.advertise)
         ? (topic: string, datatype: string, options) => {
             if (!isMounted()) {
               return;
@@ -468,7 +468,7 @@ function PanelExtensionAdapter(
           }
         : undefined,
 
-      unadvertise: capabilities.includes(PlayerCapabilities.advertise)
+      unadvertise: capabilities.includes(PLAYER_CAPABILITIES.advertise)
         ? (topic: string) => {
             if (!isMounted()) {
               return;
@@ -481,7 +481,7 @@ function PanelExtensionAdapter(
           }
         : undefined,
 
-      publish: capabilities.includes(PlayerCapabilities.advertise)
+      publish: capabilities.includes(PLAYER_CAPABILITIES.advertise)
         ? (topic, message) => {
             if (!isMounted()) {
               return;
@@ -493,7 +493,7 @@ function PanelExtensionAdapter(
           }
         : undefined,
 
-      callService: capabilities.includes(PlayerCapabilities.callServices)
+      callService: capabilities.includes(PLAYER_CAPABILITIES.callServices)
         ? async (service, request): Promise<unknown> => {
             if (!isMounted()) {
               throw new Error("Service call after panel was unmounted");
