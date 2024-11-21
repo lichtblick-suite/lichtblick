@@ -95,7 +95,7 @@ const useStyles = makeStyles()((theme) => ({
 /**
  * Extract existing left split percentage from a layout node or return the default.
  */
-function mosiacLeftSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
+function mosaicLeftSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
   if (typeof node !== "object") {
     return undefined;
   }
@@ -103,7 +103,7 @@ function mosiacLeftSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number 
     return node.splitPercentage;
   } else {
     return (
-      mosiacLeftSidebarSplitPercentage(node.first) ?? mosiacLeftSidebarSplitPercentage(node.second)
+      mosaicLeftSidebarSplitPercentage(node.first) ?? mosaicLeftSidebarSplitPercentage(node.second)
     );
   }
 }
@@ -111,7 +111,7 @@ function mosiacLeftSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number 
 /**
  * Extract existing right split percentage from a layout node or return the default.
  */
-function mosiacRightSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
+function mosaicRightSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
   if (typeof node !== "object") {
     return undefined;
   }
@@ -119,8 +119,8 @@ function mosiacRightSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number
     return node.splitPercentage;
   } else {
     return (
-      mosiacRightSidebarSplitPercentage(node.first) ??
-      mosiacRightSidebarSplitPercentage(node.second)
+      mosaicRightSidebarSplitPercentage(node.first) ??
+      mosaicRightSidebarSplitPercentage(node.second)
     );
   }
 }
@@ -218,7 +218,7 @@ export default function Sidebars<
           second: "rightbar",
           splitPercentage:
             rightSidebarSize ??
-            mosiacRightSidebarSplitPercentage(oldValue) ??
+            mosaicRightSidebarSplitPercentage(oldValue) ??
             defaultRightPercentage,
         };
       }
@@ -228,7 +228,7 @@ export default function Sidebars<
           first: "leftbar",
           second: node,
           splitPercentage:
-            leftSidebarSize ?? mosiacLeftSidebarSplitPercentage(oldValue) ?? defaultLeftPercentage,
+            leftSidebarSize ?? mosaicLeftSidebarSplitPercentage(oldValue) ?? defaultLeftPercentage,
         };
       }
       return node;
@@ -318,8 +318,8 @@ export default function Sidebars<
     (newValue: ReactNull | MosaicNode<LayoutNode>) => {
       if (newValue != undefined) {
         setMosaicValue(newValue);
-        setLeftSidebarSize(mosiacLeftSidebarSplitPercentage(newValue));
-        setRightSidebarSize(mosiacRightSidebarSplitPercentage(newValue));
+        setLeftSidebarSize(mosaicLeftSidebarSplitPercentage(newValue));
+        setRightSidebarSize(mosaicRightSidebarSplitPercentage(newValue));
       }
     },
     [setLeftSidebarSize, setRightSidebarSize],
