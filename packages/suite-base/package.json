@@ -151,7 +151,7 @@
     "react-hover-observer": "2.1.1",
     "react-i18next": "14.0.1",
     "react-json-tree": "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch",
-    "react-markdown": "8.0.7",
+    "react-markdown": "9.0.1",
     "react-monaco-editor": "0.56.2",
     "react-mosaic-component": "6.1.0",
     "react-refresh-typescript": "2.0.9",

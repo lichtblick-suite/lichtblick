@@ -15,8 +15,7 @@ import {
   buttonClasses,
 } from "@mui/material";
 import * as _ from "lodash-es";
-import { forwardRef } from "react";
-import { ReactElement } from "react-markdown/lib/react-markdown";
+import { forwardRef, ReactElement } from "react";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
