@@ -608,11 +608,11 @@ describe("PanelExtensionAdapter", () => {
     });
 
     expect(renderStates).toEqual([
-      { variables: {} },
-      { variables: { foo: "bar" } },
-      { variables: { foo: true } },
-      { variables: { foo: { nested: [1, 2, 3] } } },
-      { variables: {} },
+      { variables: new Map() },
+      { variables: new Map([["foo", "bar"]]) },
+      { variables: new Map([["foo", true]]) },
+      { variables: new Map([["foo", { nested: [1, 2, 3] }]]) },
+      { variables: new Map() },
     ]);
     mockRAF.mockRestore();
   });

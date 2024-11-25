@@ -178,8 +178,11 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     }
 
     if (watchedFields.has("variables")) {
-      updateRenderStateField("variables", globalVariables, prevVariables, shouldRender);
-      prevVariables = globalVariables;
+      if (globalVariables !== prevVariables) {
+        shouldRender.value = true;
+        prevVariables = globalVariables;
+        renderState.variables = new Map(Object.entries(globalVariables));
+      }
     }
 
     if (watchedFields.has("topics")) {
