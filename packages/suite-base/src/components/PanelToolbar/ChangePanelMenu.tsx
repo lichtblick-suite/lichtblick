@@ -33,7 +33,7 @@ export default function ChangePanelMenu({
   tabId?: string;
   anchorEl?: HTMLElement;
   onClose: () => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes } = useStyles();
   const panelContext = useContext(PanelContext);
   const { mosaicActions } = useContext(MosaicContext);

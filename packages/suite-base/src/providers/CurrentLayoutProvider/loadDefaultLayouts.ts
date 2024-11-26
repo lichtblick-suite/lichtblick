@@ -52,7 +52,7 @@ export const loadDefaultLayouts = async (
     savedResults.filter(isRejected).forEach(({ reason }) => {
       log.error(`Failed to save layout: ${reason}`);
     });
-  } catch (err) {
+  } catch (err: unknown) {
     log.error(`Loading default layouts failed: ${err}`);
   }
 };

@@ -15,7 +15,7 @@ export default {
   title: "panels/Gauge",
   component: GaugePanel,
   decorators: [
-    (StoryComponent: StoryFn, { parameters }: StoryContext): JSX.Element => {
+    (StoryComponent: StoryFn, { parameters }: StoryContext): React.JSX.Element => {
       return (
         <PanelSetup fixture={parameters.panelSetup?.fixture}>
           <StoryComponent />

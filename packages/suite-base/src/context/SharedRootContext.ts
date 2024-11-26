@@ -25,10 +25,10 @@ interface ISharedRootContext {
   enableLaunchPreferenceScreen?: boolean;
   enableGlobalCss?: boolean;
   appBarLeftInset?: number;
-  extraProviders?: readonly JSX.Element[];
+  extraProviders?: readonly React.JSX.Element[];
   customWindowControlProps?: CustomWindowControlsProps;
   onAppBarDoubleClick?: () => void;
-  AppBarComponent?: (props: AppBarProps) => JSX.Element;
+  AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
 }
 
 const SharedRootContext = createContext<ISharedRootContext>({

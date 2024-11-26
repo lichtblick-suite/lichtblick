@@ -35,7 +35,7 @@ function makeGridData({ width, height }: { width: number; height: number }) {
   return grid;
 }
 
-function BaseStory({ includeSettings = false }: { includeSettings?: boolean }): JSX.Element {
+function BaseStory({ includeSettings = false }: { includeSettings?: boolean }): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/grid", schemaName: "nav_msgs/OccupancyGrid" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },

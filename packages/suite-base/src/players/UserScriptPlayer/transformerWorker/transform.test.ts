@@ -313,7 +313,7 @@ describe("pipeline", () => {
             }),
           ),
         });
-        const { diagnostics } = compile({ ...baseNodeData, sourceCode, rosLib: `${rosLib}` });
+        const { diagnostics } = compile({ ...baseNodeData, sourceCode, rosLib });
         expect(diagnostics).toEqual([]);
       });
     });

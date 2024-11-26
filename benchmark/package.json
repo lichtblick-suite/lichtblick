@@ -19,7 +19,7 @@
     "mathjs": "11.11.1",
     "react": "18.3.1",
     "react-dom": "18.2.0",
-    "webpack": "5.95.0",
+    "webpack": "5.96.1",
     "webpack-dev-server": "5.1.0"
   }
 }

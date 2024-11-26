@@ -108,7 +108,7 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
         log.info("Checking for updates");
         await autoUpdater.checkForUpdatesAndNotify();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       if (isNetworkError(err)) {
         log.warn(`Network error checking for updates: ${err}`);
       } else {

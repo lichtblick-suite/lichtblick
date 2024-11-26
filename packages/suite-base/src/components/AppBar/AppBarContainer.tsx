@@ -32,7 +32,7 @@ const useStyles = makeStyles()((theme) => {
   };
 });
 
-export function AppBarContainer(props: Props): JSX.Element {
+export function AppBarContainer(props: Props): React.JSX.Element {
   const { children, leftInset, onDoubleClick } = props;
   const { classes } = useStyles();
 

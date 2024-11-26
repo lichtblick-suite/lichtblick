@@ -63,7 +63,7 @@ const MockExtensionMarketplace: ExtensionMarketplace = {
 Mock markdown rendering for URL [${url}](${url}).`,
 };
 
-function Wrapper(StoryComponent: StoryFn): JSX.Element {
+function Wrapper(StoryComponent: StoryFn): React.JSX.Element {
   return (
     <WorkspaceContextProvider>
       <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>

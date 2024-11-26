@@ -53,7 +53,7 @@ export default {
   title: "components/ProblemsList",
   component: ProblemsList,
   decorators: [
-    (Story: StoryFn): JSX.Element => {
+    (Story: StoryFn): React.JSX.Element => {
       const theme = useTheme();
       return (
         <WorkspaceContextProvider>

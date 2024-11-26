@@ -12,7 +12,10 @@ export type EmptyWrapperProps = {
   enableNewTopNav: boolean;
 };
 
-export const EmptyWrapper = ({ children, enableNewTopNav }: EmptyWrapperProps): JSX.Element => {
+export const EmptyWrapper = ({
+  children,
+  enableNewTopNav,
+}: EmptyWrapperProps): React.JSX.Element => {
   const { t } = useTranslation("panelSettings");
 
   if (enableNewTopNav) {

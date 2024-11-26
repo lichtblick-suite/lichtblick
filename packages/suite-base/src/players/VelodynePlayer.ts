@@ -130,7 +130,7 @@ export default class VelodynePlayer implements Player {
     } else {
       try {
         await this.#socket.close();
-      } catch (err) {
+      } catch (err: unknown) {
         log.error(`Failed to close socket: ${err}`);
       }
     }

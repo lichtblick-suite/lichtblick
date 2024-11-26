@@ -38,7 +38,8 @@ export function getMatchingRule(
       } else {
         assertNever(value, "Unsupported rule value");
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error(error);
       continue;
     }
 

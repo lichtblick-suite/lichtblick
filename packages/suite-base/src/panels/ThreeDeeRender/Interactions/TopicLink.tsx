@@ -27,7 +27,11 @@ type Props = {
   onShowTopicSettings?: (topic: string) => void;
 };
 
-export default function TopicLink({ addPanel, onShowTopicSettings, topic }: Props): JSX.Element {
+export default function TopicLink({
+  addPanel,
+  onShowTopicSettings,
+  topic,
+}: Props): React.JSX.Element {
   const openRawMessages = React.useCallback(() => {
     addPanel({
       position: "sibling",

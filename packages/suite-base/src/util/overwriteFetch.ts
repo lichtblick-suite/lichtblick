@@ -27,8 +27,8 @@ export default function overwriteFetch(): void {
     const replacementError = new TypeError(`Failed to fetch: ${input}`);
     // Since both node types and dom types are in scope here, the input types for `fetch` conflict.
     return await originalFetch(input as Parameters<typeof originalFetch>[0], init).catch(
-      (error) => {
-        if (error.message === "Failed to fetch") {
+      (error: unknown) => {
+        if ((error as Error).message === "Failed to fetch") {
           throw replacementError;
         }
         throw error;

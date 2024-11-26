@@ -23,7 +23,7 @@ type Props = {
   onClose: () => void;
 };
 
-export function IncompatibleLayoutVersionAlert(props: Props): JSX.Element {
+export function IncompatibleLayoutVersionAlert(props: Props): React.JSX.Element {
   const { isDesktop, onClose } = props;
   const { t } = useTranslation("incompatibleLayoutVersion");
 

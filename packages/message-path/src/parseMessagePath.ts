@@ -52,7 +52,8 @@ const parseMessagePath = (path: string): MessagePath | undefined => {
     const feedResults = parser.feed(path).results;
     CacheMessagePath[path] = feedResults[0];
     return feedResults[0];
-  } catch (_err) {
+  } catch (err: unknown) {
+    console.error("Error parsing message path", err);
     return undefined;
   }
 };

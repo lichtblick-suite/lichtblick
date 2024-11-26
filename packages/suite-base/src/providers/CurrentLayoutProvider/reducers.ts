@@ -180,10 +180,10 @@ const splitPanel = (
   const type = getPanelTypeFromId(id);
   const newId = getPanelIdForType(type);
   let newPanelsState = { ...panelsState };
-  const { configById: savedProps } = newPanelsState;
+  const { configById } = newPanelsState;
   // If splitting inside a Tab, update that Tab's layout instead of the root layout
   if (tabId != undefined) {
-    const prevConfig = savedProps[tabId] as TabPanelConfig;
+    const prevConfig = configById[tabId] as TabPanelConfig;
     const activeTabLayout = prevConfig.tabs[prevConfig.activeTabIdx]?.layout;
     if (activeTabLayout != undefined) {
       const newTabLayout = updateTree(activeTabLayout, [
@@ -210,7 +210,7 @@ const splitPanel = (
   // Save the new panel's config and clone any panels in tabs if necessary
   newPanelsState = savePanelConfigs(
     newPanelsState,
-    getSaveConfigsPayloadForAddedPanel({ id: newId, config, savedProps }),
+    getSaveConfigsPayloadForAddedPanel({ id: newId, config, savedProps: configById }),
   );
   return newPanelsState;
 };
@@ -258,10 +258,10 @@ const createTabPanelWithSingleTab = (
   { idToReplace, layout, idsToRemove }: CreateTabPanelPayload,
 ): LayoutData => {
   const newId = getPanelIdForType(TAB_PANEL_TYPE);
-  const { configById: savedProps } = panelsState;
+  const { configById } = panelsState;
   // Build the layout for the new tab
-  const layoutWithInlinedTabs = inlineTabPanelLayouts(layout, savedProps, idsToRemove);
-  const panelIdsNotInNewTab = getAllPanelIds(layout, savedProps).filter(
+  const layoutWithInlinedTabs = inlineTabPanelLayouts(layout, configById, idsToRemove);
+  const panelIdsNotInNewTab = getAllPanelIds(layout, configById).filter(
     (leaf: string) => !idsToRemove.includes(leaf),
   );
   const tabLayout = replaceAndRemovePanels(
@@ -283,7 +283,7 @@ const createTabPanelWithSingleTab = (
     idToReplace,
     newId,
     idsToRemove,
-    savedProps,
+    configById,
   );
   newPanelsState = savePanelConfigs(newPanelsState, {
     configs: [tabPanelConfig, ...nestedPanelConfigs],
@@ -295,7 +295,7 @@ const createTabPanelWithMultipleTabs = (
   panelsState: LayoutData,
   { idToReplace, layout, idsToRemove }: CreateTabPanelPayload,
 ): LayoutData => {
-  const { configById: savedProps } = panelsState;
+  const { configById } = panelsState;
   const newId = getPanelIdForType(TAB_PANEL_TYPE);
   const newLayout = replaceAndRemovePanels({ originalId: idToReplace, newId, idsToRemove }, layout);
   let newPanelsState = changePanelLayout(
@@ -312,7 +312,7 @@ const createTabPanelWithMultipleTabs = (
     idToReplace,
     newId,
     idsToRemove,
-    savedProps,
+    configById,
   );
   newPanelsState = savePanelConfigs(newPanelsState, {
     configs: [tabPanelConfig, ...nestedPanelConfigs],

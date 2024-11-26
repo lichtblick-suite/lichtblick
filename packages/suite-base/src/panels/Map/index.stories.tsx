@@ -102,7 +102,7 @@ function makeGeoJsonMessage({
   };
 }
 
-const Wrapper = (StoryComponent: StoryFn, { parameters }: StoryContext): JSX.Element => {
+const Wrapper = (StoryComponent: StoryFn, { parameters }: StoryContext): React.JSX.Element => {
   return (
     <PanelSetup
       fixture={parameters.panelSetup?.fixture}

@@ -14,7 +14,8 @@ function supportsClassStaticInitialization() {
     // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
     new Function("class X { static { } }");
     return true;
-  } catch (err) {
+  } catch (err: unknown) {
+    console.error(err);
     return false;
   }
 }

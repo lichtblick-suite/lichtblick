@@ -102,7 +102,7 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const id = getPackageId(packageJson);
 
       extensions.push({ id, packageJson, directory: extensionRootPath });
-    } catch (err) {
+    } catch (err: unknown) {
       log.error(err);
     }
   }
@@ -145,7 +145,7 @@ export async function installExtension(
   let pkgJson: ExtensionPackageJson;
   try {
     pkgJson = JSON.parse(await pkgJsonZipObj.async("string"));
-  } catch (err) {
+  } catch (err: unknown) {
     log.error(err);
     throw new Error(`Extension contains an invalid package.json`);
   }

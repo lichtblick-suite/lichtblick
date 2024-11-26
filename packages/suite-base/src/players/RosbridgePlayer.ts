@@ -328,7 +328,7 @@ export default class RosbridgePlayer implements Player {
       this.setSubscriptions(this.#requestedSubscriptions);
 
       // Refresh the full graph topology
-      this.#refreshSystemState().catch((error) => {
+      this.#refreshSystemState().catch((error: unknown) => {
         log.error(error);
       });
     } catch (error) {

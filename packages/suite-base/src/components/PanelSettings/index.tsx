@@ -62,7 +62,7 @@ type PanelSettingsProps = React.PropsWithChildren<{
 export default function PanelSettings({
   disableToolbar = false,
   selectedPanelIdsForTests,
-}: PanelSettingsProps): JSX.Element {
+}: PanelSettingsProps): React.JSX.Element {
   const { t } = useTranslation("panelSettings");
   const singlePanelId = useCurrentLayoutSelector(singlePanelIdSelector);
   const {

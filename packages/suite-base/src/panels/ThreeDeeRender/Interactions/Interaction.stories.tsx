@@ -232,7 +232,7 @@ export default {
   },
   excludeStories: ["POINT_CLOUD_MESSAGE", "POINT_CLOUD_WITH_ADDITIONAL_FIELDS"],
   decorators: [
-    (Story: StoryFn): JSX.Element => {
+    (Story: StoryFn): React.JSX.Element => {
       const theme = useTheme();
 
       return (

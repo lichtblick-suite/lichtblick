@@ -34,7 +34,7 @@ function SensorMsgs_LaserScan({
   rangeMin?: number;
   rangeMax?: number;
   settings: Record<string, unknown>;
-}): JSX.Element {
+}): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/scan", schemaName: "sensor_msgs/LaserScan" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },

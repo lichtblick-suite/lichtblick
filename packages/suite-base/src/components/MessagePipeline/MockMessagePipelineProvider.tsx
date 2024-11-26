@@ -84,7 +84,6 @@ export type MockMessagePipelineProps = {
   playerId?: string;
   progress?: Progress;
   urlState?: PlayerURLState;
-  /* eslint-enable react/no-unused-prop-types */
 };
 type MockMessagePipelineState = MessagePipelineInternalState & {
   mockProps: MockMessagePipelineProps;

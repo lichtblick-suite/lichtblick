@@ -106,9 +106,9 @@ export function getDisplayName(hardwareId: string, name: string): string {
   return name.length > 0
     ? hardwareId.length > 0
       ? `${hardwareId}: ${name}`
-      : `${name}`
+      : name
     : hardwareId.length > 0
-      ? `${hardwareId}`
+      ? hardwareId
       : `(empty)`;
 }
 

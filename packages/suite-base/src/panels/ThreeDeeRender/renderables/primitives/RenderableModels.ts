@@ -174,7 +174,8 @@ export class RenderableModels extends RenderablePrimitive {
                 URL.revokeObjectURL(url);
               },
             );
-          } catch (err) {
+          } catch (e: unknown) {
+            const err = e as Error;
             this.renderer.settings.errors.add(
               this.userData.settingsPath,
               MODEL_FETCH_FAILED,
@@ -190,7 +191,8 @@ export class RenderableModels extends RenderablePrimitive {
               (model) => model.url,
               (_url) => {},
             );
-          } catch (err) {
+          } catch (e: unknown) {
+            const err = e as Error;
             this.renderer.settings.errors.add(
               this.userData.settingsPath,
               MODEL_FETCH_FAILED,
@@ -217,7 +219,9 @@ export class RenderableModels extends RenderablePrimitive {
         // Remove any mesh fetch error message since loading was successful
         this.renderer.settings.errors.remove(this.userData.settingsPath, MODEL_FETCH_FAILED);
       })
-      .catch(console.error)
+      .catch((e: unknown) => {
+        console.error(e);
+      })
       .finally(() => {
         // update for new models
         this.#updateOutlineVisibility();

@@ -27,7 +27,7 @@ type AddPanelProps = {
   open: boolean;
 };
 
-export function AddPanelMenu(props: AddPanelProps): JSX.Element {
+export function AddPanelMenu(props: AddPanelProps): React.JSX.Element {
   const { classes } = useStyles();
   const { anchorEl, anchorPosition, anchorReference, disablePortal, handleClose, open } = props;
   const addPanel = useAddPanel();

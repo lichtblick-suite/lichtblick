@@ -176,8 +176,8 @@ export default class CachedFilelike implements Filelike {
           this.#readRequests.push({ range, resolve, reject, requestTime: Date.now() });
           this.#updateState();
         })
-        .catch((err) => {
-          reject(err);
+        .catch((err: unknown) => {
+          reject(err as Error);
         });
     });
   }
@@ -299,7 +299,7 @@ export default class CachedFilelike implements Filelike {
       }
 
       // Copy the data into the VirtualLRUBuffer.
-      this.#virtualBuffer.copyFrom(chunk, currentConnection.remainingRange.start);
+      this.#virtualBuffer.copyFrom(Buffer.from(chunk), currentConnection.remainingRange.start);
       bytesRead += chunk.byteLength;
 
       // Every now and then, do some logging of the current download speed.

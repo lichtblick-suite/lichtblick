@@ -14,7 +14,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Log from "@lichtblick/log";
 import { DetailsType } from "@lichtblick/suite-base/util/sendNotification";
+
+const log = Log.getLogger(__filename);
 
 export class AppError extends Error {
   public details: DetailsType;
@@ -43,7 +46,8 @@ export class AppError extends Error {
         try {
           const stringifiedExtraInfo = JSON.stringify(extraInfo);
           this.message += `\n\n${stringifiedExtraInfo}`;
-        } catch (e) {
+        } catch (e: unknown) {
+          log.error("Failed to stringify extraInfo", e);
           this.message += `\n\n[ Either cyclic object or object with BigInt(s) ]`;
         }
       }

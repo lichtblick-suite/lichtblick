@@ -66,7 +66,7 @@ function draw(
   context.stroke();
 }
 
-export function Sparkline(props: SparklineProps): JSX.Element {
+export function Sparkline(props: SparklineProps): React.JSX.Element {
   const { classes, theme } = useStyles();
   const drawCallback = useCallback(
     (context: CanvasRenderingContext2D, width: number, height: number) => {

@@ -159,7 +159,7 @@ const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != u
 const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
 const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 
-export function AppBar(props: AppBarProps): JSX.Element {
+export function AppBar(props: AppBarProps): React.JSX.Element {
   const {
     debugDragRegion,
     isMaximized,
@@ -260,7 +260,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                       <kbd className={classes.keyEquivalent}>[</kbd>
                     </>
                   }
-                  aria-label={`${leftSidebarOpen ? t("hideLeftSidebar") : t("showLeftSidebar")}`}
+                  aria-label={leftSidebarOpen ? t("hideLeftSidebar") : t("showLeftSidebar")}
                   onClick={() => {
                     sidebarActions.left.setOpen(!leftSidebarOpen);
                   }}
@@ -275,7 +275,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                       <kbd className={classes.keyEquivalent}>]</kbd>
                     </>
                   }
-                  aria-label={`${rightSidebarOpen ? t("hideRightSidebar") : t("showRightSidebar")}`}
+                  aria-label={rightSidebarOpen ? t("hideRightSidebar") : t("showRightSidebar")}
                   onClick={() => {
                     sidebarActions.right.setOpen(!rightSidebarOpen);
                   }}

@@ -27,7 +27,7 @@ type AutoSizingCanvasProps = {
 const AutoSizingCanvas = ({
   draw,
   overrideDevicePixelRatioForTest,
-}: AutoSizingCanvasProps): JSX.Element => {
+}: AutoSizingCanvasProps): React.JSX.Element => {
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.
   // https://github.com/maslianok/react-resize-detector/issues/45

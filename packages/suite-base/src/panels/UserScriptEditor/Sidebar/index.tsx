@@ -79,7 +79,7 @@ export function Sidebar({
   setUserScripts,
   script,
   addNewScript: addNewNode,
-}: SidebarProps): JSX.Element {
+}: SidebarProps): React.JSX.Element {
   const { classes } = useStyles();
   const [activeTab, setActiveTab] = useState<TabOption>(false);
 

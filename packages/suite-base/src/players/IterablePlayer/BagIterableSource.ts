@@ -104,7 +104,7 @@ export class BagIterableSource implements IIterableSource {
     const numMessagesByConnectionIndex: number[] = new Array(this.#bag.connections.size).fill(0);
     this.#bag.chunkInfos.forEach((info) => {
       info.connections.forEach(({ conn, count }) => {
-        numMessagesByConnectionIndex[conn] += count;
+        numMessagesByConnectionIndex[conn] = (numMessagesByConnectionIndex[conn] ?? 0) + count;
       });
     });
 

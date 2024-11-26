@@ -112,7 +112,7 @@ export async function makeCompressedImageAndCalibration(args: MakeImageArgs): Pr
   const imageBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (!blob) {
-        reject();
+        reject(new Error("blob not found"));
       } else {
         resolve(blob);
       }

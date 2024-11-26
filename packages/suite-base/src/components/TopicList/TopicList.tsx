@@ -91,7 +91,7 @@ function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePath {
   }
 }
 
-export function TopicList(): JSX.Element {
+export function TopicList(): React.JSX.Element {
   const { t } = useTranslation("topicList");
   const { classes } = useStyles();
   const [undebouncedFilterText, setFilterText] = useState<string>("");
@@ -116,10 +116,12 @@ export function TopicList(): JSX.Element {
   const latestTreeItems = useLatest(treeItems);
 
   const getSelectedItemsAsDraggedMessagePaths = useCallback(() => {
-    return filterMap(Array.from(getSelectedIndexes()).sort(), (index) =>
-      latestTreeItems.current[index]
-        ? getDraggedMessagePath(latestTreeItems.current[index]!)
-        : undefined,
+    return filterMap(
+      Array.from(getSelectedIndexes()).sort(),
+      (index): DraggedMessagePath | undefined => {
+        const item = latestTreeItems.current[index];
+        return item ? getDraggedMessagePath(item) : undefined;
+      },
     );
   }, [getSelectedIndexes, latestTreeItems]);
 

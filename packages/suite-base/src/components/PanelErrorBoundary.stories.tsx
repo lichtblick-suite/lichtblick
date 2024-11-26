@@ -12,7 +12,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import PanelErrorBoundary from "./PanelErrorBoundary";
 
-function Broken(): JSX.Element | ReactNull {
+function Broken(): React.JSX.Element | ReactNull {
   throw Object.assign(new Error("Hello!"), {
     stack: `
   an error occurred

@@ -30,7 +30,7 @@ export default {
     onSelect: () => {},
   },
   decorators: [
-    (Story: StoryFn): JSX.Element => (
+    (Story: StoryFn): React.JSX.Element => (
       <Stack padding={2.5}>
         <Story />
       </Stack>
@@ -97,7 +97,7 @@ export const ManyItems: Story = {
 };
 
 export const LongPathInPopup: Story = {
-  render: (args): JSX.Element => (
+  render: (args): React.JSX.Element => (
     <div style={{ width: 200 }}>
       <Autocomplete {...args} />
     </div>

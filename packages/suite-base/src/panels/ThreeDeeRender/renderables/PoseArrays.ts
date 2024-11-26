@@ -77,8 +77,8 @@ const TIME_ZERO = { sec: 0, nsec: 0 };
 const COLOR_WHITE = { r: 1, g: 1, b: 1, a: 1 };
 
 const DEFAULT_GRADIENT_STR: Gradient = [
-  rgbaToCssString(DEFAULT_GRADIENT[0]!),
-  rgbaToCssString(DEFAULT_GRADIENT[1]!),
+  rgbaToCssString(DEFAULT_GRADIENT[0]),
+  rgbaToCssString(DEFAULT_GRADIENT[1]),
 ];
 
 const DEFAULT_SETTINGS: LayerSettingsPoseArray = {

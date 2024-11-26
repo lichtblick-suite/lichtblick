@@ -30,7 +30,7 @@ export function VerticalBarWrapper({
   children,
   scales,
   xValue,
-}: React.PropsWithChildren<VerticalBarWrapperProps>): JSX.Element {
+}: React.PropsWithChildren<VerticalBarWrapperProps>): React.JSX.Element {
   const { classes } = useStyles();
   const positionX = useMemo(() => {
     const xScale = scales?.x;

@@ -24,7 +24,7 @@ export function PanelRemounter({
   children: ReactNode;
   id: string;
   tabId: undefined | string;
-}): JSX.Element {
+}): React.JSX.Element {
   const selector = useCallback((store: PanelStateStore) => store.sequenceNumbers[id] ?? 0, [id]);
   const sequenceNumber = usePanelStateStore(selector);
 

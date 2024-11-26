@@ -24,7 +24,7 @@ export function MessagePathSelectionProvider(
   props: React.PropsWithChildren<{
     getSelectedItems: () => DraggedMessagePath[];
   }>,
-): JSX.Element {
+): React.JSX.Element {
   const value = useMemo(
     () => ({ getSelectedItems: props.getSelectedItems }),
     [props.getSelectedItems],

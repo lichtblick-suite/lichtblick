@@ -164,8 +164,8 @@ export const processMessage = ({
   try {
     const newMessage = nodeCallback(message, globalVariables);
     return { message: newMessage, error: undefined, userScriptLogs, userScriptDiagnostics };
-  } catch (err) {
-    const error: string = err.toString();
+  } catch (err: unknown) {
+    const error: string = (err as Error).toString();
     const diagnostic: Diagnostic = {
       source: SOURCES.Runtime,
       severity: DIAGNOSTIC_SEVERITY.Error,

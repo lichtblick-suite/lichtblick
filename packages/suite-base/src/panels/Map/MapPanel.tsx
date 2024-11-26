@@ -59,7 +59,7 @@ const memoizedFilterMessages = memoizeWeak((msgs: readonly MessageEvent[]) =>
   msgs.filter(isValidMapMessage),
 );
 
-function MapPanel(props: MapPanelProps): JSX.Element {
+function MapPanel(props: MapPanelProps): React.JSX.Element {
   const { context } = props;
   const [colorScheme, setColorScheme] = useState<"dark" | "light">("light");
 

@@ -48,7 +48,7 @@ type FilterBarProps = {
   onFilterChange: (filter: { minLogLevel: number; searchTerms: string[] }) => void;
 };
 
-function FilterBar(props: FilterBarProps): JSX.Element {
+function FilterBar(props: FilterBarProps): React.JSX.Element {
   return (
     <FilterTagInput
       items={[...props.searchTerms]}

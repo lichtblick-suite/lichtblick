@@ -65,7 +65,7 @@ export function TopicStatsChip({
 }: {
   topicName: string;
   selected: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes, cx } = useStyles();
 
   return (

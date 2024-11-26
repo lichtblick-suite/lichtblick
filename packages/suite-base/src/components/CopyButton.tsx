@@ -35,7 +35,7 @@ function CopyButtonComponent(
     className?: string;
     edge?: IconButtonProps["edge"];
   }>,
-): JSX.Element {
+): React.JSX.Element {
   const {
     children,
     className,
@@ -79,7 +79,7 @@ function CopyButtonComponent(
           setCopied(false);
         }, 1500);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.warn(err);
       });
   }, [getText]);

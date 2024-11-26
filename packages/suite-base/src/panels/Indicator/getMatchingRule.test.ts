@@ -54,6 +54,9 @@ describe("getMatchingRule", () => {
     ];
 
     expect(getMatchingRule(value, rules)?.label).toEqual(expectedLabel);
+
+    // It expects to log conversion errors
+    (console.error as jest.Mock).mockClear();
   });
 
   it("implements operators", () => {

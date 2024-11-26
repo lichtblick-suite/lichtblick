@@ -53,7 +53,7 @@ type Props = {
   setDraggingTabState: (arg0: { isOver: boolean; item?: DraggingTabItem }) => void;
 };
 
-export function TabbedToolbar(props: Props): JSX.Element {
+export function TabbedToolbar(props: Props): React.JSX.Element {
   const { panelId, actions, tabs, activeTabIdx, setDraggingTabState } = props;
   const { classes, theme } = useStyles();
 

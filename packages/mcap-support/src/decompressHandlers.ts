@@ -27,11 +27,19 @@ async function _loadDecompressHandlers(): Promise<McapTypes.DecompressHandlers> 
   ]);
 
   return {
-    lz4: (buffer, decompressedSize) => decompressLZ4(buffer, Number(decompressedSize)),
+    lz4: (buffer, decompressedSize): Uint8Array => {
+      const decompressed = decompressLZ4(buffer, Number(decompressedSize));
+      return new Uint8Array(decompressed);
+    },
 
-    bz2: (buffer, decompressedSize) =>
-      bzip2.decompress(buffer, Number(decompressedSize), { small: false }),
+    bz2: (buffer, decompressedSize): Uint8Array => {
+      const decompressed = bzip2.decompress(buffer, Number(decompressedSize), { small: false });
+      return new Uint8Array(decompressed);
+    },
 
-    zstd: (buffer, decompressedSize) => decompressZstd(buffer, Number(decompressedSize)),
+    zstd: (buffer, decompressedSize): Uint8Array => {
+      const decompressed = decompressZstd(buffer, Number(decompressedSize));
+      return new Uint8Array(decompressed);
+    },
   };
 }

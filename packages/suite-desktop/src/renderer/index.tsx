@@ -26,7 +26,7 @@ import Root from "./Root";
 
 const log = Logger.getLogger(__filename);
 
-function LogAfterRender(props: React.PropsWithChildren): JSX.Element {
+function LogAfterRender(props: React.PropsWithChildren): React.JSX.Element {
   useEffect(() => {
     // Integration tests look for this console log to indicate the app has rendered once
     // We use console.debug to bypass our logging library which hides some log levels in prod builds
@@ -37,7 +37,7 @@ function LogAfterRender(props: React.PropsWithChildren): JSX.Element {
 
 type MainParams = {
   dataSources?: IDataSourceFactory[];
-  extraProviders?: JSX.Element[];
+  extraProviders?: React.JSX.Element[];
   appConfiguration: IAppConfiguration;
 };
 

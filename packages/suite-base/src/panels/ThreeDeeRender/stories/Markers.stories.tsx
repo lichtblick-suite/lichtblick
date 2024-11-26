@@ -28,7 +28,10 @@ export default {
   },
 };
 
-function AllMarkers(props: { showOutlines: boolean; includeSettings?: boolean }): JSX.Element {
+function AllMarkers(props: {
+  showOutlines: boolean;
+  includeSettings?: boolean;
+}): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
     { name: "/markers", schemaName: "visualization_msgs/Marker" },

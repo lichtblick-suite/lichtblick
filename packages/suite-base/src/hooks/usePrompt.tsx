@@ -46,15 +46,17 @@ function ModalPrompt({
     }
     try {
       transformer?.(value);
-    } catch (err) {
-      return err.toString();
+      return undefined;
+    } catch (err: unknown) {
+      return (err as Error).toString();
     }
   }, [transformer, value]);
 
   const onConfirmAction = () => {
     try {
       onComplete(transformer ? transformer(value) : value);
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error(err);
       onComplete(undefined);
     }
   };
@@ -151,9 +153,9 @@ function ModalPrompt({
 // backed by a React element rather than a native modal, and asynchronous.
 export function usePrompt(): [
   prompt: (options: PromptOptions) => Promise<string | undefined>,
-  promptModal: JSX.Element | undefined,
+  promptModal: React.JSX.Element | undefined,
 ] {
-  const [modal, setModal] = useState<JSX.Element | undefined>();
+  const [modal, setModal] = useState<React.JSX.Element | undefined>();
 
   const runPrompt = useCallback(async (options: PromptOptions) => {
     return await new Promise<string | undefined>((resolve) => {

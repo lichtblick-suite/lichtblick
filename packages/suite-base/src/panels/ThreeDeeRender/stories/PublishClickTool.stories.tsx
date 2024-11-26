@@ -143,7 +143,7 @@ function PublishClickToolTemplate({
 }: {
   type: PublishClickType;
   includeSettings?: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   const topics: Topic[] = [{ name: "/tf", schemaName: "geometry_msgs/TransformStamped" }];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",

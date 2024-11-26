@@ -19,7 +19,7 @@ export function NodeActionsMenu({
 }: {
   actions: readonly SettingsTreeNodeAction[];
   onSelectAction: (actionId: string) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLButtonElement>(undefined);
   const open = Boolean(anchorEl);
 

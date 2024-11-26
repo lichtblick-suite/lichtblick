@@ -20,7 +20,7 @@ export default async function installChromeExtensions(): Promise<void> {
     // So don't wait indefinitely for installation to complete.
     const result = await promiseTimeout(installExtension(REACT_DEVELOPER_TOOLS), 5000);
     log.info("Finished extension install:", result);
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof PromiseTimeoutError) {
       console.warn(
         "Warning: extension installation may be stuck; try relaunching electron or deleting its extensions directory. Continuing for now.",

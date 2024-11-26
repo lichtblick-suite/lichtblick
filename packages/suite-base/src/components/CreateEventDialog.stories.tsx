@@ -18,7 +18,7 @@ export default {
   title: "components/CreateEventDialog",
   args: { onClose: () => {} },
   decorators: [
-    (Wrapped: StoryFn): JSX.Element => {
+    (Wrapped: StoryFn): React.JSX.Element => {
       return (
         <EventsProvider>
           <MockMessagePipelineProvider>

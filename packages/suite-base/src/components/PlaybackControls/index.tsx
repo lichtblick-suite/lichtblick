@@ -99,7 +99,7 @@ export default function PlaybackControls(props: {
   playUntil?: Player["playUntil"];
   isPlaying: boolean;
   getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
-}): JSX.Element {
+}): React.JSX.Element {
   const { play, pause, seek, isPlaying, getTimeInfo, playUntil } = props;
   const presence = useMessagePipeline(selectPresence);
 

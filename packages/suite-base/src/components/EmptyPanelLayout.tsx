@@ -58,7 +58,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
+export const EmptyPanelLayout = ({ tabId }: Props): React.JSX.Element => {
   const { classes, cx } = useStyles();
   const { addPanel } = useCurrentLayoutActions();
   const { t } = useTranslation("addPanel");

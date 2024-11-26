@@ -51,7 +51,7 @@ export function ScriptListItem({
   onRename: (name: string) => void;
   title: string;
   selected?: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes } = useStyles();
   const [label, setLabel] = useState(title);
   const [editMode, setEditMode] = useState(false);

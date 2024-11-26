@@ -126,7 +126,7 @@ type WorkspaceProps = CustomWindowControlsProps & {
   onAppBarDoubleClick?: () => void;
   // eslint-disable-next-line react/no-unused-prop-types
   disablePersistenceForStorybook?: boolean;
-  AppBarComponent?: (props: AppBarProps) => JSX.Element;
+  AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
 };
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
@@ -151,7 +151,7 @@ const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
 
-function WorkspaceContent(props: WorkspaceProps): JSX.Element {
+function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const { PerformanceSidebarComponent } = useAppContext();
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
@@ -245,7 +245,8 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
           const data = new Uint8Array(arrayBuffer);
           const extension = await installExtension("local", data);
           enqueueSnackbar(`Installed extension ${extension.id}`, { variant: "success" });
-        } catch (err) {
+        } catch (e: unknown) {
+          const err = e as Error;
           log.error(err);
           enqueueSnackbar(`Failed to install extension ${file.name}: ${err.message}`, {
             variant: "error",
@@ -278,9 +279,9 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
             const data = new Uint8Array(arrayBuffer);
             const extension = await installExtension("local", data);
             enqueueSnackbar(`Installed extension ${extension.id}`, { variant: "success" });
-          } catch (err) {
+          } catch (err: unknown) {
             log.error(err);
-            enqueueSnackbar(`Failed to install extension ${file.name}: ${err.message}`, {
+            enqueueSnackbar(`Failed to install extension ${file.name}: ${(err as Error).message}`, {
               variant: "error",
             });
           }
@@ -546,7 +547,9 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
           dialogActions.dataSource.open("connection");
           return;
         }
-        void dialogActions.openFile.open().catch(console.error);
+        void dialogActions.openFile.open().catch((err: unknown) => {
+          console.error(err);
+        });
       },
     };
   }, [dialogActions.dataSource, dialogActions.openFile, sidebarActions.left, sidebarActions.right]);
@@ -686,7 +689,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   );
 }
 
-export default function Workspace(props: WorkspaceProps): JSX.Element {
+export default function Workspace(props: WorkspaceProps): React.JSX.Element {
   const [showOpenDialogOnStartup = true] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
   );

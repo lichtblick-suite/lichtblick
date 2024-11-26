@@ -7,9 +7,6 @@
 
 import { ScatterDataPoint, ChartData as ChartJsChartData } from "chart.js";
 
-// Chartjs typings use _null_ to indicate _gaps_ in the dataset
-// eslint-disable-next-line no-restricted-syntax
-const ChartNull = null;
 type Datum = ScatterDataPoint & {
   // chart.js supported properties to show a label above the datapoint
   // used by the state transition panel to show a label above the transition datum
@@ -26,7 +23,7 @@ type Datum = ScatterDataPoint & {
   // state transition data.
   states?: string[];
 };
-export type ObjectData = (Datum | typeof ChartNull)[];
+export type ObjectData = (Datum | undefined)[];
 export type ChartData = ChartJsChartData<"scatter", ObjectData>;
 
 export type TypedData = {

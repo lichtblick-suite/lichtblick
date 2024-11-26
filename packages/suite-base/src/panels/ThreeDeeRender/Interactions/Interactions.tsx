@@ -104,6 +104,6 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
 
 // Wrap the Interactions so that we don't rerender every time any part of the PanelContext config changes, but just the
 // one value that we care about.
-export default function Interactions(props: Props): JSX.Element {
+export default function Interactions(props: Props): React.JSX.Element {
   return <InteractionsBaseComponent {...props} />;
 }

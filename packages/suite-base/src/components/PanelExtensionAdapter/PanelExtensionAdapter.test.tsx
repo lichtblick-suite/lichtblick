@@ -14,7 +14,13 @@ import { act } from "react";
 
 import { Condvar, signal } from "@lichtblick/den/async";
 import { Time } from "@lichtblick/rostime";
-import { PanelExtensionContext, RenderState, MessageEvent, Immutable } from "@lichtblick/suite";
+import {
+  PanelExtensionContext,
+  RenderState,
+  MessageEvent,
+  Immutable,
+  Subscription,
+} from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
@@ -71,7 +77,7 @@ describe("PanelExtensionAdapter", () => {
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
       context.watch("didSeek");
-      context.subscribe([{ topic: "x" }]);
+      context.subscribe([{ topic: "x", preload: false }]);
       context.onRender = (renderState, done) => {
         renderStates.push({ ...renderState });
         done();
@@ -511,7 +517,7 @@ describe("PanelExtensionAdapter", () => {
 
   it("should unsubscribe from all topics when subscribing to empty topics array", async () => {
     const initPanel = (context: PanelExtensionContext) => {
-      context.subscribe([]);
+      context.subscribe([] as Subscription[]);
     };
 
     const sig = signal();
@@ -685,9 +691,9 @@ describe("PanelExtensionAdapter", () => {
     const sig = signal();
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
-      context.subscribe(["x"]);
+      context.subscribe([{ topic: "x", preload: true }]);
       setTimeout(() => {
-        context.subscribe(["y"]);
+        context.subscribe([{ topic: "y", preload: true }]);
         sig.resolve();
       }, 10);
     });

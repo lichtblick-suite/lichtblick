@@ -36,7 +36,7 @@ export function SidebarContent({
   leadingItems,
   overflow = "auto",
   trailingItems,
-}: PropsWithChildren<SidebarContentProps>): JSX.Element {
+}: PropsWithChildren<SidebarContentProps>): React.JSX.Element {
   const { classes } = useStyles();
 
   return (

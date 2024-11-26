@@ -27,7 +27,11 @@ type BaseStoryProps = {
   flipHorizontal: boolean;
   flipVertical: boolean;
 };
-const BaseStory = ({ rotation, flipHorizontal, flipVertical }: BaseStoryProps): JSX.Element => {
+const BaseStory = ({
+  rotation,
+  flipHorizontal,
+  flipVertical,
+}: BaseStoryProps): React.JSX.Element => {
   const width = 60;
   const height = 45;
   const { calibrationMessage, cameraMessage } = makeRawImageAndCalibration({

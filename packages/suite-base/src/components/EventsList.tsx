@@ -70,7 +70,7 @@ const selectEventsAtHoverValue = (store: TimelineInteractionStateStore) => store
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 const selectSelectEvent = (store: EventsStore) => store.selectEvent;
 
-export function EventsList(): JSX.Element {
+export function EventsList(): React.JSX.Element {
   const events = useEvents(selectEvents);
   const selectedEventId = useEvents(selectSelectedEventId);
   const selectEvent = useEvents(selectSelectEvent);

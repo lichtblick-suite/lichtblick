@@ -46,7 +46,11 @@ type ListItemData = {
   setRowHeight: (index: number, height: number) => void;
 };
 
-function Row(props: { data: ListItemData; index: number; style: CSSProperties }): JSX.Element {
+function Row(props: {
+  data: ListItemData;
+  index: number;
+  style: CSSProperties;
+}): React.JSX.Element {
   const { timeFormat, timeZone } = useAppTimeFormat();
   const ref = useRef<HTMLDivElement>(ReactNull);
 
@@ -69,7 +73,7 @@ function Row(props: { data: ListItemData; index: number; style: CSSProperties })
  * List for showing large number of items, which are expected to be appended to the end regularly.
  * Automatically scrolls to the bottom unless you explicitly scroll up.
  */
-function LogList({ items }: Props): JSX.Element {
+function LogList({ items }: Props): React.JSX.Element {
   const { classes } = useStyles();
 
   // Reference to the list item itself.

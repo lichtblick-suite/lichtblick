@@ -32,7 +32,7 @@ type Props = {
   searchQuery?: string;
 };
 
-export function PanelGrid(props: Props): JSX.Element {
+export function PanelGrid(props: Props): React.JSX.Element {
   const { filteredPanels, onPanelSelect, searchQuery = "" } = props;
   const { classes } = useStyles();
 

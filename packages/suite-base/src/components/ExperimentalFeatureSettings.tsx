@@ -36,7 +36,7 @@ const useStyles = makeStyles()({
 type Feature = {
   key: AppSetting;
   name: string;
-  description: JSX.Element;
+  description: React.JSX.Element;
 };
 
 function useFeatures(): Feature[] {

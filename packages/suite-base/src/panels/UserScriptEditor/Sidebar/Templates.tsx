@@ -18,7 +18,7 @@ export function Templates({
 }: {
   onClose: () => void;
   addNewNode: (template?: string) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   return (
     <Stack flex="auto">
       <SidebarHeader

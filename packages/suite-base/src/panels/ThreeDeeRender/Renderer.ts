@@ -1032,7 +1032,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       const q = transform.rotation;
 
       this.addTransform(parentId, childId, stamp, t, q);
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       this.settings.errors.add(
         ["transforms"],
         ADD_TRANSFORM_ERROR,
@@ -1050,7 +1051,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       const q = tf.transform.rotation;
 
       this.addTransform(normalizedParentId, normalizedChildId, stamp, t, q);
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       this.settings.errors.add(
         ["transforms"],
         ADD_TRANSFORM_ERROR,

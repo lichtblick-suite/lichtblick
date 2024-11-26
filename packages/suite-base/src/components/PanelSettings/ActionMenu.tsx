@@ -29,7 +29,7 @@ export function ActionMenu({
   onReset,
   onShare,
   fontSize = "medium",
-}: ActionMenuProps): JSX.Element {
+}: ActionMenuProps): React.JSX.Element {
   const { classes, cx } = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>();
   const { t } = useTranslation("panelSettings");

@@ -7,7 +7,7 @@
 
 declare module "react-hover-observer" {
   const ReactHoverObserver: React.ComponentType<{
-    children: (_: { isHovering: boolean }) => React.ReactChild;
+    children: (_: { isHovering: boolean }) => React.ReactNode;
     className?: string;
   }>;
   export default ReactHoverObserver;

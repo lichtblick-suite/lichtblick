@@ -88,7 +88,7 @@ const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activ
 const selectRefreshEvents = (store: EventsStore) => store.refreshEvents;
 const selectDeviceId = (store: EventsStore) => store.deviceId;
 
-export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
+export function CreateEventDialog(props: { onClose: () => void }): React.JSX.Element {
   const { onClose } = props;
 
   const { classes } = useStyles();
@@ -169,7 +169,7 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
   const onMetaDataKeyDown = useCallback(
     (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === "Enter") {
-        createEvent().catch((error) => {
+        createEvent().catch((error: unknown) => {
           log.error(error);
         });
       }

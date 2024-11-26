@@ -144,6 +144,10 @@ overrides:
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
 
+      "@typescript-eslint/no-unnecessary-type-parameters": off # Turn off to keep generic methods as it is
+      "@typescript-eslint/switch-exhaustiveness-check": off # Turn off to keep switch statements as it is
+      "@typescript-eslint/no-unsafe-enum-comparison": off # Turn off to keep enum comparison as it is
+
       # These are related to `any` types, which we generally don't have except from imports
       "@typescript-eslint/no-unsafe-member-access": off
       "@typescript-eslint/no-unsafe-return": off
@@ -168,7 +172,6 @@ overrides:
           args: after-used
           varsIgnorePattern: "^_."
           argsIgnorePattern: "^_."
-      "@typescript-eslint/no-unsafe-enum-comparison": off
 
   - rules:
       "@typescript-eslint/no-explicit-any": off

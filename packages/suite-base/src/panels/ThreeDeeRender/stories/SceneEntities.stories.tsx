@@ -769,7 +769,7 @@ const lineLoopSampleData = [
   },
 ];
 
-function LineLoops(): JSX.Element {
+function LineLoops(): React.JSX.Element {
   const readySignal = useReadySignal();
 
   // We're testing a Line loop using a position buffer bigger than it needs from a previous frame
@@ -894,7 +894,7 @@ function makeMultiEntityScene({
     {},
   ) as Record<keyof typeof primitives, any[]>;
   for (const primitiveType of Object.keys(primitives)) {
-    const primitiveArray = primitives[primitiveType as keyof typeof primitives]!;
+    const primitiveArray = primitives[primitiveType as keyof typeof primitives];
     let i = 0;
     for (const primitive of primitiveArray) {
       // Each primitive has it's own entity
@@ -923,7 +923,7 @@ function makeMultiEntityScene({
   };
 }
 
-function CheckVisibleAfterSeek(): JSX.Element {
+function CheckVisibleAfterSeek(): React.JSX.Element {
   const readySignal = useReadySignal();
 
   const frames = useMemo(() => {

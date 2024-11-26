@@ -415,7 +415,7 @@ class StudioWindow {
       .then(() => {
         log.info("window URL loaded");
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         log.error("loadURL error", err);
       });
   }

@@ -85,7 +85,8 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
         setIsInstalled(true);
         void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
       }
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       enqueueSnackbar(`Failed to download extension ${extension.id}. ${err.message}`, {
         variant: "error",
       });

@@ -63,7 +63,7 @@ type ColorPickerInputProps = {
   hideClearButton?: boolean;
 };
 
-export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
+export function ColorPickerInput(props: ColorPickerInputProps): React.JSX.Element {
   const { alphaType, disabled, onChange, readOnly, hideClearButton, value } = props;
   const { classes, cx } = useStyles();
 

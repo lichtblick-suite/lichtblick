@@ -28,7 +28,7 @@ const useStyles = makeStyles()({
 
 export default function WssErrorModal(
   props: Immutable<{ playerProblems?: PlayerProblem[] }>,
-): JSX.Element {
+): React.JSX.Element {
   const { playerProblems } = props;
   const { classes } = useStyles();
 

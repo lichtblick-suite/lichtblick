@@ -14,6 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import React from "react";
 import util from "util";
 
 import setImmediate from "@lichtblick/suite-base/util/setImmediate";
@@ -39,7 +40,7 @@ if (typeof window !== "undefined") {
 global.TextEncoder = util.TextEncoder;
 
 // React available everywhere (matches webpack config)
-global.React = require("react");
+global.React = React;
 
 // Jest does not include ResizeObserver.
 class ResizeObserverMock {

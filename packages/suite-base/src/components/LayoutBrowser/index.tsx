@@ -71,7 +71,7 @@ export default function LayoutBrowser({
 }: React.PropsWithChildren<{
   menuClose?: () => void;
   currentDateForStorybook?: Date;
-}>): JSX.Element {
+}>): React.JSX.Element {
   const { classes } = useStyles();
   const { signIn } = useCurrentUser();
   const isMounted = useMountedState();
@@ -165,14 +165,16 @@ export default function LayoutBrowser({
               dispatch({ type: "shift-multi-action" });
               break;
           }
-        } catch (err) {
-          enqueueSnackbar(`Error processing layouts: ${err.message}`, { variant: "error" });
+        } catch (err: unknown) {
+          enqueueSnackbar(`Error processing layouts: ${(err as Error).message}`, {
+            variant: "error",
+          });
           dispatch({ type: "clear-multi-action" });
         }
       }
     };
 
-    processAction().catch((err) => {
+    processAction().catch((err: unknown) => {
       log.error(err);
     });
   }, [dispatch, enqueueSnackbar, layoutManager, state.multiAction]);
@@ -187,7 +189,7 @@ export default function LayoutBrowser({
 
   // Start loading on first mount
   useEffect(() => {
-    reloadLayouts().catch((err) => {
+    reloadLayouts().catch((err: unknown) => {
       log.error(err);
     });
   }, [reloadLayouts]);
@@ -488,8 +490,8 @@ export default function LayoutBrowser({
         let parsedState: unknown;
         try {
           parsedState = JSON.parse(content);
-        } catch (err) {
-          enqueueSnackbar(`${file.name} is not a valid layout: ${err.message}`, {
+        } catch (err: unknown) {
+          enqueueSnackbar(`${file.name} is not a valid layout: ${(err as Error).message}`, {
             variant: "error",
           });
           return;

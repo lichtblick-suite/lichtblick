@@ -58,7 +58,7 @@ function useCombinedReadySignal(
 function StudioContextProviders({
   children,
   ctx,
-}: React.PropsWithChildren<{ ctx: StoryContext }>): JSX.Element {
+}: React.PropsWithChildren<{ ctx: StoryContext }>): React.JSX.Element {
   if (ctx.parameters.useReadySignal === true) {
     const condvar = new Condvar();
     ctx.parameters.storyReady = condvar.wait();
@@ -166,7 +166,7 @@ function StudioContextProviders({
   );
 }
 
-function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
+function WithContextProviders(Child: Story, ctx: StoryContext): React.JSX.Element {
   if (
     (ctx.parameters.fileName as string).includes("/packages/suite-base/") ||
     (ctx.parameters.fileName as string).includes("/packages/theme/")
@@ -180,7 +180,10 @@ function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
   return <Child />;
 }
 
-function WithI18n({ ctx, children }: React.PropsWithChildren<{ ctx: StoryContext }>): JSX.Element {
+function WithI18n({
+  ctx,
+  children,
+}: React.PropsWithChildren<{ ctx: StoryContext }>): React.JSX.Element {
   const lang = ctx.parameters.forceLanguage ?? "en";
   const { i18n } = useTranslation();
   useEffect(() => {
@@ -189,7 +192,7 @@ function WithI18n({ ctx, children }: React.PropsWithChildren<{ ctx: StoryContext
   return <>{children}</>;
 }
 
-function WithI18nUnlessDisabled(Child: Story, ctx: StoryContext): JSX.Element {
+function WithI18nUnlessDisabled(Child: Story, ctx: StoryContext): React.JSX.Element {
   const { disableI18n = false }: { disableI18n?: boolean } = ctx.parameters;
   if (disableI18n) {
     return <Child />;

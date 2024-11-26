@@ -147,7 +147,8 @@ export function useWorkspaceActions(): WorkspaceActions {
     let parsedState: unknown;
     try {
       parsedState = JSON.parse(content);
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       throw new Error(`${file.name} is not a valid layout: ${err.message}`);
     }
 

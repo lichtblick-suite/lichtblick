@@ -28,7 +28,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function AccountInfo(props: { currentUser?: User }): JSX.Element {
+export default function AccountInfo(props: { currentUser?: User }): React.JSX.Element {
   const { signOut } = useCurrentUser();
   const { enqueueSnackbar } = useSnackbar();
   const [confirm, confirmModal] = useConfirm();

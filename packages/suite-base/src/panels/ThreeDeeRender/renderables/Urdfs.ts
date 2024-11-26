@@ -772,8 +772,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this.renderer.settings.errors.remove(["layers", instanceId], FETCH_URDF_ERR);
         this.#loadUrdf({ instanceId, urdf: this.#textDecoder.decode(urdf.data) });
       })
-      .catch((unknown) => {
-        const err = unknown as Error;
+      .catch((e: unknown) => {
+        const err = e as Error;
         const hasError = !err.message.startsWith("Failed to fetch");
         const errMessage = `Failed to load URDF from "${url}"${hasError ? `: ${err.message}` : ""}`;
         this.renderer.settings.errors.add(["layers", instanceId], FETCH_URDF_ERR, errMessage);
@@ -909,8 +909,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         // need to queue another animation frame after robot has been loaded
         this.renderer.queueAnimationFrame();
       })
-      .catch((unknown) => {
-        const err = unknown as Error;
+      .catch((e: unknown) => {
+        const err = e as Error;
         log.error(`Failed to parse URDF: ${err.message}`);
         this.renderer.settings.errors.add(
           settingsPath,
@@ -1004,7 +1004,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       log.debug(`fetch(${url}) requested`);
       const asset = await this.renderer.fetchAsset(url, { referenceUrl });
       return this.#textDecoder.decode(asset.data);
-    } catch (err) {
+    } catch (err: unknown) {
       throw new Error(`Failed to fetch "${url}": ${err}`);
     }
   }
@@ -1054,7 +1054,7 @@ async function parseUrdf(
     });
 
     return { robot, frames, transforms };
-  } catch (err) {
+  } catch (err: unknown) {
     throw new Error(`Failed to parse ${text.length} byte URDF: ${err}`);
   }
 }
@@ -1179,7 +1179,8 @@ function isValidUrl(str: string): boolean {
   try {
     const url = new URL(str);
     return VALID_PROTOCOLS.includes(url.protocol);
-  } catch (_err) {
+  } catch (err: unknown) {
+    console.error(err);
     return false;
   }
 }

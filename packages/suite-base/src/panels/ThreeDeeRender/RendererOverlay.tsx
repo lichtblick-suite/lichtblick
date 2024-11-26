@@ -116,7 +116,7 @@ type Props = {
 /**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
  */
-export function RendererOverlay(props: Props): JSX.Element {
+export function RendererOverlay(props: Props): React.JSX.Element {
   const { t } = useTranslation("threeDee");
   const { classes } = useStyles();
   const [clickedPosition, setClickedPosition] = useState<{ clientX: number; clientY: number }>({

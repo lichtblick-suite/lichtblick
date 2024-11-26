@@ -25,8 +25,7 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import Connection from "./Connection";
 import Start from "./Start";
 
-const DataSourceDialogItems = ["start", "file", "demo", "remote", "connection"] as const;
-export type DataSourceDialogItem = (typeof DataSourceDialogItems)[number];
+export type DataSourceDialogItem = "start" | "file" | "demo" | "remote" | "connection";
 
 type DataSourceDialogProps = {
   backdropAnimation?: boolean;
@@ -46,7 +45,7 @@ const useStyles = makeStyles()((theme) => ({
 
 const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 
-export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
+export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Element {
   const { backdropAnimation } = props;
   const { classes } = useStyles();
   const { availableSources, selectSource } = usePlayerSelection();
@@ -76,7 +75,7 @@ export function DataSourceDialog(props: DataSourceDialogProps): JSX.Element {
     if (activeView === "file") {
       dialogActions.openFile
         .open()
-        .catch((err) => {
+        .catch((err: unknown) => {
           console.error(err);
         })
         .finally(() => {

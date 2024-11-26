@@ -54,7 +54,7 @@ const selectHoveredEvent = (store: TimelineInteractionStateStore) => store.hover
 const selectEventsAtHoverValue = (store: TimelineInteractionStateStore) => store.eventsAtHoverValue;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 
-function EventTick({ event }: { event: TimelinePositionedEvent }): JSX.Element {
+function EventTick({ event }: { event: TimelinePositionedEvent }): React.JSX.Element {
   const eventsAtHoverValue = useTimelineInteractionState(selectEventsAtHoverValue);
   const hoveredEvent = useTimelineInteractionState(selectHoveredEvent);
   const selectedEventId = useEvents(selectSelectedEventId);
@@ -78,7 +78,7 @@ function EventTick({ event }: { event: TimelinePositionedEvent }): JSX.Element {
 
 const MemoEventTick = React.memo(EventTick);
 
-export function EventsOverlay(): JSX.Element {
+export function EventsOverlay(): React.JSX.Element {
   const events = useEvents(selectEvents);
   const { classes } = useStyles();
 

@@ -50,7 +50,7 @@ export default async function injectFilesToOpen(
 
     // clear the files once we've opened them
     filesToOpen.splice(0, filesToOpen.length);
-  } catch (err) {
+  } catch (err: unknown) {
     log.error(err);
     dialog.showErrorBox(
       "Internal error",

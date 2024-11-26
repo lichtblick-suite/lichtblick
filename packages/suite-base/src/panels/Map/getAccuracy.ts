@@ -90,7 +90,8 @@ export function getAccuracy(
           radii: [primaryRadius, secondaryRadius],
           tilt,
         };
-      } catch (err) {
+      } catch (err: unknown) {
+        console.error("Failed to compute eigenvalues", err);
         return undefined;
       }
     }

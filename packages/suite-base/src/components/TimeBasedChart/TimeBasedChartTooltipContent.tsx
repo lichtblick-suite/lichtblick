@@ -80,7 +80,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-function OverflowMessage(): JSX.Element {
+function OverflowMessage(): React.JSX.Element {
   const { classes } = useStyles();
 
   return <div className={classes.overflow}>&lt;multiple values under cursor&gt;</div>;

@@ -108,7 +108,7 @@ export default function Variable(props: {
   name: string;
   selected?: ListItemButtonProps["selected"];
   index: number;
-}): JSX.Element {
+}): React.JSX.Element {
   const { name, selected = false, index } = props;
 
   const { classes } = useStyles();

@@ -17,7 +17,7 @@ const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 /**
  * DocumentTitleAdapter sets the document title based on the currently selected player
  */
-export default function DocumentTitleAdapter(): JSX.Element {
+export default function DocumentTitleAdapter(): React.JSX.Element {
   const playerName = useMessagePipeline(selectPlayerName);
 
   useEffect(() => {

@@ -47,11 +47,16 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export function ToolGroup<T>({ children }: { name: T; children: React.ReactElement }): JSX.Element {
+export function ToolGroup<T>({
+  children,
+}: {
+  name: T;
+  children: React.ReactElement;
+}): React.JSX.Element {
   return children;
 }
 
-export function ToolGroupFixedSizePane({ children }: { children: ReactNode }): JSX.Element {
+export function ToolGroupFixedSizePane({ children }: { children: ReactNode }): React.JSX.Element {
   return (
     <Stack padding={1} overflowX="hidden" overflowY="auto" style={{ maxHeight: PANE_HEIGHT }}>
       {children}
@@ -77,7 +82,7 @@ export default function ExpandingToolbar<T extends string>({
   selectedTab,
   tooltip,
   dataTest,
-}: Props<T>): JSX.Element {
+}: Props<T>): React.JSX.Element {
   const { classes } = useStyles();
   const expanded = selectedTab != undefined;
 

@@ -109,7 +109,7 @@ const useStyles = makeStyles<Omit<PanelRootProps, "fullscreenState" | "selected"
 });
 
 export const PanelRoot = forwardRef<HTMLDivElement, PropsWithChildren<PanelRootProps>>(
-  function PanelRoot(props, ref): JSX.Element {
+  function PanelRoot(props, ref): React.JSX.Element {
     const { className, fullscreenState, hasFullscreenDescendant, selected, sourceRect, ...rest } =
       props;
     const { classes, cx } = useStyles({ sourceRect, hasFullscreenDescendant });

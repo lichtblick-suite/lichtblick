@@ -30,7 +30,7 @@ export default {
 
 const AnnotationsStory = (
   args: { debugPicking?: boolean; imageModeConfigOverride?: Partial<ImageModeConfig> } = {},
-): JSX.Element => {
+): React.JSX.Element => {
   const { debugPicking, imageModeConfigOverride } = args;
   const width = 60;
   const height = 45;
@@ -475,7 +475,7 @@ export const MessageConverterSupport: StoryObj = {
 
 const AnnotationsUpdateStory = (
   imageModeConfigOverride: Partial<ImageModeConfig> = {},
-): JSX.Element => {
+): React.JSX.Element => {
   const readySignal = useReadySignal();
   const width = 60;
   const height = 45;
@@ -825,7 +825,7 @@ type UpdateLineArgs = {
   messages: readonly Partial<ImageAnnotations>[];
 };
 
-function UpdateLineStory({ messages }: UpdateLineArgs): JSX.Element {
+function UpdateLineStory({ messages }: UpdateLineArgs): React.JSX.Element {
   const readySignal = useReadySignal();
   const width = 60;
   const height = 45;
@@ -1213,7 +1213,7 @@ type SyncAnnotationsStoryArgs = {
   hasCalibrationTopic: boolean;
 };
 
-const SyncAnnotationsStory = (args: SyncAnnotationsStoryArgs): JSX.Element => {
+const SyncAnnotationsStory = (args: SyncAnnotationsStoryArgs): React.JSX.Element => {
   const { status, hasCalibrationTopic } = args;
   const width = 60;
   const height = 45;

@@ -26,7 +26,7 @@ export default function useRethrow<Args extends unknown[], Ret>(
     (...args: Args): Ret | void => {
       try {
         return fn(...args);
-      } catch (err) {
+      } catch (err: unknown) {
         // throwing within a setError happens within a react render context
         setError(() => {
           throw err;

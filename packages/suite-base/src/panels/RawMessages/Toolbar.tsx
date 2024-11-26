@@ -58,7 +58,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-function ToolbarComponent(props: Props): JSX.Element {
+function ToolbarComponent(props: Props): React.JSX.Element {
   const {
     canExpandAll,
     diffEnabled,

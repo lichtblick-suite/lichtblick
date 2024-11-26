@@ -202,7 +202,7 @@ export default function FileInfoDisplay({
   fileStats: FileStats;
   fileInfo?: FileInfo;
   error?: Error;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes } = useStyles();
   const compressionTypes = useMemo(
     () =>

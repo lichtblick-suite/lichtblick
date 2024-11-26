@@ -35,7 +35,7 @@ const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeD
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 
-export default function PlaybackTimeDisplay(props: Props): JSX.Element {
+export default function PlaybackTimeDisplay(props: Props): React.JSX.Element {
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
 
   const isPlaying = useMessagePipeline(selectIsPlaying);

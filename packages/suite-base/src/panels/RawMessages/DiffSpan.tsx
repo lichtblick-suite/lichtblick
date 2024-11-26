@@ -21,7 +21,7 @@ type Props = {
   style?: CSSProperties;
 };
 
-export function DiffSpan(props: Props): JSX.Element {
+export function DiffSpan(props: Props): React.JSX.Element {
   const { children, style } = props;
 
   const { classes } = useStyles();

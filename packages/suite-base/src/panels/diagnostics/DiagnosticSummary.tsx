@@ -160,7 +160,7 @@ const ALLOWED_DATATYPES: string[] = [
   "ros.diagnostic_msgs.DiagnosticArray",
 ];
 
-function DiagnosticSummary(props: Props): JSX.Element {
+function DiagnosticSummary(props: Props): React.JSX.Element {
   const { config, saveConfig } = props;
   const { classes } = useStyles();
   const { topics } = useDataSourceInfo();

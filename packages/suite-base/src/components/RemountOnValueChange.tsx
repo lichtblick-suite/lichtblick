@@ -16,7 +16,7 @@ import { PropsWithChildren, useCallback } from "react";
  */
 export default function RemountOnValueChange(
   props: PropsWithChildren<{ value: unknown }>,
-): JSX.Element {
+): React.JSX.Element {
   // When the value changes, useCallback will create a new component by returning a new
   // function instance. Since this is a completely new component it will remount its entire tree.
   const Parent = useCallback(

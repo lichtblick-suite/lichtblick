@@ -48,7 +48,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export function ColorSwatch(props: ColorSwatchProps): JSX.Element {
+export function ColorSwatch(props: ColorSwatchProps): React.JSX.Element {
   const { color, size = "medium", className, ...rest } = props;
   const { classes, cx, theme } = useStyles();
 

@@ -20,7 +20,7 @@ import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAp
 
 import { AppBar } from ".";
 
-function Wrapper({ children }: React.PropsWithChildren): JSX.Element {
+function Wrapper({ children }: React.PropsWithChildren): React.JSX.Element {
   const appConfiguration = makeMockAppConfiguration();
   const providers = [
     /* eslint-disable react/jsx-key */

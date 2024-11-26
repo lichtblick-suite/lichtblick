@@ -40,7 +40,7 @@ const useStyles = makeStyles()((theme) => ({
     backgroundSize: `${STRIPE_WIDTH * 2}px 100%`,
     backgroundImage: `repeating-linear-gradient(${[
       "90deg",
-      `${theme.palette.background.paper}`,
+      theme.palette.background.paper,
       `${theme.palette.background.paper} ${STRIPE_WIDTH / 2}px`,
       `transparent ${STRIPE_WIDTH / 2}px`,
       `transparent ${STRIPE_WIDTH}px`,
@@ -57,7 +57,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export function ProgressPlot(props: ProgressProps): JSX.Element {
+export function ProgressPlot(props: ProgressProps): React.JSX.Element {
   const { availableRanges, loading } = props;
   const { classes } = useStyles();
 

@@ -39,7 +39,7 @@ export function ForwardAnalyticsContextProvider({
   /** Context to forward. Should be the return value from useForwardAnalytics in the outer tree. */
   forwardedAnalytics,
   children,
-}: React.PropsWithChildren<{ forwardedAnalytics: ForwardedAnalytics }>): JSX.Element {
+}: React.PropsWithChildren<{ forwardedAnalytics: ForwardedAnalytics }>): React.JSX.Element {
   useMustNotChange(forwardedAnalytics);
   const [store] = useState(() =>
     createStore(() => ({ value: forwardedAnalytics.getState().value })),

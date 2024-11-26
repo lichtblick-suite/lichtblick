@@ -44,7 +44,7 @@ const useStyles = makeStyles()({
 const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
 const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 
-export function AppMenu(props: AppMenuProps): JSX.Element {
+export function AppMenu(props: AppMenuProps): React.JSX.Element {
   const { open, handleClose, anchorEl, anchorReference, anchorPosition, disablePortal } = props;
   const { classes } = useStyles();
   const { t } = useTranslation("appBar");
@@ -88,7 +88,9 @@ export function AppMenu(props: AppMenuProps): JSX.Element {
         dataTestId: "menu-item-open-local-file",
         onClick: () => {
           handleNestedMenuClose();
-          dialogActions.openFile.open().catch(console.error);
+          dialogActions.openFile.open().catch((err: unknown) => {
+            console.error(err);
+          });
         },
       },
       {

@@ -68,7 +68,7 @@ type Props = {
   onSeek: (seekTo: Time) => void;
 };
 
-export default function Scrubber(props: Props): JSX.Element {
+export default function Scrubber(props: Props): React.JSX.Element {
   const { onSeek } = props;
   const { classes, cx } = useStyles();
 

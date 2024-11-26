@@ -85,7 +85,7 @@ export function ThreeDeeRender(props: {
   testOptions: TestOptions;
   /** Allow for injection or overriding of default extensions by custom extensions */
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
-}): JSX.Element {
+}): React.JSX.Element {
   const { context, interfaceMode, testOptions, customSceneExtensions } = props;
   const {
     initialState,

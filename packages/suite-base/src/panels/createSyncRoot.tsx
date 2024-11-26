@@ -17,7 +17,10 @@ import { createRoot, Root } from "react-dom/client";
  * @param panelElement The HTML element to serve as the container for the root.
  * @returns A function to unmount the root when needed.
  */
-export function createSyncRoot(component: JSX.Element, panelElement: HTMLDivElement): () => void {
+export function createSyncRoot(
+  component: React.JSX.Element,
+  panelElement: HTMLDivElement,
+): () => void {
   const root: Root = createRoot(panelElement);
   root.render(component);
   return () => {

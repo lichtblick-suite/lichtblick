@@ -16,7 +16,9 @@ import CssBaseline from "./components/CssBaseline";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppConfigurationContext from "./context/AppConfigurationContext";
 
-export function SharedRoot(props: ISharedRootContext & { children: JSX.Element }): JSX.Element {
+export function SharedRoot(
+  props: ISharedRootContext & { children: React.JSX.Element },
+): React.JSX.Element {
   const {
     appBarLeftInset,
     appConfiguration,

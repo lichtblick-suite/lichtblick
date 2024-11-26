@@ -133,7 +133,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      let panel: JSX.Element;
+      let panel: React.JSX.Element;
       const PanelComponent = panelComponents.get(type);
       if (PanelComponent) {
         panel = <PanelComponent childId={id} tabId={tabId} />;
@@ -148,7 +148,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           key={id}
           path={path}
           createNode={createTile}
-          renderPreview={() => undefined as unknown as JSX.Element}
+          renderPreview={() => undefined as unknown as React.JSX.Element}
         >
           <Suspense
             fallback={
@@ -195,7 +195,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
 }
 
-function ExtensionsLoadingState(): JSX.Element {
+function ExtensionsLoadingState(): React.JSX.Element {
   return (
     <EmptyState>
       <Stack gap={1} alignItems="center">
@@ -210,7 +210,7 @@ const selectedLayoutExistsSelector = (state: LayoutState) =>
   state.selectedLayout?.data != undefined;
 const selectedLayoutMosaicSelector = (state: LayoutState) => state.selectedLayout?.data?.layout;
 
-export default function PanelLayout(): JSX.Element {
+export default function PanelLayout(): React.JSX.Element {
   const { layoutEmptyState } = useAppContext();
   const { changePanelLayout } = useCurrentLayoutActions();
   const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);

@@ -53,7 +53,7 @@ type AppProps = CustomWindowControlsProps & {
   enableLaunchPreferenceScreen?: boolean;
   enableGlobalCss?: boolean;
   appBarLeftInset?: number;
-  extraProviders?: JSX.Element[];
+  extraProviders?: React.JSX.Element[];
   onAppBarDoubleClick?: () => void;
 };
 
@@ -67,7 +67,7 @@ function contextMenuHandler(event: MouseEvent) {
   return false;
 }
 
-export function App(props: AppProps): JSX.Element {
+export function App(props: AppProps): React.JSX.Element {
   const {
     appConfiguration,
     dataSources,

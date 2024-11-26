@@ -786,7 +786,7 @@ function makeGridNode(index: number): SettingsTreeNode {
   };
 }
 
-function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
+function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): React.JSX.Element {
   const theme = useTheme();
   const [settingsNodes, setSettingsNodes] = useState({ ...nodes });
   const [dynamicNodes, setDynamicNodes] = useState<Record<string, SettingsTreeNode>>({});

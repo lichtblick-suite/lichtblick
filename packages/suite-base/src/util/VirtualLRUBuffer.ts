@@ -75,7 +75,7 @@ export default class VirtualLRUBuffer {
   }
 
   // Copy data from the `source` buffer to the byte at `targetStart` in the VirtualLRUBuffer.
-  public copyFrom(source: Uint8Array, targetStart: number): void {
+  public copyFrom(source: Buffer, targetStart: number): void {
     if (targetStart < 0 || targetStart >= this.byteLength) {
       throw new Error("VirtualLRUBuffer#copyFrom invalid input");
     }
@@ -151,6 +151,7 @@ export default class VirtualLRUBuffer {
       // via the `VirtualLRUBuffer#slice` method.
       const deleteIndex = this.#lastAccessedBlockIndices.shift();
       if (deleteIndex != undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-array-delete
         delete this.#blocks[deleteIndex];
         // Remove the range that we evicted from `_rangesWithData`, since the range doesn't have data now.
         this.#rangesWithData = simplify(
@@ -161,9 +162,11 @@ export default class VirtualLRUBuffer {
       }
     }
     const block = this.#blocks[index];
+
     if (!block) {
       throw new Error("invariant violation - no block at index");
     }
+
     return block;
   }
 

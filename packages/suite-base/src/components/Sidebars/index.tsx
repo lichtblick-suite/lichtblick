@@ -148,7 +148,7 @@ export default function Sidebars<
   OldLeftKey extends string,
   LeftKey extends string,
   RightKey extends string,
->(props: SidebarProps<OldLeftKey, LeftKey, RightKey>): JSX.Element {
+>(props: SidebarProps<OldLeftKey, LeftKey, RightKey>): React.JSX.Element {
   const {
     children,
     items,
@@ -381,7 +381,7 @@ export default function Sidebars<
           renderTile={(id) => {
             switch (id) {
               case "children":
-                return <ErrorBoundary>{children as JSX.Element}</ErrorBoundary>;
+                return <ErrorBoundary>{children as React.JSX.Element}</ErrorBoundary>;
               case "leftbar":
                 return (
                   <ErrorBoundary>

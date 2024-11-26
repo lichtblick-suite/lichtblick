@@ -223,7 +223,8 @@ const Editor = ({
                 text: await getPrettifiedCode(model.getValue()),
               },
             ];
-          } catch (e) {
+          } catch (err: unknown) {
+            console.error(err);
             return [];
           }
         },

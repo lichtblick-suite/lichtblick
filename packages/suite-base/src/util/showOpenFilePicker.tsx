@@ -14,8 +14,8 @@ export default async function showOpenFilePicker(
 ): Promise<FileSystemFileHandle[] /* foxglove-depcheck-used: @types/wicg-file-system-access */> {
   try {
     return await window.showOpenFilePicker(options);
-  } catch (err) {
-    if (err.name === "AbortError") {
+  } catch (err: unknown) {
+    if ((err as Error).name === "AbortError") {
       return [];
     }
     throw err;

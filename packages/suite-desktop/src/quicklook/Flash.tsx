@@ -36,7 +36,9 @@ const useStyles = makeStyles()(() => ({
   },
 }));
 
-export default function Flash(props: PropsWithChildren<{ color?: "error" | "info" }>): JSX.Element {
+export default function Flash(
+  props: PropsWithChildren<{ color?: "error" | "info" }>,
+): React.JSX.Element {
   const { children, color = "info" } = props;
   const { classes, cx } = useStyles();
 

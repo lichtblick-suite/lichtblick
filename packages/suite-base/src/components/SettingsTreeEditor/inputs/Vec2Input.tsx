@@ -23,7 +23,7 @@ type Vec2Props = {
   max?: number;
 };
 
-export function Vec2Input(props: Vec2Props): JSX.Element {
+export function Vec2Input(props: Vec2Props): React.JSX.Element {
   const {
     disabled = false,
     onChange,

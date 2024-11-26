@@ -20,7 +20,7 @@ import WorkspaceContextProvider from "@lichtblick/suite-base/providers/Workspace
 
 import { DataSourceDialog } from "./DataSourceDialog";
 
-const Wrapper = (Story: StoryFn): JSX.Element => {
+const Wrapper = (Story: StoryFn): React.JSX.Element => {
   return (
     <MockCurrentLayoutProvider>
       <WorkspaceContextProvider
@@ -109,7 +109,7 @@ const playerSelection: PlayerSelection = {
 function CurrentUserWrapper(props: {
   children: ReactNode;
   userType?: UserType | undefined;
-}): JSX.Element {
+}): React.JSX.Element {
   const value: CurrentUser = {
     currentUserType: props.userType ?? "unauthenticated",
     signIn: () => undefined,
@@ -118,7 +118,7 @@ function CurrentUserWrapper(props: {
   return <BaseUserContext.Provider value={value}>{props.children}</BaseUserContext.Provider>;
 }
 
-const Default = (): JSX.Element => <DataSourceDialog backdropAnimation={false} />;
+const Default = (): React.JSX.Element => <DataSourceDialog backdropAnimation={false} />;
 
 export const DefaultLight: StoryObj = {
   render: Default,

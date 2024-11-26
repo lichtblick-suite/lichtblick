@@ -70,7 +70,7 @@ export const SelectedPanelActions: Story = {
     colorScheme: "both-column",
   },
   decorators: [
-    (Story: StoryFn): JSX.Element => (
+    (Story: StoryFn): React.JSX.Element => (
       <Stack fullHeight gap={1}>
         <Story />
         <div
@@ -103,7 +103,7 @@ export const QuickActions: Story = {
     colorScheme: "both-column",
   },
   decorators: [
-    (Story: StoryFn): JSX.Element => (
+    (Story: StoryFn): React.JSX.Element => (
       <Stack fullHeight gap={1}>
         <Story />
         <div

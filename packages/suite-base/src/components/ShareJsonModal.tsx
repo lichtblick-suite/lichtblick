@@ -54,14 +54,14 @@ export function ShareJsonModal({
   onChange,
   onRequestClose,
   title,
-}: ShareJsonModalProps): JSX.Element {
+}: ShareJsonModalProps): React.JSX.Element {
   const { classes } = useStyles();
   const [value, setValue] = useState(JSON.stringify(initialValue, undefined, 2) ?? "");
 
   const { decodedValue, error } = useMemo(() => {
     try {
       return { decodedValue: JSON.parse(value === "" ? "{}" : value) as unknown, error: undefined };
-    } catch (err) {
+    } catch (err: unknown) {
       return { decodedValue: undefined, error: err as Error };
     }
   }, [value]);

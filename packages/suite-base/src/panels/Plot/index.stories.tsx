@@ -66,7 +66,7 @@ function PlotWrapper(props: {
   includeSettings?: boolean;
   fixture?: Fixture;
   config: PlotConfig;
-}): JSX.Element {
+}): React.JSX.Element {
   const [actualFixture, setFixture] = useState<Fixture | undefined>();
 
   useEffect(() => {

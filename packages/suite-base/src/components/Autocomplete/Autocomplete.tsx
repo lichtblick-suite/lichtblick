@@ -114,7 +114,7 @@ const CustomPopper = function (props: PopperProps) {
 export const Autocomplete = React.forwardRef(function Autocomplete(
   props: AutocompleteProps,
   ref: React.ForwardedRef<IAutocomplete>,
-): JSX.Element {
+): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(ReactNull);
 
   const { classes, cx } = useStyles();

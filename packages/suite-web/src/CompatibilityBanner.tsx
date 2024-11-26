@@ -88,7 +88,7 @@ function CompatibilityBannerBase({
   isChrome: boolean;
   isDismissable: boolean;
   onDismiss: () => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes, cx } = useStyles();
 
   const prompt = isChrome
@@ -153,7 +153,7 @@ export function CompatibilityBanner({
   isChrome: boolean;
   currentVersion: number;
   isDismissable: boolean;
-}): JSX.Element | ReactNull {
+}): React.JSX.Element | ReactNull {
   const { classes } = useStyles();
   const muiTheme = createMuiTheme("dark");
   const [showBanner, setShowBanner] = useState(true);

@@ -100,7 +100,7 @@ const selectPlayerProblems = ({ playerState }: MessagePipelineContext) =>
   playerState.problems ?? EMPTY_PLAYER_PROBLEMS;
 const selectProblems = (store: ProblemsContextStore) => store.problems;
 
-function ProblemIcon({ severity }: { severity: NotificationSeverity }): JSX.Element {
+function ProblemIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
   const { palette } = useTheme();
   const { classes } = useStyles();
 
@@ -116,7 +116,7 @@ function ProblemIcon({ severity }: { severity: NotificationSeverity }): JSX.Elem
   }
 }
 
-function ProblemDetails(props: { details: DetailsType; tip?: string }): JSX.Element {
+function ProblemDetails(props: { details: DetailsType; tip?: string }): React.JSX.Element {
   const { t } = useTranslation("problemsList");
   const { details, tip } = props;
   const { classes } = useStyles();
@@ -145,7 +145,7 @@ function ProblemDetails(props: { details: DetailsType; tip?: string }): JSX.Elem
   );
 }
 
-export function ProblemsList(): JSX.Element {
+export function ProblemsList(): React.JSX.Element {
   const { t } = useTranslation("problemsList");
   const { classes } = useStyles();
   const playerProblems = useMessagePipeline(selectPlayerProblems);

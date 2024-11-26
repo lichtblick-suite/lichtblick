@@ -114,13 +114,13 @@ const useStyles = makeStyles()((theme) => ({
 type DataSourceOptionProps = {
   text: string;
   secondaryText: string;
-  icon: JSX.Element;
+  icon: React.JSX.Element;
   onClick: () => void;
   href?: string;
   target: "_blank";
 };
 
-function DataSourceOption(props: DataSourceOptionProps): JSX.Element {
+function DataSourceOption(props: DataSourceOptionProps): React.JSX.Element {
   const { icon, onClick, text, secondaryText, href, target } = props;
   const { classes } = useStyles();
   const button = (
@@ -161,7 +161,7 @@ type SidebarItem = {
 
 function SidebarItems(props: {
   onSelectView: (newValue: DataSourceDialogItem) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { onSelectView } = props;
   const { currentUserType } = useCurrentUser();
   const analytics = useAnalytics();
@@ -288,7 +288,7 @@ function SidebarItems(props: {
   );
 }
 
-export default function Start(): JSX.Element {
+export default function Start(): React.JSX.Element {
   const { recentSources, selectRecent } = usePlayerSelection();
   const { classes } = useStyles();
   const analytics = useAnalytics();

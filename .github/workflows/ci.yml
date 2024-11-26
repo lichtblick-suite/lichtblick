@@ -51,7 +51,7 @@ jobs:
 
       - uses: actions/setup-node@v4.0.3
         with:
-          node-version: 16.17
+          node-version: 20
       - run: corepack enable yarn
 
       - name: Restore cache
@@ -84,7 +84,7 @@ jobs:
 
       - uses: actions/setup-node@v4.0.3
         with:
-          node-version: 16.17
+          node-version: 20
       - run: corepack enable yarn
 
       - name: Restore cache
@@ -98,17 +98,17 @@ jobs:
 
       - run: yarn install --immutable
 
-      - name: test:integration
+      - name: test:integration (ubuntu)
         if: matrix.os == 'ubuntu-20.04'
-        uses: GabrielBB/xvfb-action@v1.6
+        uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
           run: yarn run test:integration
 
+      - name: test:integration (windows and macOS)
+        if: matrix.os != 'ubuntu-20.04'
+        run: yarn run test:integration
+
       - name: test:web-integration
         if: matrix.os == 'ubuntu-20.04'
         run: yarn run test:web-integration
-
-      - name: test:integration
-        if: matrix.os != 'ubuntu-20.04'
-        run: yarn run test:integration

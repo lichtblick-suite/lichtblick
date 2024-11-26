@@ -6,4 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // React available everywhere (matches webpack config)
-global.React = require("react");
+import * as React from "react";
+
+global.React = React;

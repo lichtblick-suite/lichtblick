@@ -80,13 +80,13 @@ type ErrorDisplayProps = {
   title?: string;
   error?: Error;
   errorInfo?: ErrorInfo;
-  content?: JSX.Element;
-  actions?: JSX.Element;
+  content?: React.JSX.Element;
+  actions?: React.JSX.Element;
   showErrorDetails?: boolean;
   hideErrorSourceLocations?: boolean;
 };
 
-function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
+function ErrorDisplay(props: ErrorDisplayProps): React.JSX.Element {
   const { classes } = useStyles();
   const { error, errorInfo, hideErrorSourceLocations = false } = props;
 

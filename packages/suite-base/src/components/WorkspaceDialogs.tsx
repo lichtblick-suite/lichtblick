@@ -19,7 +19,7 @@ const selectWorkspacePrefsDialogOpen = (store: WorkspaceContextStore) =>
 /**
  * Encapsulates dialogs shown and controlled at workspace level.
  */
-export function WorkspaceDialogs(): JSX.Element {
+export function WorkspaceDialogs(): React.JSX.Element {
   const prefsDialogOpen = useWorkspaceStore(selectWorkspacePrefsDialogOpen);
   const { dialogActions } = useWorkspaceActions();
 

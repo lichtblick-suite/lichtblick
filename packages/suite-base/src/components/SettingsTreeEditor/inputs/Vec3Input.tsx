@@ -25,7 +25,7 @@ type Vec3Props = {
   max?: number;
 };
 
-export function Vec3Input(props: Vec3Props): JSX.Element {
+export function Vec3Input(props: Vec3Props): React.JSX.Element {
   const {
     disabled = false,
     onChange,

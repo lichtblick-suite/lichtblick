@@ -28,11 +28,11 @@ import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguratio
 const isDevelopment = process.env.NODE_ENV === "development";
 
 export function WebRoot(props: {
-  extraProviders: JSX.Element[] | undefined;
+  extraProviders: React.JSX.Element[] | undefined;
   dataSources: IDataSourceFactory[] | undefined;
-  AppBarComponent?: (props: AppBarProps) => JSX.Element;
-  children: JSX.Element;
-}): JSX.Element {
+  AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
+  children: React.JSX.Element;
+}): React.JSX.Element {
   const appConfiguration = useMemo(
     () =>
       new LocalStorageAppConfiguration({

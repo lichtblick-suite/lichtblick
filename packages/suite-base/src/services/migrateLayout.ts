@@ -16,8 +16,7 @@ import { migrateLegacyToNew3DPanels } from "./migrateLayout/migrateLegacyToNew3D
  * Perform any necessary migrations on old layout data.
  */
 export function migratePanelsState(data: MarkOptional<LayoutData, "configById">): LayoutData {
-  let result: LayoutData = { ...data, configById: data.configById ?? data.savedProps ?? {} };
-  delete result.savedProps;
+  let result: LayoutData = { ...data, configById: data.configById ?? {} };
 
   result = migrateLegacyToNew3DPanels(result);
 
@@ -46,10 +45,8 @@ export function migrateLayout(value: unknown): Layout {
   if (!baseline) {
     if (layout.working) {
       baseline = layout.working;
-    } else if (layout.data) {
-      baseline = { data: layout.data, savedAt: now };
-    } else if (layout.state) {
-      baseline = { data: layout.state, savedAt: now };
+    } else if (layout.baseline?.data) {
+      baseline = { data: layout.baseline.data, savedAt: now };
     } else {
       throw new Error("Invariant violation - layout item is missing data");
     }

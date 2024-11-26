@@ -37,7 +37,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function SignInPrompt(props: SignInPromptProps): JSX.Element {
+export default function SignInPrompt(props: SignInPromptProps): React.JSX.Element {
   const { onDismiss } = props;
   const { signIn } = useCurrentUser();
   const { classes } = useStyles();

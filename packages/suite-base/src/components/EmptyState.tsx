@@ -29,7 +29,7 @@ export default function EmptyState({
 }: {
   children: ReactNode;
   className?: string;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes, cx } = useStyles();
 
   return (

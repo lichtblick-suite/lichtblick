@@ -16,7 +16,7 @@ export function ContextMenu(props: {
   messagePaths: DraggedMessagePath[];
   anchorPosition: NonNullable<MenuProps["anchorPosition"]>;
   onClose: () => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { messagePaths, anchorPosition, onClose } = props;
   const [, copyToClipboard] = useCopyToClipboard();
   const { t } = useTranslation("topicList");

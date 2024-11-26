@@ -40,7 +40,7 @@ async function tryCreateIndexedReader(readable: McapTypes.IReadable) {
       return undefined;
     }
     return reader;
-  } catch (err) {
+  } catch (err: unknown) {
     log.error(err);
     return undefined;
   }

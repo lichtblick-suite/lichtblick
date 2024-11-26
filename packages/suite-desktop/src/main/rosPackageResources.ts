@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { DOMParser } from "@xmldom/xmldom";
-import { protocol } from "electron";
+import { protocol, net } from "electron";
 import { promises as fs } from "fs";
 import path from "path";
 import { PNG } from "pngjs";
@@ -37,7 +37,8 @@ export async function rosPackageNameAtPath(packagePath: string): Promise<string 
       encoding: "utf-8",
     });
     return rosPackageName(contents);
-  } catch (err) {
+  } catch (err: unknown) {
+    log.error(err);
     return undefined;
   }
 }
@@ -120,7 +121,7 @@ export async function findRosPackage(
 
 // https://source.chromium.org/chromium/chromium/src/+/master:net/base/net_error_list.h
 // The error code for registerFileProtocol must be from the net error list
-const NET_ERROR_FAILED = -2;
+// const NET_ERROR_FAILED = -2;
 
 /**
  * Register handlers for package: protocol
@@ -128,7 +129,7 @@ const NET_ERROR_FAILED = -2;
  * The package: protocol handler attempts to load resources using ROS_PACKAGE_PATH lookup semantics.
  */
 export function registerRosPackageProtocolHandlers(): void {
-  protocol.registerFileProtocol("package", async (request, callback) => {
+  protocol.handle("package", async (request) => {
     try {
       // Give preference to the ROS_PACKAGE_PATH app setting over the environment variable
       const rosPackagePath =
@@ -156,10 +157,10 @@ export function registerRosPackageProtocolHandlers(): void {
 
       const resolvedResourcePath = path.join(pkgRoot, ...relPath.split("/"));
       log.info(`Resolved: ${resolvedResourcePath}`);
-      callback({ path: resolvedResourcePath });
-    } catch (err) {
-      log.error(err);
-      callback({ error: NET_ERROR_FAILED });
+      return await net.fetch(resolvedResourcePath);
+    } catch (err: unknown) {
+      log.error("Error loading from ROS package url", request.url, err);
+      return Response.error();
     }
   });
 
@@ -167,7 +168,7 @@ export function registerRosPackageProtocolHandlers(): void {
   // ModelCache modifies `package://` urls ending in `.tiff?` to x-foxglove-converted-tiff.
   //
   // This handler converts the .tiff file into a PNG file which is supported in <img> tags
-  protocol.registerBufferProtocol("x-foxglove-converted-tiff", async (request, callback) => {
+  protocol.handle("x-foxglove-converted-tiff", async (request) => {
     try {
       // Give preference to the ROS_PACKAGE_PATH app setting over the environment variable
       const rosPackagePath =
@@ -204,10 +205,10 @@ export function registerRosPackageProtocolHandlers(): void {
       const png = new PNG({ width: ifd.width, height: ifd.height });
       png.data = Buffer.from(UTIF.toRGBA8(ifd));
       const pngData = PNG.sync.write(png);
-      callback({ mimeType: "image/png", data: pngData });
-    } catch (err) {
+      return new Response(Buffer.from(pngData), { headers: { "Content-Type": "image/png" } });
+    } catch (err: unknown) {
       log.warn("Error loading from ROS package url", request.url, err);
-      callback({ error: NET_ERROR_FAILED });
+      return Response.error();
     }
   });
 }

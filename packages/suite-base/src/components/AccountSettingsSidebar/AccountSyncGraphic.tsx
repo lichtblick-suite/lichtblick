@@ -9,7 +9,7 @@ type Props = {
   width?: number;
 };
 
-export default function AccountSyncGraphic(props: Props): JSX.Element {
+export default function AccountSyncGraphic(props: Props): React.JSX.Element {
   const { width } = props;
   return (
     <svg width={width} viewBox="0 0 256 256">

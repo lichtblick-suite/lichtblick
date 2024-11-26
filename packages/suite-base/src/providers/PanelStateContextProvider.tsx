@@ -112,7 +112,7 @@ type Props = PropsWithChildren<{
   initialState?: Partial<PanelStateStore>;
 }>;
 
-export function PanelStateContextProvider(props: Props): JSX.Element {
+export function PanelStateContextProvider(props: Props): React.JSX.Element {
   const { children, initialState } = props;
 
   const [store] = useState(() => createPanelStateStore(initialState));

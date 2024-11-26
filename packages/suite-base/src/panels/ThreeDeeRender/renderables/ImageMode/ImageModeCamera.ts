@@ -244,8 +244,8 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
 
     const { width: imgWidth, height: imgHeight } = model;
 
-    const fx = model.P[0]!;
-    const fy = model.P[5]!;
+    const fx = model.P[0];
+    const fy = model.P[5];
     let rendererAspect = this.#canvasSize.width / this.#canvasSize.height;
     const imageAspect = imgWidth / fx / (imgHeight / fy);
 

@@ -99,7 +99,7 @@ function Foxglove_PointCloud({
   stixelsEnabled?: boolean;
   debugPicking?: boolean;
   includeSettings?: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -244,7 +244,7 @@ function Foxglove_PointCloud_Intensity_Base({
 }: {
   minValue?: number;
   maxValue?: number;
-}): JSX.Element {
+}): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -508,7 +508,7 @@ export const Foxglove_PointCloud_TwoDimensions: StoryObj = {
   },
 };
 
-function HistoryPickingStory(): JSX.Element {
+function HistoryPickingStory(): React.JSX.Element {
   const topics: Topic[] = [{ name: "/pointcloud", schemaName: "foxglove.PointCloud" }];
   const point_stride = 12;
   function makePointCloudData(t: number) {
@@ -644,7 +644,7 @@ export const Foxglove_PointCloud_Distance: StoryObj = {
   render: () => <Foxglove_PointCloud_Distance_Base />,
 };
 
-function Foxglove_PointCloud_Distance_Base(): JSX.Element {
+function Foxglove_PointCloud_Distance_Base(): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },

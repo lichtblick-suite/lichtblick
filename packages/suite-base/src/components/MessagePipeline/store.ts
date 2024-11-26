@@ -180,7 +180,7 @@ export function createMessagePipelineStore({
           if (player?.fetchAsset) {
             try {
               return await player.fetchAsset(uri);
-            } catch (err) {
+            } catch (err: unknown) {
               if (canBuiltinFetchPkgUri) {
                 // Fallback to a builtin _fetch_ call if the asset couldn't be loaded through the player.
                 return await builtinFetch(uri, options);

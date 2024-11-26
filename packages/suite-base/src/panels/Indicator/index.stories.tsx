@@ -15,7 +15,7 @@ export default {
   title: "panels/IndicatorLight",
   component: Indicator,
   decorators: [
-    (StoryComponent: StoryFn, { parameters }: StoryContext): JSX.Element => {
+    (StoryComponent: StoryFn, { parameters }: StoryContext): React.JSX.Element => {
       return (
         <PanelSetup fixture={parameters.panelSetup?.fixture}>
           <StoryComponent />
@@ -84,7 +84,7 @@ export const BackgroundStyle: StoryObj = {
   },
 };
 
-const BooleanStory = (): JSX.Element => {
+const BooleanStory = (): React.JSX.Element => {
   return (
     <Indicator
       overrideConfig={{
@@ -129,7 +129,7 @@ export const String: StoryObj = {
   parameters: { panelSetup: { fixture: makeFixture("hello") } },
 };
 
-const NumberStory = (): JSX.Element => {
+const NumberStory = (): React.JSX.Element => {
   return (
     <Indicator
       overrideConfig={{

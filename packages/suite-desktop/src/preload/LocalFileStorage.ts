@@ -41,8 +41,8 @@ export default class LocalFileStorage implements Storage {
         const content = await fs.readFile(filePath);
         result.push(content);
       }
-    } catch (err) {
-      if (err.code !== "ENOENT") {
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
         throw err;
       }
     }
@@ -66,8 +66,8 @@ export default class LocalFileStorage implements Storage {
     options?: { encoding?: "utf8" },
   ): Promise<StorageContent | undefined> {
     const filePath = await this.#makeFilePath(datastore, key);
-    return await fs.readFile(filePath, options).catch((err) => {
-      if (err.code !== "ENOENT") {
+    return await fs.readFile(filePath, options).catch((err: unknown) => {
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
         throw err;
       }
       return undefined;
@@ -107,8 +107,8 @@ export default class LocalFileStorage implements Storage {
     const datastoresDir = path.join(basePath, DATASTORES_DIR_NAME);
     try {
       await fs.mkdir(datastoresDir);
-    } catch (err) {
-      if (err.code !== "EEXIST") {
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST") {
         throw err;
       }
     }

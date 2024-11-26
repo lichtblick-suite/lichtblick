@@ -70,7 +70,7 @@ function ValidatedInputBase({
   maxHeight,
   stringify,
   value,
-}: BaseProps & ParseAndStringifyFn): JSX.Element {
+}: BaseProps & ParseAndStringifyFn): React.JSX.Element {
   const { classes, cx } = useStyles();
   const [error, setError] = useState<string>("");
   const [inputStr, setInputStr] = useState<string>("");
@@ -197,7 +197,7 @@ function ValidatedInputBase({
   );
 }
 
-export default function JsonInput(props: BaseProps): JSX.Element {
+export default function JsonInput(props: BaseProps): React.JSX.Element {
   function stringify(val: unknown) {
     if (val === '""') {
       return val;

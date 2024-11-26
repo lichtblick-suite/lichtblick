@@ -85,7 +85,7 @@ export function estimateMessageObjectSize(
         continue;
       }
 
-      if (checkedTypes != undefined && checkedTypes.includes(field.type)) {
+      if (checkedTypes?.includes(field.type) ?? false) {
         // E.g. protobuf allows types to reference itself.
         // For that reason we bail out here to avoid an infinite loop.
         continue;

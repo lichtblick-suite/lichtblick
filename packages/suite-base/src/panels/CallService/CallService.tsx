@@ -88,7 +88,7 @@ function parseInput(value: string): { error?: string; parsedObject?: unknown } {
 }
 
 // Wrapper component with ThemeProvider so useStyles in the panel receives the right theme.
-export function CallService({ context }: Props): JSX.Element {
+export function CallService({ context }: Props): React.JSX.Element {
   const [colorScheme, setColorScheme] = useState<Palette["mode"]>("light");
 
   return (
@@ -100,7 +100,7 @@ export function CallService({ context }: Props): JSX.Element {
 
 function CallServiceContent(
   props: Props & { setColorScheme: Dispatch<SetStateAction<Palette["mode"]>> },
-): JSX.Element {
+): React.JSX.Element {
   const { context, setColorScheme } = props;
 
   // panel extensions must notify when they've completed rendering
@@ -193,7 +193,7 @@ function CallServiceContent(
             2,
           ) ?? "",
       });
-    } catch (err) {
+    } catch (err: unknown) {
       setState({ status: "error", value: (err as Error).message });
       log.error(err);
     }

@@ -668,15 +668,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
         const responseMsgEncoding = service.response?.encoding ?? this.#serviceCallEncoding;
 
         try {
-          if (
-            (service.request == undefined && service.requestSchema == undefined) ||
-            (service.response == undefined && service.responseSchema == undefined)
-          ) {
+          if (service.request == undefined || service.response == undefined) {
             throw new Error("Invalid service definition, at least one required field is missing");
-          } else if (
-            !defaultSchemaEncoding &&
-            (service.request == undefined || service.response == undefined)
-          ) {
+          } else if (!defaultSchemaEncoding) {
             throw new Error("Cannot determine service request or response schema encoding");
           } else if (!SUPPORTED_SERVICE_ENCODINGS.includes(requestMsgEncoding)) {
             const supportedEncodingsStr = SUPPORTED_SERVICE_ENCODINGS.join(", ");
@@ -691,8 +685,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
               messageEncoding: requestMsgEncoding,
               schema: {
                 name: requestType,
-                encoding: service.request?.schemaEncoding ?? defaultSchemaEncoding,
-                data: textEncoder.encode(service.request?.schema ?? service.requestSchema),
+                encoding: service.request.schemaEncoding,
+                data: textEncoder.encode(service.request.schema),
               },
             },
             parseChannelOptions,
@@ -702,8 +696,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
               messageEncoding: responseMsgEncoding,
               schema: {
                 name: responseType,
-                encoding: service.response?.schemaEncoding ?? defaultSchemaEncoding,
-                data: textEncoder.encode(service.response?.schema ?? service.responseSchema),
+                encoding: service.response.schemaEncoding,
+                data: textEncoder.encode(service.response.schema),
               },
             },
             parseChannelOptions,
@@ -1120,8 +1114,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
         try {
           const data = parsedResponse.deserialize(response.data);
           resolve(data as Record<string, unknown>);
-        } catch (error) {
-          reject(error);
+        } catch (error: unknown) {
+          reject(error as Error);
         }
       });
     });

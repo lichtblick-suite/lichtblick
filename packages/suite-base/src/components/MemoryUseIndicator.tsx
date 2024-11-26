@@ -36,7 +36,7 @@ function toMB(bytes: number): number {
   return bytes / 1024 / 1024;
 }
 
-function MemoryUseIndicator(): JSX.Element {
+function MemoryUseIndicator(): React.JSX.Element {
   const memoryInfo = useMemoryInfo({ refreshIntervalMs: 5000 });
   const { classes, cx } = useStyles();
   const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);

@@ -90,7 +90,7 @@ const useStyles = makeStyles<StackProps>({ name: "FoxgloveStack" })((theme, prop
 }));
 
 export default forwardRef<HTMLDivElement, PropsWithChildren<StackProps>>(
-  function Stack(props, ref): JSX.Element {
+  function Stack(props, ref): React.JSX.Element {
     const {
       alignItems,
       alignSelf,

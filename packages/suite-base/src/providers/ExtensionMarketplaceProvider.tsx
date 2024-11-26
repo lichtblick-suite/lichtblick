@@ -17,7 +17,7 @@ const MARKETPLACE_URL =
 
 export default function ExtensionMarketplaceProvider({
   children,
-}: React.PropsWithChildren): JSX.Element {
+}: React.PropsWithChildren): React.JSX.Element {
   const getAvailableExtensions = useCallback(async (): Promise<ExtensionMarketplaceDetail[]> => {
     const res = await fetch(MARKETPLACE_URL);
     return (await res.json()) as ExtensionMarketplaceDetail[];

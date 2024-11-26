@@ -69,7 +69,7 @@ export const VerticalBars = React.memo(function VerticalBars({
   coordinator,
   hoverComponentId,
   xAxisIsPlaybackTime,
-}: Props): JSX.Element {
+}: Props): React.JSX.Element {
   const { classes, cx, theme } = useStyles();
 
   const messagePipelineSubscribe = useMessagePipelineSubscribe();

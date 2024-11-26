@@ -68,7 +68,7 @@ export default {
   excludeStories: ["StorybookDecorator"],
 };
 
-export function StorybookDecorator(Wrapped: StoryFn): JSX.Element {
+export function StorybookDecorator(Wrapped: StoryFn): React.JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
       <WorkspaceContextProvider>

@@ -18,7 +18,7 @@ export default {
 
 const ITEMS = new Array(3).fill({});
 
-function Box({ children }: PropsWithChildren<StackProps>): JSX.Element {
+function Box({ children }: PropsWithChildren<StackProps>): React.JSX.Element {
   const theme = useTheme();
 
   return (

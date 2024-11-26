@@ -56,7 +56,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-function PanelActionsDropdownComponent({ isUnknownPanel }: Props): JSX.Element {
+function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Element {
   const { classes, cx } = useStyles();
   const [menuAnchorEl, setMenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [subMenuAnchorEl, setSubmenuAnchorEl] = useState<undefined | HTMLElement>(undefined);

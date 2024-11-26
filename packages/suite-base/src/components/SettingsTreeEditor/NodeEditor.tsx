@@ -152,7 +152,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-function ExpansionArrow({ expanded }: { expanded: boolean }): JSX.Element {
+function ExpansionArrow({ expanded }: { expanded: boolean }): React.JSX.Element {
   const { classes } = useStyles();
 
   const Component = expanded ? ArrowDownIcon : ArrowRightIcon;
@@ -197,7 +197,7 @@ type State = {
   visibilityFilter: SelectVisibilityFilterValue;
 };
 
-function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
+function NodeEditorComponent(props: NodeEditorProps): React.JSX.Element {
   const { actionHandler, defaultOpen = true, filter, focusedPath, settings = {} } = props;
   const [state, setState] = useImmer<State>({
     editing: false,

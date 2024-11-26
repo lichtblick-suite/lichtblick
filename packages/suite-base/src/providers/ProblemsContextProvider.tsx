@@ -41,7 +41,7 @@ export default function ProblemsContextProvider({
   children,
 }: {
   children?: ReactNode;
-}): JSX.Element {
+}): React.JSX.Element {
   const [store] = useState(createProblemsStore);
   return <ProblemsContext.Provider value={store}>{children}</ProblemsContext.Provider>;
 }

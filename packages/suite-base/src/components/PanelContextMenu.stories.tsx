@@ -24,7 +24,7 @@ export default {
 
 const DUMMY_CLASS = uuid();
 
-function DummyPanel(): JSX.Element {
+function DummyPanel(): React.JSX.Element {
   const getItems = useCallback(
     (): PanelContextMenuItem[] => [
       { type: "item", label: "Download Image", onclick: () => undefined },

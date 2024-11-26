@@ -25,7 +25,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function SigninForm(): JSX.Element {
+export default function SigninForm(): React.JSX.Element {
   const { classes } = useStyles();
   const { signIn } = useCurrentUser();
 

@@ -20,7 +20,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import ErrorBoundary from "./ErrorBoundary";
 
-function Broken({ depth = 1 }: { depth?: number }): JSX.Element {
+function Broken({ depth = 1 }: { depth?: number }): React.JSX.Element {
   if (depth > 20) {
     throw Object.assign(new Error("Hello!"), {
       stack: `

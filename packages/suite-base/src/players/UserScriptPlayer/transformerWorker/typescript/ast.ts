@@ -229,9 +229,9 @@ export const findReturnType = (
   if (symbol.declarations.length === 1) {
     declaration = symbol.declarations[0];
   } else {
-    declaration = symbol.declarations.filter(
+    declaration = symbol.declarations.find(
       (decl) => decl.kind === ts.SyntaxKind.InterfaceDeclaration,
-    )[0];
+    );
   }
 
   if (!declaration) {
@@ -454,6 +454,7 @@ export const constructDatatypes = (
         // One solution could potentially to 'cast' this node as an
         // ArrayTypeNode and recurse. Opting out of using 'Array' keyword for
         // now.
+
         if (nextSymbol?.escapedName === "Array") {
           throw new DatatypeExtractionError(preferArrayLiteral);
         }

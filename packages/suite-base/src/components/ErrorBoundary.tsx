@@ -15,7 +15,7 @@ import { AppError } from "@lichtblick/suite-base/util/errors";
 import ErrorDisplay from "./ErrorDisplay";
 
 type Props = {
-  actions?: JSX.Element;
+  actions?: React.JSX.Element;
   showErrorDetails?: boolean;
   hideErrorSourceLocations?: boolean;
 };

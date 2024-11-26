@@ -17,7 +17,7 @@ import type { SceneExtensionConfig } from "@lichtblick/suite-base/panels/ThreeDe
 import type { Player } from "@lichtblick/suite-base/players/types";
 
 interface IAppContext {
-  appBarLayoutButton?: JSX.Element;
+  appBarLayoutButton?: React.JSX.Element;
   appBarMenuItems?: readonly AppBarMenuItem[];
   createEvent?: (args: {
     deviceId: string;
@@ -27,15 +27,15 @@ interface IAppContext {
   }) => Promise<void>;
   injectedFeatures?: InjectedFeatures;
   importLayoutFile?: (fileName: string, data: LayoutData) => Promise<void>;
-  layoutEmptyState?: JSX.Element;
-  layoutBrowser?: () => JSX.Element;
+  layoutEmptyState?: React.JSX.Element;
+  layoutBrowser?: () => React.JSX.Element;
   sidebarItems?: readonly [[string, { iconName: string; title: string }]];
-  syncAdapters?: readonly JSX.Element[];
-  workspaceExtensions?: readonly JSX.Element[];
-  extensionSettings?: JSX.Element;
+  syncAdapters?: readonly React.JSX.Element[];
+  workspaceExtensions?: readonly React.JSX.Element[];
+  extensionSettings?: React.JSX.Element;
   renderSettingsStatusButton?: (
     nodeOrField: Immutable<SettingsTreeNode | SettingsTreeField>,
-  ) => JSX.Element | undefined;
+  ) => React.JSX.Element | undefined;
   workspaceStoreCreator?: (
     initialState?: Partial<WorkspaceContextStore>,
   ) => StoreApi<WorkspaceContextStore>;

@@ -32,7 +32,7 @@ export default {
   parameters: { colorScheme: "light" },
 };
 
-const ImageWith3D = (initialConfig: ImageModeConfig): JSX.Element => {
+const ImageWith3D = (initialConfig: ImageModeConfig): React.JSX.Element => {
   const topics: Topic[] = [
     { name: "annotations", schemaName: "foxglove.ImageAnnotations" },
     { name: "camera/calibration", schemaName: "foxglove.CameraCalibration" },

@@ -52,7 +52,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
     for (const record of records) {
       try {
         results.push(migrateLayout(record.layout));
-      } catch (err) {
+      } catch (err: unknown) {
         log.error(err);
       }
     }
@@ -132,7 +132,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
         // use a separate transaction per item so we can be sure it is safe to delete from localStorage
         await (await this.#db).put("layouts", { namespace, layout });
         localStorage.removeItem(key);
-      } catch (err) {
+      } catch (err: unknown) {
         log.error(err);
       }
     }

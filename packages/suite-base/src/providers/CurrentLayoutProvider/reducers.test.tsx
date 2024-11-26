@@ -803,7 +803,7 @@ describe("layout reducers", () => {
       });
       const { layout, configById } = panels;
       expect(layout).toEqual("Tab!a");
-      const tabLayout = (configById["Tab!a"] as TabPanelConfig)!.tabs[0]!.layout!;
+      const tabLayout = (configById["Tab!a"] as TabPanelConfig).tabs[0]!.layout!;
       expect(getPanelTypeFromId(tabLayout as string)).toEqual("RawMessages");
       expect(configById[tabLayout as string]).toEqual(rawMessagesConfig);
     });

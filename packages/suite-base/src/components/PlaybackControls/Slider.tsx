@@ -59,7 +59,7 @@ function defaultRenderSlider(value: number | undefined, className: string): Reac
   return <div className={className} style={{ width: `${value * 100}%` }} />;
 }
 
-export default function Slider(props: Props): JSX.Element {
+export default function Slider(props: Props): React.JSX.Element {
   const {
     fraction,
     disabled = false,

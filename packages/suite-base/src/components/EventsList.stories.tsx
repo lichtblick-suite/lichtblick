@@ -16,7 +16,7 @@ import { makeMockEvents } from "@lichtblick/suite-base/test/mocks/makeMockEvents
 
 import { EventsList } from "./EventsList";
 
-function Wrapper(Child: StoryFn): JSX.Element {
+function Wrapper(Child: StoryFn): React.JSX.Element {
   return (
     <MockMessagePipelineProvider>
       <EventsProvider>

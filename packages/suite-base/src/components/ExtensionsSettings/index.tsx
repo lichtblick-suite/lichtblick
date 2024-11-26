@@ -50,7 +50,7 @@ function displayNameForNamespace(namespace: string): string {
 function ExtensionListEntry(props: {
   entry: Immutable<ExtensionMarketplaceDetail>;
   onClick: () => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const {
     entry: { id, description, name, publisher, version },
     onClick,
@@ -151,7 +151,7 @@ export default function ExtensionsSettings(): React.ReactElement {
   );
 
   useEffect(() => {
-    refreshMarketplaceEntries().catch((error) => {
+    refreshMarketplaceEntries().catch((error: unknown) => {
       log.error(error);
     });
   }, [refreshMarketplaceEntries]);
@@ -193,7 +193,7 @@ export default function ExtensionsSettings(): React.ReactElement {
             </Stack>
             {entries.map((entry) => (
               <ExtensionListEntry
-                key={`${entry.id}`}
+                key={entry.id}
                 entry={entry}
                 onClick={() => {
                   setFocusedExtension({ installed: true, entry });

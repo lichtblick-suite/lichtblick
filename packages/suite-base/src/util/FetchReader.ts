@@ -15,6 +15,10 @@
 //   You may not use this file except in compliance with the License.
 import { EventEmitter } from "eventemitter3";
 
+import Log from "@lichtblick/log";
+
+const log = Log.getLogger(__filename);
+
 type EventTypes = {
   data: (chunk: Uint8Array) => void;
   end: () => void;
@@ -46,7 +50,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
     let data: Response;
     try {
       data = await this.#response;
-    } catch (err) {
+    } catch (err: unknown) {
       this.emit("error", new Error(`GET <${this.#url}> failed: ${err}`));
       return undefined;
     }
@@ -72,7 +76,8 @@ export default class FetchReader extends EventEmitter<EventTypes> {
       // If the getReader method is called on an already locked stream, an exception will be thrown.
       // This is caused by server-side errors, but we should catch it anyway.
       this.#reader = data.body.getReader();
-    } catch (err) {
+    } catch (err: unknown) {
+      log.error(`Failed to get reader for <${this.#url}>`, err);
       this.emit("error", new Error(`GET <${this.#url}> succeeded, but failed to stream`));
       return undefined;
     }
@@ -98,7 +103,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
             this.emit("data", value);
             this.read();
           })
-          .catch((unk) => {
+          .catch((unk: unknown) => {
             // canceling the xhr request causes the promise to reject
             if (this.#aborted) {
               this.emit("end");
@@ -108,7 +113,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
             this.emit("error", err);
           });
       })
-      .catch((unk) => {
+      .catch((unk: unknown) => {
         const err = unk instanceof Error ? unk : new Error(unk as string);
         this.emit("error", err);
       });

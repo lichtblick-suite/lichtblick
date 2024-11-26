@@ -53,7 +53,9 @@ const useStyles = makeStyles()((theme) => ({
 const selectHoveredEvents = (store: TimelineInteractionStateStore) => store.eventsAtHoverValue;
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 
-export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNull | JSX.Element {
+export function PlaybackControlsTooltipContent(params: {
+  stamp: Time;
+}): ReactNull | React.JSX.Element {
   const { stamp } = params;
   const { timeFormat, formatTime, formatDate } = useAppTimeFormat();
   const hoveredEvents = useTimelineInteractionState(selectHoveredEvents);

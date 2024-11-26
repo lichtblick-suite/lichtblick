@@ -86,8 +86,9 @@ function makeUnsavedLayout(id: number): Layout {
 
 async function clickMenuButtonAction(index: number) {
   const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[index]) {
-    fireEvent.click(actions[index]!);
+  const action = actions[index];
+  if (action != undefined) {
+    fireEvent.click(action);
   }
 }
 
@@ -112,7 +113,7 @@ async function selectAllAction() {
   layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
 }
 
-function WithSetup(Child: StoryFn, ctx: StoryContext): JSX.Element {
+function WithSetup(Child: StoryFn, ctx: StoryContext): React.JSX.Element {
   const storage = useMemo(
     () =>
       new MockLayoutStorage(

@@ -109,7 +109,7 @@ function EventViewComponent(params: {
   onClick: (event: TimelinePositionedEvent) => void;
   onHoverStart: (event: TimelinePositionedEvent) => void;
   onHoverEnd: (event: TimelinePositionedEvent) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { event, filter, formattedTime, isHovered, isSelected, onClick, onHoverStart, onHoverEnd } =
     params;
   const { classes, cx } = useStyles();

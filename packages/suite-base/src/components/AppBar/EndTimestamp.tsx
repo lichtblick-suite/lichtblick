@@ -19,7 +19,7 @@ import { formatTimeRaw, isAbsoluteTime } from "@lichtblick/suite-base/util/time"
 
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 
-export function EndTimestamp(): JSX.Element | ReactNull {
+export function EndTimestamp(): React.JSX.Element | ReactNull {
   const endTime = useMessagePipeline(selectEndTime);
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
   const { timeFormat } = useAppTimeFormat();

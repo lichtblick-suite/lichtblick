@@ -29,7 +29,7 @@ function selectLayoutData(state: LayoutState) {
 
 const log = Log.getLogger(__filename);
 
-export function CurrentLayoutLocalStorageSyncAdapter(): JSX.Element {
+export function CurrentLayoutLocalStorageSyncAdapter(): React.JSX.Element {
   const { selectedSource } = usePlayerSelection();
 
   const { setCurrentLayout, getCurrentLayoutState } = useCurrentLayoutActions();

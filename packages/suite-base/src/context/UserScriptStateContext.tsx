@@ -103,7 +103,7 @@ function create() {
   });
 }
 
-export function UserScriptStateProvider({ children }: React.PropsWithChildren): JSX.Element {
+export function UserScriptStateProvider({ children }: React.PropsWithChildren): React.JSX.Element {
   const [value] = useState(() => create());
 
   return (

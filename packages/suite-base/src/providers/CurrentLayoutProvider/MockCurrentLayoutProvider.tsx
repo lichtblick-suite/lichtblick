@@ -33,7 +33,7 @@ export default function MockCurrentLayoutProvider({
 }: React.PropsWithChildren<{
   initialState?: Partial<LayoutData>;
   onAction?: (action: PanelsActions) => void;
-}>): JSX.Element {
+}>): React.JSX.Element {
   const layoutStateListeners = useRef(new Set<(_: LayoutState) => void>());
   const addLayoutStateListener = useCallback((listener: (_: LayoutState) => void) => {
     layoutStateListeners.current.add(listener);

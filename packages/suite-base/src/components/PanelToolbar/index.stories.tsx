@@ -31,7 +31,9 @@ import PanelToolbar from "./index";
 
 import "react-mosaic-component/react-mosaic-component.css";
 
-function MosaicWrapper(props: PropsWithChildren<{ layout?: any; width?: number }>): JSX.Element {
+function MosaicWrapper(
+  props: PropsWithChildren<{ layout?: any; width?: number }>,
+): React.JSX.Element {
   const { children, layout = "dummy", width = 268 } = props;
   const theme = useTheme();
 
@@ -71,7 +73,7 @@ function MosaicWrapper(props: PropsWithChildren<{ layout?: any; width?: number }
 export default {
   title: "components/PanelToolbar",
   decorators: [
-    (Story: StoryFn): JSX.Element => {
+    (Story: StoryFn): React.JSX.Element => {
       // Provide all stories with PanelContext and current layout
       return (
         <MockCurrentLayoutProvider>
@@ -84,7 +86,7 @@ export default {
   ],
 };
 
-const ToolbarContent = (): JSX.Element => (
+const ToolbarContent = (): React.JSX.Element => (
   <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>Some controls here</div>
 );
 
@@ -183,7 +185,7 @@ export const MenuWithSiblingPanel: PanelToolbarStoryObj = {
 };
 
 export const MenuForTabPanel: PanelToolbarStoryObj = {
-  render: (args): JSX.Element => (
+  render: (args): React.JSX.Element => (
     <MosaicWrapper {...args}>
       <PanelToolbar>
         <ToolbarContent />

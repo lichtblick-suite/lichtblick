@@ -60,7 +60,7 @@ self.onmessage = (event: MessageEvent<ToWorkerMessage>) => {
             });
           }
         };
-      } catch (err) {
+      } catch (err: unknown) {
         // try-catch is needed to catch `Mixed Content` errors in Chrome, where the client
         // attempts to load `ws://` from `https://`. (Safari would catch these in `ws.onerror`
         // but with `undefined` as an error.)

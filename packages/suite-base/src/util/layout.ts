@@ -122,12 +122,13 @@ function getLayoutWithNewPanelIds(
   for (const key in layout) {
     if (typeof layout[key] === "object" && !Array.isArray(layout[key])) {
       newLayout[key] = getLayoutWithNewPanelIds(layout[key] as IndexableMosaic, panelIdMap);
-    } else if (typeof layout[key] === "string" && panelIdMap[layout[key] as string] != undefined) {
+    } else if (panelIdMap[layout[key] as string] != undefined) {
       newLayout[key] = panelIdMap[layout[key] as string];
     } else {
       newLayout[key] = layout[key];
     }
   }
+
   return newLayout as unknown as MosaicNode<string>;
 }
 

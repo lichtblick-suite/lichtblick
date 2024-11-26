@@ -147,7 +147,8 @@ class BenchmarkPlayer implements Player {
         minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
         problemManager: this.#problemManager,
       });
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       log.error(err);
 
       const startStr = toRFC3339String(startTime);
@@ -276,7 +277,11 @@ class BenchmarkPlayer implements Player {
         const endFrame = performance.now();
         seekFramesMs.push(endFrame - startFrame);
       }
-      seekFramesMs.forEach((ms, i) => (seekFramesMsTotals[i]! += ms));
+      seekFramesMs.forEach((ms, i) => {
+        if (seekFramesMsTotals[i] != undefined) {
+          seekFramesMsTotals[i] += ms;
+        }
+      });
     }
 
     log.info(

@@ -59,7 +59,7 @@ export default function Metadata({
   datatype,
   message,
   diffMessage,
-}: Props): JSX.Element {
+}: Props): React.JSX.Element {
   const { classes } = useStyles();
 
   // Access these by ref so that our callbacks aren't invalidated and CopyButton

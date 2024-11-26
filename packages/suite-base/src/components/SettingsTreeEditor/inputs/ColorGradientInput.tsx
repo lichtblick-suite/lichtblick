@@ -24,7 +24,7 @@ export function ColorGradientInput({
   disabled?: boolean;
   onChange: (colors: [left: string, right: string]) => void;
   readOnly?: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   const [leftAnchor, setLeftAnchor] = useState<undefined | HTMLDivElement>(undefined);
   const [rightAnchor, setRightAnchor] = useState<undefined | HTMLDivElement>(undefined);
 

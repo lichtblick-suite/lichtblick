@@ -21,7 +21,7 @@ const useStyles = makeStyles()({
 /**
  * Message indiciating the panel is too old to be used with the current version of a configuration.
  */
-export function PanelConfigVersionError(): JSX.Element {
+export function PanelConfigVersionError(): React.JSX.Element {
   const { t } = useTranslation("panelConfigVersionGuard");
 
   const { classes } = useStyles();

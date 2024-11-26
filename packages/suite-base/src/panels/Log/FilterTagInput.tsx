@@ -36,7 +36,7 @@ export function FilterTagInput({
   items: string[];
   suggestions: string[];
   onChange: (items: string[]) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes } = useStyles();
 
   return (

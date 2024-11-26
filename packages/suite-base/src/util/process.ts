@@ -10,7 +10,7 @@
 // and uses setTimeout(..., 0). Instead we use queueMicrotask which is much faster.
 const process = {
   // We want to be able to use Function type for _fn_ param
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   nextTick: (fn: Function, ...args: unknown[]): void => {
     queueMicrotask(() => {
       fn(...args);

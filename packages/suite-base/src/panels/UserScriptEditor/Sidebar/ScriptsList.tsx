@@ -42,7 +42,7 @@ export function ScriptsList({
   selectedScriptId,
   selectedScript,
   setUserScripts,
-}: ScriptsListProps): JSX.Element {
+}: ScriptsListProps): React.JSX.Element {
   const { classes } = useStyles();
 
   return (

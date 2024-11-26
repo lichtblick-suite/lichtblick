@@ -42,7 +42,7 @@ export function UnsavedChangesPrompt({
   onComplete: (_: UnsavedChangesResolution) => void;
   defaultSelectedKey?: Exclude<UnsavedChangesResolution["type"], "cancel">;
   defaultPersonalCopyName?: string;
-}): JSX.Element {
+}): React.JSX.Element {
   const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedKey);
 
   const handleChoiceGroupChange = React.useCallback(
@@ -154,7 +154,7 @@ export function UnsavedChangesPrompt({
 }
 
 export function useUnsavedChangesPrompt(): {
-  unsavedChangesPrompt?: JSX.Element;
+  unsavedChangesPrompt?: React.JSX.Element;
   openUnsavedChangesPrompt: (item: Layout) => Promise<UnsavedChangesResolution>;
 } {
   const [layout, setLayout] = useState<Layout | undefined>();

@@ -100,7 +100,7 @@ type RpcSend = <T>(
 const supportsOffscreenCanvas =
   typeof HTMLCanvasElement.prototype.transferControlToOffscreen === "function";
 
-function Chart(props: Props): JSX.Element {
+function Chart(props: Props): React.JSX.Element {
   const [id] = useState(() => uuidv4());
 
   const initialized = useRef(false);
@@ -219,6 +219,7 @@ function Chart(props: Props): JSX.Element {
     }
 
     if (prev.data !== data) {
+      // @ts-expect-error that's the original code, with nem eslint it is pointing out that data is not defined
       prev.data = out.data = data;
     }
     if (prev.typedData !== typedData) {
@@ -362,9 +363,9 @@ function Chart(props: Props): JSX.Element {
       return;
     }
 
-    updateChart(newUpdate).catch((err: Error) => {
+    updateChart(newUpdate).catch((err: unknown) => {
       if (isMounted()) {
-        setUpdateError(err);
+        setUpdateError(err as Error);
       }
       console.error(err);
     });
@@ -518,6 +519,7 @@ function Chart(props: Props): JSX.Element {
 
       // Check mouse presence again in case the mouse has left the canvas while we
       // were waiting for the RPC call.
+
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (isMounted() && mousePresentRef.current) {
         onHover(elements);

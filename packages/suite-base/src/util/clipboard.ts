@@ -14,15 +14,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Log from "@lichtblick/log";
 import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
-function fallbackCopy(text: string) {
+const log = Log.getLogger(__filename);
+
+async function fallbackCopy(text: string) {
   const body = document.body;
   const el = document.createElement("textarea");
   body.appendChild(el);
   el.value = text;
   el.select();
-  document.execCommand("copy");
+  await navigator.clipboard.writeText(el.value);
   body.removeChild(el);
 }
 
@@ -35,11 +38,12 @@ export default {
       try {
         await navigator.clipboard.writeText(text);
         return;
-      } catch (error) {
-        fallbackCopy(text);
+      } catch (error: unknown) {
+        log.error("Failed to copy to clipboard", error);
+        await fallbackCopy(text);
       }
     } else {
-      fallbackCopy(text);
+      await fallbackCopy(text);
     }
   },
 };

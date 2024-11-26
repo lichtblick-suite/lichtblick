@@ -180,7 +180,7 @@ export interface LayoutActions {
      * existing state will be passed in.
      * @see `updateIfExists`
      */
-    getState(existingState?: unknown): unknown;
+    getState: (existingState?: unknown) => unknown;
   }): void;
 }
 

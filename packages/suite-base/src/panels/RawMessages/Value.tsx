@@ -76,7 +76,7 @@ const emptyAction: ValueActionItem = {
 
 const MAX_ACTION_ITEMS = 4;
 
-function Value(props: ValueProps): JSX.Element {
+function Value(props: ValueProps): React.JSX.Element {
   const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const {
     arrLabel,
@@ -116,7 +116,7 @@ function Value(props: ValueProps): JSX.Element {
           setCopied(false);
         }, 1500);
       })
-      .catch((e) => {
+      .catch((e: unknown) => {
         console.warn(e);
       });
   }, []);

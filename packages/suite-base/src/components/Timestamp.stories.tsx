@@ -28,7 +28,7 @@ type Props = {
   time: Time;
 };
 
-function TimestampStory(props: PropsWithChildren<Props>): JSX.Element {
+function TimestampStory(props: PropsWithChildren<Props>): React.JSX.Element {
   const { config, time } = props;
   const [value] = useState(() => makeMockAppConfiguration(config));
 

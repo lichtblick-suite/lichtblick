@@ -7,7 +7,7 @@
 
 import { SvgIcon, SvgIconProps } from "@mui/material";
 
-export default function PublishGoalIcon(props: SvgIconProps): JSX.Element {
+export default function PublishGoalIcon(props: SvgIconProps): React.JSX.Element {
   return (
     <SvgIcon {...props}>
       <g>

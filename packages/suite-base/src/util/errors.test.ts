@@ -52,10 +52,24 @@ describe("errors", () => {
       obj.foo = obj;
       const { message } = new AppError("internal error", obj);
       expect(message.includes("[ Either cyclic object or object with BigInt(s) ]")).toBeTruthy();
+
+      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenLastCalledWith(
+        "Failed to stringify extraInfo",
+        expect.any(Error),
+      );
+      (console.error as jest.Mock).mockReset();
     });
     it("catches BigInt values in extraInfo", () => {
       const { message } = new AppError("internal error", { val: BigInt(10) });
       expect(message.includes("[ Either cyclic object or object with BigInt(s) ]")).toBeTruthy();
+
+      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenLastCalledWith(
+        "Failed to stringify extraInfo",
+        expect.any(Error),
+      );
+      (console.error as jest.Mock).mockReset();
     });
   });
 });

@@ -102,7 +102,7 @@ function PlaybackTimeMethodMenu({
   timeRawString?: string;
   timeOfDayString?: string;
   setTimeFormat: (format: TimeDisplayMethod) => Promise<void>;
-}): JSX.Element {
+}): React.JSX.Element {
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const open = Boolean(anchorEl);
 
@@ -182,7 +182,7 @@ export function UnconnectedPlaybackTimeDisplay({
   onSeek,
   onPause,
   isPlaying,
-}: PlaybackTimeDisplayMethodProps): JSX.Element {
+}: PlaybackTimeDisplayMethodProps): React.JSX.Element {
   const { classes, cx } = useStyles({ timeDisplayMethod: appTimeFormat.timeFormat });
   const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 

@@ -71,7 +71,7 @@ export default {
   title: "panels/ThreeDeeRender/Interactions/InteractionContextMenu",
   component: InteractionContextMenu,
   decorators: [
-    (Story: StoryFn): JSX.Element => {
+    (Story: StoryFn): React.JSX.Element => {
       const theme = useTheme();
 
       return (

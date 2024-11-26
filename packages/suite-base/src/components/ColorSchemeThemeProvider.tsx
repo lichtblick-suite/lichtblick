@@ -11,7 +11,7 @@ import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-export function ColorSchemeThemeProvider({ children }: React.PropsWithChildren): JSX.Element {
+export function ColorSchemeThemeProvider({ children }: React.PropsWithChildren): React.JSX.Element {
   const [colorScheme = "system"] = useAppConfigurationValue<string>(AppSetting.COLOR_SCHEME);
   const systemSetting = useMedia("(prefers-color-scheme: dark)");
   const isDark = colorScheme === "dark" || (colorScheme === "system" && systemSetting);

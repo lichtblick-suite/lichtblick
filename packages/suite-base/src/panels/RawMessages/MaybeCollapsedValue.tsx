@@ -22,7 +22,7 @@ const COLLAPSE_TEXT_OVER_LENGTH = 512;
 
 type Props = { itemLabel: string };
 
-export default function MaybeCollapsedValue({ itemLabel }: Props): JSX.Element {
+export default function MaybeCollapsedValue({ itemLabel }: Props): React.JSX.Element {
   const lengthOverLimit = itemLabel.length >= COLLAPSE_TEXT_OVER_LENGTH;
 
   const [showingEntireLabel, setShowingEntireLabel] = useState(!lengthOverLimit);

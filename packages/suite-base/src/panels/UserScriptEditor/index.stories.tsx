@@ -225,7 +225,7 @@ export const UtilsUsageInNode: StoryObj = {
 
 export const EditorShowsNewCodeWhenUserNodesChange: StoryObj = {
   render: function Story() {
-    const ChangeUserNodeOnMount = useCallback(function ChangeUserNodeOnMount(): JSX.Element {
+    const ChangeUserNodeOnMount = useCallback(function ChangeUserNodeOnMount(): React.JSX.Element {
       const actions = useCurrentLayoutActions();
       useEffect(() => {
         actions.setUserScripts({
@@ -388,7 +388,7 @@ export const SidebarOpenTemplatesExplorer: StoryObj = {
 };
 
 const NeverLoad = () => {
-  // eslint-disable-next-line @typescript-eslint/no-throw-literal
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw new Promise(() => {
     // no-op
   });

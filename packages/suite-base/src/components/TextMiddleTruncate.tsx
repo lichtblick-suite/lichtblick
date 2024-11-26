@@ -55,7 +55,7 @@ export default function TextMiddleTruncate({
   endTextLength,
   className,
   style,
-}: Props): JSX.Element {
+}: Props): React.JSX.Element {
   const { classes, cx } = useStyles();
   let startTextLen = Math.max(
     0,

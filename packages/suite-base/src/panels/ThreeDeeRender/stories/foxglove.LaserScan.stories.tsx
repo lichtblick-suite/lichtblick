@@ -37,7 +37,7 @@ function Foxglove_LaserScan({
   rangeMin?: number;
   rangeMax?: number;
   settings: Record<string, unknown>;
-}): JSX.Element {
+}): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/scan", schemaName: "foxglove.LaserScan" },
     { name: "/tf", schemaName: "foxglove.FrameTransform" },
@@ -363,7 +363,7 @@ export const ComparisonWithPointCloudColors: StoryObj = {
   },
 };
 
-function HistoryPickingStory(): JSX.Element {
+function HistoryPickingStory(): React.JSX.Element {
   const topics: Topic[] = [{ name: "/scan", schemaName: "foxglove.LaserScan" }];
 
   const laserScan1: MessageEvent<LaserScan> = {

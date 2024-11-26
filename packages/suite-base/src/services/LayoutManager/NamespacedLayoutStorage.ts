@@ -26,7 +26,7 @@ export class NamespacedLayoutStorage {
   ) {
     this.#migration = (async function () {
       if (migrateUnnamespacedLayouts) {
-        await storage.migrateUnnamespacedLayouts?.(namespace).catch((error) => {
+        await storage.migrateUnnamespacedLayouts?.(namespace).catch((error: unknown) => {
           log.error("Migration failed:", error);
         });
       }
@@ -37,7 +37,7 @@ export class NamespacedLayoutStorage {
             fromNamespace: importFromNamespace,
             toNamespace: namespace,
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             log.error("Import failed:", error);
           });
       }

@@ -32,7 +32,7 @@ type Props = {
   graphRef: MutableRefObject<GraphMutation | undefined>;
 };
 
-export default function Graph(props: Props): JSX.Element {
+export default function Graph(props: Props): React.JSX.Element {
   const cy = useRef<Cytoscape.Core>();
   const graphRef = useRef<HTMLDivElement>(ReactNull);
 

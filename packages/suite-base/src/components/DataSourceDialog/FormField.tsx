@@ -17,7 +17,7 @@ type Props = {
   onError: (message: string) => void;
 };
 
-export function FormField(props: Props): JSX.Element {
+export function FormField(props: Props): React.JSX.Element {
   const [error, setError] = useState<string | undefined>();
   const field = props.field;
 

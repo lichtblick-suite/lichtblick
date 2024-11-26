@@ -26,7 +26,7 @@ const useStyles = makeStyles()({
  * Optionally, an offset can be provided to account for the fact that the search
  * string may be a substring of the original string.
  */
-export function HighlightChars(props: Props): JSX.Element {
+export function HighlightChars(props: Props): React.JSX.Element {
   const { str, indices, offset = 0 } = props;
   const { classes } = useStyles();
 

@@ -32,7 +32,7 @@ export function TopicRow({
   selected: boolean;
   onClick: React.MouseEventHandler<HTMLDivElement>;
   onContextMenu: React.MouseEventHandler<HTMLDivElement>;
-}): JSX.Element {
+}): React.JSX.Element {
   const { cx, classes } = useTopicListStyles();
 
   const topic = topicResult.item;

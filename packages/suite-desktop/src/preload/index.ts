@@ -46,7 +46,7 @@ export function main(): void {
   };
 
   // Initialize the RPC channel for electron-socket asynchronously
-  PreloaderSockets.Create().catch((err) => {
+  PreloaderSockets.Create().catch((err: unknown) => {
     log.error("Failed to initialize preloader sockets", err);
   });
 

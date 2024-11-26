@@ -31,7 +31,7 @@ type Props = {
   timeZone: string | undefined;
 };
 
-function Stamp(props: Props): JSX.Element {
+function Stamp(props: Props): React.JSX.Element {
   if (props.timestampFormat === "TOD") {
     const formattedTime = formatTime(props.stamp, props.timeZone);
     return <span>{formattedTime}</span>;

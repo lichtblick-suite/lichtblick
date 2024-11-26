@@ -24,27 +24,27 @@ const DEFAULT_FONT_SIZE = 12;
 const DEFAULT_PADDING = 4;
 
 // Supported annotation schema names
-const ANNOTATION_DATATYPES = [
+
+type AnnotationDatatypes =
   // Single marker
-  "visualization_msgs/ImageMarker",
-  "visualization_msgs/msg/ImageMarker",
-  "ros.visualization_msgs.ImageMarker",
+  | "visualization_msgs/ImageMarker"
+  | "visualization_msgs/msg/ImageMarker"
+  | "ros.visualization_msgs.ImageMarker"
   // Marker arrays
-  "foxglove_msgs/ImageMarkerArray",
-  "foxglove_msgs/msg/ImageMarkerArray",
-  "studio_msgs/ImageMarkerArray",
-  "studio_msgs/msg/ImageMarkerArray",
-  "visualization_msgs/ImageMarkerArray",
-  "visualization_msgs/msg/ImageMarkerArray",
-  "ros.visualization_msgs.ImageMarkerArray",
+  | "foxglove_msgs/ImageMarkerArray"
+  | "foxglove_msgs/msg/ImageMarkerArray"
+  | "studio_msgs/ImageMarkerArray"
+  | "studio_msgs/msg/ImageMarkerArray"
+  | "visualization_msgs/ImageMarkerArray"
+  | "visualization_msgs/msg/ImageMarkerArray"
+  | "ros.visualization_msgs.ImageMarkerArray"
   // backwards compat with webviz
-  "webviz_msgs/ImageMarkerArray",
+  | "webviz_msgs/ImageMarkerArray"
   // foxglove
-  "foxglove_msgs/ImageAnnotations",
-  "foxglove_msgs/msg/ImageAnnotations",
-  "foxglove.ImageAnnotations",
-  "foxglove::ImageAnnotations",
-] as const;
+  | "foxglove_msgs/ImageAnnotations"
+  | "foxglove_msgs/msg/ImageAnnotations"
+  | "foxglove.ImageAnnotations"
+  | "foxglove::ImageAnnotations";
 
 function foxglovePointTypeToStyle(
   type: PointsAnnotationType,
@@ -211,7 +211,7 @@ function normalizeRosImageMarker(
 
 function normalizeAnnotations(message: unknown, datatype: string): Annotation[] {
   // Cast to the union of all supported datatypes to ensure we handle all cases
-  switch (datatype as (typeof ANNOTATION_DATATYPES)[number]) {
+  switch (datatype as AnnotationDatatypes) {
     // single marker
     case "visualization_msgs/ImageMarker":
     case "visualization_msgs/msg/ImageMarker":

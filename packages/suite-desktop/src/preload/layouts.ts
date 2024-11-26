@@ -33,7 +33,7 @@ export async function fetchLayouts(rootFolder: string): Promise<DesktopLayout[]>
       const layoutData = await readFile(layoutPath, { encoding: "utf8" });
 
       layouts.push({ from: entry.name, layoutJson: JSON.parse(layoutData) });
-    } catch (err) {
+    } catch (err: unknown) {
       log.error(err);
     }
   }

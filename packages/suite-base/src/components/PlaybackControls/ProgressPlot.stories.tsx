@@ -14,7 +14,7 @@ export default {
   title: "components/PlaybackControls/ProgressPlot",
   component: ProgressPlot,
   decorators: [
-    (Story: StoryFn): JSX.Element => {
+    (Story: StoryFn): React.JSX.Element => {
       const theme = useTheme();
 
       return (

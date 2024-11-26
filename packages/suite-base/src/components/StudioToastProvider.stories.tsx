@@ -21,7 +21,7 @@ export default {
     colorScheme: "dark",
   },
   decorators: [
-    (Wrapped: StoryFn): JSX.Element => {
+    (Wrapped: StoryFn): React.JSX.Element => {
       return (
         <StudioToastProvider>
           <Wrapped />

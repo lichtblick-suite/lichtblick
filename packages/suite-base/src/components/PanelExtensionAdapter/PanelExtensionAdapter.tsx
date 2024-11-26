@@ -111,7 +111,7 @@ type RenderFn = NonNullable<PanelExtensionContext["onRender"]>;
  */
 function PanelExtensionAdapter(
   props: React.PropsWithChildren<PanelExtensionAdapterProps>,
-): JSX.Element {
+): React.JSX.Element {
   const { initPanel, config, saveConfig, highestSupportedConfigVersion } = props;
 
   // Unlike the react data flow, the config is only provided to the panel once on setup.
@@ -274,7 +274,8 @@ function PanelExtensionAdapter(
         resumeFrame();
         renderingRef.current = false;
       });
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       setError(err);
     }
   }, [
@@ -304,21 +305,22 @@ function PanelExtensionAdapter(
 
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
-      addPanel({ position, type, updateIfExists, getState }) {
+      addPanel: ({ position, type, updateIfExists, getState }) => {
         if (!isMounted()) {
           return;
         }
-        switch (position) {
-          case "sibling":
-            openSiblingPanel({
-              panelType: type,
-              updateIfExists,
-              siblingConfigCreator: (existingConfig) => getState(existingConfig) as PanelConfig,
-            });
-            return;
-          default:
-            assertNever(position, `Unsupported position for addPanel: ${position}`);
+
+        // Check if it is not sibling. Currently it is impossible, but in the future it might be possible.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (position !== "sibling") {
+          assertNever(position, `Unsupported position for addPanel: ${position}`);
         }
+
+        openSiblingPanel({
+          panelType: type,
+          updateIfExists,
+          siblingConfigCreator: (existingConfig) => getState(existingConfig) as PanelConfig,
+        });
       },
     };
 

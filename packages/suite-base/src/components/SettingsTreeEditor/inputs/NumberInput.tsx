@@ -74,7 +74,7 @@ export function NumberInput(
     value?: number;
     onChange: (value: undefined | number) => void;
   } & Omit<TextFieldProps, "onChange">,
-): JSX.Element {
+): React.JSX.Element {
   const { classes, cx } = useStyles();
   const {
     value,

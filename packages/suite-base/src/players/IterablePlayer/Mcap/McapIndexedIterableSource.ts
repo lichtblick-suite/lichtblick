@@ -264,7 +264,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             sizeInBytes,
             schemaName: channelInfo.schemaName ?? "",
           });
-        } catch (err) {
+        } catch (err: unknown) {
           log.error(err);
         }
 

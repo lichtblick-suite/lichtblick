@@ -23,10 +23,10 @@ type Props = {
   itemLabel: string;
 };
 
-export default function HighlightedValue({ itemLabel }: Props): JSX.Element {
+export default function HighlightedValue({ itemLabel }: Props): React.JSX.Element {
   const diffArrowStr = ` ${diffArrow} `;
   // react-json-tree's valueRenderer only gets called for primitives, so diff before/after values must be at same level by the time it gets to the tree
-  const splitItemLabel = `${itemLabel}`.split(diffArrowStr);
+  const splitItemLabel = itemLabel.toString().split(diffArrowStr);
   const itemLabelContainsChange = splitItemLabel.length === 2;
   if (itemLabelContainsChange) {
     const [before, after] = splitItemLabel;

@@ -63,7 +63,7 @@ export default function CurrentLayoutProvider({
   loaders = [],
 }: React.PropsWithChildren<{
   loaders?: readonly LayoutLoader[];
-}>): JSX.Element {
+}>): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { getUserProfile, setUserProfile } = useUserProfileStorage();
   const layoutManager = useLayoutManager();
@@ -160,11 +160,14 @@ export default function CurrentLayoutProvider({
             },
           });
           if (saveToProfile) {
-            setUserProfile({ currentLayoutId: id }).catch((error) => {
+            setUserProfile({ currentLayoutId: id }).catch((error: unknown) => {
               console.error(error);
-              enqueueSnackbar(`The current layout could not be saved. ${error.toString()}`, {
-                variant: "error",
-              });
+              enqueueSnackbar(
+                `The current layout could not be saved. ${(error as Error).toString()}`,
+                {
+                  variant: "error",
+                },
+              );
             });
           }
         }

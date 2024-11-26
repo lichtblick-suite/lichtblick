@@ -13,7 +13,7 @@ export default {
   title: "Theme/Data Display/Typography",
 };
 
-function Wrapper({ children }: { children: ReactNode }): JSX.Element {
+function Wrapper({ children }: { children: ReactNode }): React.JSX.Element {
   return <Stack sx={{ border: "1px dotted", borderColor: "info.main" }}>{children}</Stack>;
 }
 

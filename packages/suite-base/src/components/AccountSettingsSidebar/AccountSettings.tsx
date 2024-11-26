@@ -13,7 +13,7 @@ import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContex
 import AccountInfo from "./AccountInfo";
 import SigninForm from "./SigninForm";
 
-export default function AccountSettings(): JSX.Element {
+export default function AccountSettings(): React.JSX.Element {
   const { currentUser } = useCurrentUser();
 
   const content = useMemo(() => {

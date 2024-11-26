@@ -10,13 +10,13 @@ import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent
 
 import { useStudioLogsSettingsTree } from "./useStudioLogsSettingsTree";
 
-export function StudioLogsSettings(): JSX.Element {
+export function StudioLogsSettings(): React.JSX.Element {
   const logSettings = useStudioLogsSettingsTree();
 
   return <SettingsTreeEditor variant="log" settings={logSettings} />;
 }
 
-export function StudioLogsSettingsSidebar(): JSX.Element {
+export function StudioLogsSettingsSidebar(): React.JSX.Element {
   return (
     <SidebarContent overflow="auto" title="Studio Logs Settings" disablePadding>
       <StudioLogsSettings />

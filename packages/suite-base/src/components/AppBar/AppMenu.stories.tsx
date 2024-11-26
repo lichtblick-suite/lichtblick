@@ -39,7 +39,7 @@ export default {
     handleClose: _.noop,
   },
   decorators: [
-    (Story, { args: { testId: _testId, ...args } }): JSX.Element => (
+    (Story, { args: { testId: _testId, ...args } }): React.JSX.Element => (
       <MockCurrentLayoutProvider>
         <WorkspaceContextProvider>
           <PlayerSelectionContext.Provider value={playerSelection}>

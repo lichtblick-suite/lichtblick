@@ -9,7 +9,7 @@ import { StoryContext, StoryFn } from "@storybook/react";
 
 import { GlobalStyle } from "./GlobalStyle";
 
-export default function StorybookDecorator(Child: StoryFn, _ctx: StoryContext): JSX.Element {
+export default function StorybookDecorator(Child: StoryFn, _ctx: StoryContext): React.JSX.Element {
   return (
     <>
       <GlobalStyle />

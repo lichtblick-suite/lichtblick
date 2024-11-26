@@ -32,7 +32,7 @@ const severityToToastAppearance = (severity: NotificationSeverity): VariantType 
   }
 };
 
-export default function SendNotificationToastAdapter(): JSX.Element {
+export default function SendNotificationToastAdapter(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [notificationDetails, setNotificationDetails] = useState<NotificationMessage | undefined>(
     undefined,

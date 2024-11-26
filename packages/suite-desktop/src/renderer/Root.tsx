@@ -39,9 +39,9 @@ const ctxbridge = (global as { ctxbridge?: OsContext }).ctxbridge;
 
 export default function Root(props: {
   appConfiguration: IAppConfiguration;
-  extraProviders: JSX.Element[] | undefined;
+  extraProviders: React.JSX.Element[] | undefined;
   dataSources: IDataSourceFactory[] | undefined;
-}): JSX.Element {
+}): React.JSX.Element {
   if (!storageBridge) {
     throw new Error("storageBridge is missing");
   }

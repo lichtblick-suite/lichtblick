@@ -40,7 +40,8 @@ function isFileToOpen(arg: string) {
   // Anything that isn't a file or directory will throw, we filter those out too
   try {
     return fs.statSync(arg).isFile();
-  } catch (err) {
+  } catch (err: unknown) {
+    log.error(err);
     // ignore
   }
   return false;
@@ -89,7 +90,8 @@ export async function main(): Promise<void> {
   process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = isProduction ? "false" : "true";
 
   // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   if (require("electron-squirrel-startup") as boolean) {
     app.quit();
     return;

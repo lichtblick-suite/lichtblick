@@ -32,7 +32,7 @@ export default function parseFuzzyRosTime(stamp: string): Time | undefined {
   const match = DIGITS_WITH_DECIMAL_POINT_RE.exec(trimmedStamp);
   if (match?.[1] != undefined && match[2] != undefined) {
     // There can be at most 9 digits of nanoseconds. Truncate any others.
-    return { sec: Number(match[1]), nsec: Number(match[2].substr(0, 9).padEnd(9, "0")) };
+    return { sec: Number(match[1]), nsec: Number(match[2].substring(0, 9).padEnd(9, "0")) };
   }
 
   return undefined;

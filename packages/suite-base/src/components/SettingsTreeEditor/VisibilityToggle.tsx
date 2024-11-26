@@ -24,7 +24,7 @@ const useStyles = makeStyles()((theme) => ({
 
 export function VisibilityToggle(
   props: CheckboxProps & { size: IconButtonProps["size"] },
-): JSX.Element {
+): React.JSX.Element {
   const { className, onChange, ...rest } = props;
   const { classes, cx } = useStyles();
 

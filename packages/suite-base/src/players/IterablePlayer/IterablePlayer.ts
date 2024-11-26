@@ -443,9 +443,10 @@ export class IterablePlayer implements Player {
 
         log.debug(`Done state ${state}`);
       }
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       log.error(err);
-      this.#setError((err as Error).message, err);
+      this.#setError(err.message, err);
       this.#queueEmitState();
     } finally {
       this.#runningState = false;
@@ -540,7 +541,7 @@ export class IterablePlayer implements Player {
             minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
             problemManager: this.#problemManager,
           });
-        } catch (err) {
+        } catch (err: unknown) {
           log.error(err);
 
           const startStr = toRFC3339String(this.#start);
@@ -550,7 +551,7 @@ export class IterablePlayer implements Player {
             severity: "warn",
             message: "Failed to initialize message preloading",
             tip: `The start (${startStr}) and end (${endStr}) of your data is too far apart.`,
-            error: err,
+            error: err as Error,
           });
         }
       }
@@ -569,7 +570,7 @@ export class IterablePlayer implements Player {
       this.#blockLoader?.setTopics(this.#preloadTopics);
 
       // Block loadings is constantly running and tries to keep the preloaded messages in memory
-      this.#blockLoadingProcess = this.#startBlockLoading().catch((err) => {
+      this.#blockLoadingProcess = this.#startBlockLoading().catch((err: unknown) => {
         this.#setError((err as Error).message, err as Error);
       });
 
@@ -746,7 +747,8 @@ export class IterablePlayer implements Player {
       this.#queueEmitState();
       await this.#resetPlaybackIterator();
       this.#setState(this.#isPlaying ? "play" : "idle");
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as Error;
       if (this.#nextState && err.name === "AbortError") {
         log.debug("Aborted backfill");
       } else {
@@ -1083,8 +1085,9 @@ export class IterablePlayer implements Player {
           await delay(16 - time);
         }
       }
-    } catch (err) {
-      this.#setError((err as Error).message, err);
+    } catch (e: unknown) {
+      const err = e as Error;
+      this.#setError(err.message, err);
       this.#queueEmitState();
     }
   }

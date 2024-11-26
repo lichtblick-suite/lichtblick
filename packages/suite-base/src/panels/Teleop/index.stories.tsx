@@ -17,7 +17,7 @@ export default {
   title: "panels/Teleop",
   component: TeleopPanel,
   decorators: [
-    (StoryComponent: StoryFn, context: StoryContext): JSX.Element => {
+    (StoryComponent: StoryFn, context: StoryContext): React.JSX.Element => {
       return (
         <PanelSetup
           fixture={{ capabilities: [PLAYER_CAPABILITIES.advertise], publish: action("publish") }}

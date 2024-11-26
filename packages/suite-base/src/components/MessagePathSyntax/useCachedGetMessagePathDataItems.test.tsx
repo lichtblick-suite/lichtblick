@@ -784,5 +784,9 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
       // Empty array for /topic3..value because path is invalid.
       "/topic3..value": [],
     });
+
+    expect(console.error).toHaveBeenCalled();
+    expect(console.error).toHaveBeenLastCalledWith("Error parsing message path", expect.any(Error));
+    (console.error as jest.Mock).mockReset();
   });
 });

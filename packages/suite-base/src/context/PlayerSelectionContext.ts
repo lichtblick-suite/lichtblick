@@ -48,10 +48,10 @@ export interface IDataSourceFactory {
   iconName?: RegisteredIconNames;
   description?: string;
   docsLinks?: { label?: string; url: string }[];
-  disabledReason?: string | JSX.Element;
+  disabledReason?: string | React.JSX.Element;
   badgeText?: string;
   hidden?: boolean;
-  warning?: string | JSX.Element;
+  warning?: string | React.JSX.Element;
 
   sampleLayout?: LayoutData;
 

@@ -47,7 +47,7 @@ export default function LayoutSection({
   onOverwrite: (item: Layout) => void;
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   return (
     <Stack>
       {title != undefined && (

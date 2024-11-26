@@ -109,7 +109,7 @@ type ElementAtPixelArgs = {
 const selectGlobalBounds = (store: TimelineInteractionStateStore) => store.globalBounds;
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
-export function Plot(props: Props): JSX.Element {
+export function Plot(props: Props): React.JSX.Element {
   const { saveConfig, config } = props;
   const {
     paths: series,

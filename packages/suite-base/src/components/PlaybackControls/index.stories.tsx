@@ -111,7 +111,7 @@ function Wrapper({
 export default {
   title: "components/PlaybackControls",
   decorators: [
-    (Wrapped: StoryFn): JSX.Element => (
+    (Wrapped: StoryFn): React.JSX.Element => (
       <AppConfigurationContext.Provider value={mockAppConfiguration}>
         <WorkspaceContextProvider>
           <MockCurrentLayoutProvider>

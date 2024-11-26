@@ -14,7 +14,7 @@ import { PlaybackControlsTooltipContent } from "@lichtblick/suite-base/component
 import { useTimelineInteractionState } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 
-function Wrapper(Wrapped: StoryFn): JSX.Element {
+function Wrapper(Wrapped: StoryFn): React.JSX.Element {
   const theme = useTheme();
   return (
     <TimelineInteractionStateProvider>

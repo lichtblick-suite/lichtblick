@@ -39,7 +39,11 @@ type StatSample = {
  *
  * @property interval - the interval, in frames, between updates.
  */
-export function DirectTopicStatsUpdater({ interval = 1 }: { interval?: number }): JSX.Element {
+export function DirectTopicStatsUpdater({
+  interval = 1,
+}: {
+  interval?: number;
+}): React.JSX.Element {
   const topicStats = useMessagePipeline(selectTopicStats);
   const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
   const playerId = useMessagePipeline(selectPlayerId);

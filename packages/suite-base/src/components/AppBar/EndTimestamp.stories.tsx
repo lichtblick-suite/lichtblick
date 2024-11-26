@@ -34,7 +34,7 @@ export default {
     time: ABSOLUTE_TIME,
   },
   decorators: [
-    (Story: StoryFn, ctx): JSX.Element => {
+    (Story: StoryFn, ctx): React.JSX.Element => {
       const {
         args: { timeFormat, timezone, time, ...args },
       } = ctx;

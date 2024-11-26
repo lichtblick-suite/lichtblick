@@ -16,8 +16,7 @@ import { migrateLegacyToNewImagePanels } from "./migrateLegacyToNewImagePanels";
  * Perform any necessary migrations on old layout data.
  */
 export function migratePanelsState(data: MarkOptional<LayoutData, "configById">): LayoutData {
-  let result: LayoutData = { ...data, configById: data.configById ?? data.savedProps ?? {} };
-  delete result.savedProps;
+  let result: LayoutData = { ...data, configById: data.configById ?? {} };
 
   result = migrateLegacyToNew3DPanels(result);
   result = migrateLegacyToNewImagePanels(result);

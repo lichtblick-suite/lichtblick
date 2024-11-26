@@ -36,7 +36,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function PlaybackSpeedControls(): JSX.Element {
+export default function PlaybackSpeedControls(): React.JSX.Element {
   const { classes } = useStyles();
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const open = Boolean(anchorEl);

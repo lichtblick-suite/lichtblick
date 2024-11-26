@@ -10,7 +10,7 @@ import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTrun
 /**
  * Render multiline text using TextMiddleTruncate for each line.
  */
-export function MultilineMiddleTruncate(props: { text: string }): JSX.Element {
+export function MultilineMiddleTruncate(props: { text: string }): React.JSX.Element {
   const { text } = props;
   return (
     <>

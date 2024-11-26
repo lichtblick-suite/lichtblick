@@ -72,7 +72,7 @@ export function vectorAddition(vectors: number[][]): number[] {
   const ret = first.slice();
   for (let i = 1; i < vectors.length; ++i) {
     for (let j = 0; j < ret.length; ++j) {
-      ret[j] += vectors[i]![j]!;
+      ret[j] = (ret[j] ?? 0) + vectors[i]![j]!;
     }
   }
   return ret;

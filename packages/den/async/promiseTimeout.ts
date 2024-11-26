@@ -35,9 +35,13 @@ async function promiseTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     const id = setTimeout(() => {
       reject(new PromiseTimeoutError(`Promise timed out after ${ms}ms`));
     }, ms);
-    promise.then(resolve, reject).finally(() => {
-      clearTimeout(id);
-    });
+    promise
+      .then(resolve, (reason: unknown) => {
+        reject(reason as Error);
+      })
+      .finally(() => {
+        clearTimeout(id);
+      });
   });
 }
 

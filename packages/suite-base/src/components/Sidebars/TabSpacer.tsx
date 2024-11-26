@@ -14,6 +14,6 @@
  *
  * This component acts as a stand-in so the Tabs component can add the props and they are ignored.
  */
-export function TabSpacer(): JSX.Element {
+export function TabSpacer(): React.JSX.Element {
   return <div style={{ height: "100%" }} />;
 }

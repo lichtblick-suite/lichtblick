@@ -76,7 +76,7 @@ export default function TimelineInteractionStateProvider({
   children,
 }: {
   children?: ReactNode;
-}): JSX.Element {
+}): React.JSX.Element {
   const [store] = useState(createTimelineInteractionStateStore());
 
   return (

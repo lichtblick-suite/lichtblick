@@ -27,7 +27,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function Timestamp(props: Props): JSX.Element {
+export default function Timestamp(props: Props): React.JSX.Element {
   const { classes } = useStyles();
   const { disableDate = false, horizontal = false, time, title } = props;
   const { formatDate, formatTime } = useAppTimeFormat();

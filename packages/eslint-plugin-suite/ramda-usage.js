@@ -20,7 +20,7 @@ module.exports = {
       useArrayMethod: `Use built-in Array#{{arrayName}} instead of R.{{ramdaName}}`,
     },
   },
-  create: (context) => {
+  create(context) {
     return {
       /**
        * Transform `R.min/max(a, b)` to `Math.min/max(a, b)`
@@ -113,9 +113,7 @@ module.exports = {
               return fixer.replaceText(
                 callExpr,
                 // Add parentheses indiscriminately, leave it to prettier to clean up
-                `(${sourceCode.getText(callExpr.arguments[1])}).${
-                  node.property.name
-                }(${sourceCode.getText(callExpr.arguments[0])})`,
+                `(${sourceCode.getText(callExpr.arguments[1])}).${node.property.name}(${sourceCode.getText(callExpr.arguments[0])})`,
               );
             },
           });

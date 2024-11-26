@@ -90,7 +90,7 @@ export default function WorkspaceContextProvider(props: {
     initialState?: Partial<WorkspaceContextStore>,
     options?: { disablePersistenceForStorybook?: boolean },
   ) => StoreApi<WorkspaceContextStore>;
-}): JSX.Element {
+}): React.JSX.Element {
   const { children, initialState, workspaceStoreCreator, disablePersistenceForStorybook } = props;
 
   const [store] = useState(() =>

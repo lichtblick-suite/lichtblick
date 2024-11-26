@@ -29,7 +29,7 @@ function activeDataSelector(ctx: MessagePipelineContext) {
  * NOTE: Because repeat adapter receives every message pipeline frame, we isolate its logic inside
  * a separate component so it does not cause virtual DOM diffing on any children.
  */
-export function RepeatAdapter(props: RepeatAdapterProps): JSX.Element {
+export function RepeatAdapter(props: RepeatAdapterProps): React.JSX.Element {
   const { play, seek, repeatEnabled } = props;
 
   const activeData = useMessagePipeline(activeDataSelector);

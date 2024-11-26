@@ -25,7 +25,7 @@ import {
 } from "./players";
 import { MemoryAppConfiguration } from "./services";
 
-export function Root(): JSX.Element {
+export function Root(): React.JSX.Element {
   const [appConfiguration] = useState(
     () =>
       new MemoryAppConfiguration({

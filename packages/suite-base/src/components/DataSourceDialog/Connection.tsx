@@ -88,7 +88,7 @@ const useStyles = makeStyles()((theme) => ({
 
 const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 
-export default function Connection(): JSX.Element {
+export default function Connection(): React.JSX.Element {
   const { classes } = useStyles();
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up("md"));

@@ -17,7 +17,7 @@ import { canRenderApp } from "./canRenderApp";
 
 const log = Logger.getLogger(__filename);
 
-function LogAfterRender(props: React.PropsWithChildren): JSX.Element {
+function LogAfterRender(props: React.PropsWithChildren): React.JSX.Element {
   useEffect(() => {
     // Integration tests look for this console log to indicate the app has rendered once
     // We use console.debug to bypass our logging library which hides some log levels in prod builds
@@ -28,8 +28,8 @@ function LogAfterRender(props: React.PropsWithChildren): JSX.Element {
 
 export type MainParams = {
   dataSources?: IDataSourceFactory[];
-  extraProviders?: JSX.Element[];
-  rootElement?: JSX.Element;
+  extraProviders?: React.JSX.Element[];
+  rootElement?: React.JSX.Element;
 };
 
 export async function main(getParams: () => Promise<MainParams> = async () => ({})): Promise<void> {

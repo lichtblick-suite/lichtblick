@@ -148,7 +148,7 @@ export default React.memo(function LayoutRow({
   onOverwrite: (item: Layout) => void;
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const isMounted = useMountedState();
   const [confirm, confirmModal] = useConfirm();
   const layoutManager = useLayoutManager();

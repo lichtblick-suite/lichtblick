@@ -45,7 +45,7 @@ describe("debouncePromise", () => {
         const finishedSignal = callsFinished[prevExpectedCallsStarted];
         debouncedFn.currentPromise?.then(
           () => finishedSignal?.resolve(),
-          (err: Error) => finishedSignal?.reject(err),
+          (err: unknown) => finishedSignal?.reject(err as Error),
         );
       }
       prevExpectedCallsStarted = expectedNum;

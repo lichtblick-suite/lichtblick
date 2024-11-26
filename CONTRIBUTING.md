@@ -137,7 +137,7 @@ export const myComponent = {
 
 import { useTranslation } from "react-i18next";
 
-function MyComponent(props: Props): JSX.Element {
+function MyComponent(props: Props): React.JSX.Element {
   const { t } = useTranslation("myComponent");
 
   return <p>{t("hello")}</p>;

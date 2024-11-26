@@ -47,7 +47,8 @@ export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFa
               return new Error(`Invalid protocol: ${url.protocol}`);
             }
             return undefined;
-          } catch (err) {
+          } catch (err: unknown) {
+            console.error(err);
             return new Error("Enter a valid url");
           }
         },

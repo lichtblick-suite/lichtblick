@@ -75,7 +75,9 @@ const globalVariablesSelector = (state: LayoutState) =>
 
 const selectUserScriptActions = (store: UserScriptStore) => store.actions;
 
-export default function PlayerManager(props: PropsWithChildren<PlayerManagerProps>): JSX.Element {
+export default function PlayerManager(
+  props: PropsWithChildren<PlayerManagerProps>,
+): React.JSX.Element {
   const { children, playerSources } = props;
 
   const perfRegistry = usePerformance();

@@ -17,6 +17,9 @@ export async function getBagInfo(file: File): Promise<FileInfo> {
   let totalMessages = 0n;
   for (const chunk of bag.chunkInfos) {
     for (const { conn, count } of chunk.connections) {
+      if (numMessagesByConnectionIndex[conn] == undefined) {
+        numMessagesByConnectionIndex[conn] = 0n;
+      }
       numMessagesByConnectionIndex[conn] += BigInt(count);
       totalMessages += BigInt(count);
     }

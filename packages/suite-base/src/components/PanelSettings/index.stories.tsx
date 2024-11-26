@@ -29,7 +29,7 @@ export default {
   title: "components/PanelSettings",
   component: PanelSettings,
   decorators: [
-    (Story: StoryFn): JSX.Element => (
+    (Story: StoryFn): React.JSX.Element => (
       <div style={{ margin: 30, height: 400 }}>
         <DndProvider backend={HTML5Backend}>
           <MockCurrentLayoutProvider>

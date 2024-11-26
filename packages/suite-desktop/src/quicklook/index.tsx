@@ -29,7 +29,7 @@ export function main(): void {
     throw new Error("missing #root element");
   }
 
-  function Root(): JSX.Element {
+  function Root(): React.JSX.Element {
     const [previewedFile, setPreviewedFile] = useState<File | undefined>();
 
     // Allow dragging & dropping a file for easier debugging.
@@ -65,7 +65,7 @@ export function main(): void {
         const infoPromise = file.name.endsWith(".mcap") ? getMcapInfo(file) : getBagInfo(file);
         const { fileInfo, error } = await infoPromise
           .then((info) => ({ fileInfo: info, error: undefined }))
-          .catch((err) => ({ fileInfo: undefined, error: err }));
+          .catch((err: unknown) => ({ fileInfo: undefined, error: err }));
         return { fileStats, fileInfo, error };
       } finally {
         if (typeof quicklook !== "undefined") {
@@ -97,11 +97,11 @@ export function main(): void {
 
     const fileStats = state.value?.fileStats;
     const fileInfo = moreInfo.value ?? state.value?.fileInfo;
-    const fileError = moreInfo.error ?? state.value?.error;
+    const fileError = moreInfo.error ?? (state.value?.error as Error | undefined);
 
     return (
       <div>
-        {state.loading && "Loading…"}
+        {state.loading && "Loading..."}
         {state.error && <Flash color="error">{state.error.toString()}</Flash>}
         {fileStats && (
           <FileInfoDisplay fileStats={fileStats} fileInfo={fileInfo} error={fileError} />

@@ -21,7 +21,9 @@ const log = Logger.getLogger(__filename);
 const SYNC_INTERVAL_BASE_MS = 30_000;
 const SYNC_INTERVAL_MAX_MS = 3 * 60_000;
 
-export default function LayoutManagerProvider({ children }: React.PropsWithChildren): JSX.Element {
+export default function LayoutManagerProvider({
+  children,
+}: React.PropsWithChildren): React.JSX.Element {
   const layoutStorage = useLayoutStorage();
   const remoteLayoutStorage = useRemoteLayoutStorage();
 

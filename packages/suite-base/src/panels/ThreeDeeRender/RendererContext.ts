@@ -60,7 +60,7 @@ export function useRendererProperty<K extends keyof IRenderer>(
   key: K,
   event: keyof RendererEvents,
   fallback: () => IRenderer[K],
-  rendererInstance?: IRenderer | undefined,
+  rendererInstance?: IRenderer,
 ): IRenderer[K] {
   const usedRenderer = useRenderer();
   const renderer = rendererInstance ?? usedRenderer;

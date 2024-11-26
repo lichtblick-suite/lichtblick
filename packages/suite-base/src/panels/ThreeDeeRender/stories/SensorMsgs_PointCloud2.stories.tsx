@@ -34,7 +34,7 @@ export const SensorMsgs_PointCloud2_RGB: StoryObj = {
   parameters: { colorScheme: "dark" },
 };
 
-function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): JSX.Element {
+function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): React.JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },

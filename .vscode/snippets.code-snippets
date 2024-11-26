@@ -10,12 +10,12 @@
   "const [...] = useState(...)": {
     "scope": "typescript, typescriptreact",
     "prefix": "useState",
-    "body": "const [${1:thing}, set${1/(.*)/${1:/capitalize}/}] = useState($3);"
+    "body": "const [${1:thing}, set${1/(.*)/${1:/capitalize}/}] = useState($3);",
   },
   "const fn = useCallback(...)": {
     "scope": "typescript, typescriptreact",
     "prefix": "useCallback",
-    "body": "const ${1:func} = useCallback(($2) => {$3}, [$4]);"
+    "body": "const ${1:func} = useCallback(($2) => {$3}, [$4]);",
   },
 
   // Intellisense can give you hints inside {}, so it's helpful to type the object before the
@@ -24,12 +24,12 @@
     "scope": "typescript, typescriptreact",
     "prefix": "const",
     "body": "const {$2} = $1;",
-    "description": "Destructure object"
+    "description": "Destructure object",
   },
 
   "React component": {
     "scope": "typescriptreact",
     "prefix": "component",
-    "body": "export default function ${1:$TM_FILENAME_BASE}({ children }: React.PropsWithChildren<${2:unknown}>): JSX.Element {\n\t$0\n}"
-  }
+    "body": "export default function ${1:$TM_FILENAME_BASE}({ children }: React.PropsWithChildren<${2:unknown}>): React.JSX.Element {\n\t$0\n}",
+  },
 }

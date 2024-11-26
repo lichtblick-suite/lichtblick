@@ -50,7 +50,7 @@ export default {
     colorScheme: "both-column",
   },
   decorators: [
-    (StoryComponent: StoryFn, { parameters }: StoryContext): JSX.Element => {
+    (StoryComponent: StoryFn, { parameters }: StoryContext): React.JSX.Element => {
       return (
         <PanelSetup fixture={parameters.panelSetup?.fixture}>
           <StoryComponent />

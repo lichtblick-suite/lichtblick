@@ -60,7 +60,7 @@ type ColorPickerInputProps = {
   onInputBlur: () => void;
 } & Omit<ColorPickerProps, "value">;
 
-export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
+export function ColorPickerControl(props: ColorPickerInputProps): React.JSX.Element {
   const {
     alphaType,
     onChange,

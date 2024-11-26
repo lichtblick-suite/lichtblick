@@ -22,7 +22,7 @@ const LOCAL_STORAGE_KEY = "studio.profile-data";
  */
 export default function UserProfileLocalStorageProvider({
   children,
-}: React.PropsWithChildren): JSX.Element {
+}: React.PropsWithChildren): React.JSX.Element {
   const getUserProfile = useCallback(async (): Promise<UserProfile> => {
     const item = localStorage.getItem(LOCAL_STORAGE_KEY);
     return item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
@@ -46,7 +46,9 @@ export default function UserProfileLocalStorageProvider({
       ...old,
       firstSeenTime: old.firstSeenTime ?? new Date().toISOString(),
       firstSeenTimeIsFirstLoad: old.firstSeenTimeIsFirstLoad ?? old.currentLayoutId == undefined,
-    })).catch(console.error);
+    })).catch((err: unknown) => {
+      console.error(err);
+    });
   }, [setUserProfile]);
 
   const storage = useShallowMemo({

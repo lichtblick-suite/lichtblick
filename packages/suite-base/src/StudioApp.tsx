@@ -44,7 +44,7 @@ function contextMenuHandler(event: MouseEvent) {
   return false;
 }
 
-export function StudioApp(): JSX.Element {
+export function StudioApp(): React.JSX.Element {
   const {
     dataSources,
     extensionLoaders,

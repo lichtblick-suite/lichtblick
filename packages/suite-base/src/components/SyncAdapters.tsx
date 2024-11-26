@@ -11,7 +11,7 @@ import { CurrentLayoutLocalStorageSyncAdapter } from "@lichtblick/suite-base/com
 import { URLStateSyncAdapter } from "@lichtblick/suite-base/components/URLStateSyncAdapter";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 
-export function SyncAdapters(): JSX.Element {
+export function SyncAdapters(): React.JSX.Element {
   // Sync adapters from app context override any local sync adapters
   const { syncAdapters } = useAppContext();
 

@@ -80,7 +80,7 @@ export function getFirstInvalidVariableFromRosPath(
       }
     }
     return messagePathParts;
-  }).filter(({ variableName }) => !tryToSetDefaultGlobalVar(variableName, setGlobalVariables))[0];
+  }).find(({ variableName }) => !tryToSetDefaultGlobalVar(variableName, setGlobalVariables));
 }
 
 function getExamplePrimitive(primitiveType: PrimitiveType) {

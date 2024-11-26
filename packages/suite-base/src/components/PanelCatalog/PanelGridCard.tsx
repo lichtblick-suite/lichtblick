@@ -34,7 +34,7 @@ type Props = {
   onClick: () => void;
 };
 
-export function PanelGridCard(props: Props): JSX.Element {
+export function PanelGridCard(props: Props): React.JSX.Element {
   const { searchQuery, panel, onClick } = props;
   const { classes } = useStyles();
 

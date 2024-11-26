@@ -117,7 +117,7 @@ function activateExtension(
     const wrappedExtensionModule = module.exports as ExtensionModule;
 
     wrappedExtensionModule.activate(ctx);
-  } catch (err) {
+  } catch (err: unknown) {
     log.error(err);
   }
 
@@ -175,11 +175,11 @@ function createExtensionRegistryStore(
               allContributionPoints.topicAliasFunctions.push(
                 ...contributionPoints.topicAliasFunctions,
               );
-            } catch (err) {
+            } catch (err: unknown) {
               log.error("Error loading extension", err);
             }
           }
-        } catch (err) {
+        } catch (err: unknown) {
           log.error("Error loading extension list", err);
         }
       }
@@ -229,13 +229,13 @@ export default function ExtensionCatalogProvider({
 }: PropsWithChildren<{
   loaders: readonly ExtensionLoader[];
   mockMessageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
-}>): JSX.Element {
+}>): React.JSX.Element {
   const [store] = useState(createExtensionRegistryStore(loaders, mockMessageConverters));
 
   // Request an initial refresh on first mount
   const refreshExtensions = store.getState().refreshExtensions;
   useEffect(() => {
-    refreshExtensions().catch((err) => {
+    refreshExtensions().catch((err: unknown) => {
       log.error(err);
     });
   }, [refreshExtensions]);

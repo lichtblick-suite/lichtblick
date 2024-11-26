@@ -19,7 +19,7 @@ const useStyles = makeStyles()({
   },
 });
 
-export default function Snow({ effect }: { effect: "snow" | "confetti" }): JSX.Element {
+export default function Snow({ effect }: { effect: "snow" | "confetti" }): React.JSX.Element {
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
 

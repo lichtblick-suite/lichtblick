@@ -182,7 +182,7 @@
     "use-immer": "0.10.0",
     "uuid": "9.0.1",
     "vm-browserify": "1.1.2",
-    "webpack": "5.95.0",
+    "webpack": "5.96.1",
     "zustand": "4.4.1"
   },
   "dependencies": {

@@ -43,7 +43,7 @@ export default function DiffStats({
 }: {
   data: DiffObject;
   itemType: ReactNode;
-}): JSX.Element {
+}): React.JSX.Element {
   const { classes } = useStyles();
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText] as DiffObject | undefined;

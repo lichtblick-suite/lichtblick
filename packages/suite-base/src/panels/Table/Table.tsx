@@ -208,7 +208,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string) {
   return columns;
 }
 
-function TextCellContent(props: { value: string }): JSX.Element {
+function TextCellContent(props: { value: string }): React.JSX.Element {
   const { classes } = useStyles();
 
   return <div className={classes.textContent}>{props.value}</div>;
@@ -220,7 +220,7 @@ export default function Table({
 }: {
   value: unknown;
   accessorPath: string;
-}): JSX.Element {
+}): React.JSX.Element {
   const isNested = accessorPath.length > 0;
   const { classes, cx } = useStyles();
 

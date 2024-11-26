@@ -85,7 +85,7 @@ const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 
 type DataSourceSidebarTab = "topics" | "events" | "problems";
 
-export default function DataSourceSidebar(props: Props): JSX.Element {
+export default function DataSourceSidebar(props: Props): React.JSX.Element {
   const { disableToolbar = false } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];

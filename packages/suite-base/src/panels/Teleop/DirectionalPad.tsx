@@ -82,7 +82,7 @@ type DirectionalPadProps = {
   onAction?: (action?: DirectionalPadAction) => void;
 };
 
-function DirectionalPad(props: DirectionalPadProps): JSX.Element {
+function DirectionalPad(props: DirectionalPadProps): React.JSX.Element {
   const { onAction, disabled = false } = props;
 
   const [currentAction, setCurrentAction] = useState<DirectionalPadAction | undefined>();

@@ -7,7 +7,7 @@
 
 import { StoryObj } from "@storybook/react";
 import { ReactElement, useLayoutEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { toSec } from "@lichtblick/rostime";
 import {
@@ -97,8 +97,8 @@ function SimplePanel({ context }: { context: PanelExtensionContext }) {
 export const SimplePanelRender: StoryObj = {
   render: (): ReactElement => {
     function initPanel(context: PanelExtensionContext) {
-      // eslint-disable-next-line react/no-deprecated
-      ReactDOM.render(<SimplePanel context={context} />, context.panelElement);
+      const root = createRoot(context.panelElement);
+      root.render(<SimplePanel context={context} />);
     }
 
     return (

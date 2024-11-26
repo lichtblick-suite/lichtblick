@@ -32,7 +32,7 @@ type Props = {
   saveConfig: SaveConfig<VariableSliderConfig>;
 };
 
-function VariableSliderPanel(props: Props): JSX.Element {
+function VariableSliderPanel(props: Props): React.JSX.Element {
   const { config, saveConfig } = props;
   const { sliderProps, globalVariableName } = config;
   const { globalVariables, setGlobalVariables } = useGlobalVariables();

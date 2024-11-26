@@ -48,7 +48,7 @@ function createEventsStore() {
   }));
 }
 
-export default function EventsProvider({ children }: { children?: ReactNode }): JSX.Element {
+export default function EventsProvider({ children }: { children?: ReactNode }): React.JSX.Element {
   const [store] = useState(createEventsStore);
 
   return <EventsContext.Provider value={store}>{children}</EventsContext.Provider>;
