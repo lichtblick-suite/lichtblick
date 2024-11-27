@@ -7,32 +7,43 @@
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
-import { useState } from "react";
+import { nanoid } from "nanoid";
+import { useCallback, useMemo, useState } from "react";
 
-import { SettingsTreeNodeAction } from "@lichtblick/suite";
+import { NodeActionsMenuProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 
 import { icons } from "./icons";
 
 export function NodeActionsMenu({
   actions,
   onSelectAction,
-}: {
-  actions: readonly SettingsTreeNodeAction[];
-  onSelectAction: (actionId: string) => void;
-}): React.JSX.Element {
+}: NodeActionsMenuProps): React.JSX.Element {
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLButtonElement>(undefined);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = (id: string) => {
-    onSelectAction(id);
-    setAnchorEl(undefined);
-  };
+  const handleClose = useCallback(
+    (id: string) => {
+      onSelectAction(id);
+      setAnchorEl(undefined);
+    },
+    [onSelectAction],
+  );
 
-  const anyItemHasIcon = actions.some((action) => action.type === "action" && action.icon);
+  const anyItemHasIcon = useMemo(
+    () => actions.some((action) => action.type === "action" && action.icon),
+    [actions],
+  );
+
+  const actionsWithUniqueIds = useMemo(() => {
+    return actions.map((action) => ({
+      ...action,
+      uniqueId: action.type === "divider" ? nanoid() : undefined,
+    }));
+  }, [actions]);
 
   return (
     <>
@@ -59,22 +70,27 @@ export function NodeActionsMenu({
           dense: true,
         }}
       >
-        {actions.map((action, index) => {
+        {actionsWithUniqueIds.map((action) => {
           if (action.type === "divider") {
             return (
-              <Divider variant={anyItemHasIcon ? "inset" : "fullWidth"} key={`divider_${index}`} />
+              <Divider
+                data-testid="node-actions-menu-divider"
+                variant={anyItemHasIcon ? "inset" : "fullWidth"}
+                key={`${action.uniqueId}`}
+              />
             );
           }
           const Icon = action.icon ? icons[action.icon] : undefined;
           return (
             <MenuItem
+              data-testid={`node-actions-menu-item-${action.id}`}
               key={action.id}
               onClick={() => {
                 handleClose(action.id);
               }}
             >
               {Icon && (
-                <ListItemIcon>
+                <ListItemIcon data-testid={`node-actions-menu-item-icon-${action.id}`}>
                   <Icon fontSize="small" />
                 </ListItemIcon>
               )}

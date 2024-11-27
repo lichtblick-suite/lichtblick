@@ -517,46 +517,49 @@ export interface ExtensionModule {
   activate: ExtensionActivate;
 }
 
-export type SettingsIcon =
-  | "Add"
-  | "Addchart"
-  | "AutoAwesome"
-  | "Background"
-  | "Camera"
-  | "Cells"
-  | "Check"
-  | "Circle"
-  | "Clear"
-  | "Clock"
-  | "Collapse"
-  | "Cube"
-  | "Delete"
-  | "Expand"
-  | "Flag"
-  | "Folder"
-  | "FolderOpen"
-  | "Grid"
-  | "Hive"
-  | "ImageProjection"
-  | "Map"
-  | "Move"
-  | "MoveDown"
-  | "MoveUp"
-  | "NorthWest"
-  | "Note"
-  | "NoteFilled"
-  | "Points"
-  | "PrecisionManufacturing"
-  | "Radar"
-  | "Settings"
-  | "Shapes"
-  | "Share"
-  | "Star"
-  | "SouthEast"
-  | "Timeline"
-  | "Topic"
-  | "Walk"
-  | "World";
+export const SETTINGS_ICONS = [
+  "Add",
+  "Addchart",
+  "AutoAwesome",
+  "Background",
+  "Camera",
+  "Cells",
+  "Check",
+  "Circle",
+  "Clear",
+  "Clock",
+  "Collapse",
+  "Cube",
+  "Delete",
+  "Expand",
+  "Flag",
+  "Folder",
+  "FolderOpen",
+  "Grid",
+  "Hive",
+  "ImageProjection",
+  "Map",
+  "Move",
+  "MoveDown",
+  "MoveUp",
+  "NorthWest",
+  "Note",
+  "NoteFilled",
+  "Points",
+  "PrecisionManufacturing",
+  "Radar",
+  "Settings",
+  "Shapes",
+  "Share",
+  "Star",
+  "SouthEast",
+  "Timeline",
+  "Topic",
+  "Walk",
+  "World",
+] as const;
+
+export type SettingsIcon = (typeof SETTINGS_ICONS)[number];
 
 /**
  * A settings tree field specifies the input type and the value of a field

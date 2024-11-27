@@ -13,8 +13,7 @@ import { useUnmount } from "react-use";
 import { SettingsTree } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
-import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
+import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import { ActionMenu } from "@lichtblick/suite-base/components/PanelSettings/ActionMenu";
 import { EmptyWrapper } from "@lichtblick/suite-base/components/PanelSettings/EmptyWrapper";
 import { buildSettingsTree } from "@lichtblick/suite-base/components/PanelSettings/settingsTree";
@@ -28,10 +27,6 @@ import {
   useCurrentLayoutSelector,
   useSelectedPanels,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
-import {
-  getExtensionPanelSettings,
-  useExtensionCatalog,
-} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import {
   PanelStateStore,
@@ -136,18 +131,34 @@ export default function PanelSettings({
     t,
   ]);
 
-  const [config] = useConfigById(selectedPanelId);
-  const extensionSettings = useExtensionCatalog(getExtensionPanelSettings);
-  const topicToSchemaNameMap = useMessagePipeline(getTopicToSchemaNameMap);
-  const settingsTree = usePanelStateStore((state) =>
-    buildSettingsTree({
+  const [config, , extensionSettings] = useConfigById(selectedPanelId);
+  const messagePipelineState = useMessagePipelineGetter();
+
+  const storedSettingsTrees = usePanelStateStore(({ settingsTrees }) => settingsTrees);
+  const settingsTree = useMemo(
+    () =>
+      buildSettingsTree({
+        config,
+        extensionSettings,
+        messagePipelineState,
+        panelType,
+        selectedPanelId,
+        settingsTrees: storedSettingsTrees,
+      }),
+    [
       config,
       extensionSettings,
+      messagePipelineState,
       panelType,
       selectedPanelId,
-      state,
-      topicToSchemaNameMap,
-    }),
+      /**
+       * The core issue is that settingsTrees object in the PanelStateStore is being
+       * mutated on each render, leading to unnecessary calls to buildSettingsTree
+       * To address this, we need to ensure that settingsTrees remains
+       * referentially stable unless its actual content changes.
+       */
+      storedSettingsTrees,
+    ],
   );
 
   const resetToDefaults = useCallback(() => {

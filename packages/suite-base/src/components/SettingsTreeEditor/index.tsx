@@ -11,11 +11,11 @@ import { IconButton, TextField } from "@mui/material";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
 import { FieldEditor } from "@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor";
+import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/SettingsTreeEditor.style";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
@@ -24,30 +24,6 @@ import { PANEL_TITLE_CONFIG_KEY, getPanelTypeFromId } from "@lichtblick/suite-ba
 
 import { NodeEditor } from "./NodeEditor";
 import { filterTreeNodes, prepareSettingsNodes } from "./utils";
-
-const useStyles = makeStyles()((theme) => ({
-  appBar: {
-    top: 0,
-    marginRight: 1,
-    zIndex: theme.zIndex.appBar,
-    padding: theme.spacing(0.5),
-    position: "sticky",
-    backgroundColor: theme.palette.background.paper,
-  },
-  fieldGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(20%, 20ch) auto",
-    columnGap: theme.spacing(1),
-  },
-  textField: {
-    ".MuiOutlinedInput-notchedOutline": {
-      border: "none",
-    },
-  },
-  startAdornment: {
-    display: "flex",
-  },
-}));
 
 const makeStablePath = memoizeWeak((key: string) => [key]);
 
@@ -66,12 +42,22 @@ export default function SettingsTreeEditor({
   const filteredNodes = useMemo(() => {
     if (filterText.length > 0) {
       return filterTreeNodes(settings.nodes, filterText);
-    } else {
-      return settings.nodes;
     }
+    return settings.nodes;
   }, [settings.nodes, filterText]);
 
-  const definedNodes = useMemo(() => prepareSettingsNodes(filteredNodes), [filteredNodes]);
+  const memoizedNodes = useMemo(() => {
+    const preparedNodes = prepareSettingsNodes(filteredNodes);
+    return preparedNodes.map(([key, root]) => ({
+      key,
+      actionHandler,
+      defaultOpen: root.defaultExpansionState !== "collapsed",
+      filter: filterText,
+      focusedPath,
+      path: makeStablePath(key),
+      settings: root,
+    }));
+  }, [filteredNodes, actionHandler, filterText, focusedPath]);
 
   const { selectedPanelIds } = useSelectedPanels();
   const selectedPanelId = useMemo(
@@ -116,6 +102,10 @@ export default function SettingsTreeEditor({
   const showTitleField =
     filterText.length === 0 && panelInfo?.hasCustomToolbar !== true && variant !== "log";
 
+  const handleFilterChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterText(event.target.value);
+  }, []);
+
   return (
     <Stack fullHeight>
       {settings.enableFilter === true && (
@@ -123,9 +113,7 @@ export default function SettingsTreeEditor({
           <TextField
             id={`${variant}-settings-filter`}
             variant="filled"
-            onChange={(event) => {
-              setFilterText(event.target.value);
-            }}
+            onChange={handleFilterChange}
             value={filterText}
             className={classes.textField}
             fullWidth
@@ -167,16 +155,8 @@ export default function SettingsTreeEditor({
             />
           </>
         )}
-        {definedNodes.map(([key, root]) => (
-          <NodeEditor
-            key={key}
-            actionHandler={actionHandler}
-            defaultOpen={root.defaultExpansionState === "collapsed" ? false : true}
-            filter={filterText}
-            focusedPath={focusedPath}
-            path={makeStablePath(key)}
-            settings={root}
-          />
+        {memoizedNodes.map((nodeProps) => (
+          <NodeEditor {...nodeProps} key={nodeProps.key} />
         ))}
       </div>
     </Stack>

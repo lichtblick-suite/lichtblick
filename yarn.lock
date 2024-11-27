@@ -3340,6 +3340,7 @@ __metadata:
     moment-timezone: 0.5.43
     monaco-editor: 0.52.0
     monaco-editor-webpack-plugin: 7.1.0
+    nanoid: 5.0.9
     natsort: 2.0.3
     nearley: 2.20.1
     nearley-loader: 2.0.0
@@ -15682,6 +15683,15 @@ __metadata:
     react: "*"
     react-dom: "*"
   checksum: 85d5e730798387bee3090e9943801489ec4269bd376a848b75515cf0f44dc7ce53d4a9fec575081a7dff53a8a5d4b00eebdc1bbf217d75fae7195819f917aba1
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:5.0.9":
+  version: 5.0.9
+  resolution: "nanoid@npm:5.0.9"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 8a3f9104f81095e3e4785f58caae47a05755599824b8611b9730cbf73db706b664f100e6189f8303f08764f144d499613d8e4a39e83125c53f4b4986d6576621
   languageName: node
   linkType: hard
 

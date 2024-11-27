@@ -11,9 +11,10 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
-import Sidebars, { SidebarItem } from ".";
+import Sidebars from ".";
 
 export default {
   title: "components/Sidebar",

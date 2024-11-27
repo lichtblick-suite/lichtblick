@@ -7,15 +7,7 @@
 
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Badge, Paper, Tab, Tabs } from "@mui/material";
-import {
-  ComponentProps,
-  MouseEvent,
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { MouseEvent, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
 
@@ -24,12 +16,13 @@ import { HelpMenu } from "@lichtblick/suite-base/components/AppBar/HelpMenu";
 import { BuiltinIcon } from "@lichtblick/suite-base/components/BuiltinIcon";
 import ErrorBoundary from "@lichtblick/suite-base/components/ErrorBoundary";
 import { MemoryUseIndicator } from "@lichtblick/suite-base/components/MemoryUseIndicator";
+import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import "react-mosaic-component/react-mosaic-component.css";
-import { NewSidebar, NewSidebarItem } from "./NewSidebar";
+import { NewSidebar } from "./NewSidebar";
 import { TabSpacer } from "./TabSpacer";
 
 function Noop(): ReactNull {
@@ -37,14 +30,6 @@ function Noop(): ReactNull {
 }
 
 type LayoutNode = "leftbar" | "children" | "rightbar";
-
-export type SidebarItem = {
-  iconName: ComponentProps<typeof BuiltinIcon>["name"];
-  title: string;
-  badge?: { count: number };
-  component?: React.ComponentType;
-  url?: string;
-};
 
 const useStyles = makeStyles()((theme) => ({
   leftNav: {
@@ -131,13 +116,13 @@ type SidebarProps<OldLeftKey, LeftKey, RightKey> = PropsWithChildren<{
   selectedKey: OldLeftKey | undefined;
   onSelectKey: (key: OldLeftKey | undefined) => void;
 
-  leftItems: Map<LeftKey, NewSidebarItem>;
+  leftItems: Map<LeftKey, SidebarItem>;
   selectedLeftKey: LeftKey | undefined;
   onSelectLeftKey: (item: LeftKey | undefined) => void;
   leftSidebarSize: number | undefined;
   setLeftSidebarSize: (size: number | undefined) => void;
 
-  rightItems: Map<RightKey, NewSidebarItem>;
+  rightItems: Map<RightKey, SidebarItem>;
   selectedRightKey: RightKey | undefined;
   onSelectRightKey: (item: RightKey | undefined) => void;
   rightSidebarSize: number | undefined;

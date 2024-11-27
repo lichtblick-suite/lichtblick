@@ -6,7 +6,9 @@ import { userEvent } from "@storybook/testing-library";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import { ActionMenu, ActionMenuProps } from "./ActionMenu";
+import { ActionMenuProps } from "@lichtblick/suite-base/components/PanelSettings/types";
+
+import { ActionMenu } from "./ActionMenu";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({

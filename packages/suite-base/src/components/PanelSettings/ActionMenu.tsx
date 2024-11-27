@@ -6,23 +6,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { IconButton, Menu, MenuItem, SvgIconProps } from "@mui/material";
+import { IconButton, Menu, MenuItem } from "@mui/material";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
-export type ActionMenuProps = {
-  allowShare: boolean;
-  onReset: () => void;
-  onShare: () => void;
-  fontSize?: SvgIconProps["fontSize"];
-};
-
-const useStyles = makeStyles()((theme) => ({
-  iconButtonSmall: {
-    padding: theme.spacing(0.91125), // round out the overall height to 30px
-    borderRadius: 0,
-  },
-}));
+import { useStyles } from "@lichtblick/suite-base/components/PanelSettings/ActionMenu.style";
+import { ActionMenuProps } from "@lichtblick/suite-base/components/PanelSettings/types";
 
 export function ActionMenu({
   allowShare,
@@ -31,15 +20,29 @@ export function ActionMenu({
   fontSize = "medium",
 }: ActionMenuProps): React.JSX.Element {
   const { classes, cx } = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>();
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>();
   const { t } = useTranslation("panelSettings");
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const [isMenuOpen, setMenuOpen] = useState(false);
+
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
+    setMenuOpen(true);
+  }, []);
+
+  const handleClose = useCallback(() => {
     setAnchorEl(undefined);
-  };
+    setMenuOpen(false);
+  }, []);
+
+  const handleShare = useCallback(() => {
+    onShare();
+    handleClose();
+  }, [onShare, handleClose]);
+
+  const handleReset = useCallback(() => {
+    onReset();
+    handleClose();
+  }, [onReset, handleClose]);
 
   return (
     <div>
@@ -47,9 +50,9 @@ export function ActionMenu({
         className={cx({ [classes.iconButtonSmall]: fontSize === "small" })}
         data-testid="basic-button"
         id="basic-button"
-        aria-controls={open ? "basic-menu" : undefined}
+        aria-controls={isMenuOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
+        aria-expanded={isMenuOpen ? "true" : undefined}
         onClick={handleClick}
       >
         <MoreVertIcon fontSize={fontSize} />
@@ -58,29 +61,16 @@ export function ActionMenu({
         data-testid="basic-menu"
         id="basic-menu"
         anchorEl={anchorEl}
-        open={open}
+        open={isMenuOpen}
         onClose={handleClose}
         MenuListProps={{
           "aria-labelledby": "basic-button",
         }}
       >
-        <MenuItem
-          disabled={!allowShare}
-          onClick={() => {
-            onShare();
-            handleClose();
-          }}
-        >
+        <MenuItem disabled={!allowShare} aria-disabled={!allowShare} onClick={handleShare}>
           {t("importOrExportSettingsWithEllipsis")}
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            onReset();
-            handleClose();
-          }}
-        >
-          {t("resetToDefaults")}
-        </MenuItem>
+        <MenuItem onClick={handleReset}>{t("resetToDefaults")}</MenuItem>
       </Menu>
     </div>
   );

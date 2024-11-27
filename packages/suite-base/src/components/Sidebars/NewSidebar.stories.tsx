@@ -12,11 +12,11 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
-import Sidebars, { SidebarItem } from ".";
-import { NewSidebarItem } from "./NewSidebar";
+import Sidebars from ".";
 
 export default {
   title: "components/NewSidebar",
@@ -51,13 +51,13 @@ type RightKey = "x" | "y" | "z";
 const ITEMS = new Map<string, SidebarItem>([]);
 const BOTTOM_ITEMS = new Map<string, SidebarItem>([]);
 
-const LEFT_ITEMS = new Map<LeftKey, NewSidebarItem>([
+const LEFT_ITEMS = new Map<LeftKey, SidebarItem>([
   ["a", { title: "A", component: A }],
   ["b", { title: "B", component: B }],
   ["c", { title: "C", component: C }],
 ]);
 
-const RIGHT_ITEMS = new Map<RightKey, NewSidebarItem>([
+const RIGHT_ITEMS = new Map<RightKey, SidebarItem>([
   ["x", { title: "X", component: X }],
   ["y", { title: "Y", component: Y }],
   ["z", { title: "Z", component: Z }],
