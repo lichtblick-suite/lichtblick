@@ -19,7 +19,9 @@ import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { LichtblickLogo } from "@lichtblick/suite-base/components/LichtblickLogo";
+import { MemoryUseIndicator } from "@lichtblick/suite-base/components/MemoryUseIndicator";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
@@ -31,6 +33,7 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";
@@ -175,6 +178,9 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
   const { t } = useTranslation("appBar");
 
   const { appBarLayoutButton } = useAppContext();
+  const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_MEMORY_USE_INDICATOR,
+  );
 
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
 
@@ -251,6 +257,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
 
           <div className={classes.end}>
             <div className={classes.endInner}>
+              {enableMemoryUseIndicator && <MemoryUseIndicator />}
               {appBarLayoutButton}
               <Stack direction="row" alignItems="center" data-tourid="sidebar-button-group">
                 <AppBarIconButton

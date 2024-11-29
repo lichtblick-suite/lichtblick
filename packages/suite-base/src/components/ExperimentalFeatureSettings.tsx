@@ -48,6 +48,11 @@ function useFeatures(): Feature[] {
       name: t("newAppMenu"),
       description: <>{t("newAppMenuDescription")}</>,
     },
+    {
+      key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
+      name: t("memoryUseIndicator"),
+      description: <>{t("memoryUseIndicatorDescription")}</>,
+    },
   ];
 
   if (process.env.NODE_ENV === "development") {
@@ -57,7 +62,6 @@ function useFeatures(): Feature[] {
       description: <>{t("layoutDebuggingDescription")}</>,
     });
   }
-
   return features;
 }
 
