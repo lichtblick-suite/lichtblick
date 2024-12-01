@@ -39,7 +39,7 @@
     "@lichtblick/wasm-zstd": "1.0.0",
     "@mcap/core": "2.0.2",
     "@protobufjs/base64": "1.1.2",
-    "flatbuffers": "23.5.26",
+    "flatbuffers": "24.3.25",
     "flatbuffers_reflection": "0.0.7",
     "protobufjs": "patch:protobufjs@7.2.5#../../patches/protobufjs.patch"
   }
