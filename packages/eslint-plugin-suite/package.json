@@ -17,7 +17,7 @@
   ],
   "devDependencies": {
     "@lichtblick/tsconfig": "1.0.0",
-    "@typescript-eslint/rule-tester": "8.12.2",
-    "@typescript-eslint/utils": "8.12.2"
+    "@typescript-eslint/rule-tester": "8.16.0",
+    "@typescript-eslint/utils": "8.16.0"
   }
 }
