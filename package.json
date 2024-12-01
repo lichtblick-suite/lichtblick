@@ -91,7 +91,7 @@
     "@types/babel__core": "^7.20.3",
     "@types/babel__preset-env": "^7.9.6",
     "@types/case-sensitive-paths-webpack-plugin": "2.1.9",
-    "@types/jest": "29.5.12",
+    "@types/jest": "29.5.14",
     "@types/license-checker": "^25.0.6",
     "@types/node": "22.9.3",
     "@types/react-refresh": "^0",
