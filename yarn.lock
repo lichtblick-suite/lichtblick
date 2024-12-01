@@ -3096,7 +3096,7 @@ __metadata:
     "@types/cytoscape": ^3.19.16
     "@types/geojson": 7946.0.11
     "@types/gl-matrix": 3.2.0
-    "@types/hammerjs": 2.0.45
+    "@types/hammerjs": 2.0.46
     "@types/leaflet": 1.9.7
     "@types/lichtblick__roslibjs": "workspace:*"
     "@types/memoize-weak": "workspace:*"
@@ -5260,10 +5260,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/hammerjs@npm:2.0.45":
-  version: 2.0.45
-  resolution: "@types/hammerjs@npm:2.0.45"
-  checksum: 40a29067c485a2a1f4345718104218fcf769adb1dbe091cdb6f679b3293dfa0798b207eb498ee7fd79ae8664c999117738fa0c01753f7465a639128f38c3ff5b
+"@types/hammerjs@npm:2.0.46":
+  version: 2.0.46
+  resolution: "@types/hammerjs@npm:2.0.46"
+  checksum: caba6ec788d19905c71092670b58514b3d1f5eee5382bf9205e8df688d51e7857b7994e2dd7aed57fac8977bdf0e456d67fbaf23440a4385b8ce25fe2af1ec39
   languageName: node
   linkType: hard
 
