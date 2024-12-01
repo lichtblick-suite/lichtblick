@@ -16,9 +16,9 @@
   "homepage": "https://github.com/lichtblick-suite",
   "main": "src/index",
   "devDependencies": {
-    "@emotion/cache": "11.13.1",
-    "@emotion/react": "11.13.0",
-    "@emotion/styled": "11.13.0",
+    "@emotion/cache": "11.13.5",
+    "@emotion/react": "11.13.5",
+    "@emotion/styled": "11.13.5",
     "@fluentui/react-icons": "2.0.224",
     "@foxglove/schemas": "1.6.3",
     "@foxglove/ws-protocol": "0.7.2",

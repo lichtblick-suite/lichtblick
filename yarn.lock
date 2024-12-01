@@ -1786,7 +1786,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/babel-plugin@npm:^11.12.0":
+"@emotion/babel-plugin@npm:^11.13.5":
   version: 11.13.5
   resolution: "@emotion/babel-plugin@npm:11.13.5"
   dependencies:
@@ -1805,7 +1805,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/cache@npm:*, @emotion/cache@npm:^11.11.0, @emotion/cache@npm:^11.13.0":
+"@emotion/cache@npm:*, @emotion/cache@npm:11.13.5, @emotion/cache@npm:^11.11.0, @emotion/cache@npm:^11.13.5":
   version: 11.13.5
   resolution: "@emotion/cache@npm:11.13.5"
   dependencies:
@@ -1815,19 +1815,6 @@ __metadata:
     "@emotion/weak-memoize": ^0.4.0
     stylis: 4.2.0
   checksum: d4429bcac07730dd65707b8203f855be3d1958183e05d265eeefbeab19822e70c87250fad9abaeaea575d844256d1b8fee348211ef905f7715234df0ee088188
-  languageName: node
-  linkType: hard
-
-"@emotion/cache@npm:11.13.1":
-  version: 11.13.1
-  resolution: "@emotion/cache@npm:11.13.1"
-  dependencies:
-    "@emotion/memoize": ^0.9.0
-    "@emotion/sheet": ^1.4.0
-    "@emotion/utils": ^1.4.0
-    "@emotion/weak-memoize": ^0.4.0
-    stylis: 4.2.0
-  checksum: 94b161786a03a08a1e30257478fad9a9be1ac8585ddca0c6410d7411fd474fc8b0d6d1167d7d15bdb012d1fd8a1220ac2bbc79501ad9b292b83c17da0874d7de
   languageName: node
   linkType: hard
 
@@ -1854,16 +1841,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/react@npm:11.13.0":
-  version: 11.13.0
-  resolution: "@emotion/react@npm:11.13.0"
+"@emotion/react@npm:11.13.5":
+  version: 11.13.5
+  resolution: "@emotion/react@npm:11.13.5"
   dependencies:
     "@babel/runtime": ^7.18.3
-    "@emotion/babel-plugin": ^11.12.0
-    "@emotion/cache": ^11.13.0
-    "@emotion/serialize": ^1.3.0
+    "@emotion/babel-plugin": ^11.13.5
+    "@emotion/cache": ^11.13.5
+    "@emotion/serialize": ^1.3.3
     "@emotion/use-insertion-effect-with-fallbacks": ^1.1.0
-    "@emotion/utils": ^1.4.0
+    "@emotion/utils": ^1.4.2
     "@emotion/weak-memoize": ^0.4.0
     hoist-non-react-statics: ^3.3.1
   peerDependencies:
@@ -1871,11 +1858,11 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: aa6bff49ac0c15a97cc310a36e89146c4851dcb84ba25bc284d68e19a9b9d5d78235b74915a58404d59cfa369ddaf33dc280d881ca089e4ad70310dce87e0853
+  checksum: 25c6572bdb1472d622a41817881628eb311deafe507bbb1be95c6a4c2c23a19bdd011c368d5794c5a17a1fdf2b5db327480a4c0b85d9322078d531289c163225
   languageName: node
   linkType: hard
 
-"@emotion/serialize@npm:*, @emotion/serialize@npm:^1.3.0, @emotion/serialize@npm:^1.3.3":
+"@emotion/serialize@npm:*, @emotion/serialize@npm:^1.3.3":
   version: 1.3.3
   resolution: "@emotion/serialize@npm:1.3.3"
   dependencies:
@@ -1895,23 +1882,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:11.13.0":
-  version: 11.13.0
-  resolution: "@emotion/styled@npm:11.13.0"
+"@emotion/styled@npm:11.13.5":
+  version: 11.13.5
+  resolution: "@emotion/styled@npm:11.13.5"
   dependencies:
     "@babel/runtime": ^7.18.3
-    "@emotion/babel-plugin": ^11.12.0
+    "@emotion/babel-plugin": ^11.13.5
     "@emotion/is-prop-valid": ^1.3.0
-    "@emotion/serialize": ^1.3.0
+    "@emotion/serialize": ^1.3.3
     "@emotion/use-insertion-effect-with-fallbacks": ^1.1.0
-    "@emotion/utils": ^1.4.0
+    "@emotion/utils": ^1.4.2
   peerDependencies:
     "@emotion/react": ^11.0.0-rc.0
     react: ">=16.8.0"
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: f5b951059418f57bc8ea32b238afb25965ece3314f2ffd1b14ce049ba3c066a424990dfbfabbf57bb88e044eaa80bf19f620ac988adda3d2fc483177be6da05e
+  checksum: 316b3e9f98fc9d3faa54a990ad7f3805611c76a4ebffac9a6c28b6e7e9dd6e9343e9b80c79617af7f64524081a606f3789a89373abf67362fa138028f91b62af
   languageName: node
   linkType: hard
 
@@ -1931,7 +1918,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/utils@npm:*, @emotion/utils@npm:^1.4.0, @emotion/utils@npm:^1.4.2":
+"@emotion/utils@npm:*, @emotion/utils@npm:^1.4.2":
   version: 1.4.2
   resolution: "@emotion/utils@npm:1.4.2"
   checksum: 04cf76849c6401205c058b82689fd0ec5bf501aed6974880fe9681a1d61543efb97e848f4c38664ac4a9068c7ad2d1cb84f73bde6cf95f1208aa3c28e0190321
@@ -3220,9 +3207,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite-base@workspace:packages/suite-base"
   dependencies:
-    "@emotion/cache": 11.13.1
-    "@emotion/react": 11.13.0
-    "@emotion/styled": 11.13.0
+    "@emotion/cache": 11.13.5
+    "@emotion/react": 11.13.5
+    "@emotion/styled": 11.13.5
     "@fluentui/react-icons": 2.0.224
     "@foxglove/schemas": 1.6.3
     "@foxglove/ws-protocol": 0.7.2
@@ -3484,8 +3471,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/theme@workspace:packages/theme"
   dependencies:
-    "@emotion/react": 11.13.0
-    "@emotion/styled": 11.13.0
+    "@emotion/react": 11.13.5
+    "@emotion/styled": 11.13.5
     "@fluentui/react-icons": 2.0.224
     "@lichtblick/tsconfig": 1.0.0
     "@mui/icons-material": 5.15.5
