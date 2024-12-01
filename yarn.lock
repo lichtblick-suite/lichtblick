@@ -3130,7 +3130,7 @@ __metadata:
     chromatic: 11.5.6
     crypto-browserify: 3.12.0
     css-loader: 6.8.1
-    cytoscape: 3.28.1
+    cytoscape: 3.30.4
     cytoscape-dagre: 2.5.0
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
@@ -8893,13 +8893,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:3.28.1":
-  version: 3.28.1
-  resolution: "cytoscape@npm:3.28.1"
-  dependencies:
-    heap: ^0.2.6
-    lodash: ^4.17.21
-  checksum: d9fcb14e909931ebead0fffaf230be7302156166372b7f0d446fea96bc5dfed2c36024842a8d80cd8817d6120125422beaee4a1e9ece4ba53a9addc880116afd
+"cytoscape@npm:3.30.4":
+  version: 3.30.4
+  resolution: "cytoscape@npm:3.30.4"
+  checksum: a6b33f018456766c3e49a34fd5860716a2008c29b804b105a8409520d81c778a747ef90a9eba877001c770a077c5b4d87f7cbef0b9d3686aaffc4fd1a86b051e
   languageName: node
   linkType: hard
 
@@ -12010,7 +12007,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heap@npm:^0.2.6, heap@npm:^0.2.7":
+"heap@npm:^0.2.7":
   version: 0.2.7
   resolution: "heap@npm:0.2.7"
   checksum: b0f3963a799e02173f994c452921a777f2b895b710119df999736bfed7477235c2860c423d9aea18a9f3b3d065cb1114d605c208cfcb8d0ac550f97ec5d28cb0
