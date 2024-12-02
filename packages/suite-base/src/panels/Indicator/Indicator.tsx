@@ -6,14 +6,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Typography } from "@mui/material";
-import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { MessagePath, parseMessagePath } from "@lichtblick/message-path";
-import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
-import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { parseMessagePath } from "@lichtblick/message-path";
+import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { stateReducer } from "@lichtblick/suite-base/panels/shared/gaugeAndIndicatorStateReducer";
+import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/types";
 
 import { getMatchingRule } from "./getMatchingRule";
 import { settingsActionReducer, useSettingsTree } from "./settings";
@@ -45,97 +45,6 @@ const useStyles = makeStyles()({
   },
 });
 
-type State = {
-  path: string;
-  parsedPath: MessagePath | undefined;
-  latestMessage: MessageEvent | undefined;
-  latestMatchingQueriedData: unknown;
-  error: Error | undefined;
-  pathParseError: string | undefined;
-};
-
-type Action =
-  | { type: "frame"; messages: readonly MessageEvent[] }
-  | { type: "path"; path: string }
-  | { type: "seek" };
-
-function getSingleDataItem(results: unknown[]) {
-  if (results.length <= 1) {
-    return results[0];
-  }
-  throw new Error("Message path produced multiple results");
-}
-
-function reducer(state: State, action: Action): State {
-  try {
-    switch (action.type) {
-      case "frame": {
-        if (state.pathParseError != undefined) {
-          return { ...state, latestMessage: _.last(action.messages), error: undefined };
-        }
-        let latestMatchingQueriedData = state.latestMatchingQueriedData;
-        let latestMessage = state.latestMessage;
-        if (state.parsedPath) {
-          for (const message of action.messages) {
-            if (message.topic !== state.parsedPath.topicName) {
-              continue;
-            }
-            const data = getSingleDataItem(
-              simpleGetMessagePathDataItems(message, state.parsedPath),
-            );
-            if (data != undefined) {
-              latestMatchingQueriedData = data;
-              latestMessage = message;
-            }
-          }
-        }
-        return { ...state, latestMessage, latestMatchingQueriedData, error: undefined };
-      }
-      case "path": {
-        const newPath = parseMessagePath(action.path);
-        let pathParseError: string | undefined;
-        if (
-          newPath?.messagePath.some(
-            (part) =>
-              (part.type === "filter" && typeof part.value === "object") ||
-              (part.type === "slice" &&
-                (typeof part.start === "object" || typeof part.end === "object")),
-          ) === true
-        ) {
-          pathParseError = "Message paths using variables are not currently supported";
-        }
-        let latestMatchingQueriedData: unknown;
-        let error: Error | undefined;
-        try {
-          latestMatchingQueriedData =
-            newPath && pathParseError == undefined && state.latestMessage
-              ? getSingleDataItem(simpleGetMessagePathDataItems(state.latestMessage, newPath))
-              : undefined;
-        } catch (err: unknown) {
-          error = err as Error;
-        }
-        return {
-          ...state,
-          path: action.path,
-          parsedPath: newPath,
-          latestMatchingQueriedData,
-          error,
-          pathParseError,
-        };
-      }
-      case "seek":
-        return {
-          ...state,
-          latestMessage: undefined,
-          latestMatchingQueriedData: undefined,
-          error: undefined,
-        };
-    }
-  } catch (error) {
-    return { ...state, latestMatchingQueriedData: undefined, error };
-  }
-}
-
 export function Indicator({ context }: Props): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
@@ -153,9 +62,9 @@ export function Indicator({ context }: Props): React.JSX.Element {
   }));
 
   const [state, dispatch] = useReducer(
-    reducer,
+    stateReducer,
     config,
-    ({ path }): State => ({
+    ({ path }): GaugeAndIndicatorState => ({
       path,
       parsedPath: parseMessagePath(path),
       latestMessage: undefined,

@@ -14,10 +14,9 @@ import Panel from "@lichtblick/suite-base/components/Panel";
 import { PanelExtensionAdapter } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { createSyncRoot } from "@lichtblick/suite-base/panels/createSyncRoot";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { Gauge } from "./Gauge";
-import { Config } from "./types";
+import { GaugePanelAdapterProps } from "./types";
 
 function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionContext) {
   return createSyncRoot(
@@ -30,19 +29,14 @@ function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionCo
   );
 }
 
-type Props = {
-  config: Config;
-  saveConfig: SaveConfig<Config>;
-};
-
-function GaugePanelAdapter(props: Props) {
+function GaugePanelAdapter({ config, saveConfig }: GaugePanelAdapterProps) {
   const crash = useCrash();
   const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
 
   return (
     <PanelExtensionAdapter
-      config={props.config}
-      saveConfig={props.saveConfig}
+      config={config}
+      saveConfig={saveConfig}
       initPanel={boundInitPanel}
       highestSupportedConfigVersion={1}
     />
