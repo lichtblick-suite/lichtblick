@@ -1,5 +1,5 @@
 {
-  "globalSetup": "<rootDir>/build.ts",
+  "globalSetup": "../../integration-test-build.ts",
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
   },

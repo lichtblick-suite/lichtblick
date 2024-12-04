@@ -8,9 +8,15 @@
 import path from "path";
 import webpack from "webpack";
 
-import webpackConfig from "../webpack.config";
+import webpackConfigDesktop from "./desktop/webpack.config";
+import webpackConfigWeb from "./web/webpack.config";
 
-const appPath = path.join(__dirname, "..", ".webpack");
+if (process.env.TARGET !== "desktop" && process.env.TARGET !== "web") {
+  throw new Error("TARGET env variable must be either 'desktop' or 'web'");
+}
+
+const target = process.env.TARGET;
+const appPath = path.join(__dirname, target, ".webpack");
 export { appPath };
 
 // global jest test setup builds the webpack build before running any integration tests
@@ -18,6 +24,8 @@ export default async (): Promise<void> => {
   if ((process.env.INTEGRATION_SKIP_BUILD ?? "") !== "") {
     return;
   }
+
+  const webpackConfig = target === "desktop" ? webpackConfigDesktop : webpackConfigWeb;
 
   const compiler = webpack(
     webpackConfig.map((config) => {
@@ -31,7 +39,7 @@ export default async (): Promise<void> => {
 
   await new Promise<void>((resolve, reject) => {
     // eslint-disable-next-line no-restricted-syntax
-    console.info("Building Webpack. To skip, set INTEGRATION_SKIP_BUILD=1");
+    console.info(`\nBuilding Webpack (${target}). To skip, set INTEGRATION_SKIP_BUILD=1`);
     compiler.run((err, result) => {
       compiler.close(() => {});
       if (err) {

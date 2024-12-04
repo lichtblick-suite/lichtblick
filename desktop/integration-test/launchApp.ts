@@ -14,7 +14,7 @@ import { ConsoleMessage, _electron as electron, ElectronApplication, Page } from
 import { signal } from "@lichtblick/den/async";
 import Logger from "@lichtblick/log";
 
-import { appPath } from "./build";
+import { appPath } from "../../integration-test-build";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (Symbol as any).dispose ??= Symbol("Symbol.dispose");
