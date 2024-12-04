@@ -87,11 +87,11 @@ jobs:
         if: matrix.os == 'ubuntu-22.04' && success()
         uses: actions/upload-artifact@v3
         with:
-          name: linux-app
+          name: linux-app-deb
           path: dist/**/*.deb
       - name: Upload Linux artifacts RPM
         if: matrix.os == 'ubuntu-22.04' && success()
         uses: actions/upload-artifact@v3
         with:
-          name: linux-app
+          name: linux-app-rpm
           path: dist/**/*.rpm
