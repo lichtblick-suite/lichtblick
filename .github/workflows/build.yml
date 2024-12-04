@@ -59,6 +59,16 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: yarn run package:linux
 
+      - name: Package for Linux RPM Install
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm build-essential
+
+      - name: Package for Linux RPM
+        if: matrix.os == 'ubuntu-latest'
+        run: yarn run package:rpm
+
       - name: Upload Windows artifacts
         if: matrix.os == 'windows-latest' && success()
         uses: actions/upload-artifact@v3
@@ -79,3 +89,9 @@ jobs:
         with:
           name: linux-app
           path: dist/**/*.deb
+      - name: Upload Linux artifacts RPM
+        if: matrix.os == 'ubuntu-latest' && success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-app
+          path: dist/**/*.rpm

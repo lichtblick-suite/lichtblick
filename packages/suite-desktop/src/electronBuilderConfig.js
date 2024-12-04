@@ -41,6 +41,10 @@ function makeElectronBuilderConfig(params) {
           target: "tar.gz",
           arch: ["x64", "arm64"],
         },
+        {
+          target: "rpm", // 添加 rpm 打包目标
+          arch: ["x64", "arm64"], // 支持 x64 和 arm64 架构
+        },
       ],
       fileAssociations: [
         {
@@ -213,6 +217,18 @@ function makeElectronBuilderConfig(params) {
       confinement: "strict",
       grade: "stable",
       summary: "Integrated visualization and diagnosis tool for robotics",
+    },
+    rpm: {
+      // 添加 rpm 配置
+      architecture: "x86_64", // 默认的架构
+      description: "Lichtblick Suite for robotics",
+      name: "lichtblick-suite", // RPM 包的名称
+      target: "x86_64", // 架构类型
+      category: "Tools", // 分类
+      vendor: "Lichtblick", // 供应商
+      license: "MIT", // 许可证
+      icon: path.join(__dirname, "../resources/icon/icon.png"), // 图标
+      afterInstall: path.join(__dirname, "../resources/linux/rpm/postinst"),
     },
   };
 }
