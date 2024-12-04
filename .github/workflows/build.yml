@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
 
     name: (${{ matrix.os }})
 
@@ -56,17 +56,17 @@ jobs:
         run: yarn run package:darwin
 
       - name: Package for Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: yarn run package:linux
 
       - name: Package for Linux RPM Install
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y rpm build-essential
 
       - name: Package for Linux RPM
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: yarn run package:rpm
 
       - name: Upload Windows artifacts
@@ -84,13 +84,13 @@ jobs:
           path: dist/**/*.dmg
 
       - name: Upload Linux artifacts
-        if: matrix.os == 'ubuntu-latest' && success()
+        if: matrix.os == 'ubuntu-22.04' && success()
         uses: actions/upload-artifact@v3
         with:
           name: linux-app
           path: dist/**/*.deb
       - name: Upload Linux artifacts RPM
-        if: matrix.os == 'ubuntu-latest' && success()
+        if: matrix.os == 'ubuntu-22.04' && success()
         uses: actions/upload-artifact@v3
         with:
           name: linux-app
