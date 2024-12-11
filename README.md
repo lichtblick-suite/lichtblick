@@ -1,4 +1,4 @@
-<h1 align="center">Lichtblick</h1>
+<h1 align="center">Autotblick</h1>
 
 <div align="center">
   <a href="https://github.com/lichtblick-suite/lichtblick/stargazers"><img src="https://img.shields.io/github/stars/lichtblick-suite/lichtblick" alt="Stars Badge"/></a>
@@ -11,10 +11,10 @@
 
   <br />
 <p  align="center">
-Lichtblick is an integrated visualization and diagnosis tool for robotics, available in your browser or as a desktop app on Linux, Windows, and macOS.
+Autotblick is an integrated visualization and diagnosis tool for robotics, available in your browser or as a desktop app on Linux, Windows, and macOS.
 </p>
   <p align="center">
-    <img alt="Lichtblick screenshot" src="resources/screenshot.png">
+    <img alt="Autotblick screenshot" src="resources/screenshot.png">
   </p>
 </div>
 
@@ -30,25 +30,25 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, avail
 Clone the repository:
 
 ```sh
-$ git clone https://github.com/lichtblick-suite/lichtblick.git
+git clone https://github.com/lichtblick-suite/lichtblick.git
 ```
 
 Pull large files with Git LFS:
 
 ```sh
-$ git lfs pull
+git lfs pull
 ```
 
 Enable corepack:
 
 ```sh
-$ corepack enable
+corepack enable
 ```
 
 Install packages from `package.json`:
 
 ```sh
-$ yarn install
+yarn install
 ```
 
 - If you still get errors about corepack after running `corepack enable`, try uninstalling and reinstalling Node.js. Ensure that Yarn is not separately installed from another source, but is installed _via_ corepack.
@@ -65,11 +65,14 @@ $ yarn run web:serve        # it will be avaiable in http://localhost:8080
 ```
 
 :warning: Ubuntu users: the application may present some issues using GPU. In order to bypass the GPU and process it using directly the CPU (software), please run lichtblick using the variable `LIBGL_ALWAYS_SOFTWARE` set to `1`:
+
 ```sh
-$ LIBGL_ALWAYS_SOFTWARE=1 yarn desktop:start
+LIBGL_ALWAYS_SOFTWARE=1 yarn desktop:start
 ```
 
 ## :hammer_and_wrench: Building Lichtblick
+
+>>>>>>> fix: remote Lichtblick update
 
 Build the application for production using these commands:
 
@@ -96,12 +99,12 @@ $ yarn run clean
 
 ## :pencil: License (Open Source)
 
-Lichtblick follows an open core licensing model. Most functionality is available in this repository, and can be reproduced or modified per the terms of the [Mozilla Public License v2.0](/LICENSE).
+Autotblick follows an open core licensing model. Most functionality is available in this repository, and can be reproduced or modified per the terms of the [Mozilla Public License v2.0](/LICENSE).
 
 ## :handshake: Contributing
 
-Contributions are welcome! Lichtblick is primarily built in TypeScript and ReactJS. All potential contributors must agree to the Contributor License Agreement outlined in [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome! Autotblick is primarily built in TypeScript and ReactJS. All potential contributors must agree to the Contributor License Agreement outlined in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## :star: Credits
 
-Lichtblick originally began as a fork of [Foxglove Studio](https://github.com/foxglove/studio), an open-source project developed by [Foxglove](https://foxglove.dev/).
+Lichtblick originally began as a fork of [Foxglove Studio](https://github.com/foxglove/studio), an open-source project developed by [Foxglove](https://foxglove.dev/)

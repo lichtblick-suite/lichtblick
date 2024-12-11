@@ -8,7 +8,7 @@ export const appSettings = {
   askEachTime: "每次询问",
   colorScheme: "配色方案",
   dark: "深色",
-  debugModeDescription: "启用面板和功能以调试 Lichtblick",
+  debugModeDescription: "启用面板和功能以调试 Authoblick。",
   desktopApp: "桌面应用",
   displayTimestampsIn: "显示时间戳格式",
   experimentalFeatures: "实验性功能",

@@ -1,4 +1,4 @@
-# Lichtblick Benchmarking
+# Autotblick Benchmarking
 
 Benchmarks are specific combinations of layout and synthetic data playback. When a benchmark is opened, playback automatically starts and summary results are printed to the developer console.
 

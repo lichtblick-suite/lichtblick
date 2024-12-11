@@ -92,7 +92,7 @@ export function LaunchingInDesktopScreen(): ReactElement {
               href="https://github.com/lichtblick-suite/lichtblick/releases"
               target="_blank"
             >
-              Download Lichtblick
+              Download Autotblick
             </Link>
           </Typography>
         </Stack>

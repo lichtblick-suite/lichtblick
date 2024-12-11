@@ -3,9 +3,9 @@
   "version": "1.9.8",
   "license": "MPL-2.0",
   "private": true,
-  "productName": "Lichtblick",
+  "productName": "Autoblick Edu",
   "description": "Core components of Lichtblick",
-  "productDescription": "Lichtblick Suite",
+  "productDescription": "Autoblick Edu",
   "packageManager": "yarn@3.6.3",
   "repository": {
     "type": "git",

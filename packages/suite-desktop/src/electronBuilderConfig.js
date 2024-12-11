@@ -15,7 +15,7 @@ const path = require("path");
 function makeElectronBuilderConfig(params) {
   return {
     electronVersion,
-    appId: "dev.lichtblick.suite",
+    appId: "dev.umstj.edu.autoblick.suite",
     npmRebuild: false,
     asar: true,
     directories: {
@@ -59,7 +59,7 @@ function makeElectronBuilderConfig(params) {
         },
         {
           ext: "foxe",
-          name: "Lichtblick Extension",
+          name: "Autotblick Extension",
           mimeType: "application/zip",
         },
       ],
@@ -85,7 +85,7 @@ function makeElectronBuilderConfig(params) {
         },
         {
           ext: "foxe",
-          name: "Lichtblick Extension",
+          name: "Autotblick Extension",
           mimeType: "application/zip",
         },
       ],
@@ -137,7 +137,7 @@ function makeElectronBuilderConfig(params) {
           {
             CFBundleTypeExtensions: ["foxe"],
             CFBundleTypeIconFile: "FoxeIcon",
-            CFBundleTypeName: "Lichtblick Extension File",
+            CFBundleTypeName: "Autotblick Extension File",
             CFBundleTypeRole: "Viewer",
             LSHandlerRank: "Owner",
             CFBundleTypeIconSystemGenerated: 1,
@@ -161,7 +161,7 @@ function makeElectronBuilderConfig(params) {
           },
           {
             UTTypeConformsTo: ["public.data", "public.archive", "public.zip-archive"],
-            UTTypeDescription: "Lichtblick Extension File",
+            UTTypeDescription: "Autotblick Extension File",
             UTTypeIcons: { UTTypeIconText: "foxe" },
             UTTypeIdentifier: "dev.foxglove.extension",
             UTTypeTagSpecification: { "public.filename-extension": "foxe" },
@@ -183,10 +183,10 @@ function makeElectronBuilderConfig(params) {
     appx: {
       applicationId: "LichtblickSuite",
       backgroundColor: "#f7def6",
-      displayName: "Lichtblick",
-      identityName: "Lichtblick.Suite",
-      publisher: "CN=Lichtblick, O=Lichtblick, L=San Francisco, S=California, C=US",
-      publisherDisplayName: "Lichtblick",
+      displayName: "Autotblick",
+      identityName: "Autotblick.Suite",
+      publisher: "CN=Autotblick, O=Autotblick, L=San Francisco, S=California, C=US",
+      publisherDisplayName: "Autotblick",
       languages: ["en-US"],
       addAutoLaunchExtension: false,
       showNameOnTiles: false,
@@ -219,17 +219,6 @@ function makeElectronBuilderConfig(params) {
       summary: "Integrated visualization and diagnosis tool for robotics",
     },
     rpm: {
-      depends: [
-        "libgtk-3-0",
-        "libnotify4",
-        "libnss3",
-        "libxtst6",
-        "xdg-utils",
-        "libatspi2.0-0",
-        "libdrm2",
-        "libgbm1",
-        "libxcb-dri3-0",
-      ],
       afterInstall: path.join(__dirname, "../resources/linux/rpm/postinst"),
     },
   };

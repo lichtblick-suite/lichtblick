@@ -82,7 +82,7 @@ export function LaunchPreferenceScreen(): ReactElement {
 
   return (
     <Dialog open classes={{ paper: classes.paper }}>
-      <DialogTitle className={classes.dialogTitle}>Launch Lichtblick</DialogTitle>
+      <DialogTitle className={classes.dialogTitle}>Launch Autotblick</DialogTitle>
       <DialogContent>
         <Grid container spacing={1}>
           {actions.map((action) => (

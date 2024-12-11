@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 // This file contains hooks and components comprising the public API for
-// Lichtblick panel development.
+// Autotblick panel development.
 // Recommended use: import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 
 export { useDataSourceInfo } from "./useDataSourceInfo";

@@ -479,7 +479,7 @@ class StudioWindow {
     const newMenu = buildMenu(browserWindow);
     const id = browserWindow.webContents.id;
 
-    log.info(`New Lichtblick window ${id}`);
+    log.info(`New Autotblick window ${id}`);
     StudioWindow.#windowsByContentId.set(id, this);
 
     browserWindow.once("closed", () => {

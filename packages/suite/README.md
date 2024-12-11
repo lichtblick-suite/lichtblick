@@ -1,3 +1,3 @@
-# Lichtblick Extension API
+# Autotblick Extension API
 
-This package contains type definitions for writing Lichtblick extensions.
+This package contains type definitions for writing Autotblick extensions.

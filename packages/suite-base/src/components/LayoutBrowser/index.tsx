@@ -609,7 +609,7 @@ export default function LayoutBrowser({
         <LayoutSection
           disablePadding={enableNewTopNav}
           title={layoutManager.supportsSharing ? "Personal" : undefined}
-          emptyText="Add a new layout to get started with Lichtblick!"
+          emptyText="Add a new layout to get started with Autotblick!"
           items={layouts.value?.personal}
           anySelectedModifiedLayouts={anySelectedModifiedLayouts}
           multiSelectedIds={state.selectedIds}

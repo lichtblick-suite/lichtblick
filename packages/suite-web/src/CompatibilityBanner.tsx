@@ -103,7 +103,7 @@ function CompatibilityBannerBase({
 
         <div>
           <Typography variant="subtitle2">
-            {prompt} Lichtblick currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
+            {prompt} Autotblick currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
           </Typography>
 
           {!isChrome && (

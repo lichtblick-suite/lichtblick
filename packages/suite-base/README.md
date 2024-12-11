@@ -1,9 +1,9 @@
 # @lichtblick/suite-base &nbsp;
+
  [![npm version](https://img.shields.io/npm/v/%40lichtblick%2Fsuite)](https://www.npmjs.com/package/@lichtblick/suite)
  ![GitHub License](https://img.shields.io/github/license/lichtblick-suite/lichtblick)
 
-
-This package contains core components used in [Lichtblick](https://github.com/foxglove/suite).
+This package contains core components used in [Autotblick](https://github.com/foxglove/suite).
 
 ## Quick start
 

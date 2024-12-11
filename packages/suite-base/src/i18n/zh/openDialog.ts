@@ -4,14 +4,14 @@
 
 export const openDialog = {
   canBeShared: "与队友共享数据文件、可视化布局和自定义扩展",
-  collaborateTitle: "使用 Lichtblick 数据平台加速开发",
+  collaborateTitle: "使用 Authoblick 数据平台加速开发",
   convenientWebInterface: "使用便捷的网页界面以闪电般的速度标记、搜索和检索数据",
   createAFreeAccount: "创建一个免费账户",
   exploreSampleData: "浏览示例数据",
   learnMore: "了解更多",
   needHelp: "需要帮助吗？",
   needHelpDescription: "查看我们的文档，或参阅 Foxglove 博客上的教程。",
-  newToFoxgloveStudio: "Lichtblick 新手？",
+  newToFoxgloveStudio: "Autoblick 新手？",
   newToFoxgloveStudioDescription: "从浏览示例数据集或查看我们的文档开始。",
   openAGitHubIssue: "在 GitHub 上提交问题",
   openConnection: "打开连接",

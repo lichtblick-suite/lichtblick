@@ -271,7 +271,7 @@ const generateRosLib = ({
      * Input<"/your_input_topic_2">'.
      *
      * These types are dynamically generated from the bag(s) currently in your
-     * Lichtblick session, so if a datatype changes, your User Script
+     * Autotblick session, so if a datatype changes, your User Script
      * may not compile on the newly formatted bag.
      */
     ${printer.printNode(ts.EmitHint.Unspecified, typedMessage, sourceFile)}

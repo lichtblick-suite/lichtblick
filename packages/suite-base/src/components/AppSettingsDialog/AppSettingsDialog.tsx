@@ -292,7 +292,7 @@ export function AppSettingsDialog(
               </header>
               <Stack direction="row" alignItems="center" gap={1}>
                 <Typography variant="body2">
-                  Lichtblick version {LICHTBLICK_SUITE_VERSION}
+                  Autotblick version {LICHTBLICK_SUITE_VERSION}
                 </Typography>
                 <CopyButton
                   size="small"
