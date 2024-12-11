@@ -55,12 +55,9 @@ const extension: ExtensionMarketplaceDetail = {
   description: "Extension sample description",
   qualifiedName: "Qualified Extension Name",
   publisher: "Publisher",
-  homepage: "https://foxglove.dev/",
+  homepage: "https://github.com/Lichtblick-Suite",
   license: "MIT",
   version: "1.2.10",
-  readme: "https://foxglove.dev/storyextension/readme",
-  changelog: "https://foxglove.dev/storyextension/changelog",
-  foxe: "https://foxglove.dev/storyextension/extension.foxe",
   keywords: ["storybook", "testing"],
   time: {
     modified: "2021-05-19T21:37:40.166Z",
