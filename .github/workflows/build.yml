@@ -27,7 +27,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4.0.3
         with:
-          node-version: 16.17 # 使用 LTS 版本
+          node-version: 20.18.1 # 使用 LTS 版本
 
       - name: Enable Corepack and Yarn
         run: corepack enable yarn
