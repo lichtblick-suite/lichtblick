@@ -30,7 +30,7 @@ describe("mapPanel", () => {
     // Click on "Search panels" input field and type Map
     const searchInput = app.renderer.getByPlaceholder("Search panels");
     //   await searchInput.click();
-    await searchInput.type("Map");
+    await searchInput.pressSequentially("Map");
     await app.renderer.getByTestId("panel-menu-item Map").click();
 
     const mapSettingsIcon = app.renderer.getByTestId("SettingsIcon").nth(0);

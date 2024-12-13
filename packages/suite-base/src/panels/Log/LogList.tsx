@@ -19,7 +19,7 @@ import { Fab } from "@mui/material";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
-import { AutoSizer } from "react-virtualized";
+import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList as List } from "react-window";
 import { makeStyles } from "tss-react/mui";
 

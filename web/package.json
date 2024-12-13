@@ -6,7 +6,7 @@
     "@lichtblick/suite-web": "workspace:*",
     "@lichtblick/tsconfig": "1.0.0",
     "@types/serve-handler": "^6",
-    "playwright": "1.37.1",
+    "playwright": "1.49.1",
     "serve-handler": "6.1.6",
     "webpack": "5.96.1",
     "webpack-dev-server": "5.1.0"

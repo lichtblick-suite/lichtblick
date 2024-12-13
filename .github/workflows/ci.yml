@@ -109,6 +109,13 @@ jobs:
         if: matrix.os != 'ubuntu-20.04'
         run: yarn run test:integration
 
+      # New version of playwright requires to install new browsers
+      - name: Install Playwright browsers
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          cd web
+          yarn playwright install
+
       - name: test:web-integration
         if: matrix.os == 'ubuntu-20.04'
         run: yarn run test:web-integration

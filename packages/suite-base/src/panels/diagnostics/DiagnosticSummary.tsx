@@ -32,7 +32,7 @@ import {
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { CSSProperties, useCallback, useEffect, useMemo } from "react";
-import { AutoSizer } from "react-virtualized";
+import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList as List } from "react-window";
 import { makeStyles } from "tss-react/mui";
 

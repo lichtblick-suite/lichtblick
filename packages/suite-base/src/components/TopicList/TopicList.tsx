@@ -19,7 +19,7 @@ import {
 import { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLatest } from "react-use";
-import { AutoSizer } from "react-virtualized";
+import AutoSizer from "react-virtualized-auto-sizer";
 import { ListChildComponentProps, VariableSizeList } from "react-window";
 import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
