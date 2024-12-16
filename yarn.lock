@@ -3323,7 +3323,7 @@ __metadata:
     "@mcap/core": 1.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@storybook/react": 8.4.6
-    "@types/electron-devtools-installer": 2.2.3
+    "@types/electron-devtools-installer": 2.2.5
     "@types/plist": ^3.0.3
     "@types/pngjs": ^6.0.2
     "@types/tinycolor2": 1.4.4
@@ -3336,8 +3336,8 @@ __metadata:
     electron: 33.2.1
     electron-builder: 25.1.8
     electron-devtools-installer: 3.2.0
-    electron-squirrel-startup: 1.0.0
-    electron-updater: 6.3.0-alpha.6
+    electron-squirrel-startup: 1.0.1
+    electron-updater: 6.3.9
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
     fork-ts-checker-webpack-plugin: 9.0.2
@@ -5228,10 +5228,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/electron-devtools-installer@npm:2.2.3":
-  version: 2.2.3
-  resolution: "@types/electron-devtools-installer@npm:2.2.3"
-  checksum: c46d7efce5f158acec931b0d2d9676844fd8ff78331d5654d62a74b489bd70f7be35a77b10cabb3dcb860114b749e3826e161e3ad49275e037c776c277031b30
+"@types/electron-devtools-installer@npm:2.2.5":
+  version: 2.2.5
+  resolution: "@types/electron-devtools-installer@npm:2.2.5"
+  checksum: 335ba0fb24f3f33c21f0a848f49b84b36c39086aeb07684aecce9ba69d826749acf2501a4eae5f7868be9714f87a82bff783f62bb4bbfb3a5b2b495416a44470
   languageName: node
   linkType: hard
 
@@ -7905,16 +7905,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"builder-util-runtime@npm:9.2.5-alpha.3":
-  version: 9.2.5-alpha.3
-  resolution: "builder-util-runtime@npm:9.2.5-alpha.3"
-  dependencies:
-    debug: ^4.3.4
-    sax: ^1.2.4
-  checksum: 6ecca7d87426ec863cc9dcd4df903cf4a638a09d768627284f68054c060cea290c5459da5ff68e17e1ca904018df8054f5d7171dd5668429170ddf69fe4bbc68
-  languageName: node
-  linkType: hard
-
 "builder-util@npm:*, builder-util@npm:25.1.7":
   version: 25.1.7
   resolution: "builder-util@npm:25.1.7"
@@ -9996,12 +9986,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-squirrel-startup@npm:1.0.0":
-  version: 1.0.0
-  resolution: "electron-squirrel-startup@npm:1.0.0"
+"electron-squirrel-startup@npm:1.0.1":
+  version: 1.0.1
+  resolution: "electron-squirrel-startup@npm:1.0.1"
   dependencies:
     debug: ^2.2.0
-  checksum: a1f658e326bd0f5c24aec95fd9a94a2e2b8b645adbd421465829f32719d15e85d6469d9369914c3b766d61e71eebb9f6725057b7fafa78adbcc5d6d3ce5d7a22
+  checksum: fabdca2f5badc5bb63e59d226fd23db749f15a9450d138dca21bbca9583fbd7086215d6f9a94b86f5ca0edeb97087b5d6e6aebfe292a0d2203e51b8f765b8f57
   languageName: node
   linkType: hard
 
@@ -10012,19 +10002,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-updater@npm:6.3.0-alpha.6":
-  version: 6.3.0-alpha.6
-  resolution: "electron-updater@npm:6.3.0-alpha.6"
+"electron-updater@npm:6.3.9":
+  version: 6.3.9
+  resolution: "electron-updater@npm:6.3.9"
   dependencies:
-    builder-util-runtime: 9.2.5-alpha.3
+    builder-util-runtime: 9.2.10
     fs-extra: ^10.1.0
     js-yaml: ^4.1.0
     lazy-val: ^1.0.5
     lodash.escaperegexp: ^4.1.2
     lodash.isequal: ^4.5.0
-    semver: ^7.3.8
+    semver: ^7.6.3
     tiny-typed-emitter: ^2.1.0
-  checksum: e25a07aee051d1dfea2928fbd5291201ba8ada1079efd7b32b6f49340a865f7160983b5e770de672582a8527c3bb5a21af81060f6bacb00da3502f5368f3939f
+  checksum: 1c39dd0a5e537fba0edf56714e695d133e2ca303d9e143428cd2a95034c57626f94bb3981119d88d362dfd5094655a76206b92e233d16e43ccb983ed5890d227
   languageName: node
   linkType: hard
 
@@ -18743,7 +18733,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.2":
+"semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.2, semver@npm:^7.6.3":
   version: 7.6.3
   resolution: "semver@npm:7.6.3"
   bin:
