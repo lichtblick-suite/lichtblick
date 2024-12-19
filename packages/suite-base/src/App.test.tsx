@@ -21,6 +21,7 @@ import NativeWindowContext, {
   INativeWindow,
 } from "@lichtblick/suite-base/context/NativeWindowContext";
 import { UserScriptStateProvider } from "@lichtblick/suite-base/context/UserScriptStateContext";
+import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
@@ -30,8 +31,9 @@ import ProblemsContextProvider from "@lichtblick/suite-base/providers/ProblemsCo
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
-import { App } from "./App";
+import { App, AppProps } from "./App";
 import Workspace from "./Workspace";
 
 function mockProvider(testId: string) {
@@ -41,6 +43,7 @@ function mockProvider(testId: string) {
 // Mocking shared providers and components
 jest.mock("./providers/LayoutManagerProvider", () => mockProvider("layout-manager-provider"));
 jest.mock("./providers/PanelCatalogProvider", () => mockProvider("panel-catalog-provider"));
+jest.mock("./providers/AppParametersProvider", () => mockProvider("app-parameters-provider"));
 jest.mock("./components/MultiProvider", () => mockProvider("multi-provider"));
 jest.mock("./components/StudioToastProvider", () => mockProvider("studio-toast-provider"));
 jest.mock("./components/GlobalCss", () => mockProvider("global-css"));
@@ -70,8 +73,9 @@ const mockAppConfiguration: IAppConfiguration = {
 };
 
 // Helper to render the App with default props
-const setup = (overrides: Partial<React.ComponentProps<typeof App>> = {}) => {
-  const defaultProps = {
+const setup = (overrides: Partial<AppProps> = {}) => {
+  const defaultProps: AppProps = {
+    appParameters: {},
     appConfiguration: mockAppConfiguration,
     deepLinks: [],
     dataSources: [],
@@ -89,6 +93,7 @@ describe("App Component", () => {
 
   it("renders without crashing", () => {
     setup();
+    expect(screen.getByTestId("app-parameters-provider")).toBeDefined();
     expect(screen.getByTestId("color-scheme-theme")).toBeDefined();
     expect(screen.getByTestId("css-baseline")).toBeDefined();
     expect(screen.getByTestId("error-boundary")).toBeDefined();
@@ -186,6 +191,19 @@ describe("App Component MultiProvider Tests", () => {
     expectedProviders.forEach((provider) => {
       expect(extractProviderTypes()).toContain(provider);
     });
+  });
+
+  it("verifies that AppParametersProvider is called with correct parameters", () => {
+    const appParameters = {
+      [BasicBuilder.string()]: BasicBuilder.string(),
+      [BasicBuilder.string()]: BasicBuilder.string(),
+      [BasicBuilder.string()]: BasicBuilder.string(),
+    };
+    setup({ appParameters });
+    expect(screen.getByTestId("app-parameters-provider")).toBeDefined();
+
+    const props = (AppParametersProvider as jest.Mock).mock.calls[0][0];
+    expect(props.appParameters).toBe(appParameters);
   });
 
   it("verifies that MultiProvider has rendered all providers when its nativeApp", () => {

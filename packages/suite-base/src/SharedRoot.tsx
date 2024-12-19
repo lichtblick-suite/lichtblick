@@ -10,6 +10,7 @@ import {
   ISharedRootContext,
   SharedRootContext,
 } from "@lichtblick/suite-base/context/SharedRootContext";
+import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 
 import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider";
 import CssBaseline from "./components/CssBaseline";
@@ -36,29 +37,31 @@ export function SharedRoot(
 
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
-      <ColorSchemeThemeProvider>
-        {enableGlobalCss && <GlobalCss />}
-        <CssBaseline>
-          <ErrorBoundary>
-            <SharedRootContext.Provider
-              value={{
-                appBarLeftInset,
-                AppBarComponent,
-                appConfiguration,
-                customWindowControlProps,
-                dataSources,
-                deepLinks,
-                enableLaunchPreferenceScreen,
-                extensionLoaders,
-                extraProviders,
-                onAppBarDoubleClick,
-              }}
-            >
-              {children}
-            </SharedRootContext.Provider>
-          </ErrorBoundary>
-        </CssBaseline>
-      </ColorSchemeThemeProvider>
+      <AppParametersProvider>
+        <ColorSchemeThemeProvider>
+          {enableGlobalCss && <GlobalCss />}
+          <CssBaseline>
+            <ErrorBoundary>
+              <SharedRootContext.Provider
+                value={{
+                  appBarLeftInset,
+                  AppBarComponent,
+                  appConfiguration,
+                  customWindowControlProps,
+                  dataSources,
+                  deepLinks,
+                  enableLaunchPreferenceScreen,
+                  extensionLoaders,
+                  extraProviders,
+                  onAppBarDoubleClick,
+                }}
+              >
+                {children}
+              </SharedRootContext.Provider>
+            </ErrorBoundary>
+          </CssBaseline>
+        </ColorSchemeThemeProvider>
+      </AppParametersProvider>
     </AppConfigurationContext.Provider>
   );
 }

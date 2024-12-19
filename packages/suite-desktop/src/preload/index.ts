@@ -117,6 +117,9 @@ export function main(): void {
     async updateLanguage() {
       await ipcRenderer.invoke("updateLanguage");
     },
+    async getCLIFlags(): Promise<Readonly<Record<string, string>>> {
+      return await (ipcRenderer.invoke("getCLIFlags") as Promise<Readonly<Record<string, string>>>);
+    },
     getDeepLinks(): string[] {
       return deepLinks;
     },

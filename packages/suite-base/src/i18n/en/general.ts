@@ -9,4 +9,6 @@
 export const general = {
   foxglove: "Foxglove",
   learnMore: "Learn more",
+  noDefaultLayoutParameter:
+    "The layout '{{layoutName}}' specified in the app parameters does not exist.",
 };

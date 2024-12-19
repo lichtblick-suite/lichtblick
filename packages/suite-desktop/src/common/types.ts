@@ -75,6 +75,8 @@ type DesktopLayout = {
   from: string;
 };
 
+export type CLIFlags = Readonly<Record<string, string>>;
+
 interface Desktop {
   /** https://www.electronjs.org/docs/tutorial/represented-file */
   setRepresentedFilename(path: string | undefined): Promise<void>;
@@ -108,6 +110,9 @@ interface Desktop {
   // Uninstall an extension. Returns true if the extension was found and uninstalled, or false if it
   // was not found (i.e. already uninstalled)
   uninstallExtension: (id: string) => Promise<boolean>;
+
+  // Get CLI flags passed when the app was launched
+  getCLIFlags: () => Promise<CLIFlags>;
 
   /** Handle a double-click on the custom title bar */
   handleTitleBarDoubleClick(): void;
