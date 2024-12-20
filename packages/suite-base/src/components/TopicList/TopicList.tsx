@@ -5,27 +5,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import {
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  PopoverPosition,
-  Skeleton,
-  TextField,
-} from "@mui/material";
+import { List, ListItem, ListItemText, PopoverPosition, Skeleton } from "@mui/material";
 import { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLatest } from "react-use";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { ListChildComponentProps, VariableSizeList } from "react-window";
-import { makeStyles } from "tss-react/mui";
 import { useDebounce } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
-import { quoteTopicNameIfNeeded } from "@lichtblick/message-path";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import { DirectTopicStatsUpdater } from "@lichtblick/suite-base/components/DirectTopicStatsUpdater";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
@@ -34,68 +23,28 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import SearchBar from "@lichtblick/suite-base/components/SearchBar/SearchBar";
 import { ContextMenu } from "@lichtblick/suite-base/components/TopicList/ContextMenu";
+import { getDraggedMessagePath } from "@lichtblick/suite-base/components/TopicList/getDraggedMessagePath";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { MessagePathSelectionProvider } from "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider";
 
 import { MessagePathRow } from "./MessagePathRow";
+import { useStyles } from "./TopicList.style";
 import { TopicRow } from "./TopicRow";
 import { useMultiSelection } from "./useMultiSelection";
-import { TopicListItem, useTopicListSearch } from "./useTopicListSearch";
+import { useTopicListSearch } from "./useTopicListSearch";
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-
-const useStyles = makeStyles()((theme) => ({
-  root: {
-    width: "100%",
-    height: "100%",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    containerType: "inline-size",
-  },
-  filterBar: {
-    top: 0,
-    zIndex: theme.zIndex.appBar,
-    padding: theme.spacing(0.5),
-    position: "sticky",
-    backgroundColor: theme.palette.background.paper,
-  },
-  filterStartAdornment: {
-    display: "flex",
-  },
-  skeletonText: {
-    marginTop: theme.spacing(0.5),
-    marginBottom: theme.spacing(0.5),
-  },
-}));
-
-function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePath {
-  switch (treeItem.type) {
-    case "topic":
-      return {
-        path: quoteTopicNameIfNeeded(treeItem.item.item.name),
-        rootSchemaName: treeItem.item.item.schemaName,
-        isTopic: true,
-        isLeaf: false,
-        topicName: treeItem.item.item.name,
-      };
-    case "schema":
-      return {
-        path: treeItem.item.item.fullPath,
-        rootSchemaName: treeItem.item.item.topic.schemaName,
-        isTopic: false,
-        isLeaf: treeItem.item.item.suffix.isLeaf,
-        topicName: treeItem.item.item.topic.name,
-      };
-  }
-}
 
 export function TopicList(): React.JSX.Element {
   const { t } = useTranslation("topicList");
   const { classes } = useStyles();
   const [undebouncedFilterText, setFilterText] = useState<string>("");
   const [debouncedFilterText] = useDebounce(undebouncedFilterText, 50);
+  const onClear = () => {
+    setFilterText("");
+  };
 
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const { topics, datatypes } = useDataSourceInfo();
@@ -208,7 +157,7 @@ export function TopicList(): React.JSX.Element {
     return (
       <>
         <header className={classes.filterBar}>
-          <TextField
+          <SearchBar
             disabled
             variant="filled"
             fullWidth
@@ -238,40 +187,17 @@ export function TopicList(): React.JSX.Element {
   return (
     <MessagePathSelectionProvider getSelectedItems={getSelectedItemsAsDraggedMessagePaths}>
       <div className={classes.root}>
-        <header className={classes.filterBar}>
-          <TextField
-            id="topic-filter"
-            variant="filled"
-            disabled={playerPresence !== PlayerPresence.PRESENT}
-            onChange={(event) => {
-              setFilterText(event.target.value);
-            }}
-            value={undebouncedFilterText}
-            fullWidth
-            placeholder={t("searchBarPlaceholder")}
-            InputProps={{
-              inputProps: { "data-testid": "topic-filter" },
-              size: "small",
-              startAdornment: (
-                <label className={classes.filterStartAdornment} htmlFor="topic-filter">
-                  <SearchIcon fontSize="small" />
-                </label>
-              ),
-              endAdornment: undebouncedFilterText && (
-                <IconButton
-                  size="small"
-                  title={t("clearFilter")}
-                  onClick={() => {
-                    setFilterText("");
-                  }}
-                  edge="end"
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              ),
-            }}
-          />
-        </header>
+        <SearchBar
+          id="topic-filter"
+          placeholder={t("searchBarPlaceholder")}
+          disabled={playerPresence !== PlayerPresence.PRESENT}
+          onChange={(event) => {
+            setFilterText(event.target.value);
+          }}
+          value={undebouncedFilterText}
+          showClearIcon={!!debouncedFilterText}
+          onClear={onClear}
+        />
         {treeItems.length > 0 ? (
           <div style={{ flex: "1 1 100%" }}>
             <AutoSizer>
