@@ -38,9 +38,9 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
   const groupedMarketplaceData = useMemo(() => {
     return Object.entries(groupedMarketplaceEntries).map(([namespace, entries]) => ({
       namespace,
-      entries: entries.filter((entry) =>
-        entry.name.toLowerCase().includes(debouncedFilterText.toLowerCase()),
-      ),
+      entries: entries
+        .filter((entry) => entry.name.toLowerCase().includes(debouncedFilterText.toLowerCase()))
+        .sort((a, b) => a.name.localeCompare(b.name)),
     }));
   }, [groupedMarketplaceEntries, debouncedFilterText]);
 
@@ -81,9 +81,9 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
 
   const namespacedData = Object.entries(namespacedEntries).map(([namespace, entries]) => ({
     namespace,
-    entries: entries.filter((entry) =>
-      entry.name.toLowerCase().includes(debouncedFilterText.toLowerCase()),
-    ),
+    entries: entries
+      .filter((entry) => entry.name.toLowerCase().includes(debouncedFilterText.toLowerCase()))
+      .sort((a, b) => a.name.localeCompare(b.name)),
   }));
 
   return {
