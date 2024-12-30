@@ -82,6 +82,18 @@ const dataWithoutWrappingArray = (data: unknown) => {
   return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
 };
 
+export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]): unknown => {
+  if (!isSingleElemArray(data)) {
+    return data;
+  }
+
+  if (queriedData[0]?.constantName == undefined) {
+    return data[0];
+  }
+
+  return `${data[0]} (${queriedData[0]?.constantName})`;
+};
+
 const useStyles = makeStyles()((theme) => ({
   topic: {
     fontFamily: theme.typography.body1.fontFamily,
@@ -402,7 +414,7 @@ function RawMessages(props: Props) {
     const shouldDisplaySingleVal =
       (data != undefined && typeof data !== "object") ||
       (isSingleElemArray(data) && data[0] != undefined && typeof data[0] !== "object");
-    const singleVal = isSingleElemArray(data) ? data[0] : data;
+    const singleVal = getSingleValue(data, baseItem.queriedData);
 
     const diffData =
       diffItem && dataWithoutWrappingArray(diffItem.queriedData.map(({ value }) => value));
