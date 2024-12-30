@@ -18,6 +18,7 @@ import { getExtensions, installExtension, loadExtension, uninstallExtension } fr
 import { fetchLayouts } from "./layouts";
 import { decodeRendererArg } from "../common/rendererArgs";
 import {
+  CLIFlags,
   Desktop,
   ForwardedMenuEvent,
   ForwardedWindowEvent,
@@ -117,8 +118,8 @@ export function main(): void {
     async updateLanguage() {
       await ipcRenderer.invoke("updateLanguage");
     },
-    async getCLIFlags(): Promise<Readonly<Record<string, string>>> {
-      return await (ipcRenderer.invoke("getCLIFlags") as Promise<Readonly<Record<string, string>>>);
+    async getCLIFlags(): Promise<CLIFlags> {
+      return await (ipcRenderer.invoke("getCLIFlags") as Promise<CLIFlags>);
     },
     getDeepLinks(): string[] {
       return deepLinks;
