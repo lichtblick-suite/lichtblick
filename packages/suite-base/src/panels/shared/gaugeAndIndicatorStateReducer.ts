@@ -5,6 +5,7 @@ import * as _ from "lodash-es";
 import { parseMessagePath } from "@lichtblick/message-path";
 import { MessageEvent } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
   GaugeAndIndicatorState,
   GaugeAndIndicatorAction,
@@ -30,15 +31,15 @@ function handleFrameActionState({
   if (!state.parsedPath) {
     return { ...state, error: undefined };
   }
-
+  const filledInPath = fillInGlobalVariablesInPath(state.parsedPath, state.globalVariables!);
   let latestMatchingQueriedData = state.latestMatchingQueriedData;
   let latestMessage = state.latestMessage;
   for (const message of messages) {
-    if (message.topic !== state.parsedPath.topicName) {
+    if (message.topic !== filledInPath.topicName) {
       continue;
     }
 
-    const data = getSingleDataItem(simpleGetMessagePathDataItems(message, state.parsedPath));
+    const data = getSingleDataItem(simpleGetMessagePathDataItems(message, filledInPath));
     if (data != undefined) {
       latestMatchingQueriedData = data;
       latestMessage = message;
@@ -48,7 +49,7 @@ function handleFrameActionState({
   return { ...state, latestMessage, latestMatchingQueriedData, error: undefined };
 }
 
-function handlePathActionState({
+function handlePathActionStateWithGlobalVars({
   path,
   state,
 }: {
@@ -57,22 +58,15 @@ function handlePathActionState({
 }): GaugeAndIndicatorState {
   const newPath = parseMessagePath(path);
   let pathParseError: string | undefined;
-  if (
-    newPath?.messagePath.some(
-      (part) =>
-        (part.type === "filter" && typeof part.value === "object") ||
-        (part.type === "slice" && (typeof part.start === "object" || typeof part.end === "object")),
-    ) === true
-  ) {
-    pathParseError = "Message paths using variables are not currently supported";
-  }
   let latestMatchingQueriedData: unknown;
   let error: Error | undefined;
+  const filledInPath = fillInGlobalVariablesInPath(newPath!, state.globalVariables!);
   try {
-    latestMatchingQueriedData =
-      newPath && pathParseError == undefined && state.latestMessage
-        ? getSingleDataItem(simpleGetMessagePathDataItems(state.latestMessage, newPath))
-        : undefined;
+    if (state.latestMessage) {
+      latestMatchingQueriedData = getSingleDataItem(
+        simpleGetMessagePathDataItems(state.latestMessage, filledInPath),
+      );
+    }
   } catch (err: unknown) {
     error = err as Error;
   }
@@ -80,7 +74,7 @@ function handlePathActionState({
     ...state,
     error,
     latestMatchingQueriedData,
-    parsedPath: newPath,
+    parsedPath: filledInPath,
     path,
     pathParseError,
   };
@@ -96,7 +90,7 @@ export function stateReducer(
         return handleFrameActionState({ state, messages: action.messages });
       }
       case "path": {
-        return handlePathActionState({ state, path: action.path });
+        return handlePathActionStateWithGlobalVars({ state, path: action.path });
       }
       case "seek":
         return {
@@ -105,8 +99,15 @@ export function stateReducer(
           latestMatchingQueriedData: undefined,
           error: undefined,
         };
+      case "updateGlobalVariables": {
+        return { ...state, globalVariables: action.globalVariables };
+      }
     }
   } catch (error) {
-    return { ...state, latestMatchingQueriedData: undefined, error };
+    return {
+      ...state,
+      latestMatchingQueriedData: undefined,
+      error,
+    };
   }
 }

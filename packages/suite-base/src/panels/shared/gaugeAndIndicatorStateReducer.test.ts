@@ -11,6 +11,7 @@ import {
   SeekAction,
 } from "@lichtblick/suite-base/panels/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 
 import { stateReducer, getSingleDataItem } from "./gaugeAndIndicatorStateReducer";
@@ -90,6 +91,7 @@ describe("stateReducer", () => {
   } = {}) {
     const state: GaugeAndIndicatorState = {
       error: undefined,
+      globalVariables: undefined,
       latestMatchingQueriedData: undefined,
       latestMessage: undefined,
       parsedPath: buildMessagePath(),
@@ -223,31 +225,6 @@ describe("stateReducer", () => {
       expect(newState.latestMatchingQueriedData).toBeUndefined();
     });
 
-    it.each<Partial<MessagePathPart>>([
-      { type: "filter", value: Object() },
-      { type: "slice", start: Object() },
-      { type: "slice", end: Object() },
-    ])(
-      "should set pathParseError when using unsupported variables in path",
-      (messagePathPart: Partial<MessagePathPart>) => {
-        const { action, state } = setup({
-          actionOverride: buildPathAction(),
-        });
-        const newPath: MessagePath = {
-          messagePath: [messagePathPart as MessagePathPart],
-          topicName: "",
-          topicNameRepr: "",
-        };
-        (parseMessagePath as jest.Mock).mockReturnValue(newPath);
-
-        const newState = stateReducer(state, action);
-
-        expect(newState.pathParseError).toBe(
-          "Message paths using variables are not currently supported",
-        );
-      },
-    );
-
     it("should parse the path and update latestMatchingQueriedData", () => {
       const { action, state } = setup({
         actionOverride: buildPathAction(),
@@ -289,6 +266,33 @@ describe("stateReducer", () => {
       expect(newState.latestMessage).toBeUndefined();
       expect(newState.latestMatchingQueriedData).toBeUndefined();
       expect(newState.error).toBeUndefined();
+    });
+  });
+
+  describe("stateReducer when updateGlobalVariables action", () => {
+    it("should update globalVariables in the state", () => {
+      const initialGlobalVariables = GlobalVariableBuilder.globalVariables();
+      const newGlobalVariables = GlobalVariableBuilder.globalVariables();
+
+      const { action, state } = setup({
+        actionOverride: {
+          type: "updateGlobalVariables",
+          globalVariables: newGlobalVariables,
+        },
+        stateOverride: {
+          globalVariables: initialGlobalVariables,
+        },
+      });
+
+      const newState = stateReducer(state, action);
+
+      expect(newState.globalVariables).toEqual(newGlobalVariables);
+      expect(newState.error).toBe(state.error);
+      expect(newState.latestMatchingQueriedData).toBe(state.latestMatchingQueriedData);
+      expect(newState.latestMessage).toBe(state.latestMessage);
+      expect(newState.parsedPath).toBe(state.parsedPath);
+      expect(newState.path).toBe(state.path);
+      expect(newState.pathParseError).toBe(state.pathParseError);
     });
   });
 });

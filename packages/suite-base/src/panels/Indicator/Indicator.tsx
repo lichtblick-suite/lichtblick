@@ -7,45 +7,21 @@
 
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
-import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath } from "@lichtblick/message-path";
-import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
+import { SettingsTreeAction } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { useStyles } from "@lichtblick/suite-base/panels/Indicator/Indicator.style";
+import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/Indicator/constants";
 import { stateReducer } from "@lichtblick/suite-base/panels/shared/gaugeAndIndicatorStateReducer";
 import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/types";
 
 import { getMatchingRule } from "./getMatchingRule";
 import { settingsActionReducer, useSettingsTree } from "./settings";
-import { Config } from "./types";
+import { IndicatorConfig, IndicatorProps, RawValueIndicator } from "./types";
 
-type Props = {
-  context: PanelExtensionContext;
-};
-
-const defaultConfig: Config = {
-  path: "",
-  style: "bulb",
-  fallbackColor: "#a0a0a0",
-  fallbackLabel: "False",
-  rules: [{ operator: "=", rawValue: "true", color: "#68e24a", label: "True" }],
-};
-
-const useStyles = makeStyles()({
-  root: {
-    width: 40,
-    height: 40,
-    borderRadius: "50%",
-    position: "relative",
-    backgroundImage: [
-      `radial-gradient(transparent, transparent 55%, rgba(255,255,255,0.4) 80%, rgba(255,255,255,0.4))`,
-      `radial-gradient(circle at 38% 35%, rgba(255,255,255,0.8), transparent 30%, transparent)`,
-      `radial-gradient(circle at 46% 44%, transparent, transparent 61%, rgba(0,0,0,0.7) 74%, rgba(0,0,0,0.7))`,
-    ].join(","),
-  },
-});
-
-export function Indicator({ context }: Props): React.JSX.Element {
+export function Indicator({ context }: IndicatorProps): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
@@ -57,22 +33,25 @@ export function Indicator({ context }: Props): React.JSX.Element {
   } = useStyles();
 
   const [config, setConfig] = useState(() => ({
-    ...defaultConfig,
-    ...(context.initialState as Partial<Config>),
+    ...DEFAULT_CONFIG,
+    ...(context.initialState as Partial<IndicatorConfig>),
   }));
 
   const [state, dispatch] = useReducer(
     stateReducer,
     config,
-    ({ path }): GaugeAndIndicatorState => ({
-      path,
-      parsedPath: parseMessagePath(path),
-      latestMessage: undefined,
-      latestMatchingQueriedData: undefined,
-      pathParseError: undefined,
+    ({ path: statePath }): GaugeAndIndicatorState => ({
+      globalVariables: undefined,
       error: undefined,
+      latestMatchingQueriedData: undefined,
+      latestMessage: undefined,
+      parsedPath: parseMessagePath(statePath),
+      path: statePath,
+      pathParseError: undefined,
     }),
   );
+
+  const { error, latestMatchingQueriedData, parsedPath, pathParseError } = state;
 
   useLayoutEffect(() => {
     dispatch({ type: "path", path: config.path });
@@ -87,6 +66,13 @@ export function Indicator({ context }: Props): React.JSX.Element {
     context.onRender = (renderState, done) => {
       setRenderDone(() => done);
 
+      if (renderState.variables) {
+        dispatch({
+          type: "updateGlobalVariables",
+          globalVariables: Object.fromEntries(renderState.variables) as GlobalVariables,
+        });
+      }
+
       if (renderState.didSeek === true) {
         dispatch({ type: "seek" });
       }
@@ -97,11 +83,12 @@ export function Indicator({ context }: Props): React.JSX.Element {
     };
     context.watch("currentFrame");
     context.watch("didSeek");
+    context.watch("variables");
 
     return () => {
       context.onRender = undefined;
     };
-  }, [context]);
+  }, [context, dispatch]);
 
   const settingsActionHandler = useCallback(
     (action: SettingsTreeAction) => {
@@ -110,7 +97,7 @@ export function Indicator({ context }: Props): React.JSX.Element {
     [setConfig],
   );
 
-  const settingsTree = useSettingsTree(config, state.pathParseError, state.error?.message);
+  const settingsTree = useSettingsTree(config, pathParseError, error?.message);
   useEffect(() => {
     context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,
@@ -119,29 +106,38 @@ export function Indicator({ context }: Props): React.JSX.Element {
   }, [context, settingsActionHandler, settingsTree]);
 
   useEffect(() => {
-    if (state.parsedPath?.topicName != undefined) {
-      context.subscribe([{ topic: state.parsedPath.topicName, preload: false }]);
+    if (parsedPath?.topicName != undefined) {
+      context.subscribe([{ topic: parsedPath.topicName, preload: false }]);
     }
     return () => {
       context.unsubscribeAll();
     };
-  }, [context, state.parsedPath?.topicName]);
+  }, [context, parsedPath?.topicName]);
 
   // Indicate render is complete - the effect runs after the dom is updated
   useEffect(() => {
     renderDone();
   }, [renderDone]);
 
-  const rawValue =
-    typeof state.latestMatchingQueriedData === "boolean" ||
-    typeof state.latestMatchingQueriedData === "bigint" ||
-    typeof state.latestMatchingQueriedData === "string" ||
-    typeof state.latestMatchingQueriedData === "number"
-      ? state.latestMatchingQueriedData
+  const rawValue = useMemo(() => {
+    return ["boolean", "number", "bigint", "string"].includes(typeof latestMatchingQueriedData)
+      ? latestMatchingQueriedData
       : undefined;
+  }, [latestMatchingQueriedData]);
 
   const { style, rules, fallbackColor, fallbackLabel } = config;
-  const matchingRule = useMemo(() => getMatchingRule(rawValue, rules), [rawValue, rules]);
+  const matchingRule = useMemo(
+    () => getMatchingRule(rawValue as RawValueIndicator, rules),
+    [rawValue, rules],
+  );
+
+  const bulbStyle = useMemo(
+    () => ({
+      backgroundColor: matchingRule?.color ?? fallbackColor,
+    }),
+    [matchingRule?.color, fallbackColor],
+  );
+
   return (
     <Stack fullHeight>
       <Stack
@@ -156,12 +152,7 @@ export function Indicator({ context }: Props): React.JSX.Element {
         }}
       >
         <Stack direction="row" alignItems="center" gap={2}>
-          {style === "bulb" && (
-            <div
-              className={classes.root}
-              style={{ backgroundColor: matchingRule?.color ?? fallbackColor }}
-            />
-          )}
+          {style === "bulb" && <div className={classes.root} style={bulbStyle} />}
           <Typography
             color={
               style === "background"

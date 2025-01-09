@@ -35,6 +35,7 @@ export function Gauge({ context }: GaugeProps): React.JSX.Element {
     stateReducer,
     config,
     ({ path }): GaugeAndIndicatorState => ({
+      globalVariables: undefined,
       path,
       parsedPath: parseMessagePath(path),
       latestMessage: undefined,
