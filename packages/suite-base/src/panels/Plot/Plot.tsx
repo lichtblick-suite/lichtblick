@@ -604,7 +604,7 @@ export function Plot(props: Props): React.JSX.Element {
   }, [coordinator, globalBounds, shouldSync, subscriberId]);
 
   useEffect(() => {
-    if (!coordinator || !shouldSync) {
+    if (!coordinator) {
       return;
     }
 
