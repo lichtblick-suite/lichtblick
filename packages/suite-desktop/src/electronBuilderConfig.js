@@ -39,7 +39,7 @@ function makeElectronBuilderConfig(params) {
         },
         {
           target: "tar.gz",
-          arch: ["x64"],
+          arch: ["x64, arm64"],
         },
       ],
       fileAssociations: [
