@@ -23,7 +23,6 @@ import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import delay from "@lichtblick/suite-base/util/delay";
 import { getContrastColor, getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
-import { Dataset, InteractionEvent, Scale, UpdateAction } from "./ChartRenderer";
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import {
   CsvDataset,
@@ -33,6 +32,7 @@ import {
   Viewport,
 } from "./builders/IDatasetsBuilder";
 import { isReferenceLinePlotPathType, PlotConfig } from "./config";
+import { Dataset, InteractionEvent, Scale, UpdateAction } from "./types";
 
 type EventTypes = {
   timeseriesBounds(bounds: Immutable<Bounds1D>): void;

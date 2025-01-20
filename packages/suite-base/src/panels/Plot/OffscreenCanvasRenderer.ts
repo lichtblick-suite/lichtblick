@@ -12,8 +12,9 @@ import { ComlinkWrap } from "@lichtblick/den/worker";
 import { Immutable } from "@lichtblick/suite";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 
-import { ChartRenderer, Dataset, HoverElement, Scale, UpdateAction } from "./ChartRenderer";
+import { ChartRenderer } from "./ChartRenderer";
 import type { Service } from "./ChartRenderer.worker";
+import { Dataset, HoverElement, Scale, UpdateAction } from "./types";
 
 // If the datasets builder is garbage collected we also need to cleanup the worker
 // This registry ensures the worker is cleaned up when the builder is garbage collected

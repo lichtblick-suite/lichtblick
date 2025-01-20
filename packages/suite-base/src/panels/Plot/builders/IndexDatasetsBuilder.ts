@@ -22,9 +22,9 @@ import {
   SeriesConfigKey,
   SeriesItem,
 } from "./IDatasetsBuilder";
-import { Dataset } from "../ChartRenderer";
+import { MATH_FUNCTIONS } from "../constants";
 import { getChartValue, isChartValue, Datum } from "../datum";
-import { mathFunctions } from "../mathFunctions";
+import { Dataset } from "../types";
 
 type DatumWithReceiveTime = Datum & {
   receiveTime: Time;
@@ -64,7 +64,7 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
     const range: Bounds1D = { min: 0, max: 0 };
     let datasetsChanged = false;
     for (const series of this.#seriesByKey.values()) {
-      const mathFn = series.parsed.modifier ? mathFunctions[series.parsed.modifier] : undefined;
+      const mathFn = series.parsed.modifier ? MATH_FUNCTIONS[series.parsed.modifier] : undefined;
 
       const msgEvent = lastMatchingTopic(msgEvents, series.parsed.topicName);
       if (!msgEvent) {

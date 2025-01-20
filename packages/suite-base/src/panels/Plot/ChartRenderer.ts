@@ -5,129 +5,41 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Chart, ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
+import { Chart } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import EventEmitter from "eventemitter3";
 
 import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import { unwrap } from "@lichtblick/den/monads";
 import { Immutable } from "@lichtblick/suite";
-import { Bounds, Bounds1D } from "@lichtblick/suite-base/types/Bounds";
+import {
+  addEventListener,
+  removeEventListener,
+} from "@lichtblick/suite-base/components/Chart/worker/eventHandler";
+import { DEFAULT_ANNOTATION } from "@lichtblick/suite-base/panels/Plot/constants";
+import { getChartOptions } from "@lichtblick/suite-base/panels/Plot/getChartOptions";
+import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
-import { fontMonospace } from "@lichtblick/theme";
 
-import { OriginalValue } from "./datum";
-
-export type Scale = {
-  min: number;
-  max: number;
-  left: number;
-  right: number;
-};
-
-type BaseInteractionEvent = {
-  cancelable: boolean;
-  deltaY: number;
-  deltaX: number;
-
-  boundingClientRect: DOMRect;
-};
-
-type MouseBase = BaseInteractionEvent & {
-  clientX: number;
-  clientY: number;
-};
-
-type WheelInteractionEvent = { type: "wheel" } & BaseInteractionEvent & MouseBase;
-type PanStartInteractionEvent = { type: "panstart" } & BaseInteractionEvent & {
-    center: { x: number; y: number };
-  };
-type PanMoveInteractionEvent = { type: "panmove" } & BaseInteractionEvent;
-type PanEndInteractionEvent = { type: "panend" } & BaseInteractionEvent;
-
-export type InteractionEvent =
-  | WheelInteractionEvent
-  | PanStartInteractionEvent
-  | PanMoveInteractionEvent
-  | PanEndInteractionEvent;
-
-export type Datum = ScatterDataPoint & { value?: OriginalValue };
-export type Dataset = ChartDataset<"scatter", Datum[]>;
-
-type ChartType = Chart<"scatter", Datum[]>;
-
-export type HoverElement = {
-  data: Datum;
-  configIndex: number;
-};
-
-export type Size = { width: number; height: number };
-
-export type UpdateAction = {
-  type: "update";
-  size?: { width: number; height: number };
-  showXAxisLabels?: boolean;
-  showYAxisLabels?: boolean;
-  xBounds?: Partial<Bounds1D>;
-  yBounds?: Partial<Bounds1D>;
-  zoomMode?: "x" | "y" | "xy";
-  referenceLines?: { color: string; value: number }[];
-  interactionEvents?: InteractionEvent[];
-};
-
-function addEventListener(emitter: EventEmitter) {
-  return (eventName: string, fn?: () => void) => {
-    const existing = emitter.listeners(eventName);
-    if (!fn || existing.includes(fn)) {
-      return;
-    }
-
-    emitter.on(eventName, fn);
-  };
-}
-
-function removeEventListener(emitter: EventEmitter) {
-  return (eventName: string, fn?: () => void) => {
-    if (fn) {
-      emitter.off(eventName, fn);
-    }
-  };
-}
-
-// allows us to override the chart.ctx instance field which zoom plugin uses for adding event listeners
-type MutableContext<T> = Omit<Chart, "ctx"> & { ctx: T };
-
-type PanEvent = {
-  deltaX: number;
-  deltaY: number;
-};
-
-type PanStartEvent = PanEvent & {
-  center: { x: number; y: number };
-  target: {
-    getBoundingClientRect(): DOMRect;
-  };
-};
-
-type ZoomableChart = Chart & {
-  $zoom: {
-    panStartHandler(event: PanStartEvent): void;
-    panHandler(event: PanEvent): void;
-    panEndHandler(): void;
-  };
-};
+import {
+  ChartRendererProps,
+  ChartType,
+  Dataset,
+  Datum,
+  HoverElement,
+  InteractionEvent,
+  MutableContext,
+  Scale,
+  UpdateAction,
+  ZoomableChart,
+} from "./types";
 
 export class ChartRenderer {
   #chartInstance: ChartType;
   #fakeNodeEvents = new EventEmitter();
   #fakeDocumentEvents = new EventEmitter();
 
-  public constructor(args: {
-    canvas: OffscreenCanvas;
-    devicePixelRatio: number;
-    gridColor: string;
-    tickColor: string;
-  }) {
+  public constructor(args: ChartRendererProps) {
     const fakeNode = {
       addEventListener: addEventListener(this.#fakeNodeEvents),
       removeEventListener: removeEventListener(this.#fakeNodeEvents),
@@ -136,6 +48,12 @@ export class ChartRenderer {
         removeEventListener: removeEventListener(this.#fakeDocumentEvents),
       },
     };
+
+    const chartOptions = getChartOptions({
+      devicePixelRatio: args.devicePixelRatio,
+      gridColor: args.gridColor,
+      tickColor: args.tickColor,
+    });
 
     const origZoomStart = ZoomPlugin.start?.bind(ZoomPlugin);
     ZoomPlugin.start = (chartInstance: MutableContext<unknown>, startArgs, pluginOptions) => {
@@ -149,74 +67,6 @@ export class ChartRenderer {
       return res;
     };
 
-    const fullOptions: ChartOptions<"scatter"> = {
-      maintainAspectRatio: false,
-      animation: false,
-      // Disable splines, they seem to cause weird rendering artifacts:
-      elements: { line: { tension: 0 } },
-      interaction: {
-        intersect: false,
-        mode: "x",
-      },
-      devicePixelRatio: args.devicePixelRatio,
-      font: { family: fontMonospace, size: 10 },
-      // we force responsive off since we manually trigger width/height updates on the chart
-      // responsive mode does not work properly with offscreen canvases and retina device pixel ratios
-      // it results in a run-away canvas that keeps doubling in size!
-      responsive: false,
-      scales: {
-        x: {
-          type: "linear",
-          display: true,
-          grid: { color: args.gridColor },
-          ticks: {
-            font: {
-              family: fontMonospace,
-              size: 10,
-            },
-            color: args.tickColor,
-            maxRotation: 0,
-          },
-        },
-        y: {
-          type: "linear",
-          display: true,
-          grid: { color: args.gridColor },
-          ticks: {
-            font: {
-              family: fontMonospace,
-              size: 10,
-            },
-            color: args.tickColor,
-            padding: 0,
-            precision: 3,
-          },
-        },
-      },
-      plugins: {
-        decimation: {
-          enabled: false,
-        },
-        tooltip: {
-          enabled: false, // Disable native tooltips since we use custom ones.
-        },
-        zoom: {
-          zoom: {
-            enabled: true,
-            mode: "x",
-            sensitivity: 3,
-            speed: 0.1,
-          },
-          pan: {
-            mode: "xy",
-            enabled: true,
-            speed: 20,
-            threshold: 10,
-          },
-        },
-      },
-    };
-
     // ChartJS supports offscreen canvas however the type definitions do not so we need to cast and
     // fool the constructor.
     //
@@ -227,7 +77,7 @@ export class ChartRenderer {
       data: {
         datasets: [],
       },
-      options: fullOptions,
+      options: chartOptions,
       plugins: [ZoomPlugin],
     });
 
@@ -295,13 +145,8 @@ export class ChartRenderer {
 
       const newAnnotations: AnnotationOptions[] = action.referenceLines.map((config) => {
         return {
-          type: "line",
-          display: true,
-          drawTime: "beforeDatasetsDraw",
-          scaleID: "y",
+          ...DEFAULT_ANNOTATION,
           borderColor: config.color,
-          borderDash: [5, 5],
-          borderWidth: 1,
           value: config.value,
         };
       });
@@ -438,5 +283,21 @@ export class ChartRenderer {
         maybeCast<ZoomableChart>(this.#chartInstance)?.$zoom.panEndHandler();
         break;
     }
+  }
+
+  /**
+   * Exposed as protected for unit testing strictly private fields.
+   * Developers are encouraged to avoid using these methods in production logic.
+   */
+  protected getChartInstance(): ChartType {
+    return this.#chartInstance;
+  }
+
+  /**
+   * Exposed as protected for unit testing strictly private fields.
+   * Developers are encouraged to avoid using these methods in production logic.
+   */
+  protected getFakeNodeEvents(): EventEmitter {
+    return this.#fakeNodeEvents;
   }
 }

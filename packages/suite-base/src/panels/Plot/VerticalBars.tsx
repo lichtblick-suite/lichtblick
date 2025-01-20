@@ -7,58 +7,14 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLatest } from "react-use";
-import { makeStyles } from "tss-react/mui";
 
 import { toSec } from "@lichtblick/rostime";
 import { useMessagePipelineSubscribe } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useHoverValue } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
+import { getPixelForXValue } from "@lichtblick/suite-base/panels/Plot/getPixelForXValue";
+import { useStyles } from "@lichtblick/suite-base/panels/Plot/verticalbars.style";
 
-import type { Scale } from "./ChartRenderer";
-import type { PlotCoordinator } from "./PlotCoordinator";
-
-type Props = {
-  coordinator?: PlotCoordinator;
-  hoverComponentId: string;
-  xAxisIsPlaybackTime: boolean;
-};
-
-const useStyles = makeStyles()(() => ({
-  verticalBar: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: 1,
-    marginLeft: -1,
-    display: "block",
-    pointerEvents: "none",
-  },
-  playbackBar: {
-    backgroundColor: "#aaa",
-  },
-}));
-
-/** Get the canvas pixel x location for the plot x value */
-function getPixelForXValue(
-  scale: Scale | undefined,
-  xValue: number | undefined,
-): number | undefined {
-  if (!scale || xValue == undefined) {
-    return undefined;
-  }
-
-  const pixelRange = scale.right - scale.left;
-  if (pixelRange <= 0) {
-    return undefined;
-  }
-
-  if (xValue < scale.min || xValue > scale.max) {
-    return undefined;
-  }
-
-  // Linear interpolation to place the xValue within min/max
-  return scale.left + ((xValue - scale.min) / (scale.max - scale.min)) * pixelRange;
-}
+import type { VerticalBarsProps, Scale } from "./types";
 
 /**
  * Display vertical bars at the currentTime & the hovered time.
@@ -69,7 +25,7 @@ export const VerticalBars = React.memo(function VerticalBars({
   coordinator,
   hoverComponentId,
   xAxisIsPlaybackTime,
-}: Props): React.JSX.Element {
+}: VerticalBarsProps): React.JSX.Element {
   const { classes, cx, theme } = useStyles();
 
   const messagePipelineSubscribe = useMessagePipelineSubscribe();
@@ -157,8 +113,13 @@ export const VerticalBars = React.memo(function VerticalBars({
 
   return (
     <>
-      <div ref={currentTimeBarRef} className={cx(classes.verticalBar, classes.playbackBar)} />
       <div
+        data-testid="vertical-bar"
+        ref={currentTimeBarRef}
+        className={cx(classes.verticalBar, classes.playbackBar)}
+      />
+      <div
+        data-testid="hover-bar"
         ref={hoverBarRef}
         className={cx(classes.verticalBar)}
         style={{

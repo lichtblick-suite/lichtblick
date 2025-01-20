@@ -32,6 +32,10 @@ import EventEmitter from "eventemitter3";
 import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import Logger from "@lichtblick/log";
 import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
+import {
+  addEventListener,
+  removeEventListener,
+} from "@lichtblick/suite-base/components/Chart/worker/eventHandler";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 import { fontMonospace } from "@lichtblick/theme";
 
@@ -53,25 +57,6 @@ export type InitOpts = {
 
 // allows us to override the chart.ctx instance field which zoom plugin uses for adding event listeners
 type MutableContext<T> = Omit<Chart, "ctx"> & { ctx: T };
-
-function addEventListener(emitter: EventEmitter) {
-  return (eventName: string, fn?: () => void) => {
-    const existing = emitter.listeners(eventName);
-    if (!fn || existing.includes(fn)) {
-      return;
-    }
-
-    emitter.on(eventName, fn);
-  };
-}
-
-function removeEventListener(emitter: EventEmitter) {
-  return (eventName: string, fn?: () => void) => {
-    if (fn) {
-      emitter.off(eventName, fn);
-    }
-  };
-}
 
 type ZoomableChart = Chart & {
   $zoom: {

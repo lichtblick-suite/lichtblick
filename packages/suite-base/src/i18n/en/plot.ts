@@ -28,6 +28,7 @@ export const plot = {
   min: "Min",
   position: "Position",
   receiveTime: "Receive Time",
+  resetView: "Reset view",
   secondsRange: "Range (seconds)",
   series: "Series",
   showLabels: "Show labels",
