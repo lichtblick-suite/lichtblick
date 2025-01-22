@@ -3324,7 +3324,6 @@ __metadata:
     "@mcap/core": 1.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
     "@storybook/react": 8.4.6
-    "@types/electron-devtools-installer": 2.2.5
     "@types/plist": ^3.0.3
     "@types/pngjs": ^6.0.2
     "@types/tinycolor2": 1.4.4
@@ -3336,7 +3335,7 @@ __metadata:
     clean-webpack-plugin: 4.0.0
     electron: 33.2.1
     electron-builder: 25.1.8
-    electron-devtools-installer: 3.2.0
+    electron-devtools-installer: 4.0.0
     electron-squirrel-startup: 1.0.1
     electron-updater: 6.3.9
     esbuild-loader: 2.21.0
@@ -5226,13 +5225,6 @@ __metadata:
   version: 0.0.9
   resolution: "@types/doctrine@npm:0.0.9"
   checksum: 3909eaca42e7386b2ab866f082b78da3e00718d2fa323597e254feb0556c678b41f2c490729067433630083ac9c806ec6ae1e146754f7f8ba7d3e43ed68d6500
-  languageName: node
-  linkType: hard
-
-"@types/electron-devtools-installer@npm:2.2.5":
-  version: 2.2.5
-  resolution: "@types/electron-devtools-installer@npm:2.2.5"
-  checksum: 335ba0fb24f3f33c21f0a848f49b84b36c39086aeb07684aecce9ba69d826749acf2501a4eae5f7868be9714f87a82bff783f62bb4bbfb3a5b2b495416a44470
   languageName: node
   linkType: hard
 
@@ -9945,15 +9937,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-devtools-installer@npm:3.2.0":
-  version: 3.2.0
-  resolution: "electron-devtools-installer@npm:3.2.0"
+"electron-devtools-installer@npm:4.0.0":
+  version: 4.0.0
+  resolution: "electron-devtools-installer@npm:4.0.0"
   dependencies:
-    rimraf: ^3.0.2
-    semver: ^7.2.1
-    tslib: ^2.1.0
     unzip-crx-3: ^0.2.0
-  checksum: e87d4c9283f84ac610e9ee37d72677f18feed05174e9d5bf0415a56c3daac717e3f34a5a763499aff7fc2e565660d2ad66beb95d960e8176ed148acf1c3a416b
+  checksum: 64713c8253ecc5aa13d33aba79a06f9a3412d132b4af3ee047b3d9cfc389d8f0afb7c5bc5c3ad4efd1be8e4e506d19abae8a8310376c35e39bd96487af2ca48f
   languageName: node
   linkType: hard
 
@@ -18734,7 +18723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.2, semver@npm:^7.6.3":
+"semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.2, semver@npm:^7.6.3":
   version: 7.6.3
   resolution: "semver@npm:7.6.3"
   bin:
