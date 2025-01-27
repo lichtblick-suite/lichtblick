@@ -59,6 +59,10 @@ import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDia
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
+  LayoutData,
+  useCurrentLayoutActions,
+} from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import {
   LayoutState,
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -157,6 +161,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     () => getMessagePipeline().playerState.activeData ?? {},
     [getMessagePipeline],
   );
+
+  const { setCurrentLayout } = useCurrentLayoutActions();
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
   const { handleFiles } = useHandleFiles({
@@ -489,15 +495,49 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   }, [props.deepLinks]);
 
   const [unappliedSourceArgs, setUnappliedSourceArgs] = useState(
-    targetUrlState ? { ds: targetUrlState.ds, dsParams: targetUrlState.dsParams } : undefined,
+    targetUrlState
+      ? {
+          ds: targetUrlState.ds,
+          dsParams: targetUrlState.dsParams,
+          layoutUrl: targetUrlState.layoutUrl,
+        }
+      : undefined,
   );
 
   const selectEvent = useEvents(selectSelectEvent);
+
+  const fetchLayoutFromUrl = async (layoutUrl: string) => {
+    if (!layoutUrl) {
+      return;
+    }
+    let res;
+    try {
+      res = await fetch(layoutUrl);
+    } catch {
+      log.debug(`Could not load the layout from ${layoutUrl}`);
+      return;
+    }
+    const parsedState: unknown = JSON.parse(await res.text());
+
+    if (typeof parsedState !== "object" || !parsedState) {
+      log.debug(`${layoutUrl} does not contain valid layout JSON`);
+      return;
+    }
+
+    const layoutData = parsedState as LayoutData;
+    setCurrentLayout({
+      name: "test-layout",
+      data: layoutData,
+    });
+  };
+
   // Load data source from URL.
   useEffect(() => {
     if (!unappliedSourceArgs) {
       return;
     }
+
+    let shouldUpdate;
 
     // Apply any available data source args
     if (unappliedSourceArgs.ds) {
@@ -507,7 +547,15 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         params: unappliedSourceArgs.dsParams,
       });
       selectEvent(unappliedSourceArgs.dsParams?.eventId);
-      setUnappliedSourceArgs({ ds: undefined, dsParams: undefined });
+      shouldUpdate = true;
+    }
+    // Apply any available datasource args
+    if (unappliedSourceArgs.layoutUrl) {
+      fetchLayoutFromUrl(unappliedSourceArgs.layoutUrl);
+      shouldUpdate = true;
+    }
+    if (shouldUpdate) {
+      setUnappliedSourceArgs({ ds: undefined, dsParams: undefined, layoutUrl: undefined });
     }
   }, [selectEvent, selectSource, unappliedSourceArgs, setUnappliedSourceArgs]);
 
