@@ -21,9 +21,17 @@ export const ALL_CAMERA_INFO_SCHEMAS = new Set([
   ...CAMERA_CALIBRATION_DATATYPES,
 ]);
 
+/** NOTE: Remove this definition once it is available in @foxglove/schemas */
+export type CompressedVideo = {
+  timestamp: Time;
+  frame_id: string;
+  data: Uint8Array;
+  format: string;
+};
+
 export type CompressedImageTypes = RosCompressedImage | CompressedImage;
 
-export type AnyImage = RosImage | RosCompressedImage | RawImage | CompressedImage;
+export type AnyImage = RosImage | RosCompressedImage | RawImage | CompressedImage | CompressedVideo;
 
 export function getFrameIdFromImage(image: AnyImage): string {
   if ("header" in image) {

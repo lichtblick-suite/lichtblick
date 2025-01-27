@@ -9,6 +9,7 @@ import { CompressedImage, RawImage } from "@foxglove/schemas";
 
 import { PartialMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtension";
 
+import { CompressedVideo } from "./ImageTypes";
 import { normalizeByteArray, normalizeHeader, normalizeTime } from "../../normalizeMessages";
 import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
 
@@ -68,4 +69,10 @@ export function normalizeCompressedImage(
     format: message.format ?? "",
     data: normalizeByteArray(message.data),
   };
+}
+
+export function normalizeCompressedVideo(
+  message: PartialMessage<CompressedVideo>,
+): CompressedVideo {
+  return normalizeCompressedImage(message);
 }
