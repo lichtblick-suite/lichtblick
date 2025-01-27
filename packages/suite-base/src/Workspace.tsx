@@ -526,7 +526,6 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
     const layoutData = parsedState as LayoutData;
     setCurrentLayout({
-      name: "test-layout",
       data: layoutData,
     });
   };
