@@ -13,8 +13,8 @@
   "homepage": "https://github.com/lichtblick-suite",
   "main": "./src/index",
   "devDependencies": {
-    "@emotion/react": "11.13.5",
-    "@emotion/styled": "11.13.5",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.0",
     "@fluentui/react-icons": "2.0.224",
     "@lichtblick/tsconfig": "1.0.0",
     "@mui/icons-material": "5.15.5",
