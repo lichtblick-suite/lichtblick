@@ -6,7 +6,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { SettingsTreeAction } from "@lichtblick/suite";
@@ -25,17 +33,13 @@ export function Indicator({ context }: IndicatorProps): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
-  const {
-    classes,
-    theme: {
-      palette: { augmentColor },
-    },
-  } = useStyles();
 
   const [config, setConfig] = useState(() => ({
     ...DEFAULT_CONFIG,
     ...(context.initialState as Partial<IndicatorConfig>),
   }));
+
+  const { style, rules, fallbackColor, fallbackLabel } = config;
 
   const [state, dispatch] = useReducer(
     stateReducer,
@@ -125,50 +129,57 @@ export function Indicator({ context }: IndicatorProps): React.JSX.Element {
       : undefined;
   }, [latestMatchingQueriedData]);
 
-  const { style, rules, fallbackColor, fallbackLabel } = config;
   const matchingRule = useMemo(
     () => getMatchingRule(rawValue as RawValueIndicator, rules),
     [rawValue, rules],
   );
 
-  const bulbStyle = useMemo(
-    () => ({
-      backgroundColor: matchingRule?.color ?? fallbackColor,
-    }),
-    [matchingRule?.color, fallbackColor],
-  );
+  const bulbColor = matchingRule?.color ?? fallbackColor;
+  const {
+    classes,
+    theme: {
+      palette: { augmentColor },
+    },
+  } = useStyles({ style, backgroundColor: bulbColor });
+
+  const label = matchingRule?.label ?? fallbackLabel;
+  const textColor = useMemo(() => {
+    return style === "background"
+      ? augmentColor({ color: { main: bulbColor } }).contrastText
+      : bulbColor;
+  }, [style, bulbColor, augmentColor]);
 
   return (
     <Stack fullHeight>
-      <Stack
-        flexGrow={1}
-        justifyContent="space-around"
-        alignItems="center"
-        overflow="hidden"
-        padding={1}
-        style={{
-          backgroundColor:
-            style === "background" ? matchingRule?.color ?? fallbackColor : undefined,
-        }}
-      >
-        <Stack direction="row" alignItems="center" gap={2}>
-          {style === "bulb" && <div className={classes.root} style={bulbStyle} />}
-          <Typography
-            color={
-              style === "background"
-                ? augmentColor({
-                    color: { main: matchingRule?.color ?? fallbackColor },
-                  }).contrastText
-                : matchingRule?.color ?? fallbackColor
-            }
-            fontFamily="fontMonospace"
-            variant="h1"
-            whiteSpace="pre"
-          >
-            {matchingRule?.label ?? fallbackLabel}
-          </Typography>
-        </Stack>
+      <Stack className={classes.indicatorStack}>
+        {style === "bulb" && <Bulb label={label} bulbColor={bulbColor} />}
+        {style === "background" && <Background label={label} textColor={textColor} />}
       </Stack>
     </Stack>
   );
 }
+
+const Bulb = memo(({ label, bulbColor }: { label: string; bulbColor: string }) => {
+  const { classes } = useStyles({ backgroundColor: bulbColor });
+
+  return (
+    <Stack className={classes.stack}>
+      <div className={classes.bulb} data-testid="bulb-indicator" />
+      <Typography className={classes.typography}>{label}</Typography>
+    </Stack>
+  );
+});
+Bulb.displayName = "Bulb";
+
+const Background = memo(({ label, textColor }: { label: string; textColor: string }) => {
+  const { classes } = useStyles({});
+
+  return (
+    <Stack className={classes.stack} testId="background-indicator">
+      <Typography className={classes.typography} color={textColor}>
+        {label}
+      </Typography>
+    </Stack>
+  );
+});
+Background.displayName = "Background";
