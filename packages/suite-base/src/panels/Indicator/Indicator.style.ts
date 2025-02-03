@@ -38,7 +38,7 @@ export const useStyles = makeStyles<Partial<{ style: IndicatorStyle; backgroundC
     },
     typography: {
       fontWeight: 700,
-      fontSize: "clamp(10px, 1vw, 52px)",
+      fontSize: "clamp(10px, min(1.5vw, 1.5vh), 52px)",
       whiteSpace: "pre",
       padding: spacing(0),
     },
