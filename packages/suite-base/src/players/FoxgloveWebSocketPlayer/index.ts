@@ -5,13 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import {
-  Channel,
   ChannelId,
-  ClientChannel,
   FoxgloveClient,
   ServerCapability,
   SubscriptionId,
-  Service,
   ServiceCallPayload,
   ServiceCallRequest,
   ServiceCallResponse,
@@ -27,7 +24,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import Log from "@lichtblick/log";
-import { parseChannel, ParsedChannel } from "@lichtblick/mcap-support";
+import { parseChannel } from "@lichtblick/mcap-support";
 import { MessageDefinition, isMsgDefEqual } from "@lichtblick/message-definition";
 import CommonRosTypes from "@lichtblick/rosmsg-msgs-common";
 import { MessageWriter as Ros1MessageWriter } from "@lichtblick/rosmsg-serialization";
@@ -54,45 +51,30 @@ import {
 import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
-import { MessageWriter } from "./MessageWriter";
 import WorkerSocketAdapter from "./WorkerSocketAdapter";
+import {
+  CURRENT_FRAME_MAXIMUM_SIZE_BYTES,
+  FALLBACK_PUBLICATION_ENCODING,
+  GET_ALL_PARAMS_PERIOD_MS,
+  GET_ALL_PARAMS_REQUEST_ID,
+  ROS_ENCODINGS,
+  SUBSCRIPTION_WARNING_SUPPRESSION_MS,
+  SUPPORTED_PUBLICATION_ENCODINGS,
+  SUPPORTED_SERVICE_ENCODINGS,
+  ZERO_TIME,
+} from "./constants";
+import { dataTypeToFullName, statusLevelToProblemSeverity } from "./helpers";
+import {
+  MessageWriter,
+  MessageDefinitionMap,
+  Publication,
+  ResolvedChannel,
+  ResolvedService,
+} from "./types";
 
 const log = Log.getLogger(__dirname);
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
-
-/** Suppress warnings about messages on unknown subscriptions if the susbscription was recently canceled. */
-const SUBSCRIPTION_WARNING_SUPPRESSION_MS = 2000;
-
-const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
-const GET_ALL_PARAMS_REQUEST_ID = "get-all-params";
-const GET_ALL_PARAMS_PERIOD_MS = 15000;
-const ROS_ENCODINGS = ["ros1", "cdr"];
-const SUPPORTED_PUBLICATION_ENCODINGS = ["json", ...ROS_ENCODINGS];
-const FALLBACK_PUBLICATION_ENCODING = "json";
-const SUPPORTED_SERVICE_ENCODINGS = ["json", ...ROS_ENCODINGS];
-
-type ResolvedChannel = {
-  channel: Channel;
-  parsedChannel: ParsedChannel;
-};
-type Publication = ClientChannel & { messageWriter?: Ros1MessageWriter | Ros2MessageWriter };
-type ResolvedService = {
-  service: Service;
-  parsedResponse: ParsedChannel;
-  requestMessageWriter: MessageWriter;
-};
-type MessageDefinitionMap = Map<string, MessageDefinition>;
-
-/**
- * When the tab is inactive setTimeout's are throttled to at most once per second.
- * Because the MessagePipeline listener uses timeouts to resolve its promises, it throttles our ability to
- * emit a frame more than once per second. In the websocket player this was causing
- * an accumulation of messages that were waiting to be emitted, this could keep growing
- * indefinitely if the rate at which we emit a frame is low enough.
- * 400MB
- */
-const CURRENT_FRAME_MAXIMUM_SIZE_BYTES = 400 * 1024 * 1024;
 
 export default class FoxgloveWebSocketPlayer implements Player {
   readonly #sourceId: string;
@@ -1095,7 +1077,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           : value;
       };
       const message = Buffer.from(JSON.stringify(msg, replacer) ?? "");
-      this.#client.sendMessage(clientChannel.id, message);
+      this.#client.sendMessage(clientChannel.id, new Uint8Array(message));
     } else if (
       ROS_ENCODINGS.includes(clientChannel.encoding) &&
       clientChannel.messageWriter != undefined
@@ -1359,23 +1341,5 @@ export default class FoxgloveWebSocketPlayer implements Player {
     if (updatedDatatypes != undefined) {
       this.#datatypes = updatedDatatypes; // Signal that datatypes changed.
     }
-  }
-}
-
-function dataTypeToFullName(dataType: string): string {
-  const parts = dataType.split("/");
-  if (parts.length === 2) {
-    return `${parts[0]}/msg/${parts[1]}`;
-  }
-  return dataType;
-}
-
-function statusLevelToProblemSeverity(level: StatusLevel): PlayerProblem["severity"] {
-  if (level === StatusLevel.INFO) {
-    return "info";
-  } else if (level === StatusLevel.WARNING) {
-    return "warn";
-  } else {
-    return "error";
   }
 }
