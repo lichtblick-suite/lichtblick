@@ -25,6 +25,15 @@ jobs:
       - name: Enable corepack
         run: corepack enable yarn
 
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
       - name: Install dependencies
         run: yarn install
 
