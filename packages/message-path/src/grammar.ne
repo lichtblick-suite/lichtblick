@@ -40,6 +40,14 @@ value -> integer  {% (d) => d[0] %}
        | "false" {% (d) => ({ value: false, repr: "false" }) %}
 	   | variable {% (d) => d[0] %}
 
+#Comparison operators
+comparisonOperator -> "==" {% () => "==" %}
+                    | "!=" {% () => "!=" %}
+                    | ">=" {% () => ">=" %}
+                    | "<=" {% () => "<=" %}
+                    | ">"  {% () => ">" %}
+                    | "<"  {% () => "<" %}
+
 ## Topic part. Basically an id but with (optional) slashes.
 topicName -> slashID:+     {% (d) => ({ value: d[0].join(""), repr: d[0].join("") }) %}
            | id slashID:*  {% (d) => ({ value: d[0] + d[1].join(""), repr: d[0] + d[1].join("") }) %}
@@ -112,15 +120,16 @@ filter -> "{" simplePath:? "}"
                 repr: (d[1] || []).join("."),
               })
             %}
-        | "{" simplePath:? "==" value "}"
+        | "{" simplePath:? comparisonOperator value "}"
             {%
               (d, loc) => ({
                 type: "filter",
                 path: d[1] || [],
+                operator: d[2],
                 value: d[3].value,
                 nameLoc: loc+1,
                 valueLoc: loc+1+(d[1] || []).join(".").length+d[2].length,
-                repr: `${(d[1] || []).join(".")}==${d[3].repr}`,
+                repr: `${(d[1] || []).join(".")}${d[2]}${d[3].repr}`,
               })
             %}
 

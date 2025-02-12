@@ -15,7 +15,6 @@ export function filterMatches(filter: Immutable<MessagePathFilter>, value: unkno
   if (filter.value == undefined) {
     return false;
   }
-
   let currentValue = value;
   for (const name of filter.path) {
     if (typeof currentValue !== "object" || currentValue == undefined) {
@@ -27,8 +26,28 @@ export function filterMatches(filter: Immutable<MessagePathFilter>, value: unkno
     }
   }
 
-  // Test equality using `==` so we can be forgiving for comparing booleans with integers,
+  // Test equality using non strict operators so we can be forgiving for comparing booleans with integers,
   // comparing numbers with strings, bigints with numbers, and so on.
-  // eslint-disable-next-line @lichtblick/strict-equality
-  return currentValue != undefined && currentValue == filter.value;
+
+  if (currentValue != undefined) {
+    switch (filter.operator) {
+      case "==":
+        // eslint-disable-next-line @lichtblick/strict-equality
+        return currentValue == filter.value;
+      case "!=":
+        // eslint-disable-next-line @lichtblick/strict-equality
+        return currentValue != filter.value;
+      case ">=":
+        return currentValue >= filter.value;
+      case "<=":
+        return currentValue <= filter.value;
+      case ">":
+        return currentValue > filter.value;
+      case "<":
+        return currentValue < filter.value;
+      default:
+        return false;
+    }
+  }
+  return false;
 }

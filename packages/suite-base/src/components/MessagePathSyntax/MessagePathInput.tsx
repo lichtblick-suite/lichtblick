@@ -359,7 +359,9 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         for (const name of Object.keys(structureTraversalResult.structureItem.nextByName)) {
           const item = structureTraversalResult.structureItem.nextByName[name];
           if (item?.structureType === "primitive") {
-            items.push(`${name}==${getExamplePrimitive(item.primitiveType)}`);
+            for (const operator of ["==", "!=", ">", ">=", "<", "<="]) {
+              items.push(`${name}${operator}${getExamplePrimitive(item.primitiveType)}`);
+            }
           }
         }
 

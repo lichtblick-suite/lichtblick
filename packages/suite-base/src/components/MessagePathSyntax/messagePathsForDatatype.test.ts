@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { unwrap } from "@lichtblick/den/monads";
-import { parseMessagePath } from "@lichtblick/message-path";
+import { OperatorType, parseMessagePath } from "@lichtblick/message-path";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
 import {
@@ -592,6 +592,9 @@ describe("validTerminatingStructureItem", () => {
 });
 
 describe("traverseStructure", () => {
+  const equal: OperatorType = "==";
+  const notEqual: OperatorType = "!=";
+  const greaterThan: OperatorType = ">=";
   it("returns whether the path is valid for the structure, plus some metadata", () => {
     const structure = messagePathStructures(datatypes)["pose_msgs/PoseDebug"];
 
@@ -620,7 +623,15 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose", repr: "some_pose" },
-        { type: "filter", path: ["x"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+        {
+          type: "filter",
+          path: ["x"],
+          value: 10,
+          nameLoc: 123,
+          valueLoc: 0,
+          repr: "",
+          operator: equal,
+        },
         { type: "name", name: "dummy_array", repr: "dummy_array" },
         { type: "slice", start: 50, end: 100 },
       ]),
@@ -632,7 +643,15 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose", repr: "some_pose" },
-        { type: "filter", path: ["header", "seq"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+        {
+          type: "filter",
+          path: ["header", "seq"],
+          value: 10,
+          nameLoc: 123,
+          valueLoc: 0,
+          repr: "",
+          operator: equal,
+        },
       ]),
     ).toEqual({
       valid: true,
@@ -667,17 +686,41 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose", repr: "some_pose" },
-        { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+        {
+          type: "filter",
+          path: ["y"],
+          value: 10,
+          nameLoc: 123,
+          valueLoc: 0,
+          repr: "",
+          operator: notEqual,
+        },
       ]),
     ).toEqual({
       valid: false,
-      msgPathPart: { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+      msgPathPart: {
+        type: "filter",
+        path: ["y"],
+        value: 10,
+        nameLoc: 123,
+        valueLoc: 0,
+        repr: "",
+        operator: notEqual,
+      },
       structureItem: messagePathStructures(datatypes)["pose_msgs/SomePose"],
     });
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose", repr: "some_pose" },
-        { type: "filter", path: ["header", "y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+        {
+          type: "filter",
+          path: ["header", "y"],
+          value: 10,
+          nameLoc: 123,
+          valueLoc: 0,
+          repr: "",
+          operator: greaterThan,
+        },
       ]),
     ).toEqual({
       valid: false,
@@ -688,6 +731,7 @@ describe("traverseStructure", () => {
         nameLoc: 123,
         valueLoc: 0,
         repr: "",
+        operator: greaterThan,
       },
       structureItem: messagePathStructures(datatypes)["pose_msgs/SomePose"],
     });

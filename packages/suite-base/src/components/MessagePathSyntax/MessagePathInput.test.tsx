@@ -59,6 +59,7 @@ describe("tryToSetDefaultGlobalVar", () => {
 describe("getFirstInvalidVariableFromRosPath", () => {
   it("returns all possible message paths when not passing in `validTypes`", () => {
     const setGlobalVars = jest.fn();
+    const defaultOperator = "==";
     const rosPath: MessagePath = {
       topicName: "/some_topic",
       topicNameRepr: "/some_topic",
@@ -72,6 +73,7 @@ describe("getFirstInvalidVariableFromRosPath", () => {
           nameLoc: 11,
           valueLoc: 10,
           repr: "myId==$not_yet_set_global_var",
+          operator: defaultOperator,
         },
       ],
       modifier: undefined,
