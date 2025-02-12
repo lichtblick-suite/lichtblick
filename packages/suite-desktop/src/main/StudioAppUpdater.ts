@@ -85,10 +85,10 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
     }
     try {
       autoUpdater.on("update-not-available", onNotAvailable);
-      const result = await autoUpdater.checkForUpdatesAndNotify();
-      if (!result) {
-        onDisabled();
-      }
+      // const result = await autoUpdater.checkForUpdatesAndNotify();
+      // if (!result) {
+      //   onDisabled();
+      // }
     } catch (error) {
       onError(error as Error);
     } finally {
@@ -106,7 +106,7 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
 
       if (appUpdatesEnabled ?? true) {
         log.info("Checking for updates");
-        await autoUpdater.checkForUpdatesAndNotify();
+        //await autoUpdater.checkForUpdatesAndNotify();
       }
     } catch (err: unknown) {
       if (isNetworkError(err)) {
