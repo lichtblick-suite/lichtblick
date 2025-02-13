@@ -17,12 +17,17 @@
 import { Parser } from "nearley";
 
 import { parseMessagePath } from "./parseMessagePath";
+import { OperatorType } from "./types";
 
 // Nearley parser returns nulls
 // eslint-disable-next-line no-restricted-syntax
 const MISSING = null;
 
 describe("parseRosPath", () => {
+  const equal: OperatorType = "==";
+  const notEqual: OperatorType = "!=";
+  const greaterThan: OperatorType = ">=";
+
   it("parses valid strings", () => {
     expect(parseMessagePath("/some0/nice_topic.with[99].stuff[0]")).toEqual({
       topicName: "/some0/nice_topic",
@@ -279,7 +284,7 @@ describe("parseRosPath", () => {
   it("parses filters", () => {
     expect(
       parseMessagePath(
-        "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==false}.e[:]{bar.baz==true}",
+        `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{bar${equal}-1}.d{bar${equal}false}.e[:]{bar.baz${equal}true}`,
       ),
     ).toEqual({
       topicName: "/topic",
@@ -290,45 +295,58 @@ describe("parseRosPath", () => {
           type: "filter",
           path: ["bar"],
           value: "baz",
-          nameLoc: "/topic.foo{".length,
-          valueLoc: "/topic.foo{bar==".length,
-          repr: "bar=='baz'",
+          nameLoc: `/topic.foo{`.length,
+          valueLoc: `/topic.foo{bar${equal}`.length,
+          repr: `bar${equal}'baz'`,
+          operator: equal,
         },
         { type: "name", name: "a", repr: "a" },
         {
           type: "filter",
           path: ["bar"],
           value: "baz",
-          nameLoc: "/topic.foo{bar=='baz'}.a{".length,
-          valueLoc: "/topic.foo{bar=='baz'}.a{bar==".length,
-          repr: 'bar=="baz"',
+          nameLoc: `/topic.foo{bar${equal}'baz'}.a{`.length,
+          valueLoc: `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}`.length,
+          repr: `bar${notEqual}"baz"`,
+          operator: notEqual,
         },
         { type: "name", name: "b", repr: "b" },
         {
           type: "filter",
           path: ["bar"],
           value: 3n,
-          nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{".length,
-          valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==".length,
-          repr: "bar==3",
+          nameLoc: `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{`.length,
+          valueLoc: `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}`
+            .length,
+          repr: `bar${greaterThan}3`,
+          operator: greaterThan,
         },
         { type: "name", name: "c", repr: "c" },
         {
           type: "filter",
           path: ["bar"],
           value: -1n,
-          nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{".length,
-          valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==".length,
-          repr: "bar==-1",
+          nameLoc: `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{`
+            .length,
+          valueLoc:
+            `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{bar${equal}`
+              .length,
+          repr: `bar${equal}-1`,
+          operator: equal,
         },
         { type: "name", name: "d", repr: "d" },
         {
           type: "filter",
           path: ["bar"],
           value: false,
-          nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{".length,
-          valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==".length,
-          repr: "bar==false",
+          nameLoc:
+            `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{bar${equal}-1}.d{`
+              .length,
+          valueLoc:
+            `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{bar${equal}-1}.d{bar${equal}`
+              .length,
+          repr: `bar${equal}false`,
+          operator: equal,
         },
         { type: "name", name: "e", repr: "e" },
         { type: "slice", start: 0, end: Infinity },
@@ -336,12 +354,14 @@ describe("parseRosPath", () => {
           type: "filter",
           path: ["bar", "baz"],
           value: true,
-          nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==false}.e[:]{"
-            .length,
-          valueLoc:
-            "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==false}.e[:]{bar.baz=="
+          nameLoc:
+            `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{bar${equal}-1}.d{bar${equal}false}.e[:]{`
               .length,
-          repr: "bar.baz==true",
+          valueLoc:
+            `/topic.foo{bar${equal}'baz'}.a{bar${notEqual}"baz"}.b{bar${greaterThan}3}.c{bar${equal}-1}.d{bar${equal}false}.e[:]{bar.baz${equal}`
+              .length,
+          repr: `bar.baz${equal}true`,
+          operator: equal,
         },
       ],
       modifier: MISSING,
@@ -349,7 +369,9 @@ describe("parseRosPath", () => {
   });
 
   it("parses filters on top level topic", () => {
-    expect(parseMessagePath("/topic{foo=='bar'}{baz==2}.a[3].b{x=='y'}")).toEqual({
+    expect(
+      parseMessagePath(`/topic{foo${equal}'bar'}{baz${notEqual}2}.a[3].b{x${greaterThan}'y'}`),
+    ).toEqual({
       topicName: "/topic",
       topicNameRepr: "/topic",
       messagePath: [
@@ -359,15 +381,17 @@ describe("parseRosPath", () => {
           value: "bar",
           nameLoc: "/topic{".length,
           valueLoc: "/topic{foo==".length,
-          repr: "foo=='bar'",
+          repr: `foo${equal}'bar'`,
+          operator: equal,
         },
         {
           type: "filter",
           path: ["baz"],
           value: 2n,
-          nameLoc: "/topic{foo=='bar'}{".length,
-          valueLoc: "/topic{foo=='bar'}{baz==".length,
-          repr: "baz==2",
+          nameLoc: `/topic{foo${equal}'bar'}{`.length,
+          valueLoc: `/topic{foo${equal}'bar'}{baz${notEqual}`.length,
+          repr: `baz${notEqual}2`,
+          operator: notEqual,
         },
         { type: "name", name: "a", repr: "a" },
         { type: "slice", start: 3, end: 3 },
@@ -376,9 +400,10 @@ describe("parseRosPath", () => {
           type: "filter",
           path: ["x"],
           value: "y",
-          nameLoc: "/topic{foo=='bar'}{baz==2}.a[3].b{".length,
-          valueLoc: "/topic{foo=='bar'}{baz==2}.a[3].b{x==".length,
-          repr: "x=='y'",
+          nameLoc: `/topic{foo${equal}'bar'}{baz${notEqual}2}.a[3].b{`.length,
+          valueLoc: `/topic{foo${equal}'bar'}{baz${notEqual}2}.a[3].b{x${greaterThan}`.length,
+          repr: `x${greaterThan}'y'`,
+          operator: greaterThan,
         },
       ],
       modifier: MISSING,
@@ -386,7 +411,7 @@ describe("parseRosPath", () => {
   });
 
   it("parses filters with global variables", () => {
-    expect(parseMessagePath("/topic.foo{bar==$}.a{bar==$my_var_1}")).toEqual({
+    expect(parseMessagePath(`/topic.foo{bar${equal}$}.a{bar${notEqual}$my_var_1}`)).toEqual({
       topicName: "/topic",
       topicNameRepr: "/topic",
       messagePath: [
@@ -395,18 +420,20 @@ describe("parseRosPath", () => {
           type: "filter",
           path: ["bar"],
           value: { variableName: "", startLoc: "/topic.foo{bar==".length },
-          nameLoc: "/topic.foo{".length,
-          valueLoc: "/topic.foo{bar==".length,
-          repr: "bar==$",
+          nameLoc: `/topic.foo{`.length,
+          valueLoc: `/topic.foo{bar${equal}`.length,
+          repr: `bar==$`,
+          operator: equal,
         },
         { type: "name", name: "a", repr: "a" },
         {
           type: "filter",
           path: ["bar"],
           value: { variableName: "my_var_1", startLoc: "/topic.foo{bar==$}.a{bar==".length },
-          nameLoc: "/topic.foo{bar==$}.a{".length,
-          valueLoc: "/topic.foo{bar==$}.a{bar==".length,
-          repr: "bar==$my_var_1",
+          nameLoc: `/topic.foo{bar${equal}$}.a{`.length,
+          valueLoc: `/topic.foo{bar${equal}$}.a{bar${notEqual}`.length,
+          repr: `bar${notEqual}$my_var_1`,
+          operator: notEqual,
         },
       ],
       modifier: MISSING,
@@ -485,6 +512,7 @@ describe("parseRosPath", () => {
           nameLoc: "/topic.foo{".length,
           valueLoc: "/topic.foo{==".length,
           repr: "==1",
+          operator: "==",
         },
       ],
       modifier: MISSING,
@@ -501,6 +529,7 @@ describe("parseRosPath", () => {
           nameLoc: "/topic.foo{".length,
           valueLoc: "/topic.foo{==".length,
           repr: "==-3",
+          operator: "==",
         },
       ],
       modifier: MISSING,
