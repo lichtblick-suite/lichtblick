@@ -5,20 +5,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-
+import {
+  LayoutColumnOneThirdLeft24Regular,
+  LayoutColumnOneThirdLeft24Filled,
+  LayoutColumnOneThirdRight24Filled,
+  LayoutColumnOneThirdRight24Regular,
+} from "@fluentui/react-icons";
+import { Button, Tag } from "antd";
 import { useState } from "react";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import { LichtblickLogo } from "@lichtblick/suite-base/components/LichtblickLogo";
+import { InfoContent } from "@lichtblick/suite-base/components/AppBar/DataSource";
+import { isRunningInElectron } from "@lichtblick/suite-base/components/DataSourceDialog/Start";
 import { MemoryUseIndicator } from "@lichtblick/suite-base/components/MemoryUseIndicator";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
-import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
   WorkspaceContextStore,
   useWorkspaceStore,
@@ -29,22 +32,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";
 import { CustomWindowControls, CustomWindowControlsProps } from "./CustomWindowControls";
-
 import { SettingsMenu } from "./SettingsMenu";
-import { Button, Tag } from "antd";
-import {
-  LayoutColumnOneThirdLeft24Regular,
-  LayoutColumnOneThirdLeft24Filled,
-  LayoutColumnOneThirdRight24Filled,
-  LayoutColumnOneThirdRight24Regular,
-} from "@fluentui/react-icons";
-import {
-  useWorkspaceStore,
-  WorkspaceContextStore,
-} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
-import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
-import { isRunningInElectron } from "@lichtblick/suite-base/components/DataSourceDialog/Start";
-import { InfoContent } from "@lichtblick/suite-base/components/AppBar/DataSource";
 
 const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
   theme,
@@ -63,6 +51,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       gridTemplateColumns: "1fr auto 1fr",
       alignItems: "center",
     },
+    // eslint-disable-next-line tss-unused-classes/unused-classes
     logo: {
       padding: theme.spacing(0.75, 0.5),
       fontSize: "2rem",
@@ -84,6 +73,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
         opacity: theme.palette.action.disabledOpacity,
       },
     },
+    // eslint-disable-next-line tss-unused-classes/unused-classes
     dropDownIcon: {
       fontSize: "12px !important",
     },
@@ -117,6 +107,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       alignItems: "center",
       ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
     },
+    // eslint-disable-next-line tss-unused-classes/unused-classes
     keyEquivalent: {
       fontFamily: theme.typography.fontMonospace,
       background: tc(theme.palette.common.white).darken(45).toString(),
@@ -125,6 +116,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       borderRadius: theme.shape.borderRadius,
       marginLeft: theme.spacing(1),
     },
+    // eslint-disable-next-line tss-unused-classes/unused-classes
     tooltip: {
       marginTop: `${theme.spacing(0.5)} !important`,
     },
@@ -134,6 +126,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       height: theme.spacing(3.5),
       width: theme.spacing(3.5),
     },
+    // eslint-disable-next-line tss-unused-classes/unused-classes
     iconButton: {
       padding: theme.spacing(1),
       borderRadius: 0,
@@ -162,7 +155,6 @@ export type AppBarProps = CustomWindowControlsProps & {
   debugDragRegion?: boolean;
 };
 
-
 export function AppBar(props: AppBarProps): React.JSX.Element {
   const {
     debugDragRegion,
@@ -183,11 +175,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
 
-
-
-  const { sidebarActions } = useWorkspaceActions();
-
-  const [appMenuEl, setAppMenuEl] = useState<undefined | HTMLElement>(undefined);
+  // const [appMenuEl, setAppMenuEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [panelAnchorEl, setPanelAnchorEl] = useState<undefined | HTMLElement>(undefined);
 
@@ -216,7 +204,9 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     <LayoutColumnOneThirdLeft24Regular />
                   )
                 }
-                onClick={() => sidebarActions.left.setOpen(!leftSidebarOpen)}
+                onClick={() => {
+                  sidebarActions.left.setOpen(!leftSidebarOpen);
+                }}
               ></Button>
 
               {/* <IconButton
@@ -361,7 +351,9 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     <LayoutColumnOneThirdLeft24Regular />
                   )
                 }
-                onClick={() => sidebarActions.left.setOpen(!leftSidebarOpen)}
+                onClick={() => {
+                  sidebarActions.left.setOpen(!leftSidebarOpen);
+                }}
               ></Button>
               <Button
                 type="text"
@@ -379,7 +371,9 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     <LayoutColumnOneThirdRight24Regular />
                   )
                 }
-                onClick={() => sidebarActions.right.setOpen(!rightSidebarOpen)}
+                onClick={() => {
+                  sidebarActions.right.setOpen(!rightSidebarOpen);
+                }}
               />
               {showCustomWindowControls && (
                 <CustomWindowControls

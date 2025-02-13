@@ -22,6 +22,7 @@ import moment from "moment";
 import { useSnackbar } from "notistack";
 import path from "path";
 import { MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 import { makeStyles } from "tss-react/mui";
@@ -72,6 +73,7 @@ export default function LayoutBrowser({
   menuClose?: () => void;
   currentDateForStorybook?: Date;
 }>): React.JSX.Element {
+  const { t } = useTranslation("layoutsList");
   const { classes } = useStyles();
   const { signIn } = useCurrentUser();
   const isMounted = useMountedState();

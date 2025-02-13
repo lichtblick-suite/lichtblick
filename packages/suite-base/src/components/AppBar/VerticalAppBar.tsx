@@ -1,27 +1,33 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Code24Regular, AppsAddIn24Regular, ContentSettings24Regular } from "@fluentui/react-icons";
-import { AddPanelMenu } from "@lichtblick/suite-base/components/AppBar/AddPanelMenu";
-import { DataSource } from "@lichtblick/suite-base/components/AppBar/DataSource";
-import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { Layout } from "antd";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import { AddPanelMenu } from "@lichtblick/suite-base/components/AppBar/AddPanelMenu";
+import AppBarButton from "@lichtblick/suite-base/components/AppBar/AppBarButton";
+import { DataSource } from "@lichtblick/suite-base/components/AppBar/DataSource";
+import { isRunningInElectron } from "@lichtblick/suite-base/components/DataSourceDialog/Start";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import { isRunningInElectron } from "@lichtblick/suite-base/components/DataSourceDialog/Start";
 import { openCode } from "@lichtblick/suite-base/components/UdpMessage";
-import AppBarButton from "@lichtblick/suite-base/components/AppBar/AppBarButton";
-import { useTranslation } from "react-i18next";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 const { Sider } = Layout;
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const getIpAddress = (name?: string) => {
-  if (!name) return undefined;
+  if (!name) {
+    return undefined;
+  }
   const ipRegex = /(\d{1,3}\.){3}\d{1,3}/g;
 
   // 使用正则表达式匹配 IP 地址
@@ -51,10 +57,12 @@ const VerticalAppBar: React.FC = () => {
   const [codeOnlineState, setCodeOnlineState] = useState<boolean>(false);
 
   useEffect(() => {
+    // eslint-disable-next-line no-restricted-syntax
     console.log("playerName: ", playerName);
     if (playerName != undefined) {
       const currentIp = getIpAddress(playerName);
       if (currentIp != undefined) {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         setIPAddr(currentIp + "");
         setCodeOnlineState(true);
       }
@@ -158,7 +166,7 @@ const VerticalAppBar: React.FC = () => {
                 window.open("http://" + nowIPAddr + ":8080");
               }
             }}
-            text={"Code"}
+            text="Code"
           ></AppBarButton>
         </div>
       </div>
@@ -173,7 +181,9 @@ const VerticalAppBar: React.FC = () => {
       >
         <AppBarButton
           icon={<ContentSettings24Regular />}
-          onClick={() => dialogActions.preferences.open("general")}
+          onClick={() => {
+            dialogActions.preferences.open("general");
+          }}
           text={t("general")}
         ></AppBarButton>
         {/* <Button

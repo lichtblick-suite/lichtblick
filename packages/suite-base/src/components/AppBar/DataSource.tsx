@@ -10,8 +10,16 @@
 // import { useTranslation } from "react-i18next";
 // import { makeStyles } from "tss-react/mui";
 import { CheckOutlined, DisconnectOutlined, LoadingOutlined } from "@ant-design/icons";
+// eslint-disable-next-line import/order
 import { DocumentAdd24Regular, ErrorCircle20Filled } from "@fluentui/react-icons";
+
 // import { ErrorCircle16Filled } from "@fluentui/react-icons";
+import { Button } from "@mui/material";
+import { Popover, Row } from "antd";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import AppBarButton from "@lichtblick/suite-base/components/AppBar/AppBarButton";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -22,16 +30,12 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 // import WssErrorModal from "@lichtblick/suite-base/components/WssErrorModal";
 // import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import { Popover, Row } from "antd";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
+
 // import { CircularProgress, IconButton } from "@mui/material";
-import { Button } from "@mui/material";
 // import { useTranslation } from "react-i18next";
 // import { makeStyles } from "tss-react/mui";
 
 import { EndTimestamp } from "./EndTimestamp";
-import AppBarButton from "@lichtblick/suite-base/components/AppBar/AppBarButton";
 
 // const ICON_SIZE = 18;
 
@@ -112,7 +116,7 @@ export const InfoContent = () => {
     );
   }
 };
-export function DataSource(): JSX.Element {
+export function DataSource(): React.JSX.Element {
   // const { classes, cx } = useStyles();
 
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -140,18 +144,36 @@ export function DataSource(): JSX.Element {
   };
 
   const ICON = () => {
+    // eslint-disable-next-line no-restricted-syntax
     console.log(playerPresence);
     if (isLiveConnection) {
-      <CheckOutlined rev={undefined} />;
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      <CheckOutlined
+        rev={undefined}
+        onPointerEnterCapture={undefined}
+        onPointerLeaveCapture={undefined}
+      />;
     }
     if (playerPresence === PlayerPresence.PRESENT && !isLiveConnection) {
       return <DocumentAdd24Regular />;
     }
     if (playerPresence === PlayerPresence.NOT_PRESENT) {
-      return <DisconnectOutlined rev={undefined} />;
+      return (
+        <DisconnectOutlined
+          rev={undefined}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+        />
+      );
     }
     if (loading || playerPresence === PlayerPresence.BUFFERING) {
-      return <LoadingOutlined rev={undefined} />;
+      return (
+        <LoadingOutlined
+          rev={undefined}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+        />
+      );
     }
     if (error) {
       return <ErrorCircle20Filled />;
@@ -161,7 +183,11 @@ export function DataSource(): JSX.Element {
       <>
         {isLiveConnection && (
           <>
-            <CheckOutlined rev={undefined} />
+            <CheckOutlined
+              rev={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+            />
             {/* <EndTimestamp /> */}
           </>
         )}
@@ -202,6 +228,7 @@ export function DataSource(): JSX.Element {
             <Button
               variant="contained"
               color="primary"
+              // eslint-disable-next-line react/forbid-component-props
               sx={{
                 borderRadius: "50%", // 设置圆形
                 minWidth: "30px", // 最小宽度
@@ -216,7 +243,9 @@ export function DataSource(): JSX.Element {
               {/* <AddIcon /> */}
             </Button>
           }
-          onClick={() => dialogActions.dataSource.open("start")}
+          onClick={() => {
+            dialogActions.dataSource.open("start");
+          }}
           text={t("start")}
         ></AppBarButton>
       </Popover>

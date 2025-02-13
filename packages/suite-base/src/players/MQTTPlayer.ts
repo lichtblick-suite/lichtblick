@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -19,7 +22,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual, sortBy, keyBy } from "lodash";
+import { Time, fromMillis, isGreaterThan, toSec } from "@foxglove/rostime";
+import * as _ from "lodash-es";
 import mqtt, {
   IClientOptions,
   IClientPublishOptions,
@@ -30,14 +34,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import Log from "@lichtblick/log";
-import { Time, fromMillis, isGreaterThan, toSec } from "@foxglove/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
   MessageEvent,
   Player,
-  PlayerCapabilities,
   PlayerState,
   PublishPayload,
   SubscribePayload,
@@ -74,11 +76,11 @@ type MQTTPlayerOpts = {
   metricsCollector: PlayerMetricsCollectorInterface;
 };
 
-const CAPABILITIES = [
-  PlayerCapabilities.advertise,
-  PlayerCapabilities.getParameters,
-  PlayerCapabilities.setParameters,
-];
+// const CAPABILITIES = [
+//   PlayerCapabilities.advertise,
+//   PlayerCapabilities.getParameters,
+//   PlayerCapabilities.setParameters,
+// ];
 
 export default class MQTTPlayer implements Player {
   #url: string; // rosmaster URL.
@@ -210,7 +212,7 @@ export default class MQTTPlayer implements Player {
 
         topics.push({ ...topicR, schemaName });
       }
-      const sortedTopics = sortBy(topics, "name");
+      const sortedTopics = _.sortBy(topics, "name");
 
       if (this.#topicsChanged(sortedTopics)) {
         // Remove stats entries for removed topics
@@ -247,7 +249,7 @@ export default class MQTTPlayer implements Player {
     this.#requestedSubscriptions = subscriptions;
     this.#addInternalSubscriptions(subscriptions);
     // 添加 MQTT 订阅逻辑，订阅指定的 MQTT 主题
-    const availableTopicsByTopicName = keyBy(this.#providerTopics ?? [], ({ name }) => name);
+    const availableTopicsByTopicName = _.keyBy(this.#providerTopics ?? [], ({ name }) => name);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);
@@ -272,9 +274,11 @@ export default class MQTTPlayer implements Player {
   }
   #handleInternalMessage(msg: MessageEvent): void {
     const maybeClockMsg = msg.message as { clock?: Time };
-    if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock.sec)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    if (msg.topic === "/clock" && Boolean(maybeClockMsg.clock) && !isNaN(maybeClockMsg.clock.sec)) {
       const time = maybeClockMsg.clock;
       const seconds = toSec(maybeClockMsg.clock);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       if (isNaN(seconds)) {
         return;
       }
@@ -293,8 +297,7 @@ export default class MQTTPlayer implements Player {
     sizeInBytes: number,
     schemaName: string,
     // This is a hot path so we avoid extra object allocation from a parameters struct
-    // eslint-disable-next-line @foxglove/no-boolean-parameters
-    external: boolean,
+    { external }: { external: boolean },
   ): void => {
     if (this.#providerTopics == undefined) {
       return;
@@ -328,6 +331,7 @@ export default class MQTTPlayer implements Player {
     stats.firstMessageTime ??= receiveTime;
     if (stats.lastMessageTime == undefined) {
       stats.lastMessageTime = receiveTime;
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     } else if (isGreaterThan(receiveTime, stats.lastMessageTime)) {
       stats.lastMessageTime = receiveTime;
     }
@@ -407,7 +411,7 @@ export default class MQTTPlayer implements Player {
     if (!this.#providerTopics || newTopics.length !== this.#providerTopics.length) {
       return true;
     }
-    return !isEqual(this.#providerTopics, newTopics);
+    return !_.isEqual(this.#providerTopics, newTopics);
   };
   #getCurrentTime(): Time {
     return this.#clockTime ?? fromMillis(Date.now());
@@ -420,6 +424,7 @@ export default class MQTTPlayer implements Player {
 
     const providerTopics = this.#providerTopics;
     const start = this.#start;
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!providerTopics || !start) {
       return this.#listener({
         name: this.#url,

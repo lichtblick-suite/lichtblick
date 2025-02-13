@@ -14,8 +14,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { CloseOutlined } from "@ant-design/icons";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { forwardRef, useCallback, useContext, useMemo } from "react";
+import { MosaicContext, MosaicWindowContext, MosaicNode } from "react-mosaic-component";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
@@ -30,7 +32,6 @@ import {
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
-import { CloseOutlined } from "@ant-design/icons";
 
 type PanelToolbarControlsProps = {
   additionalIcons?: React.ReactNode;
@@ -91,7 +92,7 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
         )}
         <PanelActionsDropdown isUnknownPanel={isUnknownPanel} />
         <ToolbarIconButton title="Close" onClick={close}>
-          <CloseOutlined />
+          <CloseOutlined onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
         </ToolbarIconButton>
       </Stack>
     );

@@ -14,6 +14,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, Typography, useTheme } from "@mui/material";
+import { ConfigProvider, theme } from "antd";
 import { t } from "i18next";
 import { useSnackbar } from "notistack";
 import { extname } from "path";
@@ -64,6 +65,7 @@ import {
 import { SyncAdapters } from "@lichtblick/suite-base/components/SyncAdapters";
 import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import VariablesList from "@lichtblick/suite-base/components/VariablesList";
+import VehiclesStateList from "@lichtblick/suite-base/components/VehiclesStateList";
 import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDialogs";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
@@ -96,11 +98,8 @@ import ICONS from "@lichtblick/suite-base/theme/icons";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
-
-import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
-import { ConfigProvider, theme } from "antd";
 import VerticalAppBar from "./components/AppBar/VerticalAppBar";
-import VehiclesStateList from "@lichtblick/suite-base/components/VehiclesStateList";
+import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 
 const log = Logger.getLogger(__filename);
 
@@ -115,7 +114,7 @@ const useStyles = makeStyles()({
     outline: "none",
     overflow: "hidden",
     marginLeft: "60px",
-        // marginRight: "60px",
+    // marginRight: "60px",
   },
 });
 
@@ -453,7 +452,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const showEventsTab = currentUserType !== "unauthenticated" && eventsSupported;
 
   const leftSidebarItems = useMemo(() => {
-    const items = new Map<LeftSidebarItemKey, NewSidebarItem>([
+    const items = new Map<LeftSidebarItemKey, SidebarItem>([
       ["panel-settings", { title: t("workspace:panel"), component: PanelSettingsSidebar }],
       ["topics", { title: t("workspace:topics"), component: TopicList }],
       [
@@ -675,49 +674,49 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       >
         <VerticalAppBar />
 
-      {dataSourceDialog.open && <DataSourceDialog />}
-      <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
-      <SyncAdapters />
-      <KeyListener global keyDownHandlers={keyDownHandlers} />
-      <div className={classes.container} ref={containerRef} tabIndex={0}>
-        {appBar}
-        <Sidebars
-          selectedKey=""
-          onSelectKey={() => {}}
-          items={sidebarItems}
-          leftItems={leftSidebarItems}
-          bottomItems={sidebarBottomItems}
-          selectedLeftKey={leftSidebarOpen ? leftSidebarItem : undefined}
-          onSelectLeftKey={sidebarActions.left.selectItem}
-          leftSidebarSize={leftSidebarSize}
-          setLeftSidebarSize={sidebarActions.left.setSize}
-          rightItems={rightSidebarItems}
-          selectedRightKey={rightSidebarOpen ? rightSidebarItem : undefined}
-          onSelectRightKey={sidebarActions.right.selectItem}
-          rightSidebarSize={rightSidebarSize}
-          setRightSidebarSize={sidebarActions.right.setSize}
-        >
-          {/* To ensure no stale player state remains, we unmount all panels when players change */}
-          <RemountOnValueChange value={playerId}>
-            <Stack>
-              <PanelLayout />
-            </Stack>
-          </RemountOnValueChange>
-        </Sidebars>
-        {play && pause && seek && (
-          <div style={{ flexShrink: 0 }}>
-            <PlaybackControls
-              play={play}
-              pause={pause}
-              seek={seek}
-              playUntil={playUntil}
-              isPlaying={isPlaying}
-              getTimeInfo={getTimeInfo}
-            />
-          </div>
-        )}
-      </div>
-      <WorkspaceDialogs />
+        {dataSourceDialog.open && <DataSourceDialog />}
+        <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
+        <SyncAdapters />
+        <KeyListener global keyDownHandlers={keyDownHandlers} />
+        <div className={classes.container} ref={containerRef} tabIndex={0}>
+          {appBar}
+          <Sidebars
+            selectedKey=""
+            onSelectKey={() => {}}
+            items={sidebarItems}
+            leftItems={leftSidebarItems}
+            bottomItems={sidebarBottomItems}
+            selectedLeftKey={leftSidebarOpen ? leftSidebarItem : undefined}
+            onSelectLeftKey={sidebarActions.left.selectItem}
+            leftSidebarSize={leftSidebarSize}
+            setLeftSidebarSize={sidebarActions.left.setSize}
+            rightItems={rightSidebarItems}
+            selectedRightKey={rightSidebarOpen ? rightSidebarItem : undefined}
+            onSelectRightKey={sidebarActions.right.selectItem}
+            rightSidebarSize={rightSidebarSize}
+            setRightSidebarSize={sidebarActions.right.setSize}
+          >
+            {/* To ensure no stale player state remains, we unmount all panels when players change */}
+            <RemountOnValueChange value={playerId}>
+              <Stack>
+                <PanelLayout />
+              </Stack>
+            </RemountOnValueChange>
+          </Sidebars>
+          {play && pause && seek && (
+            <div style={{ flexShrink: 0 }}>
+              <PlaybackControls
+                play={play}
+                pause={pause}
+                seek={seek}
+                playUntil={playUntil}
+                isPlaying={isPlaying}
+                getTimeInfo={getTimeInfo}
+              />
+            </div>
+          )}
+        </div>
+        <WorkspaceDialogs />
       </ConfigProvider>
     </PanelStateContextProvider>
   );

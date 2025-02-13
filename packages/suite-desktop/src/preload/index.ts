@@ -5,7 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
+import { shell } from "electron";
 import os from "os";
 import { join as pathJoin } from "path";
 
@@ -26,7 +27,6 @@ import {
   Storage,
 } from "../common/types";
 import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/webpackDefines";
-import { shell } from "electron";
 
 // Since we have no way of modifying `window.process.argv` we use a sentinel cookie and reload
 // hack to reset the page without deep links. By setting a session cookie and reloading
@@ -62,7 +62,9 @@ contextBridge.exposeInMainWorld("electron", {
     },
   },
   shell2: {
-    openExternal: (url: string) => shell.openExternal(url),
+    openExternal: async (url: string) => {
+      await shell.openExternal(url);
+    },
   },
 } as ElectronAPI);
 export function main(): void {
