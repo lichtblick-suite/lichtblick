@@ -21,6 +21,8 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import { createMuiTheme } from "@lichtblick/theme";
 
 const MINIMUM_CHROME_VERSION = 76;
+const MINIMUM_SAFARI_VERSION = 13;
+const MINIMUM_FIREFOX_VERSION = 70;
 const BANNER_HEIGHT = 54;
 const BANNER_MOBILE_HEIGHT = 100;
 
@@ -81,20 +83,44 @@ const useStyles = makeStyles<void, "button" | "icon">()((theme, _params, classes
 }));
 
 function CompatibilityBannerBase({
-  isChrome,
+  browserType,
   isDismissable,
   onDismiss,
 }: {
-  isChrome: boolean;
+  browserType: "chrome" | "safari" | "firefox" | "other";
   isDismissable: boolean;
   onDismiss: () => void;
 }): React.JSX.Element {
   const { classes, cx } = useStyles();
 
-  const prompt = isChrome
-    ? "You’re using an outdated version of Chrome."
-    : "You’re using an unsupported browser.";
-  const fixText = isChrome ? "Update Chrome" : "Download Chrome";
+  const [prompt, fixText, downloadUrl] = (() => {
+    switch (browserType) {
+      case "chrome":
+        return [
+          `You’re using an outdated version of Chrome. Autotblick currently requires Chrome v${MINIMUM_CHROME_VERSION}+.`,
+          "Update Chrome",
+          "https://www.google.com/chrome/",
+        ];
+      case "safari":
+        return [
+          `You’re using an outdated version of Safari. Autotblick currently requires Safari v${MINIMUM_SAFARI_VERSION}+.`,
+          "Update Safari",
+          "https://support.apple.com/downloads/safari",
+        ];
+      case "firefox":
+        return [
+          `You’re using an outdated version of Firefox. Autotblick currently requires Firefox v${MINIMUM_FIREFOX_VERSION}+.`,
+          "Update Firefox",
+          "https://www.mozilla.org/firefox/",
+        ];
+      default:
+        return [
+          "You’re using an unsupported browser. Autotblick currently requires Chrome, Safari or Firefox.",
+          "Download Chrome",
+          "https://www.google.com/chrome/",
+        ];
+    }
+  })();
 
   return (
     <div className={cx(classes.root, { [classes.fullscreen]: !isDismissable })}>
@@ -102,11 +128,8 @@ function CompatibilityBannerBase({
         <Warning24Filled className={classes.icon} />
 
         <div>
-          <Typography variant="subtitle2">
-            {prompt} Autotblick currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
-          </Typography>
-
-          {!isChrome && (
+          <Typography variant="subtitle2">{prompt}</Typography>
+          {browserType === "other" && (
             <Typography variant="body2">
               Check out our cross-browser support progress in GitHub discussion{" "}
               <Link
@@ -124,7 +147,7 @@ function CompatibilityBannerBase({
 
       <Stack direction="row" gap={1} alignItems="center">
         <Button
-          href="https://www.google.com/chrome/"
+          href={downloadUrl}
           target="_blank"
           rel="noreferrer"
           color="inherit"
@@ -146,11 +169,11 @@ function CompatibilityBannerBase({
 }
 
 export function CompatibilityBanner({
-  isChrome,
+  browserType,
   currentVersion,
   isDismissable,
 }: {
-  isChrome: boolean;
+  browserType: "chrome" | "safari" | "firefox" | "other";
   currentVersion: number;
   isDismissable: boolean;
 }): React.JSX.Element | ReactNull {
@@ -158,7 +181,20 @@ export function CompatibilityBanner({
   const muiTheme = createMuiTheme("dark");
   const [showBanner, setShowBanner] = useState(true);
 
-  if (!showBanner || currentVersion >= MINIMUM_CHROME_VERSION) {
+  const isCompatible = (() => {
+    switch (browserType) {
+      case "chrome":
+        return currentVersion >= MINIMUM_CHROME_VERSION;
+      case "safari":
+        return currentVersion >= MINIMUM_SAFARI_VERSION;
+      case "firefox":
+        return currentVersion >= MINIMUM_FIREFOX_VERSION;
+      default:
+        return false;
+    }
+  })();
+
+  if (!showBanner || isCompatible) {
     return ReactNull;
   }
 
@@ -166,7 +202,7 @@ export function CompatibilityBanner({
     <MuiThemeProvider theme={muiTheme}>
       <Portal>
         <CompatibilityBannerBase
-          isChrome={isChrome}
+          browserType={browserType}
           isDismissable={isDismissable}
           onDismiss={() => {
             setShowBanner(false);

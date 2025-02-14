@@ -11,9 +11,11 @@ import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
+import deviceSettingSummaryThumbnail from "./DeviceSetting/thumbnail.png";
 import gaugeThumbnail from "./Gauge/thumbnail.png";
 import imageThumbnail from "./Image/thumbnail.png";
 import indicatorThumbnail from "./Indicator/thumbnail.png";
+import joystickSummaryThumbnail from "./Joystick/thumbnail.png";
 import logThumbnail from "./Log/thumbnail.png";
 import mapThumbnail from "./Map/thumbnail.png";
 import parametersThumbnail from "./Parameters/thumbnail.png";
@@ -28,11 +30,10 @@ import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
 import userScriptEditorThumbnail from "./UserScriptEditor/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
+import vehicleControlSummaryThumbnail from "./VehicleControl/thumbnail.png";
 import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-status.png";
 import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summary.png";
-import vehicleControlSummaryThumbnail from "./VehicleControl/thumbnail.png";
-import joystickSummaryThumbnail from "./Joystick/thumbnail.png";
-import deviceSettingSummaryThumbnail from "./DeviceSetting/thumbnail.png";
+
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
     title: t("joystick"),

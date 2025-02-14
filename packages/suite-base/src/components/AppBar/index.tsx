@@ -359,7 +359,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                 type="text"
                 style={{
                   marginTop: 5,
-                  marginRight: showCustomWindowControls && isRunningInElectron() ? 0 : 67,
+                  marginRight: isRunningInElectron() ? 64 : 10,
                   width: 22,
                   height: 22,
                 }}

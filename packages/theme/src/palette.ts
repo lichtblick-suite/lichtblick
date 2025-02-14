@@ -78,9 +78,9 @@ export const light: PaletteOptions = {
   mode: "light",
   tonalOffset: 0.22,
   appBar: {
-    main: "#27272b",
-    primary: "#404040",
-    text: "#ffffff",
+    main: "#f4f4f5",
+    primary: "#000000",
+    text: "#000000",
   },
   primary: { main: "#002766" },
   secondary: { main: "#808080" },

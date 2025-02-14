@@ -17,6 +17,44 @@ import { canRenderApp } from "./canRenderApp";
 
 const log = Logger.getLogger(__filename);
 
+function detectBrowser() {
+  const ua = navigator.userAgent;
+  let type: "chrome" | "safari" | "firefox" | "other" = "other";
+  let version = 0;
+
+  const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
+  const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
+  const isChrome = chromeVersion !== 0;
+
+  // Chrome检测
+  // const chromeMatch = ua.match(/Chrome\/(\d+)/);
+  // if (chromeMatch && !/Edge|Edg|OPR/.test(ua)) {
+  //   type = "chrome";
+  //   version = parseInt(chromeMatch[1] ?? "0", 10); // 添加默认值
+  // }
+  if (isChrome) {
+    type = "chrome";
+    version = chromeVersion;
+  }
+  // Safari检测
+  else if (ua.includes("Safari")) {
+    const safariVersionMatch = ua.match(/Version\/(\d+)/);
+    if (safariVersionMatch) {
+      type = "safari";
+      version = parseInt(safariVersionMatch[1] ?? "0", 10);
+    }
+  }
+  // Firefox检测
+  else if (ua.match(/Firefox\/(\d+)/)) {
+    const firefoxMatch = ua.match(/Firefox\/(\d+)/);
+    if (firefoxMatch) {
+      type = "firefox";
+      version = parseInt(firefoxMatch[1] ?? "0", 10);
+    }
+  }
+
+  return { type, version };
+}
 function LogAfterRender(props: React.PropsWithChildren): React.JSX.Element {
   useEffect(() => {
     // Integration tests look for this console log to indicate the app has rendered once
@@ -44,16 +82,13 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     throw new Error("missing #root element");
   }
 
-  const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
-  const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
-  const isChrome = chromeVersion !== 0;
-
+  const browserInfo = detectBrowser();
   const canRender = canRenderApp();
   const banner = (
     <CompatibilityBanner
-      isChrome={isChrome}
-      currentVersion={chromeVersion}
-      isDismissable={canRender}
+      browserType={browserInfo.type}
+      currentVersion={browserInfo.version}
+      isDismissable={true}
     />
   );
 
