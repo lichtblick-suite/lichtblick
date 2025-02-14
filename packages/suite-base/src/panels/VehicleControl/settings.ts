@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
-import { isEqual, set } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
@@ -127,26 +130,26 @@ function buildSettingsTree(
         //     { label: "4", value: 4 },
         //   ],
         // },
-        pass_mode: {
-          label: "PassMode",
-          input: "boolean",
-          value: config.pass_mode,
-        },
-        run: {
-          label: "Run",
-          input: "boolean",
-          value: config.run,
-        },
+        // pass_mode: {
+        //   label: "PassMode",
+        //   input: "boolean",
+        //   value: config.pass_mode,
+        // },
+        // run: {
+        //   label: "Run",
+        //   input: "boolean",
+        //   value: config.run,
+        // },
         // upload_map: {
         //   label: "UploadMap",
         //   input: "boolean",
         //   value: config.uploadMap,
         // },
-        lights: {
-          label: "UploadMap",
-          input: "boolean",
-          value: config.lights,
-        },
+        // lights: {
+        //   label: "UploadMap",
+        //   input: "boolean",
+        //   value: config.lights,
+        // },
         // rain: {
         //   label: "rain",
         //   input: "boolean",
@@ -177,7 +180,7 @@ export function useVehicleControlSettings(
       saveConfig(
         produce<VehicleControlConfig>((draft) => {
           if (input === "autocomplete") {
-            if (isEqual(path, ["general", "topicName"])) {
+            if (_.isEqual(path, ["general", "topicName"])) {
               const topicSchemaName = topics.find((t) => t.name === value)?.schemaName;
               setDefaultPanelTitle(value ? `Publish ${value}` : "Publish");
 
@@ -188,11 +191,11 @@ export function useVehicleControlSettings(
                 draft.nodeDatatype = topicSchemaName;
                 draft.runDatatype = topicSchemaName;
               }
-            } else if (isEqual(path, ["general", "datatype"])) {
+            } else if (_.isEqual(path, ["general", "datatype"])) {
               draft.nodeDatatype = value ?? "";
             }
           } else {
-            set(draft, path.slice(1), value);
+            _.set(draft, path.slice(1), value);
           }
         }),
       );
