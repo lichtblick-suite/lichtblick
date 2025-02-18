@@ -8,3 +8,5 @@
 export * from "./CameraInfo";
 export * from "./decodings";
 export * from "./PinholeCameraModel";
+export * from "./CylinderCameraModel";
+export * from "./DeformedCylinderCameraModel";

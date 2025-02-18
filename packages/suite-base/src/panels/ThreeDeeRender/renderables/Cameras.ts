@@ -8,7 +8,11 @@
 import { CameraCalibration } from "@foxglove/schemas";
 import { t } from "i18next";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import {
+  PinholeCameraModel,
+  CylinderCameraModel,
+  DeformedCylinderCameraModel,
+} from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
@@ -70,7 +74,7 @@ export type CameraInfoUserData = BaseUserData & {
   topic: string;
   cameraInfo: CameraInfo | undefined;
   originalMessage: Record<string, RosValue> | undefined;
-  cameraModel: PinholeCameraModel | undefined;
+  cameraModel: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel | undefined;
   lines: RenderableLineList | undefined;
 };
 
@@ -314,7 +318,7 @@ function vec3(): Vector3 {
 
 function createLineListMarker(
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel,
   settings: LayerSettingsCameraInfo,
   steps = 10,
 ): Marker {
@@ -380,7 +384,7 @@ function horizontalLine(
   output: Vector3[],
   y: number,
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {
@@ -397,7 +401,7 @@ function verticalLine(
   output: Vector3[],
   x: number,
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {

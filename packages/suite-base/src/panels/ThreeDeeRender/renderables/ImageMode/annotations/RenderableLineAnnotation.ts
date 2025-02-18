@@ -11,7 +11,11 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import {
+  PinholeCameraModel,
+  CylinderCameraModel,
+  DeformedCylinderCameraModel,
+} from "@lichtblick/den/image";
 import { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
 
 import {
@@ -89,7 +93,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
   #annotation?: NormalizedPointsAnnotation & { style: LineStyle };
   #annotationNeedsUpdate = false;
 
-  #cameraModel?: PinholeCameraModel;
+  #cameraModel?: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel;
   #cameraModelNeedsUpdate = false;
 
   public constructor(topicName: string) {
@@ -176,7 +180,9 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     this.#canvasHeight = canvasHeight;
   }
 
-  public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
+  public setCameraModel(
+    cameraModel: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel | undefined,
+  ): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }
