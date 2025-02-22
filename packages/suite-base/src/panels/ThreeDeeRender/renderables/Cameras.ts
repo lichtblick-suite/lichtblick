@@ -269,7 +269,13 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
       if (cameraInfo.P.length === 12) {
         try {
-          renderable.userData.cameraModel = new PinholeCameraModel(cameraInfo);
+          if (cameraInfo.distortion_model == "cylindrical") {
+            renderable.userData.cameraModel = new CylinderCameraModel(cameraInfo);
+          } else if (cameraInfo.distortion_model == "deformed_cylinder") {
+            renderable.userData.cameraModel = new DeformedCylinderCameraModel(cameraInfo);
+          } else {
+            renderable.userData.cameraModel = new PinholeCameraModel(cameraInfo);
+          }
         } catch (errUnk) {
           const err = errUnk as Error;
           this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);
