@@ -33,6 +33,7 @@ export const defaultConfig: VehicleControlConfig = {
   runDatatype: "msg_interfaces/msg/EmergencyInterface",
   rfidSource: "/rfid_data",
   pathSource: "/gpp_path",
+  batterySource: "/battery_state",
 };
 
 function datatypeError(schemaNames: string[], datatype?: string) {
@@ -111,6 +112,13 @@ function buildSettingsTree(
           input: "autocomplete",
           error: topicError(config.pathSource),
           value: config.pathSource,
+          items: topics.map((t) => t.name),
+        },
+        battery: {
+          label: "Battery",
+          input: "autocomplete",
+          error: topicError(config.batterySource),
+          value: config.batterySource,
           items: topics.map((t) => t.name),
         },
       },

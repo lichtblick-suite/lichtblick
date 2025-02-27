@@ -1,4 +1,12 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+/* eslint-disable no-restricted-syntax */
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+/* eslint-disable import/order */
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
@@ -21,7 +29,7 @@ interface Position {
   y: number;
 }
 
-function Joystick(props: Props): JSX.Element {
+function Joystick(props: Props): React.JSX.Element {
   const { config, saveConfig } = props;
   const { topics, datatypes } = useDataSourceInfo();
   const [isDragging, setIsDragging] = useState(false);
@@ -32,6 +40,8 @@ function Joystick(props: Props): JSX.Element {
   const joystickRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const intervalEmergencyRef = useRef<NodeJS.Timeout | null>(null);
+  const [isEmergency, setIsEmergency] = useState(false);
 
   // Update leaveMode when config changes
   useEffect(() => {
@@ -47,18 +57,49 @@ function Joystick(props: Props): JSX.Element {
     datatypes,
   });
 
+  useEffect(() => {
+    if (isEmergency) {
+      intervalEmergencyRef.current = setInterval(() => {
+        cmdPublish({
+          linear: { x: 0, y: 0, z: 0 },
+          angular: { x: 0, y: 0, z: 0 },
+        } as Record<string, unknown>);
+      }, 10); // 100ms = 10Hz
+    } else {
+      if (intervalEmergencyRef.current) {
+        clearInterval(intervalEmergencyRef.current);
+      }
+    }
+
+    // 设置定时器，以10Hz的频率调用cmdPublish
+
+    // 清除定时器，防止内存泄漏
+    return () => {
+      if (intervalEmergencyRef.current) {
+        clearInterval(intervalEmergencyRef.current);
+      }
+    };
+  }, [isEmergency, cmdPublish]);
+
   // Handle joystick movement
   const handleMove = useCallback(
     (x: number, y: number) => {
       // Apply deadzone
       const deadzone = 0.1; // Adjust as needed
-      if (Math.abs(x) < deadzone) x = 0;
-      if (Math.abs(y) < deadzone) y = 0;
+      let newX = x;
+      let newY = y;
 
-      setVPosition({ x, y });
-      x = Math.max(-1 * config.angle, Math.min(config.angle, x));
-      y = Math.max(-1 * config.vel, Math.min(config.vel, y));
-      setPosition({ x, y });
+      if (Math.abs(newX) < deadzone) {
+        newX = 0;
+      }
+      if (Math.abs(newY) < deadzone) {
+        newY = 0;
+      }
+
+      setVPosition({ x: newX, y: newY });
+      newX = Math.max(-1 * config.angle, Math.min(config.angle, newX));
+      newY = Math.max(-1 * config.vel, Math.min(config.vel, newY));
+      setPosition({ x: newX, y: newY });
     },
     [config.angle, config.vel],
   );
@@ -152,7 +193,9 @@ function Joystick(props: Props): JSX.Element {
   // Add event listeners for mouse and touch
   useEffect(() => {
     const joystickElement = joystickRef.current;
-    if (!joystickElement) return;
+    if (!joystickElement) {
+      return;
+    }
 
     joystickElement.addEventListener("mousemove", handleMouseMove);
     joystickElement.addEventListener("mouseup", handleMouseUp);
@@ -197,7 +240,7 @@ function Joystick(props: Props): JSX.Element {
   const handleGamepadDisconnected = useCallback((e: GamepadEvent) => {
     console.log("Gamepad disconnected:", e.gamepad);
     setIsGamepadConnected(false);
-    if (animationFrameRef.current) {
+    if (animationFrameRef.current != null) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
@@ -210,7 +253,7 @@ function Joystick(props: Props): JSX.Element {
     return () => {
       window.removeEventListener("gamepadconnected", handleGamepadConnected);
       window.removeEventListener("gamepaddisconnected", handleGamepadDisconnected);
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current != null) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
@@ -219,7 +262,7 @@ function Joystick(props: Props): JSX.Element {
 
   // Disconnect gamepad manually
   const disconnectGamepad = useCallback(() => {
-    if (animationFrameRef.current) {
+    if (animationFrameRef.current != null) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
@@ -235,7 +278,9 @@ function Joystick(props: Props): JSX.Element {
             <div
               className="joystick"
               ref={joystickRef}
-              onMouseDown={() => setIsDragging(true)}
+              onMouseDown={() => {
+                setIsDragging(true);
+              }}
               onTouchStart={(e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -251,9 +296,23 @@ function Joystick(props: Props): JSX.Element {
               ></div>
             </div>
             <div style={{ marginTop: "16px" }}>
+              <Button
+                onClick={() => {
+                  setIsEmergency(!isEmergency);
+                }}
+                variant="contained"
+                color={isEmergency ? "success" : "error"}
+                style={{ marginTop: "8px", width: "100%", height: "50px" }}
+              >
+                {" "}
+                {isEmergency ? "Emergency Stop Cancel" : "Emergency Stop"}{" "}
+              </Button>
               <p>Gamepad Status: {isGamepadConnected ? "Connected" : "Disconnected"}</p>
               {isGamepadConnected && (
-                <Button onClick={disconnectGamepad} style={{ marginTop: "8px" }}>
+                <Button
+                  onClick={disconnectGamepad}
+                  style={{ marginTop: "8px", width: "100%", height: "50px" }}
+                >
                   Disconnect Gamepad
                 </Button>
               )}

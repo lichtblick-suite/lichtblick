@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 /* eslint-disable react-hooks/exhaustive-deps */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -19,6 +23,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Button, Stack } from "@mui/material";
+// import { Card } from "antd";
+// import { use } from "cytoscape";
 import React, { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -29,7 +35,8 @@ import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import usePublisher from "@lichtblick/suite-base/hooks/usePublisher";
-import { SceneControls } from "@lichtblick/suite-base/panels/VehicleControl/manager/SceneControls";
+import BatteryIndicator from "@lichtblick/suite-base/panels/VehicleControl/components/BatteryIndicator";
+import TextCard from "@lichtblick/suite-base/panels/VehicleControl/components/TextCard";
 import map from "@lichtblick/suite-base/panels/VehicleControl/map.png";
 import {
   defaultConfig,
@@ -58,7 +65,7 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
   const rendererRef = useRef<THREE.WebGLRenderer | ReactNull>(ReactNull);
   const controlsRef = useRef<OrbitControls | ReactNull>(ReactNull);
   const resizeObserverRef = useRef<ResizeObserver | undefined>(undefined);
-  const sceneControlsRef = useRef<SceneControls | undefined>(undefined);
+  const batteryPercentageRef = useRef<number | undefined>(0);
   const animationFrameRef = useRef<number>();
   const WORLD_WIDTH = 10;
   const {
@@ -67,20 +74,25 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
     // pass_mode,
     nodeTopicName,
     nodeDatatype,
-    runTopicName,
-    runDatatype,
+    // runTopicName,
+    // runDatatype,
     pathSource,
     rfidSource,
+    batterySource,
   } = config;
 
   const rfidMessages = useMessageDataItem(rfidSource);
   const pathMessages = useMessageDataItem(pathSource);
+  const batteryMessages = useMessageDataItem(batterySource);
 
   const rfidObj = rfidMessages[rfidMessages.length - 1] as {
     queriedData: { value: { data: string } }[];
   };
   const pathObj = pathMessages[pathMessages.length - 1] as {
     queriedData: { value: { target_rfids: number[] } }[];
+  };
+  const batteryObj = batteryMessages[batteryMessages.length - 1] as {
+    queriedData: { value: { percentage: number } }[];
   };
 
   const interactionManagerRef = useRef<RFIDInteractionManager | undefined>(
@@ -97,12 +109,12 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
     datatypes,
   });
 
-  const runPublish = usePublisher({
-    name: "RunPublish",
-    topic: runTopicName,
-    schemaName: runDatatype,
-    datatypes,
-  });
+  // const runPublish = usePublisher({
+  //   name: "RunPublish",
+  //   topic: runTopicName,
+  //   schemaName: runDatatype,
+  //   datatypes,
+  // });
 
   const setEndNode = useCallbackWithToast(
     (rfidEnd: number) => {
@@ -127,9 +139,21 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
 
       interactionManagerRef.current?.highlightRoute(path);
     } catch (error) {
-      console.error("Failed to set end node:", error);
+      //console.error("Failed to set end node:", error);
     }
   }, [rfidObj, pathObj]);
+
+  useEffect(() => {
+    try {
+      const battery = batteryObj.queriedData[0]?.value.percentage;
+
+      if (battery !== batteryPercentageRef.current) {
+        batteryPercentageRef.current = battery;
+      }
+    } catch (error) {
+      console.error("Failed to get battery percentage:", error);
+    }
+  }, [batteryObj]);
 
   const parseAndRenderPaths = (
     jsonData: { canvas?: { objects?: { name: string; type: string; [key: string]: any }[] } },
@@ -213,26 +237,26 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
       if (!isNaN(pathId)) {
         interactionManagerRef.current?.registerPath(pathId, group);
       } else {
-        console.error("Invalid path ID:", pathGroup.data.id);
+        //console.error("Invalid path ID:", pathGroup.data.id);
       }
     });
   };
-  const highlightRoute = () => {
-    if (!interactionManagerRef.current) {
-      return;
-    }
+  // const highlightRoute = () => {
+  //   if (!interactionManagerRef.current) {
+  //     return;
+  //   }
 
-    // 示例：高亮显示经过 RFID 38, 39, 40 的路线
-    const rfidSequence = [1, 10, 8];
-    interactionManagerRef.current.highlightRoute(rfidSequence);
-  };
+  //   // 示例：高亮显示经过 RFID 38, 39, 40 的路线
+  //   const rfidSequence = [1, 10, 8];
+  //   interactionManagerRef.current.highlightRoute(rfidSequence);
+  // };
 
-  const setRun = useCallbackWithToast(
-    ({ state }: { state: boolean }) => {
-      runPublish({ timestamp: Date.now(), is_run: state, message: "manual" });
-    },
-    [runPublish],
-  );
+  // const setRun = useCallbackWithToast(
+  //   ({ state }: { state: boolean }) => {
+  //     runPublish({ timestamp: Date.now(), is_run: state, message: "manual" });
+  //   },
+  //   [runPublish],
+  // );
 
   // 初始化 Three.js
   useEffect(() => {
@@ -350,15 +374,6 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
       const maxDimension = Math.max(width, height);
       camera.position.z = maxDimension * 0.7; // 调整这个系数以获得合适的视图
       camera.updateProjectionMatrix();
-
-      const sceneControls = new SceneControls(
-        camera,
-        controls,
-        mapTexture.image.width,
-        mapTexture.image.height,
-      );
-
-      sceneControlsRef.current = sceneControls;
 
       // 重置到初始视图
       // sceneControls.resetView();
@@ -520,19 +535,19 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
     };
   }, [mountRef, cameraRef, rendererRef, debouncedResize, resizeObserverRef]);
 
-  useEffect(() => {
-    if (config.run) {
-      setRun({ state: true }).catch((error) => {
-        console.error("Failed to set run state:", error);
-      });
-    }
-  }, [config.run, setRun]);
+  // useEffect(() => {
+  //   if (config.run) {
+  //     setRun({ state: true }).catch((error) => {
+  //       console.error("Failed to set run state:", error);
+  //     });
+  //   }
+  // }, [config.run, setRun]);
 
-  const setCurrentPosition = (rfidId: number) => {
-    interactionManagerRef.current?.setCurrentPosition(rfidId);
-    // 可选：启动动画
-    interactionManagerRef.current?.animateCurrentPosition();
-  };
+  // const setCurrentPosition = (rfidId: number) => {
+  //   interactionManagerRef.current?.setCurrentPosition(rfidId);
+  //   // 可选：启动动画
+  //   interactionManagerRef.current?.animateCurrentPosition();
+  // };
 
   // 移动到下一个位置（示例）
 
@@ -590,13 +605,19 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
             position: "absolute",
             height: "auto",
             zIndex: 999,
-            left: "30px",
+            right: "10px",
             display: "flex",
             justifyContent: "center",
             flexDirection: "column",
+            top: "50px",
           }}
         >
-          <button onClick={highlightRoute}>显示路线</button>
+          <BatteryIndicator batteryLevel={(batteryPercentageRef.current ?? 0) * 100} />
+          <TextCard
+            text={interactionManagerRef.current?.getCurrentPositionRfidId()?.toString() ?? "无位置"}
+          />
+
+          {/* <button onClick={highlightRoute}>显示路线</button>
           <button
             onClick={() => {
               setCurrentPosition(1);
@@ -604,7 +625,6 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
           >
             设置当前位置1
           </button>
-
           <button
             onClick={() => {
               setCurrentPosition(10);
@@ -612,14 +632,14 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
           >
             设置当前位置10
           </button>
-
           <button
             onClick={() => {
               setCurrentPosition(8);
             }}
           >
             设置当前位置8
-          </button>
+          </button> */}
+
           {config.pass_mode && (
             <>
               <Button size="large" variant="contained" color="secondary">

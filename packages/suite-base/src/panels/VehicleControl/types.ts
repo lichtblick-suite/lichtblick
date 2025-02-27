@@ -21,4 +21,5 @@ export type VehicleControlConfig = {
   runDatatype: string;
   rfidSource: string;
   pathSource: string;
+  batterySource: string;
 };

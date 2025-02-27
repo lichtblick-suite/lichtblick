@@ -278,7 +278,7 @@ export class RFIDInteractionManager {
       context.textBaseline = "middle";
 
       // 绘制文字
-      context.fillText("A", canvas.width / 2, canvas.height / 2);
+      context.fillText("🚘", canvas.width / 2, canvas.height / 2);
 
       // 创建纹理
       const texture = new THREE.CanvasTexture(canvas);
