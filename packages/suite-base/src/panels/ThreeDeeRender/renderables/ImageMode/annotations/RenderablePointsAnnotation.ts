@@ -7,11 +7,7 @@
 
 import * as THREE from "three";
 
-import {
-  PinholeCameraModel,
-  CylinderCameraModel,
-  DeformedCylinderCameraModel,
-} from "@lichtblick/den/image";
+import { CameraModel } from "@lichtblick/den/image";
 import { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
 
 import {
@@ -63,7 +59,7 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
   #annotation?: NormalizedPointsAnnotation & { style: "points" };
   #annotationNeedsUpdate = false;
 
-  #cameraModel?: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel;
+  #cameraModel?: CameraModel;
   #cameraModelNeedsUpdate = false;
 
   public constructor(topicName: string) {
@@ -121,9 +117,7 @@ export class RenderablePointsAnnotation extends Renderable<BaseUserData, /*TRend
     this.#pixelRatio = pixelRatio;
   }
 
-  public setCameraModel(
-    cameraModel: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel | undefined,
-  ): void {
+  public setCameraModel(cameraModel: CameraModel | undefined): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }

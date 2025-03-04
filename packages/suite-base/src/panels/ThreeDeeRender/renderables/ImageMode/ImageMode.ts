@@ -10,11 +10,8 @@ import * as THREE from "three";
 import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
-import {
-  PinholeCameraModel,
-  CylinderCameraModel,
-  DeformedCylinderCameraModel,
-} from "@lichtblick/den/image";
+
+import { CameraModel, createCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
@@ -143,7 +140,7 @@ export class ImageMode
   #camera: ImageModeCamera;
   #cameraModel:
     | {
-        model: PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel;
+        model: CameraModel;
         info: CameraInfo;
       }
     | undefined;
@@ -925,22 +922,14 @@ export class ImageMode
   }
 
   /**
-   * Returns PinholeCameraModel for given CameraInfo
+   * Returns CameraModel for given CameraInfo
    * This function will set a topic error on the image topic if the camera model creation fails.
    * @param cameraInfo - CameraInfo to create model from
    */
-  #getCameraModel(
-    cameraInfo: CameraInfo,
-  ): PinholeCameraModel | CylinderCameraModel | DeformedCylinderCameraModel | undefined {
+  #getCameraModel(cameraInfo: CameraInfo): CameraModel | undefined {
     let model = undefined;
     try {
-      if (cameraInfo.distortion_model == "cylindrical") {
-        model = new CylinderCameraModel(cameraInfo);
-      } else if (cameraInfo.distortion_model == "deformed_cylinder") {
-        model = new DeformedCylinderCameraModel(cameraInfo);
-      } else {
-        model = new PinholeCameraModel(cameraInfo);
-      }
+      model = createCameraModel(cameraInfo);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;

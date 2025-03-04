@@ -10,11 +10,8 @@ import { t } from "i18next";
 import { assert } from "ts-essentials";
 
 import { MultiMap, filterMap } from "@lichtblick/den/collection";
-import {
-  PinholeCameraModel,
-  CylinderCameraModel,
-  DeformedCylinderCameraModel,
-} from "@lichtblick/den/image";
+
+import { CameraModel, createCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
@@ -428,13 +425,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     const imageTopic = renderable.userData.topic;
 
     try {
-      if (newCameraInfo.distortion_model == "cylindrical") {
-        renderable.setCameraModel(new CylinderCameraModel(newCameraInfo));
-      } else if (newCameraInfo.distortion_model == "deformed_cylinder") {
-        renderable.setCameraModel(new DeformedCylinderCameraModel(newCameraInfo));
-      } else {
-        renderable.setCameraModel(new PinholeCameraModel(newCameraInfo));
-      }
+      renderable.setCameraModel(createCameraModel(newCameraInfo));
       renderable.userData.cameraInfo = newCameraInfo;
       this.renderer.settings.errors.removeFromTopic(imageTopic, CAMERA_MODEL);
     } catch (errUnk) {
