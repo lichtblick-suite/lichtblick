@@ -15,7 +15,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
-export type Initalization = {
+export type Initialization = {
   start: Time;
   end: Time;
   topics: Topic[];
@@ -154,7 +154,7 @@ export interface IIterableSource {
   /**
    * Initialize the source.
    */
-  initialize(): Promise<Initalization>;
+  initialize(): Promise<Initialization>;
 
   /**
    * Instantiate an IMessageIterator for the source.
@@ -191,6 +191,8 @@ export interface IIterableSource {
     args: Immutable<MessageIteratorArgs> & { abort?: AbortSignal },
   ) => IMessageCursor;
 
+  getStart?: () => Time | undefined;
+
   /**
    * Optional method a data source can implement to cleanup resources. The player will call this
    * method when the source will no longer be used.
@@ -202,6 +204,7 @@ export type IterableSourceInitializeArgs = {
   file?: File;
   url?: string;
   files?: File[];
+  urls?: string[];
   params?: Record<string, string | undefined>;
 
   api?: {

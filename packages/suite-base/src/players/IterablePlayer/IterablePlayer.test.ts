@@ -17,14 +17,14 @@ import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicS
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
-  Initalization,
+  Initialization,
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
 import { IterablePlayer } from "./IterablePlayer";
 
 class TestSource implements IIterableSource {
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     return {
       start: { sec: 0, nsec: 0 },
       end: { sec: 1, nsec: 0 },
@@ -547,7 +547,7 @@ describe("IterablePlayer", () => {
 
   it("provides error message for inconsistent topic datatypes", async () => {
     class DuplicateTopicsSource implements IIterableSource {
-      public async initialize(): Promise<Initalization> {
+      public async initialize(): Promise<Initialization> {
         return {
           start: { sec: 0, nsec: 0 },
           end: { sec: 1, nsec: 0 },

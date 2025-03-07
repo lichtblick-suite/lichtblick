@@ -85,7 +85,7 @@ type IterablePlayerOptions = {
   name?: string;
 
   // Optional set of key/values to store with url handling
-  urlParams?: Record<string, string>;
+  urlParams?: Record<string, string | string[]>;
 
   // Source identifier used in constructing state urls.
   sourceId: string;
@@ -114,7 +114,7 @@ type IterablePlayerState =
  * detecting that there is another state waiting and cooperatively ending itself.
  */
 export class IterablePlayer implements Player {
-  #urlParams?: Record<string, string>;
+  #urlParams?: Record<string, string | string[]>;
   #name?: string;
   #nextState?: IterablePlayerState;
   #state: IterablePlayerState = "preinit";

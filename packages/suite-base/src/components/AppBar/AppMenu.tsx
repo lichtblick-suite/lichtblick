@@ -82,7 +82,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
       },
       {
         type: "item",
-        label: t("openLocalFile"),
+        label: t("openLocalFiles"),
         key: "open-file",
         shortcut: formatKeyboardShortcut("O", ["Meta"]),
         dataTestId: "menu-item-open-local-file",

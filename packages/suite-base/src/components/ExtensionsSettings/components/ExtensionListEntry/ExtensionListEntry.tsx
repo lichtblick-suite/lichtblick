@@ -23,7 +23,7 @@ export default function ExtensionListEntry({
 }: Props): React.JSX.Element {
   const { classes } = useStyles();
   return (
-    <ListItem disablePadding key={id}>
+    <ListItem disablePadding key={id} data-testid="extension-list-entry">
       <ListItemButton className={classes.listItemButton} onClick={onClick}>
         <ListItemText
           disableTypography

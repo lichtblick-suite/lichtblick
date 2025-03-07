@@ -16,6 +16,10 @@ import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import ExtensionsSettings from "./index";
 
+jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
+  useExtensionCatalog: jest.fn(),
+}));
+
 jest.mock("@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionSettings");
 jest.mock("react-i18next");
 

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Immutable } from "@lichtblick/suite";
 import { FocusedExtension } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
 import ExtensionListEntry from "../ExtensionListEntry/ExtensionListEntry";
@@ -43,6 +44,7 @@ export default function ExtensionList({
   selectExtension,
 }: ExtensionListProps): React.JSX.Element {
   const { t } = useTranslation("extensionsSettings");
+  const installedExtensions = useExtensionCatalog((state) => state.installedExtensions);
 
   const renderComponent = () => {
     if (entries.length === 0 && filterText) {
@@ -52,16 +54,22 @@ export default function ExtensionList({
     }
     return (
       <>
-        {entries.map((entry) => (
-          <ExtensionListEntry
-            key={entry.id}
-            entry={entry}
-            onClick={() => {
-              selectExtension({ installed: true, entry });
-            }}
-            searchText={filterText}
-          />
-        ))}
+        {entries.map((entry) => {
+          const isInstalled = installedExtensions
+            ? installedExtensions.some((installed) => installed.id === entry.id)
+            : false;
+
+          return (
+            <ExtensionListEntry
+              key={entry.id}
+              entry={entry}
+              onClick={() => {
+                selectExtension({ installed: isInstalled, entry });
+              }}
+              searchText={filterText}
+            />
+          );
+        })}
       </>
     );
   };

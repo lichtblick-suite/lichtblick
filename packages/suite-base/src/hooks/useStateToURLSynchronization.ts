@@ -62,6 +62,11 @@ export function useStateToURLSynchronization(): void {
         },
         _.isString,
       ),
+      dsParamsArray: _.pickBy(
+        stablePlayerUrlState.parameters,
+
+        _.isArray,
+      ),
     });
   }, [selectedEventId, stablePlayerUrlState]);
 }

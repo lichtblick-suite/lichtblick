@@ -10,7 +10,7 @@ concurrency:
 jobs:
   deploy:
     name: Deploy to Cloudflare Pages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       # Environment variables that are injected into the build

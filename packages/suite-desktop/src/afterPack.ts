@@ -7,17 +7,23 @@
 
 import { exec } from "@actions/exec";
 import { downloadTool, extractZip } from "@actions/tool-cache";
-import type MacPackager from "app-builder-lib/out/macPackager";
 import { log, Arch } from "builder-util";
 import crypto from "crypto";
-import { AfterPackContext } from "electron-builder";
+import { AfterPackContext, MacPackager } from "electron-builder";
 import fs from "fs/promises";
 import path from "path";
 import plist, { PlistObject } from "plist";
 
 async function getKeychainFile(context: AfterPackContext): Promise<string | undefined> {
-  const macPackager = context.packager as unknown as MacPackager;
-  if ((macPackager as Partial<typeof macPackager>).codeSigningInfo == undefined) {
+  // Ensure it's a macOS packager
+  if (context.packager.platform.name !== "mac") {
+    log.error("Not a macOS packager.");
+    return;
+  }
+
+  // Access properties dynamically
+  const macPackager = context.packager as MacPackager;
+  if (!macPackager.codeSigningInfo.hasValue) {
     log.error("No code signing info available.");
     return;
   }

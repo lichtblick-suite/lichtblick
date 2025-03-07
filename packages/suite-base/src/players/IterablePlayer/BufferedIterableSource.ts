@@ -18,7 +18,7 @@ import { CachingIterableSource } from "./CachingIterableSource";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
-  Initalization,
+  Initialization,
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
@@ -70,7 +70,7 @@ class BufferedIterableSource extends EventEmitter<EventTypes> implements IIterab
   // producer before exiting.
   #producer?: Promise<void>;
 
-  #initResult?: Initalization;
+  #initResult?: Initialization;
 
   // How far ahead of the read head we should try to keep buffering
   #readAheadDuration: Time;
@@ -93,7 +93,7 @@ class BufferedIterableSource extends EventEmitter<EventTypes> implements IIterab
     this.#source.on("loadedRangesChange", () => this.emit("loadedRangesChange"));
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     this.#initResult = await this.#source.initialize();
     return this.#initResult;
   }

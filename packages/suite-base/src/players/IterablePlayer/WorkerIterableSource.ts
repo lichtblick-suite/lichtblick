@@ -14,7 +14,7 @@ import type {
   GetBackfillMessagesArgs,
   IIterableSource,
   IMessageCursor,
-  Initalization,
+  Initialization,
   IteratorResult,
   MessageIteratorArgs,
   IterableSourceInitializeArgs,
@@ -38,7 +38,7 @@ export class WorkerIterableSource implements IIterableSource {
     this.#args = args;
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     this.#disposeRemote?.();
 
     // Note: this launches the worker.

@@ -27,7 +27,7 @@ import decompressLZ4 from "@lichtblick/wasm-lz4";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
-  Initalization,
+  Initialization,
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
@@ -46,7 +46,7 @@ export class BagIterableSource implements IIterableSource {
     this.#source = source;
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     await decompressLZ4.isLoaded;
     const bzip2 = await Bzip2.init();
 
@@ -111,7 +111,7 @@ export class BagIterableSource implements IIterableSource {
     const datatypes: RosDatatypes = new Map();
     const topics = new Map<string, Topic>();
     const topicStats = new Map<string, TopicStats>();
-    const publishersByTopic: Initalization["publishersByTopic"] = new Map();
+    const publishersByTopic: Initialization["publishersByTopic"] = new Map();
     for (const [id, connection] of this.#bag.connections) {
       const schemaName = connection.type;
       if (!schemaName) {

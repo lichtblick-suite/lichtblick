@@ -244,7 +244,7 @@ function PanelExtensionAdapter(
       sortedTopics,
       subscriptions: localSubscriptions,
       watchedFields,
-      config: undefined,
+      config: initialState.current,
     });
 
     if (!renderState) {

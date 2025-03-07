@@ -23,7 +23,7 @@ import { messageIdToTopic, messageDefinitionToRos, logLevelToRosout } from "./su
 import {
   IIterableSource,
   IteratorResult,
-  Initalization,
+  Initialization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
 } from "../IIterableSource";
@@ -45,7 +45,7 @@ export class UlogIterableSource implements IIterableSource {
     this.#options = options;
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     const file = this.#options.file;
     const bytes = this.#options.file.size;
     log.debug(`initialize(${bytes} bytes)`);

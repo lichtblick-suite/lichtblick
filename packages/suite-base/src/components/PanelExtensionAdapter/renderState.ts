@@ -119,6 +119,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       config,
     } = input;
 
+    const configTopics = config?.topics ?? {};
+
     const topicToSchemaNameMap = _.mapValues(
       _.keyBy(sortedTopics, "name"),
       ({ schemaName }) => schemaName,
@@ -235,7 +237,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           const schemaName = topicToSchemaNameMap[messageEvent.topic];
           if (schemaName) {
             convertMessage(
-              { ...messageEvent, topicConfig: config?.topics[messageEvent.topic] },
+              { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               topicSchemaConverters,
               postProcessedFrame,
             );
@@ -252,7 +254,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           const schemaName = topicToSchemaNameMap[messageEvent.topic];
           if (schemaName) {
             convertMessage(
-              { ...messageEvent, topicConfig: config?.topics[messageEvent.topic] },
+              { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               newConverters,
               postProcessedFrame,
             );
@@ -308,7 +310,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               const schemaName = topicToSchemaNameMap[messageEvent.topic];
               if (schemaName) {
                 convertMessage(
-                  { ...messageEvent, topicConfig: config?.topics[messageEvent.topic] },
+                  { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
                   topicSchemaConverters,
                   frames,
                 );

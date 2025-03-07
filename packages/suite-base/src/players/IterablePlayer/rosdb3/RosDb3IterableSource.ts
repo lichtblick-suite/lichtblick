@@ -23,7 +23,7 @@ import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
-  Initalization,
+  Initialization,
   IteratorResult,
   MessageIteratorArgs,
 } from "../IIterableSource";
@@ -39,7 +39,7 @@ export class RosDb3IterableSource implements IIterableSource {
     this.#files = files;
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     const res = await fetch(
       // foxglove-depcheck-used: babel-plugin-transform-import-meta
       new URL("@foxglove/sql.js/dist/sql-wasm.wasm", import.meta.url).toString(),

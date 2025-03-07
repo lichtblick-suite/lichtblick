@@ -45,6 +45,36 @@ describe("app state url parser", () => {
       });
     });
 
+    it("parses multiple remote data state urls to a single string", () => {
+      const url = urlBuilder();
+      url.searchParams.append("ds", "remote-file");
+      url.searchParams.append("ds.url", "http://example1.com");
+      url.searchParams.append("ds.url", "http://example2.com");
+
+      expect(parseAppURLState(url)).toMatchObject({
+        ds: "remote-file",
+        dsParams: {
+          url: "http://example1.com,http://example2.com",
+        },
+      });
+    });
+
+    it("parses handles duplicate dsParams correctly", () => {
+      const url = urlBuilder();
+      url.searchParams.append("ds", "remote-file");
+      url.searchParams.append("ds.url", "http://example1.com");
+      url.searchParams.append("ds.test", "test1");
+      url.searchParams.append("ds.test", "test2");
+
+      expect(parseAppURLState(url)).toMatchObject({
+        ds: "remote-file",
+        dsParams: {
+          url: "http://example1.com",
+          test: "test2",
+        },
+      });
+    });
+
     it("parses data platform state urls", () => {
       const now: Time = { sec: new Date().getTime(), nsec: 0 };
       const time = toRFC3339String({ sec: now.sec + 500, nsec: 0 });
@@ -84,6 +114,32 @@ describe("app state encoding", () => {
     ).toEqual(
       "http://example.com/?ds=ros1-remote-bagfile&ds.url=http%3A%2F%2Ffoxglove.dev%2Ftest.bag",
     );
+  });
+
+  it("should encode multiple remote files urls", () => {
+    expect(
+      updateAppURLState(baseURL(), {
+        time: undefined,
+        ds: "remote-file",
+        dsParamsArray: {
+          urls: ["http://lichtblick.dev/test-file1.mcap", "http://lichtblick.dev/test-file2.mcap"],
+        },
+      }).href,
+    ).toEqual(
+      "http://example.com/?ds=remote-file&ds.url=http%3A%2F%2Flichtblick.dev%2Ftest-file1.mcap&ds.url=http%3A%2F%2Flichtblick.dev%2Ftest-file2.mcap",
+    );
+  });
+
+  it("appends 'ds.' + key when keyMap entry doesn't have a substitute for that key", () => {
+    expect(
+      updateAppURLState(baseURL(), {
+        time: undefined,
+        ds: "remote-file",
+        dsParamsArray: {
+          keyTest: ["foo", "bar"],
+        },
+      }).href,
+    ).toEqual("http://example.com/?ds=remote-file&ds.keyTest=foo&ds.keyTest=bar");
   });
 
   describe("url states", () => {

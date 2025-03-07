@@ -96,7 +96,7 @@ export type PlayerProblem = {
 
 export type PlayerURLState = Immutable<{
   sourceId: string;
-  parameters?: Record<string, string>;
+  parameters?: Record<string, string | string[]>;
 }>;
 
 export type PlayerState = {

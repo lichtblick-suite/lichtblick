@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-latest
         config:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
@@ -67,14 +67,9 @@ jobs:
       - run: ${{ matrix.config.command }}
 
   integration:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
+    runs-on: ubuntu-latest
 
-    name: integration (${{ matrix.os }})
+    name: integration (ubuntu-latest)
 
     steps:
       - uses: actions/checkout@v4.1.1
@@ -97,24 +92,22 @@ jobs:
 
       - run: yarn install --immutable
 
-      - name: test:integration (ubuntu)
-        if: matrix.os == 'ubuntu-20.04'
+      - name: Apply AppArmor Fix (Ubuntu)
+        # Required for Playwright on Ubuntu to work properly
+        # See: https://github.com/microsoft/playwright/issues/34251
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: test:integration (ubuntu-latest)
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
           run: yarn run test:integration
 
-      - name: test:integration (windows and macOS)
-        if: matrix.os != 'ubuntu-20.04'
-        run: yarn run test:integration
-
       # New version of playwright requires to install new browsers
       - name: Install Playwright browsers
-        if: matrix.os == 'ubuntu-20.04'
         run: |
           cd web
           yarn playwright install
 
       - name: test:web-integration
-        if: matrix.os == 'ubuntu-20.04'
         run: yarn run test:web-integration

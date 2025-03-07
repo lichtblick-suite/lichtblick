@@ -56,7 +56,7 @@ export function main(): void {
       try {
         let file = previewedFile;
         if (!file && typeof quicklook !== "undefined") {
-          file = await quicklook.getPreviewedFile();
+          file = (await quicklook.getPreviewedFile()).file;
         }
         if (!file) {
           return;

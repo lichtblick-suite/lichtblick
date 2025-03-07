@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { enqueueSnackbar } from "notistack";
 import path from "path";
 import { useCallback, useMemo } from "react";
 
@@ -12,10 +13,16 @@ import {
   IDataSourceFactory,
   usePlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
+import { FILE_ACCEPT_TYPE } from "@lichtblick/suite-base/context/Workspace/constants";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
 export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promise<void> {
   const { selectSource } = usePlayerSelection();
+
+  const throwErrorAndSnackbar = (message: string): void => {
+    enqueueSnackbar(message, { variant: "error" });
+    throw new Error(message);
+  };
 
   const allExtensions = useMemo(() => {
     return sources.reduce<string[]>((all, source) => {
@@ -28,39 +35,67 @@ export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promi
   }, [sources]);
 
   return useCallback(async () => {
-    const [fileHandle] = await showOpenFilePicker({
+    const filesHandle = await showOpenFilePicker({
+      multiple: true,
       types: [
         {
           description: allExtensions.join(", "),
-          accept: { "application/octet-stream": allExtensions },
+          accept: { [FILE_ACCEPT_TYPE]: allExtensions },
         },
       ],
     });
-    if (!fileHandle) {
+
+    if (filesHandle.length === 0) {
       return;
     }
 
-    const file = await fileHandle.getFile();
-    // Find the first _file_ source which can load our extension
-    const matchingSources = sources.filter((source) => {
-      // Only consider _file_ type sources that have a list of supported file types
-      if (!source.supportedFileTypes || source.type !== "file") {
-        return false;
-      }
+    const processedFiles = await Promise.all(
+      filesHandle.map(async (handle) => {
+        const file = await handle.getFile();
+        return {
+          file,
+          extension: path.extname(file.name),
+        };
+      }),
+    );
 
-      const extension = path.extname(file.name);
-      return source.supportedFileTypes.includes(extension);
-    });
+    const uniqueExtensions = new Set(processedFiles.map(({ extension }) => extension));
+    if (uniqueExtensions.size > 1) {
+      throwErrorAndSnackbar(
+        `Multiple file extensions detected: ${[...uniqueExtensions].join(
+          ", ",
+        )}. All files must have the same extension.`,
+      );
+    }
+
+    const [extension] = uniqueExtensions;
+
+    const matchingSources = sources.filter(
+      (source) =>
+        source.supportedFileTypes &&
+        source.type === "file" &&
+        source.supportedFileTypes.includes(extension!),
+    );
+
+    if (matchingSources.length === 0) {
+      throwErrorAndSnackbar(`Cannot find a source to handle files with extension ${extension}`);
+    }
 
     if (matchingSources.length > 1) {
-      throw new Error(`Multiple source matched ${file.name}. This is not supported.`);
+      throwErrorAndSnackbar(
+        `The file extension "${extension}" is not supported. Please select files with the following extensions: ${allExtensions.join(", ")}.`,
+      );
     }
 
-    const foundSource = matchingSources[0];
-    if (!foundSource) {
-      throw new Error(`Cannot find source to handle ${file.name}`);
+    /**
+     * Should be removed when implement the rest of extensions.
+     */
+    if (extension !== ".mcap" && processedFiles.length > 1) {
+      throwErrorAndSnackbar(`The application only support multiple files for MCAP extension.`);
     }
-
-    selectSource(foundSource.id, { type: "file", handle: fileHandle });
+    selectSource(matchingSources[0]!.id, {
+      type: "file",
+      handles: filesHandle,
+    });
   }, [allExtensions, selectSource, sources]);
 }

@@ -290,7 +290,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
       },
       {
         id: "openLocalFile",
-        label: t("appBar:openLocalFile"),
+        label: t("appBar:openLocalFiles"),
         click: async () => {
           await simulateUserClick(browserWindow);
           sendNativeAppMenuEvent("open-file", browserWindow);

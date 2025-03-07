@@ -40,7 +40,12 @@ type RecentConnectionRecord = RecentRecordCommon & {
 
 type RecentFileRecord = RecentRecordCommon & {
   type: "file";
-  handle: FileSystemFileHandle; // foxglove-depcheck-used: @types/wicg-file-system-access
+  handles: FileSystemFileHandle[]; // foxglove-depcheck-used: @types/wicg-file-system-access
+};
+
+// Make sure users with old recents can still use them
+type OldRecentRecord = {
+  handle?: FileSystemFileHandle;
 };
 
 type UnsavedRecentRecord = Omit<RecentConnectionRecord, "id"> | Omit<RecentFileRecord, "id">;
@@ -60,7 +65,7 @@ interface IRecentsStore {
 
 function useIndexedDbRecents(): IRecentsStore {
   const { value: initialRecents, loading } = useAsync(
-    async () => await idbGet<RecentRecord[] | undefined>(IDB_KEY, IDB_STORE),
+    async () => await idbGet<(RecentRecord & OldRecentRecord)[] | undefined>(IDB_KEY, IDB_STORE),
     [],
   );
 
@@ -92,7 +97,8 @@ function useIndexedDbRecents(): IRecentsStore {
         if (
           savedRecent.type === "file" &&
           newRecent.type === savedRecent.type &&
-          (await savedRecent.handle.isSameEntry(newRecent.handle))
+          newRecent.sourceId === savedRecent.sourceId &&
+          newRecent.title === savedRecent.title
         ) {
           exists = true;
         }
@@ -129,6 +135,13 @@ function useIndexedDbRecents(): IRecentsStore {
     const haveUnsavedRecents = newRecentsRef.current.length > 0;
 
     if (initialRecents) {
+      for (const initialRecent of initialRecents) {
+        if (initialRecent.type === "file" && initialRecent.handle) {
+          // We don't have access to the file handles so we can't verify if the files still exist
+          initialRecent.handles = [initialRecent.handle];
+        }
+      }
+
       newRecentsRef.current.push(...initialRecents);
     }
 

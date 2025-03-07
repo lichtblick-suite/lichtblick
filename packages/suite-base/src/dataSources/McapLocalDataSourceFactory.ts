@@ -14,6 +14,7 @@ import {
   WorkerIterableSource,
 } from "@lichtblick/suite-base/players/IterablePlayer";
 import { Player } from "@lichtblick/suite-base/players/types";
+import { mergeMultipleFileNames } from "@lichtblick/suite-base/util/mergeMultipleFileName";
 
 class McapLocalDataSourceFactory implements IDataSourceFactory {
   public id = "mcap-local-file";
@@ -21,10 +22,12 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
   public displayName = "MCAP";
   public iconName: IDataSourceFactory["iconName"] = "OpenFile";
   public supportedFileTypes = [".mcap"];
+  public supportsMultiFile = true;
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const file = args.file;
-    if (!file) {
+    const files = [...(args.files ?? []), ...(args.file ? [args.file] : [])];
+
+    if (files.length === 0) {
       return;
     }
 
@@ -38,13 +41,13 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
           ),
         );
       },
-      initArgs: { file },
+      initArgs: { files },
     });
 
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,
-      name: file.name,
+      name: mergeMultipleFileNames(files.map((file) => file.name)),
       sourceId: this.id,
     });
   }

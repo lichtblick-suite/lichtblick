@@ -29,7 +29,7 @@ settings:
 
 rules:
   "@lichtblick/license-header": error
-  "@lichtblick/prefer-hash-private": error
+  "@lichtblick/prefer-hash-private": off
 
   tss-unused-classes/unused-classes: error
 

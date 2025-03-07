@@ -26,7 +26,7 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
-    "@foxglove/schemas": "1.6.3",
+    "@foxglove/schemas": "1.6.6",
     "@lichtblick/message-definition": "1.0.0",
     "@lichtblick/omgidl-parser": "1.0.0",
     "@lichtblick/omgidl-serialization": "1.0.0",

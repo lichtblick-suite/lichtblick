@@ -40,7 +40,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
-import { CellValue } from "./types";
+import { CellValue, MergedColumnsType } from "./types";
 
 type TypedArray =
   | Int8Array
@@ -187,7 +187,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string) {
       }),
     ];
   }
-  const columns = Object.keys(val).map((accessor) => {
+  const columns: MergedColumnsType = Object.keys(val).map((accessor) => {
     const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
     return columnHelper.accessor(accessor, {
       header: accessor,

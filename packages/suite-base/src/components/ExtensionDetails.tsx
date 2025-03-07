@@ -40,9 +40,26 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+enum OperationStatus {
+  IDLE = "idle",
+  INSTALLING = "installing",
+  UNINSTALLING = "uninstalling",
+}
+
+/**
+ * ExtensionDetails component displays detailed information about a specific extension.
+ * It allows users to install, uninstall, and view the README and CHANGELOG of the extension.
+ *
+ * @param {Object} props - The component props.
+ * @param {boolean} props.installed - Indicates if the extension is already installed.
+ * @param {Immutable<ExtensionMarketplaceDetail>} props.extension - The extension details.
+ * @param {Function} props.onClose - Callback function to close the details view.
+ * @returns {React.ReactElement} The rendered component.
+ */
 export function ExtensionDetails({ extension, onClose, installed }: Props): React.ReactElement {
   const { classes } = useStyles();
   const [isInstalled, setIsInstalled] = useState(installed);
+  const [operationStatus, setOperationStatus] = useState<OperationStatus>(OperationStatus.IDLE);
   const [activeTab, setActiveTab] = useState<number>(0);
   const isMounted = useMountedState();
   const downloadExtension = useExtensionCatalog((state) => state.downloadExtension);
@@ -66,7 +83,14 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
 
   const analytics = useAnalytics();
 
-  const install = useCallback(async () => {
+  /**
+   * Handles the download and installation of the extension.
+   *
+   * @async
+   * @function downloadAndInstall
+   * @returns {Promise<void>}
+   */
+  const downloadAndInstall = useCallback(async () => {
     if (!isDesktopApp()) {
       enqueueSnackbar("Download the desktop app to use marketplace extensions.", {
         variant: "error",
@@ -79,17 +103,21 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
       if (url == undefined) {
         throw new Error(`Cannot install extension ${extension.id}, "foxe" URL is missing`);
       }
+      setOperationStatus(OperationStatus.INSTALLING);
       const data = await downloadExtension(url);
       await installExtension("local", data);
+      enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
       if (isMounted()) {
         setIsInstalled(true);
+        setOperationStatus(OperationStatus.IDLE);
         void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
       }
     } catch (e: unknown) {
       const err = e as Error;
-      enqueueSnackbar(`Failed to download extension ${extension.id}. ${err.message}`, {
+      enqueueSnackbar(`Failed to install extension ${extension.id}. ${err.message}`, {
         variant: "error",
       });
+      setOperationStatus(OperationStatus.IDLE);
     }
   }, [
     analytics,
@@ -99,15 +127,44 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
     extension.id,
     installExtension,
     isMounted,
+    extension.name,
   ]);
 
+  /**
+   * Handles the uninstallation of the extension.
+   *
+   * @async
+   * @function uninstall
+   * @returns {Promise<void>}
+   */
   const uninstall = useCallback(async () => {
-    await uninstallExtension(extension.namespace ?? "local", extension.id);
-    if (isMounted()) {
-      setIsInstalled(false);
-      void analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
+    try {
+      setOperationStatus(OperationStatus.UNINSTALLING);
+      // UX - Avoids the button from blinking when operation completes too fast
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      await uninstallExtension(extension.namespace ?? "local", extension.id);
+      enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
+      if (isMounted()) {
+        setIsInstalled(false);
+        setOperationStatus(OperationStatus.IDLE);
+        void analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
+      }
+    } catch (e: unknown) {
+      const err = e as Error;
+      enqueueSnackbar(`Failed to uninstall extension ${extension.id}. ${err.message}`, {
+        variant: "error",
+      });
+      setOperationStatus(OperationStatus.IDLE);
     }
-  }, [analytics, extension.id, extension.namespace, isMounted, uninstallExtension]);
+  }, [
+    analytics,
+    extension.id,
+    extension.namespace,
+    isMounted,
+    uninstallExtension,
+    enqueueSnackbar,
+    extension.name,
+  ]);
 
   return (
     <Stack fullHeight flex="auto" gap={1}>
@@ -160,8 +217,9 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
             color="inherit"
             variant="contained"
             onClick={uninstall}
+            disabled={operationStatus !== OperationStatus.IDLE}
           >
-            Uninstall
+            {operationStatus === OperationStatus.UNINSTALLING ? "Uninstalling..." : "Uninstall"}
           </Button>
         ) : (
           canInstall && (
@@ -171,9 +229,10 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
               key="install"
               color="inherit"
               variant="contained"
-              onClick={install}
+              onClick={downloadAndInstall}
+              disabled={operationStatus !== "idle"}
             >
-              Install
+              {operationStatus === OperationStatus.INSTALLING ? "Installing..." : "Install"}
             </Button>
           )
         )}

@@ -107,5 +107,9 @@ describe("fetchLayouts", () => {
     const result = await fetchLayouts("/valid/path");
 
     expect(result).toEqual([{ from: "layout1.json", layoutJson: mockLayout1 }]);
+
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(console.error).toHaveBeenCalledWith(new Error("read error"));
+    (console.error as jest.Mock).mockClear();
   });
 });

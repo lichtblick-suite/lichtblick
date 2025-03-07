@@ -12,6 +12,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
+import { fileTypesAllowed } from "@lichtblick/suite-base/dataSources/constants";
 import {
   IterablePlayer,
   WorkerIterableSource,
@@ -39,6 +40,21 @@ const initWorkers: Record<string, () => Worker> = {
   },
 };
 
+export function isFileExtensionAllowed(fileExtension: string): void {
+  if (
+    !fileTypesAllowed.some((allowedExtension) => fileExtension.toLowerCase() === allowedExtension)
+  ) {
+    throw new Error(`Unsupported extension: ${fileExtension}`);
+  }
+}
+
+export function checkExtensionMatch(fileExtension: string, previousExtension?: string): string {
+  if (previousExtension != undefined && previousExtension !== fileExtension) {
+    throw new Error("All sources need to be from the same type");
+  }
+  return fileExtension;
+}
+
 class RemoteDataSourceFactory implements IDataSourceFactory {
   public id = "remote-file";
 
@@ -51,7 +67,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   public type: IDataSourceFactory["type"] = "connection";
   public displayName = "Remote file";
   public iconName: IDataSourceFactory["iconName"] = "FileASPX";
-  public supportedFileTypes = [".bag", ".mcap"];
+  public supportedFileTypes = fileTypesAllowed;
   public description = "Open pre-recorded .bag or .mcap files from a remote location.";
   public docsLinks = [
     {
@@ -88,25 +104,29 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   );
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const url = args.params?.url;
-    if (!url) {
-      throw new Error("Missing url argument");
+    if (args.params?.url == undefined) {
+      return;
     }
+    const urls = args.params.url.split(",");
 
-    const extension = path.extname(new URL(url).pathname);
-    const initWorker = initWorkers[extension];
-    if (!initWorker) {
-      throw new Error(`Unsupported extension: ${extension}`);
-    }
+    let nextExtension: string | undefined = undefined;
+    let extension = "";
 
-    const source = new WorkerIterableSource({ initWorker, initArgs: { url } });
+    urls.forEach((url) => {
+      extension = path.extname(new URL(url).pathname);
+      isFileExtensionAllowed(extension);
+      nextExtension = checkExtensionMatch(extension, nextExtension);
+    });
+
+    const initWorker = initWorkers[extension]!;
+
+    const source = new WorkerIterableSource({ initWorker, initArgs: { urls } });
 
     return new IterablePlayer({
       source,
-      name: url,
+      name: urls.join(),
       metricsCollector: args.metricsCollector,
-      // Use blank url params so the data source is set in the url
-      urlParams: { url },
+      urlParams: { urls },
       sourceId: this.id,
     });
   }
