@@ -1,6 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 /* eslint-disable react/forbid-component-props */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -75,9 +93,10 @@ function NodesMonitorPanel(props: Props): React.JSX.Element {
     datatypes,
   });
 
-  const killProcess = (pid: number) => {
+  const killProcess = (pid: number, in_signal: number) => {
     const killLaunchMsg = {
       pid: `${pid}`,
+      in_signal: `${in_signal}`,
     };
     killLaunchPublisher({ data: JSON.stringify(killLaunchMsg) } as Record<string, unknown>);
   };
@@ -156,7 +175,18 @@ function NodesMonitorPanel(props: Props): React.JSX.Element {
                             size="small"
                             color="error"
                             onClick={() => {
-                              killProcess(launch.pid);
+                              killProcess(launch.pid, 0);
+                            }}
+                          >
+                            C{/* <DeleteIcon fontSize="small" /> */}
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="杀死进程">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => {
+                              killProcess(launch.pid, 1);
                             }}
                           >
                             X{/* <DeleteIcon fontSize="small" /> */}
