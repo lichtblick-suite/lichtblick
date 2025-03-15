@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -27,6 +28,7 @@ import {
   Storage,
 } from "../common/types";
 import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/webpackDefines";
+import { FileOperation } from "../main/StorageManager";
 
 // Since we have no way of modifying `window.process.argv` we use a sentinel cookie and reload
 // hack to reset the page without deep links. By setting a session cookie and reloading
@@ -37,7 +39,7 @@ document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
 const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
 
 // 定义用于暴露到渲染进程的类型
-interface ElectronAPI {
+export interface ElectronAPI {
   ipcRenderer: {
     send: (channel: string, data?: any) => void;
     on: (channel: string, func: (event: IpcRendererEvent, ...args: any[]) => void) => void;
@@ -45,6 +47,18 @@ interface ElectronAPI {
   };
   shell2: {
     openExternal: (url: string) => Promise<void>;
+  };
+  fileRenderer: {
+    saveFile: (
+      directory: string,
+      filename: string,
+      data: string | Buffer,
+    ) => Promise<FileOperation>;
+    readFile: (directory: string, filename: string) => Promise<FileOperation>;
+    listFiles: (directory: string) => Promise<FileOperation>;
+    deleteFile: (directory: string, filename: string) => Promise<FileOperation>;
+    fileExists: (directory: string, filename: string) => Promise<FileOperation>;
+    getFileStats: (directory: string, filename: string) => Promise<FileOperation>;
   };
 }
 
@@ -64,6 +78,60 @@ contextBridge.exposeInMainWorld("electron", {
   shell2: {
     openExternal: async (url: string) => {
       await shell.openExternal(url);
+    },
+  },
+  fileRenderer: {
+    saveFile: async (
+      directory: string,
+      filename: string,
+      data: string | Buffer,
+    ): Promise<FileOperation> => {
+      return await new Promise((resolve) => {
+        ipcRenderer.send("file-save", { directory, filename, data });
+        ipcRenderer.once("file-save-response", (_, result) => {
+          resolve(result);
+        });
+      });
+    },
+    readFile: async (directory: string, filename: string): Promise<FileOperation> => {
+      return await new Promise((resolve) => {
+        ipcRenderer.send("file-read", { directory, filename });
+        ipcRenderer.once("file-read-response", (_, result) => {
+          resolve(result);
+        });
+      });
+    },
+    listFiles: async (directory: string): Promise<FileOperation> => {
+      return await new Promise((resolve) => {
+        ipcRenderer.send("file-list", { directory });
+        ipcRenderer.once("file-list-response", (_, result) => {
+          resolve(result);
+        });
+      });
+    },
+    deleteFile: async (directory: string, filename: string): Promise<FileOperation> => {
+      return await new Promise((resolve) => {
+        ipcRenderer.send("file-delete", { directory, filename });
+        ipcRenderer.once("file-delete-response", (_, result) => {
+          resolve(result);
+        });
+      });
+    },
+    fileExists: async (directory: string, filename: string): Promise<FileOperation> => {
+      return await new Promise((resolve) => {
+        ipcRenderer.send("file-exists", { directory, filename });
+        ipcRenderer.once("file-exists-response", (_, result) => {
+          resolve(result);
+        });
+      });
+    },
+    getFileStats: async (directory: string, filename: string): Promise<FileOperation> => {
+      return await new Promise((resolve) => {
+        ipcRenderer.send("file-stats", { directory, filename });
+        ipcRenderer.once("file-stats-response", (_, result) => {
+          resolve(result);
+        });
+      });
     },
   },
 } as ElectronAPI);

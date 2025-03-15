@@ -157,6 +157,7 @@
     "@mui/material": "5.13.5",
     "@tauri-apps/api": "1.6.0",
     "antd": "5.20.0",
+    "lucide-react": "0.481.0",
     "react-use": "17.4.0",
     "rehype-raw": "6.1.1",
     "umi-request": "1.4.0",

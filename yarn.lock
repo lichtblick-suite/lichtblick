@@ -16920,6 +16920,7 @@ __metadata:
     jest: 29.7.0
     jest-environment-jsdom: 29.7.0
     license-checker: 25.0.1
+    lucide-react: 0.481.0
     prettier: 3.3.2
     react-refresh: 0.14.2
     react-use: 17.4.0
@@ -17164,6 +17165,15 @@ __metadata:
   version: 7.18.3
   resolution: "lru-cache@npm:7.18.3"
   checksum: e550d772384709deea3f141af34b6d4fa392e2e418c1498c078de0ee63670f1f46f5eee746e8ef7e69e1c895af0d4224e62ee33e66a543a14763b0f2e74c1356
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:0.481.0":
+  version: 0.481.0
+  resolution: "lucide-react@npm:0.481.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: d42891c98223215e88c792ba359d30de49d66e4f4d22c77d484cf6f3cf930f0cb9f3a6037226ff9cf03c2909e1bcc00c98698bc9397c447cd2e9bef5b084ed7b
   languageName: node
   linkType: hard
 

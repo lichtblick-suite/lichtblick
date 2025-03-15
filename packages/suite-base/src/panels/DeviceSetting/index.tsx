@@ -1,18 +1,17 @@
+import { Tabs, Tab } from "@mui/material";
 import React, { useState } from "react";
 
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { DummyTable } from "@lichtblick/suite-base/panels/DeviceSetting/components/DummyTable";
+import { EtcTable } from "@lichtblick/suite-base/panels/DeviceSetting/components/EtcTable";
+import { useDeviceSettings } from "@lichtblick/suite-base/panels/DeviceSetting/settings";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
+import { LightTable } from "./components/LightTable";
 import { DeviceSetting } from "./types";
 
-import { LightTable } from "./components/LightTable";
-import { useDeviceSettings } from "@lichtblick/suite-base/panels/DeviceSetting/settings";
-import { Tabs, Tab } from "@mui/material";
-import { EtcTable } from "@lichtblick/suite-base/panels/DeviceSetting/components/EtcTable";
-import { DummyTable } from "@lichtblick/suite-base/panels/DeviceSetting/components/DummyTable";
-import LightFlashMode from "@lichtblick/suite-base/panels/DeviceSetting/components/LightFlashMode";
 // import { DummyTable } from "@lichtblick/suite-base/panels/DeviceSetting/components/DummyTable";
 // import { EtcTable } from "@lichtblick/suite-base/panels/DeviceSetting/components/EtcTable";
 
@@ -21,7 +20,7 @@ type Props = {
   saveConfig: SaveConfig<DeviceSetting>;
 };
 
-function DeviceSettingsPanels(props: Props): JSX.Element {
+function DeviceSettingsPanels(props: Props): React.JSX.Element {
   const { config, saveConfig } = props;
   const [tabValue, setTabValue] = useState(0);
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -37,13 +36,13 @@ function DeviceSettingsPanels(props: Props): JSX.Element {
         <Tab label="红绿灯" />
         <Tab label="闸机" />
         <Tab label="假人" />
-        <Tab label="红绿灯调试" />
+        {/* <Tab label="红绿灯调试" /> */}
       </Tabs>
 
       {tabValue === 0 && <LightTable config={config} />}
       {tabValue === 1 && <EtcTable config={config} />}
       {tabValue === 2 && <DummyTable config={config} />}
-      {tabValue === 3 && <LightFlashMode config={config} />}
+      {/* {tabValue === 3 && <LightFlashMode config={config} />} */}
     </Stack>
   );
 }
@@ -53,7 +52,7 @@ function TeleopPanelAdapter(props: Props) {
 }
 
 const defaultConfig: DeviceSetting = {
-  mqttHost: "localhost",
+  mqttHost: "192.168.50.101",
   port: 50082,
   save: false,
 };

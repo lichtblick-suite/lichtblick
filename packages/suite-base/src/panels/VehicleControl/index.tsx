@@ -1,3 +1,6 @@
+/* eslint-disable react/forbid-component-props */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -25,7 +28,7 @@
 import { Button, Stack } from "@mui/material";
 // import { Card } from "antd";
 // import { use } from "cytoscape";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -36,8 +39,10 @@ import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import usePublisher from "@lichtblick/suite-base/hooks/usePublisher";
 import BatteryIndicator from "@lichtblick/suite-base/panels/VehicleControl/components/BatteryIndicator";
+import FileUploadModal from "@lichtblick/suite-base/panels/VehicleControl/components/FileUploadModal";
+import MapFilesTab from "@lichtblick/suite-base/panels/VehicleControl/components/MapFilesTab";
 import TextCard from "@lichtblick/suite-base/panels/VehicleControl/components/TextCard";
-import map from "@lichtblick/suite-base/panels/VehicleControl/map.png";
+import demap from "@lichtblick/suite-base/panels/VehicleControl/map.png";
 import {
   defaultConfig,
   useVehicleControlSettings,
@@ -51,11 +56,14 @@ import {
   convertCoordinates,
   debounce,
 } from "./manager/RFIDInteractionManager";
-import json from "./map.json";
 
 type Props = {
   config: VehicleControlConfig;
   saveConfig: SaveConfig<VehicleControlConfig>;
+};
+type SandTableMap = {
+  map: string;
+  json: any;
 };
 
 const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
@@ -67,19 +75,21 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
   const resizeObserverRef = useRef<ResizeObserver | undefined>(undefined);
   const batteryPercentageRef = useRef<number | undefined>(0);
   const animationFrameRef = useRef<number>();
+
+  // 在组件顶部添加这些状态
+  const [imageLoadStatus, setImageLoadStatus] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  const [isSceneReady, setIsSceneReady] = useState(false);
+
+  const [map, setMap] = useState<SandTableMap | undefined>(undefined);
+  const [mapName, setMapName] = useState<string>("");
+  const [mapFiles, setMapFiles] = useState<string[]>([]);
+  const [openModal, setOpenModal] = useState(false);
   const WORLD_WIDTH = 10;
-  const {
-    // lights,
-    // run,
-    // pass_mode,
-    nodeTopicName,
-    nodeDatatype,
-    // runTopicName,
-    // runDatatype,
-    pathSource,
-    rfidSource,
-    batterySource,
-  } = config;
+  const { nodeTopicName, nodeDatatype, pathSource, rfidSource, batterySource, update_map } = config;
 
   const rfidMessages = useMessageDataItem(rfidSource);
   const pathMessages = useMessageDataItem(pathSource);
@@ -109,12 +119,41 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
     datatypes,
   });
 
-  // const runPublish = usePublisher({
-  //   name: "RunPublish",
-  //   topic: runTopicName,
-  //   schemaName: runDatatype,
-  //   datatypes,
-  // });
+  // 在现有的useEffect之外添加这个新的useEffect
+  useEffect(() => {
+    if (!map?.map) {
+      console.error("No map image URL available");
+      setImageLoadStatus("error");
+      return;
+    }
+
+    setImageLoadStatus("loading");
+    console.log("Testing image load from URL:", map.map);
+
+    // 保存URL以便在UI中使用
+    setImageUrl(map.map);
+
+    const testImg = new Image();
+    testImg.onload = () => {
+      console.log("TEST IMAGE LOADED SUCCESSFULLY:", testImg.width, "x", testImg.height);
+      setImageLoadStatus("success");
+    };
+    testImg.onerror = (err) => {
+      console.error("TEST IMAGE LOAD FAILED:", err);
+      setImageLoadStatus("error");
+    };
+    testImg.src = map.map;
+  }, [map?.map]);
+  useEffect(() => {
+    setOpenModal(update_map);
+  }, [update_map]);
+
+  useEffect(() => {
+    if (imageLoadStatus === "error") {
+      //toast.error("Map image load failed. Please check the map image path and try again.");
+      // loadMapAndJson();
+    }
+  }, [imageLoadStatus]);
 
   const setEndNode = useCallbackWithToast(
     (rfidEnd: number) => {
@@ -241,29 +280,17 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
       }
     });
   };
-  // const highlightRoute = () => {
-  //   if (!interactionManagerRef.current) {
-  //     return;
-  //   }
-
-  //   // 示例：高亮显示经过 RFID 38, 39, 40 的路线
-  //   const rfidSequence = [1, 10, 8];
-  //   interactionManagerRef.current.highlightRoute(rfidSequence);
-  // };
-
-  // const setRun = useCallbackWithToast(
-  //   ({ state }: { state: boolean }) => {
-  //     runPublish({ timestamp: Date.now(), is_run: state, message: "manual" });
-  //   },
-  //   [runPublish],
-  // );
 
   // 初始化 Three.js
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) {
+
+  const initThreeJS = useCallback(() => {
+    if (!map?.map || !map?.json || !mountRef.current) {
+      console.error("map or json or mountRef.current is undefined");
       return;
     }
+    const sence_map = map.map;
+
+    const mount = mountRef.current;
 
     // 创建场景
     const scene = new THREE.Scene();
@@ -342,52 +369,61 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
 
     // 加载地图
     const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(map, (mapTexture) => {
-      // 获取图片的原始宽高比
-      const imageAspect = mapTexture.image.width / mapTexture.image.height;
+    textureLoader.load(sence_map, (mapTexture) => {
+      try {
+        // 获取图片的原始宽高比
+        const imageAspect = mapTexture.image.width / mapTexture.image.height;
 
-      // 设置基准宽度为10（与原代码保持一致）
-      const width = 10;
-      // 根据宽高比计算高度
-      const height = width / imageAspect;
+        // 设置基准宽度为10（与原代码保持一致）
+        const width = 10;
+        // 根据宽高比计算高度
+        const height = width / imageAspect;
 
-      const mapGeometry = new THREE.PlaneGeometry(width, height);
-      const mapMaterial = new THREE.MeshBasicMaterial({ map: mapTexture });
-      const mapMesh = new THREE.Mesh(mapGeometry, mapMaterial);
-      scene.add(mapMesh);
-      // parseAndRenderRfids(json, scene, {
-      //   width: mapTexture.image.width,
-      //   height: mapTexture.image.height,
-      // });
+        const mapGeometry = new THREE.PlaneGeometry(width, height);
+        const mapMaterial = new THREE.MeshBasicMaterial({ map: mapTexture });
+        // 添加下面这行代码，确保材质正确应用纹理
+        mapMaterial.needsUpdate = true; // 修复：明确标记材质需要更新
+        // 可选：确保纹理参数正确设置
+        mapTexture.encoding = THREE.sRGBEncoding; // 修复：设置正确的编码
+        mapTexture.needsUpdate = true; // 修复：明确标记纹理需要更新
+        mapTexture.flipY = true; // 修复：确保纹理方向正确
 
-      interactionManagerRef.current = parseAndRenderRfids(json, scene, {
-        width: mapTexture.image.width,
-        height: mapTexture.image.height,
-      });
+        const mapMesh = new THREE.Mesh(mapGeometry, mapMaterial);
+        scene.add(mapMesh);
 
-      parseAndRenderPaths(json, scene, {
-        width: mapTexture.image.width,
-        height: mapTexture.image.height,
-      });
+        interactionManagerRef.current = parseAndRenderRfids(map.json, scene, {
+          width: mapTexture.image.width,
+          height: mapTexture.image.height,
+        });
 
-      // 可选：调整相机位置以适应新的地图尺寸
-      const maxDimension = Math.max(width, height);
-      camera.position.z = maxDimension * 0.7; // 调整这个系数以获得合适的视图
-      camera.updateProjectionMatrix();
+        parseAndRenderPaths(map.json, scene, {
+          width: mapTexture.image.width,
+          height: mapTexture.image.height,
+        });
 
-      // 重置到初始视图
-      // sceneControls.resetView();
+        // 可选：调整相机位置以适应新的地图尺寸
+        const maxDimension = Math.max(width, height);
+        camera.position.z = maxDimension * 0.7; // 调整这个系数以获得合适的视图
+        camera.updateProjectionMatrix();
 
-      // const cleanup = parseAndRenderRfids(
-      //   json,
-      //   scene,
-      //   {
-      //     width: mapTexture.image.width,
-      //     height: mapTexture.image.height,
-      //   },
-      //   camera,
-      //   renderer,
-      // );
+        // 增加强制渲染调用，确保变更立即生效
+        renderer.render(scene, camera); // 修复：在加载完成后立即进行一次渲染
+
+        // 在textureLoader.load回调中，最后添加：
+        setTimeout(() => {
+          // 强制更新材质和重新渲染
+          mapMaterial.needsUpdate = true;
+          mapTexture.needsUpdate = true;
+          // 强制重新渲染几次
+          for (let i = 0; i < 5; i++) {
+            renderer.render(scene, camera);
+          }
+          // 标记场景准备完毕
+          setIsSceneReady(true);
+        }, 1000);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
     });
 
     // 渲染循环
@@ -398,66 +434,97 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
     };
 
     animate();
+  }, [map]);
 
-    // 处理窗口大小变化
-    // const handleResize = () => {
-    //   if (!mountRef.current || !renderer || !camera) {
-    //     return;
-    //   }
+  useEffect(() => {
+    if (mountRef.current && map) {
+      // 先清理旧的场景
+      if (rendererRef.current && mountRef.current.contains(rendererRef.current.domElement)) {
+        mountRef.current.removeChild(rendererRef.current.domElement);
+        rendererRef.current.dispose();
+      }
 
-    //   const width = mountRef.current.clientWidth;
-    //   const height = mountRef.current.clientHeight;
-
-    //   camera.aspect = width / height;
-    //   camera.updateProjectionMatrix();
-    //   renderer.setSize(width, height);
-    // };
-
-    // window.addEventListener("resize", handleResize);
-
-    return () => {
-      // window.removeEventListener("resize", handleResize);
+      if (sceneRef.current) {
+        sceneRef.current.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            object.geometry.dispose();
+            if (object.material instanceof THREE.Material) {
+              object.material.dispose();
+            }
+          }
+        });
+      }
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
 
-      if (mount && rendererRef.current) {
-        mount.removeChild(rendererRef.current.domElement);
-      }
-
-      scene.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
-          object.geometry.dispose();
-          if (object.material instanceof THREE.Material) {
-            object.material.dispose();
-          }
-        }
-      });
-
-      renderer.dispose();
-      controls.dispose();
-    };
-  }, []);
+      // 然后初始化新场景
+      initThreeJS();
+    }
+  }, [mountRef.current, map, initThreeJS]);
 
   useEffect(() => {
+    if (!isSceneReady || !rendererRef.current) {
+      return;
+    }
+
     const handleClick = (event: MouseEvent) => {
-      if (cameraRef.current && rendererRef.current) {
-        interactionManagerRef.current?.handleClick(event, cameraRef.current, rendererRef.current);
+      if (!cameraRef.current || !rendererRef.current || !interactionManagerRef.current) {
+        return;
       }
 
-      const selectedRfidId = interactionManagerRef.current?.getSelectedRfidId();
-      if (selectedRfidId != undefined) {
-        setEndNode(Number(selectedRfidId)).catch((error) => {
-          console.error("Failed to set end node:", error);
-        });
+      try {
+        interactionManagerRef.current.handleClick(event, cameraRef.current, rendererRef.current);
+
+        const selectedRfidId = interactionManagerRef.current.getSelectedRfidId();
+        if (selectedRfidId) {
+          setEndNode(Number(selectedRfidId)).catch(console.error);
+        }
+      } catch (error) {
+        console.error("Click handling error:", error);
       }
     };
 
-    if (rendererRef.current) {
-      rendererRef.current.domElement.addEventListener("click", handleClick);
-    }
-  }, [setEndNode, interactionManagerRef, cameraRef, rendererRef]);
+    rendererRef.current.domElement.addEventListener("click", handleClick);
+
+    return () => {
+      rendererRef.current?.domElement.removeEventListener("click", handleClick);
+    };
+  }, [isSceneReady, setEndNode, map]);
+
+  useEffect(() => {
+    return () => {
+      if (rendererRef.current && mountRef.current) {
+        mountRef.current.removeChild(rendererRef.current.domElement);
+        rendererRef.current.dispose();
+      }
+
+      if (sceneRef.current) {
+        sceneRef.current.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            object.geometry.dispose();
+            if (object.material instanceof THREE.Material) {
+              object.material.dispose();
+            }
+          }
+        });
+      }
+
+      if (interactionManagerRef.current) {
+        interactionManagerRef.current = undefined;
+        // interactionManagerRef.current.dispose();
+      }
+
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+      }
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [map]);
 
   // 创建一个去抖动的 resize 处理函数
   const debouncedResize = useCallback(
@@ -479,6 +546,9 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) {
+      return;
+    }
+    if (map == undefined) {
       return;
     }
 
@@ -533,39 +603,242 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
       renderer?.dispose();
       debouncedResize.cancel(); // 取消未执行的去抖动函数
     };
-  }, [mountRef, cameraRef, rendererRef, debouncedResize, resizeObserverRef]);
+  }, [mountRef, cameraRef, rendererRef, debouncedResize, resizeObserverRef, map]);
 
-  // useEffect(() => {
-  //   if (config.run) {
-  //     setRun({ state: true }).catch((error) => {
-  //       console.error("Failed to set run state:", error);
-  //     });
-  //   }
-  // }, [config.run, setRun]);
+  const loadMapAndJson = async (fileName: string) => {
+    if (!fileName) {
+      return;
+    }
 
-  // const setCurrentPosition = (rfidId: number) => {
-  //   interactionManagerRef.current?.setCurrentPosition(rfidId);
-  //   // 可选：启动动画
-  //   interactionManagerRef.current?.animateCurrentPosition();
-  // };
+    try {
+      let jsonData = {};
+      let mapImageData = null;
 
-  // 移动到下一个位置（示例）
+      // 读取文件，无论它是什么类型
+      const result = await window.electron.fileRenderer.readFile("documents", fileName);
+
+      if (!result.success || !result.data) {
+        console.error("Failed to read file:", fileName);
+        setMap({ map: demap, json: {} });
+        return;
+      }
+
+      // 检测文件内容类型
+      const isJsonContent = isProbablyJson(result.data);
+      const isPngContent = isProbablyPng(result.data);
+
+      console.log(`File content analysis: isJson=${isJsonContent}, isPng=${isPngContent}`);
+
+      if (isJsonContent) {
+        // 处理JSON内容
+        try {
+          const jsonContent = new TextDecoder().decode(result.data);
+          jsonData = JSON.parse(jsonContent);
+          console.log("Successfully parsed JSON data");
+
+          // 尝试查找匹配的PNG文件
+          const pngFileName = derivePngFileName(fileName);
+          if (pngFileName) {
+            try {
+              const pngResult = await window.electron.fileRenderer.readFile(
+                "documents",
+                pngFileName,
+              );
+
+              if (pngResult.success && pngResult.data && isProbablyPng(pngResult.data)) {
+                // 转换为base64数据URL
+                const base64Image = Buffer.from(pngResult.data).toString("base64");
+                mapImageData = `data:image/png;base64,${base64Image}`;
+                console.log("Successfully loaded associated PNG file");
+              }
+            } catch (pngError) {
+              console.warn("Error loading associated PNG:", pngError);
+            }
+          }
+        } catch (jsonError) {
+          console.error("Error parsing JSON:", jsonError);
+        }
+      } else if (isPngContent) {
+        // 处理PNG内容
+        try {
+          // 转换为base64数据URL
+          const base64Image = Buffer.from(result.data).toString("base64");
+          mapImageData = `data:image/png;base64,${base64Image}`;
+          console.log("Successfully loaded PNG image");
+
+          // 尝试查找匹配的JSON文件
+          const jsonFileName = deriveJsonFileName(fileName);
+          if (jsonFileName) {
+            try {
+              const jsonResult = await window.electron.fileRenderer.readFile(
+                "documents",
+                jsonFileName,
+              );
+
+              if (jsonResult.success && jsonResult.data && isProbablyJson(jsonResult.data)) {
+                const jsonContent = new TextDecoder().decode(jsonResult.data);
+                jsonData = JSON.parse(jsonContent);
+                console.log("Successfully loaded associated JSON file");
+              }
+            } catch (jsonError) {
+              console.warn("Error loading associated JSON:", jsonError);
+            }
+          }
+        } catch (pngError) {
+          console.error("Error processing PNG:", pngError);
+        }
+      } else {
+        // 未知文件类型
+        console.error("Unknown file content type, neither JSON nor PNG");
+      }
+
+      // 如果没有找到地图图像，使用默认图像
+      if (!mapImageData) {
+        mapImageData = demap;
+        console.log("Using default map image");
+
+        return;
+      }
+
+      // 更新状态
+      setMap({ map: mapImageData, json: jsonData });
+    } catch (error) {
+      console.error("Error in loadMapAndJson:", error);
+      setMap({ map: demap, json: {} });
+    }
+  };
+
+  // 辅助函数来检测内容类型
+  const isProbablyJson = (data: {
+    slice: (arg0: number, arg1: number) => AllowSharedBufferSource | undefined;
+  }) => {
+    try {
+      // 尝试将数据转换为字符串并检查是否像JSON
+      const str = new TextDecoder().decode(data.slice(0, 100));
+      return str.trim().startsWith("{") || str.trim().startsWith("[");
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const isProbablyPng = (data: string | any[]) => {
+    try {
+      // 检查PNG文件标志：第一个8字节应该是固定的PNG头
+      if (!data || data.length < 8) {
+        return false;
+      }
+
+      // PNG文件头标志：89 50 4E 47 0D 0A 1A 0A
+      return (
+        data[0] === 0x89 &&
+        data[1] === 0x50 &&
+        data[2] === 0x4e &&
+        data[3] === 0x47 &&
+        data[4] === 0x0d &&
+        data[5] === 0x0a &&
+        data[6] === 0x1a &&
+        data[7] === 0x0a
+      );
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // 辅助函数来派生相应的文件名
+  const derivePngFileName = (filename: string) => {
+    if (filename.toLowerCase().endsWith(".json")) {
+      return filename.replace(/\.json$/i, ".png");
+    } else if (!filename.includes(".")) {
+      return `${filename}.png`;
+    }
+    return null;
+  };
+
+  const deriveJsonFileName = (filename: string) => {
+    if (filename.toLowerCase().endsWith(".png")) {
+      return filename.replace(/\.png$/i, ".json");
+    } else if (!filename.includes(".")) {
+      return `${filename}.json`;
+    }
+    return null;
+  };
+  useEffect(() => {
+    loadMapAndJson(mapName).catch((error) => {
+      console.error("Failed to load map and json:", error);
+    });
+  }, [mapName]);
+
+  useEffect(() => {
+    const loadMapFiles = async () => {
+      try {
+        const result = await window.electron.fileRenderer.listFiles("documents");
+        if (result.success && result.data) {
+          // 只过滤 .json 文件
+          const jsonFiles = result.data.filter((file: string) => file.endsWith(".json"));
+          setMapFiles(jsonFiles);
+          setMapName(jsonFiles[0]);
+        }
+      } catch (error) {
+        console.error("Failed to load map files:", error);
+      }
+    };
+    loadMapFiles().catch((error) => {
+      console.error("Failed to load map files:", error);
+    });
+  }, []);
 
   return (
     <Stack>
       <PanelToolbar />
-      {config.lights && (
-        <>
-          <Button variant="contained" component="label">
-            Upload JSON
-            <input type="file" accept=".json" style={{ display: "none" }} />
-          </Button>
-          <Button variant="contained" component="label" color="secondary">
-            Upload Image
-            <input type="file" accept="image/*" style={{ display: "none" }} />
-          </Button>
-        </>
+      <div
+        style={{
+          position: "absolute",
+          top: "35px",
+          left: "10px",
+          zIndex: 1000,
+          backgroundColor: "rgba(0,0,0,0.7)",
+          color: "white",
+          padding: "10px",
+        }}
+      >
+        <div>Map URL: {imageUrl ? "Available" : "None"}</div>
+        <div>Load Status: {imageLoadStatus}</div>
+        {imageUrl && (
+          <div>
+            <div>Testing direct image render:</div>
+            <img
+              src={imageUrl}
+              alt="Map test"
+              style={{ width: "100px", height: "auto", border: "1px solid white" }}
+              onLoad={() => {
+                console.log("Image in DOM loaded");
+              }}
+              onError={(e) => {
+                console.error("Image in DOM failed to load", e);
+              }}
+            />
+          </div>
+        )}
+      </div>
+      {update_map && (
+        <Button
+          variant="contained"
+          component="label"
+          color="secondary"
+          onClick={() => {
+            setOpenModal(true);
+          }}
+        >
+          Upload map
+        </Button>
       )}
+      <FileUploadModal
+        open={openModal}
+        onClose={() => {
+          setOpenModal(false);
+        }}
+      />
+      <MapFilesTab mapFiles={mapFiles} setMapName={setMapName} initialValue={mapFiles[0]} />
       <Stack
         ref={mountRef}
         flex="auto"
@@ -573,85 +846,43 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
         justifyContent="center"
         gap={2}
         paddingX={3}
-        // eslint-disable-next-line react/forbid-component-props
+        display={isSceneReady ? "block" : "none"}
         sx={{ height: "100vh" }}
       >
-        <div
-          style={{
-            position: "absolute",
-            height: "50%",
-            width: "40px",
-            zIndex: 999,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          {/* <Slider
-            orientation="vertical"
-            onChange={(_, value) => {
-              if (typeof value === "number") {
-                setZoom(value);
-              }
-            }}
-            min={0.2}
-            max={5}
-            step={0.01}
-            value={zoom}
-          /> */}
-        </div>
-        <div
-          style={{
-            position: "absolute",
-            height: "auto",
-            zIndex: 999,
-            right: "10px",
-            display: "flex",
-            justifyContent: "center",
-            flexDirection: "column",
-            top: "50px",
-          }}
-        >
-          <BatteryIndicator batteryLevel={(batteryPercentageRef.current ?? 0) * 100} />
-          <TextCard
-            text={interactionManagerRef.current?.getCurrentPositionRfidId()?.toString() ?? "无位置"}
-          />
-
-          {/* <button onClick={highlightRoute}>显示路线</button>
-          <button
-            onClick={() => {
-              setCurrentPosition(1);
-            }}
-          >
-            设置当前位置1
-          </button>
-          <button
-            onClick={() => {
-              setCurrentPosition(10);
-            }}
-          >
-            设置当前位置10
-          </button>
-          <button
-            onClick={() => {
-              setCurrentPosition(8);
-            }}
-          >
-            设置当前位置8
-          </button> */}
-
-          {config.pass_mode && (
-            <>
-              <Button size="large" variant="contained" color="secondary">
-                Submit
-              </Button>
-              <br />
-              <Button size="large" variant="contained" color="secondary">
-                Clean
-              </Button>
-            </>
-          )}
-        </div>
+        {isSceneReady && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                height: "50%",
+                width: "40px",
+                zIndex: 999,
+                right: 0,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                height: "auto",
+                zIndex: 999,
+                right: "10px",
+                display: "flex",
+                justifyContent: "center",
+                flexDirection: "column",
+                top: "50px",
+              }}
+            >
+              <BatteryIndicator batteryLevel={(batteryPercentageRef.current ?? 0) * 100} />
+              <TextCard
+                text={
+                  interactionManagerRef.current?.getCurrentPositionRfidId()?.toString() ?? "无位置"
+                }
+              />
+            </div>
+          </>
+        )}
       </Stack>
     </Stack>
   );

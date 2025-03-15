@@ -3,12 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panels = {
+  hardwareInfo: "本地硬件信息",
+  LaunchMotion: "节点管理器",
+  LaunchMotionDescription: "管理节点,启动节点,查看节点状态",
   joystick: "摇杆",
   deviceSetting: "本地设备设置",
   VsCode: "VsCode",
   vscodeEditer: "远程链接到 VsCode 编辑器",
-  VehicleControl: "车辆控制",
-  VehicleControlDescription: "控制车辆操作",
+  VehicleControl: "沙盘车辆控制/目标点选择",
+  VehicleControlDescription: "控制车辆前往沙盘对应目的地",
   "3D": "3D",
   "3DPanelDescription": "在3D场景中显示标记、相机图像、网格、URDF等。",
   callService: "服务调用",

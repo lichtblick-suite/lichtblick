@@ -9,11 +9,8 @@ export type Codes = {
   i: number;
 };
 export type VehicleControlConfig = {
-  car_id: number;
-  lights: boolean;
-  rain: boolean;
-  run: boolean;
-  uploadMap: boolean;
+  car_id: string;
+  update_map: boolean;
   pass_mode: boolean;
   nodeTopicName: string;
   nodeDatatype: string;

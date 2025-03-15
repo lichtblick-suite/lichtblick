@@ -6,6 +6,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panels = {
+  hardwareInfo: "Local Hardware Info",
+  LaunchMotion: "Node Manager",
+  LaunchMotionDescription: "Manage nodes, start nodes, and view node status",
   joystick: "Joystick",
   deviceSetting: "Device Setting",
   VsCode: "VsCode",

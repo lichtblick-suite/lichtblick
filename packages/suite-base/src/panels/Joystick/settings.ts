@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { produce } from "immer";
-import { set } from "lodash";
+import * as _ from "lodash-es";
 import { useCallback, useEffect } from "react";
 
 import { SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
@@ -79,7 +79,7 @@ export function useCodeServerSettings(
         produce<Joysetting>((draft) => {
           const path = action.payload.path.slice(1);
 
-          set(draft, path, action.payload.value);
+          _.set(draft, path, action.payload.value);
         }),
       );
     },

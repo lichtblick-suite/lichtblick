@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from "react";
 import { Button, List, ListItem } from "@mui/material";
-import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 import { IpcRendererEvent } from "electron"; // 导入正确的类型定义
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
 import {
   DataSourceArgs,
   usePlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import { useTranslation } from "react-i18next";
 
 // 声明 Electron API 类型
 declare global {
   interface Window {
     electron: {
+      [x: string]: any;
       ipcRenderer: {
         send: (channel: string, data?: any) => void;
         on: (channel: string, func: (event: IpcRendererEvent, ...args: any[]) => void) => void;
@@ -73,8 +75,20 @@ const UdpMessageComponent: React.FC = () => {
           <ListItem disablePadding key={index}>
             <TextMiddleTruncate text={message} />
 
-            <Button onClick={() => openCode(message)}>{t("open")} Code</Button>
-            <Button onClick={() => createNewPlayer(message)}>{t("openConnection")}</Button>
+            <Button
+              onClick={() => {
+                openCode(message);
+              }}
+            >
+              {t("open")} Code
+            </Button>
+            <Button
+              onClick={async () => {
+                await createNewPlayer(message);
+              }}
+            >
+              {t("openConnection")}
+            </Button>
           </ListItem>
         ))}
       </List>

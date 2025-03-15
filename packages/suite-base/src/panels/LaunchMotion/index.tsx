@@ -66,9 +66,9 @@ import LaunchSelector from "./LaunchSelector";
 // 添加自定义的启动文件映射
 const launchFilesMap = {
   bootstrap: ["start.launch.py", "lidar_map.launch.py", "camera.launch.py"],
-  ums_fiction_driver: ["ums_fiction_umscom.launch.py"],
+  // ums_fiction_driver: ["ums_fiction_umscom.launch.py"],
   custom_rknn: ["detector.launch.py"],
-  ascamera: ["hp60c.launch.py"],
+  // ascamera: ["hp60c.launch.py"],
   // 你可以添加更多的包和对应的启动文件
 };
 

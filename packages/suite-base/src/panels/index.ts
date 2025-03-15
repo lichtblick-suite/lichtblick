@@ -42,16 +42,16 @@ import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summ
 
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
-    title: "hardwareInfo",
+    title: t("hardwareInfo"),
     type: "hardwareInfo",
-    description: "hardwareInfo",
+    description: t("hardwareInfo"),
     // thumbnail: joystickSummaryThumbnail,
     module: async () => await import("./hardwareInfo"),
   },
   {
-    title: "LaunchMotion",
+    title: t("LaunchMotion"),
     type: "LaunchMotion",
-    description: "LaunchMotion",
+    description: t("LaunchMotionDescription"),
     // thumbnail: joystickSummaryThumbnail,
     module: async () => await import("./LaunchMotion"),
   },

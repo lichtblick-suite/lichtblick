@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -7,7 +10,7 @@
 
 import { produce } from "immer";
 import * as _ from "lodash-es";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Immutable, SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
 import { Topic } from "@lichtblick/suite-base/players/types";
@@ -21,11 +24,8 @@ import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { VehicleControlConfig } from "./types";
 
 export const defaultConfig: VehicleControlConfig = {
-  car_id: 1,
-  lights: false,
-  rain: false,
-  run: true,
-  uploadMap: true,
+  car_id: "map1.json",
+  update_map: false,
   pass_mode: false,
   nodeTopicName: "/nav_select",
   nodeDatatype: "msg_interfaces/msg/NavSelectInterface",
@@ -57,6 +57,7 @@ function buildSettingsTree(
   config: VehicleControlConfig,
   schemaNames: string[],
   topics: readonly Topic[],
+  _mapFiles: string[],
 ): SettingsTreeNodes {
   return {
     node_publish: {
@@ -76,46 +77,32 @@ function buildSettingsTree(
           items: schemaNames,
           value: config.nodeDatatype,
         },
+        upload_map: {
+          label: "UMap",
+          input: "boolean",
+          value: config.update_map,
+        },
       },
     },
-    // run_publish: {
-    //   label: "RunPublish",
-    //   fields: {
-    //     RunTopicName: {
-    //       label: "Topic",
-    //       input: "autocomplete",
-    //       error: topicError(config.runTopicName),
-    //       value: config.runTopicName,
-    //       items: topics.map((t) => t.name),
-    //     },
-    //     RunDatatype: {
-    //       label: "Schema",
-    //       input: "autocomplete",
-    //       error: datatypeError(schemaNames, config.runDatatype),
-    //       items: schemaNames,
-    //       value: config.nodeDatatype,
-    //     },
-    //   },
-    // },
     source: {
       label: "Source",
       fields: {
         rfid: {
-          label: "Rfid",
+          label: "Topic",
           input: "autocomplete",
           error: topicError(config.rfidSource),
           value: config.rfidSource,
           items: topics.map((t) => t.name),
         },
         path: {
-          label: "Path",
+          label: "Topic",
           input: "autocomplete",
           error: topicError(config.pathSource),
           value: config.pathSource,
           items: topics.map((t) => t.name),
         },
         battery: {
-          label: "Battery",
+          label: "Topic",
           input: "autocomplete",
           error: topicError(config.batterySource),
           value: config.batterySource,
@@ -123,48 +110,20 @@ function buildSettingsTree(
         },
       },
     },
-
-    control: {
-      label: "Control",
-      fields: {
-        // car_id: {
-        //   label: "Car ID",
-        //   input: "select",
-        //   value: config.car_id,
-        //   options: [
-        //     { label: "1", value: 1 },
-        //     { label: "2", value: 2 },
-        //     { label: "3", value: 3 },
-        //     { label: "4", value: 4 },
-        //   ],
-        // },
-        // pass_mode: {
-        //   label: "PassMode",
-        //   input: "boolean",
-        //   value: config.pass_mode,
-        // },
-        // run: {
-        //   label: "Run",
-        //   input: "boolean",
-        //   value: config.run,
-        // },
-        // upload_map: {
-        //   label: "UploadMap",
-        //   input: "boolean",
-        //   value: config.uploadMap,
-        // },
-        // lights: {
-        //   label: "UploadMap",
-        //   input: "boolean",
-        //   value: config.lights,
-        // },
-        // rain: {
-        //   label: "rain",
-        //   input: "boolean",
-        //   value: config.rain,
-        // },
-      },
-    },
+    // control: {
+    //   label: "地图切换",
+    //   fields: {
+    //     car_id: {
+    //       label: "Map",
+    //       input: "select",
+    //       value: config.car_id,
+    //       options: mapFiles.map((filename) => ({
+    //         label: filename.replace(".json", ""),
+    //         value: filename,
+    //       })),
+    //     },
+    //   },
+    // },
   };
 }
 
@@ -175,26 +134,48 @@ export function useVehicleControlSettings(
   datatypes: Immutable<RosDatatypes>,
 ): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+  const [mapFiles, setMapFiles] = useState<string[]>([]);
   const [, setDefaultPanelTitle] = useDefaultPanelTitle();
   const schemaNames = useMemo(() => Array.from(datatypes.keys()).sort(), [datatypes]);
-
+  // 添加获取文件列表的 effect
+  useEffect(() => {
+    const loadMapFiles = async () => {
+      try {
+        const result = await window.electron.fileRenderer.listFiles("documents");
+        if (result.success && result.data) {
+          // 只过滤 .json 文件
+          const jsonFiles = result.data.filter((file: string) => file.endsWith(".json"));
+          setMapFiles(jsonFiles);
+        }
+      } catch (error) {
+        console.error("Failed to load map files:", error);
+      }
+    };
+    loadMapFiles();
+  }, []);
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
       if (action.action !== "update") {
         return;
       }
+
       const { path, value, input } = action.payload;
 
       saveConfig(
         produce<VehicleControlConfig>((draft) => {
+          // 获取完整路径字符串
+          if (path.length === 1 && path[0] === "upload_map") {
+            draft.update_map = typeof value === "boolean" ? value : false;
+            return;
+          }
+          // 处理特殊情况
+
           if (input === "autocomplete") {
             if (_.isEqual(path, ["general", "topicName"])) {
               const topicSchemaName = topics.find((t) => t.name === value)?.schemaName;
               setDefaultPanelTitle(value ? `Publish ${value}` : "Publish");
-
               draft.nodeTopicName = value ?? "";
               draft.runTopicName = value ?? "";
-
               if (topicSchemaName) {
                 draft.nodeDatatype = topicSchemaName;
                 draft.runDatatype = topicSchemaName;
@@ -204,7 +185,39 @@ export function useVehicleControlSettings(
             }
           } else {
             _.set(draft, path.slice(1), value);
+            draft.update_map = typeof value === "boolean" ? value : false;
           }
+
+          // 处理其他情况
+          // switch (pathString) {
+          //   case "node_publish.NodeTopicName":
+          //     draft.nodeTopicName = value ?? "";
+          //     const topicSchemaName = topics.find((t) => t.name === value)?.schemaName;
+          //     if (topicSchemaName) {
+          //       draft.nodeDatatype = topicSchemaName;
+          //     }
+          //     break;
+          //   case "node_publish.NodeDatatype":
+          //     draft.nodeDatatype = value;
+          //     break;
+          //   case "node_publish.upload_map":
+          //     draft.update_map = value;
+          //     break;
+          //   case "source.rfid":
+          //     draft.rfidSource = value;
+          //     break;
+          //   case "source.path":
+          //     draft.pathSource = value;
+          //     break;
+          //   case "source.battery":
+          //     draft.batterySource = value;
+          //     break;
+          //   case "control.car_id":
+          //     draft.car_id = value;
+          //     break;
+          //   default:
+          //     console.warn("Unhandled path:", path);
+          // }
         }),
       );
     },
@@ -214,7 +227,7 @@ export function useVehicleControlSettings(
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      nodes: buildSettingsTree(config, schemaNames, topics),
+      nodes: buildSettingsTree(config, schemaNames, topics, mapFiles),
     });
-  }, [actionHandler, config, schemaNames, topics, updatePanelSettingsTree]);
+  }, [actionHandler, config, schemaNames, topics, updatePanelSettingsTree, mapFiles]);
 }

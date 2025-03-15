@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -13,6 +14,7 @@ import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/src/AppSetting";
 import { initI18n, sharedI18nObject as i18n } from "@lichtblick/suite-base/src/i18n";
 
+import { StorageManager } from "./StorageManager";
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
 import getDevModeIcon from "./getDevModeIcon";
@@ -182,6 +184,46 @@ export async function main(): Promise<void> {
         new StudioWindow().load();
       }
     }
+  });
+
+  // 在主进程中需要添加对应的处理器：
+
+  const storage = StorageManager.getInstance();
+
+  ipcMain.on("file-save", (event, { directory, filename, data }) => {
+    storage.saveFile(directory, filename, data, (result) => {
+      event.reply("file-save-response", result);
+    });
+  });
+
+  ipcMain.on("file-read", (event, { directory, filename }) => {
+    storage.readFile(directory, filename, (result) => {
+      event.reply("file-read-response", result);
+    });
+  });
+
+  ipcMain.on("file-list", (event, { directory }) => {
+    storage.listFiles(directory, (result) => {
+      event.reply("file-list-response", result);
+    });
+  });
+
+  ipcMain.on("file-delete", (event, { directory, filename }) => {
+    storage.deleteFile(directory, filename, (result) => {
+      event.reply("file-delete-response", result);
+    });
+  });
+
+  ipcMain.on("file-exists", (event, { directory, filename }) => {
+    storage.fileExists(directory, filename, (result) => {
+      event.reply("file-exists-response", result);
+    });
+  });
+
+  ipcMain.on("file-stats", (event, { directory, filename }) => {
+    storage.getFileStats(directory, filename, (result) => {
+      event.reply("file-stats-response", result);
+    });
   });
 
   // preload will tell us when it is ready to process the pending open file requests

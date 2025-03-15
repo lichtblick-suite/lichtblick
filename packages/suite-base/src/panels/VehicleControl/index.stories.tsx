@@ -13,7 +13,7 @@
 
 import { StoryObj } from "@storybook/react";
 
-import CodeServerPanel from "@lichtblick/suite-base/panels/CodeServer/index";
+import VehicleControl from "@lichtblick/suite-base/panels/VehicleControl";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 
 const fixture = {
@@ -30,14 +30,14 @@ const fixture = {
 
 export default {
   title: "panels/CodeServer",
-  component: CodeServerPanel,
+  component: VehicleControl,
 };
 
 export const Example: StoryObj = {
   render: () => {
     return (
       <PanelSetup fixture={fixture}>
-        <CodeServerPanel />
+        <VehicleControl />
       </PanelSetup>
     );
   },
@@ -48,7 +48,7 @@ export const NarrowLayout: StoryObj = {
     return (
       <PanelSetup fixture={fixture}>
         <div style={{ width: 400 }}>
-          <CodeServerPanel />
+          <VehicleControl />
         </div>
       </PanelSetup>
     );
@@ -59,7 +59,7 @@ export const WithSettings: StoryObj = {
   render: function Story() {
     return (
       <PanelSetup fixture={fixture} includeSettings>
-        <CodeServerPanel />
+        <VehicleControl />
       </PanelSetup>
     );
   },

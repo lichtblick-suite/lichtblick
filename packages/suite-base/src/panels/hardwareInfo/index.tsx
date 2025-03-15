@@ -43,7 +43,6 @@ import {
   TableHead,
   TableRow,
   Typography,
-  useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -51,7 +50,6 @@ import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePat
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 type HardwareInfo = {
   timestamp: number;
@@ -142,6 +140,7 @@ function HardwareInfoPanel(props: Props): React.JSX.Element {
           // 如果数据是字符串，尝试解析JSON
           const parsedData = typeof data === "string" ? JSON.parse(data) : data;
           setHardwareInfo(parsedData);
+          setLastUpdate(new Date());
         } catch (error) {
           console.error("Error processing hardware info data:", error);
         }
