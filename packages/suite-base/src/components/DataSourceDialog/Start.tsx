@@ -224,7 +224,7 @@ function SidebarItems(props: {
   const sidebarItems: SidebarItem[] = useMemo(() => {
     switch (currentUserType) {
       case "unauthenticated":
-        return [...freeUser];
+        return [];
       case "authenticated-free":
         return [
           {

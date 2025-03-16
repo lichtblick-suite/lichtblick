@@ -11,7 +11,8 @@ import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
-import Snow from "@lichtblick/suite-base/components/DataSourceDialog/Snow";
+import NewStart from "@lichtblick/suite-base/components/DataSourceDialog/NewStart";
+// import Snow from "@lichtblick/suite-base/components/DataSourceDialog/Snow";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
@@ -23,7 +24,7 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
 import Connection from "./Connection";
-import Start from "./Start";
+// import Start from "./Start";
 
 export type DataSourceDialogItem = "start" | "file" | "demo" | "remote" | "connection";
 
@@ -45,8 +46,8 @@ const useStyles = makeStyles()((theme) => ({
 
 const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dialogs.dataSource;
 
-export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Element {
-  const { backdropAnimation } = props;
+export function DataSourceDialog(_props: DataSourceDialogProps): React.JSX.Element {
+  // const { backdropAnimation } = props;
   const { classes } = useStyles();
   const { availableSources, selectSource } = usePlayerSelection();
   const { dialogActions } = useWorkspaceActions();
@@ -89,17 +90,17 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
     }
   }, [activeView, dialogActions, firstSampleSource, isMounted, selectSource]);
 
-  const backdrop = useMemo(() => {
-    const now = new Date();
-    if (backdropAnimation === false) {
-      return;
-    } else if (now >= new Date(now.getFullYear(), 11, 25)) {
-      return <Snow effect="snow" />;
-    } else if (now < new Date(now.getFullYear(), 0, 2)) {
-      return <Snow effect="confetti" />;
-    }
-    return;
-  }, [backdropAnimation]);
+  // const backdrop = useMemo(() => {
+  //   const now = new Date();
+  //   if (backdropAnimation === false) {
+  //     return;
+  //   } else if (now >= new Date(now.getFullYear(), 11, 25)) {
+  //     return <Snow effect="snow" />;
+  //   } else if (now < new Date(now.getFullYear(), 0, 2)) {
+  //     return <Snow effect="confetti" />;
+  //   }
+  //   return;
+  // }, [backdropAnimation]);
 
   const view = useMemo(() => {
     switch (activeView) {
@@ -117,7 +118,7 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
       default:
         return {
           title: "Get started",
-          component: <Start />,
+          component: <NewStart />,
         };
     }
   }, [activeView]);
@@ -128,8 +129,9 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
       open
       onClose={onModalClose}
       fullWidth
+      // fullScreen
       maxWidth="lg"
-      BackdropProps={{ children: backdrop }}
+      // BackdropProps={{ children: backdrop }}
       PaperProps={{
         square: false,
         elevation: 4,

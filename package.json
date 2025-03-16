@@ -1,11 +1,11 @@
 {
-  "name": "lichtblick",
+  "name": "autoblick",
   "version": "1.10.0",
   "license": "MPL-2.0",
   "private": true,
-  "productName": "Autoblick Edu",
+  "productName": "Autoblick",
   "description": "Core components of Lichtblick",
-  "productDescription": "Autoblick Edu",
+  "productDescription": "Autoblick",
   "packageManager": "yarn@3.6.3",
   "repository": {
     "type": "git",

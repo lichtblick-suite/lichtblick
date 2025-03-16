@@ -80,7 +80,7 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
   const [imageLoadStatus, setImageLoadStatus] = useState<"loading" | "success" | "error">(
     "loading",
   );
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  // const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [isSceneReady, setIsSceneReady] = useState(false);
 
@@ -131,7 +131,7 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
     console.log("Testing image load from URL:", map.map);
 
     // 保存URL以便在UI中使用
-    setImageUrl(map.map);
+    // setImageUrl(map.map);
 
     const testImg = new Image();
     testImg.onload = () => {
@@ -790,7 +790,7 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
   return (
     <Stack>
       <PanelToolbar />
-      <div
+      {/* <div
         style={{
           position: "absolute",
           top: "35px",
@@ -819,7 +819,7 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
             />
           </div>
         )}
-      </div>
+      </div> */}
       {update_map && (
         <Button
           variant="contained"

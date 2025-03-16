@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
-import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
+// import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 
 /**
  * Overridden default layout that may have been provided when self-hosting via Docker
@@ -22,39 +22,127 @@ export const defaultLayout: LayoutData =
   staticDefaultLayout ??
   ({
     configById: {
-      "3D!18i6zy7": {
-        layers: {
-          "845139cb-26bc-40b3-8161-8ab60af4baf5": {
-            visible: true,
-            frameLocked: true,
-            label: "Grid",
-            instanceId: "845139cb-26bc-40b3-8161-8ab60af4baf5",
-            layerId: "foxglove.Grid",
-            size: 10,
-            divisions: 10,
-            lineWidth: 1,
-            color: "#248eff",
-            position: [0, 0, 0],
-            rotation: [0, 0, 0],
-            order: 1,
-          },
-        },
+      "VehicleControl!15vbcz4": {
+        car_id: "map1.json",
+        update_map: false,
+        pass_mode: false,
+        nodeTopicName: "/nav_select",
+        nodeDatatype: "msg_interfaces/msg/NavSelectInterface",
+        runTopicName: "/emergency_stop",
+        runDatatype: "msg_interfaces/msg/EmergencyInterface",
+        rfidSource: "/rfid_data",
+        pathSource: "/gpp_path",
+        batterySource: "/battery_state",
       },
-      "RawMessages!os6rgs": {},
-      "Image!3mnp456": {},
+      "Image!2yd3i6i": {
+        cameraState: {
+          distance: 20,
+          perspective: true,
+          phi: 60,
+          target: [0, 0, 0],
+          targetOffset: [0, 0, 0],
+          targetOrientation: [0, 0, 0, 1],
+          thetaOffset: 45,
+          fovy: 45,
+          near: 0.5,
+          far: 5000,
+        },
+        followMode: "follow-pose",
+        scene: {},
+        transforms: {},
+        topics: {},
+        layers: {},
+        publish: {
+          type: "point",
+          poseTopic: "/move_base_simple/goal",
+          pointTopic: "/clicked_point",
+          poseEstimateTopic: "/initialpose",
+          poseEstimateXDeviation: 0.5,
+          poseEstimateYDeviation: 0.5,
+          poseEstimateThetaDeviation: 0.26179939,
+        },
+        imageMode: {},
+      },
+      "Joystick!3r9hj7": {
+        vel: 0.2,
+        topic: "/manu_cmd",
+        angle: 0.8,
+        mode: false,
+      },
+      "3D!1emiifn": {
+        cameraState: {
+          distance: 20,
+          perspective: true,
+          phi: 60,
+          target: [0, 0, 0],
+          targetOffset: [0, 0, 0],
+          targetOrientation: [0, 0, 0, 1],
+          thetaOffset: 45,
+          fovy: 45,
+          near: 0.5,
+          far: 5000,
+        },
+        followMode: "follow-pose",
+        scene: {},
+        transforms: {},
+        topics: {},
+        layers: {},
+        publish: {
+          type: "point",
+          poseTopic: "/move_base_simple/goal",
+          pointTopic: "/clicked_point",
+          poseEstimateTopic: "/initialpose",
+          poseEstimateXDeviation: 0.5,
+          poseEstimateYDeviation: 0.5,
+          poseEstimateThetaDeviation: 0.26179939,
+        },
+        imageMode: {},
+      },
+      "hardwareInfo!1e3m38m": {
+        hardwareInfoSource: "/hardware_info",
+      },
+      "LaunchMotion!39ntfap": {
+        activeNodeSource: "/active_node",
+        activeLaunchSource: "/active_launch",
+        killLaunchTopic: "/kill_launch",
+        startLaunchTopic: "/start_launch",
+      },
+      "Tab!3m4s96y": {
+        activeTabIdx: 1,
+        tabs: [
+          {
+            title: "1",
+            layout: {
+              first: "VehicleControl!15vbcz4",
+              second: {
+                first: "Image!2yd3i6i",
+                second: "Joystick!3r9hj7",
+                direction: "column",
+                splitPercentage: 42.64919941775837,
+              },
+              direction: "row",
+              splitPercentage: 72.35693501454898,
+            },
+          },
+          {
+            title: "2",
+            layout: "3D!1emiifn",
+          },
+          {
+            title: "3",
+            layout: {
+              first: "hardwareInfo!1e3m38m",
+              second: "LaunchMotion!39ntfap",
+              direction: "row",
+            },
+          },
+        ],
+      },
     },
     globalVariables: {},
     userNodes: {},
-    playbackConfig: { ...defaultPlaybackConfig },
-    layout: {
-      first: "3D!18i6zy7",
-      second: {
-        first: "Image!3mnp456",
-        second: "RawMessages!os6rgs",
-        direction: "column",
-        splitPercentage: 30,
-      },
-      direction: "row",
-      splitPercentage: 70,
+    playbackConfig: {
+      speed: 1,
     },
+    layout: "Tab!3m4s96y",
   } as const);

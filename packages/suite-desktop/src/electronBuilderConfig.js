@@ -27,8 +27,8 @@ function makeElectronBuilderConfig(params) {
     icon: path.join(__dirname, "../resources/icon/icon.icns"),
     protocols: [
       {
-        name: "lichtblick",
-        schemes: ["lichtblick"],
+        name: "autoblick",
+        schemes: ["autoblick"],
       },
     ],
     linux: {
@@ -64,6 +64,18 @@ function makeElectronBuilderConfig(params) {
         },
       ],
     },
+    nsis: {
+      oneClick: false, // 是否一键安装
+      allowToChangeInstallationDirectory: true, // 允许用户修改安装位置
+      // installerIcon: path.join(__dirname, "../resources/icon/icon.png"),
+      // uninstallerIcon: path.join(__dirname, "../resources/icon/icon.png"),
+      // installerHeaderIcon: path.join(__dirname, "../resources/icon/icon.png"),
+      createDesktopShortcut: true,
+      createStartMenuShortcut: true,
+      shortcutName: "Autotblick",
+      // 设置默认安装路径
+      // installDirectory: "C:\\Autotblick",
+    },
     win: {
       target: [
         {
@@ -71,6 +83,7 @@ function makeElectronBuilderConfig(params) {
           arch: ["x64", "arm64"],
         },
       ],
+
       icon: path.join(__dirname, "../resources/icon/icon.png"),
       fileAssociations: [
         {
@@ -181,13 +194,13 @@ function makeElectronBuilderConfig(params) {
       },
     },
     appx: {
-      applicationId: "LichtblickSuite",
+      applicationId: "AutotblickSuite",
       backgroundColor: "#f7def6",
       displayName: "Autotblick",
       identityName: "Autotblick.Suite",
-      publisher: "CN=Autotblick, O=Autotblick, L=San Francisco, S=California, C=US",
+      publisher: "CN=Autotblick, O=Autotblick, L=Tianjin, S=Tianjin, C=CN",
       publisherDisplayName: "Autotblick",
-      languages: ["en-US"],
+      languages: ["zh-CN"],
       addAutoLaunchExtension: false,
       showNameOnTiles: false,
       setBuildNumber: false,
