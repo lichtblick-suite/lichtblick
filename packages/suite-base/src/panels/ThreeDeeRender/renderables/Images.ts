@@ -11,7 +11,7 @@ import { assert } from "ts-essentials";
 
 import { MultiMap, filterMap } from "@lichtblick/den/collection";
 
-import { CameraModel, createCameraModel } from "@lichtblick/den/image";
+import { createCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
