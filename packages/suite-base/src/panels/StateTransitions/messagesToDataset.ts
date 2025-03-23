@@ -32,7 +32,7 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
   const dataset: ChartDataset = {
     borderWidth: 10,
     data: [],
-    label: path.label ? path.label : path.value,
+    label: path.label ?? path.value,
     pointBackgroundColor: "rgba(0, 0, 0, 0.4)",
     pointBorderColor: "transparent",
     pointHoverRadius: 3,
