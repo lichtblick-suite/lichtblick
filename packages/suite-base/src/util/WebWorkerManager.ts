@@ -42,7 +42,7 @@ export default class WebWorkerManager<W extends Channel> {
   }
 
   public testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {
-    return this.#workerStates.find((workerState) => workerState?.listenerIds.includes(id));
+    return this.#workerStates.find((workerState) => workerState?.listenerIds.includes(id) ?? false);
   }
 
   public registerWorkerListener(id: string): Rpc {

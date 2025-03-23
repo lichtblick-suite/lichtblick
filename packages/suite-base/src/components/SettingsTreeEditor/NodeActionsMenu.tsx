@@ -34,7 +34,7 @@ export function NodeActionsMenu({
   );
 
   const anyItemHasIcon = useMemo(
-    () => actions.some((action) => action.type === "action" && action.icon),
+    () => actions.some((action): boolean => action.type === "action" && action.icon != undefined),
     [actions],
   );
 
