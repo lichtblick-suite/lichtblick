@@ -5,14 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { MessagePathPart, MessagePath } from "@lichtblick/message-path";
+import type { MessagePath } from "@lichtblick/message-path";
 import type { Immutable } from "@lichtblick/suite";
 import type {
   SubscribePayload,
   SubscriptionPreloadType,
 } from "@lichtblick/suite-base/players/types";
-
-const typeIsName = (part: Immutable<MessagePathPart>) => part.type === "name";
 
 export function pathToSubscribePayload(
   path: Immutable<MessagePath>,
@@ -20,18 +18,17 @@ export function pathToSubscribePayload(
 ): SubscribePayload | undefined {
   const { messagePath: parts, topicName: topic } = path;
 
-  const firstField = parts.find(typeIsName);
+  const firstField = parts.find(
+    (part): part is { type: "name"; name: string; repr: string } => part.type === "name",
+  );
 
-  if (firstField == undefined || firstField.type !== "name" || firstField.name.length === 0) {
+  if (firstField == undefined || firstField.name.length === 0) {
     return undefined;
   }
 
-  // Always subscribe to the header so it is available for header stamp mode
   const fields = new Set(["header", firstField.name]);
 
   for (const part of parts) {
-    // We want to take _all_ of the filters that start the path, since these can
-    // be chained
     if (part.type !== "filter") {
       break;
     }
