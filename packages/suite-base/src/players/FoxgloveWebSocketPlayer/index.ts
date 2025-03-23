@@ -1040,7 +1040,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       throw new Error(`Attempted to set parameters without a valid Foxglove WebSocket connection`);
     }
 
-    log.debug(`FoxgloveWebSocketPlayer.setParameter(key=${key}, value=${value})`);
+    log.debug(`FoxgloveWebSocketPlayer.setParameter(key=${key}, value=${JSON.stringify(value)})`);
     const isByteArray = value instanceof Uint8Array;
     const paramValueToSent = isByteArray ? btoa(textDecoder.decode(value)) : value;
     this.#client.setParameters(
