@@ -67,6 +67,7 @@ import { NodeState, RawMessagesPanelConfig } from "./types";
 import {
   DATA_ARRAY_PREVIEW_LIMIT,
   generateDeepKeyPaths,
+  getConstantNameByKeyPath,
   getConstantNameFromQueriedData,
   toggleExpansion,
 } from "./utils";
@@ -338,7 +339,7 @@ function RawMessages(props: Props) {
             );
           }
 
-          let constantName: string | undefined = getConstantNameFromQueriedData(label, queriedData);
+          let constantName: string | undefined = getConstantNameByKeyPath(keyPath, queriedData);
           if (structureItem) {
             const childStructureItem = getStructureItemForPath(
               structureItem,

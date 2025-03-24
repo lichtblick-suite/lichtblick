@@ -153,11 +153,11 @@ export function getMessageDocumentationLink(datatype: string): string | undefine
   return undefined;
 }
 
-export function getConstantNameFromQueriedData(
-  label: string | number,
+export function getConstantNameByKeyPath(
+  keyPath: (string | number)[],
   queriedData: MessagePathDataItem[],
 ): string | undefined {
-  return typeof label === "number" && queriedData[label]
-    ? queriedData[label]?.constantName
+  return keyPath.length > 0 && typeof keyPath[0] === "number"
+    ? queriedData[keyPath[0]]?.constantName
     : undefined;
 }

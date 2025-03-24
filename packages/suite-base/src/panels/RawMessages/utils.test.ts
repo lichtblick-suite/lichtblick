@@ -8,7 +8,7 @@
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { NodeExpansion, NodeState } from "@lichtblick/suite-base/panels/RawMessages/types";
 import {
-  getConstantNameFromQueriedData,
+  getConstantNameByKeyPath,
   getMessageDocumentationLink,
   toggleExpansion,
 } from "@lichtblick/suite-base/panels/RawMessages/utils";
@@ -77,51 +77,61 @@ describe("toggleExpansion", () => {
   });
 });
 
-describe("getConstantNameFromQueriedData", () => {
-  it("returns undefined if label is not a number", () => {
-    const label = BasicBuilder.string();
+describe("getConstantNameByKeyPath", () => {
+  it("should return undefined when keyPath is empty", () => {
+    const keyPath: (string | number)[] = [];
     const queriedData: MessagePathDataItem[] = [];
 
-    const result = getConstantNameFromQueriedData(label, queriedData);
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
 
     expect(result).toBeUndefined();
   });
 
-  it("returns undefined if queriedData at position does not exist", () => {
-    const label = BasicBuilder.number();
+  it("should return undefined when keyPath is not a number", () => {
+    const keyPath: (string | number)[] = [BasicBuilder.string()];
     const queriedData: MessagePathDataItem[] = [];
 
-    const result = getConstantNameFromQueriedData(label, queriedData);
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
 
     expect(result).toBeUndefined();
   });
 
-  it("returns constantName correctly when present", () => {
+  it("should return undefined when queriedData at keyPath does not exist", () => {
+    const keyPath: (string | number)[] = [BasicBuilder.number()];
+    const queriedData: MessagePathDataItem[] = [];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should return undefined if constantName is missing from item", () => {
+    const keyPath: (string | number)[] = [0];
     const queriedData: MessagePathDataItem[] = [
       {
-        constantName: BasicBuilder.string(),
         path: BasicBuilder.string(),
         value: BasicBuilder.number(),
       },
     ];
-    const label = queriedData.length - 1;
 
-    const result = getConstantNameFromQueriedData(label, queriedData);
-
-    expect(result).toBe(queriedData[label]?.constantName);
-  });
-
-  it("returns undefined if constantName is missing from item", () => {
-    const label = 0;
-    const queriedData: MessagePathDataItem[] = [
-      {
-        path: "foo.bar",
-        value: 42,
-      },
-    ];
-
-    const result = getConstantNameFromQueriedData(label, queriedData);
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
 
     expect(result).toBeUndefined();
+  });
+
+  it("should return constantName correctly when present", () => {
+    const constantName = BasicBuilder.string();
+    const queriedData: MessagePathDataItem[] = [
+      {
+        constantName,
+        path: BasicBuilder.string(),
+        value: BasicBuilder.number(),
+      },
+    ];
+    const keyPath: (string | number)[] = [0];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBe(constantName);
   });
 });
