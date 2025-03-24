@@ -86,8 +86,14 @@ export default function LayoutBrowser({
     online: layoutManager.isOnline,
   });
 
-  const { onRenameLayout, onDuplicateLayout, onDeleteLayout, onRevertLayout, onOverwriteLayout, confirmModal } =
-    useLayoutActions();
+  const {
+    onRenameLayout,
+    onDuplicateLayout,
+    onDeleteLayout,
+    onRevertLayout,
+    onOverwriteLayout,
+    confirmModal,
+  } = useLayoutActions();
   const { importLayout, exportLayout } = useLayoutTransfer();
   const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
   const onExportLayout = exportLayout;
