@@ -17,6 +17,7 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import { formatKeyboardShortcut } from "@lichtblick/suite-base/util/formatKeyboardShortcut";
 
 import { NestedMenuItem } from "./NestedMenuItem";
@@ -55,7 +56,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
 
   const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
   const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
-  const { sidebarActions, dialogActions, layoutActions } = useWorkspaceActions();
+  const { sidebarActions, dialogActions } = useWorkspaceActions();
 
   const handleNestedMenuClose = useCallback(() => {
     setNestedMenu(undefined);
@@ -66,6 +67,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
     setNestedMenu(id);
   }, []);
 
+  const { importLayout, exportLayout } = useLayoutTransfer();
   // FILE
 
   const fileItems = useMemo(() => {
@@ -162,8 +164,8 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         type: "item",
         label: t("importLayoutFromFile"),
         key: "import-layout",
-        onClick: () => {
-          layoutActions.importFromFile();
+        onClick: async () => {
+          await importLayout();
           handleNestedMenuClose();
         },
       },
@@ -171,15 +173,16 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         type: "item",
         label: t("exportLayoutToFile"),
         key: "export-layout",
-        onClick: () => {
-          layoutActions.exportToFile();
+        onClick: async () => {
+          await exportLayout();
           handleNestedMenuClose();
         },
       },
     ],
     [
+      exportLayout,
       handleNestedMenuClose,
-      layoutActions,
+      importLayout,
       leftSidebarOpen,
       rightSidebarOpen,
       sidebarActions.left,
