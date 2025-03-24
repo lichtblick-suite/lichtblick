@@ -12,6 +12,7 @@ import {
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
+import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
 import { useAnalytics } from "../context/AnalyticsContext";
 import { useLayoutManager } from "../context/LayoutManagerContext";
@@ -80,6 +81,7 @@ export function useLayoutTransfer(): useHandleLayouts {
           data,
           permission: "CREATOR_WRITE",
         });
+        enqueueSnackbar(`${newLayout.name} imported successfully`, { variant: "success" });
         return newLayout;
       }),
     );
@@ -100,9 +102,11 @@ export function useLayoutTransfer(): useHandleLayouts {
       return;
     }
 
-    const name = getCurrentLayoutState().selectedLayout?.name ?? "lichtblick-layout";
+    const name = getCurrentLayoutState().selectedLayout?.name?.trim() ?? "";
+    const layoutName = name.length > 0 ? name : "lichtblick-layout";
     const content = JSON.stringify(item, undefined, 2) ?? "";
-    downloadTextFile(content, `${name}.json`);
+    downloadTextFile(content, `${layoutName}.json`);
+    enqueueSnackbar(`${layoutName} exported successfully`, { variant: "success" });
     void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
   }, [analytics, getCurrentLayoutState]);
 

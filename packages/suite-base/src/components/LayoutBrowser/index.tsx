@@ -41,7 +41,6 @@ import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContex
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
-import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
@@ -75,8 +74,7 @@ export default function LayoutBrowser({
   const layoutManager = useLayoutManager();
   const [prompt, promptModal] = usePrompt();
   const analytics = useAnalytics();
-  //PROBLEM HERE WITH IMPORT
-  const [, confirmModal] = useConfirm();
+
   const { unsavedChangesPrompt } = useUnsavedChangesPrompt();
 
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
@@ -88,7 +86,7 @@ export default function LayoutBrowser({
     online: layoutManager.isOnline,
   });
 
-  const { onRenameLayout, onDuplicateLayout, onDeleteLayout, onRevertLayout, onOverwriteLayout } =
+  const { onRenameLayout, onDuplicateLayout, onDeleteLayout, onRevertLayout, onOverwriteLayout, confirmModal } =
     useLayoutActions();
   const { importLayout, exportLayout } = useLayoutTransfer();
   const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
@@ -219,7 +217,6 @@ export default function LayoutBrowser({
     void analytics.logEvent(AppEvent.LAYOUT_CREATE);
   }, [promptForUnsavedChanges, currentDateForStorybook, layoutManager, onSelectLayout, analytics]);
 
-  // function for a feature that we currently don't have?
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
       const name = await prompt({
@@ -241,7 +238,6 @@ export default function LayoutBrowser({
     [analytics, layoutManager, onSelectLayout, prompt],
   );
 
-  // another funciton connected to layouts and organizations, something we dont use right now
   const onMakePersonalCopy = useCallbackWithToast(
     async (item: Layout) => {
       const newLayout = await layoutManager.makePersonalCopy({

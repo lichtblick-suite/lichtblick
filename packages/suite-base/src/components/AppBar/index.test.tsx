@@ -16,31 +16,11 @@ import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerCo
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
-import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
 
 import { AppBar } from ".";
-
-const mockLayoutManager: ILayoutManager = {
-  getLayouts: jest.fn(),
-  getLayout: jest.fn(),
-  deleteLayout: jest.fn(),
-  updateLayout: jest.fn(),
-  overwriteLayout: jest.fn(),
-  revertLayout: jest.fn(),
-  makePersonalCopy: jest.fn(),
-  setOnline: jest.fn(),
-  setError: jest.fn(),
-  supportsSharing: BasicBuilder.boolean(),
-  isBusy: BasicBuilder.boolean(),
-  isOnline: BasicBuilder.boolean(),
-  error: new Error(),
-  on: jest.fn(),
-  off: jest.fn(),
-  saveNewLayout: jest.fn(),
-};
 
 function Wrapper({ children }: React.PropsWithChildren): React.JSX.Element {
   const appConfiguration = makeMockAppConfiguration();
@@ -53,7 +33,7 @@ function Wrapper({ children }: React.PropsWithChildren): React.JSX.Element {
     <MockMessagePipelineProvider />,
     <MockCurrentLayoutProvider />,
     <ThemeProvider isDark />,
-    <LayoutManagerContext.Provider value={mockLayoutManager} />,
+    <LayoutManagerContext.Provider value={new MockLayoutManager()} />,
     /* eslint-enable react/jsx-key */
   ];
   return <MultiProvider providers={providers}>{children}</MultiProvider>;

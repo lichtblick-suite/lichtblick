@@ -21,6 +21,7 @@ type useLayoutActions = {
   onDeleteLayout: (item: Layout) => Promise<void>;
   onRevertLayout: (item: Layout) => Promise<void>;
   onOverwriteLayout: (item: Layout) => Promise<void>;
+  confirmModal: React.JSX.Element | undefined
 };
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
@@ -28,10 +29,10 @@ const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.i
 export function useLayoutActions(): useLayoutActions {
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
-  const [confirm] = useConfirm();
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
   const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
+  const [ confirm ,confirmModal] = useConfirm();
 
   const [state, dispatch] = useLayoutBrowserReducer({
     lastSelectedId: currentLayoutId,
@@ -150,5 +151,5 @@ export function useLayoutActions(): useLayoutActions {
     [analytics, dispatch, layoutManager, state.selectedIds.length],
   );
 
-  return { onRenameLayout, onDuplicateLayout, onDeleteLayout, onRevertLayout, onOverwriteLayout };
+  return { onRenameLayout, onDuplicateLayout, onDeleteLayout, onRevertLayout, onOverwriteLayout, confirmModal };
 }
