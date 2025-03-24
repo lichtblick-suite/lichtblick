@@ -18,12 +18,12 @@ import { useAnalytics } from "../context/AnalyticsContext";
 import { useLayoutManager } from "../context/LayoutManagerContext";
 import { AppEvent } from "../services/IAnalytics";
 
-type useHandleLayouts = {
+type UseLayoutTransfer = {
   importLayout: () => Promise<void>;
   exportLayout: () => Promise<void>;
 };
 
-export function useLayoutTransfer(): useHandleLayouts {
+export function useLayoutTransfer(): UseLayoutTransfer {
   const isMounted = useMountedState();
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();

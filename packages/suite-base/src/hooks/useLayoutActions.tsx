@@ -15,7 +15,7 @@ import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavig
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
-type useLayoutActions = {
+type UseLayoutActions = {
   onRenameLayout: (item: Layout, newName: string) => Promise<void>;
   onDuplicateLayout: (item: Layout) => Promise<void>;
   onDeleteLayout: (item: Layout) => Promise<void>;
@@ -26,7 +26,7 @@ type useLayoutActions = {
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
-export function useLayoutActions(): useLayoutActions {
+export function useLayoutActions(): UseLayoutActions {
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);

@@ -2,22 +2,22 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import * as _ from "lodash-es";
-import { useCallback, MouseEvent } from "react";
+import { useCallback, MouseEvent, Dispatch } from "react";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
+import { useUnsavedChangesPrompt } from "@lichtblick/suite-base/components/LayoutBrowser/UnsavedChangesPrompt";
+import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/constants";
 import { useLayoutBrowserReducer } from "@lichtblick/suite-base/components/LayoutBrowser/reducer";
+import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
-
-import { useUnsavedChangesPrompt } from "../components/LayoutBrowser/UnsavedChangesPrompt";
-import { useAnalytics } from "../context/AnalyticsContext";
-import { useLayoutManager } from "../context/LayoutManagerContext";
-import { AppEvent } from "../services/IAnalytics";
 
 export type UseLayoutNavigation = {
   promptForUnsavedChanges: () => Promise<boolean>;
@@ -25,6 +25,9 @@ export type UseLayoutNavigation = {
     item: Layout,
     params?: { selectedViaClick?: boolean; event?: MouseEvent },
   ) => Promise<void>;
+  state: State;
+  dispatch: Dispatch<Action>;
+  unsavedChangesPrompt: React.JSX.Element | undefined;
 };
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
@@ -33,11 +36,10 @@ export function useLayoutNavigation(menuClose?: () => void): UseLayoutNavigation
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
-  const { openUnsavedChangesPrompt } = useUnsavedChangesPrompt();
+  const { openUnsavedChangesPrompt, unsavedChangesPrompt } = useUnsavedChangesPrompt();
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
-  //problem here
-  const [, dispatch] = useLayoutBrowserReducer({
+  const [state, dispatch] = useLayoutBrowserReducer({
     lastSelectedId: currentLayoutId,
     busy: layoutManager.isBusy,
     error: layoutManager.error,
@@ -146,5 +148,5 @@ export function useLayoutNavigation(menuClose?: () => void): UseLayoutNavigation
     ],
   );
 
-  return { promptForUnsavedChanges, onSelectLayout };
+  return { promptForUnsavedChanges, onSelectLayout, state, dispatch, unsavedChangesPrompt };
 }

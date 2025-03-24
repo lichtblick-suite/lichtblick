@@ -27,7 +27,6 @@ import { makeStyles } from "tss-react/mui";
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import SignInPrompt from "@lichtblick/suite-base/components/LayoutBrowser/SignInPrompt";
-import { useUnsavedChangesPrompt } from "@lichtblick/suite-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
@@ -50,7 +49,6 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import LayoutSection from "./LayoutSection";
-import { useLayoutBrowserReducer } from "./reducer";
 
 const log = Logger.getLogger(__filename);
 
@@ -75,17 +73,7 @@ export default function LayoutBrowser({
   const [prompt, promptModal] = usePrompt();
   const analytics = useAnalytics();
 
-  const { unsavedChangesPrompt } = useUnsavedChangesPrompt();
-
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
-
-  const [state, dispatch] = useLayoutBrowserReducer({
-    lastSelectedId: currentLayoutId,
-    busy: layoutManager.isBusy,
-    error: layoutManager.error,
-    online: layoutManager.isOnline,
-  });
-
   const {
     onRenameLayout,
     onDuplicateLayout,
@@ -95,7 +83,8 @@ export default function LayoutBrowser({
     confirmModal,
   } = useLayoutActions();
   const { importLayout, exportLayout } = useLayoutTransfer();
-  const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
+  const { promptForUnsavedChanges, onSelectLayout, state, dispatch, unsavedChangesPrompt } =
+    useLayoutNavigation();
   const onExportLayout = exportLayout;
 
   useLayoutEffect(() => {

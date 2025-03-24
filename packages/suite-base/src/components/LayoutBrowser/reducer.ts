@@ -9,33 +9,9 @@ import * as _ from "lodash-es";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
 
-import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
+import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/constants";
 
-type MultiAction = "delete" | "duplicate" | "revert" | "save";
-
-type State = {
-  busy: boolean;
-  error: undefined | Error;
-  online: boolean;
-  lastSelectedId: undefined | string;
-  multiAction: undefined | { action: MultiAction; ids: string[] };
-  selectedIds: string[];
-};
-
-type Action =
-  | { type: "clear-multi-action" }
-  | { type: "queue-multi-action"; action: MultiAction }
-  | {
-      type: "select-id";
-      id?: string;
-      layouts?: undefined | { personal: Layout[]; shared: Layout[] };
-      shiftKey?: boolean;
-      modKey?: boolean;
-    }
-  | { type: "set-busy"; value: boolean }
-  | { type: "set-error"; value: undefined | Error }
-  | { type: "set-online"; value: boolean }
-  | { type: "shift-multi-action" };
+export type MultiAction = "delete" | "duplicate" | "revert" | "save";
 
 function reducer(draft: State, action: Action) {
   switch (action.type) {
