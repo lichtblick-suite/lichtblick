@@ -56,7 +56,7 @@ const extension: ExtensionMarketplaceDetail = {
   description: "Extension sample description",
   qualifiedName: "Qualified Extension Name",
   publisher: "Publisher",
-  homepage: "https://github.com/Lichtblick-Suite",
+  homepage: "https://github.com/lichtblick-suite",
   license: "MIT",
   version: "1.2.10",
   keywords: ["storybook", "testing"],

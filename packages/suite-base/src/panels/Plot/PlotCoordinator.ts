@@ -61,6 +61,7 @@ const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => datas
 export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private renderer: OffscreenCanvasRenderer;
   private datasetsBuilder: IDatasetsBuilder;
+  private shouldSync: boolean = false;
   private configBounds: ConfigBounds = { x: {}, y: {} };
   private globalBounds?: Immutable<Partial<Bounds1D>>;
   private datasetRange?: Bounds1D;
@@ -98,6 +99,10 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   /** Stop the coordinator from sending any future updates to the renderer. */
   public destroy(): void {
     this.destroyed = true;
+  }
+
+  public setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
+    this.shouldSync = shouldSync;
   }
 
   public handlePlayerState(state: Immutable<PlayerState>): void {
@@ -430,9 +435,10 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       this.interactionBounds = bounds;
     }
 
-    if (haveInteractionEvents && bounds) {
+    if (haveInteractionEvents && bounds && this.shouldSync) {
       this.emit("timeseriesBounds", bounds.x);
     }
+
     this.emit("viewportChange", this.canReset());
 
     // The viewport has changed from some render interactions so we need to consider new datasets

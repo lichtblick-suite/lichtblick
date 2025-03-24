@@ -216,6 +216,7 @@ describe("PlotCoordinator", () => {
 
     it("should emit 'timeseriesBounds' when updating limits", async () => {
       const listener = jest.fn();
+      plotCoordinator.setShouldSync({ shouldSync: true });
       plotCoordinator.on("timeseriesBounds", listener);
       const bounds: Bounds = {
         x: { min: BasicBuilder.number(), max: BasicBuilder.number() },
@@ -230,10 +231,29 @@ describe("PlotCoordinator", () => {
 
       await plotCoordinator["dispatchRender"]();
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
       expect(listener).toHaveBeenCalledTimes(1);
       expect(listener).toHaveBeenCalledWith(bounds.x);
+    });
+
+    it("should not emit 'timeseriesBounds' if shouldSync is false", async () => {
+      const listener = jest.fn();
+
+      plotCoordinator.setShouldSync({ shouldSync: false });
+      plotCoordinator.on("timeseriesBounds", listener);
+      const bounds: Bounds = {
+        x: { min: BasicBuilder.number(), max: BasicBuilder.number() },
+        y: { min: BasicBuilder.number(), max: BasicBuilder.number() },
+      };
+      (renderer.update as jest.Mock).mockResolvedValue(bounds);
+      plotCoordinator.addInteractionEvent({
+        type: "zoom",
+        scaleX: BasicBuilder.number(),
+        scaleY: BasicBuilder.number(),
+      } as unknown as InteractionEvent);
+
+      await plotCoordinator["dispatchRender"]();
+
+      expect(listener).not.toHaveBeenCalled();
     });
   });
 
@@ -377,6 +397,15 @@ describe("PlotCoordinator", () => {
       expect(plotCoordinator["globalBounds"]).toBeUndefined();
       expect(plotCoordinator["shouldResetY"]).toBe(true);
       queueDispatchRenderSpy.mockRestore();
+    });
+  });
+
+  describe("setShouldSync", () => {
+    // eslint-disable-next-line @lichtblick/no-boolean-parameters
+    it.each([true, false])("should update shouldSync property", (shouldSync: boolean) => {
+      plotCoordinator.setShouldSync({ shouldSync });
+
+      expect(plotCoordinator["shouldSync"]).toBe(shouldSync);
     });
   });
 
