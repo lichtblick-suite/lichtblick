@@ -68,7 +68,6 @@ import {
   DATA_ARRAY_PREVIEW_LIMIT,
   generateDeepKeyPaths,
   getConstantNameByKeyPath,
-  getConstantNameFromQueriedData,
   toggleExpansion,
 } from "./utils";
 
