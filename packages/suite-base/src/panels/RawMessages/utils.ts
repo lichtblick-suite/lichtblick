@@ -18,6 +18,7 @@ import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
 import * as _ from "lodash-es";
 
 import { ros1 } from "@lichtblick/rosmsg-msgs-common";
+import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessages/getDiff";
 
 import { PATH_NAME_AGGREGATOR } from "./constants";
@@ -150,4 +151,13 @@ export function getMessageDocumentationLink(datatype: string): string | undefine
   }
 
   return undefined;
+}
+
+export function getConstantNameFromQueriedData(
+  label: string | number,
+  queriedData: MessagePathDataItem[],
+): string | undefined {
+  return typeof label === "number" && queriedData[label]
+    ? queriedData[label]?.constantName
+    : undefined;
 }

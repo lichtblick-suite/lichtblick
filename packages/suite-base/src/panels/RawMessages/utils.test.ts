@@ -5,11 +5,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { NodeExpansion, NodeState } from "@lichtblick/suite-base/panels/RawMessages/types";
 import {
+  getConstantNameFromQueriedData,
   getMessageDocumentationLink,
   toggleExpansion,
 } from "@lichtblick/suite-base/panels/RawMessages/utils";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 describe("getMessageDocumentationLink", () => {
   it("links to ROS and Foxglove docs", () => {
@@ -71,5 +74,54 @@ describe("toggleExpansion", () => {
       [`grandchild${PATH_NAME_AGGREGATOR}child${PATH_NAME_AGGREGATOR}key1`]: NodeState.Expanded,
       key2: NodeState.Collapsed,
     });
+  });
+});
+
+describe("getConstantNameFromQueriedData", () => {
+  it("returns undefined if label is not a number", () => {
+    const label = BasicBuilder.string();
+    const queriedData: MessagePathDataItem[] = [];
+
+    const result = getConstantNameFromQueriedData(label, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("returns undefined if queriedData at position does not exist", () => {
+    const label = BasicBuilder.number();
+    const queriedData: MessagePathDataItem[] = [];
+
+    const result = getConstantNameFromQueriedData(label, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("returns constantName correctly when present", () => {
+    const queriedData: MessagePathDataItem[] = [
+      {
+        constantName: BasicBuilder.string(),
+        path: BasicBuilder.string(),
+        value: BasicBuilder.number(),
+      },
+    ];
+    const label = queriedData.length - 1;
+
+    const result = getConstantNameFromQueriedData(label, queriedData);
+
+    expect(result).toBe(queriedData[label]?.constantName);
+  });
+
+  it("returns undefined if constantName is missing from item", () => {
+    const label = 0;
+    const queriedData: MessagePathDataItem[] = [
+      {
+        path: "foo.bar",
+        value: 42,
+      },
+    ];
+
+    const result = getConstantNameFromQueriedData(label, queriedData);
+
+    expect(result).toBeUndefined();
   });
 });
