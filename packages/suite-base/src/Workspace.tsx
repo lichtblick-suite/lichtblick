@@ -241,12 +241,12 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       const otherFiles: File[] = [];
       log.debug("open files", files);
 
-      const data: Uint8Array[] = [];
+      const extensionsData: Uint8Array[] = [];
       for (const file of files) {
         try {
           if (file.name.endsWith(".foxe")) {
             const arrayBuffer = await file.arrayBuffer();
-            data.push(new Uint8Array(arrayBuffer));
+            extensionsData.push(new Uint8Array(arrayBuffer));
           } else {
             otherFiles.push(file);
           }
@@ -255,21 +255,23 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         }
       }
 
-      try {
-        enqueueSnackbar(`Installing ${data.length} extensions`, { variant: "info" });
-        const result = await installExtensions("local", data);
-        const installed = result.filter(({ success }) => success);
-        const progressText = `${installed.length}/${result.length}`;
+      if (extensionsData.length > 0) {
+        try {
+          enqueueSnackbar(`Installing ${extensionsData.length} extensions`, { variant: "info" });
+          const result = await installExtensions("local", extensionsData);
+          const installed = result.filter(({ success }) => success);
+          const progressText = `${installed.length}/${result.length}`;
 
-        if (installed.length === result.length) {
-          enqueueSnackbar(`Installed all extensions (${progressText})`, { variant: "success" });
-        } else {
-          enqueueSnackbar(`Installed ${progressText} extensions.`, { variant: "warning" });
+          if (installed.length === result.length) {
+            enqueueSnackbar(`Installed all extensions (${progressText})`, { variant: "success" });
+          } else {
+            enqueueSnackbar(`Installed ${progressText} extensions.`, { variant: "warning" });
+          }
+        } catch (error) {
+          enqueueSnackbar(`An error occurred during extension installation: ${error.message}`, {
+            variant: "error",
+          });
         }
-      } catch (error) {
-        enqueueSnackbar(`An error occurred during extension installation: ${error.message}`, {
-          variant: "error",
-        });
       }
 
       if (otherFiles.length > 0) {
