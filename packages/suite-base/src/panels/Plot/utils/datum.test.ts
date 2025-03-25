@@ -3,7 +3,7 @@
 
 import { isTime, toSec } from "@lichtblick/rostime";
 import { Time } from "@lichtblick/suite";
-import { getChartValue, isChartValue } from "@lichtblick/suite-base/panels/Plot/datum";
+import { getChartValue, isChartValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 jest.mock("@lichtblick/rostime", () => ({

@@ -1,34 +1,34 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-
 import { TFunction } from "i18next";
-import { produce } from "immer";
 import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
-import { useCallback, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 
-import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
+import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
+import {
+  PlotConfig,
+  PlotPath,
+  plotPathDisplayName,
+} from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 
-import { PlotPath, PlotConfig, plotPathDisplayName } from "./config";
-import { PLOTABLE_ROS_TYPES } from "./plotableRosTypes";
+type MakeSeriesNode = {
+  path: PlotPath;
+  index: number;
+  canDelete: boolean;
+  t: TFunction<"plot">;
+};
 
-export const DEFAULT_PATH: PlotPath = Object.freeze({
-  timestampMethod: "receiveTime",
-  value: "",
-  enabled: true,
-});
+type MakeRootSeriesNode = {
+  paths: PlotPath[];
+  t: TFunction<"plot">;
+};
 
 const makeSeriesNode = memoizeWeak(
-  // eslint-disable-next-line @lichtblick/no-boolean-parameters
-  (path: PlotPath, index: number, canDelete: boolean, t: TFunction<"plot">): SettingsTreeNode => {
+  ({ canDelete, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
     return {
       actions: canDelete
         ? [
@@ -45,11 +45,11 @@ const makeSeriesNode = memoizeWeak(
       visible: path.enabled,
       fields: {
         value: {
-          label: t("messagePath"),
           input: "messagepath",
-          value: path.value,
-          validTypes: PLOTABLE_ROS_TYPES,
+          label: t("messagePath"),
           supportsMathModifiers: true,
+          validTypes: PLOTABLE_ROS_TYPES,
+          value: path.value,
         },
         label: {
           input: "string",
@@ -70,51 +70,49 @@ const makeSeriesNode = memoizeWeak(
           placeholder: "auto",
         },
         showLine: {
-          label: t("showLine"),
           input: "boolean",
-          value: path.showLine !== false,
+          label: t("showLine"),
+          value: path.showLine ?? true,
         },
         timestampMethod: {
           input: "select",
           label: t("timestamp"),
-          value: path.timestampMethod,
           options: [
             { label: t("receiveTime"), value: "receiveTime" },
             { label: t("headerStamp"), value: "headerStamp" },
           ],
+          value: path.timestampMethod,
         },
       },
     };
   },
 );
 
-const makeRootSeriesNode = memoizeWeak(
-  (paths: PlotPath[], t: TFunction<"plot">): SettingsTreeNode => {
-    const children = Object.fromEntries(
-      paths.length === 0
-        ? [["0", makeSeriesNode(DEFAULT_PATH, 0, /*canDelete=*/ false, t)]]
-        : paths.map((path, index) => [
-            `${index}`,
-            makeSeriesNode(path, index, /*canDelete=*/ true, t),
-          ]),
-    );
-    return {
-      label: t("series"),
-      children,
-      actions: [
-        {
-          type: "action",
-          id: "add-series",
-          label: t("addSeries"),
-          display: "inline",
-          icon: "Addchart",
-        },
-      ],
-    };
-  },
-);
+const makeRootSeriesNode = memoizeWeak(({ paths, t }: MakeRootSeriesNode): SettingsTreeNode => {
+  const children = Object.fromEntries(
+    paths.length === 0
+      ? [["0", makeSeriesNode({ canDelete: false, path: DEFAULT_PLOT_PATH, index: 0, t })]]
+      : paths.map((path, index) => [
+          `${index}`,
+          makeSeriesNode({ canDelete: true, index, path, t }),
+        ]),
+  );
+  return {
+    label: t("series"),
+    children,
+    actions: [
+      {
+        type: "action",
+        id: "add-series",
+        display: "inline",
+        icon: "Addchart",
+        label: t("addSeries"),
+      },
+    ],
+  };
+});
 
-function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): SettingsTreeNodes {
+export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): SettingsTreeNodes {
   const maxYError =
     _.isNumber(config.minYValue) &&
     _.isNumber(config.maxYValue) &&
@@ -231,79 +229,6 @@ function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): SettingsTr
         },
       },
     },
-    paths: makeRootSeriesNode(config.paths, t),
+    paths: makeRootSeriesNode({ paths: config.paths, t }),
   };
-}
-
-export function usePlotPanelSettings(
-  config: PlotConfig,
-  saveConfig: SaveConfig<PlotConfig>,
-  focusedPath?: readonly string[],
-): void {
-  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-  const { t } = useTranslation("plot");
-
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action === "update") {
-        const { path, value } = action.payload;
-        saveConfig(
-          produce((draft) => {
-            if (path[0] === "paths") {
-              if (draft.paths.length === 0) {
-                draft.paths.push({ ...DEFAULT_PATH });
-              }
-              if (path[2] === "visible") {
-                _.set(draft, [...path.slice(0, 2), "enabled"], value);
-              } else {
-                _.set(draft, path, value);
-              }
-            } else if (_.isEqual(path, ["legend", "legendDisplay"])) {
-              draft.legendDisplay = value;
-              draft.showLegend = true;
-            } else if (_.isEqual(path, ["xAxis", "xAxisPath"])) {
-              _.set(draft, ["xAxisPath", "value"], value);
-            } else {
-              _.set(draft, path.slice(1), value);
-
-              // X min/max and following width are mutually exclusive.
-              if (path[1] === "followingViewWidth") {
-                draft.minXValue = undefined;
-                draft.maxXValue = undefined;
-              } else if (path[1] === "minXValue" || path[1] === "maxXValue") {
-                draft.followingViewWidth = undefined;
-              }
-            }
-          }),
-        );
-      } else {
-        if (action.payload.id === "add-series") {
-          saveConfig(
-            produce<PlotConfig>((draft) => {
-              if (draft.paths.length === 0) {
-                draft.paths.push({ ...DEFAULT_PATH });
-              }
-              draft.paths.push({ ...DEFAULT_PATH });
-            }),
-          );
-        } else if (action.payload.id === "delete-series") {
-          const index = action.payload.path[1];
-          saveConfig(
-            produce<PlotConfig>((draft) => {
-              draft.paths.splice(Number(index), 1);
-            }),
-          );
-        }
-      }
-    },
-    [saveConfig],
-  );
-
-  useEffect(() => {
-    updatePanelSettingsTree({
-      actionHandler,
-      focusedPath,
-      nodes: buildSettingsTree(config, t),
-    });
-  }, [actionHandler, config, focusedPath, updatePanelSettingsTree, t]);
 }

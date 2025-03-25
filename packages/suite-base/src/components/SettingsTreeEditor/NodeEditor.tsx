@@ -33,6 +33,10 @@ import {
 } from "@lichtblick/suite";
 import { HighlightedText } from "@lichtblick/suite-base/components/HighlightedText";
 import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/NodeEditor.style";
+import {
+  NodeEditorProps,
+  SelectVisibilityFilterValue,
+} from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 
@@ -66,7 +70,6 @@ function ExpansionArrow({ expanded }: { expanded: boolean }): React.JSX.Element 
 
 const makeStablePath = memoizeWeak((path: readonly string[], key: string) => [...path, key]);
 
-type SelectVisibilityFilterValue = "all" | "visible" | "invisible";
 const SelectVisibilityFilterOptions: (t: TFunction<"settingsEditor">) => {
   label: string;
   value: SelectVisibilityFilterValue;
@@ -195,24 +198,21 @@ function NodeEditorComponent(props: NodeEditorProps): React.JSX.Element {
     if (!filterFn) {
       return preparedNodes;
     }
-    return filterMap(preparedNodes, ([, child]) => filterFn(child));
+    return preparedNodes.filter(([, child]) => filterFn(child));
   }, [preparedNodes, filterFn]);
 
   const childNodes = useMemo(() => {
-    return filterMap(
-      filteredNodes as Immutable<Array<[string, SettingsTreeNode]>>,
-      ([key, child]) => (
-        <NodeEditor
-          actionHandler={actionHandler}
-          defaultOpen={child.defaultExpansionState !== "collapsed"}
-          filter={filter}
-          focusedPath={focusedPath}
-          key={key}
-          settings={child}
-          path={makeStablePath(props.path, key)}
-        />
-      ),
-    );
+    return filterMap(filteredNodes, ([key, child]) => (
+      <NodeEditor
+        actionHandler={actionHandler}
+        defaultOpen={child.defaultExpansionState !== "collapsed"}
+        filter={filter}
+        focusedPath={focusedPath}
+        key={key}
+        settings={child}
+        path={makeStablePath(props.path, key)}
+      />
+    ));
   }, [filteredNodes, actionHandler, filter, focusedPath, props.path]);
 
   const IconComponent = settings.icon ? icons[settings.icon] : undefined;

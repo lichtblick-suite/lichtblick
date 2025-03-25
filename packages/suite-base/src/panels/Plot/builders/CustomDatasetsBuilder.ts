@@ -28,8 +28,8 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
-import { getChartValue, isChartValue } from "../datum";
-import { MathFunction, mathFunctions } from "../mathFunctions";
+import { getChartValue, isChartValue } from "../utils/datum";
+import { MathFunction, mathFunctions } from "../utils/mathFunctions";
 
 type CustomDatasetsSeriesItem = {
   config: Immutable<SeriesItem>;

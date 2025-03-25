@@ -4,7 +4,7 @@
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { getPixelForXValue } from "./getPixelForXValue";
-import type { Scale } from "./types";
+import type { Scale } from "../types";
 
 describe("getPixelForXValue", () => {
   const scale: Scale = { left: 0, right: 100, min: 0, max: 50 };

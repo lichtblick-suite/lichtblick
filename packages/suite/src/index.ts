@@ -811,22 +811,25 @@ export type SettingsTreeNode = {
  */
 type DistributivePick<T, K extends keyof T> = T extends unknown ? Pick<T, K> : never;
 
+export type SettingsTreeActionUpdatePayload = { path: readonly string[] } & DistributivePick<
+  SettingsTreeFieldValue,
+  "input" | "value"
+>;
+export type SettingsTreeActionUpdate = {
+  action: "update";
+  payload: SettingsTreeActionUpdatePayload;
+};
+
+export type SettingsTreeActionPerformNode = {
+  action: "perform-node-action";
+  payload: { id: string; path: readonly string[] };
+};
+
 /**
  * Represents actions that can be dispatched to source of the SettingsTree to implement
  * edits and updates.
  */
-export type SettingsTreeAction =
-  | {
-      action: "update";
-      payload: { path: readonly string[] } & DistributivePick<
-        SettingsTreeFieldValue,
-        "input" | "value"
-      >;
-    }
-  | {
-      action: "perform-node-action";
-      payload: { id: string; path: readonly string[] };
-    };
+export type SettingsTreeAction = SettingsTreeActionUpdate | SettingsTreeActionPerformNode;
 
 export type SettingsTreeNodes = Record<string, undefined | SettingsTreeNode>;
 

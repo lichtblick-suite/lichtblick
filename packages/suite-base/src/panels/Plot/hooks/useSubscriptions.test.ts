@@ -9,14 +9,14 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { PlotConfig, PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/config";
+import { PlotConfig, PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 
 import useSubscriptions from "./useSubscriptions";
-import { isReferenceLinePlotPathType } from "../config";
-import { pathToSubscribePayload } from "../subscription";
+import { isReferenceLinePlotPathType } from "../utils/config";
+import { pathToSubscribePayload } from "../utils/subscription";
 
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
   useMessagePipeline: jest.fn(),
@@ -33,11 +33,11 @@ jest.mock(
   }),
 );
 
-jest.mock("../config", () => ({
+jest.mock("../utils/config", () => ({
   isReferenceLinePlotPathType: jest.fn(),
 }));
 
-jest.mock("../subscription", () => ({
+jest.mock("../utils/subscription", () => ({
   pathToSubscribePayload: jest.fn(),
 }));
 

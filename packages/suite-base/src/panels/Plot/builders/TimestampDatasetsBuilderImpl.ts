@@ -15,8 +15,8 @@ import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types
 import { extendBounds1D } from "@lichtblick/suite-base/types/Bounds";
 
 import { CsvDataset, SeriesConfigKey, SeriesItem, Viewport } from "./IDatasetsBuilder";
-import { Datum } from "../datum";
 import { Dataset } from "../types";
+import { Datum } from "../utils/datum";
 
 export type DataItem = Datum & {
   receiveTime: Time;

@@ -21,7 +21,7 @@ import {
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "./TimestampDatasetsBuilder";
 import { TimestampDatasetsBuilderImpl } from "./TimestampDatasetsBuilderImpl";
-import { PlotPath } from "../config";
+import { PlotPath } from "../utils/config";
 
 Object.defineProperty(global, "Worker", {
   writable: true,

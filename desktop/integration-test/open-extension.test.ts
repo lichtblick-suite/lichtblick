@@ -1,9 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import path from "path";
-
 import { launchApp } from "./launchApp";
+import { loadFile } from "./utils/loadFile";
 
 describe("open extension", () => {
   it("should import .foxe extension correctly", async () => {
@@ -11,13 +10,10 @@ describe("open extension", () => {
 
     await app.renderer.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
 
-    const extensionPath = path.resolve(
-      __dirname,
-      "../../packages/suite-base/src/test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe",
+    await loadFile(
+      app,
+      "../../../packages/suite-base/src/test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe",
     );
-
-    const fileInput = app.renderer.locator("[data-puppeteer-file-upload]");
-    await fileInput.setInputFiles(extensionPath);
 
     // Add turtlesim extension
     await app.renderer.getByLabel("Add panel button").click();

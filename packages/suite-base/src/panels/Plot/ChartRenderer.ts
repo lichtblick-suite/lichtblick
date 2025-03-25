@@ -17,7 +17,7 @@ import {
   removeEventListener,
 } from "@lichtblick/suite-base/components/Chart/worker/eventHandler";
 import { DEFAULT_ANNOTATION } from "@lichtblick/suite-base/panels/Plot/constants";
-import { getChartOptions } from "@lichtblick/suite-base/panels/Plot/getChartOptions";
+import { getChartOptions } from "@lichtblick/suite-base/panels/Plot/utils/getChartOptions";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 

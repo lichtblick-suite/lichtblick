@@ -230,66 +230,47 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const installExtension = useExtensionCatalog((state) => state.installExtension);
+  const installExtensions = useExtensionCatalog((state) => state.installExtensions);
 
-  const openHandles = useCallback(
-    async (
-      handles: FileSystemFileHandle[] /* foxglove-depcheck-used: @types/wicg-file-system-access */,
-    ) => {
-      log.debug("open handles", handles);
-      const files = await Promise.all(handles.map(async (handle) => await handle.getFile()));
-
-      for (const file of files) {
-        if (file.name.endsWith(".foxe")) {
-          // Extension installation
-          try {
-            const arrayBuffer = await file.arrayBuffer();
-            const data = new Uint8Array(arrayBuffer);
-            const extension = await installExtension("local", data);
-            enqueueSnackbar(`Installed extension ${extension.id}`, { variant: "success" });
-          } catch (e: unknown) {
-            const err = e as Error;
-            log.error(err);
-            enqueueSnackbar(`Failed to install extension ${file.name}: ${err.message}`, {
-              variant: "error",
-            });
-          }
-        }
-      }
-
-      // Look for a source that supports the file extensions
-      const matchedSource = availableSources.find((source) => {
-        const ext = extname(files[0]!.name);
-        return source.supportedFileTypes?.includes(ext);
-      });
-      if (matchedSource) {
-        selectSource(matchedSource.id, { type: "file", handles });
-      }
-    },
-    [availableSources, enqueueSnackbar, installExtension, selectSource],
-  );
-
-  const openFiles = useCallback(
+  const handleFiles = useCallback(
     async (files: File[]) => {
+      if (files.length === 0) {
+        return;
+      }
+
       const otherFiles: File[] = [];
       log.debug("open files", files);
 
+      const extensionsData: Uint8Array[] = [];
       for (const file of files) {
-        if (file.name.endsWith(".foxe")) {
-          // Extension installation
-          try {
+        try {
+          if (file.name.endsWith(".foxe")) {
             const arrayBuffer = await file.arrayBuffer();
-            const data = new Uint8Array(arrayBuffer);
-            const extension = await installExtension("local", data);
-            enqueueSnackbar(`Installed extension ${extension.id}`, { variant: "success" });
-          } catch (err: unknown) {
-            log.error(err);
-            enqueueSnackbar(`Failed to install extension ${file.name}: ${(err as Error).message}`, {
-              variant: "error",
-            });
+            extensionsData.push(new Uint8Array(arrayBuffer));
+          } else {
+            otherFiles.push(file);
           }
-        } else {
-          otherFiles.push(file);
+        } catch (error) {
+          console.error(`Error loading foxe file ${file.name}`, error);
+        }
+      }
+
+      if (extensionsData.length > 0) {
+        try {
+          enqueueSnackbar(`Installing ${extensionsData.length} extensions`, { variant: "info" });
+          const result = await installExtensions("local", extensionsData);
+          const installed = result.filter(({ success }) => success);
+          const progressText = `${installed.length}/${result.length}`;
+
+          if (installed.length === result.length) {
+            enqueueSnackbar(`Installed all extensions (${progressText})`, { variant: "success" });
+          } else {
+            enqueueSnackbar(`Installed ${progressText} extensions.`, { variant: "warning" });
+          }
+        } catch (error) {
+          enqueueSnackbar(`An error occurred during extension installation: ${error.message}`, {
+            variant: "error",
+          });
         }
       }
 
@@ -309,29 +290,33 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         }
       }
     },
-    [availableSources, enqueueSnackbar, installExtension, selectSource],
+    [availableSources, enqueueSnackbar, installExtensions, selectSource],
   );
 
   // files the main thread told us to open
   const filesToOpen = useElectronFilesToOpen();
   useEffect(() => {
     if (filesToOpen) {
-      void openFiles(Array.from(filesToOpen));
+      void handleFiles(Array.from(filesToOpen));
     }
-  }, [filesToOpen, openFiles]);
+  }, [filesToOpen, handleFiles]);
 
   const dropHandler = useCallback(
-    (event: { files?: File[]; handles?: FileSystemFileHandle[] }) => {
-      // When selecting sources with handles we can only select with a single handle since we haven't
-      // written the code to store multiple handles for recents. When there are multiple handles, we
-      // fall back to opening regular files.
-      if (event.handles) {
-        void openHandles(event.handles);
-      } else if (event.files) {
-        void openFiles(event.files);
+    async ({ files, handles }: { files?: File[]; handles?: FileSystemFileHandle[] }) => {
+      const filesArray: File[] = [];
+
+      if (handles?.length === 1) {
+        const fileHandle = handles[0];
+        if (fileHandle) {
+          filesArray.push(await fileHandle.getFile());
+        }
+      } else if (files?.length != undefined) {
+        filesArray.push(...files);
       }
+
+      void handleFiles(filesArray);
     },
-    [openFiles, openHandles],
+    [handleFiles],
   );
 
   // Since the _component_ field of a sidebar item entry is a component and accepts no additional

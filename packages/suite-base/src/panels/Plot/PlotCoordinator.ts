@@ -31,10 +31,10 @@ import {
   SeriesItem,
   Viewport,
 } from "./builders/IDatasetsBuilder";
-import { isReferenceLinePlotPathType, PlotConfig } from "./config";
 import { Dataset, InteractionEvent, Scale, UpdateAction } from "./types";
+import { isReferenceLinePlotPathType, PlotConfig } from "./utils/config";
 
-type EventTypes = {
+type PlotCoordinatorEventTypes = {
   timeseriesBounds(bounds: Immutable<Bounds1D>): void;
 
   /** X scale changed. */
@@ -50,73 +50,66 @@ type EventTypes = {
   viewportChange(canReset: boolean): void;
 };
 
+type ConfigBounds = { x: Partial<Bounds1D>; y: Partial<Bounds1D> };
+
 const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => dataset ?? { data: [] };
 
 /**
  * PlotCoordinator interfaces commands and updates between the dataset builder and the chart
  * renderer.
  */
-export class PlotCoordinator extends EventEmitter<EventTypes> {
-  #renderer: OffscreenCanvasRenderer;
-  #datasetsBuilder: IDatasetsBuilder;
-
-  #configBounds: { x: Partial<Bounds1D>; y: Partial<Bounds1D> } = {
-    x: {},
-    y: {},
-  };
-
-  #globalBounds?: Immutable<Partial<Bounds1D>>;
-  #datasetRange?: Bounds1D;
-  #followRange?: number;
-  #interactionBounds?: Bounds;
-
-  #lastSeekTime = NaN;
-
+export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
+  private renderer: OffscreenCanvasRenderer;
+  private datasetsBuilder: IDatasetsBuilder;
+  private shouldSync: boolean = false;
+  private configBounds: ConfigBounds = { x: {}, y: {} };
+  private globalBounds?: Immutable<Partial<Bounds1D>>;
+  private datasetRange?: Bounds1D;
+  private followRange?: number;
+  private interactionBounds?: Bounds;
+  private lastSeekTime = NaN;
   /** Normalized series from latest config */
-  #series: Immutable<SeriesItem[]> = [];
+  private series: Immutable<SeriesItem[]> = [];
   /** Current value for each series to show in the legend */
-  #currentValuesByConfigIndex: unknown[] = [];
-
+  private currentValuesByConfigIndex: unknown[] = [];
   /** Flag indicating that new Y bounds should be sent to the renderer because the bounds have been reset */
-  #shouldResetY = false;
-
-  #updateAction: UpdateAction = { type: "update" };
-
-  #isTimeseriesPlot: boolean = false;
-  #currentSeconds?: number;
-
-  #viewport: Viewport = {
+  private shouldResetY = false;
+  private updateAction: UpdateAction = { type: "update" };
+  private isTimeseriesPlot: boolean = false;
+  private currentSeconds?: number;
+  private viewport: Viewport = {
     size: { width: 0, height: 0 },
     bounds: { x: undefined, y: undefined },
   };
-
-  #latestXScale?: Scale;
-
-  #queueDispatchRender = debouncePromise(this.#dispatchRender.bind(this));
-  #queueDispatchDownsample = debouncePromise(this.#dispatchDownsample.bind(this));
-  #queueDatasetsRender = debouncePromise(this.#dispatchDatasetsRender.bind(this));
-  #queueBlocks = debouncePromise(this.#dispatchBlocks.bind(this));
-
-  #destroyed = false;
-
-  #latestBlocks?: Immutable<(MessageBlock | undefined)[]>;
+  private latestXScale?: Scale;
+  private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
+  private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
+  private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
+  private queueBlocks = debouncePromise(this.dispatchBlocks.bind(this));
+  private destroyed = false;
+  private latestBlocks?: Immutable<(MessageBlock | undefined)[]>;
 
   public constructor(renderer: OffscreenCanvasRenderer, builder: IDatasetsBuilder) {
     super();
 
-    this.#renderer = renderer;
-    this.#datasetsBuilder = builder;
+    this.renderer = renderer;
+    this.datasetsBuilder = builder;
   }
 
   /** Stop the coordinator from sending any future updates to the renderer. */
   public destroy(): void {
-    this.#destroyed = true;
+    this.destroyed = true;
+  }
+
+  public setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
+    this.shouldSync = shouldSync;
   }
 
   public handlePlayerState(state: Immutable<PlayerState>): void {
-    if (this.#isDestroyed()) {
+    if (this.isDestroyed()) {
       return;
     }
+
     const activeData = state.activeData;
     if (!activeData) {
       return;
@@ -124,17 +117,17 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
 
     const { messages, lastSeekTime, currentTime, startTime } = activeData;
 
-    if (this.#isTimeseriesPlot) {
+    if (this.isTimeseriesPlot) {
       const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
-      this.#currentSeconds = secondsSinceStart;
+      this.currentSeconds = secondsSinceStart;
     }
 
-    if (lastSeekTime !== this.#lastSeekTime) {
-      this.#currentValuesByConfigIndex = [];
-      this.#lastSeekTime = lastSeekTime;
+    if (lastSeekTime !== this.lastSeekTime) {
+      this.currentValuesByConfigIndex = [];
+      this.lastSeekTime = lastSeekTime;
     }
 
-    for (const seriesItem of this.#series) {
+    for (const seriesItem of this.series) {
       if (seriesItem.timestampMethod === "headerStamp") {
         // We currently do not support showing current values in the legend for header.stamp mode,
         // which would require keeping a buffer of messages to sort (currently done in
@@ -148,27 +141,27 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
         }
         const items = simpleGetMessagePathDataItems(msgEvent, seriesItem.parsed);
         if (items.length > 0) {
-          this.#currentValuesByConfigIndex[seriesItem.configIndex] = items[items.length - 1];
+          this.currentValuesByConfigIndex[seriesItem.configIndex] = items[items.length - 1];
           break;
         }
       }
     }
 
-    this.emit("currentValuesChanged", this.#currentValuesByConfigIndex);
+    this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
 
-    const handlePlayerStateResult = this.#datasetsBuilder.handlePlayerState(state);
+    const handlePlayerStateResult = this.datasetsBuilder.handlePlayerState(state);
 
     const blocks = state.progress.messageCache?.blocks;
-    if (blocks && this.#datasetsBuilder.handleBlocks) {
-      this.#latestBlocks = blocks;
-      this.#queueBlocks(activeData.startTime, blocks);
+    if (blocks && this.datasetsBuilder.handleBlocks) {
+      this.latestBlocks = blocks;
+      this.queueBlocks(activeData.startTime, blocks);
     }
 
     // There's no result from the builder so we clear dataset range and trigger a render so
     // we can fall back to other ranges
     if (!handlePlayerStateResult) {
-      this.#datasetRange = undefined;
-      this.#queueDispatchRender();
+      this.datasetRange = undefined;
+      this.queueDispatchRender();
       return;
     }
 
@@ -176,13 +169,13 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
 
     // If the range has changed we will trigger a render to incorporate the new range into the chart
     // axis
-    if (!_.isEqual(this.#datasetRange, newRange)) {
-      this.#datasetRange = handlePlayerStateResult.range;
-      this.#queueDispatchRender();
+    if (!_.isEqual(this.datasetRange, newRange)) {
+      this.datasetRange = handlePlayerStateResult.range;
+      this.queueDispatchRender();
     }
 
     if (handlePlayerStateResult.datasetsChanged) {
-      this.#queueDispatchDownsample();
+      this.queueDispatchDownsample();
     }
   }
 
@@ -191,14 +184,14 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
     colorScheme: "light" | "dark",
     globalVariables: GlobalVariables,
   ): void {
-    if (this.#isDestroyed()) {
+    if (this.isDestroyed()) {
       return;
     }
-    this.#isTimeseriesPlot = config.xAxisVal === "timestamp";
-    if (!this.#isTimeseriesPlot) {
-      this.#currentSeconds = undefined;
+    this.isTimeseriesPlot = config.xAxisVal === "timestamp";
+    if (!this.isTimeseriesPlot) {
+      this.currentSeconds = undefined;
     }
-    this.#followRange = config.followingViewWidth;
+    this.followRange = config.followingViewWidth;
 
     const newConfigBounds = {
       x: {
@@ -211,9 +204,9 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       },
     };
     const configYBoundsChanged =
-      this.#configBounds.y.min !== newConfigBounds.y.min ||
-      this.#configBounds.y.max !== newConfigBounds.y.max;
-    this.#configBounds = newConfigBounds;
+      this.configBounds.y.min !== newConfigBounds.y.min ||
+      this.configBounds.y.max !== newConfigBounds.y.max;
+    this.configBounds = newConfigBounds;
 
     const referenceLines = filterMap(config.paths, (path, idx) => {
       if (!path.enabled || !isReferenceLinePlotPathType(path)) {
@@ -231,17 +224,17 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       };
     });
 
-    this.#updateAction.showXAxisLabels = config.showXAxisLabels;
-    this.#updateAction.showYAxisLabels = config.showYAxisLabels;
-    this.#updateAction.referenceLines = referenceLines;
+    this.updateAction.showXAxisLabels = config.showXAxisLabels;
+    this.updateAction.showYAxisLabels = config.showYAxisLabels;
+    this.updateAction.referenceLines = referenceLines;
 
     if (configYBoundsChanged) {
       // Config changes to yBounds always takes precedence over user interaction changes like pan/zoom
-      this.#updateAction.yBounds = this.#configBounds.y;
+      this.updateAction.yBounds = this.configBounds.y;
     }
 
     const newCurrentValuesByConfigIndex: unknown[] = [];
-    this.#series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
+    this.series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
       if (isReferenceLinePlotPathType(path)) {
         return;
       }
@@ -268,10 +261,10 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       )}` as SeriesConfigKey;
 
       // Keep current values for paths that match existing ones
-      const existingSeries = this.#series.find((series) => series.key === key);
+      const existingSeries = this.series.find((series) => series.key === key);
       if (existingSeries != undefined) {
         newCurrentValuesByConfigIndex[idx] =
-          this.#currentValuesByConfigIndex[existingSeries.configIndex];
+          this.currentValuesByConfigIndex[existingSeries.configIndex];
       }
 
       const color = getLineColor(path.color, idx);
@@ -289,94 +282,92 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       };
     });
 
-    this.#currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
-    this.emit("currentValuesChanged", this.#currentValuesByConfigIndex);
+    this.currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
+    this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
 
     // Dispatch because bounds changed
-    this.#queueDispatchRender();
+    this.queueDispatchRender();
 
     // Dispatch since we might have series changes
-    this.#datasetsBuilder.setSeries(this.#series);
-    this.#queueDispatchDownsample();
+    this.datasetsBuilder.setSeries(this.series);
+    this.queueDispatchDownsample();
   }
 
   public setGlobalBounds(bounds: Immutable<Bounds1D> | undefined): void {
-    this.#globalBounds = bounds;
-    this.#interactionBounds = undefined;
+    this.globalBounds = bounds;
+    this.interactionBounds = undefined;
     if (bounds == undefined) {
       // This happens when "reset view" is clicked in a different panel or otherwise cleared the global bounds
-      this.#shouldResetY = true;
+      this.shouldResetY = true;
     }
-    this.#queueDispatchRender();
+    this.queueDispatchRender();
   }
 
   public setZoomMode(mode: "x" | "xy" | "y"): void {
-    this.#updateAction.zoomMode = mode;
-    this.#queueDispatchRender();
+    this.updateAction.zoomMode = mode;
+    this.queueDispatchRender();
   }
 
   public resetBounds(): void {
-    this.#interactionBounds = undefined;
-    this.#globalBounds = undefined;
-    this.#shouldResetY = true;
-    this.#queueDispatchRender();
+    this.interactionBounds = undefined;
+    this.globalBounds = undefined;
+    this.shouldResetY = true;
+    this.queueDispatchRender();
   }
 
   public setSize(size: { width: number; height: number }): void {
-    this.#viewport.size = size;
-    this.#updateAction.size = size;
-    this.#queueDispatchRender();
-    this.#queueDispatchDownsample();
+    this.viewport.size = size;
+    this.updateAction.size = size;
+    this.queueDispatchRender();
+    this.queueDispatchDownsample();
   }
 
   public addInteractionEvent(ev: InteractionEvent): void {
-    if (!this.#updateAction.interactionEvents) {
-      this.#updateAction.interactionEvents = [];
+    if (!this.updateAction.interactionEvents) {
+      this.updateAction.interactionEvents = [];
     }
-    this.#updateAction.interactionEvents.push(ev);
-    this.#queueDispatchRender();
+    this.updateAction.interactionEvents.push(ev);
+    this.queueDispatchRender();
   }
 
   /** Get the plot x value at the canvas pixel x location */
   public getXValueAtPixel(pixelX: number): number {
-    if (!this.#latestXScale) {
+    if (!this.latestXScale) {
       return -1;
     }
 
-    const pixelRange = this.#latestXScale.right - this.#latestXScale.left;
+    const pixelRange = this.latestXScale.right - this.latestXScale.left;
     if (pixelRange <= 0) {
       return -1;
     }
 
     // Linear interpolation to place the pixelX value within min/max
     return (
-      this.#latestXScale.min +
-      ((pixelX - this.#latestXScale.left) / pixelRange) *
-        (this.#latestXScale.max - this.#latestXScale.min)
+      this.latestXScale.min +
+      ((pixelX - this.latestXScale.left) / pixelRange) *
+        (this.latestXScale.max - this.latestXScale.min)
     );
   }
 
   /** Get the entire data for all series */
   public async getCsvData(): Promise<CsvDataset[]> {
-    if (this.#isDestroyed()) {
+    if (this.isDestroyed()) {
       return [];
     }
-    return await this.#datasetsBuilder.getCsvData();
+    return await this.datasetsBuilder.getCsvData();
   }
 
   /**
    * Return true if the plot viewport has deviated from the config or dataset bounds and can reset
    */
-  #canReset(): boolean {
-    if (this.#interactionBounds) {
+  private canReset(): boolean {
+    if (this.interactionBounds) {
       return true;
     }
 
-    if (this.#globalBounds) {
-      const resetBounds = this.#getXResetBounds();
-      return (
-        this.#globalBounds.min !== resetBounds.min || this.#globalBounds.max !== resetBounds.max
-      );
+    if (this.globalBounds) {
+      const resetBounds = this.getXResetBounds();
+      return this.globalBounds.min !== resetBounds.min || this.globalBounds.max !== resetBounds.max;
     }
 
     return false;
@@ -386,87 +377,88 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
    * Get the xBounds if we cleared the interaction and global bounds (i.e) reset
    * back to the config or dataset bounds
    */
-  #getXResetBounds(): Partial<Bounds1D> {
+  private getXResetBounds(): Partial<Bounds1D> {
     const currentSecondsIfFollowMode =
-      this.#isTimeseriesPlot && this.#followRange != undefined && this.#currentSeconds != undefined
-        ? this.#currentSeconds
+      this.isTimeseriesPlot && this.followRange != undefined && this.currentSeconds != undefined
+        ? this.currentSeconds
         : undefined;
-    const xMax = currentSecondsIfFollowMode ?? this.#configBounds.x.max ?? this.#datasetRange?.max;
+    const xMax = currentSecondsIfFollowMode ?? this.configBounds.x.max ?? this.datasetRange?.max;
 
     const xMinIfFollowMode =
-      this.#isTimeseriesPlot && this.#followRange != undefined && xMax != undefined
-        ? xMax - this.#followRange
+      this.isTimeseriesPlot && this.followRange != undefined && xMax != undefined
+        ? xMax - this.followRange
         : undefined;
-    const xMin = xMinIfFollowMode ?? this.#configBounds.x.min ?? this.#datasetRange?.min;
+    const xMin = xMinIfFollowMode ?? this.configBounds.x.min ?? this.datasetRange?.min;
 
     return { min: xMin, max: xMax };
   }
 
-  #getXBounds(): Partial<Bounds1D> {
+  private getXBounds(): Partial<Bounds1D> {
     // Interaction, synced global bounds override the config and data source bounds in precedence
-    const resetBounds = this.#getXResetBounds();
+    const resetBounds = this.getXResetBounds();
     return {
-      min: this.#interactionBounds?.x.min ?? this.#globalBounds?.min ?? resetBounds.min,
-      max: this.#interactionBounds?.x.max ?? this.#globalBounds?.max ?? resetBounds.max,
+      min: this.interactionBounds?.x.min ?? this.globalBounds?.min ?? resetBounds.min,
+      max: this.interactionBounds?.x.max ?? this.globalBounds?.max ?? resetBounds.max,
     };
   }
 
-  #isDestroyed(): boolean {
-    return this.#destroyed;
+  private isDestroyed(): boolean {
+    return this.destroyed;
   }
 
-  async #dispatchRender(): Promise<void> {
-    if (this.#isDestroyed()) {
+  private async dispatchRender(): Promise<void> {
+    if (this.isDestroyed()) {
       return;
     }
-    this.#updateAction.xBounds = this.#getXBounds();
+    this.updateAction.xBounds = this.getXBounds();
 
-    if (this.#shouldResetY) {
-      const yMin = this.#interactionBounds?.y.min ?? this.#configBounds.y.min;
-      const yMax = this.#interactionBounds?.y.max ?? this.#configBounds.y.max;
-      this.#updateAction.yBounds = { min: yMin, max: yMax };
-      this.#shouldResetY = false;
+    if (this.shouldResetY) {
+      const yMin = this.interactionBounds?.y.min ?? this.configBounds.y.min;
+      const yMax = this.interactionBounds?.y.max ?? this.configBounds.y.max;
+      this.updateAction.yBounds = { min: yMin, max: yMax };
+      this.shouldResetY = false;
     }
 
-    const haveInteractionEvents = (this.#updateAction.interactionEvents?.length ?? 0) > 0;
+    const haveInteractionEvents = (this.updateAction.interactionEvents?.length ?? 0) > 0;
 
-    const action = this.#updateAction;
-    this.#updateAction = {
+    const action = this.updateAction;
+    this.updateAction = {
       type: "update",
     };
 
-    const bounds = await this.#renderer.update(action);
-    if (this.#isDestroyed()) {
+    const bounds = await this.renderer.update(action);
+    if (this.isDestroyed()) {
       return;
     }
 
     if (haveInteractionEvents) {
-      this.#interactionBounds = bounds;
+      this.interactionBounds = bounds;
     }
 
-    if (haveInteractionEvents && bounds) {
+    if (haveInteractionEvents && bounds && this.shouldSync) {
       this.emit("timeseriesBounds", bounds.x);
     }
-    this.emit("viewportChange", this.#canReset());
+
+    this.emit("viewportChange", this.canReset());
 
     // The viewport has changed from some render interactions so we need to consider new datasets
-    const x = this.#getXBounds();
-    const y = this.#interactionBounds?.y ?? this.#configBounds.y;
-    if (!_.isEqual(this.#viewport.bounds.x, x) || !_.isEqual(this.#viewport.bounds.y, y)) {
-      this.#viewport.bounds.x = x;
-      this.#viewport.bounds.y = y;
-      this.#queueDispatchDownsample();
+    const x = this.getXBounds();
+    const y = this.interactionBounds?.y ?? this.configBounds.y;
+    if (!_.isEqual(this.viewport.bounds.x, x) || !_.isEqual(this.viewport.bounds.y, y)) {
+      this.viewport.bounds.x = x;
+      this.viewport.bounds.y = y;
+      this.queueDispatchDownsample();
     }
   }
 
   /** Dispatch getting the latest downsampled datasets and then queue rendering them */
-  async #dispatchDownsample(): Promise<void> {
-    if (this.#isDestroyed()) {
+  private async dispatchDownsample(): Promise<void> {
+    if (this.isDestroyed()) {
       return;
     }
 
-    const result = await this.#datasetsBuilder.getViewportDatasets(this.#viewport);
-    if (this.#isDestroyed()) {
+    const result = await this.datasetsBuilder.getViewportDatasets(this.viewport);
+    if (this.isDestroyed()) {
       return;
     }
     this.emit("pathsWithMismatchedDataLengthsChanged", [...result.pathsWithMismatchedDataLengths]);
@@ -474,32 +466,32 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
     // Use Array.from to fill in any `undefined` entries with an empty dataset (`map` would not
     // work for sparse arrays)
     const datasets = Array.from(result.datasetsByConfigIndex, replaceUndefinedWithEmptyDataset);
-    this.#queueDatasetsRender(datasets);
+    this.queueDatasetsRender(datasets);
   }
 
   /** Render the provided datasets */
-  async #dispatchDatasetsRender(datasets: Dataset[]): Promise<void> {
-    if (this.#isDestroyed()) {
+  private async dispatchDatasetsRender(datasets: Dataset[]): Promise<void> {
+    if (this.isDestroyed()) {
       return;
     }
 
-    this.#latestXScale = await this.#renderer.updateDatasets(datasets);
-    if (this.#isDestroyed()) {
+    this.latestXScale = await this.renderer.updateDatasets(datasets);
+    if (this.isDestroyed()) {
       return;
     }
-    this.emit("xScaleChanged", this.#latestXScale);
+    this.emit("xScaleChanged", this.latestXScale);
   }
 
-  async #dispatchBlocks(
+  private async dispatchBlocks(
     startTime: Immutable<Time>,
     blocks: Immutable<(MessageBlock | undefined)[]>,
   ): Promise<void> {
-    if (!this.#datasetsBuilder.handleBlocks) {
+    if (!this.datasetsBuilder.handleBlocks) {
       return;
     }
 
-    await this.#datasetsBuilder.handleBlocks(startTime, blocks, async () => {
-      this.#queueDispatchDownsample();
+    await this.datasetsBuilder.handleBlocks(startTime, blocks, async () => {
+      this.queueDispatchDownsample();
       // When blocks are fully loaded and a user splits the panel, we are able to process all of the
       // blocks synchronously. However this creates a poor UX experience for large datasets by
       // showing nothing on the plot for many seconds while the postMessage prepares a massive send.
@@ -516,7 +508,7 @@ export class PlotCoordinator extends EventEmitter<EventTypes> {
       // Bail processing if the coordinator has been destroyed or if our input blocks have changed
       // This lets us start processing new input blocks instead of continuing to work on stale
       // blocks.
-      return this.#isDestroyed() || this.#latestBlocks !== blocks;
+      return this.isDestroyed() || this.latestBlocks !== blocks;
     });
   }
 }

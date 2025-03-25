@@ -154,7 +154,9 @@ describe("renderState", () => {
 
   it("should provide stable time values", () => {
     const buildRenderState = initRenderStateBuilder();
-    const playerState = PlayerBuilder.playerState();
+    const playerState = PlayerBuilder.playerState({
+      activeData: PlayerBuilder.activeData(),
+    });
 
     playerState.activeData!.currentTime = { sec: 33, nsec: 1 };
     playerState.activeData!.startTime = { sec: 1, nsec: 1 };
