@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // SPDX-FileCopyrightText: Copyright (C) 2024 Yukihiro Saito <yukky.saito@gmail.com>
+// SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: Apache-2.0
 
 // Portions of this file were modified in 2024 by Yukihiro Saito
@@ -13,7 +14,7 @@
 // You may obtain a copy of the Apache License at http://www.apache.org/licenses/LICENSE-2.0
 
 import * as _ from "lodash-es";
-import { useCallback, useEffect, useLayoutEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useReducer, useState, useMemo } from "react";
 import {
   PieChart as RechartsPieChart,
   Pie,
@@ -27,6 +28,7 @@ import Logger from "@lichtblick/log";
 import { parseMessagePath, MessagePath } from "@lichtblick/message-path";
 import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
 // import { usePanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
 
 import { settingsActionReducer, useSettingsTree } from "./settings";
@@ -143,6 +145,7 @@ export function PieChart({ context }: Props): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
+  const { legendCount } = useLegendCount();
 
   const [config, setConfig] = useState(() => ({
     ...defaultConfig,
@@ -199,7 +202,12 @@ export function PieChart({ context }: Props): React.JSX.Element {
     [setConfig],
   );
 
-  const settingsTree = useSettingsTree(config, state.pathParseError, state.error?.message);
+  const settingsTree = useSettingsTree(
+    config,
+    state.pathParseError,
+    state.error?.message,
+    legendCount,
+  );
 
   useEffect(() => {
     context.updatePanelSettingsEditor({
@@ -229,21 +237,23 @@ export function PieChart({ context }: Props): React.JSX.Element {
     }));
   }, [context.initialState]);
 
-  log.info("context.initialState updated:", context);
+  const rawValue = useMemo(
+    () =>
+      state.latestMatchingQueriedData instanceof Float32Array
+        ? state.latestMatchingQueriedData
+        : new Float32Array(),
+    [state.latestMatchingQueriedData],
+  );
 
-  log.info("config updated:", config);
-
-  const rawValue =
-    state.latestMatchingQueriedData instanceof Float32Array
-      ? state.latestMatchingQueriedData
-      : new Float32Array();
-
-  const chartData =
-    rawValue.length > 0
-      ? Array.from(rawValue).map(
-          (value) => (value / Array.from(rawValue).reduce((sum, val) => sum + val, 0)) * 100,
-        )
-      : [];
+  const chartData = useMemo(
+    () =>
+      rawValue.length > 0
+        ? Array.from(rawValue).map(
+            (value) => (value / Array.from(rawValue).reduce((sum, val) => sum + val, 0)) * 100,
+          )
+        : [],
+    [rawValue],
+  );
 
   const data = chartData.map((value, index) => {
     const legendKey = `legend${index + 1}` as keyof Config;

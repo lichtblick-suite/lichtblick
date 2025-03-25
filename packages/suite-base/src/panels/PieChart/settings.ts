@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // SPDX-FileCopyrightText: Copyright (C) 2024 Yukihiro Saito <yukky.saito@gmail.com>
+// SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: Apache-2.0
 
 // Portions of this file were modified in 2024 by Yukihiro Saito
@@ -55,78 +56,38 @@ export function useSettingsTree(
   config: Config,
   pathParseError: string | undefined,
   error: string | undefined,
+  legendCount: number,
 ): SettingsTreeNodes {
-  const generalSettings = useMemo(
-    (): SettingsTreeNode => ({
-      error,
-      fields: {
-        path: {
-          label: "Message path",
-          input: "messagepath",
-          value: config.path,
-          error: pathParseError,
-          validTypes: supportedDataTypes,
-        },
-        title: {
-          label: "Title",
-          input: "string",
-          value: config.title,
-        },
-        legend1: {
-          label: "Legend 1",
-          input: "string",
-          value: config.legend1,
-        },
-        legend2: {
-          label: "Legend 2",
-          input: "string",
-          value: config.legend2,
-        },
-        legend3: {
-          label: "Legend 3",
-          input: "string",
-          value: config.legend3,
-        },
-        legend4: {
-          label: "Legend 4",
-          input: "string",
-          value: config.legend4,
-        },
-        legend5: {
-          label: "Legend 5",
-          input: "string",
-          value: config.legend5,
-        },
-        legend6: {
-          label: "Legend 6",
-          input: "string",
-          value: config.legend6,
-        },
-        legend7: {
-          label: "Legend 7",
-          input: "string",
-          value: config.legend7,
-        },
-        legend8: {
-          label: "Legend 8",
-          input: "string",
-          value: config.legend8,
-        },
-        legend9: {
-          label: "Legend 9",
-          input: "string",
-          value: config.legend9,
-        },
-        legend10: {
-          label: "Legend 10",
-          input: "string",
-          value: config.legend10,
-        },
+  const generalSettings = useMemo((): SettingsTreeNode => {
+    const fields: SettingsTreeNode["fields"] = {
+      path: {
+        label: "Message path",
+        input: "messagepath",
+        value: config.path,
+        error: pathParseError,
+        validTypes: supportedDataTypes,
       },
-    }),
-    [error, config, pathParseError],
-  );
-  return useShallowMemo({
-    general: generalSettings,
-  });
+      title: {
+        label: "Title",
+        input: "string",
+        value: config.title,
+      },
+    };
+
+    for (let i = 1; i <= legendCount; i++) {
+      const key = `legend${i}` as const;
+      fields[key] = {
+        label: `Legend ${i}`,
+        input: "string",
+        value: config[key] ?? "",
+      };
+    }
+
+    return {
+      error,
+      fields,
+    };
+  }, [config, pathParseError, error, legendCount]);
+
+  return useShallowMemo({ general: generalSettings });
 }
