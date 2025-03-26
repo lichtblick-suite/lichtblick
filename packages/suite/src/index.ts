@@ -48,10 +48,6 @@ export type Topic = {
    */
   name: string;
   /**
-   * @deprecated Renamed to `schemaName`. `datatype` will be removed in a future release.
-   */
-  datatype: string;
-  /**
    * The schema name is an identifier for the types of messages on this topic. Typically this is the
    * fully-qualified name of the message schema. The fully-qualified name depends on the data source
    * and data loaded by the data source.

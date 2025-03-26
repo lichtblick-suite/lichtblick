@@ -25,7 +25,6 @@ describe("pointExtensionUtils", () => {
     const createTopic = (topicArgs?: Partial<Topic>): Topic => {
       return {
         name: BasicBuilder.string(),
-        datatype: BasicBuilder.string(), // will be deprecated soon
         schemaName: BasicBuilder.string(),
         ...topicArgs,
       };
