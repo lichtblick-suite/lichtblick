@@ -9,9 +9,7 @@ import * as _ from "lodash-es";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
 
-import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/constants";
-
-export type MultiAction = "delete" | "duplicate" | "revert" | "save";
+import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/types";
 
 function reducer(draft: State, action: Action) {
   switch (action.type) {

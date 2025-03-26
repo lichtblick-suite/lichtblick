@@ -6,8 +6,8 @@ import { useCallback, MouseEvent, Dispatch } from "react";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
 import { useUnsavedChangesPrompt } from "@lichtblick/suite-base/components/LayoutBrowser/UnsavedChangesPrompt";
-import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/constants";
 import { useLayoutBrowserReducer } from "@lichtblick/suite-base/components/LayoutBrowser/reducer";
+import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
   LayoutState,
