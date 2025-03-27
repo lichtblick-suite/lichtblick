@@ -22,7 +22,7 @@ export function pathToSubscribePayload(
 
   const firstField = parts.find(typeIsName);
 
-  if (firstField == undefined || firstField.type !== "name" || firstField.name.length === 0) {
+  if (firstField == undefined || firstField.name.length === 0) {
     return undefined;
   }
 
