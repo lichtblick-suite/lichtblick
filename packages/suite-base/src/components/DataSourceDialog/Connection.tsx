@@ -109,7 +109,9 @@ export default function Connection(): React.JSX.Element {
   // List enabled sources before disabled sources so the default selected item is an available source
   const enabledSourcesFirst = useMemo(() => {
     const enabledSources = connectionSources.filter((source) => source.disabledReason == undefined);
-    const disabledSources = connectionSources.filter((source) => source.disabledReason);
+    const disabledSources = connectionSources.filter(
+      (source) => source.disabledReason != undefined,
+    );
     return [...enabledSources, ...disabledSources];
   }, [connectionSources]);
 

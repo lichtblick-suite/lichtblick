@@ -277,9 +277,9 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       if (otherFiles.length > 0) {
         // Look for a source that supports the dragged file extensions
         for (const source of availableSources) {
-          const filteredFiles = otherFiles.filter((file) => {
+          const filteredFiles = otherFiles.filter((file): boolean => {
             const ext = extname(file.name);
-            return source.supportedFileTypes?.includes(ext);
+            return source.supportedFileTypes ? source.supportedFileTypes.includes(ext) : false;
           });
 
           // select the first source that has files that match the supported extensions

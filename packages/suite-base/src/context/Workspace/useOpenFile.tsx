@@ -72,9 +72,10 @@ export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promi
 
     const matchingSources = sources.filter(
       (source) =>
-        source.supportedFileTypes &&
-        source.type === "file" &&
-        source.supportedFileTypes.includes(extension!),
+        (source.supportedFileTypes &&
+          source.type === "file" &&
+          source.supportedFileTypes.includes(extension!)) ??
+        false,
     );
 
     if (matchingSources.length === 0) {
