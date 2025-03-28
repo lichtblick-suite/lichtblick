@@ -17,6 +17,7 @@ import indicatorThumbnail from "./Indicator/thumbnail.png";
 import logThumbnail from "./Log/thumbnail.png";
 import mapThumbnail from "./Map/thumbnail.png";
 import parametersThumbnail from "./Parameters/thumbnail.png";
+import pieChartThumbnail from "./PieChart/thumbnail.png";
 import plotThumbnail from "./Plot/thumbnail.png";
 import publishThumbnail from "./Publish/thumbnail.png";
 import rawMessagesThumbnail from "./RawMessages/thumbnail.png";
@@ -103,6 +104,13 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("plotDescription"),
     thumbnail: plotThumbnail,
     module: async () => await import("./Plot"),
+  },
+  {
+    title: t("pieChart"),
+    type: "PieChart",
+    description: t("pieChartDescription"),
+    thumbnail: pieChartThumbnail,
+    module: async () => await import("./PieChart"),
   },
   {
     title: t("publish"),

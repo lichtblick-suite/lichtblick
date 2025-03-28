@@ -148,6 +148,7 @@
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
     "react-use": "17.5.1",
+    "recharts": "2.15.1",
     "rehype-raw": "6.1.1",
     "vm-browserify": "1.1.2"
   }
