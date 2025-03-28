@@ -9,9 +9,12 @@ import * as _ from "lodash-es";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
 
-import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/types";
+import {
+  LayoutSelectionState,
+  LayoutSelectionAction,
+} from "@lichtblick/suite-base/components/LayoutBrowser/types";
 
-function reducer(draft: State, action: Action) {
+function reducer(draft: LayoutSelectionState, action: LayoutSelectionAction) {
   switch (action.type) {
     case "clear-multi-action":
       draft.multiAction = undefined;
@@ -61,8 +64,8 @@ function reducer(draft: State, action: Action) {
 }
 
 export function useLayoutBrowserReducer(
-  props: Pick<State, "busy" | "error" | "online" | "lastSelectedId">,
-): [State, Dispatch<Action>] {
+  props: Pick<LayoutSelectionState, "busy" | "error" | "online" | "lastSelectedId">,
+): [LayoutSelectionState, Dispatch<LayoutSelectionAction>] {
   return useImmerReducer(reducer, {
     ...props,
     selectedIds: [],

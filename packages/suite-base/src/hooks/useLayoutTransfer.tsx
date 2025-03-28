@@ -81,7 +81,6 @@ export function useLayoutTransfer(): UseLayoutTransfer {
           data,
           permission: "CREATOR_WRITE",
         });
-        enqueueSnackbar(`${newLayout.name} imported successfully`, { variant: "success" });
         return newLayout;
       }),
     );
@@ -106,7 +105,6 @@ export function useLayoutTransfer(): UseLayoutTransfer {
     const layoutName = name.length > 0 ? name : "lichtblick-layout";
     const content = JSON.stringify(item, undefined, 2) ?? "";
     downloadTextFile(content, `${layoutName}.json`);
-    enqueueSnackbar(`${layoutName} exported successfully`, { variant: "success" });
     void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
   }, [analytics, getCurrentLayoutState]);
 

@@ -7,7 +7,10 @@ import useAsyncFn from "react-use/lib/useAsyncFn";
 
 import { useUnsavedChangesPrompt } from "@lichtblick/suite-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { useLayoutBrowserReducer } from "@lichtblick/suite-base/components/LayoutBrowser/reducer";
-import { State, Action } from "@lichtblick/suite-base/components/LayoutBrowser/types";
+import {
+  LayoutSelectionState,
+  LayoutSelectionAction,
+} from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
   LayoutState,
@@ -25,8 +28,8 @@ export type UseLayoutNavigation = {
     item: Layout,
     params?: { selectedViaClick?: boolean; event?: MouseEvent },
   ) => Promise<void>;
-  state: State;
-  dispatch: Dispatch<Action>;
+  state: LayoutSelectionState;
+  dispatch: Dispatch<LayoutSelectionAction>;
   unsavedChangesPrompt: React.JSX.Element | undefined;
 };
 

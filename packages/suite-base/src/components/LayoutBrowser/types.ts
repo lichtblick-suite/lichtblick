@@ -5,7 +5,7 @@ import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 export type MultiAction = "delete" | "duplicate" | "revert" | "save";
 
-export type State = {
+export type LayoutSelectionState = {
   busy: boolean;
   error: undefined | Error;
   online: boolean;
@@ -14,7 +14,7 @@ export type State = {
   selectedIds: string[];
 };
 
-export type Action =
+export type LayoutSelectionAction =
   | { type: "clear-multi-action" }
   | { type: "queue-multi-action"; action: MultiAction }
   | {
