@@ -71,7 +71,7 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
     };
     const onNotAvailable = (info: UpdateInfo) => {
       void dialog.showMessageBox({
-        message: `Autoblick is up to date (version ${info.version}).`,
+        message: `Lichtblick is up to date (version ${info.version}).`,
       });
     };
     const onError = (error: Error) => {

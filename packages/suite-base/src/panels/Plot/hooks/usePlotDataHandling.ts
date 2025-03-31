@@ -8,8 +8,8 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CurrentCustomDatasetsBuilder";
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
-import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/config";
 import { UsePlotDataHandling } from "@lichtblick/suite-base/panels/Plot/types";
+import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
 import { IndexDatasetsBuilder } from "../builders/IndexDatasetsBuilder";

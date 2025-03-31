@@ -15,12 +15,12 @@ import {
   useSetHoverValue,
   useTimelineInteractionState,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
-import { downloadCSV } from "@lichtblick/suite-base/panels/Plot/csv";
 import {
   ElementAtPixelArgs,
   UseHoverHandlersHook as UsePlotInteractionHandlers,
   UsePlotInteractionHandlersProps,
 } from "@lichtblick/suite-base/panels/Plot/types";
+import { downloadCSV } from "@lichtblick/suite-base/panels/Plot/utils/csv";
 import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;

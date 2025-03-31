@@ -82,13 +82,20 @@ export function pointSettingsNode(
   const pointShape = config.pointShape ?? "circle";
   const decayTime = config.decayTime;
 
+  const checkColorsForDatatypes = (pointCloudDatatypes: Set<string>): boolean => {
+    return (
+      pointCloudDatatypes.has(topic.schemaName) ||
+      (topic.convertibleTo ?? []).some((item) => pointCloudDatatypes.has(item))
+    );
+  };
+
   const colorModeFields = colorModeSettingsFields({
     msgFields: messageFields,
     config,
     defaults: defaultSettings,
     modifiers: {
-      supportsPackedRgbModes: ROS_POINTCLOUD_DATATYPES.has(topic.schemaName),
-      supportsRgbaFieldsMode: LICHTBLICK_POINTCLOUD_DATATYPES.has(topic.schemaName),
+      supportsPackedRgbModes: checkColorsForDatatypes(ROS_POINTCLOUD_DATATYPES),
+      supportsRgbaFieldsMode: checkColorsForDatatypes(LICHTBLICK_POINTCLOUD_DATATYPES),
     },
   });
 

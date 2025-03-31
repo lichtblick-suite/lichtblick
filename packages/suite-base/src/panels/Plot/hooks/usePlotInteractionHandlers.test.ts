@@ -13,12 +13,12 @@ import {
   useClearHoverValue,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
-import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/config";
 import { DEFAULT_PLOT_CONFIG } from "@lichtblick/suite-base/panels/Plot/constants";
 import {
   TooltipStateSetter,
   UsePlotInteractionHandlersProps,
 } from "@lichtblick/suite-base/panels/Plot/types";
+import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";

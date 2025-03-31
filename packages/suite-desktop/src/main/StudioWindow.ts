@@ -56,7 +56,7 @@ function getWindowBackgroundColor(): string | undefined {
 
 function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
   const theme = palette[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
-  if (isWindows) {
+  if (!isMac) {
     return {
       height: APP_BAR_HEIGHT,
       color: theme.appBar.main,
@@ -133,7 +133,7 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
 
   const browserWindow = new BrowserWindow(windowOptions);
   nativeTheme.on("updated", () => {
-    if (isWindows) {
+    if (!isMac) {
       // Although the TS types say this function is always available, it is undefined on non-Windows platforms
       browserWindow.setTitleBarOverlay(getTitleBarOverlayOptions());
     }

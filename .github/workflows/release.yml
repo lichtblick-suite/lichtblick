@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.1
+        with:
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          lfs: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: 16.17
+
+      - name: Enable corepack
+        run: corepack enable yarn
+
+      - name: Bump minor version and save it on environment variable
+        run: |
+          yarn version minor
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Bump @lichtblick/suite version
+        run: yarn version minor
+        working-directory: packages/suite
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build prod files
+        run: |
+          yarn run desktop:build:prod
+
+      - name: Build windows version
+        run: yarn run package:win
+
+      - name: Build linux version
+        run: yarn run package:linux
+
+      - name: Build macOS version
+        run: yarn run package:darwin
+
+      # Important to use [skip actions] to avoid triggering other verisoning workflows
+      # https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/skipping-workflow-runs
+      - name: Commit and tag the new version
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json packages/suite/package.json yarn.lock
+          git commit -m "Bump version v${{ env.new_version }} [skip actions]"
+          git tag "v${{ env.new_version }}"
+          git push origin main --tags
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ env.new_version }}"
+          name: "v${{ env.new_version }}"
+          commit: main
+          generateReleaseNotes: true
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          artifacts: |
+            dist/lichtblick-${{ env.new_version }}-linux-amd64.deb
+            dist/lichtblick-${{ env.new_version }}-linux-x64.tar.gz
+            dist/lichtblick-${{ env.new_version }}-linux-arm64.deb
+            dist/lichtblick-${{ env.new_version }}-linux-arm64.tar.gz
+            dist/lichtblick-${{ env.new_version }}-mac-universal.dmg
+            dist/lichtblick-${{ env.new_version }}-win.exe
+            dist/latest-linux.yml
+            dist/latest-mac.yml
+            dist/latest.yml

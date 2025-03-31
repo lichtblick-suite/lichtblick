@@ -155,6 +155,10 @@ export type AppBarProps = CustomWindowControlsProps & {
   debugDragRegion?: boolean;
 };
 
+const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
+const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
+const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
+
 export function AppBar(props: AppBarProps): React.JSX.Element {
   const {
     debugDragRegion,
@@ -167,25 +171,28 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
     onUnmaximizeWindow,
     showCustomWindowControls = false,
   } = props;
-  const { classes } = useStyles({ debugDragRegion });
-  // const { t } = useTranslation("appBar");
+  const { classes, cx, theme } = useStyles({ debugDragRegion });
+  const { t } = useTranslation("appBar");
 
   const { appBarLayoutButton } = useAppContext();
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
 
-  // const [appMenuEl, setAppMenuEl] = useState<undefined | HTMLElement>(undefined);
+  const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
+
+  const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
+  const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
+
+  const { sidebarActions } = useWorkspaceActions();
+
+  const [appMenuEl, setAppMenuEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [panelAnchorEl, setPanelAnchorEl] = useState<undefined | HTMLElement>(undefined);
 
+  const appMenuOpen = Boolean(appMenuEl);
   const userMenuOpen = Boolean(userAnchorEl);
   const panelMenuOpen = Boolean(panelAnchorEl);
-  const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
-  const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
-  const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
-  const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
-  const { sidebarActions } = useWorkspaceActions();
 
   return (
     <>

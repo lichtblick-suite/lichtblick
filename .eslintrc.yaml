@@ -28,7 +28,7 @@ settings:
   import/internal-regex: "^@lichtblick"
 
 rules:
-  "@lichtblick/license-header": off
+  "@lichtblick/license-header": error
   "@lichtblick/prefer-hash-private": off
 
   tss-unused-classes/unused-classes: error
@@ -103,30 +103,14 @@ rules:
     # We disable console methods here rather than using no-console so that it doesn't prohibit overrides such as "console.info = ..."
     - selector: "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error|debug|assert)$/]"
       message: "Unexpected property on console object was called"
-
-    - selector: "TSNullKeyword, Literal[raw=null]"
-      message: >
-        Prefer undefined instead of null. When required for React refs/components, use
-        the `ReactNull` alias. Otherwise, if strictly necessary, disable this error with
-        `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
-        https://github.com/sindresorhus/meta/discussions/7"
-
-    - selector: "CallExpression[callee.name='setTimeout'][arguments.length<2]"
-      message: "`setTimeout()` must be invoked with at least two arguments."
-    - selector: "CallExpression[callee.name='setInterval'][arguments.length<2]"
-      message: "`setInterval()` must be invoked with at least two arguments."
-
-    - selector: "CallExpression[callee.object.name='Promise'][callee.property.name='race']"
-      message: >
-        Promise.race is banned
-          use `import { race } from "@lichtblick/den/async"` instead
-
-        See:
-          https://github.com/nodejs/node/issues/17469#issuecomment-685216777
-          https://bugs.chromium.org/p/v8/issues/detail?id=9858"
-
-  jest/expect-expect:
-    [error, { assertFunctionNames: [expect*, sendNotification.expectCalledDuringTest] }]
+  "@typescript-eslint/strict-boolean-expressions":
+    - error
+      # Force explicit checks that strings are empty
+    - allowString: false
+      # Force explicit checks that numbers are != 0 or NaN
+      allowNumber: false
+      # Keeps the error count manageable while we enhance type information from the flow conversion
+      allowAny: true
 
 overrides:
   - files: ["*.ts", "*.tsx"]

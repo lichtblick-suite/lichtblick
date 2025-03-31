@@ -35,9 +35,9 @@ import { PlotCoordinator } from "./PlotCoordinator";
 import { PlotLegend } from "./PlotLegend";
 import useGlobalSync from "./hooks/useGlobalSync";
 import usePlotDataHandling from "./hooks/usePlotDataHandling";
+import usePlotPanelSettings from "./hooks/usePlotPanelSettings";
 import useRenderer from "./hooks/useRenderer";
 import useSubscriptions from "./hooks/useSubscriptions";
-import { usePlotPanelSettings } from "./settings";
 
 const Plot = (props: PlotProps): React.JSX.Element => {
   const { saveConfig, config } = props;
@@ -64,7 +64,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const [subscriberId] = useState(() => uuidv4());
   const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
   const [coordinator, setCoordinator] = useState<PlotCoordinator | undefined>(undefined);
-  const shouldSync = config.xAxisVal === "timestamp" && config.isSynced;
+  const shouldSync = config.isSynced;
   const renderer = useRenderer(canvasDiv, theme);
   const { globalVariables } = useGlobalVariables();
   const getMessagePipelineState = useMessagePipelineGetter();
@@ -144,6 +144,12 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     coordinator.handlePlayerState(getMessagePipelineState().playerState);
     return unsub;
   }, [coordinator, getMessagePipelineState, subscribeMessagePipeline]);
+
+  useEffect(() => {
+    if (coordinator) {
+      coordinator.setShouldSync({ shouldSync });
+    }
+  }, [coordinator, shouldSync]);
 
   useEffect(() => {
     if (!renderer || !canvasDiv) {

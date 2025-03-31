@@ -83,7 +83,6 @@ function makeElectronBuilderConfig(params) {
           arch: ["x64", "arm64"],
         },
       ],
-
       icon: path.join(__dirname, "../resources/icon/icon.png"),
       fileAssociations: [
         {

@@ -1,0 +1,64 @@
+name: Pre-Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.1
+        with:
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          lfs: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: 16.17
+
+      - name: Enable corepack
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Read version from package.json
+        id: package_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Build prod files
+        run: |
+          yarn run desktop:build:prod
+
+      - name: Build Windows version
+        run: yarn run package:win
+
+      - name: Build Linux version
+        run: yarn run package:linux
+
+      - name: Build macOS version
+        run: yarn run package:darwin
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lichtblick-${{ env.version }}-windows
+          path: dist/lichtblick-${{ env.version }}-win.exe
+          retention-days: 30
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lichtblick-${{ env.version }}-debian-amd64
+          path: dist/lichtblick-${{ env.version }}-linux-amd64.deb
+          retention-days: 30
+
+      - name: Upload MacOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lichtblick-${{ env.version }}-macos
+          path: dist/lichtblick-${{ env.version }}-mac-universal.dmg
+          retention-days: 30

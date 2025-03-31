@@ -56,7 +56,7 @@ export type DataSourceInfo = {
 
 /**
  * Data source info" encapsulates **rarely-changing** metadata about the source from which
- * Autotblick Suite is loading data.
+ * Lichtblick Suite is loading data.
  *
  * A data source might be a local file, a remote file, or a streaming source.
  */

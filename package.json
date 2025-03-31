@@ -1,10 +1,10 @@
 {
   "name": "autoblick",
-  "version": "1.10.0",
+  "version": "1.11.4",
   "license": "MPL-2.0",
   "private": true,
   "productName": "Autoblick",
-  "description": "Core components of Lichtblick",
+  "description": "Core components of Autoblick",
   "productDescription": "Autoblick",
   "packageManager": "yarn@3.6.3",
   "repository": {
@@ -54,9 +54,9 @@
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
     "storybook": "storybook dev --port 9009 --config-dir .storybook",
     "storybook:build": "storybook build --config-dir .storybook --webpack-stats-json",
-    "version:all": "yarn workspaces foreach version",
     "tauri:dev": "yarn tauri dev",
-    "tauri:build": "yarn tauri build"
+    "tauri:build": "yarn tauri build",
+    "version:all": "yarn workspaces foreach version"
   },
   "workspaces": {
     "packages": [
@@ -78,10 +78,10 @@
     "@actions/core": "1.10.1",
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.1",
-    "@babel/core": "7.26.7",
+    "@babel/core": "7.26.9",
     "@babel/plugin-proposal-decorators": "7.25.9",
     "@babel/plugin-proposal-explicit-resource-management": "7.25.9",
-    "@babel/preset-env": "7.26.7",
+    "@babel/preset-env": "7.26.9",
     "@babel/preset-react": "7.26.3",
     "@babel/preset-typescript": "7.26.0",
     "@lichtblick/eslint-plugin": "1.0.1",
@@ -138,7 +138,7 @@
     "ts-unused-exports": "10.0.1",
     "tslib": "2.6.2",
     "typescript": "5.3.3",
-    "webpack": "5.97.1",
+    "webpack": "5.98.0",
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.0",
     "webpack-hot-middleware": "2.26.0"
@@ -158,7 +158,7 @@
     "@tauri-apps/api": "1.6.0",
     "antd": "5.20.0",
     "lucide-react": "0.481.0",
-    "react-use": "17.4.0",
+    "react-use": "17.5.1",
     "rehype-raw": "6.1.1",
     "umi-request": "1.4.0",
     "vm-browserify": "1.1.2"

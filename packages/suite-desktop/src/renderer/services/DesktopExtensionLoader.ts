@@ -8,7 +8,7 @@
 import Logger from "@lichtblick/log";
 import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@lichtblick/suite-base";
 
-import { Desktop } from "../../common/types";
+import { Desktop, DesktopExtension } from "../../common/types";
 
 const log = Logger.getLogger(__filename);
 
@@ -20,25 +20,24 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     this.#bridge = bridge;
   }
 
+  public async getExtension(id: string): Promise<ExtensionInfo | undefined> {
+    const storedExtension = (await this.getExtensions()).find((extension) => extension.id === id);
+    return storedExtension;
+  }
+
   public async getExtensions(): Promise<ExtensionInfo[]> {
     const extensionList = (await this.#bridge?.getExtensions()) ?? [];
     log.debug(`Loaded ${extensionList.length} extension(s)`);
 
-    const extensions = extensionList.map((item): ExtensionInfo => {
-      const pkgInfo = item.packageJson as ExtensionInfo;
+    const extensions = extensionList.map((extension: DesktopExtension): ExtensionInfo => {
+      const pkgInfo = extension.packageJson as ExtensionInfo;
       return {
-        id: item.id,
+        ...pkgInfo,
+        id: extension.id,
         name: pkgInfo.displayName,
         namespace: this.namespace,
         // Qualified name is display name for backwards compatibility with existing layouts.
         qualifiedName: pkgInfo.displayName,
-        displayName: pkgInfo.displayName,
-        description: pkgInfo.description,
-        publisher: pkgInfo.publisher,
-        homepage: pkgInfo.homepage,
-        license: pkgInfo.license,
-        version: pkgInfo.version,
-        keywords: pkgInfo.keywords,
       };
     });
 
@@ -53,23 +52,17 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     if (this.#bridge == undefined) {
       throw new Error(`Cannot install extension without a desktopBridge`);
     }
-    const detail = await this.#bridge.installExtension(foxeFileData);
 
-    const pkgInfo = detail.packageJson as ExtensionInfo;
+    const extension: DesktopExtension = await this.#bridge.installExtension(foxeFileData);
+    const pkgInfo = extension.packageJson as ExtensionInfo;
 
     return {
-      id: detail.id,
+      ...pkgInfo,
+      id: extension.id,
       name: pkgInfo.displayName,
       namespace: this.namespace,
       // Qualified name is display name for backwards compatibility with existing layouts.
       qualifiedName: pkgInfo.displayName,
-      displayName: pkgInfo.displayName,
-      description: pkgInfo.description,
-      publisher: pkgInfo.publisher,
-      homepage: pkgInfo.homepage,
-      license: pkgInfo.license,
-      version: pkgInfo.version,
-      keywords: pkgInfo.keywords,
     };
   }
 

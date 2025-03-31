@@ -26,7 +26,7 @@ export interface GraphMutation {
 }
 
 type Props = {
-  style: Cytoscape.Stylesheet[];
+  style: Cytoscape.StylesheetStyle[];
   elements: cytoscape.ElementDefinition[];
   rankDir: string;
   graphRef: MutableRefObject<GraphMutation | undefined>;

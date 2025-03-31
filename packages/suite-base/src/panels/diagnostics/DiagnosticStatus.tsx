@@ -34,7 +34,7 @@ import sanitizeHtml from "sanitize-html";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/openSiblingPlotPanel";
+import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 

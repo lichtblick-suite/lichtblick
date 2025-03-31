@@ -9,7 +9,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterNoneIcon from "@mui/icons-material/FilterNone";
 import MinimizeIcon from "@mui/icons-material/Minimize";
-import { IconButton, useTheme } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -43,14 +43,8 @@ export function CustomWindowControls({
   onCloseWindow,
 }: Omit<CustomWindowControlsProps, "showCustomWindowControls">): React.JSX.Element {
   const { classes } = useStyles();
-  const {
-    palette: { mode: colorScheme },
-  } = useTheme();
   return (
     <Stack direction="row" gap={1} paddingX={1}>
-      {colorScheme === "dark" &&
-      <>
-
       <IconButton
         size="small"
         color="inherit"
@@ -82,48 +76,6 @@ export function CustomWindowControls({
       >
         <CloseIcon fontSize="inherit" color="inherit" />
       </IconButton>
-      </>
-      }
-       {colorScheme != "dark" &&
-      <>
-
-      <IconButton
-        size="small"
-        color="inherit"
-        onClick={onMinimizeWindow}
-        data-testid="win-minimize"
-        style={{color:'black'}}
-      >
-        <MinimizeIcon fontSize="inherit" color="inherit" />
-      </IconButton>
-
-      <IconButton
-        size="small"
-        color="inherit"
-        onClick={isMaximized ? onUnmaximizeWindow : onMaximizeWindow}
-        data-testid="win-maximize"
-        style={{color:'black'}}
-      >
-        {isMaximized ? (
-          <FilterNoneIcon fontSize="inherit" color="inherit" />
-        ) : (
-          <CheckBoxOutlineBlankIcon fontSize="inherit" color="inherit" />
-        )}
-      </IconButton>
-
-      <IconButton
-        className={classes.closeButton}
-        size="small"
-        color="inherit"
-        onClick={onCloseWindow}
-        data-testid="win-close"
-        style={{color:'black'}}
-      >
-        <CloseIcon fontSize="inherit" color="inherit" />
-      </IconButton>
-      </>
-      }
-
     </Stack>
   );
 }

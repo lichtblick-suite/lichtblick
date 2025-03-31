@@ -72,7 +72,7 @@ const LogsSection = ({ logs }: { logs: readonly UserScriptLog[] }): React.JSX.El
           No logs to display.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Invoke <code>log(someValue)</code> in your Autotblick Suite node code to see data printed
+          Invoke <code>log(someValue)</code> in your Lichtblick Suite node code to see data printed
           here.
         </Typography>
       </Stack>

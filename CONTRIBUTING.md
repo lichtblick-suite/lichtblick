@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-Welcome, and thank you for your interest in contributing to Autotblick! We value your contributions and want to make the contributing experience enjoyable and rewarding for you. Here’s how you can get started:
+Welcome, and thank you for your interest in contributing to Lichtblick! We value your contributions and want to make the contributing experience enjoyable and rewarding for you. Here’s how you can get started:
 
 ## :rocket: Getting Started
 
@@ -20,11 +20,11 @@ $ yarn dlx electron@22.1.0 .webpack # launch the version of electron for the cur
 ```
 
 ```sh
-yarn run               # list available commands
-yarn lint              # lint all files
-yarn test              # run all tests
-yarn test:watch        # run tests on changed files
-yarn test:integration  # run all integration tests
+$ yarn run               # list available commands
+$ yarn lint              # lint all files
+$ yarn test              # run all tests
+$ yarn test:watch        # run tests on changed files
+$ yarn test:integration  # run all integration tests
 ```
 
 ## :herb: Creating a new branch
@@ -70,7 +70,7 @@ BUILD NUMBER (Optional): Optionally, the build number can be additionally added.
 
 ## :globe_with_meridians: Localization
 
-At this time, first-class support for Autotblick is provided in English only. Localization into other languages is available on a best-effort basis, with translations provided by community volunteers.
+At this time, first-class support for Lichtblick is provided in English only. Localization into other languages is available on a best-effort basis, with translations provided by community volunteers.
 
 Translation support is implemented using [`react-i18next`](https://react.i18next.com).
 
@@ -81,7 +81,7 @@ Translation support is implemented using [`react-i18next`](https://react.i18next
 
 ### Add translations to the `i18n` directory
 
-The [`i18n` directory](packages/suite-base/src/i18n) contains translated (localized) strings for all languages supported by Autotblick.
+The [`i18n` directory](packages/suite-base/src/i18n) contains translated (localized) strings for all languages supported by Lichtblick.
 
 Translated strings are organized into _namespaces_ — e.g. [`i18n/[language]/appSettings.ts`](packages/suite-base/src/i18n/en/appSettings.ts) contains translations for the app's Settings tab.
 

@@ -64,7 +64,12 @@ import {
   getValueActionForValue,
 } from "./getValueActionForValue";
 import { NodeState, RawMessagesPanelConfig } from "./types";
-import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths, toggleExpansion } from "./utils";
+import {
+  DATA_ARRAY_PREVIEW_LIMIT,
+  generateDeepKeyPaths,
+  getConstantNameByKeyPath,
+  toggleExpansion,
+} from "./utils";
 
 type Props = {
   config: Immutable<RawMessagesPanelConfig>;
@@ -333,7 +338,7 @@ function RawMessages(props: Props) {
             );
           }
 
-          let constantName: string | undefined;
+          let constantName: string | undefined = getConstantNameByKeyPath(keyPath, queriedData);
           if (structureItem) {
             const childStructureItem = getStructureItemForPath(
               structureItem,

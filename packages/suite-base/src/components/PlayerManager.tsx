@@ -333,7 +333,6 @@ function createSelectRecentCallback(
           type: "connection",
           params: foundRecent.extra,
         });
-        console.log("restoring recent connection", foundRecent);
         break;
       }
       case "file": {
