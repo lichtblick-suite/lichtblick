@@ -10,11 +10,7 @@ import { SvgIcon, SvgIconProps } from "@mui/material";
 export function LichtblickLogo(props: SvgIconProps): React.JSX.Element {
   return (
     <SvgIcon viewBox="0 0 512 512" {...props}>
-<<<<<<< HEAD
-      <title>Autotblick</title>
-=======
       <title>Lichtblick</title>
->>>>>>> upstream/main
       <svg
         id="Layer_2"
         data-name="Layer 2"

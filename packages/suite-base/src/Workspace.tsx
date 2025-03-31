@@ -652,11 +652,21 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   return (
     <PanelStateContextProvider>
+      <ConfigProvider
+        theme={{
+          // 1. 单独使用暗色算法
+          algorithm: colorScheme === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
+
+          // 2. 组合使用暗色算法与紧凑算法
+          // algorithm: [theme.darkAlgorithm, theme.compactAlgorithm],
+        }}
+      >
       {dataSourceDialog.open && <DataSourceDialog />}
       <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
       <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
+        <VerticalAppBar/>
         {appBar}
         <Sidebars
           selectedKey=""
@@ -695,6 +705,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         )}
       </div>
       <WorkspaceDialogs />
+      </ConfigProvider>
     </PanelStateContextProvider>
   );
 }

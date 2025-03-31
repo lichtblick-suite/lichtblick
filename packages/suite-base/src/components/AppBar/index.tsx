@@ -155,7 +155,7 @@ export type AppBarProps = CustomWindowControlsProps & {
   debugDragRegion?: boolean;
 };
 
-const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
+// const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
 const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
 const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 
@@ -172,14 +172,14 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
     showCustomWindowControls = false,
   } = props;
   const { classes, cx, theme } = useStyles({ debugDragRegion });
-  const { t } = useTranslation("appBar");
+  // const { t } = useTranslation("appBar");
 
   const { appBarLayoutButton } = useAppContext();
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
 
-  const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
+  // const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
 
   const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
   const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
