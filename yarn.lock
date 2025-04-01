@@ -2998,7 +2998,7 @@ __metadata:
     eventemitter3: 5.0.1
     fake-indexeddb: 4.0.2
     fork-ts-checker-webpack-plugin: 9.0.2
-    fuzzysort: 2.0.4
+    fuzzysort: 3.1.0
     fzf: 0.5.2
     geojson: 0.5.0
     gl-matrix: 3.4.3
@@ -11259,10 +11259,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fuzzysort@npm:2.0.4":
-  version: 2.0.4
-  resolution: "fuzzysort@npm:2.0.4"
-  checksum: 5c498ec452ffc75c4368c52a7c4a490fc4d4129d94eab5f892d7e69d91ee3057259d9ab6924f14cca21f5731e7d91912e6c01669b40ef9b2165924e4b8e65fb5
+"fuzzysort@npm:3.1.0":
+  version: 3.1.0
+  resolution: "fuzzysort@npm:3.1.0"
+  checksum: 5cca05625976bde961812b7f6c03beb48a69fc9db07edce5cf16686cd48252c4b7ea88d3aaa055c8c7ad17c19a6eea834c40a73bcfb9823a4c3eccc8193538e2
   languageName: node
   linkType: hard
 
