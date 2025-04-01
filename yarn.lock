@@ -3130,7 +3130,7 @@ __metadata:
     tss-react: 4.9.2
     utif: 3.1.0
     webpack: 5.98.0
-    webpack-dev-server: 5.2.0
+    webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
 
@@ -3154,7 +3154,7 @@ __metadata:
     react-dom: 18.3.1
     tss-react: 4.9.3
     webpack: 5.98.0
-    webpack-dev-server: 5.2.0
+    webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
 
@@ -5027,7 +5027,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express-serve-static-core@npm:^4.17.33":
+"@types/express-serve-static-core@npm:^4.17.21, @types/express-serve-static-core@npm:^4.17.33":
   version: 4.19.6
   resolution: "@types/express-serve-static-core@npm:4.19.6"
   dependencies:
@@ -7293,7 +7293,7 @@ __metadata:
     react: 18.3.1
     react-dom: 18.2.0
     webpack: 5.98.0
-    webpack-dev-server: 5.2.0
+    webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
 
@@ -14126,7 +14126,7 @@ __metadata:
     vm-browserify: 1.1.2
     webpack: 5.98.0
     webpack-cli: 6.0.1
-    webpack-dev-server: 5.2.0
+    webpack-dev-server: 5.2.1
     webpack-hot-middleware: 2.26.0
   languageName: unknown
   linkType: soft
@@ -20600,7 +20600,7 @@ __metadata:
     playwright: 1.49.1
     serve-handler: 6.1.6
     webpack: 5.98.0
-    webpack-dev-server: 5.2.0
+    webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
 
@@ -20692,13 +20692,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-server@npm:5.2.0":
-  version: 5.2.0
-  resolution: "webpack-dev-server@npm:5.2.0"
+"webpack-dev-server@npm:5.2.1":
+  version: 5.2.1
+  resolution: "webpack-dev-server@npm:5.2.1"
   dependencies:
     "@types/bonjour": ^3.5.13
     "@types/connect-history-api-fallback": ^1.5.4
     "@types/express": ^4.17.21
+    "@types/express-serve-static-core": ^4.17.21
     "@types/serve-index": ^1.9.4
     "@types/serve-static": ^1.15.5
     "@types/sockjs": ^0.3.36
@@ -20732,7 +20733,7 @@ __metadata:
       optional: true
   bin:
     webpack-dev-server: bin/webpack-dev-server.js
-  checksum: 87b7acc194cfa3e5c95cd797bf1f0c2ffc8718bbc02e8f47777b9a861a6b7691f27c5138162ba2a9ac2c337d122e14f220342789c290027a3f9db44b4af104c9
+  checksum: cb96b182970dad1ea67ccca7b1c7a207ee0815c3b65218b08a8fad07df6a1854a2fed3588b17b06a99f28c999f4f391d551a42058cf02425ff7d0d21bfd2d27f
   languageName: node
   linkType: hard
 
