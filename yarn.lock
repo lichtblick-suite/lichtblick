@@ -1523,7 +1523,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/asar@npm:3.2.18":
+"@electron/asar@npm:3.2.18, @electron/asar@npm:^3.2.7":
   version: 3.2.18
   resolution: "@electron/asar@npm:3.2.18"
   dependencies:
@@ -1533,19 +1533,6 @@ __metadata:
   bin:
     asar: bin/asar.js
   checksum: bbb983d9395d92a6cb7405435d734e465f13346b78b398ba787ed04b8d626b634eecaadfa04f43a73ba5883613acb96807869b31953304038352c8b9d4197532
-  languageName: node
-  linkType: hard
-
-"@electron/asar@npm:^3.2.7":
-  version: 3.2.17
-  resolution: "@electron/asar@npm:3.2.17"
-  dependencies:
-    commander: ^5.0.0
-    glob: ^7.1.6
-    minimatch: ^3.0.4
-  bin:
-    asar: bin/asar.js
-  checksum: 0b9fae8c508c86e1f844f7e55499ce199609187e2bf9af11a1a2a773805b2bb0ff1d8af43c5e6c0cec8c0de1541b9e263c9bbe5fbf168e44f8c2c1414d6cec6c
   languageName: node
   linkType: hard
 
