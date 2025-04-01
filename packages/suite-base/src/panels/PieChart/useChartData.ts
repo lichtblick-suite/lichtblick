@@ -21,7 +21,7 @@ export function useChartData(rawValue: Float32Array, config: Config): ChartDatum
       const name = rawName && rawName.trim() !== "" ? rawName : `Data ${index + 1}`;
 
       return {
-        name, // ← ここは絶対に string 型
+        name,
         value: percentage,
         color: `hsl(${(index / rawArray.length) * 40 + 200}, 20%, ${50 - index * 5}%)`,
       };
