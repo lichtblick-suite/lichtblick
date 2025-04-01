@@ -2986,7 +2986,7 @@ __metadata:
     babel-jest: 29.7.0
     babel-plugin-transform-import-meta: 2.2.1
     browserify-zlib: 0.2.0
-    chart.js: 4.4.7
+    chart.js: 4.4.8
     chartjs-plugin-annotation: 3.0.1
     chartjs-plugin-datalabels: 2.2.0
     chromatic: 11.5.6
@@ -7885,12 +7885,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:4.4.7":
-  version: 4.4.7
-  resolution: "chart.js@npm:4.4.7"
+"chart.js@npm:4.4.8":
+  version: 4.4.8
+  resolution: "chart.js@npm:4.4.8"
   dependencies:
     "@kurkle/color": ^0.3.0
-  checksum: c0f0e9efd935b21a37286d1544046277bb607c08fb3e012b4c501104187a42a0c6541c8d7575782c7f1f3e0a91537b7d6a2eb9cd57122eb176609493838a9543
+  checksum: f6d7532f3f014d8d28d5e2a95c2aac362d22d2bd09fcdabcb7529ac21affc81670fc6920f78400d97ca80c13f274df7036c54b76340efbb4b0be63ced13c602a
   languageName: node
   linkType: hard
 
