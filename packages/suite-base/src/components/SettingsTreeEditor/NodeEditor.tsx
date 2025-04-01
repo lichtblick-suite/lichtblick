@@ -42,16 +42,6 @@ import { VisibilityToggle } from "./VisibilityToggle";
 import { icons } from "./icons";
 import { prepareSettingsNodes } from "./utils";
 
-type NodeEditorProps = {
-  actionHandler: (action: SettingsTreeAction) => void;
-  defaultOpen?: boolean;
-  filter?: string;
-  focusedPath?: readonly string[];
-  path: readonly string[];
-  settings?: Immutable<SettingsTreeNode>;
-  panelTitle?: string;
-};
-
 function ExpansionArrow({ expanded }: { expanded: boolean }): React.JSX.Element {
   const { classes } = useStyles();
 

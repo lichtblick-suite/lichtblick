@@ -13,17 +13,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import Logger from "@lichtblick/log";
-import { parseMessagePath, MessagePath } from "@lichtblick/message-path";
-import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
+import { parseMessagePath } from "@lichtblick/message-path";
+import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
-// import { usePanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
 
 import { settingsActionReducer, useSettingsTree } from "./settings";
-import type { Config } from "./types";
-
-const log = Logger.getLogger(__filename);
+import type { Config, State, Action } from "./types";
+import { useChartData } from "./useChartData";
 
 type Props = {
   context: PanelExtensionContext;
@@ -44,89 +41,81 @@ const defaultConfig: Config = {
   legend10: "Legend 10",
 };
 
-type State = {
-  path: string;
-  parsedPath: MessagePath | undefined;
-  latestMessage: MessageEvent | undefined;
-  latestMatchingQueriedData: unknown;
-  error: Error | undefined;
-  pathParseError: string | undefined;
-};
-
-type Action =
-  | { type: "frame"; messages: readonly MessageEvent[] }
-  | { type: "path"; path: string }
-  | { type: "seek" };
-
-function reducer(state: State, action: Action): State {
-  // log.info("New data received: state", state);
-  // log.info("New data received: action", action);
-  try {
-    switch (action.type) {
-      case "frame": {
-        if (state.pathParseError != undefined) {
-          return { ...state, latestMessage: _.last(action.messages), error: undefined };
-        }
-        let latestMatchingQueriedData = state.latestMatchingQueriedData;
-        let latestMessage = state.latestMessage;
-        if (state.parsedPath) {
-          for (const message of action.messages) {
-            if (message.topic !== state.parsedPath.topicName) {
-              continue;
-            }
-
-            const data = (message.message as { data: Float32Array }).data;
-
-            // if (!data) {
-            latestMatchingQueriedData = data;
-            latestMessage = message;
-            // }
-          }
-        }
-        return { ...state, latestMessage, latestMatchingQueriedData, error: undefined };
+// Reducer case: handle new frame messages
+function handleFrame(state: State, action: Extract<Action, { type: "frame" }>): State {
+  if (state.pathParseError != undefined) {
+    return { ...state, latestMessage: _.last(action.messages), error: undefined };
+  }
+  let latestMatchingQueriedData = state.latestMatchingQueriedData;
+  let latestMessage = state.latestMessage;
+  if (state.parsedPath) {
+    for (const message of action.messages) {
+      if (message.topic !== state.parsedPath.topicName) {
+        continue;
       }
-      case "path": {
-        const newPath = parseMessagePath(action.path);
-        let pathParseError: string | undefined;
-        if (
-          newPath?.messagePath.some(
-            (part) =>
-              (part.type === "filter" && typeof part.value === "object") ||
-              (part.type === "slice" &&
-                (typeof part.start === "object" || typeof part.end === "object")),
-          ) === true
-        ) {
-          pathParseError = "Message paths using variables are not currently supported";
-        }
-        let latestMatchingQueriedData: unknown;
-        let error: Error | undefined;
-        try {
-          latestMatchingQueriedData =
-            newPath && pathParseError == undefined && state.latestMessage
-              ? simpleGetMessagePathDataItems(state.latestMessage, newPath)
-              : undefined;
-        } catch (err: unknown) {
-          error = err as Error;
-        }
-        return {
-          ...state,
-          path: action.path,
-          parsedPath: newPath,
-          latestMatchingQueriedData,
-          error,
-          pathParseError,
-        };
-      }
-      case "seek":
-        return {
-          ...state,
-          latestMessage: undefined,
-          latestMatchingQueriedData: undefined,
-          error: undefined,
-        };
+      const data = (message.message as { data: Float32Array }).data;
+      latestMatchingQueriedData = data;
+      latestMessage = message;
     }
-  } catch (error) {
-    return { ...state, latestMatchingQueriedData: undefined, error };
+  }
+  return { ...state, latestMessage, latestMatchingQueriedData, error: undefined };
+}
+
+// Reducer case: handle path change
+function handlePath(state: State, action: Extract<Action, { type: "path" }>): State {
+  const newPath = parseMessagePath(action.path);
+  let pathParseError: string | undefined;
+  if (
+    (newPath?.messagePath.some(
+      (part) =>
+        (part.type === "filter" && typeof part.value === "object") ||
+        (part.type === "slice" &&
+          (typeof part.start === "object" || typeof part.end === "object"))
+    )) ?? false
+  ) {
+    pathParseError = "Message paths using variables are not currently supported";
+  }
+  let latestMatchingQueriedData: unknown;
+  let error: Error | undefined;
+  try {
+    latestMatchingQueriedData =
+      newPath && pathParseError == undefined && state.latestMessage
+        ? simpleGetMessagePathDataItems(state.latestMessage, newPath)
+        : undefined;
+  } catch (err: unknown) {
+    error = err as Error;
+  }
+  return {
+    ...state,
+    path: action.path,
+    parsedPath: newPath,
+    latestMatchingQueriedData,
+    error,
+    pathParseError,
+  };
+}
+
+// Reducer case: handle seek (reset state)
+function handleSeek(state: State): State {
+  return {
+    ...state,
+    latestMessage: undefined,
+    latestMatchingQueriedData: undefined,
+    error: undefined,
+  };
+}
+
+// Reducer function combining all cases
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "frame":
+      return handleFrame(state, action);
+    case "path":
+      return handlePath(state, action);
+    case "seek":
+      return handleSeek(state);
+    default:
+      return state;
   }
 }
 
@@ -154,15 +143,44 @@ export function PieChart({ context }: Props): React.JSX.Element {
     }),
   );
 
+  const settingsActionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
+    },
+    [],
+  );
+
+  const settingsTree = useSettingsTree(
+    config,
+    state.pathParseError,
+    state.error?.message,
+    legendCount,
+  );
+
+  // Extract raw values from queried message data
+  const rawValue = useMemo(
+    () =>
+      state.latestMatchingQueriedData instanceof Float32Array
+        ? state.latestMatchingQueriedData
+        : new Float32Array(),
+    [state.latestMatchingQueriedData],
+  );
+
+  // Normalize values into percentage format from useChartData
+  const data = useChartData(rawValue, config);
+
+  // Dispatch path change on config.path update
   useLayoutEffect(() => {
     dispatch({ type: "path", path: config.path });
   }, [config.path]);
 
+  // Save panel state and title on config update
   useEffect(() => {
     context.saveState(config);
     context.setDefaultPanelTitle(config.path === "" ? undefined : config.path);
   }, [config, context]);
 
+  // Register frame/seek render handler
   useEffect(() => {
     context.onRender = (renderState, done) => {
       setRenderDone(() => done);
@@ -183,21 +201,7 @@ export function PieChart({ context }: Props): React.JSX.Element {
     };
   }, [context]);
 
-  const settingsActionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      log.info("settingsActionHandler updated:", settingsActionHandler);
-      setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
-    },
-    [setConfig],
-  );
-
-  const settingsTree = useSettingsTree(
-    config,
-    state.pathParseError,
-    state.error?.message,
-    legendCount,
-  );
-
+  // Update panel settings editor with latest tree and handler
   useEffect(() => {
     context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,
@@ -205,6 +209,7 @@ export function PieChart({ context }: Props): React.JSX.Element {
     });
   }, [context, settingsActionHandler, settingsTree]);
 
+  // Subscribe/unsubscribe to topic from parsed path
   useEffect(() => {
     if (state.parsedPath?.topicName != undefined) {
       context.subscribe([{ topic: state.parsedPath.topicName, preload: false }]);
@@ -214,49 +219,10 @@ export function PieChart({ context }: Props): React.JSX.Element {
     };
   }, [context, state.parsedPath?.topicName]);
 
-  // Indicate render is complete - the effect runs after the dom is updated
+  // Call renderDone after render
   useEffect(() => {
     renderDone();
   }, [renderDone]);
-
-  useEffect(() => {
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      ...(context.initialState as Partial<Config>),
-    }));
-  }, [context.initialState]);
-
-  const rawValue = useMemo(
-    () =>
-      state.latestMatchingQueriedData instanceof Float32Array
-        ? state.latestMatchingQueriedData
-        : new Float32Array(),
-    [state.latestMatchingQueriedData],
-  );
-
-  const chartData = useMemo(
-    () =>
-      rawValue.length > 0
-        ? Array.from(rawValue).map(
-            (value) => (value / Array.from(rawValue).reduce((sum, val) => sum + val, 0)) * 100,
-          )
-        : [],
-    [rawValue],
-  );
-
-  const data = chartData.map((value, index) => {
-    const legendKey = `legend${index + 1}` as keyof Config;
-    const name =
-      typeof config[legendKey] === "string" && config[legendKey] !== ""
-        ? config[legendKey]
-        : `Data ${index + 1}`;
-
-    return {
-      name,
-      value,
-      color: `hsl(${(index / chartData.length) * 40 + 200}, 20%, ${50 - index * 5}%)`, // dark based color
-    };
-  });
 
   return (
     <div style={{ fontFamily: "Arial, sans-serif", color: "#333" }}>
