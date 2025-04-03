@@ -33,6 +33,9 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
     }
 
     const file: File | undefined = files[0];
+    if (!file) {
+      return;
+    }
 
     const source = new WorkerIterableSource({
       initWorker: () => {
@@ -50,7 +53,7 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,
-      name: file?.name,
+      name: file.name,
       sourceId: this.id,
     });
   }
