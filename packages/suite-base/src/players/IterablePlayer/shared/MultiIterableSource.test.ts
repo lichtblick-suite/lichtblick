@@ -163,7 +163,7 @@ describe("MultiIterableSource", () => {
       expect(result.topics.length).toBe(1);
       expect(result.problems.length).toBe(2);
       expect(result.problems[0]!.message).toBe(
-        `Datatype mismatch detected for "${dataTypeName}". Merging may cause issues.`,
+        `Different datatypes found for schema "${dataTypeName}"`,
       );
 
       expect(result.problems[1]!.message).toBe(

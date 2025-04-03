@@ -31,9 +31,9 @@ export const validateAndAddNewDatatypes = (
 
     if (!isSameDatatype(accumulatedDefinition, currentDefinition)) {
       accumulated.problems.push({
-        message: `Datatype mismatch detected for "${datatype}". Merging may cause issues.`,
+        message: `Different datatypes found for schema "${datatype}"`,
         severity: "warn",
-        tip: "Ensure all MCAPs use the same schema for each datatype.",
+        tip: "Ensure all MCAPs use the same schema for each datatype. Merge may cause issues in the visualization.",
       });
     }
   }

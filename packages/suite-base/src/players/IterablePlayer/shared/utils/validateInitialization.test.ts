@@ -31,7 +31,7 @@ describe("validateInitialization", () => {
       expect(accumulated.datatypes.get(datatype)).toEqual(accumulatedDefinition);
       expect(accumulated.problems).toHaveLength(1);
       expect(accumulated.problems[0]!.message).toBe(
-        `Datatype mismatch detected for "${datatype}". Merging may cause issues.`,
+        `Different datatypes found for schema "${datatype}"`,
       );
     });
 
