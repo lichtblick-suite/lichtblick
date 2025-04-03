@@ -23,10 +23,16 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
   public supportedFileTypes = [".bag"];
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const file = args.file;
-    if (!file) {
+    const files = args.files ?? [];
+
+    if (args.file) {
+      files.push(args.file);
+    }
+    if (files.length === 0) {
       return;
     }
+
+    const file: File | undefined = files[0];
 
     const source = new WorkerIterableSource({
       initWorker: () => {
@@ -44,7 +50,7 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,
-      name: file.name,
+      name: file?.name,
       sourceId: this.id,
     });
   }
