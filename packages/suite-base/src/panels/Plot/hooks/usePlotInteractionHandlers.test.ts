@@ -80,7 +80,6 @@ describe("usePlotInteractionHandlers", () => {
       draggingRef: { current: false, ...draggingRef },
       renderer: {
         getElementsAtPixel: jest.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-misused-spread
         ...renderer,
       },
       setActiveTooltip,
