@@ -53,12 +53,12 @@ describe("useStateToURLSynchronization", () => {
     expect(spy).toHaveBeenCalledWith(
       undefined,
       "",
-      "http://localhost/?time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?time=1970-01-01T00:00:01.000000001Z",
     );
     expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://localhost/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00:00:01.000000001Z",
     );
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
@@ -79,7 +79,7 @@ describe("useStateToURLSynchronization", () => {
     expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&time=1970-01-01T00:00:01.000000001Z",
     );
   });
 });
