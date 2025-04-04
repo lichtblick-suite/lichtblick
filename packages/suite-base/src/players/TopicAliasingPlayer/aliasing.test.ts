@@ -236,6 +236,7 @@ describe("mapPlayerState", () => {
         {
           extensionId: "any",
           aliasFunction: (args: Parameters<TopicAliasFunction>[0]) => [
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             { sourceTopicName: "/topic_1", name: `/renamed_topic_${args.globalVariables["foo"]}` },
           ],
         },
