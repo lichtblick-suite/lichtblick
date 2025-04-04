@@ -33,7 +33,7 @@ export const validateAndAddNewDatatypes = (
       accumulated.problems.push({
         message: `Different datatypes found for schema "${datatype}"`,
         severity: "warn",
-        tip: "Ensure all MCAPs use the same schema for each datatype. Merge may cause issues in visualization.",
+        tip: "Ensure all MCAPs use the same schema for each datatype. Merging files may cause issues in visualization.",
       });
     }
   }
