@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { CameraModel } from "@lichtblick/den/image";
 import { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
 import { Label, LabelPool } from "@lichtblick/three-text";
 
@@ -30,7 +30,7 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
   #annotation?: NormalizedTextAnnotation;
   #annotationNeedsUpdate = false;
 
-  #cameraModel?: PinholeCameraModel;
+  #cameraModel?: CameraModel;
   #cameraModelNeedsUpdate = false;
 
   public constructor(topicName: string, labelPool: LabelPool) {
@@ -81,7 +81,7 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
     this.#scale = scale;
   }
 
-  public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
+  public setCameraModel(cameraModel: CameraModel | undefined): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }

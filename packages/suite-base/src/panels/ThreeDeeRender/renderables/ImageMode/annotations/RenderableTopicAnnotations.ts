@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { CameraModel } from "@lichtblick/den/image";
 import { RosObject } from "@lichtblick/suite-base/players/types";
 import { LabelPool } from "@lichtblick/three-text";
 
@@ -34,7 +34,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
   #annotations: NormalizedAnnotation[] = [];
   #annotationsNeedsUpdate = false;
 
-  #cameraModel?: PinholeCameraModel;
+  #cameraModel?: CameraModel;
   #cameraModelNeedsUpdate = false;
 
   #originalMessage?: RosObject;
@@ -72,7 +72,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     this.#originalMessage = originalMessage;
   }
 
-  public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
+  public setCameraModel(cameraModel: CameraModel | undefined): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }
