@@ -15,6 +15,7 @@
 
 import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
+import { nanoid } from "nanoid";
 import { useSnackbar } from "notistack";
 import { extname } from "path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -92,6 +93,8 @@ import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
+
+const INSTALL_EXTENSIONS_BATCH = 1;
 
 const log = Logger.getLogger(__filename);
 
@@ -228,9 +231,34 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     }
   }, []);
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const installExtensions = useExtensionCatalog((state) => state.installExtensions);
+
+  const [installingProgress, setInstallingProgress] = useState<{
+    installed: number;
+    total: number;
+  }>({
+    installed: 0,
+    total: 0,
+  });
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  const progressSnackbarKey = `installing-extensions-${nanoid()}`;
+  useEffect(() => {
+    const { installed, total } = installingProgress;
+    // eslint-disable-next-line no-restricted-syntax
+    console.log("GOLD installedCount/total", installed, total);
+
+    if (total === 0 || installed === total) {
+      closeSnackbar(progressSnackbarKey);
+      return;
+    }
+
+    enqueueSnackbar(`Installing ${total} extensions... (${installed}/${total})`, {
+      key: progressSnackbarKey,
+      variant: "info",
+      preventDuplicate: true,
+    });
+  }, [closeSnackbar, enqueueSnackbar, installingProgress, progressSnackbarKey]);
 
   const handleFiles = useCallback(
     async (files: File[]) => {
@@ -257,15 +285,32 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
       if (extensionsData.length > 0) {
         try {
-          enqueueSnackbar(`Installing ${extensionsData.length} extensions`, { variant: "info" });
-          const result = await installExtensions("local", extensionsData);
-          const installed = result.filter(({ success }) => success);
-          const progressText = `${installed.length}/${result.length}`;
+          const total = extensionsData.length;
 
-          if (installed.length === result.length) {
-            enqueueSnackbar(`Installed all extensions (${progressText})`, { variant: "success" });
+          setInstallingProgress({
+            installed: 0,
+            total: extensionsData.length,
+          });
+
+          for (let i = 0; i < extensionsData.length; i += INSTALL_EXTENSIONS_BATCH) {
+            const chunk = extensionsData.slice(i, i + INSTALL_EXTENSIONS_BATCH);
+
+            const result = await installExtensions("local", chunk);
+            const installed = result.filter(({ success }) => success);
+            setInstallingProgress((lastState) => ({
+              ...lastState,
+              installed: lastState.installed + installed.length,
+            }));
+          }
+
+          if (installingProgress.installed === installingProgress.total) {
+            enqueueSnackbar(`Successfully installed all ${total} extensions.`, {
+              variant: "success",
+            });
           } else {
-            enqueueSnackbar(`Installed ${progressText} extensions.`, { variant: "warning" });
+            enqueueSnackbar(`Installed ${installingProgress.installed}/${total} extensions.`, {
+              variant: "warning",
+            });
           }
         } catch (error) {
           enqueueSnackbar(`An error occurred during extension installation: ${error.message}`, {
@@ -290,7 +335,14 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         }
       }
     },
-    [availableSources, enqueueSnackbar, installExtensions, selectSource],
+    [
+      availableSources,
+      enqueueSnackbar,
+      installExtensions,
+      installingProgress.installed,
+      installingProgress.total,
+      selectSource,
+    ],
   );
 
   // files the main thread told us to open

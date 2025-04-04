@@ -23,8 +23,8 @@ import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/
 
 const log = Logger.getLogger(__filename);
 
-const REFRESH_EXTENSIONS_BATCH = 3;
-const INSTALL_EXTENSIONS_BATCH = 3;
+const MAX_REFRESH_EXTENSIONS_BATCH = 1;
+const MAX_INSTALL_EXTENSIONS_BATCH = 1;
 
 function createExtensionRegistryStore(
   loaders: readonly ExtensionLoader[],
@@ -59,14 +59,15 @@ function createExtensionRegistryStore(
       }
 
       const results: InstallExtensionsResult[] = [];
-      for (let i = 0; i < data.length; i += INSTALL_EXTENSIONS_BATCH) {
-        const chunk = data.slice(i, i + INSTALL_EXTENSIONS_BATCH);
+      for (let i = 0; i < data.length; i += MAX_INSTALL_EXTENSIONS_BATCH) {
+        const chunk = data.slice(i, i + MAX_INSTALL_EXTENSIONS_BATCH);
         const result = await promisesInBatch(chunk, namespaceLoader);
         results.push(...result);
       }
       return results;
     };
 
+    // Called by installExtensions
     async function promisesInBatch(
       batch: Uint8Array[],
       loader: ExtensionLoader,
@@ -88,6 +89,7 @@ function createExtensionRegistryStore(
       );
     }
 
+    // Called by installExtensions > promisesInBatch
     const mergeState = (
       info: ExtensionInfo,
       { messageConverters, panelSettings, panels, topicAliasFunctions }: ContributionPoints,
@@ -107,6 +109,7 @@ function createExtensionRegistryStore(
       }));
     };
 
+    // Called by refreshAllExtensions > processLoader
     async function loadInBatch({
       batch,
       loader,
@@ -162,7 +165,7 @@ function createExtensionRegistryStore(
       const processLoader = async (loader: ExtensionLoader) => {
         try {
           const extensions = await loader.getExtensions();
-          const chunks = _.chunk(extensions, REFRESH_EXTENSIONS_BATCH);
+          const chunks = _.chunk(extensions, MAX_REFRESH_EXTENSIONS_BATCH);
           for (const chunk of chunks) {
             await loadInBatch({
               batch: chunk,
