@@ -16,6 +16,7 @@ jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerIterableSource");
 jest.mock("@lichtblick/suite-base/players/IterablePlayer");
 
 describe("Ros1LocalBagDataSourceFactory", () => {
+  const metricsCollector = new NoopMetricsCollector();
   let factory: Ros1LocalBagDataSourceFactory;
 
   beforeEach(() => {
@@ -33,7 +34,7 @@ describe("Ros1LocalBagDataSourceFactory", () => {
   it("should return undefined if no files is provided", () => {
     const result = factory.initialize({
       files: [],
-      metricsCollector: new NoopMetricsCollector(),
+      metricsCollector,
     });
 
     expect(result).toBeUndefined();
@@ -42,7 +43,7 @@ describe("Ros1LocalBagDataSourceFactory", () => {
   it("should return undefined if no file is provided", () => {
     const result = factory.initialize({
       file: undefined,
-      metricsCollector: new NoopMetricsCollector(),
+      metricsCollector,
     });
 
     expect(result).toBeUndefined();
@@ -51,7 +52,7 @@ describe("Ros1LocalBagDataSourceFactory", () => {
   it("should return undefined if undefined file is provided", () => {
     const result = factory.initialize({
       files: [undefined as unknown as File],
-      metricsCollector: new NoopMetricsCollector(),
+      metricsCollector,
     });
 
     expect(result).toBeUndefined();
@@ -60,11 +61,11 @@ describe("Ros1LocalBagDataSourceFactory", () => {
   it.each([
     {
       file: new File([BasicBuilder.string()], `${BasicBuilder.string()}.bag`),
-      metricsCollector: new NoopMetricsCollector(),
+      metricsCollector,
     },
     {
       files: [new File([BasicBuilder.string()], `${BasicBuilder.string()}.bag`)],
-      metricsCollector: new NoopMetricsCollector(),
+      metricsCollector,
     },
   ])("should return an IterablePlayer", (args: DataSourceFactoryInitializeArgs) => {
     const expectedInitArgs = {
