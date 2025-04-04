@@ -26,7 +26,7 @@ const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 
 function updateUrl(newState: AppURLState) {
   const newStateUrl = updateAppURLState(new URL(window.location.href), newState);
-  window.history.replaceState(undefined, "", newStateUrl.href);
+  window.history.replaceState(undefined, "", decodeURIComponent(newStateUrl.href));
 }
 
 /**
