@@ -31,7 +31,7 @@ describe("Ros1LocalBagDataSourceFactory", () => {
     expect(factory.supportedFileTypes).toEqual([".bag"]);
   });
 
-  it("should return undefined if no files is provided", () => {
+  it("should return undefined if no files are provided", () => {
     const result = factory.initialize({
       files: [],
       metricsCollector,
