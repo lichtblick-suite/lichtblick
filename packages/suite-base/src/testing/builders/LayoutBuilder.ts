@@ -3,53 +3,63 @@
 
 import { LayoutData, LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
+  ISO8601Timestamp,
   Layout,
-  LayoutPermission,
-  LayoutSyncStatus,
+  LayoutBaseline,
+  LayoutSyncInfo,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { PlaybackConfig } from "@lichtblick/suite-base/types/panels";
 
-const defaultPlaybackConfigValue: PlaybackConfig = {
-  speed: 1.0,
-};
-
-const DEFAULT_LAYOUT_FOR_TESTS: LayoutData = {
-  configById: {},
-  globalVariables: {},
-  userNodes: {},
-  playbackConfig: defaultPlaybackConfigValue,
-};
-
-function randomLayoutPermission(): LayoutPermission {
-  const layoutPermissions: LayoutPermission[] = ["CREATOR_WRITE", "ORG_READ", "ORG_WRITE"];
-  const randomSelector = BasicBuilder.number({ min: 0, max: layoutPermissions.length - 1 });
-  return layoutPermissions[randomSelector]!;
-}
-
-function randomLayoutSyncStatus(): LayoutSyncStatus {
-  const layoutSyncStatuses: LayoutSyncStatus[] = [
-    "new",
-    "updated",
-    "tracked",
-    "locally-deleted",
-    "remotely-deleted",
-  ];
-  const randomSelector = BasicBuilder.number({ min: 0, max: layoutSyncStatuses.length - 1 });
-  return layoutSyncStatuses[randomSelector]!;
-}
-
 export default class LayoutBuilder {
+  public static layoutPlaybackConfig(props: Partial<PlaybackConfig> = {}): PlaybackConfig {
+    return defaults<PlaybackConfig>(props, {
+      speed: BasicBuilder.float(),
+    });
+  }
+
+  public static layoutData(props: Partial<LayoutData> = {}): LayoutData {
+    return defaults<LayoutData>(props, {
+      configById: {},
+      globalVariables: {},
+      userNodes: {},
+      playbackConfig: LayoutBuilder.layoutPlaybackConfig(),
+    });
+  }
+
+  public static layoutBaseline(props: Partial<LayoutBaseline> = {}): LayoutBaseline {
+    return defaults<LayoutBaseline>(props, {
+      data: LayoutBuilder.layoutData(),
+      savedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp,
+    });
+  }
+
+  public static layoutSyncInfo(props: Partial<LayoutSyncInfo> = {}): LayoutSyncInfo {
+    return defaults<LayoutSyncInfo>(props, {
+      status: BasicBuilder.sample([
+        "new",
+        "updated",
+        "tracked",
+        "locally-deleted",
+        "remotely-deleted",
+      ]),
+      lastRemoteSavedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp
+    });
+  }
+
   public static layout(props: Partial<Layout> = {}): Layout {
     return defaults<Layout>(props, {
       id: BasicBuilder.string() as LayoutID,
       name: BasicBuilder.string(),
       from: BasicBuilder.string(),
-      permission: randomLayoutPermission(),
-      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, savedAt: undefined },
-      working: { data: DEFAULT_LAYOUT_FOR_TESTS, savedAt: undefined },
-      syncInfo: { status: randomLayoutSyncStatus(), lastRemoteSavedAt: undefined },
+      permission: BasicBuilder.sample(["CREATOR_WRITE", "ORG_READ", "ORG_WRITE"]),
+      baseline: LayoutBuilder.layoutBaseline(),
+      working: LayoutBuilder.layoutBaseline(),
+      syncInfo: LayoutBuilder.layoutSyncInfo(),
+      //Deprecated fields
+      data: LayoutBuilder.layoutData(),
+      state: LayoutBuilder.layoutData(),
     });
   }
 }

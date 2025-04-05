@@ -54,7 +54,7 @@ describe("useLayoutActions", () => {
     const { result } = renderHook(() => useLayoutActions());
     const newName = BasicBuilder.string();
 
-    const mockLayout = LayoutBuilder.layout();
+    const mockLayout = LayoutBuilder.layout({ permission: "CREATOR_WRITE" });
 
     await act(async () => {
       await result.current.onRenameLayout(mockLayout, newName);
