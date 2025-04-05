@@ -44,9 +44,10 @@ export function useLayoutActions(): UseLayoutActions {
   const onRenameLayout = useCallbackWithToast(
     async (item: Layout, newName: string) => {
       await layoutManager.updateLayout({ id: item.id, name: newName });
+      setSelectedLayoutId(item.id);
       void analytics.logEvent(AppEvent.LAYOUT_RENAME, { permission: item.permission });
     },
-    [analytics, layoutManager],
+    [analytics, layoutManager, setSelectedLayoutId],
   );
 
   const onDuplicateLayout = useCallbackWithToast(
