@@ -51,9 +51,7 @@ export type Layout = {
   working: LayoutBaseline | undefined;
 
   /** Info about this layout from remote storage. */
-  syncInfo:
-    | LayoutSyncInfo
-    | undefined;
+  syncInfo: LayoutSyncInfo | undefined;
 };
 
 export interface ILayoutStorage {

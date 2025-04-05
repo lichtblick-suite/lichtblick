@@ -44,7 +44,7 @@ export default class LayoutBuilder {
         "locally-deleted",
         "remotely-deleted",
       ]),
-      lastRemoteSavedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp
+      lastRemoteSavedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp,
     });
   }
 
