@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { CircularProgress } from "@mui/material";
-import React, { PropsWithChildren, Suspense, useCallback, useMemo } from "react";
+import React, { PropsWithChildren, Suspense, useCallback, useEffect, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import {
   MosaicDragType,
@@ -45,8 +45,8 @@ import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";
 import { PanelRemounter } from "./PanelRemounter";
 import { UnknownPanel } from "./UnknownPanel";
-
 import "react-mosaic-component/react-mosaic-component.css";
+import { useInstallingExtensionsStore } from "../hooks/useInstallingExtensionsStore";
 
 type Props = {
   layout?: MosaicNode<string>;
@@ -216,6 +216,19 @@ export default function PanelLayout(): React.JSX.Element {
   const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);
   const mosaicLayout = useCurrentLayoutSelector(selectedLayoutMosaicSelector);
   const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
+  const { installingProgress } = useInstallingExtensionsStore();
+
+  let isInstallingExtensions = installingProgress.inProgress;
+  const totalExtensions = installingProgress.total;
+  const installedExtensions = installingProgress.installed;
+  console.log("EXTENSOES", totalExtensions, installedExtensions)
+  console.log("installingProgress.inProgress NO PAINEL", installingProgress.inProgress)
+
+  if (totalExtensions === installedExtensions ) {
+    isInstallingExtensions = false;
+  }
+
+  console.log("installingProgress.inProgress NO PAINEL DEPOIS", installingProgress.inProgress)
 
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {
@@ -226,7 +239,7 @@ export default function PanelLayout(): React.JSX.Element {
     [changePanelLayout],
   );
 
-  if (registeredExtensions == undefined) {
+  if (registeredExtensions == undefined || isInstallingExtensions) {
     return <ExtensionsLoadingState />;
   }
 
