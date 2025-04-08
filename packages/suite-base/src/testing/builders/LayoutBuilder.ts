@@ -13,7 +13,7 @@ import {
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
-import { PlaybackConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
+import { PlaybackConfig, UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 
 export default class LayoutBuilder {
   public static playbackConfig(props: Partial<PlaybackConfig> = {}): PlaybackConfig {
@@ -22,10 +22,15 @@ export default class LayoutBuilder {
     });
   }
 
-  public static userScripts(props: Partial<UserScripts> = {}): UserScripts {
-    return defaults<UserScripts>(props, {
-      scriptId: { name: BasicBuilder.string(), sourceCode: BasicBuilder.string() },
+  public static userScript(props: Partial<UserScript> = {}): UserScript {
+    return defaults<UserScript>(props, {
+      name: BasicBuilder.string(),
+      sourceCode: BasicBuilder.string(),
     });
+  }
+
+  public static userScripts(count = 3): UserScripts {
+    return BasicBuilder.genericDictionary(LayoutBuilder.userScript, { count });
   }
 
   public static data(props: Partial<LayoutData> = {}): LayoutData {
