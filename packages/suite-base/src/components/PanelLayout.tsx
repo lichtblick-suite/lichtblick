@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { CircularProgress } from "@mui/material";
-import React, { PropsWithChildren, Suspense, useCallback, useEffect, useMemo } from "react";
+import React, { PropsWithChildren, Suspense, useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import {
   MosaicDragType,
@@ -221,14 +221,14 @@ export default function PanelLayout(): React.JSX.Element {
   let isInstallingExtensions = installingProgress.inProgress;
   const totalExtensions = installingProgress.total;
   const installedExtensions = installingProgress.installed;
-  console.log("EXTENSOES", totalExtensions, installedExtensions)
-  console.log("installingProgress.inProgress NO PAINEL", installingProgress.inProgress)
+  console.log("EXTENSOES", totalExtensions, installedExtensions);
+  console.log("installingProgress.inProgress NO PAINEL", installingProgress.inProgress);
 
-  if (totalExtensions === installedExtensions ) {
+  if (totalExtensions === installedExtensions) {
     isInstallingExtensions = false;
   }
 
-  console.log("installingProgress.inProgress NO PAINEL DEPOIS", installingProgress.inProgress)
+  console.log("installingProgress.inProgress NO PAINEL DEPOIS", installingProgress.inProgress);
 
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {

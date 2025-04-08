@@ -178,7 +178,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     [getMessagePipeline],
   );
 
-  console.log("IS PLAYING FILE", isPlaying)
+  console.log("IS PLAYING FILE", isPlaying);
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
   const { handleFiles } = useInstallingExtensionsState(availableSources, selectSource, play, pause);
