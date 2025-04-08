@@ -8,7 +8,7 @@
 import { CameraCalibration } from "@foxglove/schemas";
 import { t } from "i18next";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { CameraModel, createCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
@@ -70,7 +70,7 @@ export type CameraInfoUserData = BaseUserData & {
   topic: string;
   cameraInfo: CameraInfo | undefined;
   originalMessage: Record<string, RosValue> | undefined;
-  cameraModel: PinholeCameraModel | undefined;
+  cameraModel: CameraModel | undefined;
   lines: RenderableLineList | undefined;
 };
 
@@ -265,7 +265,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
       if (cameraInfo.P.length === 12) {
         try {
-          renderable.userData.cameraModel = new PinholeCameraModel(cameraInfo);
+          renderable.userData.cameraModel = createCameraModel(cameraInfo);
         } catch (errUnk) {
           const err = errUnk as Error;
           this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);
@@ -314,7 +314,7 @@ function vec3(): Vector3 {
 
 function createLineListMarker(
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: CameraModel,
   settings: LayerSettingsCameraInfo,
   steps = 10,
 ): Marker {
@@ -380,7 +380,7 @@ function horizontalLine(
   output: Vector3[],
   y: number,
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: CameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {
@@ -397,7 +397,7 @@ function verticalLine(
   output: Vector3[],
   x: number,
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: CameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {
