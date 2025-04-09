@@ -23,8 +23,10 @@ import {
   decodeUYVY,
   decodeYUYV,
 } from "@lichtblick/den/image";
+import { H264, VideoPlayer } from "@lichtblick/den/video";
+import { toMicroSec } from "@lichtblick/rostime";
 
-import { CompressedImageTypes } from "./ImageTypes";
+import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
 import { Image as RosImage } from "../../ros";
 import { ColorModeSettings, getColorConverter } from "../colorMode";
 
@@ -34,6 +36,55 @@ export async function decodeCompressedImageToBitmap(
 ): Promise<ImageBitmap> {
   const bitmapData = new Blob([image.data], { type: `image/${image.format}` });
   return await createImageBitmap(bitmapData, { resizeWidth });
+}
+
+export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
+  switch (frameMsg.format) {
+    case "h264": {
+      // Search for an IDR NAL unit to determine if this is a keyframe
+      return H264.IsKeyframe(frameMsg.data);
+    }
+  }
+  return false;
+}
+
+export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
+  switch (frameMsg.format) {
+    case "h264": {
+      // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe
+      return H264.ParseDecoderConfig(frameMsg.data);
+    }
+  }
+
+  return undefined;
+}
+
+export async function decodeCompressedVideoToBitmap(
+  frameMsg: CompressedVideo,
+  videoPlayer: VideoPlayer,
+  firstMessageTime: bigint,
+  resizeWidth?: number,
+): Promise<ImageBitmap> {
+  if (!videoPlayer.isInitialized()) {
+    return await emptyVideoFrame(videoPlayer, resizeWidth);
+  }
+
+  // Get the timestamp of this frame as microseconds relative to the first frame
+  const firstTimestampMicros = Number(firstMessageTime / 1000n);
+  const timestampMicros = toMicroSec(frameMsg.timestamp) - firstTimestampMicros;
+
+  const videoFrame = await videoPlayer.decode(
+    frameMsg.data,
+    timestampMicros,
+    isVideoKeyframe(frameMsg) ? "key" : "delta",
+  );
+  if (videoFrame) {
+    const imageBitmap = await self.createImageBitmap(videoFrame, { resizeWidth });
+    videoPlayer.lastImageBitmap = imageBitmap;
+    videoFrame.close();
+    return imageBitmap;
+  }
+  return await emptyVideoFrame(videoPlayer, resizeWidth);
 }
 
 export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<
@@ -133,4 +184,16 @@ export function decodeRawImage(
     default:
       throw new Error(`Unsupported encoding ${encoding}`);
   }
+}
+
+// Performance sensitive, skip the extra await when returning a blank image
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+export function emptyVideoFrame(
+  videoPlayer?: VideoPlayer,
+  resizeWidth?: number,
+): Promise<ImageBitmap> {
+  const width = resizeWidth ?? 32;
+  const size = videoPlayer?.codedSize() ?? { width, height: width };
+  const data = new ImageData(size.width, size.height);
+  return createImageBitmap(data, { resizeWidth });
 }

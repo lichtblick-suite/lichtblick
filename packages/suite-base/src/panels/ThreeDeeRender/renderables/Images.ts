@@ -21,9 +21,10 @@ import {
   ImageRenderable,
   ImageUserData,
 } from "./Images/ImageRenderable";
-import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
+import { ALL_CAMERA_INFO_SCHEMAS, AnyImage, CompressedVideo } from "./Images/ImageTypes";
 import {
   normalizeCompressedImage,
+  normalizeCompressedVideo,
   normalizeRawImage,
   normalizeRosCompressedImage,
   normalizeRosImage,
@@ -36,6 +37,7 @@ import { SettingsTreeEntry } from "../SettingsManager";
 import {
   CAMERA_CALIBRATION_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES,
+  COMPRESSED_VIDEO_DATATYPES,
   RAW_IMAGE_DATATYPES,
 } from "../foxglove";
 import {
@@ -132,6 +134,14 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleCompressedImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_VIDEO_DATATYPES,
+        subscription: {
+          handler: this.#handleCompressedVideo,
           filterQueue: onlyLastByTopicMessage,
         },
       },
@@ -303,6 +313,10 @@ export class Images extends SceneExtension<ImageRenderable> {
     this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
   };
 
+  #handleCompressedVideo = (messageEvent: PartialMessageEvent<CompressedVideo>): void => {
+    this.handleImage(messageEvent, normalizeCompressedVideo(messageEvent.message));
+  };
+
   protected handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
     const imageTopic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
@@ -435,10 +449,13 @@ export class Images extends SceneExtension<ImageRenderable> {
     const userSettings = this.renderer.config.topics[imageTopic] as
       | Partial<LayerSettingsImage>
       | undefined;
-
+    const messageTime = image
+      ? toNanoSec("header" in image ? image.header.stamp : image.timestamp)
+      : 0n;
     renderable = this.initRenderable(imageTopic, {
       receiveTime,
-      messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
+      messageTime,
+      firstMessageTime: messageTime,
       frameId: this.renderer.normalizeFrameId(frameId),
       pose: makePose(),
       settingsPath: ["topics", imageTopic],
