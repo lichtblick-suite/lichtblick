@@ -12,6 +12,8 @@ const tempEuler = new THREE.Euler();
 
 /**
  * Convert a quaternion to roll-pitch-yaw Euler angles.
+ * Returns angles in degrees using extrinsic ZYX (yaw-pitch-roll) convention,
+ * which is the standard for aerospace and robotics.
  */
 export function quatToEuler(
   x: number,
@@ -20,7 +22,7 @@ export function quatToEuler(
   w: number,
 ): [roll: number, pitch: number, yaw: number] {
   tempQuaternion.set(x, y, z, w);
-  tempEuler.setFromQuaternion(tempQuaternion, "XYZ");
+  tempEuler.setFromQuaternion(tempQuaternion, "ZYX");
   return [
     THREE.MathUtils.radToDeg(tempEuler.x),
     THREE.MathUtils.radToDeg(tempEuler.y),
