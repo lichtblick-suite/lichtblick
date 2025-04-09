@@ -26,6 +26,8 @@ export const panels = {
   parametersDescription: "Read and set parameters for a data source.",
   plot: "Plot",
   plotDescription: "Plot numerical values over time or other values.",
+  pieChart: "Pie Chart",
+  pieChartDescription: "Display a pie chart based on a continuous value.",
   publish: "Publish",
   publishDescription: "Publish messages to the data source (live connections only).",
   rawMessages: "Raw Messages",
