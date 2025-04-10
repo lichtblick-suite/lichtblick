@@ -45,8 +45,8 @@ import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";
 import { PanelRemounter } from "./PanelRemounter";
 import { UnknownPanel } from "./UnknownPanel";
-
 import "react-mosaic-component/react-mosaic-component.css";
+import { useInstallingExtensionsStore } from "../hooks/useInstallingExtensionsStore";
 
 type Props = {
   layout?: MosaicNode<string>;
@@ -216,6 +216,9 @@ export default function PanelLayout(): React.JSX.Element {
   const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);
   const mosaicLayout = useCurrentLayoutSelector(selectedLayoutMosaicSelector);
   const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
+  const { installingProgress } = useInstallingExtensionsStore();
+
+  const isInstallingExtensions = installingProgress.inProgress;
 
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {
@@ -226,7 +229,7 @@ export default function PanelLayout(): React.JSX.Element {
     [changePanelLayout],
   );
 
-  if (registeredExtensions == undefined) {
+  if (registeredExtensions == undefined || isInstallingExtensions) {
     return <ExtensionsLoadingState />;
   }
 
