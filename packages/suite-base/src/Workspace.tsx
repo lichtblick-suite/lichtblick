@@ -178,10 +178,13 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     [getMessagePipeline],
   );
 
-  console.log("IS PLAYING FILE", isPlaying);
-
   const { dialogActions, sidebarActions } = useWorkspaceActions();
-  const { handleFiles } = useInstallingExtensionsState(availableSources, selectSource, play, pause);
+  const { handleFiles } = useInstallingExtensionsState({
+    availableSources,
+    selectSource,
+    isPlaying,
+    playerEvents: { play, pause },
+  });
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {

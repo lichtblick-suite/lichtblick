@@ -218,17 +218,7 @@ export default function PanelLayout(): React.JSX.Element {
   const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
   const { installingProgress } = useInstallingExtensionsStore();
 
-  let isInstallingExtensions = installingProgress.inProgress;
-  const totalExtensions = installingProgress.total;
-  const installedExtensions = installingProgress.installed;
-  console.log("EXTENSOES", totalExtensions, installedExtensions);
-  console.log("installingProgress.inProgress NO PAINEL", installingProgress.inProgress);
-
-  if (totalExtensions === installedExtensions) {
-    isInstallingExtensions = false;
-  }
-
-  console.log("installingProgress.inProgress NO PAINEL DEPOIS", installingProgress.inProgress);
+  const isInstallingExtensions = installingProgress.inProgress;
 
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {

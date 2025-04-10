@@ -7,7 +7,6 @@ import { extname } from "path";
 import { useCallback, useEffect, useRef } from "react";
 
 import Logger from "@lichtblick/log";
-import InstallingSnackbar from "@lichtblick/suite-base/InstallingSnackbar";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import {
   DataSourceArgs,
@@ -20,19 +19,34 @@ type UseInstallingExtensionsState = {
   handleFiles: (files: File[]) => Promise<void>;
 };
 
+type UseInstallingExtensionsStateProps = {
+  availableSources: readonly IDataSourceFactory[];
+  selectSource: (sourceId: string, args?: DataSourceArgs) => void;
+  isPlaying: boolean;
+  playerEvents: {
+    play: (() => void) | undefined;
+    pause: (() => void) | undefined;
+  };
+};
+
 const log = Logger.getLogger(__filename);
 
-export function useInstallingExtensionsState(
-  availableSources: readonly IDataSourceFactory[],
-  selectSource: (sourceId: string, args?: DataSourceArgs) => void,
-  play: (() => void) | undefined,
-  pause: (() => void) | undefined,
-): UseInstallingExtensionsState {
+export function useInstallingExtensionsState({
+  availableSources,
+  selectSource,
+  isPlaying,
+  playerEvents: { play, pause },
+}: UseInstallingExtensionsStateProps): UseInstallingExtensionsState {
   const installExtensions = useExtensionCatalog((state) => state.installExtensions);
   const INSTALL_EXTENSIONS_BATCH = 1;
 
-  const setInstallingProgress = useInstallingExtensionsStore((s) => s.setInstallingProgress);
-  const installingProgress = useInstallingExtensionsStore((s) => s.installingProgress);
+  const { setInstallingProgress, startInstallingProgress, resetInstallingProgress } =
+    useInstallingExtensionsStore((state) => ({
+      setInstallingProgress: state.setInstallingProgress,
+      startInstallingProgress: state.startInstallingProgress,
+      resetInstallingProgress: state.resetInstallingProgress,
+    }));
+  const progress = useInstallingExtensionsStore((state) => state.installingProgress);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -40,22 +54,75 @@ export function useInstallingExtensionsState(
   const progressSnackbarKey = progressSnackbarKeyRef.current;
 
   useEffect(() => {
-    const { installed, total } = installingProgress;
-    // eslint-disable-next-line no-restricted-syntax
-    console.log("GOLD installedCount/total", installed, total);
-
+    const { installed, total } = progress;
     if (total === 0 || installed === total) {
       closeSnackbar(progressSnackbarKey);
       return;
     }
 
-    enqueueSnackbar(<InstallingSnackbar installed={installed} total={total} />, {
+    enqueueSnackbar(`Installing ${total} extensions...`, {
       key: progressSnackbarKey,
       variant: "info",
-      preventDuplicate: true,
       persist: true,
+      preventDuplicate: true,
     });
-  }, [closeSnackbar, enqueueSnackbar, installingProgress, progressSnackbarKey]);
+  }, [progress, enqueueSnackbar, closeSnackbar, progressSnackbarKey]);
+
+  const installFoxeExtensions = useCallback(
+    async (extensionsData: Uint8Array[]) => {
+      startInstallingProgress(extensionsData.length);
+
+      const isPlayingInitialState = isPlaying;
+
+      try {
+        for (let i = 0; i < extensionsData.length; i += INSTALL_EXTENSIONS_BATCH) {
+          const chunk = extensionsData.slice(i, i + INSTALL_EXTENSIONS_BATCH);
+          const result = await installExtensions("local", chunk);
+
+          const installedCount = result.filter(({ success }) => success).length;
+          setInstallingProgress((prev) => ({
+            ...prev,
+            installed: prev.installed + installedCount,
+          }));
+        }
+
+        setInstallingProgress((prev) => ({
+          ...prev,
+          inProgress: false,
+        }));
+
+        enqueueSnackbar(`Successfully installed all ${extensionsData.length} extensions.`, {
+          variant: "success",
+          preventDuplicate: true,
+          autoHideDuration: 3500,
+        });
+      } catch (error: unknown) {
+        setInstallingProgress((prev) => ({
+          ...prev,
+          inProgress: false,
+        }));
+
+        enqueueSnackbar(
+          `An error occurred during extension installation: ${error instanceof Error ? error.message : "Unknown error"}`,
+          { variant: "error" },
+        );
+      } finally {
+        if (isPlayingInitialState) {
+          play?.();
+        }
+        resetInstallingProgress();
+      }
+    },
+    [
+      startInstallingProgress,
+      isPlaying,
+      setInstallingProgress,
+      enqueueSnackbar,
+      installExtensions,
+      resetInstallingProgress,
+      play,
+    ],
+  );
 
   const handleFiles = useCallback(
     async (files: File[]) => {
@@ -63,104 +130,39 @@ export function useInstallingExtensionsState(
         return;
       }
 
-      if (pause) {
-        pause();
-      }
-
-      const otherFiles: File[] = [];
-      log.debug("open files", files);
+      pause?.();
 
       const extensionsData: Uint8Array[] = [];
+      const otherFiles: File[] = [];
+
       for (const file of files) {
         try {
           if (file.name.endsWith(".foxe")) {
-            const arrayBuffer = await file.arrayBuffer();
-            extensionsData.push(new Uint8Array(arrayBuffer));
+            const buffer = await file.arrayBuffer();
+            extensionsData.push(new Uint8Array(buffer));
           } else {
             otherFiles.push(file);
           }
         } catch (error) {
-          console.error(`Error loading foxe file ${file.name}`, error);
+          log.error(`Error reading file ${file.name}`, error);
         }
       }
 
       if (extensionsData.length > 0) {
-        try {
-          const total = extensionsData.length;
-
-          setInstallingProgress({
-            installed: 0,
-            total: extensionsData.length,
-            inProgress: true,
-          });
-
-          for (let i = 0; i < extensionsData.length; i += INSTALL_EXTENSIONS_BATCH) {
-            const chunk = extensionsData.slice(i, i + INSTALL_EXTENSIONS_BATCH);
-
-            const result = await installExtensions("local", chunk);
-            const installed = result.filter(({ success }) => success);
-            setInstallingProgress((lastState) => ({
-              ...lastState,
-              installed: lastState.installed + installed.length,
-            }));
-          }
-
-          if (installingProgress.installed === installingProgress.total) {
-            console.log("installingProgress.inProgress BEFORE", installingProgress.inProgress);
-            if (play) {
-              play();
-            }
-            setInstallingProgress((prevState) => ({
-              ...prevState,
-              installingInProgress: false,
-            }));
-            console.log("installingProgress.inProgress AFTER", installingProgress.inProgress);
-            enqueueSnackbar(`Successfully installed all ${total} extensions.`, {
-              variant: "success",
-            });
-          }
-        } catch (error) {
-          if (play) {
-            play();
-          }
-          setInstallingProgress((prevState) => ({
-            ...prevState,
-            installingInProgress: false,
-          }));
-          enqueueSnackbar(`An error occurred during extension installation: ${error.message}`, {
-            variant: "error",
-          });
-        }
+        await installFoxeExtensions(extensionsData);
       }
 
       if (otherFiles.length > 0) {
-        // Look for a source that supports the dragged file extensions
-        for (const source of availableSources) {
-          const filteredFiles = otherFiles.filter((file): boolean => {
-            const ext = extname(file.name);
-            return source.supportedFileTypes ? source.supportedFileTypes.includes(ext) : false;
-          });
+        const source = availableSources.find((s) =>
+          otherFiles.some((file) => s.supportedFileTypes?.includes(extname(file.name)) ?? false),
+        );
 
-          // select the first source that has files that match the supported extensions
-          if (filteredFiles.length > 0) {
-            selectSource(source.id, { type: "file", files: otherFiles });
-            break;
-          }
+        if (source) {
+          selectSource(source.id, { type: "file", files: otherFiles });
         }
       }
     },
-    [
-      setInstallingProgress,
-      pause,
-      installingProgress.installed,
-      installingProgress.total,
-      installingProgress.inProgress,
-      installExtensions,
-      play,
-      enqueueSnackbar,
-      availableSources,
-      selectSource,
-    ],
+    [availableSources, installFoxeExtensions, pause, selectSource],
   );
 
   return { handleFiles };
