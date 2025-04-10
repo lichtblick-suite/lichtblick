@@ -41,7 +41,7 @@ describe("ExtensionDetails Component", () => {
   const mockEnqueueSnackbar = jest.fn();
   const mockLogEvent = jest.fn();
   const mockDownloadExtension = jest.fn();
-  const mockInstallExtension = jest.fn();
+  const mockInstallExtensions = jest.fn();
   const mockUninstallExtension = jest.fn();
   const mockGetMarkdown = jest.fn();
 
@@ -66,7 +66,7 @@ describe("ExtensionDetails Component", () => {
     (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
       const mockExtensionCatalog = {
         downloadExtension: mockDownloadExtension,
-        installExtension: mockInstallExtension,
+        installExtensions: mockInstallExtensions,
         uninstallExtension: mockUninstallExtension,
         refreshExtensions: jest.fn(),
         installedExtensions: [],
@@ -112,7 +112,7 @@ describe("ExtensionDetails Component", () => {
       (isDesktopApp as jest.Mock).mockReturnValue(true);
 
       mockDownloadExtension.mockResolvedValue(new Uint8Array());
-      mockInstallExtension.mockResolvedValue({});
+      mockInstallExtensions.mockResolvedValue({});
 
       render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
 
@@ -121,7 +121,7 @@ describe("ExtensionDetails Component", () => {
 
       await waitFor(() => {
         expect(mockDownloadExtension).toHaveBeenCalledWith(mockExtension.foxe);
-        expect(mockInstallExtension).toHaveBeenCalledWith("local", expect.any(Uint8Array));
+        expect(mockInstallExtensions).toHaveBeenCalledWith("local", [expect.any(Uint8Array)]);
         expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
           `${mockExtension.name} installed successfully`,
           { variant: "success" },
@@ -146,7 +146,7 @@ describe("ExtensionDetails Component", () => {
           { variant: "error" },
         );
         expect(mockDownloadExtension).not.toHaveBeenCalled();
-        expect(mockInstallExtension).not.toHaveBeenCalled();
+        expect(mockInstallExtensions).not.toHaveBeenCalled();
       });
     });
 

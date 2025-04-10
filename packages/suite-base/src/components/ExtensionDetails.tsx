@@ -63,7 +63,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
   const [activeTab, setActiveTab] = useState<number>(0);
   const isMounted = useMountedState();
   const downloadExtension = useExtensionCatalog((state) => state.downloadExtension);
-  const installExtension = useExtensionCatalog((state) => state.installExtension);
+  const installExtensions = useExtensionCatalog((state) => state.installExtensions);
   const uninstallExtension = useExtensionCatalog((state) => state.uninstallExtension);
   const marketplace = useExtensionMarketplace();
   const { enqueueSnackbar } = useSnackbar();
@@ -105,7 +105,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
       }
       setOperationStatus(OperationStatus.INSTALLING);
       const data = await downloadExtension(url);
-      await installExtension("local", data);
+      await installExtensions("local", [data]);
       enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
       if (isMounted()) {
         setIsInstalled(true);
@@ -125,7 +125,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
     enqueueSnackbar,
     extension.foxe,
     extension.id,
-    installExtension,
+    installExtensions,
     isMounted,
     extension.name,
   ]);

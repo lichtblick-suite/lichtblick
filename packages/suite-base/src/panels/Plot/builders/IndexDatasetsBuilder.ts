@@ -23,8 +23,8 @@ import {
   SeriesItem,
 } from "./IDatasetsBuilder";
 import { MATH_FUNCTIONS } from "../constants";
-import { getChartValue, isChartValue, Datum } from "../datum";
 import { Dataset } from "../types";
+import { getChartValue, isChartValue, Datum } from "../utils/datum";
 
 type DatumWithReceiveTime = Datum & {
   receiveTime: Time;

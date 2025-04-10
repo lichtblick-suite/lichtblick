@@ -21,7 +21,7 @@ import {
 import { CustomDatasetsBuilder } from "./CustomDatasetsBuilder";
 import { CustomDatasetsBuilderImpl } from "./CustomDatasetsBuilderImpl";
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
-import { PlotPath } from "../config";
+import { PlotPath } from "../utils/config";
 
 Object.defineProperty(global, "Worker", {
   writable: true,

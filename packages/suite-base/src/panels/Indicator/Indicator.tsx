@@ -23,7 +23,7 @@ import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables
 import { useStyles } from "@lichtblick/suite-base/panels/Indicator/Indicator.style";
 import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/Indicator/constants";
 import { stateReducer } from "@lichtblick/suite-base/panels/shared/gaugeAndIndicatorStateReducer";
-import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/types";
+import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/shared/types";
 
 import { getMatchingRule } from "./getMatchingRule";
 import { settingsActionReducer, useSettingsTree } from "./settings";

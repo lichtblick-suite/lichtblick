@@ -41,7 +41,7 @@ class BenchmarkStats {
       const stddev = std(values);
 
       log.info(
-        `Frame time (filtered) average: ${avgFrameMs}, median: ${medianFrameMs}, P90: ${p90FrameMs}, stddev: ${stddev}`,
+        `Frame time (filtered) average: ${String(avgFrameMs)}, median: ${String(medianFrameMs)}, P90: ${String(p90FrameMs)}, stddev: ${String(stddev.values)}`,
       );
 
       const record = (window as { recordFrameTimes?: RecordFrameTimesFn }).recordFrameTimes;

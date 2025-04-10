@@ -37,8 +37,6 @@ import { LICHTBLICK_PRODUCT_NAME } from "../common/webpackDefines";
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const isMac = process.platform === "darwin";
-const isLinux = process.platform === "linux";
-const isWindows = process.platform === "win32";
 const isProduction = process.env.NODE_ENV === "production";
 const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
 
@@ -54,7 +52,7 @@ function getWindowBackgroundColor(): string | undefined {
 
 function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
   const theme = palette[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
-  if (isWindows) {
+  if (!isMac) {
     return {
       height: APP_BAR_HEIGHT,
       color: theme.appBar.main,
@@ -79,7 +77,6 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     minHeight: 250,
     autoHideMenuBar: true,
     title: LICHTBLICK_PRODUCT_NAME,
-    frame: isLinux ? false : true,
     titleBarStyle: "hidden",
     trafficLightPosition: isMac ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
     titleBarOverlay: getTitleBarOverlayOptions(),
@@ -109,7 +106,7 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
 
   const browserWindow = new BrowserWindow(windowOptions);
   nativeTheme.on("updated", () => {
-    if (isWindows) {
+    if (!isMac) {
       // Although the TS types say this function is always available, it is undefined on non-Windows platforms
       browserWindow.setTitleBarOverlay(getTitleBarOverlayOptions());
     }

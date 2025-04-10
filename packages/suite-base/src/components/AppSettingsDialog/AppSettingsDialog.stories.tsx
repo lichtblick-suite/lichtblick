@@ -25,7 +25,7 @@ const installedExtensions: ExtensionInfo[] = _.range(1, 10).map((index) => ({
   displayName: `Private Extension Name ${index + 1}`,
   description: "Private extension sample description",
   publisher: "Private Publisher",
-  homepage: "https://github.com/Lichtblick-Suite",
+  homepage: "https://github.com/lichtblick-suite",
   license: "MIT",
   version: `1.${index}`,
   keywords: ["storybook", "testing"],
@@ -40,7 +40,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
     displayName: "Extension Name",
     description: "Extension sample description",
     publisher: "Publisher",
-    homepage: "https://github.com/Lichtblick-Suite",
+    homepage: "https://github.com/lichtblick-suite",
     license: "MIT",
     version: "1.2.10",
     keywords: ["storybook", "testing"],
@@ -49,6 +49,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
 
 const MockExtensionLoader: ExtensionLoader = {
   namespace: "local",
+  getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,
   loadExtension: async (_id: string) => "",
   installExtension: async (_foxeFileData: Uint8Array) => {

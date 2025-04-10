@@ -11,11 +11,11 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/config";
+import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { SubscriptionPreloadType } from "@lichtblick/suite-base/players/types";
 
-import { isReferenceLinePlotPathType } from "../config";
-import { pathToSubscribePayload } from "../subscription";
+import { isReferenceLinePlotPathType } from "../utils/config";
+import { pathToSubscribePayload } from "../utils/subscription";
 
 const useSubscriptions = (config: PlotConfig, subscriberId: string): void => {
   const { paths, xAxisVal } = config;

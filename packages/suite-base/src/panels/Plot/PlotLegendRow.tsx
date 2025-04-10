@@ -24,7 +24,7 @@ import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutC
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
-import { PlotPath, plotPathDisplayName } from "./config";
+import { PlotPath, plotPathDisplayName } from "./utils/config";
 
 type PlotLegendRowProps = Immutable<{
   hasMismatchedDataLength: boolean;

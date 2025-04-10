@@ -14,6 +14,9 @@ import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/
 export interface ExtensionLoader {
   readonly namespace: ExtensionNamespace;
 
+  // get extension by id
+  getExtension(id: string): Promise<ExtensionInfo | undefined>;
+
   // get a list of installed extensions
   getExtensions(): Promise<ExtensionInfo[]>;
 

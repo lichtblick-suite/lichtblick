@@ -718,7 +718,7 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
     }
 
     return Object.fromEntries(
-      datasets.map((dataset, index) => [index, dataset.borderColor?.toString()]),
+      datasets.map((dataset, index) => [index, JSON.stringify(dataset.borderColor)]),
     );
   }, [datasets]);
 

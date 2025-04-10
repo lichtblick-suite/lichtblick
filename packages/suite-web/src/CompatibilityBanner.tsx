@@ -108,15 +108,15 @@ function CompatibilityBannerBase({
 
           {!isChrome && (
             <Typography variant="body2">
-              Check out our cross-browser support progress in GitHub discussion{" "}
+              Check out our{" "}
               <Link
                 color="inherit"
-                href="https://github.com/orgs/foxglove/discussions/174"
+                href="https://lichtblick-suite.github.io/docs/browser-support"
                 target="_blank"
               >
-                #174
-              </Link>
-              .
+                Browser Support documentation
+              </Link>{" "}
+              for more information.
             </Typography>
           )}
         </div>

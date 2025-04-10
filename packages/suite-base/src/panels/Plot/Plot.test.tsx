@@ -7,11 +7,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PanelExtensionAdapter } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/config";
 import { DEFAULT_PLOT_CONFIG } from "@lichtblick/suite-base/panels/Plot/constants";
 import usePlotDataHandling from "@lichtblick/suite-base/panels/Plot/hooks/usePlotDataHandling";
 import useRenderer from "@lichtblick/suite-base/panels/Plot/hooks/useRenderer";
 import { PlotProps } from "@lichtblick/suite-base/panels/Plot/types";
+import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 

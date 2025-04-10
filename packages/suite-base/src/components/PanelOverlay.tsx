@@ -134,7 +134,7 @@ export const PanelOverlay = forwardRef<HTMLDivElement, PanelOverlayProps>(
     const { classes, cx } = useStyles();
 
     return (
-      <ClickAwayListener onClickAway={onClickAway ? onClickAway : _.noop}>
+      <ClickAwayListener onClickAway={onClickAway ?? _.noop}>
         <Backdrop
           transitionDuration={0}
           unmountOnExit

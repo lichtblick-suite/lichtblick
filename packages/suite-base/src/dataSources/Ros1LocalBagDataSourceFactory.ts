@@ -23,7 +23,16 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
   public supportedFileTypes = [".bag"];
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const file = args.file;
+    const files = args.files ?? [];
+
+    if (args.file) {
+      files.push(args.file);
+    }
+    if (files.length === 0) {
+      return;
+    }
+
+    const file: File | undefined = files[0];
     if (!file) {
       return;
     }

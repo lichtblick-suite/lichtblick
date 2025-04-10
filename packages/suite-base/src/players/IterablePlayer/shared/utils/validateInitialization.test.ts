@@ -2,18 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Initialization } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import { InitLoadedTimes } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import RosDatatypesBuilder from "@lichtblick/suite-base/testing/builders/RosDatatypesBuilder";
-import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
-import {
-  validateOverlap,
-  validateAndAddNewDatatypes,
-  validateAndAddNewTopics,
-} from "./validateInitialization";
+import { validateAndAddNewDatatypes, validateAndAddNewTopics } from "./validateInitialization";
 
 describe("validateInitialization", () => {
   let accumulated: Initialization;
@@ -22,81 +16,6 @@ describe("validateInitialization", () => {
   beforeEach(() => {
     accumulated = InitilizationSourceBuilder.initialization();
     current = InitilizationSourceBuilder.initialization();
-  });
-
-  describe("validateOverlap", () => {
-    it.each<[number, number]>([
-      [15, 25], // starts inside
-      [5, 15], // ends inside
-      [5, 25], // wraps around
-      [12, 18], // fully inside
-    ])(
-      "should add a warning if the current MCAP overlaps with the accumulated range",
-      (startSec, endSec) => {
-        const loadedTimes: InitLoadedTimes = [
-          {
-            start: RosTimeBuilder.time({ sec: 10, nsec: 0 }),
-            end: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
-          },
-        ];
-        current.start = RosTimeBuilder.time({ sec: startSec, nsec: 0 });
-        current.end = RosTimeBuilder.time({ sec: endSec, nsec: 0 });
-
-        validateOverlap(loadedTimes, current, accumulated);
-
-        expect(accumulated.problems).toHaveLength(1);
-        expect(accumulated.problems[0]!.message).toBe(
-          "MCAP time overlap detected. Some functionalities may not work as expected.",
-        );
-      },
-    );
-
-    it.each<[number, number]>([
-      [0, 5], // before
-      [5, 10], // before and touching
-      [25, 30], // after
-      [20, 25], // after and touching
-    ])("should not add a warning if there is no overlap", (startSec, endSec) => {
-      const loadedTimes: InitLoadedTimes = [
-        {
-          start: RosTimeBuilder.time({ sec: 10, nsec: 0 }),
-          end: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
-        },
-      ];
-      current.start = RosTimeBuilder.time({ sec: startSec, nsec: 0 });
-      current.end = RosTimeBuilder.time({ sec: endSec, nsec: 0 });
-
-      validateOverlap(loadedTimes, current, accumulated);
-
-      expect(accumulated.problems).toHaveLength(0);
-    });
-
-    it.each<[number, number]>([
-      [22, 28], // in between
-      [20, 30], // in between and touching
-      [20, 28], // in between and touching the start
-      [22, 30], // in between and touching the end
-    ])(
-      "should not add a warning if the current MCAP is between two loaded times",
-      (startSec, endSec) => {
-        const loadedTimes: InitLoadedTimes = [
-          {
-            start: RosTimeBuilder.time({ sec: 10, nsec: 0 }),
-            end: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
-          },
-          {
-            start: RosTimeBuilder.time({ sec: 30, nsec: 0 }),
-            end: RosTimeBuilder.time({ sec: 40, nsec: 0 }),
-          },
-        ];
-        current.start = RosTimeBuilder.time({ sec: startSec, nsec: 0 });
-        current.end = RosTimeBuilder.time({ sec: endSec, nsec: 0 });
-
-        validateOverlap(loadedTimes, current, accumulated);
-
-        expect(accumulated.problems).toHaveLength(0);
-      },
-    );
   });
 
   describe("validateAndAddDatatypes", () => {
@@ -112,7 +31,7 @@ describe("validateInitialization", () => {
       expect(accumulated.datatypes.get(datatype)).toEqual(accumulatedDefinition);
       expect(accumulated.problems).toHaveLength(1);
       expect(accumulated.problems[0]!.message).toBe(
-        `Datatype mismatch detected for "${datatype}". Merging may cause issues.`,
+        `Different datatypes found for schema "${datatype}"`,
       );
     });
 

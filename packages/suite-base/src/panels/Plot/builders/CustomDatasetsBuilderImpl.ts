@@ -18,8 +18,8 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
-import { Datum, OriginalValue } from "../datum";
 import { Dataset } from "../types";
+import { Datum, OriginalValue } from "../utils/datum";
 
 export type ValueItem = {
   value: number;

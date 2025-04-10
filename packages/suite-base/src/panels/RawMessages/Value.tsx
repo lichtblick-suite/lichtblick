@@ -18,9 +18,9 @@ import { withStyles, makeStyles } from "tss-react/mui";
 
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/openSiblingPlotPanel";
-import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
+import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
+import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import clipboard from "@lichtblick/suite-base/util/clipboard";
 

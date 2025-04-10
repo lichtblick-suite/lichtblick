@@ -15,13 +15,17 @@ export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicNa
   openSiblingPanel({
     panelType: "Plot",
     updateIfExists: true,
-    siblingConfigCreator: (config: PanelConfig) => ({
-      ...config,
-      paths: _.uniq(
-        (config as PlotConfig).paths
-          .concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }])
-          .filter(({ value }) => value),
-      ),
-    }),
+    siblingConfigCreator: (config: PanelConfig) => {
+      return {
+        ...config,
+        paths: _.uniqBy(
+          [
+            ...(config as PlotConfig).paths,
+            { value: topicName, enabled: true, timestampMethod: "receiveTime" },
+          ],
+          "value",
+        ),
+      };
+    },
   });
 }

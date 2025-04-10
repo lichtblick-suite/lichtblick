@@ -6,10 +6,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Immutable } from "@lichtblick/suite";
+import { CsvDataset } from "@lichtblick/suite-base/panels/Plot/builders/IDatasetsBuilder";
 import { downloadFiles } from "@lichtblick/suite-base/util/download";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 
-import { CsvDataset } from "./builders/IDatasetsBuilder";
 import { PlotXAxisVal } from "./config";
 
 function getCSVRow(label: string, data: CsvDataset["data"][0]) {

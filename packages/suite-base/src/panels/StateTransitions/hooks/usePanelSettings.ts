@@ -19,8 +19,8 @@ import {
   SettingsTreeNodeActionItem,
   SettingsTreeNodes,
 } from "@lichtblick/suite";
-import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
 import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
+import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 

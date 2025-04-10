@@ -20,12 +20,12 @@ import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@lichtblick/suite";
+import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import type { PlotCoordinator } from "./PlotCoordinator";
 import { PlotLegendRow, ROW_HEIGHT } from "./PlotLegendRow";
-import { PlotPath, PlotConfig } from "./config";
-import { DEFAULT_PATH } from "./settings";
+import { PlotPath, PlotConfig } from "./utils/config";
 
 const minLegendWidth = 25;
 const maxLegendWidth = 800;
@@ -276,7 +276,7 @@ function PlotLegendComponent(props: Props): React.JSX.Element {
             width: legendDisplay === "left" ? Math.round(sidebarDimension) : undefined,
           }}
         >
-          {(paths.length === 0 ? [DEFAULT_PATH] : paths).map((path, index) => (
+          {(paths.length === 0 ? [DEFAULT_PLOT_PATH] : paths).map((path, index) => (
             <PlotLegendRow
               hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
               index={index}

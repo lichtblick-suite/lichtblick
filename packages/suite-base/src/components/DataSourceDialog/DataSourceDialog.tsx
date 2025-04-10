@@ -129,7 +129,11 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
       onClose={onModalClose}
       fullWidth
       maxWidth="lg"
-      BackdropProps={{ children: backdrop }}
+      slotProps={{
+        backdrop: {
+          children: backdrop,
+        },
+      }}
       PaperProps={{
         square: false,
         elevation: 4,

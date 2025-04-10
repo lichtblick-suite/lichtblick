@@ -161,16 +161,12 @@ describe("MultiIterableSource", () => {
       expect(result.end.sec).toBe(30);
       expect(result.datatypes.size).toBe(1);
       expect(result.topics.length).toBe(1);
-      expect(result.problems.length).toBe(3);
+      expect(result.problems.length).toBe(2);
       expect(result.problems[0]!.message).toBe(
-        "MCAP time overlap detected. Some functionalities may not work as expected.",
+        `Different datatypes found for schema "${dataTypeName}"`,
       );
 
       expect(result.problems[1]!.message).toBe(
-        `Datatype mismatch detected for "${dataTypeName}". Merging may cause issues.`,
-      );
-
-      expect(result.problems[2]!.message).toBe(
         `Schema name mismatch detected for topic "${topicName}". Expected "${init1.topics[0]!.schemaName}", but found "${init2.topics[0]!.schemaName}".`,
       );
 

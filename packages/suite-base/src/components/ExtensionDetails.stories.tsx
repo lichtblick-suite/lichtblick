@@ -34,6 +34,7 @@ export default {
 
 const MockExtensionLoader: ExtensionLoader = {
   namespace: "local",
+  getExtension: async () => undefined,
   getExtensions: async () => [],
   loadExtension: async (_id: string) => "",
   installExtension: async (_foxeFileData: Uint8Array) => {
@@ -55,7 +56,7 @@ const extension: ExtensionMarketplaceDetail = {
   description: "Extension sample description",
   qualifiedName: "Qualified Extension Name",
   publisher: "Publisher",
-  homepage: "https://github.com/Lichtblick-Suite",
+  homepage: "https://github.com/lichtblick-suite",
   license: "MIT",
   version: "1.2.10",
   keywords: ["storybook", "testing"],

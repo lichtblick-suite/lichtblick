@@ -13,8 +13,8 @@ import type { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/
 import type { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
 
-import { OriginalValue } from "../datum";
 import type { Dataset } from "../types";
+import { OriginalValue } from "../utils/datum";
 
 type CsvDatum = {
   x: number;

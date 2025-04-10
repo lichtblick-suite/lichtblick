@@ -26,7 +26,7 @@ describe("Uninstall extension", () => {
     await app.renderer.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
 
     await app.renderer.getByTestId("PersonIcon").click();
-    await app.renderer.getByText("Extensions").click();
+    await app.renderer.getByRole("menuitem", { name: "Extensions" }).click();
     const searchBar = app.renderer.getByPlaceholder("Search Extensions...");
     await searchBar.fill("turtlesim");
     const extensionListItem = app.renderer

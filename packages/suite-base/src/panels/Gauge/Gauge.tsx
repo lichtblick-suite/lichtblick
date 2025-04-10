@@ -14,7 +14,7 @@ import { useStyles } from "@lichtblick/suite-base/panels/Gauge/Gauge.style";
 import { buildConicGradient } from "@lichtblick/suite-base/panels/Gauge/buildConicGradient";
 import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/Gauge/constants";
 import { stateReducer } from "@lichtblick/suite-base/panels/shared/gaugeAndIndicatorStateReducer";
-import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/types";
+import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/shared/types";
 
 import { settingsActionReducer } from "./settingsActionReducer";
 import { GaugeConfig, GaugeProps } from "./types";

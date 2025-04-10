@@ -1,9 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import path from "path";
-
 import { AppType, launchApp } from "./launchApp";
+import { loadFile } from "./utils/loadFile";
 
 describe("openFiles", () => {
   const closeDataSourceDialogAfterAppLaunch = async (app: AppType) => {
@@ -16,34 +15,19 @@ describe("openFiles", () => {
     await using app = await launchApp();
     await closeDataSourceDialogAfterAppLaunch(app);
 
-    //Add bag file from source
-    const filePath = path.resolve(
-      __dirname,
-      "../../packages/suite-base/src/test/fixtures/example.bag",
-    );
-
     //Expect that there are not preloaded files
     await expect(
       app.renderer.getByText("No data source", { exact: true }).innerText(),
     ).resolves.toBe("No data source");
 
-    //Drag and drop the bag file
-    const fileInput = app.renderer.locator("[data-puppeteer-file-upload]");
-    await fileInput.setInputFiles(filePath);
+    await loadFile(app, "../../../packages/suite-base/src/test/fixtures/example.bag");
 
     //Expect that the bag file is being shown
     await expect(
       app.renderer.getByText("example.bag", { exact: true }).innerText(),
     ).resolves.toBeDefined();
 
-    //Add mcap file from source
-    const filePathMcap = path.resolve(
-      __dirname,
-      "../../packages/suite-base/src/test/fixtures/example.mcap",
-    );
-
-    //Drag and drop the mcap file
-    await fileInput.setInputFiles(filePathMcap);
+    await loadFile(app, "../../../packages/suite-base/src/test/fixtures/example.mcap");
 
     //Expect that the mcap file is being shown
     await expect(

@@ -5,11 +5,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { NodeExpansion, NodeState } from "@lichtblick/suite-base/panels/RawMessages/types";
 import {
+  getConstantNameByKeyPath,
   getMessageDocumentationLink,
   toggleExpansion,
 } from "@lichtblick/suite-base/panels/RawMessages/utils";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 describe("getMessageDocumentationLink", () => {
   it("links to ROS and Foxglove docs", () => {
@@ -71,5 +74,64 @@ describe("toggleExpansion", () => {
       [`grandchild${PATH_NAME_AGGREGATOR}child${PATH_NAME_AGGREGATOR}key1`]: NodeState.Expanded,
       key2: NodeState.Collapsed,
     });
+  });
+});
+
+describe("getConstantNameByKeyPath", () => {
+  it("should return undefined when keyPath is empty", () => {
+    const keyPath: (string | number)[] = [];
+    const queriedData: MessagePathDataItem[] = [];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should return undefined when keyPath is not a number", () => {
+    const keyPath: (string | number)[] = [BasicBuilder.string()];
+    const queriedData: MessagePathDataItem[] = [];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should return undefined when queriedData at keyPath does not exist", () => {
+    const keyPath: (string | number)[] = [BasicBuilder.number()];
+    const queriedData: MessagePathDataItem[] = [];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should return undefined if constantName is missing from item", () => {
+    const keyPath: (string | number)[] = [0];
+    const queriedData: MessagePathDataItem[] = [
+      {
+        path: BasicBuilder.string(),
+        value: BasicBuilder.number(),
+      },
+    ];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should return constantName correctly when present", () => {
+    const constantName = BasicBuilder.string();
+    const queriedData: MessagePathDataItem[] = [
+      {
+        constantName,
+        path: BasicBuilder.string(),
+        value: BasicBuilder.number(),
+      },
+    ];
+    const keyPath: (string | number)[] = [0];
+
+    const result = getConstantNameByKeyPath(keyPath, queriedData);
+
+    expect(result).toBe(constantName);
   });
 });

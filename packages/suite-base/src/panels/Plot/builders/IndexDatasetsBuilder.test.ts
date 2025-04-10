@@ -16,7 +16,7 @@ import {
 
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
 import { IndexDatasetsBuilder } from "./IndexDatasetsBuilder";
-import { PlotPath } from "../config";
+import { PlotPath } from "../utils/config";
 
 function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],

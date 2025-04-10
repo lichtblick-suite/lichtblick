@@ -76,7 +76,7 @@ class PlayerBuilder {
   public static topic(props: Partial<Topic> = {}): Topic {
     return defaults<Topic>(props, {
       aliasedFromName: BasicBuilder.string(),
-      name: `/${BasicBuilder.string()}`,
+      name: `/${BasicBuilder.string()}/${BasicBuilder.string()}`,
       schemaName: BasicBuilder.string(),
     });
   }
@@ -111,7 +111,6 @@ class PlayerBuilder {
 
   public static playerState(props: Partial<PlayerState> = {}): PlayerState {
     return defaults<PlayerState>(props, {
-      activeData: PlayerBuilder.activeData(),
       capabilities: BasicBuilder.sample(PLAYER_CAPABILITIES, 3),
       name: BasicBuilder.string(),
       playerId: BasicBuilder.string(),

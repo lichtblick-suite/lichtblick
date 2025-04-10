@@ -3,7 +3,6 @@
 
 import { compare } from "@lichtblick/rostime";
 import {
-  InitLoadedTimes,
   IterableSourceConstructor,
   MultiSource,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
@@ -18,7 +17,6 @@ import {
 import {
   validateAndAddNewTopics,
   validateAndAddNewDatatypes,
-  validateOverlap,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/validateInitialization";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
@@ -95,13 +93,10 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
       topicStats: new Map(),
     };
 
-    const loadedTimes: InitLoadedTimes = [];
-
     for (const init of initializations) {
       resultInit.start = setStartTime(resultInit.start, init.start);
       resultInit.end = setEndTime(resultInit.end, init.end);
-      validateOverlap(loadedTimes, init, resultInit);
-      loadedTimes.push({ start: init.start, end: init.end });
+
       resultInit.profile = init.profile ?? resultInit.profile;
       resultInit.publishersByTopic = accumulateMap(
         resultInit.publishersByTopic,

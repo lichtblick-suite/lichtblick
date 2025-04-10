@@ -35,7 +35,6 @@ export function isChartValue(value: unknown): value is OriginalValue {
     default:
       return false;
   }
-  return false;
 }
 
 export function getChartValue(value: unknown): number | undefined {

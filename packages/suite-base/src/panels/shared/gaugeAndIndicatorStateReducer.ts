@@ -9,7 +9,7 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import {
   GaugeAndIndicatorState,
   GaugeAndIndicatorAction,
-} from "@lichtblick/suite-base/panels/types";
+} from "@lichtblick/suite-base/panels/shared/types";
 
 export function getSingleDataItem(results: unknown[]): unknown {
   if (results.length <= 1) {

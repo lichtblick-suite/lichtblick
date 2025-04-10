@@ -165,7 +165,6 @@ export default function Root(props: RootProps): React.JSX.Element {
       onAppBarDoubleClick={() => {
         nativeWindow.handleTitleBarDoubleClick();
       }}
-      showCustomWindowControls={ctxbridge?.platform === "linux"}
       isMaximized={isMaximized}
       onMinimizeWindow={onMinimizeWindow}
       onMaximizeWindow={onMaximizeWindow}

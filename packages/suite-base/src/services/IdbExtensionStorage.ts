@@ -17,8 +17,8 @@ import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 const log = Log.getLogger(__filename);
 
 const DATABASE_BASE_NAME = "foxglove-extensions";
-const METADATA_STORE_NAME = "metadata";
-const EXTENSION_STORE_NAME = "extensions";
+export const METADATA_STORE_NAME = "metadata";
+export const EXTENSION_STORE_NAME = "extensions";
 
 interface ExtensionsDB extends IDB.DBSchema {
   metadata: {
