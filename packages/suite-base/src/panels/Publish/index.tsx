@@ -233,9 +233,7 @@ function Publish(props: Props) {
   );
 }
 
-export default Panel(
-  Object.assign(React.memo(Publish), {
-    panelType: "Publish",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(React.memo(Publish), {
+  panelType: "Publish",
+  defaultConfig
+}));

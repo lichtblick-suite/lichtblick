@@ -370,9 +370,7 @@ const defaultConfig: DiagnosticSummaryConfig = {
   sortByLevel: true,
 };
 
-export default Panel(
-  Object.assign(DiagnosticSummary, {
-    panelType: "DiagnosticSummary",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(DiagnosticSummary, {
+  panelType: "DiagnosticSummary",
+  defaultConfig
+}));

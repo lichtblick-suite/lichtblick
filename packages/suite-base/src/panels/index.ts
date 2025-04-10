@@ -40,6 +40,8 @@ import vehicleControlSummaryThumbnail from "./VehicleControl/thumbnail.png";
 // import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-status.png";
 // import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summary.png";
 
+// @ts-ignore
+// @ts-ignore
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
     title: t("hardwareInfo"),
@@ -47,6 +49,14 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("hardwareInfo"),
     // thumbnail: joystickSummaryThumbnail,
     module: async () => await import("./hardwareInfo"),
+  },
+  {
+    title: t("motionState"),
+    type: "MotionState",
+    description: t("motionStateDescription"),
+    // thumbnail: motionStateThumbnail,
+    module: async () => await import("./MotionState"),
+    hasCustomToolbar: true,
   },
   {
     title: t("LaunchMotion"),

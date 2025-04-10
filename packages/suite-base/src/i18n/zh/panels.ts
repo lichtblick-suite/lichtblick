@@ -3,6 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panels = {
+  motionStateDescription: "运动状态描述",
+  motionState: "运动状态",
   hardwareInfo: "本地硬件信息",
   LaunchMotion: "节点管理器",
   LaunchMotionDescription: "管理节点,启动节点,查看节点状态",

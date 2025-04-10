@@ -467,9 +467,7 @@ const defaultConfig: Config = {
   selectedNodeId: undefined,
   autoFormatOnSave: true,
 };
-export default Panel(
-  Object.assign(UserScriptEditor, {
-    panelType: "NodePlayground",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(UserScriptEditor, {
+  panelType: "NodePlayground",
+  defaultConfig
+}));

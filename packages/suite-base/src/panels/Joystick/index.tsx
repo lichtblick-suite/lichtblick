@@ -336,9 +336,7 @@ const defaultConfig: Joysetting = {
   mode: false,
 };
 
-export default Panel(
-  Object.assign(TeleopPanelAdapter, {
-    panelType: "Joystick",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(TeleopPanelAdapter, {
+  panelType: "Joystick",
+  defaultConfig
+}));

@@ -732,9 +732,7 @@ const defaultConfig: RawMessagesPanelConfig = {
   fontSize: undefined,
 };
 
-export default Panel(
-  Object.assign(RawMessages, {
-    panelType: "RawMessages",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(RawMessages, {
+  panelType: "RawMessages",
+  defaultConfig
+}));

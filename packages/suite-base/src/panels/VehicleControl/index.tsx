@@ -888,9 +888,7 @@ const VehicleControlPanel: React.FC<Props> = ({ config, saveConfig }) => {
   );
 };
 
-export default Panel(
-  Object.assign(React.memo(VehicleControlPanel), {
-    panelType: "VehicleControl",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(React.memo(VehicleControlPanel), {
+  panelType: "VehicleControl",
+  defaultConfig
+}));

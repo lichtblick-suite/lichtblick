@@ -5,6 +5,7 @@ import { AnnotationOptions } from "chartjs-plugin-annotation";
 
 import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { MathFunction } from "@lichtblick/suite-base/panels/Plot/utils/mathFunctions";
+import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 
 export const MATH_FUNCTIONS: { [fn: string]: MathFunction } = {
   abs: Math.abs,
@@ -36,6 +37,7 @@ export const DEFAULT_ANNOTATION: AnnotationOptions = {
   borderDash: [5, 5],
 };
 
+// @ts-ignore
 export const DEFAULT_PLOT_CONFIG: PlotConfig = {
   paths: [],
   minYValue: undefined,
@@ -50,8 +52,59 @@ export const DEFAULT_PLOT_CONFIG: PlotConfig = {
   sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
 };
 
+export interface TriplePlotConfig extends PanelConfig {
+  plot1: PlotConfig;
+  plot2: PlotConfig;
+  plot3: PlotConfig;
+}
+
+
 export const DEFAULT_PLOT_PATH: PlotPath = Object.freeze({
   timestampMethod: "receiveTime",
   value: "",
   enabled: true,
 });
+export const DEFAULT_PLOT_CONFIG1: PlotConfig = {
+  paths: [],
+  minYValue: undefined,
+  maxYValue: undefined,
+  showXAxisLabels: true,
+  showYAxisLabels: true,
+  showLegend: true,
+  legendDisplay: "floating",
+  showPlotValuesInLegend: false,
+  isSynced: true,
+  xAxisVal: "timestamp",
+  sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
+};
+export const DEFAULT_PLOT_CONFIG2: PlotConfig = {
+  paths: [],
+  minYValue: undefined,
+  maxYValue: undefined,
+  showXAxisLabels: true,
+  showYAxisLabels: true,
+  showLegend: true,
+  legendDisplay: "floating",
+  showPlotValuesInLegend: false,
+  isSynced: true,
+  xAxisVal: "timestamp",
+  sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
+};
+export const DEFAULT_PLOT_CONFIG3: PlotConfig = {
+  paths: [],
+  minYValue: undefined,
+  maxYValue: undefined,
+  showXAxisLabels: true,
+  showYAxisLabels: true,
+  showLegend: true,
+  legendDisplay: "floating",
+  showPlotValuesInLegend: false,
+  isSynced: true,
+  xAxisVal: "timestamp",
+  sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
+};
+export const DEFAULT_TRIPLE_PLOT_CONFIG: TriplePlotConfig = {
+  plot1: DEFAULT_PLOT_CONFIG1,
+  plot2: DEFAULT_PLOT_CONFIG2,
+  plot3: DEFAULT_PLOT_CONFIG3,
+};

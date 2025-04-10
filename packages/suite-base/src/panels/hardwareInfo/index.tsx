@@ -620,9 +620,7 @@ const defaultConfig: HardwareInfoConfig = {
   hardwareInfoSource: "/hardware_info",
 };
 
-export default Panel(
-  Object.assign(HardwareInfoPanel, {
-    panelType: "HardwareInfoPanel",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(HardwareInfoPanel, {
+  panelType: "HardwareInfoPanel",
+  defaultConfig
+}));

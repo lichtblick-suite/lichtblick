@@ -70,7 +70,7 @@ function presence<T>(value: undefined | T): undefined | T {
 export function plotPathDisplayName(path: Readonly<PlotPath>, index: number): string {
   return presence(path.label) ?? presence(path.value) ?? `Series ${index + 1}`;
 }
-type DeprecatedPlotConfig = {
+export type DeprecatedPlotConfig = {
   showSidebar?: boolean;
   sidebarWidth?: number;
 };

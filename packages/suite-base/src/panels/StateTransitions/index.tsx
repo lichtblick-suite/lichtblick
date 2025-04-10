@@ -153,9 +153,7 @@ const defaultConfig: StateTransitionConfig = {
   isSynced: true,
 };
 
-export default Panel(
-  Object.assign(StateTransitions, {
-    panelType: "StateTransitions",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(StateTransitions, {
+  panelType: "StateTransitions",
+  defaultConfig
+}));

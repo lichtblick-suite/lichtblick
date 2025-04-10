@@ -145,7 +145,7 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
             { value: "floating", label: t("floating") },
             { value: "left", label: t("left") },
             { value: "top", label: t("top") },
-            { value: "none", label: t("hidden") },
+            // { value: "none", label: t("hidden") },
           ],
         },
         showPlotValuesInLegend: {

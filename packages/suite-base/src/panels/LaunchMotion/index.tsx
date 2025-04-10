@@ -270,9 +270,7 @@ const defaultConfig: NodesMonitorConfig = {
   startLaunchTopic: "/start_launch",
 };
 
-export default Panel(
-  Object.assign(NodesMonitorPanel, {
-    panelType: "ROS2NodesMonitorPanel",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(NodesMonitorPanel, {
+  panelType: "ROS2NodesMonitorPanel",
+  defaultConfig
+}));

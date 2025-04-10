@@ -287,3 +287,6 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 };
 
 export default Plot;
+
+export class DeprecatedPlotConfig {
+}

@@ -241,9 +241,7 @@ function DiagnosticStatusPanel(props: Props) {
 
 const defaultConfig: Config = { topicToRender: "/diagnostics" };
 
-export default Panel(
-  Object.assign(DiagnosticStatusPanel, {
-    panelType: "DiagnosticStatusPanel",
-    defaultConfig,
-  }),
-);
+export default Panel(Object.assign(DiagnosticStatusPanel, {
+  panelType: "DiagnosticStatusPanel",
+  defaultConfig
+}));
