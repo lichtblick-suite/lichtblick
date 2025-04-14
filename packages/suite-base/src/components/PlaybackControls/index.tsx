@@ -52,6 +52,7 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { Player, PlayerPresence } from "@lichtblick/suite-base/players/types";
+import BroadcastLB from "@lichtblick/suite-base/util/BroadcastLB";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
@@ -118,7 +119,11 @@ export default function PlaybackControls(props: {
   }, [setRepeat]);
 
   const togglePlayPause = useCallback(() => {
+    const broadcast = BroadcastLB.getInstance();
     if (isPlaying) {
+      broadcast.postMessage({
+        type: "pause",
+      });
       pause();
     } else {
       const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
@@ -126,6 +131,9 @@ export default function PlaybackControls(props: {
       if (current && end && start && compare(current, end) >= 0) {
         seek(start);
       }
+      broadcast.postMessage({
+        type: "play",
+      });
       play();
     }
   }, [isPlaying, pause, getTimeInfo, play, seek]);
@@ -147,11 +155,19 @@ export default function PlaybackControls(props: {
       // i.e. Skipping coordinate frame messages may result in incorrectly rendered markers or
       // missing markers altogther.
       const targetTime = jumpSeek(DIRECTION.FORWARD, currentTime, ev);
-
+      const broadcast = BroadcastLB.getInstance();
       if (playUntil) {
         playUntil(targetTime);
+        broadcast.postMessage({
+          type: "playUntil",
+          time: targetTime,
+        });
       } else {
         seek(targetTime);
+        broadcast.postMessage({
+          type: "seek",
+          time: targetTime,
+        });
       }
     },
     [getTimeInfo, playUntil, seek],
@@ -163,7 +179,13 @@ export default function PlaybackControls(props: {
       if (!currentTime) {
         return;
       }
-      seek(jumpSeek(DIRECTION.BACKWARD, currentTime, ev));
+      const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev);
+      seek(targetTime);
+      const broadcast = BroadcastLB.getInstance();
+      broadcast.postMessage({
+        type: "seek",
+        time: targetTime,
+      });
     },
     [getTimeInfo, seek],
   );

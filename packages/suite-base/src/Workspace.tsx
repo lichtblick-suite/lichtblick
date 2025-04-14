@@ -20,6 +20,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
+import { Time } from "@lichtblick/rostime";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
 import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
@@ -86,6 +87,7 @@ import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import ICONS from "@lichtblick/suite-base/theme/icons";
+import BroadcastLB from "@lichtblick/suite-base/util/BroadcastLB";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
@@ -576,6 +578,28 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       props.showCustomWindowControls,
     ],
   );
+
+  // Listener for broadcast messages from other players
+  useEffect(() => {
+    const broadcast = BroadcastLB.getInstance();
+
+    const handler = (message: { type: "play" | "pause" | "seek" | "playUntil"; time: Time }) => {
+      if (play && message.type === "play") {
+        play();
+      }
+      if (pause && message.type === "pause") {
+        pause();
+      }
+      if (seek && message.type === "seek") {
+        seek(message.time);
+      }
+      if (playUntil && message.type === "playUntil") {
+        playUntil(message.time);
+      }
+    };
+    //@ts-expect-error asdasda
+    broadcast.addListener(handler);
+  }, [play, pause, seek, playUntil]);
 
   return (
     <PanelStateContextProvider>
