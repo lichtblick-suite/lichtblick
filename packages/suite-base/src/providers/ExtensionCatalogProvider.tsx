@@ -67,7 +67,6 @@ function createExtensionRegistryStore(
       return results;
     };
 
-    // Called by installExtensions
     async function promisesInBatch(
       batch: Uint8Array[],
       loader: ExtensionLoader,
@@ -89,7 +88,6 @@ function createExtensionRegistryStore(
       );
     }
 
-    // Called by installExtensions > promisesInBatch
     const mergeState = (
       info: ExtensionInfo,
       { messageConverters, panelSettings, panels, topicAliasFunctions }: ContributionPoints,
@@ -109,7 +107,6 @@ function createExtensionRegistryStore(
       }));
     };
 
-    // Called by refreshAllExtensions > processLoader
     async function loadInBatch({
       batch,
       loader,
