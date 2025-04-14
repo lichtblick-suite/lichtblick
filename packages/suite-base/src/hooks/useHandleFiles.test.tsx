@@ -69,7 +69,9 @@ describe("useHandleFilesProps", () => {
     const files = filesOverride ?? [fileBuilder("mcap", FILE_ACCEPT_TYPE)];
     files.forEach((file) => {
       file.arrayBuffer = async () =>
-        await Promise.resolve(new TextEncoder().encode(BasicBuilder.string()).buffer);
+        await Promise.resolve(
+          new Uint8Array(new TextEncoder().encode(BasicBuilder.string()).buffer),
+        );
     });
 
     return {

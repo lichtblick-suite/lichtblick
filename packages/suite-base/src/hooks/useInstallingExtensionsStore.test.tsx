@@ -3,6 +3,8 @@
 
 import { act } from "@testing-library/react";
 
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+
 import { useInstallingExtensionsStore } from "./useInstallingExtensionsStore";
 
 describe("useInstallingExtensionsStore", () => {
@@ -11,27 +13,33 @@ describe("useInstallingExtensionsStore", () => {
   });
 
   it("starts installation progress", () => {
+    const extensionsNumber = BasicBuilder.number({ min: 0, max: 150 });
+
     act(() => {
-      useInstallingExtensionsStore.getState().startInstallingProgress(5);
+      useInstallingExtensionsStore.getState().startInstallingProgress(extensionsNumber);
     });
 
     const state = useInstallingExtensionsStore.getState();
     expect(state.installingProgress).toEqual({
       installed: 0,
-      total: 5,
+      total: extensionsNumber,
       inProgress: true,
     });
   });
 
   it("sets installing progress correctly", () => {
+    const extensionsInstalled = BasicBuilder.number({ min: 0, max: 150 });
+
     act(() => {
       useInstallingExtensionsStore.getState().setInstallingProgress((prev) => ({
         ...prev,
-        installed: prev.installed + 2,
+        installed: prev.installed + extensionsInstalled,
       }));
     });
 
-    expect(useInstallingExtensionsStore.getState().installingProgress.installed).toBe(2);
+    expect(useInstallingExtensionsStore.getState().installingProgress.installed).toBe(
+      extensionsInstalled,
+    );
   });
 
   it("resets installation progress", () => {
