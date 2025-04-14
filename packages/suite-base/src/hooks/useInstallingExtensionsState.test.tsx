@@ -6,16 +6,30 @@
 import { act, renderHook } from "@testing-library/react";
 import { useSnackbar } from "notistack";
 
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { useInstallingExtensionsState } from "./useInstallingExtensionsState";
-import * as installingStore from "./useInstallingExtensionsStore";
+
+const mockStartInstallingProgress = jest.fn();
+const mockSetInstallingProgress = jest.fn();
+const mockResetInstallingProgress = jest.fn();
+const mockInstallExtensions = jest.fn();
+const mockStore = {
+  setInstallingProgress: mockSetInstallingProgress,
+  startInstallingProgress: mockStartInstallingProgress,
+  resetInstallingProgress: mockResetInstallingProgress,
+  installingProgress: { installed: 0, total: 0, inProgress: false },
+};
+
+jest.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsStore", () => ({
+  useInstallingExtensionsStore: (selector: any) => selector(mockStore),
+}));
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  useExtensionCatalog: jest.fn(),
-}));
-jest.mock("./useInstallingExtensionsStore", () => ({
-  useInstallingExtensionsStore: jest.fn(),
+  useExtensionCatalog: (selector: any) =>
+    selector({
+      installExtensions: mockInstallExtensions,
+    }),
 }));
 
 jest.mock("notistack", () => ({
@@ -23,36 +37,14 @@ jest.mock("notistack", () => ({
 }));
 
 describe("useInstallingExtensionsState", () => {
-  const mockInstallExtensions = jest.fn();
-  const mockStartInstallingProgress = jest.fn();
-  const mockSetInstallingProgress = jest.fn();
-  const mockResetInstallingProgress = jest.fn();
   const playMock = jest.fn();
   const enqueueSnackbar = jest.fn();
   const closeSnackbar = jest.fn();
 
-  const mockedUseInstallingExtensionsStore =
-    installingStore.useInstallingExtensionsStore as jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useExtensionCatalog as jest.Mock).mockReturnValue(() => ({
-      installExtensions: mockInstallExtensions,
-    }));
-
-    mockedUseInstallingExtensionsStore.mockImplementation((selector) =>
-      selector({
-        installingProgress: {
-          installed: 0,
-          total: 2,
-          inProgress: true,
-        },
-        startInstallingProgress: mockStartInstallingProgress,
-        setInstallingProgress: mockSetInstallingProgress,
-        resetInstallingProgress: mockResetInstallingProgress,
-      }),
-    );
+    mockStore.installingProgress = { installed: 0, total: 0, inProgress: false };
 
     (useSnackbar as jest.Mock).mockReturnValue({
       enqueueSnackbar,
@@ -61,7 +53,10 @@ describe("useInstallingExtensionsState", () => {
   });
 
   it("installs extensions and updates progress", async () => {
-    const extensionsData = [new Uint8Array([1]), new Uint8Array([2])];
+    const extensionsData = [
+      new Uint8Array([BasicBuilder.number()]),
+      new Uint8Array([BasicBuilder.number()]),
+    ];
 
     mockInstallExtensions.mockResolvedValue([{ success: true }, { success: true }]);
 
@@ -77,19 +72,27 @@ describe("useInstallingExtensionsState", () => {
     });
 
     expect(mockStartInstallingProgress).toHaveBeenCalledWith(2);
-    //expect(mockInstallExtensions).toHaveBeenCalled();
+    expect(mockStartInstallingProgress).toHaveBeenCalledTimes(1);
+
+    expect(mockInstallExtensions).toHaveBeenCalledTimes(2);
+    expect(mockSetInstallingProgress).toHaveBeenCalled();
+
     expect(mockSetInstallingProgress).toHaveBeenCalledWith(expect.any(Function));
     expect(enqueueSnackbar).toHaveBeenCalledWith(
-      expect.stringContaining("Successfully"),
-      expect.anything(),
+      expect.stringContaining(`Successfully installed all ${extensionsData.length} extensions.`),
+      expect.objectContaining({
+        variant: "success",
+        preventDuplicate: true,
+      }),
     );
-    expect(mockResetInstallingProgress).toHaveBeenCalled();
     expect(playMock).toHaveBeenCalled();
+    expect(mockResetInstallingProgress).toHaveBeenCalled();
   });
 
-  it("shows error snackbar on failure", async () => {
-    const extensionsData = [new Uint8Array([1])];
-    mockInstallExtensions.mockRejectedValue(new Error("Error"));
+  it("calls installExtensions and shows error snackbar on failure", async () => {
+    const errorValue = new Error(BasicBuilder.string());
+    const extensionsData = [new Uint8Array([BasicBuilder.number()])];
+    mockInstallExtensions.mockRejectedValue(errorValue);
 
     const { result } = renderHook(() =>
       useInstallingExtensionsState({
@@ -102,9 +105,41 @@ describe("useInstallingExtensionsState", () => {
       await result.current.installFoxeExtensions(extensionsData);
     });
 
+    expect(mockInstallExtensions).toHaveBeenCalledTimes(1);
+
     expect(enqueueSnackbar).toHaveBeenCalledWith(
-      expect.stringContaining("An error occurred"),
+      expect.stringContaining(
+        `An error occurred during extension installation: ${errorValue.message}`,
+      ),
       expect.objectContaining({ variant: "error" }),
+    );
+  });
+
+  it("shows progress snackbar when installation starts", () => {
+    const extensionsToBeInstalled = BasicBuilder.number();
+    const { rerender } = renderHook(() =>
+      useInstallingExtensionsState({
+        isPlaying: false,
+        playerEvents: { play: playMock },
+      }),
+    );
+
+    mockStore.installingProgress = {
+      installed: 0,
+      total: extensionsToBeInstalled,
+      inProgress: true,
+    };
+
+    rerender();
+
+    expect(enqueueSnackbar).toHaveBeenCalledWith(
+      `Installing ${extensionsToBeInstalled} extensions...`,
+      expect.objectContaining({
+        key: expect.anything(),
+        variant: "info",
+        persist: true,
+        preventDuplicate: true,
+      }),
     );
   });
 });

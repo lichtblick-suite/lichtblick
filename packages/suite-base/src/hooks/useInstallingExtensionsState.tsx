@@ -81,7 +81,6 @@ export function useInstallingExtensionsState({
         enqueueSnackbar(`Successfully installed all ${extensionsData.length} extensions.`, {
           variant: "success",
           preventDuplicate: true,
-          autoHideDuration: 3500,
         });
       } catch (error: unknown) {
         setInstallingProgress((prev) => ({
