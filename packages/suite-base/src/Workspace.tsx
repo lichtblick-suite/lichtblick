@@ -80,7 +80,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAddPanel from "@lichtblick/suite-base/hooks/useAddPanel";
 import { useDefaultWebLaunchPreference } from "@lichtblick/suite-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@lichtblick/suite-base/hooks/useElectronFilesToOpen";
-import { useInstallingExtensionsState } from "@lichtblick/suite-base/hooks/useInstallingExtensionsState";
+import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import useSeekTimeFromCLI from "@lichtblick/suite-base/hooks/useSeekTimeFromCLI";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
@@ -179,7 +179,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   );
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
-  const { handleFiles } = useInstallingExtensionsState({
+  const { handleFiles } = useHandleFiles({
     availableSources,
     selectSource,
     isPlaying,

@@ -3,39 +3,26 @@
 
 import { nanoid } from "nanoid";
 import { SnackbarKey, useSnackbar } from "notistack";
-import { extname } from "path";
 import { useCallback, useEffect, useRef } from "react";
 
-import Logger from "@lichtblick/log";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import {
-  DataSourceArgs,
-  IDataSourceFactory,
-} from "@lichtblick/suite-base/context/PlayerSelectionContext";
 
 import { useInstallingExtensionsStore } from "./useInstallingExtensionsStore";
 
 type UseInstallingExtensionsState = {
-  handleFiles: (files: File[]) => Promise<void>;
+  installFoxeExtensions: (extensionsData: Uint8Array[]) => Promise<void>;
 };
 
 type UseInstallingExtensionsStateProps = {
-  availableSources: readonly IDataSourceFactory[];
-  selectSource: (sourceId: string, args?: DataSourceArgs) => void;
   isPlaying: boolean;
   playerEvents: {
     play: (() => void) | undefined;
-    pause: (() => void) | undefined;
   };
 };
 
-const log = Logger.getLogger(__filename);
-
 export function useInstallingExtensionsState({
-  availableSources,
-  selectSource,
   isPlaying,
-  playerEvents: { play, pause },
+  playerEvents: { play },
 }: UseInstallingExtensionsStateProps): UseInstallingExtensionsState {
   const installExtensions = useExtensionCatalog((state) => state.installExtensions);
   const INSTALL_EXTENSIONS_BATCH = 1;
@@ -124,46 +111,5 @@ export function useInstallingExtensionsState({
     ],
   );
 
-  const handleFiles = useCallback(
-    async (files: File[]) => {
-      if (files.length === 0) {
-        return;
-      }
-
-      pause?.();
-
-      const extensionsData: Uint8Array[] = [];
-      const otherFiles: File[] = [];
-
-      for (const file of files) {
-        try {
-          if (file.name.endsWith(".foxe")) {
-            const buffer = await file.arrayBuffer();
-            extensionsData.push(new Uint8Array(buffer));
-          } else {
-            otherFiles.push(file);
-          }
-        } catch (error) {
-          log.error(`Error reading file ${file.name}`, error);
-        }
-      }
-
-      if (extensionsData.length > 0) {
-        await installFoxeExtensions(extensionsData);
-      }
-
-      if (otherFiles.length > 0) {
-        const source = availableSources.find((s) =>
-          otherFiles.some((file) => s.supportedFileTypes?.includes(extname(file.name)) ?? false),
-        );
-
-        if (source) {
-          selectSource(source.id, { type: "file", files: otherFiles });
-        }
-      }
-    },
-    [availableSources, installFoxeExtensions, pause, selectSource],
-  );
-
-  return { handleFiles };
+  return { installFoxeExtensions };
 }
