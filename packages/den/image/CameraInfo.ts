@@ -7,6 +7,13 @@
 
 type FloatArray = number[] | Float32Array | Float64Array;
 
+type DistortionModel =
+  | "plumb_bob"
+  | "rational_polynomial"
+  | "cylindrical"
+  | "deformed_cylinder"
+  | (string & {});
+
 export type CameraInfo = Readonly<{
   width: number;
   height: number;
@@ -19,9 +26,14 @@ export type CameraInfo = Readonly<{
     width: number;
     do_rectify: boolean;
   };
-  distortion_model: string; // Usually "plumb_bob" | "rational_polynomial" | ""
+  distortion_model: DistortionModel; // Usually "plumb_bob" | "rational_polynomial" | ""
   D: FloatArray;
   K: FloatArray;
   P: FloatArray;
   R: FloatArray;
 }>;
+
+export type CustomCameraInfo = {
+  name: string;
+  params: unknown;
+};

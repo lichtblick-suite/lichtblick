@@ -5,7 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { CameraInfo } from "./CameraInfo";
+import { CameraInfo } from "./CameraInfo";
+import { ICameraModel } from "./CameraModel";
 
 type Vector2 = { x: number; y: number };
 
@@ -22,6 +23,13 @@ type Matrix3x4 = [
 
 type Vec8 = [number, number, number, number, number, number, number, number];
 
+export interface IPinholeCameraModel extends ICameraModel {
+  P: Readonly<number[]>; // Projection matrix
+  K: Readonly<number[]>; // Intrinsic matrix
+  D: Readonly<number[]>; // Distortion coefficients
+  R?: Readonly<number[]>; // Optional rectification matrix
+}
+
 /**
  * A pinhole camera model that can be used to rectify, unrectify, and project pixel coordinates.
  * Based on `ROSPinholeCameraModel` from the ROS `image_geometry` package. See
@@ -29,7 +37,8 @@ type Vec8 = [number, number, number, number, number, number, number, number];
  *
  * See also <http://wiki.ros.org/image_pipeline/CameraInfo>
  */
-export class PinholeCameraModel {
+export class PinholeCameraModel implements IPinholeCameraModel {
+  public name = "pinhole_camera_model";
   /**
    * Distortion parameters `[k1, k2, p1, p2, k3, k4, k5, k6]`. For `rational_polynomial`, all eight
    * parameters are set. For `plumb_bob`, the last three parameters are set to zero. For no
@@ -84,12 +93,22 @@ export class PinholeCameraModel {
   /** The full camera image height in pixels. */
   public readonly height: number;
 
+  public fx: number;
+  public fy: number;
+  public cx: number;
+  public cy: number;
+
   // Mostly copied from `fromCameraInfo`
   // <http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00064>
   public constructor(info: CameraInfo) {
     const { binning_x, binning_y, roi, distortion_model: model, D, K, P, R, width, height } = info;
     const fx = P[0];
     const fy = P[5];
+
+    this.fx = fx ?? 0;
+    this.fy = fy ?? 0;
+    this.cx = P[2] ?? 0;
+    this.cy = P[6] ?? 0;
 
     if (width <= 0 || height <= 0) {
       throw new Error(`Invalid image size ${width}x${height}`);
@@ -359,4 +378,6 @@ export class PinholeCameraModel {
 
     return out;
   }
+
+  public setCameraInfo(): void {}
 }

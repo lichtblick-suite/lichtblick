@@ -157,6 +157,7 @@ function createExtensionRegistryStore(
         panels: {},
         panelSettings: {},
         topicAliasFunctions: [],
+        cameraModels: [],
       };
 
       const processLoader = async (loader: ExtensionLoader) => {
@@ -253,6 +254,7 @@ function createExtensionRegistryStore(
       installedMessageConverters: mockMessageConverters ?? [],
       installedPanels: {},
       installedTopicAliasFunctions: [],
+      installedCameraModels: [],
       loadedExtensions: new Set<string>(),
       panelSettings: _.merge(
         {},

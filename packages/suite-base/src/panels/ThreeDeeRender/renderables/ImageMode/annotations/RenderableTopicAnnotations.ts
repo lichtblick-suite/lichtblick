@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 
-import { CameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/den/image";
 import { RosObject } from "@lichtblick/suite-base/players/types";
 import { LabelPool } from "@lichtblick/three-text";
 
@@ -34,7 +34,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
   #annotations: NormalizedAnnotation[] = [];
   #annotationsNeedsUpdate = false;
 
-  #cameraModel?: CameraModel;
+  #cameraModel?: ICameraModel;
   #cameraModelNeedsUpdate = false;
 
   #originalMessage?: RosObject;
@@ -72,7 +72,7 @@ export class RenderableTopicAnnotations extends THREE.Object3D {
     this.#originalMessage = originalMessage;
   }
 
-  public setCameraModel(cameraModel: CameraModel | undefined): void {
+  public setCameraModel(cameraModel: ICameraModel | undefined): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }

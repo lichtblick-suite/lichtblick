@@ -503,6 +503,8 @@ export interface ExtensionContext {
    * topic aliases.
    */
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
+
+  registerCameraModel(cameraModel: unknown): void;
 }
 
 export type ExtensionActivate = (extensionContext: ExtensionContext) => void;

@@ -141,13 +141,19 @@ export class DeformedCylinderCameraModel {
 
     if (pixel.y < cy - cut_height_pixels) {
       // top
-      out = this.sphericalProjectionInverse(out, pixel, -cut_height);
+      const result = this.sphericalProjectionInverse(out, pixel, -cut_height);
+      out.x = result.x;
+      out.y = result.y;
+      out.z = result.z;
       //   out.x = 0;
       //   out.y = 0;
       //   out.z = -1;
     } else if (pixel.y > cy + cut_height_pixels) {
       // bottom
-      out = this.sphericalProjectionInverse(out, pixel, cut_height);
+      const result = this.sphericalProjectionInverse(out, pixel, cut_height);
+      out.x = result.x;
+      out.y = result.y;
+      out.z = result.z;
       //   out.x = 0;
       //   out.y = 0;
       //   out.z = -1;

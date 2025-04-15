@@ -10,8 +10,7 @@ import * as THREE from "three";
 import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
-
-import { CameraModel, createCameraModel } from "@lichtblick/den/image";
+import { CameraModel, ICameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
@@ -121,6 +120,7 @@ const SUPPORTED_RAW_IMAGE_SCHEMAS = new Set([...RAW_IMAGE_DATATYPES, ...ROS_IMAG
 const ALL_SUPPORTED_CALIBRATION_SCHEMAS = new Set([
   ...CAMERA_INFO_DATATYPES,
   ...CAMERA_CALIBRATION_DATATYPES,
+  ...[], // create lichtblick schemas here
 ]);
 
 const DEFAULT_CONFIG = {
@@ -140,7 +140,7 @@ export class ImageMode
   #camera: ImageModeCamera;
   #cameraModel:
     | {
-        model: CameraModel;
+        model: ICameraModel;
         info: CameraInfo;
       }
     | undefined;
@@ -157,6 +157,8 @@ export class ImageMode
   #dragStartPanOffset = new THREE.Vector2();
   #dragStartMouseCoords = new THREE.Vector2();
   #hasModifiedView = false;
+
+  private customCameraModels: ICameraModel[] = [];
 
   public constructor(renderer: IRenderer, name: string = ImageMode.extensionId) {
     super(name, renderer);
@@ -922,14 +924,14 @@ export class ImageMode
   }
 
   /**
-   * Returns CameraModel for given CameraInfo
+   * Returns ICameraModel for given CameraInfo
    * This function will set a topic error on the image topic if the camera model creation fails.
    * @param cameraInfo - CameraInfo to create model from
    */
-  #getCameraModel(cameraInfo: CameraInfo): CameraModel | undefined {
+  #getCameraModel(cameraInfo: CameraInfo): ICameraModel | undefined {
     let model = undefined;
     try {
-      model = createCameraModel(cameraInfo);
+      model = CameraModel.create(cameraInfo, this.customCameraModels);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;
@@ -1050,6 +1052,10 @@ export class ImageMode
         disabled: this.imageRenderable?.getDecodedImage() == undefined,
       },
     ];
+  }
+
+  public setCustomCameraModels(cameraModels: ICameraModel[]): void {
+    this.customCameraModels = cameraModels;
   }
 }
 

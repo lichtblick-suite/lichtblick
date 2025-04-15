@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { CameraModel } from "@lichtblick/den/image";
 import { Cameras } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Cameras";
 import { FoxgloveGrid } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
 import { FrameAxes } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/FrameAxes";
@@ -43,7 +44,7 @@ export type ReservedSceneExtensionConfig = {
 };
 
 export type ExtensionOverride<ExtensionType extends SceneExtension> = {
-  init: (renderer: IRenderer) => ExtensionType;
+  init: (renderer: IRenderer, cameraModels?: CameraModel[]) => ExtensionType;
   /** Which interfaceModes this extension is supported in. If undefined, will default be present in BOTH '3d' and 'image' modes */
   supportedInterfaceModes?: InterfaceMode[];
 };
