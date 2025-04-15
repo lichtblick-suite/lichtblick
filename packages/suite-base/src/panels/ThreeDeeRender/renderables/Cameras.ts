@@ -8,7 +8,7 @@
 import { CameraCalibration } from "@foxglove/schemas";
 import { t } from "i18next";
 
-import { CameraModel, createCameraModel } from "@lichtblick/den/image";
+import { CameraModel, ICameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
@@ -70,7 +70,7 @@ export type CameraInfoUserData = BaseUserData & {
   topic: string;
   cameraInfo: CameraInfo | undefined;
   originalMessage: Record<string, RosValue> | undefined;
-  cameraModel: CameraModel | undefined;
+  cameraModel: ICameraModel | undefined;
   lines: RenderableLineList | undefined;
 };
 
@@ -87,6 +87,8 @@ export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
 
 export class Cameras extends SceneExtension<CameraInfoRenderable> {
   public static extensionId = "foxglove.Cameras";
+  private customCameraModels: ICameraModel[] = [];
+
   public constructor(renderer: IRenderer, name: string = Cameras.extensionId) {
     super(name, renderer);
   }
@@ -265,7 +267,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
       if (cameraInfo.P.length === 12) {
         try {
-          renderable.userData.cameraModel = createCameraModel(cameraInfo);
+          renderable.userData.cameraModel = CameraModel.create(cameraInfo, this.customCameraModels);
         } catch (errUnk) {
           const err = errUnk as Error;
           this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);
@@ -306,6 +308,10 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
       }
     }
   }
+
+  public setCustomCameraModels(customCameraModels: ICameraModel[]): void {
+    this.customCameraModels = customCameraModels;
+  }
 }
 
 function vec3(): Vector3 {
@@ -314,7 +320,7 @@ function vec3(): Vector3 {
 
 function createLineListMarker(
   cameraInfo: CameraInfo,
-  cameraModel: CameraModel,
+  cameraModel: ICameraModel,
   settings: LayerSettingsCameraInfo,
   steps = 10,
 ): Marker {
@@ -380,7 +386,7 @@ function horizontalLine(
   output: Vector3[],
   y: number,
   cameraInfo: CameraInfo,
-  cameraModel: CameraModel,
+  cameraModel: ICameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {
@@ -397,7 +403,7 @@ function verticalLine(
   output: Vector3[],
   x: number,
   cameraInfo: CameraInfo,
-  cameraModel: CameraModel,
+  cameraModel: ICameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {
