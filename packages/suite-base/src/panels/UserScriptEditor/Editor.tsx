@@ -23,7 +23,7 @@ import { StandaloneServices } from "monaco-editor/esm/vs/editor/standalone/brows
 import * as path from "path";
 import { ReactElement, useCallback, useEffect, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
-import { useResizeDetector } from "react-resize-detector";
+import { ResizePayload, useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import { ModuleResolutionKind } from "typescript";
 
@@ -330,7 +330,7 @@ const Editor = ({
     [latestSetScriptCode],
   );
 
-  const onResize = useCallback((width?: number, height?: number) => {
+  const onResize = useCallback(({ width, height }: ResizePayload) => {
     if (width != undefined && height != undefined) {
       editorRef.current?.layout({ width, height });
     }
