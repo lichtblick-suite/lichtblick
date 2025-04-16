@@ -331,7 +331,8 @@ const Editor = ({
   );
 
   const onResize = useCallback(({ width, height }: ResizePayload) => {
-    if (width != undefined && height != undefined) {
+    // eslint-disable-next-line no-restricted-syntax
+    if (width != null && height != null) {
       editorRef.current?.layout({ width, height });
     }
   }, []);
