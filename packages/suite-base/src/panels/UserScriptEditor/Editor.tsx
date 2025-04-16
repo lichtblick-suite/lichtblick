@@ -331,10 +331,10 @@ const Editor = ({
   );
 
   const onResize = useCallback(({ width, height }: ResizePayload) => {
-    // eslint-disable-next-line no-restricted-syntax
-    if (width != null && height != null) {
-      editorRef.current?.layout({ width, height });
+    if (width == undefined) {
+      return;
     }
+    editorRef.current?.layout({ width, height });
   }, []);
 
   // monaco editor builtin auto layout uses an interval to adjust size to the parent component
