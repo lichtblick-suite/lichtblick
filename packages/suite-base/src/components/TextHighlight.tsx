@@ -43,7 +43,7 @@ export default function TextHighlight({
 
   const match = fuzzySort.single(searchText, targetStr);
   const result = match
-    ? fuzzySort.highlight(match, "<span class='TextHighlight-highlight'>", "</span>")
+    ? match.highlight("<span class='TextHighlight-highlight'>", "</span>")
     : undefined;
 
   return (
