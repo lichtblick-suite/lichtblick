@@ -141,7 +141,6 @@ export function UnconnectedPanelLayout(props: Readonly<Props>): React.ReactEleme
               </EmptyState>
             }
           >
-            {loadingComponent}
             <MosaicPathContext.Provider value={path}>
               <PanelRemounter id={id} tabId={tabId}>
                 {panel}
@@ -155,7 +154,7 @@ export function UnconnectedPanelLayout(props: Readonly<Props>): React.ReactEleme
       }
       return mosaicWindow;
     },
-    [panelComponents, createTile, loadingComponent, tabId],
+    [panelComponents, createTile, tabId],
   );
 
   const bodyToRender = useMemo(
@@ -177,7 +176,12 @@ export function UnconnectedPanelLayout(props: Readonly<Props>): React.ReactEleme
     [layout, mosaicId, onChange, renderTile, tabId],
   );
 
-  return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
+  return (
+    <ErrorBoundary>
+      {loadingComponent}
+      {bodyToRender}
+    </ErrorBoundary>
+  );
 }
 
 function ExtensionsLoadingState(): React.JSX.Element {
