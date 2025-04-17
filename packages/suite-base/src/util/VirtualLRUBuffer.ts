@@ -76,11 +76,12 @@ export default class VirtualLRUBuffer {
 
   // Copy data from the `source` buffer to the byte at `targetStart` in the VirtualLRUBuffer.
   public copyFrom(source: Buffer, targetStart: number): void {
+    const sourceArray = source instanceof Buffer ? new Uint8Array(source) : source;
     if (targetStart < 0 || targetStart >= this.byteLength) {
       throw new Error("VirtualLRUBuffer#copyFrom invalid input");
     }
 
-    const range = { start: targetStart, end: targetStart + source.byteLength };
+    const range = { start: targetStart, end: targetStart + sourceArray.byteLength };
 
     // Walk through the blocks and copy the data over. If the input buffer is too large we will
     // currently just evict the earliest copied in data.
@@ -88,7 +89,7 @@ export default class VirtualLRUBuffer {
     while (position < range.end) {
       const { blockIndex, positionInBlock, remainingBytesInBlock } =
         this.#calculatePosition(position);
-      copy(source, this.#getBlock(blockIndex), positionInBlock, position - targetStart);
+      copy(sourceArray, this.#getBlock(blockIndex), positionInBlock, position - targetStart);
       position += remainingBytesInBlock;
     }
 
@@ -131,29 +132,24 @@ export default class VirtualLRUBuffer {
   // Get a reference to a block, and mark it as most recently used. Might evict older blocks.
   #getBlock(index: number): Uint8Array {
     if (!this.#blocks[index]) {
-      // If a block is not allocated yet, do so.
-      let size = this.#blockSize;
-      if ((index + 1) * this.#blockSize > this.byteLength) {
-        size = this.byteLength % this.#blockSize; // Trim the last block to match the total size.
-      }
-      // It's okay to use `allocUnsafe` because we don't allow reading data from ranges that have
-      // not explicitly be filled using `VirtualLRUBuffer#copyFrom`.
+      const size =
+        (index + 1) * this.#blockSize > this.byteLength
+          ? this.byteLength % this.#blockSize
+          : this.#blockSize;
+
       this.#blocks[index] = new Uint8Array(size);
     }
-    // Put the current index to the end of the list, while avoiding duplicates.
+
     this.#lastAccessedBlockIndices = [
       ...this.#lastAccessedBlockIndices.filter((idx) => idx !== index),
       index,
     ];
+
     if (this.#lastAccessedBlockIndices.length > this.#numberOfBlocks) {
-      // If we have too many blocks, remove the least recently used one.
-      // Note that we don't reuse blocks, since other code might still hold a reference to it
-      // via the `VirtualLRUBuffer#slice` method.
       const deleteIndex = this.#lastAccessedBlockIndices.shift();
       if (deleteIndex != undefined) {
         // eslint-disable-next-line @typescript-eslint/no-array-delete
         delete this.#blocks[deleteIndex];
-        // Remove the range that we evicted from `_rangesWithData`, since the range doesn't have data now.
         this.#rangesWithData = simplify(
           substract(this.#rangesWithData, [
             { start: deleteIndex * this.#blockSize, end: (deleteIndex + 1) * this.#blockSize },
@@ -161,13 +157,7 @@ export default class VirtualLRUBuffer {
         );
       }
     }
-    const block = this.#blocks[index];
-
-    if (!block) {
-      throw new Error("invariant violation - no block at index");
-    }
-
-    return block;
+    return this.#blocks[index];
   }
 
   // For a given position, calculate `blockIndex` (which block is this position in);

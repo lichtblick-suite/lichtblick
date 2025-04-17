@@ -76,7 +76,7 @@ async function copySpotlightImporter(context: AfterPackContext) {
   await downloadTool(zipURL, zipPath);
   const actualSHA = crypto
     .createHash("sha256")
-    .update(await fs.readFile(zipPath))
+    .update(new Uint8Array(await fs.readFile(zipPath)))
     .digest("hex");
   if (actualSHA !== zipSHA) {
     throw new Error(`SHA mismatch for ${zipURL}: expected ${zipSHA}, got ${actualSHA}`);

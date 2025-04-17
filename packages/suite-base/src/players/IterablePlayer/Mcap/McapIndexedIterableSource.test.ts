@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { McapIndexedReader, McapWriter, TempBuffer } from "@mcap/core";
-import { Blob } from "node:buffer";
 
 import { loadDecompressHandlers } from "@lichtblick/mcap-support";
 import { BlobReadable } from "@lichtblick/suite-base/players/IterablePlayer/Mcap/BlobReadable";

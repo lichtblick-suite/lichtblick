@@ -112,7 +112,10 @@ describe("useMessagesByPath", () => {
       },
     });
 
-    rerender({ paths: ["/some/topic"] });
+    rerender({
+      paths: ["/some/topic"],
+      topics: [],
+    });
     unmount();
 
     expect(setSubscriptions.mock.calls).toEqual([

@@ -86,7 +86,7 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
       if (dsParams[cleanKey] == undefined) {
         dsParams[cleanKey] = v;
       } else if (cleanKey === "url") {
-        dsParams[cleanKey] = dsParams[cleanKey]! + "," + v;
+        dsParams[cleanKey] = dsParams[cleanKey] + "," + v;
       } else {
         dsParams[cleanKey] = v;
       }
