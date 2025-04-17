@@ -18,7 +18,6 @@ import { Autocomplete, TextField } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
 
 import { compare } from "@lichtblick/rostime";
 import { SettingsTreeAction } from "@lichtblick/suite";
@@ -28,40 +27,25 @@ import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
+import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticStatusPanel.style";
+import {
+  ALLOWED_DATATYPES,
+  DEFAULT_SECONDS_UNTIL_STALE,
+  diagnosticStatusConfig as defaultConfig,
+  LEVELS,
+} from "@lichtblick/suite-base/panels/diagnostics/constants";
+import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/hooks/useStaleTime";
+import { DiagnosticStatusPanelProps } from "@lichtblick/suite-base/panels/diagnostics/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import DiagnosticStatus from "./DiagnosticStatus";
-import { buildStatusPanelSettingsTree } from "./utils/settings";
-import useAvailableDiagnostics from "./useAvailableDiagnostics";
+import useAvailableDiagnostics from "./hooks/useAvailableDiagnostics";
 import useDiagnostics from "./hooks/useDiagnostics";
-import {
-  DiagnosticStatusConfig as Config,
-  DEFAULT_SECONDS_UNTIL_STALE,
-  LEVELS,
-  getDisplayName,
-} from "./utils/util";
-
-type Props = {
-  config: Config;
-  saveConfig: SaveConfig<Config>;
-};
-
-const ALLOWED_DATATYPES: string[] = [
-  "diagnostic_msgs/DiagnosticArray",
-  "diagnostic_msgs/msg/DiagnosticArray",
-  "ros.diagnostic_msgs.DiagnosticArray",
-];
-
-const useStyles = makeStyles()({
-  toolbar: {
-    paddingBlock: 0,
-  },
-});
+import { buildStatusPanelSettingsTree } from "./utils/settings";
+import { getDisplayName } from "./utils/util";
 
 // component to display a single diagnostic status from list
-function DiagnosticStatusPanel(props: Props) {
+function DiagnosticStatusPanel(props: DiagnosticStatusPanelProps) {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
@@ -238,8 +222,6 @@ function DiagnosticStatusPanel(props: Props) {
     </Stack>
   );
 }
-
-const defaultConfig: Config = { topicToRender: "/diagnostics" };
 
 export default Panel(
   Object.assign(DiagnosticStatusPanel, {

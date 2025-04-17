@@ -17,15 +17,17 @@
 import { renderHook } from "@testing-library/react";
 
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
+import { LEVELS } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import { DiagnosticStatusArrayMsg } from "@lichtblick/suite-base/panels/diagnostics/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 
 import useDiagnostics, { addMessages, UseDiagnosticsResult } from "./useDiagnostics";
-import { computeDiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "../utils/util";
+import { computeDiagnosticInfo } from "../utils/util";
 
-jest.mock("./util", () => ({
-  ...jest.requireActual("./util"),
+jest.mock("../utils/util", () => ({
+  ...jest.requireActual("../utils/util"),
   computeDiagnosticInfo: jest.fn(),
 }));
 

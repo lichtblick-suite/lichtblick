@@ -6,12 +6,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { SettingsTreeNodes } from "@lichtblick/suite";
-
+import { DEFAULT_SECONDS_UNTIL_STALE } from "@lichtblick/suite-base/panels/diagnostics/constants";
 import {
-  DEFAULT_SECONDS_UNTIL_STALE,
   DiagnosticStatusConfig,
   DiagnosticSummaryConfig,
-} from "./util";
+} from "@lichtblick/suite-base/panels/diagnostics/types";
 
 export function buildSummarySettingsTree(
   config: DiagnosticSummaryConfig,

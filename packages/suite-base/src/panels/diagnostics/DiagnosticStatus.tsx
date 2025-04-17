@@ -24,31 +24,33 @@ import {
   TableRow,
   IconButton,
   Typography,
-  tableRowClasses,
-  iconButtonClasses,
 } from "@mui/material";
 import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
-import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
+import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticsStatus.style";
+import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import {
+  DiagnosticInfo,
+  DiagnosticStatusMessage,
+  KeyValue,
+} from "@lichtblick/suite-base/panels/diagnostics/types";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
-
-import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage, LEVELS } from "./utils/util";
 
 const MIN_SPLIT_FRACTION = 0.1;
 
-type Props = {
+type DiagnosticStatusProps = {
   info: DiagnosticInfo;
-  splitFraction: number | undefined;
-  onChangeSplitFraction: (arg0: number) => void;
-  topicToRender: string;
   numericPrecision: number | undefined;
+  onChangeSplitFraction: (arg0: number) => void;
   openSiblingPanel: OpenSiblingPanel;
+  splitFraction: number | undefined;
+  topicToRender: string;
 };
 
 type FormattedKeyValue = {
@@ -87,56 +89,6 @@ const allowedTags = [
   "H6",
 ];
 
-const useStyles = makeStyles()((theme) => ({
-  resizeHandle: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 12,
-    marginLeft: -6,
-    cursor: "col-resize",
-
-    "&:hover, &:active, &:focus": {
-      outline: "none",
-
-      "&::after": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 6,
-        marginLeft: -2,
-        width: 4,
-        backgroundColor: theme.palette.action.focus,
-      },
-    },
-  },
-  table: {
-    "@media (pointer: fine)": {
-      [`.${tableRowClasses.root} .${iconButtonClasses.root}`]: { visibility: "hidden" },
-      [`.${tableRowClasses.root}:hover .${iconButtonClasses.root}`]: { visibility: "visible" },
-    },
-  },
-  tableHeaderRow: {
-    backgroundColor: theme.palette.background.paper,
-  },
-  htmlTableCell: {
-    "h1, h2, h3, h4, h5, h6": {
-      fontFamily: theme.typography.subtitle2.fontFamily,
-      fontSize: theme.typography.subtitle2.fontSize,
-      lineHeight: theme.typography.subtitle2.lineHeight,
-      letterSpacing: theme.typography.subtitle2.letterSpacing,
-      fontWeight: 800,
-      margin: 0,
-    },
-  },
-  iconButton: {
-    "&:hover, &:active, &:focus": {
-      backgroundColor: "transparent",
-    },
-  },
-}));
-
 function sanitize(value: string): { __html: string } {
   return {
     __html: sanitizeHtml(value, {
@@ -168,7 +120,7 @@ const getFormattedKeyValues = createSelector(
 );
 
 // component to display a single diagnostic status
-export default function DiagnosticStatus(props: Props): React.JSX.Element {
+export default function DiagnosticStatus(props: DiagnosticStatusProps): React.JSX.Element {
   const {
     onChangeSplitFraction,
     info,
@@ -301,13 +253,6 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
     });
   }, [classes.iconButton, info.status, openSiblingPanel, renderKeyValueCell, topicToRender]);
 
-  const STATUS_COLORS: Record<number, string> = {
-    [LEVELS.OK]: "success.main",
-    [LEVELS.ERROR]: "error.main",
-    [LEVELS.WARN]: "warning.main",
-    [LEVELS.STALE]: "text.secondary",
-  };
-
   return (
     <div>
       <div
@@ -344,7 +289,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
                 }
               >
                 <Typography
-                  color={STATUS_COLORS[info.status.level]}
+                  color={MESSAGE_COLORS[info.status.level]}
                   variant="subtitle1"
                   fontWeight={800}
                 >
@@ -364,7 +309,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
               >
                 <Typography
                   flex="auto"
-                  color={STATUS_COLORS[info.status.level]}
+                  color={MESSAGE_COLORS[info.status.level]}
                   variant="inherit"
                   fontWeight={800}
                 >

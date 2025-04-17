@@ -17,80 +17,14 @@
 import * as _ from "lodash-es";
 
 import { Time, compare } from "@lichtblick/rostime";
-import { Header } from "@lichtblick/suite-base/types/Messages";
+import { LEVELS, MAX_STRING_LENGTH } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import {
+  DiagnosticId,
+  DiagnosticInfo,
+  DiagnosticsById,
+  DiagnosticStatusMessage,
+} from "@lichtblick/suite-base/panels/diagnostics/types";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
-
-// Trim the message if it's too long. We sometimes get crazy massive messages here that can
-// otherwise crash our entire UI. I looked at a bunch of messages manually and they are typically
-// way smaller than 5KB, so this is a very generous maximum. But feel free to increase it more if
-// necessary. Exported for tests.
-export const MAX_STRING_LENGTH = 5000; // 5KB
-export const DEFAULT_SECONDS_UNTIL_STALE = 5; // ROS rqt_runtime_monitor default
-
-export const LEVELS: { OK: 0; WARN: 1; ERROR: 2; STALE: 3 } = {
-  OK: 0,
-  WARN: 1,
-  ERROR: 2,
-  STALE: 3,
-};
-
-export const LEVEL_NAMES: { [key: number]: string } = {
-  0: "ok",
-  1: "warn",
-  2: "error",
-  3: "stale",
-};
-
-export const KNOWN_LEVELS = [0, 1, 2, 3];
-
-interface ToString {
-  toString(): string;
-}
-
-export type DiagnosticStatusConfig = {
-  selectedHardwareId?: string;
-  selectedName?: string;
-  splitFraction?: number;
-  topicToRender: string;
-  numericPrecision?: number;
-  secondsUntilStale?: number;
-};
-
-export type DiagnosticSummaryConfig = {
-  minLevel: number;
-  pinnedIds: DiagnosticId[];
-  topicToRender: string;
-  hardwareIdFilter: string;
-  sortByLevel?: boolean;
-  secondsUntilStale?: number;
-};
-
-export type DiagnosticId = string & ToString;
-
-export type KeyValue = { key: string; value: string };
-
-// diagnostic_msgs/DiagnosticStatus
-export type DiagnosticStatusMessage = {
-  name: string;
-  hardware_id: string;
-  level: number;
-  message: string;
-  values: KeyValue[];
-};
-
-export type DiagnosticInfo = {
-  status: DiagnosticStatusMessage;
-  stamp: Time;
-  id: DiagnosticId;
-  displayName: string;
-};
-
-export type DiagnosticStatusArrayMsg = {
-  header: Header;
-  status: DiagnosticStatusMessage[];
-};
-
-export type DiagnosticsById = Map<DiagnosticId, DiagnosticInfo>;
 
 // Remove leading slash from hardware_id if present.
 export function trimHardwareId(hardwareId: string): string {

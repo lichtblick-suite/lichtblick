@@ -8,10 +8,9 @@
 import { useMemo } from "react";
 
 import { useMessageReducer } from "@lichtblick/suite-base/PanelAPI";
+import { DiagnosticStatusArrayMsg } from "@lichtblick/suite-base/panels/diagnostics/types";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
-
-import { DiagnosticStatusArrayMsg } from "./util";
 
 type DiagnosticNameSet = Set<string>;
 type UseAvailableDiagnosticResult = Map<string, DiagnosticNameSet>;

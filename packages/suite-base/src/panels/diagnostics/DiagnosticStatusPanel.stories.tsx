@@ -9,7 +9,7 @@ import { StoryObj } from "@storybook/react";
 
 import DiagnosticStatusPanel from "@lichtblick/suite-base/panels/diagnostics/DiagnosticStatusPanel";
 import { makeDiagnosticMessage } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticSummary.stories";
-import { LEVELS } from "@lichtblick/suite-base/panels/diagnostics/utils/util";
+import { LEVELS } from "@lichtblick/suite-base/panels/diagnostics/constants";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 
 export default {
