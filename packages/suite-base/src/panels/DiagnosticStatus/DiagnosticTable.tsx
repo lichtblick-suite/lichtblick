@@ -27,108 +27,29 @@ import {
 } from "@mui/material";
 import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { createSelector } from "reselect";
-import sanitizeHtml from "sanitize-html";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticStatus/DiagnosticTable.style";
+import { MIN_SPLIT_FRACTION } from "@lichtblick/suite-base/panels/DiagnosticStatus/constants";
+import {
+  DiagnosticStatusProps,
+  FormattedKeyValue,
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { getFormattedKeyValues } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getFormattedKeyValues";
+import { isFloatOrInteger } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/isFloaterOrInteger";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticTable.style";
 import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/diagnostics/constants";
-import {
-  DiagnosticInfo,
-  DiagnosticStatusMessage,
-  KeyValue,
-} from "@lichtblick/suite-base/panels/diagnostics/types";
-import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
-
-const MIN_SPLIT_FRACTION = 0.1;
-
-type DiagnosticStatusProps = {
-  info: DiagnosticInfo;
-  numericPrecision: number | undefined;
-  onChangeSplitFraction: (arg0: number) => void;
-  openSiblingPanel: OpenSiblingPanel;
-  splitFraction: number | undefined;
-  topicToRender: string;
-};
-
-type FormattedKeyValue = {
-  key: string;
-  keyHtml: { __html: string } | undefined;
-  value: string;
-  valueHtml: { __html: string } | undefined;
-};
-
-const allowedTags = [
-  "b",
-  "br",
-  "center",
-  "code",
-  "em",
-  "font",
-  "i",
-  "strong",
-  "table",
-  "td",
-  "th",
-  "tr",
-  "tt",
-  "u",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "H1",
-  "H2",
-  "H3",
-  "H4",
-  "H5",
-  "H6",
-];
-
-function sanitize(value: string): { __html: string } {
-  return {
-    __html: sanitizeHtml(value, {
-      allowedTags,
-      allowedAttributes: {
-        font: ["color", "size"],
-        td: ["colspan"],
-        th: ["colspan"],
-      },
-    }),
-  };
-}
-
-// preliminary check to avoid expensive operations when there is no html
-const HAS_ANY_HTML = new RegExp(`<(${allowedTags.join("|")})`);
-
-const getFormattedKeyValues = createSelector(
-  (message: DiagnosticStatusMessage) => message,
-  (message: DiagnosticStatusMessage): FormattedKeyValue[] => {
-    return message.values.map(({ key, value }: KeyValue) => {
-      return {
-        key,
-        keyHtml: HAS_ANY_HTML.test(key) ? sanitize(key) : undefined,
-        value,
-        valueHtml: HAS_ANY_HTML.test(value) ? sanitize(value) : undefined,
-      };
-    });
-  },
-);
 
 // component to display a single diagnostic status
-export default function DiagnosticTable(props: DiagnosticStatusProps): React.JSX.Element {
-  const {
-    onChangeSplitFraction,
-    info,
-    topicToRender,
-    numericPrecision,
-    openSiblingPanel,
-    splitFraction = 0.5,
-  } = props;
+export default function DiagnosticTable({
+  info,
+  numericPrecision,
+  onChangeSplitFraction,
+  openSiblingPanel,
+  splitFraction = 0.5,
+  topicToRender,
+}: DiagnosticStatusProps): React.JSX.Element {
   const { classes } = useStyles();
   const tableRef = useRef<HTMLTableElement>(ReactNull);
 
@@ -338,15 +259,4 @@ export default function DiagnosticTable(props: DiagnosticStatusProps): React.JSX
       </Table>
     </div>
   );
-}
-
-// Returns true if the input string can be parsed as a float or an integer using
-// parseFloat(). Hex and octal numbers will return false.
-function isFloatOrInteger(n: string): boolean {
-  if (n.startsWith("0") && n.length > 1) {
-    if (n[1] === "x" || n[1] === "X" || n[1] === "o" || n[1] === "O") {
-      return false;
-    }
-  }
-  return !isNaN(parseFloat(n)) && isFinite(Number(n));
 }

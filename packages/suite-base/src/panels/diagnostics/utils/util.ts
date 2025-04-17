@@ -17,13 +17,14 @@
 import * as _ from "lodash-es";
 
 import { Time, compare } from "@lichtblick/rostime";
-import { LEVELS, MAX_STRING_LENGTH } from "@lichtblick/suite-base/panels/diagnostics/constants";
 import {
   DiagnosticId,
   DiagnosticInfo,
-  DiagnosticsById,
   DiagnosticStatusMessage,
-} from "@lichtblick/suite-base/panels/diagnostics/types";
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
+import { LEVELS, MAX_STRING_LENGTH } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import { DiagnosticsById } from "@lichtblick/suite-base/panels/diagnostics/types";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 
 // Remove leading slash from hardware_id if present.
@@ -34,16 +35,6 @@ export function trimHardwareId(hardwareId: string): string {
 export function getDiagnosticId(hardwareId: string, name?: string): DiagnosticId {
   const trimmedHardwareId = trimHardwareId(hardwareId);
   return name != undefined ? `|${trimmedHardwareId}|${name}|` : `|${trimmedHardwareId}|`;
-}
-
-export function getDisplayName(hardwareId: string, name: string): string {
-  return name.length > 0
-    ? hardwareId.length > 0
-      ? `${hardwareId}: ${name}`
-      : name
-    : hardwareId.length > 0
-      ? hardwareId
-      : `(empty)`;
 }
 
 // ensures the diagnostic status message's name consists of both the hardware id and the name

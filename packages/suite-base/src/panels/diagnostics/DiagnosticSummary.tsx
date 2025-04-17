@@ -39,6 +39,10 @@ import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import {
+  DiagnosticInfo,
+  DiagnosticStatusConfig,
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticSummary.style";
 import {
   ALLOWED_DATATYPES,
@@ -51,8 +55,6 @@ import {
 import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/hooks/useDiagnostics";
 import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/hooks/useStaleTime";
 import {
-  DiagnosticInfo,
-  DiagnosticStatusConfig,
   DiagnosticSummaryConfig,
   DiagnosticSummaryProps,
   NodeRowProps,

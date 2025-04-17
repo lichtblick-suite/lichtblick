@@ -23,29 +23,27 @@ import { compare } from "@lichtblick/rostime";
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticStatusPanel.style";
+import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticStatus/DiagnosticStatusPanel.style";
+import useAvailableDiagnostics from "@lichtblick/suite-base/panels/DiagnosticStatus/hooks/useAvailableDiagnostics";
+import { DiagnosticStatusPanelProps } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
 import {
   ALLOWED_DATATYPES,
   DEFAULT_SECONDS_UNTIL_STALE,
-  diagnosticStatusConfig as defaultConfig,
   LEVELS,
 } from "@lichtblick/suite-base/panels/diagnostics/constants";
 import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/hooks/useStaleTime";
-import { DiagnosticStatusPanelProps } from "@lichtblick/suite-base/panels/diagnostics/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
 import DiagnosticTable from "./DiagnosticTable";
-import useAvailableDiagnostics from "./hooks/useAvailableDiagnostics";
-import useDiagnostics from "./hooks/useDiagnostics";
-import { buildStatusPanelSettingsTree } from "./utils/settings";
-import { getDisplayName } from "./utils/util";
+import { buildStatusPanelSettingsTree } from "./utils/buildStatusPanelSettingsTree";
+import useDiagnostics from "../diagnostics/hooks/useDiagnostics";
 
 // component to display a single diagnostic status from list
-function DiagnosticStatusPanel(props: DiagnosticStatusPanelProps) {
+const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Element => {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
@@ -221,11 +219,6 @@ function DiagnosticStatusPanel(props: DiagnosticStatusPanelProps) {
       )}
     </Stack>
   );
-}
+};
 
-export default Panel(
-  Object.assign(DiagnosticStatusPanel, {
-    panelType: "DiagnosticStatusPanel",
-    defaultConfig,
-  }),
-);
+export default DiagnosticStatusPanel;

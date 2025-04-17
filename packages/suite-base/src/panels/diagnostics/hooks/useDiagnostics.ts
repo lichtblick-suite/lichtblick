@@ -17,10 +17,8 @@
 import { useMemo } from "react";
 
 import { useMessageReducer } from "@lichtblick/suite-base/PanelAPI";
-import {
-  DiagnosticsById,
-  DiagnosticStatusArrayMsg,
-} from "@lichtblick/suite-base/panels/diagnostics/types";
+import { DiagnosticStatusArrayMsg } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { DiagnosticsById } from "@lichtblick/suite-base/panels/diagnostics/types";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { computeDiagnosticInfo } from "../utils/util";

@@ -1,16 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-
 import { SettingsTreeNodes } from "@lichtblick/suite";
+import { DiagnosticStatusConfig } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { DEFAULT_SECONDS_UNTIL_STALE } from "@lichtblick/suite-base/panels/diagnostics/constants";
-import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/diagnostics/types";
 
-export function buildSummarySettingsTree(
-  config: DiagnosticSummaryConfig,
+export function buildStatusPanelSettingsTree(
+  config: DiagnosticStatusConfig,
   topicToRender: string,
   availableTopics: readonly string[],
 ): SettingsTreeNodes {
@@ -32,7 +28,16 @@ export function buildSummarySettingsTree(
           error: topicError,
           options: topicOptions,
         },
-        sortByLevel: { label: "Sort by level", input: "boolean", value: config.sortByLevel },
+        numericPrecision: {
+          label: "Numeric precision",
+          input: "number",
+          min: 0,
+          max: 17,
+          precision: 0,
+          step: 1,
+          placeholder: "auto",
+          value: config.numericPrecision,
+        },
         secondsUntilStale: {
           label: "Stale timeout",
           help: "Number of seconds after which entries will be marked as stale if no new diagnostic message(s) have been received",
