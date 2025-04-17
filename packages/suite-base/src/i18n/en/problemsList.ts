@@ -7,5 +7,5 @@
 
 export const problemsList = {
   noDetailsProvided: "No details provided",
-  noProblemsFound: "No problems found",
+  noProblemsFound: "No alerts found",
 };

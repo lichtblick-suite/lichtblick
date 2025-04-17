@@ -384,7 +384,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       [
         "problems",
         {
-          title: "Problems",
+          title: "Alerts",
           component: ProblemsList,
           badge:
             playerProblems && playerProblems.length > 0

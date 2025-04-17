@@ -544,7 +544,7 @@ export default class UserScriptPlayer implements Player {
           this.#problemStore.set(problemKey, {
             severity: "error",
             message: `User Script ${scriptData.name} encountered an error.`,
-            tip: "Open the User Scripts panel and check the Problems tab for errors.",
+            tip: "Open the User Scripts panel and check the Alerts tab for errors.",
           });
 
           this.#setUserScriptDiagnostics(scriptId, allDiagnostics);
