@@ -21,33 +21,35 @@ import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { DiagnosticStatusArrayMsg, DiagnosticsById, computeDiagnosticInfo } from "./util";
 
-type UseDiagnosticsResult = Map<string, DiagnosticsById>;
+export type UseDiagnosticsResult = Map<string, DiagnosticsById>;
 
-// Exported for tests
 export function addMessages(
-  prevResult: UseDiagnosticsResult,
-  msgEvents: readonly MessageEvent[],
+  prev: UseDiagnosticsResult,
+  messageEvents: readonly MessageEvent[],
 ): UseDiagnosticsResult {
   // Mutates the previous value since there might be many diagnostic messages
   let modified = false;
-  for (const msgEvent of msgEvents as MessageEvent<DiagnosticStatusArrayMsg>[]) {
-    const { header, status: statusArray }: DiagnosticStatusArrayMsg = msgEvent.message;
+  const next = new Map(prev);
+
+  for (const event of messageEvents as MessageEvent<DiagnosticStatusArrayMsg>[]) {
+    const { header, status: statusArray }: DiagnosticStatusArrayMsg = event.message;
 
     for (const status of statusArray) {
       const info = computeDiagnosticInfo(status, header.stamp);
-      const hardwareId = status.hardware_id;
-      const hardwareDiagnosticsByName = prevResult.get(hardwareId);
-      if (hardwareDiagnosticsByName == undefined) {
+      const diagnosticsByName = next.get(status.hardware_id);
+
+      if (!diagnosticsByName) {
+        next.set(status.hardware_id, new Map([[status.name, info]]));
         modified = true;
-        prevResult.set(hardwareId, new Map([[status.name, info]]));
       } else {
+        diagnosticsByName.set(status.name, info);
         modified = true;
-        hardwareDiagnosticsByName.set(status.name, info);
       }
     }
   }
+
   // We shallow-copy the buffer when it changes to help users know when to rerender.
-  return modified ? new Map(prevResult) : prevResult;
+  return modified ? next : prev;
 }
 
 const EmptyMap = () => new Map();
