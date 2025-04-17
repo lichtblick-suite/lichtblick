@@ -33,7 +33,7 @@ import sanitizeHtml from "sanitize-html";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticsStatus.style";
+import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticStatus.style";
 import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/diagnostics/constants";
 import {
   DiagnosticInfo,
