@@ -35,7 +35,7 @@ import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import DiagnosticStatus from "./DiagnosticStatus";
 import { buildStatusPanelSettingsTree } from "./settings";
 import useAvailableDiagnostics from "./useAvailableDiagnostics";
-import useDiagnostics from "./useDiagnostics";
+import useDiagnostics from "./hooks/useDiagnostics";
 import {
   DiagnosticStatusConfig as Config,
   DEFAULT_SECONDS_UNTIL_STALE,

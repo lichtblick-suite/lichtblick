@@ -19,7 +19,7 @@ import { useMemo } from "react";
 import { useMessageReducer } from "@lichtblick/suite-base/PanelAPI";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
-import { DiagnosticStatusArrayMsg, DiagnosticsById, computeDiagnosticInfo } from "./util";
+import { DiagnosticStatusArrayMsg, DiagnosticsById, computeDiagnosticInfo } from "../util";
 
 export type UseDiagnosticsResult = Map<string, DiagnosticsById>;
 

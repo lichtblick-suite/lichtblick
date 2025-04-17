@@ -44,7 +44,7 @@ import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/useDiagnostics";
+import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/hooks/useDiagnostics";
 import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
