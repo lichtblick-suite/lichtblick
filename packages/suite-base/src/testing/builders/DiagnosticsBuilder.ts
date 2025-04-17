@@ -8,7 +8,7 @@ import {
   DiagnosticStatusMessage,
   KeyValue,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
-import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/diagnostics/types";
+import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";

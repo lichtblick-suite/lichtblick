@@ -23,8 +23,11 @@ import {
   DiagnosticStatusMessage,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
-import { LEVELS, MAX_STRING_LENGTH } from "@lichtblick/suite-base/panels/diagnostics/constants";
-import { DiagnosticsById } from "@lichtblick/suite-base/panels/diagnostics/types";
+import {
+  LEVELS,
+  MAX_STRING_LENGTH,
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 
 // Remove leading slash from hardware_id if present.

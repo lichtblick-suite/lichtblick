@@ -7,18 +7,18 @@
 
 import { StoryObj } from "@storybook/react";
 
-import DiagnosticSummary from "@lichtblick/suite-base/panels/diagnostics/DiagnosticSummary";
 import {
   DiagnosticStatusArrayMsg,
-  getDiagnosticId,
   KeyValue,
-  LEVELS,
-} from "@lichtblick/suite-base/panels/diagnostics/utils/util";
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import DiagnosticSummary from "@lichtblick/suite-base/panels/DiagnosticSummary";
+import { LEVELS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import { getDiagnosticId } from "@lichtblick/suite-base/panels/DiagnosticSummary/utils/util";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 
 export default {
-  title: "panels/diagnostics/DiagnosticSummary",
+  title: "panels/DiagnosticSummary/DiagnosticSummary",
   excludeStories: ["makeDiagnosticMessage"],
 };
 

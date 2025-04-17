@@ -14,16 +14,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
+import {
+  LEVELS,
+  MAX_STRING_LENGTH,
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
+
 import {
   getDiagnosticId,
-  getDisplayName,
   getDiagnosticsByLevel,
   filterAndSortDiagnostics,
   computeDiagnosticInfo,
-  LEVELS,
-  MAX_STRING_LENGTH,
-  DiagnosticsById,
-  DiagnosticInfo,
 } from "./util";
 
 const watchdogStatus: DiagnosticInfo = {

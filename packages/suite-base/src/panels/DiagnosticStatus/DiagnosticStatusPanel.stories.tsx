@@ -8,8 +8,8 @@
 import { StoryObj } from "@storybook/react";
 
 import DiagnosticStatusPanel from "@lichtblick/suite-base/panels/DiagnosticStatus";
-import { makeDiagnosticMessage } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticSummary.stories";
-import { LEVELS } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import { makeDiagnosticMessage } from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary.stories";
+import { LEVELS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 
 export default {

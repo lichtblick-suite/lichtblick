@@ -34,13 +34,13 @@ import {
   ALLOWED_DATATYPES,
   DEFAULT_SECONDS_UNTIL_STALE,
   LEVELS,
-} from "@lichtblick/suite-base/panels/diagnostics/constants";
-import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/hooks/useStaleTime";
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import useDiagnostics from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics";
+import useStaleTime from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useStaleTime";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
 import DiagnosticTable from "./DiagnosticTable";
 import { buildStatusPanelSettingsTree } from "./utils/buildStatusPanelSettingsTree";
-import useDiagnostics from "../diagnostics/hooks/useDiagnostics";
 
 // component to display a single diagnostic status from list
 const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Element => {

@@ -14,17 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import PushPinIcon from "@mui/icons-material/PushPin";
-import {
-  IconButton,
-  InputBase,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
+import { InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { CSSProperties, useCallback, useEffect, useMemo } from "react";
@@ -35,7 +25,6 @@ import { filterMap } from "@lichtblick/den/collection";
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -43,22 +32,21 @@ import {
   DiagnosticInfo,
   DiagnosticStatusConfig,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
-import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticSummary.style";
+import DiagnosticNodeRow from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticNodeRow";
+import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary.style";
 import {
   ALLOWED_DATATYPES,
   DEFAULT_SECONDS_UNTIL_STALE,
-  diagnosticSummaryConfig as defaultConfig,
   KNOWN_LEVELS,
   LEVEL_NAMES,
   MESSAGE_COLORS,
-} from "@lichtblick/suite-base/panels/diagnostics/constants";
-import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/hooks/useDiagnostics";
-import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/hooks/useStaleTime";
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import useDiagnostics from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics";
+import useStaleTime from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useStaleTime";
 import {
   DiagnosticSummaryConfig,
   DiagnosticSummaryProps,
-  NodeRowProps,
-} from "@lichtblick/suite-base/panels/diagnostics/types";
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import toggle from "@lichtblick/suite-base/util/toggle";
 
@@ -69,45 +57,7 @@ import {
   getDiagnosticsWithStales,
 } from "./utils/util";
 
-const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
-  const { info, isPinned, onClick, onClickPin } = props;
-  const { classes } = useStyles();
-
-  const handleClick = useCallback(() => {
-    onClick(info);
-  }, [onClick, info]);
-
-  const handleClickPin = useCallback(() => {
-    onClickPin(info);
-  }, [onClickPin, info]);
-
-  return (
-    <ListItem dense disablePadding data-testid-diagnostic-row>
-      <ListItemButton className={classes.listItemButton} disableGutters onClick={handleClick}>
-        <IconButton
-          size="small"
-          onClick={(event) => {
-            handleClickPin();
-            event.stopPropagation();
-          }}
-          style={isPinned ? { visibility: "visible" } : undefined}
-        >
-          <PushPinIcon fontSize="small" color={isPinned ? "inherit" : "disabled"} />
-        </IconButton>
-        <ListItemText
-          primary={info.displayName}
-          secondary={info.status.message}
-          secondaryTypographyProps={{
-            color: MESSAGE_COLORS[info.status.level],
-          }}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-        />
-      </ListItemButton>
-    </ListItem>
-  );
-});
-
-function DiagnosticSummary(props: DiagnosticSummaryProps): React.JSX.Element {
+const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => {
   const { config, saveConfig } = props;
   const { classes } = useStyles();
   const { topics } = useDataSourceInfo();
@@ -152,7 +102,7 @@ function DiagnosticSummary(props: DiagnosticSummaryProps): React.JSX.Element {
       const item = renderProps.data[renderProps.index]!;
       return (
         <div style={{ ...renderProps.style }}>
-          <NodeRow
+          <DiagnosticNodeRow
             key={item.id}
             info={item}
             isPinned={pinnedIds.includes(item.id)}
@@ -307,11 +257,6 @@ function DiagnosticSummary(props: DiagnosticSummaryProps): React.JSX.Element {
       <Stack flex="auto">{summary}</Stack>
     </Stack>
   );
-}
+};
 
-export default Panel(
-  Object.assign(DiagnosticSummary, {
-    panelType: "DiagnosticSummary",
-    defaultConfig,
-  }),
-);
+export default DiagnosticSummary;

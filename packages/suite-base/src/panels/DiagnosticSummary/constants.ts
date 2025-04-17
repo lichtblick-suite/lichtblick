@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/diagnostics/types";
+import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 
 // Trim the message if it's too long. We sometimes get crazy massive messages here that can
 // otherwise crash our entire UI. I looked at a bunch of messages manually and they are typically
@@ -40,7 +40,7 @@ export const MESSAGE_COLORS: Record<number, string> = {
   [LEVELS.STALE]: "text.secondary",
 };
 
-export const diagnosticSummaryConfig: DiagnosticSummaryConfig = {
+export const DEFAULT_CONFIG: DiagnosticSummaryConfig = {
   minLevel: 0,
   pinnedIds: [],
   hardwareIdFilter: "",

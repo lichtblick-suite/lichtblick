@@ -18,7 +18,7 @@ import { renderHook } from "@testing-library/react";
 
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import { DiagnosticStatusArrayMsg } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
-import { LEVELS } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import { LEVELS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";

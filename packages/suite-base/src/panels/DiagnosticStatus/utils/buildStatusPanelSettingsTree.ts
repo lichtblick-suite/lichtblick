@@ -3,7 +3,7 @@
 
 import { SettingsTreeNodes } from "@lichtblick/suite";
 import { DiagnosticStatusConfig } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
-import { DEFAULT_SECONDS_UNTIL_STALE } from "@lichtblick/suite-base/panels/diagnostics/constants";
+import { DEFAULT_SECONDS_UNTIL_STALE } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 
 export function buildStatusPanelSettingsTree(
   config: DiagnosticStatusConfig,

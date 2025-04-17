@@ -37,9 +37,9 @@ import {
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { getFormattedKeyValues } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getFormattedKeyValues";
 import { isFloatOrInteger } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/isFloaterOrInteger";
+import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/diagnostics/constants";
 
 // component to display a single diagnostic status
 export default function DiagnosticTable({
