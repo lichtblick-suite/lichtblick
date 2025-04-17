@@ -33,7 +33,7 @@ import sanitizeHtml from "sanitize-html";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticStatus.style";
+import { useStyles } from "@lichtblick/suite-base/panels/diagnostics/DiagnosticTable.style";
 import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/diagnostics/constants";
 import {
   DiagnosticInfo,
@@ -120,7 +120,7 @@ const getFormattedKeyValues = createSelector(
 );
 
 // component to display a single diagnostic status
-export default function DiagnosticStatus(props: DiagnosticStatusProps): React.JSX.Element {
+export default function DiagnosticTable(props: DiagnosticStatusProps): React.JSX.Element {
   const {
     onChangeSplitFraction,
     info,
@@ -274,7 +274,7 @@ export default function DiagnosticStatus(props: DiagnosticStatusProps): React.JS
             <TableCell padding="none" style={{ borderLeft: "none" }} />
           </TableRow>
           <TableRow className={classes.tableHeaderRow}>
-            <TableCell variant="head" data-testid="DiagnosticStatus-display-name" colSpan={2}>
+            <TableCell variant="head" data-testid="DiagnosticTable-display-name" colSpan={2}>
               <Tooltip
                 arrow
                 title={

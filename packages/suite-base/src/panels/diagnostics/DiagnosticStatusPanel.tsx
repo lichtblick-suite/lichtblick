@@ -38,7 +38,7 @@ import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/hooks/useSta
 import { DiagnosticStatusPanelProps } from "@lichtblick/suite-base/panels/diagnostics/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
-import DiagnosticStatus from "./DiagnosticStatus";
+import DiagnosticTable from "./DiagnosticTable";
 import useAvailableDiagnostics from "./hooks/useAvailableDiagnostics";
 import useDiagnostics from "./hooks/useDiagnostics";
 import { buildStatusPanelSettingsTree } from "./utils/settings";
@@ -199,7 +199,7 @@ function DiagnosticStatusPanel(props: DiagnosticStatusPanelProps) {
       {filteredDiagnostics.length > 0 ? (
         <Stack flex="auto" overflowY="auto">
           {_.sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
-            <DiagnosticStatus
+            <DiagnosticTable
               key={item.id}
               info={item}
               splitFraction={splitFraction}
