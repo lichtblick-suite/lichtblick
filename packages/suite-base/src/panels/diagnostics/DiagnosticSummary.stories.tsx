@@ -13,7 +13,7 @@ import {
   getDiagnosticId,
   KeyValue,
   LEVELS,
-} from "@lichtblick/suite-base/panels/diagnostics/util";
+} from "@lichtblick/suite-base/panels/diagnostics/utils/util";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 

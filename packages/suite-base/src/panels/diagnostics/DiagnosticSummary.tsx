@@ -50,7 +50,7 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import toggle from "@lichtblick/suite-base/util/toggle";
 
-import { buildSummarySettingsTree } from "./settings";
+import { buildSummarySettingsTree } from "./utils/settings";
 import {
   DEFAULT_SECONDS_UNTIL_STALE,
   DiagnosticInfo,
@@ -61,7 +61,7 @@ import {
   filterAndSortDiagnostics,
   getDiagnosticsByLevel,
   getDiagnosticsWithStales,
-} from "./util";
+} from "./utils/util";
 
 type NodeRowProps = {
   info: DiagnosticInfo;

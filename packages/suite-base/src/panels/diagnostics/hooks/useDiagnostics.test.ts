@@ -22,7 +22,7 @@ import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/Diagnost
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 
 import useDiagnostics, { addMessages, UseDiagnosticsResult } from "./useDiagnostics";
-import { computeDiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "../util";
+import { computeDiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "../utils/util";
 
 jest.mock("./util", () => ({
   ...jest.requireActual("./util"),

@@ -38,7 +38,7 @@ import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/o
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 
-import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage, LEVELS } from "./util";
+import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage, LEVELS } from "./utils/util";
 
 const MIN_SPLIT_FRACTION = 0.1;
 

@@ -33,7 +33,7 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import DiagnosticStatus from "./DiagnosticStatus";
-import { buildStatusPanelSettingsTree } from "./settings";
+import { buildStatusPanelSettingsTree } from "./utils/settings";
 import useAvailableDiagnostics from "./useAvailableDiagnostics";
 import useDiagnostics from "./hooks/useDiagnostics";
 import {
@@ -41,7 +41,7 @@ import {
   DEFAULT_SECONDS_UNTIL_STALE,
   LEVELS,
   getDisplayName,
-} from "./util";
+} from "./utils/util";
 
 type Props = {
   config: Config;
