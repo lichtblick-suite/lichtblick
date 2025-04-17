@@ -126,7 +126,6 @@ export default function Panel<
 ): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
     const { childId = FALLBACK_PANEL_ID, overrideConfig, tabId, ...otherProps } = props;
-    console.log("otherProps", props);
     const { classes, cx, theme } = useStyles();
     const isMounted = useMountedState();
 
