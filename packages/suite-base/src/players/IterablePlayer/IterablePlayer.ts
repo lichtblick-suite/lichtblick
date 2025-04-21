@@ -25,7 +25,7 @@ import {
 import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
-import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
@@ -160,7 +160,7 @@ export class IterablePlayer implements Player {
   // See additional comments below where _currentTime is set
   #currentTime?: Time;
 
-  #problemManager = new PlayerProblemManager();
+  #problemManager = new PlayerAlertManager();
 
   #iterableSource: IIterableSource;
   #bufferedSource: BufferedIterableSource;
@@ -455,7 +455,7 @@ export class IterablePlayer implements Player {
 
   #setError(message: string, error?: Error): void {
     this.#hasError = true;
-    this.#problemManager.addProblem("global-error", {
+    this.#problemManager.addAlert("global-error", {
       severity: "error",
       message,
       error,
@@ -475,7 +475,7 @@ export class IterablePlayer implements Player {
         topics,
         profile,
         topicStats,
-        problems,
+        alerts,
         metadata,
         publishersByTopic,
         datatypes,
@@ -509,7 +509,7 @@ export class IterablePlayer implements Player {
       for (const topic of topics) {
         const existingTopic = uniqueTopics.get(topic.name);
         if (existingTopic) {
-          problems.push({
+          alerts.push({
             severity: "warn",
             message: `Inconsistent datatype for topic: ${topic.name}`,
             tip: `Topic ${topic.name} has messages with multiple datatypes: ${existingTopic.schemaName}, ${topic.schemaName}. This may result in errors during visualization.`,
@@ -524,8 +524,8 @@ export class IterablePlayer implements Player {
       this.#providerTopicStats = topicStats;
 
       let idx = 0;
-      for (const problem of problems) {
-        this.#problemManager.addProblem(`init-problem-${idx}`, problem);
+      for (const problem of alerts) {
+        this.#problemManager.addAlert(`init-problem-${idx}`, problem);
         idx += 1;
       }
 
@@ -539,7 +539,7 @@ export class IterablePlayer implements Player {
             end: this.#end,
             maxBlocks: MAX_BLOCKS,
             minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
-            problemManager: this.#problemManager,
+            alertManager: this.#problemManager,
           });
         } catch (err: unknown) {
           log.error(err);
@@ -547,7 +547,7 @@ export class IterablePlayer implements Player {
           const startStr = toRFC3339String(this.#start);
           const endStr = toRFC3339String(this.#end);
 
-          this.#problemManager.addProblem("block-loader", {
+          this.#problemManager.addAlert("block-loader", {
             severity: "warn",
             message: "Failed to initialize message preloading",
             tip: `The start (${startStr}) and end (${endStr}) of your data is too far apart.`,
@@ -666,8 +666,8 @@ export class IterablePlayer implements Player {
           return;
         }
 
-        if (iterResult.type === "problem") {
-          this.#problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+        if (iterResult.type === "alert") {
+          this.#problemManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
           continue;
         }
 
@@ -779,7 +779,7 @@ export class IterablePlayer implements Player {
         profile: this.#profile,
         playerId: this.#id,
         activeData: undefined,
-        problems: this.#problemManager.problems(),
+        alerts: this.#problemManager.alerts(),
         urlState: {
           sourceId: this.#sourceId,
           parameters: this.#urlParams,
@@ -819,7 +819,7 @@ export class IterablePlayer implements Player {
       capabilities: this.#capabilities,
       profile: this.#profile,
       playerId: this.#id,
-      problems: this.#problemManager.problems(),
+      alerts: this.#problemManager.alerts(),
       activeData,
       urlState: {
         sourceId: this.#sourceId,
@@ -938,8 +938,8 @@ export class IterablePlayer implements Player {
         }
         const iterResult = result.value;
 
-        if (iterResult.type === "problem") {
-          this.#problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+        if (iterResult.type === "alert") {
+          this.#problemManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
           continue;
         }
 

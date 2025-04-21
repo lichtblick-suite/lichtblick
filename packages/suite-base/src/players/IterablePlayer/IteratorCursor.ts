@@ -45,7 +45,7 @@ class IteratorCursor implements IMessageCursor {
       return undefined;
     }
 
-    if (firstResult.type === "problem") {
+    if (firstResult.type === "alert") {
       return [firstResult];
     }
 
@@ -69,7 +69,7 @@ class IteratorCursor implements IMessageCursor {
 
       results.push(result);
 
-      if (result.type === "problem") {
+      if (result.type === "alert") {
         break;
       }
       if (result.type === "stamp" && compare(result.stamp, cutoffTime) > 0) {

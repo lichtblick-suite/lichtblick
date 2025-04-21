@@ -36,7 +36,7 @@ export type { TopicAliasFunctions };
  *
  * Aliases that alias input topics to other input topics or that request conflicting
  * aliases from multiple input topics to the same output topic are disallowed and flagged
- * as player problems
+ * as player alerts
  */
 export class TopicAliasingPlayer implements Player {
   readonly #player: Player;

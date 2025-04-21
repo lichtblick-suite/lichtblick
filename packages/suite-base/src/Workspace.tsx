@@ -22,6 +22,7 @@ import { makeStyles } from "tss-react/mui";
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
+import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
 import { AppBar, AppBarProps } from "@lichtblick/suite-base/components/AppBar";
 import { CustomWindowControlsProps } from "@lichtblick/suite-base/components/AppBar/CustomWindowControls";
 import {
@@ -43,7 +44,6 @@ import { PanelCatalog } from "@lichtblick/suite-base/components/PanelCatalog";
 import PanelLayout from "@lichtblick/suite-base/components/PanelLayout";
 import PanelSettings from "@lichtblick/suite-base/components/PanelSettings";
 import PlaybackControls from "@lichtblick/suite-base/components/PlaybackControls";
-import { ProblemsList } from "@lichtblick/suite-base/components/ProblemsList";
 import RemountOnValueChange from "@lichtblick/suite-base/components/RemountOnValueChange";
 import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent";
 import Sidebars from "@lichtblick/suite-base/components/Sidebars";
@@ -131,7 +131,7 @@ type WorkspaceProps = CustomWindowControlsProps & {
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerIsPresent = ({ playerState }: MessagePipelineContext) =>
   playerState.presence !== PlayerPresence.NOT_PRESENT;
-const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
+const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) => playerState.alerts;
 const selectIsPlaying = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.isPlaying === true;
 const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
@@ -156,7 +156,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const playerProblems = useMessagePipeline(selectPlayerProblems);
+  const playerAlerts = useMessagePipeline(selectPlayerAlerts);
 
   const dataSourceDialog = useWorkspaceStore(selectWorkspaceDataSourceDialog);
   const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);
@@ -295,9 +295,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           title: "Data source",
           component: DataSourceSidebarItem,
           badge:
-            playerProblems && playerProblems.length > 0
-              ? { count: playerProblems.length }
-              : undefined,
+            playerAlerts && playerAlerts.length > 0 ? { count: playerAlerts.length } : undefined,
         },
       ],
     ]);
@@ -365,7 +363,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     return [topItems, bottomItems];
   }, [
     DataSourceSidebarItem,
-    playerProblems,
+    playerAlerts,
     enableNewTopNav,
     enableStudioLogsSidebar,
     AppContextLayoutBrowser,
@@ -382,14 +380,14 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       ["panel-settings", { title: "Panel", component: PanelSettingsSidebar }],
       ["topics", { title: "Topics", component: TopicList }],
       [
-        "problems",
+        "alerts",
         {
           title: "Alerts",
-          component: ProblemsList,
+          component: AlertsList,
           badge:
-            playerProblems && playerProblems.length > 0
+            playerAlerts && playerAlerts.length > 0
               ? {
-                  count: playerProblems.length,
+                  count: playerAlerts.length,
                   color: "error",
                 }
               : undefined,
@@ -398,7 +396,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       ["layouts", { title: "Layouts", component: LayoutBrowser }],
     ]);
     return items;
-  }, [PanelSettingsSidebar, playerProblems]);
+  }, [PanelSettingsSidebar, playerAlerts]);
 
   const rightSidebarItems = useMemo(() => {
     const items = new Map<RightSidebarItemKey, SidebarItem>([

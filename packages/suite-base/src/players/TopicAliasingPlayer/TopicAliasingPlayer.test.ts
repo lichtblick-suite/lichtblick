@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
-import { PlayerProblem, PlayerState, Topic } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert, PlayerState, Topic } from "@lichtblick/suite-base/players/types";
 
 import { TopicAliasFunctions } from "./StateProcessorFactory";
 import { TopicAliasingPlayer } from "./TopicAliasingPlayer";
@@ -132,9 +132,9 @@ describe("TopicAliasingPlayer", () => {
     ];
     const player = new TopicAliasingPlayer(fakePlayer);
     player.setAliasFunctions(mappers);
-    let problems: undefined | PlayerProblem[] = [];
+    let problems: undefined | PlayerAlert[] = [];
     const listener = async (state: PlayerState) => {
-      problems = state.problems;
+      problems = state.alerts;
     };
     player.setListener(listener);
     await fakePlayer.emit(

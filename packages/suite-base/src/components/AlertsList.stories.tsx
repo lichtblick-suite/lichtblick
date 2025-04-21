@@ -10,14 +10,14 @@ import { StoryFn, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
 import { fromDate } from "@lichtblick/rostime";
+import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { ProblemsList } from "@lichtblick/suite-base/components/ProblemsList";
-import { useProblemsActions } from "@lichtblick/suite-base/context/ProblemsContext";
-import { PlayerPresence, PlayerProblem, Topic } from "@lichtblick/suite-base/players/types";
-import ProblemsContextProvider from "@lichtblick/suite-base/providers/ProblemsContextProvider";
+import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
+import { PlayerPresence, PlayerAlert, Topic } from "@lichtblick/suite-base/players/types";
+import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 
-function makeProblems(): PlayerProblem[] {
+function makeProblems(): PlayerAlert[] {
   return [
     {
       severity: "error",
@@ -51,16 +51,16 @@ at ck (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4c
 
 export default {
   title: "components/ProblemsList",
-  component: ProblemsList,
+  component: AlertsList,
   decorators: [
     (Story: StoryFn): React.JSX.Element => {
       const theme = useTheme();
       return (
         <WorkspaceContextProvider>
           <div style={{ height: "100%", background: theme.palette.background.paper }}>
-            <ProblemsContextProvider>
+            <AlertsContextProvider>
               <Story />
-            </ProblemsContextProvider>
+            </AlertsContextProvider>
           </div>
         </WorkspaceContextProvider>
       );
@@ -80,7 +80,7 @@ export const Default: StoryObj = {
         endTime={END_TIME}
         presence={PlayerPresence.INITIALIZING}
       >
-        <ProblemsList />
+        <AlertsList />
       </MockMessagePipelineProvider>
     );
   },
@@ -102,9 +102,9 @@ export const WithErrors: StoryObj = {
         endTime={END_TIME}
         topics={TOPICS}
         presence={PlayerPresence.RECONNECTING}
-        problems={makeProblems()}
+        alerts={makeProblems()}
       >
-        <ProblemsList />
+        <AlertsList />
       </MockMessagePipelineProvider>
     );
   },
@@ -120,7 +120,7 @@ export const WithErrorsJapanese: StoryObj = {
 
 export const WithSessionProblems: StoryObj = {
   render: function Story() {
-    const problemsActions = useProblemsActions();
+    const problemsActions = useAlertsActions();
     useEffect(() => {
       problemsActions.setProblem("tag-1", {
         message: "Session problem error",
@@ -140,10 +140,10 @@ export const WithSessionProblems: StoryObj = {
         endTime={END_TIME}
         topics={TOPICS}
         presence={PlayerPresence.RECONNECTING}
-        problems={makeProblems()}
+        alerts={makeProblems()}
       >
         <WorkspaceContextProvider>
-          <ProblemsList />
+          <AlertsList />
         </WorkspaceContextProvider>
       </MockMessagePipelineProvider>
     );

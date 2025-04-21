@@ -127,7 +127,7 @@ const BottomBar = ({
                   invisible={diagnostics.length === 0}
                   className={classes.badge}
                 >
-                  Problems
+                  Alerts
                 </Badge>
               }
               value="diagnostics"

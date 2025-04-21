@@ -56,7 +56,7 @@ const Grid = (Story: StoryFn): React.JSX.Element => (
   </Stack>
 );
 
-const problems: MockMessagePipelineProps["problems"] = [
+const problems: MockMessagePipelineProps["alerts"] = [
   { severity: "error", message: "example error" },
   { severity: "warn", message: "example warn" },
 ];
@@ -78,19 +78,19 @@ export const PlayerStates: Story = {
         {
           name: "https://exampleurl:2002",
           presence: PlayerPresence.ERROR,
-          problems,
+          alerts: problems,
         },
         {
           label: "INITIALIZING + problems",
           name: "https://exampleurl:2002",
           presence: PlayerPresence.INITIALIZING,
-          problems,
+          alerts: problems,
         },
         {
           label: "INITIALIZING + no name",
           name: undefined,
           presence: PlayerPresence.INITIALIZING,
-          problems,
+          alerts: problems,
         },
       ];
 
@@ -101,7 +101,7 @@ export const PlayerStates: Story = {
               key={props.presence}
               name={props.name}
               presence={props.presence}
-              problems={props.problems}
+              alerts={props.alerts}
             >
               <div style={{ padding: 8 }}>{props.label ?? props.presence}</div>
               <div>
@@ -163,7 +163,7 @@ export const DataSources: Story = {
         {
           label: "with problems",
           name: "https://longexampleurlwith_error-and-portnumber:3030",
-          problems,
+          alerts: problems,
         },
       ];
 
@@ -175,7 +175,7 @@ export const DataSources: Story = {
               name={props.name}
               presence={PlayerPresence.PRESENT}
               urlState={props.urlState}
-              problems={props.problems}
+              alerts={props.alerts}
               seekPlayback={() => {}}
             >
               <div style={{ padding: 8 }}>{props.label ?? props.urlState?.sourceId}</div>

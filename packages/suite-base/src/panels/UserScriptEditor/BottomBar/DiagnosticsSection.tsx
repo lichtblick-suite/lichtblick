@@ -54,7 +54,7 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
     return (
       <Stack gap={0.5} padding={2}>
         <Typography variant="body2" color="text.secondary">
-          No problems to display.
+          No alerts to display.
         </Typography>
       </Stack>
     );

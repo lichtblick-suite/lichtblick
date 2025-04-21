@@ -26,11 +26,8 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  ProblemsContextStore,
-  useProblemsStore,
-} from "@lichtblick/suite-base/context/ProblemsContext";
-import { PlayerProblem } from "@lichtblick/suite-base/players/types";
+import { AlertsContextStore, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
+import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import { DetailsType, NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 const useStyles = makeStyles()((theme) => ({
@@ -95,10 +92,10 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-const EMPTY_PLAYER_PROBLEMS: PlayerProblem[] = [];
-const selectPlayerProblems = ({ playerState }: MessagePipelineContext) =>
-  playerState.problems ?? EMPTY_PLAYER_PROBLEMS;
-const selectProblems = (store: ProblemsContextStore) => store.problems;
+const EMPTY_PLAYER_ALERTS: PlayerAlert[] = [];
+const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) =>
+  playerState.alerts ?? EMPTY_PLAYER_ALERTS;
+const selectAlerts = (store: AlertsContextStore) => store.alerts;
 
 function ProblemIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
   const { palette } = useTheme();
@@ -117,7 +114,7 @@ function ProblemIcon({ severity }: { severity: NotificationSeverity }): React.JS
 }
 
 function ProblemDetails(props: { details: DetailsType; tip?: string }): React.JSX.Element {
-  const { t } = useTranslation("problemsList");
+  const { t } = useTranslation("alertsList");
   const { details, tip } = props;
   const { classes } = useStyles();
 
@@ -145,23 +142,23 @@ function ProblemDetails(props: { details: DetailsType; tip?: string }): React.JS
   );
 }
 
-export function ProblemsList(): React.JSX.Element {
-  const { t } = useTranslation("problemsList");
+export function AlertsList(): React.JSX.Element {
+  const { t } = useTranslation("alertsList");
   const { classes } = useStyles();
-  const playerProblems = useMessagePipeline(selectPlayerProblems);
-  const sessionProblems = useProblemsStore(selectProblems);
+  const playerAlerts = useMessagePipeline(selectPlayerAlerts);
+  const sessionAlerts = useAlertsStore(selectAlerts);
 
-  const allProblems = useMemo(() => {
-    return [...sessionProblems, ...playerProblems];
-  }, [sessionProblems, playerProblems]);
+  const allAlerts = useMemo(() => {
+    return [...sessionAlerts, ...playerAlerts];
+  }, [sessionAlerts, playerAlerts]);
 
-  if (allProblems.length === 0) {
-    return <EmptyState>{t("noProblemsFound")}</EmptyState>;
+  if (allAlerts.length === 0) {
+    return <EmptyState>{t("noAlertsFound")}</EmptyState>;
   }
 
   return (
     <Stack fullHeight flex="auto" overflow="auto">
-      {allProblems.map((problem, idx) => (
+      {allAlerts.map((problem, idx) => (
         <Accordion
           className={classes.acccordion}
           key={`${idx}.${problem.severity}.${problem.message}`}

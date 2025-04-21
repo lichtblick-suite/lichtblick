@@ -10,7 +10,7 @@ import { OptionalMessageDefinition } from "@lichtblick/suite-base/types/RosDatat
  * Validates that topics maintain a consistent datatype across all MCAPs.
  *
  * - If a topic already exists in `accumulated` but has a different datatype,
- *   a warning is added to `accumulated.problems`.
+ *   a warning is added to `accumulated.alerts`.
  * - If the topic is new, it is safe to add it to the `accumulated` map.
  */
 export const validateAndAddNewDatatypes = (
@@ -30,7 +30,7 @@ export const validateAndAddNewDatatypes = (
     }
 
     if (!isSameDatatype(accumulatedDefinition, currentDefinition)) {
-      accumulated.problems.push({
+      accumulated.alerts.push({
         message: `Different datatypes found for schema "${datatype}"`,
         severity: "warn",
         tip: "Ensure all MCAPs use the same schema for each datatype. Merging files may cause issues in visualization.",
@@ -55,7 +55,7 @@ export const validateAndAddNewTopics = (
     }
 
     if (existingTopic.schemaName !== topic.schemaName) {
-      accumulated.problems.push({
+      accumulated.alerts.push({
         message: `Schema name mismatch detected for topic "${topic.name}". Expected "${existingTopic.schemaName}", but found "${topic.schemaName}".`,
         severity: "warn",
         tip: "Ensure all MCAPs use a consistent schema for this topic.",

@@ -16,7 +16,7 @@ import { RosNode, TcpSocket } from "@lichtblick/ros1";
 import { Time, fromMillis, isGreaterThan, toSec } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
-import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
@@ -25,7 +25,7 @@ import {
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
-  PlayerProblem,
+  PlayerAlert,
   PublishPayload,
   SubscribePayload,
   Topic,
@@ -84,7 +84,7 @@ export default class Ros1Player implements Player {
   #hasReceivedMessage = false;
   #metricsCollector: PlayerMetricsCollectorInterface;
   #presence: PlayerPresence = PlayerPresence.INITIALIZING;
-  #problems = new PlayerProblemManager();
+  #alerts = new PlayerAlertManager();
   #emitTimer?: ReturnType<typeof setTimeout>;
   readonly #sourceId: string;
 
@@ -168,26 +168,26 @@ export default class Ros1Player implements Player {
 
   #addProblem(
     id: string,
-    problem: PlayerProblem,
+    problem: PlayerAlert,
     { skipEmit = false }: { skipEmit?: boolean } = {},
   ): void {
-    this.#problems.addProblem(id, problem);
+    this.#alerts.addAlert(id, problem);
     if (!skipEmit) {
       this.#emitState();
     }
   }
 
-  #clearProblem(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
-    if (this.#problems.removeProblem(id)) {
+  #clearAlert(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
+    if (this.#alerts.removeAlert(id)) {
       if (!skipEmit) {
         this.#emitState();
       }
     }
   }
 
-  #clearPublishProblems({ skipEmit = false }: { skipEmit?: boolean } = {}) {
+  #clearPublishAlerts({ skipEmit = false }: { skipEmit?: boolean } = {}) {
     if (
-      this.#problems.removeProblems(
+      this.#alerts.removeAlerts(
         (id) =>
           id.startsWith("msgdef:") || id.startsWith("advertise:") || id.startsWith("publish:"),
       )
@@ -245,7 +245,7 @@ export default class Ros1Player implements Player {
           this.#parameters = new Map();
           params.forEach((value, key) => this.#parameters.set(key, value));
         }
-        this.#clearProblem(Problem.Parameters, { skipEmit: true });
+        this.#clearAlert(Problem.Parameters, { skipEmit: true });
       } catch (error) {
         this.#addProblem(
           Problem.Parameters,
@@ -262,7 +262,7 @@ export default class Ros1Player implements Player {
       // Fetch the full graph topology
       await this.#updateConnectionGraph(rosNode);
 
-      this.#clearProblem(Problem.Connection, { skipEmit: true });
+      this.#clearAlert(Problem.Connection, { skipEmit: true });
       this.#presence = PlayerPresence.PRESENT;
       this.#emitState();
     } catch (error) {
@@ -300,7 +300,7 @@ export default class Ros1Player implements Player {
         capabilities: CAPABILITIES,
         profile: "ros1",
         playerId: this.#id,
-        problems: this.#problems.problems(),
+        alerts: this.#alerts.alerts(),
         activeData: undefined,
       });
     }
@@ -324,7 +324,7 @@ export default class Ros1Player implements Player {
       capabilities: CAPABILITIES,
       profile: "ros1",
       playerId: this.#id,
-      problems: this.#problems.problems(),
+      alerts: this.#alerts.alerts(),
       urlState: {
         sourceId: this.#sourceId,
         parameters: { url: this.#url },
@@ -405,8 +405,8 @@ export default class Ros1Player implements Player {
       });
       subscription.on("message", (message, data, _pub) => {
         this.#handleMessage(topicName, message, data.byteLength, schemaName, true);
-        // Clear any existing subscription problems for this topic if we're receiving messages again.
-        this.#clearProblem(`subscribe:${topicName}`, { skipEmit: true });
+        // Clear any existing subscription alerts for this topic if we're receiving messages again.
+        this.#clearAlert(`subscribe:${topicName}`, { skipEmit: true });
       });
       subscription.on("error", (error) => {
         this.#addProblem(`subscribe:${topicName}`, {
@@ -488,8 +488,8 @@ export default class Ros1Player implements Player {
     const validPublishers = publishers.filter(({ topic }) => topic.length > 0 && topic !== "/");
     const topics = new Set<string>(validPublishers.map(({ topic }) => topic));
 
-    // Clear all problems related to publishing
-    this.#clearPublishProblems({ skipEmit: true });
+    // Clear all alerts related to publishing
+    this.#clearPublishAlerts({ skipEmit: true });
 
     // Unadvertise any topics that were previously published and no longer appear in the list
     for (const topic of this.#rosNode.publications.keys()) {
@@ -563,7 +563,7 @@ export default class Ros1Player implements Player {
         this.#rosNode
           .publish(topic, msg)
           .then(() => {
-            this.#clearProblem(problemId);
+            this.#clearAlert(problemId);
           })
           .catch((error: unknown) => {
             this.#addProblem(problemId, {
@@ -643,7 +643,7 @@ export default class Ros1Player implements Player {
         this.#subscribedTopics = graph.subscribers;
         this.#services = graph.services;
       }
-      this.#clearProblem(Problem.Graph, { skipEmit: true });
+      this.#clearAlert(Problem.Graph, { skipEmit: true });
     } catch (error) {
       this.#addProblem(
         Problem.Graph,

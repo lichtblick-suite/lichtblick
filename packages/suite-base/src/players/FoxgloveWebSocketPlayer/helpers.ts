@@ -3,7 +3,7 @@
 
 import { StatusLevel } from "@foxglove/ws-protocol";
 
-import { PlayerProblem } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 
 export function dataTypeToFullName(dataType: string): string {
   const parts = dataType.split("/");
@@ -13,7 +13,7 @@ export function dataTypeToFullName(dataType: string): string {
   return dataType;
 }
 
-export function statusLevelToProblemSeverity(level: StatusLevel): PlayerProblem["severity"] {
+export function statusLevelToAlertSeverity(level: StatusLevel): PlayerAlert["severity"] {
   if (level === StatusLevel.INFO) {
     return "info";
   } else if (level === StatusLevel.WARNING) {

@@ -128,7 +128,7 @@ describe("MultiIterableSource", () => {
       expect(result.metadata).toContainEqual(init1.metadata![0]);
       expect(result.metadata).toContainEqual(init2.metadata![0]);
       expect(result.profile).toBe(init2.profile);
-      expect(result.problems.length).toBe(0);
+      expect(result.alerts.length).toBe(0);
 
       expect(mockSourceConstructor).toHaveBeenCalledTimes(2);
     });
@@ -161,12 +161,12 @@ describe("MultiIterableSource", () => {
       expect(result.end.sec).toBe(30);
       expect(result.datatypes.size).toBe(1);
       expect(result.topics.length).toBe(1);
-      expect(result.problems.length).toBe(2);
-      expect(result.problems[0]!.message).toBe(
+      expect(result.alerts.length).toBe(2);
+      expect(result.alerts[0]!.message).toBe(
         `Different datatypes found for schema "${dataTypeName}"`,
       );
 
-      expect(result.problems[1]!.message).toBe(
+      expect(result.alerts[1]!.message).toBe(
         `Schema name mismatch detected for topic "${topicName}". Expected "${init1.topics[0]!.schemaName}", but found "${init2.topics[0]!.schemaName}".`,
       );
 

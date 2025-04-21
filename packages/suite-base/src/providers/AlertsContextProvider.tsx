@@ -10,26 +10,26 @@ import { ReactNode, useState } from "react";
 import { StoreApi, create } from "zustand";
 
 import {
-  ProblemsContext,
-  ProblemsContextStore,
-  SessionProblem,
-} from "@lichtblick/suite-base/context/ProblemsContext";
+  AlertsContext,
+  AlertsContextStore,
+  SessionAlert,
+} from "@lichtblick/suite-base/context/AlertsContext";
 
-function createProblemsStore(): StoreApi<ProblemsContextStore> {
-  return create<ProblemsContextStore>((set, get) => {
+function createAlertsStore(): StoreApi<AlertsContextStore> {
+  return create<AlertsContextStore>((set, get) => {
     return {
-      problems: [],
+      alerts: [],
       actions: {
         clearProblem: (tag: string) => {
           set({
-            problems: get().problems.filter((prob) => prob.tag !== tag),
+            alerts: get().alerts.filter((prob) => prob.tag !== tag),
           });
         },
-        setProblem: (tag: string, problem: Immutable<SessionProblem>) => {
-          const newProblems = get().problems.filter((prob) => prob.tag !== tag);
+        setProblem: (tag: string, problem: Immutable<SessionAlert>) => {
+          const newAlerts = get().alerts.filter((prob) => prob.tag !== tag);
 
           set({
-            problems: [{ tag, ...problem }, ...newProblems],
+            alerts: [{ tag, ...problem }, ...newAlerts],
           });
         },
       },
@@ -37,11 +37,11 @@ function createProblemsStore(): StoreApi<ProblemsContextStore> {
   });
 }
 
-export default function ProblemsContextProvider({
+export default function AlertsContextProvider({
   children,
 }: {
   children?: ReactNode;
 }): React.JSX.Element {
-  const [store] = useState(createProblemsStore);
-  return <ProblemsContext.Provider value={store}>{children}</ProblemsContext.Provider>;
+  const [store] = useState(createAlertsStore);
+  return <AlertsContext.Provider value={store}>{children}</AlertsContext.Provider>;
 }

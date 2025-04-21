@@ -27,7 +27,7 @@ import {
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
-  PlayerProblem,
+  PlayerAlert,
   PublishPayload,
   SubscribePayload,
   Topic,
@@ -96,8 +96,8 @@ export default class VelodynePlayer implements Player {
   #emitTimer?: ReturnType<typeof setTimeout>;
 
   // track issues within the player
-  #problems: PlayerProblem[] = [];
-  #problemsById = new Map<string, PlayerProblem>();
+  #alerts: PlayerAlert[] = [];
+  #alertsById = new Map<string, PlayerAlert>();
 
   public constructor({ port, metricsCollector }: VelodynePlayerOpts) {
     this.#port = port ?? DEFAULT_VELODYNE_PORT;
@@ -205,21 +205,21 @@ export default class VelodynePlayer implements Player {
 
   #addProblem(
     id: string,
-    problem: PlayerProblem,
+    problem: PlayerAlert,
     { skipEmit = false }: { skipEmit?: boolean } = {},
   ): void {
-    this.#problemsById.set(id, problem);
-    this.#problems = Array.from(this.#problemsById.values());
+    this.#alertsById.set(id, problem);
+    this.#alerts = Array.from(this.#alertsById.values());
     if (!skipEmit) {
       this.#emitState();
     }
   }
 
   #clearProblem(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
-    if (!this.#problemsById.delete(id)) {
+    if (!this.#alertsById.delete(id)) {
       return;
     }
-    this.#problems = Array.from(this.#problemsById.values());
+    this.#alerts = Array.from(this.#alertsById.values());
     if (!skipEmit) {
       this.#emitState();
     }
@@ -251,7 +251,7 @@ export default class VelodynePlayer implements Player {
       capabilities: CAPABILITIES,
       profile: "velodyne",
       playerId: this.#id,
-      problems: this.#problems,
+      alerts: this.#alerts,
 
       activeData: {
         messages,

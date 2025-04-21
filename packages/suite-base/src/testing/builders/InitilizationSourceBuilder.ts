@@ -15,7 +15,7 @@ export default class InitilizationSourceBuilder {
       datatypes: new Map(),
       publishersByTopic: new Map(),
       topicStats: new Map(),
-      problems: [],
+      alerts: [],
       topics: [],
       metadata: [],
       profile: BasicBuilder.string(),

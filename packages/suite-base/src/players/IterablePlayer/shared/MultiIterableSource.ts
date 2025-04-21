@@ -86,7 +86,7 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
       end: { sec: Number.MIN_SAFE_INTEGER, nsec: Number.MIN_SAFE_INTEGER },
       datatypes: new Map(),
       metadata: [],
-      problems: [],
+      alerts: [],
       profile: "",
       publishersByTopic: new Map(),
       topics: [],
@@ -104,7 +104,7 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
       );
       resultInit.topicStats = mergeTopicStats(resultInit.topicStats, init.topicStats);
       resultInit.metadata = mergeMetadata(resultInit.metadata, init.metadata);
-      resultInit.problems.push(...init.problems);
+      resultInit.alerts.push(...init.alerts);
       // These methos validate and add to avoid lopp through all topics and datatypes once again
       validateAndAddNewDatatypes(resultInit, init);
       validateAndAddNewTopics(resultInit, init);
