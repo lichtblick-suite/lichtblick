@@ -91,7 +91,7 @@ type RenderStateListener = (
   oldState: MessageRenderState | undefined,
 ) => void;
 
-// Have constants for the HUD items so that they don't need to be recreated and GCed every message
+// Have constants.tsx for the HUD items so that they don't need to be recreated and GCed every message
 export const WAITING_FOR_BOTH_HUD_ITEM: HUDItem = {
   id: WAITING_FOR_BOTH_MESSAGES_HUD_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,

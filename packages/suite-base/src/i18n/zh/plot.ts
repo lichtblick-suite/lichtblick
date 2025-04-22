@@ -5,6 +5,10 @@
 
 
 export const plot = {
+  pidline: "PID 线",
+  pnumber:"P值",
+  inumber: "I值",
+  dnumber: "D值",
   deleteSeries: "删除数据系列",
   messagePath: "消息地址",
   label: "标签",
@@ -12,6 +16,7 @@ export const plot = {
   timestamp: "时间戳",
   receiveTime: "接收时间",
   headerStamp: "头时间戳",
+  pidtype: "PID 类型",
   series: "数据系列",
   addSeries: "添加数据系列",
   maxYError: "Y 的最大值必须大于 Y 的最小值。",

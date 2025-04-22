@@ -59,6 +59,14 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     hasCustomToolbar: true,
   },
   {
+    title: t("pidPlot"),
+    type: "PIDPlot",
+    description: t("pidPlotDescription"),
+    // thumbnail: motionStateThumbnail,
+    module: async () => await import("./PIDPlot"),
+    hasCustomToolbar: true,
+  },
+  {
     title: t("LaunchMotion"),
     type: "LaunchMotion",
     description: t("LaunchMotionDescription"),

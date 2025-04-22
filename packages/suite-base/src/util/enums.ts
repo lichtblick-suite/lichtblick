@@ -32,7 +32,7 @@ export const constantsByDatatype = (
         typeof field.value !== "boolean"
       ) {
         if (result[field.value.toString()] != undefined) {
-          result[field.value.toString()] = "<multiple constants match>";
+          result[field.value.toString()] = "<multiple constants.tsx match>";
         } else {
           result[field.value.toString()] = field.name;
         }
@@ -59,13 +59,13 @@ export const enumValuesByDatatypeAndField = (
   const results: { [datatype: string]: { [field: string]: { [value: string]: string } } } = {};
   for (const [datatype, value] of datatypes) {
     const currentResult: { [field: string]: { [value: string]: string } } = {};
-    // keep track of parsed constants
+    // keep track of parsed constants.tsx
     let constants: { [key: string]: string } = {};
-    // constants' types
+    // constants.tsx' types
     let lastType: string | undefined;
     for (const field of value.definitions) {
       if (lastType != undefined && field.type !== lastType) {
-        // encountering new type resets the accumulated constants
+        // encountering new type resets the accumulated constants.tsx
         constants = {};
         lastType = undefined;
       }
@@ -77,7 +77,7 @@ export const enumValuesByDatatypeAndField = (
       ) {
         lastType = field.type;
         if (constants[field.value.toString()] != undefined) {
-          constants[field.value.toString()] = "<multiple constants match>";
+          constants[field.value.toString()] = "<multiple constants.tsx match>";
         } else {
           constants[field.value.toString()] = field.name;
         }
@@ -87,7 +87,7 @@ export const enumValuesByDatatypeAndField = (
       // This means that "bar" is enum of type "Foo"
       const fieldName = extractTypeFromStudioEnumAnnotation(field.name);
       if (fieldName != undefined) {
-        // associate all constants of type field.type with the annotated field
+        // associate all constants.tsx of type field.type with the annotated field
         const fieldConstants = datatypeConstants[field.type];
         if (fieldConstants) {
           currentResult[fieldName] = fieldConstants;
@@ -100,14 +100,14 @@ export const enumValuesByDatatypeAndField = (
         continue;
       }
 
-      // otherwise assign accumulated constants for that field
+      // otherwise assign accumulated constants.tsx for that field
       if (Object.keys(constants).length > 0) {
         currentResult[field.name] = constants;
       }
-      // and start over - reset constants
+      // and start over - reset constants.tsx
       constants = {};
     }
-    // only assign result if we found non-empty mapping into constants
+    // only assign result if we found non-empty mapping into constants.tsx
     if (Object.keys(currentResult).length > 0) {
       results[datatype] = currentResult;
     }

@@ -26,6 +26,19 @@ export type PlotPath = BasePlotPath & {
   showLine?: boolean;
   lineSize?: number;
 };
+export type PIDLinePlotPath = PIDPlotPath & {
+  kp: number;
+  ki: number;
+  kd: number;
+}
+export type PIDPlotPath = BasePlotPath & {
+  color?: string;
+  label?: string;
+  timestampMethod: TimestampMethod;
+  showLine?: boolean;
+  lineSize?: number;
+  pidtype:string;
+};
 
 export type PlotXAxisVal =
   // x-axis is either receive time since start or header stamp since start
@@ -53,6 +66,10 @@ export type PlotDataItem = {
  * @returns true if the series config is a reference line
  */
 export function isReferenceLinePlotPathType(path: Immutable<PlotPath>): boolean {
+  return !isNaN(Number.parseFloat(path.value));
+}
+
+export function isReferenceLinePIDPlotPathType(path: Immutable<PIDPlotPath>): boolean {
   return !isNaN(Number.parseFloat(path.value));
 }
 
@@ -94,4 +111,27 @@ export type PlotConfig = DeprecatedPlotConfig & {
   followingViewWidth?: number;
   sidebarDimension: number;
   [PANEL_TITLE_CONFIG_KEY]?: string;
+};
+
+export type PIDPlotConfig = DeprecatedPlotConfig & {
+  paths: PIDPlotPath[];
+  minXValue?: number;
+  maxXValue?: number;
+  minYValue?: string | number;
+  maxYValue?: string | number;
+  showLegend: boolean;
+  legendDisplay: PlotLegendDisplay;
+  showPlotValuesInLegend: boolean;
+  showXAxisLabels: boolean;
+  showYAxisLabels: boolean;
+  isSynced: boolean;
+  xAxisVal: PlotXAxisVal;
+  xAxisPath?: BasePlotPath;
+  followingViewWidth?: number;
+  sidebarDimension: number;
+  [PANEL_TITLE_CONFIG_KEY]?: string;
+  kp: number;
+  ki: number;
+  kd: number;
+  pidline: PIDLinePlotPath[];
 };

@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const plot = {
+  pidline: "PID Line",
   accumulatedPath: "Path (accumulated)",
   addSeries: "Add series",
   clickToAddASeries: "Click to add a series",
@@ -24,6 +25,11 @@ export const plot = {
   max: "Max",
   maxXError: "X max must be greater than X min.",
   maxYError: "Y max must be greater than Y min.",
+  pidcanvassetting: "PID Canvas",
+  pidtype: "PID Type",
+  pnumber:"PNumber",
+  inumber:"INumber",
+  dnumber:"DNumber",
   messagePath: "Message path",
   min: "Min",
   position: "Position",

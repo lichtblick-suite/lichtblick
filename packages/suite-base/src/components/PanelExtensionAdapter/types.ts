@@ -20,6 +20,7 @@ export type Asset = {
 };
 
 export type DraggedMessagePath = {
+  pidtype: string;
   /** The full message path */
   path: string;
   /** The schema name of the top-level topic being dragged */

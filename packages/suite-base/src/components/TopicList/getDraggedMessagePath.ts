@@ -9,6 +9,7 @@ export function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePa
   switch (treeItem.type) {
     case "topic":
       return {
+        pidtype: "pnumber",
         path: quoteTopicNameIfNeeded(treeItem.item.item.name),
         rootSchemaName: treeItem.item.item.schemaName,
         isTopic: true,
@@ -17,6 +18,7 @@ export function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePa
       };
     case "schema":
       return {
+        pidtype: "pnumber",
         path: treeItem.item.item.fullPath,
         rootSchemaName: treeItem.item.item.topic.schemaName,
         isTopic: false,

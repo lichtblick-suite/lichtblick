@@ -41,6 +41,7 @@ export function MessagePathRow({
 
   const item: DraggedMessagePath = useMemo(
     () => ({
+      pidtype: "pnumber",
       path: fullPath,
       rootSchemaName: topic.schemaName,
       isTopic: false,

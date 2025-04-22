@@ -40,7 +40,7 @@ describe("buildSampleMessage", () => {
   it("handles single field", () => {
     expect(buildSampleMessage(datatypes, "B")).toEqual({ data: {} });
   });
-  it("ignores constants", () => {
+  it("ignores constants.tsx", () => {
     expect(buildSampleMessage(datatypes, "C")).toEqual({});
   });
   it("handles variable-length arrays", () => {

@@ -1,0 +1,501 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import EventEmitter from "eventemitter3";
+import * as _ from "lodash-es";
+
+import { debouncePromise } from "@lichtblick/den/async";
+import { filterMap } from "@lichtblick/den/collection";
+import { parseMessagePath } from "@lichtblick/message-path";
+import { toSec, subtract as subtractTime } from "@lichtblick/rostime";
+import { Immutable, Time } from "@lichtblick/suite";
+import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
+import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
+import { Bounds } from "@lichtblick/suite-base/types/Bounds";
+import delay from "@lichtblick/suite-base/util/delay";
+import { getContrastColor, getLineColor } from "@lichtblick/suite-base/util/plotColors";
+
+import { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
+import {
+  CsvDataset,
+  IDatasetsBuilder,
+  SeriesConfigKey,
+  SeriesItem,
+  Viewport,
+} from "@lichtblick/suite-base/panels/Plot/builders/IDatasetsBuilder";
+import { Dataset, InteractionEvent, Scale, UpdateAction } from "@lichtblick/suite-base/panels/Plot/types";
+import {
+  isReferenceLinePIDPlotPathType,
+  PIDPlotConfig,
+} from "@lichtblick/suite-base/panels/Plot/utils/config";
+
+type PlotCoordinatorEventTypes = {
+  timeseriesBounds(bounds: Immutable<Bounds1D>): void;
+
+  /** X scale changed. */
+  xScaleChanged(scale: Scale | undefined): void;
+
+  /** Current values changed (for displaying in the legend) */
+  currentValuesChanged(values: readonly unknown[]): void;
+
+  /** Paths with mismatched data lengths were detected */
+  pathsWithMismatchedDataLengthsChanged(pathsWithMismatchedDataLengths: string[]): void;
+
+  /** Rendering updated the viewport. `canReset` is true if the viewport can be reset. */
+  viewportChange(canReset: boolean): void;
+};
+
+type ConfigBounds = { x: Partial<Bounds1D>; y: Partial<Bounds1D> };
+
+const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => dataset ?? { data: [] };
+
+/**
+ * PlotCoordinator interfaces commands and updates between the dataset builder and the chart
+ * renderer.
+ */
+export class PIDPlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
+  private renderer: OffscreenCanvasRenderer;
+  private datasetsBuilder: IDatasetsBuilder;
+  private shouldSync: boolean = false;
+  private configBounds: ConfigBounds = { x: {}, y: {} };
+  private globalBounds?: Immutable<Partial<Bounds1D>>;
+  private datasetRange?: Bounds1D;
+  private followRange?: number;
+  private interactionBounds?: Bounds;
+  private lastSeekTime = NaN;
+  /** Normalized series from latest config */
+  private series: Immutable<SeriesItem[]> = [];
+  /** Current value for each series to show in the legend */
+  private currentValuesByConfigIndex: unknown[] = [];
+  /** Flag indicating that new Y bounds should be sent to the renderer because the bounds have been reset */
+  private shouldResetY = false;
+  private updateAction: UpdateAction = { type: "update" };
+  private isTimeseriesPlot: boolean = false;
+  private currentSeconds?: number;
+  private viewport: Viewport = {
+    size: { width: 0, height: 0 },
+    bounds: { x: undefined, y: undefined },
+  };
+  private latestXScale?: Scale;
+  private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
+  private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
+  private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
+  private queueBlocks = debouncePromise(this.dispatchBlocks.bind(this));
+  private destroyed = false;
+  private latestBlocks?: Immutable<(MessageBlock | undefined)[]>;
+  // @ts-ignore
+  private pidseries: Immutable<SeriesItem>[];
+
+  public constructor(renderer: OffscreenCanvasRenderer, builder: IDatasetsBuilder) {
+    super();
+
+    this.renderer = renderer;
+    this.datasetsBuilder = builder;
+  }
+
+  /** Stop the coordinator from sending any future updates to the renderer. */
+  public destroy(): void {
+    this.destroyed = true;
+  }
+
+  public setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
+    this.shouldSync = shouldSync;
+  }
+
+  public handlePlayerState(state: Immutable<PlayerState>): void {
+    if (this.isDestroyed()) {
+      return;
+    }
+
+    const activeData = state.activeData;
+    if (!activeData) {
+      return;
+    }
+
+    const { messages, lastSeekTime, currentTime, startTime } = activeData;
+
+    if (this.isTimeseriesPlot) {
+      const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
+      this.currentSeconds = secondsSinceStart;
+    }
+
+    if (lastSeekTime !== this.lastSeekTime) {
+      this.currentValuesByConfigIndex = [];
+      this.lastSeekTime = lastSeekTime;
+    }
+
+    for (const seriesItem of this.series) {
+      if (seriesItem.timestampMethod === "headerStamp") {
+        // We currently do not support showing current values in the legend for header.stamp mode,
+        // which would require keeping a buffer of messages to sort (currently done in
+        // TimestampDatasetsBuilderImpl)
+        continue;
+      }
+      for (let i = messages.length - 1; i >= 0; --i) {
+        const msgEvent = messages[i]!;
+        if (msgEvent.topic !== seriesItem.parsed.topicName) {
+          continue;
+        }
+        const items = simpleGetMessagePathDataItems(msgEvent, seriesItem.parsed);
+        if (items.length > 0) {
+          this.currentValuesByConfigIndex[seriesItem.configIndex] = items[items.length - 1];
+          break;
+        }
+      }
+    }
+    this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
+
+    const handlePlayerStateResult = this.datasetsBuilder.handlePlayerState(state);
+
+    const blocks = state.progress.messageCache?.blocks;
+    if (blocks && this.datasetsBuilder.handleBlocks) {
+      this.latestBlocks = blocks;
+      this.queueBlocks(activeData.startTime, blocks);
+    }
+
+    // There's no result from the builder so we clear dataset range and trigger a render so
+    // we can fall back to other ranges
+    if (!handlePlayerStateResult) {
+      this.datasetRange = undefined;
+      this.queueDispatchRender();
+      return;
+    }
+
+    const newRange = handlePlayerStateResult.range;
+
+    // If the range has changed we will trigger a render to incorporate the new range into the chart
+    // axis
+    if (!_.isEqual(this.datasetRange, newRange)) {
+      this.datasetRange = handlePlayerStateResult.range;
+      this.queueDispatchRender();
+    }
+
+    if (handlePlayerStateResult.datasetsChanged) {
+      this.queueDispatchDownsample();
+    }
+  }
+
+  public handleConfig(
+    config: Immutable<PIDPlotConfig>,
+    colorScheme: "light" | "dark",
+    globalVariables: GlobalVariables,
+  ): void {
+    if (this.isDestroyed()) {
+      return;
+    }
+    this.isTimeseriesPlot = config.xAxisVal === "timestamp";
+    if (!this.isTimeseriesPlot) {
+      this.currentSeconds = undefined;
+    }
+    this.followRange = config.followingViewWidth;
+    const newConfigBounds = {
+      x: {
+        max: config.maxXValue,
+        min: config.minXValue,
+      },
+      y: {
+        max: config.maxYValue == undefined ? undefined : +config.maxYValue,
+        min: config.minYValue == undefined ? undefined : +config.minYValue,
+      },
+    };
+    const configYBoundsChanged =
+      this.configBounds.y.min !== newConfigBounds.y.min ||
+      this.configBounds.y.max !== newConfigBounds.y.max;
+    this.configBounds = newConfigBounds;
+    const referenceLines = filterMap(config.paths, (path, idx) => {
+      if (!path.enabled || !isReferenceLinePIDPlotPathType(path)) {
+        return;
+      }
+
+      const value = +path.value;
+      if (isNaN(value)) {
+        return;
+      }
+      return {
+        color: getLineColor(path.color, idx),
+        value,
+      };
+    });
+    console.log("referenceLines", referenceLines);
+
+    this.updateAction.showXAxisLabels = config.showXAxisLabels;
+    this.updateAction.showYAxisLabels = config.showYAxisLabels;
+    this.updateAction.referenceLines = referenceLines;
+
+    if (configYBoundsChanged) {
+      this.updateAction.yBounds = this.configBounds.y;
+    }
+
+    const newCurrentValuesByConfigIndex: unknown[] = [];
+    this.series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
+      if (isReferenceLinePIDPlotPathType(path)) {
+        return;
+      }
+
+      const parsed = parseMessagePath(path.value);
+      if (!parsed) {
+        return;
+      }
+
+      const filledParsed = fillInGlobalVariablesInPath(parsed, globalVariables);
+      const key = `${path.timestampMethod}:${stringifyMessagePath(filledParsed)}` as SeriesConfigKey;
+
+      // 恢复原有 SeriesItem 创建逻辑
+      const seriesItem: Immutable<SeriesItem> = {
+        key,
+        configIndex: idx,
+        messagePath: path.value,
+        parsed: filledParsed,
+        color: getLineColor(path.color, idx),
+        contrastColor: getContrastColor(colorScheme, getLineColor(path.color, idx)),
+        lineSize: path.lineSize ?? 1.0,
+        timestampMethod: path.timestampMethod,
+        showLine: path.showLine ?? true,
+        enabled: path.enabled,
+      };
+
+      if (seriesItem) {
+        newCurrentValuesByConfigIndex[idx] =
+          this.currentValuesByConfigIndex[seriesItem.configIndex];
+      }
+
+      return seriesItem;
+    });
+    console.log("this.series", this.series);
+
+    this.currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
+    this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
+
+    this.queueDispatchRender();
+    this.datasetsBuilder.setSeries(this.series);
+    console.log("this.datasetsBuilder", this.datasetsBuilder);
+    this.queueDispatchDownsample();
+  }
+
+  public setGlobalBounds(bounds: Immutable<Bounds1D> | undefined): void {
+    this.globalBounds = bounds;
+    this.interactionBounds = undefined;
+    if (bounds == undefined) {
+      // This happens when "reset view" is clicked in a different panel or otherwise cleared the global bounds
+      this.shouldResetY = true;
+    }
+    this.queueDispatchRender();
+  }
+
+  public setZoomMode(mode: "x" | "xy" | "y"): void {
+    this.updateAction.zoomMode = mode;
+    this.queueDispatchRender();
+  }
+
+  public resetBounds(): void {
+    this.interactionBounds = undefined;
+    this.globalBounds = undefined;
+    this.shouldResetY = true;
+    this.queueDispatchRender();
+  }
+
+  public setSize(size: { width: number; height: number }): void {
+    this.viewport.size = size;
+    this.updateAction.size = size;
+    this.queueDispatchRender();
+    this.queueDispatchDownsample();
+  }
+
+  public addInteractionEvent(ev: InteractionEvent): void {
+    if (!this.updateAction.interactionEvents) {
+      this.updateAction.interactionEvents = [];
+    }
+    this.updateAction.interactionEvents.push(ev);
+    this.queueDispatchRender();
+  }
+
+  /** Get the plot x value at the canvas pixel x location */
+  public getXValueAtPixel(pixelX: number): number {
+    if (!this.latestXScale) {
+      return -1;
+    }
+
+    const pixelRange = this.latestXScale.right - this.latestXScale.left;
+    if (pixelRange <= 0) {
+      return -1;
+    }
+
+    // Linear interpolation to place the pixelX value within min/max
+    return (
+      this.latestXScale.min +
+      ((pixelX - this.latestXScale.left) / pixelRange) *
+      (this.latestXScale.max - this.latestXScale.min)
+    );
+  }
+
+  /** Get the entire data for all series */
+  public async getCsvData(): Promise<CsvDataset[]> {
+    if (this.isDestroyed()) {
+      return [];
+    }
+    return await this.datasetsBuilder.getCsvData();
+  }
+
+  /**
+   * Return true if the plot viewport has deviated from the config or dataset bounds and can reset
+   */
+  private canReset(): boolean {
+    if (this.interactionBounds) {
+      return true;
+    }
+
+    if (this.globalBounds) {
+      const resetBounds = this.getXResetBounds();
+      return this.globalBounds.min !== resetBounds.min || this.globalBounds.max !== resetBounds.max;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get the xBounds if we cleared the interaction and global bounds (i.e) reset
+   * back to the config or dataset bounds
+   */
+  private getXResetBounds(): Partial<Bounds1D> {
+    const currentSecondsIfFollowMode =
+      this.isTimeseriesPlot && this.followRange != undefined && this.currentSeconds != undefined
+        ? this.currentSeconds
+        : undefined;
+    const xMax = currentSecondsIfFollowMode ?? this.configBounds.x.max ?? this.datasetRange?.max;
+
+    const xMinIfFollowMode =
+      this.isTimeseriesPlot && this.followRange != undefined && xMax != undefined
+        ? xMax - this.followRange
+        : undefined;
+    const xMin = xMinIfFollowMode ?? this.configBounds.x.min ?? this.datasetRange?.min;
+
+    return { min: xMin, max: xMax };
+  }
+
+  private getXBounds(): Partial<Bounds1D> {
+    // Interaction, synced global bounds override the config and data source bounds in precedence
+    const resetBounds = this.getXResetBounds();
+    return {
+      min: this.interactionBounds?.x.min ?? this.globalBounds?.min ?? resetBounds.min,
+      max: this.interactionBounds?.x.max ?? this.globalBounds?.max ?? resetBounds.max,
+    };
+  }
+
+  private isDestroyed(): boolean {
+    return this.destroyed;
+  }
+
+  private async dispatchRender(): Promise<void> {
+    if (this.isDestroyed()) {
+      return;
+    }
+    this.updateAction.xBounds = this.getXBounds();
+
+    if (this.shouldResetY) {
+      const yMin = this.interactionBounds?.y.min ?? this.configBounds.y.min;
+      const yMax = this.interactionBounds?.y.max ?? this.configBounds.y.max;
+      this.updateAction.yBounds = { min: yMin, max: yMax };
+      this.shouldResetY = false;
+    }
+
+    const haveInteractionEvents = (this.updateAction.interactionEvents?.length ?? 0) > 0;
+
+    const action = this.updateAction;
+    this.updateAction = {
+      type: "update",
+    };
+
+    const bounds = await this.renderer.update(action);
+    if (this.isDestroyed()) {
+      return;
+    }
+
+    if (haveInteractionEvents) {
+      this.interactionBounds = bounds;
+    }
+
+    if (haveInteractionEvents && bounds && this.shouldSync) {
+      this.emit("timeseriesBounds", bounds.x);
+    }
+
+    this.emit("viewportChange", this.canReset());
+
+    // The viewport has changed from some render interactions so we need to consider new datasets
+    const x = this.getXBounds();
+    const y = this.interactionBounds?.y ?? this.configBounds.y;
+    if (!_.isEqual(this.viewport.bounds.x, x) || !_.isEqual(this.viewport.bounds.y, y)) {
+      this.viewport.bounds.x = x;
+      this.viewport.bounds.y = y;
+      this.queueDispatchDownsample();
+    }
+  }
+
+  /** Dispatch getting the latest downsampled datasets and then queue rendering them */
+  private async dispatchDownsample(): Promise<void> {
+    if (this.isDestroyed()) {
+      return;
+    }
+
+    const result = await this.datasetsBuilder.getViewportDatasets(this.viewport);
+    if (this.isDestroyed()) {
+      return;
+    }
+    this.emit("pathsWithMismatchedDataLengthsChanged", [...result.pathsWithMismatchedDataLengths]);
+
+    // Use Array.from to fill in any `undefined` entries with an empty dataset (`map` would not
+    // work for sparse arrays)
+    const datasets = Array.from(result.datasetsByConfigIndex, replaceUndefinedWithEmptyDataset);
+    this.queueDatasetsRender(datasets);
+  }
+
+  /** Render the provided datasets */
+  private async dispatchDatasetsRender(datasets: Dataset[]): Promise<void> {
+    if (this.isDestroyed()) {
+      return;
+    }
+
+    this.latestXScale = await this.renderer.updateDatasets(datasets);
+    if (this.isDestroyed()) {
+      return;
+    }
+    this.emit("xScaleChanged", this.latestXScale);
+  }
+
+  private async dispatchBlocks(
+    startTime: Immutable<Time>,
+    blocks: Immutable<(MessageBlock | undefined)[]>,
+  ): Promise<void> {
+    if (!this.datasetsBuilder.handleBlocks) {
+      return;
+    }
+
+    await this.datasetsBuilder.handleBlocks(startTime, blocks, async () => {
+      this.queueDispatchDownsample();
+      // When blocks are fully loaded and a user splits the panel, we are able to process all of the
+      // blocks synchronously. However this creates a poor UX experience for large datasets by
+      // showing nothing on the plot for many seconds while the postMessage prepares a massive send.
+      // This send also hangs the main thread.
+      //
+      // Instead of doing this all synchronously and stalling main thread, we artificially break up
+      // block loading to periodically dispatch the loaded data and render it. This avoids stalling
+      // the main thread and provides visual feedabck to the user that data is loading on the plot.
+      //
+      // await Promise.resolve() does not work as it does not yield enough to the main thread to
+      // dispatch and render.
+      await delay(0);
+
+      // Bail processing if the coordinator has been destroyed or if our input blocks have changed
+      // This lets us start processing new input blocks instead of continuing to work on stale
+      // blocks.
+      return this.isDestroyed() || this.latestBlocks !== blocks;
+    });
+  }
+}

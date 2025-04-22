@@ -12,11 +12,12 @@ import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
-import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { PIDPlotConfig, PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { OriginalValue } from "./utils/datum";
+import { PIDPlotCoordinator } from "@lichtblick/suite-base/panels/PIDPlot/PIDPlotCoordinator";
 
 export type Scale = {
   min: number;
@@ -107,6 +108,10 @@ export type PlotProps = {
   config: PlotConfig;
   saveConfig: SaveConfig<PlotConfig>;
 };
+export type PIDPlotProps = {
+  config: PIDPlotConfig;
+  saveConfig: SaveConfig<PIDPlotConfig>;
+}
 
 export type ElementAtPixelArgs = {
   clientX: number;
@@ -154,8 +159,22 @@ export type VerticalBarsProps = {
   hoverComponentId: string;
   xAxisIsPlaybackTime: boolean;
 };
+export type PIDVerticalBarsProps = {
+  coordinator?: PIDPlotCoordinator;
+  hoverComponentId: string;
+  xAxisIsPlaybackTime: boolean;
+};
 
 export type UsePlotDataHandling = {
+  colorsByDatasetIndex: Record<string, string>;
+  labelsByDatasetIndex: Record<string, string>;
+  datasetsBuilder:
+    | TimestampDatasetsBuilder
+    | IndexDatasetsBuilder
+    | CustomDatasetsBuilder
+    | CurrentCustomDatasetsBuilder;
+};
+export type UsePIDPlotDataHandling = {
   colorsByDatasetIndex: Record<string, string>;
   labelsByDatasetIndex: Record<string, string>;
   datasetsBuilder:
@@ -168,6 +187,15 @@ export type UsePlotDataHandling = {
 export type UsePlotInteractionHandlersProps = {
   config: PlotConfig;
   coordinator: PlotCoordinator | undefined;
+  draggingRef: MutableRefObject<boolean>;
+  renderer: OffscreenCanvasRenderer | undefined;
+  setActiveTooltip: (data: TooltipStateSetter | undefined) => void;
+  shouldSync: boolean;
+  subscriberId: string;
+};
+export type UsePIDPlotInteractionHandlersProps = {
+  config: PIDPlotConfig;
+  coordinator: PIDPlotCoordinator | undefined;
   draggingRef: MutableRefObject<boolean>;
   renderer: OffscreenCanvasRenderer | undefined;
   setActiveTooltip: (data: TooltipStateSetter | undefined) => void;

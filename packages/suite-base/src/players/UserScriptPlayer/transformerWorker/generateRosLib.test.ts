@@ -293,8 +293,8 @@ describe("typegen", () => {
         });
       });
     });
-    describe("ros constants", () => {
-      it("does not return anything for ros constants", () => {
+    describe("ros constants.tsx", () => {
+      it("does not return anything for ros constants.tsx", () => {
         const declarations = generateTypeDefs(
           new Map(
             Object.entries({

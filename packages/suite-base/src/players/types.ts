@@ -215,6 +215,7 @@ export type Topic = {
   schemaName: string | undefined;
   // Name of the topic before topic aliasing, if any.
   aliasedFromName?: string;
+  pidtype?: string |undefined;
 };
 
 export type TopicWithSchemaName = Topic & { schemaName: string };

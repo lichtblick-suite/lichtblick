@@ -92,4 +92,5 @@ export type PlotConfig = DeprecatedPlotConfig & {
   followingViewWidth?: number;
   sidebarDimension: number;
   [PANEL_TITLE_CONFIG_KEY]?: string;
+
 };

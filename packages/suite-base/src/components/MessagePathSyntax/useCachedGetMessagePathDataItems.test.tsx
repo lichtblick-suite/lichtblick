@@ -489,7 +489,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       ).toEqual([[], [], []]);
     });
 
-    it("returns matching constants", () => {
+    it("returns matching constants.tsx", () => {
       const messages: MessageEvent[] = [
         {
           topic: "/some/topic",

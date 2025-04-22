@@ -3,12 +3,17 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panels = {
+  pidPlot: "PID 绘图",
+  pnumber:"p值",
+  inumber:"i值",
+  dnumber:"d值",
+  pidPlotDescription: "PID 绘图描述",
   motionStateDescription: "运动状态描述",
   motionState: "运动状态",
   hardwareInfo: "本地硬件信息",
   LaunchMotion: "节点管理器",
   LaunchMotionDescription: "管理节点,启动节点,查看节点状态",
-  joystick: "摇杆",
+  joystick: "车辆摇杆控制",
   deviceSetting: "本地设备设置",
   VsCode: "VsCode",
   vscodeEditer: "远程链接到 VsCode 编辑器",

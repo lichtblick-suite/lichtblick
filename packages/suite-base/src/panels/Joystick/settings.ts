@@ -30,7 +30,7 @@ function buildSettingsTree(config: Joysetting, topics: readonly Topic[]): Settin
       label: "JoySetting",
       fields: {
         topic: {
-          label: "Topic",
+          label: "话题",
           input: "autocomplete",
           error: topicError(config.topic),
           value: config.topic,
@@ -39,22 +39,22 @@ function buildSettingsTree(config: Joysetting, topics: readonly Topic[]): Settin
             .map((t) => t.name),
         },
         vel: {
-          label: "Vel max",
+          label: "最大速度",
           input: "number",
           value: config.vel,
           placeholder: "0.2",
         },
         angle: {
-          label: "Angle max",
+          label: "最大转角",
           input: "number",
           value: config.angle,
           placeholder: "0.8",
         },
-        mode: {
-          label: "分离模式",
-          input: "boolean",
-          value: config.mode,
-        },
+        // mode: {
+        //   label: "分离模式",
+        //   input: "boolean",
+        //   value: config.mode,
+        // },
       },
     },
   };

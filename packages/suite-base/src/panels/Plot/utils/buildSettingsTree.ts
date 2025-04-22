@@ -98,6 +98,7 @@ const makeRootSeriesNode = memoizeWeak(({ paths, t }: MakeRootSeriesNode): Setti
         ]),
   );
   return {
+
     label: t("series"),
     children,
     actions: [
@@ -155,6 +156,7 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
         },
       },
     },
+
     yAxis: {
       label: t("yAxis"),
       defaultExpansionState: "collapsed",

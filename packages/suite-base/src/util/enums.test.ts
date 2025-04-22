@@ -53,12 +53,12 @@ describe("selectors", () => {
             }),
           ),
         ),
-      ).toEqual({ "some/datatype": { "0": "<multiple constants match>" } });
+      ).toEqual({ "some/datatype": { "0": "<multiple constants.tsx match>" } });
     });
   });
 
   describe("enumValuesByDatatypeAndField", () => {
-    it("handles multiple blocks of constants", () => {
+    it("handles multiple blocks of constants.tsx", () => {
       expect(
         enumValuesByDatatypeAndField(
           new Map(
@@ -89,7 +89,7 @@ describe("selectors", () => {
       });
     });
 
-    it("only assigns constants to matching types", () => {
+    it("only assigns constants.tsx to matching types", () => {
       expect(
         enumValuesByDatatypeAndField(
           new Map(
@@ -106,7 +106,7 @@ describe("selectors", () => {
           ),
         ),
       ).toEqual({
-        // getting empty result as the first type after constants doesn't match constant type
+        // getting empty result as the first type after constants.tsx doesn't match constant type
       });
     });
 

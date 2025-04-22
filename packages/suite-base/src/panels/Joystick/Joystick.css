@@ -3,9 +3,10 @@
   height: 200px;
   background-color: #ccc;
   border-radius: 50%;
-  position: relative;
+  position: relative; /* 重要: 保证子元素可使用绝对定位 */
 }
 
+/* 中心摇杆把手的样式 */
 .handle {
   width: 80px;
   height: 80px;
@@ -14,4 +15,49 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  /* 使其默认在圆心 */
+}
+
+/* 上方文字 */
+.label-top {
+  position: absolute;
+  top: 0;  /* 对齐到容器顶部 */
+  left: 50%;
+  transform: translateX(-50%); /* 使文字水平居中 */
+  color: #000; /* 文字颜色可自行调整 */
+  font-size: 14px; /* 文字大小可自行调整 */
+  margin-top: -16px; /* 调整与容器边缘的距离 */
+}
+
+/* 下方文字 */
+.label-bottom {
+  position: absolute;
+  bottom: 0; /* 对齐到容器底部 */
+  left: 50%;
+  transform: translateX(-50%);
+  color: #000;
+  font-size: 14px;
+  margin-bottom: -16px;
+}
+
+/* 左侧文字 */
+.label-left {
+  position: absolute;
+  left: 0; /* 对齐到容器左边缘 */
+  top: 50%;
+  transform: translateY(-50%); /* 使文字垂直居中 */
+  color: #000;
+  font-size: 14px;
+  margin-left: -32px;
+}
+
+/* 右侧文字 */
+.label-right {
+  position: absolute;
+  right: 0; /* 对齐到容器右边缘 */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #000;
+  font-size: 14px;
+  margin-right: -32px;
 }

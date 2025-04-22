@@ -39,7 +39,7 @@ global.Worker = jest.fn().mockImplementation(() => ({
   terminate: jest.fn(),
 }));
 
-describe("usePlotDataHandling hook", () => {
+describe("usePIDPlotDataHandling hook", () => {
   const globalVariables: GlobalVariables = {};
 
   it("should create an IndexDatasetsBuilder for 'index' xAxisVal", () => {

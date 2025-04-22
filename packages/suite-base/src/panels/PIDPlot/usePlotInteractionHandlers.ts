@@ -17,15 +17,15 @@ import {
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import {
   ElementAtPixelArgs,
-  UseHoverHandlersHook as UsePlotInteractionHandlers,
-   UsePlotInteractionHandlersProps
+  UseHoverHandlersHook as UsePIDPlotInteractionHandlers,
+  UsePIDPlotInteractionHandlersProps,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { downloadCSV } from "@lichtblick/suite-base/panels/Plot/utils/csv";
 import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
-const usePlotInteractionHandlers = ({
+const UsePIDPlotInteractionHandlers = ({
   config,
   coordinator,
   draggingRef,
@@ -33,7 +33,7 @@ const usePlotInteractionHandlers = ({
   setActiveTooltip,
   shouldSync,
   subscriberId,
-}: UsePlotInteractionHandlersProps): UsePlotInteractionHandlers => {
+}: UsePIDPlotInteractionHandlersProps): UsePIDPlotInteractionHandlers => {
   const setHoverValue = useSetHoverValue();
   const clearHoverValue = useClearHoverValue();
   const isMounted = useMountedState();
@@ -239,4 +239,4 @@ const usePlotInteractionHandlers = ({
   };
 };
 
-export default usePlotInteractionHandlers;
+export default UsePIDPlotInteractionHandlers;

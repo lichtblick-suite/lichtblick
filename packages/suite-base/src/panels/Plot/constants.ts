@@ -3,9 +3,17 @@
 
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 
-import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import {
+
+  PIDLinePlotPath,
+  PIDPlotPath,
+  PlotConfig,
+  PlotPath
+} from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { MathFunction } from "@lichtblick/suite-base/panels/Plot/utils/mathFunctions";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
+import { nanoid } from "nanoid";
+
 
 export const MATH_FUNCTIONS: { [fn: string]: MathFunction } = {
   abs: Math.abs,
@@ -63,6 +71,29 @@ export const DEFAULT_PLOT_PATH: PlotPath = Object.freeze({
   timestampMethod: "receiveTime",
   value: "",
   enabled: true,
+
+});
+
+export const DEFAULT_PIDPLOT_PATH: PIDPlotPath = Object.freeze({
+  id: nanoid(),
+  timestampMethod: "receiveTime",
+  value: "",
+  enabled: true,
+  pidtype: "pnumber",
+});
+
+
+
+export const DEFAULT_PIDLINEPLOT_PATH: PIDLinePlotPath = Object.freeze({
+  id:nanoid(),
+  label:"预定轨迹绘制",
+  timestampMethod: "receiveTime",
+  value: "",
+  enabled: true,
+  pidtype: "pnumber",
+  kp: 0.1,
+  ki: 0.1,
+  kd: 0.1,
 });
 export const DEFAULT_PLOT_CONFIG1: PlotConfig = {
   paths: [],

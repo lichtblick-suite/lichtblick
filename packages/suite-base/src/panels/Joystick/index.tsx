@@ -286,6 +286,16 @@ function Joystick(props: Props): React.JSX.Element {
                 setIsDragging(true);
               }}
             >
+              {/* 上方文字 */}
+              <div className="label-top">前进</div>
+              {/* 左侧文字 */}
+              <div className="label-left">左转</div>
+              {/* 右侧文字 */}
+              <div className="label-right">右转</div>
+              {/* 下方文字 */}
+              <div className="label-bottom">后退</div>
+
+              {/* 中心的摇杆把手 */}
               <div
                 className="handle"
                 style={{
@@ -295,6 +305,7 @@ function Joystick(props: Props): React.JSX.Element {
                 }}
               ></div>
             </div>
+
             <div style={{ marginTop: "16px" }}>
               <Button
                 onClick={() => {
@@ -305,7 +316,7 @@ function Joystick(props: Props): React.JSX.Element {
                 style={{ marginTop: "8px", width: "100%", height: "50px" }}
               >
                 {" "}
-                {isEmergency ? "Emergency Stop Cancel" : "Emergency Stop"}{" "}
+                {isEmergency ? "启动" : "刹车"}{" "}
               </Button>
               <p>Gamepad Status: {isGamepadConnected ? "Connected" : "Disconnected"}</p>
               {isGamepadConnected && (

@@ -76,7 +76,7 @@ function typeForField(schema: SchemaT, field: FieldT): MessageDefinitionField[] 
     case BaseType.String:
     case BaseType.None: {
       const simpleType = typeForSimpleField(field.type.baseType);
-      // Enums have magic logic--the constants definitions for the enum values
+      // Enums have magic logic--the constants.tsx definitions for the enum values
       // have to go right before the enum itself.
       if (field.type.index !== -1) {
         const enums = schema.enums[field.type.index]?.values;
@@ -116,7 +116,7 @@ function typeForField(schema: SchemaT, field: FieldT): MessageDefinitionField[] 
           break;
         default: {
           const type = typeForSimpleField(field.type.element);
-          // Enums have magic logic--the constants definitions for the enum
+          // Enums have magic logic--the constants.tsx definitions for the enum
           // values have to go right before the enum itself.
           if (field.type.index !== -1) {
             const enums = schema.enums[field.type.index]?.values;
