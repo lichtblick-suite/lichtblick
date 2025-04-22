@@ -19,7 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          lfs: true
           submodules: true
 
       - uses: actions/setup-node@v4.0.3
