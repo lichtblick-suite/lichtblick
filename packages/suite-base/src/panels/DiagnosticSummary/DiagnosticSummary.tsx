@@ -47,15 +47,12 @@ import {
   DiagnosticSummaryConfig,
   DiagnosticSummaryProps,
 } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
+import { getDiagnosticsWithStales } from "@lichtblick/suite-base/panels/DiagnosticSummary/utils/getDiagnosticsWithStales";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import toggle from "@lichtblick/suite-base/util/toggle";
 
 import { buildSummarySettingsTree } from "./utils/settings";
-import {
-  filterAndSortDiagnostics,
-  getDiagnosticsByLevel,
-  getDiagnosticsWithStales,
-} from "./utils/util";
+import { filterAndSortDiagnostics, getDiagnosticsByLevel } from "./utils/util";
 
 const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => {
   const { config, saveConfig } = props;

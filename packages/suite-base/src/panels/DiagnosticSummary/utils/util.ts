@@ -16,17 +16,14 @@
 
 import * as _ from "lodash-es";
 
-import { Time, compare } from "@lichtblick/rostime";
+import { Time } from "@lichtblick/rostime";
 import {
   DiagnosticId,
   DiagnosticInfo,
   DiagnosticStatusMessage,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
-import {
-  LEVELS,
-  MAX_STRING_LENGTH,
-} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import { MAX_STRING_LENGTH } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 
@@ -77,24 +74,6 @@ export function getDiagnosticsByLevel(
       } else {
         ret.set(diagnostic.status.level, [diagnostic]);
       }
-    }
-  }
-  return ret;
-}
-
-export function getDiagnosticsWithStales(
-  diagnosticsByHardwareId: Map<string, DiagnosticsById>,
-  staleTime: Time,
-): Map<string, DiagnosticsById> {
-  const ret = new Map<string, DiagnosticsById>();
-  for (const [hardwareId, diagnosticsByName] of diagnosticsByHardwareId) {
-    const newDiagnosticsByName: DiagnosticsById = new Map();
-    ret.set(hardwareId, newDiagnosticsByName);
-
-    for (const [name, diagnostic] of diagnosticsByName) {
-      const markStale = compare(diagnostic.stamp, staleTime) < 0;
-      const level = markStale ? LEVELS.STALE : diagnostic.status.level;
-      newDiagnosticsByName.set(name, { ...diagnostic, status: { ...diagnostic.status, level } });
     }
   }
   return ret;
