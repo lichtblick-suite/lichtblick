@@ -10,7 +10,8 @@ import * as THREE from "three";
 import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
-import { PinholeCameraModel } from "@lichtblick/den/image";
+
+import { CameraModel, createCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
@@ -137,7 +138,7 @@ export class ImageMode
   #camera: ImageModeCamera;
   #cameraModel:
     | {
-        model: PinholeCameraModel;
+        model: CameraModel;
         info: CameraInfo;
       }
     | undefined;
@@ -890,11 +891,12 @@ export class ImageMode
     // If the camera info has not changed, we don't need to make a new model and can return the existing one
     const currentCameraInfo = this.#cameraModel?.info;
     const dataEqual = cameraInfosEqual(currentCameraInfo, newCameraInfo);
+
     if (dataEqual && currentCameraInfo != undefined) {
       return;
     }
 
-    const model = this.#getPinholeCameraModel(newCameraInfo);
+    const model = this.#getCameraModel(newCameraInfo);
     if (model) {
       this.#cameraModel = {
         model,
@@ -905,14 +907,14 @@ export class ImageMode
   }
 
   /**
-   * Returns PinholeCameraModel for given CameraInfo
+   * Returns CameraModel for given CameraInfo
    * This function will set a topic error on the image topic if the camera model creation fails.
    * @param cameraInfo - CameraInfo to create model from
    */
-  #getPinholeCameraModel(cameraInfo: CameraInfo): PinholeCameraModel | undefined {
+  #getCameraModel(cameraInfo: CameraInfo): CameraModel | undefined {
     let model = undefined;
     try {
-      model = new PinholeCameraModel(cameraInfo);
+      model = createCameraModel(cameraInfo);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;

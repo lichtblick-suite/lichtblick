@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { CameraModel } from "@lichtblick/den/image";
 
 const DEFAULT_CAMERA_STATE = {
   near: 0.001,
@@ -18,7 +18,7 @@ const MIN_USER_ZOOM = 0.5;
 const MAX_USER_ZOOM = 50;
 
 export class ImageModeCamera extends THREE.PerspectiveCamera {
-  #model?: PinholeCameraModel;
+  #model?: CameraModel;
   readonly #cameraState = DEFAULT_CAMERA_STATE;
   #rotation: 0 | 90 | 180 | 270 = 0;
   #flipHorizontal = false;
@@ -33,7 +33,7 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
   /** Amount the user has zoomed with the scroll wheel */
   #userZoom = 1;
 
-  public updateCamera(cameraModel: PinholeCameraModel | undefined): void {
+  public updateCamera(cameraModel: CameraModel | undefined): void {
     this.#model = cameraModel;
     this.#updateProjection();
   }
@@ -119,7 +119,7 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
    *
    * @returns the projection matrix for the current camera model, or undefined if no camera model is available
    */
-  #getProjection(out: THREE.Matrix4, model: PinholeCameraModel) {
+  #getProjection(out: THREE.Matrix4, model: CameraModel) {
     const { width, height } = model;
 
     // focal lengths

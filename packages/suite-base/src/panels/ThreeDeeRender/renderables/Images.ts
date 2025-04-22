@@ -10,7 +10,8 @@ import { t } from "i18next";
 import { assert } from "ts-essentials";
 
 import { MultiMap, filterMap } from "@lichtblick/den/collection";
-import { PinholeCameraModel } from "@lichtblick/den/image";
+
+import { createCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
@@ -410,7 +411,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     const imageTopic = renderable.userData.topic;
 
     try {
-      renderable.setCameraModel(new PinholeCameraModel(newCameraInfo));
+      renderable.setCameraModel(createCameraModel(newCameraInfo));
       renderable.userData.cameraInfo = newCameraInfo;
       this.renderer.settings.errors.removeFromTopic(imageTopic, CAMERA_MODEL);
     } catch (errUnk) {
