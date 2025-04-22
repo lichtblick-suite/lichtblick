@@ -32,7 +32,6 @@ jobs:
           # See: https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854/2
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
-          lfs: true
 
       - uses: actions/setup-node@v4.0.3
         with:
