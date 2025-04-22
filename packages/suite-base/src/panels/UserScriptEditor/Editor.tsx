@@ -21,8 +21,7 @@ import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error StandaloneService does not have type information in the monaco-editor package
 import { StandaloneServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 import * as path from "path";
-import React, { Suspense } from "react";
-import { ReactElement, useCallback, useEffect, useRef } from "react";
+import React, { Suspense, ReactElement, useCallback, useEffect, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { ResizePayload, useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";

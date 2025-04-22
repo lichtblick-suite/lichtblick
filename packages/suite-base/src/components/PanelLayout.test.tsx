@@ -114,8 +114,8 @@ describe("UnconnectedPanelLayout", () => {
     expect(moduleA).toHaveBeenCalledTimes(1);
     expect(moduleB).toHaveBeenCalledTimes(1);
     expect(moduleC).toHaveBeenCalledTimes(0);
-    expect(renderA).toHaveBeenCalledTimes(4);
-    expect(renderB).toHaveBeenCalledTimes(4);
+    expect(renderA).toHaveBeenCalledTimes(2);
+    expect(renderB).toHaveBeenCalledTimes(2);
     expect(renderC).toHaveBeenCalledTimes(0);
 
     rerender(
@@ -125,15 +125,15 @@ describe("UnconnectedPanelLayout", () => {
       />,
     );
     await waitFor(() => {
-      expect(renderC).toHaveBeenCalledTimes(4);
+      expect(renderC).toHaveBeenCalledTimes(2);
     });
     // Each panel module should have only been loaded once; panels A and B should not render again
     expect(moduleA).toHaveBeenCalledTimes(1);
     expect(moduleB).toHaveBeenCalledTimes(1);
     expect(moduleC).toHaveBeenCalledTimes(1);
-    expect(renderA).toHaveBeenCalledTimes(4);
-    expect(renderB).toHaveBeenCalledTimes(4);
-    expect(renderC).toHaveBeenCalledTimes(4);
+    expect(renderA).toHaveBeenCalledTimes(2);
+    expect(renderB).toHaveBeenCalledTimes(2);
+    expect(renderC).toHaveBeenCalledTimes(2);
 
     unmount();
   });
