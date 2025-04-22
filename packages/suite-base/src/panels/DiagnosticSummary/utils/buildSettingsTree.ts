@@ -5,17 +5,30 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { SettingsTreeNodes } from "@lichtblick/suite";
-import { DEFAULT_SECONDS_UNTIL_STALE } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import {
+  SettingsTreeField,
+  SettingsTreeFieldBoolean,
+  SettingsTreeFieldNumber,
+  SettingsTreeFieldSelectString,
+  SettingsTreeNodes,
+} from "@lichtblick/suite";
+import { DEFAULT_SETTINGS_TREE_NODE } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 
-export function buildSummarySettingsTree(
-  config: DiagnosticSummaryConfig,
-  topicToRender: string,
-  availableTopics: readonly string[],
-): SettingsTreeNodes {
+export type BuildSettingsTreeProps = {
+  config: DiagnosticSummaryConfig;
+  topicToRender: string;
+  availableTopics: readonly string[];
+};
+
+export function buildSettingsTree({
+  availableTopics,
+  config,
+  topicToRender,
+}: BuildSettingsTreeProps): SettingsTreeNodes {
   const topicOptions = availableTopics.map((topic) => ({ label: topic, value: topic }));
   const topicIsAvailable = availableTopics.includes(topicToRender);
+
   if (!topicIsAvailable) {
     topicOptions.unshift({ value: topicToRender, label: topicToRender });
   }
@@ -23,26 +36,22 @@ export function buildSummarySettingsTree(
 
   return {
     general: {
-      label: "General",
+      ...DEFAULT_SETTINGS_TREE_NODE.general,
       fields: {
         topicToRender: {
-          label: "Topic",
-          input: "select",
+          ...DEFAULT_SETTINGS_TREE_NODE.general?.fields?.topicToRender,
           value: topicToRender,
           error: topicError,
           options: topicOptions,
-        },
-        sortByLevel: { label: "Sort by level", input: "boolean", value: config.sortByLevel },
+        } as SettingsTreeField & SettingsTreeFieldSelectString,
+        sortByLevel: {
+          ...DEFAULT_SETTINGS_TREE_NODE.general?.fields?.sortByLevel,
+          value: config.sortByLevel,
+        } as SettingsTreeField & SettingsTreeFieldBoolean,
         secondsUntilStale: {
-          label: "Stale timeout",
-          help: "Number of seconds after which entries will be marked as stale if no new diagnostic message(s) have been received",
-          input: "number",
-          placeholder: `${DEFAULT_SECONDS_UNTIL_STALE} seconds`,
-          min: 0,
-          step: 1,
-          precision: 0,
+          ...DEFAULT_SETTINGS_TREE_NODE.general?.fields?.secondsUntilStale,
           value: config.secondsUntilStale,
-        },
+        } as SettingsTreeField & SettingsTreeFieldNumber,
       },
     },
   };
