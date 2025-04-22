@@ -27,13 +27,8 @@ import { MAX_STRING_LENGTH } from "@lichtblick/suite-base/panels/DiagnosticSumma
 import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 
-// Remove leading slash from hardware_id if present.
-export function trimHardwareId(hardwareId: string): string {
-  return hardwareId.startsWith("/") ? hardwareId.slice(1) : hardwareId;
-}
-
 export function getDiagnosticId(hardwareId: string, name?: string): DiagnosticId {
-  const trimmedHardwareId = trimHardwareId(hardwareId);
+  const trimmedHardwareId = hardwareId.startsWith("/") ? hardwareId.slice(1) : hardwareId;
   return name != undefined ? `|${trimmedHardwareId}|${name}|` : `|${trimmedHardwareId}|`;
 }
 
