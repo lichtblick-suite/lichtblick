@@ -35,3 +35,5 @@ export const ALLOWED_TAGS: string[] = [
   "H5",
   "H6",
 ];
+
+export const DISPLAY_EMPTY_STATE = "(empty)";
