@@ -13,7 +13,7 @@ const tempEuler = new THREE.Euler();
 /**
  * Convert a quaternion to roll-pitch-yaw Euler angles.
  * Returns angles in degrees using extrinsic ZYX (yaw-pitch-roll) convention,
- * which is the standard for aerospace and robotics.
+ * which is the common standard for aerospace and robotics.
  */
 export function quatToEuler(
   x: number,
