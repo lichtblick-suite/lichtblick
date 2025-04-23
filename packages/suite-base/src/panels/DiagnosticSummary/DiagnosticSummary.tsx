@@ -51,7 +51,7 @@ import { getDiagnosticsWithStales } from "@lichtblick/suite-base/panels/Diagnost
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import toggle from "@lichtblick/suite-base/util/toggle";
 
-import { buildSummarySettingsTree } from "./utils/settings";
+import { buildSettingsTree } from "./utils/buildSettingsTree";
 import { filterAndSortDiagnostics, getDiagnosticsByLevel } from "./utils/util";
 
 const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => {
@@ -214,7 +214,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      nodes: buildSummarySettingsTree(config, topicToRender, availableTopics),
+      nodes: buildSettingsTree({ config, topicToRender, availableTopics }),
     });
   }, [actionHandler, availableTopics, config, topicToRender, updatePanelSettingsTree]);
 

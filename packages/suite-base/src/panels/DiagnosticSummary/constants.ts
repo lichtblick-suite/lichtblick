@@ -1,6 +1,13 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import {
+  SettingsTreeField,
+  SettingsTreeFieldBoolean,
+  SettingsTreeFieldNumber,
+  SettingsTreeFieldSelectString,
+  SettingsTreeNodes,
+} from "@lichtblick/suite";
 import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 
 // Trim the message if it's too long. We sometimes get crazy massive messages here that can
@@ -46,4 +53,28 @@ export const DEFAULT_CONFIG: DiagnosticSummaryConfig = {
   hardwareIdFilter: "",
   topicToRender: "/diagnostics",
   sortByLevel: true,
+};
+
+export const DEFAULT_SETTINGS_TREE_NODE: SettingsTreeNodes = {
+  general: {
+    label: "General",
+    fields: {
+      topicToRender: {
+        label: "Topic",
+        input: "select",
+        options: [],
+      } as SettingsTreeField & SettingsTreeFieldSelectString,
+      sortByLevel: { label: "Sort by level", input: "boolean" } as SettingsTreeField &
+        SettingsTreeFieldBoolean,
+      secondsUntilStale: {
+        label: "Stale timeout",
+        help: "Number of seconds after which entries will be marked as stale if no new diagnostic message(s) have been received",
+        input: "number",
+        placeholder: `${DEFAULT_SECONDS_UNTIL_STALE} seconds`,
+        min: 0,
+        step: 1,
+        precision: 0,
+      } as SettingsTreeField & SettingsTreeFieldNumber,
+    },
+  },
 };
