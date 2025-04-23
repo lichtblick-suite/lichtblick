@@ -60,6 +60,9 @@ const sampleImage = {
 };
 
 describe("ImageRenderable", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should instantiate and set settings", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     expect(renderable).toBeInstanceOf(ImageRenderable);
@@ -121,6 +124,9 @@ describe("ImageRenderable", () => {
 });
 
 describe("ImageRenderable error handling", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should call renderer error methods on addError", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, {
       ...mockUserData,
@@ -138,6 +144,20 @@ describe("ImageRenderable error handling", () => {
       mockErrorMessage,
     );
     expect(mockAddToTopic).toHaveBeenCalledWith(mockUserData.topic, mockErrorKey, mockErrorMessage);
+  });
+
+  it("should not call addError in case of renderable is disposed", () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, {
+      ...mockUserData,
+    });
+
+    renderable.dispose();
+
+    // @ts-expect-error addError is protected, but ok to use on tests
+    renderable.addError(BasicBuilder.string(), BasicBuilder.string());
+
+    expect(mockAdd).not.toHaveBeenCalled();
+    expect(mockAddToTopic).not.toHaveBeenCalled();
   });
 
   it("should call renderer error methods on removeError", () => {
