@@ -62,3 +62,7 @@ export type FormattedKeyValue = {
   value: string;
   valueHtml: { __html: string } | undefined;
 };
+
+type DiagnosticNameSet = Set<string>;
+
+export type UseAvailableDiagnosticResult = Map<string, DiagnosticNameSet>;

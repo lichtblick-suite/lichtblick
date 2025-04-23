@@ -8,14 +8,14 @@
 import { useMemo } from "react";
 
 import { useMessageReducer } from "@lichtblick/suite-base/PanelAPI";
-import { DiagnosticStatusArrayMsg } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import {
+  DiagnosticStatusArrayMsg,
+  UseAvailableDiagnosticResult,
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
-type DiagnosticNameSet = Set<string>;
-type UseAvailableDiagnosticResult = Map<string, DiagnosticNameSet>;
-
-function addMessages(
+export function addMessages(
   previousAvailableDiagnostics: UseAvailableDiagnosticResult,
   messages: readonly MessageEvent[],
 ): UseAvailableDiagnosticResult {
