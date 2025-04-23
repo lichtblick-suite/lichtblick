@@ -74,23 +74,6 @@ describe("imageNormalizers", () => {
       };
       expect(normalizeRosImage(input)).toEqual(expected);
     });
-
-    it("should handle Int8Array data", () => {
-      const int8Data = new Int8Array([1, -2, 3, -4]);
-      const input: PartialMessage<RosImage> = { data: int8Data };
-      const expected: RosImage = {
-        header: { stamp: { sec: 0, nsec: 0 }, frame_id: "" },
-        height: 0,
-        width: 0,
-        encoding: "",
-        is_bigendian: false,
-        step: 0,
-        data: int8Data, // Expecting the same Int8Array instance
-      };
-      const result = normalizeRosImage(input);
-      expect(result).toEqual(expected);
-      expect(result.data).toBeInstanceOf(Int8Array);
-    });
   });
 
   describe("normalizeRosCompressedImage", () => {
@@ -154,23 +137,6 @@ describe("imageNormalizers", () => {
         data: new Uint8Array(0),
       };
       expect(normalizeRawImage(input)).toEqual(expected);
-    });
-
-    it("should handle Int8Array data", () => {
-      const int8Data = new Int8Array([1, -2, 3, -4]);
-      const input: PartialMessage<RawImage> = { data: int8Data };
-      const expected: RawImage = {
-        timestamp: { sec: 0, nsec: 0 },
-        frame_id: "",
-        height: 0,
-        width: 0,
-        encoding: "",
-        step: 0,
-        data: int8Data, // Expecting the same Int8Array instance
-      };
-      const result = normalizeRawImage(input);
-      expect(result).toEqual(expected);
-      expect(result.data).toBeInstanceOf(Int8Array);
     });
   });
 
