@@ -2682,7 +2682,9 @@ __metadata:
   resolution: "@lichtblick/den@workspace:packages/den"
   dependencies:
     "@lichtblick/comlink": 1.0.3
+    "@lichtblick/log": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
+    "@types/dom-webcodecs": 0.1.14
     async-mutex: 0.4.0
     eventemitter3: 5.0.1
     xacro-parser: 0.3.9
@@ -4999,6 +5001,13 @@ __metadata:
   version: 0.0.9
   resolution: "@types/doctrine@npm:0.0.9"
   checksum: 3909eaca42e7386b2ab866f082b78da3e00718d2fa323597e254feb0556c678b41f2c490729067433630083ac9c806ec6ae1e146754f7f8ba7d3e43ed68d6500
+  languageName: node
+  linkType: hard
+
+"@types/dom-webcodecs@npm:0.1.14":
+  version: 0.1.14
+  resolution: "@types/dom-webcodecs@npm:0.1.14"
+  checksum: 3670184fcec5f13c551d2e6af6638ace8515a2c1bc6f54df10a70ac2feacf49ef59f3518e10243c80abd12909f71ce3d9ac457bc85ce583c894d3a20e9619af9
   languageName: node
   linkType: hard
 
