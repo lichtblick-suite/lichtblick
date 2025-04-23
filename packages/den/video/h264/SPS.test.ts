@@ -8,6 +8,13 @@
 import { SPS } from "./SPS";
 
 describe("SPS", () => {
+  function createValidNALU() {
+    return [
+      0x67, 0x64, 0x0, 0x1e, 0xac, 0xb2, 0x1, 0x40, 0x5f, 0xf2, 0xe0, 0x2d, 0x40, 0x40, 0x40, 0x50,
+      0x0, 0x0, 0x3, 0x0, 0x10, 0x0, 0x0, 0x3, 0x3, 0x20, 0xf1, 0x62, 0xe4, 0x80,
+    ];
+  }
+
   it("Parses a simple SPS NALU correctly", () => {
     const NALU = [0x67, 0x42, 0x00, 0x0a, 0xf8, 0x41, 0xa2];
     const sps = new SPS(new Uint8Array(NALU));
@@ -113,10 +120,7 @@ describe("SPS", () => {
   });
 
   it("Parses a real-world example SPS", () => {
-    const NALU = [
-      0x67, 0x64, 0x0, 0x1e, 0xac, 0xb2, 0x1, 0x40, 0x5f, 0xf2, 0xe0, 0x2d, 0x40, 0x40, 0x40, 0x50,
-      0x0, 0x0, 0x3, 0x0, 0x10, 0x0, 0x0, 0x3, 0x3, 0x20, 0xf1, 0x62, 0xe4, 0x80,
-    ];
+    const NALU = createValidNALU();
     const sps = new SPS(new Uint8Array(NALU));
 
     expect(sps.nal_ref_id).toBe(3);
@@ -193,5 +197,125 @@ describe("SPS", () => {
 
     expect(sps.profileCompatibility()).toBe(0);
     expect(sps.MIME()).toBe("avc1.64001E");
+  });
+
+  describe("SPS > profile_idc parsing", () => {
+    it.each([
+      [66, "BASELINE"],
+      [77, "MAIN"],
+      [88, "EXTENDED"],
+      [100, "FREXT_HP"],
+      [110, "FREXT_Hi10P"],
+      [122, "FREXT_Hi422"],
+      [244, "FREXT_Hi444"],
+      [44, "FREXT_CAVLC444"],
+    ])("Parses profile_idc = %i and maps to profileName = %s", (profile_idc, profile_idc_name) => {
+      const NALU = createValidNALU();
+      NALU[1] = profile_idc;
+
+      const sps = new SPS(new Uint8Array(NALU));
+      expect(sps.profile_idc).toBe(profile_idc);
+      expect(sps.profileName).toBe(profile_idc_name);
+    });
+  });
+
+  describe("SPS Constructor Exceptions", () => {
+    it("Throws an error for invalid forbidden_zero_bit", () => {
+      const NALU = createValidNALU();
+      NALU[0] = 0x80; // forbidden_zero_bit is 1 // 0x80 in bytes: 10000000
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow("NALU error: invalid NALU header");
+    });
+
+    it("Throws an error for invalid nal_unit_type", () => {
+      const NALU = createValidNALU();
+      NALU[0] = 0x65; // nal_unit_type is not 7 // 0x65 in bytes: 01100101
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow("SPS error: not SPS");
+    });
+
+    it("Throws an error for invalid profile_idc", () => {
+      const NALU = createValidNALU();
+      NALU[1] = 0xff; // profile_idc is invalid //
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow("SPS error: invalid profile_idc");
+    });
+
+    it("Throws an error for non-zero reserved_zero_2bits", () => {
+      const NALU = createValidNALU();
+      NALU[2] = 0x49; // 01001001: reserved_zero_2bits = 1;
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: reserved_zero_2bits must be zero",
+      );
+    });
+
+    it("Throws an error for seq_parameter_set_id greater than 31", () => {
+      const NALU = createValidNALU();
+
+      NALU[4] = 0x04; // 00000100
+      NALU[5] = 0x20; // 00100000 → Exp-Golomb of 32: 00000100001
+
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: seq_parameter_set_id must be 31 or less",
+      );
+    });
+
+    it("Throws an error if chroma_format_idc is greater than 3", () => {
+      const NALU = createValidNALU();
+      NALU[4] = 0x85; // 10000101 = seq_parameter_set_id = 0, chroma_format_idc = 4
+
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: chroma_format_idc must be 3 or less",
+      );
+    });
+
+    it("Throws an error if bit_depth_luma_minus8 is greater than 6", () => {
+      const NALU = createValidNALU();
+      NALU[4] = 0xa0; // seq_parameter_set_id = 0 (1), chroma_format_idc = 1 (010)
+      NALU[5] = 0x80; // bit_depth_luma_minus8 = 7 (000001000)
+
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: bit_depth_luma_minus8 must be 6 or less",
+      );
+    });
+
+    it("Throws an error if bit_depth_chroma_minus8 is greater than 6", () => {
+      const NALU = createValidNALU();
+      NALU[4] = 0xa8; // 10101000: seq_parameter_set_id = 0, chroma_format_idc = 1, bit_depth_luma_minus8 = 0
+      NALU[5] = 0x20; // 00100000: bit_depth_chroma_minus8 = 7
+
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: bit_depth_chroma_minus8 must be 6 or less",
+      );
+    });
+
+    it("Throws an error if log2_max_frame_num_minus4 is greater than 12", () => {
+      const NALU = createValidNALU();
+      NALU[1] = 0x42; // profile_idc = 66 (baseline profile)
+      NALU[4] = 0x83; // seq_parameter_set_id = 0 (ue = 1), start of log2_max_frame_num_minus4 = 13
+      NALU[5] = 0x80; // continuation of log2_max_frame_num_minus4
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: log2_max_frame_num_minus4 must be 12 or less",
+      );
+    });
+
+    it("Throws an error if pic_order_cnt_type is greater than 2", () => {
+      const NALU = createValidNALU();
+      NALU[1] = 0x42; // profile_idc = 66 (baseline profile)
+      NALU[4] = 0xc0; // seq_parameter_set_id = 0, log2_max_frame_num_minus4 = 0 (ue = 1 + 1)
+      NALU[5] = 0x80; // pic_order_cnt_type = 3 (ue = 00000100)
+
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: pic_order_cnt_type must be 2 or less",
+      );
+    });
+
+    it("Throws an error if log2_max_pic_order_cnt_lsb_minus4 is greater than 12", () => {
+      const NALU = createValidNALU();
+      NALU[1] = 0x42; // profile_idc = 66 (baseline profile)
+      NALU[4] = 0xe0; // seq_parameter_set_id = 0
+      NALU[5] = 0xe0; // log2_max_pic_order_cnt_lsb_minus4 = 13 (000001110)
+
+      expect(() => new SPS(new Uint8Array(NALU))).toThrow(
+        "SPS error: log2_max_pic_order_cnt_lsb_minus4 must be 12 or less",
+      );
+    });
   });
 });
