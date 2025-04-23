@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -7,11 +10,11 @@
  * decoding exponential Golomb format integers.
  */
 export class Bitstream {
-  #buffer: Uint8Array;
   #ptr: number = 0;
   #bytePtr: number = 0;
   #lastTwoBytes: number = 0;
-  #max: number;
+  readonly #buffer: Uint8Array;
+  readonly #max: number;
 
   /**
    * Construct a bitstream
@@ -151,7 +154,6 @@ export class Bitstream {
    * @returns {number}
    */
   public u(n: number): number {
-    // console.log(`u(${n})`);
     if (n === 8) {
       return this.u_8();
     }
@@ -161,7 +163,6 @@ export class Bitstream {
     let val = 0;
     for (let i = 0; i < n; i++) {
       val = (val << 1) | this.u_1();
-      // console.log(`val: ${val}`);
     }
     return val;
   }

@@ -260,8 +260,6 @@ export class ImageRenderable extends Renderable<ImageUserData> {
           }
           // show black image instead of error image
           return await emptyVideoFrame(this.videoPlayer, resizeWidth);
-          // Raise error so the caller can catch it and display an error image
-          throw new Error(error);
         }
 
         if (!this.videoPlayer) {
@@ -279,12 +277,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         // Initialize the video player if needed
         if (!videoPlayer.isInitialized()) {
           const decoderConfig = getVideoDecoderConfig(frameMsg);
-          if (decoderConfig) {
+          if (decoderConfig != undefined) {
             await videoPlayer.init(decoderConfig);
           } else {
             // Raise error so the caller can catch it
             throw new Error("Waiting for keyframe");
-            return await emptyVideoFrame(this.videoPlayer, resizeWidth);
           }
         }
 
