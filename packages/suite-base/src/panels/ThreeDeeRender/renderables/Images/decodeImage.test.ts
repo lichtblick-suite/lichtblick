@@ -1,201 +1,163 @@
+/** @jest-environment jsdom */
+
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
+import { H264, VideoPlayer } from "@lichtblick/den/video";
+import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
-import { CompressedImage, RawImage } from "@foxglove/schemas";
-
-import { PartialMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtension";
-
-import { CompressedVideo } from "./ImageTypes";
+import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
 import {
-  normalizeCompressedImage,
-  normalizeCompressedVideo,
-  normalizeRawImage,
-  normalizeRosCompressedImage,
-  normalizeRosImage,
-} from "./imageNormalizers";
-import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
+  decodeCompressedImageToBitmap,
+  isVideoKeyframe,
+  getVideoDecoderConfig,
+  decodeCompressedVideoToBitmap,
+  decodeRawImage,
+  emptyVideoFrame,
+} from "./decodeImage";
+import { Image as RosImage } from "../../ros";
 
-describe("imageNormalizers", () => {
-  const mockTime = { sec: 123, nsec: 456000000 };
-  const mockHeader = { stamp: mockTime, frame_id: "test_frame" };
-  const mockData = new Uint8Array([1, 2, 3, 4]);
+function createMockVideoFrame(override: Partial<CompressedVideo>): CompressedVideo {
+  return {
+    data: new Uint8Array([]),
+    format: "h264",
+    timestamp: RosTimeBuilder.time(),
+    frame_id: "frame_video",
+    ...override,
+  };
+}
 
-  describe("normalizeRosImage", () => {
-    it("should normalize a complete RosImage message", () => {
-      const input: PartialMessage<RosImage> = {
-        header: mockHeader,
-        height: 480,
-        width: 640,
-        encoding: "rgb8",
-        is_bigendian: false,
-        step: 1920,
-        data: mockData,
-      };
-      const expected: RosImage = {
-        header: mockHeader,
-        height: 480,
-        width: 640,
-        encoding: "rgb8",
-        is_bigendian: false,
-        step: 1920,
-        data: mockData,
-      };
-      expect(normalizeRosImage(input)).toEqual(expected);
+describe("decodeCompressedImageToBitmap", () => {
+  it("should decode a compressed image to an ImageBitmap", async () => {
+    const mockImage: CompressedImageTypes = {
+      data: new Uint8Array([1, 2, 3]),
+      format: "jpeg",
+      timestamp: RosTimeBuilder.time(),
+      frame_id: "frame_1",
+    };
+    const bitmap = await decodeCompressedImageToBitmap(mockImage);
+    expect(bitmap).toBeInstanceOf(ImageBitmap);
+  });
+});
+
+describe("isVideoKeyframe", () => {
+  it("should return true for a keyframe", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([0x65]), // Mock IDR NAL unit
     });
-
-    it("should handle missing fields with defaults", () => {
-      const input: PartialMessage<RosImage> = {};
-      const expected: RosImage = {
-        header: { stamp: { sec: 0, nsec: 0 }, frame_id: "" },
-        height: 0,
-        width: 0,
-        encoding: "",
-        is_bigendian: false,
-        step: 0,
-        data: new Uint8Array(0),
-      };
-      expect(normalizeRosImage(input)).toEqual(expected);
-    });
-
-    it("should handle partial header", () => {
-      const input: PartialMessage<RosImage> = { header: { frame_id: "partial_frame" } };
-      const expected: RosImage = {
-        header: { stamp: { sec: 0, nsec: 0 }, frame_id: "partial_frame" },
-        height: 0,
-        width: 0,
-        encoding: "",
-        is_bigendian: false,
-        step: 0,
-        data: new Uint8Array(0),
-      };
-      expect(normalizeRosImage(input)).toEqual(expected);
-    });
+    jest.spyOn(H264, "IsKeyframe").mockReturnValue(true);
+    expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
   });
 
-  describe("normalizeRosCompressedImage", () => {
-    it("should normalize a complete RosCompressedImage message", () => {
-      const input: PartialMessage<RosCompressedImage> = {
-        header: mockHeader,
-        format: "jpeg",
-        data: mockData,
-      };
-      const expected: RosCompressedImage = {
-        header: mockHeader,
-        format: "jpeg",
-        data: mockData,
-      };
-      expect(normalizeRosCompressedImage(input)).toEqual(expected);
+  it("should return false for a non-keyframe", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([0x41]), // Mock non-IDR NAL unit
     });
+    jest.spyOn(H264, "IsKeyframe").mockReturnValue(false);
+    expect(isVideoKeyframe(mockVideoFrame)).toBe(false);
+  });
+});
 
-    it("should handle missing fields with defaults", () => {
-      const input: PartialMessage<RosCompressedImage> = {};
-      const expected: RosCompressedImage = {
-        header: { stamp: { sec: 0, nsec: 0 }, frame_id: "" },
-        format: "",
-        data: new Uint8Array(0),
-      };
-      expect(normalizeRosCompressedImage(input)).toEqual(expected);
+describe("getVideoDecoderConfig", () => {
+  it("should return a VideoDecoderConfig for h264 format", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([0x67]), // Mock SPS NAL unit
     });
+    const mockConfig = { codec: "avc1.42E01E" };
+    jest.spyOn(H264, "ParseDecoderConfig").mockReturnValue(mockConfig);
+    expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
 
-  describe("normalizeRawImage", () => {
-    it("should normalize a complete RawImage message", () => {
-      const input: PartialMessage<RawImage> = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        height: 480,
-        width: 640,
-        encoding: "rgb8",
-        step: 1920,
-        data: mockData,
-      };
-      const expected: RawImage = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        height: 480,
-        width: 640,
-        encoding: "rgb8",
-        step: 1920,
-        data: mockData,
-      };
-      expect(normalizeRawImage(input)).toEqual(expected);
+  it("should return undefined for unsupported formats", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([0x00]),
     });
+    expect(getVideoDecoderConfig(mockVideoFrame)).toBeUndefined();
+  });
+});
 
-    it("should handle missing fields with defaults", () => {
-      const input: PartialMessage<RawImage> = {};
-      const expected: RawImage = {
-        timestamp: { sec: 0, nsec: 0 },
+describe("decodeCompressedVideoToBitmap", () => {
+  it("should decode a compressed video frame to an ImageBitmap", async () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([1, 2, 3]),
+    });
+    const mockVideoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      decode: jest.fn().mockResolvedValue(new ImageBitmap()),
+    } as unknown as VideoPlayer;
+    const bitmap = await decodeCompressedVideoToBitmap(mockVideoFrame, mockVideoPlayer, BigInt(0));
+    expect(bitmap).toBeInstanceOf(ImageBitmap);
+    expect(mockVideoPlayer.lastImageBitmap).toBeDefined();
+  });
+
+  it("should return an empty video frame if the video player is not initialized", async () => {
+    const mockFrame: CompressedVideo = {
+      data: new Uint8Array([1, 2, 3]),
+      format: "h264",
+      timestamp: RosTimeBuilder.time(),
+      frame_id: "frame__video",
+    };
+    const mockVideoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(false),
+      codedSize: jest.fn(),
+    } as unknown as VideoPlayer;
+
+    const bitmap = await decodeCompressedVideoToBitmap(mockFrame, mockVideoPlayer, BigInt(0));
+    expect(bitmap).toBeInstanceOf(ImageBitmap);
+    expect(mockVideoPlayer.lastImageBitmap).toBeUndefined();
+  });
+});
+
+describe("decodeRawImage", () => {
+  it("should decode a raw image with rgb8 encoding", () => {
+    const mockImage: RosImage = {
+      encoding: "rgb8",
+      width: 2,
+      height: 2,
+      step: 6,
+      data: new Uint8Array([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]),
+      header: {
         frame_id: "",
-        height: 0,
-        width: 0,
-        encoding: "",
-        step: 0,
-        data: new Uint8Array(0),
-      };
-      expect(normalizeRawImage(input)).toEqual(expected);
-    });
+        stamp: {
+          sec: 0,
+          nsec: 0,
+        },
+        seq: undefined,
+      },
+      is_bigendian: false,
+    };
+    const output = new Uint8ClampedArray(12);
+    decodeRawImage(mockImage, {}, output);
+    expect(output).toEqual(new Uint8ClampedArray([255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255]));
   });
 
-  describe("normalizeCompressedImage", () => {
-    it("should normalize a complete CompressedImage message", () => {
-      const input: PartialMessage<CompressedImage> = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        format: "jpeg",
-        data: mockData,
-      };
-      const expected: CompressedImage = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        format: "jpeg",
-        data: mockData,
-      };
-      expect(normalizeCompressedImage(input)).toEqual(expected);
-    });
-
-    it("should handle missing fields with defaults", () => {
-      const input: PartialMessage<CompressedImage> = {};
-      const expected: CompressedImage = {
-        timestamp: { sec: 0, nsec: 0 },
+  it("should throw an error for unsupported encoding", () => {
+    const mockImage: RosImage = {
+      encoding: "unsupported",
+      width: 2,
+      height: 2,
+      step: 6,
+      data: new Uint8Array([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]),
+      header: {
         frame_id: "",
-        format: "",
-        data: new Uint8Array(0),
-      };
-      expect(normalizeCompressedImage(input)).toEqual(expected);
-    });
+        stamp: {
+          sec: 0,
+          nsec: 0,
+        },
+        seq: undefined,
+      },
+      is_bigendian: false,
+    };
+    const output = new Uint8ClampedArray(12);
+    expect(() => {
+      decodeRawImage(mockImage, {}, output);
+    }).toThrow("Unsupported encoding unsupported");
   });
+});
 
-  describe("normalizeCompressedVideo", () => {
-    it("should normalize a complete CompressedVideo message by calling normalizeCompressedImage", () => {
-      const input: PartialMessage<CompressedVideo> = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        format: "h264",
-        data: mockData,
-      };
-      const expected: CompressedVideo = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        format: "h264",
-        data: mockData,
-      };
-      // Since normalizeCompressedVideo just calls normalizeCompressedImage, the expected output is the same structure
-      expect(normalizeCompressedVideo(input)).toEqual(expected);
-    });
-
-    it("should handle missing fields with defaults by calling normalizeCompressedImage", () => {
-      const input: PartialMessage<CompressedVideo> = {};
-      const expected: CompressedVideo = {
-        timestamp: { sec: 0, nsec: 0 },
-        frame_id: "",
-        format: "",
-        data: new Uint8Array(0),
-      };
-      expect(normalizeCompressedVideo(input)).toEqual(expected);
-    });
+describe("emptyVideoFrame", () => {
+  it("should return an empty ImageBitmap", async () => {
+    const bitmap = await emptyVideoFrame();
+    expect(bitmap).toBeInstanceOf(ImageBitmap);
   });
 });
