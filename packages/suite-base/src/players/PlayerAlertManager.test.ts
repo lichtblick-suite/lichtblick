@@ -8,7 +8,7 @@
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 
 describe("PlayerAlertManager", () => {
-  it("keys problems by id", () => {
+  it("keys alerts by id", () => {
     const manager = new PlayerAlertManager();
     expect(manager.alerts()).toEqual([]);
     manager.addAlert("a", { severity: "error", message: "A" });
@@ -25,7 +25,7 @@ describe("PlayerAlertManager", () => {
     (console.error as jest.Mock).mockClear();
   });
 
-  it("allows removing problems by id", () => {
+  it("allows removing alerts by id", () => {
     const manager = new PlayerAlertManager();
     manager.addAlert("a", { severity: "warn", message: "A" });
     manager.addAlert("b", { severity: "warn", message: "B" });
@@ -41,15 +41,13 @@ describe("PlayerAlertManager", () => {
     (console.error as jest.Mock).mockClear();
   });
 
-  it("allows removing problems with a predicate", () => {
+  it("allows removing alerts with a predicate", () => {
     const manager = new PlayerAlertManager();
     manager.addAlert("a", { severity: "warn", message: "A" });
     manager.addAlert("b", { severity: "warn", message: "B" });
     manager.addAlert("c", { severity: "error", message: "C" });
     manager.addAlert("d", { severity: "error", message: "D" });
-    expect(manager.removeAlerts((id, problem) => id === "c" || problem.severity === "warn")).toBe(
-      true,
-    );
+    expect(manager.removeAlerts((id, alert) => id === "c" || alert.severity === "warn")).toBe(true);
     expect(manager.alerts()).toEqual([{ severity: "error", message: "D" }]);
     expect(console.warn).toHaveBeenCalledTimes(2);
     expect(console.error).toHaveBeenCalledTimes(2);
@@ -57,7 +55,7 @@ describe("PlayerAlertManager", () => {
     (console.error as jest.Mock).mockClear();
   });
 
-  it("keeps array identity until problems change", () => {
+  it("keeps array identity until alerts change", () => {
     const manager = new PlayerAlertManager();
 
     let result = manager.alerts();
@@ -77,7 +75,7 @@ describe("PlayerAlertManager", () => {
     expect(manager.removeAlert("c")).toBe(false);
     expect(manager.alerts()).toBe(result);
 
-    // predicate does not match any problems - no change
+    // predicate does not match any alerts - no change
     expect(manager.removeAlerts(() => false)).toBe(false);
     expect(manager.alerts()).toBe(result);
 

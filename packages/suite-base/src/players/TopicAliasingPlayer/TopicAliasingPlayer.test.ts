@@ -115,7 +115,7 @@ describe("TopicAliasingPlayer", () => {
     );
   });
 
-  it("marks disallowed mappings as player problems", async () => {
+  it("marks disallowed mappings as player alerts", async () => {
     const fakePlayer = new FakePlayer();
     const mappers: TopicAliasFunctions = [
       {
@@ -132,9 +132,9 @@ describe("TopicAliasingPlayer", () => {
     ];
     const player = new TopicAliasingPlayer(fakePlayer);
     player.setAliasFunctions(mappers);
-    let problems: undefined | PlayerAlert[] = [];
+    let alerts: undefined | PlayerAlert[] = [];
     const listener = async (state: PlayerState) => {
-      problems = state.alerts;
+      alerts = state.alerts;
     };
     player.setListener(listener);
     await fakePlayer.emit(
@@ -147,7 +147,7 @@ describe("TopicAliasingPlayer", () => {
       }),
     );
 
-    expect(problems).toEqual([
+    expect(alerts).toEqual([
       {
         message: "Disallowed topic alias",
         tip: "Extension ext1 aliased topic /original_topic_1 is already present in the data source.",

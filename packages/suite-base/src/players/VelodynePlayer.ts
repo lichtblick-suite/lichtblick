@@ -119,7 +119,7 @@ export default class VelodynePlayer implements Player {
       const net = await Sockets.Create();
       this.#socket = await net.createUdpSocket();
       this.#socket.on("error", (error) => {
-        this.#addProblem(PROBLEM_SOCKET_ERROR, {
+        this.#addAlert(PROBLEM_SOCKET_ERROR, {
           message: "Networking error listening for Velodyne data",
           severity: "error",
           error,
@@ -139,7 +139,7 @@ export default class VelodynePlayer implements Player {
       await this.#socket.bind({ address: "0.0.0.0", port: this.#port });
       log.debug(`Bound Velodyne UDP listener socket to port ${this.#port}`);
     } catch (error) {
-      this.#addProblem(PROBLEM_SOCKET_ERROR, {
+      this.#addAlert(PROBLEM_SOCKET_ERROR, {
         message: "Could not bind to the Velodyne UDP data port",
         severity: "error",
         error,
@@ -156,7 +156,7 @@ export default class VelodynePlayer implements Player {
 
     this.#totalBytesReceived += data.byteLength;
     this.#presence = PlayerPresence.PRESENT;
-    this.#clearProblem(PROBLEM_SOCKET_ERROR, { skipEmit: true });
+    this.#clearAlert(PROBLEM_SOCKET_ERROR, { skipEmit: true });
 
     if (this.#seq === 0) {
       // this.#metricsCollector.recordTimeToFirstMsgs();
@@ -203,19 +203,19 @@ export default class VelodynePlayer implements Player {
     }
   };
 
-  #addProblem(
+  #addAlert(
     id: string,
-    problem: PlayerAlert,
+    alert: PlayerAlert,
     { skipEmit = false }: { skipEmit?: boolean } = {},
   ): void {
-    this.#alertsById.set(id, problem);
+    this.#alertsById.set(id, alert);
     this.#alerts = Array.from(this.#alertsById.values());
     if (!skipEmit) {
       this.#emitState();
     }
   }
 
-  #clearProblem(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
+  #clearAlert(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
     if (!this.#alertsById.delete(id)) {
       return;
     }

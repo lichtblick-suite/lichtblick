@@ -97,7 +97,7 @@ const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) =>
   playerState.alerts ?? EMPTY_PLAYER_ALERTS;
 const selectAlerts = (store: AlertsContextStore) => store.alerts;
 
-function ProblemIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
+function AlertIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
   const { palette } = useTheme();
   const { classes } = useStyles();
 
@@ -113,7 +113,7 @@ function ProblemIcon({ severity }: { severity: NotificationSeverity }): React.JS
   }
 }
 
-function ProblemDetails(props: { details: DetailsType; tip?: string }): React.JSX.Element {
+function AlertDetails(props: { details: DetailsType; tip?: string }): React.JSX.Element {
   const { t } = useTranslation("alertsList");
   const { details, tip } = props;
   const { classes } = useStyles();
@@ -158,25 +158,25 @@ export function AlertsList(): React.JSX.Element {
 
   return (
     <Stack fullHeight flex="auto" overflow="auto">
-      {allAlerts.map((problem, idx) => (
+      {allAlerts.map((alert, idx) => (
         <Accordion
           className={classes.acccordion}
-          key={`${idx}.${problem.severity}.${problem.message}`}
+          key={`${idx}.${alert.severity}.${alert.message}`}
           TransitionProps={{ unmountOnExit: true }}
           defaultExpanded
         >
           <AccordionSummary
             className={classes.acccordionSummary}
             expandIcon={<ArrowDropDownIcon />}
-            title={problem.message}
+            title={alert.message}
           >
-            <ProblemIcon severity={problem.severity} />
+            <AlertIcon severity={alert.severity} />
             <Typography variant="inherit" noWrap>
-              {problem.message}
+              {alert.message}
             </Typography>
           </AccordionSummary>
           <Divider />
-          <ProblemDetails details={problem.error} tip={problem.tip} />
+          <AlertDetails details={alert.error} tip={alert.tip} />
         </Accordion>
       ))}
     </Stack>

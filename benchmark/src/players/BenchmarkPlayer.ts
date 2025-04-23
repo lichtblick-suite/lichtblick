@@ -168,7 +168,7 @@ class BenchmarkPlayer implements Player {
 
     // Load all messages into memory
     for await (const item of iterator) {
-      // any problem bails
+      // bails on any alert
       if (item.type === "alert") {
         throw new Error(item.alert.message);
       }

@@ -41,8 +41,7 @@ export default function WssErrorModal(
   };
 
   const hasWssConnectionProblem = playerAlerts?.find(
-    (problem) =>
-      problem.severity === "error" && problem.message === "Insecure WebSocket connection",
+    (alert) => alert.severity === "error" && alert.message === "Insecure WebSocket connection",
   );
 
   if (hasDismissedWssErrorModal || !hasWssConnectionProblem) {

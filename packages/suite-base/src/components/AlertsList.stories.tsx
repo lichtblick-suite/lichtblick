@@ -17,7 +17,7 @@ import { PlayerPresence, PlayerAlert, Topic } from "@lichtblick/suite-base/playe
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 
-function makeProblems(): PlayerAlert[] {
+function makeAlerts(): PlayerAlert[] {
   return [
     {
       severity: "error",
@@ -50,7 +50,7 @@ at ck (https://603ec8bf7908b500231841e2-nozcuvybhv.capture.chromatic.com/1983.4c
 }
 
 export default {
-  title: "components/ProblemsList",
+  title: "components/AlertsList",
   component: AlertsList,
   decorators: [
     (Story: StoryFn): React.JSX.Element => {
@@ -102,7 +102,7 @@ export const WithErrors: StoryObj = {
         endTime={END_TIME}
         topics={TOPICS}
         presence={PlayerPresence.RECONNECTING}
-        alerts={makeProblems()}
+        alerts={makeAlerts()}
       >
         <AlertsList />
       </MockMessagePipelineProvider>
@@ -118,21 +118,21 @@ export const WithErrorsJapanese: StoryObj = {
   parameters: { forceLanguage: "ja" },
 };
 
-export const WithSessionProblems: StoryObj = {
+export const WithSessionAlerts: StoryObj = {
   render: function Story() {
-    const problemsActions = useAlertsActions();
+    const alertsActions = useAlertsActions();
     useEffect(() => {
-      problemsActions.setProblem("tag-1", {
-        message: "Session problem error",
+      alertsActions.setAlert("tag-1", {
+        message: "Session alert error",
         severity: "error",
         tip: "Something really bad happened",
       });
-      problemsActions.setProblem("tag-2", {
-        message: "Session problem warn",
+      alertsActions.setAlert("tag-2", {
+        message: "Session alert warn",
         severity: "warn",
         tip: "Something kinda bad happened",
       });
-    }, [problemsActions]);
+    }, [alertsActions]);
 
     return (
       <MockMessagePipelineProvider
@@ -140,7 +140,7 @@ export const WithSessionProblems: StoryObj = {
         endTime={END_TIME}
         topics={TOPICS}
         presence={PlayerPresence.RECONNECTING}
-        alerts={makeProblems()}
+        alerts={makeAlerts()}
       >
         <WorkspaceContextProvider>
           <AlertsList />

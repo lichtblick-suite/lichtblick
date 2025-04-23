@@ -96,7 +96,7 @@ export function DataSource(): React.JSX.Element {
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
   const error =
     playerPresence === PlayerPresence.ERROR ||
-    playerAlerts.some((problem) => problem.severity === "error");
+    playerAlerts.some((alert) => alert.severity === "error");
   const loading = reconnecting || initializing;
 
   const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;

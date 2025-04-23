@@ -28,8 +28,8 @@ describe("McapIterableSource", () => {
       // to get around this.
       file: new Blob([tempBuffer.get()]) as unknown as globalThis.Blob,
     });
-    const { alerts: problems } = await source.initialize();
-    expect(problems).toEqual([
+    const { alerts } = await source.initialize();
+    expect(alerts).toEqual([
       {
         message: "This file contains no messages.",
         severity: "warn",

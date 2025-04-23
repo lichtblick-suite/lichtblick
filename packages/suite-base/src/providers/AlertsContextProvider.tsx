@@ -20,16 +20,16 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
     return {
       alerts: [],
       actions: {
-        clearProblem: (tag: string) => {
+        clearAlert: (tag: string) => {
           set({
-            alerts: get().alerts.filter((prob) => prob.tag !== tag),
+            alerts: get().alerts.filter((al) => al.tag !== tag),
           });
         },
-        setProblem: (tag: string, problem: Immutable<SessionAlert>) => {
-          const newAlerts = get().alerts.filter((prob) => prob.tag !== tag);
+        setAlert: (tag: string, alert: Immutable<SessionAlert>) => {
+          const newAlerts = get().alerts.filter((al) => al.tag !== tag);
 
           set({
-            alerts: [{ tag, ...problem }, ...newAlerts],
+            alerts: [{ tag, ...alert }, ...newAlerts],
           });
         },
       },

@@ -68,7 +68,7 @@ export type MessageIteratorArgs = {
  * types of results.
  *
  * - message-event: the result contains a MessageEvent
- * - problem: the result contains a problem
+ * - alert: the result contains an alert
  * - stamp: the result is a timestamp
  *
  * Note: A stamp result acts as a marker indicating that the source has reached the specified stamp.

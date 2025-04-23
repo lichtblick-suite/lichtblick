@@ -56,7 +56,7 @@ const Grid = (Story: StoryFn): React.JSX.Element => (
   </Stack>
 );
 
-const problems: MockMessagePipelineProps["alerts"] = [
+const alerts: MockMessagePipelineProps["alerts"] = [
   { severity: "error", message: "example error" },
   { severity: "warn", message: "example warn" },
 ];
@@ -78,19 +78,19 @@ export const PlayerStates: Story = {
         {
           name: "https://exampleurl:2002",
           presence: PlayerPresence.ERROR,
-          alerts: problems,
+          alerts,
         },
         {
-          label: "INITIALIZING + problems",
+          label: "INITIALIZING + alerts",
           name: "https://exampleurl:2002",
           presence: PlayerPresence.INITIALIZING,
-          alerts: problems,
+          alerts,
         },
         {
           label: "INITIALIZING + no name",
           name: undefined,
           presence: PlayerPresence.INITIALIZING,
-          alerts: problems,
+          alerts,
         },
       ];
 
@@ -161,9 +161,9 @@ export const DataSources: Story = {
         ...fileSources,
         ...remoteSources,
         {
-          label: "with problems",
+          label: "with alerts",
           name: "https://longexampleurlwith_error-and-portnumber:3030",
-          alerts: problems,
+          alerts,
         },
       ];
 

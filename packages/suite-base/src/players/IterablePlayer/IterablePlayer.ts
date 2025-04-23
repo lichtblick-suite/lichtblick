@@ -160,7 +160,7 @@ export class IterablePlayer implements Player {
   // See additional comments below where _currentTime is set
   #currentTime?: Time;
 
-  #problemManager = new PlayerAlertManager();
+  #alertManager = new PlayerAlertManager();
 
   #iterableSource: IIterableSource;
   #bufferedSource: BufferedIterableSource;
@@ -455,7 +455,7 @@ export class IterablePlayer implements Player {
 
   #setError(message: string, error?: Error): void {
     this.#hasError = true;
-    this.#problemManager.addAlert("global-error", {
+    this.#alertManager.addAlert("global-error", {
       severity: "error",
       message,
       error,
@@ -524,8 +524,8 @@ export class IterablePlayer implements Player {
       this.#providerTopicStats = topicStats;
 
       let idx = 0;
-      for (const problem of alerts) {
-        this.#problemManager.addAlert(`init-problem-${idx}`, problem);
+      for (const alert of alerts) {
+        this.#alertManager.addAlert(`init-alert-${idx}`, alert);
         idx += 1;
       }
 
@@ -539,7 +539,7 @@ export class IterablePlayer implements Player {
             end: this.#end,
             maxBlocks: MAX_BLOCKS,
             minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
-            alertManager: this.#problemManager,
+            alertManager: this.#alertManager,
           });
         } catch (err: unknown) {
           log.error(err);
@@ -547,7 +547,7 @@ export class IterablePlayer implements Player {
           const startStr = toRFC3339String(this.#start);
           const endStr = toRFC3339String(this.#end);
 
-          this.#problemManager.addAlert("block-loader", {
+          this.#alertManager.addAlert("block-loader", {
             severity: "warn",
             message: "Failed to initialize message preloading",
             tip: `The start (${startStr}) and end (${endStr}) of your data is too far apart.`,
@@ -667,7 +667,7 @@ export class IterablePlayer implements Player {
         }
 
         if (iterResult.type === "alert") {
-          this.#problemManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
+          this.#alertManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
           continue;
         }
 
@@ -779,7 +779,7 @@ export class IterablePlayer implements Player {
         profile: this.#profile,
         playerId: this.#id,
         activeData: undefined,
-        alerts: this.#problemManager.alerts(),
+        alerts: this.#alertManager.alerts(),
         urlState: {
           sourceId: this.#sourceId,
           parameters: this.#urlParams,
@@ -819,7 +819,7 @@ export class IterablePlayer implements Player {
       capabilities: this.#capabilities,
       profile: this.#profile,
       playerId: this.#id,
-      alerts: this.#problemManager.alerts(),
+      alerts: this.#alertManager.alerts(),
       activeData,
       urlState: {
         sourceId: this.#sourceId,
@@ -939,7 +939,7 @@ export class IterablePlayer implements Player {
         const iterResult = result.value;
 
         if (iterResult.type === "alert") {
-          this.#problemManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
+          this.#alertManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
           continue;
         }
 

@@ -70,7 +70,7 @@ const StyledTabs = muiStyled(Tabs)({
   },
 });
 
-const ProblemCount = muiStyled("div")(({ theme }) => ({
+const AlertCount = muiStyled("div")(({ theme }) => ({
   backgroundColor: theme.palette.error.main,
   fontSize: theme.typography.caption.fontSize,
   color: theme.palette.error.contrastText,
@@ -166,7 +166,7 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                         <Stack direction="row" alignItems="baseline" gap={1}>
                           Alerts
                           {playerAlerts.length > 0 && (
-                            <ProblemCount>{playerAlerts.length}</ProblemCount>
+                            <AlertCount>{playerAlerts.length}</AlertCount>
                           )}
                         </Stack>
                       }

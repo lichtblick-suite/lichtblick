@@ -478,7 +478,7 @@ export default class RosbridgePlayer implements Player {
         continue;
       }
 
-      const problemId = `message:${topicName}`;
+      const alertId = `message:${topicName}`;
       topic.subscribe((message) => {
         if (!this.#providerTopics) {
           return;
@@ -512,7 +512,7 @@ export default class RosbridgePlayer implements Player {
             };
             this.#parsedMessages.push(msg);
           }
-          this.#alerts.removeAlert(problemId);
+          this.#alerts.removeAlert(alertId);
 
           // Update the message count for this topic
           let stats = this.#providerTopicsStats.get(topicName);
@@ -524,7 +524,7 @@ export default class RosbridgePlayer implements Player {
             stats.numMessages++;
           }
         } catch (error) {
-          this.#alerts.addAlert(problemId, {
+          this.#alerts.addAlert(alertId, {
             severity: "error",
             message: `Failed to parse message on ${topicName}`,
             error,

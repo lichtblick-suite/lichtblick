@@ -45,7 +45,7 @@ const CAPABILITIES = [
   PLAYER_CAPABILITIES.setParameters,
 ];
 
-enum Problem {
+enum Alert {
   Connection = "Connection",
   Parameters = "Parameters",
   Graph = "Graph",
@@ -145,7 +145,7 @@ export default class Ros1Player implements Player {
         this.#parameters = new Map(rosNode.parameters);
       });
       rosNode.on("error", (error) => {
-        this.#addProblem(Problem.Node, {
+        this.#addAlert(Alert.Node, {
           severity: "warn",
           message: "ROS node error",
           tip: `Connectivity will be automatically re-established`,
@@ -166,12 +166,12 @@ export default class Ros1Player implements Player {
     this.#presence = PlayerPresence.PRESENT;
   };
 
-  #addProblem(
+  #addAlert(
     id: string,
-    problem: PlayerAlert,
+    alert: PlayerAlert,
     { skipEmit = false }: { skipEmit?: boolean } = {},
   ): void {
-    this.#alerts.addAlert(id, problem);
+    this.#alerts.addAlert(id, alert);
     if (!skipEmit) {
       this.#emitState();
     }
@@ -245,10 +245,10 @@ export default class Ros1Player implements Player {
           this.#parameters = new Map();
           params.forEach((value, key) => this.#parameters.set(key, value));
         }
-        this.#clearAlert(Problem.Parameters, { skipEmit: true });
+        this.#clearAlert(Alert.Parameters, { skipEmit: true });
       } catch (error) {
-        this.#addProblem(
-          Problem.Parameters,
+        this.#addAlert(
+          Alert.Parameters,
           {
             severity: "warn",
             message: "ROS parameter fetch failed",
@@ -262,13 +262,13 @@ export default class Ros1Player implements Player {
       // Fetch the full graph topology
       await this.#updateConnectionGraph(rosNode);
 
-      this.#clearAlert(Problem.Connection, { skipEmit: true });
+      this.#clearAlert(Alert.Connection, { skipEmit: true });
       this.#presence = PlayerPresence.PRESENT;
       this.#emitState();
     } catch (error) {
       this.#presence = PlayerPresence.INITIALIZING;
-      this.#addProblem(
-        Problem.Connection,
+      this.#addAlert(
+        Alert.Connection,
         {
           severity: "error",
           message: "ROS connection failed",
@@ -409,7 +409,7 @@ export default class Ros1Player implements Player {
         this.#clearAlert(`subscribe:${topicName}`, { skipEmit: true });
       });
       subscription.on("error", (error) => {
-        this.#addProblem(`subscribe:${topicName}`, {
+        this.#addAlert(`subscribe:${topicName}`, {
           severity: "warn",
           message: `Topic subscription error for "${topicName}"`,
           tip: `The subscription to "${topicName}" will be automatically re-established`,
@@ -514,8 +514,8 @@ export default class Ros1Player implements Player {
         continue;
       }
 
-      const msgdefProblemId = `msgdef:${topic}`;
-      const advertiseProblemId = `advertise:${topic}`;
+      const msgdefAlertId = `msgdef:${topic}`;
+      const advertiseAlertId = `advertise:${topic}`;
 
       // Try to retrieve the ROS message definition for this topic
       let msgdef: MessageDefinition[];
@@ -527,7 +527,7 @@ export default class Ros1Player implements Player {
         msgdef = rosDatatypesToMessageDefinition(datatypes, dataType);
       } catch (error) {
         log.debug(error);
-        this.#addProblem(msgdefProblemId, {
+        this.#addAlert(msgdefAlertId, {
           severity: "warn",
           message: `Unknown message definition for "${topic}"`,
           tip: `Try subscribing to the topic "${topic}" before publishing to it`,
@@ -539,7 +539,7 @@ export default class Ros1Player implements Player {
       this.#rosNode
         .advertise({ topic, dataType, messageDefinition: msgdef })
         .catch((error: unknown) => {
-          this.#addProblem(advertiseProblemId, {
+          this.#addAlert(advertiseAlertId, {
             severity: "error",
             message: `Failed to advertise "${topic}"`,
             error: error as Error,
@@ -556,24 +556,24 @@ export default class Ros1Player implements Player {
   }
 
   public publish({ topic, msg }: PublishPayload): void {
-    const problemId = `publish:${topic}`;
+    const alertId = `publish:${topic}`;
 
     if (this.#rosNode != undefined) {
       if (this.#rosNode.isAdvertising(topic)) {
         this.#rosNode
           .publish(topic, msg)
           .then(() => {
-            this.#clearAlert(problemId);
+            this.#clearAlert(alertId);
           })
           .catch((error: unknown) => {
-            this.#addProblem(problemId, {
+            this.#addAlert(alertId, {
               severity: "error",
               message: `Publishing to ${topic} failed`,
               error: error as Error,
             });
           });
       } else {
-        this.#addProblem(problemId, {
+        this.#addAlert(alertId, {
           severity: "warn",
           message: `Unable to publish to "${topic}"`,
           tip: `ROS1 may be disconnected. Please try again in a moment`,
@@ -643,10 +643,10 @@ export default class Ros1Player implements Player {
         this.#subscribedTopics = graph.subscribers;
         this.#services = graph.services;
       }
-      this.#clearAlert(Problem.Graph, { skipEmit: true });
+      this.#clearAlert(Alert.Graph, { skipEmit: true });
     } catch (error) {
-      this.#addProblem(
-        Problem.Graph,
+      this.#addAlert(
+        Alert.Graph,
         {
           severity: "warn",
           message: "Unable to update connection graph",

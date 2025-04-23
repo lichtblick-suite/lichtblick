@@ -90,7 +90,7 @@ describe("MultiIterableSource", () => {
       };
       mockSourceConstructor.mockImplementationOnce(() => mockSource);
     };
-    it("should merge initializations correctly with no problems", async () => {
+    it("should merge initializations correctly with no alerts", async () => {
       const multiSource = new MultiIterableSource(dataSource, mockSourceConstructor);
       const dataTypeName = BasicBuilder.string();
       const dataType = { definitions: [{ name: "field1", type: "int64" }] };
@@ -133,7 +133,7 @@ describe("MultiIterableSource", () => {
       expect(mockSourceConstructor).toHaveBeenCalledTimes(2);
     });
 
-    it("should merge initializations, but containing problems", async () => {
+    it("should merge initializations, but containing alerts", async () => {
       const multiSource = new MultiIterableSource(dataSource, mockSourceConstructor);
 
       const dataTypeName = BasicBuilder.string();

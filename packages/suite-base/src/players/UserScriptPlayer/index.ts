@@ -133,7 +133,7 @@ export default class UserScriptPlayer implements Player {
   #playerState?: PlayerState;
 
   // The store tracks alerts for individual user scripts
-  // a script may set its own problem or clear its problem
+  // a script may set its own alert or clear its alert
   #alertStore = new Map<string, PlayerAlert>();
 
   // keep track of last message on all topics to recompute output topic messages when user scripts change
@@ -439,10 +439,10 @@ export default class UserScriptPlayer implements Player {
     const scriptData = await transformWorker.send<ScriptData>("transform", transformMessage);
     const { inputTopics, outputTopic, transpiledCode, projectCode, outputDatatype } = scriptData;
 
-    // problemKey is a unique identifier for each user script so we can manage alerts from
+    // alertKey is a unique identifier for each user script so we can manage alerts from
     // a specific script. A script may have a problem that may later clear. Using the key we can add/remove
     // alerts for specific user scripts independently of other user scripts.
-    const problemKey = `script-id-${scriptId}`;
+    const alertKey = `script-id-${scriptId}`;
     const buildMessageProcessor = (): {
       registration: ScriptRegistration["processMessage"];
       terminate: () => void;
@@ -463,7 +463,7 @@ export default class UserScriptPlayer implements Player {
             worker.onerror = (event) => {
               log.error(event);
 
-              this.#alertStore.set(problemKey, {
+              this.#alertStore.set(alertKey, {
                 message: `User script runtime error: ${event.message}`,
                 severity: "error",
               });
@@ -476,7 +476,7 @@ export default class UserScriptPlayer implements Player {
             port.onmessageerror = (event) => {
               log.error(event);
 
-              this.#alertStore.set(problemKey, {
+              this.#alertStore.set(alertKey, {
                 severity: "error",
                 message: `User script runtime error: ${String(event.data)}`,
               });
@@ -489,7 +489,7 @@ export default class UserScriptPlayer implements Player {
             rpc.receive("error", (msg) => {
               log.error(msg);
 
-              this.#alertStore.set(problemKey, {
+              this.#alertStore.set(alertKey, {
                 severity: "error",
                 message: `User script runtime error: ${msg}`,
               });
@@ -541,7 +541,7 @@ export default class UserScriptPlayer implements Player {
         this.#addUserScriptLogs(scriptId, result.userScriptLogs);
 
         if (allDiagnostics.length > 0) {
-          this.#alertStore.set(problemKey, {
+          this.#alertStore.set(alertKey, {
             severity: "error",
             message: `User Script ${scriptData.name} encountered an error.`,
             tip: "Open the User Scripts panel and check the Alerts tab for errors.",
@@ -552,7 +552,7 @@ export default class UserScriptPlayer implements Player {
         }
 
         if (!result.message) {
-          this.#alertStore.set(problemKey, {
+          this.#alertStore.set(alertKey, {
             severity: "warn",
             message: `User Script ${scriptData.name} did not produce a message.`,
             tip: "Check that all code paths in the user script return a message.",
@@ -562,7 +562,7 @@ export default class UserScriptPlayer implements Player {
 
         // At this point we've received a message successfully from the user script, therefore
         // we clear any previous problem from this script.
-        this.#alertStore.delete(problemKey);
+        this.#alertStore.delete(alertKey);
 
         return {
           topic: outputTopic,
@@ -574,7 +574,7 @@ export default class UserScriptPlayer implements Player {
       };
 
       const terminate = () => {
-        this.#alertStore.delete(problemKey);
+        this.#alertStore.delete(alertKey);
 
         if (rpc) {
           this.#unusedRuntimeWorkers.push(rpc);

@@ -320,14 +320,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
           SUPPORTED_SERVICE_ENCODINGS.includes(e),
         );
 
-        const problemId = "callService:unsupportedEncoding";
+        const alertId = "callService:unsupportedEncoding";
         if (this.#serviceCallEncoding) {
           this.#playerCapabilities = this.#playerCapabilities.concat(
             PLAYER_CAPABILITIES.callServices,
           );
-          this.#alerts.removeAlert(problemId);
+          this.#alerts.removeAlert(alertId);
         } else {
-          this.#alerts.addAlert(problemId, {
+          this.#alerts.addAlert(alertId, {
             severity: "warn",
             message: `Calling services is disabled as no compatible encoding could be found. \
             The server supports [${event.supportedEncodings?.join(", ")}], \
@@ -371,17 +371,17 @@ export default class FoxgloveWebSocketPlayer implements Player {
         log.error(msg);
       }
 
-      const problem: PlayerAlert = {
+      const alert: PlayerAlert = {
         message: event.message,
         severity: statusLevelToAlertSeverity(event.level),
       };
 
       if (event.message === "Send buffer limit reached") {
-        problem.tip =
+        alert.tip =
           "Server is dropping messages to the client. Check if you are subscribing to large or frequent topics or adjust your server send buffer limit.";
       }
 
-      this.#alerts.addAlert(event.message, problem);
+      this.#alerts.addAlert(event.message, alert);
       this.#emitState();
     });
 
@@ -641,7 +641,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       for (const service of services) {
-        const serviceProblemId = `service:${service.id}`;
+        const serviceAlertId = `service:${service.id}`;
         // If not explicitly given, derive request / response type name from the service type
         // (according to ROS convention).
         const requestType = service.request?.schemaName ?? `${service.type}_Request`;
@@ -725,14 +725,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
             requestMessageWriter,
           };
           this.#servicesByName.set(service.name, resolvedService);
-          this.#alerts.removeAlert(serviceProblemId);
+          this.#alerts.removeAlert(serviceAlertId);
 
           // Issue a warning to users if the service relies on deprecated fields (`requestSchema` or `responseSchema`).
           // This highlights the need for migration, as these fields will be removed in future versions.
 
           // eslint-disable-next-line @typescript-eslint/no-deprecated
           if (service.requestSchema || service.responseSchema) {
-            this.#alerts.addAlert(serviceProblemId, {
+            this.#alerts.addAlert(serviceAlertId, {
               severity: "warn",
               message: `Service ${service.name}`,
               error: new Error(
@@ -741,7 +741,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
             });
           }
         } catch (error) {
-          this.#alerts.addAlert(serviceProblemId, {
+          this.#alerts.addAlert(serviceAlertId, {
             severity: "error",
             message: `Failed to parse service ${service.name}`,
             error,
@@ -760,8 +760,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
         if (service) {
           this.#servicesByName.delete(service.service.name);
         }
-        const serviceProblemId = `service:${serviceId}`;
-        needsStateUpdate = this.#alerts.removeAlert(serviceProblemId) || needsStateUpdate;
+        const serviceAlertId = `service:${serviceId}`;
+        needsStateUpdate = this.#alerts.removeAlert(serviceAlertId) || needsStateUpdate;
       }
       if (needsStateUpdate) {
         this.#emitState();
@@ -1223,11 +1223,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     const { topic, schemaName, options } = publication;
 
-    const encodingProblemId = `pub:encoding:${topic}`;
-    const msgdefProblemId = `pub:msgdef:${topic}`;
+    const encodingAlertId = `pub:encoding:${topic}`;
+    const msgdefAlertId = `pub:msgdef:${topic}`;
 
     if (!encoding) {
-      this.#alerts.addAlert(encodingProblemId, {
+      this.#alerts.addAlert(encodingAlertId, {
         severity: "warn",
         message: `Cannot advertise topic '${topic}': Server does not support one of the following encodings for client-side publishing: ${SUPPORTED_PUBLICATION_ENCODINGS}`,
       });
@@ -1247,7 +1247,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         msgdef = rosDatatypesToMessageDefinition(datatypes, schemaName);
       } catch (error) {
         log.debug(error);
-        this.#alerts.addAlert(msgdefProblemId, {
+        this.#alerts.addAlert(msgdefAlertId, {
           severity: "warn",
           message: `Unknown message definition for "${topic}"`,
           tip: `Try subscribing to the topic "${topic}" before publishing to it`,
@@ -1268,9 +1268,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
       messageWriter,
     });
 
-    for (const problemId of [encodingProblemId, msgdefProblemId]) {
-      if (this.#alerts.hasAlert(problemId)) {
-        this.#alerts.removeAlert(problemId);
+    for (const alertId of [encodingAlertId, msgdefAlertId]) {
+      if (this.#alerts.hasAlert(alertId)) {
+        this.#alerts.removeAlert(alertId);
       }
     }
   }
@@ -1282,10 +1282,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     this.#client.unadvertise(channel.id);
     this.#publicationsByTopic.delete(channel.topic);
-    const problemIds = [`pub:encoding:${channel.topic}`, `pub:msgdef:${channel.topic}`];
-    for (const problemId of problemIds) {
-      if (this.#alerts.hasAlert(problemId)) {
-        this.#alerts.removeAlert(problemId);
+    const alertIds = [`pub:encoding:${channel.topic}`, `pub:msgdef:${channel.topic}`];
+    for (const alertId of alertIds) {
+      if (this.#alerts.hasAlert(alertId)) {
+        this.#alerts.removeAlert(alertId);
       }
     }
   }

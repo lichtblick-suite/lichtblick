@@ -19,8 +19,8 @@ type TaggedAlert = SessionAlert & { tag: string };
 export type AlertsContextStore = Immutable<{
   alerts: TaggedAlert[];
   actions: {
-    clearProblem: (tag: string) => void;
-    setProblem: (tag: string, problem: Immutable<SessionAlert>) => void;
+    clearAlert: (tag: string) => void;
+    setAlert: (tag: string, alert: Immutable<SessionAlert>) => void;
   };
 }>;
 
