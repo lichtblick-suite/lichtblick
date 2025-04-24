@@ -178,7 +178,6 @@ export default function DiagnosticTable({
   return (
     <div>
       <div
-        role="separator"
         className={classes.resizeHandle}
         style={{
           left: `${100 * splitFraction}%`,
