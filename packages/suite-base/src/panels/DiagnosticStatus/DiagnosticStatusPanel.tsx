@@ -158,6 +158,16 @@ const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Ele
     });
   }, [actionHandler, config, availableTopics, topicToRender, updatePanelSettingsTree]);
 
+  function renderEmptyState(displayName: string | undefined): React.JSX.Element {
+    return displayName ? (
+      <EmptyState>
+        Waiting for diagnostics from <code>{displayName}</code>
+      </EmptyState>
+    ) : (
+      <EmptyState>No diagnostic node selected</EmptyState>
+    );
+  }
+
   return (
     <Stack flex="auto" overflow="hidden">
       <PanelToolbar className={classes.toolbar}>
@@ -210,12 +220,8 @@ const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Ele
             />
           ))}
         </Stack>
-      ) : selectedDisplayName ? (
-        <EmptyState>
-          Waiting for diagnostics from <code>{selectedDisplayName}</code>
-        </EmptyState>
       ) : (
-        <EmptyState>No diagnostic node selected</EmptyState>
+        renderEmptyState(selectedDisplayName)
       )}
     </Stack>
   );
