@@ -35,16 +35,8 @@ describe("imageNormalizers", () => {
         step: 1920,
         data: mockData,
       };
-      const expected: RosImage = {
-        header: mockHeader,
-        height: 480,
-        width: 640,
-        encoding: "rgb8",
-        is_bigendian: false,
-        step: 1920,
-        data: mockData,
-      };
-      expect(normalizeRosImage(input)).toEqual(expected);
+      // Expect input to be already normalized
+      expect(normalizeRosImage(input)).toEqual(input);
     });
 
     it("should handle missing fields with defaults", () => {
@@ -100,12 +92,8 @@ describe("imageNormalizers", () => {
         format: "jpeg",
         data: mockData,
       };
-      const expected: RosCompressedImage = {
-        header: mockHeader,
-        format: "jpeg",
-        data: mockData,
-      };
-      expect(normalizeRosCompressedImage(input)).toEqual(expected);
+      // Expect input to be already normalized
+      expect(normalizeRosCompressedImage(input)).toEqual(input);
     });
 
     it("should handle missing fields with defaults", () => {
@@ -130,16 +118,8 @@ describe("imageNormalizers", () => {
         step: 1920,
         data: mockData,
       };
-      const expected: RawImage = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        height: 480,
-        width: 640,
-        encoding: "rgb8",
-        step: 1920,
-        data: mockData,
-      };
-      expect(normalizeRawImage(input)).toEqual(expected);
+      // Expect input to be already normalized
+      expect(normalizeRawImage(input)).toEqual(input);
     });
 
     it("should handle missing fields with defaults", () => {
@@ -165,13 +145,8 @@ describe("imageNormalizers", () => {
         format: "jpeg",
         data: mockData,
       };
-      const expected: CompressedImage = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        format: "jpeg",
-        data: mockData,
-      };
-      expect(normalizeCompressedImage(input)).toEqual(expected);
+      // Expect input to be already normalized
+      expect(normalizeCompressedImage(input)).toEqual(input);
     });
 
     it("should handle missing fields with defaults", () => {
@@ -194,14 +169,8 @@ describe("imageNormalizers", () => {
         format: "h264",
         data: mockData,
       };
-      const expected: CompressedVideo = {
-        timestamp: mockTime,
-        frame_id: "test_frame",
-        format: "h264",
-        data: mockData,
-      };
-      // Since normalizeCompressedVideo just calls normalizeCompressedImage, the expected output is the same structure
-      expect(normalizeCompressedVideo(input)).toEqual(expected);
+      // Expect input to be already normalized
+      expect(normalizeCompressedVideo(input)).toEqual(input);
     });
 
     it("should handle missing fields with defaults by calling normalizeCompressedImage", () => {
