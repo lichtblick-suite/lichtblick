@@ -6,23 +6,22 @@
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 
+import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import DiagnosticNodeRow from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticNodeRow";
 import { NodeRowProps } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 
 describe("DiagnosticNodeRow", () => {
-  let info: ReturnType<typeof DiagnosticsBuilder.info>;
+  const onClick = jest.fn();
+  const onClickPin = jest.fn();
+  let info: DiagnosticInfo;
   let isPinned: boolean;
-  let onClick: jest.Mock;
-  let onClickPin: jest.Mock;
   let mockProps: NodeRowProps;
 
   beforeEach(() => {
     info = DiagnosticsBuilder.info();
     isPinned = BasicBuilder.boolean();
-    onClick = jest.fn();
-    onClickPin = jest.fn();
 
     mockProps = { info, isPinned, onClick, onClickPin };
   });
