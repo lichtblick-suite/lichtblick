@@ -25,7 +25,6 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { yellow } from "@mui/material/colors";
 import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
