@@ -25,6 +25,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
+import { yellow } from "@mui/material/colors";
 import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
@@ -178,6 +179,7 @@ export default function DiagnosticTable({
   return (
     <div>
       <div
+        role="separator"
         className={classes.resizeHandle}
         style={{
           left: `${100 * splitFraction}%`,
