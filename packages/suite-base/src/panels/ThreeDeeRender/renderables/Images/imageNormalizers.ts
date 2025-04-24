@@ -60,19 +60,25 @@ export function normalizeRawImage(message: PartialMessage<RawImage>): RawImage {
   };
 }
 
-export function normalizeCompressedImage(
-  message: PartialMessage<CompressedImage>,
-): CompressedImage {
+function normalizeCompressedMedia<T extends CompressedImage | CompressedVideo>(
+  message: PartialMessage<T>,
+): T {
   return {
     timestamp: normalizeTime(message.timestamp),
     frame_id: message.frame_id ?? "",
     format: message.format ?? "",
     data: normalizeByteArray(message.data),
-  };
+  } as T;
+}
+
+export function normalizeCompressedImage(
+  message: PartialMessage<CompressedImage>,
+): CompressedImage {
+  return normalizeCompressedMedia<CompressedImage>(message);
 }
 
 export function normalizeCompressedVideo(
   message: PartialMessage<CompressedVideo>,
 ): CompressedVideo {
-  return normalizeCompressedImage(message);
+  return normalizeCompressedMedia<CompressedVideo>(message);
 }
