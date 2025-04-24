@@ -11,9 +11,6 @@ import { NodeRowProps } from "@lichtblick/suite-base/panels/DiagnosticSummary/ty
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
-// SPDX-License-Identifier: MPL-2.0
-
 describe("DiagnosticNodeRow", () => {
   let info: ReturnType<typeof DiagnosticsBuilder.info>;
   let isPinned: boolean;
