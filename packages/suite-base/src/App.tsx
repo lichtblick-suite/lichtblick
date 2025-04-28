@@ -14,10 +14,10 @@ import GlobalCss from "@lichtblick/suite-base/components/GlobalCss";
 import { AppParametersInput } from "@lichtblick/suite-base/context/AppParametersContext";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import { UserScriptStateProvider } from "@lichtblick/suite-base/context/UserScriptStateContext";
+import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
-import ProblemsContextProvider from "@lichtblick/suite-base/providers/ProblemsContextProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
@@ -108,8 +108,8 @@ export function App(props: AppProps): React.JSX.Element {
     providers.unshift(...extraProviders);
   }
 
-  // Problems provider also must come before other, dependent contexts.
-  providers.unshift(<ProblemsContextProvider />);
+  // Alerts provider also must come before other, dependent contexts.
+  providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider loaders={layoutLoaders} />);
   providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);

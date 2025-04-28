@@ -87,7 +87,7 @@ export enum PlayerPresence {
   ERROR = "ERROR",
 }
 
-export type PlayerProblem = {
+export type PlayerAlert = {
   severity: NotificationSeverity;
   message: string;
   error?: Error;
@@ -127,7 +127,7 @@ export type PlayerState = {
   name?: string;
 
   // Surface issues during playback or player initialization
-  problems?: PlayerProblem[];
+  alerts?: PlayerAlert[];
 
   // The actual data to render panels with. Can be empty during initialization, until all this data
   // is known. See `type PlayerStateActiveData` for more details.

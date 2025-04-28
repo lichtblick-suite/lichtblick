@@ -35,7 +35,7 @@ import {
   AdvertiseOptions,
   MessageEvent,
   PlayerPresence,
-  PlayerProblem,
+  PlayerAlert,
   PlayerState,
   PlayerStateActiveData,
   PlayerURLState,
@@ -62,7 +62,7 @@ export type MockMessagePipelineProps = {
   topicStats?: Map<string, TopicStats>;
   datatypes?: RosDatatypes;
   messages?: MessageEvent[];
-  problems?: PlayerProblem[];
+  alerts?: PlayerAlert[];
   publish?: (request: PublishPayload) => void;
   callService?: (service: string, request: unknown) => Promise<unknown>;
   setPublishers?: (arg0: string, arg1: AdvertiseOptions[]) => void;
@@ -121,7 +121,7 @@ function getPublicState(
       progress: props.progress ?? {},
       capabilities: props.capabilities ?? prevState?.public.playerState.capabilities ?? [],
       profile: props.profile,
-      problems: props.problems,
+      alerts: props.alerts,
       urlState: props.urlState,
       activeData:
         props.noActiveData === true

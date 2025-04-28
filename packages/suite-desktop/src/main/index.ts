@@ -82,7 +82,7 @@ export async function main(): Promise<void> {
 
   if (!isProduction && (app as Partial<typeof app>).dock != undefined) {
     const devIcon = getDevModeIcon();
-    if (devIcon) {
+    if (app.dock && devIcon) {
       app.dock.setIcon(devIcon);
     }
   }

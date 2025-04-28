@@ -25,7 +25,7 @@ class TestSource implements IIterableSource {
       topics: [],
       topicStats: new Map(),
       profile: undefined,
-      problems: [],
+      alerts: [],
       datatypes: new Map(),
       publishersByTopic: new Map(),
     };

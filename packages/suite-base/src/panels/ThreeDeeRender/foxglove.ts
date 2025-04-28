@@ -23,6 +23,9 @@ addFoxgloveSchema(RAW_IMAGE_DATATYPES, "foxglove.RawImage");
 export const COMPRESSED_IMAGE_DATATYPES = new Set<string>();
 addFoxgloveSchema(COMPRESSED_IMAGE_DATATYPES, "foxglove.CompressedImage");
 
+export const COMPRESSED_VIDEO_DATATYPES = new Set<string>();
+addFoxgloveSchema(COMPRESSED_VIDEO_DATATYPES, "foxglove.CompressedVideo");
+
 export const CAMERA_CALIBRATION_DATATYPES = new Set<string>();
 addFoxgloveSchema(CAMERA_CALIBRATION_DATATYPES, "foxglove.CameraCalibration");
 

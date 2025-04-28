@@ -27,7 +27,6 @@ We are actively updating our documentation with new features, stay tunned! :rock
 **Dependencies:**
 
 - [Node.js](https://nodejs.org/en/) v16.10+
-- [Git LFS](https://git-lfs.github.com/)
 
 <hr/>
 
@@ -37,12 +36,6 @@ Clone the repository:
 
 ```sh
 $ git clone https://github.com/lichtblick-suite/lichtblick.git
-```
-
-Pull large files with Git LFS:
-
-```sh
-$ git lfs pull
 ```
 
 Enable corepack:

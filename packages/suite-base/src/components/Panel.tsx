@@ -22,7 +22,7 @@ import {
   SplitHorizontal20Regular,
 } from "@fluentui/react-icons";
 import * as _ from "lodash-es";
-import React, {
+import {
   ComponentType,
   MouseEventHandler,
   Profiler,
@@ -704,7 +704,7 @@ export default function Panel<
                   />
                 )}
                 <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
-                  <React.StrictMode>{child}</React.StrictMode>
+                  {child}
                 </PanelErrorBoundary>
                 {process.env.NODE_ENV !== "production" && (
                   <div className={classes.perfInfo} ref={perfInfo} />
