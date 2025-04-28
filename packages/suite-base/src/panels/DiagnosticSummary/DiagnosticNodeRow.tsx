@@ -9,7 +9,7 @@ import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticSummary/Diagn
 import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import { NodeRowProps } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 
-function DiagnosticNodeRow(props: NodeRowProps) {
+function DiagnosticNodeRow(props: Readonly<NodeRowProps>) {
   const { info, isPinned, onClick, onClickPin } = props;
   const { classes } = useStyles();
 
@@ -22,8 +22,13 @@ function DiagnosticNodeRow(props: NodeRowProps) {
   }, [onClickPin, info]);
 
   return (
-    <ListItem dense disablePadding data-testid-diagnostic-row>
-      <ListItemButton className={classes.listItemButton} disableGutters onClick={handleClick}>
+    <ListItem dense disablePadding data-testid="diagnostic-row">
+      <ListItemButton
+        className={classes.listItemButton}
+        disableGutters
+        onClick={handleClick}
+        data-testid="diagnostic-row-button"
+      >
         <IconButton
           size="small"
           onClick={(event) => {
@@ -31,6 +36,7 @@ function DiagnosticNodeRow(props: NodeRowProps) {
             event.stopPropagation();
           }}
           style={isPinned ? { visibility: "visible" } : undefined}
+          data-testid="diagnostic-row-icon"
         >
           <PublishPointIcon fontSize="small" color={isPinned ? "inherit" : "disabled"} />
         </IconButton>
