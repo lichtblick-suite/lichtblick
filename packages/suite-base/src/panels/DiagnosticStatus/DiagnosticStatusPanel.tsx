@@ -205,7 +205,7 @@ const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Ele
         />
       </PanelToolbar>
       {filteredDiagnostics.length > 0 ? (
-        <Stack flex="auto" overflowY="auto">
+        <Stack flex="auto" overflowY="auto" testId="filtered-diagnostics">
           {_.sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
             <DiagnosticTable
               key={item.id}
