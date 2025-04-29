@@ -57,7 +57,7 @@ class DiagnosticsBuilder {
     return defaults<DiagnosticStatusMessage>(props, {
       name: BasicBuilder.string(),
       hardware_id: BasicBuilder.string(),
-      level: BasicBuilder.number({ min: 0, max: 5 }),
+      level: BasicBuilder.number({ min: 0, max: 3 }), // see LEVELS in DiagnosticSummary/constants.ts
       message: BasicBuilder.string(),
       values: DiagnosticsBuilder.keyValues(),
     });

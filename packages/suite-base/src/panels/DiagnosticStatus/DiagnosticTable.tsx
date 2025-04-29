@@ -144,7 +144,7 @@ export default function DiagnosticTable({
             title="Open in Plot panel"
             color="inherit"
             size="small"
-            data-testid="open-plot-icon"
+            data-testid="open-plot-button"
             onClick={() => {
               openSiblingPlotPanel(openSiblingPanel, valuePath);
             }}
@@ -157,6 +157,7 @@ export default function DiagnosticTable({
             title="Open in State Transitions panel"
             color="inherit"
             size="small"
+            data-testid="open-state-transitions-button"
             onClick={() => {
               openSiblingStateTransitionsPanel(openSiblingPanel, valuePath);
             }}
@@ -182,7 +183,7 @@ export default function DiagnosticTable({
           left: `${100 * splitFraction}%`,
         }}
         onMouseDown={resizeMouseDown}
-        data-testid-resizehandle
+        data-testid="DiagnosticTable-resizeHandle"
       />
       <Table className={classes.table} size="small" ref={tableRef}>
         <TableBody>
