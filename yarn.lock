@@ -2992,7 +2992,7 @@ __metadata:
     "@testing-library/user-event": 14.5.2
     "@types/base16": ^1.0.5
     "@types/cytoscape": ^3.21.9
-    "@types/geojson": 7946.0.11
+    "@types/geojson": 7946.0.16
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.46
     "@types/leaflet": 1.9.7
@@ -5117,10 +5117,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:7946.0.11":
-  version: 7946.0.11
-  resolution: "@types/geojson@npm:7946.0.11"
-  checksum: 93fe7e9c5d16b0a836058ee4b87f8b022d53893d5a8e7ab52c8bf64d12039d076df99f3764c1c4da13abaa1001115fd899330edba4d8d8fa4a4feb162650b22c
+"@types/geojson@npm:7946.0.16":
+  version: 7946.0.16
+  resolution: "@types/geojson@npm:7946.0.16"
+  checksum: d66e5e023f43b3e7121448117af1930af7d06410a32a585a8bc9c6bb5d97e0d656cd93d99e31fa432976c32e98d4b780f82bf1fd1acd20ccf952eb6b8e39edf2
   languageName: node
   linkType: hard
 

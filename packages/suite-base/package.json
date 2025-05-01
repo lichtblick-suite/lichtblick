@@ -69,7 +69,7 @@
     "@testing-library/user-event": "14.5.2",
     "@types/base16": "^1.0.5",
     "@types/cytoscape": "^3.21.9",
-    "@types/geojson": "7946.0.11",
+    "@types/geojson": "7946.0.16",
     "@types/gl-matrix": "3.2.0",
     "@types/hammerjs": "2.0.46",
     "@types/leaflet": "1.9.7",
