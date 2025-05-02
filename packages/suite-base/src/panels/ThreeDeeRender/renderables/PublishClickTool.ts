@@ -7,12 +7,12 @@
 
 import * as THREE from "three";
 
-import { RenderableArrow } from "./markers/RenderableArrow";
-import { RenderableSphere } from "./markers/RenderableSphere";
 import type { IRenderer } from "../IRenderer";
 import { Renderable } from "../Renderable";
 import { SceneExtension } from "../SceneExtension";
 import { Marker, MarkerAction, MarkerType, TIME_ZERO } from "../ros";
+import { RenderableArrow } from "./markers/RenderableArrow";
+import { RenderableSphere } from "./markers/RenderableSphere";
 import { makePose, Point, Pose } from "../transforms/geometry";
 
 const UNIT_X = new THREE.Vector3(1, 0, 0);

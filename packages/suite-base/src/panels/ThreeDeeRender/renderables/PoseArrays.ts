@@ -16,8 +16,6 @@ import type { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { Axis, AXIS_LENGTH } from "./Axis";
 import { createArrowMarker } from "./Poses";
-import { RenderableArrow } from "./markers/RenderableArrow";
-import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import {
@@ -49,6 +47,8 @@ import {
 } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose, Pose } from "../transforms";
+import { RenderableArrow } from "./markers/RenderableArrow";
+import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 
 type GradientRgba = [ColorRGBA, ColorRGBA];
 type Gradient = [string, string];

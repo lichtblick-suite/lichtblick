@@ -9,7 +9,6 @@ import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
-import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import {
@@ -33,6 +32,7 @@ import {
 import { BaseSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
+import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 
 export type LayerSettingsPolygon = BaseSettings & {
   lineWidth: number;
