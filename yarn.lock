@@ -1443,6 +1443,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.26.10":
+  version: 7.27.1
+  resolution: "@babel/runtime@npm:7.27.1"
+  checksum: 11339838a54783e5b14e04d94d7a4d032e9965c5823f3f687e41556fa40344ae7aeb57c535720b7a74ab3e8217def7834a6f1a665ee55bbb3befede141419913
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.27.1, @babel/template@npm:^7.3.3, @babel/template@npm:^7.4.4":
   version: 7.27.1
   resolution: "@babel/template@npm:7.27.1"
@@ -3029,7 +3036,7 @@ __metadata:
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
     heap-js: 2.6.0
-    i18next: 24.2.2
+    i18next: 25.0.2
     i18next-browser-languagedetector: 7.1.0
     idb: 7.1.1
     idb-keyval: 6.2.1
@@ -12229,17 +12236,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:24.2.2":
-  version: 24.2.2
-  resolution: "i18next@npm:24.2.2"
+"i18next@npm:25.0.2":
+  version: 25.0.2
+  resolution: "i18next@npm:25.0.2"
   dependencies:
-    "@babel/runtime": ^7.23.2
+    "@babel/runtime": ^7.26.10
   peerDependencies:
     typescript: ^5
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: dc87ff61c45366a1197c9732c4b36cd20bbae3ae14b7672e5d7d3d1ec21ec1cd2edc25cbfd10dc776d2a8c24b88d123f3c32369ac4eb50ba5c8f9cbcf3c14ec9
+  checksum: 33caed628eee2bc20d368f4a2c96a76456421b7b63860a28400410218dca61fb28c8892d5a7303cd0f7bc2f99cc721094a3488a530fbfceb2c48c7ad21f968ee
   languageName: node
   linkType: hard
 
