@@ -109,20 +109,18 @@ export default function DiagnosticTable({
       }
 
       return (
-        <>
-          <TableCell padding="checkbox">
-            <Stack
-              direction="row"
-              gap={1}
-              alignItems="center"
-              flex="auto"
-              justifyContent="space-between"
-            >
-              {strToRender ? strToRender : "\xa0"}
-              {openPlotPanelIconElem}
-            </Stack>
-          </TableCell>
-        </>
+        <TableCell padding="checkbox">
+          <Stack
+            direction="row"
+            gap={1}
+            alignItems="center"
+            flex="auto"
+            justifyContent="space-between"
+          >
+            {strToRender || "\xa0"}
+            {openPlotPanelIconElem}
+          </Stack>
+        </TableCell>
       );
     },
     [classes.htmlTableCell, numericPrecision],
