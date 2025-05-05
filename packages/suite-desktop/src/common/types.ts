@@ -68,6 +68,8 @@ type DesktopExtension = {
   id: string;
   packageJson: unknown;
   directory: string;
+  readme: string;
+  changelog: string;
 };
 
 type DesktopLayout = {

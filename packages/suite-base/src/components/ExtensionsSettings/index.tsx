@@ -88,6 +88,7 @@ export default function ExtensionsSettings(): React.ReactElement {
         />
       </div>
       {namespacedData.map(({ namespace, entries }) => (
+        console.log("entries", entries),
         <ExtensionList
           key={namespace}
           filterText={debouncedFilterText}

@@ -45,6 +45,7 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
   }, [groupedMarketplaceEntries, debouncedFilterText]);
 
   const installedEntries = useMemo(() => {
+    console.log("installed", installed);
     return (installed ?? []).map((entry) => {
       const marketplaceEntry = marketplaceMap[entry.id];
       if (marketplaceEntry != undefined) {
@@ -64,6 +65,8 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
         keywords: entry.keywords,
         namespace: entry.namespace,
         qualifiedName: entry.qualifiedName,
+        readme: entry.readme,
+        changelog: entry.changelog,
       };
     });
   }, [installed, marketplaceMap]);

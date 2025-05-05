@@ -64,6 +64,7 @@ function createExtensionRegistryStore(
         const result = await promisesInBatch(chunk, namespaceLoader);
         results.push(...result);
       }
+      console.log("Install extensions results", results);
       return results;
     };
 
@@ -75,6 +76,7 @@ function createExtensionRegistryStore(
         batch.map(async (extensionData: Uint8Array) => {
           try {
             const info = await loader.installExtension(extensionData);
+            console.log("Installed extension", info);
             const unwrappedExtensionSource = await loader.loadExtension(info.id);
             const contributionPoints = buildContributionPoints(info, unwrappedExtensionSource);
 
@@ -118,6 +120,7 @@ function createExtensionRegistryStore(
       installedExtensions: ExtensionInfo[];
       contributionPoints: ContributionPoints;
     }) {
+      console.log("Loading extensions in batch", batch);
       await Promise.all(
         batch.map(async (extension) => {
           try {

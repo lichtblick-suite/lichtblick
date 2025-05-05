@@ -98,10 +98,12 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const packagePath = pathJoin(extensionRootPath, "package.json");
       const packageData = await readFile(packagePath, { encoding: "utf8" });
       const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
+      const readme = pathJoin(extensionRootPath, "README.md");
+      const changelog = pathJoin(extensionRootPath, "CHANGELOG.md");
 
       const id = getPackageId(packageJson);
 
-      extensions.push({ id, packageJson, directory: extensionRootPath });
+      extensions.push({ id, packageJson, directory: extensionRootPath, readme, changelog });
     } catch (err: unknown) {
       log.error(err);
     }
@@ -150,6 +152,11 @@ export async function installExtension(
     throw new Error(`Extension contains an invalid package.json`);
   }
 
+  const readmeZipObj = archive.files["README.md"];
+  const changelogZipObj = archive.files["CHANGELOG.md"];
+  const readme = readmeZipObj ? await readmeZipObj.async("string") : "";
+  const changelog = changelogZipObj ? await changelogZipObj.async("string") : "";
+
   // Check for basic validity of package.json and get the packageId
   const packageId = getPackageId(pkgJson);
 
@@ -177,6 +184,8 @@ export async function installExtension(
     id: packageId,
     packageJson: pkgJson,
     directory: extensionBaseDir,
+    readme,
+    changelog,
   };
 }
 
