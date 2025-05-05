@@ -29,8 +29,8 @@ describe("validateInitialization", () => {
       validateAndAddNewDatatypes(accumulated, current);
 
       expect(accumulated.datatypes.get(datatype)).toEqual(accumulatedDefinition);
-      expect(accumulated.problems).toHaveLength(1);
-      expect(accumulated.problems[0]!.message).toBe(
+      expect(accumulated.alerts).toHaveLength(1);
+      expect(accumulated.alerts[0]!.message).toBe(
         `Different datatypes found for schema "${datatype}"`,
       );
     });
@@ -43,7 +43,7 @@ describe("validateInitialization", () => {
 
       validateAndAddNewDatatypes(accumulated, current);
 
-      expect(accumulated.problems).toHaveLength(0);
+      expect(accumulated.alerts).toHaveLength(0);
       expect(accumulated.datatypes.get(datatype)).toEqual(definition);
     });
 
@@ -54,7 +54,7 @@ describe("validateInitialization", () => {
 
       validateAndAddNewDatatypes(accumulated, current);
 
-      expect(accumulated.problems).toHaveLength(0);
+      expect(accumulated.alerts).toHaveLength(0);
       expect(accumulated.datatypes.get(datatype)).toEqual(definition);
     });
 
@@ -69,8 +69,8 @@ describe("validateInitialization", () => {
         validateAndAddNewTopics(accumulated, current);
 
         expect(accumulated.topics).toEqual([accumulatedTopic]);
-        expect(accumulated.problems).toHaveLength(1);
-        expect(accumulated.problems[0]!.message).toBe(
+        expect(accumulated.alerts).toHaveLength(1);
+        expect(accumulated.alerts[0]!.message).toBe(
           `Schema name mismatch detected for topic "${topicName}". Expected "${accumulatedTopic.schemaName}", but found "${currentTopic.schemaName}".`,
         );
       });
@@ -82,7 +82,7 @@ describe("validateInitialization", () => {
 
         validateAndAddNewTopics(accumulated, current);
 
-        expect(accumulated.problems).toHaveLength(0);
+        expect(accumulated.alerts).toHaveLength(0);
         expect(accumulated.topics).toEqual([topic]);
       });
 
@@ -94,7 +94,7 @@ describe("validateInitialization", () => {
         validateAndAddNewTopics(accumulated, current);
 
         expect(accumulated.topics).toEqual([topic]);
-        expect(accumulated.problems).toHaveLength(0);
+        expect(accumulated.alerts).toHaveLength(0);
       });
 
       it("should add all topics for multiple topics per MCAP", () => {
@@ -113,7 +113,7 @@ describe("validateInitialization", () => {
         validateAndAddNewTopics(accumulated, current);
 
         expect(accumulated.topics).toEqual([topic1, topic2, topic3, topic4]);
-        expect(accumulated.problems).toHaveLength(0);
+        expect(accumulated.alerts).toHaveLength(0);
       });
     });
   });

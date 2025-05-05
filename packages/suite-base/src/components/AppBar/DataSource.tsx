@@ -75,7 +75,7 @@ const useStyles = makeStyles<void, "adornmentError">()((theme, _params, _classes
 
 const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
-const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
+const selectPlayerAlerts = (ctx: MessagePipelineContext) => ctx.playerState.alerts;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 
 export function DataSource(): React.JSX.Element {
@@ -84,7 +84,7 @@ export function DataSource(): React.JSX.Element {
 
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
+  const playerAlerts = useMessagePipeline(selectPlayerAlerts) ?? [];
   const seek = useMessagePipeline(selectSeek);
 
   const { sidebarActions } = useWorkspaceActions();
@@ -96,7 +96,7 @@ export function DataSource(): React.JSX.Element {
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
   const error =
     playerPresence === PlayerPresence.ERROR ||
-    playerProblems.some((problem) => problem.severity === "error");
+    playerAlerts.some((alert) => alert.severity === "error");
   const loading = reconnecting || initializing;
 
   const playerDisplayName = initializing && playerName == undefined ? "Initializing…" : playerName;
@@ -107,7 +107,7 @@ export function DataSource(): React.JSX.Element {
 
   return (
     <>
-      <WssErrorModal playerProblems={playerProblems} />
+      <WssErrorModal playerAlerts={playerAlerts} />
       <Stack direction="row" alignItems="center">
         <div className={classes.sourceName}>
           <div className={classes.textTruncate}>
@@ -135,7 +135,7 @@ export function DataSource(): React.JSX.Element {
               className={classes.iconButton}
               onClick={() => {
                 sidebarActions.left.setOpen(true);
-                sidebarActions.left.selectItem("problems");
+                sidebarActions.left.selectItem("alerts");
               }}
             >
               <ErrorCircle16Filled />

@@ -21,7 +21,7 @@ export * from "./panels";
 export * from "./panelSettings";
 export * from "./panelToolbar";
 export * from "./plot";
-export * from "./problemsList";
+export * from "./alertsList";
 export * from "./settingsEditor";
 export * from "./stateTransitions";
 export * from "./threeDee";

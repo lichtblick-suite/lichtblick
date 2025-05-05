@@ -21,13 +21,13 @@ import NativeWindowContext, {
   INativeWindow,
 } from "@lichtblick/suite-base/context/NativeWindowContext";
 import { UserScriptStateProvider } from "@lichtblick/suite-base/context/UserScriptStateContext";
+import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "@lichtblick/suite-base/providers/ExtensionMarketplaceProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
-import ProblemsContextProvider from "@lichtblick/suite-base/providers/ProblemsContextProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
@@ -167,7 +167,7 @@ describe("App Component MultiProvider Tests", () => {
     EventsProvider,
     StudioToastProvider,
     StudioLogsSettingsProvider,
-    ProblemsContextProvider,
+    AlertsContextProvider,
     CurrentLayoutProvider,
     UserProfileLocalStorageProvider,
     LayoutManagerProvider,

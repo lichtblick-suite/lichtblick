@@ -5,7 +5,7 @@ import { StatusLevel } from "@foxglove/ws-protocol";
 
 import {
   dataTypeToFullName,
-  statusLevelToProblemSeverity,
+  statusLevelToAlertSeverity,
 } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/helpers";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
@@ -35,6 +35,6 @@ describe("statusLevelToProblemSeverity", () => {
     [StatusLevel.WARNING, "warn"],
     [StatusLevel.ERROR, "error"],
   ])("should map StatusLevel %s to result %s", (level, result) => {
-    expect(statusLevelToProblemSeverity(level)).toBe(result);
+    expect(statusLevelToAlertSeverity(level)).toBe(result);
   });
 });

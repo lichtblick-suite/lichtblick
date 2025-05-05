@@ -8,7 +8,7 @@
 import { Time } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Metadata } from "@lichtblick/suite";
 import {
-  PlayerProblem,
+  PlayerAlert,
   Topic,
   TopicSelection,
   TopicStats,
@@ -28,7 +28,7 @@ export type Initialization = {
   /** Publisher names by topic **/
   publishersByTopic: Map<string, Set<string>>;
 
-  problems: PlayerProblem[];
+  alerts: PlayerAlert[];
 };
 
 export type MessageIteratorArgs = {
@@ -68,7 +68,7 @@ export type MessageIteratorArgs = {
  * types of results.
  *
  * - message-event: the result contains a MessageEvent
- * - problem: the result contains a problem
+ * - alert: the result contains an alert
  * - stamp: the result is a timestamp
  *
  * Note: A stamp result acts as a marker indicating that the source has reached the specified stamp.
@@ -81,13 +81,13 @@ export type IteratorResult =
       msgEvent: MessageEvent;
     }
   | {
-      type: "problem";
+      type: "alert";
       /**
-       * An ID representing the channel/connection where this problem came from. The app may choose
-       * to display only a single problem from each connection to avoid overwhelming the user.
+       * An ID representing the channel/connection where this alert came from. The app may choose
+       * to display only a single alert from each connection to avoid overwhelming the user.
        */
       connectionId: number;
-      problem: PlayerProblem;
+      alert: PlayerAlert;
     }
   | {
       type: "stamp";

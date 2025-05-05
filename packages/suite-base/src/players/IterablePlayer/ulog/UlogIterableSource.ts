@@ -13,7 +13,7 @@ import {
   ParsedMessageDefinitionsByTopic,
   Topic,
   TopicStats,
-  PlayerProblem,
+  PlayerAlert,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { MessageType, ULog } from "@lichtblick/ulog";
@@ -61,7 +61,7 @@ export class UlogIterableSource implements IIterableSource {
     const start = fromMicros(Number(timeRange[0]));
     const end = fromMicros(Number(timeRange[1]));
 
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
     const topics: Topic[] = [];
     const topicStats = new Map<string, TopicStats>();
     const datatypes: RosDatatypes = new Map();
@@ -113,7 +113,7 @@ export class UlogIterableSource implements IIterableSource {
       topics,
       datatypes,
       profile: "ulog",
-      problems,
+      alerts,
       publishersByTopic: new Map(),
       topicStats,
     };

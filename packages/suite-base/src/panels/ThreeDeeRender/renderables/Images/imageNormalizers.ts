@@ -9,6 +9,7 @@ import { CompressedImage, RawImage } from "@foxglove/schemas";
 
 import { PartialMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtension";
 
+import { CompressedVideo } from "./ImageTypes";
 import { normalizeByteArray, normalizeHeader, normalizeTime } from "../../normalizeMessages";
 import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
 
@@ -59,13 +60,25 @@ export function normalizeRawImage(message: PartialMessage<RawImage>): RawImage {
   };
 }
 
-export function normalizeCompressedImage(
-  message: PartialMessage<CompressedImage>,
-): CompressedImage {
+function normalizeCompressedMedia<T extends CompressedImage | CompressedVideo>(
+  message: PartialMessage<T>,
+): T {
   return {
     timestamp: normalizeTime(message.timestamp),
     frame_id: message.frame_id ?? "",
     format: message.format ?? "",
     data: normalizeByteArray(message.data),
-  };
+  } as T;
+}
+
+export function normalizeCompressedImage(
+  message: PartialMessage<CompressedImage>,
+): CompressedImage {
+  return normalizeCompressedMedia<CompressedImage>(message);
+}
+
+export function normalizeCompressedVideo(
+  message: PartialMessage<CompressedVideo>,
+): CompressedVideo {
+  return normalizeCompressedMedia<CompressedVideo>(message);
 }
