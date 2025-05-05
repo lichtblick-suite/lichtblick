@@ -29,7 +29,6 @@ import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import OsContextSingleton from "@lichtblick/suite-base/OsContextSingleton";
 import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import { ExperimentalFeatureSettings } from "@lichtblick/suite-base/components/ExperimentalFeatureSettings";
 import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
@@ -184,11 +183,7 @@ export function AppSettingsDialog(
   const { extensionSettings } = useAppContext();
 
   // automatic updates are a desktop-only setting
-  //
-  // electron-updater does not provide a way to detect if we are on a supported update platform
-  // so we hard-code linux as an _unsupported_ auto-update platform since we cannot auto-update
-  // with our .deb package install method on linux.
-  const supportsAppUpdates = isDesktopApp() && OsContextSingleton?.platform !== "linux";
+  const supportsAppUpdates = isDesktopApp();
 
   const handleTabChange = (_event: SyntheticEvent, newValue: AppSettingsTab) => {
     setActiveTab(newValue);
