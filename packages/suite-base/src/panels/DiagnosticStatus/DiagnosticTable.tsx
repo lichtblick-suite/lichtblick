@@ -129,7 +129,7 @@ export default function DiagnosticTable({
   const renderKeyValueSections = useCallback((): React.ReactNode => {
     const formattedKeyVals: FormattedKeyValue[] = getFormattedKeyValues(info.status);
 
-    return formattedKeyVals.map(({ key, value, keyHtml, valueHtml }, idx) => {
+    return formattedKeyVals.map(({ key, value, keyHtml, valueHtml }) => {
       // We need both `hardware_id` and `name`; one of them is not enough. That's also how we identify
       // what to show in this very panel; see `selectedHardwareId` AND `selectedName` in the config.
       const valuePath = `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.values[:]{key=="${key}"}.value`;
@@ -165,7 +165,7 @@ export default function DiagnosticTable({
         );
       }
       return (
-        <TableRow key={idx} hover>
+        <TableRow key={key} hover>
           {renderKeyValueCell(keyHtml, key)}
           {renderKeyValueCell(valueHtml, value, openPlotPanelIconElem)}
         </TableRow>
