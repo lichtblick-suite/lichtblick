@@ -179,12 +179,14 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   );
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
-  const { handleFiles } = useHandleFiles({
+  const handleFiles = useHandleFiles({
     availableSources,
     selectSource,
     isPlaying,
     playerEvents: { play, pause },
   });
+
+  const handleFilesRef = useRef(handleFiles);
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
@@ -245,11 +247,16 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   // files the main thread told us to open
   const filesToOpen = useElectronFilesToOpen();
+
   useEffect(() => {
-    if (filesToOpen) {
-      void handleFiles(Array.from(filesToOpen));
+    handleFilesRef.current = handleFiles;
+  }, [handleFiles]);
+
+  useEffect(() => {
+    if (filesToOpen && filesToOpen.length > 0) {
+      void handleFilesRef.current(Array.from(filesToOpen));
     }
-  }, [filesToOpen, handleFiles]);
+  }, [filesToOpen]);
 
   const dropHandler = useCallback(
     async ({ files, handles }: { files?: File[]; handles?: FileSystemFileHandle[] }) => {

@@ -33,7 +33,7 @@ type Setup = {
   filesOverride?: File[];
 };
 
-describe("useHandleFilesProps", () => {
+describe("useHandleFiles", () => {
   const installFoxeExtensionsMock = jest.fn();
   const availableSources: IDataSourceFactory[] = [
     {
@@ -74,8 +74,9 @@ describe("useHandleFilesProps", () => {
         );
     });
 
+    const { result } = renderHook(() => useHandleFiles(useHandleFilesProps));
     return {
-      ...renderHook(() => useHandleFiles(useHandleFilesProps)),
+      handleFiles: result.current,
       files,
     };
   }
@@ -91,10 +92,12 @@ describe("useHandleFilesProps", () => {
   });
 
   it("should call pause and install .foxe extension", async () => {
-    const { result, files } = setup({ filesOverride: [fileBuilder(".foxe", FILE_ACCEPT_TYPE)] });
+    const { handleFiles, files } = setup({
+      filesOverride: [fileBuilder("foxe", FILE_ACCEPT_TYPE)],
+    });
 
     await act(async () => {
-      await result.current.handleFiles(files);
+      await handleFiles(files);
     });
 
     expect(playerEvents.pause).toHaveBeenCalled();
@@ -102,10 +105,10 @@ describe("useHandleFilesProps", () => {
   });
 
   it("does nothing when passed an empty file array", async () => {
-    const { result, files } = setup({ filesOverride: [] });
+    const { handleFiles, files } = setup({ filesOverride: [] });
 
     await act(async () => {
-      await result.current.handleFiles(files);
+      await handleFiles(files);
     });
 
     expect(playerEvents.pause).not.toHaveBeenCalled();
@@ -119,9 +122,8 @@ describe("useHandleFilesProps", () => {
       writable: false,
     });
 
-    const { result, files } = setup({
-      filesOverride: [brokenFile],
-    });
+    const { handleFiles, files } = setup({ filesOverride: [brokenFile] });
+
     files.forEach((file) => {
       (file as any).arrayBuffer = () => {
         throw new Error("Read failed");
@@ -131,7 +133,7 @@ describe("useHandleFilesProps", () => {
     const logSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     await act(async () => {
-      await result.current.handleFiles(files);
+      await handleFiles(files);
     });
 
     expect(logSpy).toHaveBeenCalledWith(
@@ -142,21 +144,21 @@ describe("useHandleFilesProps", () => {
     logSpy.mockRestore();
   });
 
-  it("handles and selects source for non foxe files", async () => {
-    const { result, files } = setup();
+  it("handles and selects source for non-foxe files", async () => {
+    const { handleFiles, files } = setup();
 
     await act(async () => {
-      await result.current.handleFiles(files);
+      await handleFiles(files);
     });
 
     expect(selectSource).toHaveBeenCalled();
   });
 
   it("does not select source if no file type matches availableSources", async () => {
-    const { result, files } = setup({ filesOverride: [fileBuilder("csv", FILE_ACCEPT_TYPE)] });
+    const { handleFiles, files } = setup({ filesOverride: [fileBuilder("csv", FILE_ACCEPT_TYPE)] });
 
     await act(async () => {
-      await result.current.handleFiles(files);
+      await handleFiles(files);
     });
 
     expect(selectSource).not.toHaveBeenCalled();
