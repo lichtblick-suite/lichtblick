@@ -3,13 +3,18 @@
 
 import { compare, Time } from "@lichtblick/rostime";
 import { LEVELS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import { UseDiagnosticsResult } from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics";
 import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 
 export function getDiagnosticsWithStales(
-  diagnosticsByHardwareId: Map<string, DiagnosticsById>,
+  diagnosticsByHardwareId: UseDiagnosticsResult | undefined,
   staleTime: Time,
-): Map<string, DiagnosticsById> {
+): UseDiagnosticsResult {
   const ret = new Map<string, DiagnosticsById>();
+
+  if (!diagnosticsByHardwareId) {
+    return ret;
+  }
 
   for (const [hardwareId, diagnosticsByName] of diagnosticsByHardwareId) {
     const newDiagnosticsByName: DiagnosticsById = new Map();

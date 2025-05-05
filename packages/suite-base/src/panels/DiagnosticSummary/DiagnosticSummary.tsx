@@ -98,7 +98,10 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
     (renderProps: { data: DiagnosticInfo[]; index: number; style: CSSProperties }) => {
       const item = renderProps.data[renderProps.index]!;
       return (
-        <div style={{ ...renderProps.style }}>
+        <div
+          style={{ ...renderProps.style }}
+          data-testid={`diagnostic-summary-node-row-${renderProps.index}`}
+        >
           <DiagnosticNodeRow
             key={item.id}
             info={item}
