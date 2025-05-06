@@ -21,7 +21,6 @@ import {
   colorModeSettingsFields,
   getColorConverter,
 } from "./colorMode";
-import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import {
@@ -35,6 +34,7 @@ import { rgbaToCssString, rgbaToLinear, stringToRgba } from "../color";
 import { normalizeByteArray, normalizePose, normalizeTime } from "../normalizeMessages";
 import { BaseSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
+import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 
 type GridColorModeSettings = ColorModeSettings & {
   // rgba packed modes are only supported for sensor_msgs/PointCloud2
