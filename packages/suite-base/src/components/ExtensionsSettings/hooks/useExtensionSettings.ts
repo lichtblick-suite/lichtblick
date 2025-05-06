@@ -45,7 +45,6 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
   }, [groupedMarketplaceEntries, debouncedFilterText]);
 
   const installedEntries = useMemo(() => {
-    console.log("installed", installed);
     return (installed ?? []).map((entry) => {
       const marketplaceEntry = marketplaceMap[entry.id];
       if (marketplaceEntry != undefined) {

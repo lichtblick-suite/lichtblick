@@ -19,6 +19,8 @@ export default class ExtensionBuilder {
       publisher: BasicBuilder.string(),
       qualifiedName: BasicBuilder.string(),
       version: BasicBuilder.string(),
+      readme: BasicBuilder.string(),
+      changelog: BasicBuilder.string(),
     });
   }
 }

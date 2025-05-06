@@ -38,6 +38,8 @@ export class DesktopExtensionLoader implements ExtensionLoader {
         namespace: this.namespace,
         // Qualified name is display name for backwards compatibility with existing layouts.
         qualifiedName: pkgInfo.displayName,
+        readme: extension.readme,
+        changelog: extension.changelog,
       };
     });
 
@@ -55,8 +57,6 @@ export class DesktopExtensionLoader implements ExtensionLoader {
 
     const extension: DesktopExtension = await this.#bridge.installExtension(foxeFileData);
     const pkgInfo = extension.packageJson as ExtensionInfo;
-    pkgInfo.readme = extension.readme;
-    pkgInfo.changelog = extension.changelog;
 
     return {
       ...pkgInfo,
@@ -65,8 +65,8 @@ export class DesktopExtensionLoader implements ExtensionLoader {
       namespace: this.namespace,
       // Qualified name is display name for backwards compatibility with existing layouts.
       qualifiedName: pkgInfo.displayName,
-      readme: pkgInfo.readme,
-      changelog: pkgInfo.changelog,
+      readme: extension.readme,
+      changelog: extension.changelog,
     };
   }
 

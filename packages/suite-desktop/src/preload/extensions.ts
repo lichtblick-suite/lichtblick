@@ -98,8 +98,16 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const packagePath = pathJoin(extensionRootPath, "package.json");
       const packageData = await readFile(packagePath, { encoding: "utf8" });
       const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
-      const readme = pathJoin(extensionRootPath, "README.md");
-      const changelog = pathJoin(extensionRootPath, "CHANGELOG.md");
+      const readmePath = pathJoin(extensionRootPath, "README.md");
+      const readme =
+        existsSync(readmePath) && (await readFile(readmePath, { encoding: "utf8" }))
+          ? await readFile(readmePath, { encoding: "utf8" })
+          : "";
+      const changelogPath = pathJoin(extensionRootPath, "CHANGELOG.md");
+      const changelog =
+        existsSync(changelogPath) && (await readFile(changelogPath, { encoding: "utf8" }))
+          ? await readFile(changelogPath, { encoding: "utf8" })
+          : "";
 
       const id = getPackageId(packageJson);
 
