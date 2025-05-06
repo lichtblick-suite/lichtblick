@@ -11,7 +11,9 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useInstallingExtensionsState } from "@lichtblick/suite-base/hooks/useInstallingExtensionsState";
 
-type UseHandleFiles = (files: File[]) => Promise<void>;
+type UseHandleFiles = {
+  handleFiles: (files: File[]) => Promise<void>;
+};
 
 type UseHandleFilesProps = {
   availableSources: readonly IDataSourceFactory[];
@@ -76,5 +78,5 @@ export function useHandleFiles({
     [availableSources, installFoxeExtensions, pause, selectSource],
   );
 
-  return handleFiles;
+  return { handleFiles };
 }

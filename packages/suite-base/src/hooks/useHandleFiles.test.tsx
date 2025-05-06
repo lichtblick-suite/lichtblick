@@ -76,7 +76,7 @@ describe("useHandleFiles", () => {
 
     const { result } = renderHook(() => useHandleFiles(useHandleFilesProps));
     return {
-      handleFiles: result.current,
+      handleFiles: result.current.handleFiles,
       files,
     };
   }

@@ -179,14 +179,18 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   );
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
-  const handleFiles = useHandleFiles({
+  const { handleFiles } = useHandleFiles({
     availableSources,
     selectSource,
     isPlaying,
     playerEvents: { play, pause },
   });
 
-  const handleFilesRef = useRef(handleFiles);
+  // Store stable reference to avoid re-running effects unnecessarily
+  const handleFilesRef = useRef<typeof handleFiles>(handleFiles);
+  useLayoutEffect(() => {
+    handleFilesRef.current = handleFiles;
+  }, [handleFiles]);
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
