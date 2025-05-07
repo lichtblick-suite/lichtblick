@@ -148,7 +148,6 @@
     "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
-    "dompurify": "3.2.5",
     "react-use": "17.5.1",
     "rehype-raw": "6.1.1",
     "vm-browserify": "1.1.2"

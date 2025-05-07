@@ -188,5 +188,8 @@
     "vm-browserify": "1.1.2",
     "webpack": "5.99.7",
     "zustand": "4.4.1"
+  },
+  "dependencies": {
+    "dompurify": "3.2.5"
   }
 }

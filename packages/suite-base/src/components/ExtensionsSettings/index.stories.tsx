@@ -44,6 +44,8 @@ const installedExtensions: ExtensionInfo[] = [
     version: "1.2.10",
     keywords: ["storybook", "testing"],
     namespace: "org",
+    readme: "Readme for extension",
+    changelog: "Changes effectuated on extension",
   },
   {
     id: "publisher.storyextension",
@@ -57,6 +59,8 @@ const installedExtensions: ExtensionInfo[] = [
     version: "1.2.10",
     keywords: ["storybook", "testing"],
     namespace: "local",
+    readme: "Readme for extension",
+    changelog: "Changes effectuated on extension",
   },
 ];
 
@@ -72,6 +76,8 @@ const marketplaceExtensions: ExtensionInfo[] = [
     license: "MIT",
     version: "1.2.10",
     keywords: ["storybook", "testing"],
+    readme: "Readme for extension",
+    changelog: "Changes effectuated on extension",
   },
 ];
 
