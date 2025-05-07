@@ -7,8 +7,7 @@ export function isValidUrl(str: string): boolean {
   try {
     const url = new URL(str);
     return VALID_PROTOCOLS.includes(url.protocol);
-  } catch (err: unknown) {
-    console.error(err);
+  } catch {
     return false;
   }
 }
