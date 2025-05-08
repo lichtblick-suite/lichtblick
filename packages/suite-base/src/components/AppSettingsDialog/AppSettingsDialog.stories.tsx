@@ -47,7 +47,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
     version: "1.2.10",
     keywords: ["storybook", "testing"],
     readme: "Information about extension",
-    changelog: "Some changes effectuated on extension",
+    changelog: "Some changes on extension",
   },
 ];
 
