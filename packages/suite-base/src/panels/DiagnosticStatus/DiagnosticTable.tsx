@@ -24,159 +24,32 @@ import {
   TableRow,
   IconButton,
   Typography,
-  tableRowClasses,
-  iconButtonClasses,
 } from "@mui/material";
 import * as _ from "lodash-es";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { createSelector } from "reselect";
-import sanitizeHtml from "sanitize-html";
-import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticStatus/DiagnosticTable.style";
+import { MIN_SPLIT_FRACTION } from "@lichtblick/suite-base/panels/DiagnosticStatus/constants";
+import {
+  DiagnosticStatusProps,
+  FormattedKeyValue,
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { getFormattedKeyValues } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getFormattedKeyValues";
+import { isFloatOrInteger } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/isFloaterOrInteger";
+import { MESSAGE_COLORS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
-import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
-
-import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage, LEVELS } from "./util";
-
-const MIN_SPLIT_FRACTION = 0.1;
-
-type Props = {
-  info: DiagnosticInfo;
-  splitFraction: number | undefined;
-  onChangeSplitFraction: (arg0: number) => void;
-  topicToRender: string;
-  numericPrecision: number | undefined;
-  openSiblingPanel: OpenSiblingPanel;
-};
-
-type FormattedKeyValue = {
-  key: string;
-  keyHtml: { __html: string } | undefined;
-  value: string;
-  valueHtml: { __html: string } | undefined;
-};
-
-const allowedTags = [
-  "b",
-  "br",
-  "center",
-  "code",
-  "em",
-  "font",
-  "i",
-  "strong",
-  "table",
-  "td",
-  "th",
-  "tr",
-  "tt",
-  "u",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "H1",
-  "H2",
-  "H3",
-  "H4",
-  "H5",
-  "H6",
-];
-
-const useStyles = makeStyles()((theme) => ({
-  resizeHandle: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 12,
-    marginLeft: -6,
-    cursor: "col-resize",
-
-    "&:hover, &:active, &:focus": {
-      outline: "none",
-
-      "&::after": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 6,
-        marginLeft: -2,
-        width: 4,
-        backgroundColor: theme.palette.action.focus,
-      },
-    },
-  },
-  table: {
-    "@media (pointer: fine)": {
-      [`.${tableRowClasses.root} .${iconButtonClasses.root}`]: { visibility: "hidden" },
-      [`.${tableRowClasses.root}:hover .${iconButtonClasses.root}`]: { visibility: "visible" },
-    },
-  },
-  tableHeaderRow: {
-    backgroundColor: theme.palette.background.paper,
-  },
-  htmlTableCell: {
-    "h1, h2, h3, h4, h5, h6": {
-      fontFamily: theme.typography.subtitle2.fontFamily,
-      fontSize: theme.typography.subtitle2.fontSize,
-      lineHeight: theme.typography.subtitle2.lineHeight,
-      letterSpacing: theme.typography.subtitle2.letterSpacing,
-      fontWeight: 800,
-      margin: 0,
-    },
-  },
-  iconButton: {
-    "&:hover, &:active, &:focus": {
-      backgroundColor: "transparent",
-    },
-  },
-}));
-
-function sanitize(value: string): { __html: string } {
-  return {
-    __html: sanitizeHtml(value, {
-      allowedTags,
-      allowedAttributes: {
-        font: ["color", "size"],
-        td: ["colspan"],
-        th: ["colspan"],
-      },
-    }),
-  };
-}
-
-// preliminary check to avoid expensive operations when there is no html
-const HAS_ANY_HTML = new RegExp(`<(${allowedTags.join("|")})`);
-
-const getFormattedKeyValues = createSelector(
-  (message: DiagnosticStatusMessage) => message,
-  (message: DiagnosticStatusMessage): FormattedKeyValue[] => {
-    return message.values.map(({ key, value }: KeyValue) => {
-      return {
-        key,
-        keyHtml: HAS_ANY_HTML.test(key) ? sanitize(key) : undefined,
-        value,
-        valueHtml: HAS_ANY_HTML.test(value) ? sanitize(value) : undefined,
-      };
-    });
-  },
-);
 
 // component to display a single diagnostic status
-export default function DiagnosticStatus(props: Props): React.JSX.Element {
-  const {
-    onChangeSplitFraction,
-    info,
-    topicToRender,
-    numericPrecision,
-    openSiblingPanel,
-    splitFraction = 0.5,
-  } = props;
+export default function DiagnosticTable({
+  info,
+  numericPrecision,
+  onChangeSplitFraction,
+  openSiblingPanel,
+  splitFraction = 0.5,
+  topicToRender,
+}: DiagnosticStatusProps): React.JSX.Element {
   const { classes } = useStyles();
   const tableRef = useRef<HTMLTableElement>(ReactNull);
 
@@ -236,20 +109,18 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
       }
 
       return (
-        <>
-          <TableCell padding="checkbox">
-            <Stack
-              direction="row"
-              gap={1}
-              alignItems="center"
-              flex="auto"
-              justifyContent="space-between"
-            >
-              {strToRender ? strToRender : "\xa0"}
-              {openPlotPanelIconElem}
-            </Stack>
-          </TableCell>
-        </>
+        <TableCell padding="checkbox">
+          <Stack
+            direction="row"
+            gap={1}
+            alignItems="center"
+            flex="auto"
+            justifyContent="space-between"
+          >
+            {strToRender || "\xa0"}
+            {openPlotPanelIconElem}
+          </Stack>
+        </TableCell>
       );
     },
     [classes.htmlTableCell, numericPrecision],
@@ -258,7 +129,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
   const renderKeyValueSections = useCallback((): React.ReactNode => {
     const formattedKeyVals: FormattedKeyValue[] = getFormattedKeyValues(info.status);
 
-    return formattedKeyVals.map(({ key, value, keyHtml, valueHtml }, idx) => {
+    return formattedKeyVals.map(({ key, value, keyHtml, valueHtml }) => {
       // We need both `hardware_id` and `name`; one of them is not enough. That's also how we identify
       // what to show in this very panel; see `selectedHardwareId` AND `selectedName` in the config.
       const valuePath = `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.values[:]{key=="${key}"}.value`;
@@ -271,7 +142,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
             title="Open in Plot panel"
             color="inherit"
             size="small"
-            data-testid="open-plot-icon"
+            data-testid="open-plot-button"
             onClick={() => {
               openSiblingPlotPanel(openSiblingPanel, valuePath);
             }}
@@ -284,6 +155,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
             title="Open in State Transitions panel"
             color="inherit"
             size="small"
+            data-testid="open-state-transitions-button"
             onClick={() => {
               openSiblingStateTransitionsPanel(openSiblingPanel, valuePath);
             }}
@@ -293,20 +165,13 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
         );
       }
       return (
-        <TableRow key={idx} hover>
+        <TableRow key={key} hover>
           {renderKeyValueCell(keyHtml, key)}
           {renderKeyValueCell(valueHtml, value, openPlotPanelIconElem)}
         </TableRow>
       );
     });
   }, [classes.iconButton, info.status, openSiblingPanel, renderKeyValueCell, topicToRender]);
-
-  const STATUS_COLORS: Record<number, string> = {
-    [LEVELS.OK]: "success.main",
-    [LEVELS.ERROR]: "error.main",
-    [LEVELS.WARN]: "warning.main",
-    [LEVELS.STALE]: "text.secondary",
-  };
 
   return (
     <div>
@@ -316,7 +181,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
           left: `${100 * splitFraction}%`,
         }}
         onMouseDown={resizeMouseDown}
-        data-testid-resizehandle
+        data-testid="DiagnosticTable-resizeHandle"
       />
       <Table className={classes.table} size="small" ref={tableRef}>
         <TableBody>
@@ -329,7 +194,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
             <TableCell padding="none" style={{ borderLeft: "none" }} />
           </TableRow>
           <TableRow className={classes.tableHeaderRow}>
-            <TableCell variant="head" data-testid="DiagnosticStatus-display-name" colSpan={2}>
+            <TableCell variant="head" data-testid="DiagnosticTable-display-name" colSpan={2}>
               <Tooltip
                 arrow
                 title={
@@ -344,7 +209,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
                 }
               >
                 <Typography
-                  color={STATUS_COLORS[info.status.level]}
+                  color={MESSAGE_COLORS[info.status.level]}
                   variant="subtitle1"
                   fontWeight={800}
                 >
@@ -364,7 +229,7 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
               >
                 <Typography
                   flex="auto"
-                  color={STATUS_COLORS[info.status.level]}
+                  color={MESSAGE_COLORS[info.status.level]}
                   variant="inherit"
                   fontWeight={800}
                 >
@@ -393,15 +258,4 @@ export default function DiagnosticStatus(props: Props): React.JSX.Element {
       </Table>
     </div>
   );
-}
-
-// Returns true if the input string can be parsed as a float or an integer using
-// parseFloat(). Hex and octal numbers will return false.
-function isFloatOrInteger(n: string): boolean {
-  if (n.startsWith("0") && n.length > 1) {
-    if (n[1] === "x" || n[1] === "X" || n[1] === "o" || n[1] === "O") {
-      return false;
-    }
-  }
-  return !isNaN(parseFloat(n)) && isFinite(Number(n));
 }

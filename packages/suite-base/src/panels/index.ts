@@ -11,6 +11,8 @@ import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
+import diagnosticStatusThumbnail from "./DiagnosticStatus/assets/diagnostic-status.png";
+import diagnosticSummaryThumbnail from "./DiagnosticSummary/assets/diagnostic-summary.png";
 import gaugeThumbnail from "./Gauge/thumbnail.png";
 import imageThumbnail from "./Image/thumbnail.png";
 import indicatorThumbnail from "./Indicator/thumbnail.png";
@@ -28,8 +30,6 @@ import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
 import userScriptEditorThumbnail from "./UserScriptEditor/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
-import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-status.png";
-import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summary.png";
 
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
@@ -44,7 +44,7 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     type: "DiagnosticStatusPanel",
     description: t("ROSDiagnosticsDetailDescription"),
     thumbnail: diagnosticStatusThumbnail,
-    module: async () => await import("./diagnostics/DiagnosticStatusPanel"),
+    module: async () => await import("./DiagnosticStatus"),
     hasCustomToolbar: true,
   },
   {
@@ -52,7 +52,7 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     type: "DiagnosticSummary",
     description: t("ROSDiagnosticSummaryDescription"),
     thumbnail: diagnosticSummaryThumbnail,
-    module: async () => await import("./diagnostics/DiagnosticSummary"),
+    module: async () => await import("./DiagnosticSummary"),
     hasCustomToolbar: true,
   },
   {

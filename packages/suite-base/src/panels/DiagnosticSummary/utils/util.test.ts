@@ -14,16 +14,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import {
+  LEVELS,
+  MAX_STRING_LENGTH,
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
+
 import {
   getDiagnosticId,
-  getDisplayName,
   getDiagnosticsByLevel,
   filterAndSortDiagnostics,
   computeDiagnosticInfo,
-  LEVELS,
-  MAX_STRING_LENGTH,
-  DiagnosticsById,
-  DiagnosticInfo,
 } from "./util";
 
 const watchdogStatus: DiagnosticInfo = {
@@ -108,24 +110,6 @@ describe("diagnostics", () => {
       expect(getDiagnosticId("foo")).toBe("|foo|");
       expect(getDiagnosticId("/foo")).toBe("|foo|");
       expect(getDiagnosticId("//foo")).toBe("|/foo|");
-    });
-  });
-
-  describe("getDisplayName", () => {
-    it("handles hardware_id and name", () => {
-      expect(getDisplayName("my_hardware_id", "my_name")).toBe("my_hardware_id: my_name");
-    });
-
-    it("handles blank name with hardware_id", () => {
-      expect(getDisplayName("my_hardware_id", "")).toBe("my_hardware_id");
-    });
-
-    it("handles blank hardware_id with name", () => {
-      expect(getDisplayName("", "my_name")).toBe("my_name");
-    });
-
-    it("handles blank hardware_id and blank name", () => {
-      expect(getDisplayName("", "")).toBe("(empty)");
     });
   });
 

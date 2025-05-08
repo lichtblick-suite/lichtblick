@@ -18,50 +18,32 @@ import { Autocomplete, TextField } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
 
 import { compare } from "@lichtblick/rostime";
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-
-import DiagnosticStatus from "./DiagnosticStatus";
-import { buildStatusPanelSettingsTree } from "./settings";
-import useAvailableDiagnostics from "./useAvailableDiagnostics";
-import useDiagnostics from "./useDiagnostics";
+import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticStatus/DiagnosticStatusPanel.style";
+import useAvailableDiagnostics from "@lichtblick/suite-base/panels/DiagnosticStatus/hooks/useAvailableDiagnostics";
+import { DiagnosticStatusPanelProps } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
 import {
-  DiagnosticStatusConfig as Config,
+  ALLOWED_DATATYPES,
   DEFAULT_SECONDS_UNTIL_STALE,
   LEVELS,
-  getDisplayName,
-} from "./util";
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import useDiagnostics from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics";
+import useStaleTime from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useStaleTime";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
-type Props = {
-  config: Config;
-  saveConfig: SaveConfig<Config>;
-};
-
-const ALLOWED_DATATYPES: string[] = [
-  "diagnostic_msgs/DiagnosticArray",
-  "diagnostic_msgs/msg/DiagnosticArray",
-  "ros.diagnostic_msgs.DiagnosticArray",
-];
-
-const useStyles = makeStyles()({
-  toolbar: {
-    paddingBlock: 0,
-  },
-});
+import DiagnosticTable from "./DiagnosticTable";
+import { buildStatusPanelSettingsTree } from "./utils/buildStatusPanelSettingsTree";
 
 // component to display a single diagnostic status from list
-function DiagnosticStatusPanel(props: Props) {
+const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Element => {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
@@ -176,6 +158,16 @@ function DiagnosticStatusPanel(props: Props) {
     });
   }, [actionHandler, config, availableTopics, topicToRender, updatePanelSettingsTree]);
 
+  function renderEmptyState(displayName: string | undefined): React.JSX.Element {
+    return displayName ? (
+      <EmptyState>
+        Waiting for diagnostics from <code>{displayName}</code>
+      </EmptyState>
+    ) : (
+      <EmptyState>No diagnostic node selected</EmptyState>
+    );
+  }
+
   return (
     <Stack flex="auto" overflow="hidden">
       <PanelToolbar className={classes.toolbar}>
@@ -213,9 +205,9 @@ function DiagnosticStatusPanel(props: Props) {
         />
       </PanelToolbar>
       {filteredDiagnostics.length > 0 ? (
-        <Stack flex="auto" overflowY="auto">
+        <Stack flex="auto" overflowY="auto" testId="filtered-diagnostics">
           {_.sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
-            <DiagnosticStatus
+            <DiagnosticTable
               key={item.id}
               info={item}
               splitFraction={splitFraction}
@@ -228,22 +220,11 @@ function DiagnosticStatusPanel(props: Props) {
             />
           ))}
         </Stack>
-      ) : selectedDisplayName ? (
-        <EmptyState>
-          Waiting for diagnostics from <code>{selectedDisplayName}</code>
-        </EmptyState>
       ) : (
-        <EmptyState>No diagnostic node selected</EmptyState>
+        renderEmptyState(selectedDisplayName)
       )}
     </Stack>
   );
-}
+};
 
-const defaultConfig: Config = { topicToRender: "/diagnostics" };
-
-export default Panel(
-  Object.assign(DiagnosticStatusPanel, {
-    panelType: "DiagnosticStatusPanel",
-    defaultConfig,
-  }),
-);
+export default DiagnosticStatusPanel;

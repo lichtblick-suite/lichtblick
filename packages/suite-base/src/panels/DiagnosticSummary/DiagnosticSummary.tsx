@@ -14,153 +14,47 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import PushPinIcon from "@mui/icons-material/PushPin";
-import {
-  IconButton,
-  InputBase,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  MenuItem,
-  Select,
-  Typography,
-  iconButtonClasses,
-  inputBaseClasses,
-  listItemTextClasses,
-  selectClasses,
-} from "@mui/material";
+import { InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { CSSProperties, useCallback, useEffect, useMemo } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList as List } from "react-window";
-import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import useDiagnostics from "@lichtblick/suite-base/panels/diagnostics/useDiagnostics";
-import useStaleTime from "@lichtblick/suite-base/panels/diagnostics/useStaleTime";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import toggle from "@lichtblick/suite-base/util/toggle";
-
-import { buildSummarySettingsTree } from "./settings";
 import {
-  DEFAULT_SECONDS_UNTIL_STALE,
   DiagnosticInfo,
   DiagnosticStatusConfig,
-  DiagnosticSummaryConfig,
+} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import DiagnosticNodeRow from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticNodeRow";
+import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary.style";
+import {
+  ALLOWED_DATATYPES,
+  DEFAULT_SECONDS_UNTIL_STALE,
   KNOWN_LEVELS,
   LEVEL_NAMES,
-  filterAndSortDiagnostics,
-  getDiagnosticsByLevel,
-  getDiagnosticsWithStales,
-} from "./util";
+  MESSAGE_COLORS,
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
+import useDiagnostics from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics";
+import useStaleTime from "@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useStaleTime";
+import {
+  DiagnosticSummaryConfig,
+  DiagnosticSummaryProps,
+} from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
+import { getDiagnosticsWithStales } from "@lichtblick/suite-base/panels/DiagnosticSummary/utils/getDiagnosticsWithStales";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import toggle from "@lichtblick/suite-base/util/toggle";
 
-type NodeRowProps = {
-  info: DiagnosticInfo;
-  isPinned: boolean;
-  onClick: (info: DiagnosticInfo) => void;
-  onClickPin: (info: DiagnosticInfo) => void;
-};
+import { buildSettingsTree } from "./utils/buildSettingsTree";
+import { filterAndSortDiagnostics, getDiagnosticsByLevel } from "./utils/util";
 
-const MESSAGE_COLORS: { [key: string]: string } = {
-  ok: "success.main",
-  warn: "warning.main",
-  error: "error.main",
-  stale: "text.secondary",
-};
-
-const useStyles = makeStyles()((theme) => ({
-  listItemButton: {
-    padding: 0,
-
-    [`.${iconButtonClasses.root}`]: {
-      visibility: "hidden",
-
-      "&:hover": {
-        backgroundColor: "transparent",
-      },
-    },
-    [`.${listItemTextClasses.root}`]: {
-      gap: theme.spacing(1),
-      display: "flex",
-    },
-    [`&:hover .${iconButtonClasses.root}`]: {
-      visibility: "visible",
-    },
-  },
-  select: {
-    [`.${inputBaseClasses.input}.${selectClasses.select}.${inputBaseClasses.inputSizeSmall}`]: {
-      paddingTop: 0,
-      paddingBottom: 0,
-      minWidth: 40,
-    },
-    [`.${listItemTextClasses.root}`]: {
-      marginTop: 0,
-      marginBottom: 0,
-    },
-  },
-}));
-
-const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
-  const { info, isPinned, onClick, onClickPin } = props;
-  const { classes } = useStyles();
-
-  const handleClick = useCallback(() => {
-    onClick(info);
-  }, [onClick, info]);
-
-  const handleClickPin = useCallback(() => {
-    onClickPin(info);
-  }, [onClickPin, info]);
-
-  const levelName = LEVEL_NAMES[info.status.level];
-
-  return (
-    <ListItem dense disablePadding data-testid-diagnostic-row>
-      <ListItemButton className={classes.listItemButton} disableGutters onClick={handleClick}>
-        <IconButton
-          size="small"
-          onClick={(event) => {
-            handleClickPin();
-            event.stopPropagation();
-          }}
-          style={isPinned ? { visibility: "visible" } : undefined}
-        >
-          <PushPinIcon fontSize="small" color={isPinned ? "inherit" : "disabled"} />
-        </IconButton>
-        <ListItemText
-          primary={info.displayName}
-          secondary={info.status.message}
-          secondaryTypographyProps={{
-            color: MESSAGE_COLORS[levelName ?? "stale"],
-          }}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-        />
-      </ListItemButton>
-    </ListItem>
-  );
-});
-
-type Props = {
-  config: DiagnosticSummaryConfig;
-  saveConfig: SaveConfig<DiagnosticSummaryConfig>;
-};
-
-const ALLOWED_DATATYPES: string[] = [
-  "diagnostic_msgs/DiagnosticArray",
-  "diagnostic_msgs/msg/DiagnosticArray",
-  "ros.diagnostic_msgs.DiagnosticArray",
-];
-
-function DiagnosticSummary(props: Props): React.JSX.Element {
+const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => {
   const { config, saveConfig } = props;
   const { classes } = useStyles();
   const { topics } = useDataSourceInfo();
@@ -204,8 +98,11 @@ function DiagnosticSummary(props: Props): React.JSX.Element {
     (renderProps: { data: DiagnosticInfo[]; index: number; style: CSSProperties }) => {
       const item = renderProps.data[renderProps.index]!;
       return (
-        <div style={{ ...renderProps.style }}>
-          <NodeRow
+        <div
+          style={{ ...renderProps.style }}
+          data-testid={`diagnostic-summary-node-row-${renderProps.index}`}
+        >
+          <DiagnosticNodeRow
             key={item.id}
             info={item}
             isPinned={pinnedIds.includes(item.id)}
@@ -320,7 +217,7 @@ function DiagnosticSummary(props: Props): React.JSX.Element {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      nodes: buildSummarySettingsTree(config, topicToRender, availableTopics),
+      nodes: buildSettingsTree({ config, topicToRender, availableTopics }),
     });
   }, [actionHandler, availableTopics, config, topicToRender, updatePanelSettingsTree]);
 
@@ -341,7 +238,7 @@ function DiagnosticSummary(props: Props): React.JSX.Element {
           >
             {KNOWN_LEVELS.map((level) => (
               <MenuItem key={level} value={level}>
-                <Typography variant="inherit" color={MESSAGE_COLORS[LEVEL_NAMES[level] ?? "stale"]}>
+                <Typography variant="inherit" color={MESSAGE_COLORS[level]}>
                   {LEVEL_NAMES[level]?.toUpperCase()}
                 </Typography>
               </MenuItem>
@@ -360,19 +257,6 @@ function DiagnosticSummary(props: Props): React.JSX.Element {
       <Stack flex="auto">{summary}</Stack>
     </Stack>
   );
-}
-
-const defaultConfig: DiagnosticSummaryConfig = {
-  minLevel: 0,
-  pinnedIds: [],
-  hardwareIdFilter: "",
-  topicToRender: "/diagnostics",
-  sortByLevel: true,
 };
 
-export default Panel(
-  Object.assign(DiagnosticSummary, {
-    panelType: "DiagnosticSummary",
-    defaultConfig,
-  }),
-);
+export default DiagnosticSummary;
