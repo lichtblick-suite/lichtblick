@@ -29,24 +29,10 @@ export default class ExtensionBuilder {
     props: Partial<ExtensionMarketplaceDetail> = {},
   ): ExtensionMarketplaceDetail {
     return defaults<ExtensionMarketplaceDetail>(props, {
-      id: BasicBuilder.string(),
-      name: BasicBuilder.string(),
-      qualifiedName: BasicBuilder.string(),
-      description: BasicBuilder.string(),
-      publisher: BasicBuilder.string(),
-      homepage: BasicBuilder.string(),
-      license: BasicBuilder.string(),
-      version: BasicBuilder.string(),
-      readme: BasicBuilder.string(),
-      changelog: BasicBuilder.string(),
+      ...this.extensionInfo(props),
       foxe: BasicBuilder.string(),
-      namespace: BasicBuilder.sample(["local", "org"] as ExtensionNamespace[]),
       sha256sum: BasicBuilder.string(),
-      keywords: BasicBuilder.strings(),
-      time: {
-        created: BasicBuilder.string(),
-        modified: BasicBuilder.string(),
-      },
+      time: BasicBuilder.genericDictionary(String),
     });
   }
 }

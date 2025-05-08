@@ -1,0 +1,265 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import { existsSync } from "fs";
+import { readdir, readFile } from "fs/promises";
+import randomString from "randomstring";
+
+import {
+  getExtensions,
+  getPackageDirname,
+  getPackageId,
+  parsePackageName,
+} from "./extensionsManager";
+import { ExtensionPackageJson } from "./types";
+
+jest.mock("fs", () => ({
+  existsSync: jest.fn(),
+}));
+
+jest.mock("fs/promises", () => ({
+  readdir: jest.fn(),
+  readFile: jest.fn(),
+  mkdir: jest.fn(),
+  rm: jest.fn(),
+  writeFile: jest.fn(),
+}));
+
+const genericString = (): string =>
+  randomString.generate({ length: 6, charset: "alphanumeric", capitalization: "lowercase" });
+
+function generateExtensionPackageJSon({
+  name,
+  version,
+  main,
+  publisher,
+}: Partial<ExtensionPackageJson> = {}): ExtensionPackageJson {
+  return {
+    name: name ?? genericString(),
+    version: version ?? genericString(),
+    main: main ?? genericString(),
+    publisher,
+  };
+}
+
+describe("getPackageId", () => {
+  it("should throw an error if package.json is undefined", () => {
+    const undefinedPackageJson = undefined;
+
+    const result = () => {
+      getPackageId(undefinedPackageJson);
+    };
+
+    expect(result).toThrow(`Missing package.json`);
+  });
+
+  it("should throw an error if package.json is missing name field", () => {
+    const invalidPackageJson: Partial<ExtensionPackageJson> = {
+      version: genericString(),
+      main: genericString(),
+      publisher: genericString(),
+    };
+
+    const result = () => {
+      getPackageId(invalidPackageJson as ExtensionPackageJson);
+    };
+
+    expect(result).toThrow(`package.json is missing required "name" field`);
+  });
+
+  it("should throw an error if package.json is missing version field", () => {
+    const invalidPackageJson: Partial<ExtensionPackageJson> = {
+      name: genericString(),
+      main: genericString(),
+      publisher: genericString(),
+    };
+
+    const result = () => {
+      getPackageId(invalidPackageJson as ExtensionPackageJson);
+    };
+
+    expect(result).toThrow(`package.json is missing required "version" field`);
+  });
+
+  it("should throw an error if package.json is missing publisher field", () => {
+    const invalidPackageJson: Partial<ExtensionPackageJson> = generateExtensionPackageJSon();
+
+    const result = () => {
+      getPackageId(invalidPackageJson as ExtensionPackageJson);
+    };
+
+    expect(result).toThrow(`package.json is missing required "publisher" field`);
+  });
+
+  it("should throw an error if package.json contains an invalid publisher", () => {
+    const invalidPackageJson: Partial<ExtensionPackageJson> = generateExtensionPackageJSon({
+      publisher: "-----",
+    });
+
+    const result = () => {
+      getPackageId(invalidPackageJson as ExtensionPackageJson);
+    };
+
+    expect(result).toThrow(`package.json contains an invalid "publisher" field`);
+  });
+
+  it("should return an identifier with package publisher and name", () => {
+    const publisher = "lichtblick";
+    const mockPakageJson = generateExtensionPackageJSon({ publisher });
+
+    const result = getPackageId(mockPakageJson);
+
+    expect(result).toBe(`lichtblick.${mockPakageJson.name}`);
+  });
+});
+
+describe("getPackageDirname", () => {
+  const mockPakageJson = generateExtensionPackageJSon({ publisher: genericString() });
+  it("should return a valid directory name for a valid package.json", () => {
+    const result = getPackageDirname(mockPakageJson);
+
+    expect(result).toBe(
+      `${mockPakageJson.publisher}.${mockPakageJson.name}-${mockPakageJson.version}`,
+    );
+  });
+
+  it("should throw an error if the directory name exceeds 255 characters", () => {
+    mockPakageJson.name = genericString().repeat(50);
+    mockPakageJson.publisher = genericString().repeat(100);
+
+    expect(() => getPackageDirname(mockPakageJson)).toThrow(
+      "package.json publisher.name-version is too long",
+    );
+  });
+});
+
+describe("parsePackageName", () => {
+  it("should return the namespace and name for a scoped package name", () => {
+    const mockName = "@lichtblick-namespace/extension-package";
+    const result = parsePackageName(mockName);
+
+    expect(result).toEqual({
+      namespace: "lichtblick-namespace",
+      name: "extension-package",
+    });
+  });
+
+  it("should return only the name if the package name is not scoped", () => {
+    const mockName = "extension-package";
+    const result = parsePackageName(mockName);
+
+    expect(result).toEqual({
+      name: "extension-package",
+    });
+  });
+
+  it("should handle invalid package names gracefully", () => {
+    const result = parsePackageName("");
+
+    expect(result).toEqual({
+      name: "",
+    });
+  });
+});
+
+describe("getExtensions", () => {
+  const mockRootFolder = "/mock/extensions";
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return an empty array if the root folder does not exist", async () => {
+    (existsSync as jest.Mock).mockReturnValue(false);
+
+    const result = await getExtensions(mockRootFolder);
+
+    expect(result).toEqual([]);
+    expect(existsSync).toHaveBeenCalledWith(mockRootFolder);
+  });
+
+  it("should return an empty array if the root folder is empty", async () => {
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([]);
+
+    const result = await getExtensions(mockRootFolder);
+
+    expect(result).toEqual([]);
+    expect(readdir).toHaveBeenCalledWith(mockRootFolder, { withFileTypes: true });
+  });
+
+  it("should skip all entries when isDirectory is false", async () => {
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([{ isDirectory: () => false }]);
+
+    const result = await getExtensions(mockRootFolder);
+
+    expect(result).toEqual([]);
+    expect(readdir).toHaveBeenCalledWith(mockRootFolder, { withFileTypes: true });
+  });
+
+  it("should load extensions from valid directories", async () => {
+    const mockPackageJson = generateExtensionPackageJSon({ publisher: genericString() });
+
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([
+      { name: "extension1", isDirectory: () => true },
+      { name: "extension2", isDirectory: () => true },
+    ]);
+    (readFile as jest.Mock).mockImplementation(async (path: string) => {
+      if (path.endsWith("package.json")) {
+        return await Promise.resolve(JSON.stringify(mockPackageJson));
+      }
+      return await Promise.resolve("");
+    });
+
+    const result = await getExtensions(mockRootFolder);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({
+      id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
+      packageJson: mockPackageJson,
+      directory: `${mockRootFolder}/extension1`,
+      readme: "",
+      changelog: "",
+    });
+    expect(result[1]).toMatchObject({
+      id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
+      packageJson: mockPackageJson,
+      directory: `${mockRootFolder}/extension2`,
+      readme: "",
+      changelog: "",
+    });
+  });
+
+  it("should handle errors gracefully and continue processing other extensions", async () => {
+    const mockPackageJson = generateExtensionPackageJSon({ publisher: genericString() });
+
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([
+      { name: "extension1", isDirectory: () => true },
+      { name: "extension2", isDirectory: () => true },
+    ]);
+    (readFile as jest.Mock).mockImplementation(async (path: string) => {
+      if (path.includes("extension1")) {
+        throw new Error("Failed to read package.json");
+      }
+      if (path.endsWith("package.json")) {
+        return await Promise.resolve(JSON.stringify(mockPackageJson));
+      }
+      return await Promise.resolve("");
+    });
+
+    const result = await getExtensions(mockRootFolder);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
+      packageJson: mockPackageJson,
+      directory: `${mockRootFolder}/extension2`,
+      readme: "",
+      changelog: "",
+    });
+    (console.error as jest.Mock).mockClear();
+  });
+});

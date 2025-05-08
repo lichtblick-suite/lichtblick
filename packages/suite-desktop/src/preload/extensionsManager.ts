@@ -12,11 +12,10 @@ import { dirname, join as pathJoin } from "path";
 
 import Logger from "@lichtblick/log";
 
+import { ExtensionPackageJson } from "./types";
 import { DesktopExtension } from "../common/types";
 
 const log = Logger.getLogger(__filename);
-
-type ExtensionPackageJson = { name: string; version: string; main: string; publisher?: string };
 
 /**
  * Returns a unique identifier for an extension based on the publisher and package name. The
@@ -27,7 +26,7 @@ type ExtensionPackageJson = { name: string; version: string; main: string; publi
  * @param pkgJson Parsed package.json file
  * @returns An identifier string such as "lichtblick.suite-extension-turtlesim"
  */
-function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
+export function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
   if (pkgJson == undefined) {
     throw new Error(`Missing package.json`);
   }
@@ -58,7 +57,7 @@ function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
  * @param pkgJson Parsed package.json file
  * @returns A directory name such as "lichtblick.suite-extension-turtlesim-1.0.0"
  */
-function getPackageDirname(pkgJson: ExtensionPackageJson): string {
+export function getPackageDirname(pkgJson: ExtensionPackageJson): string {
   const pkgId = getPackageId(pkgJson);
   const dir = `${pkgId}-${pkgJson.version}`;
   if (dir.length >= 255) {
@@ -72,7 +71,7 @@ function getPackageDirname(pkgJson: ExtensionPackageJson): string {
  * @param name The "name" field from a package.json file
  * @returns An object containing the unprefixed name and the namespace, if present
  */
-function parsePackageName(name: string): { namespace?: string; name: string } {
+export function parsePackageName(name: string): { namespace?: string; name: string } {
   const res = /^@([^/]+)\/(.+)/.exec(name);
   if (res == undefined) {
     return { name };

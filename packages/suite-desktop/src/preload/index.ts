@@ -14,7 +14,12 @@ import Logger from "@lichtblick/log";
 import { NetworkInterface, OsContext } from "@lichtblick/suite-base/src/OsContext";
 
 import LocalFileStorage from "./LocalFileStorage";
-import { getExtensions, installExtension, loadExtension, uninstallExtension } from "./extensions";
+import {
+  getExtensions,
+  installExtension,
+  loadExtension,
+  uninstallExtension,
+} from "./extensionsManager";
 import { fetchLayouts } from "./layouts";
 import { decodeRendererArg } from "../common/rendererArgs";
 import {
