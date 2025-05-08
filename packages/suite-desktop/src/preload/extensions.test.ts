@@ -227,8 +227,10 @@ describe("getExtensions", () => {
     });
   });
 
-  it("should handle errors gracefully and continue processing other extensions", async () => {
+  it("should handle errors gracefully and continue processing other extensions with README and CHANGELOG", async () => {
     const mockPackageJson = generateExtensionPackageJSon({ publisher: genericString() });
+    const mockReadmeContent = genericString();
+    const mockChangelogContent = genericString();
 
     (existsSync as jest.Mock).mockReturnValue(true);
     (readdir as jest.Mock).mockResolvedValue([
@@ -237,10 +239,22 @@ describe("getExtensions", () => {
     ]);
     (readFile as jest.Mock).mockImplementation(async (path: string) => {
       if (path.includes("extension1")) {
+        if (path.endsWith("README.md")) {
+          return await Promise.resolve(mockReadmeContent);
+        }
+        if (path.endsWith("CHANGELOG.md")) {
+          return await Promise.resolve(mockChangelogContent);
+        }
         throw new Error("Failed to read package.json");
       }
       if (path.endsWith("package.json")) {
         return await Promise.resolve(JSON.stringify(mockPackageJson));
+      }
+      if (path.endsWith("README.md")) {
+        return await Promise.resolve(mockReadmeContent);
+      }
+      if (path.endsWith("CHANGELOG.md")) {
+        return await Promise.resolve(mockChangelogContent);
       }
       return await Promise.resolve("");
     });
@@ -252,8 +266,8 @@ describe("getExtensions", () => {
       id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
       packageJson: mockPackageJson,
       directory: `${mockRootFolder}/extension2`,
-      readme: "",
-      changelog: "",
+      readme: mockReadmeContent,
+      changelog: mockChangelogContent,
     });
     (console.error as jest.Mock).mockClear();
   });
