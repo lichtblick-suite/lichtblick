@@ -2,10 +2,18 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { existsSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, mkdir, rm, writeFile } from "fs/promises";
+import JSZip from "jszip";
+import { dirname, join as pathJoin } from "path";
 import randomString from "randomstring";
 
-import { getExtensions, getPackageDirname, getPackageId, parsePackageName } from "./extensions";
+import {
+  getExtensions,
+  getPackageDirname,
+  getPackageId,
+  installExtension,
+  parsePackageName,
+} from "./extensions";
 import { ExtensionPackageJson } from "./types";
 
 jest.mock("fs", () => ({
@@ -18,6 +26,10 @@ jest.mock("fs/promises", () => ({
   mkdir: jest.fn(),
   rm: jest.fn(),
   writeFile: jest.fn(),
+}));
+
+jest.mock("jszip", () => ({
+  loadAsync: jest.fn(),
 }));
 
 const genericString = (): string =>
@@ -269,6 +281,79 @@ describe("getExtensions", () => {
       readme: mockReadmeContent,
       changelog: mockChangelogContent,
     });
+    (console.error as jest.Mock).mockClear();
+  });
+});
+
+describe("installExtension", () => {
+  const mockRootFolder = "/mock/extensions";
+  const mockPackageJson = generateExtensionPackageJSon({ publisher: genericString() });
+  const mockReadmeContent = genericString();
+  const mockChangelogContent = genericString();
+
+  let mockArchive: any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockArchive = {
+      files: {
+        "package.json": {
+          async: jest.fn().mockResolvedValue(JSON.stringify(mockPackageJson)),
+        },
+        "README.md": {
+          async: jest.fn().mockResolvedValue(mockReadmeContent),
+        },
+        "CHANGELOG.md": {
+          async: jest.fn().mockResolvedValue(mockChangelogContent),
+        },
+        "file.txt": {
+          async: jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
+        },
+      },
+    };
+
+    (JSZip.loadAsync as jest.Mock).mockResolvedValue(mockArchive);
+  });
+
+  it("should install an extension successfully", async () => {
+    const result = await installExtension(new Uint8Array([1, 2, 3]), mockRootFolder);
+
+    expect(result).toMatchObject({
+      id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
+      packageJson: mockPackageJson,
+      directory: expect.stringContaining(`${mockPackageJson.publisher}.${mockPackageJson.name}`),
+      readme: mockReadmeContent,
+      changelog: mockChangelogContent,
+    });
+
+    const expectedDir = pathJoin(
+      mockRootFolder,
+      `${mockPackageJson.publisher}.${mockPackageJson.name}-${mockPackageJson.version}`,
+    );
+    expect(rm).toHaveBeenCalledWith(expectedDir, { recursive: true, force: true });
+    expect(mkdir).toHaveBeenCalledWith(expectedDir, { recursive: true });
+    expect(writeFile).toHaveBeenCalledWith(
+      pathJoin(expectedDir, "file.txt"),
+      expect.any(Uint8Array),
+    );
+  });
+
+  it("should throw an error if package.json is missing", async () => {
+    delete mockArchive.files["package.json"];
+
+    await expect(installExtension(new Uint8Array([1, 2, 3]), mockRootFolder)).rejects.toThrow(
+      "Extension does not contain a package.json file",
+    );
+  });
+
+  it("should throw an error if package.json is invalid", async () => {
+    mockArchive.files["package.json"].async.mockResolvedValue("invalid-json");
+
+    await expect(installExtension(new Uint8Array([1, 2, 3]), mockRootFolder)).rejects.toThrow(
+      "Extension contains an invalid package.json",
+    );
+
     (console.error as jest.Mock).mockClear();
   });
 });
