@@ -5,12 +5,7 @@ import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import randomString from "randomstring";
 
-import {
-  getExtensions,
-  getPackageDirname,
-  getPackageId,
-  parsePackageName,
-} from "./extensionsManager";
+import { getExtensions, getPackageDirname, getPackageId, parsePackageName } from "./extensions";
 import { ExtensionPackageJson } from "./types";
 
 jest.mock("fs", () => ({
