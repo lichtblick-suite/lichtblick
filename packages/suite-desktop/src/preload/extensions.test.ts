@@ -4,7 +4,7 @@
 import { existsSync } from "fs";
 import { readdir, readFile, mkdir, rm, writeFile } from "fs/promises";
 import JSZip from "jszip";
-import { dirname, join as pathJoin } from "path";
+import { join as pathJoin } from "path";
 import randomString from "randomstring";
 
 import {
