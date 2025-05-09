@@ -39,17 +39,5 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
       },
     },
-    {
-      name: "web-firefox",
-      use: {
-        baseURL: URL,
-        storageState: STORAGE_STATE,
-        headless: true,
-        trace: "on-first-retry",
-        video: "retain-on-failure",
-        screenshot: "only-on-failure",
-        ...devices["Desktop Firefox"],
-      },
-    },
   ],
 });
