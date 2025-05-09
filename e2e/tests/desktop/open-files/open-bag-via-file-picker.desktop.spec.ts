@@ -5,7 +5,7 @@ import { loadFile } from "../../../fixtures/load-file";
 
 test("should open a BAG file via file picker", async ({ mainWindow }) => {
   // Given
-  const filename = "example-bag.bag";
+  const filename = "example.bag";
   await loadFile({
     mainWindow,
     filename,
