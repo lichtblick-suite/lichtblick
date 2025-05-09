@@ -79,6 +79,14 @@ export function parsePackageName(name: string): { namespace?: string; name: stri
   return { namespace: res[1], name: res[2]! };
 }
 
+const safeReadFile = async (filePath: string): Promise<string> => {
+  try {
+    return await readFile(filePath, { encoding: "utf8" });
+  } catch {
+    return "";
+  }
+};
+
 export async function getExtensions(rootFolder: string): Promise<DesktopExtension[]> {
   const extensions: DesktopExtension[] = [];
 
@@ -98,15 +106,11 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const packageData = await readFile(packagePath, { encoding: "utf8" });
       const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
       const readmePath = pathJoin(extensionRootPath, "README.md");
-      const readme =
-        existsSync(readmePath) && (await readFile(readmePath, { encoding: "utf8" }))
-          ? await readFile(readmePath, { encoding: "utf8" })
-          : "";
       const changelogPath = pathJoin(extensionRootPath, "CHANGELOG.md");
-      const changelog =
-        existsSync(changelogPath) && (await readFile(changelogPath, { encoding: "utf8" }))
-          ? await readFile(changelogPath, { encoding: "utf8" })
-          : "";
+      const [readme, changelog] = await Promise.all([
+        safeReadFile(readmePath),
+        safeReadFile(changelogPath),
+      ]);
 
       const id = getPackageId(packageJson);
 
