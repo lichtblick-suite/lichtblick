@@ -31,6 +31,9 @@ yarn test:e2e:desktop:report
 
 # Run desktop tests in CI (headless mode enforced in Electron)
 yarn test:e2e:desktop:ci
+
+# Run a specific test when developing (filename: uninstall-extension.desktop.spec.ts)
+yarn test:e2e:desktop:debug uninstall-extens
 ```
 
 ## 🧪 Filename Pattern
