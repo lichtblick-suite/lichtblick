@@ -8,6 +8,7 @@ import { DOMParser } from "@xmldom/xmldom";
 import { protocol, net } from "electron";
 import { promises as fs } from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { PNG } from "pngjs";
 import UTIF from "utif";
 
@@ -157,7 +158,9 @@ export function registerRosPackageProtocolHandlers(): void {
 
       const resolvedResourcePath = path.join(pkgRoot, ...relPath.split("/"));
       log.info(`Resolved: ${resolvedResourcePath}`);
-      return await net.fetch(resolvedResourcePath);
+      // prepend the file:// protocol to the path
+      const fileUrl = pathToFileURL(resolvedResourcePath).toString();
+      return await net.fetch(fileUrl);
     } catch (err: unknown) {
       log.error("Error loading from ROS package url", request.url, err);
       return Response.error();
