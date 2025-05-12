@@ -82,14 +82,14 @@ export function ExtensionDetails({
     async () =>
       readme != undefined && isValidUrl(readme)
         ? await marketplace.getMarkdown(readme)
-        : DOMPurify.sanitize(readme ?? ""),
+        : DOMPurify.sanitize(readme ?? "No readme found."),
     [marketplace, readme],
   );
   const { value: changelogContent } = useAsync(
     async () =>
       changelog != undefined && isValidUrl(changelog)
         ? await marketplace.getMarkdown(changelog)
-        : DOMPurify.sanitize(changelog ?? ""),
+        : DOMPurify.sanitize(changelog ?? "No changelog found."),
     [marketplace, changelog],
   );
 
