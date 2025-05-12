@@ -127,26 +127,32 @@ export default function PlaybackControls({
     setRepeat((old) => !old);
   }, [setRepeat]);
 
+  const syncInstances = useWorkspaceStore((store) => store.playbackControls.syncInstances);
+
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
-      BroadcastLB.getInstance().postMessage({
-        type: "pause",
-        time: getTimeInfo().currentTime!,
-      });
       pause();
+      if (syncInstances) {
+        BroadcastLB.getInstance().postMessage({
+          type: "pause",
+          time: getTimeInfo().currentTime!,
+        });
+      }
     } else {
       const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
       // if we are at the end, we need to go back to start
       if (current && end && start && compare(current, end) >= 0) {
         seek(start);
       }
-      BroadcastLB.getInstance().postMessage({
-        type: "play",
-        time: getTimeInfo().currentTime!,
-      });
       play();
+      if (syncInstances) {
+        BroadcastLB.getInstance().postMessage({
+          type: "play",
+          time: getTimeInfo().currentTime!,
+        });
+      }
     }
-  }, [isPlaying, pause, getTimeInfo, play, seek]);
+  }, [isPlaying, pause, getTimeInfo, play, seek, syncInstances]);
 
   const seekForwardAction = useCallback(
     (ev?: KeyboardEvent) => {
@@ -191,12 +197,14 @@ export default function PlaybackControls({
       }
       const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev);
       seek(targetTime);
-      BroadcastLB.getInstance().postMessage({
-        type: "seek",
-        time: targetTime,
-      });
+      if (syncInstances) {
+        BroadcastLB.getInstance().postMessage({
+          type: "seek",
+          time: targetTime,
+        });
+      }
     },
-    [getTimeInfo, seek],
+    [getTimeInfo, seek, syncInstances],
   );
 
   const keyDownHandlers = useMemo(
