@@ -156,6 +156,23 @@ describe("ExtensionDetails Component", () => {
       });
     });
 
+    it("displays message indicating readme is not found when readme is undefined", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const readmeContent = undefined;
+      mockExtension.readme = readmeContent;
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
+      const readmeButton = screen.getByRole("tab", {
+        name: /readme/i,
+      });
+
+      fireEvent.click(readmeButton);
+      await waitFor(() => {
+        expect(screen.getByText(/No readme found/i)).toBeInTheDocument();
+      });
+    });
+
     it("displays changelog correctly", async () => {
       (isDesktopApp as jest.Mock).mockReturnValue(true);
 
@@ -170,6 +187,23 @@ describe("ExtensionDetails Component", () => {
       fireEvent.click(changelogButton);
       await waitFor(() => {
         expect(screen.getByText(changelogContent)).toBeInTheDocument();
+      });
+    });
+
+    it("displays message indicating changelog is not found when changelog is undefined", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const changelogContent = undefined;
+      mockExtension.changelog = changelogContent;
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
+      const changelogButton = screen.getByRole("tab", {
+        name: /changelog/i,
+      });
+
+      fireEvent.click(changelogButton);
+      await waitFor(() => {
+        expect(screen.getByText(/No changelog found/i)).toBeInTheDocument();
       });
     });
 
