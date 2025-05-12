@@ -53,6 +53,7 @@ export type WorkspaceActions = {
 
   playbackControlActions: {
     setRepeat: Dispatch<SetStateAction<boolean>>;
+    setSyncInstances: Dispatch<SetStateAction<boolean>>;
   };
 
   sidebarActions: {
@@ -170,6 +171,13 @@ export function useWorkspaceActions(): WorkspaceActions {
           set((draft) => {
             const repeat = setterValue(setter, draft.playbackControls.repeat);
             draft.playbackControls.repeat = repeat;
+          });
+        },
+
+        setSyncInstances: (setter: SetStateAction<boolean>) => {
+          set((draft) => {
+            const sync = setterValue(setter, draft.playbackControls.syncInstances);
+            draft.playbackControls.syncInstances = sync;
           });
         },
       },

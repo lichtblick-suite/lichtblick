@@ -77,6 +77,7 @@ export function migrateV0WorkspaceState(
     },
     playbackControls: {
       repeat: v0State.playbackControls.repeat,
+      syncInstances: false,
     },
   };
   return migrated;

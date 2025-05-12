@@ -24,6 +24,7 @@ export enum AppSetting {
 
   // Experimental features
   SHOW_DEBUG_PANELS = "showDebugPanels",
+  SHOW_SYNC_LB_INSTANCES = "showSyncLBInstances",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

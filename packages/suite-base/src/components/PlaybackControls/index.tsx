@@ -42,6 +42,7 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import SyncInstanceToggle from "@lichtblick/suite-base/components/PlaybackControls/SwitchSyncInstances/SyncInstanceToggle";
 import PlaybackSpeedControls from "@lichtblick/suite-base/components/PlaybackSpeedControls";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useCurrentUser } from "@lichtblick/suite-base/context/BaseUserContext";
@@ -52,7 +53,7 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { Player, PlayerPresence } from "@lichtblick/suite-base/players/types";
-import BroadcastLB from "@lichtblick/suite-base/util/BroadcastLB";
+import BroadcastLB from "@lichtblick/suite-base/util/broadcast/BroadcastLB";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
@@ -93,15 +94,23 @@ const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 const selectPlaybackRepeat = (store: WorkspaceContextStore) => store.playbackControls.repeat;
 
-export default function PlaybackControls(props: {
+type PlaybackControlsProps = Readonly<{
   play: NonNullable<Player["startPlayback"]>;
   pause: NonNullable<Player["pausePlayback"]>;
   seek: NonNullable<Player["seekPlayback"]>;
   playUntil?: Player["playUntil"];
   isPlaying: boolean;
   getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
-}): React.JSX.Element {
-  const { play, pause, seek, isPlaying, getTimeInfo, playUntil } = props;
+}>;
+
+export default function PlaybackControls({
+  play,
+  pause,
+  seek,
+  playUntil,
+  isPlaying,
+  getTimeInfo,
+}: PlaybackControlsProps): React.JSX.Element {
   const presence = useMessagePipeline(selectPresence);
 
   const { classes, cx } = useStyles();
@@ -119,10 +128,10 @@ export default function PlaybackControls(props: {
   }, [setRepeat]);
 
   const togglePlayPause = useCallback(() => {
-    const broadcast = BroadcastLB.getInstance();
     if (isPlaying) {
-      broadcast.postMessage({
+      BroadcastLB.getInstance().postMessage({
         type: "pause",
+        time: getTimeInfo().currentTime!,
       });
       pause();
     } else {
@@ -131,8 +140,9 @@ export default function PlaybackControls(props: {
       if (current && end && start && compare(current, end) >= 0) {
         seek(start);
       }
-      broadcast.postMessage({
+      BroadcastLB.getInstance().postMessage({
         type: "play",
+        time: getTimeInfo().currentTime!,
       });
       play();
     }
@@ -181,8 +191,7 @@ export default function PlaybackControls(props: {
       }
       const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev);
       seek(targetTime);
-      const broadcast = BroadcastLB.getInstance();
-      broadcast.postMessage({
+      BroadcastLB.getInstance().postMessage({
         type: "seek",
         time: targetTime,
       });
@@ -285,6 +294,7 @@ export default function PlaybackControls(props: {
             />
           </Stack>
           <Stack direction="row" flex={1} alignItems="center" justifyContent="flex-end" gap={0.5}>
+            <SyncInstanceToggle />
             <HoverableIconButton
               size="small"
               title="Loop playback"
