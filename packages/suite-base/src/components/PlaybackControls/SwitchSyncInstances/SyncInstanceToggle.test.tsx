@@ -149,4 +149,18 @@ describe("SyncInstanceToggle", () => {
     expect(setSyncInstancesMock).toHaveBeenCalledTimes(1);
     expect(setSyncInstancesMock).toHaveBeenCalledWith(false);
   });
+
+  it("should not deactivate synchronization when experimental feature is disabled", () => {
+    // GIVEN feature is initially disabled
+    useAppConfigurationValueMock.mockReturnValue([false]);
+
+    // WHEN sync is off
+    useWorkspaceStoreMock.mockImplementation((selector: any) =>
+      selector({ playbackControls: { syncInstances: false } }),
+    );
+    render(<SyncInstanceToggle />);
+
+    // THEN syncInstances is not explicitly turned off
+    expect(setSyncInstancesMock).not.toHaveBeenCalled();
+  });
 });
