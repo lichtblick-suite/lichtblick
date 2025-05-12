@@ -21,10 +21,10 @@ const useBroadcast = ({ play, pause, seek, playUntil }: UseBroadcastProps): void
   const syncInstances = useWorkspaceStore((store) => store.playbackControls.syncInstances);
 
   useEffect(() => {
-    if (!syncInstances) {
-      return;
-    }
+    BroadcastLB.setShouldSync({ shouldSync: syncInstances });
+  }, [syncInstances]);
 
+  useEffect(() => {
     const handler = (message: BroadcastMessageEvent) => {
       if (message.type === "playUntil") {
         playUntil?.(message.time);
@@ -51,7 +51,7 @@ const useBroadcast = ({ play, pause, seek, playUntil }: UseBroadcastProps): void
     return () => {
       BroadcastLB.getInstance().removeListener(handler);
     };
-  }, [play, pause, seek, playUntil, syncInstances]);
+  }, [play, pause, seek, playUntil]);
 };
 
 export default useBroadcast;

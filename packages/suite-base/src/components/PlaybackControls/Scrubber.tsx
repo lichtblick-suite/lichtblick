@@ -28,7 +28,6 @@ import {
   useClearHoverValue,
   useSetHoverValue,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
-import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import BroadcastLB from "@lichtblick/suite-base/util/broadcast/BroadcastLB";
 
@@ -95,8 +94,6 @@ export default function Scrubber(props: Props): React.JSX.Element {
   const latestStartTime = useLatest(startTime);
   const latestEndTime = useLatest(endTime);
 
-  const syncInstances = useWorkspaceStore((store) => store.playbackControls.syncInstances);
-
   const onChange = useCallback(
     (fraction: number) => {
       if (!latestStartTime.current || !latestEndTime.current) {
@@ -107,14 +104,12 @@ export default function Scrubber(props: Props): React.JSX.Element {
         fromSec(fraction * toSec(subtractTimes(latestEndTime.current, latestStartTime.current))),
       );
       onSeek(timeToSeek);
-      if (syncInstances) {
-        BroadcastLB.getInstance().postMessage({
-          type: "seek",
-          time: timeToSeek,
-        });
-      }
+      BroadcastLB.getInstance().postMessage({
+        type: "seek",
+        time: timeToSeek,
+      });
     },
-    [onSeek, latestEndTime, latestStartTime, syncInstances],
+    [onSeek, latestEndTime, latestStartTime],
   );
 
   const onHoverOver = useCallback(

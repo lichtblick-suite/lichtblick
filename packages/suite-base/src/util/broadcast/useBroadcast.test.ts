@@ -161,4 +161,27 @@ describe("useBroadcast", () => {
     expect(seek).not.toHaveBeenCalled();
     expect(playUntil).not.toHaveBeenCalled();
   });
+
+  it("should call BroadcastLB.setShouldSync with the correct value when syncInstances changes", () => {
+    // GIVEN syncInstances is true initially
+    useWorkspaceStoreMock.mockImplementation((selector: any) =>
+      selector({ playbackControls: { syncInstances: true } }),
+    );
+    const setShouldSyncSpy = jest.spyOn(BroadcastLB, "setShouldSync");
+
+    // WHEN useBroadcast is initialized
+    const { rerender } = renderUseBroadcast();
+
+    // THEN BroadcastLB.setShouldSync should be called with { shouldSync: true }
+    expect(setShouldSyncSpy).toHaveBeenCalledWith({ shouldSync: true });
+
+    // WHEN syncInstances changes to false
+    useWorkspaceStoreMock.mockImplementation((selector: any) =>
+      selector({ playbackControls: { syncInstances: false } }),
+    );
+    rerender();
+
+    // THEN BroadcastLB.setShouldSync should be called with { shouldSync: false }
+    expect(setShouldSyncSpy).toHaveBeenCalledWith({ shouldSync: false });
+  });
 });

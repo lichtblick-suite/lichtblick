@@ -127,17 +127,14 @@ export default function PlaybackControls({
     setRepeat((old) => !old);
   }, [setRepeat]);
 
-  const syncInstances = useWorkspaceStore((store) => store.playbackControls.syncInstances);
-
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
       pause();
-      if (syncInstances) {
-        BroadcastLB.getInstance().postMessage({
-          type: "pause",
-          time: getTimeInfo().currentTime!,
-        });
-      }
+
+      BroadcastLB.getInstance().postMessage({
+        type: "pause",
+        time: getTimeInfo().currentTime!,
+      });
     } else {
       const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
       // if we are at the end, we need to go back to start
@@ -145,14 +142,13 @@ export default function PlaybackControls({
         seek(start);
       }
       play();
-      if (syncInstances) {
-        BroadcastLB.getInstance().postMessage({
-          type: "play",
-          time: getTimeInfo().currentTime!,
-        });
-      }
+
+      BroadcastLB.getInstance().postMessage({
+        type: "play",
+        time: getTimeInfo().currentTime!,
+      });
     }
-  }, [isPlaying, pause, getTimeInfo, play, seek, syncInstances]);
+  }, [isPlaying, pause, getTimeInfo, play, seek]);
 
   const seekForwardAction = useCallback(
     (ev?: KeyboardEvent) => {
@@ -171,16 +167,17 @@ export default function PlaybackControls({
       // i.e. Skipping coordinate frame messages may result in incorrectly rendered markers or
       // missing markers altogther.
       const targetTime = jumpSeek(DIRECTION.FORWARD, currentTime, ev);
-      const broadcast = BroadcastLB.getInstance();
       if (playUntil) {
         playUntil(targetTime);
-        broadcast.postMessage({
+
+        BroadcastLB.getInstance().postMessage({
           type: "playUntil",
           time: targetTime,
         });
       } else {
         seek(targetTime);
-        broadcast.postMessage({
+
+        BroadcastLB.getInstance().postMessage({
           type: "seek",
           time: targetTime,
         });
@@ -197,14 +194,13 @@ export default function PlaybackControls({
       }
       const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev);
       seek(targetTime);
-      if (syncInstances) {
-        BroadcastLB.getInstance().postMessage({
-          type: "seek",
-          time: targetTime,
-        });
-      }
+
+      BroadcastLB.getInstance().postMessage({
+        type: "seek",
+        time: targetTime,
+      });
     },
-    [getTimeInfo, seek, syncInstances],
+    [getTimeInfo, seek],
   );
 
   const keyDownHandlers = useMemo(

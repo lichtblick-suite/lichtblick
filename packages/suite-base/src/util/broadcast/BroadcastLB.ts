@@ -6,6 +6,7 @@ import { BroadcastMessageEvent, ChannelListeners } from "./types";
 
 export default class BroadcastLB {
   private static instance: BroadcastLB | undefined;
+  private static shouldSync = false;
 
   private readonly channel: BroadcastChannel;
   private readonly listeners: ChannelListeners;
@@ -15,6 +16,9 @@ export default class BroadcastLB {
     this.listeners = new Set();
 
     this.channel.onmessage = (event: MessageEvent<BroadcastMessageEvent>) => {
+      if (!BroadcastLB.shouldSync) {
+        return;
+      }
       for (const listener of this.listeners) {
         listener(event.data);
       }
@@ -22,6 +26,9 @@ export default class BroadcastLB {
   }
 
   public postMessage(message: BroadcastMessageEvent): void {
+    if (!BroadcastLB.shouldSync) {
+      return;
+    }
     this.channel.postMessage(message);
   }
 
@@ -41,5 +48,9 @@ export default class BroadcastLB {
   public static getInstance(): BroadcastLB {
     BroadcastLB.instance ??= new BroadcastLB();
     return BroadcastLB.instance;
+  }
+
+  public static setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
+    BroadcastLB.shouldSync = shouldSync;
   }
 }
