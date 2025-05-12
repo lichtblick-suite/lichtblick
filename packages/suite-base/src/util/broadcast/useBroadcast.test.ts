@@ -128,7 +128,7 @@ describe("useBroadcast", () => {
     expect(seek).not.toHaveBeenCalled();
   });
 
-  it("should not add listeners if syncInstances is false", () => {
+  it("should add listeners, even if syncInstances is false", () => {
     // GIVEN syncInstances is false
     useWorkspaceStoreMock.mockImplementation((selector: any) =>
       selector({ playbackControls: { syncInstances: false } }),
@@ -140,7 +140,7 @@ describe("useBroadcast", () => {
     unmount();
 
     // THEN no listener should be added
-    expect(addListenerSpy).not.toHaveBeenCalled();
+    expect(addListenerSpy).toHaveBeenCalled();
   });
 
   it("should not call any functions if the functions are not defined", () => {
