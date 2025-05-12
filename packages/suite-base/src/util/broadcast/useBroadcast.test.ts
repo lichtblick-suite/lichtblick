@@ -18,6 +18,10 @@ jest.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", () => ({
   useWorkspaceStore: jest.fn(),
 }));
 
+jest.mock("@lichtblick/suite-base/hooks", () => ({
+  useAppConfigurationValue: jest.fn(),
+}));
+
 describe("useBroadcast", () => {
   let play: jest.Mock;
   let pause: jest.Mock;
@@ -63,30 +67,61 @@ describe("useBroadcast", () => {
   };
 
   it("should call play and seek on 'play' message", () => {
+    // GIVEN useBroadcast is active with play and seek
     renderUseBroadcast();
+
+    // WHEN a 'play' message is emitted
     emitMessage({ type: "play", time: testTime });
+
+    // THEN it should seek and play
     expect(seek).toHaveBeenCalledWith(testTime);
     expect(play).toHaveBeenCalled();
+    expect(pause).not.toHaveBeenCalled();
+    expect(playUntil).not.toHaveBeenCalled();
+
+    // and seek should be called BEFORE play
+    expect(seek.mock.invocationCallOrder[0]!).toBeLessThan(play.mock.invocationCallOrder[0]!);
   });
 
   it("should call pause and seek on 'pause' message", () => {
+    // GIVEN useBroadcast is active with pause and seek
     renderUseBroadcast();
+
+    // WHEN a 'pause' message is emitted
     emitMessage({ type: "pause", time: testTime });
+
+    // THEN it should pause and seek
     expect(pause).toHaveBeenCalled();
     expect(seek).toHaveBeenCalledWith(testTime);
+    expect(play).not.toHaveBeenCalled();
+    expect(playUntil).not.toHaveBeenCalled();
+
+    // and seek should be called AFTER play
+    expect(seek.mock.invocationCallOrder[0]!).toBeGreaterThan(pause.mock.invocationCallOrder[0]!);
   });
 
   it("should call only seek on 'seek' message", () => {
+    // GIVEN useBroadcast is active with seek
     renderUseBroadcast();
+
+    // WHEN a 'seek' message is emitted
     emitMessage({ type: "seek", time: testTime });
+
+    // THEN it should seek, but not play or pause
     expect(seek).toHaveBeenCalledWith(testTime);
     expect(play).not.toHaveBeenCalled();
     expect(pause).not.toHaveBeenCalled();
+    expect(playUntil).not.toHaveBeenCalled();
   });
 
   it("should call playUntil on 'playUntil' message", () => {
+    // GIVEN useBroadcast is active with playUntil
     renderUseBroadcast();
+
+    // WHEN a 'playUntil' message is emitted
     emitMessage({ type: "playUntil", time: testTime });
+
+    // THEN it should call playUntil only
     expect(playUntil).toHaveBeenCalledWith(testTime);
     expect(play).not.toHaveBeenCalled();
     expect(pause).not.toHaveBeenCalled();
@@ -94,27 +129,33 @@ describe("useBroadcast", () => {
   });
 
   it("should not add listeners if syncInstances is false", () => {
+    // GIVEN syncInstances is false
     useWorkspaceStoreMock.mockImplementation((selector: any) =>
       selector({ playbackControls: { syncInstances: false } }),
     );
-
     const addListenerSpy = jest.spyOn(BroadcastLB.getInstance(), "addListener");
+
+    // WHEN useBroadcast is initialized
     const { unmount } = renderUseBroadcast();
     unmount();
 
+    // THEN no listener should be added
     expect(addListenerSpy).not.toHaveBeenCalled();
   });
 
   it("should not call any functions if the functions are not defined", () => {
+    // GIVEN useBroadcast is used with callbacks undefined
     renderHook(() => {
       useBroadcast({});
     });
 
+    // WHEN any types of messages are emitted
     emitMessage({ type: "play", time: testTime });
     emitMessage({ type: "pause", time: testTime });
     emitMessage({ type: "seek", time: testTime });
     emitMessage({ type: "playUntil", time: testTime });
 
+    // THEN no callback should be called
     expect(play).not.toHaveBeenCalled();
     expect(pause).not.toHaveBeenCalled();
     expect(seek).not.toHaveBeenCalled();

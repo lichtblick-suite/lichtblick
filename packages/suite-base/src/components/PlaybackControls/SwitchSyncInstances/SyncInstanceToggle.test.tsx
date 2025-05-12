@@ -5,7 +5,6 @@
 
 // SyncInstanceToggle.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
-
 import "@testing-library/jest-dom";
 
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
@@ -55,64 +54,98 @@ describe("SyncInstanceToggle", () => {
   });
 
   it("returns null and disables sync if config is false", () => {
+    // GIVEN
     useAppConfigurationValueMock.mockReturnValue([false]);
     useWorkspaceStoreMock.mockImplementation((selector: any) =>
       selector({ playbackControls: { syncInstances: true } }),
     );
 
+    // WHEN
     const { container } = render(<SyncInstanceToggle />);
 
+    // THEN
     expect(setSyncInstancesMock).toHaveBeenCalledTimes(1);
     expect(setSyncInstancesMock).toHaveBeenCalledWith(false);
     expect(container.firstChild).toBeNull();
   });
 
   it("renders button with correct text when sync is on", () => {
+    // GIVEN
     useAppConfigurationValueMock.mockReturnValue([true]);
     useWorkspaceStoreMock.mockImplementation((selector: any) =>
       selector({ playbackControls: { syncInstances: true } }),
     );
 
+    // WHEN
     render(<SyncInstanceToggle />);
 
+    // THEN
     expect(screen.getByText("Sync")).toBeInTheDocument();
     expect(screen.getByText("on")).toBeInTheDocument();
   });
 
   it("renders button with correct text when sync is off", () => {
+    // GIVEN
     useAppConfigurationValueMock.mockReturnValue([true]);
     useWorkspaceStoreMock.mockImplementation((selector: any) =>
       selector({ playbackControls: { syncInstances: false } }),
     );
 
+    // WHEN
     render(<SyncInstanceToggle />);
 
+    // THEN
     expect(screen.getByText("Sync")).toBeInTheDocument();
     expect(screen.getByText("off")).toBeInTheDocument();
   });
 
   it("toggles sync state on button click (turn on)", () => {
+    // GIVEN sync is initially off
     useAppConfigurationValueMock.mockReturnValue([true]);
     useWorkspaceStoreMock.mockImplementationOnce((selector: any) =>
       selector({ playbackControls: { syncInstances: false } }),
     );
 
+    // WHEN user clicks the button
     render(<SyncInstanceToggle />);
-
     fireEvent.click(screen.getByRole("button"));
+
+    // THEN sync is turned on
     expect(setSyncInstancesMock).toHaveBeenCalledTimes(1);
     expect(setSyncInstancesMock).toHaveBeenCalledWith(true);
   });
 
-  it("toggles sync state on button click (turn off", () => {
+  it("toggles sync state on button click (turn off)", () => {
+    // GIVEN sync is initially on
     useAppConfigurationValueMock.mockReturnValue([true]);
     useWorkspaceStoreMock.mockImplementationOnce((selector: any) =>
       selector({ playbackControls: { syncInstances: true } }),
     );
 
+    // WHEN user clicks the button
     render(<SyncInstanceToggle />);
-
     fireEvent.click(screen.getByRole("button"));
+
+    // THEN sync is turned off
+    expect(setSyncInstancesMock).toHaveBeenCalledTimes(1);
+    expect(setSyncInstancesMock).toHaveBeenCalledWith(false);
+  });
+
+  it("should turn synchronization off when experimental feature is disabled", () => {
+    // GIVEN feature is initially enabled
+    useAppConfigurationValueMock.mockReturnValue([true]);
+    useWorkspaceStoreMock.mockImplementation((selector: any) =>
+      selector({ playbackControls: { syncInstances: true } }),
+    );
+
+    const { rerender } = render(<SyncInstanceToggle />);
+    expect(setSyncInstancesMock).not.toHaveBeenCalled();
+
+    // WHEN feature is disabled and component re-renders
+    useAppConfigurationValueMock.mockReturnValue([false]);
+    rerender(<SyncInstanceToggle />);
+
+    // THEN syncInstances is explicitly turned off
     expect(setSyncInstancesMock).toHaveBeenCalledTimes(1);
     expect(setSyncInstancesMock).toHaveBeenCalledWith(false);
   });

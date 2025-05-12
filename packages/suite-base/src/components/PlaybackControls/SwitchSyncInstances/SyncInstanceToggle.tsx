@@ -11,7 +11,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import { useStyles } from "./SyncInstanceToggle.style";
 
 const SyncInstanceToggle = (): React.JSX.Element => {
-  const [enableSyncLBInstances] = useAppConfigurationValue<boolean>(
+  const [enableSyncLBInstances = false] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_SYNC_LB_INSTANCES,
   );
 
@@ -23,7 +23,7 @@ const SyncInstanceToggle = (): React.JSX.Element => {
 
   const { classes } = useStyles({ syncInstances });
 
-  if (enableSyncLBInstances === false) {
+  if (!enableSyncLBInstances) {
     // Turn off sync if experimental feature is turned off
     if (syncInstances) {
       setSyncInstances(false);
