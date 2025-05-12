@@ -145,7 +145,7 @@ describe("ExtensionDetails Component", () => {
       const readmeContent = BasicBuilder.string();
       mockExtension.readme = readmeContent;
 
-      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
       const readmeButton = screen.getByRole("tab", {
         name: /readme/i,
       });
@@ -162,7 +162,7 @@ describe("ExtensionDetails Component", () => {
       const readmeContent = undefined;
       mockExtension.readme = readmeContent;
 
-      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
       const readmeButton = screen.getByRole("tab", {
         name: /readme/i,
       });
@@ -179,7 +179,7 @@ describe("ExtensionDetails Component", () => {
       const changelogContent = BasicBuilder.string();
       mockExtension.changelog = changelogContent;
 
-      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
       const changelogButton = screen.getByRole("tab", {
         name: /changelog/i,
       });
@@ -196,7 +196,7 @@ describe("ExtensionDetails Component", () => {
       const changelogContent = undefined;
       mockExtension.changelog = changelogContent;
 
-      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
       const changelogButton = screen.getByRole("tab", {
         name: /changelog/i,
       });
