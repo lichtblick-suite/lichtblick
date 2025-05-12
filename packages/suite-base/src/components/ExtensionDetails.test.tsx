@@ -159,8 +159,7 @@ describe("ExtensionDetails Component", () => {
     it("displays message indicating readme is not found when readme is undefined", async () => {
       (isDesktopApp as jest.Mock).mockReturnValue(true);
 
-      const readmeContent = undefined;
-      mockExtension.readme = readmeContent;
+      mockExtension.readme = undefined;
 
       render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
       const readmeButton = screen.getByRole("tab", {
@@ -193,8 +192,7 @@ describe("ExtensionDetails Component", () => {
     it("displays message indicating changelog is not found when changelog is undefined", async () => {
       (isDesktopApp as jest.Mock).mockReturnValue(true);
 
-      const changelogContent = undefined;
-      mockExtension.changelog = changelogContent;
+      mockExtension.changelog = undefined;
 
       render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
       const changelogButton = screen.getByRole("tab", {
