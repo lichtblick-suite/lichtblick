@@ -75,7 +75,6 @@ type BuildRenderStateFn = (input: BuilderRenderStateInput) => Immutable<RenderSt
  */
 function initRenderStateBuilder(): BuildRenderStateFn {
   let prevVariables: Immutable<GlobalVariables> = EMPTY_GLOBAL_VARIABLES;
-  let prevBlocks: undefined | Immutable<(undefined | MessageBlock)[]>;
   let prevSeekTime: number | undefined;
   let prevSortedTopics: BuilderRenderStateInput["sortedTopics"] | undefined;
   let prevMessageConverters: BuilderRenderStateInput["messageConverters"] | undefined;
@@ -90,6 +89,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   const memoCollateTopicSchemaConversions = memoizeWeak(collateTopicSchemaConversions);
 
   const prevRenderState: Writable<Immutable<RenderState>> = {};
+  const prevProcessedBlocks = new WeakSet<MessageBlock>();
 
   function updateRenderStateField<T>(
     field: keyof RenderState,
@@ -273,11 +273,17 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 
     if (watchedFields.has("allFrames")) {
       // Rebuild allFrames if we have new blocks or if our conversions have changed.
-      const newBlocks = playerState?.progress.messageCache?.blocks;
-      if ((newBlocks != undefined && prevBlocks !== newBlocks) || conversionsChanged) {
+      const newBlocks = playerState?.progress.messageCache?.blocks ?? [];
+      // fora da função, manter um Set de blocos já processados
+      const unprocessedBlocks = newBlocks.filter(
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        (block) => block && !prevProcessedBlocks.has(block as Writable<MessageBlock>),
+      );
+
+      if (unprocessedBlocks.length > 0 || conversionsChanged) {
         shouldRender.value = true;
-        const blocksToProcess = newBlocks ?? prevBlocks ?? [];
-        const frames: MessageEvent[] = (renderState.allFrames = []);
+        const frames: MessageEvent[] = (renderState.allFrames ?? []) as MessageEvent[];
+
         // only populate allFrames with topics that the panel wants to preload
         const topicsToPreloadForPanel = Array.from(
           new Set<string>(
@@ -285,15 +291,11 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           ),
         );
 
-        for (const block of blocksToProcess) {
-          if (!block) {
-            continue;
-          }
-
+        for (const block of unprocessedBlocks) {
           // Given that messagesByTopic should be in order by receiveTime, we need to
           // combine all of the messages into a single array and sorted by receive time.
           forEachSortedArrays(
-            topicsToPreloadForPanel.map((topic) => block.messagesByTopic[topic] ?? []),
+            topicsToPreloadForPanel.map((topic) => block?.messagesByTopic[topic] ?? []),
             (a, b) => compare(a.receiveTime, b.receiveTime),
             (messageEvent) => {
               // Message blocks may contain topics that we are not subscribed to so we
@@ -316,9 +318,10 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               }
             },
           );
+          prevProcessedBlocks.add(block as Writable<MessageBlock>);
         }
+        renderState.allFrames = frames;
       }
-      prevBlocks = newBlocks;
     }
 
     if (watchedFields.has("currentTime")) {
