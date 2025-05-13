@@ -55,6 +55,8 @@ describe("ExtensionList Component", () => {
       qualifiedName: "org.extension1",
       homepage: BasicBuilder.string(),
       license: BasicBuilder.string(),
+      displayName: "DisplayName-Extension 1",
+      keywords: [BasicBuilder.string()],
     },
     {
       id: "2",
@@ -65,6 +67,8 @@ describe("ExtensionList Component", () => {
       qualifiedName: "org.extension2",
       homepage: BasicBuilder.string(),
       license: BasicBuilder.string(),
+      displayName: "DisplayName-Extension 2",
+      keywords: [BasicBuilder.string()],
     },
   ];
   const mockFilterText = "Extension";

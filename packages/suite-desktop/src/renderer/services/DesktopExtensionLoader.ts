@@ -38,6 +38,8 @@ export class DesktopExtensionLoader implements ExtensionLoader {
         namespace: this.namespace,
         // Qualified name is display name for backwards compatibility with existing layouts.
         qualifiedName: pkgInfo.displayName,
+        readme: extension.readme,
+        changelog: extension.changelog,
       };
     });
 
@@ -63,6 +65,8 @@ export class DesktopExtensionLoader implements ExtensionLoader {
       namespace: this.namespace,
       // Qualified name is display name for backwards compatibility with existing layouts.
       qualifiedName: pkgInfo.displayName,
+      readme: extension.readme,
+      changelog: extension.changelog,
     };
   }
 

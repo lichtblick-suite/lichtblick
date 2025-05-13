@@ -30,6 +30,8 @@ const installedExtensions: ExtensionInfo[] = _.range(1, 10).map((index) => ({
   version: `1.${index}`,
   keywords: ["storybook", "testing"],
   namespace: index % 2 === 0 ? "local" : "org",
+  readme: "Readme for extension",
+  changelog: "Changes effectuated on extension",
 }));
 
 const marketplaceExtensions: ExtensionInfo[] = [
@@ -44,6 +46,8 @@ const marketplaceExtensions: ExtensionInfo[] = [
     license: "MIT",
     version: "1.2.10",
     keywords: ["storybook", "testing"],
+    readme: "Information about extension",
+    changelog: "Some changes on extension",
   },
 ];
 

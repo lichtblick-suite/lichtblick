@@ -30,6 +30,7 @@ import {
 import { makeRgba, stringToRgba } from "@lichtblick/suite-base/panels/ThreeDeeRender/color";
 import { eulerToQuaternion } from "@lichtblick/suite-base/util/geometry";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { isValidUrl } from "@lichtblick/suite-base/util/isValidURL";
 
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCylinder } from "./markers/RenderableCylinder";
@@ -1171,18 +1172,6 @@ function createMeshMarker(
     mesh_resource: new URL(mesh.filename, baseUrl).toString(),
     mesh_use_embedded_materials: embeddedMaterialUsage === EmbeddedMaterialUsage.Use,
   };
-}
-
-const VALID_PROTOCOLS = ["https:", "http:", "file:", "data:", "package:"];
-
-function isValidUrl(str: string): boolean {
-  try {
-    const url = new URL(str);
-    return VALID_PROTOCOLS.includes(url.protocol);
-  } catch (err: unknown) {
-    console.error(err);
-    return false;
-  }
 }
 
 function urdfChildren(

@@ -12,11 +12,10 @@ import { dirname, join as pathJoin } from "path";
 
 import Logger from "@lichtblick/log";
 
+import { ExtensionPackageJson } from "./types";
 import { DesktopExtension } from "../common/types";
 
 const log = Logger.getLogger(__filename);
-
-type ExtensionPackageJson = { name: string; version: string; main: string; publisher?: string };
 
 /**
  * Returns a unique identifier for an extension based on the publisher and package name. The
@@ -27,7 +26,7 @@ type ExtensionPackageJson = { name: string; version: string; main: string; publi
  * @param pkgJson Parsed package.json file
  * @returns An identifier string such as "lichtblick.suite-extension-turtlesim"
  */
-function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
+export function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
   if (pkgJson == undefined) {
     throw new Error(`Missing package.json`);
   }
@@ -58,7 +57,7 @@ function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
  * @param pkgJson Parsed package.json file
  * @returns A directory name such as "lichtblick.suite-extension-turtlesim-1.0.0"
  */
-function getPackageDirname(pkgJson: ExtensionPackageJson): string {
+export function getPackageDirname(pkgJson: ExtensionPackageJson): string {
   const pkgId = getPackageId(pkgJson);
   const dir = `${pkgId}-${pkgJson.version}`;
   if (dir.length >= 255) {
@@ -72,13 +71,21 @@ function getPackageDirname(pkgJson: ExtensionPackageJson): string {
  * @param name The "name" field from a package.json file
  * @returns An object containing the unprefixed name and the namespace, if present
  */
-function parsePackageName(name: string): { namespace?: string; name: string } {
+export function parsePackageName(name: string): { namespace?: string; name: string } {
   const res = /^@([^/]+)\/(.+)/.exec(name);
   if (res == undefined) {
     return { name };
   }
   return { namespace: res[1], name: res[2]! };
 }
+
+const safeReadFile = async (filePath: string): Promise<string> => {
+  try {
+    return await readFile(filePath, { encoding: "utf8" });
+  } catch {
+    return "";
+  }
+};
 
 export async function getExtensions(rootFolder: string): Promise<DesktopExtension[]> {
   const extensions: DesktopExtension[] = [];
@@ -98,10 +105,16 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const packagePath = pathJoin(extensionRootPath, "package.json");
       const packageData = await readFile(packagePath, { encoding: "utf8" });
       const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
+      const readmePath = pathJoin(extensionRootPath, "README.md");
+      const changelogPath = pathJoin(extensionRootPath, "CHANGELOG.md");
+      const [readme, changelog] = await Promise.all([
+        safeReadFile(readmePath),
+        safeReadFile(changelogPath),
+      ]);
 
       const id = getPackageId(packageJson);
 
-      extensions.push({ id, packageJson, directory: extensionRootPath });
+      extensions.push({ id, packageJson, directory: extensionRootPath, readme, changelog });
     } catch (err: unknown) {
       log.error(err);
     }
@@ -150,6 +163,11 @@ export async function installExtension(
     throw new Error(`Extension contains an invalid package.json`);
   }
 
+  const readmeZipObj = archive.files["README.md"];
+  const changelogZipObj = archive.files["CHANGELOG.md"];
+  const readme = readmeZipObj ? await readmeZipObj.async("string") : "";
+  const changelog = changelogZipObj ? await changelogZipObj.async("string") : "";
+
   // Check for basic validity of package.json and get the packageId
   const packageId = getPackageId(pkgJson);
 
@@ -177,6 +195,8 @@ export async function installExtension(
     id: packageId,
     packageJson: pkgJson,
     directory: extensionBaseDir,
+    readme,
+    changelog,
   };
 }
 
