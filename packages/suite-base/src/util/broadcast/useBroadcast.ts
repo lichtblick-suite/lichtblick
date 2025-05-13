@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { Time } from "@lichtblick/suite";
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 
-import BroadcastLB from "./BroadcastLB";
+import BroadcastManager from "./BroadcastManager";
 import { BroadcastMessageEvent } from "./types";
 
 type UseBroadcastProps = {
@@ -21,7 +21,7 @@ const useBroadcast = ({ play, pause, seek, playUntil }: UseBroadcastProps): void
   const syncInstances = useWorkspaceStore((store) => store.playbackControls.syncInstances);
 
   useEffect(() => {
-    BroadcastLB.setShouldSync({ shouldSync: syncInstances });
+    BroadcastManager.setShouldSync({ shouldSync: syncInstances });
   }, [syncInstances]);
 
   useEffect(() => {
@@ -46,10 +46,10 @@ const useBroadcast = ({ play, pause, seek, playUntil }: UseBroadcastProps): void
       }
     };
 
-    BroadcastLB.getInstance().addListener(handler);
+    BroadcastManager.getInstance().addListener(handler);
 
     return () => {
-      BroadcastLB.getInstance().removeListener(handler);
+      BroadcastManager.getInstance().removeListener(handler);
     };
   }, [play, pause, seek, playUntil]);
 };

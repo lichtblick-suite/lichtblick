@@ -53,7 +53,7 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { Player, PlayerPresence } from "@lichtblick/suite-base/players/types";
-import BroadcastLB from "@lichtblick/suite-base/util/broadcast/BroadcastLB";
+import BroadcastManager from "@lichtblick/suite-base/util/broadcast/BroadcastManager";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
@@ -128,24 +128,25 @@ export default function PlaybackControls({
   }, [setRepeat]);
 
   const togglePlayPause = useCallback(() => {
+    const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
+
     if (isPlaying) {
       pause();
 
-      BroadcastLB.getInstance().postMessage({
+      BroadcastManager.getInstance().postMessage({
         type: "pause",
-        time: getTimeInfo().currentTime!,
+        time: current!,
       });
     } else {
-      const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
       // if we are at the end, we need to go back to start
       if (current && end && start && compare(current, end) >= 0) {
         seek(start);
       }
       play();
 
-      BroadcastLB.getInstance().postMessage({
+      BroadcastManager.getInstance().postMessage({
         type: "play",
-        time: getTimeInfo().currentTime!,
+        time: current!,
       });
     }
   }, [isPlaying, pause, getTimeInfo, play, seek]);
@@ -170,14 +171,14 @@ export default function PlaybackControls({
       if (playUntil) {
         playUntil(targetTime);
 
-        BroadcastLB.getInstance().postMessage({
+        BroadcastManager.getInstance().postMessage({
           type: "playUntil",
           time: targetTime,
         });
       } else {
         seek(targetTime);
 
-        BroadcastLB.getInstance().postMessage({
+        BroadcastManager.getInstance().postMessage({
           type: "seek",
           time: targetTime,
         });
@@ -195,7 +196,7 @@ export default function PlaybackControls({
       const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev);
       seek(targetTime);
 
-      BroadcastLB.getInstance().postMessage({
+      BroadcastManager.getInstance().postMessage({
         type: "seek",
         time: targetTime,
       });

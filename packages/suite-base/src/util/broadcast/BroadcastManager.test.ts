@@ -5,11 +5,10 @@ import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import MockBroadcastChannel from "@lichtblick/suite-base/util/broadcast/MockBroadcastChannel";
 
-import BroadcastLB from "./BroadcastLB";
+import BroadcastManager from "./BroadcastManager";
 import { BROADCAST_CHANNEL_NAME } from "./constants";
 import { BroadcastMessageEvent } from "./types";
 
-// Replace global BroadcastChannel with the mock
 (global as any).BroadcastChannel = MockBroadcastChannel;
 
 const createMockMessage = (): BroadcastMessageEvent => {
@@ -19,136 +18,146 @@ const createMockMessage = (): BroadcastMessageEvent => {
   } as BroadcastMessageEvent;
 };
 
-describe("BroadcastLB", () => {
+describe("BroadcastManager", () => {
   beforeEach(() => {
-    // Reset the singleton instance before each test
-    (BroadcastLB as any).instance = undefined;
-    BroadcastLB.setShouldSync({ shouldSync: true });
+    (BroadcastManager as any).instance = undefined;
+    BroadcastManager.setShouldSync({ shouldSync: true });
   });
 
   it("should create a BroadcastChannel with the correct name", () => {
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    const instance = BroadcastManager.getInstance();
+
+    // THEN
     expect((instance as any).channel.name).toBe(BROADCAST_CHANNEL_NAME);
   });
 
   it("should be a singleton", () => {
-    const firstInstance = BroadcastLB.getInstance();
-    const secondInstance = BroadcastLB.getInstance();
+    // GIVEN
+    const firstInstance = BroadcastManager.getInstance();
+    const secondInstance = BroadcastManager.getInstance();
 
+    // THEN
     expect(firstInstance).toBe(secondInstance);
   });
 
   it("should post messages to the BroadcastChannel", () => {
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    const instance = BroadcastManager.getInstance();
     const mockChannel: MockBroadcastChannel = (instance as any).channel;
 
+    // WHEN
     const testMessage = createMockMessage();
     instance.postMessage(testMessage);
 
+    // THEN
     expect(mockChannel.postedMessages).toContain(testMessage);
   });
 
   it("should notify listeners when a message is received", () => {
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    const instance = BroadcastManager.getInstance();
     const mockChannel: MockBroadcastChannel = (instance as any).channel;
-
     const receivedMessages: BroadcastMessageEvent[] = [];
-
-    const listener = (message: BroadcastMessageEvent) => {
-      receivedMessages.push(message);
-    };
-
+    const listener = (message: BroadcastMessageEvent) => receivedMessages.push(message);
     instance.addListener(listener);
 
+    // WHEN
     const incomingMessage = createMockMessage();
     mockChannel.simulateIncomingMessage(incomingMessage);
 
+    // THEN
     expect(receivedMessages).toContain(incomingMessage);
   });
 
   it("should remove listeners properly", () => {
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    const instance = BroadcastManager.getInstance();
     const mockChannel = (instance as any).channel as MockBroadcastChannel;
-
     const receivedMessages: BroadcastMessageEvent[] = [];
-
-    const listener = (message: BroadcastMessageEvent) => {
-      receivedMessages.push(message);
-    };
-
+    const listener = (message: BroadcastMessageEvent) => receivedMessages.push(message);
     instance.addListener(listener);
     instance.removeListener(listener);
 
+    // WHEN
     const incomingMessage = createMockMessage();
     mockChannel.simulateIncomingMessage(incomingMessage);
 
+    // THEN
     expect(receivedMessages).not.toContain(incomingMessage);
   });
 
   it("should close the BroadcastChannel", () => {
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    const instance = BroadcastManager.getInstance();
     const mockChannel = (instance as any).channel as MockBroadcastChannel;
 
+    // WHEN
     instance.close();
 
+    // THEN
     expect(mockChannel.isClosed).toBe(true);
   });
 
   it("should not post messages when shouldSync is false", () => {
-    BroadcastLB.setShouldSync({ shouldSync: false });
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    BroadcastManager.setShouldSync({ shouldSync: false });
+    const instance = BroadcastManager.getInstance();
     const mockChannel: MockBroadcastChannel = (instance as any).channel;
 
+    // WHEN
     const testMessage = createMockMessage();
     instance.postMessage(testMessage);
 
+    // THEN
     expect(mockChannel.postedMessages).not.toContain(testMessage);
   });
 
   it("should post messages when shouldSync is true", () => {
-    BroadcastLB.setShouldSync({ shouldSync: true });
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    BroadcastManager.setShouldSync({ shouldSync: true });
+    const instance = BroadcastManager.getInstance();
     const mockChannel: MockBroadcastChannel = (instance as any).channel;
 
+    // WHEN
     const testMessage = createMockMessage();
     instance.postMessage(testMessage);
 
+    // THEN
     expect(mockChannel.postedMessages).toContain(testMessage);
   });
 
   it("should not notify listeners when shouldSync is false", () => {
-    BroadcastLB.setShouldSync({ shouldSync: false });
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    BroadcastManager.setShouldSync({ shouldSync: false });
+    const instance = BroadcastManager.getInstance();
     const mockChannel: MockBroadcastChannel = (instance as any).channel;
-
     const receivedMessages: BroadcastMessageEvent[] = [];
-    const listener = (message: BroadcastMessageEvent) => {
-      receivedMessages.push(message);
-    };
-
+    const listener = (message: BroadcastMessageEvent) => receivedMessages.push(message);
     instance.addListener(listener);
 
+    // WHEN
     const incomingMessage = createMockMessage();
     mockChannel.simulateIncomingMessage(incomingMessage);
 
+    // THEN the listener should not be notified
     expect(receivedMessages).not.toContain(incomingMessage);
   });
 
   it("should notify listeners when shouldSync is true", () => {
-    BroadcastLB.setShouldSync({ shouldSync: true });
-    const instance = BroadcastLB.getInstance();
+    // GIVEN
+    BroadcastManager.setShouldSync({ shouldSync: true });
+    const instance = BroadcastManager.getInstance();
     const mockChannel: MockBroadcastChannel = (instance as any).channel;
-
     const receivedMessages: BroadcastMessageEvent[] = [];
-    const listener = (message: BroadcastMessageEvent) => {
-      receivedMessages.push(message);
-    };
-
+    const listener = (message: BroadcastMessageEvent) => receivedMessages.push(message);
     instance.addListener(listener);
 
+    // WHEN
     const incomingMessage = createMockMessage();
     mockChannel.simulateIncomingMessage(incomingMessage);
 
+    // THEN
     expect(receivedMessages).toContain(incomingMessage);
   });
 });
