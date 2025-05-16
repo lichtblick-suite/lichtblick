@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSourceDialog/DataSourceDialog";
-import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/style";
+import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/index.style";
 import { SidebarItem } from "@lichtblick/suite-base/components/DataSourceDialog/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";

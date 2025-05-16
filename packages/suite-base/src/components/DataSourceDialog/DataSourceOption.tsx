@@ -3,7 +3,7 @@
 
 import { Button, Link, Typography } from "@mui/material";
 
-import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/style";
+import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/index.style";
 import { DataSourceOptionProps } from "@lichtblick/suite-base/components/DataSourceDialog/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 

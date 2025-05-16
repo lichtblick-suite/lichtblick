@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 import DataSourceOption from "@lichtblick/suite-base/components/DataSourceDialog/DataSourceOption";
 import SidebarItems from "@lichtblick/suite-base/components/DataSourceDialog/SidebarItems";
-import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/style";
+import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/index.style";
 import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
