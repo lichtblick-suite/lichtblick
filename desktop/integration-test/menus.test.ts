@@ -59,4 +59,24 @@ describe("menus", () => {
 
     await expect(openFilePickerCalled).resolves.toBe(true);
   }, 15_000);
+
+  it("should open the documentation when clicking Help > Documentation", async () => {
+    await using app = await launchApp();
+
+    await closeDataSourceDialogAfterAppLaunch(app);
+
+    // The page is loaded as a file:// URL in the test, so showOpenFilePicker is not available and we need to mock it.
+    // If it were available we could use `app.renderer.waitForEvent("filechooser")` instead.
+    const openFilePickerCalled = signal<boolean>();
+    await app.renderer.exposeFunction("showOpenFilePicker", async () => {
+      openFilePickerCalled.resolve(true);
+      return [];
+    });
+
+    await app.renderer.getByTestId("AppMenuButton").click();
+    await app.renderer.getByTestId("app-menu-file").click();
+    await app.renderer.getByTestId("menu-item-open-local-file").click();
+
+    await expect(openFilePickerCalled).resolves.toBe(true);
+  }, 15_000);
 });
