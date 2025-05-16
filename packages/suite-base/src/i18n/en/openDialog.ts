@@ -12,6 +12,7 @@ export const openDialog = {
     "Use a convenient web interface to tag, search, and retrieve data at lightning speed",
   createAFreeAccount: "Create a free account",
   exploreSampleData: "Explore sample data",
+  checkoutDocumentation: "Check out documentation",
   learnMore: "Learn more",
   needHelp: "Need help?",
   needHelpDescription: "View our documentation, or check out the tutorials on the Foxglove blog.",

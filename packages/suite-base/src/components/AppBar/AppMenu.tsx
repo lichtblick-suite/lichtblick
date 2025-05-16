@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
+import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import {
   WorkspaceContextStore,
@@ -203,13 +204,20 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
     handleNestedMenuClose();
   }, [dialogActions.dataSource, handleNestedMenuClose]);
 
+  const onDocsClick = useCallback(() => {
+    window.open(LICHTBLICK_DOCUMENTATION_LINK, "_blank", "noopener,noreferrer");
+    handleNestedMenuClose();
+  }, [handleNestedMenuClose]);
+
   const helpItems = useMemo<AppBarMenuItem[]>(
     () => [
       { type: "item", key: "about", label: t("about"), onClick: onAboutClick },
       { type: "divider" },
+      { type: "item", key: "docs", label: t("documentation"), onClick: onDocsClick },
+      { type: "divider" },
       { type: "item", key: "demo", label: t("exploreSampleData"), onClick: onDemoClick },
     ],
-    [onAboutClick, onDemoClick, t],
+    [onAboutClick, onDemoClick, onDocsClick, t],
   );
 
   return (

@@ -34,6 +34,7 @@ import { ExperimentalFeatureSettings } from "@lichtblick/suite-base/components/E
 import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
 import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   useWorkspaceStore,
@@ -132,7 +133,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-type SectionKey = "resources" | "products" | "contact" | "legal";
+type SectionKey = "documentation" | "legal";
 
 const aboutItems = new Map<
   SectionKey,
@@ -141,6 +142,18 @@ const aboutItems = new Map<
     links: { title: string; url?: string }[];
   }
 >([
+  [
+    "documentation",
+    {
+      subheader: "Documentation",
+      links: [
+        {
+          title: "Check out our documentation",
+          url: LICHTBLICK_DOCUMENTATION_LINK,
+        },
+      ],
+    },
+  ],
   [
     "legal",
     {
@@ -294,12 +307,7 @@ export function AppSettingsDialog(
                   getText={() => LICHTBLICK_SUITE_VERSION?.toString() ?? ""}
                 />
               </Stack>
-              {[
-                aboutItems.get("resources"),
-                aboutItems.get("products"),
-                aboutItems.get("contact"),
-                aboutItems.get("legal"),
-              ].map((item) => {
+              {[aboutItems.get("documentation"), aboutItems.get("legal")].map((item) => {
                 return (
                   <Stack key={item?.subheader} gap={1}>
                     {item?.subheader && <Typography>{item.subheader}</Typography>}

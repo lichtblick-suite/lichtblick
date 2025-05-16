@@ -15,6 +15,7 @@ import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSour
 import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
+import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/BaseUserContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
@@ -188,6 +189,15 @@ function SidebarItems(props: {
             variant="outlined"
           >
             {t("exploreSampleData")}
+          </Button>
+          <Button
+            onClick={() => {
+              window.open(LICHTBLICK_DOCUMENTATION_LINK, "_blank", "noopener,noreferrer");
+            }}
+            className={classes.button}
+            variant="outlined"
+          >
+            {t("checkoutDocumentation")}
           </Button>
         </>
       ),
