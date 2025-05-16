@@ -25,7 +25,7 @@ jest.mock("@lichtblick/suite-base/context/BaseUserContext", () => ({
   useCurrentUser: jest.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/components/DataSourceDialog/style", () => ({
+jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () => ({
   useStyles: () => ({ classes: { button: "mock-button-class" } }),
 }));
 

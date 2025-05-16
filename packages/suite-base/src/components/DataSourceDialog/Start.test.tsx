@@ -29,7 +29,7 @@ jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => 
   useWorkspaceActions: jest.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/components/DataSourceDialog/style", () => ({
+jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () => ({
   useStyles: () => ({
     classes: {
       grid: "grid",
