@@ -74,6 +74,8 @@ export async function main(): Promise<void> {
 
   // https://github.com/electron/electron/issues/28422#issuecomment-987504138
   app.commandLine.appendSwitch("enable-experimental-web-platform-features");
+
+  // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
   app.commandLine.appendSwitch("gtk-version", "3");
 
   const start = Date.now();
