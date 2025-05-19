@@ -14,6 +14,7 @@ import { CameraModel, ICameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
+  CustomCameraInfo,
   Immutable,
   MessageEvent,
   SettingsTreeAction,
@@ -158,7 +159,7 @@ export class ImageMode
   #dragStartMouseCoords = new THREE.Vector2();
   #hasModifiedView = false;
 
-  private customCameraModels: ICameraModel[] = [];
+  private customCameraModels = new Map<string, (info: CustomCameraInfo) => ICameraModel>();
 
   public constructor(renderer: IRenderer, name: string = ImageMode.extensionId) {
     super(name, renderer);
@@ -931,6 +932,7 @@ export class ImageMode
   #getCameraModel(cameraInfo: CameraInfo): ICameraModel | undefined {
     let model = undefined;
     try {
+      log.debug(cameraInfo);
       model = CameraModel.create(cameraInfo, this.customCameraModels);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
@@ -1054,8 +1056,8 @@ export class ImageMode
     ];
   }
 
-  public setCustomCameraModels(cameraModels: ICameraModel[]): void {
-    this.customCameraModels = cameraModels;
+  public setCustomCameraModels(name: string, builder: () => ICameraModel): void {
+    this.customCameraModels.set(name, builder);
   }
 }
 

@@ -13,7 +13,7 @@ import { MultiMap, filterMap } from "@lichtblick/den/collection";
 import { CameraModel, ICameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
-import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
+import { CustomCameraInfo, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
 
 import {
@@ -85,7 +85,10 @@ export class Images extends SceneExtension<ImageRenderable> {
    */
   #cameraInfoByTopic = new Map<string, CameraInfo>();
 
-  private customCameraModels: ICameraModel[] = [];
+  private customCameraModels = new Map<
+    string,
+    (customCameraInfo: CustomCameraInfo) => ICameraModel
+  >();
 
   protected supportedImageSchemas = ALL_SUPPORTED_IMAGE_SCHEMAS;
 
@@ -481,7 +484,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     return new ImageRenderable(topicName, this.renderer, userData);
   }
 
-  public setCustomCameraModels(cameraModels: ICameraModel[]): void {
-    this.customCameraModels = cameraModels;
+  public setCustomCameraModels(name: string, builder: () => ICameraModel): void {
+    this.customCameraModels.set(name, builder);
   }
 }

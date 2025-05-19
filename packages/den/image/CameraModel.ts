@@ -65,23 +65,21 @@ export class CameraModel implements ICameraModel {
 
   public static create(
     cameraInfo: CameraInfo | CustomCameraInfo,
-    cameraModels: ICameraModel[] = [],
+    cameraModels = new Map<string, (customCameraInfo: CustomCameraInfo) => ICameraModel>(),
   ): ICameraModel {
     if ("name" in cameraInfo) {
-      if (cameraModels.length === 0) {
+      if (cameraModels.size === 0) {
         throw new Error("No camera models registered. Please register a camera model first.");
       }
 
-      const cameraModel = cameraModels.find((model) => model.name === cameraInfo.name);
+      const cameraModel = cameraModels.get(cameraInfo.name);
       if (!cameraModel) {
         throw new Error(
           `Camera model ${cameraInfo.name} not found. Please register the camera model first.`,
         );
       }
 
-      cameraModel.setCameraInfo(cameraInfo);
-
-      return cameraModel;
+      return cameraModel(cameraInfo);
     }
 
     return new PinholeCameraModel(cameraInfo);

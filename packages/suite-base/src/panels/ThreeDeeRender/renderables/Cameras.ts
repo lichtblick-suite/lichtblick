@@ -11,7 +11,7 @@ import { t } from "i18next";
 import { CameraModel, ICameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
-import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
+import { CustomCameraInfo, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { RenderableLineList } from "./markers/RenderableLineList";
@@ -87,7 +87,10 @@ export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
 
 export class Cameras extends SceneExtension<CameraInfoRenderable> {
   public static extensionId = "foxglove.Cameras";
-  private customCameraModels: ICameraModel[] = [];
+  private customCameraModels = new Map<
+    string,
+    (customCameraInfo: CustomCameraInfo) => ICameraModel
+  >();
 
   public constructor(renderer: IRenderer, name: string = Cameras.extensionId) {
     super(name, renderer);
@@ -264,10 +267,12 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
       // log.warn(`CameraInfo changed on topic "${topic}", updating rectification model`);
       renderable.userData.cameraInfo = cameraInfo;
       renderable.userData.originalMessage = originalMessage;
+      log.debug("cameraInfo", cameraInfo);
 
       if (cameraInfo.P.length === 12) {
         try {
           renderable.userData.cameraModel = CameraModel.create(cameraInfo, this.customCameraModels);
+          log.debug("renderable.userData.cameraModel", renderable.userData.cameraModel);
         } catch (errUnk) {
           const err = errUnk as Error;
           this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);
@@ -309,8 +314,8 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     }
   }
 
-  public setCustomCameraModels(customCameraModels: ICameraModel[]): void {
-    this.customCameraModels = customCameraModels;
+  public setCustomCameraModels(name: string, builder: () => ICameraModel): void {
+    this.customCameraModels.set(name, builder);
   }
 }
 
