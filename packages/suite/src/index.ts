@@ -478,6 +478,30 @@ export type TopicAliasFunction = (
   }>,
 ) => TopicAlias[];
 
+// CHECK DUPLICATION ON PACKAGES / DEN
+export type CustomCameraInfo = {
+  name: string;
+  params: unknown;
+};
+
+// CHECK DUPLICATION ON PACKAGES / DEN
+export type Vector2 = { x: number; y: number };
+export type Vector3 = { x: number; y: number; z: number };
+
+// CHECK DUPLICATION ON PACKAGES / DEN
+export interface ICameraModel {
+  name: string;
+  width: number;
+  height: number;
+  fx: number;
+  fy: number;
+  cx: number;
+  cy: number;
+  projectPixelTo3dPlane(out: Vector3, pixel: Readonly<Vector2>): Vector3;
+  projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): Vector3;
+  setCameraInfo(customCameraInfo: CustomCameraInfo): void;
+}
+
 export interface ExtensionContext {
   /** The current _mode_ of the application. */
   readonly mode: "production" | "development" | "test";
@@ -504,7 +528,7 @@ export interface ExtensionContext {
    */
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
 
-  registerCameraModel(cameraModel: unknown): void;
+  registerCameraModel(name: string, builder: (info: CustomCameraInfo) => ICameraModel): void;
 }
 
 export type ExtensionActivate = (extensionContext: ExtensionContext) => void;

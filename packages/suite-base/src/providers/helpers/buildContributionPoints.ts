@@ -12,6 +12,7 @@ import {
   TopicAliasFunction,
   ExtensionModule,
   ExtensionPanelRegistration,
+  CustomCameraInfo,
 } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
@@ -33,7 +34,7 @@ export function buildContributionPoints(
   const messageConverters: RegisterMessageConverterArgs<unknown>[] = [];
   const panelSettings: ExtensionSettings = {};
   const topicAliasFunctions: ContributionPoints["topicAliasFunctions"] = [];
-  const cameraModels: ICameraModel[] = [];
+  const cameraModels = new Map<string, (info: CustomCameraInfo) => ICameraModel>();
 
   log.debug(`Mounting extension ${extension.qualifiedName}`);
 
@@ -91,12 +92,10 @@ export function buildContributionPoints(
       topicAliasFunctions.push({ aliasFunction, extensionId: extension.id });
     },
 
-    registerCameraModel(cameraModel: ICameraModel) {
-      log.debug(
-        `Extension ${extension.qualifiedName} registering camera model: ${cameraModel.name}`,
-      );
+    registerCameraModel(name: string, builder: (info: CustomCameraInfo) => ICameraModel) {
+      log.debug(`Extension ${extension.qualifiedName} registering camera model: ${name}`);
 
-      cameraModels.push(cameraModel);
+      cameraModels.set(name, builder);
     },
   };
 

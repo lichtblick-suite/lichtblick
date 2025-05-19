@@ -11,6 +11,7 @@ import { StoreApi, useStore } from "zustand";
 import { ICameraModel } from "@lichtblick/den/image";
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import {
+  CustomCameraInfo,
   ExtensionPanelRegistration,
   Immutable,
   PanelSettings,
@@ -51,7 +52,7 @@ export type ExtensionCatalog = Immutable<{
   installedPanels: undefined | Record<string, RegisteredPanel>;
   installedMessageConverters: undefined | Omit<MessageConverter, "panelSettings">[];
   installedTopicAliasFunctions: undefined | TopicAliasFunctions;
-  installedCameraModels: undefined | ICameraModel[];
+  installedCameraModels: Map<string, (Info: CustomCameraInfo) => ICameraModel>;
   panelSettings: undefined | ExtensionSettings;
 }>;
 
@@ -65,7 +66,7 @@ export type ContributionPoints = {
   messageConverters: MessageConverter[];
   topicAliasFunctions: TopicAliasFunctions;
   panelSettings: ExtensionSettings;
-  cameraModels: ICameraModel[];
+  cameraModels: Map<string, (info: CustomCameraInfo) => ICameraModel>;
 };
 
 export const ExtensionCatalogContext = createContext<undefined | StoreApi<ExtensionCatalog>>(
