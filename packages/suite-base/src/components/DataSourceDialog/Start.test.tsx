@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import Start from "./Start";
 
@@ -49,6 +50,11 @@ describe("Start Component", () => {
   const mockSelectRecent = jest.fn();
   const mockOpenDialog = jest.fn();
 
+  const mockRecentSources = BasicBuilder.multiple(() => ({
+    id: BasicBuilder.string(),
+    title: BasicBuilder.string(),
+  }));
+
   beforeEach(() => {
     (useTranslation as jest.Mock).mockReturnValue({
       t: (key: string) => key,
@@ -59,10 +65,7 @@ describe("Start Component", () => {
     });
 
     (usePlayerSelection as jest.Mock).mockReturnValue({
-      recentSources: [
-        { id: "1", title: "Recent Source 1" },
-        { id: "2", title: "Recent Source 2" },
-      ],
+      recentSources: mockRecentSources,
       selectRecent: mockSelectRecent,
     });
 
@@ -80,51 +83,67 @@ describe("Start Component", () => {
   });
 
   it("renders the Start component correctly", () => {
+    // GIVEN
     render(<Start />);
 
+    // THEN
     expect(screen.getByText("openDataSource")).toBeInTheDocument();
     expect(screen.getByText("openLocalFiles")).toBeInTheDocument();
     expect(screen.getByText("openConnection")).toBeInTheDocument();
     expect(screen.getByText("recentDataSources")).toBeInTheDocument();
-    expect(screen.getByText("Recent Source 1")).toBeInTheDocument();
-    expect(screen.getByText("Recent Source 2")).toBeInTheDocument();
+    mockRecentSources.forEach((source) => {
+      expect(screen.getByText(source.title)).toBeInTheDocument();
+    });
   });
 
   it("handles 'open-local-file' button click", () => {
+    // GIVEN
     render(<Start />);
 
+    // WHEN
     const localFileButton = screen.getByText("openLocalFiles");
     fireEvent.click(localFileButton);
 
+    // THEN
     expect(mockOpenDialog).toHaveBeenCalledWith("file");
   });
 
   it("handles 'open-connection' button click", () => {
+    // GIVEN
     render(<Start />);
 
+    // WHEN
     const connectionButton = screen.getByText("openConnection");
     fireEvent.click(connectionButton);
 
+    // THEN
     expect(mockOpenDialog).toHaveBeenCalledWith("connection");
   });
 
   it("handles recent source selection", () => {
+    // GIVEN
     render(<Start />);
 
-    const recentSourceButton = screen.getByText("Recent Source 1");
-    fireEvent.click(recentSourceButton);
+    mockRecentSources.forEach((source) => {
+      // WHEN
+      fireEvent.click(screen.getByText(source.title));
 
-    expect(mockSelectRecent).toHaveBeenCalledWith("1");
+      // THEN
+      expect(mockSelectRecent).toHaveBeenCalledWith(source.id);
+    });
   });
 
   it("does not render recent sources section if there are no recent sources", () => {
+    // GIVEN
     (usePlayerSelection as jest.Mock).mockReturnValue({
       recentSources: [],
       selectRecent: mockSelectRecent,
     });
 
+    // WHEN
     render(<Start />);
 
+    // THEN
     expect(screen.queryByText("recentDataSources")).not.toBeInTheDocument();
   });
 });

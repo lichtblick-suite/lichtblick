@@ -10,7 +10,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
-import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog";
+import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/types";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 const useStyles = makeStyles()({

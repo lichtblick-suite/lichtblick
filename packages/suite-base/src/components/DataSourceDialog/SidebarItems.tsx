@@ -51,7 +51,7 @@ const SidebarItems = (props: {
             className={classes.button}
             variant="outlined"
           >
-            {t("checkoutDocumentation")}
+            {t("viewDocumentation")}
           </Button>
         </>
       ),

@@ -10,7 +10,7 @@ import * as _ from "lodash-es";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 
 import { useGuaranteedContext } from "@lichtblick/hooks";
-import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog";
+import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/types";
 import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSourceDialog";
 import {
   IDataSourceFactory,

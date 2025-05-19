@@ -9,7 +9,7 @@ import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
 import { useGuaranteedContext } from "@lichtblick/hooks";
-import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog";
+import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/types";
 import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSourceDialog";
 import { IDataSourceFactory } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 
