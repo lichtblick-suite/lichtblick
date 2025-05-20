@@ -50,7 +50,7 @@ describe("SidebarItems", () => {
     expect(screen.getByText("newToLichtblick")).toBeInTheDocument();
     expect(screen.getByText("newToLichtblickDescription")).toBeInTheDocument();
     expect(screen.getByText("exploreSampleData")).toBeInTheDocument();
-    expect(screen.getByText("checkoutDocumentation")).toBeInTheDocument();
+    expect(screen.getByText("viewDocumentation")).toBeInTheDocument();
   });
 
   it("renders items for authenticated-free users", () => {
@@ -92,7 +92,7 @@ describe("SidebarItems", () => {
     const windowOpenSpy = jest.spyOn(window, "open").mockImplementation(() => window);
     render(<SidebarItems onSelectView={mockOnSelectView} />);
 
-    const documentationButton = screen.getByText("checkoutDocumentation");
+    const documentationButton = screen.getByText("viewDocumentation");
     fireEvent.click(documentationButton);
     expect(windowOpenSpy).toHaveBeenCalledWith(
       LICHTBLICK_DOCUMENTATION_LINK,
