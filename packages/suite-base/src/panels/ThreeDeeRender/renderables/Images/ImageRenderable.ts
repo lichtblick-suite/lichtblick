@@ -9,6 +9,7 @@ import * as _ from "lodash-es";
 import * as THREE from "three";
 import { assert } from "ts-essentials";
 
+import { VideoPlayer } from "@lichtblick/den/video";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { ICameraModel } from "@lichtblick/suite";
