@@ -360,48 +360,6 @@ export default function Panel<
       });
     }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
-    // const splitPanel = useCallback(
-    //   (direction: "row" | "column") => {
-    //     const savedProps = getCurrentLayoutState().selectedLayout?.data?.configById;
-    //     if (!savedProps) {
-    //       return;
-    //     }
-    //     const tabSavedProps =
-    //       tabId != undefined ? (savedProps[tabId] as TabPanelConfig) : undefined;
-    //     if (tabId != undefined && tabSavedProps != undefined) {
-    //       const newId = getPanelIdForType(PanelComponent.panelType);
-    //       const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]?.layout;
-    //       if (activeTabLayout == undefined) {
-    //         return;
-    //       }
-    //       const pathToPanelInTab = getPathFromNode(childId, activeTabLayout);
-    //       const newTabLayout = updateTree(activeTabLayout, [
-    //         {
-    //           path: pathToPanelInTab,
-    //           spec: { $set: { first: childId, second: newId, direction } },
-    //         },
-    //       ]);
-    //       const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps);
-    //       savePanelConfigs({
-    //         configs: [
-    //           { id: tabId, config: newTabConfig },
-    //           { id: newId, config: panelComponentConfig },
-    //         ],
-    //       });
-    //     } else {
-    //       void mosaicWindowActions.split({ type: PanelComponent.panelType });
-    //     }
-    //   },
-    //   [
-    //     childId,
-    //     getCurrentLayoutState,
-    //     mosaicWindowActions,
-    //     panelComponentConfig,
-    //     savePanelConfigs,
-    //     tabId,
-    //   ],
-    // );
-
     const getPanelType = useCallback(
       () => getPanelTypeFromMosaic(mosaicWindowActions, mosaicActions),
       [mosaicActions, mosaicWindowActions],
