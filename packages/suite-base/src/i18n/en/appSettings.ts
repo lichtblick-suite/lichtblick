@@ -26,6 +26,9 @@ export const appSettings = {
   messageRate: "Message rate",
   memoryUseIndicator: "Memory use indicator",
   memoryUseIndicatorDescription: "Show the app memory use in the sidebar.",
+  syncLichtblickInstances: "Sync Lichtblick instances",
+  syncLichtblickInstancesDescription:
+    "Activates the button in the right lower corner of the application to sync Lichtblick instances opened.",
   noExperimentalFeatures: "Currently there are no experimental features.",
   openLinksIn: "Open links in",
   ros: "ROS",

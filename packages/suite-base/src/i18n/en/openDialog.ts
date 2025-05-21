@@ -12,11 +12,12 @@ export const openDialog = {
     "Use a convenient web interface to tag, search, and retrieve data at lightning speed",
   createAFreeAccount: "Create a free account",
   exploreSampleData: "Explore sample data",
+  viewDocumentation: "View documentation",
   learnMore: "Learn more",
   needHelp: "Need help?",
   needHelpDescription: "View our documentation, or check out the tutorials on the Foxglove blog.",
-  newToFoxgloveStudio: "New to Lichtblick?",
-  newToFoxgloveStudioDescription:
+  newToLichtblick: "New to Lichtblick?",
+  newToLichtblickDescription:
     "Start by exploring a sample dataset or checking out our documentation.",
   openAGitHubIssue: "Open a GitHub issue",
   openConnection: "Open connection",

@@ -48,6 +48,11 @@ function useFeatures(): Feature[] {
       name: t("memoryUseIndicator"),
       description: <>{t("memoryUseIndicatorDescription")}</>,
     },
+    {
+      key: AppSetting.SHOW_SYNC_LB_INSTANCES,
+      name: t("syncLichtblickInstances"),
+      description: <>{t("syncLichtblickInstancesDescription")}</>,
+    },
   ];
 
   if (process.env.NODE_ENV === "development") {
