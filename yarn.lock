@@ -3053,6 +3053,7 @@ __metadata:
     react-virtualized-auto-sizer: 1.0.24
     react-window: 1.8.10
     readable-stream: 4.4.2
+    recharts: 2.15.3
     rehype-raw: 6.1.1
     reselect: 5.1.1
     sanitize-html: 2.12.1
@@ -14297,7 +14298,6 @@ __metadata:
     prettier: 3.3.2
     react-refresh: 0.14.2
     react-use: 17.5.1
-    recharts: 2.15.1
     rehype-raw: 6.1.1
     rimraf: 5.0.5
     semver: 7.5.4
@@ -17753,9 +17753,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:2.15.1":
-  version: 2.15.1
-  resolution: "recharts@npm:2.15.1"
+"recharts@npm:2.15.3":
+  version: 2.15.3
+  resolution: "recharts@npm:2.15.3"
   dependencies:
     clsx: ^2.0.0
     eventemitter3: ^4.0.1
@@ -17768,7 +17768,7 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: c288012087424e7067bf4a48a3d50a7c0ea231188ecaaf17685d93711ef1846aedd37509dfc25c046052f671e7e19dd2de5d8b9c1e497a64c39995c9c338b40a
+  checksum: 65f391873587aff2b55d33835407cd97e37f1093d9f998a74afaac2bc380117f0adf216ece7d345cad724f9a047782adb88463c5c3911efc073b846274dd8d42
   languageName: node
   linkType: hard
 
