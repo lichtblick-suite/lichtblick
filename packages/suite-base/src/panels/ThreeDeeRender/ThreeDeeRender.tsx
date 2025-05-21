@@ -16,6 +16,7 @@ import { useDebouncedCallback } from "use-debounce";
 import Logger from "@lichtblick/log";
 import { Time, toNanoSec } from "@lichtblick/rostime";
 import {
+  CameraModelsMap,
   Immutable,
   LayoutActions,
   MessageEvent,
@@ -85,8 +86,9 @@ export function ThreeDeeRender(props: {
   testOptions: TestOptions;
   /** Allow for injection or overriding of default extensions by custom extensions */
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
+  customCameraModels: CameraModelsMap;
 }): React.JSX.Element {
-  const { context, interfaceMode, testOptions, customSceneExtensions } = props;
+  const { context, interfaceMode, testOptions, customSceneExtensions, customCameraModels } = props;
   const {
     initialState,
     saveState,
@@ -156,6 +158,7 @@ export function ThreeDeeRender(props: {
           ),
           displayTemporaryError,
           testOptions,
+          customCameraModels,
         })
       : undefined;
     setRenderer(newRenderer);
@@ -169,6 +172,7 @@ export function ThreeDeeRender(props: {
     configRef,
     config.scene.transforms?.enablePreloading,
     customSceneExtensions,
+    customCameraModels,
     interfaceMode,
     fetchAsset,
     testOptions,

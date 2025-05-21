@@ -27,8 +27,7 @@ export const COMPRESSED_VIDEO_DATATYPES = new Set<string>();
 addFoxgloveSchema(COMPRESSED_VIDEO_DATATYPES, "foxglove.CompressedVideo");
 
 export const CAMERA_CALIBRATION_DATATYPES = new Set<string>();
-// addFoxgloveSchema(CAMERA_CALIBRATION_DATATYPES, "foxglove.CameraCalibration");
-addFoxgloveSchema(CAMERA_CALIBRATION_DATATYPES, "lichtblick.CustomCameraCalibration");
+addFoxgloveSchema(CAMERA_CALIBRATION_DATATYPES, "foxglove.CameraCalibration");
 
 export const SCENE_UPDATE_DATATYPES = new Set<string>();
 addFoxgloveSchema(SCENE_UPDATE_DATATYPES, "foxglove.SceneUpdate");

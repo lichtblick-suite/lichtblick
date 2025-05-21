@@ -8,10 +8,15 @@
 import { CameraCalibration } from "@foxglove/schemas";
 import { t } from "i18next";
 
-import { CameraModel, ICameraModel } from "@lichtblick/den/image";
+import { selectCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
-import { CustomCameraInfo, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
+import {
+  CameraModelsMap,
+  ICameraModel,
+  SettingsTreeAction,
+  SettingsTreeFields,
+} from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { RenderableLineList } from "./markers/RenderableLineList";
@@ -87,10 +92,7 @@ export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
 
 export class Cameras extends SceneExtension<CameraInfoRenderable> {
   public static extensionId = "foxglove.Cameras";
-  private customCameraModels = new Map<
-    string,
-    (customCameraInfo: CustomCameraInfo) => ICameraModel
-  >();
+  private customCameraModels: CameraModelsMap = new Map();
 
   public constructor(renderer: IRenderer, name: string = Cameras.extensionId) {
     super(name, renderer);
@@ -271,7 +273,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
       if (cameraInfo.P.length === 12) {
         try {
-          renderable.userData.cameraModel = CameraModel.create(cameraInfo, this.customCameraModels);
+          renderable.userData.cameraModel = selectCameraModel(cameraInfo, this.customCameraModels);
           log.debug("renderable.userData.cameraModel", renderable.userData.cameraModel);
         } catch (errUnk) {
           const err = errUnk as Error;
@@ -314,8 +316,8 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     }
   }
 
-  public setCustomCameraModels(name: string, builder: () => ICameraModel): void {
-    this.customCameraModels.set(name, builder);
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
   }
 }
 

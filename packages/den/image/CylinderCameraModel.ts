@@ -1,15 +1,11 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { CameraInfo, Vector2, Vector3 } from "@lichtblick/suite";
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-import type { CameraInfo } from "./CameraInfo";
-
-type Vector2 = { x: number; y: number };
-
-type Vector3 = { x: number; y: number; z: number };
 
 type Matrix3 = [number, number, number, number, number, number, number, number, number];
 

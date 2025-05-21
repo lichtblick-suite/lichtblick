@@ -10,10 +10,10 @@ import { t } from "i18next";
 import { assert } from "ts-essentials";
 
 import { MultiMap, filterMap } from "@lichtblick/den/collection";
-import { CameraModel, ICameraModel } from "@lichtblick/den/image";
+import { selectCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
-import { CustomCameraInfo, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
+import { CameraModelsMap, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
 
 import {
@@ -85,10 +85,7 @@ export class Images extends SceneExtension<ImageRenderable> {
    */
   #cameraInfoByTopic = new Map<string, CameraInfo>();
 
-  private customCameraModels = new Map<
-    string,
-    (customCameraInfo: CustomCameraInfo) => ICameraModel
-  >();
+  private customCameraModels: CameraModelsMap = new Map();
 
   protected supportedImageSchemas = ALL_SUPPORTED_IMAGE_SCHEMAS;
 
@@ -429,7 +426,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     const imageTopic = renderable.userData.topic;
 
     try {
-      const cameraModel = CameraModel.create(newCameraInfo, this.customCameraModels);
+      const cameraModel = selectCameraModel(newCameraInfo, this.customCameraModels);
       renderable.setCameraModel(cameraModel);
       renderable.userData.cameraInfo = newCameraInfo;
       this.renderer.settings.errors.removeFromTopic(imageTopic, CAMERA_MODEL);
@@ -484,7 +481,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     return new ImageRenderable(topicName, this.renderer, userData);
   }
 
-  public setCustomCameraModels(name: string, builder: () => ICameraModel): void {
-    this.customCameraModels.set(name, builder);
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
   }
 }

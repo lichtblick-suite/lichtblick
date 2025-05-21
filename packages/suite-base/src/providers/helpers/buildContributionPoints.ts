@@ -4,7 +4,6 @@
 import * as _ from "lodash-es";
 import ReactDOM from "react-dom";
 
-import { ICameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import {
   RegisterMessageConverterArgs,
@@ -12,7 +11,8 @@ import {
   TopicAliasFunction,
   ExtensionModule,
   ExtensionPanelRegistration,
-  CustomCameraInfo,
+  CameraModelsMap,
+  CameraModelBuilder,
 } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
@@ -34,7 +34,7 @@ export function buildContributionPoints(
   const messageConverters: RegisterMessageConverterArgs<unknown>[] = [];
   const panelSettings: ExtensionSettings = {};
   const topicAliasFunctions: ContributionPoints["topicAliasFunctions"] = [];
-  const cameraModels = new Map<string, (info: CustomCameraInfo) => ICameraModel>();
+  const cameraModels: CameraModelsMap = new Map();
 
   log.debug(`Mounting extension ${extension.qualifiedName}`);
 
@@ -92,7 +92,7 @@ export function buildContributionPoints(
       topicAliasFunctions.push({ aliasFunction, extensionId: extension.id });
     },
 
-    registerCameraModel(name: string, builder: (info: CustomCameraInfo) => ICameraModel) {
+    registerCameraModel(name: string, builder: CameraModelBuilder) {
       log.debug(`Extension ${extension.qualifiedName} registering camera model: ${name}`);
 
       cameraModels.set(name, builder);

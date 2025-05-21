@@ -10,11 +10,12 @@ import * as THREE from "three";
 import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
-import { CameraModel, ICameraModel } from "@lichtblick/den/image";
+import { selectCameraModel } from "@lichtblick/den/image";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
-  CustomCameraInfo,
+  CameraModelsMap,
+  ICameraModel,
   Immutable,
   MessageEvent,
   SettingsTreeAction,
@@ -159,10 +160,12 @@ export class ImageMode
   #dragStartMouseCoords = new THREE.Vector2();
   #hasModifiedView = false;
 
-  private customCameraModels = new Map<string, (info: CustomCameraInfo) => ICameraModel>();
+  protected customCameraModels: CameraModelsMap = new Map();
 
   public constructor(renderer: IRenderer, name: string = ImageMode.extensionId) {
     super(name, renderer);
+
+    this.customCameraModels = renderer.customCameraModels;
 
     this.#camera = new ImageModeCamera();
     const canvasSize = renderer.input.canvasSize;
@@ -932,8 +935,8 @@ export class ImageMode
   #getCameraModel(cameraInfo: CameraInfo): ICameraModel | undefined {
     let model = undefined;
     try {
-      log.debug(cameraInfo);
-      model = CameraModel.create(cameraInfo, this.customCameraModels);
+      log.debug("this.customCameraModels", this.customCameraModels);
+      model = selectCameraModel(cameraInfo, this.customCameraModels);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;
@@ -1056,8 +1059,8 @@ export class ImageMode
     ];
   }
 
-  public setCustomCameraModels(name: string, builder: () => ICameraModel): void {
-    this.customCameraModels.set(name, builder);
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
   }
 }
 

@@ -7,7 +7,7 @@
 
 import { CameraCalibration } from "@foxglove/schemas";
 
-import { ICameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/suite";
 
 import { PartialMessage } from "../SceneExtension";
 import { normalizeHeader, normalizeTime } from "../normalizeMessages";

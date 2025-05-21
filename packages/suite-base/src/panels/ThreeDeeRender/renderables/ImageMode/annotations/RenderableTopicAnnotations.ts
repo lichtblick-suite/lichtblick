@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 
-import { ICameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/suite";
 import { RosObject } from "@lichtblick/suite-base/players/types";
 import { LabelPool } from "@lichtblick/three-text";
 
