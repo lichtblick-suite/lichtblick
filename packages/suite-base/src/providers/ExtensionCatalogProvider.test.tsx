@@ -230,6 +230,50 @@ describe("ExtensionCatalogProvider", () => {
     ]);
   });
 
+  it("should register camera models", async () => {
+    const cameraModel1 = BasicBuilder.string();
+    const cameraModel2 = BasicBuilder.string();
+
+    const source = `
+        module.exports = {
+            activate: function(ctx) {
+                ctx.registerCameraModel(
+                      "${cameraModel1}",
+                      () => undefined
+                )
+                ctx.registerCameraModel(
+                      "${cameraModel2}",
+                      () => undefined
+                )
+            }
+        }
+    `;
+    const loadExtension = jest.fn().mockResolvedValue(source);
+    const extension = ExtensionBuilder.extensionInfo();
+    const loader: ExtensionLoader = {
+      namespace: extension.namespace!,
+      getExtension: jest.fn(),
+      getExtensions: jest.fn().mockResolvedValue([extension]),
+      loadExtension,
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+    };
+
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+      initialProps: {},
+      wrapper: ({ children }) => (
+        <ExtensionCatalogProvider loaders={[loader]}>{children}</ExtensionCatalogProvider>
+      ),
+    });
+
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
+    expect(result.current.installedCameraModels.size).toEqual(2);
+    expect(result.current.installedCameraModels.get(cameraModel1)).toEqual(expect.any(Function));
+    expect(result.current.installedCameraModels.get(cameraModel2)).toEqual(expect.any(Function));
+  });
+
   it("should register a default config", async () => {
     jest.spyOn(console, "error").mockImplementation(() => {});
 
@@ -367,6 +411,7 @@ describe("ExtensionCatalogProvider", () => {
       expect(result.current.installedPanels).toEqual({});
       expect(result.current.installedMessageConverters?.length).toBe(0);
       expect(result.current.installedTopicAliasFunctions?.length).toBe(0);
+      expect(result.current.installedCameraModels.size).toBe(0);
     });
 
     it("should throw an error when uninstall with no registered loader to the namespace", async () => {
@@ -397,6 +442,7 @@ describe("ExtensionCatalogProvider", () => {
       ];
       const contributionPoints: ContributionPoints = {
         messageConverters: [messageConverter],
+        cameraModels: new Map(),
         topicAliasFunctions,
         panelSettings: {
           panelA: {
