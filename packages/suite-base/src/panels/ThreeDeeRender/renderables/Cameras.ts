@@ -92,10 +92,12 @@ export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
 
 export class Cameras extends SceneExtension<CameraInfoRenderable> {
   public static extensionId = "foxglove.Cameras";
-  private customCameraModels: CameraModelsMap = new Map();
+  public customCameraModels: CameraModelsMap;
 
   public constructor(renderer: IRenderer, name: string = Cameras.extensionId) {
     super(name, renderer);
+
+    this.customCameraModels = renderer.customCameraModels;
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

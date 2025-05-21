@@ -97,6 +97,8 @@ export function ThreeDeeRender(props: {
   } = context;
   const analytics = useAnalytics();
 
+  console.log("customCameraModels", customCameraModels);
+
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
     const partialConfig = initialState as DeepPartial<RendererConfig> | undefined;
@@ -178,6 +180,10 @@ export function ThreeDeeRender(props: {
     testOptions,
     displayTemporaryError,
   ]);
+
+  useEffect(() => {
+    renderer?.setCustomCameraModels(customCameraModels);
+  }, [renderer, customCameraModels]);
 
   useEffect(() => {
     if (renderer) {

@@ -160,12 +160,14 @@ export class ImageMode
   #dragStartMouseCoords = new THREE.Vector2();
   #hasModifiedView = false;
 
-  protected customCameraModels: CameraModelsMap = new Map();
+  public customCameraModels: CameraModelsMap;
 
   public constructor(renderer: IRenderer, name: string = ImageMode.extensionId) {
     super(name, renderer);
 
     this.customCameraModels = renderer.customCameraModels;
+
+    log.debug("renderer.customCameraModels", renderer.customCameraModels);
 
     this.#camera = new ImageModeCamera();
     const canvasSize = renderer.input.canvasSize;
@@ -918,6 +920,7 @@ export class ImageMode
     }
 
     const model = this.#getCameraModel(newCameraInfo);
+    log.debug("selected model", model);
     if (model) {
       this.#cameraModel = {
         model,
@@ -935,8 +938,7 @@ export class ImageMode
   #getCameraModel(cameraInfo: CameraInfo): ICameraModel | undefined {
     let model = undefined;
     try {
-      log.debug("this.customCameraModels", this.customCameraModels);
-      model = selectCameraModel(cameraInfo, this.customCameraModels);
+      model = selectCameraModel({ ...cameraInfo }, this.customCameraModels);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;
