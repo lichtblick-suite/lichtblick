@@ -85,12 +85,13 @@ export class Images extends SceneExtension<ImageRenderable> {
    */
   #cameraInfoByTopic = new Map<string, CameraInfo>();
 
-  private customCameraModels: CameraModelsMap = new Map();
+  public customCameraModels: CameraModelsMap;
 
   protected supportedImageSchemas = ALL_SUPPORTED_IMAGE_SCHEMAS;
 
   public constructor(renderer: IRenderer, name: string = Images.extensionId) {
     super(name, renderer);
+    this.customCameraModels = renderer.customCameraModels;
     this.renderer.on("topicsChanged", this.#handleTopicsChanged);
     this.#handleTopicsChanged();
   }

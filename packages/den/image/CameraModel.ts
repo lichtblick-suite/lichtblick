@@ -16,7 +16,7 @@ export const selectCameraModel = (
   cameraInfo: CameraInfo,
   cameraModels: CameraModelsMap,
 ): ICameraModel => {
-  const selectedCameraModel = cameraModels.get("CylinderCameraModel");
+  const selectedCameraModel = cameraModels.get(cameraInfo.distortion_model);
   log.debug("distortion_model", cameraInfo.distortion_model);
   log.debug("selectedCameraModel", selectedCameraModel);
   if (selectedCameraModel) {
