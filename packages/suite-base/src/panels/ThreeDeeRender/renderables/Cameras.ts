@@ -268,15 +268,12 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     // If the CameraInfo message contents changed, rebuild cameraModel
     const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
     if (!dataEqual) {
-      // log.warn(`CameraInfo changed on topic "${topic}", updating rectification model`);
       renderable.userData.cameraInfo = cameraInfo;
       renderable.userData.originalMessage = originalMessage;
-      log.debug("cameraInfo", cameraInfo);
 
       if (cameraInfo.P.length === 12) {
         try {
           renderable.userData.cameraModel = selectCameraModel(cameraInfo, this.customCameraModels);
-          log.debug("renderable.userData.cameraModel", renderable.userData.cameraModel);
         } catch (errUnk) {
           const err = errUnk as Error;
           this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);

@@ -122,7 +122,6 @@ const SUPPORTED_RAW_IMAGE_SCHEMAS = new Set([...RAW_IMAGE_DATATYPES, ...ROS_IMAG
 const ALL_SUPPORTED_CALIBRATION_SCHEMAS = new Set([
   ...CAMERA_INFO_DATATYPES,
   ...CAMERA_CALIBRATION_DATATYPES,
-  ...[], // create lichtblick schemas here
 ]);
 
 const DEFAULT_CONFIG = {
@@ -166,8 +165,6 @@ export class ImageMode
     super(name, renderer);
 
     this.customCameraModels = renderer.customCameraModels;
-
-    log.debug("renderer.customCameraModels", renderer.customCameraModels);
 
     this.#camera = new ImageModeCamera();
     const canvasSize = renderer.input.canvasSize;
@@ -920,7 +917,7 @@ export class ImageMode
     }
 
     const model = this.#getCameraModel(newCameraInfo);
-    log.debug("selected model", model);
+
     if (model) {
       this.#cameraModel = {
         model,
@@ -938,7 +935,7 @@ export class ImageMode
   #getCameraModel(cameraInfo: CameraInfo): ICameraModel | undefined {
     let model = undefined;
     try {
-      model = selectCameraModel({ ...cameraInfo }, this.customCameraModels);
+      model = selectCameraModel(cameraInfo, this.customCameraModels);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;
