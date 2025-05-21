@@ -36,7 +36,6 @@ export interface ICameraModel {
   cy: number;
   projectPixelTo3dPlane(out: Vector3, pixel: Readonly<Vector2>): Vector3;
   projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): Vector3;
-  setCameraInfo(cameraInfo: CameraInfo): void;
 }
 
 export type CameraModelBuilder = (info: CameraInfo) => ICameraModel;
