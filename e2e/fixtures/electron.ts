@@ -17,15 +17,9 @@ export const test = base.extend<ElectronFixtures>({
   electronApp: async ({}, use) => {
     checkBuild(WEBPACK_PATH);
 
-    const env: Record<string, string> = {};
-    if (process.env.CI) {
-      env.E2E_TEST = "true";
-    }
-
     const app = await electron.launch({
       args: [WEBPACK_PATH],
       executablePath: electronPath as unknown as string,
-      env,
     });
     await use(app);
     await app.close();
