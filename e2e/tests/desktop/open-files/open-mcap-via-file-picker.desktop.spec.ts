@@ -3,7 +3,7 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
-test("should open a MCAP file via file picker", async ({ mainWindow }) => {
+test("should open an MCAP file via file picker", async ({ mainWindow }) => {
   // Given
   const filename = "example.mcap";
   await loadFile({

@@ -3,7 +3,7 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
-test("should open a BAG file via file picker", async ({ mainWindow }) => {
+test("should uninstall an extension", async ({ mainWindow }) => {
   // Given
   const filename = "lichtblick.suite-extension-turtlesim-0.0.1.foxe";
   await loadFile({

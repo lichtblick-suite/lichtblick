@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 
 import { TEST_MCAP_URL } from "../../../fixtures/urls";
 
-test("should open a MCAP file via URL", async ({ page }) => {
+test("should open an MCAP file via URL", async ({ page }) => {
   // Given
   await page.goto(`/?ds=remote-file&ds.url=${TEST_MCAP_URL}`);
 
