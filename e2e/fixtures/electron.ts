@@ -10,11 +10,12 @@ export type ElectronFixtures = {
   mainWindow: Page;
 };
 
+const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
+
 export const test = base.extend<ElectronFixtures>({
   // eslint-disable-next-line no-empty-pattern
   electronApp: async ({}, use) => {
-    const webpackPath = "desktop/.webpack";
-    checkBuild(webpackPath);
+    checkBuild(WEBPACK_PATH);
 
     const env: Record<string, string> = {};
     if (process.env.CI) {
@@ -22,7 +23,7 @@ export const test = base.extend<ElectronFixtures>({
     }
 
     const app = await electron.launch({
-      args: [webpackPath],
+      args: [WEBPACK_PATH],
       executablePath: electronPath as unknown as string,
       env,
     });
@@ -37,14 +38,12 @@ export const test = base.extend<ElectronFixtures>({
 });
 
 function checkBuild(webpackPath: string): void {
-  const resolvedWebpackPath = path.join(__dirname, "../../", webpackPath);
-
-  if (!fs.existsSync(resolvedWebpackPath)) {
-    throw new Error(`Webpack path does not exist: ${resolvedWebpackPath}`);
+  if (!fs.existsSync(webpackPath)) {
+    throw new Error(`Webpack path does not exist: ${webpackPath}`);
   }
-  const files = fs.readdirSync(resolvedWebpackPath);
+  const files = fs.readdirSync(webpackPath);
   if (files.length === 0) {
-    throw new Error(`Webpack path is empty: ${resolvedWebpackPath}`);
+    throw new Error(`Webpack path is empty: ${webpackPath}`);
   }
 }
 
