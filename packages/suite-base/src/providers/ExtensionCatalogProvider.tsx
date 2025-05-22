@@ -244,8 +244,9 @@ function createExtensionRegistryStore(
         installedTopicAliasFunctions: installedTopicAliasFunctions?.filter(
           ({ extensionId }) => extensionId !== id,
         ),
-        // NEED TO FILTER BY EXTENSION?
-        installedCameraModels,
+        installedCameraModels: new Map(
+          [...installedCameraModels].filter(([, { extensionId }]) => extensionId !== id),
+        ),
       };
     }
 

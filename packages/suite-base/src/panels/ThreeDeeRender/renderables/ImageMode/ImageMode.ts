@@ -11,10 +11,10 @@ import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { selectCameraModel } from "@lichtblick/den/image";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
-  CameraModelsMap,
   ICameraModel,
   Immutable,
   MessageEvent,

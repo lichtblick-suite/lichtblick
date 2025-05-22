@@ -8,8 +8,8 @@
 import EventEmitter from "eventemitter3";
 import * as THREE from "three";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import {
-  CameraModelsMap,
   Immutable,
   MessageEvent,
   ParameterValue,

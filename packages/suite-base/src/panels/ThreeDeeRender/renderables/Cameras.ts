@@ -9,14 +9,10 @@ import { CameraCalibration } from "@foxglove/schemas";
 import { t } from "i18next";
 
 import { selectCameraModel } from "@lichtblick/den/image";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
-import {
-  CameraModelsMap,
-  ICameraModel,
-  SettingsTreeAction,
-  SettingsTreeFields,
-} from "@lichtblick/suite";
+import { ICameraModel, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { RenderableLineList } from "./markers/RenderableLineList";

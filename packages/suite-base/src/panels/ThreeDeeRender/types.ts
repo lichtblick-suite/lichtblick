@@ -7,7 +7,7 @@
 
 import { DeepPartial } from "ts-essentials";
 
-import { CameraModelsMap } from "@lichtblick/suite";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { FollowMode, TestOptions } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { SceneExtensionConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";

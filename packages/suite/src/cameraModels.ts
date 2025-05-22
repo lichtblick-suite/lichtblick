@@ -40,4 +40,7 @@ export interface ICameraModel {
 
 export type CameraModelBuilder = (info: CameraInfo) => ICameraModel;
 
-export type CameraModelsMap = Map<string, CameraModelBuilder>;
+export type RegisterCameraModelArgs = {
+  name: DistortionModel;
+  modelBuilder: CameraModelBuilder;
+};

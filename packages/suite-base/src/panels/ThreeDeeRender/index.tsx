@@ -8,8 +8,8 @@
 import { useMemo } from "react";
 import { DeepPartial } from "ts-essentials";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { useCrash } from "@lichtblick/hooks";
-import { CameraModelsMap } from "@lichtblick/suite";
 import { CaptureErrorBoundary } from "@lichtblick/suite-base/components/CaptureErrorBoundary";
 import {
   ForwardAnalyticsContextProvider,

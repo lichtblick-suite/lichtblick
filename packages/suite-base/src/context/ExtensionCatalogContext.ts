@@ -8,9 +8,9 @@
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import {
-  CameraModelsMap,
   ExtensionPanelRegistration,
   Immutable,
   PanelSettings,

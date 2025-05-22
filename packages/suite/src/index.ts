@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { CameraModelBuilder } from "./cameraModels";
+import type { RegisterCameraModelArgs } from "./cameraModels";
 import type { Immutable } from "./immutable";
 
 export type { Immutable } from "./immutable";
@@ -507,7 +507,7 @@ export interface ExtensionContext {
    */
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
 
-  registerCameraModel(name: string, builder: CameraModelBuilder): void;
+  registerCameraModel(args: RegisterCameraModelArgs): void;
 }
 
 export type ExtensionActivate = (extensionContext: ExtensionContext) => void;

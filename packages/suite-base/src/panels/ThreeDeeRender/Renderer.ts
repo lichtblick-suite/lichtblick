@@ -18,7 +18,6 @@ import { ObjectPool } from "@lichtblick/den/collection";
 import Logger from "@lichtblick/log";
 import { Time, fromNanoSec, isLessThan, toNanoSec } from "@lichtblick/rostime";
 import {
-  CameraModelsMap,
   Immutable,
   MessageEvent,
   ParameterValue,
@@ -95,6 +94,7 @@ import {
   Transform,
 } from "./transforms";
 import { InterfaceMode } from "./types";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 
 const log = Logger.getLogger(__filename);
 
