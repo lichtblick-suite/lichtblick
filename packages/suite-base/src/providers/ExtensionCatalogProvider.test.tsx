@@ -270,7 +270,6 @@ describe("ExtensionCatalogProvider", () => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
     });
 
-    console.log(result.current.installedCameraModels);
     expect(result.current.installedCameraModels.size).toEqual(2);
     expect(result.current.installedCameraModels.get(cameraModel1)).toEqual({
       extensionId: extension.id,

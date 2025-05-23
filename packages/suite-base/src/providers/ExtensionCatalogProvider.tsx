@@ -148,7 +148,6 @@ function createExtensionRegistryStore(
             topicAliasFunctions.push(...newContributionPoints.topicAliasFunctions);
 
             newContributionPoints.cameraModels.forEach((builder, name: string) => {
-              console.log("cameraModels AAA", name, builder);
               if (cameraModels.has(name)) {
                 log.warn(`Camera model "${name}" already registered, skipping.`);
                 return;
