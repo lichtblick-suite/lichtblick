@@ -2700,9 +2700,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lichtblick/eslint-plugin@npm:1.0.1":
-  version: 1.0.1
-  resolution: "@lichtblick/eslint-plugin@npm:1.0.1"
+"@lichtblick/eslint-plugin@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@lichtblick/eslint-plugin@npm:1.0.4"
   dependencies:
     "@typescript-eslint/utils": ^6
     tsutils: ^3
@@ -2715,7 +2715,7 @@ __metadata:
     eslint-plugin-import: ^2
     eslint-plugin-prettier: ^5
     prettier: ^3
-  checksum: 340226c47435888692a4e0f0f8d6a525dffc29ad0b9619d8c38836f8ab19603c032ba5f2205b1d3d21b6718b069a1ab93fa6100a438bde3c7757fee0d0cdbf1e
+  checksum: 782778753f876f50a273c1750df6be9f0d68614a37596c536124142fca017928c5b2ccad400ed0dc78c9fe8c75b96c7b2894bcb216f6e18b9e26332e5301bcfd
   languageName: node
   linkType: hard
 
@@ -3017,6 +3017,7 @@ __metadata:
     css-loader: 6.8.1
     cytoscape: 3.31.1
     cytoscape-dagre: 2.5.0
+    dompurify: 3.2.5
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
     fake-indexeddb: 4.0.2
@@ -5732,6 +5733,13 @@ __metadata:
   version: 4.0.5
   resolution: "@types/tough-cookie@npm:4.0.5"
   checksum: f19409d0190b179331586365912920d192733112a195e870c7f18d20ac8adb7ad0b0ff69dad430dba8bc2be09593453a719cfea92dc3bda19748fd158fe1498d
+  languageName: node
+  linkType: hard
+
+"@types/trusted-types@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/trusted-types@npm:2.0.7"
+  checksum: 8e4202766a65877efcf5d5a41b7dd458480b36195e580a3b1085ad21e948bc417d55d6f8af1fd2a7ad008015d4117d5fdfe432731157da3c68678487174e4ba3
   languageName: node
   linkType: hard
 
@@ -9447,6 +9455,18 @@ __metadata:
   dependencies:
     domelementtype: ^2.3.0
   checksum: 0f58f4a6af63e6f3a4320aa446d28b5790a009018707bce2859dcb1d21144c7876482b5188395a188dfa974238c019e0a1e610d2fc269a12b2c192ea2b0b131c
+  languageName: node
+  linkType: hard
+
+"dompurify@npm:3.2.5":
+  version: 3.2.5
+  resolution: "dompurify@npm:3.2.5"
+  dependencies:
+    "@types/trusted-types": ^2.0.7
+  dependenciesMeta:
+    "@types/trusted-types":
+      optional: true
+  checksum: bd3b40810cc74312970dc6b99d38450ec839c81fb56c27d2c1b815ce0206b73e9cd4fe2e9021f735a1aaebf017990a63e6454e7d9c893f72b365b94d030ec9c4
   languageName: node
   linkType: hard
 
@@ -14036,7 +14056,7 @@ __metadata:
     "@babel/preset-env": 7.27.1
     "@babel/preset-react": 7.27.1
     "@babel/preset-typescript": 7.27.1
-    "@lichtblick/eslint-plugin": 1.0.1
+    "@lichtblick/eslint-plugin": 1.0.4
     "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
@@ -20037,11 +20057,11 @@ __metadata:
   linkType: hard
 
 "undici@npm:^5.25.4":
-  version: 5.28.5
-  resolution: "undici@npm:5.28.5"
+  version: 5.29.0
+  resolution: "undici@npm:5.29.0"
   dependencies:
     "@fastify/busboy": ^2.0.0
-  checksum: a402d699a602a8feee1c0f78267467c8ffcbd7682267fec7a1307fd11554a32976a2307bf1cc8bf6ef7a667654336592fbd66d675df20ce28357536fb55a3a7d
+  checksum: a25b5462c1b6ffb974f5ffc492ffd64146a9983aad0cbda6fde65e2b22f6f1acd43f09beacc66cc47624a113bd0c684ffc60366102b6a21b038fbfafb7d75195
   languageName: node
   linkType: hard
 

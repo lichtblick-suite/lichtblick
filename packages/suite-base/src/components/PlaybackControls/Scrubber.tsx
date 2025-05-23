@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -29,6 +29,7 @@ import {
   useSetHoverValue,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
+import BroadcastManager from "@lichtblick/suite-base/util/broadcast/BroadcastManager";
 
 import { EventsOverlay } from "./EventsOverlay";
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
@@ -98,12 +99,15 @@ export default function Scrubber(props: Props): React.JSX.Element {
       if (!latestStartTime.current || !latestEndTime.current) {
         return;
       }
-      onSeek(
-        addTimes(
-          latestStartTime.current,
-          fromSec(fraction * toSec(subtractTimes(latestEndTime.current, latestStartTime.current))),
-        ),
+      const timeToSeek = addTimes(
+        latestStartTime.current,
+        fromSec(fraction * toSec(subtractTimes(latestEndTime.current, latestStartTime.current))),
       );
+      onSeek(timeToSeek);
+      BroadcastManager.getInstance().postMessage({
+        type: "seek",
+        time: timeToSeek,
+      });
     },
     [onSeek, latestEndTime, latestStartTime],
   );

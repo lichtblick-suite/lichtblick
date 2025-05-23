@@ -1,6 +1,6 @@
 {
   "name": "lichtblick",
-  "version": "1.13.0",
+  "version": "1.14.2",
   "license": "MPL-2.0",
   "private": true,
   "productName": "Lichtblick",
@@ -88,7 +88,7 @@
     "@babel/preset-env": "7.27.1",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@lichtblick/eslint-plugin": "1.0.1",
+    "@lichtblick/eslint-plugin": "1.0.4",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
     "@lichtblick/tsconfig": "1.0.0",
     "@octokit/rest": "20.0.2",

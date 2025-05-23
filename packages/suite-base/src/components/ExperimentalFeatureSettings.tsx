@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -47,6 +47,11 @@ function useFeatures(): Feature[] {
       key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
       name: t("memoryUseIndicator"),
       description: <>{t("memoryUseIndicatorDescription")}</>,
+    },
+    {
+      key: AppSetting.SHOW_SYNC_LB_INSTANCES,
+      name: t("syncLichtblickInstances"),
+      description: <>{t("syncLichtblickInstancesDescription")}</>,
     },
   ];
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { nanoid } from "nanoid";
@@ -65,7 +65,6 @@ export function useInstallingExtensionsState({
         for (let i = 0; i < extensionsData.length; i += INSTALL_EXTENSIONS_BATCH) {
           const chunk = extensionsData.slice(i, i + INSTALL_EXTENSIONS_BATCH);
           const result = await installExtensions("local", chunk);
-
           const installedCount = result.filter(({ success }) => success).length;
           setInstallingProgress((prev) => ({
             ...prev,

@@ -1,27 +1,19 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 
 import { Immutable } from "@lichtblick/suite";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import "@testing-library/jest-dom";
+import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 
 import ExtensionListEntry from "./ExtensionListEntry";
 
 describe("ExtensionListEntry Component", () => {
-  const mockEntry: Immutable<ExtensionMarketplaceDetail> = {
-    id: BasicBuilder.string(),
-    name: BasicBuilder.string(),
-    qualifiedName: BasicBuilder.string(),
-    description: BasicBuilder.string(),
-    publisher: BasicBuilder.string(),
-    homepage: BasicBuilder.string(),
-    license: BasicBuilder.string(),
-    version: BasicBuilder.string(),
-  };
+  const mockEntry: Immutable<ExtensionMarketplaceDetail> =
+    ExtensionBuilder.extensionMarketplaceDetail();
 
   const mockOnClick = jest.fn();
 

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -27,7 +27,7 @@ import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
 
 describe("ExtensionCatalogProvider", () => {
   function setup({ loadersOverride }: { loadersOverride?: ExtensionLoader[] } = {}) {
-    const extensionInfo: ExtensionInfo = ExtensionBuilder.extension();
+    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo();
     const extensions: ExtensionInfo[] = [extensionInfo];
 
     const loadExtension = jest
@@ -68,8 +68,8 @@ describe("ExtensionCatalogProvider", () => {
   it("handles extensions with the same id in different loaders", async () => {
     const source1 = `module.exports = { activate: function() { return 1; } }`;
     const source2 = `module.exports = { activate: function() { return 2; } }`;
-    const extension1 = ExtensionBuilder.extension({ namespace: "org" });
-    const extension2 = ExtensionBuilder.extension({ namespace: "local" });
+    const extension1 = ExtensionBuilder.extensionInfo({ namespace: "org" });
+    const extension2 = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loadExtension1 = jest.fn().mockResolvedValue(source1);
     const loadExtension2 = jest.fn().mockResolvedValue(source2);
     const loader1: ExtensionLoader = {
@@ -112,7 +112,7 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const loadExtension = jest.fn().mockResolvedValue(source);
-    const extension = ExtensionBuilder.extension();
+    const extension = ExtensionBuilder.extensionInfo();
     const loader: ExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
@@ -167,7 +167,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const extension = ExtensionBuilder.extension();
+    const extension = ExtensionBuilder.extensionInfo();
     const loadExtension = jest.fn().mockResolvedValue(source);
     const loader: ExtensionLoader = {
       namespace: extension.namespace!,
@@ -205,7 +205,7 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const loadExtension = jest.fn().mockResolvedValue(source);
-    const extension = ExtensionBuilder.extension();
+    const extension = ExtensionBuilder.extensionInfo();
     const loader: ExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
