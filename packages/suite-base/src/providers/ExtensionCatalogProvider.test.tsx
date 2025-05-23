@@ -231,20 +231,20 @@ describe("ExtensionCatalogProvider", () => {
   });
 
   it("should register camera models", async () => {
-    const cameraModel1 = BasicBuilder.string();
-    const cameraModel2 = BasicBuilder.string();
+    const cameraModel1 = "CameraModel1";
+    const cameraModel2 = "CameraModel2";
 
     const source = `
         module.exports = {
             activate: function(ctx) {
-                ctx.registerCameraModel(
-                      "${cameraModel1}",
-                      () => undefined
-                )
-                ctx.registerCameraModel(
-                      "${cameraModel2}",
-                      () => undefined
-                )
+                ctx.registerCameraModel({
+                    name: "${cameraModel1}",
+                    modelBuilder: () => undefined
+                })
+                ctx.registerCameraModel({
+                    name: "${cameraModel2}",
+                    modelBuilder: () => undefined
+                })
             }
         }
     `;
@@ -269,9 +269,17 @@ describe("ExtensionCatalogProvider", () => {
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
     });
+
+    console.log(result.current.installedCameraModels);
     expect(result.current.installedCameraModels.size).toEqual(2);
-    expect(result.current.installedCameraModels.get(cameraModel1)).toEqual(expect.any(Function));
-    expect(result.current.installedCameraModels.get(cameraModel2)).toEqual(expect.any(Function));
+    expect(result.current.installedCameraModels.get(cameraModel1)).toEqual({
+      extensionId: extension.id,
+      modelBuilder: expect.any(Function),
+    });
+    expect(result.current.installedCameraModels.get(cameraModel2)).toEqual({
+      extensionId: extension.id,
+      modelBuilder: expect.any(Function),
+    });
   });
 
   it("should register a default config", async () => {
