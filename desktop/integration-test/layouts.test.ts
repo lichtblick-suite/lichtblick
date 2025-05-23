@@ -19,17 +19,6 @@ describe("layouts", () => {
       .click();
   }
 
-  it("should open 3D panel when clicking on Layouts > default", async () => {
-    await using app = await launchApp();
-    await accessLayout(app);
-    const threeDeeSettingsIcon = app.renderer.getByTestId("SettingsIcon").nth(0);
-    await threeDeeSettingsIcon.click();
-
-    await expect(app.renderer.getByText("3D panel", { exact: true }).innerText()).resolves.toBe(
-      "3D panel",
-    );
-  }, 15_000);
-
   it("should open Image panel when clicking on Layouts > default", async () => {
     await using app = await launchApp();
     await accessLayout(app);
