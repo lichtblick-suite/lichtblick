@@ -19,6 +19,6 @@ export function setLegendCount(newCount: number): void {
 export function subscribeLegendCount(cb: (count: number) => void): () => void {
   listeners.push(cb);
   return () => {
-    listeners = listeners.filter((l) => l !== cb);
+    listeners = listeners.filter((listener) => listener !== cb);
   };
 }

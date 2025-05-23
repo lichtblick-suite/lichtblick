@@ -149,14 +149,12 @@ function NodeEditorComponent(props: NodeEditorProps): React.JSX.Element {
 
   const renderFieldEditor = useCallback(
     (key: string, field: Immutable<SettingsTreeField>) => (
-      <>
-        <FieldEditor
-          key={key}
-          field={field}
-          path={makeStablePath(props.path, key)}
-          actionHandler={actionHandler}
-        />
-      </>
+      <FieldEditor
+        key={key}
+        field={field}
+        path={makeStablePath(props.path, key)}
+        actionHandler={actionHandler}
+      />
     ),
     [props.path, actionHandler],
   );

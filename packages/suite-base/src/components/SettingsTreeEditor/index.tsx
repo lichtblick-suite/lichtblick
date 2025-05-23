@@ -156,7 +156,7 @@ export default function SettingsTreeEditor({
           </>
         )}
         {memoizedNodes.map((nodeProps) => (
-          <NodeEditor {...nodeProps} panelTitle={panelInfo?.title} key={nodeProps.key} />
+          <NodeEditor {...nodeProps} key={nodeProps.key} />
         ))}
       </div>
     </Stack>
