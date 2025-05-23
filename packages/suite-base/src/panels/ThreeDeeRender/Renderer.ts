@@ -15,6 +15,7 @@ import { DeepPartial, assert } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
 import { ObjectPool } from "@lichtblick/den/collection";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { Time, fromNanoSec, isLessThan, toNanoSec } from "@lichtblick/rostime";
 import {
@@ -94,7 +95,6 @@ import {
   Transform,
 } from "./transforms";
 import { InterfaceMode } from "./types";
-import { CameraModelsMap } from "@lichtblick/den/image/types";
 
 const log = Logger.getLogger(__filename);
 
