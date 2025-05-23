@@ -10,10 +10,12 @@ import * as THREE from "three";
 import { Writable } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { selectCameraModel } from "@lichtblick/den/image";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import {
+  ICameraModel,
   Immutable,
   MessageEvent,
   SettingsTreeAction,
@@ -139,7 +141,7 @@ export class ImageMode
   #camera: ImageModeCamera;
   #cameraModel:
     | {
-        model: PinholeCameraModel;
+        model: ICameraModel;
         info: CameraInfo;
       }
     | undefined;
@@ -157,8 +159,12 @@ export class ImageMode
   #dragStartMouseCoords = new THREE.Vector2();
   #hasModifiedView = false;
 
+  public customCameraModels: CameraModelsMap;
+
   public constructor(renderer: IRenderer, name: string = ImageMode.extensionId) {
     super(name, renderer);
+
+    this.customCameraModels = renderer.customCameraModels;
 
     this.#camera = new ImageModeCamera();
     const canvasSize = renderer.input.canvasSize;
@@ -905,11 +911,13 @@ export class ImageMode
     // If the camera info has not changed, we don't need to make a new model and can return the existing one
     const currentCameraInfo = this.#cameraModel?.info;
     const dataEqual = cameraInfosEqual(currentCameraInfo, newCameraInfo);
+
     if (dataEqual && currentCameraInfo != undefined) {
       return;
     }
 
-    const model = this.#getPinholeCameraModel(newCameraInfo);
+    const model = this.#getCameraModel(newCameraInfo);
+
     if (model) {
       this.#cameraModel = {
         model,
@@ -920,14 +928,14 @@ export class ImageMode
   }
 
   /**
-   * Returns PinholeCameraModel for given CameraInfo
+   * Returns ICameraModel for given CameraInfo
    * This function will set a topic error on the image topic if the camera model creation fails.
    * @param cameraInfo - CameraInfo to create model from
    */
-  #getPinholeCameraModel(cameraInfo: CameraInfo): PinholeCameraModel | undefined {
+  #getCameraModel(cameraInfo: CameraInfo): ICameraModel | undefined {
     let model = undefined;
     try {
-      model = new PinholeCameraModel(cameraInfo);
+      model = selectCameraModel(cameraInfo, this.customCameraModels);
       this.renderer.settings.errors.remove(CALIBRATION_TOPIC_PATH, CAMERA_MODEL);
     } catch (errUnk) {
       this.#cameraModel = undefined;
@@ -1048,6 +1056,10 @@ export class ImageMode
         disabled: this.imageRenderable?.getDecodedImage() == undefined,
       },
     ];
+  }
+
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
   }
 }
 

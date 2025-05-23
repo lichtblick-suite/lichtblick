@@ -8,6 +8,7 @@
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import {
   ExtensionPanelRegistration,
@@ -50,6 +51,7 @@ export type ExtensionCatalog = Immutable<{
   installedPanels: undefined | Record<string, RegisteredPanel>;
   installedMessageConverters: undefined | Omit<MessageConverter, "panelSettings">[];
   installedTopicAliasFunctions: undefined | TopicAliasFunctions;
+  installedCameraModels: CameraModelsMap;
   panelSettings: undefined | ExtensionSettings;
 }>;
 
@@ -63,6 +65,7 @@ export type ContributionPoints = {
   messageConverters: MessageConverter[];
   topicAliasFunctions: TopicAliasFunctions;
   panelSettings: ExtensionSettings;
+  cameraModels: CameraModelsMap;
 };
 
 export const ExtensionCatalogContext = createContext<undefined | StoreApi<ExtensionCatalog>>(

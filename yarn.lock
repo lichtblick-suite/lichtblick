@@ -2670,6 +2670,7 @@ __metadata:
   dependencies:
     "@lichtblick/comlink": 1.0.3
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/suite": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
     "@types/dom-webcodecs": 0.1.14
     async-mutex: 0.4.0
