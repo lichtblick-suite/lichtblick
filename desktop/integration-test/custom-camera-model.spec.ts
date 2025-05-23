@@ -5,7 +5,7 @@ import { launchApp } from "./launchApp";
 import { loadFile } from "./utils/loadFile";
 
 describe("custom camera model", () => {
-  it("should import .foxe extension correctly", async () => {
+  it("should identify a custom camera model when a custom camera info has defined a distortion model", async () => {
     await using app = await launchApp();
     await app.renderer.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
 
