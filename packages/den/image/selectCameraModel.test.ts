@@ -49,7 +49,9 @@ describe("selectCameraModel", () => {
 
     const mockCameraInfo = createCameraInfo({ distortion_model: mockCameraModelName });
 
-    const mockCameraModels = new Map([[mockCameraModelName, () => new MockCameraModel()]]);
+    const mockCameraModels = new Map([
+      [mockCameraModelName, { extensionId: "", modelBuilder: () => new MockCameraModel() }],
+    ]);
 
     const result = selectCameraModel(mockCameraInfo, mockCameraModels);
 
@@ -58,7 +60,9 @@ describe("selectCameraModel", () => {
 
   it("should default to PinholeCameraModel when distortion_model not found", () => {
     const mockCameraInfo = createCameraInfo();
-    const mockCameraModels = new Map([["TestModel", () => new MockCameraModel()]]);
+    const mockCameraModels = new Map([
+      ["TestModel", { extensionId: "", modelBuilder: () => new MockCameraModel() }],
+    ]);
 
     const result = selectCameraModel(mockCameraInfo, mockCameraModels);
 
