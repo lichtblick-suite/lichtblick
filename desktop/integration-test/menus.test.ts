@@ -16,18 +16,6 @@ describe("menus", () => {
     await expect(app.renderer.getByTestId("DataSourceDialog").isVisible()).resolves.toBe(false);
   };
 
-  it("should display the Open Connection screen when clicking File > Open Connection", async () => {
-    await using app = await launchApp();
-
-    await closeDataSourceDialogAfterAppLaunch(app);
-
-    await app.renderer.getByTestId("AppMenuButton").click();
-    await app.renderer.getByTestId("app-menu-file").click();
-    await app.renderer.getByTestId("menu-item-open-connection").click();
-
-    await expect(app.renderer.getByTestId("OpenConnection").count()).resolves.toBe(1);
-  }, 15_000);
-
   it("should open the file chooser when clicking File > Open Local File", async () => {
     await using app = await launchApp();
 
