@@ -33,9 +33,10 @@ import {
 
 const log = Logger.getLogger(__filename);
 
-// This overwrite needs to be done before the app is ready, otherwise it will not take effect
-if (process.env.E2E_TEST_HOME_DIR) {
-  app.setPath("home", process.env.E2E_TEST_HOME_DIR);
+// This overwrite needs to be done here, before the app is ready, otherwise it will not take effect
+const homeOverride = process.argv.find((arg) => arg.startsWith("--home-dir="));
+if (homeOverride != undefined) {
+  app.setPath("userData", homeOverride.split("=")[1]!);
 }
 
 /**

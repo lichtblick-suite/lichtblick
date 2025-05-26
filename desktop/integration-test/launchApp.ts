@@ -41,14 +41,10 @@ export async function launchApp(): Promise<AppType> {
   const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-integration-test-"));
 
   const electronApp = await electron.launch({
-    args: [appPath, `--user-data-dir=${userDataDir}`],
+    args: [appPath, `--user-data-dir=${userDataDir}`, `--home-dir=${homeDir}`],
     // In node.js the electron import gives us the path to the electron binary
     // Our type definitions don't realize this so cast the variable to a string
     executablePath: electronPath as unknown as string,
-    env: {
-      ...process.env,
-      E2E_TEST_HOME_DIR: homeDir,
-    },
   });
 
   const electronWindow = await electronApp.firstWindow();
