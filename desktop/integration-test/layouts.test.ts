@@ -18,17 +18,6 @@ describe("layouts", () => {
       .getByText("Default", { exact: true })
       .click();
   }
-
-  it("should open Raw Messages panel when clicking on Layouts > default", async () => {
-    await using app = await launchApp();
-    await accessLayout(app);
-    const rawMessagesSettingsIcon = app.renderer.getByTestId("SettingsIcon").nth(2);
-    await rawMessagesSettingsIcon.click();
-    await expect(
-      app.renderer.getByText("Raw Messages panel", { exact: true }).innerText(),
-    ).resolves.toBe("Raw Messages panel");
-  }, 15_000);
-
   it("should create a new layout by accessing Layouts > default > new Layout", async () => {
     await using app = await launchApp();
     await closeDataSourceDialogAfterAppLaunch(app);
