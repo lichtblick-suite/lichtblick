@@ -36,11 +36,19 @@ export type AppType = {
 export async function launchApp(): Promise<AppType> {
   // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
   const userDataDir = await mkdtemp(path.join(os.tmpdir(), "integration-test-"));
+
+  // Create a new home directory for each test, which creates a brand new .lcihtblick-suite directory for e2e testing
+  const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-integration-test-"));
+
   const electronApp = await electron.launch({
     args: [appPath, `--user-data-dir=${userDataDir}`],
     // In node.js the electron import gives us the path to the electron binary
     // Our type definitions don't realize this so cast the variable to a string
     executablePath: electronPath as unknown as string,
+    env: {
+      ...process.env,
+      E2E_TEST_HOME_DIR: homeDir,
+    },
   });
 
   const electronWindow = await electronApp.firstWindow();

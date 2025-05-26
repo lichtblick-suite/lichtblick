@@ -33,6 +33,11 @@ import {
 
 const log = Logger.getLogger(__filename);
 
+// This overwrite needs to be done before the app is ready, otherwise it will not take effect
+if (process.env.E2E_TEST_HOME_DIR) {
+  app.setPath("home", process.env.E2E_TEST_HOME_DIR);
+}
+
 /**
  * Determine whether an item in argv is a file that we should try opening as a data source.
  *
