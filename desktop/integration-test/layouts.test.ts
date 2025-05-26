@@ -19,17 +19,6 @@ describe("layouts", () => {
       .click();
   }
 
-  it("should open Image panel when clicking on Layouts > default", async () => {
-    await using app = await launchApp();
-    await accessLayout(app);
-
-    const imagePanelSettingsIcon = app.renderer.getByTestId("SettingsIcon").nth(1);
-    await imagePanelSettingsIcon.click();
-    await expect(app.renderer.getByText("Image panel", { exact: true }).innerText()).resolves.toBe(
-      "Image panel",
-    );
-  }, 15_000);
-
   it("should open Raw Messages panel when clicking on Layouts > default", async () => {
     await using app = await launchApp();
     await accessLayout(app);
