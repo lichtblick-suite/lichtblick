@@ -1,0 +1,106 @@
+@startuml realtime-connection-sequence
+!theme blueprint
+skinparam sequenceMessageAlign center
+
+title Real-time Connection Workflow
+
+actor User
+participant "Connection\nDialog" as Dialog
+participant "Data Source\nManager" as DSM
+participant "WebSocket\nFactory" as Factory
+participant "WebSocket\nPlayer" as Player
+participant "WebSocket\nConnection" as WS
+participant "Remote\nServer" as Server
+
+User -> Dialog: Enter WebSocket URL
+activate Dialog
+Dialog -> Dialog: validateUrl("ws://localhost:8765")
+Dialog --> User: Show "Connect" button
+
+User -> Dialog: Click "Connect"
+Dialog -> DSM: connect({\n  type: "foxglove-websocket",\n  url: "ws://localhost:8765"\n})
+activate DSM
+
+DSM -> Factory: initialize({\n  url: "ws://localhost:8765"\n})
+activate Factory
+
+Factory -> Player: new FoxgloveWebSocketPlayer(url)
+activate Player
+
+Player -> WS: new WebSocket(url)
+activate WS
+WS -> Server: Connect
+activate Server
+
+Server --> WS: Connection established
+WS --> Player: onopen
+
+Player -> WS: send({\n  op: "getServerInfo"\n})
+WS -> Server: getServerInfo request
+
+Server -> Server: gatherServerInfo()
+Server --> WS: serverInfo {\n  capabilities: [...],\n  supportedEncodings: [...]\n}
+
+WS --> Player: onmessage(serverInfo)
+Player -> Player: processServerInfo()
+
+Player -> WS: send({\n  op: "getChannels"\n})
+WS -> Server: getChannels request
+
+Server -> Server: listAvailableTopics()
+Server --> WS: channels [\n  {id: 1, topic: "/scan", encoding: "ros1"},\n  {id: 2, topic: "/image", encoding: "ros1"}\n]
+
+WS --> Player: onmessage(channels)
+Player -> Player: updateTopics(channels)
+
+Player --> Factory: player instance
+deactivate Player
+Factory --> DSM: player
+deactivate Factory
+
+DSM --> Dialog: connected
+deactivate DSM
+Dialog --> User: "Connected to server"
+deactivate Dialog
+
+== Subscription Management ==
+
+Player -> WS: send({\n  op: "subscribe",\n  subscriptions: [\n    {channelId: 1},\n    {channelId: 2}\n  ]\n})
+WS -> Server: subscribe request
+
+Server -> Server: addSubscriptions()
+Server --> WS: subscribed
+
+== Message Streaming ==
+
+loop Real-time messages
+    Server -> WS: binaryMessage {\n  channelId: 1,\n  data: Uint8Array\n}
+    WS --> Player: onmessage(data)
+    
+    Player -> Player: decodeMessage(data)
+    Player -> Player: emitPlayerState({\n  messages: [decodedMessage]\n})
+    Player --> Dialog: stateUpdate
+end
+
+== Connection Monitoring ==
+
+alt Connection lost
+    WS -> WS: onerror/onclose
+    WS --> Player: disconnected
+    Player -> Player: attemptReconnect()
+    
+    loop Retry with backoff
+        Player -> WS: new WebSocket(url)
+        alt Reconnected
+            WS --> Player: connected
+            Player -> Player: resubscribe()
+        else Failed
+            Player -> Player: wait(backoffTime)
+        end
+    end
+end
+
+deactivate Server
+deactivate WS
+
+@enduml

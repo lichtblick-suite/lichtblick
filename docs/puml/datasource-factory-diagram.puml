@@ -1,0 +1,127 @@
+@startuml datasource-factory-diagram
+!theme blueprint
+skinparam classAttributeIconSize 0
+
+title Data Source Factory Class Diagram
+
+interface IDataSourceFactory {
+  + id: string
+  + type: "file" | "connection" | "sample"
+  + displayName: string
+  + iconName?: RegisteredIconNames
+  + supportedFileTypes?: string[]
+  + supportsMultiFile?: boolean
+  + initialize(args: DataSourceFactoryInitializeArgs): Player
+}
+
+class DataSourceFactoryInitializeArgs {
+  + files?: File[]
+  + url?: string
+  + params?: URLSearchParams
+  + reportMetadataCallback?: (metadata: Metadata) => void
+  + deviceId?: string
+  + startTime?: Time
+  + endTime?: Time
+}
+
+abstract class BaseDataSourceFactory {
+  # id: string
+  # type: DataSourceType
+  # displayName: string
+  + abstract initialize(args: DataSourceFactoryInitializeArgs): Player
+}
+
+class McapLocalDataSourceFactory {
+  + id: "mcap-local"
+  + type: "file"
+  + supportedFileTypes: [".mcap"]
+  + initialize(args): IterablePlayer
+  - createMcapIterableSource(file: File): IIterableSource
+}
+
+class Ros1LocalBagDataSourceFactory {
+  + id: "ros1-local-bag"
+  + type: "file"
+  + supportedFileTypes: [".bag"]
+  + initialize(args): IterablePlayer
+  - parseBagFile(file: File): Ros1Bag
+}
+
+class Ros2LocalBagDataSourceFactory {
+  + id: "ros2-local-bag"
+  + type: "file"  
+  + supportedFileTypes: [".db3"]
+  + initialize(args): IterablePlayer
+  - openDb3File(file: File): Ros2Db
+}
+
+class FoxgloveWebSocketDataSourceFactory {
+  + id: "foxglove-websocket"
+  + type: "connection"
+  + initialize(args): FoxgloveWebSocketPlayer
+  - createWebSocketConnection(url: string): WebSocket
+}
+
+class RosbridgeDataSourceFactory {
+  + id: "rosbridge"
+  + type: "connection"
+  + initialize(args): RosbridgePlayer
+  - connectToRosbridge(url: string): RosbridgeConnection
+}
+
+class VelodyneDataSourceFactory {
+  + id: "velodyne"
+  + type: "connection"
+  + initialize(args): VelodynePlayer
+  - setupVelodyneConnection(params: VelodyneParams): void
+}
+
+class SampleDataSourceFactory {
+  + id: "sample"
+  + type: "sample"
+  + displayName: "Sample Data"
+  + initialize(args): IterablePlayer
+  - generateSampleData(): IIterableSource
+}
+
+class DataSourceManager {
+  - factories: Map<string, IDataSourceFactory>
+  + registerFactory(factory: IDataSourceFactory): void
+  + getFactories(): IDataSourceFactory[]
+  + getFactoryById(id: string): IDataSourceFactory | undefined
+  + initializeDataSource(factoryId: string, args: DataSourceFactoryInitializeArgs): Player
+}
+
+IDataSourceFactory <|.. BaseDataSourceFactory
+BaseDataSourceFactory <|-- McapLocalDataSourceFactory
+BaseDataSourceFactory <|-- Ros1LocalBagDataSourceFactory
+BaseDataSourceFactory <|-- Ros2LocalBagDataSourceFactory
+BaseDataSourceFactory <|-- FoxgloveWebSocketDataSourceFactory
+BaseDataSourceFactory <|-- RosbridgeDataSourceFactory
+BaseDataSourceFactory <|-- VelodyneDataSourceFactory
+BaseDataSourceFactory <|-- SampleDataSourceFactory
+
+DataSourceManager --> IDataSourceFactory : manages
+IDataSourceFactory ..> DataSourceFactoryInitializeArgs : uses
+IDataSourceFactory ..> Player : creates
+
+McapLocalDataSourceFactory ..> IterablePlayer : creates
+Ros1LocalBagDataSourceFactory ..> IterablePlayer : creates
+Ros2LocalBagDataSourceFactory ..> IterablePlayer : creates
+FoxgloveWebSocketDataSourceFactory ..> FoxgloveWebSocketPlayer : creates
+RosbridgeDataSourceFactory ..> RosbridgePlayer : creates
+VelodyneDataSourceFactory ..> VelodynePlayer : creates
+SampleDataSourceFactory ..> IterablePlayer : creates
+
+note right of IDataSourceFactory
+  Factory pattern for
+  creating players from
+  different sources
+end note
+
+note bottom of DataSourceManager
+  Central registry for
+  all data source factories
+end note
+
+@enduml

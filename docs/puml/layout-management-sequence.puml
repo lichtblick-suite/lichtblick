@@ -1,0 +1,108 @@
+@startuml layout-management-sequence
+!theme blueprint
+skinparam sequenceMessageAlign center
+
+title Layout Management Workflow
+
+actor User
+participant "Layout\nMenu" as Menu
+participant "Layout\nManager" as Manager
+participant "Current\nLayout" as Current
+participant "Panel\nManager" as PanelMgr
+participant "Storage\n(IndexedDB)" as Storage
+
+== Save Layout ==
+
+User -> Menu: Click "Save layout"
+activate Menu
+Menu -> Menu: showSaveDialog()
+Menu --> User: Enter layout name
+
+User -> Menu: "My Robot Layout"
+Menu -> Current: getLayoutData()
+activate Current
+
+Current -> PanelMgr: getAllPanelConfigs()
+activate PanelMgr
+PanelMgr --> Current: panelConfigs[]
+deactivate PanelMgr
+
+Current -> Current: collectLayoutData({\n  panels,\n  globalVars,\n  playbackConfig\n})
+Current --> Menu: layoutData
+deactivate Current
+
+Menu -> Manager: saveNewLayout({\n  name: "My Robot Layout",\n  data: layoutData\n})
+activate Manager
+
+Manager -> Manager: generateId()
+Manager -> Manager: createLayout({\n  id,\n  name,\n  data,\n  savedAt: now()\n})
+
+Manager -> Storage: put(layout)
+activate Storage
+Storage -> Storage: saveToIndexedDB()
+Storage --> Manager: success
+deactivate Storage
+
+Manager --> Menu: savedLayout
+deactivate Manager
+
+Menu --> User: "Layout saved"
+deactivate Menu
+
+== Load Layout ==
+
+User -> Menu: Click "Load layout"
+activate Menu
+Menu -> Manager: getLayouts()
+activate Manager
+
+Manager -> Storage: getAll()
+activate Storage
+Storage -> Storage: queryIndexedDB()
+Storage --> Manager: layouts[]
+deactivate Storage
+
+Manager --> Menu: availableLayouts
+deactivate Manager
+
+Menu --> User: Show layout list
+User -> Menu: Select "My Robot Layout"
+
+Menu -> Manager: loadLayout(layoutId)
+activate Manager
+
+Manager -> Storage: get(layoutId)
+activate Storage
+Storage --> Manager: layout
+deactivate Storage
+
+Manager -> Current: applyLayout(layout.data)
+activate Current
+
+Current -> PanelMgr: clearAllPanels()
+activate PanelMgr
+PanelMgr -> PanelMgr: closePanels()
+deactivate PanelMgr
+
+loop For each panel in layout
+    Current -> PanelMgr: createPanel({\n  type,\n  config,\n  position\n})
+    activate PanelMgr
+    PanelMgr -> PanelMgr: instantiatePanel()
+    PanelMgr -> PanelMgr: restoreConfig()
+    PanelMgr --> Current: panelInstance
+    deactivate PanelMgr
+end
+
+Current -> Current: setGlobalVariables()
+Current -> Current: setPlaybackConfig()
+
+Current --> Manager: layoutApplied
+deactivate Current
+
+Manager --> Menu: success
+deactivate Manager
+
+Menu --> User: "Layout loaded"
+deactivate Menu
+
+@enduml

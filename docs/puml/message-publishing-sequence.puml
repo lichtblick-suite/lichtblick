@@ -1,0 +1,65 @@
+@startuml message-publishing-sequence
+!theme blueprint
+skinparam sequenceMessageAlign center
+
+title Message Publishing Workflow
+
+actor User
+participant "Publish\nPanel" as Panel
+participant "Panel\nContext" as Context
+participant "Player" as Player
+participant "Data\nSource" as Source
+participant "ROS\nSystem" as ROS
+
+User -> Panel: Enter message data
+activate Panel
+Panel -> Panel: validateMessage()
+
+User -> Panel: Click "Publish"
+Panel -> Panel: constructMessage({\n  header: {...},\n  data: {...}\n})
+
+Panel -> Context: publish({\n  topic: "/cmd_vel",\n  message: velocityCommand\n})
+activate Context
+
+Context -> Context: validateTopic("/cmd_vel")
+Context -> Context: validateSchema(message)
+
+Context -> Player: publish({\n  topic: "/cmd_vel",\n  message: velocityCommand\n})
+activate Player
+
+Player -> Player: checkPublishCapability()
+alt Player supports publishing
+    Player -> Source: publish(publishRequest)
+    activate Source
+    
+    Source -> Source: serializeMessage()
+    Source -> ROS: publishMessage("/cmd_vel", data)
+    activate ROS
+    
+    ROS --> Source: ack
+    deactivate ROS
+    
+    Source --> Player: publishConfirmed
+    deactivate Source
+    
+    Player --> Context: success
+else Player doesn't support publishing
+    Player --> Context: error("Publishing not supported")
+end
+
+deactivate Player
+
+Context --> Panel: publishResult
+deactivate Context
+
+alt Success
+    Panel -> Panel: showSuccess("Message published")
+    Panel --> User: "Published to /cmd_vel"
+else Error
+    Panel -> Panel: showError(error.message)
+    Panel --> User: Display error
+end
+
+deactivate Panel
+
+@enduml

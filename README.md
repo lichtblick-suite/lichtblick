@@ -22,6 +22,18 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, avail
 
 Looking for guidance on using Lichtblick? Check out our [official documentation here!](https://lichtblick-suite.github.io/docs/)
 
+### Developer Documentation
+
+- **[Architecture Overview](docs/architecture-overview.md)** - System architecture, components, and design patterns
+- **[Class Diagrams](docs/class-diagrams.md)** - Detailed UML class diagrams for core components
+- **[Sequence Diagrams](docs/sequence-diagrams.md)** - Workflow diagrams for main operations
+- **[Use Cases](docs/use-cases.md)** - Common workflows and usage examples
+- **[API Documentation](docs/api-documentation.md)** - Complete API reference for developers
+
+### Visual Documentation
+
+![Lichtblick Architecture](docs/images/lichtblick-showcase.svg)
+
 We are actively updating our documentation with new features, stay tunned! :rocket:
 
 **Dependencies:**

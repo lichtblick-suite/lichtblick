@@ -1,0 +1,123 @@
+@startuml panel-class-diagram
+!theme blueprint
+skinparam classAttributeIconSize 0
+
+title Panel System Class Diagram
+
+interface PanelComponent<Config> {
+  + defaultConfig: Config
+  + supportsStrictMode?: boolean
+}
+
+class Panel<Config> {
+  + wrap(component: PanelComponent<Config>): WrappedPanel
+  - withContext(): ComponentWithContext
+  - withErrorBoundary(): ComponentWithErrorHandling
+}
+
+interface PanelContext {
+  + id: string
+  + type: string
+  + title: string
+  + config: unknown
+  + saveConfig: SaveConfig<unknown>
+  + updatePanelConfigs: (panelId: string, config: ConfigUpdate) => void
+  + openSiblingPanel: (panelType: string, state: unknown) => void
+  + removePanel: () => void
+  + watch: (field: "activeData" | "allFrames" | "previewTime") => unknown
+  + subscribe: (topics: string[]) => void
+  + unsubscribeAll: () => void
+  + setParameter: (name: string, value: ParameterValue) => void
+  + setVariable: (name: string, value: unknown) => void
+  + callService: (service: string, request: unknown) => Promise<unknown>
+}
+
+class PanelCatalog {
+  + panels: Map<string, PanelInfo>
+  + getPanelByType(type: string): PanelInfo | undefined
+  + getAllPanels(): PanelInfo[]
+  + addPanel(info: PanelInfo): void
+}
+
+class PanelInfo {
+  + title: string
+  + type: string
+  + description?: string
+  + thumbnail?: string
+  + module: () => Promise<PanelModule>
+  + hasCustomToolbar?: boolean
+  + helpContent?: React.ReactNode
+}
+
+class PanelState {
+  + id: string
+  + type: string
+  + config: unknown
+  + tabId?: string
+}
+
+class PanelConfig {
+  + id: string
+  + config: unknown
+  + fullscreen?: boolean
+}
+
+abstract class BasePanel<Config> {
+  # context: PanelContext
+  # config: Config
+  + abstract render(): React.ReactElement
+  + saveConfig(config: Config): void
+  + getDefaultConfig(): Config
+}
+
+class ThreeDeeRender {
+  - camera: PerspectiveCamera
+  - scene: Scene
+  - renderer: WebGLRenderer
+  + addMarker(marker: Marker): void
+  + updateCamera(settings: CameraState): void
+}
+
+class Plot {
+  - datasets: PlotDataset[]
+  - xAxis: PlotXAxis
+  + addDataPoint(topic: string, value: number): void
+  + setTimeWindow(duration: number): void
+}
+
+class RawMessages {
+  - messages: MessageEvent[]
+  - topicFilter: string
+  + setTopicFilter(filter: string): void
+  + exportMessages(): void
+}
+
+class Image {
+  - imageData: ImageData
+  - markers: ImageMarker[]
+  + renderImage(message: CompressedImage): void
+  + addAnnotation(marker: ImageMarker): void
+}
+
+Panel ..> PanelComponent : wraps
+Panel ..> PanelContext : provides
+PanelCatalog --> PanelInfo : contains
+PanelContext --> PanelConfig : manages
+BasePanel <|-- ThreeDeeRender
+BasePanel <|-- Plot
+BasePanel <|-- RawMessages
+BasePanel <|-- Image
+BasePanel ..> PanelContext : uses
+
+note right of Panel
+  Higher-Order Component
+  that provides common
+  panel functionality
+end note
+
+note bottom of PanelContext
+  Interface between panels
+  and the application
+end note
+
+@enduml

@@ -1,0 +1,108 @@
+@startuml player-architecture
+!theme blueprint
+skinparam componentStyle rectangle
+
+title Lichtblick Player Architecture
+
+package "Data Source Layer" {
+  component [MCAP Data Source] as MCAPSource
+  component [ROS1 Bag Source] as ROS1Source
+  component [ROS2 Bag Source] as ROS2Source
+  component [WebSocket Source] as WSSource
+  component [ROSBridge Source] as RBSource
+  component [User Script Source] as UserSource
+}
+
+package "Player Layer" {
+  interface IPlayer
+  
+  component [IterablePlayer] as IterablePlayer
+  component [WebSocketPlayer] as WSPlayer
+  component [Ros1Player] as Ros1Player
+  component [RosbridgePlayer] as RBPlayer
+  component [UserScriptPlayer] as UserPlayer
+  
+  IterablePlayer ..|> IPlayer
+  WSPlayer ..|> IPlayer
+  Ros1Player ..|> IPlayer
+  RBPlayer ..|> IPlayer
+  UserPlayer ..|> IPlayer
+}
+
+package "Message Processing" {
+  component [Message Pipeline] as Pipeline
+  
+  component [Message Converters] as Converters
+  
+  component [Topic Aliases] as Aliases
+}
+
+package "Panel Layer" {
+  component [Panel Manager] as PanelManager
+  component [3D Panel] as Panel3D
+  component [Plot Panel] as PlotPanel
+  component [Image Panel] as ImagePanel
+  component [Table Panel] as TablePanel
+  component [Custom Panels] as CustomPanels
+}
+
+database "Storage" {
+  folder [Local Files] as LocalFiles
+  folder [IndexedDB] as IndexedDB
+}
+
+cloud "Remote Sources" {
+  node [ROS System] as ROSSystem
+  node [WebSocket Server] as WSServer
+  node [ROSBridge] as ROSBridge
+}
+
+MCAPSource --> IterablePlayer
+ROS1Source --> IterablePlayer
+ROS2Source --> IterablePlayer
+WSSource --> WSPlayer
+RBSource --> RBPlayer
+UserSource --> UserPlayer
+
+LocalFiles --> MCAPSource
+LocalFiles --> ROS1Source
+LocalFiles --> ROS2Source
+
+ROSSystem --> Ros1Player
+WSServer --> WSPlayer
+ROSBridge --> RBPlayer
+
+IterablePlayer --> Pipeline
+WSPlayer --> Pipeline
+Ros1Player --> Pipeline
+RBPlayer --> Pipeline
+UserPlayer --> Pipeline
+
+Pipeline --> Converters
+Pipeline --> Aliases
+
+Pipeline --> PanelManager
+
+PanelManager --> Panel3D
+PanelManager --> PlotPanel
+PanelManager --> ImagePanel
+PanelManager --> TablePanel
+PanelManager --> CustomPanels
+
+note right of IPlayer
+  Common interface for
+  all player types
+end note
+
+note bottom of Pipeline
+  Manages subscriptions,
+  message transformation,
+  and delivery to panels
+end note
+
+note left of IterablePlayer
+  Worker-based processing
+  for file sources
+end note
+
+@enduml

@@ -1,0 +1,129 @@
+@startuml player-class-diagram
+!theme blueprint
+skinparam classAttributeIconSize 0
+
+title Player System Class Diagram
+
+interface Player {
+  + setListener(listener: PlayerStateListener): void
+  + close(): void
+  + setSubscriptions(subscriptions: SubscribePayload[]): void
+  + setPublishers(publishers: AdvertiseOptions[]): void
+  + publish(request: PublishPayload): void
+  + callService(service: string, request: unknown): Promise<unknown>
+  + seekPlayback?(time: Time): void
+  + setPlaybackSpeed?(speedFraction: number): void
+  + setGlobalVariables(globalVariables: GlobalVariables): void
+}
+
+class PlayerState {
+  + presence: PlayerPresence
+  + progress?: Progress
+  + capabilities: PlayerCapabilities[]
+  + profile?: UserProfile
+  + playerId: string
+  + activeData?: PlayerStateActiveData
+}
+
+class PlayerStateActiveData {
+  + messages: MessageEvent[]
+  + currentTime?: Time
+  + startTime?: Time
+  + endTime?: Time
+  + isPlaying: boolean
+  + repeatEnabled: boolean
+  + speed: number
+  + lastSeekTime?: number
+  + topics: Topic[]
+  + datatypes: Map<string, RosDatatypes>
+  + publishedTopics: Map<string, Set<string>>
+  + subscribedTopics: Map<string, Set<string>>
+  + services: Map<string, Set<string>>
+  + parameters: Map<string, ParameterValue>
+  + topicStats: Map<string, TopicStats>
+}
+
+enum PlayerPresence {
+  NOT_PRESENT
+  INITIALIZING
+  BUFFERING
+  PRESENT
+  ERROR
+}
+
+class IterablePlayer {
+  - source: IIterableSource
+  - worker?: Worker
+  - stateMachine: StateMachine
+  + constructor(options: IterablePlayerOptions)
+  + startPlayback(): void
+  + pausePlayback(): void
+  - loadData(): Promise<void>
+  - processMessages(): void
+}
+
+class Ros1Player {
+  - rosNode: RosNode
+  - connection: TcpConnection
+  + constructor(url: string)
+  - connect(): Promise<void>
+  - setupSubscriptions(): void
+}
+
+class RosbridgePlayer {
+  - websocket: WebSocket
+  - protocol: RosbridgeProtocol
+  + constructor(url: string)
+  - handleMessage(message: RosbridgeMessage): void
+}
+
+class UserScriptPlayer {
+  - scriptWorker: Worker
+  - userScript: string
+  + setUserScript(script: string): void
+  - runScript(): Promise<void>
+}
+
+class MessageEvent {
+  + topic: string
+  + receiveTime: Time
+  + message: unknown
+  + sizeInBytes: number
+  + schemaName?: string
+}
+
+class Topic {
+  + name: string
+  + schemaName?: string
+  + aliasedFromName?: string
+}
+
+class SubscribePayload {
+  + topic: string
+  + fields?: string[]
+  + preloadType?: "full" | "partial"
+}
+
+Player <|.. IterablePlayer
+Player <|.. Ros1Player
+Player <|.. RosbridgePlayer
+Player <|.. UserScriptPlayer
+
+Player --> PlayerState : emits
+PlayerState --> PlayerStateActiveData : contains
+PlayerState --> PlayerPresence : has
+PlayerStateActiveData --> MessageEvent : contains
+PlayerStateActiveData --> Topic : manages
+Player --> SubscribePayload : accepts
+
+note right of Player
+  Core interface for all
+  player implementations
+end note
+
+note bottom of IterablePlayer
+  File-based playback with
+  worker thread support
+end note
+
+@enduml

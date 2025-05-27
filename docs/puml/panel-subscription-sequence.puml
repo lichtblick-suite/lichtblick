@@ -1,0 +1,69 @@
+@startuml panel-subscription-sequence
+!theme blueprint
+skinparam sequenceMessageAlign center
+
+title Panel Subscription Workflow
+
+actor User
+participant "Panel\n(e.g., Plot)" as Panel
+participant "Panel\nContext" as Context
+participant "Player" as Player
+participant "Message\nPipeline" as Pipeline
+participant "Data\nSource" as Source
+
+User -> Panel: Configure topics
+activate Panel
+Panel -> Panel: selectTopics(["/velocity", "/position"])
+
+Panel -> Context: subscribe(["/velocity", "/position"])
+activate Context
+
+Context -> Context: updateSubscriptions()
+Context -> Player: setSubscriptions([\n  {topic: "/velocity"},\n  {topic: "/position"}\n])
+activate Player
+
+Player -> Pipeline: updateSubscriptions(subscriptions)
+activate Pipeline
+Pipeline -> Pipeline: buildSubscriptionMap()
+Pipeline --> Player: subscription updated
+deactivate Pipeline
+
+Player -> Source: updateSubscriptions(topics)
+activate Source
+Source --> Player: ack
+deactivate Source
+
+Player --> Context: subscription confirmed
+deactivate Player
+Context --> Panel: subscription active
+deactivate Context
+
+== Message Delivery ==
+
+Source -> Player: messageEvent {\n  topic: "/velocity",\n  message: {...},\n  receiveTime: {...}\n}
+activate Player
+
+Player -> Pipeline: processMessage(messageEvent)
+activate Pipeline
+
+Pipeline -> Pipeline: checkSubscription("/velocity")
+Pipeline -> Pipeline: applyConverters()
+Pipeline --> Player: processedMessage
+
+deactivate Pipeline
+
+Player -> Player: updatePlayerState({\n  activeData: {\n    messages: [processedMessage]\n  }\n})
+
+Player --> Context: stateUpdate(playerState)
+activate Context
+
+Context -> Panel: render(playerState)
+Panel -> Panel: extractMessages("/velocity")
+Panel -> Panel: updateChart(velocityData)
+Panel --> User: Display updated plot
+
+deactivate Context
+deactivate Player
+deactivate Panel
+
+@enduml

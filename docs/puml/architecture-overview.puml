@@ -1,0 +1,112 @@
+@startuml architecture-overview
+!theme blueprint
+skinparam componentStyle rectangle
+
+title Lichtblick System Architecture
+
+package "Lichtblick Platform" {
+  
+  package "Desktop Application" #LightBlue {
+    component [Electron Main Process] as ElectronMain
+    component [Electron Renderer] as ElectronRenderer
+    component [Native Menus] as NativeMenus
+    component [Auto Updater] as AutoUpdater
+    component [File System Access] as FSAccess
+  }
+  
+  package "Web Application" #LightGreen {
+    component [Service Worker] as ServiceWorker
+    component [Web App] as WebApp
+    component [IndexedDB] as IndexedDB
+  }
+  
+  package "Core (@lichtblick/suite-base)" #LightYellow {
+    component [UI Components] as UIComponents
+    component [Player System] as PlayerSystem
+    component [Extension Manager] as ExtManager
+    component [Layout System] as LayoutSystem
+    component [Data Sources] as DataSources
+    component [Message Pipeline] as MessagePipeline
+  }
+  
+  package "Shared Libraries" #LightGray {
+    component [@lichtblick/suite] as SuiteAPI
+    component [@lichtblick/log] as Logging
+    component [@lichtblick/hooks] as Hooks
+    component [@lichtblick/theme] as Theme
+    component [@lichtblick/mcap-support] as MCAP
+    component [@lichtblick/message-path] as MessagePath
+  }
+  
+  package "Panels" #Pink {
+    component [3D Scene] as Panel3D
+    component [Plot] as PanelPlot
+    component [Image] as PanelImage
+    component [Table] as PanelTable
+    component [Raw Messages] as PanelRaw
+    component [... 17 more] as MorePanels
+  }
+  
+  package "Extensions" #Orange {
+    component [Custom Panels] as CustomPanels
+    component [Message Converters] as Converters
+    component [Topic Aliases] as TopicAliases
+    component [Camera Models] as CameraModels
+  }
+}
+
+cloud "Data Sources" as ExternalData {
+  node [MCAP Files] as MCAPFiles
+  node [ROS Bags] as ROSBags
+  node [WebSocket] as WebSocket
+  node [ROSBridge] as ROSBridge
+}
+
+ElectronRenderer --> UIComponents
+WebApp --> UIComponents
+
+UIComponents --> PlayerSystem
+UIComponents --> LayoutSystem
+UIComponents --> ExtManager
+
+PlayerSystem --> DataSources
+PlayerSystem --> MessagePipeline
+
+DataSources --> MCAP
+MessagePipeline --> MessagePath
+
+ExtManager --> SuiteAPI
+ExtManager --> Extensions
+
+UIComponents --> Panels
+UIComponents --> Theme
+UIComponents --> Hooks
+
+PlayerSystem --> Logging
+
+ElectronMain --> FSAccess
+ElectronMain --> NativeMenus
+ElectronMain --> AutoUpdater
+ElectronMain --> ElectronRenderer
+
+ServiceWorker --> WebApp
+WebApp --> IndexedDB
+
+ExternalData --> DataSources
+
+note right of Extensions
+  Third-party extensions
+  extend functionality
+end note
+
+note left of PlayerSystem
+  Central data management
+  and playback control
+end note
+
+note bottom of UIComponents
+  React-based UI framework
+  with Material-UI components
+end note
+
+@enduml
