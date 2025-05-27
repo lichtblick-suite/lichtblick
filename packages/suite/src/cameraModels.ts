@@ -17,7 +17,7 @@ export type CameraInfo = Readonly<{
     width: number;
     do_rectify: boolean;
   };
-  distortion_model: DistortionModel; // Usually "plumb_bob" | "rational_polynomial" | ""
+  distortion_model: DistortionModel;
   D: FloatArray;
   K: FloatArray;
   P: FloatArray;
