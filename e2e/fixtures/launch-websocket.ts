@@ -4,13 +4,9 @@
 import { FoxgloveServer } from "@foxglove/ws-protocol";
 import { WebSocketServer } from "ws";
 
-import Logger from "@lichtblick/log";
-
 export type WebsocketTest = {
   close: () => Promise<unknown>;
 };
-
-const log = Logger.getLogger(__filename);
 
 /**
  * Launch a simulation of a websocket server, using real use case.
@@ -34,25 +30,25 @@ export function launchWebsocket(): WebsocketTest {
   });
 
   ws.on("listening", () => {
-    log.info("server listening on %s", ws.address());
+    console.debug("server listening on %s", ws.address());
   });
 
   ws.on("message", (message) => {
-    log.info("message -> ", message);
+    console.debug("message -> ", message);
   });
 
   ws.on("connection", (conn, req) => {
     const name = `${req.socket.remoteAddress}:${req.socket.remotePort}`;
-    log.info("connection from %s via %s", name, req.url);
+    console.debug("connection from %s via %s", name, req.url);
     server.handleConnection(conn, name);
   });
 
   server.on("subscribe", (chanId) => {
-    log.info("first client subscribed to %d", chanId);
+    console.debug("first client subscribed to %d", chanId);
   });
 
   server.on("error", (err) => {
-    log.error("server error: %o", err);
+    console.error("server error: %o", err);
   });
 
   const textEncoder = new TextEncoder();
@@ -97,7 +93,7 @@ export function launchWebsocket(): WebsocketTest {
     return await new Promise((resolve, reject) => {
       ws.close((err) => {
         if (err) {
-          log.error("Error closing WebSocket server: %o", err);
+          console.error("Error closing WebSocket server: %o", err);
           reject(err);
           return;
         }

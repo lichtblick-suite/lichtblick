@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
-import { launchWebsocket } from "../utils/launchWebsocket";
+import { launchWebsocket } from "../../../fixtures/launch-websocket";
 
 test("show correctly open a web socket connection showing correct attibutes on raw messages panel", async ({
   mainWindow,
