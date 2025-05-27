@@ -1,0 +1,40 @@
+@startuml Data Loading Sequence
+!theme plain
+skinparam monochrome true
+skinparam shadowing false
+
+actor User
+participant "Application" as App
+participant "DataSourceManager" as DSM
+participant "DataSource" as DS
+participant "Panel" as Panel
+participant "Layout Manager" as LM
+
+User -> App : Open Data Source
+App -> DSM : createSource(type, args)
+DSM -> DS : initialize()
+DS --> DSM : initialized
+DSM --> App : dataSource
+
+User -> App : Select Layout
+App -> LM : setCurrentLayout(id)
+LM --> App : layout loaded
+
+App -> Panel : initialize()
+Panel -> DS : subscribe(topics)
+DS --> Panel : subscription
+
+loop For each message
+    DS -> Panel : onMessage(topic, message)
+    Panel -> Panel : update visualization
+end
+
+User -> Panel : Change Settings
+Panel -> Panel : onSettingsChange(settings)
+Panel -> Panel : update visualization
+
+User -> App : Save Layout
+App -> LM : updateLayout(layout)
+LM -> LM : store layout changes
+
+@enduml

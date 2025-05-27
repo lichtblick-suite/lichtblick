@@ -20,9 +20,24 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, avail
 
 ## :book: Documentation
 
-Looking for guidance on using Lichtblick? Check out our [official documentation here!](https://lichtblick-suite.github.io/docs/)
+Looking for guidance on using Lichtblick? Check out our [documentation](./docs/index.md)!
 
-We are actively updating our documentation with new features, stay tunned! :rocket:
+Our documentation includes:
+
+- [Getting Started Guide](./docs/getting-started.md)
+- [Architecture Overview](./docs/architecture.md)
+- [Feature List](./docs/features.md)
+- [User Guide](./docs/user-guide.md)
+- [Common Tasks](./docs/common-tasks.md)
+- [API Documentation](./docs/api/index.md)
+  - [Custom Panels](./docs/api/custom-panels.md)
+  - [Custom Data Sources](./docs/api/custom-data-sources.md)
+- [Developer Guide](./docs/developer-guide.md)
+- [FAQs](./docs/faq.md)
+- [Tutorials](./docs/index.md#common-tasks)
+  - [Adding Filters](./docs/adding-filters.md)
+
+We are actively updating our documentation with new features, stay tuned! :rocket:
 
 **Dependencies:**
 

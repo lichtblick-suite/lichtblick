@@ -1,0 +1,136 @@
+@startuml Class Diagram
+!theme plain
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+package "Core Components" {
+  interface "ILayoutManager" {
+    +getCurrentLayout(): Layout
+    +getLayouts(): Layout[]
+    +saveNewLayout(name: string): Promise<string>
+    +updateLayout(layout: Layout): Promise<void>
+    +deleteLayout(id: string): Promise<void>
+    +setCurrentLayout(id: string): Promise<void>
+  }
+
+  class "LayoutManager" {
+    -storage: ILayoutStorage
+    -cache: WriteThroughLayoutCache
+    +getCurrentLayout(): Layout
+    +getLayouts(): Layout[]
+    +saveNewLayout(name: string): Promise<string>
+    +updateLayout(layout: Layout): Promise<void>
+    +deleteLayout(id: string): Promise<void>
+    +setCurrentLayout(id: string): Promise<void>
+  }
+
+  interface "ILayoutStorage" {
+    +list(): Promise<Layout[]>
+    +get(id: string): Promise<Layout | undefined>
+    +put(layout: Layout): Promise<void>
+    +delete(id: string): Promise<void>
+  }
+
+  class "PanelCatalog" {
+    -builtinPanels: PanelInfo[]
+    -userPanels: PanelInfo[]
+    +getPanels(): PanelInfo[]
+    +registerPanel(panel: PanelInfo): void
+    +unregisterPanel(panelType: string): void
+  }
+
+  class "DataSourceManager" {
+    -sources: DataSourceFactories
+    -sourcesByType: Map<string, DataSourceFactory>
+    +initialize(): void
+    +registerFactory(factory: DataSourceFactory): void
+    +getSourceTypes(): DataSourceType[]
+    +createSource(type: string, args: any): DataSource
+  }
+
+  LayoutManager ..|> ILayoutManager
+  LayoutManager --> ILayoutStorage
+}
+
+package "Data Sources" {
+  interface "DataSource" {
+    +initialize(): Promise<void>
+    +getTopics(): Topic[]
+    +getMessages(topic: string): Message[]
+    +subscribe(topic: string, callback: (msg: Message) => void): Subscription
+    +unsubscribe(subscription: Subscription): void
+    +close(): void
+  }
+
+  class "Ros1DataSource" {
+    +initialize(): Promise<void>
+    +getTopics(): Topic[]
+    +getMessages(topic: string): Message[]
+    +subscribe(topic: string, callback: (msg: Message) => void): Subscription
+    +unsubscribe(subscription: Subscription): void
+    +close(): void
+  }
+
+  class "Ros2DataSource" {
+    +initialize(): Promise<void>
+    +getTopics(): Topic[]
+    +getMessages(topic: string): Message[]
+    +subscribe(topic: string, callback: (msg: Message) => void): Subscription
+    +unsubscribe(subscription: Subscription): void
+    +close(): void
+  }
+
+  class "McapDataSource" {
+    +initialize(): Promise<void>
+    +getTopics(): Topic[]
+    +getMessages(topic: string): Message[]
+    +subscribe(topic: string, callback: (msg: Message) => void): Subscription
+    +unsubscribe(subscription: Subscription): void
+    +close(): void
+  }
+
+  Ros1DataSource ..|> DataSource
+  Ros2DataSource ..|> DataSource
+  McapDataSource ..|> DataSource
+}
+
+package "Visualization" {
+  interface "PanelComponent" {
+    +renderPanel(): JSX.Element
+    +initialize(): Promise<void>
+    +onMessage(topic: string, msg: Message): void
+    +onLayoutChange(layout: PanelLayout): void
+    +onSettingsChange(settings: PanelSettings): void
+    +save(): PanelConfig
+    +restore(config: PanelConfig): void
+  }
+
+  class "ThreeDeeRender" {
+    +renderPanel(): JSX.Element
+    +initialize(): Promise<void>
+    +onMessage(topic: string, msg: Message): void
+    +onLayoutChange(layout: PanelLayout): void
+    +onSettingsChange(settings: PanelSettings): void
+    +save(): PanelConfig
+    +restore(config: PanelConfig): void
+  }
+
+  class "PlotPanel" {
+    +renderPanel(): JSX.Element
+    +initialize(): Promise<void>
+    +onMessage(topic: string, msg: Message): void
+    +onLayoutChange(layout: PanelLayout): void
+    +onSettingsChange(settings: PanelSettings): void
+    +save(): PanelConfig
+    +restore(config: PanelConfig): void
+  }
+
+  ThreeDeeRender ..|> PanelComponent
+  PlotPanel ..|> PanelComponent
+}
+
+DataSourceManager --> DataSource
+PanelCatalog --> PanelComponent
+
+@enduml

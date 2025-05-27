@@ -1,0 +1,24 @@
+@startuml Adding a Filter
+!theme plain
+skinparam monochrome true
+skinparam shadowing false
+
+actor User
+participant "Panel" as Panel
+participant "FilterInput" as Filter
+participant "DataSource" as DS
+participant "MessageCache" as Cache
+
+User -> Panel: Open panel settings
+Panel -> User: Display settings UI
+User -> Panel: Add filter
+Panel -> Filter: Create new filter
+Filter -> Filter: Configure filter settings
+User -> Filter: Set filter parameters
+Filter -> Filter: Validate parameters
+Filter -> DS: Register filter
+DS -> Cache: Apply filter to messages
+Cache -> Panel: Send filtered messages
+Panel -> Panel: Update visualization
+
+@enduml
