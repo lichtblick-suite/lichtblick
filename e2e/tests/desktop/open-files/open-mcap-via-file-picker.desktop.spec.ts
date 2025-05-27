@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
-test("should open an MCAP file via file picker", async ({ mainWindow }) => {
+test("should open an MCAP file via drag and drop", async ({ mainWindow }) => {
   // Given
   const filename = "example.mcap";
   await loadFile({
