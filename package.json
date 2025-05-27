@@ -42,7 +42,7 @@
     "test:coverage": "jest --coverage",
     "test:debug": "cross-env NODE_OPTIONS='--inspect-brk' jest",
     "test:watch": "jest --watch",
-    "test:integration": "TARGET=desktop jest --forceExit --detectOpenHandles --projects desktop/integration-test",
+    "test:integration": "TARGET=desktop jest --forceExit --projects desktop/integration-test",
     "test:web-integration": "TARGET=web jest --forceExit --projects  web/integration-test",
     "test:web-integration:local": "TARGET=web BASE_URL=\"http://localhost:8080/\" jest --forceExit --projects  web/integration-test",
     "package:win": "yarn package --win",
