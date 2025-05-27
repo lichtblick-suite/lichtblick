@@ -4,6 +4,11 @@ This directory contains all end-to-end (E2E) tests using [Playwright](https://pl
 
 ## 📦 How to Run
 
+```bash
+# Build desktop packages
+yarn desktop:build:prod
+```
+
 ### Web
 
 ```bash
