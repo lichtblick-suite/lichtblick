@@ -3,6 +3,13 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
+/**
+ * GIVEN the "turtlesim" extension file is loaded
+ * WHEN the user navigates to the extensions menu and selects "turtlesim"
+ * THEN the uninstall option should be enabled
+ * WHEN the user confirms the uninstall
+ * THEN a toast indicating "Uninstalling..." should appear
+ */
 test("should uninstall an extension", async ({ mainWindow }) => {
   // Given
   const filename = "lichtblick.suite-extension-turtlesim-0.0.1.foxe";
@@ -10,24 +17,18 @@ test("should uninstall an extension", async ({ mainWindow }) => {
     mainWindow,
     filename,
   });
+  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
 
   // When
-  // Close startup dialog
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  // Open user menu
   await mainWindow.getByTestId("PersonIcon").click();
-  // Open extensions menu
   await mainWindow.getByRole("menuitem", { name: "Extensions" }).click();
-  // Fill search bar and find by installed extension
   const searchBar = mainWindow.getByPlaceholder("Search Extensions...");
   await searchBar.fill("turtlesim");
-  // Open extension in the list
   const extensionListItem = mainWindow
     .locator('[data-testid="extension-list-entry"]')
     .filter({ hasText: "turtlesim" })
     .filter({ hasText: "0.0.1" });
   await extensionListItem.click();
-
   const uninstallButton = mainWindow.getByText("Uninstall");
 
   // Then

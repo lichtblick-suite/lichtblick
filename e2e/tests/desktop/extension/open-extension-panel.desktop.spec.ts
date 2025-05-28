@@ -3,6 +3,11 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
+/**
+ * GIVEN the "turtlesim" extension file is loaded
+ * WHEN the user adds the "Turtle" panel
+ * THEN the "Turtle" panel should be visible on the screen
+ */
 test("open extension panel", async ({ mainWindow }) => {
   // Given
   const filename = "lichtblick.suite-extension-turtlesim-0.0.1.foxe";
@@ -12,14 +17,10 @@ test("open extension panel", async ({ mainWindow }) => {
   });
 
   // When
-  // Close startup dialog
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  // Click on Add Panel button
   await mainWindow.getByLabel("Add panel button").click();
-  // And search for "Turtle"
   await mainWindow.getByText("Turtle [local]").click();
 
   // Then
-  // There is a panel on screen named "Turtle"
   await expect(mainWindow.getByText("Turtle", { exact: true }).count()).resolves.toBe(1);
 });

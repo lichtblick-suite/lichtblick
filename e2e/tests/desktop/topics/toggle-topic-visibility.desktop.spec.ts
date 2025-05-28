@@ -3,6 +3,11 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
+/**
+ * GIVEN a file with multiple topics is loaded
+ * WHEN the user toggles topic visibility
+ * THEN the filters "List all", "List visible", and "List invisible" should work as expected
+ */
 test("toggle topics visibility", async ({ mainWindow }) => {
   // Given
   const filename = "demo-shuffled.bag";
@@ -11,14 +16,13 @@ test("toggle topics visibility", async ({ mainWindow }) => {
     filename,
   });
 
-  // Click on Panels tab
+  // When
   await mainWindow.getByTestId("panel-settings-left").click();
-  // Click on 3D Panel
   await mainWindow.getByText("3D").nth(0).click();
-
-  // Make the first topic visible
   const visibilityButtons = mainWindow.getByTitle("Toggle visibility");
   await visibilityButtons.nth(0).click();
+
+  // Then
   expect(await visibilityButtons.count()).toBe(4);
 
   // Select only visibles

@@ -3,6 +3,10 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
+/**
+ * GIVEN a .mcap file is loaded via drag and drop
+ * THEN the filename should be visible and the "Play" button enabled
+ */
 test("should open an MCAP file via drag and drop", async ({ mainWindow }) => {
   // Given
   const filename = "example.mcap";
@@ -11,11 +15,9 @@ test("should open an MCAP file via drag and drop", async ({ mainWindow }) => {
     filename,
   });
 
-  // When
+  // Then
   const sourceTitle = mainWindow.getByText(filename);
   const playButton = mainWindow.getByRole("button", { name: "Play", exact: true });
-
-  // Then
   await expect(sourceTitle).toBeVisible();
   await expect(playButton).toBeEnabled();
 });

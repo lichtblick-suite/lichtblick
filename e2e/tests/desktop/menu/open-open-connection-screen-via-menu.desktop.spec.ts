@@ -2,25 +2,24 @@
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 
+/**
+ * GIVEN the app is on the initial screen
+ * WHEN the user opens the File Open... > Open connection menu
+ * AND the user clicks on the "Open connection" button
+ * THEN the "Open a new connection" dialog should appear
+ */
 test("Display the open a new connection dialog when clicking File > Open... > Open connection", async ({
   mainWindow,
 }) => {
   // Given
-  // Close startup dialog
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
 
   // When
-  // Click on App menu button
   await mainWindow.getByTestId("AppMenuButton").click();
-  // Click on "File" menu item
   await mainWindow.getByTestId("app-menu-file").click();
-  // Click on "Open..." menu item
   await mainWindow.getByTestId("menu-item-open").click();
-  // Click on "Open connection"
   await mainWindow.getByText("Open connection").nth(0).click();
 
   // Then
-  // Data Source dialog is opened
   await expect(mainWindow.getByText("Open a new connection", { exact: true })).toBeVisible();
 });

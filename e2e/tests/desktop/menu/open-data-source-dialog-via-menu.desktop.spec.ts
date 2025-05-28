@@ -2,21 +2,20 @@
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 
+/**
+ * GIVEN the app is on the initial screen
+ * WHEN the user opens the File > Open... menu
+ * THEN the Data Source dialog should appear
+ */
 test("Display the data source dialog when clicking File > Open...", async ({ mainWindow }) => {
   // Given
-  // Close startup dialog
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
 
   // When
-  // Click on App menu button
   await mainWindow.getByTestId("AppMenuButton").click();
-  // Click on "File" menu item
   await mainWindow.getByTestId("app-menu-file").click();
-  // Click on "Open..." menu item
   await mainWindow.getByTestId("menu-item-open").click();
 
   // Then
-  // Data Source dialog is opened
   await expect(mainWindow.getByTestId("DataSourceDialog").isVisible()).resolves.toBe(true);
 });
