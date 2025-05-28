@@ -65,10 +65,10 @@ jobs:
 
       - run: ${{ matrix.config.command }}
 
-  integration:
+  e2e:
     runs-on: ubuntu-latest
 
-    name: integration (ubuntu-latest)
+    name: e2e tests (ubuntu-latest)
 
     steps:
       - uses: actions/checkout@v4.1.1
@@ -94,11 +94,11 @@ jobs:
         # See: https://github.com/microsoft/playwright/issues/34251
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      - name: test:integration (ubuntu-latest)
+      - name: test:e2e:desktop (ubuntu-latest)
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: yarn run test:integration
+          run: yarn run test:e2e:desktop
 
       # New version of playwright requires to install new browsers
       - name: Install Playwright browsers
@@ -106,5 +106,5 @@ jobs:
           cd web
           yarn playwright install
 
-      - name: test:web-integration
-        run: yarn run test:web-integration
+      - name: test:e2e:web (ubuntu-latest)
+        run: yarn run test:e2e:web
