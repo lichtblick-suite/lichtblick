@@ -90,7 +90,13 @@ function createExtensionRegistryStore(
 
     const mergeState = (
       info: ExtensionInfo,
-      { messageConverters, panelSettings, panels, topicAliasFunctions }: ContributionPoints,
+      {
+        messageConverters,
+        panelSettings,
+        panels,
+        topicAliasFunctions,
+        cameraModels,
+      }: ContributionPoints,
     ) => {
       set((state) => ({
         installedExtensions: _.uniqBy([...(state.installedExtensions ?? []), info], "id"),
@@ -104,6 +110,11 @@ function createExtensionRegistryStore(
           "extensionId",
         ),
         panelSettings: { ...state.panelSettings, ...panelSettings },
+
+        installedCameraModels: new Map([
+          ...state.installedCameraModels,
+          ...Array.from(cameraModels.entries()),
+        ]),
       }));
     };
 
@@ -123,7 +134,7 @@ function createExtensionRegistryStore(
           try {
             installedExtensions.push(extension);
 
-            const { messageConverters, panelSettings, panels, topicAliasFunctions } =
+            const { messageConverters, panelSettings, panels, topicAliasFunctions, cameraModels } =
               contributionPoints;
             const unwrappedExtensionSource = await loader.loadExtension(extension.id);
             const newContributionPoints = buildContributionPoints(
@@ -135,6 +146,14 @@ function createExtensionRegistryStore(
             _.merge(panelSettings, newContributionPoints.panelSettings);
             messageConverters.push(...newContributionPoints.messageConverters);
             topicAliasFunctions.push(...newContributionPoints.topicAliasFunctions);
+
+            newContributionPoints.cameraModels.forEach((builder, name: string) => {
+              if (cameraModels.has(name)) {
+                log.warn(`Camera model "${name}" already registered, skipping.`);
+                return;
+              }
+              cameraModels.set(name, builder);
+            });
 
             get().markExtensionAsInstalled(extension.id);
           } catch (err) {
@@ -157,6 +176,7 @@ function createExtensionRegistryStore(
         panels: {},
         panelSettings: {},
         topicAliasFunctions: [],
+        cameraModels: new Map(),
       };
 
       const processLoader = async (loader: ExtensionLoader) => {
@@ -186,6 +206,7 @@ function createExtensionRegistryStore(
         installedPanels: contributionPoints.panels,
         installedMessageConverters: contributionPoints.messageConverters,
         installedTopicAliasFunctions: contributionPoints.topicAliasFunctions,
+        installedCameraModels: contributionPoints.cameraModels,
         panelSettings: contributionPoints.panelSettings,
       });
     };
@@ -201,6 +222,7 @@ function createExtensionRegistryStore(
         | "installedPanels"
         | "installedMessageConverters"
         | "installedTopicAliasFunctions"
+        | "installedCameraModels"
       >;
     }) {
       const {
@@ -208,6 +230,7 @@ function createExtensionRegistryStore(
         installedPanels,
         installedMessageConverters,
         installedTopicAliasFunctions,
+        installedCameraModels,
       } = state;
 
       return {
@@ -220,6 +243,9 @@ function createExtensionRegistryStore(
         ),
         installedTopicAliasFunctions: installedTopicAliasFunctions?.filter(
           ({ extensionId }) => extensionId !== id,
+        ),
+        installedCameraModels: new Map(
+          [...installedCameraModels].filter(([, { extensionId }]) => extensionId !== id),
         ),
       };
     }
@@ -253,6 +279,7 @@ function createExtensionRegistryStore(
       installedMessageConverters: mockMessageConverters ?? [],
       installedPanels: {},
       installedTopicAliasFunctions: [],
+      installedCameraModels: new Map(),
       loadedExtensions: new Set<string>(),
       panelSettings: _.merge(
         {},

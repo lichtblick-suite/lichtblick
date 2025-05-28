@@ -128,6 +128,7 @@ const defaultRendererProps = {
   fetchAsset,
   sceneExtensionConfig: DEFAULT_SCENE_EXTENSION_CONFIG,
   testOptions: {},
+  customCameraModels: new Map(),
 };
 describe("3D Renderer", () => {
   let canvas = document.createElement("canvas");

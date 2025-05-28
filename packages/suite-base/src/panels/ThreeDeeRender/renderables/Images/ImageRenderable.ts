@@ -9,10 +9,10 @@ import * as _ from "lodash-es";
 import * as THREE from "three";
 import { assert } from "ts-essentials";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
 import { VideoPlayer } from "@lichtblick/den/video";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
+import { ICameraModel } from "@lichtblick/suite";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderable";
 import { stringToRgba } from "@lichtblick/suite-base/panels/ThreeDeeRender/color";
@@ -60,7 +60,7 @@ export type ImageUserData = BaseUserData & {
   settings: ImageRenderableSettings;
   firstMessageTime: bigint | undefined;
   cameraInfo: CameraInfo | undefined;
-  cameraModel: PinholeCameraModel | undefined;
+  cameraModel: ICameraModel | undefined;
   image: AnyImage | undefined;
   texture: THREE.Texture | undefined;
   material: THREE.MeshBasicMaterial | undefined;
@@ -142,7 +142,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   }
 
   // Renderable should only need to care about the model
-  public setCameraModel(cameraModel: PinholeCameraModel): void {
+  public setCameraModel(cameraModel: ICameraModel): void {
     this.#geometryNeedsUpdate ||= this.userData.cameraModel !== cameraModel;
     this.userData.cameraModel = cameraModel;
   }
@@ -511,7 +511,7 @@ function createDataTexture(imageData: ImageData): THREE.DataTexture {
 }
 
 function createGeometry(
-  cameraModel: PinholeCameraModel,
+  cameraModel: ICameraModel,
   settings: ImageRenderableSettings,
 ): THREE.PlaneGeometry {
   const WIDTH_SEGMENTS = 10;

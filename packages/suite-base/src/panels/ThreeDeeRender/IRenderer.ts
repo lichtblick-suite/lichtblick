@@ -8,6 +8,7 @@
 import EventEmitter from "eventemitter3";
 import * as THREE from "three";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import {
   Immutable,
   MessageEvent,
@@ -217,6 +218,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   readonly interfaceMode: InterfaceMode;
   readonly gl: THREE.WebGLRenderer;
   readonly testOptions: TestOptions;
+  customCameraModels: CameraModelsMap;
   maxLod: DetailLevel;
   config: Immutable<RendererConfig>;
   settings: SettingsManager;
@@ -335,6 +337,8 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   updateCustomLayersCount(): void;
 
   setCameraState(cameraState: CameraState): void;
+
+  setCustomCameraModels(newCameraModels: CameraModelsMap): void;
 
   getCameraState(): CameraState | undefined;
 

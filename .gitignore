@@ -22,9 +22,6 @@ test-results/
 !.yarn/sdks
 .pnp.*
 
-# Extensions
-*.foxe
-
 # SonarQube files
 .sonar_lock
 .scannerwork

@@ -11,8 +11,13 @@ import * as THREE from "three";
 import { Opaque } from "ts-essentials";
 
 import { filterMap } from "@lichtblick/den/collection";
-import { PinholeCameraModel } from "@lichtblick/den/image";
-import { Immutable, MessageEvent, SettingsTreeAction, Topic } from "@lichtblick/suite";
+import {
+  ICameraModel,
+  Immutable,
+  MessageEvent,
+  SettingsTreeAction,
+  Topic,
+} from "@lichtblick/suite";
 import { Path } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
 import { onlyLastByTopicMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtension";
 import {
@@ -73,7 +78,7 @@ export class ImageAnnotations extends THREE.Object3D {
   #context: ImageAnnotationsContext;
 
   #renderablesByTopic = new Map<TopicName, RenderableTopicAnnotations>();
-  #cameraModel?: PinholeCameraModel;
+  #cameraModel?: ICameraModel;
 
   #scale: number;
   #canvasWidth: number;
@@ -160,7 +165,7 @@ export class ImageAnnotations extends THREE.Object3D {
     }
   }
 
-  public updateCameraModel(cameraModel: PinholeCameraModel): void {
+  public updateCameraModel(cameraModel: ICameraModel): void {
     this.#cameraModel = cameraModel;
     for (const renderable of this.#renderablesByTopic.values()) {
       renderable.setCameraModel(cameraModel);

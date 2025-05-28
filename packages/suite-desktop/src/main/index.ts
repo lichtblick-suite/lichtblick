@@ -33,6 +33,12 @@ import {
 
 const log = Logger.getLogger(__filename);
 
+// This overwrite needs to be done here, before the app is ready, otherwise it will not take effect
+const homeOverride = process.argv.find((arg) => arg.startsWith("--home-dir="));
+if (homeOverride != undefined) {
+  app.setPath("home", homeOverride.split("=")[1]!);
+}
+
 /**
  * Determine whether an item in argv is a file that we should try opening as a data source.
  *

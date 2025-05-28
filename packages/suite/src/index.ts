@@ -5,9 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { RegisterCameraModelArgs } from "./cameraModels";
 import type { Immutable } from "./immutable";
 
 export type { Immutable } from "./immutable";
+// Expose all interfaces from about camera models
+export type * from "./cameraModels";
 
 // Valid types for parameter data (such as rosparams)
 export type ParameterValue =
@@ -503,6 +506,8 @@ export interface ExtensionContext {
    * topic aliases.
    */
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
+
+  registerCameraModel(args: RegisterCameraModelArgs): void;
 }
 
 export type ExtensionActivate = (extensionContext: ExtensionContext) => void;
