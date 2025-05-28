@@ -100,7 +100,9 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: yarn run test:e2e:desktop
+          run: |
+            yarn run desktop:build:prod
+            yarn run test:e2e:desktop
 
       # New version of playwright requires to install new browsers
       - name: Install Playwright browsers
@@ -109,4 +111,5 @@ jobs:
           yarn playwright install
 
       - name: test:e2e:web (ubuntu-latest)
-        run: yarn run test:e2e:web
+        run: |
+          yarn run test:e2e:web
