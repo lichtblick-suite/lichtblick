@@ -6,6 +6,7 @@ import { defineConfig } from "@playwright/test";
 export const STORAGE_STATE = "e2e/tmp/desktop-session.json";
 
 export default defineConfig({
+  globalTeardown: require.resolve("./desktop-teardown.ts"),
   reporter: [["html", { outputFolder: "./reports", open: "never", title: "Desktop E2E Tests" }]],
   testDir: "./",
   name: "desktop",
