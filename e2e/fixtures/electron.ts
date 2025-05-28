@@ -5,6 +5,8 @@ import electronPath from "electron";
 import fs from "fs";
 import path from "path";
 
+import clearStorage from "./clear-storage";
+
 export type ElectronFixtures = {
   electronApp: ElectronApplication;
   mainWindow: Page;
@@ -15,6 +17,7 @@ const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
 export const test = base.extend<ElectronFixtures>({
   // eslint-disable-next-line no-empty-pattern
   electronApp: async ({}, use) => {
+    await clearStorage();
     checkBuild(WEBPACK_PATH);
 
     const app = await electron.launch({

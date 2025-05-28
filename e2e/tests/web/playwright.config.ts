@@ -18,15 +18,6 @@ export default defineConfig({
     timeout: 3 * 60 * 1000,
   },
   projects: [
-    // {
-    //   name: "setup",
-    //   testMatch: /web\.setup\.ts/,
-    //   teardown: "cleanup",
-    // },
-    // {
-    //   name: "cleanup",
-    //   testMatch: /web\.teardown\.ts/,
-    // },
     {
       name: "web-chromium",
       use: {
