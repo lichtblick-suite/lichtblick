@@ -44,7 +44,7 @@ import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 const log = Logger.getLogger(__filename);
 
 /** Key injected into panel configs for user-selected title (overrides setDefaultPanelTitle) */
-export const PANEL_TITLE_CONFIG_KEY = "foxglovePanelTitle";
+export const PANEL_TITLE_CONFIG_KEY = "lichtblickPanelTitle";
 
 // given a panel type, create a unique id for a panel
 // with the type embedded within the id
