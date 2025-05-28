@@ -11,7 +11,7 @@ test("create a new layout by accessing Layouts > Create new layout", async ({ ma
 
   // When
   // Click on Layouts tab
-  await mainWindow.getByTestId("layout-list-item").getByText("layout", { exact: true }).click();
+  await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
   // Click on Create new layout
   await mainWindow.getByText("Create new layout").click();
   // Click on Diagnostics - Details (ROS) panel
@@ -20,6 +20,6 @@ test("create a new layout by accessing Layouts > Create new layout", async ({ ma
   // Then
   // A new layout is created under the name "Unnamed layout"
   await expect(
-    mainWindow.getByText("Unnamed layout", { exact: false }).innerText(),
+    mainWindow.getByText("Unnamed layout", { exact: false }).nth(0).innerText(),
   ).resolves.toContain("Unnamed layout");
 });

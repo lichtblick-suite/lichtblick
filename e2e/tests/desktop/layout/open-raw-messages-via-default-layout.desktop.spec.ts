@@ -9,13 +9,13 @@ test("open Raw Messages panel when clicking on Layouts > layout", async ({ mainW
   // Click on Layouts tab
   await mainWindow.getByTestId("layouts-left").click();
   // And click on default layout
-  await mainWindow.getByTestId("layout-list-item").getByText("layout", { exact: true }).click();
+  await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
 
   // When
   // Click on Panels tab
   await mainWindow.getByTestId("panel-settings-left").click();
   // Click on 3D Panel
-  await mainWindow.getByText("Waiting for next message…").nth(0).click();
+  await mainWindow.getByText("No topic selected").nth(0).click();
 
   // Then
   // The 3D panel settings are shown

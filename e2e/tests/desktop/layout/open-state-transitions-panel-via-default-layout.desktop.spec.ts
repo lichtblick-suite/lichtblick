@@ -2,24 +2,18 @@
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 
-test("open State Transitions panel when clicking on Layouts > layout", async ({ mainWindow }) => {
+test("open Image panel when clicking on Layouts > layout", async ({ mainWindow }) => {
   // Given
   // Close startup dialog
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  // Click on Layouts tab
-  await mainWindow.getByTestId("layouts-left").click();
-  // And click on default layout
-  await mainWindow.getByTestId("layout-list-item").getByText("layout", { exact: true }).click();
 
   // When
   // Click on Panels tab
   await mainWindow.getByTestId("panel-settings-left").click();
   // Click on State Transitions Panel
-  await mainWindow.getByText("State Transitions").nth(0).click();
+  await mainWindow.getByText("Image").nth(0).click();
 
   // Then
   // The State Transitions panel settings are shown
-  await expect(
-    mainWindow.getByText("State Transitions panel", { exact: true }).count(),
-  ).resolves.toBe(1);
+  await expect(mainWindow.getByText("Image panel", { exact: true }).count()).resolves.toBe(1);
 });

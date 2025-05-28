@@ -9,7 +9,7 @@ test("open 3D panel when clicking on Layouts > layout", async ({ mainWindow }) =
   // Click on Layouts tab
   await mainWindow.getByTestId("layouts-left").click();
   // And click on default layout
-  await mainWindow.getByTestId("layout-list-item").getByText("layout", { exact: true }).click();
+  await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
 
   // When
   // Click on Panels tab
