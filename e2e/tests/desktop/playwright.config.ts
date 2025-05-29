@@ -14,6 +14,7 @@ export default defineConfig({
   retries: 1,
   workers: 1,
   use: {
+    headless: true,
     storageState: STORAGE_STATE,
     ignoreHTTPSErrors: true,
     trace: "retain-on-first-failure",
