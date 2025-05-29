@@ -91,6 +91,17 @@ jobs:
 
       - run: yarn install --immutable
 
+      - name: Install Electron dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libxss1 \
+            libasound2 \
+            libgtk-3-0 \
+            libgbm-dev
+
       - name: Build desktop (Electron)
         run: yarn desktop:build:prod
 
@@ -99,8 +110,5 @@ jobs:
           cd e2e/tests/desktop
           yarn playwright install --with-deps
 
-      - name: Run E2E desktop tests
-        uses: coactions/setup-xvfb@v1
-        with:
-          working-directory: ./
-          run: yarn test:e2e:desktop:ci
+      - name: Run E2E desktop tests with Xvfb
+        run: xvfb-run --auto-servernum -- yarn test:e2e:desktop:ci
