@@ -475,10 +475,7 @@ export default React.memo(function LayoutRow({
         }
         anchorEl={contextMenuTarget?.element}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "layout-actions",
-          dense: true,
-        }}
+        slotProps={{ list: { "aria-labelledby": "layout-actions", dense: true } }}
       >
         {filteredItems.map((item) => {
           switch (item.type) {

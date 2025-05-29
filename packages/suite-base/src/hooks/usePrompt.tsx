@@ -116,8 +116,10 @@ function ModalPrompt({
             value={value}
             error={errorMessage != undefined}
             helperText={errorMessage}
-            FormHelperTextProps={{
-              variant: "standard",
+            slotProps={{
+              formHelperText: {
+                variant: "standard",
+              },
             }}
             onChange={(event) => {
               setValue(event.target.value);

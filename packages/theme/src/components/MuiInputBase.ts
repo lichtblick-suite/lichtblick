@@ -18,10 +18,10 @@ export const MuiInputBase: OverrideComponentReturn<"MuiInputBase"> = {
       [`&.${inputBaseClasses.adornedEnd}`]: {
         paddingInlineEnd: theme.spacing(1.25),
       },
-      [`.${inputBaseClasses.inputAdornedStart}`]: {
+      [`.${inputBaseClasses.adornedStart}`]: {
         paddingInlineStart: theme.spacing(1),
       },
-      [`.${inputBaseClasses.inputAdornedEnd}`]: {
+      [`.${inputBaseClasses.adornedEnd}`]: {
         paddingInlineEnd: theme.spacing(1),
       },
     }),
@@ -32,10 +32,10 @@ export const MuiInputBase: OverrideComponentReturn<"MuiInputBase"> = {
       [`&.${inputBaseClasses.adornedEnd}`]: {
         paddingInlineEnd: theme.spacing(1),
       },
-      [`.${inputBaseClasses.inputAdornedStart}`]: {
+      [`.${inputBaseClasses.adornedStart}`]: {
         paddingInlineStart: theme.spacing(0.75),
       },
-      [`.${inputBaseClasses.inputAdornedEnd}`]: {
+      [`.${inputBaseClasses.adornedEnd}`]: {
         paddingInlineEnd: theme.spacing(0.75),
       },
     }),

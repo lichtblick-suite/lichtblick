@@ -34,7 +34,7 @@ const useStyles = makeStyles()((theme) => ({
     paddingTop: 1,
     paddingBottom: 1,
     lineHeight: 1,
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     wordBreak: "break-word",
   },
 }));

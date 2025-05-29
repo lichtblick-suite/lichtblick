@@ -18,7 +18,7 @@ export const MuiCssBaseline: OverrideComponentReturn<"MuiCssBaseline"> = {
       textDecoration: "none",
     },
     pre: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: theme.typography.fontFamily,
       backgroundColor: theme.palette.background.default,
       borderRadius: theme.shape.borderRadius,
       padding: theme.spacing(2),
@@ -27,7 +27,7 @@ export const MuiCssBaseline: OverrideComponentReturn<"MuiCssBaseline"> = {
       margin: 0,
     },
     code: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: theme.typography.fontFamily,
     },
   }),
 };

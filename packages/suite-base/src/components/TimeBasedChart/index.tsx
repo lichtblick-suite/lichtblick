@@ -775,6 +775,7 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
   return (
     <Stack direction="row" fullWidth fullHeight>
       <Tooltip
+
         arrow={false}
         classes={{ tooltip: classes.tooltip }}
         open={activeTooltip != undefined}
@@ -782,8 +783,12 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
         title={tooltipContent ?? <></>}
         disableInteractive
         followCursor
-        TransitionComponent={Fade}
-        TransitionProps={{ timeout: 0 }}
+        slots={{transition: Fade}}
+        slotProps={{
+          transition: {
+            timeout: 0,
+          },
+        }}
       >
         <Stack direction="row" style={{ width }}>
           <div className={classes.root} onDoubleClick={onResetZoom}>

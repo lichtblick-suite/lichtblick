@@ -29,7 +29,7 @@ const useStyles = makeStyles()((theme) => ({
   editor: {
     backgroundColor: "transparent !important",
     font: "inherit !important",
-    fontFamily: `${theme.typography.fontMonospace} !important`,
+    fontFamily: `${theme.typography.fontFamily} !important`,
     overflow: "auto",
   },
   error: {

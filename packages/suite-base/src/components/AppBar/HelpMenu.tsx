@@ -75,9 +75,7 @@ export function HelpMenu(props: HelpMenuProps): React.JSX.Element {
       open={open}
       onClose={handleClose}
       transformOrigin={transformOrigin}
-      MenuListProps={{
-        "aria-labelledby": "help-button",
-      }}
+      slotProps={{ list: { "aria-labelledby": "help-button" } }}
     >
       <MenuItem
         href="https://foxglove.dev/docs/data-platform"
@@ -96,7 +94,7 @@ export function HelpMenu(props: HelpMenuProps): React.JSX.Element {
         <ListItemText
           primary="Data Platform"
           secondary="Scalable data management platform"
-          secondaryTypographyProps={{ className: classes.menuText }}
+          slotProps={{ secondary: { className: classes.menuText } }}
         />
       </MenuItem>
     </Menu>

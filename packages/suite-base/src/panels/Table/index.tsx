@@ -38,7 +38,7 @@ const useStyles = makeStyles()((theme) => ({
     paddingBlock: 0,
   },
   monospace: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
   },
 }));
 

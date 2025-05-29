@@ -58,7 +58,7 @@ const useStyles = makeStyles<{ buttonColor?: string }>()((theme, { buttonColor }
         [`.${inputBaseClasses.input}`]: {
           height: "100% !important",
           lineHeight: 1.4,
-          fontFamily: theme.typography.fontMonospace,
+          fontFamily: theme.typography.fontFamily,
           overflow: "auto !important",
           resize: "none",
         },

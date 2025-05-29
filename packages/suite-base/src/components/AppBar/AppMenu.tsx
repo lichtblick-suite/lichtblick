@@ -223,15 +223,11 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         open={open}
         disableAutoFocusItem
         onClose={handleNestedMenuClose}
-        MenuListProps={{
-          "aria-labelledby": "app-menu-button",
-          dense: true,
-          className: classes.menuList,
-        }}
         slotProps={{
           paper: {
             "data-tourid": "app-menu",
           } as Partial<PaperProps & { "data-tourid"?: string }>,
+          list: { "aria-labelledby": "app-menu-button", dense: true, className: classes.menuList },
         }}
       >
         <NestedMenuItem

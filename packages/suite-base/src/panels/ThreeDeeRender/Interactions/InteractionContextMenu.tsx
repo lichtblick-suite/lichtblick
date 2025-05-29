@@ -73,8 +73,10 @@ export function InteractionContextMenu({
         top: clickedPosition.clientY,
         left: clickedPosition.clientX,
       }}
-      MenuListProps={{
-        dense: true,
+      slotProps={{
+        list: {
+          dense: true,
+        },
       }}
     >
       {clickedObjects.map((interactiveObject, index) => (

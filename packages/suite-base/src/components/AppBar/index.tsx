@@ -114,7 +114,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
     },
     keyEquivalent: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: theme.typography.fontFamily,
       background: tc(theme.palette.common.white).darken(45).toString(),
       padding: theme.spacing(0, 0.5),
       aspectRatio: 1,

@@ -97,7 +97,7 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   select: {
-    [`.${inputBaseClasses.input}.${selectClasses.select}.${inputBaseClasses.inputSizeSmall}`]: {
+    [`.${inputBaseClasses.input}.${selectClasses.select}.${inputBaseClasses.sizeSmall}`]: {
       paddingTop: 0,
       paddingBottom: 0,
       minWidth: 40,
@@ -139,8 +139,10 @@ const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
         <ListItemText
           primary={info.displayName}
           secondary={info.status.message}
-          secondaryTypographyProps={{
-            color: MESSAGE_COLORS[levelName ?? "stale"],
+          slotProps={{
+            secondary: {
+              color: MESSAGE_COLORS[levelName ?? "stale"],
+            },
           }}
           style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         />

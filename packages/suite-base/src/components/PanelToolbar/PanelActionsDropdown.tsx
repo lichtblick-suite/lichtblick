@@ -218,9 +218,8 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
         open={menuOpen}
         onClose={handleMenuClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        MenuListProps={{
-          "aria-labelledby": "panel-menu-button",
-          dense: true,
+        slotProps={{
+          list: { "aria-labelledby": "panel-menu-button", dense: true },
         }}
       >
         <MenuItem

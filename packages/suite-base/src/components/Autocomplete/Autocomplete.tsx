@@ -205,17 +205,17 @@ export const Autocomplete = React.forwardRef(function Autocomplete(
   return (
     <MuiAutocomplete
       className={className}
-      componentsProps={{
+      slotProps={{
         paper: { elevation: 8 },
+        listbox: { component: ReactWindowListboxAdapter },
       }}
+      slots={{ popper: CustomPopper }}
       getOptionLabel={getOptionLabel}
       disableCloseOnSelect
       disabled={disabled}
       freeSolo
       fullWidth
-      PopperComponent={CustomPopper}
       filterOptions={filterOptions}
-      ListboxComponent={ReactWindowListboxAdapter}
       onChange={onSelect}
       onInputChange={onChange}
       openOnFocus

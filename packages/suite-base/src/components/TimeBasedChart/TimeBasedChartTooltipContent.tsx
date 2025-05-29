@@ -38,7 +38,7 @@ type Props = Immutable<{
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
@@ -48,7 +48,7 @@ const useStyles = makeStyles()((theme) => ({
     display: "grid",
     gridTemplateColumns: "auto minmax(0px, max-content) minmax(auto, max-content)",
     alignItems: "center",
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
