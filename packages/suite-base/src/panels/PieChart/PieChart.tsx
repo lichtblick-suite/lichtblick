@@ -15,10 +15,10 @@ import {
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
-import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
 
-import { settingsActionReducer, useSettingsTree } from "./settings";
+import { useSettingsTree } from "./useSettingsTree";
+import { settingsActionReducer } from "./utils/settingsActionReducer";
 import type { PieChartConfig, PieChartState } from "./types";
 import { useChartData } from "./useChartData";
 import { DEFAULT_CONFIG } from "./constants";
@@ -59,12 +59,12 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
     [],
   );
 
-  const settingsTree = useSettingsTree(
+  const settingsTree = useSettingsTree({
     config,
-    state.pathParseError,
-    state.error?.message,
+    pathParseError: state.pathParseError,
+    error: state.error?.message,
     legendCount,
-  );
+  });
 
   // Extract raw values from queried message data
   const rawValue = useMemo(
