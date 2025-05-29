@@ -21,7 +21,6 @@ export type NodeEditorProps = {
   focusedPath?: readonly string[];
   path: readonly string[];
   settings?: Immutable<SettingsTreeNode>;
-  panelTitle?: string;
 };
 
 export type SelectVisibilityFilterValue = "all" | "visible" | "invisible";
