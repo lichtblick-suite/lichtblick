@@ -67,10 +67,9 @@ jobs:
 
       - run: ${{ matrix.config.command }}
 
-  e2e:
+  e2e-desktop:
     runs-on: ubuntu-latest
-
-    name: e2e tests (ubuntu-latest)
+    name: e2e-desktop (Electron)
 
     steps:
       - uses: actions/checkout@v4.1.1
@@ -78,6 +77,7 @@ jobs:
       - uses: actions/setup-node@v4.0.3
         with:
           node-version: 20
+
       - run: corepack enable yarn
 
       - name: Restore cache
@@ -91,25 +91,16 @@ jobs:
 
       - run: yarn install --immutable
 
-      - name: Apply AppArmor Fix (Ubuntu)
-        # Required for Playwright on Ubuntu to work properly
-        # See: https://github.com/microsoft/playwright/issues/34251
-        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Build desktop (Electron)
+        run: yarn desktop:build:prod
 
-      - name: test:e2e:desktop (ubuntu-latest)
+      - name: Install Playwright browsers
+        run: |
+          cd e2e/tests/desktop
+          yarn playwright install --with-deps
+
+      - name: Run E2E desktop tests
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: |
-            yarn run desktop:build:prod
-            yarn run test:e2e:desktop
-
-      # New version of playwright requires to install new browsers
-      - name: Install Playwright browsers
-        run: |
-          cd web
-          yarn playwright install
-
-      - name: test:e2e:web (ubuntu-latest)
-        run: |
-          yarn run test:e2e:web
+          run: yarn test:e2e:desktop:ci
