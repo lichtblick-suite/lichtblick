@@ -36,6 +36,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 
 import { FieldEditor } from "./FieldEditor";
+import { LegendControls } from "./LegendControls";
 import { NodeActionsMenu } from "./NodeActionsMenu";
 import { VisibilityToggle } from "./VisibilityToggle";
 import { icons } from "./icons";
@@ -417,6 +418,19 @@ function NodeEditorComponent(props: NodeEditorProps): React.JSX.Element {
           {fieldEditors}
           <div className={classes.fieldPadding} />
         </>
+      )}
+      {props.panelTitle === "Pie Chart" && (
+        <div
+          style={{
+            justifyContent: "center",
+            display: "flex",
+            gridColumn: "span 2",
+            marginTop: 3,
+            marginBottom: 8,
+          }}
+        >
+          <LegendControls />
+        </div>
       )}
       {state.open && selectVisibilityFilterEnabled && hasChildren && (
         <>
