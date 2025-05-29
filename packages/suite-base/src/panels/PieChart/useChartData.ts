@@ -3,9 +3,9 @@
 
 import { useMemo } from "react";
 
-import type { Config, ChartDatum } from "./types";
+import type { PieChartConfig, PieChartDatum } from "./types";
 
-export function useChartData(rawValue: Float32Array, config: Config): ChartDatum[] {
+export function useChartData(rawValue: Float32Array, config: PieChartConfig): PieChartDatum[] {
   return useMemo(() => {
     if (rawValue.length === 0) {
       return [];
@@ -16,7 +16,7 @@ export function useChartData(rawValue: Float32Array, config: Config): ChartDatum
 
     return rawArray.map((value, index) => {
       const percentage = (value / total) * 100;
-      const legendKey = `legend${index + 1}` as keyof Config;
+      const legendKey = `legend${index + 1}` as keyof PieChartConfig;
       const rawName = config[legendKey];
       const name = rawName && rawName.trim() !== "" ? rawName : `Data ${index + 1}`;
 

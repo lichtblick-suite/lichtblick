@@ -13,7 +13,7 @@ import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { PieChart } from "./PieChart";
-import { Config } from "./types";
+import { PieChartConfig } from "./types";
 
 function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionContext) {
   return createSyncRoot(
@@ -26,12 +26,12 @@ function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionCo
   );
 }
 
-type Props = {
-  config: Config;
-  saveConfig: SaveConfig<Config>;
+type PieChartPanelAdapterProps = {
+  config: PieChartConfig;
+  saveConfig: SaveConfig<PieChartConfig>;
 };
 
-function PieChartPanelAdapter(props: Props) {
+function PieChartPanelAdapter(props: PieChartPanelAdapterProps) {
   const crash = useCrash();
   const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
 

@@ -5,14 +5,14 @@
 import { MessagePath } from "@lichtblick/message-path";
 import { MessageEvent } from "@lichtblick/suite";
 
-export type Config = {
+export type PieChartConfig = {
   path: string;
   title: string;
 } & {
   [key in `legend${number}`]?: string;
 };
 
-export type State = {
+export type PieChartState = {
   path: string;
   parsedPath: MessagePath | undefined;
   latestMessage: MessageEvent | undefined;
@@ -21,12 +21,12 @@ export type State = {
   pathParseError: string | undefined;
 };
 
-export type Action =
+export type PieChartAction =
   | { type: "frame"; messages: readonly MessageEvent[] }
   | { type: "path"; path: string }
   | { type: "seek" };
 
-export type ChartDatum = {
+export type PieChartDatum = {
     name: string;
     value: number;
     color: string;

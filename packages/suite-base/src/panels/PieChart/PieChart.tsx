@@ -19,26 +19,12 @@ import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components
 import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
 
 import { settingsActionReducer, useSettingsTree } from "./settings";
-import type { Config, State, Action } from "./types";
+import type { PieChartConfig, PieChartState } from "./types";
 import { useChartData } from "./useChartData";
+import { DEFAULT_CONFIG } from "./constants";
 
-type Props = {
+type PieChartProps = {
   context: PanelExtensionContext;
-};
-
-const defaultConfig: Config = {
-  path: "",
-  title: "Pie Chart",
-  legend1: "Legend 1",
-  legend2: "Legend 2",
-  legend3: "Legend 3",
-  legend4: "Legend 4",
-  legend5: "Legend 5",
-  legend6: "Legend 6",
-  legend7: "Legend 7",
-  legend8: "Legend 8",
-  legend9: "Legend 9",
-  legend10: "Legend 10",
 };
 
 // Reducer case: handle new frame messages
@@ -118,22 +104,21 @@ function reducer(state: State, action: Action): State {
       return state;
   }
 }
-
-export function PieChart({ context }: Props): React.JSX.Element {
+export function PieChart({ context }: PieChartProps): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
   const { legendCount } = useLegendCount();
 
   const [config, setConfig] = useState(() => ({
-    ...defaultConfig,
-    ...(context.initialState as Partial<Config>),
+    ...(DEFAULT_CONFIG as PieChartConfig),
+    ...(context.initialState as Partial<PieChartConfig>),
   }));
 
   const [state, dispatch] = useReducer(
     reducer,
     config,
-    ({ path }): State => ({
+    ({ path }): PieChartState => ({
       path,
       parsedPath: parseMessagePath(path),
       latestMessage: undefined,
@@ -227,7 +212,7 @@ export function PieChart({ context }: Props): React.JSX.Element {
   return (
     <div style={{ fontFamily: "Arial, sans-serif", color: "#333" }}>
       <h1 style={{ textAlign: "center", fontSize: "24px", marginBottom: "20px" }}>
-        {(config as Config)[`title`]}{" "}
+        {(config as PieChartConfig)[`title`]}{" "}
       </h1>
       {rawValue.length === 0 ? (
         <div>No data available</div>
