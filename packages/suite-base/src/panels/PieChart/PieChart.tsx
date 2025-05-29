@@ -22,88 +22,12 @@ import { settingsActionReducer, useSettingsTree } from "./settings";
 import type { PieChartConfig, PieChartState } from "./types";
 import { useChartData } from "./useChartData";
 import { DEFAULT_CONFIG } from "./constants";
+import { stateReducer } from "./utils/stateReducer";
 
 type PieChartProps = {
   context: PanelExtensionContext;
 };
 
-// Reducer case: handle new frame messages
-function handleFrame(state: State, action: Extract<Action, { type: "frame" }>): State {
-  if (state.pathParseError != undefined) {
-    return { ...state, latestMessage: _.last(action.messages), error: undefined };
-  }
-  let latestMatchingQueriedData = state.latestMatchingQueriedData;
-  let latestMessage = state.latestMessage;
-  if (state.parsedPath) {
-    for (const message of action.messages) {
-      if (message.topic !== state.parsedPath.topicName) {
-        continue;
-      }
-      const data = (message.message as { data: Float32Array }).data;
-      latestMatchingQueriedData = data;
-      latestMessage = message;
-    }
-  }
-  return { ...state, latestMessage, latestMatchingQueriedData, error: undefined };
-}
-
-// Reducer case: handle path change
-function handlePath(state: State, action: Extract<Action, { type: "path" }>): State {
-  const newPath = parseMessagePath(action.path);
-  let pathParseError: string | undefined;
-  if (
-    (newPath?.messagePath.some(
-      (part) =>
-        (part.type === "filter" && typeof part.value === "object") ||
-        (part.type === "slice" &&
-          (typeof part.start === "object" || typeof part.end === "object"))
-    )) ?? false
-  ) {
-    pathParseError = "Message paths using variables are not currently supported";
-  }
-  let latestMatchingQueriedData: unknown;
-  let error: Error | undefined;
-  try {
-    latestMatchingQueriedData =
-      newPath && pathParseError == undefined && state.latestMessage
-        ? simpleGetMessagePathDataItems(state.latestMessage, newPath)
-        : undefined;
-  } catch (err: unknown) {
-    error = err as Error;
-  }
-  return {
-    ...state,
-    path: action.path,
-    parsedPath: newPath,
-    latestMatchingQueriedData,
-    error,
-    pathParseError,
-  };
-}
-
-// Reducer case: handle seek (reset state)
-function handleSeek(state: State): State {
-  return {
-    ...state,
-    latestMessage: undefined,
-    latestMatchingQueriedData: undefined,
-    error: undefined,
-  };
-}
-
-// Reducer function combining all cases
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "frame":
-      return handleFrame(state, action);
-    case "path":
-      return handlePath(state, action);
-    case "seek":
-      return handleSeek(state);
-    default:
-      return state;
-  }
-}
 export function PieChart({ context }: PieChartProps): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
@@ -116,7 +40,7 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
   }));
 
   const [state, dispatch] = useReducer(
-    reducer,
+    stateReducer,
     config,
     ({ path }): PieChartState => ({
       path,
