@@ -160,8 +160,8 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
               animationDuration={1500}
               animationEasing="ease-in-out"
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {data.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip
