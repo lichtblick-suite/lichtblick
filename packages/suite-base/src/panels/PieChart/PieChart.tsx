@@ -52,12 +52,14 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
     }),
   );
 
-  const settingsActionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
-    },
-    [],
-  );
+  function formatTooltip(value: number, name: string): [string, string] {
+    const formattedValue = typeof value === "number" ? value.toFixed(2) : value;
+    return [`${formattedValue}%`, name];
+  }
+
+  const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
+    setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
+  }, []);
 
   const settingsTree = useSettingsTree({
     config,
@@ -174,10 +176,7 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
                 padding: "10px",
                 boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
               }}
-              formatter={(value, name) => {
-                const formattedValue = typeof value === "number" ? value.toFixed(2) : value;
-                return [`${name}: ${formattedValue}%`];
-              }}
+              formatter={formatTooltip}
             />
             <Legend />
           </RechartsPieChart>
