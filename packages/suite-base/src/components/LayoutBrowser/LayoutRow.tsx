@@ -338,7 +338,7 @@ export default React.memo(function LayoutRow({
     },
   ];
 
-  if (hasModifications || anySelectedModifiedLayouts) {
+  if (hasModifications) {
     const sectionItems: LayoutActionMenuItem[] = [
       {
         type: "item",
