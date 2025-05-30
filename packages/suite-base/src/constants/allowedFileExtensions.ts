@@ -4,4 +4,6 @@
 export enum AllowedFileExtensions {
   FOXE = ".foxe",
   JSON = ".json",
+  BAG = ".bag",
+  MCAP = ".mcap",
 }
