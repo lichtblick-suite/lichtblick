@@ -9,6 +9,11 @@ storybook-screenshots/
 storybook-static/
 # for jest --coverage
 coverage/
+e2e/reports
+e2e/tests/desktop/reports
+e2e/tests/web/reports
+e2e/tmp
+test-results/
 
 # Yarn
 .yarn/*
