@@ -3,6 +3,7 @@
 
 import { enqueueSnackbar } from "notistack";
 import path from "path";
+import { useCallback } from "react";
 import { useMountedState } from "react-use";
 
 import {
@@ -11,6 +12,7 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
+import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
@@ -21,6 +23,7 @@ import { AppEvent } from "../services/IAnalytics";
 type UseLayoutTransfer = {
   importLayout: () => Promise<void>;
   exportLayout: () => Promise<void>;
+  parseAndInstallLayout: (file: File) => Promise<Layout | undefined>;
 };
 
 export function useLayoutTransfer(): UseLayoutTransfer {
@@ -30,10 +33,47 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
   const { getCurrentLayoutState } = useCurrentLayoutActions();
 
+  const parseAndInstallLayout = useCallback(
+    async (file: File) => {
+      const layoutName = path.basename(file.name, path.extname(file.name));
+      const content = await file.text();
+
+      if (!isMounted()) {
+        return;
+      }
+
+      let parsedState: unknown;
+      try {
+        parsedState = JSON.parse(content);
+      } catch (err: unknown) {
+        enqueueSnackbar(`${file.name} is not a valid layout: ${(err as Error).message}`, {
+          variant: "error",
+        });
+        return;
+      }
+
+      if (typeof parsedState !== "object" || !parsedState) {
+        enqueueSnackbar(`${file.name} is not a valid layout`, { variant: "error" });
+        return;
+      }
+
+      const data = parsedState as LayoutData;
+      const newLayout = await layoutManager.saveNewLayout({
+        name: layoutName,
+        data,
+        permission: "CREATOR_WRITE",
+      });
+
+      return newLayout;
+    },
+    [isMounted, layoutManager],
+  );
+
   const importLayout = useCallbackWithToast(async () => {
     if (!(await promptForUnsavedChanges())) {
       return;
     }
+
     const fileHandles = await showOpenFilePicker({
       multiple: true,
       excludeAcceptAllOption: false,
@@ -46,6 +86,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
         },
       ],
     });
+
     if (fileHandles.length === 0) {
       return;
     }
@@ -53,47 +94,21 @@ export function useLayoutTransfer(): UseLayoutTransfer {
     const newLayouts = await Promise.all(
       fileHandles.map(async (fileHandle) => {
         const file = await fileHandle.getFile();
-        const layoutName = path.basename(file.name, path.extname(file.name));
-        const content = await file.text();
-
-        if (!isMounted()) {
-          return;
-        }
-
-        let parsedState: unknown;
-        try {
-          parsedState = JSON.parse(content);
-        } catch (err: unknown) {
-          enqueueSnackbar(`${file.name} is not a valid layout: ${(err as Error).message}`, {
-            variant: "error",
-          });
-          return;
-        }
-
-        if (typeof parsedState !== "object" || !parsedState) {
-          enqueueSnackbar(`${file.name} is not a valid layout`, { variant: "error" });
-          return;
-        }
-
-        const data = parsedState as LayoutData;
-        const newLayout = await layoutManager.saveNewLayout({
-          name: layoutName,
-          data,
-          permission: "CREATOR_WRITE",
-        });
-        return newLayout;
+        return await parseAndInstallLayout(file);
       }),
     );
 
     if (!isMounted()) {
       return;
     }
+
     const newLayout = newLayouts.find((layout) => layout != undefined);
     if (newLayout) {
       void onSelectLayout(newLayout);
     }
+
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
-  }, [analytics, isMounted, layoutManager, onSelectLayout, promptForUnsavedChanges]);
+  }, [analytics, isMounted, onSelectLayout, parseAndInstallLayout, promptForUnsavedChanges]);
 
   const exportLayout = useCallbackWithToast(async () => {
     const item = getCurrentLayoutState().selectedLayout?.data;
@@ -108,5 +123,5 @@ export function useLayoutTransfer(): UseLayoutTransfer {
     void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
   }, [analytics, getCurrentLayoutState]);
 
-  return { importLayout, exportLayout };
+  return { importLayout, exportLayout, parseAndInstallLayout };
 }
