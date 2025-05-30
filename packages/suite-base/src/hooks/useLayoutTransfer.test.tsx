@@ -6,6 +6,7 @@ import { act, renderHook } from "@testing-library/react";
 
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import * as filePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
 import { useLayoutTransfer } from "./useLayoutTransfer";
@@ -69,7 +70,7 @@ describe("useLayoutTransfer", () => {
 
   it("should import a layout and call onSelectLayout", async () => {
     promptForUnsavedChangesMock.mockResolvedValue(true);
-    const content = JSON.stringify({ foo: "bar" }) ?? "";
+    const content = JSON.stringify({ data: BasicBuilder.string() }) ?? "";
     const mockFile = new File([content], "test-layout.json", {
       type: "application/json",
     });
@@ -85,7 +86,7 @@ describe("useLayoutTransfer", () => {
     saveNewLayoutMock.mockResolvedValue({
       id: "123",
       name: "test-layout",
-      data: { foo: "bar" },
+      data: content,
     });
 
     const { result } = renderHook(() => useLayoutTransfer());
