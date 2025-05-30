@@ -30,6 +30,10 @@ jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => 
   useWorkspaceActions: jest.fn(),
 }));
 
+jest.mock("@lichtblick/suite-base/hooks", () => ({
+  useAppConfigurationValue: jest.fn().mockImplementation(() => [true, jest.fn()]),
+}));
+
 jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () => ({
   useStyles: () => ({
     classes: {
