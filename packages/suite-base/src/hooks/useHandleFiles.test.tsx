@@ -5,14 +5,33 @@
 
 import { act, renderHook } from "@testing-library/react";
 
+import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { IDataSourceFactory } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import { FILE_ACCEPT_TYPE } from "@lichtblick/suite-base/context/Workspace/constants";
+import {
+  FILE_ACCEPT_TYPE,
+  FILE_JSON_TYPE,
+} from "@lichtblick/suite-base/context/Workspace/constants";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useInstallingExtensionsState } from "@lichtblick/suite-base/hooks/useInstallingExtensionsState";
+import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
   useExtensionCatalog: jest.fn(),
+}));
+
+jest.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", () => ({
+  useLayoutTransfer: jest.fn(),
+}));
+
+jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
+  useLayoutManager: jest.fn(),
+}));
+
+jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
+  useCurrentLayoutActions: jest.fn(() => ({})),
+  useCurrentLayoutSelector: jest.fn(),
 }));
 
 jest.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsState", () => ({
@@ -31,10 +50,13 @@ jest.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsStore", () => ({
 
 type Setup = {
   filesOverride?: File[];
+  isLayout: boolean;
 };
 
 describe("useHandleFiles", () => {
+  const mockLayoutManager = new MockLayoutManager();
   const installFoxeExtensionsMock = jest.fn();
+  const parseAndInstallLayoutMock = jest.fn();
   const availableSources: IDataSourceFactory[] = [
     {
       id: BasicBuilder.string(),
@@ -65,14 +87,22 @@ describe("useHandleFiles", () => {
     });
   }
 
-  function setup({ filesOverride }: Setup = {}) {
-    const files = filesOverride ?? [fileBuilder("mcap", FILE_ACCEPT_TYPE)];
-    files.forEach((file) => {
-      file.arrayBuffer = async () =>
-        await Promise.resolve(
-          new Uint8Array(new TextEncoder().encode(BasicBuilder.string()).buffer),
-        );
-    });
+  function setup({ filesOverride, isLayout }: Setup = { isLayout: false }) {
+    let files: File[] = [];
+    if (isLayout) {
+      files = filesOverride ?? [fileBuilder("json", FILE_JSON_TYPE)];
+      files.forEach((file) => {
+        file.text = async () => JSON.stringify({ some: BasicBuilder.string() })!;
+      });
+    } else {
+      files = filesOverride ?? [fileBuilder("mcap", FILE_ACCEPT_TYPE)];
+      files.forEach((file) => {
+        file.arrayBuffer = async () =>
+          await Promise.resolve(
+            new Uint8Array(new TextEncoder().encode(BasicBuilder.string()).buffer),
+          );
+      });
+    }
 
     const { result } = renderHook(() => useHandleFiles(useHandleFilesProps));
     return {
@@ -82,8 +112,12 @@ describe("useHandleFiles", () => {
   }
 
   beforeEach(() => {
+    (useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
     (useInstallingExtensionsState as jest.Mock).mockReturnValue({
       installFoxeExtensions: installFoxeExtensionsMock,
+    });
+    (useLayoutTransfer as jest.Mock).mockReturnValue({
+      parseAndInstallLayout: parseAndInstallLayoutMock,
     });
   });
 
@@ -94,6 +128,7 @@ describe("useHandleFiles", () => {
   it("should call pause and install .foxe extension", async () => {
     const { handleFiles, files } = setup({
       filesOverride: [fileBuilder("foxe", FILE_ACCEPT_TYPE)],
+      isLayout: false,
     });
 
     await act(async () => {
@@ -104,8 +139,22 @@ describe("useHandleFiles", () => {
     expect(installFoxeExtensionsMock).toHaveBeenCalled();
   });
 
+  it("should call pause and parse .json layout file", async () => {
+    const mockLayout = fileBuilder("json", FILE_JSON_TYPE);
+    const { handleFiles, files } = setup({
+      filesOverride: [mockLayout],
+      isLayout: true,
+    });
+
+    await act(async () => {
+      await handleFiles(files);
+    });
+    expect(playerEvents.pause).toHaveBeenCalled();
+    expect(parseAndInstallLayoutMock).toHaveBeenCalledWith(mockLayout);
+  });
+
   it("does nothing when passed an empty file array", async () => {
-    const { handleFiles, files } = setup({ filesOverride: [] });
+    const { handleFiles, files } = setup({ filesOverride: [], isLayout: false });
 
     await act(async () => {
       await handleFiles(files);
@@ -122,7 +171,7 @@ describe("useHandleFiles", () => {
       writable: false,
     });
 
-    const { handleFiles, files } = setup({ filesOverride: [brokenFile] });
+    const { handleFiles, files } = setup({ filesOverride: [brokenFile], isLayout: false });
 
     files.forEach((file) => {
       (file as any).arrayBuffer = () => {
@@ -155,7 +204,10 @@ describe("useHandleFiles", () => {
   });
 
   it("does not select source if no file type matches availableSources", async () => {
-    const { handleFiles, files } = setup({ filesOverride: [fileBuilder("csv", FILE_ACCEPT_TYPE)] });
+    const { handleFiles, files } = setup({
+      filesOverride: [fileBuilder("csv", FILE_ACCEPT_TYPE)],
+      isLayout: false,
+    });
 
     await act(async () => {
       await handleFiles(files);

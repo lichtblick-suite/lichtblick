@@ -17,14 +17,13 @@ import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { useStyles } from "@lichtblick/suite-base/Workspace.style";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
 import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
-import { AppBar, AppBarProps } from "@lichtblick/suite-base/components/AppBar";
-import { CustomWindowControlsProps } from "@lichtblick/suite-base/components/AppBar/CustomWindowControls";
+import { AppBar } from "@lichtblick/suite-base/components/AppBar";
 import {
   DataSourceDialog,
   DataSourceDialogItem,
@@ -57,6 +56,7 @@ import { SyncAdapters } from "@lichtblick/suite-base/components/SyncAdapters";
 import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import VariablesList from "@lichtblick/suite-base/components/VariablesList";
 import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDialogs";
+import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   LayoutState,
@@ -86,6 +86,7 @@ import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import ICONS from "@lichtblick/suite-base/theme/icons";
+import { InjectedSidebarItem, WorkspaceProps } from "@lichtblick/suite-base/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
@@ -94,22 +95,8 @@ import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 
 const log = Logger.getLogger(__filename);
 
-const useStyles = makeStyles()({
-  container: {
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-    flex: "1 1 100%",
-    outline: "none",
-    overflow: "hidden",
-  },
-});
-
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
-type InjectedSidebarItem = [SidebarItemKey, SidebarItem];
 function isInjectedSidebarItem(
   item: [string, { iconName?: string; title: string }],
 ): item is InjectedSidebarItem {
@@ -119,15 +106,6 @@ function isInjectedSidebarItem(
     Object.keys(ICONS).includes(item[1].iconName)
   );
 }
-
-type WorkspaceProps = CustomWindowControlsProps & {
-  deepLinks?: readonly string[];
-  appBarLeftInset?: number;
-  onAppBarDoubleClick?: () => void;
-  // eslint-disable-next-line react/no-unused-prop-types
-  disablePersistenceForStorybook?: boolean;
-  AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
-};
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerIsPresent = ({ playerState }: MessagePipelineContext) =>
@@ -195,7 +173,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
-    const extensions = [".foxe"];
+    const extensions: string[] = [AllowedFileExtensions.FOXE, AllowedFileExtensions.JSON];
     for (const source of availableSources) {
       if (source.type === "file" && source.supportedFileTypes) {
         extensions.push(...source.supportedFileTypes);

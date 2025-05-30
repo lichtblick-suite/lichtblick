@@ -8,11 +8,11 @@
 import { Link } from "@mui/material";
 import path from "path";
 
+import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import { fileTypesAllowed } from "@lichtblick/suite-base/dataSources/constants";
 import {
   IterablePlayer,
   WorkerIterableSource,
@@ -39,6 +39,8 @@ const initWorkers: Record<string, () => Worker> = {
     );
   },
 };
+
+const fileTypesAllowed: string[] = [AllowedFileExtensions.BAG, AllowedFileExtensions.MCAP];
 
 export function isFileExtensionAllowed(fileExtension: string): void {
   if (
