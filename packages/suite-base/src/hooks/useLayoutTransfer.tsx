@@ -64,9 +64,11 @@ export function useLayoutTransfer(): UseLayoutTransfer {
         permission: "CREATOR_WRITE",
       });
 
+      void onSelectLayout(newLayout);
+
       return newLayout;
     },
-    [isMounted, layoutManager],
+    [isMounted, layoutManager, onSelectLayout],
   );
 
   const importLayout = useCallbackWithToast(async () => {
@@ -91,7 +93,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
       return;
     }
 
-    const newLayouts = await Promise.all(
+    await Promise.all(
       fileHandles.map(async (fileHandle) => {
         const file = await fileHandle.getFile();
         return await parseAndInstallLayout(file);
@@ -102,13 +104,8 @@ export function useLayoutTransfer(): UseLayoutTransfer {
       return;
     }
 
-    const newLayout = newLayouts.find((layout) => layout != undefined);
-    if (newLayout) {
-      void onSelectLayout(newLayout);
-    }
-
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
-  }, [analytics, isMounted, onSelectLayout, parseAndInstallLayout, promptForUnsavedChanges]);
+  }, [analytics, isMounted, parseAndInstallLayout, promptForUnsavedChanges]);
 
   const exportLayout = useCallbackWithToast(async () => {
     const item = getCurrentLayoutState().selectedLayout?.data;
