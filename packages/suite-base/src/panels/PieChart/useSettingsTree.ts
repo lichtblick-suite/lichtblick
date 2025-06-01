@@ -25,6 +25,10 @@ export function useSettingsTree({
 }: UseSettingsTreeProps): SettingsTreeNodes {
   const generalSettings = useMemo((): SettingsTreeNode => {
     const fields: SettingsTreeNode["fields"] = {
+      legendControls: {
+        label: "Legend controls",
+        input: "legendcontrols",
+      },
       path: {
         label: "Message path",
         input: "messagepath",

@@ -674,7 +674,8 @@ export type SettingsTreeFieldValue =
       labels?: [string, string];
       max?: number;
       min?: number;
-    };
+    }
+  | { input: "legendcontrols"; value?: undefined };
 
 export type SettingsTreeField = SettingsTreeFieldValue & {
   /**
