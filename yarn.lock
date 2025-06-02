@@ -5818,7 +5818,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:^8, @types/ws@npm:^8.5.10":
+"@types/ws@npm:^8.5.10":
   version: 8.18.1
   resolution: "@types/ws@npm:8.18.1"
   dependencies:
@@ -9138,10 +9138,6 @@ __metadata:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/suite-desktop": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
-    "@types/ws": ^8
-    electron: 36.3.2
-    playwright: 1.49.1
-    ws: 8.18.2
   languageName: unknown
   linkType: soft
 
@@ -20963,7 +20959,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.18.2, ws@npm:^8.11.0, ws@npm:^8.18.0, ws@npm:^8.2.3":
+"ws@npm:^8.11.0, ws@npm:^8.18.0, ws@npm:^8.2.3":
   version: 8.18.2
   resolution: "ws@npm:8.18.2"
   peerDependencies:
