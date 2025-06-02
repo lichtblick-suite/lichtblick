@@ -37,7 +37,7 @@ jobs:
           - name: test
             command: yarn run test --maxWorkers=100%
         include:
-          - os: windows-2019
+          - os: windows-latest
             config:
               name: packages
               command: echo complete
