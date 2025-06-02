@@ -227,7 +227,7 @@ export default function PanelSettings({
             <SettingsTreeEditor
               key={selectedPanelId}
               settings={settingsTree ?? EMPTY_SETTINGS_TREE}
-              variant="log"
+              variant="panel"
             />
           ) : (
             <Stack

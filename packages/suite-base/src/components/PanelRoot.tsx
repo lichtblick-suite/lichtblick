@@ -12,7 +12,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { APP_BAR_HEIGHT } from "@lichtblick/suite-base/components/AppBar/constants";
 
-export const PANEL_ROOT_CLASS_NAME = "FoxglovePanelRoot-root";
+export const PANEL_ROOT_CLASS_NAME = "LichtblickPanelRoot-root";
 
 type PanelRootProps = {
   fullscreenState: TransitionStatus;

@@ -53,7 +53,7 @@ export default class PlotBuilder {
   public static config(props: Partial<PlotConfig> = {}): PlotConfig {
     return defaults<PlotConfig>(props, {
       followingViewWidth: BasicBuilder.number(),
-      foxglovePanelTitle: BasicBuilder.string(),
+      lichtblickPanelTitle: BasicBuilder.string(),
       isSynced: BasicBuilder.boolean(),
       legendDisplay: "floating",
       maxXValue: BasicBuilder.number(),

@@ -28,3 +28,26 @@ export type LayoutSelectionAction =
   | { type: "set-error"; value: undefined | Error }
   | { type: "set-online"; value: boolean }
   | { type: "shift-multi-action" };
+
+export type LayoutActionMenuItem =
+  | {
+      type: "item";
+      text: string;
+      secondaryText?: string;
+      key: string;
+      onClick?: (event: React.MouseEvent<HTMLLIElement>) => void;
+      disabled?: boolean;
+      debug?: boolean;
+      "data-testid"?: string;
+    }
+  | {
+      type: "divider";
+      key: string;
+      debug?: boolean;
+    }
+  | {
+      type: "header";
+      key: string;
+      text: string;
+      debug?: boolean;
+    };
