@@ -5,8 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { action } from "@storybook/addon-actions";
 import { StoryFn, StoryContext, StoryObj } from "@storybook/react";
+import { action } from "storybook/actions";
 
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
