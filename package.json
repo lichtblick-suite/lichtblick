@@ -1,6 +1,6 @@
 {
   "name": "lichtblick",
-  "version": "1.14.5",
+  "version": "1.14.6",
   "license": "MPL-2.0",
   "private": true,
   "productName": "Lichtblick",
@@ -106,7 +106,7 @@
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
     "depcheck": "1.4.7",
-    "electron": "36.0.1",
+    "electron": "36.3.2",
     "electron-builder": "26.0.12",
     "eslint": "8.57",
     "eslint-config-prettier": "9.1.0",
@@ -149,7 +149,7 @@
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
     "react-use": "17.5.1",
-    "rehype-raw": "6.1.1",
+    "rehype-raw": "7.0.0",
     "vm-browserify": "1.1.2"
   }
 }
