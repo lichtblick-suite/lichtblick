@@ -3098,7 +3098,7 @@ __metadata:
     use-immer: 0.10.0
     uuid: 9.0.1
     vm-browserify: 1.1.2
-    webpack: 5.99.7
+    webpack: 5.99.9
     zustand: 4.5.7
   languageName: unknown
   linkType: soft
@@ -3154,7 +3154,7 @@ __metadata:
     tinycolor2: 1.6.0
     tss-react: 4.9.2
     utif: 3.1.0
-    webpack: 5.99.7
+    webpack: 5.99.9
     webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
@@ -3178,7 +3178,7 @@ __metadata:
     react: 18.3.1
     react-dom: 18.3.1
     tss-react: 4.9.3
-    webpack: 5.99.7
+    webpack: 5.99.9
     webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
@@ -7289,7 +7289,7 @@ __metadata:
     mathjs: 11.11.1
     react: 18.3.1
     react-dom: 18.2.0
-    webpack: 5.99.7
+    webpack: 5.99.9
     webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
@@ -14077,7 +14077,7 @@ __metadata:
     tslib: 2.6.2
     typescript: 5.3.3
     vm-browserify: 1.1.2
-    webpack: 5.99.7
+    webpack: 5.99.9
     webpack-cli: 6.0.1
     webpack-dev-server: 5.2.1
     webpack-hot-middleware: 2.26.0
@@ -20488,7 +20488,7 @@ __metadata:
     "@types/serve-handler": ^6
     playwright: 1.49.1
     serve-handler: 6.1.6
-    webpack: 5.99.7
+    webpack: 5.99.9
     webpack-dev-server: 5.2.1
   languageName: unknown
   linkType: soft
@@ -20683,7 +20683,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5, webpack@npm:5.99.7":
+"webpack@npm:5":
   version: 5.99.7
   resolution: "webpack@npm:5.99.7"
   dependencies:
@@ -20717,6 +20717,43 @@ __metadata:
   bin:
     webpack: bin/webpack.js
   checksum: 691b0a57c5a4e9dc1bf99188c4b68a4ff3cf10c23ea8e726e6bf36643f40ecb0fb7a4d7a92f01b187184b8c9f3bc27ee0efc6973cf46ef3913ee6ee8fe806521
+  languageName: node
+  linkType: hard
+
+"webpack@npm:5.99.9":
+  version: 5.99.9
+  resolution: "webpack@npm:5.99.9"
+  dependencies:
+    "@types/eslint-scope": ^3.7.7
+    "@types/estree": ^1.0.6
+    "@types/json-schema": ^7.0.15
+    "@webassemblyjs/ast": ^1.14.1
+    "@webassemblyjs/wasm-edit": ^1.14.1
+    "@webassemblyjs/wasm-parser": ^1.14.1
+    acorn: ^8.14.0
+    browserslist: ^4.24.0
+    chrome-trace-event: ^1.0.2
+    enhanced-resolve: ^5.17.1
+    es-module-lexer: ^1.2.1
+    eslint-scope: 5.1.1
+    events: ^3.2.0
+    glob-to-regexp: ^0.4.1
+    graceful-fs: ^4.2.11
+    json-parse-even-better-errors: ^2.3.1
+    loader-runner: ^4.2.0
+    mime-types: ^2.1.27
+    neo-async: ^2.6.2
+    schema-utils: ^4.3.2
+    tapable: ^2.1.1
+    terser-webpack-plugin: ^5.3.11
+    watchpack: ^2.4.1
+    webpack-sources: ^3.2.3
+  peerDependenciesMeta:
+    webpack-cli:
+      optional: true
+  bin:
+    webpack: bin/webpack.js
+  checksum: 5fd25e64b8d5a31919087834af3678eaee62dbf8990024fb4c71584d4beb2c3e75ecbabbcc654fa2536e0aa7900172512c674c6650acd7088e534716faa8449d
   languageName: node
   linkType: hard
 
