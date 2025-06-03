@@ -24,7 +24,7 @@ describe("DontShowThisAgainCheckbox", () => {
     render(<DontShowThisAgainCheckbox />);
 
     // THEN
-    const label = screen.getByText("Don't show this again");
+    const label = screen.getByText("Don't show this again on startup");
     const checkbox = screen.getByRole("checkbox");
 
     expect(label).toBeInTheDocument();
