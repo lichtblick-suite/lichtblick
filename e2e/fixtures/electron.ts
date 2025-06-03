@@ -20,10 +20,10 @@ export const test = base.extend<ElectronFixtures>({
     checkBuild(WEBPACK_PATH);
 
     // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
-    const userDataDir = await mkdtemp(path.join(os.tmpdir(), "integration-test-"));
+    const userDataDir = await mkdtemp(path.join(os.tmpdir(), "e2e-test-"));
 
     // Create a new home directory for each test, which creates a brand new .lcihtblick-suite directory for e2e testing
-    const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-integration-test-"));
+    const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-e2e-test-"));
 
     const app = await electron.launch({
       args: [WEBPACK_PATH, `--user-data-dir=${userDataDir}`, `--home-dir=${homeDir}`],

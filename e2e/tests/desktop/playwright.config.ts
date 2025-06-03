@@ -6,7 +6,9 @@ import { defineConfig } from "@playwright/test";
 export const STORAGE_STATE = "e2e/tmp/desktop-session.json";
 
 export default defineConfig({
-  reporter: [["html", { outputFolder: "./reports", open: "never", title: "Desktop E2E Tests" }]],
+  reporter: [
+    ["html", { outputFolder: "../reports/desktop", open: "never", title: "Desktop E2E Tests" }],
+  ],
   testDir: "./",
   name: "desktop",
   timeout: 30 * 1000,

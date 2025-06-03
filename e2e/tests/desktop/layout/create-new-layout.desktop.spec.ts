@@ -18,7 +18,7 @@ test("create a new layout by accessing Layouts > Create new layout", async ({ ma
   await mainWindow.getByTestId("panel-grid-card Diagnostics – Detail (ROS)").click();
 
   // Then
-  await expect(
-    mainWindow.getByText("Unnamed layout", { exact: false }).nth(0).innerText(),
-  ).resolves.toContain("Unnamed layout");
+  await expect(mainWindow.getByText("Unnamed layout").nth(0).innerText()).resolves.toContain(
+    "Unnamed layout",
+  );
 });
