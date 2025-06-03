@@ -120,7 +120,6 @@ describe("RemoteDataSourceFactory", () => {
     expect(result).toBeUndefined();
   });
 
-
   it("should throw an error if the multiple sources don't have the same file extension", () => {
     const mockArgs = setupArgs({
       url: "https://example.com/test.mcap,https://example.com/test.bag",
