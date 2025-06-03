@@ -167,7 +167,7 @@
     "react-virtualized-auto-sizer": "1.0.26",
     "react-window": "1.8.10",
     "readable-stream": "4.4.2",
-    "rehype-raw": "6.1.1",
+    "rehype-raw": "7.0.0",
     "reselect": "5.1.1",
     "sanitize-html": "2.12.1",
     "seedrandom": "3.0.5",
