@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/suite";
 import { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
 import { Label, LabelPool } from "@lichtblick/three-text";
 
@@ -30,7 +30,7 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
   #annotation?: NormalizedTextAnnotation;
   #annotationNeedsUpdate = false;
 
-  #cameraModel?: PinholeCameraModel;
+  #cameraModel?: ICameraModel;
   #cameraModelNeedsUpdate = false;
 
   public constructor(topicName: string, labelPool: LabelPool) {
@@ -81,7 +81,7 @@ export class RenderableTextAnnotation extends Renderable<BaseUserData, /*TRender
     this.#scale = scale;
   }
 
-  public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
+  public setCameraModel(cameraModel: ICameraModel | undefined): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import randomString from "randomstring";
 
@@ -38,12 +38,14 @@ describe("DesktopExtensionLoader", () => {
       const extension: DesktopExtension = {
         id: genericString(),
         packageJson: { displayName },
-      } as DesktopExtension;
+        readme: genericString(),
+        changelog: genericString(),
+        directory: genericString(),
+      };
 
       mockBridge.getExtensions.mockResolvedValueOnce([extension]);
 
       const result = await loader.getExtension(extension.id);
-
       expect(mockBridge.getExtensions).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         id: extension.id,
@@ -51,7 +53,9 @@ describe("DesktopExtensionLoader", () => {
         namespace: desktopExtensionLoader.namespace,
         qualifiedName: displayName,
         displayName,
-      } as ExtensionInfo);
+        readme: extension.readme,
+        changelog: extension.changelog,
+      });
     });
 
     it("should return undefined if the extension does not exist", async () => {
@@ -72,10 +76,14 @@ describe("DesktopExtensionLoader", () => {
         {
           id: genericString(),
           packageJson: { displayName: genericString() } as ExtensionInfo,
+          readme: genericString(),
+          changelog: genericString(),
         } as DesktopExtension,
         {
           id: genericString(),
           packageJson: { displayName: genericString() } as ExtensionInfo,
+          readme: genericString(),
+          changelog: genericString(),
         } as DesktopExtension,
       ];
       mockBridge.getExtensions.mockResolvedValue(extensions);
@@ -90,6 +98,8 @@ describe("DesktopExtensionLoader", () => {
           name: (extensions[0]?.packageJson as ExtensionInfo).displayName,
           namespace: desktopExtensionLoader.namespace,
           qualifiedName: (extensions[0]?.packageJson as ExtensionInfo).displayName,
+          readme: extensions[0]?.readme,
+          changelog: extensions[0]?.changelog,
         },
         {
           ...(extensions[1]?.packageJson as ExtensionInfo),
@@ -97,6 +107,8 @@ describe("DesktopExtensionLoader", () => {
           name: (extensions[1]?.packageJson as ExtensionInfo).displayName,
           namespace: desktopExtensionLoader.namespace,
           qualifiedName: (extensions[1]?.packageJson as ExtensionInfo).displayName,
+          readme: extensions[1]?.readme,
+          changelog: extensions[1]?.changelog,
         },
       ]);
     });
@@ -141,6 +153,8 @@ describe("DesktopExtensionLoader", () => {
       const extension: DesktopExtension = {
         id: genericString(),
         packageJson: { displayName } as ExtensionInfo,
+        readme: genericString(),
+        changelog: genericString(),
       } as DesktopExtension;
 
       mockBridge.installExtension.mockResolvedValue(extension);
@@ -154,6 +168,8 @@ describe("DesktopExtensionLoader", () => {
         name: displayName,
         namespace: desktopExtensionLoader.namespace,
         qualifiedName: displayName,
+        readme: extension.readme,
+        changelog: extension.changelog,
       });
     });
 

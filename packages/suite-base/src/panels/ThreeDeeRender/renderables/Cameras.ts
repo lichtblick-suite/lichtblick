@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,10 +8,11 @@
 import { CameraCalibration } from "@foxglove/schemas";
 import { t } from "i18next";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { selectCameraModel } from "@lichtblick/den/image";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
-import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
+import { ICameraModel, SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { RenderableLineList } from "./markers/RenderableLineList";
@@ -70,7 +71,7 @@ export type CameraInfoUserData = BaseUserData & {
   topic: string;
   cameraInfo: CameraInfo | undefined;
   originalMessage: Record<string, RosValue> | undefined;
-  cameraModel: PinholeCameraModel | undefined;
+  cameraModel: ICameraModel | undefined;
   lines: RenderableLineList | undefined;
 };
 
@@ -87,8 +88,12 @@ export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
 
 export class Cameras extends SceneExtension<CameraInfoRenderable> {
   public static extensionId = "foxglove.Cameras";
+  public customCameraModels: CameraModelsMap;
+
   public constructor(renderer: IRenderer, name: string = Cameras.extensionId) {
     super(name, renderer);
+
+    this.customCameraModels = renderer.customCameraModels;
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
@@ -259,13 +264,12 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     // If the CameraInfo message contents changed, rebuild cameraModel
     const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
     if (!dataEqual) {
-      // log.warn(`CameraInfo changed on topic "${topic}", updating rectification model`);
       renderable.userData.cameraInfo = cameraInfo;
       renderable.userData.originalMessage = originalMessage;
 
       if (cameraInfo.P.length === 12) {
         try {
-          renderable.userData.cameraModel = new PinholeCameraModel(cameraInfo);
+          renderable.userData.cameraModel = selectCameraModel(cameraInfo, this.customCameraModels);
         } catch (errUnk) {
           const err = errUnk as Error;
           this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);
@@ -306,6 +310,10 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
       }
     }
   }
+
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
+  }
 }
 
 function vec3(): Vector3 {
@@ -314,7 +322,7 @@ function vec3(): Vector3 {
 
 function createLineListMarker(
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: ICameraModel,
   settings: LayerSettingsCameraInfo,
   steps = 10,
 ): Marker {
@@ -380,7 +388,7 @@ function horizontalLine(
   output: Vector3[],
   y: number,
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: ICameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {
@@ -397,7 +405,7 @@ function verticalLine(
   output: Vector3[],
   x: number,
   cameraInfo: CameraInfo,
-  cameraModel: PinholeCameraModel,
+  cameraModel: ICameraModel,
   steps: number,
   settings: LayerSettingsCameraInfo,
 ): void {

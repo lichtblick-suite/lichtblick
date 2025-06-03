@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -36,8 +36,12 @@ export type AppType = {
 export async function launchApp(): Promise<AppType> {
   // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
   const userDataDir = await mkdtemp(path.join(os.tmpdir(), "integration-test-"));
+
+  // Create a new home directory for each test, which creates a brand new .lcihtblick-suite directory for e2e testing
+  const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-integration-test-"));
+
   const electronApp = await electron.launch({
-    args: [appPath, `--user-data-dir=${userDataDir}`],
+    args: [appPath, `--user-data-dir=${userDataDir}`, `--home-dir=${homeDir}`],
     // In node.js the electron import gives us the path to the electron binary
     // Our type definitions don't realize this so cast the variable to a string
     executablePath: electronPath as unknown as string,

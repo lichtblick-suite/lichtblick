@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/suite";
 
 const DEFAULT_CAMERA_STATE = {
   near: 0.001,
@@ -18,7 +18,7 @@ const MIN_USER_ZOOM = 0.5;
 const MAX_USER_ZOOM = 50;
 
 export class ImageModeCamera extends THREE.PerspectiveCamera {
-  #model?: PinholeCameraModel;
+  #model?: ICameraModel;
   readonly #cameraState = DEFAULT_CAMERA_STATE;
   #rotation: 0 | 90 | 180 | 270 = 0;
   #flipHorizontal = false;
@@ -33,7 +33,7 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
   /** Amount the user has zoomed with the scroll wheel */
   #userZoom = 1;
 
-  public updateCamera(cameraModel: PinholeCameraModel | undefined): void {
+  public updateCamera(cameraModel: ICameraModel | undefined): void {
     this.#model = cameraModel;
     this.#updateProjection();
   }
@@ -119,12 +119,12 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
    *
    * @returns the projection matrix for the current camera model, or undefined if no camera model is available
    */
-  #getProjection(out: THREE.Matrix4, model: PinholeCameraModel) {
+  #getProjection(out: THREE.Matrix4, model: ICameraModel) {
     const { width, height } = model;
 
     // focal lengths
-    const fx = model.P[0];
-    const fy = model.P[5];
+    const fx = model.fx;
+    const fy = model.fy;
 
     // (cx, cy) image center in pixel coordinates
     // for panning we can take offsets from this in pixel coordinates
@@ -150,8 +150,8 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
         panY = this.#panOffset.x * flipPanX;
         break;
     }
-    const cx = model.P[2] + panX / scale;
-    const cy = model.P[6] + panY / scale;
+    const cx = model.cx + panX / scale;
+    const cy = model.cy + panY / scale;
 
     const near = this.#cameraState.near;
     const far = this.#cameraState.far;
@@ -244,8 +244,8 @@ export class ImageModeCamera extends THREE.PerspectiveCamera {
 
     const { width: imgWidth, height: imgHeight } = model;
 
-    const fx = model.P[0];
-    const fy = model.P[5];
+    const fx = model.fx;
+    const fy = model.fy;
     let rendererAspect = this.#canvasSize.width / this.#canvasSize.height;
     const imageAspect = imgWidth / fx / (imgHeight / fy);
 

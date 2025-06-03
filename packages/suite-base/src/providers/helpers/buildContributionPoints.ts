@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import * as _ from "lodash-es";
 import ReactDOM from "react-dom";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import {
   RegisterMessageConverterArgs,
@@ -11,6 +12,7 @@ import {
   TopicAliasFunction,
   ExtensionModule,
   ExtensionPanelRegistration,
+  RegisterCameraModelArgs,
 } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
@@ -32,6 +34,7 @@ export function buildContributionPoints(
   const messageConverters: RegisterMessageConverterArgs<unknown>[] = [];
   const panelSettings: ExtensionSettings = {};
   const topicAliasFunctions: ContributionPoints["topicAliasFunctions"] = [];
+  const cameraModels: CameraModelsMap = new Map();
 
   log.debug(`Mounting extension ${extension.qualifiedName}`);
 
@@ -88,6 +91,12 @@ export function buildContributionPoints(
     registerTopicAliases: (aliasFunction: TopicAliasFunction) => {
       topicAliasFunctions.push({ aliasFunction, extensionId: extension.id });
     },
+
+    registerCameraModel({ name, modelBuilder }: RegisterCameraModelArgs) {
+      log.debug(`Extension ${extension.qualifiedName} registering camera model: ${name}`);
+
+      cameraModels.set(name, { extensionId: extension.id, modelBuilder });
+    },
   };
 
   try {
@@ -108,5 +117,6 @@ export function buildContributionPoints(
     messageConverters,
     topicAliasFunctions,
     panelSettings,
+    cameraModels,
   };
 }

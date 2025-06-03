@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -87,6 +87,7 @@ import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/Pane
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import ICONS from "@lichtblick/suite-base/theme/icons";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
+import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
@@ -186,6 +187,12 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     playerEvents: { play, pause },
   });
 
+  // Store stable reference to avoid re-running effects unnecessarily
+  const handleFilesRef = useRef<typeof handleFiles>(handleFiles);
+  useLayoutEffect(() => {
+    handleFilesRef.current = handleFiles;
+  }, [handleFiles]);
+
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
     const extensions = [".foxe"];
@@ -245,11 +252,16 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   // files the main thread told us to open
   const filesToOpen = useElectronFilesToOpen();
+
   useEffect(() => {
-    if (filesToOpen) {
-      void handleFiles(Array.from(filesToOpen));
+    handleFilesRef.current = handleFiles;
+  }, [handleFiles]);
+
+  useEffect(() => {
+    if (filesToOpen && filesToOpen.length > 0) {
+      void handleFilesRef.current(Array.from(filesToOpen));
     }
-  }, [filesToOpen, handleFiles]);
+  }, [filesToOpen]);
 
   const dropHandler = useCallback(
     async ({ files, handles }: { files?: File[]; handles?: FileSystemFileHandle[] }) => {
@@ -565,6 +577,13 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       props.showCustomWindowControls,
     ],
   );
+
+  useBroadcast({
+    play,
+    pause,
+    seek,
+    playUntil,
+  });
 
   return (
     <PanelStateContextProvider>
