@@ -118,28 +118,30 @@ export default function SettingsTreeEditor({
             className={classes.textField}
             fullWidth
             placeholder={t("searchPanelSettings")}
-            inputProps={{
-              "data-testid": `${variant}-settings-filter-input`,
-            }}
-            InputProps={{
-              size: "small",
-              startAdornment: (
-                <label className={classes.startAdornment} htmlFor="settings-filter">
-                  <SearchIcon fontSize="small" />
-                </label>
-              ),
-              endAdornment: filterText && (
-                <IconButton
-                  size="small"
-                  title={t("clearSearch")}
-                  onClick={() => {
-                    setFilterText("");
-                  }}
-                  edge="end"
-                >
-                  <CancelIcon fontSize="small" />
-                </IconButton>
-              ),
+            slotProps={{
+              htmlInput: {
+                "data-testid": `${variant}-settings-filter-input`,
+              },
+              input: {
+                size: "small",
+                startAdornment: (
+                  <label className={classes.startAdornment} htmlFor="settings-filter">
+                    <SearchIcon fontSize="small" />
+                  </label>
+                ),
+                endAdornment: filterText && (
+                  <IconButton
+                    size="small"
+                    title={t("clearSearch")}
+                    onClick={() => {
+                      setFilterText("");
+                    }}
+                    edge="end"
+                  >
+                    <CancelIcon fontSize="small" />
+                  </IconButton>
+                ),
+              },
             }}
           />
         </header>

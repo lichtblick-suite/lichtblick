@@ -198,7 +198,7 @@ const DiagnosticStatusPanel = (props: DiagnosticStatusPanelProps): React.JSX.Ele
             <TextField
               variant="standard"
               {...params}
-              InputProps={{ ...params.InputProps, disableUnderline: true }}
+              slotProps={{ input: { ...params.InputProps, disableUnderline: true } }}
               placeholder={selectedDisplayName ?? "Filter"}
             />
           )}

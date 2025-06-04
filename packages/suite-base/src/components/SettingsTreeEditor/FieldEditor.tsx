@@ -55,19 +55,21 @@ function FieldInput({
           value={field.value}
           disabled={field.disabled}
           readOnly={field.readonly}
-          ListboxComponent={MenuList}
-          ListboxProps={{ dense: true } as Partial<MenuListProps>}
-          renderOption={(props, option, { selected }) => (
-            <MenuItem selected={selected} {...props}>
-              {option}
-            </MenuItem>
-          )}
-          componentsProps={{
+          slotProps={{
+            listbox: {
+              component: MenuList,
+              dense: true,
+            } as Partial<MenuListProps>,
             clearIndicator: {
               size: "small",
               className: classes.clearIndicator,
             },
           }}
+          renderOption={(props, option, { selected }) => (
+            <MenuItem selected={selected} {...props}>
+              {option}
+            </MenuItem>
+          )}
           clearIcon={<CancelIcon fontSize="small" />}
           renderInput={(params) => (
             <TextField {...params} variant="filled" size="small" placeholder={field.placeholder} />
@@ -146,8 +148,10 @@ function FieldInput({
           disabled={field.disabled}
           value={field.value ?? ""}
           placeholder={field.placeholder}
-          InputProps={{
-            readOnly: field.readonly,
+          slotProps={{
+            input: {
+              readOnly: field.readonly,
+            },
           }}
           onChange={(event) => {
             actionHandler({

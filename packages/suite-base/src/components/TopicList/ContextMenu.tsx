@@ -59,8 +59,10 @@ export function ContextMenu(props: {
       onClose={onClose}
       anchorReference="anchorPosition"
       anchorPosition={anchorPosition}
-      MenuListProps={{
-        dense: true,
+      slotProps={{
+        list: {
+          dense: true,
+        },
       }}
     >
       {menuItems.map((item, index) => (

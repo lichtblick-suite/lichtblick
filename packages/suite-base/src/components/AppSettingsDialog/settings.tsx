@@ -190,7 +190,9 @@ export function TimezoneSettings(): React.ReactElement {
         renderInput={(params) => (
           <TextField
             {...params}
-            inputProps={{ ...params.inputProps, className: classes.autocompleteInput }}
+            slotProps={{
+              htmlInput: { ...params.inputProps, className: classes.autocompleteInput },
+            }}
           />
         )}
         onChange={(_event, value) => void setTimezone(value?.data)}

@@ -36,7 +36,7 @@ const useStyles = makeStyles()((theme) => ({
   textarea: {
     [`.${outlinedInputClasses.root}`]: {
       backgroundColor: theme.palette.action.hover,
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: theme.typography.fontFamily,
       maxHeight: "60vh",
       overflowY: "auto",
       padding: theme.spacing(0.25),
@@ -100,8 +100,10 @@ export function ShareJsonModal({
           helperText={
             error ? "The JSON provided is invalid." : " " // pass whitespace to prevent height from jumping
           }
-          inputProps={{ "data-testid": "share-json-input" }}
-          FormHelperTextProps={{ variant: "standard" }}
+          slotProps={{
+            htmlInput: { "data-testid": "share-json-input" },
+            formHelperText: { variant: "standard" },
+          }}
           spellCheck={false}
         />
       </DialogContent>

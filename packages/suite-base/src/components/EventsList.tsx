@@ -134,17 +134,19 @@ export function EventsList(): React.JSX.Element {
             setFilter(event.currentTarget.value);
           }}
           placeholder="Search by key, value, or key:value"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: filter !== "" && (
-              <IconButton edge="end" onClick={clearFilter} size="small">
-                <ClearIcon fontSize="small" />
-              </IconButton>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: filter !== "" && (
+                <IconButton edge="end" onClick={clearFilter} size="small">
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              ),
+            },
           }}
         />
       </AppBar>

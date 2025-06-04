@@ -207,9 +207,8 @@ export default function Scrubber(props: Props): React.JSX.Element {
       }
       placement="top"
       disableInteractive
-      TransitionComponent={Fade}
-      TransitionProps={{ timeout: 0 }}
-      PopperProps={popperProps}
+      slots={{ transition: Fade }}
+      slotProps={{ transition: { timeout: 0 }, popper: popperProps }}
     >
       <Stack
         direction="row"

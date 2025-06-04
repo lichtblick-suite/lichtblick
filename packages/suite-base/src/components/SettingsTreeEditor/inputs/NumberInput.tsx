@@ -38,7 +38,7 @@ const useStyles = makeStyles()((theme) => ({
     },
     ".MuiInputBase-input": {
       textAlign: "center",
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: theme.typography.fontFamily,
       cursor: "ew-resize",
 
       "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
@@ -163,41 +163,43 @@ export function NumberInput(
       }}
       type="number"
       className={cx(classes.textField, { [classes.textFieldReadonly]: readOnly })}
-      inputProps={{
-        ref: inputRef,
-        step,
-        onPointerDown,
-        onPointerUp,
-        onPointerMove,
-      }}
-      InputProps={{
-        readOnly,
-        startAdornment: (
-          <IconButton
-            className={classes.iconButton}
-            size="small"
-            edge="start"
-            tabIndex={-1} // Disable tabbing to the step buttons.
-            onClick={(event: React.MouseEvent) => {
-              updateValue((value ?? placeHolderValue ?? 0) - (event.shiftKey ? step * 10 : step));
-            }}
-          >
-            {iconDown ?? <ChevronLeftIcon fontSize="small" />}
-          </IconButton>
-        ),
-        endAdornment: (
-          <IconButton
-            className={classes.iconButton}
-            size="small"
-            edge="end"
-            tabIndex={-1} // Disable tabbing to the step buttons.
-            onClick={(event: React.MouseEvent) => {
-              updateValue((value ?? placeHolderValue ?? 0) + (event.shiftKey ? step * 10 : step));
-            }}
-          >
-            {iconUp ?? <ChevronRightIcon fontSize="small" />}
-          </IconButton>
-        ),
+      slotProps={{
+        htmlInput: {
+          ref: inputRef,
+          step,
+          onPointerDown,
+          onPointerUp,
+          onPointerMove,
+        },
+        input: {
+          readOnly,
+          startAdornment: (
+            <IconButton
+              className={classes.iconButton}
+              size="small"
+              edge="start"
+              tabIndex={-1} // Disable tabbing to the step buttons.
+              onClick={(event: React.MouseEvent) => {
+                updateValue((value ?? placeHolderValue ?? 0) - (event.shiftKey ? step * 10 : step));
+              }}
+            >
+              {iconDown ?? <ChevronLeftIcon fontSize="small" />}
+            </IconButton>
+          ),
+          endAdornment: (
+            <IconButton
+              className={classes.iconButton}
+              size="small"
+              edge="end"
+              tabIndex={-1} // Disable tabbing to the step buttons.
+              onClick={(event: React.MouseEvent) => {
+                updateValue((value ?? placeHolderValue ?? 0) + (event.shiftKey ? step * 10 : step));
+              }}
+            >
+              {iconUp ?? <ChevronRightIcon fontSize="small" />}
+            </IconButton>
+          ),
+        },
       }}
     />
   );

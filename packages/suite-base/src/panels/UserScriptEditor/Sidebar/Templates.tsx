@@ -39,7 +39,7 @@ export function Templates({
               <ListItemText
                 primary={name}
                 secondary={description}
-                secondaryTypographyProps={{ variant: "caption" }}
+                slotProps={{ secondary: { variant: "caption" } }}
               />
             </ListItemButton>
           </ListItem>

@@ -63,9 +63,7 @@ export function ActionMenu({
         anchorEl={anchorEl}
         open={isMenuOpen}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
+        slotProps={{ list: { "aria-labelledby": "basic-button" } }}
       >
         <MenuItem disabled={!allowShare} aria-disabled={!allowShare} onClick={handleShare}>
           {t("importOrExportSettingsWithEllipsis")}

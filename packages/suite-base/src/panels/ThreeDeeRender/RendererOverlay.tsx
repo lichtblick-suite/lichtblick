@@ -72,7 +72,7 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: "center",
   },
   threeDeeButton: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     fontFeatureSettings: theme.typography.caption.fontFeatureSettings,
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.typography.fontWeightBold,
@@ -86,7 +86,7 @@ const useStyles = makeStyles()((theme) => ({
     marginRight: theme.spacing(1),
   },
   kbd: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     background: tc(theme.palette.common.white).darken(45).toString(),
     padding: theme.spacing(0, 0.5),
     aspectRatio: 1,
@@ -266,7 +266,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
         onClose={() => {
           setPublishMenuExpanded(false);
         }}
-        MenuListProps={{ dense: true }}
+        slotProps={{ list: { dense: true } }}
       >
         <MenuItem
           selected={props.publishClickType === "pose_estimate"}

@@ -46,7 +46,7 @@ const useStyles = makeStyles()((theme) => ({
   accordionDetails: {
     display: "flex",
     flexDirection: "column",
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     fontSize: "0.6875rem",
     padding: theme.spacing(1.125),
     gap: theme.spacing(1),
@@ -162,7 +162,7 @@ export function AlertsList(): React.JSX.Element {
         <Accordion
           className={classes.acccordion}
           key={`${idx}.${alert.severity}.${alert.message}`}
-          TransitionProps={{ unmountOnExit: true }}
+          slotProps={{ transition: { unmountOnExit: true } }}
           defaultExpanded
         >
           <AccordionSummary

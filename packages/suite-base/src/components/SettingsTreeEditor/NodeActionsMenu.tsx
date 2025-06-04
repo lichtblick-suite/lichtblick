@@ -65,9 +65,11 @@ export function NodeActionsMenu({
         onClose={() => {
           setAnchorEl(undefined);
         }}
-        MenuListProps={{
-          "aria-label": "node actions button",
-          dense: true,
+        slotProps={{
+          list: {
+            "aria-label": "node actions button",
+            dense: true,
+          },
         }}
       >
         {actionsWithUniqueIds.map((action) => {

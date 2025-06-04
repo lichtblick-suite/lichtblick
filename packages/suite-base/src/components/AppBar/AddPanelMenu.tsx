@@ -41,11 +41,16 @@ export function AddPanelMenu(props: AddPanelProps): React.JSX.Element {
       disablePortal={disablePortal}
       open={open}
       onClose={handleClose}
-      MenuListProps={{
-        dense: true,
-        disablePadding: true,
-        "aria-labelledby": "add-panel-button",
-        className: classes.menuList,
+      slotProps={{
+        list: {
+          dense: true,
+          disablePadding: true,
+          "aria-labelledby": "add-panel-button",
+          className: classes.menuList,
+        },
+        paper: {
+          "data-tourid": "add-panel-menu",
+        } as Partial<PaperProps & { "data-tourid"?: string }>,
       }}
       anchorOrigin={{
         horizontal: "left",
@@ -54,11 +59,6 @@ export function AddPanelMenu(props: AddPanelProps): React.JSX.Element {
       transformOrigin={{
         vertical: "top",
         horizontal: "left",
-      }}
-      slotProps={{
-        paper: {
-          "data-tourid": "add-panel-menu",
-        } as Partial<PaperProps & { "data-tourid"?: string }>,
       }}
     >
       <PanelCatalog
