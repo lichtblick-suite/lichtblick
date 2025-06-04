@@ -4,7 +4,7 @@ Welcome, and thank you for your interest in contributing to Lichtblick! We value
 
 ## :rocket: Getting Started
 
-Please check our [README.md](../README.md) and follow the installation steps.
+Please check our [README.md](README.md) and follow the installation steps.
 
 #### Other useful commands
 

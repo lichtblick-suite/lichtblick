@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSourceDialog/DataSourceDialog";
+import DontShowThisAgainCheckbox from "@lichtblick/suite-base/components/DataSourceDialog/DontShowThisAgainCheckbox";
 import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/index.style";
 import { SidebarItem } from "@lichtblick/suite-base/components/DataSourceDialog/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -132,23 +133,26 @@ const SidebarItems = (props: {
   }, [analytics, classes.button, currentUserType, freeUser, teamOrEnterpriseUser, t]);
 
   return (
-    <>
-      {sidebarItems.map((item) => (
-        <Stack key={item.id}>
-          <Typography variant="h5" gutterBottom>
-            {item.title}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {item.text}
-          </Typography>
-          {item.actions != undefined && (
-            <Stack direction="row" flexWrap="wrap" alignItems="center" gap={1} paddingTop={1.5}>
-              {item.actions}
-            </Stack>
-          )}
-        </Stack>
-      ))}
-    </>
+    <Stack fullHeight direction="column" justifyContent="space-between">
+      <Stack>
+        {sidebarItems.map((item) => (
+          <Stack key={item.id}>
+            <Typography variant="h5" gutterBottom>
+              {item.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {item.text}
+            </Typography>
+            {item.actions != undefined && (
+              <Stack direction="row" flexWrap="wrap" alignItems="center" gap={1} paddingTop={1.5}>
+                {item.actions}
+              </Stack>
+            )}
+          </Stack>
+        ))}
+      </Stack>
+      <DontShowThisAgainCheckbox />
+    </Stack>
   );
 };
 
