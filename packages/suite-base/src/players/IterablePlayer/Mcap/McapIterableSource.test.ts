@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -28,8 +28,8 @@ describe("McapIterableSource", () => {
       // to get around this.
       file: new Blob([tempBuffer.get()]) as unknown as globalThis.Blob,
     });
-    const { problems } = await source.initialize();
-    expect(problems).toEqual([
+    const { alerts } = await source.initialize();
+    expect(alerts).toEqual([
       {
         message: "This file contains no messages.",
         severity: "warn",

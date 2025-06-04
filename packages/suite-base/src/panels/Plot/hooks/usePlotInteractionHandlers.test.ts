@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 /* eslint-disable @typescript-eslint/unbound-method */
 import { renderHook, act } from "@testing-library/react";
@@ -80,6 +80,7 @@ describe("usePlotInteractionHandlers", () => {
       draggingRef: { current: false, ...draggingRef },
       renderer: {
         getElementsAtPixel: jest.fn(),
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
         ...renderer,
       },
       setActiveTooltip,

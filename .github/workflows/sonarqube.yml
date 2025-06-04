@@ -15,7 +15,6 @@ jobs:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-          lfs: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4.0.3
@@ -48,7 +47,7 @@ jobs:
         continue-on-error: true
 
       - name: ScanCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v5.0.0
+        uses: sonarsource/sonarqube-scan-action@v5.2.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}

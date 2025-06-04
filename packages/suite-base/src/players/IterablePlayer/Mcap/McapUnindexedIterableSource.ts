@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -29,7 +29,7 @@ import {
   MessageIteratorArgs,
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
-import { PlayerProblem, Topic, TopicStats } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert, Topic, TopicStats } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
 const DURATION_YEAR_SEC = 365 * 24 * 60 * 60;
@@ -57,7 +57,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
 
     const streamReader = this.#options.stream.getReader();
 
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
     const metadata: Metadata[] = [];
     const channelIdsWithErrors = new Set<number>();
 
@@ -144,7 +144,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
             messagesByChannel.set(record.id, []);
           } catch (error) {
             channelIdsWithErrors.add(record.id);
-            problems.push({
+            alerts.push({
               severity: "error",
               message: `Error in topic ${record.topic} (channel ${record.id}): ${error.message}`,
               error,
@@ -236,7 +236,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
       const startRfc = toRFC3339String(this.#start);
       const endRfc = toRFC3339String(this.#end);
 
-      problems.push({
+      alerts.push({
         message: "This file has an abnormally long duration.",
         tip: `The start ${startRfc} and end ${endRfc} are greater than a year.`,
         severity: "warn",
@@ -244,12 +244,12 @@ export class McapUnindexedIterableSource implements IIterableSource {
     }
 
     if (messageCount === 0) {
-      problems.push({
+      alerts.push({
         message: "This file contains no messages.",
         severity: "warn",
       });
     } else {
-      problems.push({
+      alerts.push({
         message: "This file is unindexed. Unindexed files may have degraded performance.",
         tip: "See the MCAP spec: https://mcap.dev/specification/index.html#summary-section",
         severity: "warn",
@@ -262,7 +262,7 @@ export class McapUnindexedIterableSource implements IIterableSource {
       topics,
       datatypes,
       profile,
-      problems,
+      alerts,
       publishersByTopic,
       topicStats,
       metadata,

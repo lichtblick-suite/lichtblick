@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -31,7 +31,7 @@ class TestSource implements IIterableSource {
       topics: [],
       topicStats: new Map(),
       profile: undefined,
-      problems: [],
+      alerts: [],
       datatypes: new Map(),
       publishersByTopic: new Map(),
       metadata: [{ name: "metadata1", metadata: { key: "value" } }],
@@ -137,7 +137,7 @@ describe("IterablePlayer", () => {
         topicStats: new Map(),
         publishedTopics: new Map<string, Set<string>>(),
       },
-      problems: [],
+      alerts: [],
       capabilities: [PLAYER_CAPABILITIES.setSpeed, PLAYER_CAPABILITIES.playbackControl],
       profile: undefined,
       presence: PlayerPresence.INITIALIZING,
@@ -244,7 +244,7 @@ describe("IterablePlayer", () => {
         topicStats: new Map(),
         publishedTopics: new Map<string, Set<string>>(),
       },
-      problems: [],
+      alerts: [],
       capabilities: [PLAYER_CAPABILITIES.setSpeed, PLAYER_CAPABILITIES.playbackControl],
       profile: undefined,
       presence: PlayerPresence.PRESENT,
@@ -333,7 +333,7 @@ describe("IterablePlayer", () => {
         topicStats: new Map(),
         publishedTopics: new Map<string, Set<string>>(),
       },
-      problems: [],
+      alerts: [],
       capabilities: [PLAYER_CAPABILITIES.setSpeed, PLAYER_CAPABILITIES.playbackControl],
       profile: undefined,
       presence: PlayerPresence.PRESENT,
@@ -557,7 +557,7 @@ describe("IterablePlayer", () => {
           ],
           topicStats: new Map(),
           profile: undefined,
-          problems: [],
+          alerts: [],
           datatypes: new Map([
             ["B", { name: "B", definitions: [] }],
             ["C", { name: "C", definitions: [] }],
@@ -584,7 +584,7 @@ describe("IterablePlayer", () => {
       await store.add(state);
     });
     const playerStates = await store.done;
-    expect(_.last(playerStates)!.problems).toEqual([
+    expect(_.last(playerStates)!.alerts).toEqual([
       {
         message: "Inconsistent datatype for topic: A",
         severity: "warn",
@@ -625,7 +625,7 @@ describe("IterablePlayer", () => {
         topicStats: new Map(),
         publishedTopics: new Map<string, Set<string>>(),
       },
-      problems: [],
+      alerts: [],
       capabilities: [PLAYER_CAPABILITIES.setSpeed, PLAYER_CAPABILITIES.playbackControl],
       profile: undefined,
       presence: PlayerPresence.PRESENT,

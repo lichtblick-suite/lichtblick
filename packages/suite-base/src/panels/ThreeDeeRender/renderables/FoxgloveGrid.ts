@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,7 +21,6 @@ import {
   colorModeSettingsFields,
   getColorConverter,
 } from "./colorMode";
-import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import {
@@ -35,6 +34,7 @@ import { rgbaToCssString, rgbaToLinear, stringToRgba } from "../color";
 import { normalizeByteArray, normalizePose, normalizeTime } from "../normalizeMessages";
 import { BaseSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
+import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 
 type GridColorModeSettings = ColorModeSettings & {
   // rgba packed modes are only supported for sensor_msgs/PointCloud2

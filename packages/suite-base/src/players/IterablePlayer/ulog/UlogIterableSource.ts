@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,7 +13,7 @@ import {
   ParsedMessageDefinitionsByTopic,
   Topic,
   TopicStats,
-  PlayerProblem,
+  PlayerAlert,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { MessageType, ULog } from "@lichtblick/ulog";
@@ -61,7 +61,7 @@ export class UlogIterableSource implements IIterableSource {
     const start = fromMicros(Number(timeRange[0]));
     const end = fromMicros(Number(timeRange[1]));
 
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
     const topics: Topic[] = [];
     const topicStats = new Map<string, TopicStats>();
     const datatypes: RosDatatypes = new Map();
@@ -113,7 +113,7 @@ export class UlogIterableSource implements IIterableSource {
       topics,
       datatypes,
       profile: "ulog",
-      problems,
+      alerts,
       publishersByTopic: new Map(),
       topicStats,
     };

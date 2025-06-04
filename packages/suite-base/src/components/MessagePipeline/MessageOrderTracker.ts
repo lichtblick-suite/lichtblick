@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -16,7 +16,7 @@
 
 import Logger from "@lichtblick/log";
 import { Time, isLessThan, subtract as subtractTimes, toSec } from "@lichtblick/rostime";
-import { PlayerState, MessageEvent, PlayerProblem } from "@lichtblick/suite-base/players/types";
+import { PlayerState, MessageEvent, PlayerAlert } from "@lichtblick/suite-base/players/types";
 import { formatFrame } from "@lichtblick/suite-base/util/time";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
@@ -47,12 +47,12 @@ class MessageOrderTracker {
 
   #incorrectMessages: MessageEvent[] = [];
 
-  public update(playerState: PlayerState): PlayerProblem[] {
+  public update(playerState: PlayerState): PlayerAlert[] {
     if (!playerState.activeData) {
       return [];
     }
 
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
 
     const { messages, currentTime, lastSeekTime } = playerState.activeData;
     let didSeek = false;
@@ -118,7 +118,7 @@ class MessageOrderTracker {
             `Processed a message on ${message.topic} at ${formattedTime} which is earlier than ` +
             `last processed message on ${this.#lastMessageTopic} at ${lastMessageTime}.`;
 
-          problems.push({
+          alerts.push({
             severity: "warn",
             message: "Data went back in time",
             error: new Error(errorMessage),
@@ -129,7 +129,7 @@ class MessageOrderTracker {
       }
     }
 
-    return problems;
+    return alerts;
   }
 }
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -32,6 +32,12 @@ import {
 } from "../common/webpackDefines";
 
 const log = Logger.getLogger(__filename);
+
+// This overwrite needs to be done here, before the app is ready, otherwise it will not take effect
+const homeOverride = process.argv.find((arg) => arg.startsWith("--home-dir="));
+if (homeOverride != undefined) {
+  app.setPath("home", homeOverride.split("=")[1]!);
+}
 
 /**
  * Determine whether an item in argv is a file that we should try opening as a data source.
@@ -75,6 +81,9 @@ export async function main(): Promise<void> {
   // https://github.com/electron/electron/issues/28422#issuecomment-987504138
   app.commandLine.appendSwitch("enable-experimental-web-platform-features");
 
+  // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
+  app.commandLine.appendSwitch("gtk-version", "3");
+
   const start = Date.now();
   log.info(`${LICHTBLICK_PRODUCT_NAME} ${LICHTBLICK_PRODUCT_VERSION}`);
 
@@ -82,7 +91,7 @@ export async function main(): Promise<void> {
 
   if (!isProduction && (app as Partial<typeof app>).dock != undefined) {
     const devIcon = getDevModeIcon();
-    if (devIcon) {
+    if (app.dock && devIcon) {
       app.dock.setIcon(devIcon);
     }
   }

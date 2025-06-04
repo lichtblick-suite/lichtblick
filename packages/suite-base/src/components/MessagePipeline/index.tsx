@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -27,7 +27,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppCon
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import {
   Player,
-  PlayerProblem,
+  PlayerAlert,
   PlayerState,
   SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
@@ -212,15 +212,15 @@ export function MessagePipelineProvider({ children, player }: ProviderProps): Re
   return <ContextInternal.Provider value={store}>{children}</ContextInternal.Provider>;
 }
 
-// Given a PlayerState and a PlayerProblem array, add the problems to any existing player problems
-function concatProblems(origState: PlayerState, problems: PlayerProblem[]): PlayerState {
-  if (problems.length === 0) {
+// Given a PlayerState and a PlayerAlert array, add the alerts to any existing player alerts
+function concatAlerts(origState: PlayerState, alerts: PlayerAlert[]): PlayerState {
+  if (alerts.length === 0) {
     return origState;
   }
 
   return {
     ...origState,
-    problems: problems.concat(origState.problems ?? []),
+    alerts: alerts.concat(origState.alerts ?? []),
   };
 }
 
@@ -271,8 +271,8 @@ function createPlayerListener(args: {
     }
 
     // check for any out-of-order or out-of-sync messages
-    const problems = messageOrderTracker.update(listenerPlayerState);
-    const newPlayerState = concatProblems(listenerPlayerState, problems);
+    const alerts = messageOrderTracker.update(listenerPlayerState);
+    const newPlayerState = concatAlerts(listenerPlayerState, alerts);
 
     const promise = new Promise<void>((resolve) => {
       resolveFn = () => {

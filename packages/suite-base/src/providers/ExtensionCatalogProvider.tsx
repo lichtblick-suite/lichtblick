@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -23,8 +23,8 @@ import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/
 
 const log = Logger.getLogger(__filename);
 
-const REFRESH_EXTENSIONS_BATCH = 3;
-const INSTALL_EXTENSIONS_BATCH = 3;
+const MAX_REFRESH_EXTENSIONS_BATCH = 1;
+const MAX_INSTALL_EXTENSIONS_BATCH = 1;
 
 function createExtensionRegistryStore(
   loaders: readonly ExtensionLoader[],
@@ -59,8 +59,8 @@ function createExtensionRegistryStore(
       }
 
       const results: InstallExtensionsResult[] = [];
-      for (let i = 0; i < data.length; i += INSTALL_EXTENSIONS_BATCH) {
-        const chunk = data.slice(i, i + INSTALL_EXTENSIONS_BATCH);
+      for (let i = 0; i < data.length; i += MAX_INSTALL_EXTENSIONS_BATCH) {
+        const chunk = data.slice(i, i + MAX_INSTALL_EXTENSIONS_BATCH);
         const result = await promisesInBatch(chunk, namespaceLoader);
         results.push(...result);
       }
@@ -90,7 +90,13 @@ function createExtensionRegistryStore(
 
     const mergeState = (
       info: ExtensionInfo,
-      { messageConverters, panelSettings, panels, topicAliasFunctions }: ContributionPoints,
+      {
+        messageConverters,
+        panelSettings,
+        panels,
+        topicAliasFunctions,
+        cameraModels,
+      }: ContributionPoints,
     ) => {
       set((state) => ({
         installedExtensions: _.uniqBy([...(state.installedExtensions ?? []), info], "id"),
@@ -104,6 +110,11 @@ function createExtensionRegistryStore(
           "extensionId",
         ),
         panelSettings: { ...state.panelSettings, ...panelSettings },
+
+        installedCameraModels: new Map([
+          ...state.installedCameraModels,
+          ...Array.from(cameraModels.entries()),
+        ]),
       }));
     };
 
@@ -123,7 +134,7 @@ function createExtensionRegistryStore(
           try {
             installedExtensions.push(extension);
 
-            const { messageConverters, panelSettings, panels, topicAliasFunctions } =
+            const { messageConverters, panelSettings, panels, topicAliasFunctions, cameraModels } =
               contributionPoints;
             const unwrappedExtensionSource = await loader.loadExtension(extension.id);
             const newContributionPoints = buildContributionPoints(
@@ -135,6 +146,14 @@ function createExtensionRegistryStore(
             _.merge(panelSettings, newContributionPoints.panelSettings);
             messageConverters.push(...newContributionPoints.messageConverters);
             topicAliasFunctions.push(...newContributionPoints.topicAliasFunctions);
+
+            newContributionPoints.cameraModels.forEach((builder, name: string) => {
+              if (cameraModels.has(name)) {
+                log.warn(`Camera model "${name}" already registered, skipping.`);
+                return;
+              }
+              cameraModels.set(name, builder);
+            });
 
             get().markExtensionAsInstalled(extension.id);
           } catch (err) {
@@ -157,12 +176,13 @@ function createExtensionRegistryStore(
         panels: {},
         panelSettings: {},
         topicAliasFunctions: [],
+        cameraModels: new Map(),
       };
 
       const processLoader = async (loader: ExtensionLoader) => {
         try {
           const extensions = await loader.getExtensions();
-          const chunks = _.chunk(extensions, REFRESH_EXTENSIONS_BATCH);
+          const chunks = _.chunk(extensions, MAX_REFRESH_EXTENSIONS_BATCH);
           for (const chunk of chunks) {
             await loadInBatch({
               batch: chunk,
@@ -186,6 +206,7 @@ function createExtensionRegistryStore(
         installedPanels: contributionPoints.panels,
         installedMessageConverters: contributionPoints.messageConverters,
         installedTopicAliasFunctions: contributionPoints.topicAliasFunctions,
+        installedCameraModels: contributionPoints.cameraModels,
         panelSettings: contributionPoints.panelSettings,
       });
     };
@@ -201,6 +222,7 @@ function createExtensionRegistryStore(
         | "installedPanels"
         | "installedMessageConverters"
         | "installedTopicAliasFunctions"
+        | "installedCameraModels"
       >;
     }) {
       const {
@@ -208,6 +230,7 @@ function createExtensionRegistryStore(
         installedPanels,
         installedMessageConverters,
         installedTopicAliasFunctions,
+        installedCameraModels,
       } = state;
 
       return {
@@ -220,6 +243,9 @@ function createExtensionRegistryStore(
         ),
         installedTopicAliasFunctions: installedTopicAliasFunctions?.filter(
           ({ extensionId }) => extensionId !== id,
+        ),
+        installedCameraModels: new Map(
+          [...installedCameraModels].filter(([, { extensionId }]) => extensionId !== id),
         ),
       };
     }
@@ -253,6 +279,7 @@ function createExtensionRegistryStore(
       installedMessageConverters: mockMessageConverters ?? [],
       installedPanels: {},
       installedTopicAliasFunctions: [],
+      installedCameraModels: new Map(),
       loadedExtensions: new Set<string>(),
       panelSettings: _.merge(
         {},

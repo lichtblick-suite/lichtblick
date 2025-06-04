@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Time, toRFC3339String } from "@lichtblick/rostime";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import {
   AppURLState,
   updateAppURLState,
@@ -99,80 +100,99 @@ describe("app state url parser", () => {
   });
 });
 
-describe("app state encoding", () => {
-  const baseURL = () => new URL("http://example.com");
+describe("updateAppURLState", () => {
+  const baseURL = new URL(`http://${BasicBuilder.string()}.com`);
 
   it("encodes rosbag urls", () => {
-    expect(
-      updateAppURLState(baseURL(), {
-        time: undefined,
-        ds: "ros1-remote-bagfile",
-        dsParams: {
-          url: "http://foxglove.dev/test.bag",
-        },
-      }).href,
-    ).toEqual(
-      "http://example.com/?ds=ros1-remote-bagfile&ds.url=http%3A%2F%2Ffoxglove.dev%2Ftest.bag",
+    const url = `${baseURL.origin}/${BasicBuilder.string()}.bag`;
+    const urlState: AppURLState = {
+      time: undefined,
+      ds: "ros1-remote-bagfile",
+      dsParams: { url },
+    };
+
+    const result = updateAppURLState(baseURL, urlState);
+
+    expect(decodeURIComponent(result.href)).toEqual(
+      `${baseURL.origin}/?ds=${urlState.ds}&ds.url=${url}`,
     );
   });
 
   it("should encode multiple remote files urls", () => {
-    expect(
-      updateAppURLState(baseURL(), {
-        time: undefined,
-        ds: "remote-file",
-        dsParamsArray: {
-          urls: ["http://lichtblick.dev/test-file1.mcap", "http://lichtblick.dev/test-file2.mcap"],
-        },
-      }).href,
-    ).toEqual(
-      "http://example.com/?ds=remote-file&ds.url=http%3A%2F%2Flichtblick.dev%2Ftest-file1.mcap&ds.url=http%3A%2F%2Flichtblick.dev%2Ftest-file2.mcap",
+    const urls = [
+      `${baseURL.origin}/${BasicBuilder.string()}.mcap`,
+      `${baseURL.origin}/${BasicBuilder.string()}.mcap`,
+    ];
+    const urlState: AppURLState = {
+      time: undefined,
+      ds: "remote-file",
+      dsParamsArray: { urls },
+    };
+
+    const result = updateAppURLState(baseURL, urlState);
+
+    expect(decodeURIComponent(result.href)).toEqual(
+      `${baseURL.origin}/?ds=${urlState.ds}&ds.url=${urls[0]}&ds.url=${urls[1]}`,
     );
   });
 
   it("appends 'ds.' + key when keyMap entry doesn't have a substitute for that key", () => {
-    expect(
-      updateAppURLState(baseURL(), {
-        time: undefined,
-        ds: "remote-file",
-        dsParamsArray: {
-          keyTest: ["foo", "bar"],
-        },
-      }).href,
-    ).toEqual("http://example.com/?ds=remote-file&ds.keyTest=foo&ds.keyTest=bar");
+    const key = BasicBuilder.string();
+    const paramArray: string[] = BasicBuilder.strings({ count: 2 });
+    const urlState: AppURLState = {
+      time: undefined,
+      ds: "remote-file",
+      dsParamsArray: { [key]: paramArray },
+    };
+
+    const result = updateAppURLState(baseURL, urlState);
+
+    expect(result.href).toEqual(
+      `${baseURL.origin}/?ds=${urlState.ds}&ds.${key}=${paramArray[0]}&ds.${key}=${paramArray[1]}`,
+    );
   });
 
   describe("url states", () => {
-    const eventId = "dummyEventId";
+    const eventId = BasicBuilder.string();
     const time = undefined;
     it.each<AppURLState>([
       {
         time,
         ds: "ros1",
-        dsParams: { url: "http://example.com:11311/test.bag", eventId },
+        dsParams: {
+          url: `${baseURL.origin}:${baseURL.port}/${BasicBuilder.string()}.bag`,
+          eventId,
+        },
       },
       {
         time,
         ds: "ros2",
-        dsParams: { url: "http://example.com:11311/test.bag", eventId },
+        dsParams: {
+          url: `${baseURL.origin}:${baseURL.port}/${BasicBuilder.string()}.bag`,
+          eventId,
+        },
       },
       {
         time,
         ds: "ros1-remote-bagfile",
-        dsParams: { url: "http://example.com/test.bag", eventId },
+        dsParams: { url: `${baseURL.origin}/${BasicBuilder.string()}.bag`, eventId },
       },
       {
         time,
         ds: "rosbridge-websocket",
-        dsParams: { url: "ws://foxglove.dev:9090/test.bag", eventId },
+        dsParams: {
+          url: `ws://${baseURL.host}:${baseURL.port}/${BasicBuilder.string()}.bag`,
+          eventId,
+        },
       },
     ])("encodes url state", (state) => {
       const url = state.dsParams?.url;
-      const encodededURL = updateAppURLState(baseURL(), state).href;
-      expect(encodededURL).toEqual(
-        `http://example.com/?ds=${state.ds}&ds.eventId=${eventId}&ds.url=${encodeURIComponent(
-          url ?? "",
-        )}`,
+      const encodedURLFile = encodeURIComponent(url ?? "");
+
+      const result = updateAppURLState(baseURL, state);
+
+      expect(result.href).toEqual(
+        `${baseURL.origin}/?ds=${state.ds}&ds.eventId=${eventId}&ds.url=${encodedURLFile}`,
       );
     });
   });

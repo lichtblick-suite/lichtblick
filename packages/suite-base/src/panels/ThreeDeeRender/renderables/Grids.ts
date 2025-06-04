@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,7 +11,6 @@ import * as _ from "lodash-es";
 import Logger from "@lichtblick/log";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 
-import { RenderableLineList } from "./markers/RenderableLineList";
 import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { SceneExtension } from "../SceneExtension";
@@ -21,6 +20,7 @@ import { vec3TupleApproxEquals } from "../math";
 import { Marker, MarkerAction, MarkerType, TIME_ZERO, Vector3 } from "../ros";
 import { CustomLayerSettings, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 import { makePose, xyzrpyToPose } from "../transforms";
+import { RenderableLineList } from "./markers/RenderableLineList";
 
 const log = Logger.getLogger(__filename);
 

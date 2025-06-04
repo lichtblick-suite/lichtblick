@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { TopicAliasFunction, ExtensionPanelRegistration, PanelSettings } from "@lichtblick/suite";
@@ -15,7 +15,7 @@ describe("buildContributionPoints", () => {
 
   it("should initialize contribution objects", () => {
     const consoleErrorMock = jest.spyOn(console, "error").mockImplementation(() => {});
-    const extensionInfo = ExtensionBuilder.extension();
+    const extensionInfo = ExtensionBuilder.extensionInfo();
 
     const result = buildContributionPoints(extensionInfo, "");
 
@@ -27,7 +27,7 @@ describe("buildContributionPoints", () => {
   });
 
   it("should register a panel", () => {
-    const extensionInfo = ExtensionBuilder.extension();
+    const extensionInfo = ExtensionBuilder.extensionInfo();
     const panelName = BasicBuilder.string();
     const panelId = `${extensionInfo.qualifiedName}.${panelName}`;
     const registration: ExtensionPanelRegistration = {
@@ -63,7 +63,7 @@ describe("buildContributionPoints", () => {
 
   it("should warn when trying to register a duplicate panel", () => {
     const logWarnMock = jest.spyOn(console, "warn").mockImplementation(() => {});
-    const extensionInfo = ExtensionBuilder.extension();
+    const extensionInfo = ExtensionBuilder.extensionInfo();
     const panelName = BasicBuilder.string();
     const panelId = `${extensionInfo.qualifiedName}.${panelName}`;
     const registration: ExtensionPanelRegistration = {
@@ -92,7 +92,7 @@ describe("buildContributionPoints", () => {
   });
 
   it("should register a message converter", () => {
-    const extensionInfo = ExtensionBuilder.extension();
+    const extensionInfo = ExtensionBuilder.extensionInfo();
     const messageConverter: MessageConverter = {
       fromSchemaName: BasicBuilder.string(),
       toSchemaName: BasicBuilder.string(),
@@ -123,7 +123,7 @@ describe("buildContributionPoints", () => {
   });
 
   it("should register a message converter with panel settings", () => {
-    const extensionInfo = ExtensionBuilder.extension();
+    const extensionInfo = ExtensionBuilder.extensionInfo();
     const panelSettingsA: PanelSettings<unknown> = {
       defaultConfig: BasicBuilder.genericDictionary(String),
       handler: jest.fn(),
@@ -171,7 +171,7 @@ describe("buildContributionPoints", () => {
   });
 
   it("registers topic aliases correctly", () => {
-    const extensionInfo = ExtensionBuilder.extension();
+    const extensionInfo = ExtensionBuilder.extensionInfo();
     const aliasFunction: TopicAliasFunction = jest.fn();
 
     (globalThis as any).topicAliasFunction = aliasFunction;

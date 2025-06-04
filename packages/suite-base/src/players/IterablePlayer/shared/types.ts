@@ -1,7 +1,6 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Time } from "@lichtblick/rostime";
 import {
   IIterableSource,
   Initialization,
@@ -14,5 +13,3 @@ export type IterableSourceConstructor<T extends IIterableSource, P> = new (args:
 export type InitMetadata = Initialization["metadata"];
 
 export type InitTopicStatsMap = Initialization["topicStats"];
-
-export type InitLoadedTimes = Array<{ start: Time; end: Time }>;

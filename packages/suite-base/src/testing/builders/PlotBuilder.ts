@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { Datum, HoverElement } from "@lichtblick/suite-base/panels/Plot/types";
 import {
@@ -53,7 +53,7 @@ export default class PlotBuilder {
   public static config(props: Partial<PlotConfig> = {}): PlotConfig {
     return defaults<PlotConfig>(props, {
       followingViewWidth: BasicBuilder.number(),
-      foxglovePanelTitle: BasicBuilder.string(),
+      lichtblickPanelTitle: BasicBuilder.string(),
       isSynced: BasicBuilder.boolean(),
       legendDisplay: "floating",
       maxXValue: BasicBuilder.number(),

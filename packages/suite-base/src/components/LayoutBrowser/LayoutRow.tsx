@@ -1,18 +1,15 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/* eslint-disable @lichtblick/no-restricted-imports */
-
 import ErrorIcon from "@mui/icons-material/Error";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Divider,
   IconButton,
-  ListItem,
   ListItemButton,
   ListItemText,
   Menu,
@@ -20,7 +17,6 @@ import {
   SvgIcon,
   TextField,
   Typography,
-  styled as muiStyled,
 } from "@mui/material";
 import {
   MouseEvent,
@@ -37,88 +33,8 @@ import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerCo
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
-const StyledListItem = muiStyled(ListItem, {
-  shouldForwardProp: (prop) =>
-    prop !== "hasModifications" && prop !== "deletedOnServer" && prop !== "editingName",
-})<{ editingName: boolean; hasModifications: boolean; deletedOnServer: boolean }>(
-  ({ editingName, hasModifications, deletedOnServer, theme }) => ({
-    ".MuiListItemSecondaryAction-root": {
-      right: theme.spacing(0.25),
-    },
-    ".MuiListItemButton-root": {
-      maxWidth: "100%",
-    },
-    "@media (pointer: fine)": {
-      ".MuiListItemButton-root": {
-        paddingRight: theme.spacing(4.5),
-      },
-      ".MuiListItemSecondaryAction-root": {
-        visibility: !hasModifications && !deletedOnServer && "hidden",
-      },
-      "&:hover .MuiListItemSecondaryAction-root": {
-        visibility: "visible",
-      },
-    },
-    ...(editingName && {
-      ".MuiListItemButton-root": {
-        paddingTop: theme.spacing(0.5),
-        paddingBottom: theme.spacing(0.5),
-        paddingLeft: theme.spacing(1),
-      },
-      ".MuiListItemText-root": {
-        margin: 0,
-      },
-    }),
-  }),
-);
-
-const StyledMenuItem = muiStyled(MenuItem, {
-  shouldForwardProp: (prop) => prop !== "debug",
-})<{ debug?: boolean }>(({ theme, debug = false }) => ({
-  position: "relative",
-
-  ...(debug && {
-    "&:before": {
-      content: "''",
-      position: "absolute",
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 4,
-      backgroundColor: theme.palette.warning.main,
-      backgroundImage: `repeating-linear-gradient(${[
-        "-35deg",
-        "transparent",
-        "transparent 6px",
-        `${theme.palette.common.black} 6px`,
-        `${theme.palette.common.black} 12px`,
-      ].join(",")})`,
-    },
-  }),
-}));
-
-export type LayoutActionMenuItem =
-  | {
-      type: "item";
-      text: string;
-      secondaryText?: string;
-      key: string;
-      onClick?: (event: React.MouseEvent<HTMLLIElement>) => void;
-      disabled?: boolean;
-      debug?: boolean;
-      "data-testid"?: string;
-    }
-  | {
-      type: "divider";
-      key: string;
-      debug?: boolean;
-    }
-  | {
-      type: "header";
-      key: string;
-      text: string;
-      debug?: boolean;
-    };
+import { StyledListItem, StyledMenuItem } from "./LayoutRow.style";
+import { LayoutActionMenuItem } from "./types";
 
 export default React.memo(function LayoutRow({
   layout,
@@ -338,7 +254,7 @@ export default React.memo(function LayoutRow({
     },
   ];
 
-  if (hasModifications || anySelectedModifiedLayouts) {
+  if (hasModifications) {
     const sectionItems: LayoutActionMenuItem[] = [
       {
         type: "item",

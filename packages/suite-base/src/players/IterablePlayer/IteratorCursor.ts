@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -45,7 +45,7 @@ class IteratorCursor implements IMessageCursor {
       return undefined;
     }
 
-    if (firstResult.type === "problem") {
+    if (firstResult.type === "alert") {
       return [firstResult];
     }
 
@@ -69,7 +69,7 @@ class IteratorCursor implements IMessageCursor {
 
       results.push(result);
 
-      if (result.type === "problem") {
+      if (result.type === "alert") {
         break;
       }
       if (result.type === "stamp" && compare(result.stamp, cutoffTime) > 0) {

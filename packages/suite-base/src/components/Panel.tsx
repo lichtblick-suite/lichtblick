@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,7 +21,7 @@ import {
   TableSimple20Regular,
 } from "@fluentui/react-icons";
 import * as _ from "lodash-es";
-import React, {
+import {
   ComponentType,
   MouseEventHandler,
   Profiler,
@@ -668,7 +668,7 @@ export default function Panel<
                   />
                 )}
                 <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
-                  <React.StrictMode>{child}</React.StrictMode>
+                  {child}
                 </PanelErrorBoundary>
                 {process.env.NODE_ENV !== "production" && (
                   <div className={classes.perfInfo} ref={perfInfo} />

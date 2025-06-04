@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Immutable, MessageEvent } from "@lichtblick/suite";
-import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { MessageBlock } from "@lichtblick/suite-base/players/types";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 
@@ -26,7 +26,7 @@ class TestSource implements IIterableSource {
       end: { sec: 10, nsec: 0 },
       topics: [],
       topicStats: new Map(),
-      problems: [],
+      alerts: [],
       profile: undefined,
       datatypes: new Map(),
       publishersByTopic: new Map(),
@@ -53,7 +53,7 @@ describe("BlockLoader", () => {
       source: new TestSource(),
       start: { sec: 0, nsec: 0 },
       end: { sec: 2, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     await loader.startLoading({
@@ -85,7 +85,7 @@ describe("BlockLoader", () => {
       source,
       start: { sec: 0, nsec: 0 },
       end: { sec: 9, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     const msgEvents: MessageEvent[] = [];
@@ -187,7 +187,7 @@ describe("BlockLoader", () => {
       source,
       start: { sec: 0, nsec: 0 },
       end: { sec: 9, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     const msgEvents: MessageEvent[] = [];
@@ -257,7 +257,7 @@ describe("BlockLoader", () => {
       source,
       start: { sec: 0, nsec: 0 },
       end: { sec: 5, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     const msgEvents: MessageEvent[] = [];
@@ -390,7 +390,7 @@ describe("BlockLoader", () => {
       source,
       start: { sec: 0, nsec: 0 },
       end: { sec: 5, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     const msgEvents: MessageEvent[] = [];
@@ -482,7 +482,7 @@ describe("BlockLoader", () => {
       source,
       start: { sec: 0, nsec: 0 },
       end: { sec: 9, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     const msgEvents: MessageEvent[] = [];
@@ -604,7 +604,7 @@ describe("BlockLoader", () => {
       source,
       start: { sec: 0, nsec: 0 },
       end: { sec: 9, nsec: 0 },
-      problemManager: new PlayerProblemManager(),
+      alertManager: new PlayerAlertManager(),
     });
 
     const msgEvents: MessageEvent[] = [];

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -63,7 +63,6 @@ describe("Panel", () => {
     expect(renderFn.mock.calls).toEqual([
       [{ config: { someString: "hello world" }, saveConfig: expect.any(Function) }],
       [{ config: { someString: "hello world" }, saveConfig: expect.any(Function) }],
-      [{ config: { someString: "hello world" }, saveConfig: expect.any(Function) }],
     ]);
 
     expect(actions).toEqual([
@@ -94,7 +93,6 @@ describe("Panel", () => {
 
     expect(renderFn.mock.calls).toEqual([
       [{ config: { someString }, saveConfig: expect.any(Function) }],
-      [{ config: { someString }, saveConfig: expect.any(Function) }],
     ]);
 
     expect(actions).toEqual([
@@ -122,7 +120,6 @@ describe("Panel", () => {
     );
 
     expect(renderFn.mock.calls).toEqual([
-      [{ config: { someNumber: 42, someString: "hello world" }, saveConfig: expect.any(Function) }],
       [{ config: { someNumber: 42, someString: "hello world" }, saveConfig: expect.any(Function) }],
       [{ config: { someNumber: 42, someString: "hello world" }, saveConfig: expect.any(Function) }],
     ]);
@@ -160,7 +157,6 @@ describe("Panel", () => {
 
     expect(renderFn.mock.calls).toEqual([
       [{ config: { someNumber: 42, someString }, saveConfig: expect.any(Function) }],
-      [{ config: { someNumber: 42, someString }, saveConfig: expect.any(Function) }],
     ]);
 
     expect(actions).toEqual([
@@ -189,10 +185,10 @@ describe("Panel", () => {
       },
     });
 
-    expect(renderFn.mock.calls.length).toEqual(3);
+    expect(renderFn.mock.calls.length).toEqual(2);
     act(() => {
       actions.current.savePanelConfigs({ configs: [{ id: "someOtherId", config: {} }] });
     });
-    expect(renderFn.mock.calls.length).toEqual(3);
+    expect(renderFn.mock.calls.length).toEqual(2);
   });
 });

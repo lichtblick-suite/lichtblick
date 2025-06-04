@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -47,6 +47,18 @@ const packageJson: any = {
   version: "0.0.1",
 };
 
+const expectedReadme = "# studio-extension-turtlesim\n\n## _A Foxglove Studio Extension_\n";
+const expectedChangelog =
+  "# studio-extension-turtlesim version history\n\n## 0.0.0\n\n- Alpha testing\n";
+
+const expectedExtensionInfo: ExtensionInfo = {
+  ...packageJson,
+  namespace: "local",
+  qualifiedName: "turtlesim",
+  readme: expectedReadme,
+  changelog: expectedChangelog,
+} as ExtensionInfo;
+
 const EXT_FILE_TURTLESIM = `${__dirname}/../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
 const EXT_FILE_PREFIXED = `${__dirname}/../test/fixtures/prefixed-name-extension.foxe`;
 
@@ -78,29 +90,24 @@ describe("IdbExtensionLoader", () => {
 
     it("should install local extensions", async () => {
       const foxe = fs.readFileSync(EXT_FILE_TURTLESIM);
-      const info: ExtensionInfo = {
-        ...packageJson,
-        namespace: "local",
-        qualifiedName: "turtlesim",
-      } as ExtensionInfo;
       const loader = new IdbExtensionLoader("local");
 
       await loader.installExtension(foxe as unknown as Uint8Array);
 
-      expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
+      expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, expectedExtensionInfo);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
         content: foxe,
-        info,
+        info: expectedExtensionInfo,
       });
     });
 
     it("should install private extensions", async () => {
       const foxe = fs.readFileSync(EXT_FILE_TURTLESIM);
       const info: ExtensionInfo = {
-        ...packageJson,
+        ...expectedExtensionInfo,
         namespace: "org",
         qualifiedName: "org:Foxglove Inc:studio-extension-turtlesim",
-      } as ExtensionInfo;
+      };
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
 
@@ -122,6 +129,8 @@ describe("IdbExtensionLoader", () => {
         namespace: "org",
         publisher: "Prefix",
         qualifiedName: "org:Prefix:package-name",
+        changelog: "",
+        readme: "",
       } as ExtensionInfo;
 
       mockGetAll.mockReturnValue([info]);

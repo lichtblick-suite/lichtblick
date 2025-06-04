@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,7 +7,7 @@
 
 import { CameraCalibration } from "@foxglove/schemas";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/suite";
 
 import { PartialMessage } from "../SceneExtension";
 import { normalizeHeader, normalizeTime } from "../normalizeMessages";
@@ -27,7 +27,7 @@ const tempVec2 = { x: 0, y: 0, z: 0 };
 export function projectPixel(
   out: Vector3,
   uv: Readonly<Vector2>,
-  cameraModel: PinholeCameraModel,
+  cameraModel: ICameraModel,
   settings: { distance: number; planarProjectionFactor: number },
 ): Vector3 {
   if (settings.planarProjectionFactor === 0) {

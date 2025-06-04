@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
-import { PlayerProblem, PlayerState, Topic } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert, PlayerState, Topic } from "@lichtblick/suite-base/players/types";
 
 import { TopicAliasFunctions } from "./StateProcessorFactory";
 import { TopicAliasingPlayer } from "./TopicAliasingPlayer";
@@ -115,7 +115,7 @@ describe("TopicAliasingPlayer", () => {
     );
   });
 
-  it("marks disallowed mappings as player problems", async () => {
+  it("marks disallowed mappings as player alerts", async () => {
     const fakePlayer = new FakePlayer();
     const mappers: TopicAliasFunctions = [
       {
@@ -132,9 +132,9 @@ describe("TopicAliasingPlayer", () => {
     ];
     const player = new TopicAliasingPlayer(fakePlayer);
     player.setAliasFunctions(mappers);
-    let problems: undefined | PlayerProblem[] = [];
+    let alerts: undefined | PlayerAlert[] = [];
     const listener = async (state: PlayerState) => {
-      problems = state.problems;
+      alerts = state.alerts;
     };
     player.setListener(listener);
     await fakePlayer.emit(
@@ -147,7 +147,7 @@ describe("TopicAliasingPlayer", () => {
       }),
     );
 
-    expect(problems).toEqual([
+    expect(alerts).toEqual([
       {
         message: "Disallowed topic alias",
         tip: "Extension ext1 aliased topic /original_topic_1 is already present in the data source.",

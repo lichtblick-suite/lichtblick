@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,7 +21,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
 import {
-  PlayerProblem,
+  PlayerAlert,
   SubscribePayload,
   Topic,
   TopicStats,
@@ -63,7 +63,7 @@ export class McapIndexedIterableSource implements IIterableSource {
     const topicStats = new Map<string, TopicStats>();
     const topicsByName = new Map<string, Topic>();
     const datatypes: RosDatatypes = new Map();
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
     const metadata: Metadata[] = [];
 
     const publishersByTopic = new Map<string, Set<string>>();
@@ -71,7 +71,7 @@ export class McapIndexedIterableSource implements IIterableSource {
     for (const channel of this.#reader.channelsById.values()) {
       const schema = this.#reader.schemasById.get(channel.schemaId);
       if (channel.schemaId !== 0 && schema == undefined) {
-        problems.push({
+        alerts.push({
           severity: "error",
           message: `Missing schema info for schema id ${channel.schemaId} (channel ${channel.id}, topic ${channel.topic})`,
         });
@@ -82,7 +82,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       try {
         parsedChannel = parseChannel({ messageEncoding: channel.messageEncoding, schema });
       } catch (error) {
-        problems.push({
+        alerts.push({
           severity: "error",
           message: `Error in topic ${channel.topic} (channel ${channel.id}): ${error.message}`,
           error,
@@ -142,7 +142,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       topics: [...topicsByName.values()],
       datatypes,
       profile: this.#reader.header.profile,
-      problems,
+      alerts,
       metadata,
       publishersByTopic,
       topicStats,
@@ -183,9 +183,9 @@ export class McapIndexedIterableSource implements IIterableSource {
       const channelInfo = this.#channelInfoById.get(message.channelId);
       if (!channelInfo) {
         yield {
-          type: "problem",
+          type: "alert",
           connectionId: message.channelId,
-          problem: {
+          alert: {
             message: `Received message on channel ${message.channelId} without prior channel info`,
             severity: "error",
           },
@@ -218,9 +218,9 @@ export class McapIndexedIterableSource implements IIterableSource {
         };
       } catch (error) {
         yield {
-          type: "problem",
+          type: "alert",
           connectionId: message.channelId,
-          problem: {
+          alert: {
             message: `Error decoding message on ${channelInfo.channel.topic}`,
             error,
             severity: "error",

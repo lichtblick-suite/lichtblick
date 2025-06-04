@@ -1,13 +1,16 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { RegisterCameraModelArgs } from "./cameraModels";
 import type { Immutable } from "./immutable";
 
 export type { Immutable } from "./immutable";
+// Expose all interfaces from about camera models
+export type * from "./cameraModels";
 
 // Valid types for parameter data (such as rosparams)
 export type ParameterValue =
@@ -47,10 +50,6 @@ export type Topic = {
    * topic name i.e. "/some/topic"
    */
   name: string;
-  /**
-   * @deprecated Renamed to `schemaName`. `datatype` will be removed in a future release.
-   */
-  datatype: string;
   /**
    * The schema name is an identifier for the types of messages on this topic. Typically this is the
    * fully-qualified name of the message schema. The fully-qualified name depends on the data source
@@ -507,6 +506,8 @@ export interface ExtensionContext {
    * topic aliases.
    */
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
+
+  registerCameraModel(args: RegisterCameraModelArgs): void;
 }
 
 export type ExtensionActivate = (extensionContext: ExtensionContext) => void;
@@ -565,117 +566,156 @@ export type SettingsIcon = (typeof SETTINGS_ICONS)[number];
  * A settings tree field specifies the input type and the value of a field
  * in the settings editor.
  */
+export type SettingsTreeFieldAutocomplete = {
+  input: "autocomplete";
+  value?: string;
+  items: string[];
+
+  /**
+   * Optional placeholder text displayed in the field input when value is undefined
+   */
+  placeholder?: string;
+};
+
+export type SettingsTreeFieldBoolean = {
+  input: "boolean";
+  value?: boolean;
+};
+
+export type SettingsTreeFieldRGB = {
+  input: "rgb";
+  value?: string;
+
+  /**
+   * Optional placeholder text displayed in the field input when value is undefined
+   */
+  placeholder?: string;
+
+  /**
+   * Optional field that's true if the clear button should be hidden.
+   */
+  hideClearButton?: boolean;
+};
+
+export type SettingsTreeFieldRGBA = {
+  input: "rgba";
+  value?: string;
+
+  /**
+   * Optional placeholder text displayed in the field input when value is undefined
+   */
+  placeholder?: string;
+
+  /**
+   * Optional field that's true if the clear button should be hidden.
+   */
+  hideClearButton?: boolean;
+};
+
+export type SettingsTreeFieldGradient = {
+  input: "gradient";
+  value?: [string, string];
+};
+
+export type SettingsTreeFieldMessagePath = {
+  input: "messagepath";
+  value?: string;
+  validTypes?: string[];
+  /** True if the input should allow math modifiers like @abs. */
+  supportsMathModifiers?: boolean;
+};
+
+export type SettingsTreeFieldNumber = {
+  input: "number";
+  value?: number;
+  step?: number;
+  max?: number;
+  min?: number;
+  precision?: number;
+
+  /**
+   * Optional placeholder text displayed in the field input when value is undefined
+   */
+  placeholder?: string;
+};
+
+export type SettingsTreeFieldSelectNumber = {
+  input: "select";
+  value?: number | number[];
+  options: Array<{ label: string; value: undefined | number; disabled?: boolean }>;
+};
+
+export type SettingsTreeFieldSelectString = {
+  input: "select";
+  value?: string | string[];
+  options: Array<{ label: string; value: undefined | string; disabled?: boolean }>;
+};
+
+export type SettingsTreeFieldString = {
+  input: "string";
+  value?: string;
+
+  /**
+   * Optional placeholder text displayed in the field input when value is undefined
+   */
+  placeholder?: string;
+};
+
+export type SettingsTreeFieldToggleString = {
+  input: "toggle";
+  value?: string;
+  options: string[] | Array<{ label: string; value: undefined | string }>;
+};
+
+export type SettingsTreeFieldToggleNumber = {
+  input: "toggle";
+  value?: number;
+  options: number[] | Array<{ label: string; value: undefined | number }>;
+};
+
+export type SettingsTreeFieldVec3 = {
+  input: "vec3";
+  value?: [undefined | number, undefined | number, undefined | number];
+  placeholder?: [undefined | string, undefined | string, undefined | string];
+  step?: number;
+  precision?: number;
+  labels?: [string, string, string];
+  max?: number;
+  min?: number;
+};
+
+export type SettingsTreeFieldVec2 = {
+  input: "vec2";
+  value?: [undefined | number, undefined | number];
+  placeholder?: [undefined | string, undefined | string];
+  step?: number;
+  precision?: number;
+  labels?: [string, string];
+  max?: number;
+  min?: number;
+};
+
+export type SettingsTreeFieldLegendControll = {
+  input: "legendcontrols";
+  value?: undefined;
+};
+
 export type SettingsTreeFieldValue =
-  | {
-      input: "autocomplete";
-      value?: string;
-      items: string[];
-
-      /**
-       * Optional placeholder text displayed in the field input when value is undefined
-       */
-      placeholder?: string;
-    }
-  | { input: "boolean"; value?: boolean }
-  | {
-      input: "rgb";
-      value?: string;
-
-      /**
-       * Optional placeholder text displayed in the field input when value is undefined
-       */
-      placeholder?: string;
-
-      /**
-       * Optional field that's true if the clear button should be hidden.
-       */
-      hideClearButton?: boolean;
-    }
-  | {
-      input: "rgba";
-      value?: string;
-
-      /**
-       * Optional placeholder text displayed in the field input when value is undefined
-       */
-      placeholder?: string;
-
-      /**
-       * Optional field that's true if the clear button should be hidden.
-       */
-      hideClearButton?: boolean;
-    }
-  | { input: "gradient"; value?: [string, string] }
-  | {
-      input: "messagepath";
-      value?: string;
-      validTypes?: string[];
-      /** True if the input should allow math modifiers like @abs. */
-      supportsMathModifiers?: boolean;
-    }
-  | {
-      input: "number";
-      value?: number;
-      step?: number;
-      max?: number;
-      min?: number;
-      precision?: number;
-
-      /**
-       * Optional placeholder text displayed in the field input when value is undefined
-       */
-      placeholder?: string;
-    }
-  | {
-      input: "select";
-      value?: number | number[];
-      options: Array<{ label: string; value: undefined | number; disabled?: boolean }>;
-    }
-  | {
-      input: "select";
-      value?: string | string[];
-      options: Array<{ label: string; value: undefined | string; disabled?: boolean }>;
-    }
-  | {
-      input: "string";
-      value?: string;
-
-      /**
-       * Optional placeholder text displayed in the field input when value is undefined
-       */
-      placeholder?: string;
-    }
-  | {
-      input: "toggle";
-      value?: string;
-      options: string[] | Array<{ label: string; value: undefined | string }>;
-    }
-  | {
-      input: "toggle";
-      value?: number;
-      options: number[] | Array<{ label: string; value: undefined | number }>;
-    }
-  | {
-      input: "vec3";
-      value?: [undefined | number, undefined | number, undefined | number];
-      placeholder?: [undefined | string, undefined | string, undefined | string];
-      step?: number;
-      precision?: number;
-      labels?: [string, string, string];
-      max?: number;
-      min?: number;
-    }
-  | {
-      input: "vec2";
-      value?: [undefined | number, undefined | number];
-      placeholder?: [undefined | string, undefined | string];
-      step?: number;
-      precision?: number;
-      labels?: [string, string];
-      max?: number;
-      min?: number;
-    }
-  | { input: "legendcontrols"; value?: undefined };
+  | SettingsTreeFieldAutocomplete
+  | SettingsTreeFieldBoolean
+  | SettingsTreeFieldRGB
+  | SettingsTreeFieldRGBA
+  | SettingsTreeFieldGradient
+  | SettingsTreeFieldMessagePath
+  | SettingsTreeFieldNumber
+  | SettingsTreeFieldSelectNumber
+  | SettingsTreeFieldSelectString
+  | SettingsTreeFieldString
+  | SettingsTreeFieldToggleString
+  | SettingsTreeFieldToggleNumber
+  | SettingsTreeFieldVec3
+  | SettingsTreeFieldVec2
+  | SettingsTreeFieldLegendControll;
 
 export type SettingsTreeField = SettingsTreeFieldValue & {
   /**

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,7 +13,7 @@ import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemory
 import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
-  PlayerProblem,
+  PlayerAlert,
   Topic,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
@@ -66,7 +66,7 @@ export class RosDb3IterableSource implements IIterableSource {
       throw new Error("Bag contains no messages");
     }
 
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
     const topics: Topic[] = [];
     const topicStats = new Map<string, TopicStats>();
     // ROS 2 .db3 files do not contain message definitions, so we can only support well-known ROS types.
@@ -84,7 +84,7 @@ export class RosDb3IterableSource implements IIterableSource {
 
       const parsedMsgdef = datatypes.get(topicDef.type);
       if (parsedMsgdef == undefined) {
-        problems.push({
+        alerts.push({
           severity: "warn",
           message: `Topic "${topicDef.name}" has unsupported datatype "${topicDef.type}"`,
           tip: "ROS 2 .db3 files do not contain message definitions, so only well-known ROS types are supported in Lichtblick. As a workaround, you can convert the db3 file to mcap using the mcap CLI. For more information, see: https://docs.foxglove.dev/docs/connecting-to-data/frameworks/ros2",
@@ -107,7 +107,7 @@ export class RosDb3IterableSource implements IIterableSource {
       topicStats,
       start,
       end,
-      problems,
+      alerts,
       profile: "ros2",
       datatypes,
       publishersByTopic: new Map(),

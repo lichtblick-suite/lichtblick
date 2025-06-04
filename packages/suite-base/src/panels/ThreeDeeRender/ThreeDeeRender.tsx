@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -27,22 +27,12 @@ import {
   Topic,
 } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import {
-  DEFAULT_SCENE_EXTENSION_CONFIG,
-  SceneExtensionConfig,
-} from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
+import { PANEL_STYLE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-import type {
-  FollowMode,
-  IRenderer,
-  ImageModeConfig,
-  RendererConfig,
-  RendererSubscription,
-  TestOptions,
-} from "./IRenderer";
+import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
 import type { PickedRenderable } from "./Picker";
 import { SELECTED_ID_VARIABLE } from "./Renderable";
 import { Renderer } from "./Renderer";
@@ -59,34 +49,15 @@ import {
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEventMap } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
-import { InterfaceMode } from "./types";
+import { Shared3DPanelState, ThreeDeeRenderProps } from "./types";
 
 const log = Logger.getLogger(__filename);
-
-type Shared3DPanelState = {
-  cameraState: CameraState;
-  followMode: FollowMode;
-  followTf: undefined | string;
-};
-
-const PANEL_STYLE: React.CSSProperties = {
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  position: "relative",
-};
 
 /**
  * A panel that renders a 3D scene. This is a thin wrapper around a `Renderer` instance.
  */
-export function ThreeDeeRender(props: {
-  context: BuiltinPanelExtensionContext;
-  interfaceMode: InterfaceMode;
-  testOptions: TestOptions;
-  /** Allow for injection or overriding of default extensions by custom extensions */
-  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
-}): React.JSX.Element {
-  const { context, interfaceMode, testOptions, customSceneExtensions } = props;
+export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.Element {
+  const { context, interfaceMode, testOptions, customSceneExtensions, customCameraModels } = props;
   const {
     initialState,
     saveState,
@@ -156,6 +127,7 @@ export function ThreeDeeRender(props: {
           ),
           displayTemporaryError,
           testOptions,
+          customCameraModels,
         })
       : undefined;
     setRenderer(newRenderer);
@@ -169,11 +141,16 @@ export function ThreeDeeRender(props: {
     configRef,
     config.scene.transforms?.enablePreloading,
     customSceneExtensions,
+    customCameraModels,
     interfaceMode,
     fetchAsset,
     testOptions,
     displayTemporaryError,
   ]);
+
+  useEffect(() => {
+    renderer?.setCustomCameraModels(customCameraModels);
+  }, [renderer, customCameraModels]);
 
   useEffect(() => {
     if (renderer) {

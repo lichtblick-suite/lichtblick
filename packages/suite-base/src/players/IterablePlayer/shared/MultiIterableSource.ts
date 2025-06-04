@@ -1,9 +1,8 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { compare } from "@lichtblick/rostime";
 import {
-  InitLoadedTimes,
   IterableSourceConstructor,
   MultiSource,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
@@ -18,7 +17,6 @@ import {
 import {
   validateAndAddNewTopics,
   validateAndAddNewDatatypes,
-  validateOverlap,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/validateInitialization";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
@@ -88,20 +86,17 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
       end: { sec: Number.MIN_SAFE_INTEGER, nsec: Number.MIN_SAFE_INTEGER },
       datatypes: new Map(),
       metadata: [],
-      problems: [],
+      alerts: [],
       profile: "",
       publishersByTopic: new Map(),
       topics: [],
       topicStats: new Map(),
     };
 
-    const loadedTimes: InitLoadedTimes = [];
-
     for (const init of initializations) {
       resultInit.start = setStartTime(resultInit.start, init.start);
       resultInit.end = setEndTime(resultInit.end, init.end);
-      validateOverlap(loadedTimes, init, resultInit);
-      loadedTimes.push({ start: init.start, end: init.end });
+
       resultInit.profile = init.profile ?? resultInit.profile;
       resultInit.publishersByTopic = accumulateMap(
         resultInit.publishersByTopic,
@@ -109,7 +104,7 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
       );
       resultInit.topicStats = mergeTopicStats(resultInit.topicStats, init.topicStats);
       resultInit.metadata = mergeMetadata(resultInit.metadata, init.metadata);
-      resultInit.problems.push(...init.problems);
+      resultInit.alerts.push(...init.alerts);
       // These methos validate and add to avoid lopp through all topics and datatypes once again
       validateAndAddNewDatatypes(resultInit, init);
       validateAndAddNewTopics(resultInit, init);

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
@@ -8,7 +8,6 @@ import "@testing-library/jest-dom";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useSnackbar } from "notistack";
 
-import { Immutable } from "@lichtblick/suite/src/immutable";
 import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
@@ -17,6 +16,7 @@ import {
   useExtensionMarketplace,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 jest.mock("notistack", () => ({
@@ -45,20 +45,9 @@ describe("ExtensionDetails Component", () => {
   const mockUninstallExtension = jest.fn();
   const mockGetMarkdown = jest.fn();
 
-  const mockExtension: Immutable<ExtensionMarketplaceDetail> = {
-    id: BasicBuilder.string(),
-    name: BasicBuilder.string(),
-    qualifiedName: BasicBuilder.string(),
-    description: BasicBuilder.string(),
-    publisher: BasicBuilder.string(),
-    homepage: BasicBuilder.string(),
-    license: BasicBuilder.string(),
-    version: BasicBuilder.string(),
-    readme: BasicBuilder.string(),
-    changelog: BasicBuilder.string(),
-    foxe: BasicBuilder.string(),
+  const mockExtension: ExtensionMarketplaceDetail = ExtensionBuilder.extensionMarketplaceDetail({
     namespace: "local",
-  };
+  });
 
   beforeEach(() => {
     (useSnackbar as jest.Mock).mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
@@ -147,6 +136,72 @@ describe("ExtensionDetails Component", () => {
         );
         expect(mockDownloadExtension).not.toHaveBeenCalled();
         expect(mockInstallExtensions).not.toHaveBeenCalled();
+      });
+    });
+
+    it("displays readme correctly", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const readmeContent = BasicBuilder.string();
+      mockExtension.readme = readmeContent;
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+      const readmeButton = screen.getByRole("tab", {
+        name: /readme/i,
+      });
+
+      fireEvent.click(readmeButton);
+      await waitFor(() => {
+        expect(screen.getByText(readmeContent)).toBeInTheDocument();
+      });
+    });
+
+    it("displays message indicating readme is not found when readme is undefined", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      mockExtension.readme = undefined;
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+      const readmeButton = screen.getByRole("tab", {
+        name: /readme/i,
+      });
+
+      fireEvent.click(readmeButton);
+      await waitFor(() => {
+        expect(screen.getByText(/No readme found/i)).toBeInTheDocument();
+      });
+    });
+
+    it("displays changelog correctly", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const changelogContent = BasicBuilder.string();
+      mockExtension.changelog = changelogContent;
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+      const changelogButton = screen.getByRole("tab", {
+        name: /changelog/i,
+      });
+
+      fireEvent.click(changelogButton);
+      await waitFor(() => {
+        expect(screen.getByText(changelogContent)).toBeInTheDocument();
+      });
+    });
+
+    it("displays message indicating changelog is not found when changelog is undefined", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      mockExtension.changelog = undefined;
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+      const changelogButton = screen.getByRole("tab", {
+        name: /changelog/i,
+      });
+
+      fireEvent.click(changelogButton);
+      await waitFor(() => {
+        expect(screen.getByText(/No changelog found/i)).toBeInTheDocument();
       });
     });
 

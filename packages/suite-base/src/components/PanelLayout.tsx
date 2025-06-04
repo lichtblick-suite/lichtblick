@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -24,7 +24,6 @@ import {
   MosaicWindow,
   MosaicWithoutDragDropContext,
 } from "react-mosaic-component";
-import { makeStyles } from "tss-react/mui";
 
 import { EmptyPanelLayout } from "@lichtblick/suite-base/components/EmptyPanelLayout";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
@@ -43,33 +42,18 @@ import { getPanelIdForType, getPanelTypeFromId } from "@lichtblick/suite-base/ut
 
 import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";
+import { useStyles } from "./PanelLayout.style";
 import { PanelRemounter } from "./PanelRemounter";
 import { UnknownPanel } from "./UnknownPanel";
-
 import "react-mosaic-component/react-mosaic-component.css";
+import { useInstallingExtensionsStore } from "../hooks/useInstallingExtensionsStore";
 
 type Props = {
   layout?: MosaicNode<string>;
   onChange: (panels: MosaicNode<string> | undefined) => void;
+  loadingComponent?: React.JSX.Element;
   tabId?: string;
 };
-
-// CSS hack to disable the first level of drop targets inside a Tab's own mosaic window (that would
-// place the dropped item as a sibling of the Tab), as well as the "root drop targets" inside the
-// nested mosaic (that would place the dropped item as a direct child of the Tab). Makes it easier
-// to drop panels into a tab layout.
-const useStyles = makeStyles()({
-  hideTopLevelDropTargets: {
-    margin: 0,
-
-    ".mosaic-root + .drop-target-container": {
-      display: "none !important",
-    },
-    "& > .mosaic-window > .drop-target-container": {
-      display: "none !important",
-    },
-  },
-});
 
 // This wrapper makes the tabId available in the drop result when something is dropped into a nested
 // drop target. This allows a panel to know which mosaic it was dropped in regardless of nesting
@@ -98,14 +82,14 @@ function TabMosaicWrapper({ tabId, children }: PropsWithChildren<{ tabId?: strin
   );
 }
 
-export function UnconnectedPanelLayout(props: Props): React.ReactElement {
+export function UnconnectedPanelLayout(props: Readonly<Props>): React.ReactElement {
   const { savePanelConfigs } = useCurrentLayoutActions();
   const mosaicId = usePanelMosaicId();
-  const { layout, onChange, tabId } = props;
+  const { layout, onChange, tabId, loadingComponent } = props;
   const createTile = useCallback(
     (config?: { type?: string; panelConfig?: PanelConfig }) => {
       const defaultPanelType = "RosOut";
-      const type = config?.type ? config.type : defaultPanelType;
+      const type = config?.type ?? defaultPanelType;
       const id = getPanelIdForType(type);
       if (config?.panelConfig) {
         savePanelConfigs({ configs: [{ id, config: config.panelConfig }] });
@@ -192,7 +176,12 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
     [layout, mosaicId, onChange, renderTile, tabId],
   );
 
-  return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
+  return (
+    <ErrorBoundary>
+      {loadingComponent}
+      {bodyToRender}
+    </ErrorBoundary>
+  );
 }
 
 function ExtensionsLoadingState(): React.JSX.Element {
@@ -211,11 +200,15 @@ const selectedLayoutExistsSelector = (state: LayoutState) =>
 const selectedLayoutMosaicSelector = (state: LayoutState) => state.selectedLayout?.data?.layout;
 
 export default function PanelLayout(): React.JSX.Element {
+  const { classes } = useStyles();
   const { layoutEmptyState } = useAppContext();
   const { changePanelLayout } = useCurrentLayoutActions();
   const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);
   const mosaicLayout = useCurrentLayoutSelector(selectedLayoutMosaicSelector);
   const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
+  const { installingProgress } = useInstallingExtensionsStore();
+
+  const isInstallingExtensions = installingProgress.inProgress;
 
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {
@@ -229,9 +222,22 @@ export default function PanelLayout(): React.JSX.Element {
   if (registeredExtensions == undefined) {
     return <ExtensionsLoadingState />;
   }
+  const loadingComponent = isInstallingExtensions ? (
+    <Stack className={classes.overlayStyle}>
+      <ExtensionsLoadingState />
+    </Stack>
+  ) : (
+    <></>
+  );
 
   if (layoutExists) {
-    return <UnconnectedPanelLayout layout={mosaicLayout} onChange={onChange} />;
+    return (
+      <UnconnectedPanelLayout
+        layout={mosaicLayout}
+        onChange={onChange}
+        loadingComponent={loadingComponent}
+      />
+    );
   }
 
   if (layoutEmptyState) {

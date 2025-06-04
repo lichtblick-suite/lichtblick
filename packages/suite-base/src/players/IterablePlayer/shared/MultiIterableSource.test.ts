@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { MultiSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
@@ -90,7 +90,7 @@ describe("MultiIterableSource", () => {
       };
       mockSourceConstructor.mockImplementationOnce(() => mockSource);
     };
-    it("should merge initializations correctly with no problems", async () => {
+    it("should merge initializations correctly with no alerts", async () => {
       const multiSource = new MultiIterableSource(dataSource, mockSourceConstructor);
       const dataTypeName = BasicBuilder.string();
       const dataType = { definitions: [{ name: "field1", type: "int64" }] };
@@ -128,12 +128,12 @@ describe("MultiIterableSource", () => {
       expect(result.metadata).toContainEqual(init1.metadata![0]);
       expect(result.metadata).toContainEqual(init2.metadata![0]);
       expect(result.profile).toBe(init2.profile);
-      expect(result.problems.length).toBe(0);
+      expect(result.alerts.length).toBe(0);
 
       expect(mockSourceConstructor).toHaveBeenCalledTimes(2);
     });
 
-    it("should merge initializations, but containing problems", async () => {
+    it("should merge initializations, but containing alerts", async () => {
       const multiSource = new MultiIterableSource(dataSource, mockSourceConstructor);
 
       const dataTypeName = BasicBuilder.string();
@@ -161,16 +161,12 @@ describe("MultiIterableSource", () => {
       expect(result.end.sec).toBe(30);
       expect(result.datatypes.size).toBe(1);
       expect(result.topics.length).toBe(1);
-      expect(result.problems.length).toBe(3);
-      expect(result.problems[0]!.message).toBe(
-        "MCAP time overlap detected. Some functionalities may not work as expected.",
+      expect(result.alerts.length).toBe(2);
+      expect(result.alerts[0]!.message).toBe(
+        `Different datatypes found for schema "${dataTypeName}"`,
       );
 
-      expect(result.problems[1]!.message).toBe(
-        `Datatype mismatch detected for "${dataTypeName}". Merging may cause issues.`,
-      );
-
-      expect(result.problems[2]!.message).toBe(
+      expect(result.alerts[1]!.message).toBe(
         `Schema name mismatch detected for topic "${topicName}". Expected "${init1.topics[0]!.schemaName}", but found "${init2.topics[0]!.schemaName}".`,
       );
 

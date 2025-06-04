@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,6 +15,7 @@ import { DeepPartial, assert } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
 import { ObjectPool } from "@lichtblick/den/collection";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { Time, fromNanoSec, isLessThan, toNanoSec } from "@lichtblick/rostime";
 import {
@@ -164,6 +165,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public readonly gl: THREE.WebGLRenderer;
   public maxLod = DetailLevel.High;
 
+  public customCameraModels: CameraModelsMap = new Map();
+
   public debugPicking: boolean;
   public config: Immutable<RendererConfig>;
   public settings: SettingsManager;
@@ -252,11 +255,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     config: Immutable<RendererConfig>;
     interfaceMode: InterfaceMode;
     sceneExtensionConfig: SceneExtensionConfig;
+    customCameraModels: CameraModelsMap;
     fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
     displayTemporaryError?: (message: string) => void;
     testOptions: TestOptions;
   }) {
     super();
+    this.customCameraModels = args.customCameraModels;
     this.displayTemporaryError = args.displayTemporaryError;
     // NOTE: Global side effect
     THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
@@ -1533,6 +1538,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   public setAnalytics(analytics: IAnalytics): void {
     this.analytics = analytics;
+  }
+
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
   }
 }
 

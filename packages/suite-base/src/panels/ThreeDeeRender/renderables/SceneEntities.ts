@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -25,7 +25,6 @@ import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction } from "@lichtblick/suite";
 
 import { TopicEntities } from "./TopicEntities";
-import { PrimitivePool } from "./primitives/PrimitivePool";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -42,6 +41,7 @@ import {
 import { LayerSettingsEntity } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
+import { PrimitivePool } from "./primitives/PrimitivePool";
 
 const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
   showOutlines: true,

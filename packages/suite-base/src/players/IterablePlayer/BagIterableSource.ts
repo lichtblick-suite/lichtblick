@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,12 +11,7 @@ import { parse as parseMessageDefinition } from "@lichtblick/rosmsg";
 import { MessageReader } from "@lichtblick/rosmsg-serialization";
 import { compare } from "@lichtblick/rostime";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
-import {
-  MessageEvent,
-  PlayerProblem,
-  Topic,
-  TopicStats,
-} from "@lichtblick/suite-base/players/types";
+import { MessageEvent, PlayerAlert, Topic, TopicStats } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import BrowserHttpReader from "@lichtblick/suite-base/util/BrowserHttpReader";
 import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
@@ -84,7 +79,7 @@ export class BagIterableSource implements IIterableSource {
 
     await this.#bag.open();
 
-    const problems: PlayerProblem[] = [];
+    const alerts: PlayerAlert[] = [];
     const chunksOverlapCount = getBagChunksOverlapCount(this.#bag.chunkInfos);
     // If >25% of the chunks overlap, show a warning. It's common for a small number of chunks to overlap
     // since it looks like `rosbag record` has a bit of a race condition, and that's not too terrible, so
@@ -94,7 +89,7 @@ export class BagIterableSource implements IIterableSource {
         this.#bag.chunkInfos.length
       }). This results in more memory use during playback.`;
       const tip = "Re-sort the messages in your bag by receive time.";
-      problems.push({
+      alerts.push({
         severity: "warn",
         message,
         tip,
@@ -127,7 +122,7 @@ export class BagIterableSource implements IIterableSource {
 
       const existingTopic = topics.get(connection.topic);
       if (existingTopic && existingTopic.schemaName !== schemaName) {
-        problems.push({
+        alerts.push({
           severity: "warn",
           message: `Conflicting datatypes on topic (${connection.topic}): ${schemaName}, ${existingTopic.schemaName}`,
           tip: `Studio requires all connections on a topic to have the same datatype. Make sure all your nodes are publishing the same message on ${connection.topic}.`,
@@ -166,7 +161,7 @@ export class BagIterableSource implements IIterableSource {
       topicStats,
       start: this.#bag.startTime ?? { sec: 0, nsec: 0 },
       end: this.#bag.endTime ?? { sec: 0, nsec: 0 },
-      problems,
+      alerts,
       profile: "ros1",
       datatypes,
       publishersByTopic,
@@ -206,9 +201,9 @@ export class BagIterableSource implements IIterableSource {
       const schemaName = this.#datatypesByConnectionId.get(connectionId);
       if (!schemaName) {
         yield {
-          type: "problem",
+          type: "alert",
           connectionId,
-          problem: {
+          alert: {
             severity: "error",
             message: `Cannot missing datatype for connection id ${connectionId}`,
             tip: `Check that your bag file is well-formed. It should have a connection record for every connection id referenced from a message record.`,
@@ -243,9 +238,9 @@ export class BagIterableSource implements IIterableSource {
         };
       } else {
         yield {
-          type: "problem",
+          type: "alert",
           connectionId,
-          problem: {
+          alert: {
             severity: "error",
             message: `Cannot deserialize message for missing connection id ${connectionId}`,
             tip: `Check that your bag file is well-formed. It should have a connection record for every connection id referenced from a message record.`,

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -165,7 +165,6 @@ export default function Root(props: RootProps): React.JSX.Element {
       onAppBarDoubleClick={() => {
         nativeWindow.handleTitleBarDoubleClick();
       }}
-      showCustomWindowControls={ctxbridge?.platform === "linux"}
       isMaximized={isMaximized}
       onMinimizeWindow={onMinimizeWindow}
       onMaximizeWindow={onMaximizeWindow}

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -18,6 +18,7 @@ import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
 import * as _ from "lodash-es";
 
 import { ros1 } from "@lichtblick/rosmsg-msgs-common";
+import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessages/getDiff";
 
 import { PATH_NAME_AGGREGATOR } from "./constants";
@@ -147,6 +148,17 @@ export function getMessageDocumentationLink(datatype: string): string | undefine
   const foxgloveDocsLink = foxgloveDocsLinksByDatatype.get(datatype);
   if (foxgloveDocsLink != undefined) {
     return foxgloveDocsLink;
+  }
+
+  return undefined;
+}
+
+export function getConstantNameByKeyPath(
+  keyPath: (string | number)[],
+  queriedData: MessagePathDataItem[],
+): string | undefined {
+  if (keyPath.length > 0 && typeof keyPath[0] === "number") {
+    return queriedData[keyPath[0]]?.constantName;
   }
 
   return undefined;

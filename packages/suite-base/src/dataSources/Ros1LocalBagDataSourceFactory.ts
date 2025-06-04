@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -23,7 +23,16 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
   public supportedFileTypes = [".bag"];
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const file = args.file;
+    const files = args.files ?? [];
+
+    if (args.file) {
+      files.push(args.file);
+    }
+    if (files.length === 0) {
+      return;
+    }
+
+    const file: File | undefined = files[0];
     if (!file) {
       return;
     }

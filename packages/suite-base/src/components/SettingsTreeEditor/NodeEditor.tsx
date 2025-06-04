@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -366,17 +366,16 @@ function NodeEditorComponent(props: NodeEditorProps): React.JSX.Element {
               <EditIcon fontSize="small" />
             </IconButton>
           )}
-          {statusButton
-            ? statusButton
-            : settings.visible != undefined && (
-                <VisibilityToggle
-                  size="small"
-                  checked={visible}
-                  onChange={toggleVisibility}
-                  style={{ opacity: allowVisibilityToggle ? 1 : 0 }}
-                  disabled={!allowVisibilityToggle}
-                />
-              )}
+          {statusButton ??
+            (settings.visible != undefined && (
+              <VisibilityToggle
+                size="small"
+                checked={visible}
+                onChange={toggleVisibility}
+                style={{ opacity: allowVisibilityToggle ? 1 : 0 }}
+                disabled={!allowVisibilityToggle}
+              />
+            ))}
           {inlineActions.map((action) => {
             const Icon = action.icon ? icons[action.icon] : undefined;
             const handler = () => {

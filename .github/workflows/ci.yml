@@ -37,7 +37,7 @@ jobs:
           - name: test
             command: yarn run test --maxWorkers=100%
         include:
-          - os: windows-2019
+          - os: windows-latest
             config:
               name: packages
               command: echo complete
@@ -46,8 +46,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.1
-        with:
-          lfs: true
 
       - uses: actions/setup-node@v4.0.3
         with:
@@ -74,8 +72,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.1
-        with:
-          lfs: true
 
       - uses: actions/setup-node@v4.0.3
         with:

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -9,9 +9,10 @@ import * as _ from "lodash-es";
 import * as THREE from "three";
 import { assert } from "ts-essentials";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { VideoPlayer } from "@lichtblick/den/video";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
+import { ICameraModel } from "@lichtblick/suite";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderable";
 import { stringToRgba } from "@lichtblick/suite-base/panels/ThreeDeeRender/color";
@@ -19,8 +20,13 @@ import { WorkerImageDecoder } from "@lichtblick/suite-base/panels/ThreeDeeRender
 import { projectPixel } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/projections";
 import { RosValue } from "@lichtblick/suite-base/players/types";
 
-import { AnyImage } from "./ImageTypes";
-import { decodeCompressedImageToBitmap } from "./decodeImage";
+import { AnyImage, CompressedVideo } from "./ImageTypes";
+import {
+  decodeCompressedImageToBitmap,
+  decodeCompressedVideoToBitmap,
+  emptyVideoFrame,
+  getVideoDecoderConfig,
+} from "./decodeImage";
 import { CameraInfo } from "../../ros";
 import { DECODE_IMAGE_ERR_KEY, IMAGE_TOPIC_PATH } from "../ImageMode/constants";
 import { ColorModeSettings } from "../colorMode";
@@ -46,11 +52,15 @@ export const IMAGE_RENDERABLE_DEFAULT_SETTINGS: ImageRenderableSettings = {
   color: "#ffffff",
 };
 
+const IMAGE_FORMATS = new Set(["jpeg", "jpg", "png", "webp"]);
+const VIDEO_FORMATS = new Set(["h264"]);
+
 export type ImageUserData = BaseUserData & {
   topic: string;
   settings: ImageRenderableSettings;
+  firstMessageTime: bigint | undefined;
   cameraInfo: CameraInfo | undefined;
-  cameraModel: PinholeCameraModel | undefined;
+  cameraModel: ICameraModel | undefined;
   image: AnyImage | undefined;
   texture: THREE.Texture | undefined;
   material: THREE.MeshBasicMaterial | undefined;
@@ -59,6 +69,9 @@ export type ImageUserData = BaseUserData & {
 };
 
 export class ImageRenderable extends Renderable<ImageUserData> {
+  // A lazily instantiated player for compressed video
+  public videoPlayer: VideoPlayer | undefined;
+
   // Make sure that everything is build the first time we render
   // set when camera info or image changes
   #geometryNeedsUpdate = true;
@@ -129,7 +142,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   }
 
   // Renderable should only need to care about the model
-  public setCameraModel(cameraModel: PinholeCameraModel): void {
+  public setCameraModel(cameraModel: ICameraModel): void {
     this.#geometryNeedsUpdate ||= this.userData.cameraModel !== cameraModel;
     this.userData.cameraModel = cameraModel;
   }
@@ -235,7 +248,57 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     resizeWidth?: number,
   ): Promise<ImageBitmap | ImageData> {
     if ("format" in image) {
-      return await decodeCompressedImageToBitmap(image, resizeWidth);
+      if (VIDEO_FORMATS.has(image.format)) {
+        const frameMsg = image as CompressedVideo;
+
+        if (frameMsg.data.byteLength === 0) {
+          const error = "Empty video frame";
+          log.error(error);
+          // show last frame instead of error image if available
+          if (this.videoPlayer?.lastImageBitmap) {
+            return this.videoPlayer.lastImageBitmap;
+          }
+          // show black image instead of error image
+          return await emptyVideoFrame(this.videoPlayer, resizeWidth);
+        }
+
+        if (!this.videoPlayer) {
+          this.videoPlayer = new VideoPlayer();
+          this.videoPlayer.on("error", (err) => {
+            log.error(err);
+            this.addError(DECODE_IMAGE_ERR_KEY, `Error decoding video: ${err.message}`);
+          });
+          this.videoPlayer.on("warn", (msg) => {
+            log.warn(msg);
+          });
+        }
+        const videoPlayer = this.videoPlayer;
+
+        // Initialize the video player if needed
+        if (!videoPlayer.isInitialized()) {
+          const decoderConfig = getVideoDecoderConfig(frameMsg);
+          if (decoderConfig != undefined) {
+            await videoPlayer.init(decoderConfig);
+          } else {
+            // Raise error so the caller can catch it
+            throw new Error("Waiting for keyframe");
+          }
+        }
+
+        assert(this.userData.firstMessageTime != undefined, "firstMessageTime must be set");
+
+        return await decodeCompressedVideoToBitmap(
+          frameMsg,
+          videoPlayer,
+          this.userData.firstMessageTime,
+          resizeWidth,
+        );
+      } else if (IMAGE_FORMATS.has(image.format)) {
+        return await decodeCompressedImageToBitmap(image, resizeWidth);
+      } else {
+        // Raise error so the caller can catch it
+        throw new Error(`Unsupported format: "${image.format}"`);
+      }
     }
     return await (this.decoder ??= new WorkerImageDecoder()).decode(image, this.userData.settings);
   }
@@ -448,7 +511,7 @@ function createDataTexture(imageData: ImageData): THREE.DataTexture {
 }
 
 function createGeometry(
-  cameraModel: PinholeCameraModel,
+  cameraModel: ICameraModel,
   settings: ImageRenderableSettings,
 ): THREE.PlaneGeometry {
   const WIDTH_SEGMENTS = 10;

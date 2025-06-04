@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -9,7 +9,7 @@ import * as _ from "lodash-es";
 
 import { TopicAliasFunction, Immutable as Im } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { PlayerProblem, Topic } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert, Topic } from "@lichtblick/suite-base/players/types";
 
 import { AliasingStateProcessor, TopicAliasMap } from "./AliasingStateProcessor";
 import { IStateProcessor } from "./IStateProcessor";
@@ -63,7 +63,7 @@ export class StateProcessorFactory {
       return (this.#stateProcessor = new NoopStateProcessor());
     }
 
-    const { aliasMap, problems } = mergeAliases(mappings, input);
+    const { aliasMap, alerts } = mergeAliases(mappings, input);
 
     // When the output of aliasing is the same list of topics, then we can keep our existing state
     // processor. This keep the state processor instance unchanged and preserves memoizations.
@@ -72,35 +72,35 @@ export class StateProcessorFactory {
     }
 
     this.#aliases = aliasMap;
-    return (this.#stateProcessor = new AliasingStateProcessor(aliasMap, problems));
+    return (this.#stateProcessor = new AliasingStateProcessor(aliasMap, alerts));
   }
 }
 
 // Merges multiple aliases into a single unified alias map. Note that a single topic name
 // can alias to more than one renamed topic if multiple extensions provide an alias for it.
-// Also returns any problems caused by disallowed aliases.
+// Also returns any alerts caused by disallowed aliases.
 function mergeAliases(
   maps: Im<{ extensionId: string; aliases: ReturnType<TopicAliasFunction> }[]>,
   inputs: Im<StateFactoryInput>,
 ): {
   aliasMap: TopicAliasMap;
-  problems: undefined | PlayerProblem[];
+  alerts: undefined | PlayerAlert[];
 } {
   const inverseMapping = new Map<string, string>();
-  const problems: PlayerProblem[] = [];
+  const alerts: PlayerAlert[] = [];
   const merged: TopicAliasMap = new Map();
   const topics = inputs.topics ?? [];
   for (const { extensionId, aliases } of maps) {
     for (const { name, sourceTopicName } of aliases) {
       const existingMapping = inverseMapping.get(name);
       if (topics.some((topic) => topic.name === name)) {
-        problems.push({
+        alerts.push({
           severity: "error",
           message: `Disallowed topic alias`,
           tip: `Extension ${extensionId} aliased topic ${name} is already present in the data source.`,
         });
       } else if (existingMapping != undefined && existingMapping !== sourceTopicName) {
-        problems.push({
+        alerts.push({
           severity: "error",
           message: `Disallowed topic alias`,
           tip: `Extension ${extensionId} requested duplicate alias from topic ${sourceTopicName} to topic ${name}.`,
@@ -112,5 +112,5 @@ function mergeAliases(
       }
     }
   }
-  return { aliasMap: merged, problems: problems.length > 0 ? problems : undefined };
+  return { aliasMap: merged, alerts: alerts.length > 0 ? alerts : undefined };
 }
