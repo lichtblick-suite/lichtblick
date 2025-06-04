@@ -10,10 +10,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer";
 import { PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/types";
 
-import RemoteDataSourceFactory, {
-  // isFileExtensionAllowed,
-  checkExtensionMatch,
-} from "./RemoteDataSourceFactory";
+import RemoteDataSourceFactory, { checkExtensionMatch } from "./RemoteDataSourceFactory";
 
 jest.mock("@lichtblick/suite-base/players/IterablePlayer", () => ({
   WorkerIterableSource: jest.fn(),
