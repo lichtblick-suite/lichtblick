@@ -87,6 +87,51 @@ const safeReadFile = async (filePath: string): Promise<string> => {
   }
 };
 
+export async function getExtension(
+  id: string,
+  rootFolder: string,
+): Promise<DesktopExtension | undefined> {
+  if (!existsSync(rootFolder)) {
+    return undefined;
+  }
+
+  const rootFolderContents = await readdir(rootFolder, { withFileTypes: true });
+  for (const entry of rootFolderContents) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const extensionRootPath = pathJoin(rootFolder, entry.name);
+    const packagePath = pathJoin(extensionRootPath, "package.json");
+
+    try {
+      const packageData = await readFile(packagePath, { encoding: "utf8" });
+      const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
+
+      if (getPackageId(packageJson) !== id) {
+        continue;
+      }
+
+      const [readme, changelog] = await Promise.all([
+        safeReadFile(pathJoin(extensionRootPath, "README.md")),
+        safeReadFile(pathJoin(extensionRootPath, "CHANGELOG.md")),
+      ]);
+
+      return {
+        id,
+        packageJson,
+        directory: extensionRootPath,
+        readme,
+        changelog,
+      };
+    } catch (err: unknown) {
+      log.error(`Failed to load extension at ${extensionRootPath}:`, err);
+      continue;
+    }
+  }
+  return undefined;
+}
+
 export async function getExtensions(rootFolder: string): Promise<DesktopExtension[]> {
   const extensions: DesktopExtension[] = [];
 
@@ -124,14 +169,11 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
 }
 
 export async function loadExtension(id: string, rootFolder: string): Promise<string> {
-  // Find this extension
-  const userExtensions = await getExtensions(rootFolder);
-  const extension = userExtensions.find(
-    (ext) => getPackageId(ext.packageJson as ExtensionPackageJson) === id,
-  );
-  if (extension == undefined) {
-    log.error(`Extension ${id} was not found, searched ${userExtensions.length} extensions`);
-    return "";
+  log.debug(`Loading extension ${id} from ${rootFolder}`);
+
+  const extension = await getExtension(id, rootFolder);
+  if (!extension) {
+    throw new Error(`Extension ${id} not found in ${rootFolder}`);
   }
 
   const packagePath = pathJoin(extension.directory, "package.json");
@@ -201,20 +243,14 @@ export async function installExtension(
 }
 
 export async function uninstallExtension(id: string, rootFolder: string): Promise<boolean> {
-  log.debug(`Searching for extension ${id} in ${rootFolder} to uninstall`);
+  log.debug(`Uninstalling extension ${id} from ${rootFolder}`);
 
-  // Find this extension
-  const userExtensions = await getExtensions(rootFolder);
-  const extension = userExtensions.find(
-    (ext) => getPackageId(ext.packageJson as ExtensionPackageJson) === id,
-  );
-  if (extension == undefined) {
-    log.error(`Extension ${id} was not found, searched ${userExtensions.length} extensions`);
+  const extension = await getExtension(id, rootFolder);
+  if (!extension) {
+    log.warn(`Extension ${id} not found in ${rootFolder}`);
     return false;
   }
 
-  // Delete the extension directory and contents
-  log.info(`Deleting extension directory ${extension.directory}`);
   await rm(extension.directory, { recursive: true, force: true });
   return true;
 }

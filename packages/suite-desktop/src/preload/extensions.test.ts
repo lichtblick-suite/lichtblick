@@ -8,6 +8,7 @@ import { join as pathJoin } from "path";
 import randomString from "randomstring";
 
 import {
+  getExtension,
   getExtensions,
   getPackageDirname,
   getPackageId,
@@ -166,6 +167,131 @@ describe("parsePackageName", () => {
     expect(result).toEqual({
       name: "",
     });
+  });
+});
+
+describe("getExtension", () => {
+  const rootFolder = "/mock/extensions";
+
+  it("should return undefined if the root folder does not exist", async () => {
+    // Given
+    const extensionId = genericString();
+    (existsSync as jest.Mock).mockReturnValue(false);
+
+    // When
+    const result = await getExtension(extensionId, rootFolder);
+
+    // Then
+    expect(result).toBeUndefined();
+    expect(existsSync).toHaveBeenCalledWith(rootFolder);
+  });
+
+  it("should return undefined if no matching extension is found", async () => {
+    // Given
+    const extensionId = genericString();
+    const extensionName = genericString();
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([{ name: extensionName, isDirectory: () => true }]);
+    (readFile as jest.Mock).mockImplementation(async (path: string) => {
+      if (path.endsWith("package.json")) {
+        const otherPackageJson = generateExtensionPackageJSon({ publisher: genericString() });
+        return JSON.stringify(otherPackageJson);
+      }
+      return "";
+    });
+
+    // When
+    const result = await getExtension(extensionId, rootFolder);
+
+    // Then
+    expect(result).toBeUndefined();
+    expect(readdir).toHaveBeenCalledWith(rootFolder, { withFileTypes: true });
+  });
+
+  it("should return the extension if a matching id is found", async () => {
+    // Given
+    const mockReadmeContent = genericString();
+    const mockChangelogContent = genericString();
+    const publisher = genericString();
+    const extensionName = genericString();
+    const mockPackageJson = generateExtensionPackageJSon({
+      name: extensionName,
+      publisher,
+    });
+    const extensionId = `${publisher}.${extensionName}`;
+
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([{ name: extensionName, isDirectory: () => true }]);
+    (readFile as jest.Mock).mockImplementation(async (path: string) => {
+      if (path.endsWith("package.json")) {
+        return JSON.stringify(mockPackageJson);
+      }
+      if (path.endsWith("README.md")) {
+        return mockReadmeContent;
+      }
+      if (path.endsWith("CHANGELOG.md")) {
+        return mockChangelogContent;
+      }
+      return "";
+    });
+
+    // When
+    const result = await getExtension(extensionId, rootFolder);
+
+    // Then
+    expect(result).toMatchObject({
+      id: extensionId,
+      packageJson: mockPackageJson,
+      directory: `${rootFolder}/${extensionName}`,
+      readme: mockReadmeContent,
+      changelog: mockChangelogContent,
+    });
+  });
+
+  it("should return the extension with empty readme and changelog if those files are missing", async () => {
+    // Given
+    const publisher = genericString();
+    const extensionName = genericString();
+    const mockPackageJson = generateExtensionPackageJSon({
+      name: extensionName,
+      publisher,
+    });
+    const extensionId = `${publisher}.${extensionName}`;
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([{ name: extensionName, isDirectory: () => true }]);
+    (readFile as jest.Mock).mockImplementation(async (path: string) => {
+      if (path.endsWith("package.json")) {
+        return JSON.stringify(mockPackageJson);
+      }
+      throw new Error("File not found");
+    });
+
+    // When
+    const result = await getExtension(extensionId, rootFolder);
+
+    // Then
+    expect(result).toMatchObject({
+      id: extensionId,
+      packageJson: mockPackageJson,
+      directory: `${rootFolder}/${extensionName}`,
+      readme: "",
+      changelog: "",
+    });
+  });
+
+  it("should skip directories that are not directories", async () => {
+    // Given
+    const publisher = genericString();
+    const extensionName = genericString();
+    const extensionId = `${publisher}.${extensionName}`;
+    (existsSync as jest.Mock).mockReturnValue(true);
+    (readdir as jest.Mock).mockResolvedValue([{ name: "notadir", isDirectory: () => false }]);
+
+    // When
+    const result = await getExtension(extensionId, rootFolder);
+
+    // Then
+    expect(result).toBeUndefined();
   });
 });
 
