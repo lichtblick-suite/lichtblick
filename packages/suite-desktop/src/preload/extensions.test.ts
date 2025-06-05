@@ -237,7 +237,6 @@ describe("getExtension", () => {
 
     // When
     const result = await getExtension(extensionId, rootFolder);
-    console.log("GOLDBERG getExtension result:", result);
 
     // Then
     expect(result).toMatchObject({

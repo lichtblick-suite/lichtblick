@@ -97,7 +97,9 @@ export async function getExtension(
 
   const rootFolderContents = await readdir(rootFolder, { withFileTypes: true });
   for (const entry of rootFolderContents) {
-    if (!entry.isDirectory()) continue;
+    if (!entry.isDirectory()) {
+      continue;
+    }
 
     const extensionRootPath = pathJoin(rootFolder, entry.name);
     const packagePath = pathJoin(extensionRootPath, "package.json");
@@ -106,7 +108,9 @@ export async function getExtension(
       const packageData = await readFile(packagePath, { encoding: "utf8" });
       const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
 
-      if (getPackageId(packageJson) !== id) continue;
+      if (getPackageId(packageJson) !== id) {
+        continue;
+      }
 
       const [readme, changelog] = await Promise.all([
         safeReadFile(pathJoin(extensionRootPath, "README.md")),
