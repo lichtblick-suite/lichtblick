@@ -3,7 +3,11 @@
 import { test, expect } from "../../../fixtures/electron";
 
 /**
- *
+ * Given the Data Source dialog is closed
+ * When the user presses clicks on the "Hide left sidebar button"
+ * Then the left‐sidebar tabs are all hidden
+ * When the user clicks on the "Show left sidebar" button
+ * Then the left‐sidebar tabs are all visible
  */
 test("show/hide left side bar via click", async ({ mainWindow }) => {
   // Given
@@ -27,6 +31,14 @@ test("show/hide left side bar via click", async ({ mainWindow }) => {
   await expect(mainWindow.getByTestId("alerts-left")).toBeVisible();
   await expect(mainWindow.getByTestId("layouts-left")).toBeVisible();
 });
+
+/**
+ * Given the Data Source dialog is closed
+ * When the user presses clicks on the "Show right sidebar button"
+ * Then the right‐sidebar tabs are all hidden
+ * When the user clicks on the "Hide right sidebar" button
+ * Then the right‐sidebar tabs are all visible
+ */
 test("hide/show right side bar via click", async ({ mainWindow }) => {
   // Given
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
