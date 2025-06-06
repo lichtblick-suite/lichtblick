@@ -17,8 +17,9 @@ test.use({
 });
 
 /**
- * GIVEN --source flag with paths to two files is passed via CLI
- * THEN both the file names should be visible and the "Play" button enabled
+ * GIVEN the app is started via CLI with --source flag pointing to two MCAPs
+ * THEN the file names, example.mcap and example-2.mcap, should be visible on the main window
+ * And the "Play" button enabled
  */
 test("should open a file passed with flag --source via CLI", async ({ mainWindow }) => {
   // Then
