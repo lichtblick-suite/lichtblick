@@ -14,9 +14,9 @@ export type ElectronFixtures = {
 
 const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
 
-export const test = base.extend<ElectronFixtures>({
-  // eslint-disable-next-line no-empty-pattern
-  electronApp: async ({}, use) => {
+export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
+  electronArgs: [],
+  electronApp: async ({ electronArgs }, use) => {
     checkBuild(WEBPACK_PATH);
 
     // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
@@ -26,7 +26,12 @@ export const test = base.extend<ElectronFixtures>({
     const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-e2e-test-"));
 
     const app = await electron.launch({
-      args: [WEBPACK_PATH, `--user-data-dir=${userDataDir}`, `--home-dir=${homeDir}`],
+      args: [
+        WEBPACK_PATH,
+        `--user-data-dir=${userDataDir}`,
+        `--home-dir=${homeDir}`,
+        ...electronArgs,
+      ],
       executablePath: electronPath as unknown as string,
     });
     await use(app);
