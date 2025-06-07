@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#0F172A"/>
+  
+  <!-- Grid pattern -->
+  <defs>
+    <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="1" opacity="0.3"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1200" height="80" fill="#1E293B"/>
+  
+  <!-- Logo placeholder -->
+  <circle cx="50" cy="40" r="20" fill="#3B82F6"/>
+  <text x="85" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="600" fill="white">Lichtblick</text>
+  <text x="85" y="70" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#94A3B8">Robotics Data Visualization Platform</text>
+  
+  <!-- Main content area -->
+  <g transform="translate(30, 110)">
+    <!-- 3D Visualization Panel -->
+    <g>
+      <rect x="0" y="0" width="580" height="350" rx="8" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+      <rect x="0" y="0" width="580" height="30" rx="8 8 0 0" fill="#334155"/>
+      <text x="10" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="white">3D Scene</text>
+      
+      <!-- 3D content mockup -->
+      <rect x="20" y="50" width="540" height="280" fill="#0F172A" opacity="0.5"/>
+      <path d="M 290 190 L 340 160 L 390 190 L 340 220 Z" fill="none" stroke="#3B82F6" stroke-width="2"/>
+      <circle cx="290" cy="190" r="3" fill="#3B82F6"/>
+      <circle cx="340" cy="160" r="3" fill="#3B82F6"/>
+      <circle cx="390" cy="190" r="3" fill="#3B82F6"/>
+      <circle cx="340" cy="220" r="3" fill="#3B82F6"/>
+      
+      <!-- Point cloud representation -->
+      <g opacity="0.6">
+        <circle cx="250" cy="150" r="1" fill="#10B981"/>
+        <circle cx="260" cy="155" r="1" fill="#10B981"/>
+        <circle cx="255" cy="160" r="1" fill="#10B981"/>
+        <circle cx="265" cy="158" r="1" fill="#10B981"/>
+        <circle cx="270" cy="165" r="1" fill="#10B981"/>
+        <circle cx="275" cy="162" r="1" fill="#10B981"/>
+        <circle cx="280" cy="170" r="1" fill="#10B981"/>
+      </g>
+    </g>
+    
+    <!-- Plot Panel -->
+    <g transform="translate(600, 0)">
+      <rect x="0" y="0" width="540" height="170" rx="8" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+      <rect x="0" y="0" width="540" height="30" rx="8 8 0 0" fill="#334155"/>
+      <text x="10" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="white">Plot - Velocity</text>
+      
+      <!-- Plot content -->
+      <path d="M 40 140 L 100 120 L 160 125 L 220 110 L 280 115 L 340 100 L 400 105 L 460 95 L 520 100" 
+            fill="none" stroke="#3B82F6" stroke-width="2"/>
+      <path d="M 40 140 L 100 130 L 160 135 L 220 125 L 280 130 L 340 120 L 400 125 L 460 115 L 520 120" 
+            fill="none" stroke="#10B981" stroke-width="2"/>
+    </g>
+    
+    <!-- Raw Messages Panel -->
+    <g transform="translate(600, 180)">
+      <rect x="0" y="0" width="540" height="170" rx="8" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+      <rect x="0" y="0" width="540" height="30" rx="8 8 0 0" fill="#334155"/>
+      <text x="10" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="white">Raw Messages</text>
+      
+      <!-- Message list -->
+      <text x="20" y="55" font-family="monospace" font-size="11" fill="#94A3B8">/scan</text>
+      <text x="100" y="55" font-family="monospace" font-size="11" fill="#10B981">sensor_msgs/LaserScan</text>
+      <text x="300" y="55" font-family="monospace" font-size="11" fill="#64748B">1.2 kB</text>
+      <text x="380" y="55" font-family="monospace" font-size="11" fill="#64748B">50 Hz</text>
+      
+      <text x="20" y="75" font-family="monospace" font-size="11" fill="#94A3B8">/odom</text>
+      <text x="100" y="75" font-family="monospace" font-size="11" fill="#10B981">nav_msgs/Odometry</text>
+      <text x="300" y="75" font-family="monospace" font-size="11" fill="#64748B">856 B</text>
+      <text x="380" y="75" font-family="monospace" font-size="11" fill="#64748B">20 Hz</text>
+      
+      <text x="20" y="95" font-family="monospace" font-size="11" fill="#94A3B8">/camera/image</text>
+      <text x="100" y="95" font-family="monospace" font-size="11" fill="#10B981">sensor_msgs/Image</text>
+      <text x="300" y="95" font-family="monospace" font-size="11" fill="#64748B">921.6 kB</text>
+      <text x="380" y="95" font-family="monospace" font-size="11" fill="#64748B">30 Hz</text>
+    </g>
+    
+    <!-- Image Panel -->
+    <g transform="translate(0, 370)">
+      <rect x="0" y="0" width="280" height="170" rx="8" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+      <rect x="0" y="0" width="280" height="30" rx="8 8 0 0" fill="#334155"/>
+      <text x="10" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="white">Camera Feed</text>
+      
+      <!-- Image placeholder -->
+      <rect x="20" y="50" width="240" height="100" fill="#0F172A" opacity="0.5"/>
+      <rect x="100" y="80" width="80" height="40" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,5"/>
+      <text x="140" y="105" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#F59E0B" text-anchor="middle">Object</text>
+    </g>
+    
+    <!-- Diagnostics Panel -->
+    <g transform="translate(300, 370)">
+      <rect x="0" y="0" width="280" height="170" rx="8" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+      <rect x="0" y="0" width="280" height="30" rx="8 8 0 0" fill="#334155"/>
+      <text x="10" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="white">Diagnostics</text>
+      
+      <!-- Status indicators -->
+      <circle cx="30" cy="60" r="5" fill="#10B981"/>
+      <text x="45" y="65" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94A3B8">Motors: OK</text>
+      
+      <circle cx="30" cy="85" r="5" fill="#10B981"/>
+      <text x="45" y="90" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94A3B8">Sensors: OK</text>
+      
+      <circle cx="30" cy="110" r="5" fill="#F59E0B"/>
+      <text x="45" y="115" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94A3B8">Battery: Low (22%)</text>
+      
+      <circle cx="30" cy="135" r="5" fill="#10B981"/>
+      <text x="45" y="140" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94A3B8">Network: Connected</text>
+    </g>
+  </g>
+  
+  <!-- Timeline -->
+  <rect x="30" y="580" width="1140" height="60" rx="8" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <rect x="50" y="600" width="1100" height="4" rx="2" fill="#334155"/>
+  <rect x="50" y="598" width="400" height="8" rx="4" fill="#3B82F6"/>
+  <circle cx="450" cy="602" r="8" fill="#3B82F6" stroke="#0F172A" stroke-width="2"/>
+  
+  <!-- Playback controls -->
+  <g transform="translate(520, 590)">
+    <rect x="0" y="5" width="30" height="30" rx="4" fill="#334155"/>
+    <path d="M 12 13 L 12 27 L 18 27 L 18 13 Z" fill="white"/>
+    
+    <rect x="40" y="5" width="30" height="30" rx="4" fill="#3B82F6"/>
+    <path d="M 50 13 L 50 27 L 62 20 Z" fill="white"/>
+    
+    <rect x="80" y="5" width="30" height="30" rx="4" fill="#334155"/>
+    <rect x="88" y="13" width="14" height="14" rx="2" fill="white"/>
+  </g>
+  
+  <!-- Features highlight -->
+  <g transform="translate(850, 590)">
+    <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748B">Speed: 1.0x</text>
+    <text x="80" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748B">Time: 00:42 / 02:15</text>
+    <text x="220" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748B">Messages: 125,432</text>
+  </g>
+</svg>

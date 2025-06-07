@@ -1,0 +1,109 @@
+@startuml web-architecture
+!theme blueprint
+skinparam componentStyle rectangle
+
+title Lichtblick Web Architecture
+
+actor "Web User" as User
+
+package "Browser Environment" {
+  
+  package "Main Thread" #LightBlue {
+    component [React Application] as ReactApp <<web/src/entrypoint.tsx>>
+    
+    component [Core Application] as CoreApp <<@lichtblick/suite-base>>
+    
+    component [WebGL Context] as WebGL
+    
+    component [DOM Manipulation] as DOM
+  }
+  
+  package "Service Worker" #LightGreen {
+    component [SW Registration] as SWReg
+    component [Cache Manager] as Cache
+    component [Network Interceptor] as Network
+  }
+  
+  package "Web Workers" #LightYellow {
+    component [Data Processing] as DataWorker
+    component [Message Workers] as MsgWorker
+    component [Computation] as CompWorker
+  }
+  
+  package "Browser Storage" #LightGray {
+    database [IndexedDB] as IDB
+    
+    database [LocalStorage] as LocalStore
+    
+    database [Cache Storage] as CacheStore
+  }
+}
+
+package "Web APIs" {
+  component [File API] as FileAPI
+  
+  component [WebSocket API] as WSAPI
+  
+  component [Fetch API] as FetchAPI
+  
+  component [WebRTC] as WebRTC
+}
+
+cloud "External Services" {
+  node [CDN] as CDN
+  
+  node [WebSocket Server] as WSServer
+  node [API Server] as APIServer
+}
+
+User --> ReactApp
+
+ReactApp --> CoreApp
+ReactApp --> DOM
+CoreApp --> WebGL
+
+ReactApp --> SWReg
+SWReg --> Cache
+SWReg --> Network
+
+CoreApp --> DataWorker : offload processing
+CoreApp --> MsgWorker : message handling
+CoreApp --> CompWorker : computations
+
+CoreApp --> FileAPI : file handling
+CoreApp --> WSAPI : real-time data
+CoreApp --> FetchAPI : HTTP requests
+CoreApp --> WebRTC : peer connections
+
+Cache --> CacheStore
+Network --> FetchAPI
+
+CoreApp --> IDB : persistent storage
+CoreApp --> LocalStore : session data
+
+Network --> CDN
+WSAPI --> WSServer
+FetchAPI --> APIServer
+
+DataWorker --> IDB : cache parsed data
+MsgWorker --> IDB : store messages
+
+note right of SWReg
+  Progressive Web App
+  capabilities with
+  offline support
+end note
+
+note bottom of DataWorker
+  Heavy processing in
+  workers to keep UI
+  responsive
+end note
+
+note left of IDB
+  Primary storage for
+  large data and
+  offline capability
+end note
+
+@enduml
