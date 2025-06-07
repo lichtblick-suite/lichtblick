@@ -28,6 +28,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 
 import { ColorGradientInput, ColorPickerInput, NumberInput, Vec2Input, Vec3Input } from "./inputs";
+import { LegendControls } from "@lichtblick/suite-base/components/SettingsTreeEditor/LegendControls";
 
 /** Used to allow both undefined and empty string in select inputs. */
 const UNDEFINED_SENTINEL_VALUE = uuid();
@@ -336,6 +337,8 @@ function FieldInput({
           }}
         />
       );
+    case "legendcontrols":
+      return <LegendControls />;
   }
 }
 
