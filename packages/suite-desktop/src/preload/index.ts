@@ -35,7 +35,7 @@ document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
 
 const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
 
-export async function main(): Promise<void> {
+export function main(): void {
   const log = Logger.getLogger(__filename);
 
   log.debug(`Start Preload`);
@@ -103,9 +103,20 @@ export async function main(): Promise<void> {
   ipcRenderer.on("maximize", () => (isMaximized = true));
   ipcRenderer.on("unmaximize", () => (isMaximized = false));
 
-  const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-  const userExtensionsDir = pathJoin(homePath, ".lichtblick-suite", "extensions");
-  const extensionHandler = new ExtensionsHandler(userExtensionsDir);
+  let extensionHandler: ExtensionsHandler | undefined;
+
+  const getUserExtensionsDir = async (): Promise<string> => {
+    const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+    return pathJoin(homePath, ".lichtblick-suite", "extensions");
+  };
+
+  const getExtensionHandler = async (): Promise<ExtensionsHandler> => {
+    if (!extensionHandler) {
+      const userExtensionsDir = await getUserExtensionsDir();
+      extensionHandler = new ExtensionsHandler(userExtensionsDir);
+    }
+    return extensionHandler;
+  };
 
   const desktopBridge: Desktop = {
     addIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void) {
@@ -149,16 +160,20 @@ export async function main(): Promise<void> {
     },
     // Extension management
     async getExtensions() {
-      return await extensionHandler.list();
+      const handler = await getExtensionHandler();
+      return await handler.list();
     },
     async loadExtension(id: string) {
-      return await extensionHandler.load(id);
+      const handler = await getExtensionHandler();
+      return await handler.load(id);
     },
     async installExtension(foxeFileData: Uint8Array) {
-      return await extensionHandler.install(foxeFileData);
+      const handler = await getExtensionHandler();
+      return await handler.install(foxeFileData);
     },
     async uninstallExtension(id: string): Promise<boolean> {
-      return await extensionHandler.uninstall(id);
+      const handler = await getExtensionHandler();
+      return await handler.uninstall(id);
     },
     handleTitleBarDoubleClick() {
       ipcRenderer.send("titleBarDoubleClicked");
