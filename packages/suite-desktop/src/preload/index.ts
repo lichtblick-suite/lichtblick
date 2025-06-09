@@ -13,8 +13,8 @@ import { PreloaderSockets } from "@lichtblick/electron-socket/preloader";
 import Logger from "@lichtblick/log";
 import { NetworkInterface, OsContext } from "@lichtblick/suite-base/src/OsContext";
 
+import { ExtensionsHandler } from "./ExtensionHandler";
 import LocalFileStorage from "./LocalFileStorage";
-import { getExtensions, installExtension, loadExtension, uninstallExtension } from "./extensions";
 import { fetchLayouts } from "./layouts";
 import { decodeRendererArg } from "../common/rendererArgs";
 import {
@@ -35,7 +35,7 @@ document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
 
 const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
 
-export function main(): void {
+export async function main(): Promise<void> {
   const log = Logger.getLogger(__filename);
 
   log.debug(`Start Preload`);
@@ -103,6 +103,10 @@ export function main(): void {
   ipcRenderer.on("maximize", () => (isMaximized = true));
   ipcRenderer.on("unmaximize", () => (isMaximized = false));
 
+  const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+  const userExtensionsDir = pathJoin(homePath, ".lichtblick-suite", "extensions");
+  const extensionHandler = new ExtensionsHandler(userExtensionsDir);
+
   const desktopBridge: Desktop = {
     addIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void) {
       ipcRenderer.on(eventName, handler);
@@ -116,8 +120,8 @@ export function main(): void {
     async updateNativeColorScheme() {
       await ipcRenderer.invoke("updateNativeColorScheme");
     },
-    async updateLanguage() {
-      await ipcRenderer.invoke("updateLanguage");
+    updateLanguage() {
+      void ipcRenderer.invoke("updateLanguage");
     },
     async getCLIFlags(): Promise<CLIFlags> {
       return await (ipcRenderer.invoke("getCLIFlags") as Promise<CLIFlags>);
@@ -134,31 +138,27 @@ export function main(): void {
       // Reload the window so the new preloader script can read the cookie
       window.location.reload();
     },
+    // Layout management
+    async fetchLayouts() {
+      const userLayoutsDir = pathJoin(
+        (await ipcRenderer.invoke("getHomePath")) as string,
+        ".lichtblick-suite",
+        "layouts",
+      );
+      return await fetchLayouts(userLayoutsDir);
+    },
+    // Extension management
     async getExtensions() {
-      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionRoot = pathJoin(homePath, ".lichtblick-suite", "extensions");
-      const userExtensions = await getExtensions(userExtensionRoot);
-      return userExtensions;
+      return await extensionHandler.list();
     },
     async loadExtension(id: string) {
-      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionRoot = pathJoin(homePath, ".lichtblick-suite", "extensions");
-      return await loadExtension(id, userExtensionRoot);
-    },
-    async fetchLayouts() {
-      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionRoot = pathJoin(homePath, ".lichtblick-suite", "layouts");
-      return await fetchLayouts(userExtensionRoot);
+      return await extensionHandler.load(id);
     },
     async installExtension(foxeFileData: Uint8Array) {
-      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionRoot = pathJoin(homePath, ".lichtblick-suite", "extensions");
-      return await installExtension(foxeFileData, userExtensionRoot);
+      return await extensionHandler.install(foxeFileData);
     },
     async uninstallExtension(id: string): Promise<boolean> {
-      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionRoot = pathJoin(homePath, ".lichtblick-suite", "extensions");
-      return await uninstallExtension(id, userExtensionRoot);
+      return await extensionHandler.uninstall(id);
     },
     handleTitleBarDoubleClick() {
       ipcRenderer.send("titleBarDoubleClicked");
