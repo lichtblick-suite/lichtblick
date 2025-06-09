@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
@@ -21,7 +22,7 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
   public type: IDataSourceFactory["type"] = "file";
   public displayName = "MCAP";
   public iconName: IDataSourceFactory["iconName"] = "OpenFile";
-  public supportedFileTypes = [".mcap"];
+  public supportedFileTypes = [AllowedFileExtensions.MCAP];
   public supportsMultiFile = true;
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {

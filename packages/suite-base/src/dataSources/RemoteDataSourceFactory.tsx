@@ -8,11 +8,11 @@
 import { Link } from "@mui/material";
 import path from "path";
 
+import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import { fileTypesAllowed } from "@lichtblick/suite-base/dataSources/constants";
 import {
   IterablePlayer,
   WorkerIterableSource,
@@ -40,13 +40,10 @@ const initWorkers: Record<string, () => Worker> = {
   },
 };
 
-export function isFileExtensionAllowed(fileExtension: string): void {
-  if (
-    !fileTypesAllowed.some((allowedExtension) => fileExtension.toLowerCase() === allowedExtension)
-  ) {
-    throw new Error(`Unsupported extension: ${fileExtension}`);
-  }
-}
+const fileTypesAllowed: AllowedFileExtensions[] = [
+  AllowedFileExtensions.BAG,
+  AllowedFileExtensions.MCAP,
+];
 
 export function checkExtensionMatch(fileExtension: string, previousExtension?: string): string {
   if (previousExtension != undefined && previousExtension !== fileExtension) {
@@ -114,7 +111,6 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
     urls.forEach((url) => {
       extension = path.extname(new URL(url).pathname);
-      isFileExtensionAllowed(extension);
       nextExtension = checkExtensionMatch(extension, nextExtension);
     });
 
@@ -134,7 +130,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   #validateUrl(newValue: string): Error | undefined {
     try {
       const url = new URL(newValue);
-      const extension = path.extname(url.pathname);
+      const extension = path.extname(url.pathname) as AllowedFileExtensions;
 
       if (extension.length === 0) {
         return new Error("URL must end with a filename and extension");

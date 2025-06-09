@@ -272,6 +272,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     sidebarActions.left.setOpen(!leftSidebarOpen);
                   }}
                   data-tourid="left-sidebar-button"
+                  data-testid="left-sidebar-button"
                 >
                   {leftSidebarOpen ? <PanelLeft24Filled /> : <PanelLeft24Regular />}
                 </AppBarIconButton>
@@ -287,6 +288,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     sidebarActions.right.setOpen(!rightSidebarOpen);
                   }}
                   data-tourid="right-sidebar-button"
+                  data-testid="right-sidebar-button"
                 >
                   {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
                 </AppBarIconButton>

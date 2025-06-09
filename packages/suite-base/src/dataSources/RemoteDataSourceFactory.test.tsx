@@ -10,10 +10,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer";
 import { PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/types";
 
-import RemoteDataSourceFactory, {
-  isFileExtensionAllowed,
-  checkExtensionMatch,
-} from "./RemoteDataSourceFactory";
+import RemoteDataSourceFactory, { checkExtensionMatch } from "./RemoteDataSourceFactory";
 
 jest.mock("@lichtblick/suite-base/players/IterablePlayer", () => ({
   WorkerIterableSource: jest.fn(),
@@ -27,24 +24,6 @@ function setupArgs(params?: Record<string, string | undefined>): DataSourceFacto
   };
   return mockArgs;
 }
-
-describe("isFileExtensionAllowed", () => {
-  it("should throw an error if extension passed isn't allowed", () => {
-    const mockExtenstion = ".json";
-
-    expect(() => {
-      isFileExtensionAllowed(mockExtenstion);
-    }).toThrow(`Unsupported extension: ${mockExtenstion}`);
-  });
-
-  it("shouldn't throw an error if extension passed is allowed", () => {
-    const mockExtenstion = ".mcap";
-
-    expect(() => {
-      isFileExtensionAllowed(mockExtenstion);
-    }).not.toThrow();
-  });
-});
 
 describe("checkExtensionMatch", () => {
   it("should return the extension if the comparing extension is undefined", () => {
@@ -136,14 +115,6 @@ describe("RemoteDataSourceFactory", () => {
     const result = factory.initialize(mockArgs);
 
     expect(result).toBeUndefined();
-  });
-
-  it("should throw an error for unsupported file extensions", () => {
-    const mockArgs = setupArgs({
-      url: "https://example.com/test.txt",
-    });
-
-    expect(() => factory.initialize(mockArgs)).toThrow("Unsupported extension: .txt");
   });
 
   it("should throw an error if the multiple sources don't have the same file extension", () => {

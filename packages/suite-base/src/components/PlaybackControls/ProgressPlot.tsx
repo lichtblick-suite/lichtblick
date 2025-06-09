@@ -99,7 +99,7 @@ export function ProgressPlot(props: ProgressProps): React.JSX.Element {
 
   return (
     <Stack position="relative" fullHeight>
-      {loading && <div className={classes.loadingIndicator} />}
+      {loading && <div data-testid="progress-plot" className={classes.loadingIndicator} />}
       {ranges}
     </Stack>
   );
