@@ -105,14 +105,10 @@ export function main(): void {
 
   let extensionHandler: ExtensionsHandler | undefined;
 
-  const getUserExtensionsDir = async (): Promise<string> => {
-    const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-    return pathJoin(homePath, ".lichtblick-suite", "extensions");
-  };
-
   const getExtensionHandler = async (): Promise<ExtensionsHandler> => {
     if (!extensionHandler) {
-      const userExtensionsDir = await getUserExtensionsDir();
+      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+      const userExtensionsDir = pathJoin(homePath, ".lichtblick-suite", "extensions");
       extensionHandler = new ExtensionsHandler(userExtensionsDir);
     }
     return extensionHandler;
