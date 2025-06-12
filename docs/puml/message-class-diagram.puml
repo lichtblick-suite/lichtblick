@@ -1,0 +1,140 @@
+@startuml message-class-diagram
+!theme blueprint
+skinparam classAttributeIconSize 0
+
+title Message System Class Diagram
+
+class MessageEvent {
+  + topic: string
+  + receiveTime: Time
+  + message: unknown
+  + sizeInBytes: number
+  + schemaName?: string
+}
+
+class Time {
+  + sec: number
+  + nsec: number
+  + toNanos(): bigint
+  + toMillis(): number
+  + toSec(): number
+}
+
+class Topic {
+  + name: string
+  + schemaName?: string
+  + schemaData?: RosDatatypes
+  + numMessages?: number
+  + aliasedFromName?: string
+}
+
+class SubscribePayload {
+  + topic: string
+  + fields?: string[]
+  + preloadType?: "full" | "partial"
+}
+
+class PublishPayload {
+  + topic: string
+  + msg: Record<string, unknown>
+}
+
+class AdvertiseOptions {
+  + topic: string
+  + schemaName: string
+  + options?: Record<string, unknown>
+}
+
+interface MessageConverter {
+  + fromSchema: string
+  + toSchema: string
+  + converter: (msg: unknown) => unknown
+}
+
+class MessagePipeline {
+  - converters: Map<string, MessageConverter[]>
+  - subscriptions: Map<string, SubscribePayload>
+  + addConverter(converter: MessageConverter): void
+  + processMessage(event: MessageEvent): MessageEvent
+  + setSubscriptions(subs: SubscribePayload[]): void
+  - findConverter(from: string, to: string): MessageConverter | undefined
+}
+
+class TopicStats {
+  + numMessages: number
+  + firstMessageTime?: Time
+  + lastMessageTime?: Time
+  + totalBytes: number
+}
+
+abstract class RosMessage {
+  + header?: Header
+}
+
+class Header {
+  + seq: number
+  + stamp: Time
+  + frame_id: string
+}
+
+class CompressedImage extends RosMessage {
+  + format: string
+  + data: Uint8Array
+}
+
+class PointCloud2 extends RosMessage {
+  + height: number
+  + width: number
+  + fields: PointField[]
+  + is_bigendian: boolean
+  + point_step: number
+  + row_step: number
+  + data: Uint8Array
+  + is_dense: boolean
+}
+
+class Marker extends RosMessage {
+  + ns: string
+  + id: number
+  + type: MarkerType
+  + action: MarkerAction
+  + pose: Pose
+  + scale: Vector3
+  + color: ColorRGBA
+  + lifetime: Duration
+  + frame_locked: boolean
+}
+
+class MessageCache {
+  - messages: Map<string, MessageEvent[]>
+  - maxSize: number
+  + addMessage(event: MessageEvent): void
+  + getMessages(topic: string): MessageEvent[]
+  + clear(): void
+  + pruneOldMessages(time: Time): void
+}
+
+MessageEvent --> Time : uses
+MessageEvent --> Topic : references
+Topic --> TopicStats : has
+MessagePipeline --> MessageConverter : uses
+MessagePipeline --> SubscribePayload : manages
+MessagePipeline --> MessageEvent : processes
+RosMessage --> Header : contains
+Header --> Time : uses
+CompressedImage --|> RosMessage
+PointCloud2 --|> RosMessage
+Marker --|> RosMessage
+MessageCache --> MessageEvent : stores
+
+note right of MessagePipeline
+  Handles message routing,
+  conversion, and filtering
+end note
+
+note bottom of MessageConverter
+  Transforms messages
+  between different schemas
+end note
+
+@enduml

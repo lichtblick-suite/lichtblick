@@ -1,0 +1,124 @@
+@startuml extension-class-diagram
+!theme blueprint
+skinparam classAttributeIconSize 0
+
+title Extension System Class Diagram
+
+interface ExtensionContext {
+  + registerPanel(panel: PanelExtension): void
+  + registerMessageConverter(converter: MessageConverter): void
+  + registerTopicAliasFunction(name: string, fn: TopicAliasFunction): void
+  + registerCameraModel(model: CameraModel): void
+  + readonly currentLayout: LayoutData
+  + readonly currentTime?: Time
+  + readonly playerProfile?: PlayerProfile
+  + saveLayout(layout: LayoutData): void
+  + openPanel(params: OpenPanelParams): void
+}
+
+class ExtensionInfo {
+  + id: string
+  + name: string
+  + displayName: string
+  + description: string
+  + publisher: string
+  + homepage?: string
+  + license?: string
+  + version: string
+  + keywords?: string[]
+  + namespace: ExtensionNamespace
+  + installed?: Date
+}
+
+class ExtensionCatalog {
+  - extensions: Map<string, ExtensionInfo>
+  + getExtensions(): ExtensionInfo[]
+  + installExtension(info: ExtensionInfo): void
+  + uninstallExtension(id: string): void
+  + getExtension(id: string): ExtensionInfo | undefined
+}
+
+interface ExtensionModule {
+  + activate(context: ExtensionContext): void
+}
+
+class ExtensionLoader {
+  + loadExtension(info: ExtensionInfo): Promise<ExtensionModule>
+  + unloadExtension(id: string): void
+  - createSandbox(): ExtensionSandbox
+}
+
+class PanelExtension {
+  + name: string
+  + component: React.ComponentType
+  + defaultConfig?: unknown
+  + supportsMultiple?: boolean
+}
+
+class MessageConverter {
+  + fromSchema: string
+  + toSchema: string
+  + converter: (msg: unknown) => unknown
+}
+
+class TopicAliasFunction {
+  + name: string
+  + fn: (args: MessageEvent[]) => MessageEvent
+  + description?: string
+  + parameters?: Parameter[]
+}
+
+class CameraModel {
+  + name: string
+  + projectionMatrix: (params: CameraParams) => mat4
+  + unprojectionMatrix: (params: CameraParams) => mat4
+}
+
+class ExtensionContributions {
+  + panels: Map<string, PanelExtension>
+  + converters: MessageConverter[]
+  + topicAliasFunctions: Map<string, TopicAliasFunction>
+  + cameraModels: Map<string, CameraModel>
+}
+
+class ExtensionManager {
+  - catalog: ExtensionCatalog
+  - loader: ExtensionLoader
+  - contributions: ExtensionContributions
+  + installFromMarketplace(id: string): Promise<void>
+  + enableExtension(id: string): void
+  + disableExtension(id: string): void
+}
+
+enum ExtensionNamespace {
+  local
+  org
+}
+
+ExtensionManager --> ExtensionCatalog : uses
+ExtensionManager --> ExtensionLoader : uses
+ExtensionManager --> ExtensionContributions : manages
+ExtensionCatalog --> ExtensionInfo : stores
+ExtensionLoader --> ExtensionModule : loads
+ExtensionModule --> ExtensionContext : receives
+ExtensionContext --> PanelExtension : registers
+ExtensionContext --> MessageConverter : registers
+ExtensionContext --> TopicAliasFunction : registers
+ExtensionContext --> CameraModel : registers
+ExtensionContributions --> PanelExtension : contains
+ExtensionContributions --> MessageConverter : contains
+ExtensionContributions --> TopicAliasFunction : contains
+ExtensionContributions --> CameraModel : contains
+ExtensionInfo --> ExtensionNamespace : has
+
+note right of ExtensionContext
+  API provided to extensions
+  for safe integration
+end note
+
+note bottom of ExtensionLoader
+  Loads extensions in
+  isolated sandbox
+end note
+
+@enduml
