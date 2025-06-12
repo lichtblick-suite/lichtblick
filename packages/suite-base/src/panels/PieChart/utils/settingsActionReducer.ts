@@ -3,7 +3,9 @@
 
 import { produce } from "immer";
 import * as _ from "lodash-es";
+
 import { SettingsTreeAction } from "@lichtblick/suite";
+
 import type { PieChartConfig } from "../types";
 
 export function settingsActionReducer(

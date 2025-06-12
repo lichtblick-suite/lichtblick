@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
-
 import { useMemo } from "react";
-
 import type { PieChartConfig, PieChartDatum } from "./types";
 
 export function useChartData(rawValue: Float32Array, config: PieChartConfig): PieChartDatum[] {
@@ -26,6 +24,5 @@ export function useChartData(rawValue: Float32Array, config: PieChartConfig): Pi
         color: `hsl(${(index / rawArray.length) * 40 + 200}, 20%, ${50 - index * 5}%)`,
       };
     });
-
   }, [rawValue, config]);
 }

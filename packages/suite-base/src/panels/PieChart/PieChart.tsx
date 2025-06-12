@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
 
-import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useReducer, useState, useMemo } from "react";
 import {
   PieChart as RechartsPieChart,
@@ -17,16 +16,21 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
 
-import { useSettingsTree } from "./useSettingsTree";
 import { settingsActionReducer } from "./utils/settingsActionReducer";
 import type { PieChartConfig, PieChartState } from "./types";
 import { useChartData } from "./useChartData";
 import { DEFAULT_CONFIG } from "./constants";
+import { useSettingsTree } from "./useSettingsTree";
 import { stateReducer } from "./utils/stateReducer";
 
 type PieChartProps = {
   context: PanelExtensionContext;
 };
+
+export function formatTooltip(value: number, name: string): [string, string] {
+  const formattedValue = typeof value === "number" ? value.toFixed(2) : value;
+  return [`${formattedValue}%`, name];
+}
 
 export function PieChart({ context }: PieChartProps): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
@@ -51,11 +55,6 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
       error: undefined,
     }),
   );
-
-  function formatTooltip(value: number, name: string): [string, string] {
-    const formattedValue = typeof value === "number" ? value.toFixed(2) : value;
-    return [`${formattedValue}%`, name];
-  }
 
   const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
     setConfig((prevConfig) => settingsActionReducer(prevConfig, action));

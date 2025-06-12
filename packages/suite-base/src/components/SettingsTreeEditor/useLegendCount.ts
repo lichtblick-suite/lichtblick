@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { useEffect, useState } from "react";
-
 import { getLegendCount, setLegendCount, subscribeLegendCount } from "./legendCountStore";
 
 export function useLegendCount(): {

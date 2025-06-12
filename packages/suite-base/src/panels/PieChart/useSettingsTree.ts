@@ -1,14 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2024-2025 Yukihiro Saito <yukky.saito@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
-
-import * as _ from "lodash-es";
 import { useMemo } from "react";
 
 import { useShallowMemo } from "@lichtblick/hooks";
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
 
-import type { PieChartConfig } from "./types";
 import { SUPPORTED_DATA_TYPES } from "./constants";
+import type { PieChartConfig } from "./types";
 
 export type UseSettingsTreeProps = {
   config: PieChartConfig;

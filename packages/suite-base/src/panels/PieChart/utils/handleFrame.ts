@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
+// SPDX-License-Identifier: MPL-2.0
+
 import type { PieChartState, PieChartAction } from "../types";
+
 import * as _ from "lodash-es";
 
 export type HandleFrameProps = {
   state: PieChartState;
-  action: Extract<PieChartAction, { type: "frame" }>
+  action: Extract<PieChartAction, { type: "frame" }>;
 };
 
 export function handleFrame({ state, action }: HandleFrameProps): PieChartState {

@@ -3,6 +3,7 @@
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+
 import type { PieChartState, PieChartAction } from "../types";
 
 export type HandlePathProps = {

@@ -27,7 +27,7 @@ export type PieChartAction =
   | { type: "seek" };
 
 export type PieChartDatum = {
-    name: string;
-    value: number;
-    color: string;
+  name: string;
+  value: number;
+  color: string;
 };

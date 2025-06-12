@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
-
 // SPDX-License-Identifier: MPL-2.0
 
 let legendCount = 10;
