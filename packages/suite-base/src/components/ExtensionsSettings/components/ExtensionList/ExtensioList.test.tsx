@@ -1,18 +1,22 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import { Immutable } from "@lichtblick/suite";
-import ExtensionList from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
+import ExtensionList, {
+  displayNameForNamespace,
+  generatePlaceholderList,
+} from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
-import { displayNameForNamespace, generatePlaceholderList } from "./ExtensionList";
-
+jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
+  useExtensionCatalog: jest.fn(),
+}));
 describe("ExtensionList utility functions", () => {
   describe("displayNameForNamespace", () => {
     it("returns 'Organization' for 'org'", () => {
@@ -51,6 +55,8 @@ describe("ExtensionList Component", () => {
       qualifiedName: "org.extension1",
       homepage: BasicBuilder.string(),
       license: BasicBuilder.string(),
+      displayName: "DisplayName-Extension 1",
+      keywords: [BasicBuilder.string()],
     },
     {
       id: "2",
@@ -61,6 +67,8 @@ describe("ExtensionList Component", () => {
       qualifiedName: "org.extension2",
       homepage: BasicBuilder.string(),
       license: BasicBuilder.string(),
+      displayName: "DisplayName-Extension 2",
+      keywords: [BasicBuilder.string()],
     },
   ];
   const mockFilterText = "Extension";
@@ -126,7 +134,7 @@ describe("ExtensionList Component", () => {
     firstEntry.click();
 
     expect(mockSelectExtension).toHaveBeenCalledWith({
-      installed: true,
+      installed: false,
       entry: mockEntries[0],
     });
   });

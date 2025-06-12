@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,11 +21,11 @@ import { useEffect, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import PanelSetup, { Fixture, triggerWheel } from "@lichtblick/suite-base/stories/PanelSetup";
+import { fixture } from "@lichtblick/suite-base/test/mocks/mockPlot";
 import delay from "@lichtblick/suite-base/util/delay";
 
-import { PlotConfig } from "./config";
 import Plot from "./index";
-import { fixture } from "./storyFixtures";
+import { PlotConfig } from "./utils/config";
 
 const withEndTime = (testFixture: Fixture, endTime: any) => ({
   ...testFixture,

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,7 +11,7 @@ import memoizeWeak from "memoize-weak";
 import { Immutable as Im, MessageEvent } from "@lichtblick/suite";
 import {
   MessageBlock,
-  PlayerProblem,
+  PlayerAlert,
   PlayerState,
   Progress,
   SubscribePayload,
@@ -33,7 +33,7 @@ type MessageBlocks = readonly (undefined | MessageBlock)[];
  * equality to detect changes and to avoid doing work when there are no changes.
  */
 export class AliasingStateProcessor implements IStateProcessor {
-  #problems: PlayerProblem[] = [];
+  #alerts: PlayerAlert[] = [];
 
   /** Source topic to a list of aliases for the topic */
   #mapping: Im<TopicAliasMap>;
@@ -43,9 +43,9 @@ export class AliasingStateProcessor implements IStateProcessor {
 
   #blockProcessors: BlockTopicProcessor[] = [];
 
-  public constructor(mapping: Im<TopicAliasMap>, problems?: PlayerProblem[]) {
+  public constructor(mapping: Im<TopicAliasMap>, alerts?: PlayerAlert[]) {
     this.#mapping = mapping;
-    this.#problems = problems ?? [];
+    this.#alerts = alerts ?? [];
     this.#inverseMapping = invertAliasMap(mapping);
 
     this.#blockProcessors = Array.from(mapping.entries()).map(
@@ -87,7 +87,7 @@ export class AliasingStateProcessor implements IStateProcessor {
       newState.progress = this.#aliasProgress(newState.progress);
     }
 
-    newState.problems = this.#addProblems(newState.problems);
+    newState.alerts = this.#addAlerts(newState.alerts);
 
     return newState;
   }
@@ -108,11 +108,9 @@ export class AliasingStateProcessor implements IStateProcessor {
     },
   );
 
-  #addProblems = memoizeWeak(
-    (existing: PlayerProblem[] | undefined): PlayerProblem[] | undefined => {
-      return (existing ?? []).concat(this.#problems);
-    },
-  );
+  #addAlerts = memoizeWeak((existing: PlayerAlert[] | undefined): PlayerAlert[] | undefined => {
+    return (existing ?? []).concat(this.#alerts);
+  });
 
   #aliasBlocks = memoizeWeak((blocks: MessageBlocks): MessageBlocks => {
     return blocks.map((block, idx) => {

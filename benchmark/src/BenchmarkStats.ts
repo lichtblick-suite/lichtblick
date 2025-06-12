@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -41,7 +41,7 @@ class BenchmarkStats {
       const stddev = std(values);
 
       log.info(
-        `Frame time (filtered) average: ${avgFrameMs}, median: ${medianFrameMs}, P90: ${p90FrameMs}, stddev: ${stddev}`,
+        `Frame time (filtered) average: ${String(avgFrameMs)}, median: ${String(medianFrameMs)}, P90: ${String(p90FrameMs)}, stddev: ${String(stddev.values)}`,
       );
 
       const record = (window as { recordFrameTimes?: RecordFrameTimesFn }).recordFrameTimes;

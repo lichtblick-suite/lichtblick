@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,7 +11,7 @@ import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@lichtblick/suite";
-import { PlayerProblem } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 
 import WssErrorModalScreenshot from "./WssErrorModal.png";
 
@@ -27,9 +27,9 @@ const useStyles = makeStyles()({
 });
 
 export default function WssErrorModal(
-  props: Immutable<{ playerProblems?: PlayerProblem[] }>,
+  props: Readonly<Immutable<{ playerAlerts?: PlayerAlert[] }>>,
 ): React.JSX.Element {
-  const { playerProblems } = props;
+  const { playerAlerts } = props;
   const { classes } = useStyles();
 
   const [open, setOpen] = useState(true);
@@ -40,9 +40,8 @@ export default function WssErrorModal(
     setHasDismissedWssErrorModal(true);
   };
 
-  const hasWssConnectionProblem = playerProblems?.find(
-    (problem) =>
-      problem.severity === "error" && problem.message === "Insecure WebSocket connection",
+  const hasWssConnectionProblem = playerAlerts?.find(
+    (alert) => alert.severity === "error" && alert.message === "Insecure WebSocket connection",
   );
 
   if (hasDismissedWssErrorModal || !hasWssConnectionProblem) {

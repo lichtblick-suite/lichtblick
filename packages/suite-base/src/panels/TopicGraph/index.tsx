@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -43,7 +43,7 @@ import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/Pane
 import Graph, { GraphMutation } from "./Graph";
 
 const LABEL_MAX_WIDTH = 200;
-const STYLESHEET: Cytoscape.Stylesheet[] = [
+const STYLESHEET: Cytoscape.StylesheetStyle[] = [
   {
     selector: "edge",
     style: {
@@ -62,10 +62,7 @@ const STYLESHEET: Cytoscape.Stylesheet[] = [
       "background-color": "#000",
       "border-color": "rgb(69, 165, 255)",
       "border-width": "1px",
-      "padding-top": "4px",
-      "padding-right": "4px",
-      "padding-bottom": "4px",
-      "padding-left": "4px",
+      padding: "4px",
       "font-size": "16px",
       "text-max-width": `${LABEL_MAX_WIDTH}px`,
       "text-wrap": "ellipsis",
@@ -97,10 +94,7 @@ const STYLESHEET: Cytoscape.Stylesheet[] = [
       "background-color": "#000",
       "border-color": "rgb(255, 107, 130)",
       "border-width": "1px",
-      "padding-top": "4px",
-      "padding-right": "4px",
-      "padding-bottom": "4px",
-      "padding-left": "4px",
+      padding: "4px",
       "font-size": "16px",
       "text-max-width": "200px",
       "text-wrap": "ellipsis",

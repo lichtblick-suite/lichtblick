@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -10,7 +10,8 @@ import { t } from "i18next";
 import { assert } from "ts-essentials";
 
 import { MultiMap, filterMap } from "@lichtblick/den/collection";
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { selectCameraModel } from "@lichtblick/den/image";
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
@@ -21,9 +22,10 @@ import {
   ImageRenderable,
   ImageUserData,
 } from "./Images/ImageRenderable";
-import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
+import { ALL_CAMERA_INFO_SCHEMAS, AnyImage, CompressedVideo } from "./Images/ImageTypes";
 import {
   normalizeCompressedImage,
+  normalizeCompressedVideo,
   normalizeRawImage,
   normalizeRosCompressedImage,
   normalizeRosImage,
@@ -36,6 +38,7 @@ import { SettingsTreeEntry } from "../SettingsManager";
 import {
   CAMERA_CALIBRATION_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES,
+  COMPRESSED_VIDEO_DATATYPES,
   RAW_IMAGE_DATATYPES,
 } from "../foxglove";
 import {
@@ -83,10 +86,13 @@ export class Images extends SceneExtension<ImageRenderable> {
    */
   #cameraInfoByTopic = new Map<string, CameraInfo>();
 
+  public customCameraModels: CameraModelsMap;
+
   protected supportedImageSchemas = ALL_SUPPORTED_IMAGE_SCHEMAS;
 
   public constructor(renderer: IRenderer, name: string = Images.extensionId) {
     super(name, renderer);
+    this.customCameraModels = renderer.customCameraModels;
     this.renderer.on("topicsChanged", this.#handleTopicsChanged);
     this.#handleTopicsChanged();
   }
@@ -132,6 +138,14 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleCompressedImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_VIDEO_DATATYPES,
+        subscription: {
+          handler: this.#handleCompressedVideo,
           filterQueue: onlyLastByTopicMessage,
         },
       },
@@ -303,6 +317,10 @@ export class Images extends SceneExtension<ImageRenderable> {
     this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
   };
 
+  #handleCompressedVideo = (messageEvent: PartialMessageEvent<CompressedVideo>): void => {
+    this.handleImage(messageEvent, normalizeCompressedVideo(messageEvent.message));
+  };
+
   protected handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
     const imageTopic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
@@ -410,7 +428,8 @@ export class Images extends SceneExtension<ImageRenderable> {
     const imageTopic = renderable.userData.topic;
 
     try {
-      renderable.setCameraModel(new PinholeCameraModel(newCameraInfo));
+      const cameraModel = selectCameraModel(newCameraInfo, this.customCameraModels);
+      renderable.setCameraModel(cameraModel);
       renderable.userData.cameraInfo = newCameraInfo;
       this.renderer.settings.errors.removeFromTopic(imageTopic, CAMERA_MODEL);
     } catch (errUnk) {
@@ -435,10 +454,13 @@ export class Images extends SceneExtension<ImageRenderable> {
     const userSettings = this.renderer.config.topics[imageTopic] as
       | Partial<LayerSettingsImage>
       | undefined;
-
+    const messageTime = image
+      ? toNanoSec("header" in image ? image.header.stamp : image.timestamp)
+      : 0n;
     renderable = this.initRenderable(imageTopic, {
       receiveTime,
-      messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
+      messageTime,
+      firstMessageTime: messageTime,
       frameId: this.renderer.normalizeFrameId(frameId),
       pose: makePose(),
       settingsPath: ["topics", imageTopic],
@@ -459,5 +481,9 @@ export class Images extends SceneExtension<ImageRenderable> {
   }
   protected initRenderable(topicName: string, userData: ImageUserData): ImageRenderable {
     return new ImageRenderable(topicName, this.renderer, userData);
+  }
+
+  public setCustomCameraModels(newCameraModels: CameraModelsMap): void {
+    this.customCameraModels = newCameraModels;
   }
 }

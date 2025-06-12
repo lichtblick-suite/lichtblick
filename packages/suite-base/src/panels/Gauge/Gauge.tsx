@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,7 +14,7 @@ import { useStyles } from "@lichtblick/suite-base/panels/Gauge/Gauge.style";
 import { buildConicGradient } from "@lichtblick/suite-base/panels/Gauge/buildConicGradient";
 import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/Gauge/constants";
 import { stateReducer } from "@lichtblick/suite-base/panels/shared/gaugeAndIndicatorStateReducer";
-import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/types";
+import { GaugeAndIndicatorState } from "@lichtblick/suite-base/panels/shared/types";
 
 import { settingsActionReducer } from "./settingsActionReducer";
 import { GaugeConfig, GaugeProps } from "./types";

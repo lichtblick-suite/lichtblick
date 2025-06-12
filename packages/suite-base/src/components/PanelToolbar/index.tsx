@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,6 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Typography } from "@mui/material";
 import { useContext, useMemo, CSSProperties } from "react";
@@ -66,6 +67,7 @@ export default React.memo<Props>(function PanelToolbar({
   const {
     isFullscreen,
     exitFullscreen,
+    enterFullscreen,
     config: { [PANEL_TITLE_CONFIG_KEY]: customTitle = undefined } = {},
   } = useContext(PanelContext) ?? {};
 
@@ -77,7 +79,7 @@ export default React.memo<Props>(function PanelToolbar({
     return (
       <>
         {additionalIcons}
-        {isFullscreen === true && (
+        {isFullscreen === true ? (
           <ToolbarIconButton
             value="exit-fullscreen"
             title="Exit fullscreen"
@@ -85,10 +87,14 @@ export default React.memo<Props>(function PanelToolbar({
           >
             <FullscreenExitIcon />
           </ToolbarIconButton>
+        ) : (
+          <ToolbarIconButton value="fullscreen" title="fullscreen" onClick={enterFullscreen}>
+            <FullscreenIcon />
+          </ToolbarIconButton>
         )}
       </>
     );
-  }, [additionalIcons, isFullscreen, exitFullscreen]);
+  }, [additionalIcons, isFullscreen, exitFullscreen, enterFullscreen]);
 
   // If we have children then we limit the drag area to the controls. Otherwise the entire
   // toolbar is draggable.

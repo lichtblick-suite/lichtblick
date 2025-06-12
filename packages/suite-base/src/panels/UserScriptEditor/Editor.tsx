@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,12 +21,13 @@ import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error StandaloneService does not have type information in the monaco-editor package
 import { StandaloneServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 import * as path from "path";
-import { ReactElement, useCallback, useEffect, useRef } from "react";
+import React, { Suspense, ReactElement, useCallback, useEffect, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
-import { useResizeDetector } from "react-resize-detector";
+import { ResizePayload, useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import { ModuleResolutionKind } from "typescript";
 
+import ErrorBoundary from "@lichtblick/suite-base/components/ErrorBoundary";
 import getPrettifiedCode from "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode";
 import { Script } from "@lichtblick/suite-base/panels/UserScriptEditor/script";
 import { getUserScriptProjectConfig } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
@@ -330,10 +331,11 @@ const Editor = ({
     [latestSetScriptCode],
   );
 
-  const onResize = useCallback((width?: number, height?: number) => {
-    if (width != undefined && height != undefined) {
-      editorRef.current?.layout({ width, height });
+  const onResize = useCallback(({ width, height }: ResizePayload) => {
+    if (width == undefined) {
+      return;
     }
+    editorRef.current?.layout({ width, height });
   }, []);
 
   // monaco editor builtin auto layout uses an interval to adjust size to the parent component
@@ -352,16 +354,23 @@ const Editor = ({
     return ReactNull;
   }
 
+  // The ErrorBoundary is required to properly capture runtime errors from Monaco Editor.
+  // Without it, TypeScript or Monaco-related errors (e.g., type mismatches or input availability issues)
+  // may not appear in the "Problems" tab. Do not remove this wrapper.
   return (
     <div ref={sizeRef} style={{ width: "100%", height: "100%" }}>
-      <MonacoEditor
-        language="typescript"
-        theme={editorTheme}
-        editorWillMount={willMount}
-        editorDidMount={didMount}
-        options={options}
-        onChange={onChange}
-      />
+      <ErrorBoundary>
+        <Suspense fallback={<p>Loading user script editor</p>}>
+          <MonacoEditor
+            language="typescript"
+            theme={editorTheme}
+            editorWillMount={willMount}
+            editorDidMount={didMount}
+            options={options}
+            onChange={onChange}
+          />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 };

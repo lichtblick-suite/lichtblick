@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,8 +15,6 @@ import { SettingsTreeAction, SettingsTreeFields } from "@lichtblick/suite";
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { Axis, AXIS_LENGTH } from "./Axis";
-import { RenderableArrow } from "./markers/RenderableArrow";
-import { RenderableSphere } from "./markers/RenderableSphere";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import {
@@ -49,6 +47,8 @@ import {
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
+import { RenderableArrow } from "./markers/RenderableArrow";
+import { RenderableSphere } from "./markers/RenderableSphere";
 
 type DisplayType = "axis" | "arrow";
 

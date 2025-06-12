@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -10,7 +10,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
-import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog";
+import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/types";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 const useStyles = makeStyles()({
@@ -59,11 +59,11 @@ export function SettingsMenu({
         onClose={handleClose}
         onClick={handleClose}
         MenuListProps={{ className: classes.menuList, dense: true }}
-        PaperProps={
-          {
+        slotProps={{
+          paper: {
             "data-tourid": "user-menu",
-          } as Partial<PaperProps & { "data-tourid"?: string }>
-        }
+          } as Partial<PaperProps & { "data-tourid"?: string }>,
+        }}
       >
         <MenuItem
           onClick={() => {

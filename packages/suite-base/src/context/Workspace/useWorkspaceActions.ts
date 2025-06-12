@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,24 +8,14 @@
 import { Draft, produce } from "immer";
 import * as _ from "lodash-es";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
-import { useMountedState } from "react-use";
 
 import { useGuaranteedContext } from "@lichtblick/hooks";
-import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog";
+import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/types";
 import { DataSourceDialogItem } from "@lichtblick/suite-base/components/DataSourceDialog";
-import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
-import {
-  LayoutData,
-  useCurrentLayoutActions,
-} from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
   IDataSourceFactory,
   usePlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
-import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import { downloadTextFile } from "@lichtblick/suite-base/util/download";
 
 import {
   LeftSidebarItemKey,
@@ -63,6 +53,7 @@ export type WorkspaceActions = {
 
   playbackControlActions: {
     setRepeat: Dispatch<SetStateAction<boolean>>;
+    setSyncInstances: Dispatch<SetStateAction<boolean>>;
   };
 
   sidebarActions: {
@@ -76,15 +67,6 @@ export type WorkspaceActions = {
       setOpen: Dispatch<SetStateAction<boolean>>;
       setSize: (size: undefined | number) => void;
     };
-  };
-
-  layoutActions: {
-    // Open a dialog for the user to select a layout file to import
-    // This will replace the current layout with the imported layout
-    importFromFile: () => void;
-    // Export the current layout to a file
-    // This will perform a browser download of the current layout to a file
-    exportToFile: () => void;
   };
 };
 
@@ -104,13 +86,6 @@ export function useWorkspaceActions(): WorkspaceActions {
 
   const { availableSources } = usePlayerSelection();
 
-  const analytics = useAnalytics();
-  const appContext = useAppContext();
-
-  const isMounted = useMountedState();
-
-  const { getCurrentLayoutState, setCurrentLayout } = useCurrentLayoutActions();
-
   const openFile = useOpenFile(availableSources);
 
   const set = useCallback(
@@ -119,69 +94,6 @@ export function useWorkspaceActions(): WorkspaceActions {
     },
     [setState],
   );
-
-  const importLayoutFromFile = useCallbackWithToast(async () => {
-    const fileHandles = await showOpenFilePicker({
-      multiple: false,
-      excludeAcceptAllOption: false,
-      types: [
-        {
-          description: "JSON Files",
-          accept: {
-            "application/json": [".json"],
-          },
-        },
-      ],
-    });
-    if (!isMounted()) {
-      return;
-    }
-
-    const file = await fileHandles[0].getFile();
-    const content = await file.text();
-
-    if (!isMounted()) {
-      return;
-    }
-
-    let parsedState: unknown;
-    try {
-      parsedState = JSON.parse(content);
-    } catch (e: unknown) {
-      const err = e as Error;
-      throw new Error(`${file.name} is not a valid layout: ${err.message}`);
-    }
-
-    if (typeof parsedState !== "object" || !parsedState) {
-      throw new Error(`${file.name} is not a valid layout`);
-    }
-
-    const data = parsedState as LayoutData;
-
-    // If there's an app context handler for this we let it take over from here
-    if (appContext.importLayoutFile) {
-      await appContext.importLayoutFile(file.name, data);
-      return;
-    }
-
-    setCurrentLayout({ data });
-
-    void analytics.logEvent(AppEvent.LAYOUT_IMPORT);
-  }, [analytics, appContext, isMounted, setCurrentLayout]);
-
-  const exportLayoutToFile = useCallback(() => {
-    // Use a stable getter to fetch the current layout to avoid thrashing the
-    // dependencies array for our hook.
-    const layoutData = getCurrentLayoutState().selectedLayout?.data;
-    if (!layoutData) {
-      return;
-    }
-
-    const name = getCurrentLayoutState().selectedLayout?.name ?? "foxglove-layout";
-    const content = JSON.stringify(layoutData, undefined, 2) ?? "";
-    downloadTextFile(content, `${name}.json`);
-    void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
-  }, [analytics, getCurrentLayoutState]);
 
   return useMemo(() => {
     return {
@@ -261,6 +173,13 @@ export function useWorkspaceActions(): WorkspaceActions {
             draft.playbackControls.repeat = repeat;
           });
         },
+
+        setSyncInstances: (setter: SetStateAction<boolean>) => {
+          set((draft) => {
+            const sync = setterValue(setter, draft.playbackControls.syncInstances);
+            draft.playbackControls.syncInstances = sync;
+          });
+        },
       },
 
       sidebarActions: {
@@ -323,11 +242,6 @@ export function useWorkspaceActions(): WorkspaceActions {
           },
         },
       },
-
-      layoutActions: {
-        importFromFile: importLayoutFromFile,
-        exportToFile: exportLayoutToFile,
-      },
     };
-  }, [exportLayoutToFile, importLayoutFromFile, openFile, set]);
+  }, [openFile, set]);
 }

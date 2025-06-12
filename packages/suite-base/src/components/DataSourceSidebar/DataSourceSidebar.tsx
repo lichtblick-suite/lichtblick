@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -36,8 +36,8 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 
+import { AlertsList } from "../AlertsList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
-import { ProblemsList } from "../ProblemsList";
 
 type Props = {
   disableToolbar?: boolean;
@@ -70,7 +70,7 @@ const StyledTabs = muiStyled(Tabs)({
   },
 });
 
-const ProblemCount = muiStyled("div")(({ theme }) => ({
+const AlertCount = muiStyled("div")(({ theme }) => ({
   backgroundColor: theme.palette.error.main,
   fontSize: theme.typography.caption.fontSize,
   color: theme.palette.error.contrastText,
@@ -79,16 +79,16 @@ const ProblemCount = muiStyled("div")(({ theme }) => ({
 }));
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
+const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) => playerState.alerts;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 
-type DataSourceSidebarTab = "topics" | "events" | "problems";
+type DataSourceSidebarTab = "topics" | "events" | "alerts";
 
 export default function DataSourceSidebar(props: Props): React.JSX.Element {
   const { disableToolbar = false } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
+  const playerAlerts = useMessagePipeline(selectPlayerAlerts) ?? [];
   const { currentUser } = useCurrentUser();
   const selectedEventId = useEvents(selectSelectedEventId);
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
@@ -110,7 +110,7 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
 
   useEffect(() => {
     if (playerPresence === PlayerPresence.ERROR || playerPresence === PlayerPresence.RECONNECTING) {
-      setActiveTab("problems");
+      setActiveTab("alerts");
     } else if (showEventsTab && selectedEventId != undefined) {
       setActiveTab("events");
     }
@@ -164,13 +164,13 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                       disableRipple
                       label={
                         <Stack direction="row" alignItems="baseline" gap={1}>
-                          Problems
-                          {playerProblems.length > 0 && (
-                            <ProblemCount>{playerProblems.length}</ProblemCount>
+                          Alerts
+                          {playerAlerts.length > 0 && (
+                            <AlertCount>{playerAlerts.length}</AlertCount>
                           )}
                         </Stack>
                       }
-                      value="problems"
+                      value="alerts"
                     />
                   </StyledTabs>
                   <Divider />
@@ -186,16 +186,16 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                   <EventsList />
                 </div>
               )}
-              {activeTab === "problems" && (
+              {activeTab === "alerts" && (
                 <div className={classes.tabContent}>
-                  <ProblemsList />
+                  <AlertsList />
                 </div>
               )}
             </Stack>
           </>
         )}
       </Stack>
-      <WssErrorModal playerProblems={playerProblems} />
+      <WssErrorModal playerAlerts={playerAlerts} />
     </SidebarContent>
   );
 }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -18,7 +18,7 @@ import { Range } from "@lichtblick/suite-base/util/ranges";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
-  Initalization,
+  Initialization,
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
@@ -84,7 +84,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
   // Cache of loaded ranges. Ranges correspond to the cache blocks and are normalized in [0, 1];
   #loadedRangesCache: Range[] = [{ start: 0, end: 0 }];
 
-  #initResult?: Initalization;
+  #initResult?: Initialization;
 
   #totalSizeBytes: number = 0;
 
@@ -108,7 +108,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     this.#maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     this.#initResult = await this.#source.initialize();
     return this.#initResult;
   }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,7 +21,7 @@ import {
 } from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { IteratorCursor } from "@lichtblick/suite-base/players/IterablePlayer/IteratorCursor";
-import PlayerProblemManager from "@lichtblick/suite-base/players/PlayerProblemManager";
+import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { MessageBlock, Progress, TopicSelection } from "@lichtblick/suite-base/players/types";
 
 import { IIterableSource, MessageIteratorArgs } from "./IIterableSource";
@@ -37,7 +37,7 @@ type BlockLoaderArgs = {
   end: Time;
   maxBlocks: number;
   minBlockDurationNs: number;
-  problemManager: PlayerProblemManager;
+  alertManager: PlayerAlertManager;
 };
 
 type CacheBlock = MessageBlock & {
@@ -61,7 +61,7 @@ export class BlockLoader {
   #blockDurationNanos: number;
   #topics: TopicSelection = new Map();
   #maxCacheSize: number = 0;
-  #problemManager: PlayerProblemManager;
+  #alertManager: PlayerAlertManager;
   #stopped: boolean = false;
   #activeChangeCondvar: Condvar = new Condvar();
   #abortController: AbortController;
@@ -71,7 +71,7 @@ export class BlockLoader {
     this.#start = args.start;
     this.#end = args.end;
     this.#maxCacheSize = args.cacheSizeBytes;
-    this.#problemManager = args.problemManager;
+    this.#alertManager = args.alertManager;
     this.#abortController = new AbortController();
 
     const totalNs = Number(toNanoSec(subtractTimes(this.#end, this.#start))) + 1; // +1 since times are inclusive.
@@ -292,11 +292,8 @@ export class BlockLoader {
 
         let sizeInBytes = 0;
         for (const iterResult of results) {
-          if (iterResult.type === "problem") {
-            this.#problemManager.addProblem(
-              `connid-${iterResult.connectionId}`,
-              iterResult.problem,
-            );
+          if (iterResult.type === "alert") {
+            this.#alertManager.addAlert(`connid-${iterResult.connectionId}`, iterResult.alert);
             continue;
           }
 
@@ -309,16 +306,16 @@ export class BlockLoader {
 
           // Because we initialized all the topicsToFetch earlier we expect to have an array for each message
           // topic in our results. If we don't, thats a problem.
-          const problemKey = `unexpected-topic-${msgTopic}`;
+          const alertKey = `unexpected-topic-${msgTopic}`;
           if (!arr) {
-            this.#problemManager.addProblem(problemKey, {
+            this.#alertManager.addAlert(alertKey, {
               severity: "error",
               message: `Received a message on an unexpected topic: ${msgTopic}.`,
             });
 
             continue;
           }
-          this.#problemManager.removeProblem(problemKey);
+          this.#alertManager.removeAlert(alertKey);
 
           const messageSizeInBytes = iterResult.msgEvent.sizeInBytes;
           totalBlockSizeBytes += messageSizeInBytes;
@@ -327,14 +324,14 @@ export class BlockLoader {
           sizeInBytes += messageSizeInBytes;
 
           if (totalBlockSizeBytes < this.#maxCacheSize) {
-            this.#problemManager.removeProblem("cache-full");
+            this.#alertManager.removeAlert("cache-full");
             continue;
           }
           // cache over capacity, try removing unused topics
           const removedSize = this.#removeUnusedBlockTopics();
           totalBlockSizeBytes -= removedSize;
           if (totalBlockSizeBytes > this.#maxCacheSize) {
-            this.#problemManager.addProblem("cache-full", {
+            this.#alertManager.addAlert("cache-full", {
               severity: "error",
               message: `Cache is full. Preloading for topics [${Array.from(
                 topicsToFetch.keys(),

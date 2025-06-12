@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -99,7 +99,7 @@ export function ProgressPlot(props: ProgressProps): React.JSX.Element {
 
   return (
     <Stack position="relative" fullHeight>
-      {loading && <div className={classes.loadingIndicator} />}
+      {loading && <div data-testid="progress-plot" className={classes.loadingIndicator} />}
       {ranges}
     </Stack>
   );

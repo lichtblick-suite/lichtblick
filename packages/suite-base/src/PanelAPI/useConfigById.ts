@@ -1,7 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
-// SPDX-License-Identifier: MPL-2.0
-
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,8 +9,9 @@ import * as _ from "lodash-es";
 import { useCallback, useMemo } from "react";
 import { DeepPartial } from "ts-essentials";
 
-import { PanelSettings, Topic } from "@lichtblick/suite";
+import { Topic } from "@lichtblick/suite";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
   LayoutState,
   useCurrentLayoutActions,
@@ -34,11 +32,7 @@ import { getPanelTypeFromId } from "../util/layout";
  */
 export default function useConfigById<Config extends Record<string, unknown>>(
   panelId: string | undefined,
-): [
-  Config | undefined,
-  SaveConfig<Config>,
-  Record<string, Record<string, PanelSettings<unknown>>>,
-] {
+): [Config | undefined, SaveConfig<Config>, ExtensionSettings] {
   const { getCurrentLayoutState, savePanelConfigs } = useCurrentLayoutActions();
   const extensionSettings = useExtensionCatalog(getExtensionPanelSettings);
   const sortedTopics = useMessagePipeline((state) => state.sortedTopics);

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -18,10 +18,11 @@ import {
   Delete20Regular,
   TabDesktop20Regular,
   TabDesktopMultiple20Regular,
-  TableSimple20Regular,
+  SplitVertical20Regular,
+  SplitHorizontal20Regular,
 } from "@fluentui/react-icons";
 import * as _ from "lodash-es";
-import React, {
+import {
   ComponentType,
   MouseEventHandler,
   Profiler,
@@ -39,7 +40,6 @@ import {
   MosaicNode,
   MosaicWindowActions,
   MosaicWindowContext,
-  updateTree,
 } from "react-mosaic-component";
 import { Transition } from "react-transition-group";
 import { useMountedState } from "react-use";
@@ -53,6 +53,7 @@ import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import PanelErrorBoundary from "@lichtblick/suite-base/components/PanelErrorBoundary";
 import { PanelOverlay, PanelOverlayProps } from "@lichtblick/suite-base/components/PanelOverlay";
 import { PanelRoot } from "@lichtblick/suite-base/components/PanelRoot";
+import { getPanelTypeFromMosaic } from "@lichtblick/suite-base/components/PanelToolbar/utils";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -64,15 +65,9 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
-import { TabPanelConfig } from "@lichtblick/suite-base/types/layouts";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
-import {
-  getPanelIdForType,
-  getPanelTypeFromId,
-  getPathFromNode,
-  updateTabPanelLayout,
-} from "@lichtblick/suite-base/util/layout";
+import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
 const useStyles = makeStyles()((theme) => ({
   perfInfo: {
@@ -160,6 +155,7 @@ export default function Panel<
       updatePanelConfigs,
       createTabPanel,
       closePanel,
+      splitPanel,
       swapPanel,
       getCurrentLayoutState,
     } = useCurrentLayoutActions();
@@ -364,43 +360,30 @@ export default function Panel<
       });
     }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
-    const splitPanel = useCallback(() => {
-      const savedProps = getCurrentLayoutState().selectedLayout?.data?.configById;
-      if (!savedProps) {
-        return;
-      }
-      const tabSavedProps = tabId != undefined ? (savedProps[tabId] as TabPanelConfig) : undefined;
-      if (tabId != undefined && tabSavedProps != undefined) {
-        const newId = getPanelIdForType(PanelComponent.panelType);
-        const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]?.layout;
-        if (activeTabLayout == undefined) {
-          return;
+    const getPanelType = useCallback(
+      () => getPanelTypeFromMosaic(mosaicWindowActions, mosaicActions),
+      [mosaicActions, mosaicWindowActions],
+    );
+
+    const split = useCallback(
+      (id: string | undefined, direction: "row" | "column") => {
+        const panelType = getPanelType();
+        if (id == undefined || panelType == undefined) {
+          throw new Error("Trying to split unknown panel!");
         }
-        const pathToPanelInTab = getPathFromNode(childId, activeTabLayout);
-        const newTabLayout = updateTree(activeTabLayout, [
-          {
-            path: pathToPanelInTab,
-            spec: { $set: { first: childId, second: newId, direction: "row" } },
-          },
-        ]);
-        const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps);
-        savePanelConfigs({
-          configs: [
-            { id: tabId, config: newTabConfig },
-            { id: newId, config: panelComponentConfig },
-          ],
+
+        const config = getCurrentLayoutState().selectedLayout?.data?.configById[id] ?? {};
+        splitPanel({
+          id,
+          tabId,
+          direction,
+          root: mosaicActions.getRoot() as MosaicNode<string>,
+          path: mosaicWindowActions.getPath(),
+          config,
         });
-      } else {
-        void mosaicWindowActions.split({ type: PanelComponent.panelType });
-      }
-    }, [
-      childId,
-      getCurrentLayoutState,
-      mosaicWindowActions,
-      panelComponentConfig,
-      savePanelConfigs,
-      tabId,
-    ]);
+      },
+      [getCurrentLayoutState, getPanelType, mosaicActions, mosaicWindowActions, splitPanel, tabId],
+    );
 
     const { enterFullscreen, exitFullscreen } = useMemo(
       () => ({
@@ -563,14 +546,24 @@ export default function Panel<
       if (quickActionsKeyPressed) {
         overlayProps.actions = [
           {
-            key: "split",
-            text: "Split panel",
-            icon: <TableSimple20Regular />,
-            onClick: splitPanel,
+            key: "splitDown",
+            text: "Split down",
+            icon: <SplitHorizontal20Regular />,
+            onClick: () => {
+              split(childId, "column");
+            },
+          },
+          {
+            key: "splitRight",
+            text: "Split right",
+            icon: <SplitVertical20Regular />,
+            onClick: () => {
+              split(childId, "row");
+            },
           },
           {
             key: "remove",
-            text: "Remove panel",
+            text: "Remove",
             icon: <Delete20Regular />,
             color: "error",
             onClick: removePanel,
@@ -579,6 +572,7 @@ export default function Panel<
       }
       return overlayProps;
     }, [
+      childId,
       classes.tabCount,
       createTabs,
       dropMessage,
@@ -591,7 +585,7 @@ export default function Panel<
       quickActionsKeyPressed,
       removePanel,
       setSelectedPanelIds,
-      splitPanel,
+      split,
       type,
     ]);
 
@@ -668,7 +662,7 @@ export default function Panel<
                   />
                 )}
                 <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
-                  <React.StrictMode>{child}</React.StrictMode>
+                  {child}
                 </PanelErrorBoundary>
                 {process.env.NODE_ENV !== "production" && (
                   <div className={classes.perfInfo} ref={perfInfo} />

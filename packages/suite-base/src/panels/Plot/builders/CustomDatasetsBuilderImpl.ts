@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -18,8 +18,8 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
-import { Datum, OriginalValue } from "../datum";
 import { Dataset } from "../types";
+import { Datum, OriginalValue } from "../utils/datum";
 
 export type ValueItem = {
   value: number;

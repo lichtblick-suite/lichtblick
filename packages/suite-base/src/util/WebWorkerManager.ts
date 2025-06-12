@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -42,7 +42,7 @@ export default class WebWorkerManager<W extends Channel> {
   }
 
   public testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {
-    return this.#workerStates.find((workerState) => workerState?.listenerIds.includes(id));
+    return this.#workerStates.find((workerState) => workerState?.listenerIds.includes(id) ?? false);
   }
 
   public registerWorkerListener(id: string): Rpc {

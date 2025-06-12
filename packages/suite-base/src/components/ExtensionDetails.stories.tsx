@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -34,6 +34,7 @@ export default {
 
 const MockExtensionLoader: ExtensionLoader = {
   namespace: "local",
+  getExtension: async () => undefined,
   getExtensions: async () => [],
   loadExtension: async (_id: string) => "",
   installExtension: async (_foxeFileData: Uint8Array) => {
@@ -55,10 +56,11 @@ const extension: ExtensionMarketplaceDetail = {
   description: "Extension sample description",
   qualifiedName: "Qualified Extension Name",
   publisher: "Publisher",
-  homepage: "https://github.com/Lichtblick-Suite",
+  homepage: "https://github.com/lichtblick-suite",
   license: "MIT",
   version: "1.2.10",
   keywords: ["storybook", "testing"],
+  displayName: "Display Extension Name",
   time: {
     modified: "2021-05-19T21:37:40.166Z",
     created: "2012-04-17T00:38:04.350Z",

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -35,9 +35,9 @@ import { PlotCoordinator } from "./PlotCoordinator";
 import { PlotLegend } from "./PlotLegend";
 import useGlobalSync from "./hooks/useGlobalSync";
 import usePlotDataHandling from "./hooks/usePlotDataHandling";
+import usePlotPanelSettings from "./hooks/usePlotPanelSettings";
 import useRenderer from "./hooks/useRenderer";
 import useSubscriptions from "./hooks/useSubscriptions";
-import { usePlotPanelSettings } from "./settings";
 
 const Plot = (props: PlotProps): React.JSX.Element => {
   const { saveConfig, config } = props;
@@ -64,7 +64,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const [subscriberId] = useState(() => uuidv4());
   const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
   const [coordinator, setCoordinator] = useState<PlotCoordinator | undefined>(undefined);
-  const shouldSync = config.xAxisVal === "timestamp" && config.isSynced;
+  const shouldSync = config.isSynced;
   const renderer = useRenderer(canvasDiv, theme);
   const { globalVariables } = useGlobalVariables();
   const getMessagePipelineState = useMessagePipelineGetter();
@@ -146,6 +146,12 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   }, [coordinator, getMessagePipelineState, subscribeMessagePipeline]);
 
   useEffect(() => {
+    if (coordinator) {
+      coordinator.setShouldSync({ shouldSync });
+    }
+  }, [coordinator, shouldSync]);
+
+  useEffect(() => {
     if (!renderer || !canvasDiv) {
       return;
     }
@@ -163,7 +169,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     const isCanvasTarget = (entry: Immutable<ResizeObserverEntry>) => entry.target === canvasDiv;
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = _.findLast(entries, isCanvasTarget);
-      if (entry) {
+      if (entry != undefined) {
         plotCoordinator.setSize({
           width: entry.contentRect.width,
           height: entry.contentRect.height,

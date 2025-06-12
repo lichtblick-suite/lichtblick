@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -60,6 +60,7 @@ export function main(): void {
       input.setAttribute("hidden", "true");
       input.setAttribute("type", "file");
       input.setAttribute("id", "electron-open-file-input");
+      input.setAttribute("multiple", "true");
       document.body.appendChild(input);
 
       // let main know we are ready to accept open-file requests

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -22,6 +22,9 @@ addFoxgloveSchema(RAW_IMAGE_DATATYPES, "foxglove.RawImage");
 
 export const COMPRESSED_IMAGE_DATATYPES = new Set<string>();
 addFoxgloveSchema(COMPRESSED_IMAGE_DATATYPES, "foxglove.CompressedImage");
+
+export const COMPRESSED_VIDEO_DATATYPES = new Set<string>();
+addFoxgloveSchema(COMPRESSED_VIDEO_DATATYPES, "foxglove.CompressedVideo");
 
 export const CAMERA_CALIBRATION_DATATYPES = new Set<string>();
 addFoxgloveSchema(CAMERA_CALIBRATION_DATATYPES, "foxglove.CameraCalibration");

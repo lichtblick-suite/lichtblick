@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -58,6 +58,7 @@ import {
 import UserScriptPlayer from "@lichtblick/suite-base/players/UserScriptPlayer";
 import { Player } from "@lichtblick/suite-base/players/types";
 import { UserScripts } from "@lichtblick/suite-base/types/panels";
+import { mergeMultipleFileNames } from "@lichtblick/suite-base/util/mergeMultipleFileName";
 
 const log = Logger.getLogger(__filename);
 
@@ -154,7 +155,7 @@ export default function PlayerManager(
       log.debug(`Select Source: ${sourceId}`);
 
       const foundSource = playerSources.find(
-        (source) => source.id === sourceId || source.legacyIds?.includes(sourceId),
+        (source) => (source.id === sourceId || source.legacyIds?.includes(sourceId)) ?? false,
       );
       if (!foundSource) {
         enqueueSnackbar(`Unknown data source: ${sourceId}`, { variant: "warning" });
@@ -203,7 +204,7 @@ export default function PlayerManager(
             return;
           }
           case "file": {
-            const handle = args.handle;
+            const handles = args.handles;
             const files = args.files;
 
             // files we can try loading immediately
@@ -227,35 +228,36 @@ export default function PlayerManager(
 
               setBasePlayer(newPlayer);
               return;
-            } else if (handle) {
-              const permission = await handle.queryPermission({ mode: "read" });
-              if (!isMounted()) {
-                return;
-              }
+            } else if (handles) {
+              for (const handle of handles) {
+                const permission = await handle.queryPermission({ mode: "read" });
+                if (!isMounted()) {
+                  return;
+                }
 
-              if (permission !== "granted") {
-                const newPerm = await handle.requestPermission({ mode: "read" });
-                if (newPerm !== "granted") {
-                  throw new Error(`Permission denied: ${handle.name}`);
+                if (permission !== "granted") {
+                  const newPerm = await handle.requestPermission({ mode: "read" });
+                  if (newPerm !== "granted") {
+                    throw new Error(`Permission denied: ${handle.name}`);
+                  }
                 }
               }
-
-              const file = await handle.getFile();
+              const filesHandled = await Promise.all(handles.map(async (f) => await f.getFile()));
               if (!isMounted()) {
                 return;
               }
 
               const newPlayer = foundSource.initialize({
-                file,
+                files: filesHandled,
                 metricsCollector,
               });
 
               setBasePlayer(newPlayer);
               addRecent({
                 type: "file",
-                title: handle.name,
+                title: mergeMultipleFileNames(handles.map((h) => h.name)),
                 sourceId: foundSource.id,
-                handle,
+                handles,
               });
 
               return;
@@ -336,7 +338,7 @@ function createSelectRecentCallback(
       case "file": {
         void selectSource(foundRecent.sourceId, {
           type: "file",
-          handle: foundRecent.handle,
+          handles: foundRecent.handles,
         });
       }
     }

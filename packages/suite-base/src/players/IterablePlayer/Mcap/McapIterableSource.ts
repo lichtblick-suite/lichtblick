@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -9,6 +9,7 @@ import { McapIndexedReader, McapTypes } from "@mcap/core";
 
 import Log from "@lichtblick/log";
 import { loadDecompressHandlers } from "@lichtblick/mcap-support";
+import { Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";
@@ -18,7 +19,7 @@ import { RemoteFileReadable } from "./RemoteFileReadable";
 import {
   IIterableSource,
   IteratorResult,
-  Initalization,
+  Initialization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
 } from "../IIterableSource";
@@ -54,7 +55,7 @@ export class McapIterableSource implements IIterableSource {
     this.#source = source;
   }
 
-  public async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initialization> {
     const source = this.#source;
 
     switch (source.type) {
@@ -120,5 +121,9 @@ export class McapIterableSource implements IIterableSource {
     }
 
     return await this.#sourceImpl.getBackfillMessages(args);
+  }
+
+  public getStart(): Time | undefined {
+    return this.#sourceImpl!.getStart!();
   }
 }

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -59,6 +59,7 @@ describe("tryToSetDefaultGlobalVar", () => {
 describe("getFirstInvalidVariableFromRosPath", () => {
   it("returns all possible message paths when not passing in `validTypes`", () => {
     const setGlobalVars = jest.fn();
+    const defaultOperator = "==";
     const rosPath: MessagePath = {
       topicName: "/some_topic",
       topicNameRepr: "/some_topic",
@@ -72,6 +73,7 @@ describe("getFirstInvalidVariableFromRosPath", () => {
           nameLoc: 11,
           valueLoc: 10,
           repr: "myId==$not_yet_set_global_var",
+          operator: defaultOperator,
         },
       ],
       modifier: undefined,

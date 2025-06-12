@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { action } from "@storybook/addon-actions";
 import { Meta, StoryFn, StoryObj } from "@storybook/react";
+import { action } from "storybook/actions";
 
 import MockMessagePipelineProvider, {
   MockMessagePipelineProps,
@@ -56,7 +56,7 @@ const Grid = (Story: StoryFn): React.JSX.Element => (
   </Stack>
 );
 
-const problems: MockMessagePipelineProps["problems"] = [
+const alerts: MockMessagePipelineProps["alerts"] = [
   { severity: "error", message: "example error" },
   { severity: "warn", message: "example warn" },
 ];
@@ -78,19 +78,19 @@ export const PlayerStates: Story = {
         {
           name: "https://exampleurl:2002",
           presence: PlayerPresence.ERROR,
-          problems,
+          alerts,
         },
         {
-          label: "INITIALIZING + problems",
+          label: "INITIALIZING + alerts",
           name: "https://exampleurl:2002",
           presence: PlayerPresence.INITIALIZING,
-          problems,
+          alerts,
         },
         {
           label: "INITIALIZING + no name",
           name: undefined,
           presence: PlayerPresence.INITIALIZING,
-          problems,
+          alerts,
         },
       ];
 
@@ -101,7 +101,7 @@ export const PlayerStates: Story = {
               key={props.presence}
               name={props.name}
               presence={props.presence}
-              problems={props.problems}
+              alerts={props.alerts}
             >
               <div style={{ padding: 8 }}>{props.label ?? props.presence}</div>
               <div>
@@ -161,9 +161,9 @@ export const DataSources: Story = {
         ...fileSources,
         ...remoteSources,
         {
-          label: "with problems",
+          label: "with alerts",
           name: "https://longexampleurlwith_error-and-portnumber:3030",
-          problems,
+          alerts,
         },
       ];
 
@@ -175,7 +175,7 @@ export const DataSources: Story = {
               name={props.name}
               presence={PlayerPresence.PRESENT}
               urlState={props.urlState}
-              problems={props.problems}
+              alerts={props.alerts}
               seekPlayback={() => {}}
             >
               <div style={{ padding: 8 }}>{props.label ?? props.urlState?.sourceId}</div>

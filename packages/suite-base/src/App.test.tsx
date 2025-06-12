@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -21,13 +21,13 @@ import NativeWindowContext, {
   INativeWindow,
 } from "@lichtblick/suite-base/context/NativeWindowContext";
 import { UserScriptStateProvider } from "@lichtblick/suite-base/context/UserScriptStateContext";
+import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "@lichtblick/suite-base/providers/ExtensionMarketplaceProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
-import ProblemsContextProvider from "@lichtblick/suite-base/providers/ProblemsContextProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
@@ -167,7 +167,7 @@ describe("App Component MultiProvider Tests", () => {
     EventsProvider,
     StudioToastProvider,
     StudioLogsSettingsProvider,
-    ProblemsContextProvider,
+    AlertsContextProvider,
     CurrentLayoutProvider,
     UserProfileLocalStorageProvider,
     LayoutManagerProvider,

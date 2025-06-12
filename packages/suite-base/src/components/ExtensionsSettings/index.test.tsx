@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -15,6 +15,10 @@ import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/Exten
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import ExtensionsSettings from "./index";
+
+jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
+  useExtensionCatalog: jest.fn(),
+}));
 
 jest.mock("@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionSettings");
 jest.mock("react-i18next");

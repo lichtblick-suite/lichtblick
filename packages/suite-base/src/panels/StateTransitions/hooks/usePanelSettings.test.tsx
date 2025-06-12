@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { act, renderHook, RenderHookResult } from "@testing-library/react";
 import { t, TFunction } from "i18next";
@@ -9,7 +9,6 @@ import { PropsWithChildren } from "react";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
-import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/Plot/plotableRosTypes";
 import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import {
   buildSettingsTree,
@@ -26,6 +25,7 @@ import {
   StateTransitionConfig,
   StateTransitionPath,
 } from "@lichtblick/suite-base/panels/StateTransitions/types";
+import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";

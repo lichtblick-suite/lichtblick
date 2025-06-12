@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,7 +12,7 @@ import { filterMap } from "@lichtblick/den/collection";
 import { MessagePath } from "@lichtblick/message-path";
 import { Immutable, Time, MessageEvent } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { mathFunctions } from "@lichtblick/suite-base/panels/Plot/mathFunctions";
+import { mathFunctions } from "@lichtblick/suite-base/panels/Plot/utils/mathFunctions";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
 
 import {
@@ -23,8 +23,8 @@ import {
   SeriesConfigKey,
   SeriesItem,
 } from "./IDatasetsBuilder";
-import { getChartValue, isChartValue, Datum } from "../datum";
 import { Dataset } from "../types";
+import { getChartValue, isChartValue, Datum } from "../utils/datum";
 
 type DatumWithReceiveTime = Datum & {
   receiveTime: Time;

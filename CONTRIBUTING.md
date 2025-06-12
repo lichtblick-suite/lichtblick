@@ -4,7 +4,7 @@ Welcome, and thank you for your interest in contributing to Lichtblick! We value
 
 ## :rocket: Getting Started
 
-Please check our [README.md](../README.md) and follow the installation steps.
+Please check our [README.md](README.md) and follow the installation steps.
 
 #### Other useful commands
 
@@ -24,7 +24,7 @@ $ yarn run               # list available commands
 $ yarn lint              # lint all files
 $ yarn test              # run all tests
 $ yarn test:watch        # run tests on changed files
-$ yarn test:integration  # run all integration tests
+$ yarn test:e2e:desktop  # run all e2e tests
 ```
 
 ## :herb: Creating a new branch

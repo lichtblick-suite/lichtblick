@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import { Datum, HoverElement } from "@lichtblick/suite-base/panels/Plot/types";
 import {
   BasePlotPath,
   PlotConfig,
   PlotPath,
   PlotXAxisVal,
-} from "@lichtblick/suite-base/panels/Plot/config";
-import { Datum, HoverElement } from "@lichtblick/suite-base/panels/Plot/types";
+} from "@lichtblick/suite-base/panels/Plot/utils/config";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
@@ -33,11 +33,9 @@ export default class PlotBuilder {
 
   public static path(props: Partial<PlotPath> = {}): PlotPath {
     return defaults<PlotPath>(props, {
-      value: BasicBuilder.string(),
-      label: BasicBuilder.string(),
-      color: BasicBuilder.string(),
       enabled: BasicBuilder.boolean(),
       timestampMethod: BasicBuilder.sample(["headerStamp", "receiveTime"] as TimestampMethod[]),
+      value: BasicBuilder.string(),
     });
   }
 
@@ -55,7 +53,7 @@ export default class PlotBuilder {
   public static config(props: Partial<PlotConfig> = {}): PlotConfig {
     return defaults<PlotConfig>(props, {
       followingViewWidth: BasicBuilder.number(),
-      foxglovePanelTitle: BasicBuilder.string(),
+      lichtblickPanelTitle: BasicBuilder.string(),
       isSynced: BasicBuilder.boolean(),
       legendDisplay: "floating",
       maxXValue: BasicBuilder.number(),

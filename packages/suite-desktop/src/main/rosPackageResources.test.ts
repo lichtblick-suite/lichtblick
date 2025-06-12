@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -31,6 +31,9 @@ describe("rosPackageResources", () => {
         rosPackagePath: `${FIXTURES_ROOT}${path.delimiter}${PACKAGES_ROOT}`,
       });
       expect(packagePath).toEqual(path.join(PACKAGES_ROOT, "./foo"));
+
+      expect(console.error).toHaveBeenCalled();
+      (console.error as jest.Mock).mockClear();
     });
 
     it("should find package within process.env.ROS_PACKAGE_PATH", async () => {
@@ -41,6 +44,9 @@ describe("rosPackageResources", () => {
       } finally {
         process.env.ROS_PACKAGE_PATH = undefined;
       }
+
+      expect(console.error).toHaveBeenCalled();
+      (console.error as jest.Mock).mockClear();
     });
 
     it("should find packages recursively within rosPackagePath", async () => {
@@ -48,6 +54,9 @@ describe("rosPackageResources", () => {
         rosPackagePath: PACKAGES_ROOT,
       });
       expect(packagePath).toEqual(path.join(PACKAGES_ROOT, "nested", "child"));
+
+      expect(console.error).toHaveBeenCalled();
+      (console.error as jest.Mock).mockClear();
     });
   });
 });

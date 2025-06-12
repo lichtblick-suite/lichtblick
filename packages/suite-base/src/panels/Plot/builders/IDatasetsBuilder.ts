@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,8 +13,8 @@ import type { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/
 import type { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
 
-import { OriginalValue } from "../datum";
 import type { Dataset } from "../types";
+import { OriginalValue } from "../utils/datum";
 
 type CsvDatum = {
   x: number;

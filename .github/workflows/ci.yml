@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-latest
         config:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
@@ -32,12 +32,14 @@ jobs:
             command: yarn run build:packages
           - name: web
             command: yarn run web:build:prod
+          - name: desktop
+            command: yarn run desktop:build:prod
           - name: build benchmark
             command: yarn run benchmark:build:prod
           - name: test
             command: yarn run test --maxWorkers=100%
         include:
-          - os: windows-2019
+          - os: windows-latest
             config:
               name: packages
               command: echo complete
@@ -46,8 +48,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.1
-        with:
-          lfs: true
 
       - uses: actions/setup-node@v4.0.3
         with:
@@ -67,20 +67,13 @@ jobs:
 
       - run: ${{ matrix.config.command }}
 
-  integration:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
+  e2e:
+    runs-on: ubuntu-latest
 
-    name: integration (${{ matrix.os }})
+    name: e2e (ubuntu-latest)
 
     steps:
       - uses: actions/checkout@v4.1.1
-        with:
-          lfs: true
 
       - uses: actions/setup-node@v4.0.3
         with:
@@ -98,24 +91,15 @@ jobs:
 
       - run: yarn install --immutable
 
-      - name: test:integration (ubuntu)
-        if: matrix.os == 'ubuntu-20.04'
+      - name: Apply AppArmor Fix (Ubuntu)
+        # Required for Playwright on Ubuntu to work properly
+        # See: https://github.com/microsoft/playwright/issues/34251
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: test:e2e:desktop:ci (ubuntu-latest)
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: yarn run test:integration
-
-      - name: test:integration (windows and macOS)
-        if: matrix.os != 'ubuntu-20.04'
-        run: yarn run test:integration
-
-      # New version of playwright requires to install new browsers
-      - name: Install Playwright browsers
-        if: matrix.os == 'ubuntu-20.04'
-        run: |
-          cd web
-          yarn playwright install
-
-      - name: test:web-integration
-        if: matrix.os == 'ubuntu-20.04'
-        run: yarn run test:web-integration
+          run: |
+            yarn desktop:build:prod
+            yarn test:e2e:desktop:ci

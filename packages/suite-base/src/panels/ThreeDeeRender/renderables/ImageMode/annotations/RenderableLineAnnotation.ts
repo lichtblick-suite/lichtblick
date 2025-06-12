@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,7 +11,7 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
-import { PinholeCameraModel } from "@lichtblick/den/image";
+import { ICameraModel } from "@lichtblick/suite";
 import { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
 
 import {
@@ -89,7 +89,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
   #annotation?: NormalizedPointsAnnotation & { style: LineStyle };
   #annotationNeedsUpdate = false;
 
-  #cameraModel?: PinholeCameraModel;
+  #cameraModel?: ICameraModel;
   #cameraModelNeedsUpdate = false;
 
   public constructor(topicName: string) {
@@ -176,7 +176,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
     this.#canvasHeight = canvasHeight;
   }
 
-  public setCameraModel(cameraModel: PinholeCameraModel | undefined): void {
+  public setCameraModel(cameraModel: ICameraModel | undefined): void {
     this.#cameraModelNeedsUpdate ||= this.#cameraModel !== cameraModel;
     this.#cameraModel = cameraModel;
   }

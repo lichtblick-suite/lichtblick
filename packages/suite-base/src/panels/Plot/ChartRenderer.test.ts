@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { Chart, ChartOptions, Element, InteractionItem, Scale } from "chart.js";
 
@@ -6,7 +6,7 @@ import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import { Immutable } from "@lichtblick/suite";
 import { ChartRenderer } from "@lichtblick/suite-base/panels/Plot/ChartRenderer";
 import { DEFAULT_ANNOTATION } from "@lichtblick/suite-base/panels/Plot/constants";
-import { getChartOptions } from "@lichtblick/suite-base/panels/Plot/getChartOptions";
+import { getChartOptions } from "@lichtblick/suite-base/panels/Plot/utils/getChartOptions";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import {
@@ -76,7 +76,7 @@ jest.mock("@lichtblick/chartjs-plugin-zoom", () => ({
   },
 }));
 
-jest.mock("@lichtblick/suite-base/panels/Plot/getChartOptions", () => ({
+jest.mock("@lichtblick/suite-base/panels/Plot/utils/getChartOptions", () => ({
   getChartOptions: jest.fn().mockReturnValue({}),
 }));
 

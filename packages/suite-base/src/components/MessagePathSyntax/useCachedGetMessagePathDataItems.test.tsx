@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -18,7 +18,7 @@
 import { renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
 
-import { parseMessagePath } from "@lichtblick/message-path";
+import { OperatorType, parseMessagePath } from "@lichtblick/message-path";
 import { messagePathStructures } from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";
@@ -618,6 +618,9 @@ describe("useCachedGetMessagePathDataItems", () => {
 });
 
 describe("fillInGlobalVariablesInPath", () => {
+  const equal: OperatorType = "==";
+  const notEqual: OperatorType = "!=";
+
   it("fills in global variables in slices", () => {
     expect(
       fillInGlobalVariablesInPath(
@@ -687,6 +690,7 @@ describe("fillInGlobalVariablesInPath", () => {
               nameLoc: 0,
               valueLoc: 0,
               repr: "",
+              operator: equal,
             },
           ],
           modifier: undefined,
@@ -697,7 +701,15 @@ describe("fillInGlobalVariablesInPath", () => {
       topicName: "/foo",
       topicNameRepr: "/foo",
       messagePath: [
-        { type: "filter", path: ["bar"], value: 123, nameLoc: 0, valueLoc: 0, repr: "" },
+        {
+          type: "filter",
+          path: ["bar"],
+          value: 123,
+          nameLoc: 0,
+          valueLoc: 0,
+          repr: "",
+          operator: equal,
+        },
       ],
     });
   });
@@ -717,6 +729,7 @@ describe("fillInGlobalVariablesInPath", () => {
               nameLoc: 0,
               valueLoc: 0,
               repr: "",
+              operator: notEqual,
             },
           ],
           modifier: undefined,
@@ -727,7 +740,15 @@ describe("fillInGlobalVariablesInPath", () => {
       topicName: "/foo",
       topicNameRepr: "/foo",
       messagePath: [
-        { type: "filter", path: ["bar"], value: undefined, nameLoc: 0, valueLoc: 0, repr: "" },
+        {
+          type: "filter",
+          path: ["bar"],
+          value: undefined,
+          nameLoc: 0,
+          valueLoc: 0,
+          repr: "",
+          operator: notEqual,
+        },
       ],
     });
   });

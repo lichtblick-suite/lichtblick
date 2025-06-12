@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,11 +12,10 @@ import { dirname, join as pathJoin } from "path";
 
 import Logger from "@lichtblick/log";
 
+import { ExtensionPackageJson } from "./types";
 import { DesktopExtension } from "../common/types";
 
 const log = Logger.getLogger(__filename);
-
-type ExtensionPackageJson = { name: string; version: string; main: string; publisher?: string };
 
 /**
  * Returns a unique identifier for an extension based on the publisher and package name. The
@@ -27,7 +26,7 @@ type ExtensionPackageJson = { name: string; version: string; main: string; publi
  * @param pkgJson Parsed package.json file
  * @returns An identifier string such as "lichtblick.suite-extension-turtlesim"
  */
-function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
+export function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
   if (pkgJson == undefined) {
     throw new Error(`Missing package.json`);
   }
@@ -58,7 +57,7 @@ function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
  * @param pkgJson Parsed package.json file
  * @returns A directory name such as "lichtblick.suite-extension-turtlesim-1.0.0"
  */
-function getPackageDirname(pkgJson: ExtensionPackageJson): string {
+export function getPackageDirname(pkgJson: ExtensionPackageJson): string {
   const pkgId = getPackageId(pkgJson);
   const dir = `${pkgId}-${pkgJson.version}`;
   if (dir.length >= 255) {
@@ -72,12 +71,65 @@ function getPackageDirname(pkgJson: ExtensionPackageJson): string {
  * @param name The "name" field from a package.json file
  * @returns An object containing the unprefixed name and the namespace, if present
  */
-function parsePackageName(name: string): { namespace?: string; name: string } {
+export function parsePackageName(name: string): { namespace?: string; name: string } {
   const res = /^@([^/]+)\/(.+)/.exec(name);
   if (res == undefined) {
     return { name };
   }
   return { namespace: res[1], name: res[2]! };
+}
+
+const safeReadFile = async (filePath: string): Promise<string> => {
+  try {
+    return await readFile(filePath, { encoding: "utf8" });
+  } catch {
+    return "";
+  }
+};
+
+export async function getExtension(
+  id: string,
+  rootFolder: string,
+): Promise<DesktopExtension | undefined> {
+  if (!existsSync(rootFolder)) {
+    return undefined;
+  }
+
+  const rootFolderContents = await readdir(rootFolder, { withFileTypes: true });
+  for (const entry of rootFolderContents) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const extensionRootPath = pathJoin(rootFolder, entry.name);
+    const packagePath = pathJoin(extensionRootPath, "package.json");
+
+    try {
+      const packageData = await readFile(packagePath, { encoding: "utf8" });
+      const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
+
+      if (getPackageId(packageJson) !== id) {
+        continue;
+      }
+
+      const [readme, changelog] = await Promise.all([
+        safeReadFile(pathJoin(extensionRootPath, "README.md")),
+        safeReadFile(pathJoin(extensionRootPath, "CHANGELOG.md")),
+      ]);
+
+      return {
+        id,
+        packageJson,
+        directory: extensionRootPath,
+        readme,
+        changelog,
+      };
+    } catch (err: unknown) {
+      log.error(`Failed to load extension at ${extensionRootPath}:`, err);
+      continue;
+    }
+  }
+  return undefined;
 }
 
 export async function getExtensions(rootFolder: string): Promise<DesktopExtension[]> {
@@ -98,10 +150,16 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const packagePath = pathJoin(extensionRootPath, "package.json");
       const packageData = await readFile(packagePath, { encoding: "utf8" });
       const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
+      const readmePath = pathJoin(extensionRootPath, "README.md");
+      const changelogPath = pathJoin(extensionRootPath, "CHANGELOG.md");
+      const [readme, changelog] = await Promise.all([
+        safeReadFile(readmePath),
+        safeReadFile(changelogPath),
+      ]);
 
       const id = getPackageId(packageJson);
 
-      extensions.push({ id, packageJson, directory: extensionRootPath });
+      extensions.push({ id, packageJson, directory: extensionRootPath, readme, changelog });
     } catch (err: unknown) {
       log.error(err);
     }
@@ -111,14 +169,11 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
 }
 
 export async function loadExtension(id: string, rootFolder: string): Promise<string> {
-  // Find this extension
-  const userExtensions = await getExtensions(rootFolder);
-  const extension = userExtensions.find(
-    (ext) => getPackageId(ext.packageJson as ExtensionPackageJson) === id,
-  );
-  if (extension == undefined) {
-    log.error(`Extension ${id} was not found, searched ${userExtensions.length} extensions`);
-    return "";
+  log.debug(`Loading extension ${id} from ${rootFolder}`);
+
+  const extension = await getExtension(id, rootFolder);
+  if (!extension) {
+    throw new Error(`Extension ${id} not found in ${rootFolder}`);
   }
 
   const packagePath = pathJoin(extension.directory, "package.json");
@@ -150,6 +205,11 @@ export async function installExtension(
     throw new Error(`Extension contains an invalid package.json`);
   }
 
+  const readmeZipObj = archive.files["README.md"];
+  const changelogZipObj = archive.files["CHANGELOG.md"];
+  const readme = readmeZipObj ? await readmeZipObj.async("string") : "";
+  const changelog = changelogZipObj ? await changelogZipObj.async("string") : "";
+
   // Check for basic validity of package.json and get the packageId
   const packageId = getPackageId(pkgJson);
 
@@ -177,24 +237,20 @@ export async function installExtension(
     id: packageId,
     packageJson: pkgJson,
     directory: extensionBaseDir,
+    readme,
+    changelog,
   };
 }
 
 export async function uninstallExtension(id: string, rootFolder: string): Promise<boolean> {
-  log.debug(`Searching for extension ${id} in ${rootFolder} to uninstall`);
+  log.debug(`Uninstalling extension ${id} from ${rootFolder}`);
 
-  // Find this extension
-  const userExtensions = await getExtensions(rootFolder);
-  const extension = userExtensions.find(
-    (ext) => getPackageId(ext.packageJson as ExtensionPackageJson) === id,
-  );
-  if (extension == undefined) {
-    log.error(`Extension ${id} was not found, searched ${userExtensions.length} extensions`);
+  const extension = await getExtension(id, rootFolder);
+  if (!extension) {
+    log.warn(`Extension ${id} not found in ${rootFolder}`);
     return false;
   }
 
-  // Delete the extension directory and contents
-  log.info(`Deleting extension directory ${extension.directory}`);
   await rm(extension.directory, { recursive: true, force: true });
   return true;
 }

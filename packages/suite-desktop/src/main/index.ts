@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -19,6 +19,7 @@ import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
 import { parseCLIFlags } from "./parseCLIFlags";
+import { resolveSourcePaths } from "./resolveSourcePaths";
 import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
@@ -31,6 +32,12 @@ import {
 } from "../common/webpackDefines";
 
 const log = Logger.getLogger(__filename);
+
+// This overwrite needs to be done here, before the app is ready, otherwise it will not take effect
+const homeOverride = process.argv.find((arg) => arg.startsWith("--home-dir="));
+if (homeOverride != undefined) {
+  app.setPath("home", homeOverride.split("=")[1]!);
+}
 
 /**
  * Determine whether an item in argv is a file that we should try opening as a data source.
@@ -74,6 +81,9 @@ export async function main(): Promise<void> {
   // https://github.com/electron/electron/issues/28422#issuecomment-987504138
   app.commandLine.appendSwitch("enable-experimental-web-platform-features");
 
+  // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
+  app.commandLine.appendSwitch("gtk-version", "3");
+
   const start = Date.now();
   log.info(`${LICHTBLICK_PRODUCT_NAME} ${LICHTBLICK_PRODUCT_VERSION}`);
 
@@ -81,7 +91,7 @@ export async function main(): Promise<void> {
 
   if (!isProduction && (app as Partial<typeof app>).dock != undefined) {
     const devIcon = getDevModeIcon();
-    if (devIcon) {
+    if (app.dock && devIcon) {
       app.dock.setIcon(devIcon);
     }
   }
@@ -142,14 +152,23 @@ export async function main(): Promise<void> {
       log.warn("Could not set app as handler for lichtblick://");
     }
   }
+  // Get the command line flags passed to the app when it was launched
+  const parsedCLIFlags = parseCLIFlags(process.argv);
 
-  // files our app should open - either from user double-click on a supported fileAssociation
-  // or command line arguments.
   const filesToOpen: string[] = process.argv
     .slice(1)
     .filter((arg) => !arg.startsWith("--")) // Filter out flags
     .map((filePath) => path.resolve(filePath)) // Convert to absolute path, linux has some problems to resolve relative paths
     .filter(isFileToOpen);
+
+  // Get file paths passed through the parameter "--source="
+  const filesToOpenFromSourceParameter = resolveSourcePaths(parsedCLIFlags.source);
+
+  filesToOpen.push(...filesToOpenFromSourceParameter);
+
+  const uniqueFilesToOpen = [...new Set(filesToOpen)];
+
+  const verifiedFilesToOpen: string[] = uniqueFilesToOpen.filter(isFileToOpen);
 
   // indicates the preloader has setup the file input used to inject which files to open
   let preloaderFileInputIsReady = false;
@@ -160,12 +179,12 @@ export async function main(): Promise<void> {
   // The open-file handler registered earlier will handle adding the file to filesToOpen
   app.on("open-file", async (_ev, filePath) => {
     log.debug("open-file handler", filePath);
-    filesToOpen.push(filePath);
+    verifiedFilesToOpen.push(filePath);
 
     if (preloaderFileInputIsReady) {
       const focusedWindow = BrowserWindow.getFocusedWindow();
       if (focusedWindow) {
-        await injectFilesToOpen(focusedWindow.webContents.debugger, filesToOpen);
+        await injectFilesToOpen(focusedWindow.webContents.debugger, verifiedFilesToOpen);
       } else {
         // On MacOS the user may have closed all the windows so we need to open a new window
         new StudioWindow().load();
@@ -179,7 +198,7 @@ export async function main(): Promise<void> {
   ipcMain.handle("load-pending-files", async (ev) => {
     log.debug("load-pending-files");
     const debug = ev.sender.debugger;
-    await injectFilesToOpen(debug, filesToOpen);
+    await injectFilesToOpen(debug, verifiedFilesToOpen);
     preloaderFileInputIsReady = true;
   });
 
@@ -214,8 +233,6 @@ export async function main(): Promise<void> {
   ipcMain.handle("getUserDataPath", () => app.getPath("userData"));
   ipcMain.handle("getHomePath", () => app.getPath("home"));
 
-  // Get the command line flags passed to the app when it was launched
-  const parsedCLIFlags = parseCLIFlags(process.argv);
   ipcMain.handle("getCLIFlags", () => parsedCLIFlags);
 
   // Must be called before app.ready event

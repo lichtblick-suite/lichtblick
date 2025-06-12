@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -9,35 +9,12 @@ import * as _ from "lodash-es";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
 
-import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
+import {
+  LayoutSelectionState,
+  LayoutSelectionAction,
+} from "@lichtblick/suite-base/components/LayoutBrowser/types";
 
-type MultiAction = "delete" | "duplicate" | "revert" | "save";
-
-type State = {
-  busy: boolean;
-  error: undefined | Error;
-  online: boolean;
-  lastSelectedId: undefined | string;
-  multiAction: undefined | { action: MultiAction; ids: string[] };
-  selectedIds: string[];
-};
-
-type Action =
-  | { type: "clear-multi-action" }
-  | { type: "queue-multi-action"; action: MultiAction }
-  | {
-      type: "select-id";
-      id?: string;
-      layouts?: undefined | { personal: Layout[]; shared: Layout[] };
-      shiftKey?: boolean;
-      modKey?: boolean;
-    }
-  | { type: "set-busy"; value: boolean }
-  | { type: "set-error"; value: undefined | Error }
-  | { type: "set-online"; value: boolean }
-  | { type: "shift-multi-action" };
-
-function reducer(draft: State, action: Action) {
+function reducer(draft: LayoutSelectionState, action: LayoutSelectionAction) {
   switch (action.type) {
     case "clear-multi-action":
       draft.multiAction = undefined;
@@ -87,8 +64,8 @@ function reducer(draft: State, action: Action) {
 }
 
 export function useLayoutBrowserReducer(
-  props: Pick<State, "busy" | "error" | "online" | "lastSelectedId">,
-): [State, Dispatch<Action>] {
+  props: Pick<LayoutSelectionState, "busy" | "error" | "online" | "lastSelectedId">,
+): [LayoutSelectionState, Dispatch<LayoutSelectionAction>] {
   return useImmerReducer(reducer, {
     ...props,
     selectedIds: [],

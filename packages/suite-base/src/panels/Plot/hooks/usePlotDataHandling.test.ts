@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { renderHook } from "@testing-library/react";
@@ -9,6 +9,7 @@ import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables
 import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CurrentCustomDatasetsBuilder";
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 
 import usePlotDataHandling from "./usePlotDataHandling";
@@ -120,11 +121,15 @@ describe("usePlotDataHandling hook", () => {
     const config = PlotBuilder.config({
       paths: [
         PlotBuilder.path({
+          color: BasicBuilder.string(),
           enabled: true,
+          label: BasicBuilder.string(),
           timestampMethod: "receiveTime",
         }),
         PlotBuilder.path({
+          color: BasicBuilder.string(),
           enabled: true,
+          label: BasicBuilder.string(),
           timestampMethod: "receiveTime",
         }),
       ],

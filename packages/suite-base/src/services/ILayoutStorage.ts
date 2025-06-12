@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -20,6 +20,17 @@ export type LayoutSyncStatus =
   | "tracked"
   | "locally-deleted"
   | "remotely-deleted";
+
+export type LayoutBaseline = {
+  data: LayoutData;
+  savedAt: ISO8601Timestamp | undefined;
+};
+
+export type LayoutSyncInfo = {
+  status: LayoutSyncStatus;
+  lastRemoteSavedAt: ISO8601Timestamp | undefined;
+};
+
 export type Layout = {
   id: LayoutID;
   name: string;
@@ -32,29 +43,15 @@ export type Layout = {
   state?: LayoutData;
 
   /** The last explicitly saved version of this layout. */
-  baseline: {
-    data: LayoutData;
-    savedAt: ISO8601Timestamp | undefined;
-  };
+  baseline: LayoutBaseline;
 
   /**
    * The working copy of this layout, if it has been edited since the last explicit save.
    */
-  working:
-    | {
-        data: LayoutData;
-        savedAt: ISO8601Timestamp | undefined;
-      }
-    | undefined;
+  working: LayoutBaseline | undefined;
 
   /** Info about this layout from remote storage. */
-  syncInfo:
-    | {
-        status: LayoutSyncStatus;
-        /** The last savedAt time returned by the server. */
-        lastRemoteSavedAt: ISO8601Timestamp | undefined;
-      }
-    | undefined;
+  syncInfo: LayoutSyncInfo | undefined;
 };
 
 export interface ILayoutStorage {

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,14 +8,14 @@
 import { Time } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Metadata } from "@lichtblick/suite";
 import {
-  PlayerProblem,
+  PlayerAlert,
   Topic,
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
-export type Initalization = {
+export type Initialization = {
   start: Time;
   end: Time;
   topics: Topic[];
@@ -28,7 +28,7 @@ export type Initalization = {
   /** Publisher names by topic **/
   publishersByTopic: Map<string, Set<string>>;
 
-  problems: PlayerProblem[];
+  alerts: PlayerAlert[];
 };
 
 export type MessageIteratorArgs = {
@@ -68,7 +68,7 @@ export type MessageIteratorArgs = {
  * types of results.
  *
  * - message-event: the result contains a MessageEvent
- * - problem: the result contains a problem
+ * - alert: the result contains an alert
  * - stamp: the result is a timestamp
  *
  * Note: A stamp result acts as a marker indicating that the source has reached the specified stamp.
@@ -81,13 +81,13 @@ export type IteratorResult =
       msgEvent: MessageEvent;
     }
   | {
-      type: "problem";
+      type: "alert";
       /**
-       * An ID representing the channel/connection where this problem came from. The app may choose
-       * to display only a single problem from each connection to avoid overwhelming the user.
+       * An ID representing the channel/connection where this alert came from. The app may choose
+       * to display only a single alert from each connection to avoid overwhelming the user.
        */
       connectionId: number;
-      problem: PlayerProblem;
+      alert: PlayerAlert;
     }
   | {
       type: "stamp";
@@ -154,7 +154,7 @@ export interface IIterableSource {
   /**
    * Initialize the source.
    */
-  initialize(): Promise<Initalization>;
+  initialize(): Promise<Initialization>;
 
   /**
    * Instantiate an IMessageIterator for the source.
@@ -191,6 +191,8 @@ export interface IIterableSource {
     args: Immutable<MessageIteratorArgs> & { abort?: AbortSignal },
   ) => IMessageCursor;
 
+  getStart?: () => Time | undefined;
+
   /**
    * Optional method a data source can implement to cleanup resources. The player will call this
    * method when the source will no longer be used.
@@ -202,6 +204,7 @@ export type IterableSourceInitializeArgs = {
   file?: File;
   url?: string;
   files?: File[];
+  urls?: string[];
   params?: Record<string, string | undefined>;
 
   api?: {

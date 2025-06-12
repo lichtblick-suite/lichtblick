@@ -10,7 +10,7 @@ concurrency:
 jobs:
   deploy:
     name: Deploy to Cloudflare Pages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       # Environment variables that are injected into the build
@@ -19,7 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
         with:
-          lfs: true
           submodules: true
 
       - uses: actions/setup-node@v4.0.3

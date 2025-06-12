@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -24,7 +24,7 @@ import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutC
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
-import { PlotPath, plotPathDisplayName } from "./config";
+import { PlotPath, plotPathDisplayName } from "./utils/config";
 
 type PlotLegendRowProps = Immutable<{
   hasMismatchedDataLength: boolean;

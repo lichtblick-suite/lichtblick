@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -272,6 +272,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     sidebarActions.left.setOpen(!leftSidebarOpen);
                   }}
                   data-tourid="left-sidebar-button"
+                  data-testid="left-sidebar-button"
                 >
                   {leftSidebarOpen ? <PanelLeft24Filled /> : <PanelLeft24Regular />}
                 </AppBarIconButton>
@@ -287,6 +288,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                     sidebarActions.right.setOpen(!rightSidebarOpen);
                   }}
                   data-tourid="right-sidebar-button"
+                  data-testid="right-sidebar-button"
                 >
                   {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
                 </AppBarIconButton>

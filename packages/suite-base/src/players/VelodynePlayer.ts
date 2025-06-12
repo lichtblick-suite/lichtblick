@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -27,7 +27,7 @@ import {
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
-  PlayerProblem,
+  PlayerAlert,
   PublishPayload,
   SubscribePayload,
   Topic,
@@ -96,8 +96,8 @@ export default class VelodynePlayer implements Player {
   #emitTimer?: ReturnType<typeof setTimeout>;
 
   // track issues within the player
-  #problems: PlayerProblem[] = [];
-  #problemsById = new Map<string, PlayerProblem>();
+  #alerts: PlayerAlert[] = [];
+  #alertsById = new Map<string, PlayerAlert>();
 
   public constructor({ port, metricsCollector }: VelodynePlayerOpts) {
     this.#port = port ?? DEFAULT_VELODYNE_PORT;
@@ -119,7 +119,7 @@ export default class VelodynePlayer implements Player {
       const net = await Sockets.Create();
       this.#socket = await net.createUdpSocket();
       this.#socket.on("error", (error) => {
-        this.#addProblem(PROBLEM_SOCKET_ERROR, {
+        this.#addAlert(PROBLEM_SOCKET_ERROR, {
           message: "Networking error listening for Velodyne data",
           severity: "error",
           error,
@@ -139,7 +139,7 @@ export default class VelodynePlayer implements Player {
       await this.#socket.bind({ address: "0.0.0.0", port: this.#port });
       log.debug(`Bound Velodyne UDP listener socket to port ${this.#port}`);
     } catch (error) {
-      this.#addProblem(PROBLEM_SOCKET_ERROR, {
+      this.#addAlert(PROBLEM_SOCKET_ERROR, {
         message: "Could not bind to the Velodyne UDP data port",
         severity: "error",
         error,
@@ -156,7 +156,7 @@ export default class VelodynePlayer implements Player {
 
     this.#totalBytesReceived += data.byteLength;
     this.#presence = PlayerPresence.PRESENT;
-    this.#clearProblem(PROBLEM_SOCKET_ERROR, { skipEmit: true });
+    this.#clearAlert(PROBLEM_SOCKET_ERROR, { skipEmit: true });
 
     if (this.#seq === 0) {
       // this.#metricsCollector.recordTimeToFirstMsgs();
@@ -203,23 +203,23 @@ export default class VelodynePlayer implements Player {
     }
   };
 
-  #addProblem(
+  #addAlert(
     id: string,
-    problem: PlayerProblem,
+    alert: PlayerAlert,
     { skipEmit = false }: { skipEmit?: boolean } = {},
   ): void {
-    this.#problemsById.set(id, problem);
-    this.#problems = Array.from(this.#problemsById.values());
+    this.#alertsById.set(id, alert);
+    this.#alerts = Array.from(this.#alertsById.values());
     if (!skipEmit) {
       this.#emitState();
     }
   }
 
-  #clearProblem(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
-    if (!this.#problemsById.delete(id)) {
+  #clearAlert(id: string, { skipEmit = false }: { skipEmit?: boolean } = {}): void {
+    if (!this.#alertsById.delete(id)) {
       return;
     }
-    this.#problems = Array.from(this.#problemsById.values());
+    this.#alerts = Array.from(this.#alertsById.values());
     if (!skipEmit) {
       this.#emitState();
     }
@@ -251,7 +251,7 @@ export default class VelodynePlayer implements Player {
       capabilities: CAPABILITIES,
       profile: "velodyne",
       playerId: this.#id,
-      problems: this.#problems,
+      alerts: this.#alerts,
 
       activeData: {
         messages,

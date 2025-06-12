@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -40,7 +40,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
-import { CellValue } from "./types";
+import { CellValue, MergedColumnsType } from "./types";
 
 type TypedArray =
   | Int8Array
@@ -187,7 +187,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string) {
       }),
     ];
   }
-  const columns = Object.keys(val).map((accessor) => {
+  const columns: MergedColumnsType = Object.keys(val).map((accessor) => {
     const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
     return columnHelper.accessor(accessor, {
       header: accessor,

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -17,8 +17,8 @@ import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 const log = Log.getLogger(__filename);
 
 const DATABASE_BASE_NAME = "foxglove-extensions";
-const METADATA_STORE_NAME = "metadata";
-const EXTENSION_STORE_NAME = "extensions";
+export const METADATA_STORE_NAME = "metadata";
+export const EXTENSION_STORE_NAME = "extensions";
 
 interface ExtensionsDB extends IDB.DBSchema {
   metadata: {

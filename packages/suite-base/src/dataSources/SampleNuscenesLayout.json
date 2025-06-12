@@ -342,7 +342,7 @@
       "legendDisplay": "floating",
       "showPlotValuesInLegend": false,
       "sidebarDimension": 240,
-      "foxglovePanelTitle": "Plot"
+      "lichtblickPanelTitle": "Plot"
     },
     "Plot!4792hqu": {
       "paths": [
@@ -377,7 +377,7 @@
       "legendDisplay": "floating",
       "showPlotValuesInLegend": false,
       "sidebarDimension": 240,
-      "foxglovePanelTitle": "Plot"
+      "lichtblickPanelTitle": "Plot"
     },
     "StateTransitions!3i4dk1l": {
       "paths": [

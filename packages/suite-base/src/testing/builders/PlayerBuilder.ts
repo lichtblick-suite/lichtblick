@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
@@ -76,7 +76,7 @@ class PlayerBuilder {
   public static topic(props: Partial<Topic> = {}): Topic {
     return defaults<Topic>(props, {
       aliasedFromName: BasicBuilder.string(),
-      name: `/${BasicBuilder.string()}`,
+      name: `/${BasicBuilder.string()}/${BasicBuilder.string()}`,
       schemaName: BasicBuilder.string(),
     });
   }
@@ -111,7 +111,6 @@ class PlayerBuilder {
 
   public static playerState(props: Partial<PlayerState> = {}): PlayerState {
     return defaults<PlayerState>(props, {
-      activeData: PlayerBuilder.activeData(),
       capabilities: BasicBuilder.sample(PLAYER_CAPABILITIES, 3),
       name: BasicBuilder.string(),
       playerId: BasicBuilder.string(),

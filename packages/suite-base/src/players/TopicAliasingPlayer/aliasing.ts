@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,7 +12,7 @@ import { TopicAliasFunction, Immutable as Im, MessageEvent } from "@lichtblick/s
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import {
   MessageBlock,
-  PlayerProblem,
+  PlayerAlert,
   PlayerState,
   Progress,
   SubscribePayload,
@@ -193,29 +193,29 @@ function aliasTopicStats(
 
 // Merges multiple aliases into a single unified alias map. Note that a single topic name
 // can alias to more than one renamed topic if multiple extensions provide an alias for it.
-// Also returns any problems caused by disallowed aliases.
+// Also returns any alert caused by disallowed aliases.
 function mergeAliases(
   maps: Im<{ extensionId: string; aliases: ReturnType<TopicAliasFunction> }[]>,
   inputs: Im<AliasingInputs>,
 ): {
   aliasMap: TopicAliasMap;
-  problems: undefined | PlayerProblem[];
+  alerts: undefined | PlayerAlert[];
 } {
   const inverseMapping = new Map<string, string>();
-  const problems: PlayerProblem[] = [];
+  const alerts: PlayerAlert[] = [];
   const merged: TopicAliasMap = new Map();
   const topics = inputs.topics ?? [];
   for (const { extensionId, aliases } of maps) {
     for (const { name, sourceTopicName } of aliases) {
       const existingMapping = inverseMapping.get(name);
       if (topics.some((topic) => topic.name === name)) {
-        problems.push({
+        alerts.push({
           severity: "error",
           message: `Disallowed topic alias`,
           tip: `Extension ${extensionId} aliased topic ${name} is already present in the data source.`,
         });
       } else if (existingMapping != undefined && existingMapping !== sourceTopicName) {
-        problems.push({
+        alerts.push({
           severity: "error",
           message: `Disallowed topic alias`,
           tip: `Extension ${extensionId} requested duplicate alias from topic ${sourceTopicName} to topic ${name}.`,
@@ -227,14 +227,14 @@ function mergeAliases(
       }
     }
   }
-  return { aliasMap: merged, problems: problems.length > 0 ? problems : undefined };
+  return { aliasMap: merged, alerts: alerts.length > 0 ? alerts : undefined };
 }
 
 // Applies our topic mappers to the input topics to generate an active set of name =>
 // renamed topic mappings.
 function buildAliases(inputs: Im<AliasingInputs>): {
   aliasMap: Im<TopicAliasMap>;
-  problems: undefined | PlayerProblem[];
+  alerts: undefined | PlayerAlert[];
 } {
   const mappings = inputs.aliasFunctions.map((mapper) => ({
     extensionId: mapper.extensionId,
@@ -246,7 +246,7 @@ function buildAliases(inputs: Im<AliasingInputs>): {
   const anyMappings = mappings.some((map) => [...map.aliases].length > 0);
   return anyMappings
     ? mergeAliases(mappings, inputs)
-    : { aliasMap: EmptyAliasMap, problems: undefined };
+    : { aliasMap: EmptyAliasMap, alerts: undefined };
 }
 
 // Memoize our mapping functions to avoid redundant work and also to preserve downstream
@@ -280,7 +280,7 @@ export function aliasPlayerState(
     activeData: playerState.activeData ? { ...playerState.activeData } : undefined,
   };
 
-  const { aliasMap: mapping, problems } = memos.buildAliases(inputs);
+  const { aliasMap: mapping, alerts } = memos.buildAliases(inputs);
 
   if (newState.activeData) {
     newState.activeData.topics = memos.aliasTopics(newState.activeData.topics, mapping);
@@ -306,8 +306,8 @@ export function aliasPlayerState(
     newState.progress = memos.aliasProgress(newState.progress, mapping);
   }
 
-  if (problems != undefined) {
-    newState.problems = (newState.problems ?? []).concat(problems);
+  if (alerts != undefined) {
+    newState.alerts = (newState.alerts ?? []).concat(alerts);
   }
 
   return newState;

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
@@ -23,7 +23,7 @@ export default function ExtensionListEntry({
 }: Props): React.JSX.Element {
   const { classes } = useStyles();
   return (
-    <ListItem disablePadding key={id}>
+    <ListItem disablePadding key={id} data-testid="extension-list-entry">
       <ListItemButton className={classes.listItemButton} onClick={onClick}>
         <ListItemText
           disableTypography

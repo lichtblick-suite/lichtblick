@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -53,7 +53,7 @@ import {
   SubscribePayload,
   Topic,
   MessageEvent,
-  PlayerProblem,
+  PlayerAlert,
   MessageBlock,
 } from "@lichtblick/suite-base/players/types";
 import { reportError } from "@lichtblick/suite-base/reportError";
@@ -132,9 +132,9 @@ export default class UserScriptPlayer implements Player {
   // we may also emit state changes on internal errors
   #playerState?: PlayerState;
 
-  // The store tracks problems for individual user scripts
-  // a script may set its own problem or clear its problem
-  #problemStore = new Map<string, PlayerProblem>();
+  // The store tracks alerts for individual user scripts
+  // a script may set its own alert or clear its alert
+  #alertStore = new Map<string, PlayerAlert>();
 
   // keep track of last message on all topics to recompute output topic messages when user scripts change
   #lastMessageByInputTopic = new Map<string, MessageEvent>();
@@ -439,10 +439,10 @@ export default class UserScriptPlayer implements Player {
     const scriptData = await transformWorker.send<ScriptData>("transform", transformMessage);
     const { inputTopics, outputTopic, transpiledCode, projectCode, outputDatatype } = scriptData;
 
-    // problemKey is a unique identifier for each user script so we can manage problems from
+    // alertKey is a unique identifier for each user script so we can manage alerts from
     // a specific script. A script may have a problem that may later clear. Using the key we can add/remove
-    // problems for specific user scripts independently of other user scripts.
-    const problemKey = `script-id-${scriptId}`;
+    // alerts for specific user scripts independently of other user scripts.
+    const alertKey = `script-id-${scriptId}`;
     const buildMessageProcessor = (): {
       registration: ScriptRegistration["processMessage"];
       terminate: () => void;
@@ -463,7 +463,7 @@ export default class UserScriptPlayer implements Player {
             worker.onerror = (event) => {
               log.error(event);
 
-              this.#problemStore.set(problemKey, {
+              this.#alertStore.set(alertKey, {
                 message: `User script runtime error: ${event.message}`,
                 severity: "error",
               });
@@ -476,7 +476,7 @@ export default class UserScriptPlayer implements Player {
             port.onmessageerror = (event) => {
               log.error(event);
 
-              this.#problemStore.set(problemKey, {
+              this.#alertStore.set(alertKey, {
                 severity: "error",
                 message: `User script runtime error: ${String(event.data)}`,
               });
@@ -489,7 +489,7 @@ export default class UserScriptPlayer implements Player {
             rpc.receive("error", (msg) => {
               log.error(msg);
 
-              this.#problemStore.set(problemKey, {
+              this.#alertStore.set(alertKey, {
                 severity: "error",
                 message: `User script runtime error: ${msg}`,
               });
@@ -541,10 +541,10 @@ export default class UserScriptPlayer implements Player {
         this.#addUserScriptLogs(scriptId, result.userScriptLogs);
 
         if (allDiagnostics.length > 0) {
-          this.#problemStore.set(problemKey, {
+          this.#alertStore.set(alertKey, {
             severity: "error",
             message: `User Script ${scriptData.name} encountered an error.`,
-            tip: "Open the User Scripts panel and check the Problems tab for errors.",
+            tip: "Open the User Scripts panel and check the Alerts tab for errors.",
           });
 
           this.#setUserScriptDiagnostics(scriptId, allDiagnostics);
@@ -552,7 +552,7 @@ export default class UserScriptPlayer implements Player {
         }
 
         if (!result.message) {
-          this.#problemStore.set(problemKey, {
+          this.#alertStore.set(alertKey, {
             severity: "warn",
             message: `User Script ${scriptData.name} did not produce a message.`,
             tip: "Check that all code paths in the user script return a message.",
@@ -562,7 +562,7 @@ export default class UserScriptPlayer implements Player {
 
         // At this point we've received a message successfully from the user script, therefore
         // we clear any previous problem from this script.
-        this.#problemStore.delete(problemKey);
+        this.#alertStore.delete(alertKey);
 
         return {
           topic: outputTopic,
@@ -574,7 +574,7 @@ export default class UserScriptPlayer implements Player {
       };
 
       const terminate = () => {
-        this.#problemStore.delete(problemKey);
+        this.#alertStore.delete(alertKey);
 
         if (rpc) {
           this.#unusedRuntimeWorkers.push(rpc);
@@ -614,7 +614,7 @@ export default class UserScriptPlayer implements Player {
       worker.onerror = (event) => {
         log.error(event);
 
-        this.#problemStore.set("worker-error", {
+        this.#alertStore.set("worker-error", {
           severity: "error",
           message: `User Script error: ${event.message}`,
         });
@@ -626,7 +626,7 @@ export default class UserScriptPlayer implements Player {
       port.onmessageerror = (event) => {
         log.error(event);
 
-        this.#problemStore.set("worker-error", {
+        this.#alertStore.set("worker-error", {
           severity: "error",
           message: `User Script error: ${String(event.data)}`,
         });
@@ -639,7 +639,7 @@ export default class UserScriptPlayer implements Player {
       rpc.receive("error", (msg) => {
         log.error(msg);
 
-        this.#problemStore.set("worker-error", {
+        this.#alertStore.set("worker-error", {
           severity: "error",
           message: `User Script error: ${msg}`,
         });
@@ -993,10 +993,10 @@ export default class UserScriptPlayer implements Player {
       this.#playerState = newPlayerState;
 
       // clear any previous problem we had from making a new player state
-      this.#problemStore.delete("player-state-update");
+      this.#alertStore.delete("player-state-update");
     } catch (e: unknown) {
       const err = e as Error;
-      this.#problemStore.set("player-state-update", {
+      this.#alertStore.set("player-state-update", {
         severity: "error",
         message: err.message,
         error: err,
@@ -1016,16 +1016,16 @@ export default class UserScriptPlayer implements Player {
         return;
       }
 
-      // only augment child problems if we have our own problems
-      // if neither child or parent have problems we do nothing
-      let problems = this.#playerState.problems;
-      if (this.#problemStore.size > 0) {
-        problems = (problems ?? []).concat(Array.from(this.#problemStore.values()));
+      // only augment child alerts if we have our own alerts
+      // if neither child or parent have alerts we do nothing
+      let alerts = this.#playerState.alerts;
+      if (this.#alertStore.size > 0) {
+        alerts = (alerts ?? []).concat(Array.from(this.#alertStore.values()));
       }
 
       const playerState: PlayerState = {
         ...this.#playerState,
-        problems,
+        alerts,
       };
 
       if (this.#listener) {
