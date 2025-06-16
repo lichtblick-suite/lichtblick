@@ -127,6 +127,7 @@ describe("ExtensionCatalogProvider", () => {
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
     });
+    expect(result.current.installedMessageConverters?.length).toEqual(1);
     expect(result.current.installedMessageConverters).toEqual([
       {
         converter: expect.any(Function),
@@ -134,6 +135,61 @@ describe("ExtensionCatalogProvider", () => {
         extensionNamespace: extension.namespace,
         fromSchemaName: "from.Schema",
         toSchemaName: "to.Schema",
+      },
+    ]);
+  });
+
+  it("should register multiple message converters", async () => {
+    const schemaName1 = BasicBuilder.string();
+    const schemaName2 = BasicBuilder.string();
+    const source = `
+      module.exports = {
+        activate: function(ctx) {
+          ctx.registerMessageConverter({
+            fromSchemaName: "from.${schemaName1}",
+            toSchemaName: "to.${schemaName1}",
+            converter: (msg) => msg,
+          });
+          ctx.registerMessageConverter({
+            fromSchemaName: "from.${schemaName2}",
+            toSchemaName: "to.${schemaName2}",
+            converter: (msg) => msg,
+          });
+        }
+      };
+    `;
+
+    const loadExtension = jest.fn().mockResolvedValue(source);
+    const extension = ExtensionBuilder.extensionInfo();
+    const loader: ExtensionLoader = {
+      namespace: extension.namespace!,
+      getExtension: jest.fn(),
+      getExtensions: jest.fn().mockResolvedValue([extension]),
+      loadExtension,
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+    };
+
+    const { result } = setup({ loadersOverride: [loader] });
+
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
+    expect(result.current.installedMessageConverters?.length).toBe(2);
+    expect(result.current.installedMessageConverters).toEqual([
+      {
+        converter: expect.any(Function),
+        extensionId: expect.any(String),
+        extensionNamespace: extension.namespace,
+        fromSchemaName: `from.${schemaName1}`,
+        toSchemaName: `to.${schemaName1}`,
+      },
+      {
+        converter: expect.any(Function),
+        extensionId: expect.any(String),
+        extensionNamespace: extension.namespace,
+        fromSchemaName: `from.${schemaName2}`,
+        toSchemaName: `to.${schemaName2}`,
       },
     ]);
   });
@@ -225,7 +281,50 @@ describe("ExtensionCatalogProvider", () => {
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
     });
+    expect(result.current.installedTopicAliasFunctions?.length).toBe(1);
     expect(result.current.installedTopicAliasFunctions).toEqual([
+      { extensionId: extension.id, aliasFunction: expect.any(Function) },
+    ]);
+  });
+
+  it("should register multiple topic aliases", async () => {
+    const source = `
+      module.exports = {
+        activate: function (ctx) {
+          ctx.registerTopicAliases(() => {
+            return [];
+          });
+          ctx.registerTopicAliases(() => {
+            return [];
+          });
+        },
+      };
+    `;
+
+    const loadExtension = jest.fn().mockResolvedValue(source);
+    const extension = ExtensionBuilder.extensionInfo();
+    const loader: ExtensionLoader = {
+      namespace: extension.namespace!,
+      getExtension: jest.fn(),
+      getExtensions: jest.fn().mockResolvedValue([extension]),
+      loadExtension,
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+    };
+
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+      initialProps: {},
+      wrapper: ({ children }) => (
+        <ExtensionCatalogProvider loaders={[loader]}>{children}</ExtensionCatalogProvider>
+      ),
+    });
+
+    await waitFor(() => {
+      expect(loadExtension).toHaveBeenCalledTimes(1);
+    });
+    expect(result.current.installedTopicAliasFunctions?.length).toBe(2);
+    expect(result.current.installedTopicAliasFunctions).toEqual([
+      { extensionId: extension.id, aliasFunction: expect.any(Function) },
       { extensionId: extension.id, aliasFunction: expect.any(Function) },
     ]);
   });
