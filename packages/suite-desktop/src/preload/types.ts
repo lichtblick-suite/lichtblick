@@ -7,3 +7,8 @@ export type ExtensionPackageJson = {
   main: string;
   publisher?: string;
 };
+
+export type PackageName = {
+  name: string;
+  namespace?: string;
+};
