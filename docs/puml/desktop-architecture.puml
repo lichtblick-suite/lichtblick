@@ -1,0 +1,104 @@
+@startuml desktop-architecture
+!theme blueprint
+skinparam componentStyle rectangle
+
+title Lichtblick Desktop (Electron) Architecture
+
+package "Main Process" #LightBlue {
+  component [App Entry Point] as AppMain <<main/index.ts>>
+  
+  component [Window Manager] as WindowManager
+  
+  component [Menu System] as MenuSystem
+  
+  component [Auto Updater] as Updater
+  
+  component [IPC Handlers] as IPCMain
+  
+  component [Protocol Handlers] as Protocols
+  
+  component [Native APIs] as NativeAPIs
+}
+
+package "Renderer Process" #LightGreen {
+  component [React App] as ReactApp <<renderer/index.tsx>>
+  
+  component [Preload Script] as Preload
+  
+  component [IPC Renderer] as IPCRenderer
+  
+  component [Core Application] as CoreApp <<@lichtblick/suite-base>>
+  
+  component [WebGL Context] as WebGL
+}
+
+package "Worker Threads" #LightYellow {
+  component [Data Workers] as DataWorkers
+  
+  component [Computation Workers] as CompWorkers
+}
+
+package "File System" #LightGray {
+  database [User Data] as UserData
+  
+  database [Application Files] as AppFiles
+  
+  database [Workspace Files] as Workspace
+}
+
+package "External" {
+  cloud [Update Server] as UpdateServer
+  cloud [Extension Registry] as ExtRegistry
+}
+
+AppMain --> WindowManager
+AppMain --> MenuSystem
+AppMain --> Updater
+AppMain --> IPCMain
+AppMain --> Protocols
+
+WindowManager --> ReactApp : creates
+WindowManager --> NativeAPIs
+
+MenuSystem --> IPCMain
+Updater --> UpdateServer
+Protocols --> IPCMain
+
+ReactApp --> Preload
+Preload --> IPCRenderer
+IPCRenderer --> CoreApp
+
+CoreApp --> WebGL
+CoreApp --> DataWorkers
+CoreApp --> CompWorkers
+
+IPCMain <--> IPCRenderer : IPC communication
+
+IPCMain --> NativeAPIs
+NativeAPIs --> UserData
+NativeAPIs --> AppFiles
+NativeAPIs --> Workspace
+
+ReactApp --> ExtRegistry : extension discovery
+
+DataWorkers --> Workspace : reads
+
+note right of Preload
+  Security boundary
+  between main and
+  renderer processes
+end note
+
+note bottom of IPCMain
+  All file system and
+  native operations go
+  through main process
+end note
+
+note left of DataWorkers
+  Offload heavy work
+  to maintain UI
+  responsiveness
+end note
+
+@enduml
