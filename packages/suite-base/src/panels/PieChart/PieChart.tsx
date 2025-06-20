@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // SPDX-FileCopyrightText: Copyright (C) 2024-2025 Yukihiro Saito <yukky.saito@gmail.com>
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
@@ -16,11 +19,11 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
 
-import { settingsActionReducer } from "./utils/settingsActionReducer";
+import { DEFAULT_CONFIG } from "./constants";
 import type { PieChartConfig, PieChartState } from "./types";
 import { useChartData } from "./useChartData";
-import { DEFAULT_CONFIG } from "./constants";
 import { useSettingsTree } from "./useSettingsTree";
+import { settingsActionReducer } from "./utils/settingsActionReducer";
 import { stateReducer } from "./utils/stateReducer";
 
 type PieChartProps = {

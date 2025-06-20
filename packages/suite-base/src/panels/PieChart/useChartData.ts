@@ -1,6 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
 import { useMemo } from "react";
+
 import type { PieChartConfig, PieChartDatum } from "./types";
 
 export function useChartData(rawValue: Float32Array, config: PieChartConfig): PieChartDatum[] {
