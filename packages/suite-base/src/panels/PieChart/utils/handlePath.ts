@@ -15,28 +15,37 @@ export type HandlePathProps = {
 };
 
 export function handlePath({ state, action }: HandlePathProps): PieChartState {
-  const newPath = parseMessagePath(action.path);
+  let newPath;
   let pathParseError: string | undefined;
-  if (
-    newPath?.messagePath.some(
-      (part) =>
-        (part.type === "filter" && typeof part.value === "object") ||
-        (part.type === "slice" && (typeof part.start === "object" || typeof part.end === "object")),
-    ) ??
-    false
-  ) {
-    pathParseError = "Message paths using variables are not currently supported";
-  }
-  let latestMatchingQueriedData: unknown;
   let error: Error | undefined;
+
   try {
-    latestMatchingQueriedData =
-      newPath && pathParseError == undefined && state.latestMessage
-        ? simpleGetMessagePathDataItems(state.latestMessage, newPath)
-        : undefined;
+    newPath = parseMessagePath(action.path);
+    if (
+      newPath?.messagePath.some(
+        (part) =>
+          (part.type === "filter" && typeof part.value === "object") ||
+          (part.type === "slice" &&
+            (typeof part.start === "object" || typeof part.end === "object")),
+      ) ??
+      false
+    ) {
+      pathParseError = "Message paths using variables are not currently supported";
+    }
   } catch (err: unknown) {
     error = err as Error;
+    newPath = undefined;
   }
+
+  let latestMatchingQueriedData: unknown;
+  if (newPath && pathParseError == undefined && state.latestMessage) {
+    try {
+      latestMatchingQueriedData = simpleGetMessagePathDataItems(state.latestMessage, newPath);
+    } catch (err: unknown) {
+      error = err as Error;
+    }
+  }
+
   return {
     ...state,
     path: action.path,
