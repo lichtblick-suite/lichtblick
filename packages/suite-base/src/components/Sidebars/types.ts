@@ -26,3 +26,5 @@ export type NewSidebarProps<K> = {
   activeTab: K | undefined;
   setActiveTab: (newValue: K) => void;
 };
+
+export type LayoutNode = "leftbar" | "children" | "rightbar";
