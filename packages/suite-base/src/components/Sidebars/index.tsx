@@ -5,80 +5,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 
-import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import ErrorBoundary from "@lichtblick/suite-base/components/ErrorBoundary";
-import { LEFT_SIDEBAR_MIN_WIDTH_PX } from "@lichtblick/suite-base/components/Sidebars/constants";
 import { useStyles } from "@lichtblick/suite-base/components/Sidebars/index.style";
-import { LayoutNode, SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
+import { LayoutNode, SidebarProps } from "@lichtblick/suite-base/components/Sidebars/types";
+import {
+  clampLeftSidebarPercentage,
+  mosaicLeftSidebarSplitPercentage,
+  mosaicRightSidebarSplitPercentage,
+} from "@lichtblick/suite-base/components/Sidebars/utils";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import "react-mosaic-component/react-mosaic-component.css";
 import { NewSidebar } from "./NewSidebar";
-
-/**
- * Clamp a given percentage to the minimum width of the left sidebar.
- */
-function clampLeftSidebarPercentage(percentage: number): number {
-  const minPercentage = (LEFT_SIDEBAR_MIN_WIDTH_PX / window.innerWidth) * 100;
-  return Math.max(percentage, minPercentage);
-}
-
-/**
- * Extract existing left split percentage from a layout node or return the default.
- */
-function mosaicLeftSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
-  if (typeof node !== "object") {
-    return undefined;
-  }
-  if (node.first === "leftbar") {
-    return node.splitPercentage;
-  } else {
-    return (
-      mosaicLeftSidebarSplitPercentage(node.first) ?? mosaicLeftSidebarSplitPercentage(node.second)
-    );
-  }
-}
-
-/**
- * Extract existing right split percentage from a layout node or return the default.
- */
-function mosaicRightSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
-  if (typeof node !== "object") {
-    return undefined;
-  }
-  if (node.second === "rightbar") {
-    return node.splitPercentage;
-  } else {
-    return (
-      mosaicRightSidebarSplitPercentage(node.first) ??
-      mosaicRightSidebarSplitPercentage(node.second)
-    );
-  }
-}
-
-type SidebarProps<OldLeftKey, LeftKey, RightKey> = PropsWithChildren<{
-  items: Map<OldLeftKey, SidebarItem>;
-  bottomItems: Map<OldLeftKey, SidebarItem>;
-  selectedKey: OldLeftKey | undefined;
-  onSelectKey: (key: OldLeftKey | undefined) => void;
-
-  leftItems: Map<LeftKey, SidebarItem>;
-  selectedLeftKey: LeftKey | undefined;
-  onSelectLeftKey: (item: LeftKey | undefined) => void;
-  leftSidebarSize: number | undefined;
-  setLeftSidebarSize: (size: number | undefined) => void;
-
-  rightItems: Map<RightKey, SidebarItem>;
-  selectedRightKey: RightKey | undefined;
-  onSelectRightKey: (item: RightKey | undefined) => void;
-  rightSidebarSize: number | undefined;
-  setRightSidebarSize: (size: number | undefined) => void;
-}>;
 
 export default function Sidebars<
   OldLeftKey extends string,
@@ -99,21 +40,12 @@ export default function Sidebars<
     setRightSidebarSize,
   } = props;
 
-  // Since we can't toggle the title bar on an electron window, keep the setting at its initial
-  // value until the app is reloaded/relaunched.
-  const [currentEnableNewTopNav = true] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_NEW_TOPNAV,
-  );
-  const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
-  const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
-
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<LayoutNode>>("children");
   const { classes } = useStyles();
 
-  const leftSidebarOpen =
-    enableNewTopNav && selectedLeftKey != undefined && leftItems.has(selectedLeftKey);
-  const rightSidebarOpen =
-    enableNewTopNav && selectedRightKey != undefined && rightItems.has(selectedRightKey);
+  const leftSidebarOpen = selectedLeftKey != undefined && leftItems.has(selectedLeftKey);
+
+  const rightSidebarOpen = selectedRightKey != undefined && rightItems.has(selectedRightKey);
 
   useEffect(() => {
     const leftTargetWidth = 320;
@@ -146,7 +78,7 @@ export default function Sidebars<
       }
       return node;
     });
-  }, [enableNewTopNav, leftSidebarSize, rightSidebarSize, leftSidebarOpen, rightSidebarOpen]);
+  }, [leftSidebarSize, rightSidebarSize, leftSidebarOpen, rightSidebarOpen]);
 
   const onChangeMosaicValue = useCallback(
     (newValue: ReactNull | MosaicNode<LayoutNode>) => {
