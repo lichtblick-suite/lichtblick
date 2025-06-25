@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link } from "@mui/material";
 import path from "path";
 
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
@@ -92,11 +91,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
   public warning = (
     <>
-      Loading large files over HTTP can be slow. For better performance, we recommend{" "}
-      <Link href="https://foxglove.dev/data-platform" target="_blank">
-        Foxglove Data Platform
-      </Link>
-      .
+      Loading large files over HTTP can be slow.
     </>
   );
 
