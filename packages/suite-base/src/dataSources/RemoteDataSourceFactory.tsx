@@ -89,7 +89,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
     ],
   };
 
-  public warning = (<>Loading large files over HTTP can be slow.</>);
+  public warning = "Loading large files over HTTP can be slow";
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     if (args.params?.url == undefined) {
