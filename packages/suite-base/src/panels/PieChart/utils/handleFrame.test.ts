@@ -14,7 +14,10 @@ import type { PieChartAction } from "../types";
 
 describe("handleFrame", () => {
   it("returns early when pathParseError is set", () => {
-    const initialState = PieChartBuilder.pieChartState({ pathParseError: "Invalid path" });
+    const initialState = PieChartBuilder.pieChartState({
+      pathParseError: "Invalid path",
+      latestMatchingQueriedData: undefined,
+    });
     const action: PieChartAction = {
       type: "frame",
       messages: MessageEventBuilder.messageEvents(),
@@ -23,7 +26,7 @@ describe("handleFrame", () => {
     const newState = stateReducer(initialState, action);
 
     expect(newState.latestMessage).toEqual(action.messages[action.messages.length - 1]);
-    expect(newState.latestMatchingQueriedData).toBeUndefined();
+    expect(newState.latestMatchingQueriedData).toBeInstanceOf(Float32Array);
     expect(newState.error).toBeUndefined();
   });
 
@@ -44,7 +47,7 @@ describe("handleFrame", () => {
     const newState = stateReducer(initialState, action);
 
     expect(newState.latestMessage).toEqual(_.last(action.messages));
-    expect(newState.latestMatchingQueriedData).toEqual(initialState.latestMatchingQueriedData);
+    expect(newState.latestMatchingQueriedData).toBeUndefined();
     expect(newState.error).toBeUndefined();
   });
 
@@ -83,7 +86,7 @@ describe("handleFrame", () => {
     const newState = stateReducer(initialState, action);
 
     // should fallback to last message but not update queried data
-    expect(newState.latestMatchingQueriedData).toBeUndefined();
+    expect(newState.latestMatchingQueriedData).toEqual(initialState.latestMatchingQueriedData);
     expect(newState.latestMessage).toEqual(initialState.latestMessage);
   });
 });
