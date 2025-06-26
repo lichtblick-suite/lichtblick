@@ -1,13 +1,20 @@
 /** @jest-environment jsdom */
+
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen } from "@testing-library/react";
+
 import "@testing-library/jest-dom";
-import { PieChart } from "./PieChart";
-import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
-import { useSettingsTree } from "./useSettingsTree";
+
 import { PanelExtensionContext } from "@lichtblick/suite";
+import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
+
+import { PieChart, formatTooltip } from "./PieChart";
+import { useSettingsTree } from "./useSettingsTree";
 
 // Jest mock for hooks and context
 jest.mock("@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount", () => ({
@@ -62,10 +69,9 @@ describe("PieChart", () => {
   });
 
   it("formats tooltip correctly", () => {
-    const { formatTooltip } = require("./PieChart");
-
     // Verify that the tooltip is formatted correctly
     expect(formatTooltip(10, "Value")).toEqual(["10.00%", "Value"]);
+    // @ts-expect-error intentionally passing string for test purposes
     expect(formatTooltip("N/A", "Value")).toEqual(["N/A%", "Value"]);
   });
 });
