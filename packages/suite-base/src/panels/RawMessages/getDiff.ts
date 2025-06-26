@@ -146,7 +146,7 @@ export default function getDiff({
     const allKeys = Object.keys(before).concat(Object.keys(after));
     for (const key of _.uniq(allKeys)) {
       const innerDiff = getDiff({
-        before: (before as DiffObject)[key] ?? {},
+        before: (before as DiffObject)[key],
         after: (after as DiffObject)[key],
         idLabel: undefined,
         showFullMessageForDiff,
