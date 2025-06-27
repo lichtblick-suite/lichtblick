@@ -1,0 +1,30 @@
+@startuml Data Loading Sequence
+!theme plain
+
+actor User
+participant "App" as A
+participant "DataSourceManager" as DSM
+participant "DataSource" as DS
+participant "Panel" as P
+
+User -> A : Open Data Source
+A -> DSM : createSource(type, args)
+DSM -> DS : initialize()
+DS --> DSM : initialized
+DSM --> A : dataSource
+
+User -> A : Select Layout
+A -> P : initialize()
+P -> DS : subscribe(topics)
+DS --> P : subscription
+
+loop For each message
+    DS -> P : onMessage(topic, message)
+    P -> P : update visualization
+end
+
+User -> P : Change Settings
+P -> P : onSettingsChange(settings)
+P -> P : update visualization
+
+@enduml
