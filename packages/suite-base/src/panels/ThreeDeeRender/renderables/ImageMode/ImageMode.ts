@@ -129,6 +129,8 @@ const DEFAULT_CONFIG = {
   flipHorizontal: false,
   flipVertical: false,
   rotation: 0 as 0 | 90 | 180 | 270,
+  brightness: 50,
+  contrast: 50,
   ...IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
 };
 
@@ -427,6 +429,8 @@ export class ImageMode
       flipHorizontal,
       flipVertical,
       rotation,
+      brightness,
+      contrast,
     } = settings;
 
     const imageTopics = filterMap(this.renderer.topics ?? [], (topic) => {
@@ -540,6 +544,20 @@ export class ImageMode
         { label: "180°", value: 180 },
         { label: "270°", value: 270 },
       ],
+    };
+    fields.brightness = {
+      input: "slider",
+      label: "Brightness",
+      min: 0,
+      max: 100,
+      value: brightness,
+    };
+    fields.contrast = {
+      input: "slider",
+      label: "Contrast",
+      min: 0,
+      max: 100,
+      value: contrast,
     };
 
     const imageTopic =

@@ -13,6 +13,7 @@ import {
   MenuList,
   MenuListProps,
   Select,
+  Slider,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -333,6 +334,23 @@ function FieldInput({
           max={field.max}
           onChange={(value) => {
             actionHandler({ action: "update", payload: { path, input: "vec2", value } });
+          }}
+        />
+      );
+    case "slider":
+      return (
+        <Slider
+          className={classes.slider}
+          value={field.value}
+          min={field.min}
+          max={field.max}
+          size="small"
+          valueLabelDisplay="auto"
+          onChange={(_, value) => {
+            actionHandler({
+              action: "update",
+              payload: { path, input: "slider", value: value as number },
+            });
           }}
         />
       );
