@@ -154,7 +154,7 @@ export default function getDiff({
       if (!_.isEmpty(innerDiff)) {
         diff[key] = innerDiff;
       } else if (showFullMessageForDiff) {
-        diff[key] = (before as DiffObject)[key];
+        diff[key] = (before as DiffObject)[key] ?? {};
       }
     }
     return diff;
