@@ -37,8 +37,8 @@ export const UPPER_CONTRAST_LIMIT = 1.9;
 export const VERTEX_SHADER = `
     varying vec2 vUv;
     void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
 `;
 
@@ -51,18 +51,18 @@ export const FRAGMENT_SHADER = `
     varying vec2 vUv;
 
     void main() {
-    vec4 texColor = texture2D(map, vUv);
+        vec4 texColor = texture2D(map, vUv);
 
-    // Apply brightness
-    texColor.rgb += brightness;
+        // Apply brightness
+        texColor.rgb += brightness;
 
-    // Apply contrast
-    texColor.rgb = ((texColor.rgb - 0.5) * contrast) + 0.5;
+        // Apply contrast
+        texColor.rgb = ((texColor.rgb - 0.5) * contrast) + 0.5;
 
-    // Apply tint color and opacity
-    texColor.rgb *= color;
-    texColor.a *= opacity;
+        // Apply tint color and opacity
+        texColor.rgb *= color;
+        texColor.a *= opacity;
 
-    gl_FragColor = texColor;
+        gl_FragColor = texColor;
     }
 `;
