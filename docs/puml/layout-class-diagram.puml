@@ -1,0 +1,136 @@
+@startuml layout-class-diagram
+!theme blueprint
+skinparam classAttributeIconSize 0
+
+title Layout System Class Diagram
+
+interface ILayoutManager {
+  + getLayouts(): Promise<Layout[]>
+  + saveNewLayout(layout: LayoutData): Promise<Layout>
+  + updateLayout(layout: Layout): Promise<Layout>
+  + deleteLayout(id: string): Promise<void>
+  + importLayout(data: LayoutData): Promise<Layout>
+  + exportLayout(id: string): Promise<LayoutData>
+  + supportsSharing: boolean
+  + supportsSyncing: boolean
+  + on(event: LayoutManagerEvent, handler: EventHandler): void
+  + off(event: LayoutManagerEvent, handler: EventHandler): void
+}
+
+class Layout {
+  + id: string
+  + name: string
+  + permission: "CREATOR_WRITE" | "ORG_WRITE" | "ORG_READ"
+  + data: LayoutData
+  + savedAt?: Date
+  + createdAt?: Date
+  + updatedAt?: Date
+}
+
+class LayoutData {
+  + configById: Record<string, PanelConfig>
+  + globalVariables: Record<string, unknown>
+  + userNodes: Record<string, UserNode>
+  + playbackConfig: PlaybackConfig
+  + layout: MosaicNode<string> | TabPanelConfig
+}
+
+class MosaicNode<T> {
+  + first?: MosaicNode<T>
+  + second?: MosaicNode<T>
+  + direction?: "row" | "column"
+  + splitPercentage?: number
+}
+
+class MosaicLeaf<T> {
+  + content: T
+}
+
+class TabPanelConfig {
+  + id: string
+  + tabs: Array<{
+    + title: string
+    + layout: MosaicNode<string>
+  }>
+  + activeTabIdx: number
+}
+
+class PanelConfig {
+  + id: string
+  + type: string
+  + config: unknown
+  + fullscreen?: boolean
+}
+
+class PlaybackConfig {
+  + speed: number
+  + messageOrder: "receiveTime" | "headerStamp"
+}
+
+class UserNode {
+  + name: string
+  + sourceCode: string
+  + input: string[]
+  + output: string[]
+}
+
+class LocalLayoutManager implements ILayoutManager {
+  - storage: ILayoutStorage
+  + async getLayouts(): Promise<Layout[]>
+  + async saveNewLayout(data: LayoutData): Promise<Layout>
+  - generateId(): string
+}
+
+class RemoteLayoutManager implements ILayoutManager {
+  - api: ILayoutAPI
+  + supportsSharing: true
+  + supportsSyncing: true
+  + async shareLayout(id: string): Promise<string>
+}
+
+interface ILayoutStorage {
+  + getAll(): Promise<Layout[]>
+  + get(id: string): Promise<Layout | undefined>
+  + put(layout: Layout): Promise<void>
+  + delete(id: string): Promise<void>
+}
+
+class IndexedDBLayoutStorage implements ILayoutStorage {
+  - db: IDBDatabase
+  + async getAll(): Promise<Layout[]>
+  + async put(layout: Layout): Promise<void>
+}
+
+abstract class LayoutManagerEvent {
+  <<enumeration>>
+  change
+  busychange
+  onlinechange
+  errorchange
+}
+
+ILayoutManager <|.. LocalLayoutManager
+ILayoutManager <|.. RemoteLayoutManager
+ILayoutManager --> Layout : manages
+Layout --> LayoutData : contains
+LayoutData --> MosaicNode : uses
+LayoutData --> TabPanelConfig : uses
+LayoutData --> PanelConfig : contains
+LayoutData --> PlaybackConfig : contains
+LayoutData --> UserNode : contains
+MosaicNode --> MosaicLeaf : contains
+LocalLayoutManager --> ILayoutStorage : uses
+ILayoutStorage <|.. IndexedDBLayoutStorage
+ILayoutManager --> LayoutManagerEvent : emits
+
+note right of ILayoutManager
+  Interface for managing
+  saved layouts
+end note
+
+note bottom of MosaicNode
+  Binary tree structure
+  for panel arrangement
+end note
+
+@enduml

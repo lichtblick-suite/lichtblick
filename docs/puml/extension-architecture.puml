@@ -1,0 +1,102 @@
+@startuml extension-architecture
+!theme blueprint
+skinparam componentStyle rectangle
+
+title Lichtblick Extension System Architecture
+
+actor "Extension Developer" as Developer
+actor "End User" as User
+
+package "Extension Package" #LightBlue {
+  component [Extension Manifest] as Manifest
+  
+  component [Extension Code] as ExtCode
+  
+  component [Panel Implementation] as PanelImpl
+  component [Converter Implementation] as ConverterImpl
+  component [Topic Alias Functions] as TopicFuncs
+  component [Camera Models] as CameraModels
+}
+
+package "Lichtblick Core" {
+  component [Extension Loader] as Loader
+  
+  component [Extension Registry] as Registry
+  
+  component [Extension Context] as Context
+  
+  component [Extension Manager] as Manager
+  
+  component [Panel Registry] as PanelRegistry
+  component [Converter Registry] as ConverterRegistry
+  component [Function Registry] as FunctionRegistry
+  component [Camera Registry] as CameraRegistry
+}
+
+package "UI Layer" {
+  component [Extension Settings UI] as ExtSettingsUI
+  component [Panel Catalog] as PanelCatalog
+  component [Active Panels] as ActivePanels
+}
+
+package "Runtime" {
+  component [Sandbox Environment] as Sandbox
+  
+  component [Message Pipeline] as Pipeline
+  component [Layout System] as Layout
+}
+
+Developer --> Manifest : creates
+Developer --> ExtCode : implements
+
+User --> ExtSettingsUI : manages extensions
+User --> PanelCatalog : selects panels
+
+Manifest --> Loader
+ExtCode --> Loader
+
+Loader --> Registry : registers
+Loader --> Sandbox : loads in
+
+Registry --> Manager
+Manager --> ExtSettingsUI
+
+ExtCode --> Context : uses API
+Context --> PanelRegistry : registers panels
+Context --> ConverterRegistry : registers converters
+Context --> FunctionRegistry : registers functions
+Context --> CameraRegistry : registers cameras
+
+PanelImpl --> PanelRegistry
+ConverterImpl --> ConverterRegistry
+TopicFuncs --> FunctionRegistry
+CameraModels --> CameraRegistry
+
+PanelRegistry --> PanelCatalog
+PanelCatalog --> ActivePanels
+
+ConverterRegistry --> Pipeline
+FunctionRegistry --> Pipeline
+
+ActivePanels --> Layout
+Pipeline --> ActivePanels : delivers messages
+
+note right of Sandbox
+  Extensions run in
+  isolated environment
+  for security
+end note
+
+note bottom of Context
+  Limited API provided
+  to extensions for
+  safe integration
+end note
+
+note left of Manager
+  Handles extension
+  lifecycle and
+  user management
+end note
+
+@enduml
