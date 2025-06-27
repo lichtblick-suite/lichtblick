@@ -29,6 +29,12 @@ import { Path } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
 import {
   IMAGE_MODE_HUD_GROUP_ID,
   IMAGE_TOPIC_PATH,
+  MAX_BRIGHTNESS,
+  MAX_CONTRAST,
+  MID_BRIGHTNESS,
+  MID_CONTRAST,
+  MIN_BRIGHTNESS,
+  MIN_CONTRAST,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
@@ -129,8 +135,8 @@ const DEFAULT_CONFIG = {
   flipHorizontal: false,
   flipVertical: false,
   rotation: 0 as 0 | 90 | 180 | 270,
-  brightness: 50,
-  contrast: 50,
+  brightness: MID_BRIGHTNESS,
+  contrast: MID_CONTRAST,
   ...IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
 };
 
@@ -548,15 +554,15 @@ export class ImageMode
     fields.brightness = {
       input: "slider",
       label: "Brightness",
-      min: 0,
-      max: 100,
+      min: MIN_BRIGHTNESS,
+      max: MAX_BRIGHTNESS,
       value: brightness,
     };
     fields.contrast = {
       input: "slider",
       label: "Contrast",
-      min: 0,
-      max: 100,
+      min: MIN_CONTRAST,
+      max: MAX_CONTRAST,
       value: contrast,
     };
 
@@ -659,6 +665,8 @@ export class ImageMode
       explicitAlpha: config.explicitAlpha,
       minValue: config.minValue,
       maxValue: config.maxValue,
+      brightness: config.brightness,
+      contrast: config.contrast,
     });
     if (config.synchronize !== prevImageModeConfig.synchronize) {
       this.hud.removeGroup(IMAGE_MODE_HUD_GROUP_ID);

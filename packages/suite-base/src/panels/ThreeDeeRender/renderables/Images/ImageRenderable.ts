@@ -16,6 +16,10 @@ import { ICameraModel } from "@lichtblick/suite";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderable";
 import { stringToRgba } from "@lichtblick/suite-base/panels/ThreeDeeRender/color";
+import {
+  clampBrightness,
+  clampContrast,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/utils";
 import { WorkerImageDecoder } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/WorkerImageDecoder";
 import { projectPixel } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/projections";
 import { RosValue } from "@lichtblick/suite-base/players/types";
@@ -28,7 +32,14 @@ import {
   getVideoDecoderConfig,
 } from "./decodeImage";
 import { CameraInfo } from "../../ros";
-import { DECODE_IMAGE_ERR_KEY, IMAGE_TOPIC_PATH } from "../ImageMode/constants";
+import {
+  DECODE_IMAGE_ERR_KEY,
+  FRAGMENT_SHADER,
+  IMAGE_TOPIC_PATH,
+  MID_BRIGHTNESS,
+  MID_CONTRAST,
+  VERTEX_SHADER,
+} from "../ImageMode/constants";
 import { ColorModeSettings } from "../colorMode";
 
 const log = Logger.getLogger(__filename);
@@ -39,6 +50,8 @@ export interface ImageRenderableSettings extends Partial<ColorModeSettings> {
   distance: number;
   planarProjectionFactor: number;
   color: string;
+  brightness: number;
+  contrast: number;
 }
 
 const DEFAULT_DISTANCE = 1;
@@ -50,6 +63,8 @@ export const IMAGE_RENDERABLE_DEFAULT_SETTINGS: ImageRenderableSettings = {
   distance: DEFAULT_DISTANCE,
   planarProjectionFactor: DEFAULT_PLANAR_PROJECTION_FACTOR,
   color: "#ffffff",
+  brightness: MID_BRIGHTNESS,
+  contrast: MID_CONTRAST,
 };
 
 const IMAGE_FORMATS = new Set(["jpeg", "jpg", "png", "webp"]);
@@ -63,7 +78,7 @@ export type ImageUserData = BaseUserData & {
   cameraModel: ICameraModel | undefined;
   image: AnyImage | undefined;
   texture: THREE.Texture | undefined;
-  material: THREE.MeshBasicMaterial | undefined;
+  material: THREE.ShaderMaterial | undefined;
   geometry: THREE.PlaneGeometry | undefined;
   mesh: THREE.Mesh | undefined;
 };
@@ -404,13 +419,17 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
     const texture = this.userData.texture;
     if (texture) {
-      material.map = texture;
+      material.uniforms.map = { value: texture };
     }
 
     tempColor = stringToRgba(tempColor, this.userData.settings.color);
     const transparent = tempColor.a < 1;
     const color = new THREE.Color(tempColor.r, tempColor.g, tempColor.b);
-    material.color.set(color);
+    const { brightness, contrast } = this.userData.settings;
+    material.uniforms.color = { value: color };
+    material.uniforms.brightness = { value: clampBrightness(brightness) };
+    material.uniforms.contrast = { value: clampContrast(contrast) };
+    material.uniforms.opacity = { value: tempColor.a };
     material.opacity = tempColor.a;
     material.transparent = transparent;
     material.depthWrite = !transparent;
@@ -429,13 +448,23 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     stringToRgba(tempColor, this.userData.settings.color);
     const transparent = tempColor.a < 1;
     const color = new THREE.Color(tempColor.r, tempColor.g, tempColor.b);
-    this.userData.material = new THREE.MeshBasicMaterial({
+    const { brightness, contrast } = this.userData.settings;
+    const uniforms = {
+      map: { value: this.userData.texture },
+      color: { value: color },
+      opacity: { value: tempColor.a },
+      brightness: { value: clampBrightness(brightness) },
+      contrast: { value: clampContrast(contrast) },
+    };
+    this.userData.material = new THREE.ShaderMaterial({
       name: `${this.userData.topic}:Material`,
-      color,
+      uniforms,
       side: THREE.DoubleSide,
       opacity: tempColor.a,
       transparent,
       depthWrite: !transparent,
+      vertexShader: VERTEX_SHADER,
+      fragmentShader: FRAGMENT_SHADER,
     });
   }
 
@@ -487,7 +516,7 @@ function createCanvasTexture(bitmap: ImageBitmap): THREE.CanvasTexture {
     THREE.UnsignedByteType,
   );
   texture.generateMipmaps = false;
-  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.colorSpace = THREE.LinearSRGBColorSpace;
   return texture;
 }
 
@@ -504,7 +533,7 @@ function createDataTexture(imageData: ImageData): THREE.DataTexture {
     THREE.NearestFilter,
     THREE.LinearFilter,
     1,
-    THREE.SRGBColorSpace,
+    THREE.LinearSRGBColorSpace,
   );
   dataTexture.needsUpdate = true; // ensure initial image data is displayed
   return dataTexture;

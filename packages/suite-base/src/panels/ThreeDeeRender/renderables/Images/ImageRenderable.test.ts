@@ -86,7 +86,7 @@ describe("ImageRenderable", () => {
   it("should dispose resources", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     renderable.userData.texture = new THREE.Texture();
-    renderable.userData.material = new THREE.MeshBasicMaterial();
+    renderable.userData.material = new THREE.ShaderMaterial();
     renderable.userData.geometry = new THREE.PlaneGeometry();
 
     // @ts-expect-error isDisposed is protected, but ok to use on tests
