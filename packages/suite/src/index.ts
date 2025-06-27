@@ -687,6 +687,7 @@ export type SettingsTreeFieldSlider = {
   value?: number;
   min?: number;
   max?: number;
+  step?: number;
 };
 
 export type SettingsTreeFieldVec3 = {

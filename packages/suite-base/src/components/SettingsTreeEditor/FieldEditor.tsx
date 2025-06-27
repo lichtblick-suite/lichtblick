@@ -344,6 +344,7 @@ function FieldInput({
           value={field.value}
           min={field.min}
           max={field.max}
+          step={field.step}
           size="small"
           valueLabelDisplay="auto"
           onChange={(_, value) => {

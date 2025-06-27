@@ -179,7 +179,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#geometryNeedsUpdate = true;
     }
 
-    if (newSettings.color !== prevSettings.color) {
+    if (
+      newSettings.color !== prevSettings.color ||
+      newSettings.brightness !== prevSettings.brightness ||
+      newSettings.contrast !== prevSettings.contrast
+    ) {
       this.#materialNeedsUpdate = true;
     }
 

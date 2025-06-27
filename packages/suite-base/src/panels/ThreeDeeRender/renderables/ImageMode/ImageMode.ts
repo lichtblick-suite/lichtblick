@@ -557,6 +557,7 @@ export class ImageMode
       min: MIN_BRIGHTNESS,
       max: MAX_BRIGHTNESS,
       value: brightness,
+      step: 5,
     };
     fields.contrast = {
       input: "slider",
@@ -564,6 +565,7 @@ export class ImageMode
       min: MIN_CONTRAST,
       max: MAX_CONTRAST,
       value: contrast,
+      step: 5,
     };
 
     const imageTopic =
