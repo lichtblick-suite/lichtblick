@@ -11,28 +11,41 @@ import {
   UPPER_BRIGHTNESS_LIMIT,
   UPPER_CONTRAST_LIMIT,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { mapRange, clampBrightness, clampContrast } from "./utils";
 
 describe("mapRange", () => {
   it("maps value correctly within range", () => {
-    expect(mapRange(50, 0, 100, 0, 200)).toBe(100);
+    const result = mapRange(50, 0, 100, 0, 200);
+    expect(result).toBe(100);
   });
 
   it("clamps value to inMax if above", () => {
-    expect(mapRange(150, 0, 100, 0, 200)).toBe(200);
+    const result = mapRange(150, 0, 100, 0, 200);
+    expect(result).toBe(200);
   });
 
   it("clamps value to inMin if below", () => {
-    expect(mapRange(-50, 0, 100, 0, 200)).toBe(0);
+    const result = mapRange(-50, 0, 100, 0, 200);
+    expect(result).toBe(0);
   });
 
   it("returns outMin if inMin === inMax to avoid division by zero", () => {
-    expect(mapRange(50, 100, 100, 0, 200)).toBe(0);
+    const result = mapRange(50, 100, 100, 0, 200);
+    expect(result).toBe(0);
   });
 
   it("maps correctly when in range", () => {
-    expect(mapRange(25, 0, 100, 0, 50)).toBe(12.5);
+    const result = mapRange(25, 0, 100, 0, 50);
+    expect(result).toBe(12.5);
+  });
+
+  it("should return outMin value when inMin and inMax are equal", () => {
+    const repeatedValue = BasicBuilder.number();
+    const outMin = BasicBuilder.number();
+    const result = mapRange(75, repeatedValue, repeatedValue, outMin, 200);
+    expect(result).toBe(outMin);
   });
 });
 
@@ -48,12 +61,14 @@ describe("clampBrightness", () => {
     expect(clampBrightness(50)).toBe(result);
   });
 
-  it("clamps brightness below minimum", () => {
-    expect(clampBrightness(-10)).toBe(LOWER_BRIGHTNESS_LIMIT);
+  it("clamps brightness bclampBrightness(-10)elow minimum", () => {
+    const result = clampBrightness(-10);
+    expect(result).toBe(LOWER_BRIGHTNESS_LIMIT);
   });
 
   it("clamps brightness above maximum", () => {
-    expect(clampBrightness(150)).toBe(UPPER_BRIGHTNESS_LIMIT);
+    const result = clampBrightness(150);
+    expect(result).toBe(UPPER_BRIGHTNESS_LIMIT);
   });
 });
 
@@ -70,10 +85,12 @@ describe("clampContrast", () => {
   });
 
   it("clamps contrast below minimum", () => {
-    expect(clampContrast(-20)).toBe(LOWER_CONTRAST_LIMIT);
+    const result = clampContrast(-20);
+    expect(result).toBe(LOWER_CONTRAST_LIMIT);
   });
 
   it("clamps contrast above maximum", () => {
-    expect(clampContrast(120)).toBe(UPPER_CONTRAST_LIMIT);
+    const result = clampContrast(120);
+    expect(result).toBe(UPPER_CONTRAST_LIMIT);
   });
 });

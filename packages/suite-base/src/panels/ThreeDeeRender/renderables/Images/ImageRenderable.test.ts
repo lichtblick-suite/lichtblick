@@ -98,6 +98,30 @@ describe("ImageRenderable", () => {
     expect(renderable.isDisposed()).toBe(true);
   });
 
+  it("should set a new brightness value", () => {
+    const newBrightnessValue = BasicBuilder.number();
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+
+    renderable.userData.texture = new THREE.Texture();
+    renderable.userData.material = new THREE.ShaderMaterial();
+    renderable.setSettings({ ...renderable.userData.settings, brightness: newBrightnessValue });
+    renderable.userData.geometry = new THREE.PlaneGeometry();
+
+    expect(renderable.userData.settings.brightness).toBe(newBrightnessValue);
+  });
+
+  it("should set a new contrast value", () => {
+    const newContrastValue = BasicBuilder.number();
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+
+    renderable.userData.texture = new THREE.Texture();
+    renderable.userData.material = new THREE.ShaderMaterial();
+    renderable.setSettings({ ...renderable.userData.settings, contrast: newContrastValue });
+    renderable.userData.geometry = new THREE.PlaneGeometry();
+
+    expect(renderable.userData.settings.contrast).toBe(newContrastValue);
+  });
+
   it("should set camera model", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     const model = new PinholeCameraModel({

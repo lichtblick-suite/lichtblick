@@ -179,7 +179,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#geometryNeedsUpdate = true;
     }
 
-    if (newSettings.color !== prevSettings.color) {
+    if (
+      newSettings.color !== prevSettings.color ||
+      prevSettings.brightness !== newSettings.brightness ||
+      prevSettings.contrast !== newSettings.contrast
+    ) {
       this.#materialNeedsUpdate = true;
     }
 
@@ -189,9 +193,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       !_.isEqual(prevSettings.gradient, newSettings.gradient) ||
       prevSettings.colorMap !== newSettings.colorMap ||
       prevSettings.minValue !== newSettings.minValue ||
-      prevSettings.maxValue !== newSettings.maxValue ||
-      prevSettings.brightness !== newSettings.brightness ||
-      prevSettings.contrast !== newSettings.contrast
+      prevSettings.maxValue !== newSettings.maxValue
     ) {
       this.userData.settings = newSettings;
       // Decode the current image again, which takes into account the new options
