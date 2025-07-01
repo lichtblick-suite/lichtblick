@@ -78,6 +78,7 @@ export type ImageUserData = BaseUserData & {
   cameraModel: ICameraModel | undefined;
   image: AnyImage | undefined;
   texture: THREE.Texture | undefined;
+  // The material should use ShaderMaterial so we can use custom shaders to apply effects like brightness and contrast
   material: THREE.ShaderMaterial | undefined;
   geometry: THREE.PlaneGeometry | undefined;
   mesh: THREE.Mesh | undefined;
@@ -520,6 +521,7 @@ function createCanvasTexture(bitmap: ImageBitmap): THREE.CanvasTexture {
     THREE.UnsignedByteType,
   );
   texture.generateMipmaps = false;
+  // Color space needs to be set to LinearSRGBColorSpace for correct color rendering on custom Shader
   texture.colorSpace = THREE.LinearSRGBColorSpace;
   return texture;
 }
@@ -537,6 +539,7 @@ function createDataTexture(imageData: ImageData): THREE.DataTexture {
     THREE.NearestFilter,
     THREE.LinearFilter,
     1,
+    // Color space needs to be set to LinearSRGBColorSpace for correct color rendering on custom Shader
     THREE.LinearSRGBColorSpace,
   );
   dataTexture.needsUpdate = true; // ensure initial image data is displayed

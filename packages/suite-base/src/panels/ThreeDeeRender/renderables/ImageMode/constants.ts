@@ -71,9 +71,13 @@ export const MIN_CONTRAST = 0;
 export const MAX_CONTRAST = 100;
 export const INITIAL_CONTRAST = (MAX_CONTRAST + MIN_CONTRAST) / 2;
 
+// Contrast should be in the range of -1 and 1.
+// It was trimmed by 0.4 to improve visualization.
 export const LOWER_BRIGHTNESS_LIMIT = -0.6;
 export const UPPER_BRIGHTNESS_LIMIT = 0.6;
 
+// Contrast should be in the range of 0 and 2.
+// It was trimmed by 0.1 to improve visualization.
 export const LOWER_CONTRAST_LIMIT = 0.1;
 export const UPPER_CONTRAST_LIMIT = 1.9;
 
@@ -102,6 +106,8 @@ export const VERTEX_SHADER = `
     }
 `;
 
+// Custom GLSL scrpit to apply brightness, contrast and other properties to the image texture
+// Source: https://github.com/mrdoob/three.js/blob/master/src/materials/ShaderMaterial.js
 export const FRAGMENT_SHADER = `
     uniform sampler2D map;
     uniform float brightness;
