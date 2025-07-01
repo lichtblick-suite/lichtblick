@@ -3146,7 +3146,7 @@ __metadata:
     tss-react: 4.9.2
     utif: 3.1.0
     webpack: 5.99.9
-    webpack-dev-server: 5.2.1
+    webpack-dev-server: 5.2.2
   languageName: unknown
   linkType: soft
 
@@ -3170,7 +3170,7 @@ __metadata:
     react-dom: 18.3.1
     tss-react: 4.9.3
     webpack: 5.99.9
-    webpack-dev-server: 5.2.1
+    webpack-dev-server: 5.2.2
   languageName: unknown
   linkType: soft
 
@@ -7283,7 +7283,7 @@ __metadata:
     react: 18.3.1
     react-dom: 18.2.0
     webpack: 5.99.9
-    webpack-dev-server: 5.2.1
+    webpack-dev-server: 5.2.2
   languageName: unknown
   linkType: soft
 
@@ -12156,7 +12156,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-proxy-middleware@npm:^2.0.7":
+"http-proxy-middleware@npm:^2.0.9":
   version: 2.0.9
   resolution: "http-proxy-middleware@npm:2.0.9"
   dependencies:
@@ -14067,7 +14067,7 @@ __metadata:
     vm-browserify: 1.1.2
     webpack: 5.99.9
     webpack-cli: 6.0.1
-    webpack-dev-server: 5.2.1
+    webpack-dev-server: 5.2.2
     webpack-hot-middleware: 2.26.0
   languageName: unknown
   linkType: soft
@@ -20512,7 +20512,7 @@ __metadata:
     playwright: 1.49.1
     serve-handler: 6.1.6
     webpack: 5.99.9
-    webpack-dev-server: 5.2.1
+    webpack-dev-server: 5.2.2
   languageName: unknown
   linkType: soft
 
@@ -20604,9 +20604,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-server@npm:5.2.1":
-  version: 5.2.1
-  resolution: "webpack-dev-server@npm:5.2.1"
+"webpack-dev-server@npm:5.2.2":
+  version: 5.2.2
+  resolution: "webpack-dev-server@npm:5.2.2"
   dependencies:
     "@types/bonjour": ^3.5.13
     "@types/connect-history-api-fallback": ^1.5.4
@@ -20624,7 +20624,7 @@ __metadata:
     connect-history-api-fallback: ^2.0.0
     express: ^4.21.2
     graceful-fs: ^4.2.6
-    http-proxy-middleware: ^2.0.7
+    http-proxy-middleware: ^2.0.9
     ipaddr.js: ^2.1.0
     launch-editor: ^2.6.1
     open: ^10.0.3
@@ -20645,7 +20645,7 @@ __metadata:
       optional: true
   bin:
     webpack-dev-server: bin/webpack-dev-server.js
-  checksum: cb96b182970dad1ea67ccca7b1c7a207ee0815c3b65218b08a8fad07df6a1854a2fed3588b17b06a99f28c999f4f391d551a42058cf02425ff7d0d21bfd2d27f
+  checksum: 96994d684563cfee76dcb031c7c18a1fa10aee2df0520a0f327c8d72d4692c0dcdd7e455adeed4f8da9695f2e9f8f5481053c7e6e27d7e35085e45357fc9f697
   languageName: node
   linkType: hard
 
