@@ -12,20 +12,20 @@ import {
   UPPER_CONTRAST_LIMIT,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 
-export function mapRange(
+function mapRange(
   value: number,
-  inMin: number,
-  inMax: number,
-  outMin: number,
-  outMax: number,
+  inputMin: number,
+  inputMax: number,
+  outputMin: number,
+  outputMax: number,
 ): number {
   // Avoid division by 0
-  if (inMin === inMax) {
-    return outMin;
+  if (inputMin === inputMax) {
+    return outputMin;
   }
 
-  const clamped = Math.min(Math.max(value, inMin), inMax);
-  return ((clamped - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin;
+  const clamped = Math.min(Math.max(value, inputMin), inputMax);
+  return ((clamped - inputMin) / (inputMax - inputMin)) * (outputMax - outputMin) + outputMin;
 }
 
 export function clampBrightness(value: number): number {

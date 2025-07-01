@@ -65,11 +65,11 @@ export const ALL_SUPPORTED_CALIBRATION_SCHEMAS = new Set([
 
 export const MIN_BRIGHTNESS = 0;
 export const MAX_BRIGHTNESS = 100;
-export const MID_BRIGHTNESS = (MAX_BRIGHTNESS + MIN_BRIGHTNESS) / 2;
+export const INITIAL_BRIGHTNESS = (MAX_BRIGHTNESS + MIN_BRIGHTNESS) / 2;
 
 export const MIN_CONTRAST = 0;
 export const MAX_CONTRAST = 100;
-export const MID_CONTRAST = (MAX_CONTRAST + MIN_CONTRAST) / 2;
+export const INITIAL_CONTRAST = (MAX_CONTRAST + MIN_CONTRAST) / 2;
 
 export const LOWER_BRIGHTNESS_LIMIT = -0.6;
 export const UPPER_BRIGHTNESS_LIMIT = 0.6;
@@ -89,8 +89,8 @@ export const DEFAULT_IMAGE_CONFIG = {
   flipHorizontal: false,
   flipVertical: false,
   rotation: 0 as 0 | 90 | 180 | 270,
-  brightness: MID_BRIGHTNESS,
-  contrast: MID_CONTRAST,
+  brightness: INITIAL_BRIGHTNESS,
+  contrast: INITIAL_CONTRAST,
   ...IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
 };
 

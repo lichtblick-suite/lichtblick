@@ -36,8 +36,8 @@ import {
   DECODE_IMAGE_ERR_KEY,
   FRAGMENT_SHADER,
   IMAGE_TOPIC_PATH,
-  MID_BRIGHTNESS,
-  MID_CONTRAST,
+  INITIAL_BRIGHTNESS,
+  INITIAL_CONTRAST,
   VERTEX_SHADER,
 } from "../ImageMode/constants";
 import { ColorModeSettings } from "../colorMode";
@@ -63,8 +63,8 @@ export const IMAGE_RENDERABLE_DEFAULT_SETTINGS: ImageRenderableSettings = {
   distance: DEFAULT_DISTANCE,
   planarProjectionFactor: DEFAULT_PLANAR_PROJECTION_FACTOR,
   color: "#ffffff",
-  brightness: MID_BRIGHTNESS,
-  contrast: MID_CONTRAST,
+  brightness: INITIAL_BRIGHTNESS,
+  contrast: INITIAL_CONTRAST,
 };
 
 const IMAGE_FORMATS = new Set(["jpeg", "jpg", "png", "webp"]);

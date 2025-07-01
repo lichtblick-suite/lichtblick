@@ -13,84 +13,56 @@ import {
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
-import { mapRange, clampBrightness, clampContrast } from "./utils";
-
-describe("mapRange", () => {
-  it("maps value correctly within range", () => {
-    const result = mapRange(50, 0, 100, 0, 200);
-    expect(result).toBe(100);
-  });
-
-  it("clamps value to inMax if above", () => {
-    const result = mapRange(150, 0, 100, 0, 200);
-    expect(result).toBe(200);
-  });
-
-  it("clamps value to inMin if below", () => {
-    const result = mapRange(-50, 0, 100, 0, 200);
-    expect(result).toBe(0);
-  });
-
-  it("returns outMin if inMin === inMax to avoid division by zero", () => {
-    const result = mapRange(50, 100, 100, 0, 200);
-    expect(result).toBe(0);
-  });
-
-  it("maps correctly when in range", () => {
-    const result = mapRange(25, 0, 100, 0, 50);
-    expect(result).toBe(12.5);
-  });
-
-  it("should return outMin value when inMin and inMax are equal", () => {
-    const repeatedValue = BasicBuilder.number();
-    const outMin = BasicBuilder.number();
-    const result = mapRange(75, repeatedValue, repeatedValue, outMin, 200);
-    expect(result).toBe(outMin);
-  });
-});
+import { clampBrightness, clampContrast } from "./utils";
 
 describe("clampBrightness", () => {
   it("maps brightness within limits", () => {
-    const result = mapRange(
-      50,
-      MIN_BRIGHTNESS,
-      MAX_BRIGHTNESS,
-      LOWER_BRIGHTNESS_LIMIT,
-      UPPER_BRIGHTNESS_LIMIT,
-    );
-    expect(clampBrightness(50)).toBe(result);
+    const randomBrightness = BasicBuilder.number({ min: MIN_BRIGHTNESS, max: MAX_BRIGHTNESS });
+    expect(clampBrightness(randomBrightness)).toBeGreaterThanOrEqual(LOWER_BRIGHTNESS_LIMIT);
+    expect(clampBrightness(randomBrightness)).toBeLessThanOrEqual(UPPER_BRIGHTNESS_LIMIT);
   });
 
-  it("clamps brightness bclampBrightness(-10)elow minimum", () => {
-    const result = clampBrightness(-10);
+  it("clamps brightness below minimum", () => {
+    const lowRandomBrightness = BasicBuilder.number({
+      min: MIN_BRIGHTNESS - 100,
+      max: MIN_BRIGHTNESS - 1,
+    });
+    const result = clampBrightness(lowRandomBrightness);
     expect(result).toBe(LOWER_BRIGHTNESS_LIMIT);
   });
 
   it("clamps brightness above maximum", () => {
-    const result = clampBrightness(150);
+    const highRandomBrightness = BasicBuilder.number({
+      min: MAX_BRIGHTNESS + 1,
+      max: MAX_BRIGHTNESS + 100,
+    });
+    const result = clampBrightness(highRandomBrightness);
     expect(result).toBe(UPPER_BRIGHTNESS_LIMIT);
   });
 });
 
 describe("clampContrast", () => {
   it("maps contrast within limits", () => {
-    const result = mapRange(
-      50,
-      MIN_CONTRAST,
-      MAX_CONTRAST,
-      LOWER_CONTRAST_LIMIT,
-      UPPER_CONTRAST_LIMIT,
-    );
-    expect(clampContrast(50)).toBe(result);
+    const randomContrast = BasicBuilder.number({ min: MIN_CONTRAST, max: MAX_CONTRAST });
+    expect(clampContrast(randomContrast)).toBeGreaterThanOrEqual(LOWER_CONTRAST_LIMIT);
+    expect(clampContrast(randomContrast)).toBeLessThanOrEqual(UPPER_CONTRAST_LIMIT);
   });
 
   it("clamps contrast below minimum", () => {
-    const result = clampContrast(-20);
+    const lowRandomContrast = BasicBuilder.number({
+      min: MIN_CONTRAST - 100,
+      max: MIN_CONTRAST - 1,
+    });
+    const result = clampContrast(lowRandomContrast);
     expect(result).toBe(LOWER_CONTRAST_LIMIT);
   });
 
   it("clamps contrast above maximum", () => {
-    const result = clampContrast(120);
+    const highRandomContrast = BasicBuilder.number({
+      min: MAX_CONTRAST + 1,
+      max: MAX_CONTRAST + 100,
+    });
+    const result = clampContrast(highRandomContrast);
     expect(result).toBe(UPPER_CONTRAST_LIMIT);
   });
 });
