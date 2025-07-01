@@ -24,18 +24,36 @@ import {
 } from "@lichtblick/suite";
 import { PanelContextMenuItem } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { HUDItem } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
 import { Path } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
 import {
+  COMPRESSED_VIDEO_DATATYPES,
+  RAW_IMAGE_DATATYPES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/foxglove";
+import {
+  ALL_SUPPORTED_CALIBRATION_SCHEMAS,
+  ALL_SUPPORTED_IMAGE_SCHEMAS,
+  CALIBRATION_TOPIC_PATH,
+  CALIBRATION_TOPIC_UNAVAILABLE,
+  CAMERA_MODEL,
+  DEFAULT_FOCAL_LENGTH,
+  DEFAULT_IMAGE_CONFIG,
   IMAGE_MODE_HUD_GROUP_ID,
+  IMAGE_TOPIC_DIFFERENT_FRAME,
   IMAGE_TOPIC_PATH,
+  IMAGE_TOPIC_UNAVAILABLE,
   MAX_BRIGHTNESS,
   MAX_CONTRAST,
-  MID_BRIGHTNESS,
-  MID_CONTRAST,
   MIN_BRIGHTNESS,
   MIN_CONTRAST,
+  MISSING_CAMERA_INFO,
+  NO_IMAGE_TOPICS_HUD_ITEM,
+  REMOVE_IMAGE_TIMEOUT_MS,
+  SUPPORTED_RAW_IMAGE_SCHEMAS,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
+import {
+  ConfigWithDefaults,
+  ImageModeEventMap,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/types";
 import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageRenderable,
@@ -46,7 +64,6 @@ import {
   AnyImage,
   getFrameIdFromImage,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
-import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
@@ -73,16 +90,10 @@ import type {
 import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
 import { SettingsTreeEntry } from "../../SettingsManager";
 import {
-  CAMERA_CALIBRATION_DATATYPES,
-  COMPRESSED_IMAGE_DATATYPES,
-  COMPRESSED_VIDEO_DATATYPES,
-  RAW_IMAGE_DATATYPES,
-} from "../../foxglove";
-import {
   IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
-  CAMERA_INFO_DATATYPES,
   CameraInfo,
+  COMPRESSED_IMAGE_DATATYPES,
 } from "../../ros";
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
@@ -91,56 +102,6 @@ import { colorModeSettingsFields } from "../colorMode";
 
 const log = Logger.getLogger(__filename);
 
-const CALIBRATION_TOPIC_PATH = ["imageMode", "calibrationTopic"];
-
-const IMAGE_TOPIC_UNAVAILABLE = "IMAGE_TOPIC_UNAVAILABLE";
-const CALIBRATION_TOPIC_UNAVAILABLE = "CALIBRATION_TOPIC_UNAVAILABLE";
-
-const MISSING_CAMERA_INFO = "MISSING_CAMERA_INFO";
-const IMAGE_TOPIC_DIFFERENT_FRAME = "IMAGE_TOPIC_DIFFERENT_FRAME";
-
-const CAMERA_MODEL = "CameraModel";
-
-const DEFAULT_FOCAL_LENGTH = 500;
-
-const REMOVE_IMAGE_TIMEOUT_MS = 50;
-
-const NO_IMAGE_TOPICS_HUD_ITEM: HUDItem = {
-  id: "NO_IMAGE_TOPICS",
-  group: IMAGE_MODE_HUD_GROUP_ID,
-  getMessage: () => t3D("noImageTopicsAvailable"),
-  displayType: "empty",
-};
-interface ImageModeEventMap extends THREE.Object3DEventMap {
-  hasModifiedViewChanged: object;
-}
-
-export const ALL_SUPPORTED_IMAGE_SCHEMAS = new Set([
-  ...ROS_IMAGE_DATATYPES,
-  ...ROS_COMPRESSED_IMAGE_DATATYPES,
-  ...RAW_IMAGE_DATATYPES,
-  ...COMPRESSED_IMAGE_DATATYPES,
-  ...COMPRESSED_VIDEO_DATATYPES,
-]);
-
-const SUPPORTED_RAW_IMAGE_SCHEMAS = new Set([...RAW_IMAGE_DATATYPES, ...ROS_IMAGE_DATATYPES]);
-
-const ALL_SUPPORTED_CALIBRATION_SCHEMAS = new Set([
-  ...CAMERA_INFO_DATATYPES,
-  ...CAMERA_CALIBRATION_DATATYPES,
-]);
-
-const DEFAULT_CONFIG = {
-  synchronize: false,
-  flipHorizontal: false,
-  flipVertical: false,
-  rotation: 0 as 0 | 90 | 180 | 270,
-  brightness: MID_BRIGHTNESS,
-  contrast: MID_CONTRAST,
-  ...IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
-};
-
-type ConfigWithDefaults = ImageModeConfig & typeof DEFAULT_CONFIG;
 export class ImageMode
   extends SceneExtension<ImageRenderable, ImageModeEventMap>
   implements ICameraHandler
@@ -580,7 +541,7 @@ export class ImageMode
         config: settings as ImageModeConfig,
 
         defaults: {
-          gradient: DEFAULT_CONFIG.gradient,
+          gradient: DEFAULT_IMAGE_CONFIG.gradient,
         },
         modifiers: {
           supportsPackedRgbModes: false,
@@ -894,12 +855,12 @@ export class ImageMode
 
     const colorMode =
       config.colorMode === "rgba-fields"
-        ? DEFAULT_CONFIG.colorMode
-        : config.colorMode ?? DEFAULT_CONFIG.colorMode;
+        ? DEFAULT_IMAGE_CONFIG.colorMode
+        : config.colorMode ?? DEFAULT_IMAGE_CONFIG.colorMode;
 
     // Ensures that no required fields are left undefined
     // rightmost values are applied last and have the most precedence
-    return _.merge({}, DEFAULT_CONFIG, { colorMode }, config);
+    return _.merge({}, DEFAULT_IMAGE_CONFIG, { colorMode }, config);
   }
 
   /**
