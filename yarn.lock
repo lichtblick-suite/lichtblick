@@ -1741,9 +1741,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:11.14.0":
-  version: 11.14.0
-  resolution: "@emotion/styled@npm:11.14.0"
+"@emotion/styled@npm:11.14.1":
+  version: 11.14.1
+  resolution: "@emotion/styled@npm:11.14.1"
   dependencies:
     "@babel/runtime": ^7.18.3
     "@emotion/babel-plugin": ^11.13.5
@@ -1757,7 +1757,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 9c1b842e942e69fb6037d1ab161046d2bcfeff95fd2ccfdab30acaaf6b89dc07b14bb00f8cc8ec14df11e6746c8e4e1d781bc54d10bd739aab44966ded64d4fb
+  checksum: 86238d9f5c41232a73499e441fa9112e855545519d6772f489fa885634bb8f31b422a9ba9d1e8bc0b4ad66132f9d398b1c309d92c19c5ee21356b41671ec984a
   languageName: node
   linkType: hard
 
@@ -2920,7 +2920,7 @@ __metadata:
   dependencies:
     "@emotion/cache": 11.14.0
     "@emotion/react": 11.14.0
-    "@emotion/styled": 11.14.0
+    "@emotion/styled": 11.14.1
     "@fluentui/react-icons": 2.0.224
     "@foxglove/schemas": 1.6.6
     "@foxglove/ws-protocol": 0.7.2
@@ -3188,7 +3188,7 @@ __metadata:
   resolution: "@lichtblick/theme@workspace:packages/theme"
   dependencies:
     "@emotion/react": 11.14.0
-    "@emotion/styled": 11.14.0
+    "@emotion/styled": 11.14.1
     "@fluentui/react-icons": 2.0.224
     "@lichtblick/tsconfig": 1.0.0
     "@mui/icons-material": 5.15.5
