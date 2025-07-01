@@ -135,7 +135,7 @@
     "moize": "6.1.6",
     "moment": "2.29.4",
     "moment-duration-format": "2.3.2",
-    "moment-timezone": "0.5.43",
+    "moment-timezone": "0.6.0",
     "monaco-editor": "0.52.2",
     "monaco-editor-webpack-plugin": "7.1.0",
     "nanoid": "5.0.9",
