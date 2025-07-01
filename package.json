@@ -79,7 +79,7 @@
     "@actions/core": "1.11.1",
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.2",
-    "@babel/core": "7.27.4",
+    "@babel/core": "7.27.7",
     "@babel/plugin-proposal-decorators": "7.27.1",
     "@babel/plugin-proposal-explicit-resource-management": "7.27.4",
     "@babel/preset-env": "7.27.2",
