@@ -12,7 +12,7 @@ import {
   UPPER_CONTRAST_LIMIT,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
 
-function mapRange(
+export function mapRange(
   value: number,
   inMin: number,
   inMax: number,
