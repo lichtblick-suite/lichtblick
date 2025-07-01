@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import {
+  INITIAL_BRIGHTNESS,
+  INITIAL_CONTRAST,
   LOWER_BRIGHTNESS_LIMIT,
   LOWER_CONTRAST_LIMIT,
   MAX_BRIGHTNESS,
@@ -64,5 +66,21 @@ describe("clampContrast", () => {
     });
     const result = clampContrast(highRandomContrast);
     expect(result).toBe(UPPER_CONTRAST_LIMIT);
+  });
+});
+
+describe("brightness and contrast limits", () => {
+  it("guarantee that brightness are ok", () => {
+    expect(MIN_BRIGHTNESS).toBeLessThan(MAX_BRIGHTNESS);
+    expect(INITIAL_BRIGHTNESS).toBeGreaterThanOrEqual(MIN_BRIGHTNESS);
+    expect(INITIAL_BRIGHTNESS).toBeLessThanOrEqual(MAX_BRIGHTNESS);
+    expect(LOWER_BRIGHTNESS_LIMIT).toBeLessThan(UPPER_BRIGHTNESS_LIMIT);
+  });
+
+  it("guarantee that contrast are ok", () => {
+    expect(MIN_CONTRAST).toBeLessThan(MAX_CONTRAST);
+    expect(INITIAL_CONTRAST).toBeGreaterThanOrEqual(MIN_CONTRAST);
+    expect(INITIAL_CONTRAST).toBeLessThanOrEqual(MAX_CONTRAST);
+    expect(LOWER_CONTRAST_LIMIT).toBeLessThan(UPPER_CONTRAST_LIMIT);
   });
 });

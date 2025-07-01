@@ -19,11 +19,6 @@ function mapRange(
   outputMin: number,
   outputMax: number,
 ): number {
-  // Avoid division by 0
-  if (inputMin === inputMax) {
-    return outputMin;
-  }
-
   const clamped = Math.min(Math.max(value, inputMin), inputMax);
   return ((clamped - inputMin) / (inputMax - inputMin)) * (outputMax - outputMin) + outputMin;
 }
