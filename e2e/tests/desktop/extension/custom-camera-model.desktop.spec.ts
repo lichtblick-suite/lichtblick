@@ -46,7 +46,7 @@ test("custom camera model", async ({ mainWindow }) => {
   await mainWindow.getByRole("option", { name: "/camera_calibration", exact: true }).click();
 
   // THEN
-  await mainWindow.waitForTimeout(10); // await for the sidebar to update
+  await mainWindow.waitForTimeout(100); // await for the sidebar to update
   expect(await sidebarLeft.getByTestId("ErrorIcon").count()).toBe(0);
 
   // WHEN
@@ -72,6 +72,6 @@ test("custom camera model", async ({ mainWindow }) => {
   await mainWindow.getByTestId("play-button").click();
 
   // THEN
-  await mainWindow.waitForTimeout(10); // await for the sidebar to update
+  await mainWindow.waitForTimeout(100); // await for the sidebar to update
   expect(await sidebarLeft.getByTestId("ErrorIcon").count()).toBe(0);
 });
