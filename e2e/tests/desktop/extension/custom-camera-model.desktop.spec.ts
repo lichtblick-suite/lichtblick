@@ -46,6 +46,7 @@ test("custom camera model", async ({ mainWindow }) => {
   await mainWindow.getByRole("option", { name: "/camera_calibration", exact: true }).click();
 
   // THEN
+  await mainWindow.waitForTimeout(10); // await for the sidebar to update
   expect(await sidebarLeft.getByTestId("ErrorIcon").count()).toBe(0);
 
   // WHEN
@@ -68,13 +69,9 @@ test("custom camera model", async ({ mainWindow }) => {
     mainWindow,
     filename: foxeFile,
   });
-  await sidebarLeft
-    .getByRole("button", { name: "/camera_calibration/custom", exact: true })
-    .nth(0)
-    .click();
-  await mainWindow.getByRole("option", { name: "/camera_calibration/custom", exact: true }).click();
   await mainWindow.getByTestId("play-button").click();
 
   // THEN
+  await mainWindow.waitForTimeout(10); // await for the sidebar to update
   expect(await sidebarLeft.getByTestId("ErrorIcon").count()).toBe(0);
 });
