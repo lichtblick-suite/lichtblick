@@ -1,0 +1,83 @@
+@startuml extension-loading-sequence
+!theme blueprint
+skinparam sequenceMessageAlign center
+
+title Extension Loading Workflow
+
+actor User
+participant "Extension\nManager UI" as UI
+participant "Extension\nManager" as Manager
+participant "Extension\nCatalog" as Catalog
+participant "Extension\nLoader" as Loader
+participant "Sandbox" as Sandbox
+participant "Extension\nCode" as Extension
+participant "Extension\nContext" as Context
+participant "Panel\nCatalog" as PanelCat
+
+User -> UI: Open extensions
+activate UI
+UI -> Manager: getInstalledExtensions()
+activate Manager
+
+Manager -> Catalog: getExtensions()
+activate Catalog
+Catalog --> Manager: ExtensionInfo[]
+deactivate Catalog
+
+Manager --> UI: extensions list
+UI --> User: Display extensions
+
+User -> UI: Enable extension
+UI -> Manager: enableExtension(extensionId)
+
+Manager -> Catalog: getExtension(extensionId)
+activate Catalog
+Catalog --> Manager: extensionInfo
+deactivate Catalog
+
+Manager -> Loader: loadExtension(extensionInfo)
+activate Loader
+
+Loader -> Loader: validateManifest()
+Loader -> Sandbox: createSandbox()
+activate Sandbox
+Sandbox --> Loader: sandbox environment
+
+Loader -> Sandbox: loadModule(extension.main)
+Sandbox -> Extension: import module
+activate Extension
+Extension --> Sandbox: module exports
+
+Loader -> Context: createContext(extensionId)
+activate Context
+Context --> Loader: context instance
+
+Loader -> Extension: activate(context)
+Extension -> Context: registerPanel({\n  name: "MyPanel",\n  component: MyPanelComponent\n})
+
+Context -> PanelCat: addPanel(panelInfo)
+activate PanelCat
+PanelCat --> Context: success
+deactivate PanelCat
+
+Extension -> Context: registerMessageConverter({\n  from: "old_schema",\n  to: "new_schema",\n  converter: fn\n})
+
+Extension -> Context: registerTopicAliasFunction({\n  name: "derivative",\n  fn: computeDerivative\n})
+
+Extension --> Loader: activation complete
+deactivate Extension
+deactivate Context
+
+Loader --> Manager: extension loaded
+deactivate Sandbox
+deactivate Loader
+
+Manager -> Manager: updateContributions()
+Manager --> UI: extension enabled
+deactivate Manager
+
+UI -> UI: refreshPanelList()
+UI --> User: Show new panels available
+deactivate UI
+
+@enduml
