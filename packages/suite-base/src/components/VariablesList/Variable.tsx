@@ -274,7 +274,11 @@ export default function Variable(props: {
           >
             {copied ? "Copied" : "Copy"}
           </CopyButton>
-          <JsonInput value={value} onChange={onChangeValue} />
+          <JsonInput
+            dataTestId="global-variable-value-input"
+            value={value}
+            onChange={onChangeValue}
+          />
         </div>
       )}
       <Divider />

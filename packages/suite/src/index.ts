@@ -10,7 +10,16 @@ import type { Immutable } from "./immutable";
 
 export type { Immutable } from "./immutable";
 // Expose all interfaces from about camera models
-export type * from "./cameraModels";
+export type {
+  FloatArray,
+  DistortionModel,
+  CameraInfo,
+  Vector2,
+  Vector3,
+  ICameraModel,
+  CameraModelBuilder,
+  RegisterCameraModelArgs,
+} from "./cameraModels";
 
 // Valid types for parameter data (such as rosparams)
 export type ParameterValue =

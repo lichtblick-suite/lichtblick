@@ -14,14 +14,14 @@
   "main": "./src/index",
   "devDependencies": {
     "@emotion/react": "11.14.0",
-    "@emotion/styled": "11.14.0",
+    "@emotion/styled": "11.14.1",
     "@fluentui/react-icons": "2.0.224",
     "@lichtblick/tsconfig": "1.0.0",
     "@mui/icons-material": "5.15.5",
     "@mui/lab": "5.0.0-alpha.176",
     "@mui/material": "5.13.5",
     "@mui/x-data-grid": "6.18.7",
-    "@storybook/react": "9.0.4",
+    "@storybook/react": "9.0.14",
     "@types/react": "18.3.12",
     "react": "18.3.1"
   }

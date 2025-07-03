@@ -19,7 +19,9 @@ class VelodyneDataSourceFactory implements IDataSourceFactory {
   public iconName: IDataSourceFactory["iconName"] = "GenericScan";
   public description =
     "Connect directly to Velodyne Lidar hardware to inspect incoming sensor data.";
-  public docsLinks = [{ url: "https://foxglove.dev/docs/studio/connection/velodyne" }];
+  public docsLinks = [
+    { url: "https://lichtblick-suite.github.io/docs/connecting-to-data/velodyne.html" },
+  ];
 
   public formConfig = {
     fields: [{ id: "port", label: "UDP Port", defaultValue: "2369" }],

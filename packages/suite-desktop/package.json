@@ -17,7 +17,7 @@
     "@lichtblick/tsconfig": "1.0.0",
     "@mcap/core": "2.1.6",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
-    "@storybook/react": "9.0.4",
+    "@storybook/react": "9.0.14",
     "@types/mock-fs": "4.13.4",
     "@types/plist": "^3.0.3",
     "@types/pngjs": "^6.0.2",
@@ -28,7 +28,7 @@
     "async-mutex": "0.4.0",
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
-    "electron": "36.3.2",
+    "electron": "37.1.0",
     "electron-builder": "26.0.12",
     "electron-devtools-installer": "4.0.0",
     "electron-squirrel-startup": "1.0.1",
@@ -52,6 +52,6 @@
     "tss-react": "4.9.2",
     "utif": "3.1.0",
     "webpack": "5.99.9",
-    "webpack-dev-server": "5.2.1"
+    "webpack-dev-server": "5.2.2"
   }
 }
