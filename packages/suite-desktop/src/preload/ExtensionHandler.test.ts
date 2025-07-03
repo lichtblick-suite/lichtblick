@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { describe, it, expect } from "@jest/globals";
 import { existsSync } from "fs";
 import { readdir, readFile, mkdir, rm, writeFile } from "fs/promises";
 import JSZip from "jszip";
-import { join as pathJoin } from "path";
+import { join } from "path";
 import randomString from "randomstring";
 
 import { ExtensionsHandler } from "./ExtensionHandler";
@@ -587,16 +586,13 @@ describe("ExtensionsHandler", () => {
         changelog: mockChangelogContent,
       });
 
-      const expectedDir = pathJoin(
+      const expectedDir = join(
         rootDir,
         `${mockPackageJson.publisher}.${mockPackageJson.name}-${mockPackageJson.version}`,
       );
       expect(rm).toHaveBeenCalledWith(expectedDir, { recursive: true, force: true });
       expect(mkdir).toHaveBeenCalledWith(expectedDir, { recursive: true });
-      expect(writeFile).toHaveBeenCalledWith(
-        pathJoin(expectedDir, "file.txt"),
-        expect.any(Uint8Array),
-      );
+      expect(writeFile).toHaveBeenCalledWith(join(expectedDir, "file.txt"), expect.any(Uint8Array));
     });
 
     it("should throw an error if package.json is missing", async () => {
@@ -688,7 +684,7 @@ describe("ExtensionsHandler", () => {
       await extensionsHandler.load(extensionId);
 
       // Then
-      const sourcePath = pathJoin(
+      const sourcePath = join(
         desktopExtension.directory,
         (desktopExtension.packageJson as ExtensionPackageJson).main,
       );
