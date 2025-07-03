@@ -127,8 +127,8 @@ export function main(): void {
     async updateNativeColorScheme() {
       await ipcRenderer.invoke("updateNativeColorScheme");
     },
-    updateLanguage() {
-      void ipcRenderer.invoke("updateLanguage");
+    async updateLanguage() {
+      await ipcRenderer.invoke("updateLanguage");
     },
     async getCLIFlags(): Promise<CLIFlags> {
       return await (ipcRenderer.invoke("getCLIFlags") as Promise<CLIFlags>);
