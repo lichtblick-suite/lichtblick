@@ -99,6 +99,21 @@ describe("ExtensionsHandler", () => {
       expect(call).toThrow('package.json is missing required "name" field');
     });
 
+    it("should throw when name is an empty string", () => {
+      // Given
+      const pkgJson = {
+        name: " ",
+        version: "1.0.0",
+        publisher: "lichtblick",
+      } as ExtensionPackageJson;
+
+      // When
+      const call = getPackageId(pkgJson);
+
+      // Then
+      expect(call).toThrow('package.json "name" field cannot be empty');
+    });
+
     it("should throw when package.json is missing version", () => {
       // Given
       const pkgJson = {
@@ -111,6 +126,21 @@ describe("ExtensionsHandler", () => {
 
       // Then
       expect(call).toThrow('package.json is missing required "version" field');
+    });
+
+    it("should throw when version is an empty string", () => {
+      // Given
+      const pkgJson = {
+        name: genericString(),
+        version: " ",
+        publisher: "lichtblick",
+      } as ExtensionPackageJson;
+
+      // When
+      const call = getPackageId(pkgJson);
+
+      // Then
+      expect(call).toThrow('package.json "version" field cannot be empty');
     });
 
     it("should throw when package.json is missing publisher and namespace", () => {

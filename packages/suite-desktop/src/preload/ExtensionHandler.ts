@@ -43,27 +43,38 @@ export class ExtensionsHandler {
       throw new Error(`Missing package.json`);
     }
 
-    if (typeof pkgJson.name !== "string") {
-      throw new Error(`package.json is missing required "name" field`);
-    }
-    if (typeof pkgJson.version !== "string") {
-      throw new Error(`package.json is missing required "version" field`);
+    const { name, version, publisher } = pkgJson;
+
+    if (typeof name !== "string") {
+      throw new Error('package.json is missing required "name" field');
     }
 
-    const pkgName = ExtensionsHandler.parsePackageName(pkgJson.name);
+    if (!name.trim()) {
+      throw new Error('package.json "name" field cannot be empty');
+    }
 
-    let publisher = pkgJson.publisher ?? pkgName.namespace;
-    if (publisher == undefined) {
+    if (typeof version !== "string") {
+      throw new Error('package.json is missing required "version" field');
+    }
+
+    if (!version.trim()) {
+      throw new Error('package.json "version" field cannot be empty');
+    }
+
+    const { name: parsedName, namespace } = ExtensionsHandler.parsePackageName(name);
+
+    let extensionPublisher = publisher ?? namespace;
+    if (extensionPublisher == undefined) {
       throw new Error(`package.json is missing required "publisher" field`);
     }
 
-    publisher = publisher.toLowerCase().replace(/\W+/g, "");
+    extensionPublisher = extensionPublisher.toLowerCase().replace(/\W+/g, "");
 
-    if (publisher.length === 0) {
+    if (extensionPublisher.length === 0) {
       throw new Error(`package.json contains an invalid "publisher" field`);
     }
 
-    return `${publisher}.${pkgName.name}`;
+    return `${extensionPublisher}.${parsedName}`;
   }
 
   /**
