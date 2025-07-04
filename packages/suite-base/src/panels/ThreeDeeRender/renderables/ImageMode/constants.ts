@@ -71,7 +71,7 @@ export const MIN_CONTRAST = 0;
 export const MAX_CONTRAST = 100;
 export const INITIAL_CONTRAST = (MAX_CONTRAST + MIN_CONTRAST) / 2;
 
-// Contrast should be in the range of -1 and 1.
+// Brightness should be in the range of -1 and 1.
 // It was trimmed by 0.4 to improve visualization.
 export const LOWER_BRIGHTNESS_LIMIT = -0.6;
 export const UPPER_BRIGHTNESS_LIMIT = 0.6;
