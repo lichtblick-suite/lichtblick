@@ -27,6 +27,7 @@ import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExten
 import { Path } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
 import {
   COMPRESSED_VIDEO_DATATYPES,
+  COMPRESSED_IMAGE_DATATYPES,
   RAW_IMAGE_DATATYPES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/foxglove";
 import {
@@ -93,7 +94,6 @@ import {
   IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
   CameraInfo,
-  COMPRESSED_IMAGE_DATATYPES,
 } from "../../ros";
 import { topicIsConvertibleToSchema } from "../../topicIsConvertibleToSchema";
 import { ICameraHandler } from "../ICameraHandler";
