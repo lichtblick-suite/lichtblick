@@ -1,0 +1,77 @@
+@startuml data-loading-sequence
+!theme blueprint
+skinparam sequenceMessageAlign center
+
+title Data Loading Workflow
+
+actor User
+participant "UI\n(File Input)" as UI
+participant "Data Source\nManager" as DSM
+participant "Data Source\nFactory" as Factory
+participant "Player" as Player
+participant "Worker\nThread" as Worker
+participant "Message\nPipeline" as Pipeline
+participant "Panels" as Panels
+
+User -> UI: Drag & drop file
+activate UI
+UI -> DSM: handleFile(file)
+activate DSM
+
+DSM -> DSM: detectFileType(file)
+DSM -> Factory: getFactoryForFile(fileType)
+activate Factory
+Factory --> DSM: McapLocalDataSourceFactory
+
+DSM -> Factory: initialize({\n  file,\n  reportMetadata\n})
+Factory -> Player: new IterablePlayer(options)
+activate Player
+
+Player -> Worker: new Worker("iterator.worker.js")
+activate Worker
+Worker --> Player: worker instance
+
+Player -> Worker: initialize(file)
+Worker -> Worker: parseFile()
+Worker -> Worker: buildIndex()
+Worker --> Player: metadata {\n  topics,\n  startTime,\n  endTime\n}
+
+Player -> Player: setState(INITIALIZED)
+Player -> Pipeline: setTopics(topics)
+activate Pipeline
+
+Factory --> DSM: player instance
+deactivate Factory
+DSM --> UI: player
+deactivate DSM
+
+UI -> Player: setListener(handleState)
+Player --> UI: initialState
+
+UI -> Panels: updateAvailableTopics(topics)
+activate Panels
+Panels --> UI: render topic list
+deactivate Panels
+
+User -> UI: Click play
+UI -> Player: play()
+
+Player -> Worker: iterate(startTime, endTime)
+Worker -> Worker: readMessages()
+
+loop For each message batch
+    Worker --> Player: messages[]
+    Player -> Pipeline: processMessages(messages)
+    Pipeline -> Pipeline: applySubscriptions()
+    Pipeline -> Pipeline: convertMessages()
+    Pipeline --> Player: filteredMessages
+    Player --> UI: playerState {\n  activeData: {\n    messages\n  }\n}
+    UI -> Panels: render(messages)
+end
+
+deactivate Worker
+deactivate Pipeline
+deactivate Player
+deactivate UI
+
+@enduml
