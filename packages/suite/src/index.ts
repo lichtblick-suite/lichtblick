@@ -695,7 +695,7 @@ export type SettingsTreeFieldVec2 = {
   min?: number;
 };
 
-export type SettingsTreeFieldLegendControll = {
+export type SettingsTreeFieldLegendControl = {
   input: "legendcontrols";
   value?: undefined;
 };
@@ -715,7 +715,7 @@ export type SettingsTreeFieldValue =
   | SettingsTreeFieldToggleNumber
   | SettingsTreeFieldVec3
   | SettingsTreeFieldVec2
-  | SettingsTreeFieldLegendControll;
+  | SettingsTreeFieldLegendControl;
 
 export type SettingsTreeField = SettingsTreeFieldValue & {
   /**
