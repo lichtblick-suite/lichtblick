@@ -41,8 +41,8 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
   const { legendCount } = useLegendCount();
 
-  const [config, setConfig] = useState(() => ({
-    ...(DEFAULT_CONFIG as PieChartConfig),
+  const [config, setConfig] = useState<PieChartConfig>(() => ({
+    ...DEFAULT_CONFIG,
     ...(context.initialState as Partial<PieChartConfig>),
   }));
 
@@ -140,7 +140,7 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
   return (
     <div style={{ fontFamily: "Arial, sans-serif", color: "#333" }}>
       <h1 style={{ textAlign: "center", fontSize: "24px", marginBottom: "20px" }}>
-        {(config as PieChartConfig)[`title`]}{" "}
+        {config.title}{" "}
       </h1>
       {rawValue.length === 0 ? (
         <div>No data available</div>
