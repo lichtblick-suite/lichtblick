@@ -19,6 +19,7 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/inputs/useLegendCount";
 
+import { useStyles, tooltipStyle } from "./PieChart.style";
 import { DEFAULT_CONFIG } from "./constants";
 import type { PieChartConfig, PieChartState } from "./types";
 import { useChartData } from "./useChartData";
@@ -38,6 +39,7 @@ export function formatTooltip(value: number, name: string): [string, string] {
 export function PieChart({ context }: PieChartProps): React.JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
+  const { classes } = useStyles();
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
   const { legendCount } = useLegendCount();
 
@@ -138,10 +140,8 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
   }, [renderDone]);
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", color: "#333" }}>
-      <h1 style={{ textAlign: "center", fontSize: "24px", marginBottom: "20px" }}>
-        {config.title}{" "}
-      </h1>
+    <div className={classes.root}>
+      <h1 className={classes.title}>{config.title} </h1>
       {rawValue.length === 0 ? (
         <div>No data available</div>
       ) : (
@@ -168,18 +168,7 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
                 <Cell key={entry.name} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.8)",
-                borderRadius: "10px",
-                border: "none",
-                color: "#fff",
-                fontSize: "14px",
-                padding: "10px",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
-              }}
-              formatter={formatTooltip}
-            />
+            <Tooltip contentStyle={tooltipStyle} formatter={formatTooltip} />
             <Legend />
           </RechartsPieChart>
         </ResponsiveContainer>
