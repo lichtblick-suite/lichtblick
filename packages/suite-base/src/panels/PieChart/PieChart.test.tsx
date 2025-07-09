@@ -51,17 +51,13 @@ describe("PieChart", () => {
   it("renders the PieChart component with default configuration", () => {
     render(<PieChart context={mockContext as PanelExtensionContext} />);
 
-    // Verify that the title is displayed correctly
     expect(screen.getByText("Pie Chart")).toBeInTheDocument();
-
-    // Verify that the "No data available" message is displayed when there is no data
     expect(screen.getByText("No data available")).toBeInTheDocument();
   });
 
   it("updates the settings editor on render", () => {
     render(<PieChart context={mockContext as PanelExtensionContext} />);
 
-    // Verify that the settings editor is updated correctly
     expect(mockContext.updatePanelSettingsEditor).toHaveBeenCalledWith({
       actionHandler: expect.any(Function),
       nodes: expect.any(Object),
@@ -69,7 +65,6 @@ describe("PieChart", () => {
   });
 
   it("formats tooltip correctly", () => {
-    // Verify that the tooltip is formatted correctly
     expect(formatTooltip(10, "Value")).toEqual(["10.00%", "Value"]);
     // @ts-expect-error intentionally passing string for test purposes
     expect(formatTooltip("N/A", "Value")).toEqual(["N/A%", "Value"]);
