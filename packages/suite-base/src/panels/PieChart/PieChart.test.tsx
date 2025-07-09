@@ -11,13 +11,13 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { PanelExtensionContext } from "@lichtblick/suite";
-import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
+import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/inputs/useLegendCount";
 
 import { PieChart, formatTooltip } from "./PieChart";
 import { useSettingsTree } from "./useSettingsTree";
 
 // Jest mock for hooks and context
-jest.mock("@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount", () => ({
+jest.mock("@lichtblick/suite-base/components/SettingsTreeEditor/inputs/useLegendCount", () => ({
   useLegendCount: jest.fn(),
 }));
 jest.mock("./useSettingsTree", () => ({

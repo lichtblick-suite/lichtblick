@@ -17,7 +17,7 @@ import {
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
-import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/useLegendCount";
+import { useLegendCount } from "@lichtblick/suite-base/components/SettingsTreeEditor/inputs/useLegendCount";
 
 import { DEFAULT_CONFIG } from "./constants";
 import type { PieChartConfig, PieChartState } from "./types";
