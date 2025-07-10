@@ -1,0 +1,68 @@
+@startuml Architecture Overview
+!theme plain
+
+skinparam componentStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+
+package "Lichtblick" {
+  [Desktop App] as desktop
+  [Web App] as web
+
+  package "Core Components" {
+    [suite-base] as base
+    [Layouts Manager] as layout_mgr
+    [Extensions System] as ext_sys
+  }
+
+  package "Data Sources" {
+    [ROS1] as ros1
+    [ROS2] as ros2
+    [MCAP] as mcap
+    [Rosbridge] as rosbridge
+    [Foxglove WebSocket] as foxglove
+    [Ulog] as ulog
+  }
+
+  package "Visualization Panels" {
+    [3D Viewer] as three_d
+    [Image Viewer] as image
+    [Plot] as plot
+    [RawMessages] as raw
+    [Map] as map
+    [Gauge] as gauge
+    [Log] as log
+    [Table] as table
+    [Diagnostics] as diag
+    [Parameters] as params
+    [Topic Graph] as graph
+    [State Transitions] as state
+    [Publish] as publish
+  }
+
+  desktop --> base
+  web --> base
+  
+  base --> ros1
+  base --> ros2
+  base --> mcap
+  base --> rosbridge
+  base --> foxglove
+  base --> ulog
+  
+  base --> three_d
+  base --> image
+  base --> plot
+  base --> raw
+  base --> map
+  base --> gauge
+  base --> log
+  base --> table
+  base --> diag
+  base --> params
+  base --> graph
+  base --> state
+  base --> publish
+}
+
+@enduml
