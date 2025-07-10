@@ -202,6 +202,14 @@ function TeleopPanel(props: TeleopPanelProps): React.JSX.Element {
       return;
     }
 
+    // Re-advertise the topic to ensure it's available before publishing
+    context.advertise?.(currentTopic, "geometry_msgs/Twist", {
+      datatypes: new Map([
+        ["geometry_msgs/Vector3", ros1["geometry_msgs/Vector3"]],
+        ["geometry_msgs/Twist", ros1["geometry_msgs/Twist"]],
+      ]),
+    });
+
     const message = {
       linear: {
         x: 0,
