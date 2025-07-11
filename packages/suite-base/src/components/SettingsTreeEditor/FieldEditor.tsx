@@ -13,6 +13,7 @@ import {
   MenuList,
   MenuListProps,
   Select,
+  Slider,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -339,6 +340,24 @@ function FieldInput({
       );
     case "legendcontrols":
       return <LegendControls />;
+    case "slider":
+      return (
+        <Slider
+          className={classes.slider}
+          value={field.value}
+          min={field.min}
+          max={field.max}
+          step={field.step}
+          size="small"
+          valueLabelDisplay="auto"
+          onChange={(_, value) => {
+            actionHandler({
+              action: "update",
+              payload: { path, input: "slider", value: value as number },
+            });
+          }}
+        />
+      );
   }
 }
 

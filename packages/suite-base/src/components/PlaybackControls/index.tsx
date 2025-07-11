@@ -286,6 +286,7 @@ export default function PlaybackControls({
               onClick={togglePlayPause}
               icon={isPlaying ? <Pause20Regular /> : <Play20Regular />}
               activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
+              data-testid="play-button"
             />
             <HoverableIconButton
               disabled={disableControls}

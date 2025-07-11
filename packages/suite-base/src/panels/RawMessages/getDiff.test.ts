@@ -263,4 +263,19 @@ describe("getDiff", () => {
       },
     ]);
   });
+
+  it("returns {} fallback when before[key] has not key and showFullMessageForDiff is true", () => {
+    const before = {};
+    const after = { someKey: undefined };
+
+    const result = getDiff({
+      before,
+      after,
+      showFullMessageForDiff: true,
+    });
+
+    expect(result).toEqual({
+      someKey: {},
+    });
+  });
 });

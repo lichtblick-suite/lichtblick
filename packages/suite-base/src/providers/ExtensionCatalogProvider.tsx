@@ -101,16 +101,12 @@ function createExtensionRegistryStore(
       set((state) => ({
         installedExtensions: _.uniqBy([...(state.installedExtensions ?? []), info], "id"),
         installedPanels: { ...state.installedPanels, ...panels },
-        installedMessageConverters: _.uniqBy(
-          [...state.installedMessageConverters!, ...messageConverters],
-          "extensionId",
-        ),
-        installedTopicAliasFunctions: _.uniqBy(
-          [...state.installedTopicAliasFunctions!, ...topicAliasFunctions],
-          "extensionId",
-        ),
+        installedMessageConverters: [...state.installedMessageConverters!, ...messageConverters],
+        installedTopicAliasFunctions: [
+          ...state.installedTopicAliasFunctions!,
+          ...topicAliasFunctions,
+        ],
         panelSettings: { ...state.panelSettings, ...panelSettings },
-
         installedCameraModels: new Map([
           ...state.installedCameraModels,
           ...Array.from(cameraModels.entries()),

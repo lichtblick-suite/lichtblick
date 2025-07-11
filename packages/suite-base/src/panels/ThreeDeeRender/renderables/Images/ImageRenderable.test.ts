@@ -86,7 +86,7 @@ describe("ImageRenderable", () => {
   it("should dispose resources", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     renderable.userData.texture = new THREE.Texture();
-    renderable.userData.material = new THREE.MeshBasicMaterial();
+    renderable.userData.material = new THREE.ShaderMaterial();
     renderable.userData.geometry = new THREE.PlaneGeometry();
 
     // @ts-expect-error isDisposed is protected, but ok to use on tests
@@ -96,6 +96,30 @@ describe("ImageRenderable", () => {
 
     // @ts-expect-error isDisposed is protected, but ok to use on tests
     expect(renderable.isDisposed()).toBe(true);
+  });
+
+  it("should set a new brightness value", () => {
+    const newBrightnessValue = BasicBuilder.number();
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+
+    renderable.userData.texture = new THREE.Texture();
+    renderable.userData.material = new THREE.ShaderMaterial();
+    renderable.setSettings({ ...renderable.userData.settings, brightness: newBrightnessValue });
+    renderable.userData.geometry = new THREE.PlaneGeometry();
+
+    expect(renderable.userData.settings.brightness).toBe(newBrightnessValue);
+  });
+
+  it("should set a new contrast value", () => {
+    const newContrastValue = BasicBuilder.number();
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+
+    renderable.userData.texture = new THREE.Texture();
+    renderable.userData.material = new THREE.ShaderMaterial();
+    renderable.setSettings({ ...renderable.userData.settings, contrast: newContrastValue });
+    renderable.userData.geometry = new THREE.PlaneGeometry();
+
+    expect(renderable.userData.settings.contrast).toBe(newContrastValue);
   });
 
   it("should set camera model", () => {

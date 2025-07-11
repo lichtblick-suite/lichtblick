@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
@@ -20,7 +21,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
   public type: IDataSourceFactory["type"] = "file";
   public displayName = "ROS 2 Bag";
   public iconName: IDataSourceFactory["iconName"] = "OpenFile";
-  public supportedFileTypes = [".db3"];
+  public supportedFileTypes = [AllowedFileExtensions.DB3];
   public supportsMultiFile = true;
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {

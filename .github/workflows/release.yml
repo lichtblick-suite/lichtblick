@@ -37,6 +37,7 @@ jobs:
       - name: Build prod files
         run: |
           yarn run desktop:build:prod
+          yarn run web:build:prod
 
       - name: Build windows version
         run: yarn run package:win
@@ -46,6 +47,9 @@ jobs:
 
       - name: Build macOS version
         run: yarn run package:darwin
+
+      - name: Create web static files tarball
+        run: tar -czf dist/lichtblick-web.tar.gz -C web/.webpack .
 
       # Important to use [skip actions] to avoid triggering other verisoning workflows
       # https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/skipping-workflow-runs
@@ -73,6 +77,7 @@ jobs:
             dist/lichtblick-${{ env.new_version }}-linux-arm64.tar.gz
             dist/lichtblick-${{ env.new_version }}-mac-universal.dmg
             dist/lichtblick-${{ env.new_version }}-win.exe
+            dist/lichtblick-web.tar.gz
             dist/latest-linux.yml
             dist/latest-mac.yml
             dist/latest.yml

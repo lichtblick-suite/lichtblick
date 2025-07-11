@@ -11,6 +11,7 @@ export const openDialog = {
   convenientWebInterface:
     "Use a convenient web interface to tag, search, and retrieve data at lightning speed",
   createAFreeAccount: "Create a free account",
+  dontShowThisAgain: "Don't show this again on startup",
   exploreSampleData: "Explore sample data",
   viewDocumentation: "View documentation",
   learnMore: "Learn more",

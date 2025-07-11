@@ -5,11 +5,12 @@
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
+import "@testing-library/jest-dom";
 
 import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/BaseUserContext";
-import "@testing-library/jest-dom";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
 import SidebarItems from "./SidebarItems";
 
@@ -29,6 +30,10 @@ jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () =
   useStyles: () => ({ classes: { button: "mock-button-class" } }),
 }));
 
+jest.mock("@lichtblick/suite-base/hooks", () => ({
+  useAppConfigurationValue: jest.fn(),
+}));
+
 describe("SidebarItems", () => {
   const mockOnSelectView = jest.fn();
   const mockLogEvent = jest.fn();
@@ -39,6 +44,7 @@ describe("SidebarItems", () => {
   beforeEach(() => {
     (useTranslation as jest.Mock).mockReturnValue(mockTranslation);
     (useAnalytics as jest.Mock).mockReturnValue({ logEvent: mockLogEvent });
+    (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
     jest.clearAllMocks();
   });
 
@@ -51,6 +57,7 @@ describe("SidebarItems", () => {
     expect(screen.getByText("newToLichtblickDescription")).toBeInTheDocument();
     expect(screen.getByText("exploreSampleData")).toBeInTheDocument();
     expect(screen.getByText("viewDocumentation")).toBeInTheDocument();
+    expect(screen.getByText("dontShowThisAgain")).toBeInTheDocument();
   });
 
   it("renders items for authenticated-free users", () => {
@@ -62,6 +69,7 @@ describe("SidebarItems", () => {
     expect(screen.getByText("startCollaboratingDescription")).toBeInTheDocument();
     expect(screen.getByText("uploadToDataPlatform")).toBeInTheDocument();
     expect(screen.getByText("shareLayouts")).toBeInTheDocument();
+    expect(screen.getByText("dontShowThisAgain")).toBeInTheDocument();
   });
 
   it("renders items for authenticated-team users", () => {
@@ -73,6 +81,7 @@ describe("SidebarItems", () => {
     expect(screen.getByText("needHelp")).toBeInTheDocument();
     expect(screen.getByText("needHelpDescription")).toBeInTheDocument();
     expect(screen.getByText("seeTutorials")).toBeInTheDocument();
+    expect(screen.getByText("dontShowThisAgain")).toBeInTheDocument();
   });
 
   it("handles button clicks correctly", () => {

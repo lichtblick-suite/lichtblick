@@ -7,9 +7,8 @@
 
 import { info, warning, error } from "@actions/core";
 import depcheck, { Detector } from "depcheck";
-import glob from "glob";
+import { glob } from "glob";
 import path from "path";
-import { promisify } from "util";
 
 /**
  * Detect comments of the form
@@ -121,7 +120,7 @@ async function getAllWorkspacePackages(roots: string[]) {
         ? workspaceInfo.workspaces.packages
         : [];
     for (const pattern of patterns) {
-      for (const packagePath of await promisify(glob)(pattern)) {
+      for (const packagePath of await glob(pattern)) {
         workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
       }
     }

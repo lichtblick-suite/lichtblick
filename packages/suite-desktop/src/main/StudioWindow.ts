@@ -70,6 +70,7 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
     Math.floor((APP_BAR_HEIGHT - /*button size*/ 12) / 2) - /*for good measure*/ 1;
 
   const windowOptions: BrowserWindowConstructorOptions = {
+    show: !process.env.CI,
     backgroundColor: getWindowBackgroundColor(),
     height: 800,
     width: 1200,

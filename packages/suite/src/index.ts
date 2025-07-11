@@ -10,7 +10,16 @@ import type { Immutable } from "./immutable";
 
 export type { Immutable } from "./immutable";
 // Expose all interfaces from about camera models
-export type * from "./cameraModels";
+export type {
+  FloatArray,
+  DistortionModel,
+  CameraInfo,
+  Vector2,
+  Vector3,
+  ICameraModel,
+  CameraModelBuilder,
+  RegisterCameraModelArgs,
+} from "./cameraModels";
 
 // Valid types for parameter data (such as rosparams)
 export type ParameterValue =
@@ -673,6 +682,14 @@ export type SettingsTreeFieldToggleNumber = {
   options: number[] | Array<{ label: string; value: undefined | number }>;
 };
 
+export type SettingsTreeFieldSlider = {
+  input: "slider";
+  value?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+};
+
 export type SettingsTreeFieldVec3 = {
   input: "vec3";
   value?: [undefined | number, undefined | number, undefined | number];
@@ -713,6 +730,7 @@ export type SettingsTreeFieldValue =
   | SettingsTreeFieldString
   | SettingsTreeFieldToggleString
   | SettingsTreeFieldToggleNumber
+  | SettingsTreeFieldSlider
   | SettingsTreeFieldVec3
   | SettingsTreeFieldVec2
   | SettingsTreeFieldLegendControl;

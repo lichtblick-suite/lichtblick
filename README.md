@@ -32,6 +32,18 @@ We are actively updating our documentation with new features, stay tunned! :rock
 
 ## :rocket: Getting started
 
+### :whale: From Docker
+
+To run lichtblick via docker you can run:
+
+```sh
+docker run --rm -p 8080:8080 ghcr.io/lichtblick-suite/lichtblick:latest
+```
+
+And open in your browser: http://localhost:8080/
+
+### 📑 From source code
+
 Clone the repository:
 
 ```sh

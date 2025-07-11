@@ -35,5 +35,8 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "lichtblick-suite",
     "projectKey": "Lichtblick-Suite_lichtblick"
+  },
+  "[ignore]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
   }
 }

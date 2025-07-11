@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4.0.3
         with:
-          node-version: 16.17
+          node-version: 20
 
       - name: Enable corepack
         run: corepack enable yarn

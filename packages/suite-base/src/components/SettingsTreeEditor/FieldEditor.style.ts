@@ -72,4 +72,17 @@ export const useStyles = makeStyles<void, "error">()((theme, _params, classes) =
       },
     },
   },
+  slider: {
+    color: theme.palette.secondary.main,
+    top: "2px",
+    height: 3,
+    width: "calc(100% - 30px)",
+    left: "10px",
+
+    "& .MuiSlider-thumb": {
+      "&:focus, &:hover, &.Mui-active, &.Mui-focusVisible": {
+        boxShadow: "none",
+      },
+    },
+  },
 }));
