@@ -102,6 +102,7 @@
     "@types/license-checker": "^25.0.6",
     "@types/node": "22.9.3",
     "@types/react-refresh": "^0",
+    "@types/react-window": "^1",
     "@types/semver": "^7.7.0",
     "@typescript-eslint/eslint-plugin": "8.27.0",
     "@typescript-eslint/parser": "8.27.0",
@@ -155,6 +156,8 @@
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
     "react-use": "17.5.1",
+    "react-vtree": "2.0.4",
+    "react-window": "1.8.11",
     "rehype-raw": "7.0.0",
     "vm-browserify": "1.1.2"
   }

@@ -18,7 +18,6 @@ import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material"
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactHoverObserver from "react-hover-observer";
-import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@lichtblick/message-path";
@@ -36,6 +35,7 @@ import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { Toolbar } from "@lichtblick/suite-base/panels/RawMessages/Toolbar";
+import VirtualizedJsonTree from "@lichtblick/suite-base/panels/RawMessages/VirtualizedJsonTree";
 import getDiff, {
   DiffObject,
   diffLabels,
@@ -478,189 +478,37 @@ function RawMessages(props: Props) {
                 label="Show full msg"
               />
             )}
-            <Tree
-              labelRenderer={(raw) => (
-                <>
-                  <DiffSpan>{_.first(raw)}</DiffSpan>
-                  {/* https://stackoverflow.com/questions/62319014/make-text-selection-treat-adjacent-elements-as-separate-words */}
-                  <span style={{ fontSize: 0 }}>&nbsp;</span>
-                </>
-              )}
-              shouldExpandNode={shouldExpandNode}
-              onExpand={(_data, _level, keyPath) => {
-                onLabelClick(keyPath);
-              }}
-              onCollapse={(_data, _level, keyPath) => {
-                onLabelClick(keyPath);
-              }}
-              hideRoot
-              invertTheme={false}
-              getItemString={getItemString}
-              valueRenderer={(valueAsString: string, value, ...keyPath) => {
-                if (diffEnabled) {
-                  return renderDiffLabel(valueAsString, value);
-                }
-                if (hideWrappingArray) {
-                  // When the wrapping array is hidden, put it back here.
-                  return valueRenderer(
-                    rootStructureItem,
-                    [data],
-                    baseItem.queriedData,
-                    valueAsString,
-                    value,
-                    ...keyPath,
-                    0,
-                  );
-                }
 
-                return valueRenderer(
-                  rootStructureItem,
-                  data as unknown[],
-                  baseItem.queriedData,
-                  valueAsString,
-                  value,
-                  ...keyPath,
-                );
-              }}
-              postprocessValue={(rawVal: unknown) => {
-                if (rawVal == undefined) {
-                  return rawVal;
+            <VirtualizedJsonTree
+              data={(diffEnabled ? diff : data) ?? {}}
+              fontSize={fontSize}
+              renderValue={(label, value) => {
+                if (diffEnabled) {
+                  return renderDiffLabel(label, value);
                 }
-                const idValue = (rawVal as Record<string, unknown>)[diffLabels.ID.labelText];
-                const addedValue = (rawVal as Record<string, unknown>)[diffLabels.ADDED.labelText];
-                const changedValue = (rawVal as Record<string, unknown>)[
-                  diffLabels.CHANGED.labelText
-                ];
-                const deletedValue = (rawVal as Record<string, unknown>)[
-                  diffLabels.DELETED.labelText
-                ];
-                if (
-                  (addedValue != undefined ? 1 : 0) +
-                    (changedValue != undefined ? 1 : 0) +
-                    (deletedValue != undefined ? 1 : 0) ===
-                    1 &&
-                  idValue == undefined
-                ) {
-                  return addedValue ?? changedValue ?? deletedValue;
-                }
-                return rawVal;
+                return valueRenderer(rootStructureItem, [data], baseItem.queriedData, label, value);
               }}
-              theme={{
-                ...jsonTreeTheme,
-                tree: { margin: 0 },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                nestedNode: ({ style }, keyPath: any) => {
-                  const baseStyle = {
-                    ...style,
-                    fontSize,
-                    paddingTop: 2,
-                    paddingBottom: 2,
-                    marginTop: 2,
-                    textDecoration: "inherit",
-                  };
-                  if (!diffEnabled) {
-                    return { style: baseStyle };
-                  }
-                  let backgroundColor;
-                  let textDecoration;
-                  if (diffLabelsByLabelText[keyPath[0]]) {
-                    backgroundColor =
-                      themePreference === "dark"
-                        ? // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[keyPath[0]].invertedBackgroundColor
-                        : // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[keyPath[0]].backgroundColor;
-                    textDecoration =
-                      keyPath[0] === diffLabels.DELETED.labelText ? "line-through" : "none";
-                  }
-                  const nestedObj = _.get(diff, keyPath.slice().reverse(), {});
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    backgroundColor =
-                      themePreference === "dark"
-                        ? // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
-                        : // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].backgroundColor;
-                    textDecoration =
-                      nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
-                  }
-                  return {
-                    style: {
-                      ...baseStyle,
-                      backgroundColor,
-                      textDecoration: textDecoration ?? "inherit",
-                    },
-                  };
-                },
-                nestedNodeLabel: ({ style }) => ({
-                  style: { ...style, textDecoration: "inherit" },
-                }),
-                nestedNodeChildren: ({ style }) => ({
-                  style: { ...style, textDecoration: "inherit" },
-                }),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                value: ({ style }, _nodeType, keyPath: any) => {
-                  const baseStyle = {
-                    ...style,
-                    fontSize,
-                    textDecoration: "inherit",
-                  };
-                  if (!diffEnabled) {
-                    return { style: baseStyle };
-                  }
-                  let backgroundColor;
-                  let textDecoration;
-                  const nestedObj = _.get(diff, keyPath.slice().reverse(), {});
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    backgroundColor =
-                      themePreference === "dark"
-                        ? // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
-                        : // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].backgroundColor;
-                    textDecoration =
-                      nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
-                  }
-                  return {
-                    style: {
-                      ...baseStyle,
-                      backgroundColor,
-                      textDecoration: textDecoration ?? "inherit",
-                    },
-                  };
-                },
-                label: { textDecoration: "inherit" },
-              }}
-              data={diffEnabled ? diff : data}
-            />
+            ></VirtualizedJsonTree>
           </>
         )}
       </Stack>
     );
   }, [
-    baseItem,
-    classes.topic,
-    fontSize,
-    diffEnabled,
-    diffItem,
-    diffMethod,
-    diffTopicPath,
-    expansion,
-    getItemString,
-    jsonTreeTheme,
-    onLabelClick,
-    renderDiffLabel,
-    rootStructureItem,
-    saveConfig,
-    showFullMessageForDiff,
-    themePreference,
-    topic,
     topicPath,
+    diffEnabled,
+    diffMethod,
+    baseItem,
+    diffItem,
+    showFullMessageForDiff,
+    classes.topic,
+    topic,
+    fontSize,
+    expansion,
+    diffTopicPath,
+    saveConfig,
     valueRenderer,
+    rootStructureItem,
+    renderDiffLabel,
   ]);
 
   const actionHandler = useCallback(
