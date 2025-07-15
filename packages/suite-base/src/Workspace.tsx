@@ -82,6 +82,7 @@ import { useDefaultWebLaunchPreference } from "@lichtblick/suite-base/hooks/useD
 import useElectronFilesToOpen from "@lichtblick/suite-base/hooks/useElectronFilesToOpen";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import useSeekTimeFromCLI from "@lichtblick/suite-base/hooks/useSeekTimeFromCLI";
+import { useStructureItemsStoreManager } from "@lichtblick/suite-base/panels/Plot/hooks/useStructureItemsStoreManager";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
@@ -189,6 +190,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const currentUserType = useCurrentUserType();
 
   useDefaultWebLaunchPreference();
+
+  useStructureItemsStoreManager();
 
   const [enableDebugMode = false] = useAppConfigurationValue<boolean>(AppSetting.SHOW_DEBUG_PANELS);
 
