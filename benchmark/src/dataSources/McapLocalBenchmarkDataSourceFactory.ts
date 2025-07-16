@@ -9,6 +9,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
+import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
 import { McapIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/Mcap/McapIterableSource";
 import { Player } from "@lichtblick/suite-base/players/types";
 
@@ -28,7 +29,8 @@ class McapLocalBenchmarkDataSourceFactory implements IDataSourceFactory {
     }
 
     const mcapProvider = new McapIterableSource({ type: "file", file });
-    return new BenchmarkPlayer(file.name, mcapProvider);
+    const source = new DeserializingIterableSource(mcapProvider);
+    return new BenchmarkPlayer(file.name, source);
   }
 }
 

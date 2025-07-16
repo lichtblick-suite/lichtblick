@@ -11,7 +11,7 @@ import { toRFC3339String } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { BlockLoader } from "@lichtblick/suite-base/players/IterablePlayer/BlockLoader";
-import { IIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import { IDeserializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
@@ -29,18 +29,18 @@ const log = Log.getLogger(__filename);
 
 const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
 const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9;
-const MAX_BLOCKS = 400;
+const MAX_BLOCKS = 100;
 const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
 class BenchmarkPlayer implements Player {
-  #source: IIterableSource;
+  #source: IDeserializedIterableSource;
   #name: string;
   #listener?: (state: PlayerState) => Promise<void>;
   #subscriptions: SubscribePayload[] = [];
   #blockLoader?: BlockLoader;
   #alertManager = new PlayerAlertManager();
 
-  public constructor(name: string, source: IIterableSource) {
+  public constructor(name: string, source: IDeserializedIterableSource) {
     this.#name = name;
     this.#source = source;
   }
