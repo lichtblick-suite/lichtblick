@@ -34,7 +34,7 @@ describe("structureAllItemsByPath", () => {
     mockTopics = BasicBuilder.multiple(TopicBuilder.topic, BasicBuilder.number());
   });
 
-  it("test", () => {
+  it("should skip topics that have no schemaName and not include them in the resulting Map", () => {
     const schemaNamelessTopic = TopicBuilder.topic();
     schemaNamelessTopic.schemaName = undefined;
 
@@ -46,6 +46,36 @@ describe("structureAllItemsByPath", () => {
       messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
       topics: mockTopics1,
     });
+
+    expect(result.size).toBe(0);
+  });
+
+  it("should skip topics with unknown or missing structure in messagePathStructuresForDataype", () => {
+    const result = structureAllItemsByPath({
+      noMultiSlices: mockNoMultiSlices,
+      validTypes: mockValidTypes,
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: mockTopics,
+    });
+
+    expect(result.size).toBe(0);
+  });
+
+  it("should skip topics with unknown or missing s in messagePathStructuresForDataype", () => {
+    mockTopics.forEach((topic) => {
+      if (topic.schemaName) {
+        mockMessagePathStructuresForDataype[topic.schemaName] = mockMessagePathStructureItemMessage;
+      }
+    });
+
+    const result = structureAllItemsByPath({
+      noMultiSlices: mockNoMultiSlices,
+      validTypes: mockValidTypes,
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: mockTopics,
+    });
+
+    console.log(mockMessagePathStructuresForDataype)
 
     expect(result.size).toBe(0);
   });

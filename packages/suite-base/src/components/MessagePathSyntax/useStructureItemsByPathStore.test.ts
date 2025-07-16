@@ -4,6 +4,7 @@
 import { act } from "@testing-library/react";
 
 import { MessagePathStructureItem } from "@lichtblick/message-path/src/types";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { useStructureItemsByPathStore } from "./useStructureItemsByPathStore";
 
@@ -15,7 +16,7 @@ describe("useStructureItemsByPathStore", () => {
       datatype: "string",
     };
     const structureItemsPathMap = new Map<string, MessagePathStructureItem>();
-    structureItemsPathMap.set("1", mockMessagePathStructureItem);
+    structureItemsPathMap.set(BasicBuilder.string(), mockMessagePathStructureItem);
 
     act(() => {
       useStructureItemsByPathStore.getState().setAllStructureItemsByPath(structureItemsPathMap);
