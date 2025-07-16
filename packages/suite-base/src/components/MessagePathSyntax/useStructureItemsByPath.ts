@@ -15,6 +15,18 @@ type UseStructuredItemsByPathProps = {
   validTypes?: readonly string[];
 };
 
+/**
+ * Returns a map of all message path structure items, optionally filtered by `validTypes` and `noMultiSlices`.
+ *
+ * If both `validTypes` and `noMultiSlices` are `undefined`, this hook returns a precomputed cached map
+ * from the global store (`useStructureItemsByPathStore`), which is populated by `useStructureItemsStoreManager`.
+ * This avoids recomputing structure definitions unnecessarily, improving performance for common use cases.
+ *
+ * When either `validTypes` or `noMultiSlices` is provided, a custom computation is triggered based on the
+ * current data source and filtering options. This allows components like `MessagePathInput` to dynamically
+ * adjust their view while still benefiting from shared logic and optimization.
+ */
+
 export function useStructuredItemsByPath({
   noMultiSlices,
   validTypes,
