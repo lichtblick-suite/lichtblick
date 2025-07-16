@@ -13,13 +13,14 @@ import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicS
 import { BlockLoader, MEMORY_INFO_PRELOADED_MSGS } from "./BlockLoader";
 import {
   GetBackfillMessagesArgs,
-  IIterableSource,
+  IDeserializedIterableSource,
   Initialization,
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
 
-class TestSource implements IIterableSource {
+class TestSource implements IDeserializedIterableSource {
+  public readonly sourceType = "deserialized";
   public async initialize(): Promise<Initialization> {
     return {
       start: { sec: 0, nsec: 0 },
