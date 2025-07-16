@@ -63,6 +63,7 @@ describe("useDataSourceInfo", () => {
     });
     expect(result.current).toEqual<typeof result.current>({
       topics: [{ name: "/foo", schemaName: "Foo" }],
+      services: [],
       datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
       capabilities: ["hello"],
       startTime: { sec: 0, nsec: 1 },
@@ -90,6 +91,7 @@ describe("useDataSourceInfo", () => {
     });
     expect(result.current).toEqual<typeof result.current>({
       topics: [{ name: "/foo", schemaName: "Foo" }],
+      services: [],
       datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
       capabilities: ["hello"],
       startTime: { sec: 0, nsec: 1 },
@@ -107,6 +109,7 @@ describe("useDataSourceInfo", () => {
         { name: "/bar", schemaName: "Bar" },
         { name: "/foo", schemaName: "Foo" },
       ],
+      services: [],
       datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
       capabilities: ["hello"],
       startTime: { sec: 0, nsec: 1 },

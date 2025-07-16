@@ -236,6 +236,11 @@ export type RenderState = {
   topics?: Topic[];
 
   /**
+   * List of available services. This list includes all services provided by the data source.
+   */
+  services?: string[];
+
+  /**
    * A timestamp value indicating the current playback time.
    */
   currentTime?: Time;
