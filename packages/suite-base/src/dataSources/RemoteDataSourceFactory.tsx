@@ -12,10 +12,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import {
-  IterablePlayer,
-  WorkerIterableSource,
-} from "@lichtblick/suite-base/players/IterablePlayer";
+import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
+import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import { Player } from "@lichtblick/suite-base/players/types";
 
 const initWorkers: Record<string, () => Worker> = {
@@ -107,7 +105,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
     const initWorker = initWorkers[extension]!;
 
-    const source = new WorkerIterableSource({ initWorker, initArgs: { urls } });
+    const source = new WorkerSerializedIterableSource({ initWorker, initArgs: { urls } });
 
     return new IterablePlayer({
       source,
@@ -115,6 +113,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
       metricsCollector: args.metricsCollector,
       urlParams: { urls },
       sourceId: this.id,
+      readAheadDuration: { sec: 10, nsec: 0 },
     });
   }
 

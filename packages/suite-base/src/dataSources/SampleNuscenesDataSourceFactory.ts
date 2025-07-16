@@ -9,10 +9,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import {
-  IterablePlayer,
-  WorkerIterableSource,
-} from "@lichtblick/suite-base/players/IterablePlayer";
+import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
+import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 
 import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
@@ -29,7 +27,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
   ): ReturnType<IDataSourceFactory["initialize"]> {
     const bagUrl = "https://assets.foxglove.dev/NuScenes-v1.0-mini-scene-0061-df24c12.mcap";
 
-    const source = new WorkerIterableSource({
+    const source = new WorkerSerializedIterableSource({
       initWorker: () => {
         return new Worker(
           // foxglove-depcheck-used: babel-plugin-transform-import-meta
@@ -50,6 +48,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
       // Use blank url params so the data source is set in the url
       urlParams: {},
       sourceId: this.id,
+      readAheadDuration: { sec: 10, nsec: 0 },
     });
   }
 }

@@ -26,7 +26,7 @@ import {
 const log = Log.getLogger(__filename);
 
 // An individual cache item represents a continuous range of CacheIteratorItems
-type CacheBlock = {
+type CacheBlock<MessageType> = {
   // Unique id of the cache item.
   id: bigint;
 
@@ -46,7 +46,7 @@ type CacheBlock = {
   end: Time;
 
   // Sorted cache item tuples. The first value is the timestamp of the iterator result and the second is the result.
-  items: [bigint, IteratorResult][];
+  items: [bigint, IteratorResult<MessageType>][];
 
   // The last time this block was accessed.
   lastAccess: number;
@@ -72,14 +72,17 @@ interface EventTypes {
  * buffer for previously read messages, then the underlying source is used and the messages are
  * cached when read.
  */
-class CachingIterableSource extends EventEmitter<EventTypes> implements IIterableSource {
-  #source: IIterableSource;
+class CachingIterableSource<MessageType = unknown>
+  extends EventEmitter<EventTypes>
+  implements IIterableSource<MessageType>
+{
+  #source: IIterableSource<MessageType>;
 
   // Stores which topics we have been caching. See notes at usage site for why we store this.
   #cachedTopics: TopicSelection = new Map();
 
   // The producer loads results into the cache and the consumer reads from the cache.
-  #cache: CacheBlock[] = [];
+  #cache: CacheBlock<MessageType>[] = [];
 
   // Cache of loaded ranges. Ranges correspond to the cache blocks and are normalized in [0, 1];
   #loadedRangesCache: Range[] = [{ start: 0, end: 0 }];
@@ -98,9 +101,9 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
   #currentReadHead: Time = { sec: 0, nsec: 0 };
 
   #nextBlockId: bigint = BigInt(0);
-  #evictableBlockCandidates: CacheBlock["id"][] = [];
+  #evictableBlockCandidates: CacheBlock<MessageType>["id"][] = [];
 
-  public constructor(source: IIterableSource, opt?: Options) {
+  public constructor(source: IIterableSource<MessageType>, opt?: Options) {
     super();
 
     this.#source = source;
@@ -128,7 +131,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
 
   public async *messageIterator(
     args: MessageIteratorArgs,
-  ): AsyncIterableIterator<Readonly<IteratorResult>> {
+  ): AsyncIterableIterator<Readonly<IteratorResult<MessageType>>> {
     if (!this.#initResult) {
       throw new Error("Invariant: uninitialized");
     }
@@ -151,11 +154,11 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     // moves forward to track the next place we should be reading.
     let readHead = args.start ?? this.#initResult.start;
 
-    const findIndexContainingPredicate = (item: CacheBlock) => {
+    const findIndexContainingPredicate = (item: CacheBlock<MessageType>) => {
       return compare(item.start, readHead) <= 0 && compare(item.end, readHead) >= 0;
     };
 
-    const findAfterPredicate = (item: CacheBlock) => {
+    const findAfterPredicate = (item: CacheBlock<MessageType>) => {
       // Find the first index where readHead is less than an existing start
       return compare(readHead, item.start) < 0;
     };
@@ -254,12 +257,12 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
       // This variable tracks the last known time from a read.
       let lastTime = toNanoSec(sourceReadStart);
 
-      const pendingIterResults: [bigint, IteratorResult][] = [];
+      const pendingIterResults: [bigint, IteratorResult<MessageType>][] = [];
 
       for await (const iterResult of sourceMessageIterator) {
         // if there is no block, we make a new block
         if (!block) {
-          const newBlock: CacheBlock = {
+          const newBlock: CacheBlock<MessageType> = {
             id: this.#nextBlockId++,
             start: readHead,
             end: readHead,
@@ -364,7 +367,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
         //
         // Since we never loop again we need to insert an empty block from the readHead
         // to sourceReadEnd because we know there's nothing else in that range.
-        const newBlock: CacheBlock = {
+        const newBlock: CacheBlock<MessageType> = {
           id: this.#nextBlockId++,
           start: readHead,
           end: sourceReadEnd,
@@ -393,7 +396,9 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
     }
   }
 
-  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
+  public async getBackfillMessages(
+    args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<MessageType>[]> {
     if (!this.#initResult) {
       throw new Error("Invariant: uninitialized");
     }
@@ -405,7 +410,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
       return compare(item.start, args.time) <= 0 && compare(item.end, args.time) >= 0;
     });
 
-    const out: MessageEvent[] = [];
+    const out: MessageEvent<MessageType>[] = [];
     const needsTopics = new Map(args.topics);
 
     // Starting at the block we found for args.time, work backwards through blocks until:
@@ -567,7 +572,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
    * @returns A list of evictable blocks (ordered by most evictable first) or an empty list
    * if there is no evictable block.
    */
-  #findEvictableBlockCandidates(readHead: Time): CacheBlock["id"][] {
+  #findEvictableBlockCandidates(readHead: Time): CacheBlock<MessageType>["id"][] {
     if (this.#cache.length === 0) {
       return [];
     }
@@ -628,7 +633,7 @@ class CachingIterableSource extends EventEmitter<EventTypes> implements IIterabl
   // @return true if a block was purged
   //
   // Throws if the cache block we want to purge is the active block.
-  #maybePurgeCache(opt: { activeBlock?: CacheBlock; sizeInBytes: number }): boolean {
+  #maybePurgeCache(opt: { activeBlock?: CacheBlock<MessageType>; sizeInBytes: number }): boolean {
     const { activeBlock, sizeInBytes } = opt;
 
     // Determine if our total size would exceed max and purge the oldest block

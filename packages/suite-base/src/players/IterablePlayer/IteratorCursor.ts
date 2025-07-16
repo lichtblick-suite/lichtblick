@@ -13,24 +13,24 @@ import type { IMessageCursor, IteratorResult } from "./IIterableSource";
 const TIME_ZERO = Object.freeze({ sec: 0, nsec: 0 });
 
 /// IteratorCursor implements a IMessageCursor interface on top of an AsyncIterable
-class IteratorCursor implements IMessageCursor {
-  #iter: AsyncIterableIterator<Readonly<IteratorResult>>;
+class IteratorCursor<MessageType = unknown> implements IMessageCursor<MessageType> {
+  #iter: AsyncIterableIterator<Readonly<IteratorResult<MessageType>>>;
   // readUntil reads from the iterator inclusive of end time. To do this, it reads from the iterator
   // until it receives a receiveTime after end time to signal it has received all the messages
   // inclusive of end time. Since iterators are read once, this last result must be stored for the
   // next readUntil call otherwise it would be lost.
-  #lastIteratorResult?: IteratorResult;
+  #lastIteratorResult?: IteratorResult<MessageType>;
   #abort?: AbortSignal;
 
   public constructor(
-    iterator: AsyncIterableIterator<Readonly<IteratorResult>>,
+    iterator: AsyncIterableIterator<Readonly<IteratorResult<MessageType>>>,
     abort?: AbortSignal,
   ) {
     this.#iter = iterator;
     this.#abort = abort;
   }
 
-  public async next(): ReturnType<IMessageCursor["next"]> {
+  public async next(): ReturnType<IMessageCursor<MessageType>["next"]> {
     if (this.#abort?.aborted === true) {
       return undefined;
     }
@@ -39,7 +39,7 @@ class IteratorCursor implements IMessageCursor {
     return result.value;
   }
 
-  public async nextBatch(durationMs: number): Promise<IteratorResult[] | undefined> {
+  public async nextBatch(durationMs: number): Promise<IteratorResult<MessageType>[] | undefined> {
     const firstResult = await this.next();
     if (!firstResult) {
       return undefined;
@@ -49,7 +49,7 @@ class IteratorCursor implements IMessageCursor {
       return [firstResult];
     }
 
-    const results: IteratorResult[] = [firstResult];
+    const results: IteratorResult<MessageType>[] = [firstResult];
 
     let cutoffTime: Time = TIME_ZERO;
     switch (firstResult.type) {
@@ -82,7 +82,7 @@ class IteratorCursor implements IMessageCursor {
     return results;
   }
 
-  public async readUntil(end: Time): ReturnType<IMessageCursor["readUntil"]> {
+  public async readUntil(end: Time): ReturnType<IMessageCursor<MessageType>["readUntil"]> {
     // Assign to a variable to fool typescript control flow analysis which does not understand
     // that this value could change after the _await_
     const isAborted = this.#abort?.aborted;
@@ -90,7 +90,7 @@ class IteratorCursor implements IMessageCursor {
       return undefined;
     }
 
-    const results: IteratorResult[] = [];
+    const results: IteratorResult<MessageType>[] = [];
 
     // if the last result is still past end time, return empty results
     if (
@@ -137,7 +137,7 @@ class IteratorCursor implements IMessageCursor {
     return results;
   }
 
-  public async end(): ReturnType<IMessageCursor["end"]> {
+  public async end(): ReturnType<IMessageCursor<MessageType>["end"]> {
     await this.#iter.return?.();
   }
 }

@@ -10,10 +10,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import {
-  IterablePlayer,
-  WorkerIterableSource,
-} from "@lichtblick/suite-base/players/IterablePlayer";
+import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
+import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import { Player } from "@lichtblick/suite-base/players/types";
 
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
@@ -32,7 +30,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    const source = new WorkerIterableSource({
+    const source = new WorkerSerializedIterableSource({
       initWorker: () => {
         return new Worker(
           // foxglove-depcheck-used: babel-plugin-transform-import-meta
@@ -50,6 +48,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
       source,
       name,
       sourceId: this.id,
+      readAheadDuration: { sec: 120, nsec: 0 },
     });
   }
 }

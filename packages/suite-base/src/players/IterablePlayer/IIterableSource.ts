@@ -15,10 +15,16 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
+export type TopicWithDecodingInfo = Topic & {
+  messageEncoding?: string;
+  schemaEncoding?: string;
+  schemaData?: Uint8Array;
+};
+
 export type Initialization = {
   start: Time;
   end: Time;
-  topics: Topic[];
+  topics: TopicWithDecodingInfo[];
   topicStats: Map<string, TopicStats>;
   datatypes: RosDatatypes;
   profile: string | undefined;
@@ -75,10 +81,10 @@ export type MessageIteratorArgs = {
  * The source may return stamp results to indicate to callers that it has read through some time
  * when there are no message events available to indicate the time is reached.
  */
-export type IteratorResult =
+export type IteratorResult<MessageType = unknown> =
   | {
       type: "message-event";
-      msgEvent: MessageEvent;
+      msgEvent: MessageEvent<MessageType>;
     }
   | {
       type: "alert";
@@ -112,11 +118,11 @@ export type GetBackfillMessagesArgs = {
 //
 // Providing an interface which allows callers to read a batch of messages significantly (4x speedup
 // on an 700k message dataset on M1 Pro) reduces the RPC call overhead.
-export interface IMessageCursor {
+export interface IMessageCursor<MessageType = unknown> {
   /**
    * Read the next message from the cursor. Return a result or undefined if the cursor is done
    */
-  next(): Promise<IteratorResult | undefined>;
+  next(): Promise<IteratorResult<MessageType> | undefined>;
 
   /**
    * Read the next batch of messages from the cursor. Return an array of results or undefined if the cursor is done.
@@ -125,14 +131,14 @@ export interface IMessageCursor {
    * more messages and return. This duration tracks the receive time from the first message in the
    * batch.
    */
-  nextBatch(durationMs: number): Promise<IteratorResult[] | undefined>;
+  nextBatch(durationMs: number): Promise<IteratorResult<MessageType>[] | undefined>;
 
   /**
    * Read a batch of messages through end time (inclusive) or end of cursor
    *
    * return undefined when no more message remain in the cursor
    */
-  readUntil(end: Time): Promise<IteratorResult[] | undefined>;
+  readUntil(end: Time): Promise<IteratorResult<MessageType>[] | undefined>;
 
   /**
    * End the cursor
@@ -150,7 +156,7 @@ export interface IMessageCursor {
  *
  * IIterableSources also provide a backfill method to obtain the last message available for topics.
  */
-export interface IIterableSource {
+export interface IIterableSource<MessageType = unknown> {
   /**
    * Initialize the source.
    */
@@ -172,13 +178,15 @@ export interface IIterableSource {
    */
   messageIterator(
     args: Immutable<MessageIteratorArgs>,
-  ): AsyncIterableIterator<Readonly<IteratorResult>>;
+  ): AsyncIterableIterator<Readonly<IteratorResult<MessageType>>>;
 
   /**
    * Load the most recent messages per topic that occurred before or at the target time, if
    * available.
    */
-  getBackfillMessages(args: Immutable<GetBackfillMessagesArgs>): Promise<MessageEvent[]>;
+  getBackfillMessages(
+    args: Immutable<GetBackfillMessagesArgs>,
+  ): Promise<MessageEvent<MessageType>[]>;
 
   /**
    * A source can optionally implement a cursor interface in addition to a messageIterator interface.
@@ -189,7 +197,7 @@ export interface IIterableSource {
    */
   getMessageCursor?: (
     args: Immutable<MessageIteratorArgs> & { abort?: AbortSignal },
-  ) => IMessageCursor;
+  ) => IMessageCursor<MessageType>;
 
   getStart?: () => Time | undefined;
 
@@ -211,4 +219,17 @@ export type IterableSourceInitializeArgs = {
     baseUrl: string;
     auth?: string;
   };
+};
+
+/**
+ * Interface for a raw iterable source where messages are in their serialized byte form (Uint8Arrays).
+ * A raw source is well suited for workers as array buffers can be efficientely transferred to the main thread.
+ */
+export type ISerializedIterableSource = IIterableSource<Uint8Array> & { sourceType: "serialized" };
+
+/**
+ * Interface for a deserialized iterable source where messages are in their deserialized form (unknown).
+ */
+export type IDeserializedIterableSource = IIterableSource & {
+  sourceType: "deserialized";
 };

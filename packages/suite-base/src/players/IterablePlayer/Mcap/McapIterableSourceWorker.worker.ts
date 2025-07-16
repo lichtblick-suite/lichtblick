@@ -7,30 +7,32 @@
 
 import * as Comlink from "@lichtblick/comlink";
 import { IterableSourceInitializeArgs } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import { WorkerIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerIterableSourceWorker";
+import { WorkerSerializedIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker";
 import { MultiIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/MultiIterableSource";
 
 import { McapIterableSource } from "./McapIterableSource";
 
-export function initialize(args: IterableSourceInitializeArgs): WorkerIterableSourceWorker {
+export function initialize(
+  args: IterableSourceInitializeArgs,
+): WorkerSerializedIterableSourceWorker {
   if (args.file) {
     const source = new McapIterableSource({ type: "file", file: args.file });
-    const wrapped = new WorkerIterableSourceWorker(source);
+    const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.files) {
     const source = new MultiIterableSource(
       { type: "files", files: args.files },
       McapIterableSource,
     );
-    const wrapped = new WorkerIterableSourceWorker(source);
+    const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.url) {
     const source = new McapIterableSource({ type: "url", url: args.url });
-    const wrapped = new WorkerIterableSourceWorker(source);
+    const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.urls) {
     const source = new MultiIterableSource({ type: "urls", urls: args.urls }, McapIterableSource);
-    const wrapped = new WorkerIterableSourceWorker(source);
+    const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   }
 

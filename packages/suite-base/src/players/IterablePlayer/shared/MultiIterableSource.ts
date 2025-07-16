@@ -26,12 +26,16 @@ import {
   Initialization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
+  ISerializedIterableSource,
 } from "../IIterableSource";
 
-export class MultiIterableSource<T extends IIterableSource, P> implements IIterableSource {
+export class MultiIterableSource<T extends ISerializedIterableSource, P>
+  implements ISerializedIterableSource
+{
+  public readonly sourceType = "serialized";
   private SourceConstructor: IterableSourceConstructor<T, P>;
   private dataSource: MultiSource;
-  private sourceImpl: IIterableSource[] = [];
+  private sourceImpl: IIterableSource<Uint8Array>[] = [];
   public constructor(dataSource: MultiSource, SourceConstructor: IterableSourceConstructor<T, P>) {
     this.dataSource = dataSource;
     this.SourceConstructor = SourceConstructor;
@@ -40,7 +44,7 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
   private async loadMultipleSources(): Promise<Initialization[]> {
     const { type } = this.dataSource;
 
-    const sources: IIterableSource[] =
+    const sources: IIterableSource<Uint8Array>[] =
       type === "files"
         ? this.dataSource.files.map(
             (file) => new this.SourceConstructor({ type: "file", file } as P),
@@ -68,11 +72,13 @@ export class MultiIterableSource<T extends IIterableSource, P> implements IItera
 
   public async *messageIterator(
     opt: MessageIteratorArgs,
-  ): AsyncIterableIterator<Readonly<IteratorResult>> {
+  ): AsyncIterableIterator<Readonly<IteratorResult<Uint8Array>>> {
     const iterators = this.sourceImpl.map((source) => source.messageIterator(opt));
     yield* mergeAsyncIterators(iterators);
   }
-  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
+  public async getBackfillMessages(
+    args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<Uint8Array>[]> {
     const backfillMessages = await Promise.all(
       this.sourceImpl.map(async (source) => await source.getBackfillMessages(args)),
     );

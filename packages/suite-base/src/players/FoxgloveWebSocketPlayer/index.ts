@@ -583,6 +583,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this.#parsedMessagesBytes = 0;
       }
 
+      // Override any previous start/end time when we set a clockTime for the first time which means
+      // we've received the first "time" event and know the server controlled time.
+      if (!this.#clockTime) {
+        this.#startTime = time;
+        this.#endTime = time;
+      }
+
       this.#clockTime = time;
       this.#emitState();
     });
