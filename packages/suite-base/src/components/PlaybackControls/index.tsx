@@ -32,6 +32,7 @@ import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { Time, compare } from "@lichtblick/rostime";
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { CreateEventDialog } from "@lichtblick/suite-base/components/CreateEventDialog";
 import { DataSourceInfoView } from "@lichtblick/suite-base/components/DataSourceInfoView";
 import EventIcon from "@lichtblick/suite-base/components/EventIcon";
@@ -52,6 +53,7 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { Player, PlayerPresence } from "@lichtblick/suite-base/players/types";
 import BroadcastManager from "@lichtblick/suite-base/util/broadcast/BroadcastManager";
 
@@ -151,6 +153,8 @@ export default function PlaybackControls({
     }
   }, [isPlaying, pause, getTimeInfo, play, seek]);
 
+  const [defaultStepSize] = useAppConfigurationValue<number>(AppSetting.DEFAULT_STEP_SIZE);
+
   const seekForwardAction = useCallback(
     (ev?: KeyboardEvent) => {
       const { currentTime } = getTimeInfo();
@@ -167,7 +171,8 @@ export default function PlaybackControls({
       //
       // i.e. Skipping coordinate frame messages may result in incorrectly rendered markers or
       // missing markers altogther.
-      const targetTime = jumpSeek(DIRECTION.FORWARD, currentTime, ev);
+
+      const targetTime = jumpSeek(DIRECTION.FORWARD, currentTime, ev, defaultStepSize);
       if (playUntil) {
         playUntil(targetTime);
 
@@ -184,7 +189,7 @@ export default function PlaybackControls({
         });
       }
     },
-    [getTimeInfo, playUntil, seek],
+    [getTimeInfo, playUntil, seek, defaultStepSize],
   );
 
   const seekBackwardAction = useCallback(
@@ -193,7 +198,7 @@ export default function PlaybackControls({
       if (!currentTime) {
         return;
       }
-      const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev);
+      const targetTime = jumpSeek(DIRECTION.BACKWARD, currentTime, ev, defaultStepSize);
       seek(targetTime);
 
       BroadcastManager.getInstance().postMessage({
@@ -201,7 +206,7 @@ export default function PlaybackControls({
         time: targetTime,
       });
     },
-    [getTimeInfo, seek],
+    [defaultStepSize, getTimeInfo, seek],
   );
 
   const keyDownHandlers = useMemo(

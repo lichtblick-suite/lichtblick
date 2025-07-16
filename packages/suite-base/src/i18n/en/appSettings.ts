@@ -24,6 +24,7 @@ export const appSettings = {
   layoutDebuggingDescription: "Show extra controls for developing and debugging layout storage.",
   light: "Light",
   messageRate: "Message rate",
+  stepSize: "Step size",
   memoryUseIndicator: "Memory use indicator",
   memoryUseIndicatorDescription: "Show the app memory use in the sidebar.",
   syncLichtblickInstances: "Sync Lichtblick instances",
