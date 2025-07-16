@@ -238,7 +238,7 @@ describe("DeserializingIterableSources", () => {
       await expect(iterResult).resolves.toMatchObject({
         done: false,
         value: {
-          type: i % 2 === 0 ? "problem" : "message-event",
+          type: i % 2 === 0 ? "alert" : "message-event",
         },
       });
     }

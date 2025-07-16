@@ -20,7 +20,7 @@ import {
   toRFC3339String,
   compare,
 } from "@lichtblick/rostime";
-import { MessageEvent } from "@lichtblick/suite";
+import { MessageEvent, Metadata } from "@lichtblick/suite";
 import {
   GetBackfillMessagesArgs,
   Initialization,
@@ -60,6 +60,7 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
     const streamReader = this.#options.stream.getReader();
 
     const alerts: PlayerAlert[] = [];
+    const metadata: Metadata[] = [];
     const channelIdsWithErrors = new Set<number>();
 
     let messageCount = 0;
@@ -85,6 +86,14 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
 
         case "Header": {
           profile = record.profile;
+          break;
+        }
+
+        case "Metadata": {
+          metadata.push({
+            name: record.name,
+            metadata: Object.fromEntries(record.metadata),
+          });
           break;
         }
 
@@ -257,6 +266,7 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
       alerts,
       publishersByTopic,
       topicStats,
+      metadata,
     };
   }
 

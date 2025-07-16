@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import * as Comlink from "@lichtblick/comlink";
-import { WorkerIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerIterableSourceWorker";
+import { WorkerSerializedIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker";
 import { MultiIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/MultiIterableSource";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
@@ -17,7 +17,7 @@ jest.mock("@lichtblick/comlink", () => ({
 }));
 
 jest.mock("./McapIterableSource");
-jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerIterableSourceWorker");
+jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker");
 jest.mock("@lichtblick/suite-base/players/IterablePlayer/shared/MultiIterableSource");
 
 describe("initialize", () => {
@@ -32,9 +32,9 @@ describe("initialize", () => {
     const result = initialize({ file });
 
     expect(McapIterableSource).toHaveBeenCalledWith({ type: "file", file });
-    expect(WorkerIterableSourceWorker).toHaveBeenCalled();
+    expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
     expect(Comlink.proxy).toHaveBeenCalled();
-    expect(result).toBeInstanceOf(WorkerIterableSourceWorker);
+    expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
   });
 
   it("should initialize with multiple files", () => {
@@ -45,9 +45,9 @@ describe("initialize", () => {
     const result = initialize({ files });
 
     expect(MultiIterableSource).toHaveBeenCalledWith({ type: "files", files }, McapIterableSource);
-    expect(WorkerIterableSourceWorker).toHaveBeenCalled();
+    expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
     expect(Comlink.proxy).toHaveBeenCalled();
-    expect(result).toBeInstanceOf(WorkerIterableSourceWorker);
+    expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
   });
 
   it("should initialize with a single URL", () => {
@@ -56,9 +56,9 @@ describe("initialize", () => {
     const result = initialize({ url });
 
     expect(McapIterableSource).toHaveBeenCalledWith({ type: "url", url });
-    expect(WorkerIterableSourceWorker).toHaveBeenCalled();
+    expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
     expect(Comlink.proxy).toHaveBeenCalled();
-    expect(result).toBeInstanceOf(WorkerIterableSourceWorker);
+    expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
   });
 
   it("should initialize with multiple URLs", () => {
@@ -70,9 +70,9 @@ describe("initialize", () => {
     const result = initialize({ urls });
 
     expect(MultiIterableSource).toHaveBeenCalledWith({ type: "urls", urls }, McapIterableSource);
-    expect(WorkerIterableSourceWorker).toHaveBeenCalled();
+    expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
     expect(Comlink.proxy).toHaveBeenCalled();
-    expect(result).toBeInstanceOf(WorkerIterableSourceWorker);
+    expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
   });
 
   it("should throw an error if no valid input is provided", () => {
