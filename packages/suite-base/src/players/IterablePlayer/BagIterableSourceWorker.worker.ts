@@ -7,18 +7,20 @@
 
 import * as Comlink from "@lichtblick/comlink";
 import { IterableSourceInitializeArgs } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import { WorkerIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerIterableSourceWorker";
+import { WorkerSerializedIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker";
 
 import { BagIterableSource } from "./BagIterableSource";
 
-export function initialize(args: IterableSourceInitializeArgs): WorkerIterableSourceWorker {
+export function initialize(
+  args: IterableSourceInitializeArgs,
+): WorkerSerializedIterableSourceWorker {
   if (args.file) {
     const source = new BagIterableSource({ type: "file", file: args.file });
-    const wrapped = new WorkerIterableSourceWorker(source);
+    const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.url) {
     const source = new BagIterableSource({ type: "remote", url: args.url });
-    const wrapped = new WorkerIterableSourceWorker(source);
+    const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   }
 
