@@ -58,11 +58,14 @@ function FieldInput({
           readOnly={field.readonly}
           ListboxComponent={MenuList}
           ListboxProps={{ dense: true } as Partial<MenuListProps>}
-          renderOption={(props, option, { selected }) => (
-            <MenuItem selected={selected} {...props}>
-              {option}
-            </MenuItem>
-          )}
+          renderOption={(props, option, { selected }) => {
+            const { key, ...otherProps } = props as any;
+            return (
+              <MenuItem key={key} selected={selected} {...otherProps}>
+                {option}
+              </MenuItem>
+            );
+          }}
           componentsProps={{
             clearIndicator: {
               size: "small",
