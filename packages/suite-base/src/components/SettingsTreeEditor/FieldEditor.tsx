@@ -59,7 +59,9 @@ function FieldInput({
           ListboxComponent={MenuList}
           ListboxProps={{ dense: true } as Partial<MenuListProps>}
           renderOption={(props, option, { selected }) => {
-            const { key, ...otherProps } = props as any;
+            const { key, ...otherProps } = props as {
+              key?: string;
+            } & React.HTMLAttributes<HTMLLIElement>;
             return (
               <MenuItem key={key} selected={selected} {...otherProps}>
                 {option}
