@@ -15,6 +15,7 @@ it("map schema names by topic name", () => {
       { name: "topic1", schemaName: "schema1" },
       { name: "topic2", schemaName: "schema2" },
     ],
+    sortedServices: [],
     playerState: {
       presence: PlayerPresence.PRESENT,
       progress: {},
