@@ -123,8 +123,15 @@ function PanelExtensionAdapter(
 
   const messagePipelineContext = useMessagePipeline(selectContext);
 
-  const { playerState, pauseFrame, setSubscriptions, seekPlayback, getMetadata, sortedTopics } =
-    messagePipelineContext;
+  const {
+    playerState,
+    pauseFrame,
+    setSubscriptions,
+    seekPlayback,
+    getMetadata,
+    sortedTopics,
+    sortedServices,
+  } = messagePipelineContext;
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
 
@@ -242,6 +249,7 @@ function PanelExtensionAdapter(
       playerState,
       sharedPanelState,
       sortedTopics,
+      sortedServices,
       subscriptions: localSubscriptions,
       watchedFields,
       config: initialState.current,
@@ -293,6 +301,7 @@ function PanelExtensionAdapter(
     renderFn,
     sharedPanelState,
     sortedTopics,
+    sortedServices,
     watchedFields,
     initialState,
   ]);

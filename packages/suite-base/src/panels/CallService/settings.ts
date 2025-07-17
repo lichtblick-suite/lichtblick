@@ -35,16 +35,17 @@ export function settingsActionReducer(prevConfig: Config, action: SettingsTreeAc
   });
 }
 
-export function useSettingsTree(config: Config): SettingsTreeNodes {
+export function useSettingsTree(config: Config, services: string[] = []): SettingsTreeNodes {
   const settings = useMemo(
     (): SettingsTreeNodes => ({
       general: {
         fields: {
           serviceName: {
             label: "Service name",
-            input: "string",
+            input: "autocomplete",
             error: serviceError(config.serviceName),
             value: config.serviceName ?? "",
+            items: services,
           },
           layout: {
             label: "Layout",
@@ -71,7 +72,7 @@ export function useSettingsTree(config: Config): SettingsTreeNodes {
         },
       },
     }),
-    [config],
+    [config, services],
   );
   return useShallowMemo(settings);
 }
