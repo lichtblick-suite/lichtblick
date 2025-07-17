@@ -6,13 +6,13 @@ import { create } from "zustand";
 import { MessagePathStructureItem } from "@lichtblick/message-path";
 
 type StructuredItemsState = {
-  allStructureItemsByPath: Map<string, MessagePathStructureItem>;
-  setAllStructureItemsByPath: (items: Map<string, MessagePathStructureItem>) => void;
+  structureItemsByPath: Map<string, MessagePathStructureItem>;
+  setStructureItemsByPath: (items: Map<string, MessagePathStructureItem>) => void;
 };
 
 export const useStructureItemsByPathStore = create<StructuredItemsState>((set) => ({
-  allStructureItemsByPath: new Map(),
-  setAllStructureItemsByPath: (items) => {
-    set({ allStructureItemsByPath: items });
+  structureItemsByPath: new Map(),
+  setStructureItemsByPath: (items) => {
+    set({ structureItemsByPath: items });
   },
 }));

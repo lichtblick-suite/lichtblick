@@ -9,7 +9,7 @@ import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { useStructureItemsByPathStore } from "./useStructureItemsByPathStore";
 
 describe("useStructureItemsByPathStore", () => {
-  it("sets allStructureItemsByPath", () => {
+  it("sets structureItemsByPath", () => {
     const mockMessagePathStructureItem: MessagePathStructureItem = {
       structureType: "primitive",
       primitiveType: "string",
@@ -19,10 +19,10 @@ describe("useStructureItemsByPathStore", () => {
     structureItemsPathMap.set(BasicBuilder.string(), mockMessagePathStructureItem);
 
     act(() => {
-      useStructureItemsByPathStore.getState().setAllStructureItemsByPath(structureItemsPathMap);
+      useStructureItemsByPathStore.getState().setStructureItemsByPath(structureItemsPathMap);
     });
     const state = useStructureItemsByPathStore.getState();
 
-    expect(state.allStructureItemsByPath).toEqual(structureItemsPathMap);
+    expect(state.structureItemsByPath).toEqual(structureItemsPathMap);
   });
 });

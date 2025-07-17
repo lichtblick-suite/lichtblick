@@ -6,7 +6,7 @@ import { messagePathsForStructure } from "@lichtblick/suite-base/components/Mess
 import { MessagePathsForStructure } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import TopicBuilder from "@lichtblick/suite-base/testing/builders/TopicBuilder";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import { structureAllItemsByPath } from "./structureAllItemsByPath";
 
@@ -36,7 +36,7 @@ describe("structureAllItemsByPath", () => {
     mockMessagePathStructuresForDataype = {};
     mockNoMultiSlices = BasicBuilder.boolean();
     mockValidTypes = BasicBuilder.multiple(BasicBuilder.string, BasicBuilder.number());
-    mockTopics = BasicBuilder.multiple(TopicBuilder.topic, BasicBuilder.number());
+    mockTopics = BasicBuilder.multiple(PlayerBuilder.topic, BasicBuilder.number());
   });
 
   const populateMockMessagePathStructuresForDataype = () => {
@@ -48,7 +48,7 @@ describe("structureAllItemsByPath", () => {
   };
 
   it("should skip topics that have no schemaName and not include them in the resulting Map", () => {
-    const schemaNamelessTopic = TopicBuilder.topic();
+    const schemaNamelessTopic = PlayerBuilder.topic();
     schemaNamelessTopic.schemaName = undefined;
 
     const mockTopics1 = [schemaNamelessTopic];

@@ -26,8 +26,8 @@ import { useStructureItemsByPathStore } from "@lichtblick/suite-base/components/
  * Only re-runs when `topics` or `datatypes` change, which typically only happens when a new MCAP is loaded.
  */
 export function useStructureItemsStoreManager(): void {
-  const setAllStructureItemsByPath = useStructureItemsByPathStore(
-    (state) => state.setAllStructureItemsByPath,
+  const setStructureItemsByPath = useStructureItemsByPathStore(
+    (state) => state.setStructureItemsByPath,
   );
   const { datatypes, topics } = PanelAPI.useDataSourceInfo();
 
@@ -38,6 +38,6 @@ export function useStructureItemsStoreManager(): void {
 
   useEffect(() => {
     const list = structureAllItemsByPath({ messagePathStructuresForDataype, topics });
-    setAllStructureItemsByPath(list);
-  }, [topics, messagePathStructuresForDataype, setAllStructureItemsByPath]);
+    setStructureItemsByPath(list);
+  }, [topics, messagePathStructuresForDataype, setStructureItemsByPath]);
 }

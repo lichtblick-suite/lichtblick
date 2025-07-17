@@ -31,9 +31,7 @@ export function useStructuredItemsByPath({
   noMultiSlices,
   validTypes,
 }: UseStructuredItemsByPathProps): Map<string, MessagePathStructureItem> {
-  const allStructureItemsByPath = useStructureItemsByPathStore(
-    (state) => state.allStructureItemsByPath,
-  );
+  const structureItemsByPath = useStructureItemsByPathStore((state) => state.structureItemsByPath);
 
   const { datatypes, topics } = PanelAPI.useDataSourceInfo();
 
@@ -54,7 +52,7 @@ export function useStructuredItemsByPath({
   );
 
   if (!validTypes && noMultiSlices == undefined) {
-    return allStructureItemsByPath;
+    return structureItemsByPath;
   }
 
   return gettingAllStructureItemsByPath();

@@ -30,7 +30,7 @@ describe("useStructureItemsStoreManager", () => {
     jest.clearAllMocks();
 
     (useStructureItemsByPathStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector({ setAllStructureItemsByPath: mockSetAllStructureItemsByPath }),
+      selector({ setStructureItemsByPath: mockSetAllStructureItemsByPath }),
     );
 
     (PanelAPI.useDataSourceInfo as jest.Mock).mockReturnValue({

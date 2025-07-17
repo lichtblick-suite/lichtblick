@@ -166,7 +166,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     [datatypes],
   );
 
-  const allStructureItemsByPath = useStructuredItemsByPath({
+  const structureItemsByPath = useStructuredItemsByPath({
     noMultiSlices,
     validTypes,
   });
@@ -204,7 +204,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
       // Check if accepting this completion would result in a path to a non-complex field.
       const completedPath = completeStart + rawValue + completeEnd;
-      const completedField = allStructureItemsByPath.get(completedPath);
+      const completedField = structureItemsByPath.get(completedPath);
       const isSimpleField =
         completedField != undefined && completedField.structureType === "primitive";
 
@@ -230,7 +230,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         autocomplete.blur();
       }
     },
-    [path, allStructureItemsByPath, validTypes, onChangeProp],
+    [path, structureItemsByPath, validTypes, onChangeProp],
   );
 
   const rosPath = useMemo(() => parseMessagePath(path), [path]);
@@ -279,8 +279,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   );
 
   const topicNamesAndFieldsAutocompleteItems = useMemo(
-    () => topicNamesAutocompleteItems.concat(Array.from(allStructureItemsByPath.keys())),
-    [allStructureItemsByPath, topicNamesAutocompleteItems],
+    () => topicNamesAutocompleteItems.concat(Array.from(structureItemsByPath.keys())),
+    [structureItemsByPath, topicNamesAutocompleteItems],
   );
 
   const autocompleteType = useMemo(() => {
