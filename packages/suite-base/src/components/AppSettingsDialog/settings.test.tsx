@@ -34,5 +34,4 @@ describe("StepSize component", () => {
 
     expect(mockSetStepSize).toHaveBeenCalledWith(250);
   });
-
 });
