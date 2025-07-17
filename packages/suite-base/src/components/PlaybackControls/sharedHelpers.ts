@@ -28,7 +28,7 @@ export const jumpSeek = (
   directionSign: (typeof DIRECTION)[keyof typeof DIRECTION],
   currentTime: Time,
   modifierKeys?: { altKey: boolean; shiftKey: boolean },
-  defaultStepSize?: number
+  defaultStepSize?: number,
 ): Time => {
   const timeMs = toMillis(currentTime);
   const deltaMs =
