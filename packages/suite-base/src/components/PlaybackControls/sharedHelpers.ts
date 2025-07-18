@@ -28,6 +28,7 @@ export const jumpSeek = (
   directionSign: (typeof DIRECTION)[keyof typeof DIRECTION],
   currentTime: Time,
   modifierKeys?: { altKey: boolean; shiftKey: boolean },
+  defaultStepSize?: number,
 ): Time => {
   const timeMs = toMillis(currentTime);
   const deltaMs =
@@ -35,6 +36,6 @@ export const jumpSeek = (
       ? ARROW_SEEK_BIG_MS
       : modifierKeys?.shiftKey === true
         ? ARROW_SEEK_SMALL_MS
-        : ARROW_SEEK_DEFAULT_MS;
+        : defaultStepSize ?? ARROW_SEEK_DEFAULT_MS;
   return fromMillis(timeMs + deltaMs * directionSign);
 };

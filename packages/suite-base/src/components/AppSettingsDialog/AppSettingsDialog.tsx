@@ -50,6 +50,7 @@ import {
   LanguageSettings,
   LaunchDefault,
   MessageFramerate,
+  StepSize,
   RosPackagePath,
   TimeFormat,
   TimezoneSettings,
@@ -125,6 +126,7 @@ export function AppSettingsDialog(
               <TimezoneSettings />
               <TimeFormat orientation={smUp ? "horizontal" : "vertical"} />
               <MessageFramerate />
+              <StepSize />
               <LanguageSettings />
               {supportsAppUpdates && <AutoUpdate />}
               {!isDesktopApp() && <LaunchDefault />}

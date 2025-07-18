@@ -13,6 +13,7 @@ export enum AppSetting {
   MESSAGE_RATE = "messageRate",
   UPDATES_ENABLED = "updates.enabled",
   LANGUAGE = "language",
+  DEFAULT_STEP_SIZE = "stepSize",
 
   // ROS
   ROS_PACKAGE_PATH = "ros.ros_package_path",

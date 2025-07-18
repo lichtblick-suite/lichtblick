@@ -303,6 +303,40 @@ export function MessageFramerate(): React.ReactElement {
   );
 }
 
+export function StepSize(): React.ReactElement {
+  const { t } = useTranslation("appSettings");
+
+  const [stepSize = 100, setStepSize] = useAppConfigurationValue<number>(
+    AppSetting.DEFAULT_STEP_SIZE,
+  );
+
+  return (
+    <Stack>
+      <FormLabel>{t("stepSize")} (ms):</FormLabel>
+      <TextField
+        id="stepSizeInput"
+        fullWidth
+        type="number"
+        value={stepSize}
+        onChange={(event) => {
+          void setStepSize(parseInt(event.target.value));
+        }}
+        InputProps={{
+          type: "number",
+          sx: {
+            "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+              display: "none",
+            },
+            "& input[type=number]": {
+              MozAppearance: "textfield",
+            },
+          },
+        }}
+      ></TextField>
+    </Stack>
+  );
+}
+
 export function AutoUpdate(): React.ReactElement {
   const [updatesEnabled = true, setUpdatedEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.UPDATES_ENABLED,
