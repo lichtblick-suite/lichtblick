@@ -27,8 +27,6 @@ test("Display the open a new connection dialog when clicking File > Open... > Op
 
   // Then
   const playerStartingTime = mainWindow.locator('input[value="2025-02-26 10:37:15.547 AM WET"]');
-
-  await mainWindow.waitForTimeout(10000);
   expect(await playerStartingTime.inputValue()).toBe("2025-02-26 10:37:15.547 AM WET");
 
   //When

@@ -72,6 +72,9 @@ jobs:
 
     name: e2e (ubuntu-latest)
 
+    env:
+      TZ: Europe/Lisbon
+
     steps:
       - uses: actions/checkout@v4.1.1
 
