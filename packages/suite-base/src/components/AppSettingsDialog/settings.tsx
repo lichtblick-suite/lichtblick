@@ -310,11 +310,11 @@ export function StepSize(): React.ReactElement {
     AppSetting.DEFAULT_STEP_SIZE,
   );
 
-  // console.log("GOLD STEP", stepSize)
   return (
     <Stack>
       <FormLabel>{t("stepSize")} (ms):</FormLabel>
       <TextField
+        id="stepSizeInput"
         fullWidth
         type="number"
         value={stepSize}
