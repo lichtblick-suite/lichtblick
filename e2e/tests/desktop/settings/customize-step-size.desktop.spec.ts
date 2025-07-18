@@ -33,7 +33,7 @@ test("Display the open a new connection dialog when clicking File > Open... > Op
   await mainWindow.getByTestId("user-button").click();
   await mainWindow.getByText("Visualization settings").click();
 
-  await mainWindow.locator('#stepSizeInput').fill('400');
+  await mainWindow.locator("#stepSizeInput").fill("400");
   await mainWindow.getByText("Done").click();
   await mainWindow.getByTitle("Seek forward").click();
 
