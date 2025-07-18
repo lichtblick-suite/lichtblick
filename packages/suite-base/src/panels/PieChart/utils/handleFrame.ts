@@ -7,6 +7,7 @@
 import * as _ from "lodash-es";
 
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+
 import type { PieChartState, PieChartAction } from "../types";
 
 export type HandleFrameProps = {
@@ -31,22 +32,31 @@ export function handleFrame({ state, action }: HandleFrameProps): PieChartState 
       try {
         const extractedData = simpleGetMessagePathDataItems(message, state.parsedPath);
         
-        if (extractedData == undefined) {
+        if (extractedData.length === 0) {
           throw new Error('No data extracted from message path');
         }
         
-        // Convert extracted data to Float32Array
+        // Handle different types of extracted data
         let data: Float32Array;
-        if (extractedData instanceof Float32Array) {
-          data = extractedData;
-        } else if (extractedData instanceof Float64Array) {
-          data = new Float32Array(extractedData);
-        } else if (Array.isArray(extractedData)) {
-          // Convert array to Float32Array, ensuring all elements are numbers
+        
+        // If we have a single item that's already a typed array, use it directly
+        if (extractedData.length === 1) {
+          const singleItem = extractedData[0];
+          if (singleItem instanceof Float32Array) {
+            data = singleItem;
+          } else if (singleItem instanceof Float64Array) {
+            data = new Float32Array(singleItem);
+          } else if (Array.isArray(singleItem)) {
+            const numericArray = singleItem.map((item) => Number(item));
+            data = new Float32Array(numericArray);
+          } else {
+            // Single numeric value - wrap in array
+            data = new Float32Array([Number(singleItem)]);
+          }
+        } else {
+          // Multiple items (e.g., from array slice P[:]) - convert all to Float32Array
           const numericArray = extractedData.map((item) => Number(item));
           data = new Float32Array(numericArray);
-        } else {
-          throw new Error('Extracted data is not a Float32Array, Float64Array, or array');
         }
         
         latestMatchingQueriedData = data;
