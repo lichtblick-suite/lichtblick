@@ -96,17 +96,19 @@ export default {
                       {...sharedProps(variant, size)}
                       color={color}
                       placeholder={size}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon fontSize="small" />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <FilterListIcon fontSize="small" />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        },
                       }}
                     />
 

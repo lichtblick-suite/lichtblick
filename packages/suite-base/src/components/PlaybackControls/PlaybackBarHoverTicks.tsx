@@ -33,7 +33,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   time: {
     textAlign: "center",
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: theme.typography.fontFamily,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     letterSpacing: theme.typography.caption.letterSpacing,
@@ -119,7 +119,7 @@ export default function PlaybackBarHoverTicks(props: Props): React.JSX.Element {
             disableHoverListener
             disableTouchListener
             disableInteractive
-            TransitionProps={{ timeout: 0 }}
+            slotProps={{ transition: { timeout: 0 } }}
             open={displayHoverTime}
             title={<div className={classes.time}>{hoverTimeDisplay}</div>}
           >
