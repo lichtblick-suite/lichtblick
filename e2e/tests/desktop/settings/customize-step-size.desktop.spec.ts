@@ -15,10 +15,13 @@ import { loadFile } from "../../../fixtures/load-file";
  * WHEN the user clicks on the seek backward button
  * THEN the player time should go back to 2025-02-26 10:37:15.547 AM WET
  */
-test("Display the open a new connection dialog when clicking File > Open... > Open connection", async ({
+test("Should update the step size value via settings and verify that change being applied on the player by moving forward and backward", async ({
   mainWindow,
 }) => {
   // Given
+  const initialTime = "2025-02-26 10:37:15.547 AM WET";
+  const forwardedTime = "2025-02-26 10:37:15.947 AM WET";
+
   const filename = "example.mcap";
   await loadFile({
     mainWindow,
@@ -26,8 +29,8 @@ test("Display the open a new connection dialog when clicking File > Open... > Op
   });
 
   // Then
-  const playerStartingTime = mainWindow.locator('input[value="2025-02-26 10:37:15.547 AM WET"]');
-  expect(await playerStartingTime.inputValue()).toBe("2025-02-26 10:37:15.547 AM WET");
+  const playerStartingTime = mainWindow.locator(`input[value="${initialTime}"]`);
+  expect(await playerStartingTime.inputValue()).toBe(initialTime);
 
   //When
   await mainWindow.getByTestId("user-button").click();
@@ -38,12 +41,12 @@ test("Display the open a new connection dialog when clicking File > Open... > Op
   await mainWindow.getByTitle("Seek forward").click();
 
   // Then
-  const playerForwardedTime = mainWindow.locator('input[value="2025-02-26 10:37:15.947 AM WET"]');
-  expect(await playerForwardedTime.inputValue()).toBe("2025-02-26 10:37:15.947 AM WET");
+  const playerForwardedTime = mainWindow.locator(`input[value="${forwardedTime}"]`);
+  expect(await playerForwardedTime.inputValue()).toBe(forwardedTime);
 
-  //When
+  // When
   await mainWindow.getByTitle("Seek backward").click();
 
   // Then
-  expect(await playerStartingTime.inputValue()).toBe("2025-02-26 10:37:15.547 AM WET");
+  expect(await playerStartingTime.inputValue()).toBe(initialTime);
 });

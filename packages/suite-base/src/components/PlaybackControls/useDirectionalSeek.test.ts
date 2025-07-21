@@ -47,6 +47,9 @@ describe("useDirectionalSeek", () => {
 
   beforeEach(() => {
     (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
