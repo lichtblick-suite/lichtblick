@@ -338,7 +338,7 @@ export function StepSize(): React.ReactElement {
 }
 
 export function AutoUpdate(): React.ReactElement {
-  const [updatesEnabled = true, setUpdatedEnabled] = useAppConfigurationValue<boolean>(
+  const [updatesEnabled = false, setUpdatedEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.UPDATES_ENABLED,
   );
 
