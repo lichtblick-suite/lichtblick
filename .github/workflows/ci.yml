@@ -72,6 +72,9 @@ jobs:
 
     name: e2e (ubuntu-latest)
 
+    # Set a fixed timezone to ensure consistent test results.
+    # Lichtblick uses the system's local timezone, which can cause test assertions
+    # to fail due to time discrepancies across different environments.
     env:
       TZ: Europe/Lisbon
 
