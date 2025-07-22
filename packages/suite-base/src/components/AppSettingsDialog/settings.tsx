@@ -312,9 +312,8 @@ export function StepSize(): React.ReactElement {
     AppSetting.DEFAULT_STEP_SIZE,
   );
 
-  const valueValidation = (value: number) => {
-    return isNaN(value) || value < minValueAllowed;
-  };
+  const valueValidation = (value: number) => isNaN(value) || value < minValueAllowed;
+  const isStepSizeInvalid = valueValidation(stepSize);
 
   const latestStepSizeRef = useRef(stepSize);
   latestStepSizeRef.current = stepSize;
@@ -351,7 +350,8 @@ export function StepSize(): React.ReactElement {
             },
           },
         }}
-        error={valueValidation(stepSize)}
+        error={isStepSizeInvalid}
+        helperText={isStepSizeInvalid ? "Step size will default to 100ms" : " "}
       ></TextField>
     </Stack>
   );
