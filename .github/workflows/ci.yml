@@ -102,10 +102,12 @@ jobs:
         # See: https://github.com/microsoft/playwright/issues/34251
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
+      # It must be dev build, otherwise playwright wont't have all data-testid avaiable for icons
+      # https://mui.com/material-ui/migration/upgrade-to-v7/#svgicons-data-testid-removed
       - name: test:e2e:desktop:ci (ubuntu-latest)
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
           run: |
-            yarn desktop:build:dev # otherwise, playwright don't have all data-testid avaiable
+            yarn desktop:build:dev
             yarn test:e2e:desktop:ci
