@@ -33,6 +33,7 @@ import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon
 import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
 import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
 import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
+import { customTypography } from "@lichtblick/theme";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
@@ -72,7 +73,7 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: "center",
   },
   threeDeeButton: {
-    fontFamily: theme.typography.fontFamily,
+    fontFamily: customTypography.fontMonospace,
     fontFeatureSettings: theme.typography.caption.fontFeatureSettings,
     fontSize: theme.typography.caption.fontSize,
     fontWeight: theme.typography.fontWeightBold,
@@ -86,7 +87,7 @@ const useStyles = makeStyles()((theme) => ({
     marginRight: theme.spacing(1),
   },
   kbd: {
-    fontFamily: theme.typography.fontFamily,
+    fontFamily: customTypography.fontMonospace,
     background: tc(theme.palette.common.white).darken(45).toString(),
     padding: theme.spacing(0, 0.5),
     aspectRatio: 1,

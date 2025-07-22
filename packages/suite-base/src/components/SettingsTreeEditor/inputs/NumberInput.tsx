@@ -13,6 +13,8 @@ import { ReactNode, useCallback, useRef } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
+import { customTypography } from "@lichtblick/theme";
+
 const Constants = {
   ScrubPrecision: 4,
 } as const;
@@ -38,7 +40,7 @@ const useStyles = makeStyles()((theme) => ({
     },
     ".MuiInputBase-input": {
       textAlign: "center",
-      fontFamily: theme.typography.fontFamily,
+      fontFamily: customTypography.fontMonospace,
       cursor: "ew-resize",
 
       "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {

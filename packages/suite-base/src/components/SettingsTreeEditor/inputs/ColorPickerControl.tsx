@@ -14,6 +14,7 @@ import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
   picker: {
@@ -73,7 +74,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): React.JSX.Elem
     onInputBlur,
   } = props;
 
-  const { classes, theme } = useStyles();
+  const { classes } = useStyles();
 
   return (
     <Stack padding={1.5} gap={1}>
@@ -100,7 +101,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): React.JSX.Elem
             },
             role: "input",
             startAdornment: <TagIcon fontSize="small" />,
-            style: { fontFamily: theme.typography.fontFamily },
+            style: { fontFamily: customTypography.fontMonospace },
           },
         }}
         placeholder={alphaType === "alpha" ? "RRGGBBAA" : "RRGGBB"}

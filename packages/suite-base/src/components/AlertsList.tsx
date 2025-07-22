@@ -29,6 +29,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import { AlertsContextStore, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import { DetailsType, NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
   acccordion: {
@@ -46,7 +47,7 @@ const useStyles = makeStyles()((theme) => ({
   accordionDetails: {
     display: "flex",
     flexDirection: "column",
-    fontFamily: theme.typography.fontFamily,
+    fontFamily: customTypography.fontMonospace,
     fontSize: "0.6875rem",
     padding: theme.spacing(1.125),
     gap: theme.spacing(1),

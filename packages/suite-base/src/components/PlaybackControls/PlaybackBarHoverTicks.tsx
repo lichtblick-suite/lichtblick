@@ -20,6 +20,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import HoverBar from "@lichtblick/suite-base/components/TimeBasedChart/HoverBar";
 import { useHoverValue } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
   tick: {
@@ -33,7 +34,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   time: {
     textAlign: "center",
-    fontFamily: theme.typography.fontFamily,
+    fontFamily: customTypography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     letterSpacing: theme.typography.caption.letterSpacing,
