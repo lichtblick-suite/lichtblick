@@ -26,7 +26,7 @@ import {
   ToggleButtonGroupProps,
 } from "@mui/material";
 import moment from "moment-timezone";
-import { MouseEvent, useCallback, useMemo } from "react";
+import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
@@ -305,10 +305,29 @@ export function MessageFramerate(): React.ReactElement {
 
 export function StepSize(): React.ReactElement {
   const { t } = useTranslation("appSettings");
+  const defaultStepValue = 100;
+  const minValueAllowed = 1;
 
-  const [stepSize = 100, setStepSize] = useAppConfigurationValue<number>(
+  const [stepSize = defaultStepValue, setStepSize] = useAppConfigurationValue<number>(
     AppSetting.DEFAULT_STEP_SIZE,
   );
+
+  const valueValidation = (value: number) => {
+    return isNaN(value) || value < minValueAllowed;
+  };
+
+  const latestStepSizeRef = useRef(stepSize);
+  latestStepSizeRef.current = stepSize;
+
+  useEffect(() => {
+    return () => {
+      const latest = latestStepSizeRef.current;
+      if (valueValidation(latest)) {
+        void setStepSize(defaultStepValue);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Stack>
@@ -332,6 +351,7 @@ export function StepSize(): React.ReactElement {
             },
           },
         }}
+        error={valueValidation(stepSize)}
       ></TextField>
     </Stack>
   );
