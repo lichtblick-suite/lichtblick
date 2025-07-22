@@ -188,5 +188,8 @@
     "vm-browserify": "1.1.2",
     "webpack": "5.99.9",
     "zustand": "4.5.7"
+  },
+  "dependencies": {
+    "@mui/material": "7.2.0"
   }
 }
