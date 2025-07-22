@@ -107,5 +107,5 @@ jobs:
         with:
           working-directory: ./
           run: |
-            yarn desktop:build:prod
+            yarn desktop:build:dev # otherwise, playwright don't have all data-testid avaiable
             yarn test:e2e:desktop:ci
