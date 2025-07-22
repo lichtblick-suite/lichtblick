@@ -55,6 +55,7 @@
     "@lichtblick/xmlrpc": "1.0.0",
     "@mcap/core": "2.1.6",
     "@mui/icons-material": "5.15.5",
+    "@mui/material": "7.2.0",
     "@popperjs/core": "^2.11.8",
     "@protobufjs/base64": "1.1.2",
     "@storybook/jest": "0.2.3",
@@ -188,8 +189,5 @@
     "vm-browserify": "1.1.2",
     "webpack": "5.99.9",
     "zustand": "4.5.7"
-  },
-  "dependencies": {
-    "@mui/material": "7.2.0"
   }
 }

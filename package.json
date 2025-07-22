@@ -88,6 +88,7 @@
     "@lichtblick/eslint-plugin": "1.0.4",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
     "@lichtblick/tsconfig": "1.0.0",
+    "@mui/material": "7.2.0",
     "@octokit/rest": "20.0.2",
     "@playwright/test": "1.52.0",
     "@storybook/addon-actions": "9.0.8",
@@ -153,7 +154,6 @@
     "@lichtblick/omgidl-serialization": "1.0.0",
     "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
-    "@mui/material": "7.2.0",
     "react-use": "17.5.1",
     "rehype-raw": "7.0.0",
     "vm-browserify": "1.1.2"
