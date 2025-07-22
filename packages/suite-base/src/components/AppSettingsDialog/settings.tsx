@@ -305,14 +305,14 @@ export function MessageFramerate(): React.ReactElement {
 
 export function StepSize(): React.ReactElement {
   const { t } = useTranslation("appSettings");
-  const defaultStepValue = 100;
-  const minValueAllowed = 1;
+  const defaultStepSize = 100;
+  const minStepSize = 1;
 
-  const [stepSize = defaultStepValue, setStepSize] = useAppConfigurationValue<number>(
+  const [stepSize = defaultStepSize, setStepSize] = useAppConfigurationValue<number>(
     AppSetting.DEFAULT_STEP_SIZE,
   );
 
-  const valueValidation = (value: number) => isNaN(value) || value < minValueAllowed;
+  const valueValidation = (value: number) => isNaN(value) || value < minStepSize;
   const isStepSizeInvalid = valueValidation(stepSize);
 
   const latestStepSizeRef = useRef(stepSize);
@@ -322,7 +322,7 @@ export function StepSize(): React.ReactElement {
     return () => {
       const latest = latestStepSizeRef.current;
       if (valueValidation(latest)) {
-        void setStepSize(defaultStepValue);
+        void setStepSize(defaultStepSize);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
