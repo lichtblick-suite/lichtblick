@@ -11,6 +11,7 @@ import { useCallback, MouseEvent, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { customTypography } from "@lichtblick/theme";
 
 import { ColorPickerControl, useColorPickerControl } from "./ColorPickerControl";
 import { ColorSwatch } from "./ColorSwatch";
@@ -27,7 +28,7 @@ const useStyles = makeStyles<void, "iconButton">()((theme, _params, classes) => 
       padding: 0,
     },
     [`.${inputBaseClasses.root}`]: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
       cursor: "pointer",
 
       [`:not(:hover) .${classes.iconButton}`]: {
@@ -36,7 +37,7 @@ const useStyles = makeStyles<void, "iconButton">()((theme, _params, classes) => 
     },
     [`.${inputBaseClasses.input}`]: {
       alignItems: "center",
-      fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+      fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
     },
   },
   iconButton: {

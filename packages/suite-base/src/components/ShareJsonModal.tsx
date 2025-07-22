@@ -24,6 +24,7 @@ import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
+import { customTypography } from "@lichtblick/theme";
 
 export type ShareJsonModalProps = {
   onRequestClose: () => void;
@@ -36,7 +37,7 @@ const useStyles = makeStyles()((theme) => ({
   textarea: {
     [`.${outlinedInputClasses.root}`]: {
       backgroundColor: theme.palette.action.hover,
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
       maxHeight: "60vh",
       overflowY: "auto",
       padding: theme.spacing(0.25),
