@@ -32,6 +32,7 @@ import {
   getValidatedTimeAndMethodFromString,
 } from "@lichtblick/suite-base/util/formatTime";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import { customTypography } from "@lichtblick/theme";
 
 type PlaybackTimeDisplayMethodProps = {
   appTimeFormat: IAppTimeFormat;
@@ -69,7 +70,7 @@ const useStyles = makeStyles<{ timeDisplayMethod: TimeDisplayMethod }>()(
         },
       },
       [`.${inputBaseClasses.input}`]: {
-        // fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero' !important`,
+        fontFeatureSettings: `${customTypography.fontFeatureSettings}, 'zero' !important`,
         fontVariantNumeric: "tabular-nums", // Example of a valid property
         minWidth: timeDisplayMethod === "TOD" ? "28ch" : "20ch",
       },
