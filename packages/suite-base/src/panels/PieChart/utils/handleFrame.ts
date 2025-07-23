@@ -22,23 +22,23 @@ export function handleFrame({ state, action }: HandleFrameProps): PieChartState 
   let latestMatchingQueriedData = state.latestMatchingQueriedData;
   let latestMessage = state.latestMessage;
   let error = state.error;
-  
+
   if (state.parsedPath) {
     for (const message of action.messages) {
       if (message.topic !== state.parsedPath.topicName) {
         continue;
       }
-      
+
       try {
         const extractedData = simpleGetMessagePathDataItems(message, state.parsedPath);
-        
+
         if (extractedData.length === 0) {
-          throw new Error('No data extracted from message path');
+          throw new Error("No data extracted from message path");
         }
-        
+
         // Handle different types of extracted data
         let data: Float32Array;
-        
+
         // If we have a single item that's already a typed array, use it directly
         if (extractedData.length === 1) {
           const singleItem = extractedData[0];
@@ -58,15 +58,15 @@ export function handleFrame({ state, action }: HandleFrameProps): PieChartState 
           const numericArray = extractedData.map((item) => Number(item));
           data = new Float32Array(numericArray);
         }
-        
+
         latestMatchingQueriedData = data;
         latestMessage = message;
         error = undefined;
       } catch (err) {
-        error = err instanceof Error ? err : new Error('Unknown error processing message data');
+        error = err instanceof Error ? err : new Error("Unknown error processing message data");
       }
     }
   }
-  
+
   return { ...state, latestMessage, latestMatchingQueriedData, error };
 }
