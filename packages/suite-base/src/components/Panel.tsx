@@ -68,6 +68,7 @@ import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathD
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
   perfInfo: {
@@ -76,7 +77,7 @@ const useStyles = makeStyles()((theme) => ({
     left: 3,
     whiteSpace: "pre-line",
     fontSize: "0.75em",
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero'`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, 'zero'`,
     opacity: 0.7,
     userSelect: "none",
     mixBlendMode: "difference",

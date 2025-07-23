@@ -58,8 +58,11 @@ export function SettingsMenu({
         open={open}
         onClose={handleClose}
         onClick={handleClose}
-        MenuListProps={{ className: classes.menuList, dense: true }}
         slotProps={{
+          list: {
+            className: classes.menuList,
+            dense: true,
+          },
           paper: {
             "data-tourid": "user-menu",
           } as Partial<PaperProps & { "data-tourid"?: string }>,

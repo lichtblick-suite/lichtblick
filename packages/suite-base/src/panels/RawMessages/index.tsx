@@ -46,6 +46,7 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
 import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
+import { customTypography } from "@lichtblick/theme";
 
 import { DiffSpan } from "./DiffSpan";
 import DiffStats from "./DiffStats";
@@ -102,7 +103,7 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
 const useStyles = makeStyles()((theme) => ({
   topic: {
     fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
   },
   hoverObserver: {
     display: "inline-flex",

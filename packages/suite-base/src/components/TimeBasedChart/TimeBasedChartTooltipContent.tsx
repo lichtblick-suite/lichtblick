@@ -21,6 +21,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { customTypography } from "@lichtblick/theme";
 
 export type TimeBasedChartTooltipData = {
   configIndex: number;
@@ -38,7 +39,7 @@ type Props = Immutable<{
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
@@ -48,7 +49,7 @@ const useStyles = makeStyles()((theme) => ({
     display: "grid",
     gridTemplateColumns: "auto minmax(0px, max-content) minmax(auto, max-content)",
     alignItems: "center",
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",

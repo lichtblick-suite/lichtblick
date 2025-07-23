@@ -93,7 +93,12 @@ export function NestedMenuItem(
           setAnchorEl(undefined);
         }}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        MenuListProps={{ dense: true, className: classes.menuList }}
+        slotProps={{
+          list: {
+            dense: true,
+            className: classes.menuList,
+          },
+        }}
         autoFocus={false}
         disableAutoFocus
         disableEnforceFocus

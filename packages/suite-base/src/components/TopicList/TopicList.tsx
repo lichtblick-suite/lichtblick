@@ -162,9 +162,11 @@ export function TopicList(): React.JSX.Element {
             variant="filled"
             fullWidth
             placeholder={t("waitingForData")}
-            InputProps={{
-              size: "small",
-              startAdornment: <SearchIcon fontSize="small" />,
+            slotProps={{
+              input: {
+                size: "small",
+                startAdornment: <SearchIcon fontSize="small" />,
+              },
             }}
           />
         </header>
@@ -175,7 +177,7 @@ export function TopicList(): React.JSX.Element {
                 className={classes.skeletonText}
                 primary={<Skeleton animation={false} width="20%" />}
                 secondary={<Skeleton animation="wave" width="55%" />}
-                secondaryTypographyProps={{ variant: "caption" }}
+                slotProps={{ secondary: { variant: "caption" } }}
               />
             </ListItem>
           ))}

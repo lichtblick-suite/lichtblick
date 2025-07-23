@@ -82,8 +82,10 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
               className={classes.listItemText}
               primary={message}
               secondary={`${source} ${errorLoc}`}
-              secondaryTypographyProps={{
-                color: "text.secondary",
+              slotProps={{
+                secondary: {
+                  color: "text.secondary",
+                },
               }}
             />
           </ListItem>

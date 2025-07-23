@@ -22,6 +22,7 @@ import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { validationErrorToString, ValidationResult } from "@lichtblick/suite-base/util/validators";
+import { customTypography } from "@lichtblick/theme";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 
@@ -29,7 +30,7 @@ const useStyles = makeStyles()((theme) => ({
   editor: {
     backgroundColor: "transparent !important",
     font: "inherit !important",
-    fontFamily: `${theme.typography.fontMonospace} !important`,
+    fontFamily: `${customTypography.fontMonospace} !important`,
     overflow: "auto",
   },
   error: {

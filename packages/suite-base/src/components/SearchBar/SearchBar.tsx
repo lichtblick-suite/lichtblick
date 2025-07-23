@@ -42,20 +42,22 @@ function SearchBar(
         value={value}
         onChange={onChange}
         fullWidth
-        InputProps={{
-          ...rest.InputProps,
-          startAdornment: (
-            <InputAdornment className={classes.filterStartAdornment} position="start">
-              {startAdornment}
-            </InputAdornment>
-          ),
-          endAdornment: showClearIcon && (
-            <InputAdornment position="end">
-              <IconButton size="small" title="Clear" onClick={onClear} edge="end">
-                <ClearIcon fontSize="small" data-testid="ClearIcon" />
-              </IconButton>
-            </InputAdornment>
-          ),
+        slotProps={{
+          ...rest.slotProps,
+          input: {
+            startAdornment: (
+              <InputAdornment className={classes.filterStartAdornment} position="start">
+                {startAdornment}
+              </InputAdornment>
+            ),
+            endAdornment: showClearIcon && (
+              <InputAdornment position="end">
+                <IconButton size="small" title="Clear" onClick={onClear} edge="end">
+                  <ClearIcon fontSize="small" data-testid="ClearIcon" />
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
         }}
         {...rest}
       />

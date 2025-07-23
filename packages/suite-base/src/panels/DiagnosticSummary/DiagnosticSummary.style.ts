@@ -29,7 +29,7 @@ export const useStyles = makeStyles()((theme) => ({
     },
   },
   select: {
-    [`.${inputBaseClasses.input}.${selectClasses.select}.${inputBaseClasses.inputSizeSmall}`]: {
+    [`.${inputBaseClasses.input}.${selectClasses.select}.MuiInputBase-sizeSmall`]: {
       paddingTop: 0,
       paddingBottom: 0,
       minWidth: 40,

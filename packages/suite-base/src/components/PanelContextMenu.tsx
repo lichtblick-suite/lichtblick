@@ -108,8 +108,10 @@ function PanelContextMenuComponent(props: PanelContextMenuProps): React.JSX.Elem
         onClose={handleClose}
         anchorReference="anchorPosition"
         anchorPosition={position ? { top: position.y, left: position.x } : undefined}
-        MenuListProps={{
-          dense: true,
+        slotProps={{
+          list: {
+            dense: true,
+          },
         }}
       >
         {items.map((item, index) => {

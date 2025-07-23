@@ -16,7 +16,7 @@ const useStyles = makeStyles()((theme) => ({
       padding: theme.spacing(0.375, 0.5),
       gap: theme.spacing(0.375),
 
-      [`.${inputBaseClasses.inputSizeSmall}`]: {
+      [`.${inputBaseClasses.root}.${inputBaseClasses.sizeSmall} .MuiInputBase-input`]: {
         padding: theme.spacing(0.425, 0.5),
       },
     },
@@ -50,11 +50,13 @@ export function FilterTagInput({
       options={suggestions}
       freeSolo
       fullWidth
-      ChipProps={{
-        className: classes.chip,
-        variant: "filled",
-        size: "small",
-        deleteIcon: <Dismiss12Filled />,
+      slotProps={{
+        chip: {
+          className: classes.chip,
+          variant: "filled",
+          size: "small",
+          deleteIcon: <Dismiss12Filled />,
+        },
       }}
       renderInput={(params) => (
         <TextField {...params} size="small" className={classes.input} placeholder="Search filter" />

@@ -232,7 +232,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
             color="secondary"
             size="small"
             onChange={(event) => {
-              saveConfig({ minLevel: event.target.value as number });
+              saveConfig({ minLevel: event.target.value });
             }}
             MenuProps={{ MenuListProps: { dense: true } }}
           >

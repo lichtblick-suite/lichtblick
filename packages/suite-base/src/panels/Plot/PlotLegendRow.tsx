@@ -23,6 +23,7 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
+import { customTypography } from "@lichtblick/theme";
 
 import { PlotPath, plotPathDisplayName } from "./utils/config";
 
@@ -94,7 +95,7 @@ const useStyles = makeStyles<void, "plotName" | "actionButton">()((theme, _param
     height: ROW_HEIGHT,
     paddingInline: theme.spacing(0.75, 2.5),
     gridColumn: "span 2",
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
 
     ".MuiTypography-root": {
       whiteSpace: "nowrap",

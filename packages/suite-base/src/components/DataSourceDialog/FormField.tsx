@@ -44,17 +44,21 @@ export function FormField(props: Props): React.JSX.Element {
         label={field.label}
         error={error != undefined}
         helperText={error}
-        FormHelperTextProps={{
-          variant: "standard",
+        slotProps={{
+          formHelperText: {
+            variant: "standard",
+          },
+          input: {
+            notched: false,
+          },
+          inputLabel: {
+            shrink: true,
+          },
         }}
         placeholder={field.placeholder}
         defaultValue={field.defaultValue}
         onChange={onChange}
         variant="outlined"
-        InputProps={{
-          notched: false,
-        }}
-        InputLabelProps={{ shrink: true }}
       />
       <FormHelperText>{field.description}</FormHelperText>
     </div>

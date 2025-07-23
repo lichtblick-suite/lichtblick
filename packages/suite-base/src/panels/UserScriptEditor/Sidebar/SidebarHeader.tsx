@@ -19,15 +19,16 @@ export const SidebarHeader = ({
 }): React.JSX.Element => (
   <CardHeader
     title={title}
-    titleTypographyProps={{
-      variant: "subtitle1",
-      fontWeight: "600",
+    slotProps={{
+      title: {
+        variant: "h6",
+      },
+      subheader: {
+        variant: "body2",
+        color: "text.secondary",
+      },
     }}
     subheader={subheader}
-    subheaderTypographyProps={{
-      variant: "body2",
-      color: "text.secondary",
-    }}
     action={
       <IconButton size="small" onClick={onClose} title="Collapse">
         <Dismiss20Filled />

@@ -247,8 +247,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
           title={tooltipContent ?? <></>}
           disableInteractive
           followCursor
-          TransitionComponent={Fade}
-          TransitionProps={{ timeout: 0 }}
+          slots={{ transition: Fade }}
+          slotProps={{ transition: { timeout: 0 } }}
         >
           <div className={classes.verticalBarWrapper} data-testid="vertical-bar-wrapper">
             <div

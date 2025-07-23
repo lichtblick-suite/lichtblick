@@ -86,7 +86,7 @@ export function LaunchPreferenceScreen(): ReactElement {
       <DialogContent>
         <Grid container spacing={1}>
           {actions.map((action) => (
-            <Grid key={action.key} item xs={12} sm={6}>
+            <Grid key={action.key} size={{ xs: 12, sm: 6 }}>
               <Button
                 className={classes.button}
                 fullWidth
@@ -105,7 +105,7 @@ export function LaunchPreferenceScreen(): ReactElement {
               </Button>
             </Grid>
           ))}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <FormControlLabel
               label="Remember my preference"
               control={
