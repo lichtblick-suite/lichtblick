@@ -38,7 +38,7 @@ export function handleFrame({ state, action }: HandleFrameProps): PieChartState 
 
         // Convert extracted data to numeric array
         let data: Float32Array | undefined;
-        
+
         try {
           const numericData = extractedData.flat().map((item) => Number(item));
           if (numericData.length > 0 && !numericData.some(isNaN)) {
