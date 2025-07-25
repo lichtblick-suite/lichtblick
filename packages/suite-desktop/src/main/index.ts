@@ -119,6 +119,9 @@ export async function main(): Promise<void> {
   // unless user force multiple instances
   if (forceMultipleInstances) {
     log.info("Multiple instances allowed by --force-multiple-instances flag.");
+    log.info(
+      "IndexDB and extension may not work correctly in this instance, but visualization should work normally.",
+    );
   } else if (!app.requestSingleInstanceLock()) {
     log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
     app.quit();
