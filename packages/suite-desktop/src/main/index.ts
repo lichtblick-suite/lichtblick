@@ -108,9 +108,18 @@ export async function main(): Promise<void> {
     return;
   }
 
+  // The flag '--force-multiple-instances' is used to allow multiple instances of the app to run.
+  // It is not a standard Electron flag, but we use it to control the behavior of `app.requestSingleInstanceLock()`.
+  const forceMultipleInstances = process.argv.some((arg) =>
+    arg.startsWith("--force-multiple-instances"),
+  );
+
   // If another instance of the app is already open, this call triggers the "second-instance" event
-  // in the original instance and returns false.
-  if (!app.requestSingleInstanceLock()) {
+  // in the original instance and returns false,
+  // unless user force multiple instances
+  if (forceMultipleInstances) {
+    log.info("Multiple instances allowed by --force-multiple-instances flag.");
+  } else if (!app.requestSingleInstanceLock()) {
     log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
     app.quit();
     return;
@@ -119,6 +128,13 @@ export async function main(): Promise<void> {
   // Forward urls/files opened in a second instance to our default handlers so it's as if we opened
   // them with this instance.
   app.on("second-instance", (_ev, argv, _workingDirectory) => {
+    // If we allow multiple instances, we don't handle the second instance
+    // and just let it run as a separate instance.
+    if (forceMultipleInstances) {
+      log.info("Multiple instances allowed by --force-multiple-instances flag.");
+      return;
+    }
+
     log.debug("Received arguments from second app instance:", argv);
 
     // Bring the app to the front
