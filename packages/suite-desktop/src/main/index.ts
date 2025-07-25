@@ -15,6 +15,7 @@ import { initI18n, sharedI18nObject as i18n } from "@lichtblick/suite-base/src/i
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
+import { createNewWindow } from "./createNewWindow";
 import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
@@ -44,7 +45,7 @@ if (homeOverride != undefined) {
  *
  * Note: in dev we launch electron with `electron .webpack` so we need to filter out things that are not files
  */
-function isFileToOpen(arg: string) {
+export const isFileToOpen = (arg: string): boolean => {
   // Anything that isn't a file or directory will throw, we filter those out too
   try {
     return fs.statSync(arg).isFile();
@@ -53,7 +54,7 @@ function isFileToOpen(arg: string) {
     // ignore
   }
   return false;
-}
+};
 
 function updateNativeColorScheme() {
   const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "system";
@@ -108,37 +109,34 @@ export async function main(): Promise<void> {
     return;
   }
 
-  // The flag '--force-multiple-instances' is used to allow multiple instances of the app to run.
-  // It is not a standard Electron flag, but we use it to control the behavior of `app.requestSingleInstanceLock()`.
-  const forceMultipleInstances = process.argv.some((arg) =>
-    arg.startsWith("--force-multiple-instances"),
-  );
+  // Check if --force-multiple-windows` is set
+  const forceMultipleWindows = process.argv.some((arg) => arg === "--force-multiple-windows");
 
   // If another instance of the app is already open, this call triggers the "second-instance" event
-  // in the original instance and returns false,
-  // unless user force multiple instances
-  if (forceMultipleInstances) {
-    log.info("Multiple instances allowed by --force-multiple-instances flag.");
-    log.info(
-      "IndexDB and extension may not work correctly in this instance, but visualization should work normally.",
-    );
-  } else if (!app.requestSingleInstanceLock()) {
-    log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
-    app.quit();
+  // in the original instance and returns false.
+  // In case of forcing multiple instances, we will open a new window and inject the files and deep links manually.
+  if (!app.requestSingleInstanceLock()) {
+    if (forceMultipleWindows) {
+      log.info(
+        `An instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Forcing a new window to run in this instance.`,
+      );
+    } else {
+      log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
+      app.quit();
+    }
     return;
   }
 
-  // Forward urls/files opened in a second instance to our default handlers so it's as if we opened
-  // them with this instance.
+  // Forward urls/files opened in a second instance to our default handlers so it's as if we opened them with this instance.
+  // In case of forcing multiple instances, we will open a new window and inject the files and deep links manually.
   app.on("second-instance", (_ev, argv, _workingDirectory) => {
-    // If we allow multiple instances, we don't handle the second instance
-    // and just let it run as a separate instance.
-    if (forceMultipleInstances) {
-      log.info("Multiple instances allowed by --force-multiple-instances flag.");
+    log.debug("Received arguments from second app instance:", argv);
+
+    if (forceMultipleWindows) {
+      log.debug("second-instance: Forcing a new window to run in this instance.");
+      createNewWindow(argv);
       return;
     }
-
-    log.debug("Received arguments from second app instance:", argv);
 
     // Bring the app to the front
     const someWindow = BrowserWindow.getAllWindows()[0];
