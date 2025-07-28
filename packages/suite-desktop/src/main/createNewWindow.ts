@@ -3,8 +3,8 @@
 
 import Logger from "@lichtblick/log";
 
-import { isFileToOpen } from ".";
 import StudioWindow from "./StudioWindow";
+import { isFileToOpen } from "./fileUtils";
 import injectFilesToOpen from "./injectFilesToOpen";
 
 const log = Logger.getLogger(__filename);

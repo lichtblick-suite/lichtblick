@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
-import fs from "fs";
 import path from "path";
 
 import Logger from "@lichtblick/log";
@@ -16,6 +15,7 @@ import { initI18n, sharedI18nObject as i18n } from "@lichtblick/suite-base/src/i
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
 import { createNewWindow } from "./createNewWindow";
+import { isFileToOpen } from "./fileUtils";
 import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
@@ -39,22 +39,6 @@ const homeOverride = process.argv.find((arg) => arg.startsWith("--home-dir="));
 if (homeOverride != undefined) {
   app.setPath("home", homeOverride.split("=")[1]!);
 }
-
-/**
- * Determine whether an item in argv is a file that we should try opening as a data source.
- *
- * Note: in dev we launch electron with `electron .webpack` so we need to filter out things that are not files
- */
-export const isFileToOpen = (arg: string): boolean => {
-  // Anything that isn't a file or directory will throw, we filter those out too
-  try {
-    return fs.statSync(arg).isFile();
-  } catch (err: unknown) {
-    log.error(err);
-    // ignore
-  }
-  return false;
-};
 
 function updateNativeColorScheme() {
   const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "system";
