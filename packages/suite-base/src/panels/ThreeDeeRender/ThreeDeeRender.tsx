@@ -318,15 +318,27 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [context.dataSourceProfile, renderer]);
 
-  // Save panel settings whenever they change
+  // Save panel settings with optimized debouncing for instant UI + efficient persistence
   const throttledSave = useDebouncedCallback(
     (newConfig: Immutable<RendererConfig>) => {
       saveState(newConfig);
     },
-    1000,
-    { leading: false, trailing: true, maxWait: 1000 },
+    100, // Fast throttling for responsive settings panel
+    {
+      leading: false, // Prevent unnecessary saves during rapid changes
+      trailing: true, // Ensure final state is always persisted
+      maxWait: 100, // Consistent timing with main delay
+    },
   );
-  useEffect(() => throttledSave(config), [config, throttledSave]);
+
+  // Optimize config memoization to prevent unnecessary re-computations
+  const configForSave = useMemo(() => config, [config]);
+
+  useEffect(() => {
+    // UI updates immediately via renderer.config
+    // Persistence is throttled for optimal I/O performance
+    throttledSave(configForSave);
+  }, [configForSave, throttledSave]);
 
   // Keep default panel title up to date with selected image topic in image mode
   useEffect(() => {
