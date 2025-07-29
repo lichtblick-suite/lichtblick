@@ -77,11 +77,13 @@ export class Input extends EventEmitter<InputEvents> {
     this.#resizeObserver = new ResizeObserver(debouncedOnResize);
     this.#resizeObserver.observe(parentEl);
 
+    // Mouse events need to be non-passive to allow preventDefault() for drag operations
     canvas.addEventListener("mousedown", this.#onMouseDown);
     canvas.addEventListener("mousemove", this.#onMouseMove);
     canvas.addEventListener("mouseup", this.#onMouseUp);
     canvas.addEventListener("click", this.#onClick);
-    canvas.addEventListener("wheel", this.#onWheel);
+    // Wheel can be passive since we don't prevent default scrolling behavior
+    canvas.addEventListener("wheel", this.#onWheel, { passive: true });
     canvas.addEventListener("touchstart", this.#onTouchStart, { passive: false });
     canvas.addEventListener("touchend", this.#onTouchEnd, { passive: false });
     canvas.addEventListener("touchmove", this.#onTouchMove, { passive: false });
