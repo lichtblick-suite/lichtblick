@@ -8,7 +8,6 @@
 import * as _ from "lodash-es";
 import { useSnackbar } from "notistack";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import { useLatest } from "react-use";
 import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
@@ -321,7 +320,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     {
       leading: false, // Prevent unnecessary saves during rapid changes
       trailing: true, // Ensure final state is always persisted
-      maxWait: 100, // Consistent timing with main delay
+      maxWait: 500, // Prevent excessive saves during continuous changes
     },
   );
 
