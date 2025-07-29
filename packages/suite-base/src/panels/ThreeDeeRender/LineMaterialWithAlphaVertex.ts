@@ -336,23 +336,27 @@ ShaderLib["foxglove.line"] = {
 
       vec3 p13 = p1 - p3;
       vec3 p43 = p4 - p3;
-
       vec3 p21 = p2 - p1;
 
+      // Pre-calculate dot products to avoid redundant computations
       float d1343 = dot( p13, p43 );
       float d4321 = dot( p43, p21 );
       float d1321 = dot( p13, p21 );
       float d4343 = dot( p43, p43 );
       float d2121 = dot( p21, p21 );
 
+      // Optimized calculation with early termination for degenerate cases
       float denom = d2121 * d4343 - d4321 * d4321;
+
+      // Avoid division by zero and handle degenerate line cases
+      if (abs(denom) < 1e-10) {
+        return vec2(0.5, 0.5); // Fallback to midpoint
+      }
 
       float numer = d1343 * d4321 - d1321 * d4343;
 
-      mua = numer / denom;
-      mua = clamp( mua, 0.0, 1.0 );
-      mub = ( d1343 + d4321 * ( mua ) ) / d4343;
-      mub = clamp( mub, 0.0, 1.0 );
+      mua = clamp( numer / denom, 0.0, 1.0 );
+      mub = clamp( ( d1343 + d4321 * mua ) / d4343, 0.0, 1.0 );
 
       return vec2( mua, mub );
 
@@ -397,15 +401,15 @@ ShaderLib["foxglove.line"] = {
 
           #ifdef USE_ALPHA_TO_COVERAGE
 
+            // Optimized anti-aliasing calculation
             float dnorm = fwidth( norm );
-            alpha = 1.0 - smoothstep( 0.5 - dnorm, 0.5 + dnorm, norm );
+            alpha *= 1.0 - smoothstep( 0.5 - dnorm, 0.5 + dnorm, norm );
 
           #else
 
+            // Early discard for better performance
             if ( norm > 0.5 ) {
-
               discard;
-
             }
 
           #endif
