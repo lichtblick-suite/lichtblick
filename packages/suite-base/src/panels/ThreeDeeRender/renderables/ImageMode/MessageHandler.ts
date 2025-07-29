@@ -160,6 +160,9 @@ export class MessageHandler implements IMessageHandler {
   /** listener functions that are called when the state changes. */
   #listeners: RenderStateListener[] = [];
 
+  /** Throttled version of state emission to prevent excessive re-renders */
+  #throttledEmitState: () => void;
+
   /** Holds what annotations are currently available on the given source. These are needed because annotations
    * that are marked as visible may be present in the layout/config, but are not present on the source.
    * This can cause synchronized annotations to never resolve if the source does not have the annotation topic
@@ -179,6 +182,19 @@ export class MessageHandler implements IMessageHandler {
     };
     this.#tree = new AVLTree<Time, SynchronizationItem>(compareTime);
     this.#availableAnnotationTopics = new Set();
+
+    // Smart throttling: immediate for important changes, throttled for rapid updates
+    this.#throttledEmitState = _.throttle(
+      () => {
+        const state = this.getRenderStateAndUpdateHUD();
+        this.#listeners.forEach((fn) => {
+          fn(state, this.#oldRenderState);
+        });
+        this.#oldRenderState = state;
+      },
+      16,
+      { leading: true, trailing: true },
+    ); // ~60fps throttling
   }
 
   public addListener(listener: RenderStateListener): void {
@@ -348,13 +364,13 @@ export class MessageHandler implements IMessageHandler {
     this.#config = newConfig;
 
     if (changed) {
-      this.#emitState();
+      this.#emitState({ immediate: true }); // Config changes need immediate update
     }
   }
 
   public setAvailableAnnotationTopics(topicNames: string[]): void {
     this.#availableAnnotationTopics = new Set(topicNames);
-    this.#emitState();
+    this.#emitState({ immediate: true }); // Topic availability changes need immediate update
   }
 
   public clear(): void {
@@ -363,16 +379,21 @@ export class MessageHandler implements IMessageHandler {
     };
     this.#tree.clear();
     this.#oldRenderState = undefined;
-    this.#emitState();
+    this.#emitState({ immediate: true }); // Clear operations need immediate update
   }
 
-  #emitState() {
-    const state = this.getRenderStateAndUpdateHUD();
-
-    this.#listeners.forEach((fn) => {
-      fn(state, this.#oldRenderState);
-    });
-    this.#oldRenderState = state;
+  #emitState(options: { immediate?: boolean } = {}) {
+    if (options.immediate === true) {
+      // Immediate emission for critical changes (config changes, clear operations)
+      const state = this.getRenderStateAndUpdateHUD();
+      this.#listeners.forEach((fn) => {
+        fn(state, this.#oldRenderState);
+      });
+      this.#oldRenderState = state;
+    } else {
+      // Use throttled version for message processing
+      this.#throttledEmitState();
+    }
   }
 
   /** Do not use. only public for testing */
