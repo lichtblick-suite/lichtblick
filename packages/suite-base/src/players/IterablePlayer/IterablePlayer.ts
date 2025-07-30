@@ -25,6 +25,7 @@ import {
 import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
 import { DeserializedSourceWrapper } from "@lichtblick/suite-base/players/IterablePlayer/DeserializedSourceWrapper";
 import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
+import { TreeLoader } from "@lichtblick/suite-base/players/IterablePlayer/TreeLoader/TreeLoader";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
@@ -46,7 +47,6 @@ import {
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
 
-import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
 import {
   IDeserializedIterableSource,
@@ -182,8 +182,11 @@ export class IterablePlayer implements Player {
   // The iterator for reading messages during playback
   #playbackIterator?: AsyncIterator<Readonly<IteratorResult>>;
 
-  #blockLoader?: BlockLoader;
-  #blockLoadingProcess?: Promise<void>;
+  // #blockLoader?: BlockLoader;
+  // #blockLoadingProcess?: Promise<void>;
+
+  #treeLoader?: TreeLoader;
+  #treeLoadingProcess?: Promise<void>;
 
   #queueEmitState: ReturnType<typeof debouncePromise>;
 
@@ -216,7 +219,7 @@ export class IterablePlayer implements Player {
       const MEGABYTE_IN_BYTES = 1024 * 1024;
       const bufferInterface = new BufferedIterableSource(source, {
         readAheadDuration,
-        maxCacheSizeBytes: 300 * MEGABYTE_IN_BYTES, // 300mb
+        maxCacheSizeBytes: 600 * MEGABYTE_IN_BYTES, // 600mb
       });
       this.#bufferImpl = bufferInterface;
       this.#bufferedSource = new DeserializingIterableSource(bufferInterface);
@@ -355,7 +358,7 @@ export class IterablePlayer implements Player {
 
     this.#allTopics = allTopics;
     this.#preloadTopics = preloadTopics;
-    this.#blockLoader?.setTopics(this.#preloadTopics);
+    this.#treeLoader?.setTopics(this.#preloadTopics);
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
     // iterators accordingly. However if we are idle or already seeking then we need to manually
@@ -564,18 +567,18 @@ export class IterablePlayer implements Player {
       if (this.#enablePreload) {
         // --- setup block loader which loads messages for _full_ subscriptions in the "background"
         try {
-          let blockLoaderSource;
+          let treeLoaderSource;
           if (this.#iterableSource.sourceType === "deserialized") {
-            blockLoaderSource = this.#iterableSource;
+            treeLoaderSource = this.#iterableSource;
           } else {
-            blockLoaderSource = new DeserializingIterableSource(this.#iterableSource);
+            treeLoaderSource = new DeserializingIterableSource(this.#iterableSource);
             // We must not call initialize() here, as the #iterableSource was already initialized above.
-            blockLoaderSource.initializeDeserializers(initResult);
+            treeLoaderSource.initializeDeserializers(initResult);
           }
 
-          this.#blockLoader = new BlockLoader({
+          this.#treeLoader = new TreeLoader({
             cacheSizeBytes: DEFAULT_CACHE_SIZE_BYTES,
-            source: blockLoaderSource,
+            source: treeLoaderSource,
             start: this.#start,
             end: this.#end,
             maxBlocks: MAX_BLOCKS,
@@ -608,10 +611,10 @@ export class IterablePlayer implements Player {
       // playback.
       await delay(START_DELAY_MS);
 
-      this.#blockLoader?.setTopics(this.#preloadTopics);
+      this.#treeLoader?.setTopics(this.#preloadTopics);
 
       // Block loadings is constantly running and tries to keep the preloaded messages in memory
-      this.#blockLoadingProcess = this.#startBlockLoading().catch((err: unknown) => {
+      this.#treeLoadingProcess = this.#startTreeLoading().catch((err: unknown) => {
         this.#setError((err as Error).message, err as Error);
       });
 
@@ -1144,8 +1147,8 @@ export class IterablePlayer implements Player {
 
   async #stateClose() {
     this.#isPlaying = false;
-    await this.#blockLoader?.stopLoading();
-    await this.#blockLoadingProcess;
+    await this.#treeLoader?.stopLoading();
+    await this.#treeLoadingProcess;
     await this.#bufferImpl.terminate();
     await this.#playbackIterator?.return?.();
     this.#playbackIterator = undefined;
@@ -1153,9 +1156,15 @@ export class IterablePlayer implements Player {
     this.#resolveIsClosed();
   }
 
-  async #startBlockLoading() {
-    await this.#blockLoader?.startLoading({
-      progress: async (progress) => {
+  async #startTreeLoading() {
+    if (!this.#start || !this.#end) {
+      return;
+    }
+
+    await this.#treeLoader?.startLoading({
+      startTime: this.#start,
+      endTime: this.#end,
+      progress: (progress) => {
         this.#progress = {
           fullyLoadedFractionRanges: this.#progress.fullyLoadedFractionRanges,
           messageCache: progress.messageCache,

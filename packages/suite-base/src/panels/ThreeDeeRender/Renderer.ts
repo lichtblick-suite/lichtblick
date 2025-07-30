@@ -647,7 +647,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   #addTransformSubscriptions(): void {
     const config = this.config;
-    const preloadTransforms = config.scene.transforms?.enablePreloading ?? true;
+    const preloadTransforms = config.scene.transforms?.enablePreloading ?? false;
     // Internal handlers for TF messages to update the transform tree
     this.#addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.#handleFrameTransform,

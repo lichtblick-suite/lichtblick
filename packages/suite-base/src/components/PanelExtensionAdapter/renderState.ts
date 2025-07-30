@@ -280,15 +280,23 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     if (watchedFields.has("allFrames")) {
       // Rebuild allFrames if we have new blocks or if our conversions have changed.
       const newBlocks = playerState?.progress.messageCache?.blocks;
+
       if ((newBlocks != undefined && prevBlocks !== newBlocks) || conversionsChanged) {
         shouldRender.value = true;
         const blocksToProcess = newBlocks ?? prevBlocks ?? [];
         const frames: MessageEvent[] = (renderState.allFrames = []);
+
         // only populate allFrames with topics that the panel wants to preload
-        const topicsToPreloadForPanel = Array.from(
-          new Set<string>(
-            filterMap(subscriptions, (sub) => (sub.preload === true ? sub.topic : undefined)),
-          ),
+        // const topicsToPreloadForPanel = Array.from(
+        //   new Set<string>(
+        //     filterMap(subscriptions, (sub) => (sub.preload === true ? sub.topic : undefined)),
+        //   ),
+        // );
+
+        // // Also include all subscribed topics even if not explicitly marked for preload
+        // This ensures compatibility with panels that don't set preload=true
+        const allSubscribedTopics = Array.from(
+          new Set<string>(subscriptions.map((sub) => sub.topic)),
         );
 
         for (const block of blocksToProcess) {
@@ -299,7 +307,11 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           // Given that messagesByTopic should be in order by receiveTime, we need to
           // combine all of the messages into a single array and sorted by receive time.
           forEachSortedArrays(
-            topicsToPreloadForPanel.map((topic) => block.messagesByTopic[topic] ?? []),
+            // topicsToPreloadForPanel.map((topic) => {
+            allSubscribedTopics.map((topic) => {
+              const messages = block.messagesByTopic[topic] ?? [];
+              return messages;
+            }),
             (a, b) => compare(a.receiveTime, b.receiveTime),
             (messageEvent) => {
               // Message blocks may contain topics that we are not subscribed to so we
