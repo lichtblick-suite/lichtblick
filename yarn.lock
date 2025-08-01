@@ -14770,16 +14770,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.11, magic-string@npm:^0.30.5":
-  version: 0.30.15
-  resolution: "magic-string@npm:0.30.15"
-  dependencies:
-    "@jridgewell/sourcemap-codec": ^1.5.0
-  checksum: 9da8c45a9d545c74a2f138b3f61240d921b167e9b24deb1a3dc297900c94cf05bf5099e8b20b9642e11c046dfe5f02b5e61679d017cfb7ddb44ee74f1e7a343d
-  languageName: node
-  linkType: hard
-
-"magic-string@npm:^0.30.17":
+"magic-string@npm:^0.30.11, magic-string@npm:^0.30.17, magic-string@npm:^0.30.5":
   version: 0.30.17
   resolution: "magic-string@npm:0.30.17"
   dependencies:
