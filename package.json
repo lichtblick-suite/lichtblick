@@ -154,7 +154,7 @@
     "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@mui/material": "5.13.5",
-    "react-use": "17.5.1",
+    "react-use": "17.6.0",
     "rehype-raw": "7.0.0",
     "vm-browserify": "1.1.2"
   }
