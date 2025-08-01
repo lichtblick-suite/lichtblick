@@ -17,7 +17,7 @@
     "@lichtblick/tsconfig": "1.0.0",
     "@mcap/core": "2.1.6",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
-    "@storybook/react": "9.0.14",
+    "@storybook/react": "9.1.0",
     "@types/mock-fs": "4.13.4",
     "@types/plist": "^3.0.3",
     "@types/pngjs": "^6.0.2",
