@@ -39,7 +39,10 @@ type InitPanelArgs = {
   testOptions: TestOptions;
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
   customCameraModels: CameraModelsMap;
-  enqueueSnackbarFromParent?: (message: string, variant?: "default" | "error" | "success" | "warning" | "info") => void;
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
 };
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
@@ -108,7 +111,10 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
         },
         customSceneExtensions,
         customCameraModels,
-        enqueueSnackbarFromParent: (message: string, variant?: "default" | "error" | "success" | "warning" | "info") => {
+        enqueueSnackbarFromParent: (
+          message: string,
+          variant?: "default" | "error" | "success" | "warning" | "info",
+        ) => {
           enqueueSnackbar(message, { variant: variant ?? "default" });
         },
       }),

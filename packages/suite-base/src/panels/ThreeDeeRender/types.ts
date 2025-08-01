@@ -29,5 +29,8 @@ export type ThreeDeeRenderProps = {
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
   customCameraModels: CameraModelsMap;
   /** Allow for accessing the parent toast snackbar from the new sync root */
-  enqueueSnackbarFromParent?: (message: string, variant?: "default" | "error" | "success" | "warning" | "info") => void;
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
 };
