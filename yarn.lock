@@ -2830,7 +2830,7 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
     "@types/dom-webcodecs": 0.1.14
-    async-mutex: 0.4.0
+    async-mutex: 0.5.0
     eventemitter3: 5.0.1
     xacro-parser: 0.3.9
   languageName: unknown
@@ -3286,7 +3286,7 @@ __metadata:
     "@types/tinycolor2": 1.4.4
     "@types/utif": ^3.0.2
     "@xmldom/xmldom": 0.8.10
-    async-mutex: 0.4.0
+    async-mutex: 0.5.0
     builder-util: "*"
     clean-webpack-plugin: 4.0.0
     electron: 37.1.0
@@ -7414,15 +7414,6 @@ __metadata:
   version: 2.0.1
   resolution: "async-exit-hook@npm:2.0.1"
   checksum: b72cbdd19ea90fa33a3a57b0dbff83e4bf2f4e4acd70b2b3847a588f9f16a45d38590ee13f285375dd919c224f60fa58dc3d315a87678d3aa24ff686d1c0200a
-  languageName: node
-  linkType: hard
-
-"async-mutex@npm:0.4.0":
-  version: 0.4.0
-  resolution: "async-mutex@npm:0.4.0"
-  dependencies:
-    tslib: ^2.4.0
-  checksum: 813a71728b35a4fbfd64dba719f04726d9133c67b577fcd951b7028c4a675a13ee34e69beb82d621f87bf81f5d4f135c4c44be0448550c7db728547244ef71fc
   languageName: node
   linkType: hard
 

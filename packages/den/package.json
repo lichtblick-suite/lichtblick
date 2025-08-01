@@ -14,7 +14,7 @@
   "homepage": "https://github.com/lichtblick-suite",
   "dependencies": {
     "@lichtblick/comlink": "1.0.3",
-    "async-mutex": "0.4.0",
+    "async-mutex": "0.5.0",
     "eventemitter3": "5.0.1",
     "xacro-parser": "0.3.9"
   },

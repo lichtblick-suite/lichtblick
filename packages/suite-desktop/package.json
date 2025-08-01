@@ -25,7 +25,7 @@
     "@types/tinycolor2": "1.4.4",
     "@types/utif": "^3.0.2",
     "@xmldom/xmldom": "0.8.10",
-    "async-mutex": "0.4.0",
+    "async-mutex": "0.5.0",
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
     "electron": "37.1.0",
