@@ -323,10 +323,13 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     (newConfig: Immutable<RendererConfig>) => {
       saveState(newConfig);
     },
-    1000,
+    100,
     { leading: false, trailing: true, maxWait: 1000 },
   );
-  useEffect(() => throttledSave(config), [config, throttledSave]);
+
+  useEffect(() => {
+    throttledSave(config);
+  }, [config, throttledSave]);
 
   // Keep default panel title up to date with selected image topic in image mode
   useEffect(() => {
