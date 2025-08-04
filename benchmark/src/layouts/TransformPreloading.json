@@ -20,7 +20,7 @@
         "near": 0.01,
         "far": 5000
       },
-      "scene": { "transforms": { "enablePreloading": true } },
+      "scene": { "transforms": { "enablePreloading": false } },
       "transforms": {},
       "topics": {},
       "layers": {
