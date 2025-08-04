@@ -95,7 +95,7 @@
     "@types/wicg-file-system-access": "2020.9.6",
     "@uiw/react-textarea-code-editor": "3.1.0",
     "async-mutex": "0.5.0",
-    "babel-jest": "30.0.4",
+    "babel-jest": "30.0.5",
     "babel-plugin-transform-import-meta": "2.2.1",
     "browserify-zlib": "0.2.0",
     "chart.js": "4.4.8",
