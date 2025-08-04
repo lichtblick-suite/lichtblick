@@ -17,7 +17,6 @@
 import { Mutex } from "async-mutex";
 import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
-import ReactDOM from "react-dom";
 import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
@@ -773,23 +772,9 @@ export default class UserScriptPlayer implements Player {
       changedTopicsRequireEmitState = true;
     }
 
-    // We need to set the user script diagnostics, which is a react set state
-    // function. This is called once per user script. Since this is in an async
-    // function, the state updates will not be batched below React 18 and React
-    // will update components synchronously during the set state. In a complex
-    // layout, each of the following #setUserScriptDiagnostics call result in
-    // ~100ms of latency. With many scripts, this can turn into a multi-second
-    // stall during layout switching.
-    //
-    // By batching the state update, unnecessary component updates are avoided
-    // and performance is improved for layout switching and initial loading.
-    //
-    // Moving to React 18 should remove the need for this call.
-    ReactDOM.unstable_batchedUpdates(() => {
-      for (const scriptRegistration of state.scriptRegistrations) {
-        this.#setUserScriptDiagnostics(scriptRegistration.scriptId, []);
-      }
-    });
+    for (const scriptRegistration of state.scriptRegistrations) {
+      this.#setUserScriptDiagnostics(scriptRegistration.scriptId, []);
+    }
 
     // If we have new topics after processing the script registrations we need to emit a new
     // state to let downstream clients subscribe to newly available topics. This is
