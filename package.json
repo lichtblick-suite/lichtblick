@@ -141,7 +141,7 @@
     "ts-unused-exports": "10.0.1",
     "tslib": "2.8.1",
     "typescript": "5.3.3",
-    "webpack": "5.99.9",
+    "webpack": "5.101.0",
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.2",
     "webpack-hot-middleware": "2.26.0"
