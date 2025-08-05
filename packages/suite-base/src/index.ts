@@ -53,3 +53,4 @@ export { makeWorkspaceContextInitialState } from "./providers/WorkspaceContextPr
 export type { AppBarProps } from "./components/AppBar";
 export { IdbExtensionLoader } from "./services/IdbExtensionLoader";
 export { default as BasicBuilder } from "./testing/builders/BasicBuilder";
+export { LOCAL_STORAGE_APP_CONFIGURATION } from "./constants/browserStorageKeys";
