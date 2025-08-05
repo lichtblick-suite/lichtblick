@@ -15,7 +15,7 @@ import { migrateLayout } from "@lichtblick/suite-base/services/migrateLayout";
 
 const log = Log.getLogger(__filename);
 
-const DATABASE_NAME = `${KEY_WORKSPACE_PREFIX}foxglove-layouts`;
+const DATABASE_NAME = `${KEY_WORKSPACE_PREFIX}lichtblick-layouts`;
 const OBJECT_STORE_NAME = "layouts";
 
 interface LayoutsDB extends IDB.DBSchema {

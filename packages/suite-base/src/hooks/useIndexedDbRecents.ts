@@ -17,7 +17,7 @@ import { KEY_WORKSPACE_PREFIX } from "@lichtblick/suite-base/constants/browserSt
 const log = Logger.getLogger(__filename);
 
 const IDB_KEY = "recents";
-const IDB_STORE = idbCreateStore(`${KEY_WORKSPACE_PREFIX}foxglove-recents`, "recents");
+const IDB_STORE = idbCreateStore(`${KEY_WORKSPACE_PREFIX}lichtblick-recents`, "recents");
 
 type RecentRecordCommon = {
   // Record id - use IndexedDbRecentsStore.GenerateRecordId() to generate
