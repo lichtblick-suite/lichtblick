@@ -8,6 +8,7 @@
 import * as IDB from "idb/with-async-ittr";
 
 import Log from "@lichtblick/log";
+import { KEY_WORKSPACE_PREFIX } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import {
   IExtensionStorage,
   StoredExtension,
@@ -16,9 +17,9 @@ import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 const log = Log.getLogger(__filename);
 
-const DATABASE_BASE_NAME = "foxglove-extensions";
-export const METADATA_STORE_NAME = "metadata";
-export const EXTENSION_STORE_NAME = "extensions";
+const DATABASE_BASE_NAME = `${KEY_WORKSPACE_PREFIX}lichtblick-extensions`;
+export const METADATA_STORE_NAME = `metadata`;
+export const EXTENSION_STORE_NAME = `extensions`;
 
 interface ExtensionsDB extends IDB.DBSchema {
   metadata: {
