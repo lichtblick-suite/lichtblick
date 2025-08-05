@@ -9,9 +9,8 @@ import i18n from "i18next";
 import LanguageDetector, { DetectorOptions } from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
-import { SESSION_STORAGE_I18N_LANGUAGE } from "@lichtblick/suite-base/constants/browserStorageKeys";
-
 import * as en from "./en";
+import { SESSION_STORAGE_I18N_LANGUAGE } from "../constants/browserStorageKeys";
 
 export const translations = { en };
 
