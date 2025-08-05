@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import dotenv from "dotenv";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
@@ -17,6 +18,9 @@ import { createTssReactNameTransformer } from "@lichtblick/typescript-transforme
 
 import { WebpackArgv } from "./WebpackArgv";
 
+// Load environment variables from .env.local
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
 type Options = {
   // During hot reloading and development it is useful to comment out code while iterating.
   // We ignore errors from unused locals to avoid having to also comment
@@ -27,6 +31,12 @@ type Options = {
   /** Specify the path to the tsconfig.json file for ForkTsCheckerWebpackPlugin. If unset, the plugin defaults to finding the config file in the webpack `context` directory. */
   tsconfigPath?: string;
 };
+
+function buildEnvVars(): Record<string, string | undefined> {
+  return {
+    "process.env.DEV_WORKSPACE": JSON.stringify(process.env.DEV_WORKSPACE),
+  };
+}
 
 // Create a partial webpack configuration required to build app using webpack.
 // Returns a webpack configuration containing resolve, module, plugins, and node fields.
@@ -231,6 +241,7 @@ export function makeConfig(
         // Should match webpack-defines.d.ts
         ReactNull: null, // eslint-disable-line no-restricted-syntax
         LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
+        ...buildEnvVars(),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales
       new webpack.IgnorePlugin({
