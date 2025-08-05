@@ -9,13 +9,13 @@ import * as _ from "lodash-es";
 import { useCallback, useEffect } from "react";
 
 import { useShallowMemo } from "@lichtblick/hooks";
+import { LOCAL_STORAGE_PROFILE_DATA } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import {
   UserProfile,
   UserProfileStorageContext,
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 
 const DEFAULT_PROFILE: UserProfile = {};
-const LOCAL_STORAGE_KEY = "studio.profile-data";
 
 /**
  * A provider for UserProfileStorage that stores data in localStorage.
@@ -24,16 +24,16 @@ export default function UserProfileLocalStorageProvider({
   children,
 }: React.PropsWithChildren): React.JSX.Element {
   const getUserProfile = useCallback(async (): Promise<UserProfile> => {
-    const item = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const item = localStorage.getItem(LOCAL_STORAGE_PROFILE_DATA);
     return item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
   }, []);
 
   const setUserProfile = useCallback(
     async (value: UserProfile | ((prev: UserProfile) => UserProfile)) => {
-      const item = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const item = localStorage.getItem(LOCAL_STORAGE_PROFILE_DATA);
       const prev = item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
       const newProfile = typeof value === "function" ? value(prev) : _.merge(prev, value);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newProfile) ?? "");
+      localStorage.setItem(LOCAL_STORAGE_PROFILE_DATA, JSON.stringify(newProfile) ?? "");
     },
     [],
   );

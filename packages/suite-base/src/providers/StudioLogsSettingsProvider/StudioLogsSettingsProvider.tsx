@@ -9,6 +9,7 @@ import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "react-use";
 
 import Log from "@lichtblick/log";
+import { SESSION_STORAGE_LOGS_SETTINGS } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import { StudioLogsSettingsContext } from "@lichtblick/suite-base/context/StudioLogsSettingsContext";
 
 import { createStudioLogsSettingsStore } from "./store";
@@ -16,7 +17,7 @@ import { LocalStorageSaveState } from "./types";
 
 function StudioLogsSettingsProvider(props: PropsWithChildren): React.JSX.Element {
   const [studioLogsSettingsSavedState, setStudioLogsSettingsSavedState] =
-    useLocalStorage<LocalStorageSaveState>("blick.logs-settings", {});
+    useLocalStorage<LocalStorageSaveState>(SESSION_STORAGE_LOGS_SETTINGS, {});
 
   const [studioLogsSettingsStore, setStudioLogsSettingsStore] = useState(() =>
     createStudioLogsSettingsStore(studioLogsSettingsSavedState),

@@ -6,8 +6,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import i18n from "i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import LanguageDetector, { DetectorOptions } from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
+
+import { SESSION_STORAGE_I18N_LANGUAGE } from "@lichtblick/suite-base/constants/browserStorageKeys";
 
 import * as en from "./en";
 
@@ -17,6 +19,13 @@ export type Language = keyof typeof translations;
 
 export const defaultNS = "general";
 
+const browserContextOptions: DetectorOptions = {
+  order: ["localStorage", "navigator"],
+  caches: ["localStorage"],
+  lookupLocalStorage: SESSION_STORAGE_I18N_LANGUAGE,
+  lookupSessionStorage: SESSION_STORAGE_I18N_LANGUAGE,
+};
+
 export async function initI18n(options?: { context?: "browser" | "electron-main" }): Promise<void> {
   const { context = "browser" } = options ?? {};
   if (context === "browser") {
@@ -25,10 +34,7 @@ export async function initI18n(options?: { context?: "browser" | "electron-main"
   }
   await i18n.init({
     resources: translations,
-    detection:
-      context === "browser"
-        ? { order: ["localStorage", "navigator"], caches: ["localStorage"] }
-        : undefined,
+    detection: context === "browser" ? browserContextOptions : undefined,
     fallbackLng: "en",
     defaultNS,
     interpolation: {

@@ -10,6 +10,7 @@ import { ReactNode, useState } from "react";
 import { StoreApi, createStore } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { SESSION_STORAGE_LICHTBLICK_WORKSPACE } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import {
   WorkspaceContext,
   WorkspaceContextStore,
@@ -71,7 +72,7 @@ function createWorkspaceContextStore(
   }
   return createStore<WorkspaceContextStore>()(
     persist(stateCreator, {
-      name: "fox.workspace",
+      name: SESSION_STORAGE_LICHTBLICK_WORKSPACE,
       version: 1,
       migrate: migrateV0WorkspaceState,
       partialize: (state) => {

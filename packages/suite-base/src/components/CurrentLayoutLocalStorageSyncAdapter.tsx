@@ -11,7 +11,7 @@ import { useAsync } from "react-use";
 import { useDebounce } from "use-debounce";
 
 import Log from "@lichtblick/log";
-import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@lichtblick/suite-base/constants/localStorageKeys";
+import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import {
   LayoutState,
   useCurrentLayoutActions,
