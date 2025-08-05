@@ -107,6 +107,7 @@
     "cytoscape": "3.31.1",
     "cytoscape-dagre": "2.5.0",
     "dompurify": "3.2.5",
+    "dotenv": "17.2.1",
     "esbuild-loader": "2.21.0",
     "eventemitter3": "5.0.1",
     "fake-indexeddb": "4.0.2",
