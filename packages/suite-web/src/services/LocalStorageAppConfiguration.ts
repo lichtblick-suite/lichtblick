@@ -11,7 +11,6 @@ import {
   AppConfigurationValue,
   LOCAL_STORAGE_APP_CONFIGURATION,
 } from "@lichtblick/suite-base";
-// import { LOCAL_STORAGE_APP_CONFIGURATION } from "@lichtblick/suite-base/src/constants/browserStorageKeys";
 
 export default class LocalStorageAppConfiguration implements IAppConfiguration {
   static #KEY_PREFIX = LOCAL_STORAGE_APP_CONFIGURATION;
