@@ -483,9 +483,17 @@ function FieldEditorComponent({
         )}
         <FieldLabel field={field} />
       </Stack>
-      <div className={cx(classes.fieldWrapper, { [classes.error]: field.error != undefined })}>
-        <FieldInput actionHandler={actionHandler} field={field} path={path} />
-      </div>
+      <Tooltip
+        arrow
+        placement="right"
+        title={
+          field.tooltip ? <Typography variant="subtitle2">{field.tooltip}</Typography> : undefined
+        }
+      >
+        <div className={cx(classes.fieldWrapper, { [classes.error]: field.error != undefined })}>
+          <FieldInput actionHandler={actionHandler} field={field} path={path} />
+        </div>
+      </Tooltip>
       <Stack paddingBottom={0.25} style={{ gridColumn: "span 2" }} />
     </>
   );

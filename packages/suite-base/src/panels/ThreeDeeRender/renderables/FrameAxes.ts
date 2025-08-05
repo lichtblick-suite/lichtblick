@@ -193,6 +193,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
             label: t("threeDee:enablePreloading"),
             input: "boolean",
             value: config.scene.transforms?.enablePreloading ?? false,
+            tooltip: t("threeDee:enablePreloadingTooltip"),
           },
         },
       },

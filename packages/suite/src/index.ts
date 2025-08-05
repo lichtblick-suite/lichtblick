@@ -765,6 +765,11 @@ export type SettingsTreeField = SettingsTreeFieldValue & {
    * Optional message indicating any error state for the field.
    */
   error?: string;
+
+  /**
+   * Optional tooltip text displayed when hovering over the field.
+   */
+  tooltip?: string;
 };
 
 export type SettingsTreeFields = Record<string, undefined | SettingsTreeField>;
