@@ -7,9 +7,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const KEY_WORKSPACE_PREFIX: string = process.env.DEV_WORKSPACE
-  ? `${process.env.DEV_WORKSPACE}.`
-  : "";
+type SessionStorageValue = [
+  value: string | undefined,
+  setValue: (newValue: string | undefined) => void,
+];
 
 /**
  * This provides a convenience wrapper around sessionStorage and triggers
@@ -18,10 +19,9 @@ const KEY_WORKSPACE_PREFIX: string = process.env.DEV_WORKSPACE
  * @param key sessionStorage key to manage.
  * @returns [value, setValue] tuple for that key.
  */
-export function useSessionStorageValue(
-  key: string,
-): [value: string | undefined, setValue: (newValue: string | undefined) => void] {
-  const prefixedKey = `${KEY_WORKSPACE_PREFIX}${key}`;
+export function useSessionStorageValue(key: string): SessionStorageValue {
+  const prefix: string = process.env.DEV_WORKSPACE ? `${process.env.DEV_WORKSPACE}.` : "";
+  const prefixedKey = `${prefix}${key}`;
   const [value, updateValue] = useState<string | undefined>(
     sessionStorage.getItem(prefixedKey) ?? undefined,
   );
