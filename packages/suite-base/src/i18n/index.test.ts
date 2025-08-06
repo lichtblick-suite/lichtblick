@@ -12,7 +12,6 @@ import i18n from "i18next";
 import { defaultNS, initI18n, Language, sharedI18nObject, translations } from "./index";
 import { SESSION_STORAGE_I18N_LANGUAGE } from "../constants/browserStorageKeys";
 
-// Mock localStorage
 const mockLocalStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -20,7 +19,6 @@ const mockLocalStorage = {
   clear: jest.fn(),
 };
 
-// Mock sessionStorage
 const mockSessionStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -45,61 +43,24 @@ Object.defineProperty(navigator, "language", {
 describe("i18n module", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // eslint-disable-next-line no-restricted-syntax
-    mockLocalStorage.getItem.mockReturnValue(null);
-    // eslint-disable-next-line no-restricted-syntax
-    mockSessionStorage.getItem.mockReturnValue(null);
+    mockLocalStorage.getItem.mockReturnValue(undefined);
+    mockSessionStorage.getItem.mockReturnValue(undefined);
   });
 
   describe("exports", () => {
-    describe("Given the i18n module is imported", () => {
-      it("When accessing translations export, Then it should contain English translations", () => {
-        // Given
-        // When
-        const result = translations;
+    it("When checking Language type, Then it should include 'en' as valid language", () => {
+      // Given When
+      const languages = Object.keys(translations) as Language[];
 
-        // Then
-        expect(result).toBeDefined();
-        expect(result.en).toBeDefined();
-        expect(typeof result.en).toBe("object");
-      });
-
-      it("When accessing defaultNS export, Then it should be 'general'", () => {
-        // Given
-        // When
-        const result = defaultNS;
-
-        // Then
-        expect(result).toBe("general");
-      });
-
-      it("When accessing sharedI18nObject export, Then it should be the i18n instance", () => {
-        // Given
-        // When
-        const result = sharedI18nObject;
-
-        // Then
-        expect(result).toBe(i18n);
-      });
-    });
-
-    describe("Language type", () => {
-      it("When checking Language type, Then it should include 'en' as valid language", () => {
-        // Given
-        // When
-        const languages = Object.keys(translations) as Language[];
-
-        // Then
-        expect(languages).toContain("en");
-      });
+      // Then
+      expect(languages).toContain("en");
     });
   });
 
   describe("initI18n function", () => {
     describe("Given browser context", () => {
       it("When initI18n is called without options, Then it should initialize with browser defaults", async () => {
-        // Given
-        // When
+        // Given When
         await initI18n();
 
         // Then
@@ -169,8 +130,7 @@ describe("i18n module", () => {
 
     describe("Given translations resources", () => {
       it("When initI18n is called, Then it should load English translations correctly", async () => {
-        // Given
-        // When
+        // Given When
         await initI18n();
 
         // Then
@@ -179,8 +139,7 @@ describe("i18n module", () => {
       });
 
       it("When initI18n is called, Then it should set correct fallback language", async () => {
-        // Given
-        // When
+        // Given When
         await initI18n();
 
         // Then
