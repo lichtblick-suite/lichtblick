@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-import "@testing-library/jest-dom"; // Adiciona matchers como toHaveTextContent e toBeInTheDocument
+import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import TeleopPanel, { buildSettingsTree } from "./TeleopPanel";
@@ -197,7 +197,7 @@ describe("TeleopPanel", () => {
     expect(tree.general?.children?.upButton?.fields?.field?.value).toBe("linear-x");
   });
 
-  it("settingsActionHandler updates field value with setFieldValue", () => {
+  it("settingsActionHandler updates up field value with setFieldValue", () => {
     const context = getMockContext({
       publish: jest.fn(),
       initialState: { topic: "foo" },
@@ -208,6 +208,51 @@ describe("TeleopPanel", () => {
       handler({
         action: "setFieldValue",
         payload: { path: ["general", "upButton", "field"], value: "linear-y" },
+      }),
+    ).not.toThrow();
+  });
+
+  it("settingsActionHandler updates down field value with setFieldValue", () => {
+    const context = getMockContext({
+      publish: jest.fn(),
+      initialState: { topic: "foo" },
+    });
+    render(<TeleopPanel context={context} />);
+    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
+    expect(() =>
+      handler({
+        action: "setFieldValue",
+        payload: { path: ["general", "downButton", "field"], value: "linear-y" },
+      }),
+    ).not.toThrow();
+  });
+
+  it("settingsActionHandler updates left field value with setFieldValue", () => {
+    const context = getMockContext({
+      publish: jest.fn(),
+      initialState: { topic: "foo" },
+    });
+    render(<TeleopPanel context={context} />);
+    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
+    expect(() =>
+      handler({
+        action: "setFieldValue",
+        payload: { path: ["general", "leftButton", "field"], value: "linear-y" },
+      }),
+    ).not.toThrow();
+  });
+
+  it("settingsActionHandler updates right field value with setFieldValue", () => {
+    const context = getMockContext({
+      publish: jest.fn(),
+      initialState: { topic: "foo" },
+    });
+    render(<TeleopPanel context={context} />);
+    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
+    expect(() =>
+      handler({
+        action: "setFieldValue",
+        payload: { path: ["general", "rightButton", "field"], value: "linear-y" },
       }),
     ).not.toThrow();
   });
