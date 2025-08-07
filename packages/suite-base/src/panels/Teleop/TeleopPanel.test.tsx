@@ -196,4 +196,19 @@ describe("TeleopPanel", () => {
     expect(tree.general?.fields?.topic?.input).toEqual("autocomplete");
     expect(tree.general?.children?.upButton?.fields?.field?.value).toBe("linear-x");
   });
+
+  it("settingsActionHandler updates field value with setFieldValue", () => {
+    const context = getMockContext({
+      publish: jest.fn(),
+      initialState: { topic: "foo" },
+    });
+    render(<TeleopPanel context={context} />);
+    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
+    expect(() =>
+      handler({
+        action: "setFieldValue",
+        payload: { path: ["general", "upButton", "field"], value: "linear-y" },
+      }),
+    ).not.toThrow();
+  });
 });
