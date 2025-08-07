@@ -9,8 +9,14 @@ import TeleopPanel, { buildSettingsTree } from "./TeleopPanel";
 // Mocks
 jest.mock("./DirectionalPad", () => ({
   __esModule: true,
-  default: ({ onAction, disabled }: any) => (
-    <div data-testid="directional-pad" data-disabled={disabled ? "true" : "false"}>
+  default: ({
+    onAction,
+    disabled,
+  }: {
+    onAction?: (action: string) => void;
+    disabled?: boolean;
+  }) => (
+    <div data-testid="directional-pad" data-disabled={Boolean(disabled ?? false).toString()}>
       <button onClick={() => onAction?.("UP")}>UP</button>
       <button onClick={() => onAction?.("DOWN")}>DOWN</button>
       <button onClick={() => onAction?.("LEFT")}>LEFT</button>
