@@ -9,22 +9,13 @@ import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
 import { ros1 } from "@lichtblick/rosmsg-msgs-common";
-import {
-  PanelExtensionContext,
-  SettingsTreeAction,
-  SettingsTreeNode,
-  SettingsTreeNodes,
-  Topic,
-} from "@lichtblick/suite";
+import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes, Topic } from "@lichtblick/suite";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { Config, TeleopPanelProps } from "@lichtblick/suite-base/panels/Teleop/types";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import DirectionalPad, { DirectionalPadAction } from "./DirectionalPad";
-
-type TeleopPanelProps = {
-  context: PanelExtensionContext;
-};
 
 const geometryMsgOptions = [
   { label: "linear-x", value: "linear-x" },
@@ -35,16 +26,7 @@ const geometryMsgOptions = [
   { label: "angular-z", value: "angular-z" },
 ];
 
-type Config = {
-  topic: undefined | string;
-  publishRate: number;
-  upButton: { field: string; value: number };
-  downButton: { field: string; value: number };
-  leftButton: { field: string; value: number };
-  rightButton: { field: string; value: number };
-};
-
-function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeNodes {
+export function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeNodes {
   const general: SettingsTreeNode = {
     label: "General",
     fields: {
@@ -111,7 +93,7 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
   return { general };
 }
 
-function TeleopPanel(props: TeleopPanelProps): React.JSX.Element {
+export function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
   const { context } = props;
   const { saveState } = context;
 
