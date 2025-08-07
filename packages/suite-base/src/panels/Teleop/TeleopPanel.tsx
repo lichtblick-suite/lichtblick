@@ -93,7 +93,7 @@ export function buildSettingsTree(config: Config, topics: readonly Topic[]): Set
   return { general };
 }
 
-export function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
+function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
   const { context } = props;
   const { saveState } = context;
 
