@@ -11,7 +11,7 @@
     "@lichtblick/rostime": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@lichtblick/tsconfig": "1.0.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.0",
     "clean-webpack-plugin": "4.0.0",
