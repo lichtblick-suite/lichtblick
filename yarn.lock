@@ -3206,7 +3206,7 @@ __metadata:
     notistack: 3.0.1
     path-browserify: 1.0.1
     prettier: 3.0.3
-    ramda: 0.30.1
+    ramda: 0.31.3
     randomstring: 1.3.0
     react: 18.3.1
     react-colorful: 5.6.1
@@ -17246,10 +17246,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ramda@npm:0.30.1":
-  version: 0.30.1
-  resolution: "ramda@npm:0.30.1"
-  checksum: ce6f4b6b967a84a4e65c01ab1b1cdd73d46b8efe71aeccf5d1443c56c4e31a0ea82ece7df6510453dd3d83b92cabf8a6b4d50d189a1b35c08a6f44b281bebf79
+"ramda@npm:0.31.3":
+  version: 0.31.3
+  resolution: "ramda@npm:0.31.3"
+  checksum: 7658f7ec75f61b9c0cd8a250285f66954f1e866a1b2e98a0c14fcc7c940f87550a6d1855e349b696a3507358a5d279794de5d0a567b11fd8a26ee5ad1363de52
   languageName: node
   linkType: hard
 
