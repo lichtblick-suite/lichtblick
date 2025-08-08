@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useSnackbar } from "notistack";
 import { useMemo } from "react";
 import { DeepPartial } from "ts-essentials";
 
@@ -38,6 +39,10 @@ type InitPanelArgs = {
   testOptions: TestOptions;
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
   customCameraModels: CameraModelsMap;
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
 };
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
@@ -48,6 +53,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
     testOptions,
     customSceneExtensions,
     customCameraModels,
+    enqueueSnackbarFromParent,
   } = args;
   return createSyncRoot(
     <CaptureErrorBoundary onError={crash}>
@@ -58,6 +64,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
           testOptions={testOptions}
           customSceneExtensions={customSceneExtensions}
           customCameraModels={customCameraModels}
+          enqueueSnackbarFromParent={enqueueSnackbarFromParent}
         />
       </ForwardAnalyticsContextProvider>
     </CaptureErrorBoundary>,
@@ -74,6 +81,7 @@ type Props = {
 
 function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
+  const { enqueueSnackbar } = useSnackbar();
 
   const customCameraModels = useExtensionCatalog(
     (state) => state.installedCameraModels,
@@ -97,9 +105,18 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
         crash,
         forwardedAnalytics,
         interfaceMode,
-        testOptions: { onDownloadImage: props.onDownloadImage, debugPicking: props.debugPicking },
+        testOptions: {
+          onDownloadImage: props.onDownloadImage,
+          debugPicking: props.debugPicking,
+        },
         customSceneExtensions,
         customCameraModels,
+        enqueueSnackbarFromParent: (
+          message: string,
+          variant?: "default" | "error" | "success" | "warning" | "info",
+        ) => {
+          enqueueSnackbar(message, { variant: variant ?? "default" });
+        },
       }),
     [
       crash,
@@ -109,6 +126,7 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
       props.debugPicking,
       customSceneExtensions,
       customCameraModels,
+      enqueueSnackbar,
     ],
   );
 

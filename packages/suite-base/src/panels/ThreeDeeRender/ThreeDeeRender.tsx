@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as _ from "lodash-es";
-import { useSnackbar } from "notistack";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest } from "react-use";
 import { DeepPartial } from "ts-essentials";
@@ -56,7 +55,14 @@ const log = Logger.getLogger(__filename);
  * A panel that renders a 3D scene. This is a thin wrapper around a `Renderer` instance.
  */
 export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.Element {
-  const { context, interfaceMode, testOptions, customSceneExtensions, customCameraModels } = props;
+  const {
+    context,
+    interfaceMode,
+    testOptions,
+    customSceneExtensions,
+    customCameraModels,
+    enqueueSnackbarFromParent,
+  } = props;
   const {
     initialState,
     saveState,
@@ -103,13 +109,13 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const [renderer, setRenderer] = useState<IRenderer | undefined>(undefined);
   const rendererRef = useRef<IRenderer | undefined>(undefined);
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const displayTemporaryError = useCallback(
     (errorString: string) => {
-      enqueueSnackbar(errorString, { variant: "error" });
+      if (enqueueSnackbarFromParent) {
+        enqueueSnackbarFromParent(errorString, "error");
+      }
     },
-    [enqueueSnackbar],
+    [enqueueSnackbarFromParent],
   );
 
   useEffect(() => {
