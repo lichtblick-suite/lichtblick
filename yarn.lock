@@ -3270,7 +3270,7 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
     "@mcap/core": 2.1.6
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
     "@storybook/react": 9.1.1
     "@types/mock-fs": 4.13.4
     "@types/plist": ^3.0.3
@@ -3320,7 +3320,7 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
     "@mui/material": 5.13.5
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
     "@storybook/react": 9.1.1
     "@types/copy-webpack-plugin": 10.1.0
     clean-webpack-plugin: 4.0.0
@@ -4024,28 +4024,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.11":
-  version: 0.5.11
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.11"
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.1":
+  version: 0.6.1
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.1"
   dependencies:
-    ansi-html-community: ^0.0.8
-    common-path-prefix: ^3.0.0
+    anser: ^2.1.1
     core-js-pure: ^3.23.3
     error-stack-parser: ^2.0.6
-    find-up: ^5.0.0
     html-entities: ^2.1.0
-    loader-utils: ^2.0.4
-    schema-utils: ^3.0.0
+    schema-utils: ^4.2.0
     source-map: ^0.7.3
   peerDependencies:
-    "@types/webpack": 4.x || 5.x
+    "@types/webpack": 5.x
     react-refresh: ">=0.10.0 <1.0.0"
     sockjs-client: ^1.4.0
     type-fest: ">=0.17.0 <5.0.0"
-    webpack: ">=4.43.0 <6.0.0"
-    webpack-dev-server: 3.x || 4.x
+    webpack: ^5.0.0
+    webpack-dev-server: ^4.8.0 || 5.x
     webpack-hot-middleware: 2.x
-    webpack-plugin-serve: 0.x || 1.x
+    webpack-plugin-serve: 1.x
   peerDependenciesMeta:
     "@types/webpack":
       optional: true
@@ -4059,7 +4056,7 @@ __metadata:
       optional: true
     webpack-plugin-serve:
       optional: true
-  checksum: a82eced9519f4dcac424acae719f819ab4150bfcf2874ac7daaf25a4f1c409e3d8b9d693fea0c686c24d520a5473756df32da90d8b89739670f8f8084c600bb4
+  checksum: 2eb0234ce418b5aba57a9db88d93e9bf9cc0cfdeb2d4fee8c4bb145c9ad2784c149ba1dc0747d191edb6e5c8a9236fb661bedb1bfde74bf87cd745ddebbd49ee
   languageName: node
   linkType: hard
 
@@ -7035,6 +7032,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"anser@npm:^2.1.1":
+  version: 2.3.2
+  resolution: "anser@npm:2.3.2"
+  checksum: 6bc5ee30b094d36c09a24a875c23bc9336bb0c5bacc8aa071a8a1b2c0729247cbcc0646a5902a7782a4ecc115df297a863ec56e30a0809468bb341d0a5ba0969
+  languageName: node
+  linkType: hard
+
 "ansi-escapes@npm:^4.3.2":
   version: 4.3.2
   resolution: "ansi-escapes@npm:4.3.2"
@@ -7667,7 +7671,7 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/tsconfig": 1.0.0
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.11
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
     "@types/react": 18.3.12
     "@types/react-dom": 18.3.0
     clean-webpack-plugin: 4.0.0
@@ -8638,13 +8642,6 @@ __metadata:
   version: 8.3.0
   resolution: "commander@npm:8.3.0"
   checksum: 0f82321821fc27b83bd409510bb9deeebcfa799ff0bf5d102128b500b7af22872c0c92cb6a0ebc5a4cf19c6b550fba9cedfa7329d18c6442a625f851377bacf0
-  languageName: node
-  linkType: hard
-
-"common-path-prefix@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "common-path-prefix@npm:3.0.0"
-  checksum: fdb3c4f54e51e70d417ccd950c07f757582de800c0678ca388aedefefc84982039f346f9fd9a1252d08d2da9e9ef4019f580a1d1d3a10da031e4bb3c924c5818
   languageName: node
   linkType: hard
 
@@ -14539,7 +14536,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^2.0.0, loader-utils@npm:^2.0.2, loader-utils@npm:^2.0.4":
+"loader-utils@npm:^2.0.0, loader-utils@npm:^2.0.2":
   version: 2.0.4
   resolution: "loader-utils@npm:2.0.4"
   dependencies:
