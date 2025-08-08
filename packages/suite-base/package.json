@@ -98,7 +98,7 @@
     "babel-jest": "30.0.5",
     "babel-plugin-transform-import-meta": "2.2.1",
     "browserify-zlib": "0.2.0",
-    "chart.js": "4.4.8",
+    "chart.js": "4.5.0",
     "chartjs-plugin-annotation": "3.0.1",
     "chartjs-plugin-datalabels": "2.2.0",
     "chromatic": "11.5.6",
