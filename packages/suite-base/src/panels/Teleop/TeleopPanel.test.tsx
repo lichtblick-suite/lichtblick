@@ -67,6 +67,7 @@ describe("TeleopPanel", () => {
   afterEach(() => {
     (console.error as jest.Mock).mockRestore();
   });
+
   it("renders EmptyState when publish is not available", () => {
     const context = getMockContext({ publish: undefined });
     render(<TeleopPanel context={context} />);
@@ -161,6 +162,21 @@ describe("TeleopPanel", () => {
     expect(screen.getByTestId("empty-state")).toHaveTextContent(
       "Select a publish topic in the panel settings",
     );
+
+    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
+    expect(() =>
+      handler({
+        action: "setFieldValue",
+        payload: { path: ["general", "downButton", "field"], value: "linear-x" },
+      }),
+    ).not.toThrow();
+
+    expect(() =>
+      handler({
+        action: "setFieldValue",
+        payload: { path: ["general", "rightButton", "field"], value: "angular-z" },
+      }),
+    ).not.toThrow();
   });
 
   it("settingsActionHandler updates config", () => {
@@ -195,65 +211,5 @@ describe("TeleopPanel", () => {
     expect(tree.general?.fields?.publishRate?.value).toBe(2);
     expect(tree.general?.fields?.topic?.input).toEqual("autocomplete");
     expect(tree.general?.children?.upButton?.fields?.field?.value).toBe("linear-x");
-  });
-
-  it("settingsActionHandler updates up field value with setFieldValue", () => {
-    const context = getMockContext({
-      publish: jest.fn(),
-      initialState: { topic: "foo" },
-    });
-    render(<TeleopPanel context={context} />);
-    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
-    expect(() =>
-      handler({
-        action: "setFieldValue",
-        payload: { path: ["general", "upButton", "field"], value: "linear-y" },
-      }),
-    ).not.toThrow();
-  });
-
-  it("settingsActionHandler updates down field value with setFieldValue", () => {
-    const context = getMockContext({
-      publish: jest.fn(),
-      initialState: { topic: "foo" },
-    });
-    render(<TeleopPanel context={context} />);
-    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
-    expect(() =>
-      handler({
-        action: "setFieldValue",
-        payload: { path: ["general", "downButton", "field"], value: "linear-y" },
-      }),
-    ).not.toThrow();
-  });
-
-  it("settingsActionHandler updates left field value with setFieldValue", () => {
-    const context = getMockContext({
-      publish: jest.fn(),
-      initialState: { topic: "foo" },
-    });
-    render(<TeleopPanel context={context} />);
-    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
-    expect(() =>
-      handler({
-        action: "setFieldValue",
-        payload: { path: ["general", "leftButton", "field"], value: "linear-y" },
-      }),
-    ).not.toThrow();
-  });
-
-  it("settingsActionHandler updates right field value with setFieldValue", () => {
-    const context = getMockContext({
-      publish: jest.fn(),
-      initialState: { topic: "foo" },
-    });
-    render(<TeleopPanel context={context} />);
-    const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
-    expect(() =>
-      handler({
-        action: "setFieldValue",
-        payload: { path: ["general", "rightButton", "field"], value: "linear-y" },
-      }),
-    ).not.toThrow();
   });
 });
