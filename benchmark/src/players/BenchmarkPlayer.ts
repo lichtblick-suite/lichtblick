@@ -94,8 +94,8 @@ class BenchmarkPlayer implements Player {
     const { start: startTime, end: endTime, topicStats, datatypes, topics } = result;
 
     // Bail on any alerts
-    for (const alert of result.alerts) {
-      throw new Error(alert.message);
+    if (result.alerts.length > 0) {
+      throw new Error(result.alerts[0]!.message);
     }
 
     do {
