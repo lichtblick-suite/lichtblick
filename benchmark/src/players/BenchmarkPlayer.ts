@@ -33,12 +33,12 @@ const MAX_BLOCKS = 100;
 const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
 class BenchmarkPlayer implements Player {
-  #source: IDeserializedIterableSource;
-  #name: string;
+  readonly #source: IDeserializedIterableSource;
+  readonly #name: string;
   #listener?: (state: PlayerState) => Promise<void>;
   #subscriptions: SubscribePayload[] = [];
   #blockLoader?: BlockLoader;
-  #alertManager = new PlayerAlertManager();
+  readonly #alertManager = new PlayerAlertManager();
 
   public constructor(name: string, source: IDeserializedIterableSource) {
     this.#name = name;
