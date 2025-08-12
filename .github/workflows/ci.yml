@@ -47,7 +47,7 @@ jobs:
     name: ${{ matrix.config.name }} (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v4.0.3
         with:
@@ -79,7 +79,7 @@ jobs:
       TZ: Europe/Lisbon
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v4.0.3
         with:
