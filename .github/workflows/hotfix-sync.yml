@@ -1,0 +1,25 @@
+name: Sync Hotfix to Develop
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  sync:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && startsWith(github.event.pull_request.head.ref, 'hotfix/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+
+      - name: Merge main into develop
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git merge --no-ff origin/main -m "merge: hotfix sync from main"
+          git push origin develop
