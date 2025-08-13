@@ -391,8 +391,7 @@ export class IterablePlayer implements Player {
 
     return this.#messageRangeSource?.messageIterator({
       topics: topicSelection,
-      start: this.#start,
-      consumptionType: "partial",
+      consumptionType: "full",
     });
   }
 

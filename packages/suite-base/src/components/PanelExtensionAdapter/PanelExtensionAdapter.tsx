@@ -25,7 +25,6 @@ import {
   Subscription,
   Time,
   VariableValue,
-  MessageEvent,
 } from "@lichtblick/suite";
 import {
   MessagePipelineContext,
@@ -61,6 +60,7 @@ import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
+import { createMessageRangeIterator } from "./messageRangeIterator";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
@@ -566,90 +566,20 @@ function PanelExtensionAdapter(
           return () => {};
         }
 
-        // Create a cancellation token
-        let cancelled = false;
-
-        // Create a wrapper async iterable that converts IteratorResult to MessageEvent
-        const messageEventIterable = {
-          async *[Symbol.asyncIterator]() {
-            try {
-              // Create a fake subscription to get message converters for this topic
-              // Include convertTo if specified to get proper conversion setup
-              const fakeSubscription = convertTo
-                ? { topic, preload: true, convertTo }
-                : { topic, preload: true };
-
-              // Import necessary functions for message processing
-              const { convertMessage, collateTopicSchemaConversions } = await import(
-                "./messageProcessing"
-              );
-
-              const collatedConversions = collateTopicSchemaConversions(
-                [fakeSubscription],
-                sortedTopics,
-                messageConverters,
-              );
-
-              const { topicSchemaConverters, unconvertedSubscriptionTopics } = collatedConversions;
-
-              const batchMessages: MessageEvent[] = [];
-              let lastBatchTime = performance.now();
-
-              for await (const iterResult of rawBatchIterator) {
-                // Check if cancelled before processing each iteration
-                if (cancelled) {
-                  break;
-                }
-
-                // Only process message-event type results
-                if (iterResult.type === "message-event") {
-                  const msgEvent = iterResult.msgEvent;
-
-                  // Filter by topic (the iterator might return other topics)
-                  if (msgEvent.topic === topic) {
-                    if (unconvertedSubscriptionTopics.has(msgEvent.topic)) {
-                      batchMessages.push(msgEvent);
-                    }
-                    // Apply message conversion if converters exist
-                    if (topicSchemaConverters.size > 0) {
-                      convertMessage(msgEvent, topicSchemaConverters, batchMessages);
-                    }
-
-                    if (performance.now() - lastBatchTime > 16) {
-                      // Yield the batch if it has been more than 16ms since the last yield
-                      if (batchMessages.length > 0) {
-                        yield batchMessages; // No copy needed - we clear it immediately after
-                        batchMessages.length = 0; // Clear the batch
-                        lastBatchTime = performance.now();
-                      }
-                    }
-                  }
-                }
-              }
-
-              // Yield any remaining messages if not cancelled
-              if (!cancelled && batchMessages.length > 0) {
-                yield batchMessages; // No copy needed - array will be garbage collected
-              }
-            } catch (err: unknown) {
-              if (!cancelled) {
-                log.error("Error in unstable_subscribeMessageRange iterator:", err);
-              }
-            }
-          },
-        };
+        const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
+          topic,
+          convertTo,
+          rawBatchIterator,
+          sortedTopics,
+          messageConverters: messageConverters ?? [],
+        });
 
         // Call the callback with the processed iterable
         void onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
-          if (!cancelled) {
-            log.error("Error in onNewRangeIterator callback:", err);
-          }
+          log.error("Error in onNewRangeIterator callback:", err);
         });
 
-        return () => {
-          // Cancel the iterator by setting the cancellation flag
-          cancelled = true;
-        };
+        return cancel;
       },
 
       unstable_setMessagePathDropConfig(dropConfig) {

@@ -318,11 +318,9 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         topic: topic.name,
         convertTo: topic.schemaName,
         onNewRangeIterator: async (batchIterator) => {
-          const bufferMessages: MessageEvent[] = [];
           for await (const messages of batchIterator) {
-            bufferMessages.push(...messages);
+            setAllMapMessages((prev) => memoizedFilterMessages([...prev, ...messages]));
           }
-          setAllMapMessages((prev) => memoizedFilterMessages([...prev, ...bufferMessages]));
         },
       });
       unsubscriptions.push(unsubscribe);
