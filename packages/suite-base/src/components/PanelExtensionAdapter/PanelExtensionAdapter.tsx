@@ -555,7 +555,7 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
-      subscribeMessageRange({ topic, convertTo, onNewRangeIterator }) {
+      unstable_subscribeMessageRange({ topic, convertTo, onNewRangeIterator }) {
         if (!isMounted()) {
           return () => {};
         }
@@ -565,6 +565,9 @@ function PanelExtensionAdapter(
           // If no batch iterator is available, just return an empty cleanup function
           return () => {};
         }
+
+        // Create a cancellation token
+        let cancelled = false;
 
         // Create a wrapper async iterable that converts IteratorResult to MessageEvent
         const messageEventIterable = {
@@ -593,6 +596,11 @@ function PanelExtensionAdapter(
               let lastBatchTime = performance.now();
 
               for await (const iterResult of rawBatchIterator) {
+                // Check if cancelled before processing each iteration
+                if (cancelled) {
+                  break;
+                }
+
                 // Only process message-event type results
                 if (iterResult.type === "message-event") {
                   const msgEvent = iterResult.msgEvent;
@@ -609,24 +617,38 @@ function PanelExtensionAdapter(
 
                     if (performance.now() - lastBatchTime > 16) {
                       // Yield the batch if it has been more than 16ms since the last yield
-                      yield batchMessages;
-                      batchMessages.length = 0; // Clear the batch
-                      lastBatchTime = performance.now();
+                      if (batchMessages.length > 0) {
+                        yield batchMessages; // No copy needed - we clear it immediately after
+                        batchMessages.length = 0; // Clear the batch
+                        lastBatchTime = performance.now();
+                      }
                     }
                   }
                 }
               }
+
+              // Yield any remaining messages if not cancelled
+              if (!cancelled && batchMessages.length > 0) {
+                yield batchMessages; // No copy needed - array will be garbage collected
+              }
             } catch (err: unknown) {
-              log.error("Error in subscribeMessageRange iterator:", err);
+              if (!cancelled) {
+                log.error("Error in unstable_subscribeMessageRange iterator:", err);
+              }
             }
           },
         };
 
         // Call the callback with the processed iterable
-        void onNewRangeIterator(messageEventIterable);
+        void onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
+          if (!cancelled) {
+            log.error("Error in onNewRangeIterator callback:", err);
+          }
+        });
 
         return () => {
-          // Cleanup function - iterator will be garbage collected when no longer referenced
+          // Cancel the iterator by setting the cancellation flag
+          cancelled = true;
         };
       },
 

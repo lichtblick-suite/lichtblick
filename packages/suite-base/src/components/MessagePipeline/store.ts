@@ -217,7 +217,7 @@ export function createMessagePipelineStore({
       },
       getBatchIterator(topic: string) {
         const player = get().player;
-        return player?.getBatchIterator?.(topic);
+        return player?.getBatchIterator(topic);
       },
       startPlayback: undefined,
       playUntil: undefined,

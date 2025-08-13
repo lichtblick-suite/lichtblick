@@ -294,13 +294,13 @@ export type SubscribeMessageRangeArgs = {
   convertTo?: string;
 
   /**
-   * `onNewRangeIterator` is a function that receives an async iterable when there is message data available on
-   * the subscription.
+   * The `onNewRangeIterator` callback function is invoked whenever message data becomes available for
+   * the subscribed topic.
    *
-   * To read messages, your function should iterate through the provided async iterable. Each item
-   * of the iterable is a batch of message events for the subscription's topic. These batches and
-   * messages are in _log time_ order. When there are no more messages to read the iterator will
-   * finish.
+   * Your function should process messages by iterating through the supplied async iterable. Each element
+   * in the iterable represents a batch containing message events for the subscription's topic. Both the batches and
+   * individual messages are ordered by _log time_. The iterator completes when no additional messages remain
+   * to be read.
    *
    * ```typescript
    * async function onNewRangeIterator(batchIterator) {
@@ -310,14 +310,14 @@ export type SubscribeMessageRangeArgs = {
    * }
    * ```
    *
-   * `onNewRangeIterator` is called again when the upstream topic data changes. I.E subscribing to a
-   * user-script output topic and the user script changes, or subscribing to an aliased topic and
-   * the alias changes. When topic data changes, the previous iterator will end, and its data is no
-   * longer valid. When `onNewRangeIterator` is called, you should discard previously received data.
+   * The `onNewRangeIterator` callback is triggered again whenever upstream topic data undergoes changes. For instance, this occurs when
+   * subscribing to a user-script output topic and the script is modified, or when subscribing to an aliased topic where
+   * the alias configuration changes. Following topic data changes, the existing iterator terminates, rendering its data
+   * obsolete. Upon receiving a new `onNewRangeIterator` call, you should discard any previously received data.
    *
-   * If your `onNewRangeIterator` function throws an error, the iterator will end and you will not receive any
-   * more messages until `onNewRangeIterator` is called again. Your error will appear in the problems sidebar
-   * for user visibility.
+   * Should your `onNewRangeIterator` function encounter an error, the iterator will terminate and no additional
+   * messages will be delivered until `onNewRangeIterator` is invoked again. Any errors will be displayed in the problems sidebar
+   * to ensure user visibility.
    */
   onNewRangeIterator: (batchIterator: AsyncIterable<Immutable<MessageEvent[]>>) => Promise<void>;
 };
@@ -486,18 +486,18 @@ export type PanelExtensionContext = {
   setDefaultPanelTitle(defaultTitle: string | undefined): void;
 
   /**
-   * Subscribe to receive the entire time range of messages for a given topic for the current data source.
+   * Enables subscription to retrieve complete message history for a specified topic from the active data source.
    *
    * See {@link SubscribeMessageRangeArgs} for more information on behavior.
    *
-   * Note: This will not read messages for live sources, like foxglove_bridge, rosbridge, or ROS 1
-   * native connections. For those messages you will still need to use `context.subscribe()` and
+   * Note: This functionality is unavailable for real-time data sources, including foxglove_bridge, rosbridge, or ROS 1
+   * native connections. For such sources, you must utilize `context.subscribe()` and
    * `watch("currentFrame")`.
    *
-   * @returns A function that will unsubscribe from the topic, cancel the active async iterator,
-   * and prevent {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator} from being called again.
+   * @returns A cleanup function that terminates the topic subscription, cancels the running async iterator,
+   * and blocks future invocations of {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator}.
    */
-  subscribeMessageRange?: (args: SubscribeMessageRangeArgs) => () => void;
+  unstable_subscribeMessageRange: (args: SubscribeMessageRangeArgs) => () => void;
 };
 
 export type ExtensionPanelRegistration = {

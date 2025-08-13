@@ -290,7 +290,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       subscriptions.push({
         topic: topic.name,
         convertTo: topic.schemaName,
-        preload: true,
+        preload: false,
       });
     }
 
@@ -304,6 +304,34 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
 
     return () => {
       context.unsubscribeAll();
+    };
+  }, [config, context, eligibleTopics, settingsActionHandler]);
+
+  // Subscribe to eligible and enabled topics for range messages
+  useEffect(() => {
+    const unsubscriptions: (() => void)[] = [];
+    for (const topic of eligibleTopics) {
+      if (config.disabledTopics.includes(topic.name)) {
+        continue;
+      }
+      const unsubscribe = context.unstable_subscribeMessageRange({
+        topic: topic.name,
+        convertTo: topic.schemaName,
+        onNewRangeIterator: async (batchIterator) => {
+          const bufferMessages: MessageEvent[] = [];
+          for await (const messages of batchIterator) {
+            bufferMessages.push(...messages);
+          }
+          setAllMapMessages((prev) => memoizedFilterMessages([...prev, ...bufferMessages]));
+        },
+      });
+      unsubscriptions.push(unsubscribe);
+    }
+
+    return () => {
+      for (const unsubscribe of unsubscriptions) {
+        unsubscribe();
+      }
     };
   }, [config, context, eligibleTopics, settingsActionHandler]);
 
@@ -353,18 +381,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       }
     };
   }, [config.disabledTopics, currentMap, topicLayers]);
-
-  useLayoutEffect(() => {
-    context.subscribeMessageRange?.({
-      topic: "/em/gnss_positioning_update_position_corrected",
-      convertTo: "foxglove.LocationFix",
-      onNewRangeIterator: async (batchIterator) => {
-        for await (const messages of batchIterator) {
-          setAllMapMessages((prev) => memoizedFilterMessages([...prev, ...messages]));
-        }
-      },
-    });
-  }, [context]);
 
   // During the initial mount we setup our context render handler
   useLayoutEffect(() => {
