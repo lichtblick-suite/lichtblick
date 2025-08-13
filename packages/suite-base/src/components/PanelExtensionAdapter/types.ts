@@ -5,8 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PanelExtensionContext, RegisterMessageConverterArgs, Topic } from "@lichtblick/suite";
+import { PanelExtensionContext, RegisterMessageConverterArgs } from "@lichtblick/suite";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import { Topic } from "@lichtblick/suite-base/players/types";
 
 /**
  * An asset loaded from Studio's asset manager.
