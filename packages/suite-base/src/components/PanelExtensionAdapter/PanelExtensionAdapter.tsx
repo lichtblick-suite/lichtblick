@@ -575,7 +575,7 @@ function PanelExtensionAdapter(
         });
 
         // Call the callback with the processed iterable
-        void onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
+        onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
           log.error("Error in onNewRangeIterator callback:", err);
         });
 

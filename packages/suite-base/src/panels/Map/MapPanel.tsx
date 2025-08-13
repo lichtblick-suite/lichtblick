@@ -18,7 +18,6 @@ import {
   TileLayer,
 } from "leaflet";
 import * as _ from "lodash-es";
-import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
@@ -54,10 +53,6 @@ import { MapPanelMessage, Point } from "./types";
 type MapPanelProps = {
   context: PanelExtensionContext;
 };
-
-const memoizedFilterMessages = memoizeWeak((msgs: readonly MessageEvent[]) =>
-  msgs.filter(isValidMapMessage),
-);
 
 function MapPanel(props: MapPanelProps): React.JSX.Element {
   const { context } = props;
@@ -308,7 +303,10 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
   }, [config, context, eligibleTopics, settingsActionHandler]);
 
   // Subscribe to eligible and enabled topics for range messages
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // Clear previous messages when subscriptions change
+    setAllMapMessages([]);
+
     const unsubscriptions: (() => void)[] = [];
     for (const topic of eligibleTopics) {
       if (config.disabledTopics.includes(topic.name)) {
@@ -319,7 +317,8 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         convertTo: topic.schemaName,
         onNewRangeIterator: async (batchIterator) => {
           for await (const messages of batchIterator) {
-            setAllMapMessages((prev) => memoizedFilterMessages([...prev, ...messages]));
+            const validMessages = messages.filter(isValidMapMessage);
+            setAllMapMessages((prev) => [...prev, ...validMessages]);
           }
         },
       });
@@ -331,7 +330,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         unsubscribe();
       }
     };
-  }, [config, context, eligibleTopics, settingsActionHandler]);
+  }, [config, context, eligibleTopics]);
 
   type TopicGroups = {
     baseColor: string;
@@ -742,6 +741,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
             visibility: center ? "visible" : "hidden",
           }}
         />
+        x
       </Stack>
     </ThemeProvider>
   );

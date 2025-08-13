@@ -47,6 +47,9 @@ function FilteredPointLayer(args: Args): FeatureGroup {
   // track which pixels have been used
   const sparse2d: (boolean | undefined)[][] = [];
 
+  // track the currently hovered marker to reset its style when hovering another
+  let currentHoveredMarker: PointMarker | undefined;
+
   for (const messageEvent of points) {
     const lat = messageEvent.message.latitude;
     const lon = messageEvent.message.longitude;
@@ -86,14 +89,35 @@ function FilteredPointLayer(args: Args): FeatureGroup {
   if (args.onHover) {
     markersLayer.on("mouseover", (event) => {
       const marker = event.sourceTarget as PointMarker;
+
+      // Reset previous hovered marker if there is one
+      if (currentHoveredMarker && currentHoveredMarker !== marker) {
+        currentHoveredMarker.setStyle(defaultStyle);
+      }
+
+      // Set new marker as hovered
+      currentHoveredMarker = marker;
       marker.setStyle({ color: args.hoverColor });
       marker.bringToFront();
       args.onHover?.(marker.messageEvent);
     });
     markersLayer.on("mouseout", (event) => {
       const marker = event.sourceTarget as PointMarker;
-      marker.setStyle(defaultStyle);
-      args.onHover?.(undefined);
+      // Only reset if this is the currently hovered marker
+      if (currentHoveredMarker === marker) {
+        marker.setStyle(defaultStyle);
+        currentHoveredMarker = undefined;
+        args.onHover?.(undefined);
+      }
+    });
+
+    // Handle case when mouse leaves the entire layer group
+    markersLayer.on("mouseleave", () => {
+      if (currentHoveredMarker) {
+        currentHoveredMarker.setStyle(defaultStyle);
+        currentHoveredMarker = undefined;
+        args.onHover?.(undefined);
+      }
     });
   }
   if (args.onClick) {
