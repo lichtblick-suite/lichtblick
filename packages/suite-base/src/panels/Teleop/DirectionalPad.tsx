@@ -16,7 +16,7 @@ import {
 
 import { useStyles } from "./DirectionalPad.style";
 
-export function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element {
+function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element {
   const { onAction, disabled = false } = props;
 
   const [currentAction, setCurrentAction] = useState<DirectionalPadAction | undefined>();
