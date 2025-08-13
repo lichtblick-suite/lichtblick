@@ -7,22 +7,9 @@
 
 import Logger from "@lichtblick/log";
 import { MessageEvent, Subscription } from "@lichtblick/suite";
-import type { RegisterMessageConverterArgs } from "@lichtblick/suite";
-import { Topic } from "@lichtblick/suite-base/players/types";
-
-import { IteratorResult } from "../../players/IterablePlayer/IIterableSource";
+import { CreateMessageRangeIteratorParams } from "@lichtblick/suite-base/components/PanelExtensionAdapter/types";
 
 const log = Logger.getLogger(__filename);
-
-type MessageConverter = RegisterMessageConverterArgs<unknown>;
-
-export type CreateMessageRangeIteratorParams = {
-  topic: string;
-  convertTo?: string;
-  rawBatchIterator: AsyncIterableIterator<Readonly<IteratorResult>>;
-  sortedTopics: readonly Topic[];
-  messageConverters: readonly MessageConverter[];
-};
 
 /**
  * Creates an async iterable that processes messages from a raw batch iterator,
