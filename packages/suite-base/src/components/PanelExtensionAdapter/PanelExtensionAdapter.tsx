@@ -555,6 +555,20 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
+      /**
+       * EXPERIMENTAL: Subscribe to message ranges for efficient batch processing.
+       *
+       * This API is marked as "unstable" because it's still experimental and not fully functional.
+       * We're gradually testing and refining this feature to see how it performs in real-world scenarios.
+       *
+       * The API may change without notice as we gather feedback and improve the implementation.
+       * Use with caution in production environments.
+       *
+       * Current limitations:
+       * - Performance characteristics may vary
+       * - Error handling is still being refined
+       * - API surface may change based on testing feedback
+       */
       unstable_subscribeMessageRange({ topic, convertTo, onNewRangeIterator }) {
         if (!isMounted()) {
           return () => {};
