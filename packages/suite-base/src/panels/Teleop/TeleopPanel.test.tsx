@@ -4,7 +4,13 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 
-import TeleopPanel, { buildSettingsTree } from "./TeleopPanel";
+import { Topic } from "@lichtblick/suite";
+import { buildSettingsTreeTeleop } from "@lichtblick/suite-base/panels/Teleop/buildSettingsTree";
+import { TeleopConfig } from "@lichtblick/suite-base/panels/Teleop/types";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+
+import TeleopPanel from "./TeleopPanel";
 
 // Mocks
 jest.mock("./DirectionalPad", () => ({
@@ -87,7 +93,7 @@ describe("TeleopPanel", () => {
   it("renders DirectionalPad when canPublish and hasTopic", () => {
     const context = getMockContext({
       publish: jest.fn(),
-      initialState: { topic: "foo" },
+      initialState: { topic: BasicBuilder.string() },
     });
     render(<TeleopPanel context={context} />);
     expect(screen.queryByTestId("directional-pad")).toBeInTheDocument();
@@ -97,7 +103,7 @@ describe("TeleopPanel", () => {
     const publish = jest.fn();
     const context = getMockContext({
       publish,
-      initialState: { topic: "foo", publishRate: 0 },
+      initialState: { topic: BasicBuilder.string(), publishRate: 0 },
     });
     render(<TeleopPanel context={context} />);
     expect(publish).not.toHaveBeenCalled();
@@ -106,15 +112,16 @@ describe("TeleopPanel", () => {
   it("publishes message when DirectionalPad action is triggered", () => {
     jest.useFakeTimers();
     const publish = jest.fn();
+    const initialState: Partial<TeleopConfig> = { topic: BasicBuilder.string(), publishRate: 1 };
     const context = getMockContext({
       publish,
-      initialState: { topic: "foo", publishRate: 1 },
+      initialState,
     });
     render(<TeleopPanel context={context} />);
     fireEvent.click(screen.getByText("UP"));
     jest.runOnlyPendingTimers();
     expect(publish).toHaveBeenCalledWith(
-      "foo",
+      initialState.topic,
       expect.objectContaining({
         linear: expect.any(Object),
         angular: expect.any(Object),
@@ -126,15 +133,16 @@ describe("TeleopPanel", () => {
   it("calls advertise and unadvertise when topic changes", () => {
     const advertise = jest.fn();
     const unadvertise = jest.fn();
+    const initialState: Partial<TeleopConfig> = { topic: BasicBuilder.string() };
     const context = getMockContext({
       publish: jest.fn(),
       advertise,
       unadvertise,
-      initialState: { topic: "foo" },
+      initialState,
     });
     const { rerender } = render(<TeleopPanel context={context} />);
     expect(advertise).toHaveBeenCalledWith(
-      "foo",
+      initialState.topic,
       "geometry_msgs/Twist",
       expect.objectContaining({
         datatypes: expect.any(Map),
@@ -146,7 +154,7 @@ describe("TeleopPanel", () => {
           publish: jest.fn(),
           advertise,
           unadvertise,
-          initialState: { topic: "bar" },
+          initialState,
         })}
       />,
     );
@@ -154,8 +162,15 @@ describe("TeleopPanel", () => {
   });
 
   it("initializes config with defaults when initialState is partial", () => {
+    const initialState: Partial<TeleopConfig> = {
+      publishRate: BasicBuilder.number(),
+      upButton: {
+        field: BasicBuilder.string(),
+        value: 0,
+      },
+    };
     const context = getMockContext({
-      initialState: { publishRate: 5, upButton: { field: "linear-y" } },
+      initialState,
       publish: jest.fn(),
     });
     render(<TeleopPanel context={context} />);
@@ -182,7 +197,7 @@ describe("TeleopPanel", () => {
   it("settingsActionHandler updates config", () => {
     const context = getMockContext({
       publish: jest.fn(),
-      initialState: { topic: "foo" },
+      initialState: { topic: BasicBuilder.string() },
     });
     render(<TeleopPanel context={context} />);
     const handler = context.updatePanelSettingsEditor.mock.calls[0][0].actionHandler;
@@ -195,8 +210,8 @@ describe("TeleopPanel", () => {
   });
 
   it("buildSettingsTree returns correct structure", () => {
-    const config = {
-      topic: "foo",
+    const config: TeleopConfig = {
+      topic: BasicBuilder.string(),
       publishRate: 2,
       upButton: { field: "linear-x", value: 1 },
       downButton: { field: "linear-x", value: -1 },
@@ -204,10 +219,11 @@ describe("TeleopPanel", () => {
       rightButton: { field: "angular-z", value: -1 },
     };
     const topics = [
-      { name: "foo", schemaName: "geometry_msgs/Twist" },
-      { name: "bar", schemaName: "geometry_msgs/Twist" },
-    ];
-    const tree = buildSettingsTree(config, topics);
+      PlayerBuilder.topic({ schemaName: "geometry_msgs/Twist" }),
+      PlayerBuilder.topic({ schemaName: "geometry_msgs/Twist" }),
+    ] as Readonly<Topic[]>;
+
+    const tree = buildSettingsTreeTeleop(config, topics);
     expect(tree.general?.fields?.publishRate?.value).toBe(2);
     expect(tree.general?.fields?.topic?.input).toEqual("autocomplete");
     expect(tree.general?.children?.upButton?.fields?.field?.value).toBe("linear-x");
