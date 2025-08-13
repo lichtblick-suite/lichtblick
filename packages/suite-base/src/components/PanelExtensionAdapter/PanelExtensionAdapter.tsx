@@ -25,6 +25,7 @@ import {
   Subscription,
   Time,
   VariableValue,
+  MessageEvent,
 } from "@lichtblick/suite";
 import {
   MessagePipelineContext,
@@ -131,6 +132,7 @@ function PanelExtensionAdapter(
     getMetadata,
     sortedTopics,
     sortedServices,
+    getBatchIterator,
   } = messagePipelineContext;
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
@@ -551,6 +553,81 @@ function PanelExtensionAdapter(
           return;
         }
         setDefaultPanelTitle(title);
+      },
+
+      subscribeMessageRange({ topic, convertTo, onNewRangeIterator }) {
+        if (!isMounted()) {
+          return () => {};
+        }
+
+        const rawBatchIterator = getBatchIterator(topic);
+        if (!rawBatchIterator) {
+          // If no batch iterator is available, just return an empty cleanup function
+          return () => {};
+        }
+
+        // Create a wrapper async iterable that converts IteratorResult to MessageEvent
+        const messageEventIterable = {
+          async *[Symbol.asyncIterator]() {
+            try {
+              // Create a fake subscription to get message converters for this topic
+              // Include convertTo if specified to get proper conversion setup
+              const fakeSubscription = convertTo
+                ? { topic, preload: true, convertTo }
+                : { topic, preload: true };
+
+              // Import necessary functions for message processing
+              const { convertMessage, collateTopicSchemaConversions } = await import(
+                "./messageProcessing"
+              );
+
+              const collatedConversions = collateTopicSchemaConversions(
+                [fakeSubscription],
+                sortedTopics,
+                messageConverters,
+              );
+
+              const { topicSchemaConverters, unconvertedSubscriptionTopics } = collatedConversions;
+
+              const batchMessages: MessageEvent[] = [];
+              let lastBatchTime = performance.now();
+
+              for await (const iterResult of rawBatchIterator) {
+                // Only process message-event type results
+                if (iterResult.type === "message-event") {
+                  const msgEvent = iterResult.msgEvent;
+
+                  // Filter by topic (the iterator might return other topics)
+                  if (msgEvent.topic === topic) {
+                    if (unconvertedSubscriptionTopics.has(msgEvent.topic)) {
+                      batchMessages.push(msgEvent);
+                    }
+                    // Apply message conversion if converters exist
+                    if (topicSchemaConverters.size > 0) {
+                      convertMessage(msgEvent, topicSchemaConverters, batchMessages);
+                    }
+
+                    if (performance.now() - lastBatchTime > 16) {
+                      // Yield the batch if it has been more than 16ms since the last yield
+                      yield batchMessages;
+                      batchMessages.length = 0; // Clear the batch
+                      lastBatchTime = performance.now();
+                    }
+                  }
+                }
+              }
+            } catch (err: unknown) {
+              log.error("Error in subscribeMessageRange iterator:", err);
+            }
+          },
+        };
+
+        // Call the callback with the processed iterable
+        void onNewRangeIterator(messageEventIterable);
+
+        return () => {
+          // Cleanup function - iterator will be garbage collected when no longer referenced
+        };
       },
 
       unstable_setMessagePathDropConfig(dropConfig) {

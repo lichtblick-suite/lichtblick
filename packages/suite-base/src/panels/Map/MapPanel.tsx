@@ -354,6 +354,18 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     };
   }, [config.disabledTopics, currentMap, topicLayers]);
 
+  useLayoutEffect(() => {
+    context.subscribeMessageRange?.({
+      topic: "/em/gnss_positioning_update_position_corrected",
+      convertTo: "foxglove.LocationFix",
+      onNewRangeIterator: async (batchIterator) => {
+        for await (const messages of batchIterator) {
+          setAllMapMessages((prev) => memoizedFilterMessages([...prev, ...messages]));
+        }
+      },
+    });
+  }, [context]);
+
   // During the initial mount we setup our context render handler
   useLayoutEffect(() => {
     if (!mapContainerRef.current) {
@@ -376,7 +388,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     // tell the context we care about updates on these fields
     context.watch("topics");
     context.watch("currentFrame");
-    context.watch("allFrames");
     context.watch("previewTime");
     context.watch("colorScheme");
 
@@ -394,11 +405,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         setTopics((oldTopics) => {
           return _.isEqual(oldTopics, renderState.topics) ? oldTopics : renderState.topics ?? [];
         });
-      }
-
-      if (renderState.allFrames) {
-        // use memoization to avoid re-filtering allFrames when it has not changed
-        setAllMapMessages(memoizedFilterMessages(renderState.allFrames));
       }
 
       // Only update the current frame if we have new messages.

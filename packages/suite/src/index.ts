@@ -276,6 +276,52 @@ export type RenderState = {
   appSettings?: Map<string, AppSettingValue>;
 };
 
+export type SubscribeMessageRangeArgs = {
+  /**
+   * Topic to be subscribed to.
+   */
+  topic: string;
+
+  /**
+   * Convert messages to this schema before delivering to the subscriber.
+   *
+   * MessageEvents for the subscription will contain the converted message and an
+   * `originalMessageEvent` field with the original message event. If no `convertTo` schema is
+   * specified, then no message converters will be used. If no message converter exists for
+   * converting the original schema to the `convertTo` schema, then no messages are delivered for
+   * this subscription.
+   */
+  convertTo?: string;
+
+  /**
+   * `onNewRangeIterator` is a function that receives an async iterable when there is message data available on
+   * the subscription.
+   *
+   * To read messages, your function should iterate through the provided async iterable. Each item
+   * of the iterable is a batch of message events for the subscription's topic. These batches and
+   * messages are in _log time_ order. When there are no more messages to read the iterator will
+   * finish.
+   *
+   * ```typescript
+   * async function onNewRangeIterator(batchIterator) {
+   *   for await (const batch of batchIterator) {
+   *     //...
+   *   }
+   * }
+   * ```
+   *
+   * `onNewRangeIterator` is called again when the upstream topic data changes. I.E subscribing to a
+   * user-script output topic and the user script changes, or subscribing to an aliased topic and
+   * the alias changes. When topic data changes, the previous iterator will end, and its data is no
+   * longer valid. When `onNewRangeIterator` is called, you should discard previously received data.
+   *
+   * If your `onNewRangeIterator` function throws an error, the iterator will end and you will not receive any
+   * more messages until `onNewRangeIterator` is called again. Your error will appear in the problems sidebar
+   * for user visibility.
+   */
+  onNewRangeIterator: (batchIterator: AsyncIterable<Immutable<MessageEvent[]>>) => Promise<void>;
+};
+
 export type PanelExtensionContext = {
   /**
    * The root element for the panel. Add your panel elements as children under this element.
@@ -438,6 +484,20 @@ export type PanelExtensionContext = {
    * manually. A value of `undefined` will display the panel's name in the title bar.
    */
   setDefaultPanelTitle(defaultTitle: string | undefined): void;
+
+  /**
+   * Subscribe to receive the entire time range of messages for a given topic for the current data source.
+   *
+   * See {@link SubscribeMessageRangeArgs} for more information on behavior.
+   *
+   * Note: This will not read messages for live sources, like foxglove_bridge, rosbridge, or ROS 1
+   * native connections. For those messages you will still need to use `context.subscribe()` and
+   * `watch("currentFrame")`.
+   *
+   * @returns A function that will unsubscribe from the topic, cancel the active async iterator,
+   * and prevent {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator} from being called again.
+   */
+  subscribeMessageRange?: (args: SubscribeMessageRangeArgs) => () => void;
 };
 
 export type ExtensionPanelRegistration = {

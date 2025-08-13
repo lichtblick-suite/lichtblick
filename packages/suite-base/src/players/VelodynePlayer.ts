@@ -319,6 +319,11 @@ export default class VelodynePlayer implements Player {
   public setGlobalVariables(_globalVariables: GlobalVariables): void {
     // no-op
   }
+
+  public getBatchIterator(): undefined {
+    // VelodynePlayer does not support batch iteration
+    return undefined;
+  }
 }
 
 function rawPacketToRos(packet: RawPacket, topOfHour: Time): { stamp: Time; data: Uint8Array } {
