@@ -15,6 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Metadata, ParameterValue } from "@lichtblick/suite";
+import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
@@ -61,6 +62,12 @@ export default class FakePlayer implements Player {
       progress: progress ?? {},
       activeData,
     });
+  }
+
+  public getBatchIterator(
+    _topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    return undefined;
   }
 
   public close = (): void => {

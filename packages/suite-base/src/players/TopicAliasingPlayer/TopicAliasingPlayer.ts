@@ -27,6 +27,7 @@ import {
   StateProcessorFactory,
   TopicAliasFunctions,
 } from "./StateProcessorFactory";
+import { IteratorResult } from "../IterablePlayer/IIterableSource";
 
 export type { TopicAliasFunctions };
 
@@ -71,6 +72,12 @@ export class TopicAliasingPlayer implements Player {
 
   public getMetadata(): ReadonlyArray<Readonly<Metadata>> {
     return this.#player.getMetadata?.() ?? Object.freeze([]);
+  }
+
+  public getBatchIterator(
+    topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    return this.#player.getBatchIterator(topic);
   }
 
   public setListener(listener: (playerState: PlayerState) => Promise<void>): void {

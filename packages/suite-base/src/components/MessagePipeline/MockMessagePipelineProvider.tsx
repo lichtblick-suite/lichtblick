@@ -205,6 +205,9 @@ function getPublicState(
           condvar.notifyAll();
         };
       },
+    getBatchIterator: () => {
+      return undefined;
+    },
   };
 }
 

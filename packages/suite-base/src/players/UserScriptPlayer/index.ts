@@ -31,6 +31,7 @@ import {
   PerformanceMetricID,
 } from "@lichtblick/suite-base/context/PerformanceContext";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { IteratorResult as IIterableSourceIteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { MemoizedLibGenerator } from "@lichtblick/suite-base/players/UserScriptPlayer/MemoizedLibGenerator";
 import { generateTypesLib } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
 import { TransformArgs } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/types";
@@ -1066,6 +1067,11 @@ export default class UserScriptPlayer implements Player {
 
   public getMetadata(): ReadonlyArray<Readonly<Metadata>> {
     return this.#player.getMetadata?.() ?? Object.freeze([]);
+  }
+  public getBatchIterator(
+    topic: string,
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
+    return this.#player.getBatchIterator(topic);
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {

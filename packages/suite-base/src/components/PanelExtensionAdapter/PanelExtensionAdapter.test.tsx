@@ -775,4 +775,68 @@ describe("PanelExtensionAdapter", () => {
     handle.rerender(<Wrapper />);
     await sig;
   });
+
+  it("should handle unstable_subscribeMessageRange when getBatchIterator returns undefined", async () => {
+    const initPanel = (context: PanelExtensionContext) => {
+      const cleanup = context.unstable_subscribeMessageRange({
+        topic: "/test/topic",
+        onNewRangeIterator: async () => {
+          // This callback should not be called when no batch iterator is available
+          throw new Error("onNewRangeIterator should not be called");
+        },
+      });
+      expect(typeof cleanup).toBe("function");
+    };
+
+    const sig = signal();
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup>
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => {
+      sig.resolve();
+    });
+    await sig;
+  });
+
+  it("should return cleanup function from unstable_subscribeMessageRange", async () => {
+    let cleanupCalled = false;
+    const initPanel = (context: PanelExtensionContext) => {
+      const cleanup = context.unstable_subscribeMessageRange({
+        topic: "/test/topic",
+        onNewRangeIterator: async () => {},
+      });
+      expect(typeof cleanup).toBe("function");
+
+      // Test that cleanup function works
+      cleanup();
+      cleanupCalled = true;
+    };
+
+    const sig = signal();
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup>
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => {
+      sig.resolve();
+    });
+    await sig;
+
+    expect(cleanupCalled).toBe(true);
+  });
 });

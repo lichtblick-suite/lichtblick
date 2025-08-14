@@ -11,7 +11,10 @@ import { toRFC3339String } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { BlockLoader } from "@lichtblick/suite-base/players/IterablePlayer/BlockLoader";
-import { IDeserializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import {
+  IDeserializedIterableSource,
+  IteratorResult,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
@@ -43,6 +46,12 @@ class BenchmarkPlayer implements Player {
   public constructor(name: string, source: IDeserializedIterableSource) {
     this.#name = name;
     this.#source = source;
+  }
+
+  public getBatchIterator(
+    _topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    return undefined;
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {

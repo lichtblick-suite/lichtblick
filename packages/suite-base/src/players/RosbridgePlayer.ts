@@ -647,6 +647,11 @@ export default class RosbridgePlayer implements Player {
     // no-op
   }
 
+  public getBatchIterator(): undefined {
+    // RosbridgePlayer does not support batch iteration
+    return undefined;
+  }
+
   #setupPublishers(): void {
     // This function will be called again once a connection is established
     if (!this.#rosClient) {

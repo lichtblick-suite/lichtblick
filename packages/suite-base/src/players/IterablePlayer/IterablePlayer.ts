@@ -185,6 +185,8 @@ export class IterablePlayer implements Player {
   #blockLoader?: BlockLoader;
   #blockLoadingProcess?: Promise<void>;
 
+  #messageRangeSource?: IDeserializedIterableSource;
+
   #queueEmitState: ReturnType<typeof debouncePromise>;
 
   readonly #sourceId: string;
@@ -382,6 +384,17 @@ export class IterablePlayer implements Player {
     // no-op
   }
 
+  public getBatchIterator(
+    topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    const topicSelection = new Map([[topic, { topic }]]);
+
+    return this.#messageRangeSource?.messageIterator({
+      topics: topicSelection,
+      consumptionType: "full",
+    });
+  }
+
   public setParameter(_key: string, _value: ParameterValue): void {
     throw new Error("Parameter editing is not supported by this data source");
   }
@@ -559,6 +572,15 @@ export class IterablePlayer implements Player {
       for (const alert of alerts) {
         this.#alertManager.addAlert(`init-alert-${idx}`, alert);
         idx += 1;
+      }
+
+      if (this.#iterableSource.sourceType === "deserialized") {
+        this.#messageRangeSource = this.#iterableSource;
+      } else {
+        this.#messageRangeSource = new DeserializingIterableSource(this.#iterableSource);
+        (this.#messageRangeSource as DeserializingIterableSource).initializeDeserializers(
+          initResult,
+        );
       }
 
       if (this.#enablePreload) {

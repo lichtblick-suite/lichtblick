@@ -4,26 +4,14 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { Map, LatLngBounds, FeatureGroup, CircleMarker, PathOptions, Ellipse } from "leaflet";
+import { FeatureGroup, CircleMarker, PathOptions, Ellipse } from "leaflet";
 
+import { POINT_MARKER_RADIUS } from "@lichtblick/suite-base/panels/Map/constants";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import "leaflet-ellipse";
 import { getAccuracy } from "./getAccuracy";
-import { NavSatFixMsg } from "./types";
-
-export const POINT_MARKER_RADIUS = 3;
-
-type Args = {
-  map: Map;
-  bounds: LatLngBounds;
-  color: string;
-  hoverColor: string;
-  showAccuracy?: boolean;
-  navSatMessageEvents: readonly MessageEvent<NavSatFixMsg>[];
-  onHover?: (event: MessageEvent<NavSatFixMsg> | undefined) => void;
-  onClick?: (event: MessageEvent<NavSatFixMsg>) => void;
-};
+import { FilteredPointLayerArgs, NavSatFixMsg } from "./types";
 
 class PointMarker extends CircleMarker {
   public messageEvent?: MessageEvent<NavSatFixMsg>;
@@ -32,7 +20,7 @@ class PointMarker extends CircleMarker {
 /**
  * Create a leaflet LayerGroup with filtered points
  */
-function FilteredPointLayer(args: Args): FeatureGroup {
+function FilteredPointLayer(args: FilteredPointLayerArgs): FeatureGroup {
   const { navSatMessageEvents: points, bounds, map } = args;
   const defaultStyle: PathOptions = {
     stroke: false,
@@ -46,6 +34,9 @@ function FilteredPointLayer(args: Args): FeatureGroup {
 
   // track which pixels have been used
   const sparse2d: (boolean | undefined)[][] = [];
+
+  // track the currently hovered marker to reset its style when hovering another
+  let currentHoveredMarker: PointMarker | undefined;
 
   for (const messageEvent of points) {
     const lat = messageEvent.message.latitude;
@@ -86,14 +77,35 @@ function FilteredPointLayer(args: Args): FeatureGroup {
   if (args.onHover) {
     markersLayer.on("mouseover", (event) => {
       const marker = event.sourceTarget as PointMarker;
+
+      // Reset previous hovered marker if there is one
+      if (currentHoveredMarker && currentHoveredMarker !== marker) {
+        currentHoveredMarker.setStyle(defaultStyle);
+      }
+
+      // Set new marker as hovered
+      currentHoveredMarker = marker;
       marker.setStyle({ color: args.hoverColor });
       marker.bringToFront();
       args.onHover?.(marker.messageEvent);
     });
     markersLayer.on("mouseout", (event) => {
       const marker = event.sourceTarget as PointMarker;
-      marker.setStyle(defaultStyle);
-      args.onHover?.(undefined);
+      // Only reset if this is the currently hovered marker
+      if (currentHoveredMarker === marker) {
+        marker.setStyle(defaultStyle);
+        currentHoveredMarker = undefined;
+        args.onHover?.(undefined);
+      }
+    });
+
+    // Handle case when mouse leaves the entire layer group
+    markersLayer.on("mouseleave", () => {
+      if (currentHoveredMarker) {
+        currentHoveredMarker.setStyle(defaultStyle);
+        currentHoveredMarker = undefined;
+        args.onHover?.(undefined);
+      }
     });
   }
   if (args.onClick) {

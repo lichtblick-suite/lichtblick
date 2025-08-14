@@ -18,7 +18,6 @@ import {
   TileLayer,
 } from "leaflet";
 import * as _ from "lodash-es";
-import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
@@ -34,9 +33,8 @@ import {
 } from "@lichtblick/suite";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import FilteredPointLayer, {
-  POINT_MARKER_RADIUS,
-} from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
+import FilteredPointLayer from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
+import { POINT_MARKER_RADIUS } from "@lichtblick/suite-base/panels/Map/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { darkColor, lightColor, lineColors } from "@lichtblick/suite-base/util/plotColors";
 
@@ -54,10 +52,6 @@ import { MapPanelMessage, Point } from "./types";
 type MapPanelProps = {
   context: PanelExtensionContext;
 };
-
-const memoizedFilterMessages = memoizeWeak((msgs: readonly MessageEvent[]) =>
-  msgs.filter(isValidMapMessage),
-);
 
 function MapPanel(props: MapPanelProps): React.JSX.Element {
   const { context } = props;
@@ -290,7 +284,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       subscriptions.push({
         topic: topic.name,
         convertTo: topic.schemaName,
-        preload: true,
+        preload: false,
       });
     }
 
@@ -306,6 +300,36 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       context.unsubscribeAll();
     };
   }, [config, context, eligibleTopics, settingsActionHandler]);
+
+  // Subscribe to eligible and enabled topics for range messages
+  useLayoutEffect(() => {
+    // Clear previous messages when subscriptions change
+    setAllMapMessages([]);
+
+    const unsubscriptions: (() => void)[] = [];
+    for (const topic of eligibleTopics) {
+      if (config.disabledTopics.includes(topic.name)) {
+        continue;
+      }
+      const unsubscribe = context.unstable_subscribeMessageRange({
+        topic: topic.name,
+        convertTo: topic.schemaName,
+        onNewRangeIterator: async (batchIterator) => {
+          for await (const messages of batchIterator) {
+            const validMessages = messages.filter(isValidMapMessage);
+            setAllMapMessages((prev) => [...prev, ...validMessages]);
+          }
+        },
+      });
+      unsubscriptions.push(unsubscribe);
+    }
+
+    return () => {
+      for (const unsubscribe of unsubscriptions) {
+        unsubscribe();
+      }
+    };
+  }, [config, context, eligibleTopics]);
 
   type TopicGroups = {
     baseColor: string;
@@ -376,7 +400,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     // tell the context we care about updates on these fields
     context.watch("topics");
     context.watch("currentFrame");
-    context.watch("allFrames");
     context.watch("previewTime");
     context.watch("colorScheme");
 
@@ -394,11 +417,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         setTopics((oldTopics) => {
           return _.isEqual(oldTopics, renderState.topics) ? oldTopics : renderState.topics ?? [];
         });
-      }
-
-      if (renderState.allFrames) {
-        // use memoization to avoid re-filtering allFrames when it has not changed
-        setAllMapMessages(memoizedFilterMessages(renderState.allFrames));
       }
 
       // Only update the current frame if we have new messages.
@@ -722,6 +740,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
             visibility: center ? "visible" : "hidden",
           }}
         />
+        x
       </Stack>
     </ThemeProvider>
   );

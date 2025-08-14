@@ -1184,6 +1184,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public setGlobalVariables(): void {}
 
+  public getBatchIterator(): undefined {
+    // FoxgloveWebSocketPlayer does not support batch iteration
+    return undefined;
+  }
+
   // Return the current time
   //
   // For servers which publish a clock, we return that time. If the server disconnects we continue

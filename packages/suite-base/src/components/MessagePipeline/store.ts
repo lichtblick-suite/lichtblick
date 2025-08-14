@@ -215,6 +215,10 @@ export function createMessagePipelineStore({
         const player = get().player;
         return player?.getMetadata?.() ?? Object.freeze([]);
       },
+      getBatchIterator(topic: string) {
+        const player = get().player;
+        return player?.getBatchIterator(topic);
+      },
       startPlayback: undefined,
       playUntil: undefined,
       pausePlayback: undefined,

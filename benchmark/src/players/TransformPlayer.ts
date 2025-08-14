@@ -12,6 +12,7 @@ import * as rostime from "@lichtblick/rostime";
 import { Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import {
   AdvertiseOptions,
   Player,
@@ -56,6 +57,12 @@ class TransformPlayer implements Player {
         { name: "rotation", type: "Quaternion", isComplex: true },
       ],
     });
+  }
+
+  public getBatchIterator(
+    _topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    return undefined;
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
