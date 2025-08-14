@@ -1,0 +1,95 @@
+name: Develop Pre-release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+
+permissions:
+  contents: write
+
+jobs:
+  prerelease:
+    if: github.event.pull_request.merged == true
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16.17
+
+      - name: Enable corepack
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Bump prerelease version in root package.json
+        run: yarn version prerelease --preid=rc
+
+      - name: Bump prerelease version in packages/suite
+        working-directory: packages/suite
+        run: yarn version prerelease --preid=rc
+
+      - name: Get new version
+        id: get_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Commit and tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json packages/suite/package.json yarn.lock
+          git commit -m "chore: bump prerelease to v${{ env.version }} [skip actions]"
+          git tag "v${{ env.version }}"
+          git push origin develop --tags
+
+      - name: Build prod files
+        run: yarn run desktop:build:prod
+
+      - name: Build Windows
+        run: yarn run package:win
+
+      - name: Build Linux
+        run: yarn run package:linux
+
+      - name: Build macOS
+        run: yarn run package:darwin
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lichtblick-${{ env.version }}-windows
+          path: dist/lichtblick-${{ env.version }}-win.exe
+          retention-days: 30
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lichtblick-${{ env.version }}-debian-amd64
+          path: dist/lichtblick-${{ env.version }}-linux-amd64.deb
+          retention-days: 30
+
+      - name: Upload MacOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lichtblick-${{ env.version }}-macos
+          path: dist/lichtblick-${{ env.version }}-mac-universal.dmg
+          retention-days: 30
+
+      - name: Create GitHub Pre-release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ env.version }}"
+          name: "v${{ env.version }}"
+          commit: develop
+          generateReleaseNotes: false
+          prerelease: true
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}

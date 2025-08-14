@@ -1,0 +1,17 @@
+name: Enforce branch naming for develop
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/) ]]; then
+            echo "Source branch must start with 'feature/' or 'bugfix/'"
+            exit 1
+          fi
