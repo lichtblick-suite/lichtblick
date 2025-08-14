@@ -16,7 +16,7 @@
     "@lichtblick/theme": "workspace:*",
     "@lichtblick/tsconfig": "1.0.0",
     "@mcap/core": "2.1.6",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
     "@storybook/react": "9.1.1",
     "@types/mock-fs": "4.13.4",
     "@types/plist": "^3.0.3",
