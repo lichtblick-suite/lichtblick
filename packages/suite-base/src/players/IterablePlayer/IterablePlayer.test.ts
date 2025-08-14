@@ -871,4 +871,297 @@ describe("IterablePlayer", () => {
       metadataInitialized.pop();
     }).toThrow();
   });
+
+  describe("getBatchIterator", () => {
+    it("should return undefined when messageRangeSource is not available", () => {
+      const source = new TestSource();
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Before initialization, messageRangeSource should be undefined
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeUndefined();
+    });
+
+    it("should create correct topic selection and call messageIterator", async () => {
+      const source = new TestSource();
+
+      // Mock the messageIterator method to track calls
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      // Now getBatchIterator should work
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      // Consume one item from the iterator to verify it works
+      expect(iterator).toBeDefined();
+      const result = await iterator!.next();
+      expect(result.done).toBe(false);
+      // Verify we got a message event
+      expect((result as any).value.type).toBe("message-event");
+
+      // Verify that messageIterator was called with correct parameters
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["test_topic", { topic: "test_topic" }]]),
+        consumptionType: "full",
+      });
+    });
+
+    it("should handle multiple topics correctly", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "topic1",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test1" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "topic2",
+            receiveTime: { sec: 2, nsec: 0 },
+            message: { data: "test2" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      // Test getBatchIterator for topic1
+      const iterator1 = player.getBatchIterator("topic1");
+      expect(iterator1).toBeDefined();
+
+      // Test getBatchIterator for topic2
+      const iterator2 = player.getBatchIterator("topic2");
+      expect(iterator2).toBeDefined();
+
+      // Verify calls with different topics
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["topic1", { topic: "topic1" }]]),
+        consumptionType: "full",
+      });
+
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["topic2", { topic: "topic2" }]]),
+        consumptionType: "full",
+      });
+    });
+
+    it("should handle iterator that yields different result types", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+        yield {
+          type: "alert",
+          connectionId: 1,
+          alert: { severity: "info", message: "test alert" },
+        };
+        yield {
+          type: "stamp",
+          stamp: { sec: 1, nsec: 500000000 },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      const results = [];
+      for await (const result of iterator!) {
+        results.push(result);
+      }
+
+      expect(results).toHaveLength(3);
+      expect(results[0]?.type).toBe("message-event");
+      expect(results[1]?.type).toBe("alert");
+      expect(results[2]?.type).toBe("stamp");
+    });
+
+    it("should handle empty iterator", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        // Empty iterator
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      const result = await iterator!.next();
+      expect(result.done).toBe(true);
+    });
+
+    it("should handle iterator errors gracefully", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+        throw new Error("Iterator error");
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      // Should get first message
+      const result1 = await iterator!.next();
+      expect(result1.done).toBe(false);
+      expect(result1.value.type).toBe("message-event");
+
+      // Should throw on second call
+      await expect(iterator!.next()).rejects.toThrow("Iterator error");
+    });
+
+    it("should use full consumption type", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      player.getBatchIterator("test_topic");
+
+      // Verify that consumptionType is "full"
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: expect.any(Map),
+        consumptionType: "full",
+      });
+    });
+  });
 });

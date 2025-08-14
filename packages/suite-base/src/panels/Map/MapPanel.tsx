@@ -33,9 +33,8 @@ import {
 } from "@lichtblick/suite";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import FilteredPointLayer, {
-  POINT_MARKER_RADIUS,
-} from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
+import FilteredPointLayer from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
+import { POINT_MARKER_RADIUS } from "@lichtblick/suite-base/panels/Map/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { darkColor, lightColor, lineColors } from "@lichtblick/suite-base/util/plotColors";
 
