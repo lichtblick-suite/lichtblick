@@ -138,7 +138,7 @@
     "storybook": "9.1.1",
     "ts-loader": "9.5.1",
     "ts-node": "10.9.2",
-    "ts-unused-exports": "10.0.1",
+    "ts-unused-exports": "11.0.1",
     "tslib": "2.8.1",
     "typescript": "5.3.3",
     "webpack": "5.101.0",
