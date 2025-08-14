@@ -98,6 +98,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         seekPlayback: undefined,
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
+        getBatchIterator: expect.any(Function),
       },
       {
         playerState: {
@@ -126,6 +127,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         seekPlayback: undefined,
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
+        getBatchIterator: expect.any(Function),
       },
     ]);
   });

@@ -56,28 +56,28 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
             break;
           }
 
-          // Only process message-event type results
-          if (iterResult.type === "message-event") {
-            const msgEvent = iterResult.msgEvent;
+          // Only process "message-event" type results
+          if (iterResult.type !== "message-event") {
+            continue;
+          }
 
-            // Filter by topic (the iterator might return other topics)
-            if (msgEvent.topic === topic) {
-              if (unconvertedSubscriptionTopics.has(msgEvent.topic)) {
-                batchMessages.push(msgEvent);
-              }
-              // Apply message conversion if converters exist
-              if (topicSchemaConverters.size > 0) {
-                convertMessage(msgEvent, topicSchemaConverters, batchMessages);
-              }
+          const msgEvent = iterResult.msgEvent;
 
-              if (performance.now() - lastBatchTime > 16) {
-                // Yield the batch if it has been more than 16ms since the last yield
-                if (batchMessages.length > 0) {
-                  yield batchMessages; // No copy needed - we clear it immediately after
-                  batchMessages.length = 0; // Clear the batch
-                  lastBatchTime = performance.now();
-                }
-              }
+          // If the topic is not in unconvertedSubscriptionTopics, skip conversion
+          if (unconvertedSubscriptionTopics.has(msgEvent.topic)) {
+            batchMessages.push(msgEvent);
+          }
+          // Apply message conversion if converters exist
+          if (topicSchemaConverters.size > 0) {
+            convertMessage(msgEvent, topicSchemaConverters, batchMessages);
+          }
+
+          if (performance.now() - lastBatchTime > 16) {
+            // Yield the batch if it has been more than 16ms since the last yield
+            if (batchMessages.length > 0) {
+              yield batchMessages; // No copy needed - we clear it immediately after
+              batchMessages.length = 0; // Clear the batch
+              lastBatchTime = performance.now();
             }
           }
         }

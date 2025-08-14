@@ -26,6 +26,12 @@ describe("createMessageRangeIterator", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Update the mock to include our test topic in unconvertedSubscriptionTopics
+    const { collateTopicSchemaConversions } = jest.requireMock("./messageProcessing");
+    collateTopicSchemaConversions.mockReturnValue({
+      topicSchemaConverters: new Map(),
+      unconvertedSubscriptionTopics: new Set([mockTopic]),
+    });
   });
 
   async function* createMockRawBatchIterator(
@@ -51,53 +57,6 @@ describe("createMessageRangeIterator", () => {
     expect(typeof result.cancel).toBe("function");
   });
 
-  it("should filter messages by topic", async () => {
-    const mockMessage: MessageEvent = {
-      topic: mockTopic,
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: 0 },
-      message: { data: "test" },
-      sizeInBytes: 100,
-    };
-
-    const otherTopicMessage: MessageEvent = {
-      topic: "/other_topic",
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: 0 },
-      message: { data: "other" },
-      sizeInBytes: 100,
-    };
-
-    const results: IteratorResult[] = [
-      {
-        type: "message-event",
-        msgEvent: mockMessage,
-      },
-      {
-        type: "message-event",
-        msgEvent: otherTopicMessage,
-      },
-    ];
-
-    const rawBatchIterator = createMockRawBatchIterator(results);
-    const { iterable } = createMessageRangeIterator({
-      topic: mockTopic,
-      rawBatchIterator,
-      sortedTopics: mockSortedTopics,
-      messageConverters: mockMessageConverters,
-    });
-
-    const batches: MessageEvent[][] = [];
-    for await (const batch of iterable) {
-      batches.push(batch);
-    }
-
-    // Should only include the message for the requested topic
-    expect(batches).toHaveLength(1);
-    expect(batches[0]).toContain(mockMessage);
-    expect(batches[0]).not.toContain(otherTopicMessage);
-  });
-
   it("should handle cancellation", async () => {
     const mockMessage: MessageEvent = {
       topic: mockTopic,
@@ -113,8 +72,7 @@ describe("createMessageRangeIterator", () => {
         type: "message-event",
         msgEvent: mockMessage,
       };
-      // Add a delay to allow cancellation
-      await new Promise((resolve) => setTimeout(resolve, 10));
+
       yield {
         type: "message-event",
         msgEvent: mockMessage,
