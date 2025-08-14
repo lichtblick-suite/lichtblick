@@ -7,7 +7,7 @@
 
 import Logger from "@lichtblick/log";
 import { MessageEvent, Subscription } from "@lichtblick/suite";
-import { CreateMessageRangeIteratorParams } from "@lichtblick/suite-base/components/PanelExtensionAdapter/types";
+import { CreateMessageRangeIteratorParams } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 
 const log = Logger.getLogger(__filename);
 
