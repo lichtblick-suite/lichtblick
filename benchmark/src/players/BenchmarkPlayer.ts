@@ -33,12 +33,12 @@ const MAX_BLOCKS = 100;
 const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
 class BenchmarkPlayer implements Player {
-  #source: IDeserializedIterableSource;
-  #name: string;
+  readonly #source: IDeserializedIterableSource;
+  readonly #name: string;
   #listener?: (state: PlayerState) => Promise<void>;
   #subscriptions: SubscribePayload[] = [];
   #blockLoader?: BlockLoader;
-  #alertManager = new PlayerAlertManager();
+  readonly #alertManager = new PlayerAlertManager();
 
   public constructor(name: string, source: IDeserializedIterableSource) {
     this.#name = name;
@@ -94,8 +94,8 @@ class BenchmarkPlayer implements Player {
     const { start: startTime, end: endTime, topicStats, datatypes, topics } = result;
 
     // Bail on any alerts
-    for (const alert of result.alerts) {
-      throw new Error(alert.message);
+    if (result.alerts.length > 0) {
+      throw new Error(result.alerts[0]!.message);
     }
 
     do {

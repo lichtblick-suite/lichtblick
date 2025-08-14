@@ -9,109 +9,19 @@ import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
 import { ros1 } from "@lichtblick/rosmsg-msgs-common";
-import {
-  PanelExtensionContext,
-  SettingsTreeAction,
-  SettingsTreeNode,
-  SettingsTreeNodes,
-  Topic,
-} from "@lichtblick/suite";
+import { SettingsTreeAction, Topic } from "@lichtblick/suite";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import DirectionalPad from "@lichtblick/suite-base/panels/Teleop/DirectionalPad";
+import { buildSettingsTreeTeleop } from "@lichtblick/suite-base/panels/Teleop/buildSettingsTree";
+import {
+  TeleopConfig,
+  DirectionalPadAction,
+  TeleopPanelProps,
+} from "@lichtblick/suite-base/panels/Teleop/types";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-import DirectionalPad, { DirectionalPadAction } from "./DirectionalPad";
-
-type TeleopPanelProps = {
-  context: PanelExtensionContext;
-};
-
-const geometryMsgOptions = [
-  { label: "linear-x", value: "linear-x" },
-  { label: "linear-y", value: "linear-y" },
-  { label: "linear-z", value: "linear-z" },
-  { label: "angular-x", value: "angular-x" },
-  { label: "angular-y", value: "angular-y" },
-  { label: "angular-z", value: "angular-z" },
-];
-
-type Config = {
-  topic: undefined | string;
-  publishRate: number;
-  upButton: { field: string; value: number };
-  downButton: { field: string; value: number };
-  leftButton: { field: string; value: number };
-  rightButton: { field: string; value: number };
-};
-
-function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeNodes {
-  const general: SettingsTreeNode = {
-    label: "General",
-    fields: {
-      publishRate: { label: "Publish rate", input: "number", value: config.publishRate },
-      topic: {
-        label: "Topic",
-        input: "autocomplete",
-        value: config.topic,
-        items: topics.map((t) => t.name),
-      },
-    },
-    children: {
-      upButton: {
-        label: "Up Button",
-        fields: {
-          field: {
-            label: "Field",
-            input: "select",
-            value: config.upButton.field,
-            options: geometryMsgOptions,
-          },
-          value: { label: "Value", input: "number", value: config.upButton.value },
-        },
-      },
-      downButton: {
-        label: "Down Button",
-        fields: {
-          field: {
-            label: "Field",
-            input: "select",
-            value: config.downButton.field,
-            options: geometryMsgOptions,
-          },
-          value: { label: "Value", input: "number", value: config.downButton.value },
-        },
-      },
-      leftButton: {
-        label: "Left Button",
-        fields: {
-          field: {
-            label: "Field",
-            input: "select",
-            value: config.leftButton.field,
-            options: geometryMsgOptions,
-          },
-          value: { label: "Value", input: "number", value: config.leftButton.value },
-        },
-      },
-      rightButton: {
-        label: "Right Button",
-        fields: {
-          field: {
-            label: "Field",
-            input: "select",
-            value: config.rightButton.field,
-            options: geometryMsgOptions,
-          },
-          value: { label: "Value", input: "number", value: config.rightButton.value },
-        },
-      },
-    },
-  };
-
-  return { general };
-}
-
-function TeleopPanel(props: TeleopPanelProps): React.JSX.Element {
+function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
   const { context } = props;
   const { saveState } = context;
 
@@ -119,8 +29,8 @@ function TeleopPanel(props: TeleopPanelProps): React.JSX.Element {
   const [topics, setTopics] = useState<readonly Topic[]>([]);
 
   // resolve an initial config which may have some missing fields into a full config
-  const [config, setConfig] = useState<Config>(() => {
-    const partialConfig = context.initialState as DeepPartial<Config>;
+  const [config, setConfig] = useState<TeleopConfig>(() => {
+    const partialConfig = context.initialState as DeepPartial<TeleopConfig>;
 
     const {
       topic,
@@ -170,7 +80,7 @@ function TeleopPanel(props: TeleopPanelProps): React.JSX.Element {
   }, [context]);
 
   useEffect(() => {
-    const tree = buildSettingsTree(config, topics);
+    const tree = buildSettingsTreeTeleop(config, topics);
     context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,
       nodes: tree,
