@@ -810,11 +810,11 @@ describe("PanelExtensionAdapter", () => {
     let cleanupCalled = false;
     const initPanel = (context: PanelExtensionContext) => {
       const cleanup = context.unstable_subscribeMessageRange({
-        topic: "/test/topic", 
+        topic: "/test/topic",
         onNewRangeIterator: async () => {},
       });
       expect(typeof cleanup).toBe("function");
-      
+
       // Test that cleanup function works
       cleanup();
       cleanupCalled = true;
