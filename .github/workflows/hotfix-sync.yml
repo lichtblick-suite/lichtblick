@@ -1,14 +1,19 @@
-name: Sync Hotfix to Develop
+name: Hotfix Sync (main -> develop)
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [closed]
+    branches:
+      - main
 
 jobs:
   sync:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && startsWith(github.event.pull_request.head.ref, 'hotfix/')
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      startsWith(github.event.pull_request.head.ref, 'hotfix/')
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,6 +21,11 @@ jobs:
           ref: main
           fetch-depth: 0
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Merge main into develop
         run: |
