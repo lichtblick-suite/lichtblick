@@ -28,4 +28,9 @@ export type ThreeDeeRenderProps = {
   /** Allow for injection or overriding of default extensions by custom extensions */
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
   customCameraModels: CameraModelsMap;
+  /** Allow for accessing the parent toast snackbar from the new sync root */
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
 };
