@@ -7,7 +7,6 @@ import { render } from "@testing-library/react";
 
 import { useCrash } from "@lichtblick/hooks";
 import { TeleopPanelAdapterProps } from "@lichtblick/suite-base/panels/Teleop/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import TeleopPanelAdapter from "./index";
 
@@ -139,7 +138,6 @@ describe("TeleopPanelAdapter", () => {
 
   it("should maintain correct panel type identification", () => {
     // Given - TeleopPanelAdapter
-
     // When - checking panel type
     const panelType = TeleopPanelAdapter.panelType;
 
