@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 16.17
+          node-version: 18
 
       - name: Enable corepack
         run: corepack enable yarn
@@ -32,11 +32,11 @@ jobs:
         run: yarn install --immutable
 
       - name: Bump prerelease version in root package.json
-        run: yarn version prerelease --preid=rc
+        run: npm version prerelease --preid=rc --no-git-tag-version
 
       - name: Bump prerelease version in packages/suite
         working-directory: packages/suite
-        run: yarn version prerelease --preid=rc
+        run: npm version prerelease --preid=rc --no-git-tag-version
 
       - name: Get new version
         id: get_version
@@ -93,3 +93,11 @@ jobs:
           generateReleaseNotes: false
           prerelease: true
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          artifacts: |
+            dist/lichtblick-${{ env.version }}-linux-amd64.deb
+            dist/lichtblick-${{ env.version }}-mac-universal.dmg
+            dist/lichtblick-${{ env.version }}-win.exe
+            dist/lichtblick-web.tar.gz
+            dist/latest-linux.yml
+            dist/latest-mac.yml
+            dist/latest.yml

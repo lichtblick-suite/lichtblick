@@ -1,6 +1,7 @@
 name: Release Sync (main -> develop)
 
 on:
+  workflow_dispatch:
   release:
     types: [released]
 

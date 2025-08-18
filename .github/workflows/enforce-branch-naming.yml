@@ -1,0 +1,33 @@
+name: Enforce branch naming
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    branches: [main, develop]
+
+jobs:
+  enforce-main:
+    name: Enforce naming for PRs into main
+    if: github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch name (release/ or hotfix/)
+        run: |
+          echo "Base: ${GITHUB_BASE_REF} | Head: ${GITHUB_HEAD_REF}"
+          if [[ ! "${GITHUB_HEAD_REF}" =~ ^(release/|hotfix/) ]]; then
+            echo "Source branch must start with 'release/' or 'hotfix/' when targeting 'main'."
+            exit 1
+          fi
+
+  enforce-develop:
+    name: Enforce naming for PRs into develop
+    if: github.event.pull_request.base.ref == 'develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch name (feature/ or bugfix/)
+        run: |
+          echo "Base: ${GITHUB_BASE_REF} | Head: ${GITHUB_HEAD_REF}"
+          if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/) ]]; then
+            echo "Source branch must start with 'feature/' or 'bugfix/' when targeting 'develop'."
+            exit 1
+          fi
