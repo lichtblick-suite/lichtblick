@@ -16,10 +16,10 @@ import tsUnusedExports from "ts-unused-exports";
 // Note: use the "// ts-unused-exports:disable-next-line" comment above an export if you would like to mark it
 // as used even though it appears unused. This might happen for exports which are injected via webpack.
 async function main(): Promise<void> {
-  const results = tsUnusedExports(path.join(__dirname, "../packages/suite-base/tsconfig.json"), [
-    "--findCompletelyUnusedFiles",
-    "--ignoreLocallyUsed",
-  ]);
+  const results = tsUnusedExports.analyzeTsConfig(
+    path.join(__dirname, "../packages/suite-base/tsconfig.json"),
+    ["--findCompletelyUnusedFiles", "--ignoreLocallyUsed"],
+  );
   const ignorePathsRegex = new RegExp(
     [
       String.raw`\.stories\.tsx?$`,
@@ -41,7 +41,7 @@ async function main(): Promise<void> {
     }
     for (const item of items) {
       // In reality, sometimes item.location is undefined
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
       if (item.location == undefined) {
         info(
           `::error file=${pathFromRepoRoot}::Unused export ${item.exportName} in ${pathFromRepoRoot}`,
