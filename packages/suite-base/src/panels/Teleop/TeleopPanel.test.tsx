@@ -6,35 +6,31 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 import { Topic } from "@lichtblick/suite";
 import { buildSettingsTreeTeleop } from "@lichtblick/suite-base/panels/Teleop/buildSettingsTree";
-import { TeleopConfig } from "@lichtblick/suite-base/panels/Teleop/types";
+import {
+  DirectionalPadAction,
+  DirectionalPadProps,
+  TeleopConfig,
+} from "@lichtblick/suite-base/panels/Teleop/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import TeleopPanel from "./TeleopPanel";
 
 // Mocks
+function MockDirectionalPad({ onAction, disabled }: DirectionalPadProps): React.JSX.Element {
+  return (
+    <div data-testid="directional-pad" data-disabled={Boolean(disabled ?? false).toString()}>
+      <button onClick={() => onAction?.(DirectionalPadAction.UP)}>UP</button>
+      <button onClick={() => onAction?.(DirectionalPadAction.DOWN)}>DOWN</button>
+      <button onClick={() => onAction?.(DirectionalPadAction.LEFT)}>LEFT</button>
+      <button onClick={() => onAction?.(DirectionalPadAction.RIGHT)}>RIGHT</button>
+    </div>
+  );
+}
+
 jest.mock("./DirectionalPad", () => ({
   __esModule: true,
-  default: ({
-    onAction,
-    disabled,
-  }: {
-    onAction?: (action: number) => void;
-    disabled?: boolean;
-  }) => (
-    <div data-testid="directional-pad" data-disabled={Boolean(disabled ?? false).toString()}>
-      <button onClick={() => onAction?.(0)}>UP</button>
-      <button onClick={() => onAction?.(1)}>DOWN</button>
-      <button onClick={() => onAction?.(2)}>LEFT</button>
-      <button onClick={() => onAction?.(3)}>RIGHT</button>
-    </div>
-  ),
-  DirectionalPadAction: {
-    UP: 0,
-    DOWN: 1,
-    LEFT: 2,
-    RIGHT: 3,
-  },
+  default: MockDirectionalPad,
 }));
 
 jest.mock("@lichtblick/suite-base/theme/ThemeProvider", () => ({
