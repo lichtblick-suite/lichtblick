@@ -97,7 +97,7 @@ class TransformPreloadingPlayer implements Player {
   public getBatchIterator(
     _topic: string,
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
-    return undefined;
+    throw new Error("Method not implemented.");
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {

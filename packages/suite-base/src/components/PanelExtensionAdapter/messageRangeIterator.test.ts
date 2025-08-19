@@ -6,6 +6,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessageEvent } from "@lichtblick/suite";
+import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { IteratorResult } from "../../players/IterablePlayer/IIterableSource";
@@ -20,8 +24,8 @@ jest.mock("./messageProcessing", () => ({
 }));
 
 describe("createMessageRangeIterator", () => {
-  const mockTopic = "/test_topic";
-  const mockSortedTopics = [{ name: mockTopic, schemaName: "test_schema" }];
+  const mockTopic = `/${BasicBuilder.string()}`;
+  const mockSortedTopics = [PlayerBuilder.topic({ name: mockTopic })];
   const mockMessageConverters: never[] = [];
 
   beforeEach(() => {
@@ -58,13 +62,7 @@ describe("createMessageRangeIterator", () => {
   });
 
   it("should handle cancellation", async () => {
-    const mockMessage: MessageEvent = {
-      topic: mockTopic,
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: 0 },
-      message: { data: "test" },
-      sizeInBytes: 100,
-    };
+    const mockMessage: MessageEvent = MessageEventBuilder.messageEvent({ topic: mockTopic });
 
     // Create a slow iterator to test cancellation
     async function* slowIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
@@ -109,7 +107,7 @@ describe("createMessageRangeIterator", () => {
 
   it("should handle convertTo parameter", () => {
     const rawBatchIterator = createMockRawBatchIterator([]);
-    const convertTo = "converted_schema";
+    const convertTo = BasicBuilder.string();
 
     const result = createMessageRangeIterator({
       topic: mockTopic,
@@ -125,20 +123,11 @@ describe("createMessageRangeIterator", () => {
 
   it("should batch messages based on time", async () => {
     const mockMessages: MessageEvent[] = [
-      {
+      MessageEventBuilder.messageEvent({ topic: mockTopic, receiveTime: { sec: 1, nsec: 0 } }),
+      MessageEventBuilder.messageEvent({
         topic: mockTopic,
-        schemaName: "test_schema",
-        receiveTime: { sec: 1, nsec: 0 },
-        message: { data: "test1" },
-        sizeInBytes: 100,
-      },
-      {
-        topic: mockTopic,
-        schemaName: "test_schema",
         receiveTime: { sec: 1, nsec: 1000000 }, // 1ms later
-        message: { data: "test2" },
-        sizeInBytes: 100,
-      },
+      }),
     ];
 
     const results: IteratorResult[] = mockMessages.map((msg) => ({
@@ -265,7 +254,7 @@ describe("createMessageRangeIterator", () => {
 
         // Add a delay after the second message to trigger 16ms batching
         if (i === 1) {
-          await new Promise((resolve) => setTimeout(resolve, 16)); // 16ms delay
+          await new Promise((resolve) => setTimeout(resolve, BATCH_INTERVAL_MS)); // 16ms delay
         }
       }
     }
@@ -287,17 +276,11 @@ describe("createMessageRangeIterator", () => {
 
     // All messages should be received
     const allMessages = batches.flat();
-    expect(allMessages).toHaveLength(5);
+    expect(allMessages).toHaveLength(mockMessages.length);
   });
 
   it("should handle message conversion when converters are available", async () => {
-    const mockMessage: MessageEvent = {
-      topic: mockTopic,
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: 0 },
-      message: { data: "test" },
-      sizeInBytes: 100,
-    };
+    const mockMessage: MessageEvent = MessageEventBuilder.messageEvent({ topic: mockTopic });
 
     const { convertMessage, collateTopicSchemaConversions } =
       jest.requireMock("./messageProcessing");
@@ -333,20 +316,16 @@ describe("createMessageRangeIterator", () => {
 
   it("should yield final batch of remaining messages", async () => {
     const mockMessages: MessageEvent[] = [
-      {
+      MessageEventBuilder.messageEvent({
         topic: mockTopic,
-        schemaName: "test_schema",
         receiveTime: { sec: 1, nsec: 0 },
         message: { data: "test1" },
-        sizeInBytes: 100,
-      },
-      {
+      }),
+      MessageEventBuilder.messageEvent({
         topic: mockTopic,
-        schemaName: "test_schema",
         receiveTime: { sec: 1, nsec: 1000000 },
         message: { data: "test2" },
-        sizeInBytes: 100,
-      },
+      }),
     ];
 
     // Create an iterator that finishes quickly to test final batch handling
@@ -375,8 +354,8 @@ describe("createMessageRangeIterator", () => {
     expect(batches.length).toBeGreaterThanOrEqual(1);
     const allMessages = batches.flat();
     expect(allMessages).toHaveLength(2);
-    expect(allMessages[0]?.message).toEqual({ data: "test1" });
-    expect(allMessages[1]?.message).toEqual({ data: "test2" });
+    expect(allMessages[0]!.message).toEqual(mockMessages[0]!.message);
+    expect(allMessages[1]!.message).toEqual(mockMessages[1]!.message);
   });
 
   it("should handle errors gracefully", async () => {
@@ -426,13 +405,7 @@ describe("createMessageRangeIterator", () => {
   });
 
   it("should not yield remaining messages when cancelled", async () => {
-    const mockMessages: MessageEvent[] = Array.from({ length: 3 }, (_, i) => ({
-      topic: mockTopic,
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: i * 1000000 },
-      message: { data: `test${i}` },
-      sizeInBytes: 100,
-    }));
+    const mockMessages: MessageEvent[] = MessageEventBuilder.messageEvents();
 
     async function* interruptibleIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
       for (const msg of mockMessages) {

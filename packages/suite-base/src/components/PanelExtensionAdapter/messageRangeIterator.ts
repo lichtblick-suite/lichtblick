@@ -8,6 +8,7 @@
 import Logger from "@lichtblick/log";
 import { MessageEvent, Subscription } from "@lichtblick/suite";
 import { CreateMessageRangeIteratorParams } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
 
 const log = Logger.getLogger(__filename);
 
@@ -72,7 +73,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
             convertMessage(msgEvent, topicSchemaConverters, batchMessages);
           }
 
-          if (performance.now() - lastBatchTime > 16) {
+          if (performance.now() - lastBatchTime > BATCH_INTERVAL_MS) {
             // Yield the batch if it has been more than 16ms since the last yield
             if (batchMessages.length > 0) {
               yield batchMessages; // No copy needed - we clear it immediately after
