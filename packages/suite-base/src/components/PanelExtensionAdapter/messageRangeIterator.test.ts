@@ -185,13 +185,13 @@ describe("createMessageRangeIterator", () => {
   });
 
   it("should properly cancel during iteration", async () => {
-    const mockMessages: MessageEvent[] = Array.from({ length: 10 }, (_, i) => ({
-      topic: mockTopic,
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: i * 1000000 },
-      message: { data: `test${i}` },
-      sizeInBytes: 100,
-    }));
+    const mockMessages: MessageEvent[] = Array.from({ length: 10 }, (_, i) =>
+      MessageEventBuilder.messageEvent({
+        topic: mockTopic,
+        receiveTime: { sec: 1, nsec: i * 1000000 },
+        message: { data: `test${i}` },
+      }),
+    );
 
     // Create an iterator that yields slowly to allow cancellation
     async function* slowIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
@@ -232,17 +232,19 @@ describe("createMessageRangeIterator", () => {
     // Should have received limited results due to cancellation
     expect(batches.length).toBeGreaterThan(0);
     const totalMessages = batches.flat().length;
-    expect(totalMessages).toBeLessThan(10); // Should not have processed all messages
+    expect(totalMessages).toBeLessThan(mockMessages.length); // Should not have processed all messages
   });
 
   it("should yield batches after 16ms timeout", async () => {
-    const mockMessages: MessageEvent[] = Array.from({ length: 5 }, (_, i) => ({
-      topic: mockTopic,
-      schemaName: "test_schema",
-      receiveTime: { sec: 1, nsec: i * 1000000 },
-      message: { data: `test${i}` },
-      sizeInBytes: 100,
-    }));
+    const mockMessages: MessageEvent[] = Array.from({ length: 5 }, (_, i) =>
+      MessageEventBuilder.messageEvent({
+        topic: mockTopic,
+        schemaName: "test_schema",
+        receiveTime: { sec: 1, nsec: i * 1000000 },
+        message: { data: `test${i}` },
+        sizeInBytes: 100,
+      }),
+    );
 
     // Create an iterator with artificial delays to trigger time-based batching
     async function* timedIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
