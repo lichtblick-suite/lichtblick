@@ -6,28 +6,24 @@ on:
     branches: [main, develop]
 
 jobs:
-  enforce-main:
-    name: Enforce naming for PRs into main
-    if: github.event.pull_request.base.ref == 'main'
+  enforce-naming:
+    name: Enforce branch naming rules
     runs-on: ubuntu-latest
     steps:
-      - name: Check source branch name (release/ or hotfix/)
+      - name: Check source branch name
         run: |
           echo "Base: ${GITHUB_BASE_REF} | Head: ${GITHUB_HEAD_REF}"
-          if [[ ! "${GITHUB_HEAD_REF}" =~ ^(release/|hotfix/) ]]; then
-            echo "Source branch must start with 'release/' or 'hotfix/' when targeting 'main'."
-            exit 1
-          fi
 
-  enforce-develop:
-    name: Enforce naming for PRs into develop
-    if: github.event.pull_request.base.ref == 'develop'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check source branch name (feature/ or bugfix/)
-        run: |
-          echo "Base: ${GITHUB_BASE_REF} | Head: ${GITHUB_HEAD_REF}"
-          if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/) ]]; then
-            echo "Source branch must start with 'feature/' or 'bugfix/' when targeting 'develop'."
-            exit 1
+          if [[ "${GITHUB_BASE_REF}" == "main" ]]; then
+            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(release/|hotfix/|dependabot/) ]]; then
+              echo "Source branch must start with 'release/' or 'hotfix/' (or 'dependabot/') when targeting 'main'."
+              exit 1
+            fi
+          elif [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
+            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/|dependabot/) ]]; then
+              echo "Source branch must start with 'feature/' or 'bugfix/' (or 'dependabot/') when targeting 'develop'."
+              exit 1
+            fi
+          else
+            echo "No naming rules defined for base branch '${GITHUB_BASE_REF}'."
           fi

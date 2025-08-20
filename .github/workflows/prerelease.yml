@@ -1,17 +1,41 @@
-name: Develop Pre-release
+name: Manual Pre-release
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - develop
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to create prerelease from"
+        required: true
+        default: "develop"
+        type: choice
+        options:
+          - develop
+          - release/*
+      version_type:
+        description: "Version bump type"
+        required: true
+        default: "prerelease"
+        type: choice
+        options:
+          - prerelease
+          - prepatch
+          - preminor
+          - premajor
+      create_release:
+        description: "Create GitHub prerelease?"
+        required: true
+        type: boolean
+        default: true
+      release_notes:
+        description: "Custom release notes (optional)"
+        required: false
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   prerelease:
-    if: github.event.pull_request.merged == true
     runs-on: macos-latest
 
     steps:
@@ -19,6 +43,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -31,25 +57,49 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Bump prerelease version in root package.json
-        run: npm version prerelease --preid=rc --no-git-tag-version
-
-      - name: Bump prerelease version in packages/suite
-        working-directory: packages/suite
-        run: npm version prerelease --preid=rc --no-git-tag-version
-
-      - name: Get new version
-        id: get_version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Commit and tag
+      - name: Get latest rc tag
+        id: get_last_rc
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/suite/package.json yarn.lock
-          git commit -m "chore: bump prerelease to v${{ env.version }} [skip actions]"
-          git tag "v${{ env.version }}"
-          git push origin develop --tags
+          last_rc=$(git tag --list "v*rc.*" --sort=-v:refname | head -n 1 || echo "")
+          echo "last_rc=$last_rc" >> $GITHUB_ENV
+          echo "Last RC: $last_rc"
+
+      - name: Calculate next rc version
+        id: next_version
+        run: |
+          npm install semver --no-save
+          node <<'EOF'
+          const fs = require("fs");
+          const semver = require("semver");
+
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const baseVersion = pkg.version;
+          const versionType = process.env.VERSION_TYPE;
+          const lastRc = process.env.LAST_RC;
+
+          let nextVersion;
+
+          if (versionType === "prerelease") {
+            if (!lastRc) {
+              nextVersion = semver.inc(baseVersion, "prerelease", "rc");
+            } else {
+              const lastVersion = lastRc.replace(/^v/, "");
+              nextVersion = semver.inc(lastVersion, "prerelease", "rc");
+            }
+          } else {
+            const stableBase = baseVersion.includes("-")
+              ? semver.parse(baseVersion).version
+              : baseVersion;
+
+            nextVersion = semver.inc(stableBase, versionType, "rc");
+          }
+
+          console.log("Next prerelease version:", nextVersion);
+          fs.appendFileSync(process.env.GITHUB_ENV, `version=${nextVersion}\n`);
+          EOF
+        env:
+          VERSION_TYPE: ${{ github.event.inputs.version_type }}
+          LAST_RC: ${{ env.last_rc }}
 
       - name: Build prod files
         run: yarn run desktop:build:prod
@@ -85,19 +135,20 @@ jobs:
           retention-days: 30
 
       - name: Create GitHub Pre-release
+        if: ${{ github.event.inputs.create_release == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ env.version }}"
           name: "v${{ env.version }}"
-          commit: develop
-          generateReleaseNotes: false
+          commit: ${{ github.event.inputs.branch }}
+          body: ${{ github.event.inputs.release_notes }}
+          generateReleaseNotes: ${{ github.event.inputs.release_notes == '' }}
           prerelease: true
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
           artifacts: |
             dist/lichtblick-${{ env.version }}-linux-amd64.deb
             dist/lichtblick-${{ env.version }}-mac-universal.dmg
             dist/lichtblick-${{ env.version }}-win.exe
-            dist/lichtblick-web.tar.gz
             dist/latest-linux.yml
             dist/latest-mac.yml
             dist/latest.yml

@@ -37,6 +37,10 @@ jobs:
           branch_name="${GITHUB_HEAD_REF}"
           if [[ "$branch_name" == hotfix/* ]]; then
             echo "type=patch" >> $GITHUB_ENV
+          elif [[ "$branch_name" =~ ^release/major ]]; then
+            echo "type=major" >> $GITHUB_ENV
+          elif [[ "$branch_name" =~ ^release/minor ]]; then
+            echo "type=minor" >> $GITHUB_ENV
           elif [[ "$branch_name" == release/* ]]; then
             echo "type=minor" >> $GITHUB_ENV
           else
