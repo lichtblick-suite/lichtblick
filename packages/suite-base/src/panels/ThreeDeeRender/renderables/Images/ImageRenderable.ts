@@ -546,8 +546,8 @@ function createGeometry(
   cameraModel: ICameraModel,
   settings: ImageRenderableSettings,
 ): THREE.PlaneGeometry {
-  const WIDTH_SEGMENTS = 50;
-  const HEIGHT_SEGMENTS = 50;
+  const WIDTH_SEGMENTS = 100;
+  const HEIGHT_SEGMENTS = 100;
 
   const width = cameraModel.width;
   const height = cameraModel.height;
