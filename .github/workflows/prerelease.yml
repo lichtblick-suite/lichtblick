@@ -102,7 +102,9 @@ jobs:
           LAST_RC: ${{ env.last_rc }}
 
       - name: Build prod files
-        run: yarn run desktop:build:prod
+        run: |
+          yarn run desktop:build:prod
+          yarn run web:build:prod
 
       - name: Build Windows
         run: yarn run package:win
@@ -113,26 +115,8 @@ jobs:
       - name: Build macOS
         run: yarn run package:darwin
 
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lichtblick-${{ env.version }}-windows
-          path: dist/lichtblick-${{ env.version }}-win.exe
-          retention-days: 30
-
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lichtblick-${{ env.version }}-debian-amd64
-          path: dist/lichtblick-${{ env.version }}-linux-amd64.deb
-          retention-days: 30
-
-      - name: Upload MacOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lichtblick-${{ env.version }}-macos
-          path: dist/lichtblick-${{ env.version }}-mac-universal.dmg
-          retention-days: 30
+      - name: Create web static files tarball
+        run: tar -czf dist/lichtblick-web.tar.gz -C web/.webpack .
 
       - name: Create GitHub Pre-release
         if: ${{ github.event.inputs.create_release == 'true' }}
@@ -147,8 +131,12 @@ jobs:
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
           artifacts: |
             dist/lichtblick-${{ env.version }}-linux-amd64.deb
+            dist/lichtblick-${{ env.version }}-linux-x64.tar.gz
+            dist/lichtblick-${{ env.version }}-linux-arm64.deb
+            dist/lichtblick-${{ env.version }}-linux-arm64.tar.gz
             dist/lichtblick-${{ env.version }}-mac-universal.dmg
             dist/lichtblick-${{ env.version }}-win.exe
+            dist/lichtblick-web.tar.gz
             dist/latest-linux.yml
             dist/latest-mac.yml
             dist/latest.yml

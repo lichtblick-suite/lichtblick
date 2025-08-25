@@ -2,6 +2,8 @@ name: Pre-Build
 
 on:
   pull_request:
+    branches:
+      - main
     types: [opened, synchronize, edited]
 
 jobs:
