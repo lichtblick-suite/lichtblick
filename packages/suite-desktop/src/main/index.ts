@@ -14,7 +14,6 @@ import { initI18n, sharedI18nObject as i18n } from "@lichtblick/suite-base/src/i
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
-import { createNewWindow } from "./createNewWindow";
 import { isFileToOpen } from "./fileUtils";
 import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
@@ -25,6 +24,7 @@ import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
 } from "./rosPackageResources";
+import { handleSecondInstance } from "./secondInstanceHandler";
 import { getAppSetting } from "./settings";
 import {
   LICHTBLICK_PRODUCT_HOMEPAGE,
@@ -113,40 +113,7 @@ export async function main(): Promise<void> {
 
   // Forward urls/files opened in a second instance to our default handlers so it's as if we opened them with this instance.
   // In case of forcing multiple instances, we will open a new window and inject the files and deep links manually.
-  app.on("second-instance", (_ev, argv, _workingDirectory) => {
-    log.debug("Received arguments from second app instance:", argv);
-
-    if (forceMultipleWindows) {
-      log.debug("second-instance: Forcing a new window to run in this instance.");
-      createNewWindow(argv);
-      return;
-    }
-
-    // Bring the app to the front
-    const someWindow = BrowserWindow.getAllWindows()[0];
-    someWindow?.restore();
-    someWindow?.focus();
-
-    const deepLinks = argv.slice(1).filter((arg) => arg.startsWith("lichtblick://"));
-    for (const link of deepLinks) {
-      app.emit("open-url", { preventDefault() {} }, link);
-    }
-
-    const files = argv
-      .slice(1)
-      .filter((arg) => !arg.startsWith("--")) // Filter out flags
-      .filter((arg) => isFileToOpen(arg));
-    for (const file of files) {
-      app.emit("open-file", { preventDefault() {} }, file);
-    }
-
-    // When being asked to open a second instance with no files or deep links then open a blank new
-    // window.
-    if (files.length === 0 && deepLinks.length === 0) {
-      log.debug("second-instance: No files or deeplinks. Opening a new window.");
-      new StudioWindow().load();
-    }
-  });
+  app.on("second-instance", handleSecondInstance);
 
   if (!app.isDefaultProtocolClient("foxglove")) {
     if (!app.setAsDefaultProtocolClient("foxglove")) {
