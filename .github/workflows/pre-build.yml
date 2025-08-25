@@ -1,11 +1,15 @@
 name: Pre-Build
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, edited]
 
 jobs:
   build:
     runs-on: macos-latest
+    if: startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/')
 
     steps:
       - name: Checkout Repository
@@ -29,8 +33,7 @@ jobs:
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Build prod files
-        run: |
-          yarn run desktop:build:prod
+        run: yarn run desktop:build:prod
 
       - name: Build Windows version
         run: yarn run package:win

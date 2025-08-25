@@ -27,23 +27,29 @@ $ yarn test:watch        # run tests on changed files
 $ yarn test:e2e:desktop  # run all e2e tests
 ```
 
-## :herb: Creating a new branch
+# Branching Strategy - Git flow
 
-To create a branch in this repository, please follow the guidelines below, ensuring that the purpose of each branch is clear and well-defined:
+When creating a new branch in this repository, please follow the naming guidelines below to ensure clarity and consistency:
 
-- `feature` : Create this branch when adding new features, modifying existing features, or removing outdated functionality.
-- `bugfix` : This branch is for resolving bugs discovered in existing features.
-- `hotfix` : Use this for rapidly addressing critical issues. This typically involves implementing a temporary solution that requires immediate attention.
-- `test` : This is intended for experimental changes, where the main goal is to explore new ideas or test solutions without addressing a specific issue.
-- `docs` : Designate this branch for updates and improvements to documentation, ensuring that information is current and helpful to users.
-- `wip` (Work In Progress): Use this for ongoing development that is not yet ready for merging into the main branch.
-- `cicd` : Use this for changes into pipeline ci/cd scripts.
+- **feature/** → For developing new features or significant improvements.
+  _Example: `feature/user-authentication`_
 
-### Examples
+- **bugfix/** → For fixing non-critical bugs or issues found in existing features.
+  _Example: `bugfix/fix-login-redirect`_
 
-`feature/new-menu-foo`
+- **hotfix/** → For urgent, critical fixes that must be applied quickly (usually targeting the `main` branch).
+  _Example: `hotfix/security-patch`_
 
-`test/create-unit-test-for-component-bar`
+- **release/** → For preparing production releases. These branches allow for final testing and adjustments before merging into `main`.
+  _Example: `release/1.2.0`_
+
+- **dependabot/** → Automatically created branches for dependency updates.
+
+---
+
+⚠️ **Deprecated branch types**:
+`test`, `docs`, `wip`, and `cicd` are no longer part of the official branching strategy.
+Please use the categories listed above instead.
 
 ## :label: Version increment
 

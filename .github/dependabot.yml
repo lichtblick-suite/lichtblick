@@ -8,6 +8,7 @@ updates:
       interval: monthly
     open-pull-requests-limit: 10
     labels: [] # disable default labels
+    target-branch: "develop"
 
     # Define groups of dependencies to be updated together
     # https://github.blog/changelog/2023-06-30-grouped-version-updates-for-dependabot-public-beta/
