@@ -346,7 +346,10 @@ export default React.memo(function LayoutRow({
         data-testid="layout-list-item"
         selected={selected || multiSelectedIds.includes(layout.id)}
         onSubmit={onSubmit}
-        onClick={editingName ? undefined : onClick}
+        onClick={(event) => {
+          // Toggle selection for multi-select support
+          onSelect(layout, { selectedViaClick: true, event });
+        }}
         onContextMenu={editingName ? undefined : handleContextMenu}
         component="form"
       >

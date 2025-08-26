@@ -30,7 +30,7 @@ export default function LayoutSection({
   onOverwrite,
   onRevert,
   onMakePersonalCopy,
-}: {
+}: Readonly<{
   title: string | undefined;
   disablePadding?: boolean;
   emptyText: string | undefined;
@@ -47,7 +47,26 @@ export default function LayoutSection({
   onOverwrite: (item: Layout) => void;
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
-}): React.JSX.Element {
+}>): React.JSX.Element {
+  // Get selected layouts
+  const selectedLayouts = items?.filter((layout) => multiSelectedIds.includes(layout.id)) ?? [];
+
+  const handleDuplicateSelected = () => {
+    selectedLayouts.forEach(onDuplicate);
+  };
+
+  const handleDeleteSelected = () => {
+    selectedLayouts.forEach(onDelete);
+  };
+
+  const handleExportSelected = () => {
+    selectedLayouts.forEach(onExport);
+  };
+
+  const handleOverwriteSelected = () => {
+    selectedLayouts.forEach(onOverwrite);
+  };
+
   return (
     <Stack>
       {title != undefined && (
@@ -74,11 +93,11 @@ export default function LayoutSection({
             layout={layout}
             onSelect={onSelect}
             onRename={onRename}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
+            onDuplicate={handleDuplicateSelected}
+            onDelete={handleDeleteSelected}
             onShare={onShare}
-            onExport={onExport}
-            onOverwrite={onOverwrite}
+            onExport={handleExportSelected}
+            onOverwrite={handleOverwriteSelected}
             onRevert={onRevert}
             onMakePersonalCopy={onMakePersonalCopy}
           />
