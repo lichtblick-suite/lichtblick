@@ -15,8 +15,8 @@ jobs:
           echo "Base: ${GITHUB_BASE_REF} | Head: ${GITHUB_HEAD_REF}"
 
           if [[ "${GITHUB_BASE_REF}" == "main" ]]; then
-            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(release/|hotfix/|dependabot/) ]]; then
-              echo "Source branch must start with 'release/' or 'hotfix/' (or 'dependabot/') when targeting 'main'."
+            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(release/|hotfix/) ]]; then
+              echo "Source branch must start with 'release/' or 'hotfix/') when targeting 'main'."
               exit 1
             fi
           elif [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
