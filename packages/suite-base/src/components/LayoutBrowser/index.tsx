@@ -131,7 +131,6 @@ export default function LayoutBrowser({
           switch (state.multiAction.action) {
             case "delete":
               await layoutManager.deleteLayout({ id: id as LayoutID });
-              dispatch({ type: "shift-multi-action" });
               break;
             case "duplicate": {
               const layout = await layoutManager.getLayout(id as LayoutID);
@@ -142,16 +141,13 @@ export default function LayoutBrowser({
                   permission: "CREATOR_WRITE",
                 });
               }
-              dispatch({ type: "shift-multi-action" });
               break;
             }
             case "revert":
               await layoutManager.revertLayout({ id: id as LayoutID });
-              dispatch({ type: "shift-multi-action" });
               break;
             case "save":
               await layoutManager.overwriteLayout({ id: id as LayoutID });
-              dispatch({ type: "shift-multi-action" });
               break;
           }
         } catch (err: unknown) {
