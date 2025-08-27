@@ -3243,7 +3243,7 @@ __metadata:
     ts-essentials: 9.4.0
     ts-key-enum: 3.0.13
     ts-loader: 9.5.1
-    tss-react: 4.8.6
+    tss-react: 4.9.19
     typescript: 5.3.3
     use-debounce: 10.0.0
     use-immer: 0.10.0
@@ -3303,7 +3303,7 @@ __metadata:
     react-refresh-typescript: 2.0.10
     react-use: 17.6.0
     tinycolor2: 1.6.0
-    tss-react: 4.9.2
+    tss-react: 4.9.19
     utif: 3.1.0
     webpack: 5.101.0
     webpack-dev-server: 5.2.2
@@ -3328,7 +3328,7 @@ __metadata:
     html-webpack-plugin: 5.6.0
     react: 18.3.1
     react-dom: 18.3.1
-    tss-react: 4.9.3
+    tss-react: 4.9.19
     webpack: 5.101.0
     webpack-dev-server: 5.2.2
   languageName: unknown
@@ -20237,9 +20237,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tss-react@npm:4.8.6":
-  version: 4.8.6
-  resolution: "tss-react@npm:4.8.6"
+"tss-react@npm:4.9.19":
+  version: 4.9.19
+  resolution: "tss-react@npm:4.9.19"
   dependencies:
     "@emotion/cache": "*"
     "@emotion/serialize": "*"
@@ -20247,53 +20247,15 @@ __metadata:
   peerDependencies:
     "@emotion/react": ^11.4.1
     "@emotion/server": ^11.4.0
-    react: ^16.8.0 || ^17.0.2 || ^18.0.0
-  peerDependenciesMeta:
-    "@emotion/server":
-      optional: true
-  checksum: 5b760dda2166bae0bb7946df25ff0ee2fca76128740cd3e6ad69c02c149b3ede0e0553e0e169c8cc70748056d39d18c70b9ccb80cc2c313b0ef57e2761b9c948
-  languageName: node
-  linkType: hard
-
-"tss-react@npm:4.9.2":
-  version: 4.9.2
-  resolution: "tss-react@npm:4.9.2"
-  dependencies:
-    "@emotion/cache": "*"
-    "@emotion/serialize": "*"
-    "@emotion/utils": "*"
-  peerDependencies:
-    "@emotion/react": ^11.4.1
-    "@emotion/server": ^11.4.0
-    "@mui/material": ^5.0.0
-    react: ^16.8.0 || ^17.0.2 || ^18.0.0
+    "@mui/material": ^5.0.0 || ^6.0.0 || ^7.0.0
+    "@types/react": ^16.8.0 || ^17.0.2 || ^18.0.0 || ^19.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@emotion/server":
       optional: true
     "@mui/material":
       optional: true
-  checksum: e998ba9e458601dc540e91c4cae424f2533b6edc013831a6ade8b35281cf7798e1ad1d9358a094fd57904f858f01fb80313437acc5377c914701c6ce75f3abac
-  languageName: node
-  linkType: hard
-
-"tss-react@npm:4.9.3":
-  version: 4.9.3
-  resolution: "tss-react@npm:4.9.3"
-  dependencies:
-    "@emotion/cache": "*"
-    "@emotion/serialize": "*"
-    "@emotion/utils": "*"
-  peerDependencies:
-    "@emotion/react": ^11.4.1
-    "@emotion/server": ^11.4.0
-    "@mui/material": ^5.0.0
-    react: ^16.8.0 || ^17.0.2 || ^18.0.0
-  peerDependenciesMeta:
-    "@emotion/server":
-      optional: true
-    "@mui/material":
-      optional: true
-  checksum: 40445f156d4d74bae18bf697dbe4e9e7a46c7056976c6312e95dc3949d637eb5e1b1dd1a4ca244c53114d9bf525a756767b33b7d59b210730c52c0e5a8524f31
+  checksum: 1e29114220d26aa3a30c05f372f61bd876a0a4eb5482b8cd16a13c9783d1ad5c33bc15cf379d467965dc98ad7c528c9165c816c26958032761dea05296e78466
   languageName: node
   linkType: hard
 
