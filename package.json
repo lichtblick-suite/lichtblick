@@ -109,7 +109,7 @@
     "@typescript-eslint/utils": "8.27.0",
     "assert": "2.1.0",
     "babel-plugin-transform-import-meta": "2.2.1",
-    "cross-env": "7.0.3",
+    "cross-env": "10.0.0",
     "depcheck": "1.4.7",
     "electron": "37.2.6",
     "electron-builder": "26.0.12",
