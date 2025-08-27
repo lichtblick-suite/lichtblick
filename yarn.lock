@@ -2162,15 +2162,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react-icons@npm:2.0.224":
-  version: 2.0.224
-  resolution: "@fluentui/react-icons@npm:2.0.224"
+"@fluentui/react-icons@npm:2.0.308":
+  version: 2.0.308
+  resolution: "@fluentui/react-icons@npm:2.0.308"
   dependencies:
     "@griffel/react": ^1.0.0
     tslib: ^2.1.0
   peerDependencies:
     react: ">=16.8.0 <19.0.0"
-  checksum: c67e0af33e6b9cd0db87609d3c9e623f2c7c9e04fd5374d3859d6322166c311b08df464ead7c79877f621b353b1fc3176e7764e3ecfe742a37c5ca6652ca7555
+  checksum: e5657bfc7441f41ae4bde5ad7f44beedf9c61833540e5960e5d173354076d8c5bd23fe380fe3dba9ba5943edf375e0d0f944b1dc207f89a5006941c6eb8df368
   languageName: node
   linkType: hard
 
@@ -3079,7 +3079,7 @@ __metadata:
     "@emotion/cache": 11.14.0
     "@emotion/react": 11.14.0
     "@emotion/styled": 11.14.1
-    "@fluentui/react-icons": 2.0.224
+    "@fluentui/react-icons": 2.0.308
     "@foxglove/schemas": 1.6.6
     "@foxglove/ws-protocol": 0.7.2
     "@lichtblick/avl": 1.0.0
@@ -3314,7 +3314,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite-web@workspace:packages/suite-web"
   dependencies:
-    "@fluentui/react-icons": 2.0.224
+    "@fluentui/react-icons": 2.0.308
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
@@ -3349,7 +3349,7 @@ __metadata:
   dependencies:
     "@emotion/react": 11.14.0
     "@emotion/styled": 11.14.1
-    "@fluentui/react-icons": 2.0.224
+    "@fluentui/react-icons": 2.0.308
     "@lichtblick/tsconfig": 1.0.0
     "@mui/icons-material": 5.15.5
     "@mui/lab": 5.0.0-alpha.177
