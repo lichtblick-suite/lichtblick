@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { renderHook, act } from "@testing-library/react";
-import * as _ from "lodash-es";
 
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
