@@ -19,10 +19,12 @@ jest.mock("./LayoutRow", () => ({
     layout,
     onDuplicate,
     onDelete,
+    onOverwrite,
   }: {
     layout: Layout;
     onDuplicate: () => void;
     onDelete: () => void;
+    onOverwrite: () => void;
   }) => (
     <div data-testid={`layout-row-${layout.id}`}>
       <button data-testid={`duplicate-button-${layout.id}`} onClick={onDuplicate}>
@@ -30,6 +32,9 @@ jest.mock("./LayoutRow", () => ({
       </button>
       <button data-testid={`delete-button-${layout.id}`} onClick={onDelete}>
         Delete
+      </button>
+      <button data-testid={`overwrite-button-${layout.id}`} onClick={onOverwrite}>
+        Overwrite
       </button>
     </div>
   ),
@@ -234,6 +239,71 @@ describe("LayoutSection", () => {
 
     // Check Layout 2 was not deleted
     const allLayouts = defaultProps.onDelete.mock.calls.map((call) => call[0]);
+    expect(allLayouts).not.toContainEqual(sampleLayouts[1]);
+  });
+
+  it("calls onOverwrite for a single selected layout", () => {
+    // GIVEN
+    const multiSelectedIds = ["1"];
+
+    // WHEN
+    render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
+    fireEvent.click(screen.getByTestId("overwrite-button-1"));
+
+    // THEN
+    expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(1);
+    // Check that onOverwrite was called with the first layout
+    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+  });
+
+  it("calls onOverwrite for all selected layouts", () => {
+    // GIVEN
+    const multiSelectedIds = ["1", "3"];
+
+    // WHEN
+    render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
+    fireEvent.click(screen.getByTestId("overwrite-button-2")); // Click on any layout's overwrite button
+
+    // THEN
+    expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(2);
+    // Check that the first call was with layout 1
+    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    // Check that the second call was with layout 3
+    expect(defaultProps.onOverwrite.mock.calls[1][0]).toEqual(sampleLayouts[2]);
+  });
+
+  it("doesn't call onOverwrite when no layouts are selected", () => {
+    // GIVEN
+    const multiSelectedIds: string[] = [];
+
+    // WHEN
+    render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
+    fireEvent.click(screen.getByTestId("overwrite-button-1"));
+
+    // THEN
+    expect(defaultProps.onOverwrite).not.toHaveBeenCalled();
+  });
+
+  it("only overwrites selected layouts", () => {
+    // GIVEN
+    const multiSelectedIds = ["1", "3"];
+
+    // WHEN
+    render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
+    fireEvent.click(screen.getByTestId("overwrite-button-1"));
+
+    // THEN
+    expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(2);
+
+    // Check the arguments for each call separately
+    const firstCallArgs = defaultProps.onOverwrite.mock.calls[0];
+    const secondCallArgs = defaultProps.onOverwrite.mock.calls[1];
+
+    expect(firstCallArgs[0]).toEqual(sampleLayouts[0]); // Layout 1
+    expect(secondCallArgs[0]).toEqual(sampleLayouts[2]); // Layout 3
+
+    // Check Layout 2 was not overwritten
+    const allLayouts = defaultProps.onOverwrite.mock.calls.map((call) => call[0]);
     expect(allLayouts).not.toContainEqual(sampleLayouts[1]);
   });
 });
