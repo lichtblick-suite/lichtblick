@@ -8,6 +8,7 @@ import "@testing-library/jest-dom"; // Add this import for DOM testing matchers
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
 import LayoutSection from "./LayoutSection";
@@ -42,17 +43,21 @@ jest.mock("./LayoutRow", () => ({
 
 describe("LayoutSection", () => {
   // Sample layouts for testing
+  const layoutName1 = BasicBuilder.string();
+  const layoutName2 = BasicBuilder.string();
+  const layoutName3 = BasicBuilder.string();
+
   const layout1 = LayoutBuilder.layout({
     id: "1" as LayoutID,
-    name: "Layout 1",
+    name: layoutName1,
   });
   const layout2 = LayoutBuilder.layout({
     id: "2" as LayoutID,
-    name: "Layout 2",
+    name: layoutName2,
   });
   const layout3 = LayoutBuilder.layout({
     id: "3" as LayoutID,
-    name: "Layout 3",
+    name: layoutName3,
   });
 
   const sampleLayouts: Layout[] = [layout1, layout2, layout3];
@@ -82,7 +87,7 @@ describe("LayoutSection", () => {
 
   it("renders with title", () => {
     // GIVEN
-    const title = "Test Section";
+    const title = BasicBuilder.string();
 
     // WHEN
     render(<LayoutSection {...defaultProps} title={title} />);
@@ -93,7 +98,7 @@ describe("LayoutSection", () => {
 
   it("renders empty text when items array is empty", () => {
     // GIVEN
-    const emptyText = "No layouts found";
+    const emptyText = BasicBuilder.string();
 
     // WHEN
     render(<LayoutSection {...defaultProps} items={[]} emptyText={emptyText} />);

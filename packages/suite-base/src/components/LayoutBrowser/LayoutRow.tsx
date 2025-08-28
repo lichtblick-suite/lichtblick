@@ -237,6 +237,7 @@ export default React.memo(function LayoutRow({
       text: "Export…",
       disabled: multiSelection,
       onClick: exportAction,
+      "data-testid": "export-layout",
     },
     { key: "divider_1", type: "divider" },
     {

@@ -9,6 +9,7 @@ import "@testing-library/jest-dom";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import * as LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import * as useConfirmModule from "@lichtblick/suite-base/hooks/useConfirm";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
 import LayoutRow from "./LayoutRow";
@@ -50,9 +51,11 @@ const mockConfirmModal = <div data-testid="confirm-modal" />;
 (LayoutManagerContext.useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
 (useConfirmModule.useConfirm as jest.Mock).mockReturnValue([mockConfirm, mockConfirmModal]);
 
+const layoutId = BasicBuilder.string();
+const layoutName = BasicBuilder.string();
 const defaultLayout = LayoutBuilder.layout({
-  id: "layout-1" as LayoutID,
-  name: "Test Layout",
+  id: layoutId as LayoutID,
+  name: layoutName,
 });
 
 const renderComponent = (props = {}) =>
@@ -82,7 +85,7 @@ describe("LayoutRow rendering", () => {
 
   it("Given default props, when rendered, then displays the layout name", () => {
     renderComponent();
-    expect(screen.getByText("Test Layout")).toBeInTheDocument();
+    expect(screen.getByText(layoutName)).toBeInTheDocument();
   });
 
   it("Given selected=true, when rendered, then the list item is marked as selected", () => {
@@ -96,7 +99,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("Given multiSelectedIds includes layout id, when rendered, then the list item is marked as selected", () => {
-    renderComponent({ multiSelectedIds: ["layout-1"] });
+    renderComponent({ multiSelectedIds: [layoutId] });
     expect(screen.getByTestId("layout-list-item")).toHaveClass("Mui-selected");
   });
 
@@ -138,10 +141,11 @@ describe("LayoutRow rendering", () => {
   });
 
   it("when multi-selection is active then certain actions are disabled", () => {
-    renderComponent({ multiSelectedIds: ["layout-1", "layout-2"] });
+    renderComponent({ multiSelectedIds: [BasicBuilder.string(), BasicBuilder.string()] });
     fireEvent.click(screen.getByTestId("layout-actions"));
     expect(screen.getByTestId("rename-layout")).toBeDisabled();
-    expect(screen.getByTestId("delete-layout")).toBeInTheDocument();
+    expect(screen.getByTestId("export-layout")).toBeDisabled();
+    expect(screen.getByTestId("delete-layout")).toBeEnabled();
   });
 
   it("Given a layout with modifications, when Revert is clicked and confirmed, then onRevert is called", async () => {
@@ -192,16 +196,14 @@ describe("LayoutRow rendering", () => {
     const input = await waitFor(() =>
       screen.getByTestId("layout-list-item").querySelector('input[type="text"]'),
     );
-    fireEvent.change(input!, { target: { value: "Blurred Name" } });
+    const inputValue = BasicBuilder.string();
+    fireEvent.change(input!, { target: { value: inputValue } });
 
     // Simulate blur event
     fireEvent.blur(input!);
 
     await waitFor(() => {
-      expect(onRename).toHaveBeenCalledWith(
-        expect.objectContaining({ id: "layout-1" }),
-        "Blurred Name",
-      );
+      expect(onRename).toHaveBeenCalledWith(expect.objectContaining({ id: layoutId }), inputValue);
     });
   });
 });
