@@ -59,10 +59,6 @@ export default function LayoutSection({
     selectedLayouts.forEach(onDelete);
   };
 
-  const handleExportSelected = () => {
-    selectedLayouts.forEach(onExport);
-  };
-
   const handleOverwriteSelected = () => {
     selectedLayouts.forEach(onOverwrite);
   };
@@ -96,7 +92,7 @@ export default function LayoutSection({
             onDuplicate={handleDuplicateSelected}
             onDelete={handleDeleteSelected}
             onShare={onShare}
-            onExport={handleExportSelected}
+            onExport={onExport}
             onOverwrite={handleOverwriteSelected}
             onRevert={onRevert}
             onMakePersonalCopy={onMakePersonalCopy}
