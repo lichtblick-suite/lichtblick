@@ -107,7 +107,6 @@ export default React.memo(function LayoutRow({
     if (response !== "ok") {
       return;
     }
-
     onRevert(layout);
   }, [confirm, layout, multiSelection, onRevert]);
 

@@ -33,7 +33,9 @@ jest.mock("./LayoutRow.style", () => ({
         {children}
       </button>
     ) : (
-      <button data-testid={props["data-testid"] ?? "styled-menu-item"}>{children}</button>
+      <button data-testid={props["data-testid"] ?? "styled-menu-item"} {...props}>
+        {children}
+      </button>
     ),
 }));
 
@@ -128,7 +130,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("when layout has modifications then unsaved changes header and related menu items are shown", () => {
-    renderComponent({ layout: { ...defaultLayout, working: {} } });
+    renderComponent({ layout: { ...defaultLayout, working: {}, syncInfo: undefined } });
     fireEvent.click(screen.getByTestId("layout-actions"));
     expect(screen.getByText("This layout has unsaved changes")).toBeInTheDocument();
     expect(screen.getByText("Save changes")).toBeInTheDocument();
@@ -140,5 +142,66 @@ describe("LayoutRow rendering", () => {
     fireEvent.click(screen.getByTestId("layout-actions"));
     expect(screen.getByTestId("rename-layout")).toBeDisabled();
     expect(screen.getByTestId("delete-layout")).toBeInTheDocument();
+  });
+
+  it("Given a layout with modifications, when Revert is clicked and confirmed, then onRevert is called", async () => {
+    const onRevert = jest.fn();
+    // Simulate confirm dialog returning "ok"
+    mockConfirm.mockResolvedValue("ok");
+    renderComponent({ layout: { ...defaultLayout, working: {}, syncInfo: undefined }, onRevert });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+    fireEvent.click(screen.getByText("Revert"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
+    });
+
+    // Wait to ensure onRevert is not called
+    await waitFor(() => {
+      expect(onRevert).toHaveBeenCalled();
+    });
+  });
+
+  it("Given a layout with modifications, when Revert is clicked and cancelled, then onRevert is not called", async () => {
+    const onRevert = jest.fn();
+    // Simulate confirm dialog returning "cancel"
+    mockConfirm.mockResolvedValue("cancel");
+    renderComponent({ layout: { ...defaultLayout, working: {}, syncInfo: undefined }, onRevert });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+    fireEvent.click(screen.getByText("Revert"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
+    });
+
+    // Wait to ensure onRevert is not called
+    await waitFor(() => {
+      expect(onRevert).not.toHaveBeenCalled();
+    });
+  });
+
+  it("Given a layout, when Rename is clicked and input is blurred, then onRename is called with the new name", async () => {
+    const onRename = jest.fn();
+    renderComponent({ onRename });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+    fireEvent.click(screen.getByTestId("rename-layout"));
+
+    const input = await waitFor(() =>
+      screen.getByTestId("layout-list-item").querySelector('input[type="text"]'),
+    );
+    fireEvent.change(input!, { target: { value: "Blurred Name" } });
+
+    // Simulate blur event
+    fireEvent.blur(input!);
+
+    await waitFor(() => {
+      expect(onRename).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "layout-1" }),
+        "Blurred Name",
+      );
+    });
   });
 });
