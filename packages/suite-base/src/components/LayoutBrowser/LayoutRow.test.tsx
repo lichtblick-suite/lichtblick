@@ -161,7 +161,7 @@ describe("LayoutRow rendering", () => {
       expect(screen.getByTestId("confirm-modal")).toBeInTheDocument();
     });
 
-    // Wait to ensure onRevert is not called
+    // Wait to ensure onRevert is called
     await waitFor(() => {
       expect(onRevert).toHaveBeenCalled();
     });

@@ -114,11 +114,11 @@ describe("LayoutSection", () => {
 
   it("calls onDuplicate for a single selected layout", () => {
     // GIVEN
-    const multiSelectedIds = ["1"];
+    const multiSelectedIds = [layout1.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("duplicate-button-1"));
+    fireEvent.click(screen.getByTestId(`duplicate-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onDuplicate).toHaveBeenCalledTimes(1);
@@ -128,11 +128,11 @@ describe("LayoutSection", () => {
 
   it("calls onDuplicate for all selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("duplicate-button-2")); // Click on any layout's duplicate button
+    fireEvent.click(screen.getByTestId(`duplicate-button-${layout2.id}`)); // Click on any layout's duplicate button
 
     // THEN
     expect(defaultProps.onDuplicate).toHaveBeenCalledTimes(2);
@@ -166,11 +166,11 @@ describe("LayoutSection", () => {
 
   it("only duplicates selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("duplicate-button-1"));
+    fireEvent.click(screen.getByTestId(`duplicate-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onDuplicate).toHaveBeenCalledTimes(2);
@@ -189,11 +189,11 @@ describe("LayoutSection", () => {
 
   it("calls onDelete for a single selected layout", () => {
     // GIVEN
-    const multiSelectedIds = ["1"];
+    const multiSelectedIds = [layout1.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("delete-button-1"));
+    fireEvent.click(screen.getByTestId(`delete-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(1);
@@ -203,11 +203,11 @@ describe("LayoutSection", () => {
 
   it("calls onDelete for all selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("delete-button-2")); // Click on any layout's delete button
+    fireEvent.click(screen.getByTestId(`delete-button-${layout2.id}`)); // Click on any layout's delete button
 
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(2);
@@ -231,11 +231,11 @@ describe("LayoutSection", () => {
 
   it("only deletes selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("delete-button-1"));
+    fireEvent.click(screen.getByTestId(`delete-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(2);
@@ -254,11 +254,11 @@ describe("LayoutSection", () => {
 
   it("calls onOverwrite for a single selected layout", () => {
     // GIVEN
-    const multiSelectedIds = ["1"];
+    const multiSelectedIds = [layout1.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("overwrite-button-1"));
+    fireEvent.click(screen.getByTestId(`overwrite-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(1);
@@ -268,11 +268,11 @@ describe("LayoutSection", () => {
 
   it("calls onOverwrite for all selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("overwrite-button-2")); // Click on any layout's overwrite button
+    fireEvent.click(screen.getByTestId(`overwrite-button-${layout2.id}`)); // Click on any layout's overwrite button
 
     // THEN
     expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(2);
@@ -296,11 +296,11 @@ describe("LayoutSection", () => {
 
   it("only overwrites selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("overwrite-button-1"));
+    fireEvent.click(screen.getByTestId(`overwrite-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(2);
@@ -319,11 +319,11 @@ describe("LayoutSection", () => {
 
   it("calls onRevert for a single selected layout", () => {
     // GIVEN
-    const multiSelectedIds = ["1"];
+    const multiSelectedIds = [layout1.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("revert-button-1"));
+    fireEvent.click(screen.getByTestId(`revert-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(1);
@@ -333,11 +333,11 @@ describe("LayoutSection", () => {
 
   it("calls onRevert for all selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("revert-button-2")); // Click on any layout's revert button
+    fireEvent.click(screen.getByTestId(`revert-button-${layout2.id}`)); // Click on any layout's revert button
 
     // THEN
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(2);
@@ -361,11 +361,11 @@ describe("LayoutSection", () => {
 
   it("only reverts selected layouts", () => {
     // GIVEN
-    const multiSelectedIds = ["1", "3"];
+    const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId("revert-button-1"));
+    fireEvent.click(screen.getByTestId(`revert-button-${layout1.id}`));
 
     // THEN
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(2);
