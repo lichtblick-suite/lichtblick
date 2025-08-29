@@ -3284,7 +3284,7 @@ __metadata:
     "@types/pngjs": ^6.0.2
     "@types/randomstring": 1.3.0
     "@types/tinycolor2": 1.4.4
-    "@types/utif": ^3.0.2
+    "@types/utif": ^3.0.6
     "@xmldom/xmldom": 0.8.10
     async-mutex: 0.5.0
     builder-util: "*"
@@ -5955,12 +5955,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/utif@npm:^3.0.2":
-  version: 3.0.5
-  resolution: "@types/utif@npm:3.0.5"
+"@types/utif@npm:^3.0.6":
+  version: 3.0.6
+  resolution: "@types/utif@npm:3.0.6"
   dependencies:
     "@types/node": "*"
-  checksum: dcf759815e1de0cd60849d76f77dc18be172d740fc56af6f57b350874c6b74cdd8ddef09e2af0b3825a0d07c7da8e461af99f20caffe381778fd1d1f2c821105
+  checksum: 0ba24d4aa321a3e0d317d5eb33c056cf1e977c581e9d83b7b3d93a83aa9aa02e5a72ab1b307e57119f940f56d79cf8c1a25dc0a50793855704cc71fc8b326b40
   languageName: node
   linkType: hard
 
