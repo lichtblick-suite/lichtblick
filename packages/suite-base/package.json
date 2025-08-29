@@ -184,7 +184,7 @@
     "ts-key-enum": "3.0.13",
     "ts-loader": "9.5.1",
     "tss-react": "4.9.19",
-    "typescript": "5.3.3",
+    "typescript": "5.9.2",
     "use-debounce": "10.0.0",
     "use-immer": "0.10.0",
     "uuid": "11.1.0",
