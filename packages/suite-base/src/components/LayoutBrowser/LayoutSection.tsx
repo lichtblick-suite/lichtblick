@@ -63,6 +63,10 @@ export default function LayoutSection({
     selectedLayouts.forEach(onOverwrite);
   };
 
+  const handleRevertSelected = () => {
+    selectedLayouts.forEach(onRevert);
+  };
+
   return (
     <Stack>
       {title != undefined && (
@@ -94,7 +98,7 @@ export default function LayoutSection({
             onShare={onShare}
             onExport={onExport}
             onOverwrite={handleOverwriteSelected}
-            onRevert={onRevert}
+            onRevert={handleRevertSelected}
             onMakePersonalCopy={onMakePersonalCopy}
           />
         ))}
