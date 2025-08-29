@@ -20,15 +20,10 @@ import {
 import { ChangeEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useUnmount } from "react-use";
 
+import { UnsavedChangesResolution } from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
-
-type UnsavedChangesResolution =
-  | { type: "cancel" }
-  | { type: "discard" }
-  | { type: "makePersonal"; name: string }
-  | { type: "overwrite" };
 
 export function UnsavedChangesPrompt({
   layout,
@@ -36,13 +31,13 @@ export function UnsavedChangesPrompt({
   onComplete,
   defaultSelectedKey = "discard",
   defaultPersonalCopyName,
-}: {
+}: Readonly<{
   layout: Layout;
   isOnline: boolean;
   onComplete: (_: UnsavedChangesResolution) => void;
   defaultSelectedKey?: Exclude<UnsavedChangesResolution["type"], "cancel">;
   defaultPersonalCopyName?: string;
-}): React.JSX.Element {
+}>): React.JSX.Element {
   const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedKey);
 
   const handleChoiceGroupChange = React.useCallback(

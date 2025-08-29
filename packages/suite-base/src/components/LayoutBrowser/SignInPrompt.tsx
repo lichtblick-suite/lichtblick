@@ -7,37 +7,16 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import { ButtonBase, IconButton, Link, Typography } from "@mui/material";
-import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { SignInPromptProps } from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
-type SignInPromptProps = {
-  onDismiss?: () => void;
-};
+import { useStyles } from "./SignInPrompt.style";
 
-const useStyles = makeStyles()((theme) => ({
-  root: {
-    display: "flex",
-    padding: theme.spacing(1.5, 1, 1.5, 2),
-    gap: theme.spacing(1),
-    backgroundColor: theme.palette.action.hover,
-    position: "sticky",
-    alignItems: "center",
-    bottom: 0,
-
-    "&:hover": {
-      backgroundColor: theme.palette.action.focus,
-    },
-  },
-  title: {
-    maxWidth: 280,
-  },
-}));
-
-export default function SignInPrompt(props: SignInPromptProps): React.JSX.Element {
+export default function SignInPrompt(props: Readonly<SignInPromptProps>): React.JSX.Element {
   const { onDismiss } = props;
   const { signIn } = useCurrentUser();
   const { classes } = useStyles();

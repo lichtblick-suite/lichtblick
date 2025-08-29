@@ -22,7 +22,6 @@ import moment from "moment";
 import { useSnackbar } from "notistack";
 import { useEffect, useLayoutEffect, useMemo } from "react";
 import useAsyncFn from "react-use/lib/useAsyncFn";
-import { makeStyles } from "tss-react/mui";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
@@ -49,16 +48,11 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import LayoutSection from "./LayoutSection";
+import { useStyles } from "./index.style";
 
 const log = Logger.getLogger(__filename);
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
-
-const useStyles = makeStyles()((theme) => ({
-  actionList: {
-    paddingTop: theme.spacing(1),
-  },
-}));
 
 export default function LayoutBrowser({
   currentDateForStorybook,
@@ -137,7 +131,6 @@ export default function LayoutBrowser({
           switch (state.multiAction.action) {
             case "delete":
               await layoutManager.deleteLayout({ id: id as LayoutID });
-              dispatch({ type: "shift-multi-action" });
               break;
             case "duplicate": {
               const layout = await layoutManager.getLayout(id as LayoutID);
@@ -148,16 +141,13 @@ export default function LayoutBrowser({
                   permission: "CREATOR_WRITE",
                 });
               }
-              dispatch({ type: "shift-multi-action" });
               break;
             }
             case "revert":
               await layoutManager.revertLayout({ id: id as LayoutID });
-              dispatch({ type: "shift-multi-action" });
               break;
             case "save":
               await layoutManager.overwriteLayout({ id: id as LayoutID });
-              dispatch({ type: "shift-multi-action" });
               break;
           }
         } catch (err: unknown) {
