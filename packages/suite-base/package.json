@@ -189,7 +189,7 @@
     "use-immer": "0.10.0",
     "uuid": "11.1.0",
     "vm-browserify": "1.1.2",
-    "webpack": "5.101.0",
+    "webpack": "5.101.3",
     "zustand": "4.5.7"
   }
 }

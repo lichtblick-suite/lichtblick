@@ -51,7 +51,7 @@
     "tinycolor2": "1.6.0",
     "tss-react": "4.9.19",
     "utif": "3.1.0",
-    "webpack": "5.101.0",
+    "webpack": "5.101.3",
     "webpack-dev-server": "5.2.2"
   }
 }
