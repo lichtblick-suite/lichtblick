@@ -108,7 +108,7 @@
     "cytoscape-dagre": "2.5.0",
     "dompurify": "3.2.5",
     "dotenv": "17.2.1",
-    "esbuild-loader": "2.21.0",
+    "esbuild-loader": "4.3.0",
     "eventemitter3": "5.0.1",
     "fake-indexeddb": "4.0.2",
     "fork-ts-checker-webpack-plugin": "9.0.2",
