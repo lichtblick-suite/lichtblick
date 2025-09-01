@@ -10779,12 +10779,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-tss-unused-classes@npm:1.0.2":
-  version: 1.0.2
-  resolution: "eslint-plugin-tss-unused-classes@npm:1.0.2"
+"eslint-plugin-tss-unused-classes@npm:1.0.3":
+  version: 1.0.3
+  resolution: "eslint-plugin-tss-unused-classes@npm:1.0.3"
   peerDependencies:
-    eslint: ^7.14.0 || ^8.0.0
-  checksum: 2984c7bd81904fae0e41bba30e7cc753e3a10354530eb985df5a61dbf06b5f96c6cf3225c5a33db0301971777008eaffc1c92f0a852142092f342feba812fa2c
+    eslint: ^7.14.0 || ^8.0.0 || ^9.0.0
+  checksum: a99a8c8ad8bf507adba08ed10480cda4bea2b34101c103655b13a9bc61d1e9ad10f6fbc0a99d92b75926a5c03139cac8ec8237a15d1b6a89b30cab8d2f111bdf
   languageName: node
   linkType: hard
 
@@ -14489,7 +14489,7 @@ __metadata:
     eslint-plugin-react: 7.33.2
     eslint-plugin-react-hooks: 4.6.0
     eslint-plugin-storybook: 0.6.15
-    eslint-plugin-tss-unused-classes: 1.0.2
+    eslint-plugin-tss-unused-classes: 1.0.3
     globals: 16.3.0
     jest: 30.0.5
     jest-environment-jsdom: 30.0.5
