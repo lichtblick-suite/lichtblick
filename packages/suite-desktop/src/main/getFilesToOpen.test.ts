@@ -3,16 +3,19 @@
 
 import path from "path";
 
+import { isFileToOpen } from "./fileUtils";
 import { getFilesToOpen } from "./getFilesToOpen";
+import { parseCLIFlags } from "./parseCLIFlags";
+import { resolveSourcePaths } from "./resolveSourcePaths";
 
 // Mock all dependencies
 jest.mock("./fileUtils");
 jest.mock("./parseCLIFlags");
 jest.mock("./resolveSourcePaths");
 
-const mockIsFileToOpen = jest.mocked(require("./fileUtils").isFileToOpen);
-const mockParseCLIFlags = jest.mocked(require("./parseCLIFlags").parseCLIFlags);
-const mockResolveSourcePaths = jest.mocked(require("./resolveSourcePaths").resolveSourcePaths);
+const mockIsFileToOpen = jest.mocked(isFileToOpen);
+const mockParseCLIFlags = jest.mocked(parseCLIFlags);
+const mockResolveSourcePaths = jest.mocked(resolveSourcePaths);
 
 describe("getFilesToOpen", () => {
   beforeEach(() => {
