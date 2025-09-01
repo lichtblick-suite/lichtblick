@@ -48,21 +48,17 @@ export default function LayoutSection({
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
 }>): React.JSX.Element {
-  // Get selected layouts
+  // Get multiple selected layouts and handle bulk actions
   const selectedLayouts = items?.filter((layout) => multiSelectedIds.includes(layout.id)) ?? [];
-
   const handleDuplicateSelected = () => {
     selectedLayouts.forEach(onDuplicate);
   };
-
   const handleDeleteSelected = () => {
     selectedLayouts.forEach(onDelete);
   };
-
   const handleOverwriteSelected = () => {
     selectedLayouts.forEach(onOverwrite);
   };
-
   const handleRevertSelected = () => {
     selectedLayouts.forEach(onRevert);
   };

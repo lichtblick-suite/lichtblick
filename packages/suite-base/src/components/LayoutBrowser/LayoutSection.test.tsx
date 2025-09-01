@@ -47,30 +47,21 @@ jest.mock("./LayoutRow", () => ({
 }));
 
 describe("LayoutSection", () => {
-  // Sample layouts for testing
-  const layoutName1 = BasicBuilder.string();
-  const layoutName2 = BasicBuilder.string();
-  const layoutName3 = BasicBuilder.string();
-
   const layout1 = LayoutBuilder.layout({
     id: "1" as LayoutID,
-    name: layoutName1,
   });
   const layout2 = LayoutBuilder.layout({
     id: "2" as LayoutID,
-    name: layoutName2,
   });
   const layout3 = LayoutBuilder.layout({
     id: "3" as LayoutID,
-    name: layoutName3,
   });
 
   const sampleLayouts: Layout[] = [layout1, layout2, layout3];
 
-  // Default props
   const defaultProps = {
-    title: "Test Section",
-    emptyText: "No layouts found",
+    title: BasicBuilder.string(),
+    emptyText: BasicBuilder.string(),
     items: sampleLayouts,
     anySelectedModifiedLayouts: false,
     multiSelectedIds: [] as string[],
@@ -123,7 +114,7 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onDuplicate).toHaveBeenCalledTimes(1);
     // Check that onDuplicate was called with the first layout (regardless of additional params)
-    expect(defaultProps.onDuplicate.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onDuplicate.mock.calls[0][0]).toEqual(layout1);
   });
 
   it("calls onDuplicate for all selected layouts", () => {
@@ -137,9 +128,9 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onDuplicate).toHaveBeenCalledTimes(2);
     // Check that the first call was with layout 1
-    expect(defaultProps.onDuplicate.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onDuplicate.mock.calls[0][0]).toEqual(layout1);
     // Check that the second call was with layout 3
-    expect(defaultProps.onDuplicate.mock.calls[1][0]).toEqual(sampleLayouts[2]);
+    expect(defaultProps.onDuplicate.mock.calls[1][0]).toEqual(layout3);
   });
 
   it("doesn't call onDuplicate when no layouts are selected", () => {
@@ -179,12 +170,12 @@ describe("LayoutSection", () => {
     const firstCallArgs = defaultProps.onDuplicate.mock.calls[0];
     const secondCallArgs = defaultProps.onDuplicate.mock.calls[1];
 
-    expect(firstCallArgs[0]).toEqual(sampleLayouts[0]); // Layout 1
-    expect(secondCallArgs[0]).toEqual(sampleLayouts[2]); // Layout 3
+    expect(firstCallArgs[0]).toEqual(layout1);
+    expect(secondCallArgs[0]).toEqual(layout3);
 
     // Check Layout 2 was not duplicated
     const allLayouts = defaultProps.onDuplicate.mock.calls.map((call) => call[0]);
-    expect(allLayouts).not.toContainEqual(sampleLayouts[1]);
+    expect(allLayouts).not.toContainEqual(layout2);
   });
 
   it("calls onDelete for a single selected layout", () => {
@@ -198,7 +189,7 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(1);
     // Check that onDelete was called with the first layout
-    expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(layout1);
   });
 
   it("calls onDelete for all selected layouts", () => {
@@ -212,9 +203,9 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(2);
     // Check that the first call was with layout 1
-    expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(layout1);
     // Check that the second call was with layout 3
-    expect(defaultProps.onDelete.mock.calls[1][0]).toEqual(sampleLayouts[2]);
+    expect(defaultProps.onDelete.mock.calls[1][0]).toEqual(layout3);
   });
 
   it("doesn't call onDelete when no layouts are selected", () => {
@@ -244,12 +235,12 @@ describe("LayoutSection", () => {
     const firstCallArgs = defaultProps.onDelete.mock.calls[0];
     const secondCallArgs = defaultProps.onDelete.mock.calls[1];
 
-    expect(firstCallArgs[0]).toEqual(sampleLayouts[0]); // Layout 1
-    expect(secondCallArgs[0]).toEqual(sampleLayouts[2]); // Layout 3
+    expect(firstCallArgs[0]).toEqual(layout1);
+    expect(secondCallArgs[0]).toEqual(layout3);
 
     // Check Layout 2 was not deleted
     const allLayouts = defaultProps.onDelete.mock.calls.map((call) => call[0]);
-    expect(allLayouts).not.toContainEqual(sampleLayouts[1]);
+    expect(allLayouts).not.toContainEqual(layout2);
   });
 
   it("calls onOverwrite for a single selected layout", () => {
@@ -263,7 +254,7 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(1);
     // Check that onOverwrite was called with the first layout
-    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(layout1);
   });
 
   it("calls onOverwrite for all selected layouts", () => {
@@ -277,9 +268,9 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(2);
     // Check that the first call was with layout 1
-    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(layout1);
     // Check that the second call was with layout 3
-    expect(defaultProps.onOverwrite.mock.calls[1][0]).toEqual(sampleLayouts[2]);
+    expect(defaultProps.onOverwrite.mock.calls[1][0]).toEqual(layout3);
   });
 
   it("doesn't call onOverwrite when no layouts are selected", () => {
@@ -309,12 +300,12 @@ describe("LayoutSection", () => {
     const firstCallArgs = defaultProps.onOverwrite.mock.calls[0];
     const secondCallArgs = defaultProps.onOverwrite.mock.calls[1];
 
-    expect(firstCallArgs[0]).toEqual(sampleLayouts[0]); // Layout 1
-    expect(secondCallArgs[0]).toEqual(sampleLayouts[2]); // Layout 3
+    expect(firstCallArgs[0]).toEqual(layout1);
+    expect(secondCallArgs[0]).toEqual(layout3);
 
     // Check Layout 2 was not overwritten
     const allLayouts = defaultProps.onOverwrite.mock.calls.map((call) => call[0]);
-    expect(allLayouts).not.toContainEqual(sampleLayouts[1]);
+    expect(allLayouts).not.toContainEqual(layout2);
   });
 
   it("calls onRevert for a single selected layout", () => {
@@ -328,7 +319,7 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(1);
     // Check that onRevert was called with the first layout
-    expect(defaultProps.onRevert.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onRevert.mock.calls[0][0]).toEqual(layout1);
   });
 
   it("calls onRevert for all selected layouts", () => {
@@ -342,9 +333,9 @@ describe("LayoutSection", () => {
     // THEN
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(2);
     // Check that the first call was with layout 1
-    expect(defaultProps.onRevert.mock.calls[0][0]).toEqual(sampleLayouts[0]);
+    expect(defaultProps.onRevert.mock.calls[0][0]).toEqual(layout1);
     // Check that the second call was with layout 3
-    expect(defaultProps.onRevert.mock.calls[1][0]).toEqual(sampleLayouts[2]);
+    expect(defaultProps.onRevert.mock.calls[1][0]).toEqual(layout3);
   });
 
   it("doesn't call onRevert when no layouts are selected", () => {
@@ -374,11 +365,11 @@ describe("LayoutSection", () => {
     const firstCallArgs = defaultProps.onRevert.mock.calls[0];
     const secondCallArgs = defaultProps.onRevert.mock.calls[1];
 
-    expect(firstCallArgs[0]).toEqual(sampleLayouts[0]); // Layout 1
-    expect(secondCallArgs[0]).toEqual(sampleLayouts[2]); // Layout 3
+    expect(firstCallArgs[0]).toEqual(layout1);
+    expect(secondCallArgs[0]).toEqual(layout3);
 
     // Check Layout 2 was not reverted
     const allLayouts = defaultProps.onRevert.mock.calls.map((call) => call[0]);
-    expect(allLayouts).not.toContainEqual(sampleLayouts[1]);
+    expect(allLayouts).not.toContainEqual(layout2);
   });
 });
