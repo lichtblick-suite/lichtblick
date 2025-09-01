@@ -47,7 +47,7 @@ jobs:
         continue-on-error: true
 
       - name: ScanCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v5.3.0
+        uses: sonarsource/sonarqube-scan-action@v5.3.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
