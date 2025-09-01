@@ -3228,7 +3228,7 @@ __metadata:
     nearley-loader: 2.0.0
     notistack: 3.0.1
     path-browserify: 1.0.1
-    prettier: 3.0.3
+    prettier: 3.6.2
     ramda: 0.31.3
     randomstring: 1.3.0
     react: 18.3.1
@@ -14519,7 +14519,7 @@ __metadata:
     jest-environment-jsdom: 30.0.5
     license-checker: 25.0.1
     playwright: 1.52.0
-    prettier: 3.3.2
+    prettier: 3.6.2
     react-refresh: 0.14.2
     react-use: 17.6.0
     rehype-raw: 7.0.0
@@ -17022,21 +17022,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.0.3":
-  version: 3.0.3
-  resolution: "prettier@npm:3.0.3"
+"prettier@npm:3.6.2":
+  version: 3.6.2
+  resolution: "prettier@npm:3.6.2"
   bin:
     prettier: bin/prettier.cjs
-  checksum: e10b9af02b281f6c617362ebd2571b1d7fc9fb8a3bd17e371754428cda992e5e8d8b7a046e8f7d3e2da1dcd21aa001e2e3c797402ebb6111b5cd19609dd228e0
-  languageName: node
-  linkType: hard
-
-"prettier@npm:3.3.2":
-  version: 3.3.2
-  resolution: "prettier@npm:3.3.2"
-  bin:
-    prettier: bin/prettier.cjs
-  checksum: 5557d8caed0b182f68123c2e1e370ef105251d1dd75800fadaece3d061daf96b1389141634febf776050f9d732c7ae8fd444ff0b4a61b20535e7610552f32c69
+  checksum: 0206f5f437892e8858f298af8850bf9d0ef1c22e21107a213ba56bfb9c2387a2020bfda244a20161d8e3dad40c6b04101609a55d370dece53d0a31893b64f861
   languageName: node
   linkType: hard
 
