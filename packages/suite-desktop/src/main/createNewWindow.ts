@@ -5,6 +5,7 @@ import Logger from "@lichtblick/log";
 
 import StudioWindow from "./StudioWindow";
 import { isFileToOpen } from "./fileUtils";
+import { getFilesToOpen } from "./getFilesToOpen";
 import injectFilesToOpen from "./injectFilesToOpen";
 
 const log = Logger.getLogger(__filename);
@@ -22,11 +23,13 @@ export const createNewWindow = (argv: string[]): void => {
 
   const newWindow = new StudioWindow(deepLinks);
 
+  const filesToOpen = getFilesToOpen(argv);
+
   // Wait for the window to be ready before injecting files
   newWindow.getBrowserWindow().webContents.once("did-finish-load", async () => {
-    if (files.length > 0) {
-      log.debug("Injecting files into new window:", files);
-      await injectFilesToOpen(newWindow.getBrowserWindow().webContents.debugger, files);
+    if (filesToOpen.length > 0) {
+      log.debug("Injecting files into new window:", filesToOpen);
+      await injectFilesToOpen(newWindow.getBrowserWindow().webContents.debugger, filesToOpen);
     }
   });
 
