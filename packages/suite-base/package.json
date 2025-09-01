@@ -118,7 +118,7 @@
     "gl-matrix": "3.4.3",
     "hammerjs": "2.0.8",
     "heap-js": "2.6.0",
-    "i18next": "25.3.2",
+    "i18next": "25.4.2",
     "i18next-browser-languagedetector": "8.2.0",
     "idb": "7.1.1",
     "idb-keyval": "6.2.1",
