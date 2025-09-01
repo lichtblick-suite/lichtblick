@@ -3228,7 +3228,7 @@ __metadata:
     react-mosaic-component: 6.1.0
     react-refresh-typescript: 2.0.10
     react-resizable-panels: 2.1.6
-    react-resize-detector: 12.0.2
+    react-resize-detector: 12.3.0
     react-transition-group: 4.4.5
     react-use: 17.6.0
     react-virtualized-auto-sizer: 1.0.26
@@ -10404,6 +10404,18 @@ __metadata:
     is-date-object: ^1.0.5
     is-symbol: ^1.0.4
   checksum: 966965880356486cd4d1fe9a523deda2084c81b3702d951212c098f5f2ee93605d1b7c1840062efb48a07d892641c7ed1bc194db563645c0dd2b919cb6d65b93
+  languageName: node
+  linkType: hard
+
+"es-toolkit@npm:^1.39.6":
+  version: 1.39.10
+  resolution: "es-toolkit@npm:1.39.10"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 128d018238487ac58da9447c629943178498a4378737aaca3acc6b1948c0b45eb3d5f5a5c0487247b6b7b3d89b44dfd2977f531512dff7c31ec6b12485c9230d
   languageName: node
   linkType: hard
 
@@ -17693,14 +17705,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resize-detector@npm:12.0.2":
-  version: 12.0.2
-  resolution: "react-resize-detector@npm:12.0.2"
+"react-resize-detector@npm:12.3.0":
+  version: 12.3.0
+  resolution: "react-resize-detector@npm:12.3.0"
   dependencies:
-    lodash: ^4.17.21
+    es-toolkit: ^1.39.6
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
-  checksum: 44f8adb5841c78f597894b9d3888acb651f797c0ffba553a8dc038759f9b7ed5d982497427a4e998d29a9bc983e795284c8bae984b2232579e3f9faa10e438a6
+  checksum: c6f98a23fcefd1737c75fabce95af7d958ab4f38fb96be1150e8bee7c91267b8e1d75d84491ce0c3366c051ef20686d788506f577430d964ed2aed0b51c2d459
   languageName: node
   linkType: hard
 
