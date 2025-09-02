@@ -67,8 +67,7 @@ jobs:
       - name: Calculate next rc version
         id: next_version
         run: |
-          npm install semver --no-save --legacy-peer-deps
-
+          npm install semver --no-save
           node <<'EOF'
           const fs = require("fs");
           const semver = require("semver");
