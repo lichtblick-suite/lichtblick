@@ -107,13 +107,13 @@ jobs:
           yarn run web:build:prod
 
       - name: Build Windows
-        run: yarn run package:win
+        run: yarn run package:win --config.extraMetadata.version=${{ env.version }}
 
       - name: Build Linux
-        run: yarn run package:linux
+        run: yarn run package:linux --config.extraMetadata.version=${{ env.version }}
 
       - name: Build macOS
-        run: yarn run package:darwin
+        run: yarn run package:darwin --config.extraMetadata.version=${{ env.version }}
 
       - name: Create web static files tarball
         run: tar -czf dist/lichtblick-web.tar.gz -C web/.webpack .
