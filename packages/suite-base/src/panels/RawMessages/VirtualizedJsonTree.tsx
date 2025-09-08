@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { FixedSizeTree } from "react-vtree";
 
 import { DiffSpan } from "./DiffSpan";
@@ -18,42 +18,6 @@ type TreeNode = {
   isLeaf: boolean;
   isOpenByDefault: boolean;
 };
-
-function* jsonTreeWalker(
-  refresh: boolean,
-  props: { root?: unknown; maxInitialDepth?: number } = {},
-): Generator<TreeNode> {
-  const root = props.root ?? {};
-  const maxInitialDepth = props.maxInitialDepth ?? 2;
-
-  // Internal recursive walker
-  function* walk(node: unknown, path: string, nestingLevel: number): Generator<TreeNode> {
-    const isObject = typeof node === "object" && node != undefined;
-    const keys = isObject ? Object.keys(node as Record<string, unknown>) : [];
-
-    const currentName = path === "" ? "(root)" : path.split(".").pop()!;
-
-    yield {
-      id: path || "(root)",
-      name: currentName,
-      value: node,
-      nestingLevel,
-      isLeaf: !isObject || keys.length === 0,
-      isOpenByDefault: nestingLevel < maxInitialDepth,
-    };
-
-    if (isObject) {
-      const obj = node as Record<string, unknown>;
-      for (const key of keys.slice(0, 1000)) {
-        const child = obj[key];
-        const childPath = path ? `${path}.${key}` : key;
-        yield* walk(child, childPath, nestingLevel + 1);
-      }
-    }
-  }
-
-  yield* walk(root, "", 0);
-}
 
 type VirtualizedJsonTreeProps = {
   data: unknown;
@@ -70,15 +34,62 @@ export default function VirtualizedJsonTree({
   height = 800,
   width = 800,
 }: VirtualizedJsonTreeProps) {
+  // Track open node IDs
+  const [openNodes, setOpenNodes] = useState<Set<string>>(new Set());
+
+  // Toggle node open/closed
+  const handleToggle = useCallback((id: string) => {
+    setOpenNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  // Tree walker that uses openNodes
   const treeWalker = useCallback(
-    (refresh: boolean) => jsonTreeWalker(refresh, { root: data }),
-    [data],
+    function* () {
+      function* walk(node: unknown, path: string, nestingLevel: number): Generator {
+        const isObject = typeof node === "object" && node != undefined;
+        const keys = isObject ? Object.keys(node as Record<string, unknown>) : [];
+        const currentName = path === "" ? "(root)" : path.split(".").pop()!;
+        const id = path || "(root)";
+        const isLeaf = !isObject || keys.length === 0;
+        const isOpen = openNodes.has(id) || nestingLevel < 2;
+
+        yield {
+          id,
+          name: currentName,
+          value: node,
+          nestingLevel,
+          isLeaf,
+          isOpen,
+          node,
+          path,
+        };
+
+        if (isObject && isOpen) {
+          const obj = node as Record<string, unknown>;
+          for (const key of keys.slice(0, 1000)) {
+            const child = obj[key];
+            const childPath = path ? `${path}.${key}` : key;
+            yield* walk(child, childPath, nestingLevel + 1);
+          }
+        }
+      }
+      yield* walk(data, "", 0);
+    },
+    [data, openNodes],
   );
 
   return (
     <FixedSizeTree<TreeNode> itemSize={20} height={height} width={width} treeWalker={treeWalker}>
-      {({ data: nodeData, isOpen, toggle, style }) => {
-        const { nestingLevel, name, value, isLeaf } = nodeData;
+      {({ data: nodeData, style }) => {
+        const { nestingLevel, name, value, isLeaf, id } = nodeData;
         const isComplex = typeof value === "object" && value != undefined;
 
         return (
@@ -94,8 +105,13 @@ export default function VirtualizedJsonTree({
             }}
           >
             {!isLeaf && (
-              <span onClick={toggle} style={{ cursor: "pointer", marginRight: 2 }}>
-                {isOpen ? "▼" : "▶"}
+              <span
+                onClick={() => {
+                  handleToggle(id);
+                }}
+                style={{ cursor: "pointer", marginRight: 2 }}
+              >
+                {openNodes.has(id) || nestingLevel < 2 ? "▼" : "▶"}
               </span>
             )}
             <DiffSpan>
