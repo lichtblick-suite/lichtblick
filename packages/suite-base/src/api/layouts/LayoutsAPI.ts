@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import {
-  RemoteLayoutResponse,
-  RemoteLayoutResponseData,
+  LayoutApiResponse,
   SaveNewLayout,
   UpdateLayoutRequest,
+  UpdateLayoutRequestBody,
   UpdateLayoutResponse,
 } from "@lichtblick/suite-base/api/layouts/types";
 import { ISO8601Timestamp } from "@lichtblick/suite-base/services/ILayoutStorage";
@@ -24,11 +24,11 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
   }
 
   public async getLayouts(): Promise<RemoteLayout[]> {
-    const layoutsResponse = await HttpService.get<RemoteLayoutResponse>(this.baseUrl, {
+    const { data: layoutData } = await HttpService.get<LayoutApiResponse[]>(this.baseUrl, {
       namespace: this.namespace,
     });
 
-    return layoutsResponse.data.map((layout) => ({
+    return layoutData.map((layout) => ({
       id: layout.layoutId,
       externalId: layout.id,
       name: layout.name,
@@ -51,49 +51,52 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
       namespace: this.namespace,
     };
 
-    const response = await HttpService.post<RemoteLayoutResponse>(this.baseUrl, requestPayload);
-    // Try to extract from response.data first, then fallback to direct access
-    const responseData = response.data || response;
+    const { data: layoutData } = await HttpService.post<LayoutApiResponse>(
+      this.baseUrl,
+      requestPayload,
+    );
 
     const transformedLayout = {
-      id: responseData.layoutId,
-      externalId: responseData.id,
-      name: responseData.name,
-      data: responseData.data,
-      permission: responseData.permission,
-      savedAt: responseData.updatedBy as ISO8601Timestamp | undefined,
+      id: layoutData.layoutId,
+      externalId: layoutData.id,
+      name: layoutData.name,
+      data: layoutData.data,
+      permission: layoutData.permission,
+      savedAt: layoutData.updatedBy as ISO8601Timestamp | undefined,
     };
 
     return transformedLayout;
   }
 
   public async updateLayout(params: UpdateLayoutRequest): Promise<UpdateLayoutResponse> {
-    console.error(`🔴 LayoutsAPI.updateLayout called with:`, params);
-    const response = await HttpService.put<RemoteLayoutResponseData>(
+    const requestBody: UpdateLayoutRequestBody = {
+      name: params.name,
+      data: params.data,
+      permission: params.permission,
+    };
+
+    const { data: layoutData } = await HttpService.put<LayoutApiResponse>(
       `${this.baseUrl}/${params.externalId}`,
-      {
-        name: params.name,
-        data: params.data,
-        permission: params.permission,
-      },
+      requestBody,
     );
-    console.error(`🔴 LayoutsAPI.updateLayout HTTP response:`, response);
 
     // Transform the HTTP response into the expected UpdateLayoutResponse format
     const newLayout: RemoteLayout = {
-      id: response.data.layoutId,
-      externalId: response.data.id,
-      name: response.data.name,
-      data: response.data.data,
-      permission: response.data.permission,
-      savedAt: response.data.updatedBy as ISO8601Timestamp | undefined,
+      id: layoutData.layoutId,
+      externalId: layoutData.id,
+      name: layoutData.name,
+      data: layoutData.data,
+      permission: layoutData.permission,
+      savedAt: layoutData.updatedBy as ISO8601Timestamp | undefined,
     };
 
-    console.error(`🔴 LayoutsAPI.updateLayout transformed newLayout:`, newLayout);
     return { status: "success", newLayout };
   }
 
   public async deleteLayout(id: string): Promise<boolean> {
-    return await HttpService.delete<boolean>(`${this.baseUrl}/${id}`);
+    const deletedLayout = await HttpService.delete<RemoteLayout | undefined>(
+      `${this.baseUrl}/${id}`,
+    );
+    return deletedLayout.data != undefined;
   }
 }

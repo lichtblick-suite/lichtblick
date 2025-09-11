@@ -3,7 +3,7 @@
 
 import { APP_CONFIG } from "@lichtblick/suite-base/constants";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
-import { HttpRequestOptions } from "@lichtblick/suite-base/services/http/types";
+import { HttpRequestOptions, HttpResponse } from "@lichtblick/suite-base/services/http/types";
 
 /**
  * HttpService is a lightweight HTTP client that wraps the Fetch API to provide
@@ -31,7 +31,10 @@ export class HttpService {
     };
   }
 
-  private async request<T>(endpoint: string, options: HttpRequestOptions = {}): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: HttpRequestOptions = {},
+  ): Promise<HttpResponse<T>> {
     const { timeout, ...fetchOptions } = options;
     const url = this.baseURL ? `${this.baseURL}/${endpoint}` : endpoint;
 
@@ -89,9 +92,9 @@ export class HttpService {
     try {
       const contentType = response.headers.get("content-type");
       if (contentType?.includes("application/json") === true) {
-        return (await response.json()) as T;
+        return (await response.json()) as HttpResponse<T>;
       }
-      return (await response.text()) as unknown as T;
+      return (await response.text()) as unknown as HttpResponse<T>;
     } catch {
       throw new HttpError(
         "Failed to parse response",
@@ -106,7 +109,7 @@ export class HttpService {
     endpoint: string,
     params: Record<string, string> = {},
     options: HttpRequestOptions = {},
-  ): Promise<T> {
+  ): Promise<HttpResponse<T>> {
     const queryString = new URLSearchParams(params);
     return await this.request<T>(`${endpoint}?${queryString.toString()}`, {
       method: "GET",
@@ -118,7 +121,7 @@ export class HttpService {
     endpoint: string,
     data?: unknown,
     options: HttpRequestOptions = {},
-  ): Promise<T> {
+  ): Promise<HttpResponse<T>> {
     return await this.request<T>(endpoint, {
       method: "POST",
       body: data != undefined ? JSON.stringify(data) : undefined,
@@ -130,7 +133,7 @@ export class HttpService {
     endpoint: string,
     data?: unknown,
     options: HttpRequestOptions = {},
-  ): Promise<T> {
+  ): Promise<HttpResponse<T>> {
     return await this.request<T>(endpoint, {
       ...options,
       method: "PUT",
@@ -138,7 +141,10 @@ export class HttpService {
     });
   }
 
-  public async delete<T>(endpoint: string, options: HttpRequestOptions = {}): Promise<T> {
+  public async delete<T>(
+    endpoint: string,
+    options: HttpRequestOptions = {},
+  ): Promise<HttpResponse<T>> {
     return await this.request<T>(endpoint, {
       ...options,
       method: "DELETE",

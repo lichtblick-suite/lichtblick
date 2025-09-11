@@ -4,3 +4,9 @@
 export interface HttpRequestOptions extends RequestInit {
   timeout?: number;
 }
+
+export interface HttpResponse<T> {
+  data: T;
+  timestamp: string;
+  path: string;
+}

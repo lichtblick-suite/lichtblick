@@ -116,7 +116,6 @@ export default React.memo(function LayoutRow({
   }, [layout]);
 
   const duplicateAction = useCallback(() => {
-    // Use correct callback based on layout type
     if (layoutIsShared(layout)) {
       onMakePersonalCopy(layout);
     } else {
