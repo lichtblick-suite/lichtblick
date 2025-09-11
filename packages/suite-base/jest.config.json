@@ -11,7 +11,9 @@
   "transformIgnorePatterns": [],
   "globals": {
     "ReactNull": null,
-    "LICHTBLICK_SUITE_VERSION": "TEST"
+    "LICHTBLICK_SUITE_VERSION": "TEST",
+    "API_URL": "/",
+    "DEV_WORKSPACE": ""
   },
   "setupFiles": ["<rootDir>/src/test/setup.ts", "jest-canvas-mock", "fake-indexeddb/auto"],
   "setupFilesAfterEnv": ["<rootDir>/src/test/setupTestFramework.ts"],
