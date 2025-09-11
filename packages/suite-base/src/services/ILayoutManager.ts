@@ -87,7 +87,7 @@ export interface ILayoutManager {
    */
   updateLayout(params: { id: LayoutID; name?: string; data?: LayoutData }): Promise<Layout>;
 
-  deleteLayout(params: { id: LayoutID }): Promise<void>;
+  deleteLayout(params: { id: LayoutID; externalId?: string }): Promise<void>;
 
   /** Save the local changes so they override the baseline. */
   overwriteLayout(params: { id: LayoutID }): Promise<Layout>;

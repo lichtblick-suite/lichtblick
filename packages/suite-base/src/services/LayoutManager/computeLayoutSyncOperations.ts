@@ -87,7 +87,6 @@ export default function computeLayoutSyncOperations(
             log.warn(`Shared layout ${localLayout.id} should have been uploaded at creation`);
             continue;
           }
-          ops.push({ local: false, type: "upload-new", localLayout });
           break;
         case "updated":
           if (!layoutIsShared(localLayout)) {

@@ -10,9 +10,11 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
+import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@lichtblick/suite-base/context/NativeWindowContext";
+import { RemoteLayoutStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
 import { useSharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
@@ -96,6 +98,18 @@ export function StudioApp(): React.JSX.Element {
 
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
+
+  const url = new URL(window.location.href);
+  const namespace = url.searchParams.get("namespace");
+
+  const remoteLayoutStorage = useMemo(
+    () => (namespace ? new LayoutsAPI(namespace) : undefined),
+    [namespace],
+  );
+
+  if (remoteLayoutStorage) {
+    providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
+  }
 
   useEffect(() => {
     document.addEventListener("contextmenu", contextMenuHandler);

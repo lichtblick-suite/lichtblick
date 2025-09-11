@@ -18,7 +18,7 @@ import delay from "@lichtblick/suite-base/util/delay";
 
 const log = Logger.getLogger(__filename);
 
-const SYNC_INTERVAL_BASE_MS = 30_000;
+const SYNC_INTERVAL_BASE_MS = 15_000;
 const SYNC_INTERVAL_MAX_MS = 3 * 60_000;
 
 export default function LayoutManagerProvider({

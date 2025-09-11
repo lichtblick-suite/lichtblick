@@ -110,18 +110,19 @@ export default React.memo(function LayoutRow({
     onRevert(layout);
   }, [confirm, layout, multiSelection, onRevert]);
 
-  const makePersonalCopyAction = useCallback(() => {
-    onMakePersonalCopy(layout);
-  }, [layout, onMakePersonalCopy]);
-
   const renameAction = useCallback(() => {
     setNameFieldValue(layout.name);
     setEditingName(true);
   }, [layout]);
 
   const duplicateAction = useCallback(() => {
-    onDuplicate(layout);
-  }, [layout, onDuplicate]);
+    // Use correct callback based on layout type
+    if (layoutIsShared(layout)) {
+      onMakePersonalCopy(layout);
+    } else {
+      onDuplicate(layout);
+    }
+  }, [layout, onDuplicate, onMakePersonalCopy]);
 
   const shareAction = useCallback(() => {
     onShare(layout);
@@ -211,8 +212,9 @@ export default React.memo(function LayoutRow({
       disabled: (layoutIsShared(layout) && !isOnline) || multiSelection,
       secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
     },
-    // For shared layouts, duplicate first requires saving or discarding changes
-    !(layoutIsShared(layout) && hasModifications) && {
+    // For shared layouts, "Make a personal copy" is always available
+    // For personal layouts, "Duplicate" is available if no modifications
+    (layoutIsShared(layout) || !hasModifications) && {
       type: "item",
       key: "duplicate",
       text:
@@ -269,15 +271,6 @@ export default React.memo(function LayoutRow({
         disabled: deletedOnServer,
       },
     ];
-    if (layoutIsShared(layout)) {
-      sectionItems.push({
-        type: "item",
-        key: "copy_to_personal",
-        text: "Make a personal copy",
-        disabled: multiSelection,
-        onClick: makePersonalCopyAction,
-      });
-    }
 
     const unsavedChangesMessage = anySelectedModifiedLayouts
       ? "These layouts have unsaved changes"

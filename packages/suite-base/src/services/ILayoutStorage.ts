@@ -33,6 +33,7 @@ export type LayoutSyncInfo = {
 
 export type Layout = {
   id: LayoutID;
+  externalId?: string; // Only for remote
   name: string;
   from?: string;
   permission: LayoutPermission;
