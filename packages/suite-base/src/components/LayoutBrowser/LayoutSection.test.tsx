@@ -25,7 +25,7 @@ jest.mock("./LayoutRow", () => ({
   }: {
     layout: Layout;
     onDuplicate: () => void;
-    onDelete: () => void;
+    onDelete: (layout: Layout) => void;
     onOverwrite: () => void;
     onRevert: () => void;
   }) => (
@@ -33,7 +33,9 @@ jest.mock("./LayoutRow", () => ({
       <button data-testid={`duplicate-button-${layout.id}`} onClick={onDuplicate}>
         Duplicate
       </button>
-      <button data-testid={`delete-button-${layout.id}`} onClick={onDelete}>
+      <button data-testid={`delete-button-${layout.id}`} onClick={() => {
+        onDelete(layout);
+      }}>
         Delete
       </button>
       <button data-testid={`overwrite-button-${layout.id}`} onClick={onOverwrite}>
@@ -192,13 +194,13 @@ describe("LayoutSection", () => {
     expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(layout1);
   });
 
-  it("calls onDelete for all selected layouts", () => {
+  it("calls onDelete for all selected layouts when clicking on a selected layout", () => {
     // GIVEN
     const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId(`delete-button-${layout2.id}`)); // Click on any layout's delete button
+    fireEvent.click(screen.getByTestId(`delete-button-${layout1.id}`)); // Click on a selected layout's delete button
 
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(2);
@@ -208,7 +210,7 @@ describe("LayoutSection", () => {
     expect(defaultProps.onDelete.mock.calls[1][0]).toEqual(layout3);
   });
 
-  it("doesn't call onDelete when no layouts are selected", () => {
+  it("calls onDelete only for the clicked layout when clicking on an unselected layout", () => {
     // GIVEN
     const multiSelectedIds: string[] = [];
 
@@ -217,16 +219,17 @@ describe("LayoutSection", () => {
     fireEvent.click(screen.getByTestId("delete-button-1"));
 
     // THEN
-    expect(defaultProps.onDelete).not.toHaveBeenCalled();
+    expect(defaultProps.onDelete).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(layout1);
   });
 
-  it("only deletes selected layouts", () => {
+  it("deletes all selected layouts when clicking on a selected layout", () => {
     // GIVEN
     const multiSelectedIds = [layout1.id, layout3.id];
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId(`delete-button-${layout1.id}`));
+    fireEvent.click(screen.getByTestId(`delete-button-${layout1.id}`)); // Click on a selected layout
 
     // THEN
     expect(defaultProps.onDelete).toHaveBeenCalledTimes(2);
@@ -241,6 +244,19 @@ describe("LayoutSection", () => {
     // Check Layout 2 was not deleted
     const allLayouts = defaultProps.onDelete.mock.calls.map((call) => call[0]);
     expect(allLayouts).not.toContainEqual(layout2);
+  });
+
+  it("deletes only the clicked layout when clicking on an unselected layout (even with other selected layouts)", () => {
+    // GIVEN
+    const multiSelectedIds = [layout1.id, layout3.id]; // layout2 is not selected
+
+    // WHEN
+    render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
+    fireEvent.click(screen.getByTestId(`delete-button-${layout2.id}`)); // Click on unselected layout2
+
+    // THEN
+    expect(defaultProps.onDelete).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onDelete.mock.calls[0][0]).toEqual(layout2);
   });
 
   it("calls onOverwrite for a single selected layout", () => {
