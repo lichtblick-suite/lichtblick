@@ -15,13 +15,16 @@ class ExtensionsAPI implements IExtensionAPI {
   }
 
   public async list(): Promise<ExtensionInfo[]> {
-    return await HttpService.get<ExtensionInfo[]>(this.extensionEndpoint, { slug: this.slug });
+    return (await HttpService.get<ExtensionInfo[]>(this.extensionEndpoint, { slug: this.slug }))
+      .data;
   }
 
   public async get(id: string): Promise<StoredExtension | undefined> {
-    return await HttpService.get<StoredExtension | undefined>(
-      `${this.extensionEndpoint}/${this.slug}/${id}`,
-    );
+    return (
+      await HttpService.get<StoredExtension | undefined>(
+        `${this.extensionEndpoint}/${this.slug}/${id}`,
+      )
+    ).data;
   }
 
   public async createOrUpdate(extension: ExtensionInfoSlug, file: File): Promise<StoredExtension> {
@@ -36,18 +39,18 @@ class ExtensionsAPI implements IExtensionAPI {
       formData.append("extension", extensionStr);
     }
 
-    return await HttpService.post<StoredExtension>(
-      `${this.extensionEndpoint}/${this.slug}`,
-      formData,
-    );
+    return (
+      await HttpService.post<StoredExtension>(`${this.extensionEndpoint}/${this.slug}`, formData)
+    ).data;
   }
 
   public async remove(id: string): Promise<boolean> {
-    return await HttpService.delete<boolean>(`${this.extensionEndpoint}/${id}`);
+    return (await HttpService.delete<boolean>(`${this.extensionEndpoint}/${id}`)).data;
   }
 
   public async loadContent(fileId: string): Promise<Uint8Array | undefined> {
-    return await HttpService.get<Uint8Array>(`${this.extensionEndpoint}/file/download/${fileId}`);
+    return (await HttpService.get<Uint8Array>(`${this.extensionEndpoint}/file/download/${fileId}`))
+      .data;
   }
 }
 

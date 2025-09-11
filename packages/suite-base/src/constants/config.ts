@@ -9,15 +9,15 @@ export const APP_CONFIG = {
   /**
    * API base URL for HTTP requests
    */
-  apiUrl: API_URL ?? "/",
+  apiUrl: typeof API_URL !== "undefined" ? API_URL : "/",
 
   /**
    * Application version
    */
-  version: LICHTBLICK_SUITE_VERSION ?? "unknown",
+  version: typeof LICHTBLICK_SUITE_VERSION !== "undefined" ? LICHTBLICK_SUITE_VERSION : "unknown",
 
   /**
    * Development workspace prefix (for local storage keys)
    */
-  devWorkspace: DEV_WORKSPACE ?? "",
+  devWorkspace: typeof DEV_WORKSPACE !== "undefined" ? DEV_WORKSPACE : "",
 } as const;
