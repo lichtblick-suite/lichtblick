@@ -88,6 +88,10 @@ export default class LayoutBuilder {
     });
   }
 
+  public static layouts(count = 3): Layout[] {
+    return BasicBuilder.multiple(LayoutBuilder.layout, count);
+  }
+
   public static panelConfig(props: Partial<PanelConfig> = {}): PanelConfig {
     return defaults<PanelConfig>(props, BasicBuilder.genericDictionary(String));
   }
