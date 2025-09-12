@@ -22,13 +22,13 @@ import {
 } from "@lichtblick/suite-base/types/panels";
 
 export default class LayoutBuilder {
-  public static permission: LayoutPermission = BasicBuilder.sample([
+  public static readonly permission: LayoutPermission = BasicBuilder.sample([
     "CREATOR_WRITE",
     "ORG_READ",
     "ORG_WRITE",
   ]);
 
-  public static syncStatus: LayoutSyncStatus = BasicBuilder.sample([
+  public static readonly syncStatus: LayoutSyncStatus = BasicBuilder.sample([
     "new",
     "updated",
     "tracked",
