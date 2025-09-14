@@ -9,7 +9,7 @@ const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 // Mock APP_CONFIG
-jest.mock("@lichtblick/suite-base/constants", () => ({
+jest.mock("@lichtblick/suite-base/constants/config", () => ({
   APP_CONFIG: {
     apiUrl: "https://api.example.com",
   },
