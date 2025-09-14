@@ -206,4 +206,49 @@ describe("LayoutRow rendering", () => {
       expect(onRename).toHaveBeenCalledWith(expect.objectContaining({ id: layoutId }), inputValue);
     });
   });
+
+  it("Given a shared layout, when Duplicate is clicked, then onMakePersonalCopy is called", () => {
+    const onMakePersonalCopy = jest.fn();
+    const sharedLayout = { ...defaultLayout, permission: "ORG_READ" as const };
+    renderComponent({ layout: sharedLayout, onMakePersonalCopy });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+    fireEvent.click(screen.getByTestId("duplicate-layout"));
+
+    expect(onMakePersonalCopy).toHaveBeenCalledWith(sharedLayout);
+  });
+
+  it("Given a personal layout, when Duplicate is clicked, then onDuplicate is called", () => {
+    const onDuplicate = jest.fn();
+    const personalLayout = { ...defaultLayout, working: undefined };
+    renderComponent({ layout: personalLayout, onDuplicate });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+    fireEvent.click(screen.getByTestId("duplicate-layout"));
+
+    expect(onDuplicate).toHaveBeenCalledWith(personalLayout);
+  });
+
+  it("Given a layout with modifications, when menu is opened, then duplicate option is not shown", () => {
+    const layoutWithModifications = {
+      ...defaultLayout,
+      working: {},
+      syncInfo: undefined,
+      permission: "CREATOR_WRITE" as const,
+    };
+    renderComponent({ layout: layoutWithModifications });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+
+    expect(screen.queryByTestId("duplicate-layout")).not.toBeInTheDocument();
+  });
+
+  it("Given a shared layout, when menu is opened, then duplicate option is shown", () => {
+    const sharedLayout = { ...defaultLayout, permission: "ORG_READ" as const };
+    renderComponent({ layout: sharedLayout });
+
+    fireEvent.click(screen.getByTestId("layout-actions"));
+
+    expect(screen.getByTestId("duplicate-layout")).toBeInTheDocument();
+  });
 });
