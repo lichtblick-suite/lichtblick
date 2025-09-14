@@ -162,7 +162,7 @@ describe("LayoutsAPI", () => {
     it("should handle conflict response", async () => {
       const mockUpdateRequest = {
         id: "123" as any,
-        externalId: "external-123", 
+        externalId: "external-123",
         name: "Updated Layout",
         data: {
           configById: {},
@@ -236,61 +236,6 @@ describe("LayoutsAPI", () => {
       const mockHttpService = jest.mocked(HttpService);
       const mockDelete = jest.fn().mockRejectedValue(mockError);
       mockHttpService.delete = mockDelete;
-
-      await expect(layoutsAPI.deleteLayout("external-123")).rejects.toThrow("Delete failed");
-    });
-  });
-  });
-
-  describe("deleteLayout", () => {
-    it("should delete layout and return true when successful", async () => {
-      const mockDeletedLayout = {
-        id: "123" as any,
-        externalId: "external-123",
-        name: "Deleted Layout",
-        data: {
-          configById: {},
-          globalVariables: {},
-          playbackConfig: { speed: 1 },
-          userNodes: {},
-        },
-        permission: "CREATOR_WRITE" as any,
-        savedAt: "2023-01-01T00:00:00.000Z" as any,
-      };
-
-      const mockHttpService = jest.mocked(HttpService);
-      mockHttpService.delete.mockResolvedValue(createMockHttpResponse(mockDeletedLayout));
-
-      const result = await layoutsAPI.deleteLayout("external-123");
-
-      const deleteCall = mockHttpService.delete.mock.calls[0];
-      expect(deleteCall?.[0]).toBe("layouts/external-123");
-      expect(result).toBe(true);
-    });
-
-    it("should return false when deletion fails", async () => {
-      const mockHttpService = jest.mocked(HttpService);
-      mockHttpService.delete.mockResolvedValue(createMockHttpResponse(undefined));
-
-      const result = await layoutsAPI.deleteLayout("external-123");
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe("error handling", () => {
-    it("should propagate HTTP errors from getLayouts", async () => {
-      const mockError = new Error("Network error");
-      const mockHttpService = jest.mocked(HttpService);
-      mockHttpService.get.mockRejectedValue(mockError);
-
-      await expect(layoutsAPI.getLayouts()).rejects.toThrow("Network error");
-    });
-
-    it("should propagate HTTP errors from deleteLayout", async () => {
-      const mockError = new Error("Delete failed");
-      const mockHttpService = jest.mocked(HttpService);
-      mockHttpService.delete.mockRejectedValue(mockError);
 
       await expect(layoutsAPI.deleteLayout("external-123")).rejects.toThrow("Delete failed");
     });
