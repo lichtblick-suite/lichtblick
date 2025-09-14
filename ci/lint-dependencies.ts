@@ -126,7 +126,7 @@ async function getAllWorkspacePackages(roots: string[]) {
       try {
         const matches = await globAsync(pattern);
         for (const packagePath of matches) {
-          if (typeof packagePath === 'string') {
+          if (typeof packagePath === "string") {
             workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
           }
         }

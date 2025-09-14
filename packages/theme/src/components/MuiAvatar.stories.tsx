@@ -8,7 +8,7 @@
 import { Avatar as MuiAvatar } from "@mui/material";
 import { Meta, StoryObj, StoryFn } from "@storybook/react";
 
-const meta: Meta<typeof MuiAvatar> = {
+export default {
   component: MuiAvatar,
   title: "Theme/Data Display/Avatar",
   args: {},
@@ -19,8 +19,6 @@ const meta: Meta<typeof MuiAvatar> = {
       </div>
     ),
   ],
-};
-
-export default meta;
+} satisfies Meta<typeof MuiAvatar>;
 
 export const Default: StoryObj = {};

@@ -19,7 +19,7 @@ const colors: BadgeProps["color"][] = [
   "warning",
 ];
 
-const meta: Meta<typeof MuiBadge> = {
+export default {
   component: MuiBadge,
   title: "Theme/Data Display/Badge",
   args: {
@@ -33,9 +33,7 @@ const meta: Meta<typeof MuiBadge> = {
       </Stack>
     ),
   ],
-};
-
-export default meta;
+} satisfies Meta<typeof MuiBadge>;
 
 export const Default: StoryObj = {
   render: (args) => (

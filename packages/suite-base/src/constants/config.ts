@@ -8,7 +8,7 @@
 
 // Helper function to safely access global variables defined by webpack
 function getGlobalVar(name: string): string | undefined {
-  return (globalThis as any)[name];
+  return (globalThis as never)[name];
 }
 
 export const APP_CONFIG = {

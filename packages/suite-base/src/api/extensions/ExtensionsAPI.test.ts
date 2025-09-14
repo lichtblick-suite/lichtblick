@@ -123,10 +123,7 @@ describe("ExtensionsAPI", () => {
 
       const result = await extensionsAPI.createOrUpdate(mockExtensionInfo, mockFile);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        `/extensions/${mockSlug}`,
-        expect.any(FormData),
-      );
+      expect(mockPost).toHaveBeenCalledWith(`/extensions/${mockSlug}`, expect.any(FormData));
       expect(result).toEqual(mockStoredExtension);
     });
   });

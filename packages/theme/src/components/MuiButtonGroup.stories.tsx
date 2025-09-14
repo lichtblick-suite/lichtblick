@@ -21,7 +21,7 @@ const colors: ButtonProps["color"][] = [
   "warning",
 ];
 
-const meta: Meta<typeof ButtonGroup> = {
+export default {
   component: ButtonGroup,
   title: "Theme/Inputs/Button Group",
   decorators: [
@@ -36,9 +36,7 @@ const meta: Meta<typeof ButtonGroup> = {
   parameters: {
     colorScheme: "both-column",
   },
-};
-
-export default meta;
+} satisfies Meta<typeof ButtonGroup>;
 
 const buttons = [
   <Button key="one">One</Button>,

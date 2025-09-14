@@ -21,7 +21,7 @@ const colors: FabProps["color"][] = [
   "warning",
 ];
 
-const meta: Meta<typeof Fab> = {
+export default {
   component: Fab,
   title: "Theme/Inputs/Floating Action Button",
   decorators: [
@@ -36,9 +36,7 @@ const meta: Meta<typeof Fab> = {
   parameters: {
     colorScheme: "both-column",
   },
-};
-
-export default meta;
+} satisfies Meta<typeof Fab>;
 
 export const Default: StoryObj = {
   render: () => (

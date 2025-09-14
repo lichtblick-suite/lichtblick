@@ -22,7 +22,7 @@ const colors: ButtonProps["color"][] = [
   "warning",
 ];
 
-const meta: Meta<typeof Button> = {
+export default {
   component: Button,
   title: "Theme/Inputs/Button",
   decorators: [
@@ -37,9 +37,7 @@ const meta: Meta<typeof Button> = {
   parameters: {
     colorScheme: "both-column",
   },
-};
-
-export default meta;
+} satisfies Meta<typeof Button>;
 
 export const Default: StoryObj = {
   render: () => (

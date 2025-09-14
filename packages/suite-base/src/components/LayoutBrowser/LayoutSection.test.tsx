@@ -33,9 +33,12 @@ jest.mock("./LayoutRow", () => ({
       <button data-testid={`duplicate-button-${layout.id}`} onClick={onDuplicate}>
         Duplicate
       </button>
-      <button data-testid={`delete-button-${layout.id}`} onClick={() => {
-        onDelete(layout);
-      }}>
+      <button
+        data-testid={`delete-button-${layout.id}`}
+        onClick={() => {
+          onDelete(layout);
+        }}
+      >
         Delete
       </button>
       <button data-testid={`overwrite-button-${layout.id}`} onClick={onOverwrite}>
