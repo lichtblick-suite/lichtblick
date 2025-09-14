@@ -212,6 +212,168 @@ describe("HttpService", () => {
 
       await expect(httpService.get("test")).rejects.toThrow(HttpError);
     });
+
+    it("should handle 400 Bad Request errors", async () => {
+      const errorResponse = {
+        error: "Bad Request",
+        message: "Invalid parameters",
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        statusText: "Bad Request",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce(errorResponse),
+        text: jest.fn().mockResolvedValueOnce(JSON.stringify(errorResponse)),
+      });
+
+      const errorPromise = httpService.get("test");
+      await expect(errorPromise).rejects.toThrow(HttpError);
+
+      await expect(errorPromise).rejects.toMatchObject({
+        status: 400,
+        statusText: "Bad Request",
+      });
+    });
+
+    it("should handle 401 Unauthorized errors", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ error: "Unauthorized" }),
+        text: jest.fn().mockResolvedValueOnce("Unauthorized"),
+      });
+
+      await expect(httpService.post("protected-resource")).rejects.toThrow(HttpError);
+    });
+
+    it("should handle 403 Forbidden errors", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ error: "Access denied" }),
+        text: jest.fn().mockResolvedValueOnce("Access denied"),
+      });
+
+      await expect(httpService.delete("forbidden-resource")).rejects.toThrow(HttpError);
+    });
+
+    it("should handle 404 Not Found errors", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ error: "Resource not found" }),
+        text: jest.fn().mockResolvedValueOnce("Not Found"),
+      });
+
+      await expect(httpService.get("nonexistent")).rejects.toThrow(HttpError);
+    });
+
+    it("should handle 500 Internal Server Error", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockRejectedValueOnce(new Error("Invalid JSON")),
+        text: jest.fn().mockResolvedValueOnce("Internal Server Error"),
+      });
+
+      await expect(httpService.put("server-error", { data: "test" })).rejects.toThrow(HttpError);
+    });
+
+    it("should handle network errors", async () => {
+      const networkError = new Error("Network request failed");
+      mockFetch.mockRejectedValueOnce(networkError);
+
+      await expect(httpService.get("test")).rejects.toThrow("Network request failed");
+    });
+
+    it("should handle timeout errors", async () => {
+      const abortError = new Error("The operation was aborted");
+      abortError.name = "AbortError";
+      mockFetch.mockRejectedValueOnce(abortError);
+
+      await expect(httpService.get("slow-endpoint", {}, { timeout: 1000 })).rejects.toThrow(
+        "Network error: The operation was aborted",
+      );
+    });
+
+    it("should handle AbortController signal timeout", async () => {
+      const abortError = new Error("The operation was aborted");
+      abortError.name = "AbortError";
+      mockFetch.mockRejectedValueOnce(abortError);
+
+      await expect(httpService.get("test", {}, { timeout: 5000 })).rejects.toThrow(
+        "The operation was aborted",
+      );
+    });
+
+    it("should handle non-JSON response content types", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        statusText: "Bad Request",
+        headers: {
+          get: jest.fn().mockReturnValue("text/plain"),
+        },
+        json: jest.fn().mockRejectedValueOnce(new Error("Not JSON")),
+        text: jest.fn().mockResolvedValueOnce("Plain text error message"),
+      });
+
+      const errorPromise = httpService.get("test");
+      await expect(errorPromise).rejects.toThrow(HttpError);
+      await expect(errorPromise).rejects.toMatchObject({
+        status: 400,
+      });
+    });
+
+    it("should handle empty error responses", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: "Service Unavailable",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockRejectedValueOnce(new Error("No content")),
+        text: jest.fn().mockResolvedValueOnce(""),
+      });
+
+      await expect(httpService.get("unavailable")).rejects.toThrow(HttpError);
+    });
+
+    it("should handle malformed JSON in error response", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 422,
+        statusText: "Unprocessable Entity",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockRejectedValueOnce(new Error("Unexpected token")),
+        text: jest.fn().mockResolvedValueOnce("{ invalid json"),
+      });
+
+      await expect(httpService.post("invalid", { data: "test" })).rejects.toThrow(HttpError);
+    });
   });
 
   describe("custom headers", () => {
@@ -246,6 +408,216 @@ describe("HttpService", () => {
         },
         method: "GET",
       });
+    });
+
+    it("should allow overriding default headers", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("text/plain"),
+        },
+        text: jest.fn().mockResolvedValueOnce("file uploaded"),
+      });
+
+      await httpService.post("upload", "file data", {
+        headers: {
+          "Content-Type": "text/plain",
+          "Api-Version": "2.0",
+        },
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/upload", {
+        headers: {
+          "Content-Type": "text/plain",
+          "Api-Version": "2.0",
+        },
+        method: "POST",
+        body: JSON.stringify("file data"),
+      });
+    });
+  });
+
+  describe("request options", () => {
+    it("should handle custom timeout option", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+      });
+
+      await httpService.get("test", {}, { timeout: 5000 });
+
+      // Verify that fetch was called (timeout logic would be handled internally)
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it("should handle additional fetch options", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+      });
+
+      await httpService.get(
+        "test",
+        {},
+        {
+          cache: "no-cache",
+          redirect: "follow",
+          referrer: "client",
+        },
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com/test?",
+        expect.objectContaining({
+          cache: "no-cache",
+          redirect: "follow",
+          referrer: "client",
+        }),
+      );
+    });
+  });
+
+  describe("response handling", () => {
+    it("should handle successful responses with different status codes", async () => {
+      const testCases = [
+        { status: 200, statusText: "OK" },
+        { status: 201, statusText: "Created" },
+        { status: 202, statusText: "Accepted" },
+        { status: 204, statusText: "No Content" },
+      ];
+
+      for (const testCase of testCases) {
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          status: testCase.status,
+          statusText: testCase.statusText,
+          headers: {
+            get: jest.fn().mockReturnValue("application/json"),
+          },
+          json: jest.fn().mockResolvedValueOnce({ success: true }),
+        });
+
+        const result = await httpService.get("test");
+        expect(result).toEqual({ success: true });
+        mockFetch.mockClear();
+      }
+    });
+
+    it("should handle empty successful responses", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        statusText: "No Content",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce(undefined),
+      });
+
+      const result = await httpService.delete("resource");
+      expect(result).toBeUndefined();
+    });
+
+    it("should handle responses with different content types", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("text/plain"),
+        },
+        text: jest.fn().mockResolvedValueOnce("plain text response"),
+      });
+
+      const result = await httpService.get("text-endpoint");
+      expect(result).toBe("plain text response");
+    });
+  });
+
+  describe("URL construction", () => {
+    it("should handle endpoints with leading slash", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+      });
+
+      await httpService.get("/api/users");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com//api/users?",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle empty query parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+      });
+
+      await httpService.get("test", {});
+
+      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/test?", expect.any(Object));
+    });
+
+    it("should handle undefined query parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+      });
+
+      await httpService.get("test", undefined);
+
+      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/test?", expect.any(Object));
+    });
+
+    it("should handle special characters in query parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+      });
+
+      await httpService.get("search", {
+        query: "hello world & more",
+        filter: "type=user|admin",
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com/search?query=hello+world+%26+more&filter=type%3Duser%7Cadmin",
+        expect.any(Object),
+      );
     });
   });
 });
