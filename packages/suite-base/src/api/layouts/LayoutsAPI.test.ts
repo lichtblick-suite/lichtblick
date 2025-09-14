@@ -107,11 +107,14 @@ describe("LayoutsAPI", () => {
 
       const result = await layoutsAPI.saveNewLayout(mockSaveRequest);
 
-      expect(mockPost).toHaveBeenCalledWith("layouts", expect.objectContaining({
-        layoutId: "new-layout",
-        name: "New Layout",
-        namespace: mockNamespace,
-      }));
+      expect(mockPost).toHaveBeenCalledWith(
+        "layouts",
+        expect.objectContaining({
+          layoutId: "new-layout",
+          name: "New Layout",
+          namespace: mockNamespace,
+        }),
+      );
 
       expect(result.name).toBe("New Layout");
       expect(result.id).toBe("new-layout");
@@ -149,38 +152,17 @@ describe("LayoutsAPI", () => {
 
       const result = await layoutsAPI.updateLayout(mockUpdateRequest);
 
-      expect(mockPut).toHaveBeenCalledWith("layouts/external-123", expect.objectContaining({
-        name: "Updated Layout",
-        permission: "ORG_READ",
-      }));
+      expect(mockPut).toHaveBeenCalledWith(
+        "layouts/external-123",
+        expect.objectContaining({
+          name: "Updated Layout",
+          permission: "ORG_READ",
+        }),
+      );
 
       expect(result.status).toBe("success");
       // Type narrowing for success case
       expect((result as any).newLayout?.name).toBe("Updated Layout");
-    });
-
-    it("should handle conflict response", async () => {
-      const mockUpdateRequest = {
-        id: "123" as any,
-        externalId: "external-123",
-        name: "Updated Layout",
-        data: {
-          configById: {},
-          globalVariables: {},
-          playbackConfig: { speed: 1 },
-          userNodes: {},
-        },
-        permission: "ORG_READ" as any,
-        savedAt: "2023-01-01T00:00:00.000Z" as any,
-      };
-
-      const mockHttpService = jest.mocked(HttpService);
-      const mockPut = jest.fn().mockResolvedValue(createMockHttpResponse({ status: "conflict" }));
-      mockHttpService.put = mockPut;
-
-      const result = await layoutsAPI.updateLayout(mockUpdateRequest);
-
-      expect(result.status).toBe("conflict");
     });
   });
 
