@@ -213,7 +213,6 @@ export default class LayoutManager implements ILayoutManager {
         permission: remoteLayout.permission,
         baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
         working: undefined,
-        // 🔴 FIX: Only shared layouts should have syncInfo when loaded from remote
         syncInfo: layoutPermissionIsShared(remoteLayout.permission)
           ? { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt }
           : undefined,
@@ -274,7 +273,6 @@ export default class LayoutManager implements ILayoutManager {
           permission,
           baseline: { data, savedAt: new Date().toISOString() as ISO8601Timestamp },
           working: undefined,
-          // 🔴 FIX: Personal layouts should NEVER have syncInfo - they should not sync to remote
           syncInfo: undefined,
         }),
     );
@@ -337,7 +335,7 @@ export default class LayoutManager implements ILayoutManager {
       this.#notifyChangeListeners({ type: "change", updatedLayout: result });
       return result;
     } else {
-      // 🔴 FIX: Only shared layouts should be marked for server upload on rename
+      // Only shared layouts should be marked for server upload on rename
       const isRename =
         this.#remote != undefined &&
         name != undefined &&
@@ -357,7 +355,7 @@ export default class LayoutManager implements ILayoutManager {
               ? isRename
                 ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
                 : localLayout.syncInfo
-              : undefined, // 🔴 FIX: Personal layouts should NEVER have syncInfo
+              : undefined, // Personal layouts should NEVER have syncInfo
           }),
       );
       this.#notifyChangeListeners({ type: "change", updatedLayout: result });
@@ -373,19 +371,12 @@ export default class LayoutManager implements ILayoutManager {
     id: LayoutID;
     externalId?: string;
   }): Promise<void> {
-    console.error(`🔴 DELETE DEBUG: Starting delete for layout ${id} (externalId: ${externalId})`);
     const localLayout = await this.#local.runExclusive(async (local) => await local.get(id));
     if (!localLayout) {
-      console.error(`🔴 DELETE DEBUG: Layout ${id} not found locally`);
       throw new Error(`Cannot delete layout ${id} because it does not exist`);
     }
 
-    console.error(
-      `🔴 DELETE DEBUG: Layout found - permission: ${localLayout.permission}, syncInfo: ${JSON.stringify(localLayout.syncInfo)}`,
-    );
-
     if (layoutIsShared(localLayout)) {
-      console.error(`🔴 DELETE DEBUG: Layout is shared, attempting remote deletion`);
       if (!this.#remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
@@ -393,24 +384,17 @@ export default class LayoutManager implements ILayoutManager {
         if (!this.isOnline) {
           throw new Error("Cannot delete a shared layout while offline");
         }
-        console.error(
-          `🔴 DELETE DEBUG: Calling remote.deleteLayout with externalId: ${externalId}`,
-        );
         const deleteResult = await this.#remote.deleteLayout(externalId);
-        console.error(`🔴 DELETE DEBUG: Remote delete result: ${deleteResult}`);
+        console.error(`Remote delete result: ${deleteResult}`);
       }
-    } else {
-      console.error(`🔴 DELETE DEBUG: Layout is not shared, proceeding with local deletion logic`);
     }
 
     await this.#local.runExclusive(async (local) => {
       // For truly local layouts (never synced), delete completely
       // For layouts from remote but personal, mark as locally-deleted for sync
       const isTrulyLocalLayout = !localLayout.syncInfo || localLayout.syncInfo.status === "new";
-      console.error(`🔴 DELETE DEBUG: isTrulyLocalLayout: ${isTrulyLocalLayout}`);
 
       if (this.#remote && !layoutIsShared(localLayout) && !isTrulyLocalLayout) {
-        console.error(`🔴 DELETE DEBUG: Marking layout as locally-deleted`);
         await local.put({
           ...localLayout,
           working: {
@@ -423,11 +407,9 @@ export default class LayoutManager implements ILayoutManager {
           },
         });
       } else {
-        console.error(`🔴 DELETE DEBUG: Permanently deleting layout from IndexedDB`);
         await local.delete(id);
       }
     });
-    console.error(`🔴 DELETE DEBUG: Notifying change listeners`);
     this.#notifyChangeListeners({ type: "delete", layoutId: id });
   }
 
@@ -479,7 +461,7 @@ export default class LayoutManager implements ILayoutManager {
               ? this.#remote && localLayout.syncInfo?.status !== "new"
                 ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
                 : localLayout.syncInfo
-              : undefined, // 🔴 FIX: Personal layouts should NEVER have syncInfo
+              : undefined, // Personal layouts should NEVER have syncInfo
           }),
       );
       this.#notifyChangeListeners({ type: "change", updatedLayout: result });
@@ -517,7 +499,6 @@ export default class LayoutManager implements ILayoutManager {
         permission: "CREATOR_WRITE",
         baseline: { data: layout.working?.data ?? layout.baseline.data, savedAt: now },
         working: undefined,
-        // 🔴 FIX: Personal copies should NEVER have syncInfo - they should not sync to remote
         syncInfo: undefined,
       });
       await local.put({ ...layout, working: undefined });
@@ -565,33 +546,16 @@ export default class LayoutManager implements ILayoutManager {
       return;
     }
 
-    console.error(`🔴 SYNC DEBUG: Starting sync process`);
     const [localLayouts, remoteLayouts] = await Promise.all([
       this.#local.runExclusive(async (local) => await local.list()),
       this.#remote.getLayouts(),
     ]);
-
-    console.error(
-      `🔴 SYNC DEBUG: Found ${localLayouts.length} local layouts, ${remoteLayouts.length} remote layouts`,
-    );
-    console.error(
-      `🔴 SYNC DEBUG: Local layouts:`,
-      localLayouts.map((l) => ({ id: l.id, name: l.name, syncStatus: l.syncInfo?.status })),
-    );
-    console.error(
-      `🔴 SYNC DEBUG: Remote layouts:`,
-      remoteLayouts.map((l) => ({ id: l.id, name: l.name, externalId: l.externalId })),
-    );
 
     if (abortSignal.aborted) {
       return;
     }
 
     const syncOperations = computeLayoutSyncOperations(localLayouts, remoteLayouts);
-    console.error(
-      `🔴 SYNC DEBUG: Computed ${syncOperations.length} sync operations:`,
-      syncOperations.map((op) => ({ type: op.type, local: op.local })),
-    );
 
     const [localOps, remoteOps] = _.partition(
       syncOperations,
@@ -634,9 +598,6 @@ export default class LayoutManager implements ILayoutManager {
           case "add-to-cache": {
             const { remoteLayout } = operation;
             log.debug(`Adding layout to cache: ${remoteLayout.id}`);
-            console.error(
-              `🔴 SYNC DEBUG: Adding layout to cache - ${remoteLayout.name} (${remoteLayout.id}) with externalId: ${remoteLayout.externalId}`,
-            );
             await local.put({
               id: remoteLayout.id,
               name: remoteLayout.name,
@@ -644,7 +605,6 @@ export default class LayoutManager implements ILayoutManager {
               permission: remoteLayout.permission,
               baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
               working: undefined,
-              // 🔴 FIX: Only shared layouts should have syncInfo when added to cache
               syncInfo: layoutPermissionIsShared(remoteLayout.permission)
                 ? { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt }
                 : undefined,
@@ -711,9 +671,6 @@ export default class LayoutManager implements ILayoutManager {
           case "upload-new": {
             const { localLayout } = operation;
             log.debug(`Uploading new layout ${localLayout.id}`);
-            console.error(
-              `🔴 SYNC DEBUG: UPLOAD-NEW - Uploading layout ${localLayout.name} (${localLayout.id}) with syncStatus: ${localLayout.syncInfo?.status}`,
-            );
             const newBaseline = await remote.saveNewLayout({
               id: localLayout.id,
               name: localLayout.name,
@@ -723,9 +680,6 @@ export default class LayoutManager implements ILayoutManager {
               savedAt:
                 localLayout.baseline.savedAt ?? (new Date().toISOString() as ISO8601Timestamp),
             });
-            console.error(
-              `🔴 SYNC DEBUG: UPLOAD-NEW result - new externalId: ${newBaseline.externalId}`,
-            );
             return async (local) => {
               // Don't check abortSignal; we need the cache to be updated to show the layout is tracked
               await local.put({
@@ -739,9 +693,6 @@ export default class LayoutManager implements ILayoutManager {
           case "upload-updated": {
             const { localLayout } = operation;
             log.debug(`Uploading updated layout ${localLayout.id}`);
-            console.error(
-              `🔴 SYNC DEBUG: UPLOAD-UPDATED - Uploading layout ${localLayout.name} (${localLayout.id}) with syncStatus: ${localLayout.syncInfo?.status}`,
-            );
             if (!localLayout.externalId) {
               throw new Error(
                 `Cannot update layout ${localLayout.id} (${localLayout.name}) because it has no externalId`,
@@ -755,9 +706,6 @@ export default class LayoutManager implements ILayoutManager {
               savedAt:
                 localLayout.baseline.savedAt ?? (new Date().toISOString() as ISO8601Timestamp),
             });
-            console.error(
-              `🔴 SYNC DEBUG: UPLOAD-UPDATED result - updated externalId: ${newBaseline.externalId}`,
-            );
             return async (local) => {
               // Don't check abortSignal; we need the cache to be updated to show the layout is tracked
               await local.put({
