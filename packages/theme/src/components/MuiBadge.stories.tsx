@@ -7,7 +7,7 @@
 
 import { Alert24Filled } from "@fluentui/react-icons";
 import { BadgeProps, Badge as MuiBadge, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj, StoryFn } from "@storybook/react";
 
 const colors: BadgeProps["color"][] = [
   "default",
@@ -19,7 +19,7 @@ const colors: BadgeProps["color"][] = [
   "warning",
 ];
 
-export default {
+const meta: Meta<typeof MuiBadge> = {
   component: MuiBadge,
   title: "Theme/Data Display/Badge",
   args: {
@@ -27,13 +27,15 @@ export default {
     children: <Alert24Filled />,
   },
   decorators: [
-    (Story) => (
+    (Story: StoryFn): React.JSX.Element => (
       <Stack direction="row" gap={2} padding={2}>
         <Story />
       </Stack>
     ),
   ],
-} as Meta<typeof MuiBadge>;
+};
+
+export default meta;
 
 export const Default: StoryObj = {
   render: (args) => (

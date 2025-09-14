@@ -7,7 +7,7 @@
 
 import { Add20Filled, Edit20Filled, Heart20Filled, Toolbox20Filled } from "@fluentui/react-icons";
 import { Fab, FabProps, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj, StoryFn } from "@storybook/react";
 
 const variants: FabProps["variant"][] = ["circular", "extended"];
 const sizes: FabProps["size"][] = ["small", "medium", "large"];
@@ -21,11 +21,11 @@ const colors: FabProps["color"][] = [
   "warning",
 ];
 
-export default {
+const meta: Meta<typeof Fab> = {
   component: Fab,
   title: "Theme/Inputs/Floating Action Button",
   decorators: [
-    (Story) => {
+    (Story: StoryFn): React.JSX.Element => {
       return (
         <Stack direction="row" padding={2} gap={2} justifyContent="center" alignItems="center">
           <Story />
@@ -36,7 +36,9 @@ export default {
   parameters: {
     colorScheme: "both-column",
   },
-} satisfies Meta<typeof Fab>;
+};
+
+export default meta;
 
 export const Default: StoryObj = {
   render: () => (

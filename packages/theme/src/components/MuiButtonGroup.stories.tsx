@@ -7,7 +7,7 @@
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Button, ButtonGroup, ButtonProps, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj, StoryFn } from "@storybook/react";
 
 const variants: ButtonProps["variant"][] = ["text", "outlined", "contained"];
 const sizes: ButtonProps["size"][] = ["small", "medium", "large"];
@@ -21,11 +21,11 @@ const colors: ButtonProps["color"][] = [
   "warning",
 ];
 
-export default {
+const meta: Meta<typeof ButtonGroup> = {
   component: ButtonGroup,
   title: "Theme/Inputs/Button Group",
   decorators: [
-    (Story) => {
+    (Story: StoryFn): React.JSX.Element => {
       return (
         <Stack padding={2} gap={2} alignItems="center">
           <Story />
@@ -36,7 +36,9 @@ export default {
   parameters: {
     colorScheme: "both-column",
   },
-} satisfies Meta<typeof ButtonGroup>;
+};
+
+export default meta;
 
 const buttons = [
   <Button key="one">One</Button>,

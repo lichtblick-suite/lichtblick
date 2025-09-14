@@ -27,11 +27,13 @@ const colors: IconButtonProps["color"][] = [
   "warning",
 ];
 
-export default {
+const meta: Meta<typeof MuiIconButton> = {
   component: MuiIconButton,
   title: "Theme/Inputs/Icon Button",
   args: {},
-} as Meta<typeof MuiIconButton>;
+};
+
+export default meta;
 
 export const Default: StoryObj = {
   render: () => (

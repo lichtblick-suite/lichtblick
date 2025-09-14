@@ -5,19 +5,25 @@
  * Application configuration constants.
  * Centralizes all environment variables and build-time constants.
  */
+
+// Helper function to safely access global variables defined by webpack
+function getGlobalVar(name: string): string | undefined {
+  return (globalThis as any)[name];
+}
+
 export const APP_CONFIG = {
   /**
    * API base URL for HTTP requests
    */
-  apiUrl: typeof API_URL !== "undefined" ? API_URL : "/",
+  apiUrl: getGlobalVar("API_URL") ?? "/",
 
   /**
    * Application version
    */
-  version: typeof LICHTBLICK_SUITE_VERSION !== "undefined" ? LICHTBLICK_SUITE_VERSION : "unknown",
+  version: getGlobalVar("LICHTBLICK_SUITE_VERSION") ?? "unknown",
 
   /**
    * Development workspace prefix (for local storage keys)
    */
-  devWorkspace: typeof DEV_WORKSPACE !== "undefined" ? DEV_WORKSPACE : "",
+  devWorkspace: getGlobalVar("DEV_WORKSPACE") ?? "",
 } as const;
