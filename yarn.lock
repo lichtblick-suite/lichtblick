@@ -3190,7 +3190,7 @@ __metadata:
     cytoscape: 3.31.1
     cytoscape-dagre: 2.5.0
     dompurify: 3.2.5
-    dotenv: 17.2.1
+    dotenv: 17.2.2
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.1
     fake-indexeddb: 4.0.2
@@ -9928,10 +9928,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:17.2.1":
-  version: 17.2.1
-  resolution: "dotenv@npm:17.2.1"
-  checksum: 2a3842a5451eb64f41cd11bd30d4d9d83941058f952f5e3adc3ca470d381e46ed8acbb0c0e3059da9725df91b42796987fa1deb032fafac992c37b94870ef085
+"dotenv@npm:17.2.2":
+  version: 17.2.2
+  resolution: "dotenv@npm:17.2.2"
+  checksum: 673825993b16a6722332b2e1f8c24b1c2ebe3dd3b81ae5df9be35f1483bf52e0b463555b09da65b756c7abee3cf55ba2ae2628c22874a899556fa787fac56019
   languageName: node
   linkType: hard
 
