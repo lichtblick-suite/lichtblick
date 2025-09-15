@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-/* eslint-disable @typescript-eslint/unbound-method */
-
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ILayoutStorage } from "@lichtblick/suite-base/services/ILayoutStorage";
 import WriteThroughLayoutCache from "@lichtblick/suite-base/services/LayoutManager/WriteThroughLayoutCache";
@@ -33,22 +31,24 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layouts = LayoutBuilder.layouts(2);
-      mockStorage.list.mockResolvedValue(layouts);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue(layouts);
 
       // When
       const result = await cache.list(namespace);
 
       // Then
       expect(result).toEqual(layouts);
-      expect(mockStorage.list).toHaveBeenCalledWith(namespace);
-      expect(mockStorage.list).toHaveBeenCalledTimes(1);
+      expect(listSpy).toHaveBeenCalledWith(namespace);
+      expect(listSpy).toHaveBeenCalledTimes(1);
     });
 
     it("should return cached data on subsequent calls without calling underlying storage", async () => {
       // Given
       const namespace = BasicBuilder.string();
       const layouts = LayoutBuilder.layouts(1);
-      mockStorage.list.mockResolvedValue(layouts);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue(layouts);
 
       // When
       await cache.list(namespace);
@@ -56,7 +56,7 @@ describe("WriteThroughLayoutCache", () => {
 
       // Then
       expect(secondResult).toEqual(layouts);
-      expect(mockStorage.list).toHaveBeenCalledTimes(1);
+      expect(listSpy).toHaveBeenCalledTimes(1);
     });
 
     it("should maintain separate caches for different namespaces", async () => {
@@ -66,7 +66,8 @@ describe("WriteThroughLayoutCache", () => {
       const layouts1 = LayoutBuilder.layouts(1);
       const layouts2 = LayoutBuilder.layouts(1);
 
-      mockStorage.list.mockResolvedValueOnce(layouts1).mockResolvedValueOnce(layouts2);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValueOnce(layouts1).mockResolvedValueOnce(layouts2);
 
       // When
       const result1 = await cache.list(namespace1);
@@ -75,9 +76,9 @@ describe("WriteThroughLayoutCache", () => {
       // Then
       expect(result1).toEqual(layouts1);
       expect(result2).toEqual(layouts2);
-      expect(mockStorage.list).toHaveBeenCalledWith(namespace1);
-      expect(mockStorage.list).toHaveBeenCalledWith(namespace2);
-      expect(mockStorage.list).toHaveBeenCalledTimes(2);
+      expect(listSpy).toHaveBeenCalledWith(namespace1);
+      expect(listSpy).toHaveBeenCalledWith(namespace2);
+      expect(listSpy).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -86,14 +87,15 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      mockStorage.list.mockResolvedValue([layout]);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue([layout]);
 
       // When
       const result = await cache.get(namespace, layout.id);
 
       // Then
       expect(result).toEqual(layout);
-      expect(mockStorage.list).toHaveBeenCalledWith(namespace);
+      expect(listSpy).toHaveBeenCalledWith(namespace);
     });
 
     it("should return undefined when layout does not exist in cache", async () => {
@@ -113,7 +115,8 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      mockStorage.list.mockResolvedValue([layout]);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue([layout]);
 
       // When
       await cache.list(namespace); // Initialize cache
@@ -121,7 +124,7 @@ describe("WriteThroughLayoutCache", () => {
 
       // Then
       expect(result).toEqual(layout);
-      expect(mockStorage.list).toHaveBeenCalledTimes(1);
+      expect(listSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -130,24 +133,27 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      const updatedLayout = { ...layout, name: "Updated Name" };
+      const updatedLayout = LayoutBuilder.layout({ ...layout, name: BasicBuilder.string() });
       mockStorage.list.mockResolvedValue([]);
-      mockStorage.put.mockResolvedValue(updatedLayout);
+      const putSpy = jest.spyOn(mockStorage, "put");
+      putSpy.mockResolvedValue(updatedLayout);
 
       // When
       const result = await cache.put(namespace, layout);
 
       // Then
       expect(result).toEqual(updatedLayout);
-      expect(mockStorage.put).toHaveBeenCalledWith(namespace, layout);
+      expect(putSpy).toHaveBeenCalledWith(namespace, layout);
     });
 
     it("should update cache with result from underlying storage", async () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      const updatedLayout = { ...layout, name: "Updated Name" };
-      mockStorage.list.mockResolvedValue([]);
+      const updatedLayout = LayoutBuilder.layout({ ...layout, name: BasicBuilder.string() });
+
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue([]);
       mockStorage.put.mockResolvedValue(updatedLayout);
 
       // When
@@ -156,7 +162,7 @@ describe("WriteThroughLayoutCache", () => {
 
       // Then
       expect(cachedLayout).toEqual(updatedLayout);
-      expect(mockStorage.list).toHaveBeenCalledTimes(1); // Only called to initialize cache
+      expect(listSpy).toHaveBeenCalledTimes(1); // Only called to initialize cache
     });
 
     it("should add new layout to cache when not previously present", async () => {
@@ -189,14 +195,15 @@ describe("WriteThroughLayoutCache", () => {
       await cache.delete(namespace, layout.id);
 
       // Then
-      expect(mockStorage.delete).toHaveBeenCalledWith(namespace, layout.id);
+      expect(jest.spyOn(mockStorage, "delete")).toHaveBeenCalledWith(namespace, layout.id);
     });
 
     it("should remove layout from cache after deletion", async () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      mockStorage.list.mockResolvedValue([layout]);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue([layout]);
 
       // When
       await cache.delete(namespace, layout.id);
@@ -204,15 +211,16 @@ describe("WriteThroughLayoutCache", () => {
 
       // Then
       expect(result).toBe(undefined);
-      expect(mockStorage.list).toHaveBeenCalledTimes(1); // Only called to initialize cache
+      expect(listSpy).toHaveBeenCalledTimes(1); // Only called to initialize cache
     });
 
     it("should maintain other layouts in cache after deletion", async () => {
       // Given
       const namespace = BasicBuilder.string();
-      const layoutToDelete = LayoutBuilder.layout({ id: "delete-me" as LayoutID });
-      const layoutToKeep = LayoutBuilder.layout({ id: "keep-me" as LayoutID });
-      mockStorage.list.mockResolvedValue([layoutToDelete, layoutToKeep]);
+      const layoutToDelete = LayoutBuilder.layout();
+      const layoutToKeep = LayoutBuilder.layout();
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue([layoutToDelete, layoutToKeep]);
 
       // When
       await cache.delete(namespace, layoutToDelete.id);
@@ -235,7 +243,7 @@ describe("WriteThroughLayoutCache", () => {
       await cache.importLayouts(params);
 
       // Then
-      expect(mockStorage.importLayouts).toHaveBeenCalledWith(params);
+      expect(jest.spyOn(mockStorage, "importLayouts")).toHaveBeenCalledWith(params);
     });
   });
 
@@ -248,7 +256,7 @@ describe("WriteThroughLayoutCache", () => {
       await cache.migrateUnnamespacedLayouts(namespace);
 
       // Then
-      expect(mockStorage.migrateUnnamespacedLayouts).toHaveBeenCalledWith(namespace);
+      expect(jest.spyOn(mockStorage, "migrateUnnamespacedLayouts")).toHaveBeenCalledWith(namespace);
     });
 
     it("should handle when underlying storage does not implement method", async () => {
@@ -269,7 +277,8 @@ describe("WriteThroughLayoutCache", () => {
       const layout1 = LayoutBuilder.layout();
       const layout2 = LayoutBuilder.layout();
 
-      mockStorage.list.mockResolvedValueOnce([layout1]).mockResolvedValueOnce([layout2]);
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValueOnce([layout1]).mockResolvedValueOnce([layout2]);
 
       // When
       const result1 = await cache.get(namespace1, layout1.id);
@@ -278,17 +287,21 @@ describe("WriteThroughLayoutCache", () => {
       // Then
       expect(result1).toEqual(layout1);
       expect(result2).toEqual(layout2);
-      expect(mockStorage.list).toHaveBeenCalledWith(namespace1);
-      expect(mockStorage.list).toHaveBeenCalledWith(namespace2);
-      expect(mockStorage.list).toHaveBeenCalledTimes(2);
+      expect(listSpy).toHaveBeenCalledWith(namespace1);
+      expect(listSpy).toHaveBeenCalledWith(namespace2);
+      expect(listSpy).toHaveBeenCalledTimes(2);
     });
 
     it("should maintain cache consistency across operations", async () => {
       // Given
       const namespace = BasicBuilder.string();
       const originalLayout = LayoutBuilder.layout();
-      const updatedLayout = { ...originalLayout, name: "Updated" };
-      mockStorage.list.mockResolvedValue([originalLayout]);
+      const updatedLayout = LayoutBuilder.layout({
+        ...originalLayout,
+        name: BasicBuilder.string(),
+      });
+      const listSpy = jest.spyOn(mockStorage, "list");
+      listSpy.mockResolvedValue([originalLayout]);
       mockStorage.put.mockResolvedValue(updatedLayout);
 
       // When
@@ -298,7 +311,7 @@ describe("WriteThroughLayoutCache", () => {
 
       // Then
       expect(result).toEqual(updatedLayout);
-      expect(mockStorage.list).toHaveBeenCalledTimes(1); // Cache prevents additional calls
+      expect(listSpy).toHaveBeenCalledTimes(1); // Cache prevents additional calls
     });
   });
 });
