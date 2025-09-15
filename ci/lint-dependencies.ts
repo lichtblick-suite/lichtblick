@@ -9,9 +9,6 @@ import { info, warning, error } from "@actions/core";
 import depcheck, { Detector } from "depcheck";
 import { glob } from "glob";
 import path from "path";
-import { promisify } from "util";
-
-const globAsync = promisify(glob);
 
 /**
  * Detect comments of the form
@@ -123,15 +120,8 @@ async function getAllWorkspacePackages(roots: string[]) {
         ? workspaceInfo.workspaces.packages
         : [];
     for (const pattern of patterns) {
-      try {
-        const matches = await globAsync(pattern);
-        for (const packagePath of matches) {
-          if (typeof packagePath === "string") {
-            workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
-          }
-        }
-      } catch (globError) {
-        console.warn(`Failed to glob pattern ${pattern}:`, globError);
+      for (const packagePath of await glob(pattern)) {
+        workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
       }
     }
   }
