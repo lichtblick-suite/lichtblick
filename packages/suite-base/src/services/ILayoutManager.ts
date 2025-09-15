@@ -32,6 +32,10 @@ export type LayoutManagerEventTypes = {
   errorchange: () => void;
 };
 
+export type SetOnlineProps = {
+  online: boolean;
+};
+
 /**
  * The Layout Manager is a high-level interface on top of raw layout storage which maps more closely
  * to actions the user can take in the application.
@@ -42,18 +46,18 @@ export interface ILayoutManager {
   readonly supportsSharing: boolean;
 
   /** Indicates whether the layout manager is currently performing an async operation. */
-  readonly isBusy: boolean;
-
-  /** Indicates whether the layout manager is currently performing an async operation. */
   readonly isOnline: boolean;
 
   /** Indicates the error state of the layout manager, if any. */
   readonly error: undefined | Error;
 
+  /** Indicates whether the layout manager is currently performing an async operation. */
+  isBusy: () => boolean;
+
   /**
    * Inform the layout manager whether it is online or offline (and remote requests may be expected to fail).
    */
-  setOnline(online: boolean): void;
+  setOnline({ online }: SetOnlineProps): void;
 
   /**
    * Update the layout manager's error state.

@@ -35,7 +35,7 @@ export default function LayoutManagerProvider({
   const { online = false } = useNetworkState();
   const visibilityState = useVisibilityState();
   useEffect(() => {
-    layoutManager.setOnline(online);
+    layoutManager.setOnline({ online });
   }, [layoutManager, online]);
 
   // Sync periodically when logged in, online, and the app is not hidden

@@ -12,6 +12,7 @@
       "@lichtblick/suite-base/*": ["./*"]
     },
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "useUnknownInCatchVariables": false
   }
 }

@@ -58,7 +58,7 @@ function makeMockLayoutManager() {
   return {
     supportsSharing: false,
     supportsSyncing: false,
-    isBusy: false,
+    isBusy: jest.fn().mockReturnValue(false),
     isOnline: false,
     error: undefined,
     on: jest.fn(),

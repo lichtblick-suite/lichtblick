@@ -10,12 +10,32 @@ import {
   LayoutSyncInfo,
   LayoutSyncStatus,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
+import { RemoteLayout } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
-import { PlaybackConfig, UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
+import {
+  PanelConfig,
+  PlaybackConfig,
+  UserScript,
+  UserScripts,
+} from "@lichtblick/suite-base/types/panels";
 
 export default class LayoutBuilder {
+  public static readonly permission: LayoutPermission = BasicBuilder.sample([
+    "CREATOR_WRITE",
+    "ORG_READ",
+    "ORG_WRITE",
+  ]);
+
+  public static readonly syncStatus: LayoutSyncStatus = BasicBuilder.sample([
+    "new",
+    "updated",
+    "tracked",
+    "locally-deleted",
+    "remotely-deleted",
+  ]);
+
   public static playbackConfig(props: Partial<PlaybackConfig> = {}): PlaybackConfig {
     return defaults<PlaybackConfig>(props, {
       speed: BasicBuilder.float(),
@@ -35,7 +55,7 @@ export default class LayoutBuilder {
 
   public static data(props: Partial<LayoutData> = {}): LayoutData {
     return defaults<LayoutData>(props, {
-      configById: BasicBuilder.genericDictionary(Object),
+      configById: BasicBuilder.genericDictionary(LayoutBuilder.panelConfig),
       globalVariables: GlobalVariableBuilder.globalVariables(),
       userNodes: LayoutBuilder.userScripts(),
       playbackConfig: LayoutBuilder.playbackConfig(),
@@ -51,13 +71,7 @@ export default class LayoutBuilder {
 
   public static syncInfo(props: Partial<LayoutSyncInfo> = {}): LayoutSyncInfo {
     return defaults<LayoutSyncInfo>(props, {
-      status: BasicBuilder.sample([
-        "new",
-        "updated",
-        "tracked",
-        "locally-deleted",
-        "remotely-deleted",
-      ]) as LayoutSyncStatus,
+      status: LayoutBuilder.syncStatus,
       lastRemoteSavedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp,
     });
   }
@@ -67,14 +81,28 @@ export default class LayoutBuilder {
       id: BasicBuilder.string() as LayoutID,
       name: BasicBuilder.string(),
       from: BasicBuilder.string(),
-      permission: BasicBuilder.sample([
-        "CREATOR_WRITE",
-        "ORG_READ",
-        "ORG_WRITE",
-      ]) as LayoutPermission,
+      permission: LayoutBuilder.permission,
       baseline: LayoutBuilder.baseline(),
       working: LayoutBuilder.baseline(),
       syncInfo: LayoutBuilder.syncInfo(),
+    });
+  }
+
+  public static layouts(count = 3): Layout[] {
+    return BasicBuilder.multiple(LayoutBuilder.layout, count);
+  }
+
+  public static panelConfig(props: Partial<PanelConfig> = {}): PanelConfig {
+    return defaults<PanelConfig>(props, BasicBuilder.genericDictionary(String));
+  }
+
+  public static remoteLayout(props: Partial<RemoteLayout> = {}): RemoteLayout {
+    return defaults<RemoteLayout>(props, {
+      id: BasicBuilder.string() as LayoutID,
+      name: BasicBuilder.string(),
+      permission: LayoutBuilder.permission,
+      data: LayoutBuilder.data(),
+      savedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp,
     });
   }
 }
