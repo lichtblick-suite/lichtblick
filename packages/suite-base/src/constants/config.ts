@@ -15,7 +15,7 @@ export const APP_CONFIG = {
   /**
    * API base URL for HTTP requests
    */
-  apiUrl: API_URL ?? "/",
+  apiUrl: API_URL,
 
   /**
    * Application version

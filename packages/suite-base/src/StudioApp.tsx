@@ -35,6 +35,7 @@ import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 
 // Suppress context menu for the entire app except on inputs & textareas.
 function contextMenuHandler(event: MouseEvent) {
@@ -102,10 +103,12 @@ export function StudioApp(): React.JSX.Element {
   const url = new URL(window.location.href);
   const namespace = url.searchParams.get("namespace");
 
-  const remoteLayoutStorage = useMemo(
-    () => (namespace ? new LayoutsAPI(namespace) : undefined),
-    [namespace],
-  );
+  const remoteLayoutStorage = useMemo(() => {
+    if (namespace && APP_CONFIG.apiUrl) {
+      return new LayoutsAPI(namespace);
+    }
+    return undefined;
+  }, [namespace]);
 
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
