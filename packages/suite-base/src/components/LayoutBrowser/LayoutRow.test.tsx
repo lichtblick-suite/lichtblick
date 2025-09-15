@@ -220,7 +220,11 @@ describe("LayoutRow rendering", () => {
 
   it("Given a personal layout, when Duplicate is clicked, then onDuplicate is called", () => {
     const onDuplicate = jest.fn();
-    const personalLayout = { ...defaultLayout, working: undefined };
+    const personalLayout = {
+      ...defaultLayout,
+      working: undefined,
+      permission: "CREATOR_WRITE",
+    };
     renderComponent({ layout: personalLayout, onDuplicate });
 
     fireEvent.click(screen.getByTestId("layout-actions"));
