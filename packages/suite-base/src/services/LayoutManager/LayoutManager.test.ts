@@ -29,7 +29,7 @@ describe("LayoutManager", () => {
     };
 
     mockRemoteStorage = {
-      namespace: "test-user",
+      namespace: BasicBuilder.string(),
       getLayouts: jest.fn().mockResolvedValue([]),
       getLayout: jest.fn().mockResolvedValue(undefined),
       saveNewLayout: jest.fn(),
@@ -73,7 +73,7 @@ describe("LayoutManager", () => {
       layoutManager.on("onlinechange", mockOnlineChangeListener);
 
       // When
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // Then
       expect(layoutManager.isOnline).toBe(true);
@@ -90,7 +90,7 @@ describe("LayoutManager", () => {
       layoutManager.on("onlinechange", mockOnlineChangeListener);
 
       // When
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // Then
       expect(layoutManager.isOnline).toBe(false);
@@ -178,7 +178,7 @@ describe("LayoutManager", () => {
   describe("getLayout", () => {
     it("should return layout when it exists locally and is not deleted", async () => {
       // Given
-      const layoutId = "existing-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const existingLayout = LayoutBuilder.layout({
         id: layoutId,
         syncInfo: { status: "tracked", lastRemoteSavedAt: undefined },
@@ -201,7 +201,7 @@ describe("LayoutManager", () => {
 
     it("should return undefined when layout exists locally but is deleted", async () => {
       // Given
-      const layoutId = "deleted-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const deletedLayout = LayoutBuilder.layout({
         id: layoutId,
         syncInfo: { status: "locally-deleted", lastRemoteSavedAt: undefined },
@@ -224,7 +224,7 @@ describe("LayoutManager", () => {
 
     it("should return undefined when layout does not exist locally and no remote storage", async () => {
       // Given
-      const layoutId = "non-existent" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.list.mockResolvedValue([]);
 
       const layoutManager = new LayoutManager({
@@ -241,14 +241,14 @@ describe("LayoutManager", () => {
 
     it("should return undefined when layout does not exist locally and offline", async () => {
       // Given
-      const layoutId = "non-existent" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.list.mockResolvedValue([]);
 
       const layoutManager = new LayoutManager({
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // When
       const result = await layoutManager.getLayout(layoutId);
@@ -260,7 +260,7 @@ describe("LayoutManager", () => {
 
     it("should fetch from remote and cache when layout does not exist locally but exists remotely", async () => {
       // Given
-      const layoutId = "remote-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const remoteLayoutData = LayoutBuilder.remoteLayout({
         id: layoutId,
         name: "Remote Layout",
@@ -273,7 +273,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       const result = await layoutManager.getLayout(layoutId);
@@ -288,7 +288,7 @@ describe("LayoutManager", () => {
 
     it("should return undefined when layout does not exist locally or remotely", async () => {
       // Given
-      const layoutId = "non-existent" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.list.mockResolvedValue([]);
       mockRemoteStorage.getLayout.mockResolvedValue(undefined);
 
@@ -296,7 +296,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       const result = await layoutManager.getLayout(layoutId);
@@ -390,7 +390,7 @@ describe("LayoutManager", () => {
       mockRemoteStorage.saveNewLayout.mockResolvedValue(savedRemoteLayout);
       const putSpy = jest.spyOn(mockLocalStorage, "put");
       putSpy.mockResolvedValue(savedLocalLayout);
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       const result = await layoutManager.saveNewLayout({
@@ -434,7 +434,7 @@ describe("LayoutManager", () => {
       const layoutName = BasicBuilder.string();
       const layoutData = LayoutBuilder.data();
       const permission: LayoutPermission = "ORG_WRITE";
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // When & Then
       await expect(
@@ -461,7 +461,7 @@ describe("LayoutManager", () => {
       await expect(
         layoutManager.updateLayout({
           id: layoutId,
-          name: "New Name",
+          name: expect.any(String),
           data: undefined,
         }),
       ).rejects.toThrow(`Cannot update layout ${layoutId} because it does not exist`);
@@ -481,7 +481,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // When & Then
       await expect(
@@ -515,7 +515,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       await layoutManager.updateLayout({
@@ -548,7 +548,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: undefined,
       });
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       await layoutManager.updateLayout({
@@ -575,7 +575,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: undefined,
       });
-      const layoutId = "non-existent" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.get.mockResolvedValue(undefined);
 
       // When & Then
@@ -586,7 +586,7 @@ describe("LayoutManager", () => {
 
     it("should throw error when trying to delete and is not remote", async () => {
       // Given
-      const layoutId = "shared-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const sharedLayout = LayoutBuilder.layout({
         id: layoutId,
         permission: "ORG_WRITE",
@@ -603,7 +603,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: undefined,
       });
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // When & Then
       await expect(layoutManager.deleteLayout({ id: layoutId })).rejects.toThrow(
@@ -613,7 +613,7 @@ describe("LayoutManager", () => {
 
     it("should throw error when trying to delete shared layout while offline", async () => {
       // Given
-      const layoutId = "shared-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const sharedLayout = LayoutBuilder.layout({
         id: layoutId,
         permission: "ORG_WRITE",
@@ -630,7 +630,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // When & Then
       await expect(layoutManager.deleteLayout({ id: layoutId })).rejects.toThrow(
@@ -640,7 +640,7 @@ describe("LayoutManager", () => {
 
     it("should delete layout when online", async () => {
       // Given
-      const layoutId = "shared-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const sharedLayout = LayoutBuilder.layout({
         id: layoutId,
         permission: "CREATOR_WRITE",
@@ -657,7 +657,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       await layoutManager.deleteLayout({ id: layoutId });
@@ -679,7 +679,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: undefined,
       });
-      const layoutId = "non-existent" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.get.mockResolvedValue(undefined);
 
       // When & Then
@@ -690,7 +690,7 @@ describe("LayoutManager", () => {
 
     it("should throw error when trying to overwrite shared layout while offline", async () => {
       // Given
-      const layoutId = "shared-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const sharedLayout = LayoutBuilder.layout({
         id: layoutId,
         permission: "ORG_WRITE",
@@ -703,7 +703,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // When & Then
       await expect(layoutManager.overwriteLayout({ id: layoutId })).rejects.toThrow(
@@ -713,7 +713,7 @@ describe("LayoutManager", () => {
 
     it("should overwrite shared layout when online", async () => {
       // Given
-      const layoutId = "shared-layout" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const sharedLayout = LayoutBuilder.layout({
         id: layoutId,
         permission: "ORG_WRITE",
@@ -739,7 +739,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: mockRemoteStorage,
       });
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When
       const result = await layoutManager.overwriteLayout({ id: layoutId });
@@ -850,7 +850,7 @@ describe("LayoutManager", () => {
         local: mockLocalStorage,
         remote: undefined,
       });
-      const layoutId = "non-existent" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.get.mockResolvedValue(undefined);
 
       // When & Then
@@ -861,7 +861,7 @@ describe("LayoutManager", () => {
 
     it("should revert layout", async () => {
       // Given
-      const layoutId = "existing" as LayoutID;
+      const layoutId = BasicBuilder.string() as LayoutID;
       const existingLayout = LayoutBuilder.layout({
         id: layoutId,
         working: {
@@ -995,7 +995,7 @@ describe("LayoutManager", () => {
       const abortController = new AbortController();
 
       mockLocalStorage.list.mockRejectedValue(syncError);
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
 
       // When & Then
       await expect(layoutManager.syncWithRemote(abortController.signal)).rejects.toThrow(
@@ -1015,7 +1015,7 @@ describe("LayoutManager", () => {
 
       jest.spyOn(mockLocalStorage, "list").mockResolvedValue([]);
       jest.spyOn(mockRemoteStorage, "getLayouts").mockResolvedValue([]);
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
       layoutManager.setError(testError);
 
       // When
@@ -1035,7 +1035,7 @@ describe("LayoutManager", () => {
       });
 
       // When, Then
-      expect(layoutManager.isBusy).toBe(false);
+      expect(layoutManager.isBusy()).toBe(false);
     });
   });
 
@@ -1050,9 +1050,9 @@ describe("LayoutManager", () => {
 
       // When
       layoutManager.on("onlinechange", mockListener);
-      layoutManager.setOnline(true);
+      layoutManager.setOnline({ online: true });
       layoutManager.off("onlinechange", mockListener);
-      layoutManager.setOnline(false);
+      layoutManager.setOnline({ online: false });
 
       // Then
       expect(mockListener).toHaveBeenCalledTimes(1);

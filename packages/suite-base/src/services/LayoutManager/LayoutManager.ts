@@ -17,6 +17,7 @@ import {
   ILayoutManager,
   LayoutManagerChangeEvent,
   LayoutManagerEventTypes,
+  SetOnlineProps,
 } from "@lichtblick/suite-base/services/ILayoutManager";
 import {
   ILayoutStorage,
@@ -85,13 +86,11 @@ export default class LayoutManager implements ILayoutManager {
     this.supportsSharing = remote != undefined;
   }
 
-  // eslint-disable-next-line no-restricted-syntax
-  public get isBusy(): boolean {
+  public isBusy(): boolean {
     return this.busyCount > 0;
   }
 
-  // eslint-disable-next-line @lichtblick/no-boolean-parameters
-  public setOnline(online: boolean): void {
+  public setOnline({ online }: SetOnlineProps): void {
     this.isOnline = online;
     this.emitter.emit("onlinechange");
   }

@@ -44,7 +44,7 @@ export function useLayoutNavigation(menuClose?: () => void): UseLayoutNavigation
 
   const [state, dispatch] = useLayoutBrowserReducer({
     lastSelectedId: currentLayoutId,
-    busy: layoutManager.isBusy,
+    busy: layoutManager.isBusy(),
     error: layoutManager.error,
     online: layoutManager.isOnline,
   });

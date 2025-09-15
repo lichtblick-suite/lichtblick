@@ -83,7 +83,7 @@ export default function LayoutBrowser({
 
   useLayoutEffect(() => {
     const busyListener = () => {
-      dispatch({ type: "set-busy", value: layoutManager.isBusy });
+      dispatch({ type: "set-busy", value: layoutManager.isBusy() });
     };
     const onlineListener = () => {
       dispatch({ type: "set-online", value: layoutManager.isOnline });
