@@ -75,7 +75,9 @@ export const webpackPreloadConfig =
           LICHTBLICK_PRODUCT_HOMEPAGE: JSON.stringify(params.packageJson.homepage),
           LICHTBLICK_SUITE_VERSION: JSON.stringify(params.packageJson.version),
           API_URL: process.env.API_URL ? JSON.stringify(process.env.API_URL) : undefined,
-          DEV_WORKSPACE: process.env.DEV_WORKSPACE ? JSON.stringify(process.env.DEV_WORKSPACE) : undefined,
+          DEV_WORKSPACE: process.env.DEV_WORKSPACE
+            ? JSON.stringify(process.env.DEV_WORKSPACE)
+            : undefined,
         }),
         new ForkTsCheckerWebpackPlugin(),
       ],
