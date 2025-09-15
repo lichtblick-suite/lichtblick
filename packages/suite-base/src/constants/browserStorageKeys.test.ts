@@ -27,6 +27,9 @@ describe("browserStorageKeys", () => {
   });
 
   it("should generate keys without workspace prefix when DEV_WORKSPACE is not set", async () => {
+    // Define DEV_WORKSPACE as undefined before importing
+    (globalThis as any).DEV_WORKSPACE = undefined;
+    
     const storageKeys = await import("./browserStorageKeys");
 
     expect(storageKeys.KEY_WORKSPACE_PREFIX).toBe("");
@@ -76,6 +79,9 @@ describe("browserStorageKeys", () => {
   });
 
   it("should have consistent storage key naming patterns", async () => {
+    // Define DEV_WORKSPACE as undefined to test default behavior
+    (globalThis as any).DEV_WORKSPACE = undefined;
+    
     const storageKeys = await import("./browserStorageKeys");
 
     // Test that all local storage keys are properly defined

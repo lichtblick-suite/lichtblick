@@ -27,6 +27,11 @@ describe("APP_CONFIG", () => {
   });
 
   it("should use default values when global variables are not defined", async () => {
+    // Define variables as undefined before importing
+    (globalThis as any).API_URL = undefined;
+    (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
+    (globalThis as any).DEV_WORKSPACE = undefined;
+
     const { APP_CONFIG } = await import("./config");
 
     expect(APP_CONFIG.apiUrl).toBe("/");
