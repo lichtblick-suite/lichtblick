@@ -1478,6 +1478,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.11.0":
+  version: 7.28.4
+  resolution: "@babel/runtime@npm:7.28.4"
+  checksum: 934b0a0460f7d06637d93fcd1a44ac49adc33518d17253b5a0b55ff4cb90a45d8fe78bf034b448911dbec7aff2a90b918697559f78d21c99ff8dbadae9565b55
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.27.1, @babel/template@npm:^7.27.2, @babel/template@npm:^7.4.4":
   version: 7.27.2
   resolution: "@babel/template@npm:7.27.2"
@@ -14490,6 +14497,7 @@ __metadata:
     prettier: 3.3.2
     react-refresh: 0.14.2
     react-use: 17.6.0
+    react-vtree: 2.0.4
     rehype-raw: 7.0.0
     rimraf: 5.0.5
     semver: 7.7.2
@@ -17799,6 +17807,20 @@ __metadata:
     react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: bbfecf2bc8546b350a948a3e1a3be445bf04c46400f8e33771795aa8fafbc4e8f436d2ab461e8476b89ec4b7efe3c194bfaf31f5f6b3cf043276c4f7d3705b52
+  languageName: node
+  linkType: hard
+
+"react-vtree@npm:2.0.4":
+  version: 2.0.4
+  resolution: "react-vtree@npm:2.0.4"
+  dependencies:
+    "@babel/runtime": ^7.11.0
+  peerDependencies:
+    "@types/react-window": ^1.8.2
+    react: ^16.13.1
+    react-dom: ^16.13.1
+    react-window: ^1.8.5
+  checksum: 07f75733b6d7addd5f4e7f58d6791d76822f8481de5fafcd013311983b47a4549c99ee1ceafa9dd1d0e3731ac3d0cb8414144891e0cf53c62107ffdb559039d2
   languageName: node
   linkType: hard
 

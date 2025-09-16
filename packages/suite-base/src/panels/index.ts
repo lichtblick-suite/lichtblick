@@ -198,4 +198,11 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("studioPlaybackPerformanceDescription"),
     module: async () => await import("./PlaybackPerformance"),
   },
+  {
+    title: t("virtualizedRawMessages"),
+    type: "VirtualizedRawMessages",
+    description: t("virtualizedRawMessagesDescription"),
+    thumbnail: rawMessagesThumbnail,
+    module: async () => await import("./VirtualizedRawMessages"),
+  },
 ];
