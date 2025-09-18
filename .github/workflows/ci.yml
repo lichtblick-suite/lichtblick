@@ -18,6 +18,8 @@ jobs:
         config:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
+          - name: npm audit
+            command: yarn npm audit --all --recursive --severity moderate
           - name: lint
             command: |
               # lint steps
