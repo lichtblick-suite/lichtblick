@@ -63,6 +63,15 @@ async function updateOrFetchLayout(
   }
 }
 
+/**
+ * Updates a layout with new name and/or data.
+ *
+ * This method updates the layout LOCALLY. For remote layouts, it is used for renaming ONLY.
+ * To actually update the layout data on the remote server, use `overwriteLayout()` instead.
+ *
+ * Note: In the future, this could be split into separate methods to better divide responsibilities
+ * between local updates, remote renames, and remote data updates.
+ */
 export default class LayoutManager implements ILayoutManager {
   public static readonly LOCAL_STORAGE_NAMESPACE = "local";
   public static readonly REMOTE_STORAGE_NAMESPACE_PREFIX = "remote-";
