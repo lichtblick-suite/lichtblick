@@ -98,7 +98,7 @@ export function useLayoutActions(): UseLayoutActions {
         setSelectedLayoutId(targetLayout?.id);
         dispatch({ type: "select-id", id: targetLayout?.id });
       }
-      await layoutManager.deleteLayout({ id: item.id, externalId: item.externalId });
+      await layoutManager.deleteLayout({ id: item.id });
     },
     [
       analytics,

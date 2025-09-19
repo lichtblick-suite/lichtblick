@@ -11,6 +11,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@lichtblick/suite-base/context/NativeWindowContext";
@@ -35,7 +36,6 @@ import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
-import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 
 // Suppress context menu for the entire app except on inputs & textareas.
 function contextMenuHandler(event: MouseEvent) {

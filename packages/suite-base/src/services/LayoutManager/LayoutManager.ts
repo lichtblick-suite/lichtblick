@@ -364,13 +364,7 @@ export default class LayoutManager implements ILayoutManager {
   }
 
   @LayoutManager.#withBusyStatus
-  public async deleteLayout({
-    id,
-    externalId,
-  }: {
-    id: LayoutID;
-    externalId?: string;
-  }): Promise<void> {
+  public async deleteLayout({ id }: { id: LayoutID }): Promise<void> {
     const localLayout = await this.#local.runExclusive(async (local) => await local.get(id));
     if (!localLayout) {
       throw new Error(`Cannot delete layout ${id} because it does not exist`);
@@ -380,11 +374,14 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.#remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
-      if (localLayout.syncInfo?.status !== "remotely-deleted" && externalId) {
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
+      }
+      if (localLayout.syncInfo?.status !== "remotely-deleted") {
         if (!this.isOnline) {
           throw new Error("Cannot delete a shared layout while offline");
         }
-        const deleteResult = await this.#remote.deleteLayout(externalId);
+        const deleteResult = await this.#remote.deleteLayout(localLayout.externalId);
         console.error(`Remote delete result: ${deleteResult}`);
       }
     }
