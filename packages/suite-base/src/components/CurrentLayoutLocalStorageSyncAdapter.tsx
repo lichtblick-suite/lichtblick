@@ -37,14 +37,15 @@ export function CurrentLayoutLocalStorageSyncAdapter(): React.JSX.Element {
   const layoutManager = useLayoutManager();
 
   const [debouncedLayoutData] = useDebounce(currentLayoutData, 250, { maxWait: 500 });
-  
+
   // Track if this is the initial layout load to prevent false "edited" states
   const isInitialLayoutLoad = useRef(true);
-  
+
   // Reset the flag when layout changes
   useEffect(() => {
     isInitialLayoutLoad.current = true;
-  }, [currentLayoutId]);  useEffect(() => {
+  }, [currentLayoutId]);
+  useEffect(() => {
     if (!debouncedLayoutData) {
       return;
     }

@@ -99,6 +99,7 @@ export default class LayoutBuilder {
   public static remoteLayout(props: Partial<RemoteLayout> = {}): RemoteLayout {
     return defaults<RemoteLayout>(props, {
       id: BasicBuilder.string() as LayoutID,
+      externalId: BasicBuilder.string(),
       name: BasicBuilder.string(),
       permission: LayoutBuilder.permission,
       data: LayoutBuilder.data(),
