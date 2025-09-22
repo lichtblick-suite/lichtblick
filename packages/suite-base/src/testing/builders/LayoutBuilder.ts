@@ -79,6 +79,7 @@ export default class LayoutBuilder {
   public static layout(props: Partial<Layout> = {}): Layout {
     return defaults<Layout>(props, {
       id: BasicBuilder.string() as LayoutID,
+      externalId: BasicBuilder.string(),
       name: BasicBuilder.string(),
       from: BasicBuilder.string(),
       permission: LayoutBuilder.permission,

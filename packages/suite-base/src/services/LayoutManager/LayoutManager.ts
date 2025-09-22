@@ -441,7 +441,7 @@ export default class LayoutManager implements ILayoutManager {
         permission: "CREATOR_WRITE",
         baseline: { data: layout.working?.data ?? layout.baseline.data, savedAt: now },
         working: undefined,
-        syncInfo: undefined,
+        syncInfo: { status: "new", lastRemoteSavedAt: now },
       });
       await local.put({ ...layout, working: undefined });
       return newLayout;

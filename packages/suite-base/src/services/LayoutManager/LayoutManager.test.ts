@@ -457,14 +457,18 @@ describe("LayoutManager", () => {
       const layoutId = BasicBuilder.string() as LayoutID;
       mockLocalStorage.get.mockResolvedValue(undefined);
 
+      const randomLayoutName = BasicBuilder.string();
+
       // When & Then
       await expect(
         layoutManager.updateLayout({
           id: layoutId,
-          name: expect.any(String),
+          name: randomLayoutName,
           data: undefined,
         }),
-      ).rejects.toThrow(`Cannot update layout ${layoutId} because it does not exist`);
+      ).rejects.toThrow(
+        `Cannot update layout ${layoutId} (${randomLayoutName}) because it does not exist`,
+      );
     });
 
     it("should throw error when trying to update shared layout while offline", async () => {
@@ -580,7 +584,7 @@ describe("LayoutManager", () => {
 
       // When & Then
       await expect(layoutManager.deleteLayout({ id: layoutId })).rejects.toThrow(
-        `Cannot update layout ${layoutId} because it does not exist`,
+        `Cannot delete layout ${layoutId} because it does not exist`,
       );
     });
 
