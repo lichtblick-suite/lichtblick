@@ -222,7 +222,7 @@ export default class LayoutManager implements ILayoutManager {
           permission,
           baseline: { data, savedAt: new Date().toISOString() as ISO8601Timestamp },
           working: undefined,
-          syncInfo: this.remote ? { status: "new", lastRemoteSavedAt: undefined } : undefined,
+          syncInfo: undefined,
         }),
     );
     this.notifyChangeListeners({ type: "change", updatedLayout: newLayout });
