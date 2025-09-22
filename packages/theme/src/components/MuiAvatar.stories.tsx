@@ -6,19 +6,19 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Avatar as MuiAvatar } from "@mui/material";
-import { Meta, StoryObj, StoryFn } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 
 export default {
   component: MuiAvatar,
   title: "Theme/Data Display/Avatar",
   args: {},
   decorators: [
-    (Story: StoryFn): React.JSX.Element => (
+    (Story) => (
       <div style={{ padding: 16 }}>
         <Story />
       </div>
     ),
   ],
-} satisfies Meta<typeof MuiAvatar>;
+} as Meta<typeof MuiAvatar>;
 
 export const Default: StoryObj = {};

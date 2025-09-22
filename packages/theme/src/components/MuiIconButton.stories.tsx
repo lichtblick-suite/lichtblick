@@ -31,7 +31,7 @@ export default {
   component: MuiIconButton,
   title: "Theme/Inputs/Icon Button",
   args: {},
-} satisfies Meta<typeof MuiIconButton>;
+} as Meta<typeof MuiIconButton>;
 
 export const Default: StoryObj = {
   render: () => (

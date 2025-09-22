@@ -7,7 +7,7 @@
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Button, ButtonGroup, ButtonProps, Stack } from "@mui/material";
-import { Meta, StoryObj, StoryFn } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 
 const variants: ButtonProps["variant"][] = ["text", "outlined", "contained"];
 const sizes: ButtonProps["size"][] = ["small", "medium", "large"];
@@ -25,7 +25,7 @@ export default {
   component: ButtonGroup,
   title: "Theme/Inputs/Button Group",
   decorators: [
-    (Story: StoryFn): React.JSX.Element => {
+    (Story) => {
       return (
         <Stack padding={2} gap={2} alignItems="center">
           <Story />

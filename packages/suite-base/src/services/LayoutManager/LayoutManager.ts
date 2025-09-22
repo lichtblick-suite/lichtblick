@@ -207,10 +207,10 @@ export default class LayoutManager implements ILayoutManager {
         syncInfo: { status: "tracked" as const, lastRemoteSavedAt: newLayout.savedAt },
       };
 
-      const result = await this.#local.runExclusive(
+      const result = await this.local.runExclusive(
         async (local) => await local.put(localLayoutData),
       );
-      this.#notifyChangeListeners({ type: "change", updatedLayout: result });
+      this.notifyChangeListeners({ type: "change", updatedLayout: result });
       return result;
     }
 
@@ -263,9 +263,13 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.isOnline) {
         throw new Error("Cannot update a shared layout while offline");
       }
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
+      }
 
       const updatedBaseline = await updateOrFetchLayout(this.remote, {
         id,
+        externalId: localLayout.externalId,
         name,
         savedAt: now,
       });
@@ -366,6 +370,9 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.isOnline) {
         throw new Error("Cannot save a shared layout while offline");
       }
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
+      }
       const updatedBaseline = await updateOrFetchLayout(this.remote, {
         id,
         externalId: localLayout.externalId,
@@ -396,8 +403,7 @@ export default class LayoutManager implements ILayoutManager {
             syncInfo:
               this.remote && localLayout.syncInfo?.status !== "new"
                 ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-                : localLayout.syncInfo
-              : undefined, // Personal layouts should NEVER have syncInfo
+                : localLayout.syncInfo,
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });

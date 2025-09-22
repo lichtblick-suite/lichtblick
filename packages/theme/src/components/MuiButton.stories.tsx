@@ -7,7 +7,7 @@
 
 import { Delete20Regular, Send20Filled } from "@fluentui/react-icons";
 import { Button, ButtonProps, Stack } from "@mui/material";
-import { Meta, StoryObj, StoryFn } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { Fragment } from "react";
 
 const variants: ButtonProps["variant"][] = ["text", "outlined", "contained"];
@@ -26,7 +26,7 @@ export default {
   component: Button,
   title: "Theme/Inputs/Button",
   decorators: [
-    (Story: StoryFn): React.JSX.Element => {
+    (Story) => {
       return (
         <Stack direction="row" padding={2} gap={1} justifyContent="center" alignItems="center">
           <Story />
