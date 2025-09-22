@@ -886,14 +886,11 @@ describe("LayoutManager", () => {
             data: localLayout.working!.data,
           }),
           working: undefined,
-          syncInfo: expect.objectContaining({
-            status: "updated",
-            lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt,
-          }),
+          syncInfo: undefined,
         }),
       );
       expect(result.working).toBe(undefined);
-      expect(result.syncInfo?.status).toBe("updated");
+      expect(result.syncInfo?.status).toBe(undefined);
       expect(mockRemoteStorage.updateLayout).not.toHaveBeenCalled();
     });
   });

@@ -179,7 +179,7 @@ describe("computeLayoutSyncOperations", () => {
   });
 
   describe("when local layout exists but no matching remote layout", () => {
-    it("should upload new personal layout when sync status is undefined", () => {
+    it("should NOT upload new personal layout when sync status is undefined", () => {
       // Given
       const localLayout = LayoutBuilder.layout({
         id: layoutId,
@@ -191,12 +191,7 @@ describe("computeLayoutSyncOperations", () => {
       const operations = computeLayoutSyncOperations([localLayout], []);
 
       // Then
-      expect(operations).toHaveLength(1);
-      expect(operations[0]).toMatchObject({
-        local: false,
-        type: "upload-new",
-        localLayout: expect.objectContaining({ id: layoutId }),
-      });
+      expect(operations).toHaveLength(0);
     });
 
     it("should skip shared layouts when sync status is undefined", () => {
@@ -214,7 +209,7 @@ describe("computeLayoutSyncOperations", () => {
       expect(operations).toEqual([]);
     });
 
-    it("should upload new personal layout when sync status is new", () => {
+    it("should NOT upload new personal layout when sync status is new", () => {
       // Given
       const localLayout = LayoutBuilder.layout({
         id: layoutId,
@@ -226,12 +221,7 @@ describe("computeLayoutSyncOperations", () => {
       const operations = computeLayoutSyncOperations([localLayout], []);
 
       // Then
-      expect(operations).toHaveLength(1);
-      expect(operations[0]).toMatchObject({
-        local: false,
-        type: "upload-new",
-        localLayout: expect.objectContaining({ id: layoutId }),
-      });
+      expect(operations).toHaveLength(0);
     });
 
     it("should delete local personal layout when sync status is updated", () => {

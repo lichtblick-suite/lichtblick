@@ -399,11 +399,7 @@ export default class LayoutManager implements ILayoutManager {
               savedAt: now,
             },
             working: undefined,
-            syncInfo: layoutIsShared(localLayout)
-              ? this.remote && localLayout.syncInfo?.status !== "new"
-                ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-                : localLayout.syncInfo
-              : undefined, // Personal layouts should NEVER have syncInfo
+            syncInfo: undefined, // Personal layouts should NEVER have syncInfo
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
