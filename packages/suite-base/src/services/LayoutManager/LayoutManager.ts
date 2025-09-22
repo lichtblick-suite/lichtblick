@@ -222,7 +222,7 @@ export default class LayoutManager implements ILayoutManager {
           permission,
           baseline: { data, savedAt: new Date().toISOString() as ISO8601Timestamp },
           working: undefined,
-          syncInfo: undefined,
+          syncInfo: undefined, // Personal layouts should NEVER have syncInfo
         }),
     );
     this.notifyChangeListeners({ type: "change", updatedLayout: newLayout });
@@ -399,10 +399,11 @@ export default class LayoutManager implements ILayoutManager {
               savedAt: now,
             },
             working: undefined,
-            syncInfo:
-              this.remote && localLayout.syncInfo?.status !== "new"
+            syncInfo: layoutIsShared(localLayout)
+              ? this.remote && localLayout.syncInfo?.status !== "new"
                 ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-                : localLayout.syncInfo,
+                : localLayout.syncInfo
+              : undefined, // Personal layouts should NEVER have syncInfo
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
