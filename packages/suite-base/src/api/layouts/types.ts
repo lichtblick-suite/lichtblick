@@ -110,9 +110,7 @@ export type LayoutApiResponse = LayoutApiData;
 /**
  * Parameters for saving a new layout (service layer)
  */
-export type SaveNewLayout = Pick<Layout, "name" | "data" | "permission" | "externalId"> & {
-  /** Client-side layout identifier */
-  id: LayoutID | undefined;
-  /** Timestamp when the layout was saved */
-  savedAt: ISO8601Timestamp;
+export type SaveNewLayoutParams = Pick<Layout, "id" | "name" | "permission"> & {
+  /** New layout data */
+  data: LayoutData;
 };

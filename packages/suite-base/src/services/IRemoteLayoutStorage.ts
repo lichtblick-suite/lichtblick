@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
-  SaveNewLayout,
+  SaveNewLayoutParams,
   UpdateLayoutRequest,
   UpdateLayoutResponse,
 } from "@lichtblick/suite-base/api/layouts/types";
@@ -36,7 +36,7 @@ export interface IRemoteLayoutStorage {
 
   getLayout: (id: LayoutID) => Promise<RemoteLayout | undefined>;
 
-  saveNewLayout: (params: SaveNewLayout) => Promise<RemoteLayout>;
+  saveNewLayout: (params: SaveNewLayoutParams) => Promise<RemoteLayout>;
 
   updateLayout: (params: UpdateLayoutRequest) => Promise<UpdateLayoutResponse>;
 

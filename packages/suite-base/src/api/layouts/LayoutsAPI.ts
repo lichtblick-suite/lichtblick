@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import {
+  CreateLayoutRequest,
   LayoutApiResponse,
-  SaveNewLayout,
+  SaveNewLayoutParams,
   UpdateLayoutRequest,
   UpdateLayoutRequestBody,
   UpdateLayoutResponse,
@@ -42,13 +43,13 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
     throw new Error("Method not implemented.");
   }
 
-  public async saveNewLayout(params: SaveNewLayout): Promise<RemoteLayout> {
-    const requestPayload = {
-      ...params,
+  public async saveNewLayout(params: SaveNewLayoutParams): Promise<RemoteLayout> {
+    const requestPayload: CreateLayoutRequest = {
       layoutId: params.id,
-      id: undefined,
-      savedAt: undefined,
       namespace: this.namespace,
+      data: params.data,
+      name: params.name,
+      permission: params.permission,
     };
 
     const { data: layoutData } = await HttpService.post<LayoutApiResponse>(

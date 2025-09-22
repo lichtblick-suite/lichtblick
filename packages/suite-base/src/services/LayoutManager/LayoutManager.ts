@@ -195,7 +195,6 @@ export default class LayoutManager implements ILayoutManager {
         name,
         data,
         permission,
-        savedAt: new Date().toISOString() as ISO8601Timestamp,
       });
       const localLayoutData = {
         id: newLayout.id,
@@ -333,7 +332,7 @@ export default class LayoutManager implements ILayoutManager {
         if (!this.isOnline) {
           throw new Error("Cannot delete a shared layout while offline");
         }
-        await this.remote.deleteLayout(id);
+        await this.remote.deleteLayout(localLayout.externalId);
       }
     }
     await this.local.runExclusive(async (local) => {
@@ -613,11 +612,8 @@ export default class LayoutManager implements ILayoutManager {
             const newBaseline = await remote.saveNewLayout({
               id: localLayout.id,
               name: localLayout.name,
-              externalId: localLayout.externalId,
               data: localLayout.baseline.data,
               permission: localLayout.permission,
-              savedAt:
-                localLayout.baseline.savedAt ?? (new Date().toISOString() as ISO8601Timestamp),
             });
             return async (local) => {
               // Don't check abortSignal; we need the cache to be updated to show the layout is tracked
