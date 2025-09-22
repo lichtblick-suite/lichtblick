@@ -34,7 +34,7 @@ describe("APP_CONFIG", () => {
 
     const { APP_CONFIG } = await import("./config");
 
-    expect(APP_CONFIG.apiUrl).toBe("/");
+    expect(APP_CONFIG.apiUrl).toBe(undefined);
     expect(APP_CONFIG.version).toBe("unknown");
     expect(APP_CONFIG.devWorkspace).toBe("");
   });
@@ -73,7 +73,7 @@ describe("APP_CONFIG", () => {
 
     const { APP_CONFIG } = await import("./config");
 
-    expect(APP_CONFIG.apiUrl).toBe("/");
+    expect(APP_CONFIG.apiUrl).toBe(undefined);
     expect(APP_CONFIG.version).toBe("unknown");
     expect(APP_CONFIG.devWorkspace).toBe("");
   });
