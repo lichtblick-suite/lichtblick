@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ILayoutStorage } from "@lichtblick/suite-base/services/ILayoutStorage";
 import WriteThroughLayoutCache from "@lichtblick/suite-base/services/LayoutManager/WriteThroughLayoutCache";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
@@ -101,7 +100,7 @@ describe("WriteThroughLayoutCache", () => {
     it("should return undefined when layout does not exist in cache", async () => {
       // Given
       const namespace = BasicBuilder.string();
-      const layoutId = BasicBuilder.string() as LayoutID;
+      const layoutId = LayoutBuilder.layoutId();
       mockStorage.list.mockResolvedValue([]);
 
       // When

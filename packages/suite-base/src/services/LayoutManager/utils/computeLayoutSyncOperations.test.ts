@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ISO8601Timestamp, LayoutPermission } from "@lichtblick/suite-base/services/ILayoutStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
 import computeLayoutSyncOperations from "./computeLayoutSyncOperations";
@@ -15,7 +13,7 @@ jest.mock("@lichtblick/log", () => ({
 }));
 
 describe("computeLayoutSyncOperations", () => {
-  const layoutId = BasicBuilder.string() as LayoutID;
+  const layoutId = LayoutBuilder.layoutId();
   const savedAt = "2023-01-01T00:00:00.000Z" as ISO8601Timestamp;
 
   describe("when local and remote layouts match", () => {

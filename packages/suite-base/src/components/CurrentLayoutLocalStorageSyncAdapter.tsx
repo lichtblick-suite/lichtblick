@@ -13,17 +13,19 @@ import { useDebounce } from "use-debounce";
 import Log from "@lichtblick/log";
 import { LOCAL_STORAGE_STUDIO_LAYOUT_KEY } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import {
+  LayoutData,
+  LayoutID,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 
-function selectLayoutData(state: LayoutState) {
+export function selectLayoutData(state: LayoutState): LayoutData | undefined {
   return state.selectedLayout?.data;
 }
 
-function selectLayoutId(state: LayoutState) {
+export function selectLayoutId(state: LayoutState): LayoutID | undefined {
   return state.selectedLayout?.id;
 }
 
@@ -45,6 +47,7 @@ export function CurrentLayoutLocalStorageSyncAdapter(): React.JSX.Element {
   useEffect(() => {
     isInitialLayoutLoad.current = true;
   }, [currentLayoutId]);
+
   useEffect(() => {
     if (!debouncedLayoutData) {
       return;
