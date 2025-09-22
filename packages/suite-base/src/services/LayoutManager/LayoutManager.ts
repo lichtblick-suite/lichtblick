@@ -323,6 +323,7 @@ export default class LayoutManager implements ILayoutManager {
     }
 
     if (layoutIsShared(localLayout)) {
+      console.log("chegou aqui!!");
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }

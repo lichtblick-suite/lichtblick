@@ -570,6 +570,34 @@ describe("LayoutManager", () => {
         }),
       );
     });
+
+    it("should throw if layout does not contain externalId", async () => {
+      // Given
+      const newName = BasicBuilder.string();
+      const sharedLayout = LayoutBuilder.layout({
+        permission: "ORG_WRITE",
+      });
+
+      sharedLayout.externalId = undefined;
+
+      // Need to include the shared layout in the list results for the cache
+      mockLocalStorage.list.mockResolvedValue([sharedLayout]);
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      // When & Then
+      await expect(
+        layoutManager.updateLayout({
+          id: sharedLayout.id,
+          name: newName,
+          data: undefined,
+        }),
+      ).rejects.toThrow("Local layout does not have externalId");
+    });
   });
 
   describe("deleteLayout", () => {
@@ -639,6 +667,29 @@ describe("LayoutManager", () => {
       // When & Then
       await expect(layoutManager.deleteLayout({ id: layoutId })).rejects.toThrow(
         "Cannot delete a shared layout while offline",
+      );
+    });
+
+    it("should throw if layout does not contain externalId", async () => {
+      // Given
+      const sharedLayout = LayoutBuilder.layout({
+        permission: "ORG_WRITE",
+      });
+
+      sharedLayout.externalId = undefined;
+
+      // Need to include the shared layout in the list results for the cache
+      mockLocalStorage.list.mockResolvedValue([sharedLayout]);
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      // When & Then
+      await expect(layoutManager.deleteLayout({ id: sharedLayout.id })).rejects.toThrow(
+        "Local layout does not have externalId",
       );
     });
 
