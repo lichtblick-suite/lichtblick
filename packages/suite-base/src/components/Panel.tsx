@@ -51,6 +51,7 @@ import KeyListener from "@lichtblick/suite-base/components/KeyListener";
 import { MosaicPathContext } from "@lichtblick/suite-base/components/MosaicPathContext";
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import PanelErrorBoundary from "@lichtblick/suite-base/components/PanelErrorBoundary";
+import PanelLogs, { PanelLog } from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelOverlay, PanelOverlayProps } from "@lichtblick/suite-base/components/PanelOverlay";
 import { PanelRoot } from "@lichtblick/suite-base/components/PanelRoot";
 import { getPanelTypeFromMosaic } from "@lichtblick/suite-base/components/PanelToolbar/utils";
@@ -125,6 +126,12 @@ export default function Panel<
   PanelComponent: ComponentType<PanelProps> & PanelStatics<Config>,
 ): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
+    const [logs, setLogs] = useState<PanelLog[]>([]);
+    const [showLogs, setShowLogs] = useState(false);
+
+    const addLog = useCallback((message: string, error?: Error) => {
+      setLogs((prev) => [...prev, { timestamp: new Date().toLocaleString(), message, error }]);
+    }, []);
     const { childId = FALLBACK_PANEL_ID, overrideConfig, tabId, ...otherProps } = props;
     const { classes, cx, theme } = useStyles();
     const isMounted = useMountedState();
@@ -616,6 +623,12 @@ export default function Panel<
             // disallow dragging the root panel in a layout
             connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
             setMessagePathDropConfig,
+            showLogs,
+            setShowLogs: ({ show }) => {
+              setShowLogs(show);
+            },
+            logError: addLog,
+            logCount: logs.length,
           }}
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
@@ -661,7 +674,20 @@ export default function Panel<
                     }}
                   />
                 )}
-                <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
+                {/* Panel logs toggle and display */}
+                {showLogs ? (
+                  <PanelLogs
+                    logs={logs}
+                    onClose={() => {
+                      setShowLogs(false);
+                    }}
+                  />
+                ) : undefined}
+                <PanelErrorBoundary
+                  onRemovePanel={removePanel}
+                  onResetPanel={resetPanel}
+                  onLogError={addLog}
+                >
                   {child}
                 </PanelErrorBoundary>
                 {process.env.NODE_ENV !== "production" && (
