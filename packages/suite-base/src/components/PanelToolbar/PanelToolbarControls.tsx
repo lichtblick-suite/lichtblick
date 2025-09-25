@@ -14,8 +14,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { Badge } from "@mui/material";
 import { forwardRef, useCallback, useContext, useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
@@ -30,6 +33,16 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
 
+const useStyles = makeStyles()(() => ({
+  logsBadge: {
+    "& .MuiBadge-dot": {
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+    },
+  },
+}));
+
 type PanelToolbarControlsProps = {
   additionalIcons?: React.ReactNode;
   isUnknownPanel: boolean;
@@ -38,7 +51,14 @@ type PanelToolbarControlsProps = {
 const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarControlsProps>(
   (props, ref) => {
     const { additionalIcons, isUnknownPanel } = props;
-    const { id: panelId, type: panelType } = useContext(PanelContext) ?? {};
+    const { classes } = useStyles();
+    const panelContext = useContext(PanelContext);
+    const { id: panelId, type: panelType, showLogs, setShowLogs, logCount } = panelContext ?? {};
+    const toggleLogs = () => {
+      if (typeof setShowLogs === "function") {
+        setShowLogs({ show: !(showLogs ?? false) });
+      }
+    };
     const panelCatalog = useContext(PanelCatalogContext);
     const { setSelectedPanelIds } = useSelectedPanels();
     const { openPanelSettings } = useWorkspaceActions();
@@ -69,6 +89,23 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     return (
       <Stack direction="row" alignItems="center" paddingLeft={1} ref={ref}>
         {additionalIcons}
+        <Badge
+          color="error"
+          variant="dot"
+          invisible={(logCount ?? 0) === 0}
+          className={classes.logsBadge}
+        >
+          <ToolbarIconButton
+            title={
+              showLogs === true
+                ? "Hide logs"
+                : `Show logs${(logCount ?? 0) > 0 ? ` (${logCount})` : ""}`
+            }
+            onClick={toggleLogs}
+          >
+            <ListAltIcon color={showLogs === true ? "primary" : undefined} />
+          </ToolbarIconButton>
+        </Badge>
         {showSettingsButton && (
           <ToolbarIconButton title="Settings" onClick={openSettings}>
             <SettingsIcon />

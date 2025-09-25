@@ -17,7 +17,15 @@
 import { MessagePathDropConfig } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { SaveConfig, PanelConfig, OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 
+type SetVisibleLogs = {
+  show: boolean;
+};
+
 export type PanelContextType<T> = {
+  showLogs?: boolean;
+  setShowLogs?: (options: SetVisibleLogs) => void;
+  logError?: (message: string, error?: Error) => void;
+  logCount?: number;
   type: string;
   id: string;
   title: string;
