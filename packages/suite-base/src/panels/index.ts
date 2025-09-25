@@ -198,4 +198,10 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("studioPlaybackPerformanceDescription"),
     module: async () => await import("./PlaybackPerformance"),
   },
+  {
+    title: "Test Log Panel",
+    type: "TestLogPanel",
+    description: "Test panel for demonstrating log functionality",
+    module: async () => await import("./TestLogPanel"),
+  },
 ];
