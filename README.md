@@ -104,6 +104,8 @@ $ docker run -p 8080:8080 lichtblick
 $ yarn run clean
 ```
 
+- The desktop builds are located in the `dist` directory, and the web builds are found in the `web/.webpack` directory.
+
 ## :warning: Note on Linux dependencies (.tar.gz only)
 
 When installing the **`.tar.gz` package**, unlike the `.deb`, **system dependencies are not installed automatically**.
@@ -134,9 +136,6 @@ sudo apt-get update && sudo apt-get install -y libgtk-3-0 libatk1.0-0 libatk-bri
 ```
 
 👉 **Recommendation**: if using the `.tar.gz`, always check the error messages in the terminal. They will indicate which library is missing so you can install it manually.
-
-
-- The desktop builds are located in the `dist` directory, and the web builds are found in the `web/.webpack` directory.
 
 ## :pencil: License (Open Source)
 
