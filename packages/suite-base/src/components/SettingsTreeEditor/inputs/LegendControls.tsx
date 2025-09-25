@@ -14,13 +14,13 @@ export const LegendControls = (): React.JSX.Element => {
   const { increment, decrement } = useLegendCount();
 
   return (
-    <>
+    <div data-testid="LegendControls">
       <IconButton onClick={increment}>
         <AddIcon />
       </IconButton>
       <IconButton onClick={decrement}>
         <RemoveIcon />
       </IconButton>
-    </>
+    </div>
   );
 };
