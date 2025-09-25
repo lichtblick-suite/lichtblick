@@ -24,17 +24,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+
       - uses: actions/setup-node@v4.0.3
         with:
           node-version: 20
+
       - run: corepack enable
+
       - name: Install dependencies
         run: yarn install
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
+
       - name: Build web static files
         run: yarn web:build:prod
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
