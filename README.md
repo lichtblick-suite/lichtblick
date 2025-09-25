@@ -18,6 +18,12 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, avail
   </p>
 </div>
 
+## :rocket: Try Lichtblick
+
+**[Try Lichtblick now in your browser!](https://lichtblick-suite.github.io/lichtblick/)**
+
+No installation required - experience the full power of Lichtblick directly in your web browser!
+
 ## :book: Documentation
 
 Looking for guidance on using Lichtblick? Check out our [official documentation here!](https://lichtblick-suite.github.io/docs/)
