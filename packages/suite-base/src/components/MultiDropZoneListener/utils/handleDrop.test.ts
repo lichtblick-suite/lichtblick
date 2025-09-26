@@ -3,11 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { HandleDropProps } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
-import handleDrop, { HandleDropProps } from "./handleDrop";
+import handleDrop from "./handleDrop";
 
 jest.mock("@lichtblick/log", () => ({
   getLogger: () => ({

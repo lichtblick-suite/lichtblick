@@ -4,25 +4,10 @@
 import { extname } from "path";
 
 import Logger from "@lichtblick/log";
-import { DropZoneType } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
+import { HandleDropProps } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
 import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
 const log = Logger.getLogger(__filename);
-
-export type HandleDropProps = {
-  allowedExtensions?: string[];
-  dropZone: DropZoneType;
-  enqueueSnackbar: (message: string, options?: { variant: "error" }) => string | number | undefined;
-  event: DragEvent;
-  onDrop?: (event: {
-    files?: File[];
-    handles?: FileSystemFileHandle[];
-    namespace?: ExtensionNamespace;
-    isSource?: boolean;
-  }) => void;
-  setActiveZone: (zone: DropZoneType | undefined) => void;
-  setHovering: (zone: DropZoneType | undefined) => void;
-};
 
 export default async function handleDrop({
   allowedExtensions,

@@ -14,6 +14,21 @@ export type MultiDropZoneListenerProps = {
   }) => void;
 };
 
+export type HandleDropProps = {
+  allowedExtensions?: string[];
+  dropZone: DropZoneType;
+  enqueueSnackbar: (message: string, options?: { variant: "error" }) => string | number | undefined;
+  event: DragEvent;
+  onDrop?: (event: {
+    files?: File[];
+    handles?: FileSystemFileHandle[];
+    namespace?: ExtensionNamespace;
+    isSource?: boolean;
+  }) => void;
+  setActiveZone: (zone: DropZoneType | undefined) => void;
+  setHovering: (zone: DropZoneType | undefined) => void;
+};
+
 export type DropZoneType = ExtensionNamespace | "source";
 
 export interface DragPosition {
