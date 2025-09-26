@@ -105,6 +105,17 @@ export class HttpService {
         };
       }
 
+      const contentType = response.headers.get("content-type");
+      if (contentType && !contentType.includes("application/json")) {
+        // Handle non-JSON responses (e.g., text/plain)
+        const textData = await response.text();
+        return {
+          data: textData as T,
+          timestamp: new Date().toISOString(),
+          path: endpoint,
+        };
+      }
+
       const jsonData = await response.json();
       return {
         data: jsonData.data as T,
