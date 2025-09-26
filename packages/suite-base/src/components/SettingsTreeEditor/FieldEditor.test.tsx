@@ -60,9 +60,11 @@ describe("FieldEditor", () => {
 
   it("renders a text input and triggers update action when value changes", async () => {
     const input = "string";
+    const tooltip = BasicBuilder.string();
+    const error = BasicBuilder.string();
 
     const { props } = await renderComponent({
-      field: { input, label },
+      field: { input, label, tooltip, error },
     });
 
     fireEvent.click(screen.getByTestId("FieldEditor-TextField"));
