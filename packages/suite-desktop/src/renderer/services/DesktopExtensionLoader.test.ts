@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 import randomString from "randomstring";
 
-import { ExtensionInfo } from "@lichtblick/suite-base";
+import { ExtensionInfo, LoadedExtension } from "@lichtblick/suite-base";
 
 import { DesktopExtensionLoader } from "./DesktopExtensionLoader";
 import { Desktop, DesktopExtension } from "../../common/types";
@@ -125,23 +125,23 @@ describe("DesktopExtensionLoader", () => {
 
   describe("loadExtension", () => {
     it("should return the extension content if loaded successfully", async () => {
-      const rawContent = "console.log('loaded');";
+      const loadedContent: LoadedExtension = { raw: "console.log('loaded');" };
       const extensionId = genericString();
-      mockBridge.loadExtension.mockResolvedValue(rawContent);
+      mockBridge.loadExtension.mockResolvedValue(loadedContent);
 
       const result = await loader.loadExtension(extensionId);
 
       expect(mockBridge.loadExtension).toHaveBeenCalledWith(extensionId);
-      expect(result).toBe(rawContent);
+      expect(result).toEqual(loadedContent);
     });
 
-    it("should return an empty string if the bridge is not available", async () => {
+    it("should throw an error if the bridge is not available", async () => {
       const nonExistentId = genericString();
       loader = new DesktopExtensionLoader(undefined as unknown as Desktop);
 
-      const result = await loader.loadExtension(nonExistentId);
-
-      expect(result).toBe("");
+      await expect(loader.loadExtension(nonExistentId)).rejects.toThrow(
+        "Cannot load extension without a desktopBridge",
+      );
     });
   });
 
