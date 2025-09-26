@@ -3,7 +3,8 @@
 
 import { GenericApiEntity } from "@lichtblick/suite-base/api/types";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 export interface IExtensionAPI {
   createOrUpdate(extension: ExtensionInfoSlug, file: File): Promise<StoredExtension>;
@@ -38,12 +39,12 @@ type RemoteExtension = Pick<
 export interface IExtensionApiResponse extends GenericApiEntity, RemoteExtension {
   extensionId: string;
   fileId: string;
-  scope: ExtensionNamespace;
+  scope: Namespace;
 }
 
 export type CreateOrUpdateBody = RemoteExtension & {
   extensionId: string;
-  scope: ExtensionNamespace;
+  scope: Namespace;
 };
 
 export type DownloadExtensionsInBatchBody = {

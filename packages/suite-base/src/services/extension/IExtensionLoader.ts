@@ -5,7 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 export type LoadedExtension = {
   buffer?: Uint8Array;
@@ -17,7 +18,7 @@ export type LoadedExtension = {
  * from a particular namespace.
  */
 export interface IExtensionLoader {
-  readonly namespace: ExtensionNamespace;
+  readonly namespace: Namespace;
 
   // get extension by id
   getExtension(id: string): Promise<ExtensionInfo | undefined>;

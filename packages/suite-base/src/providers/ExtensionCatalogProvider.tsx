@@ -22,7 +22,8 @@ import { buildContributionPoints } from "@lichtblick/suite-base/providers/helper
 import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { IdbExtensionLoader } from "@lichtblick/suite-base/services/extension/IdbExtensionLoader";
 import { RemoteExtensionLoader } from "@lichtblick/suite-base/services/extension/RemoteExtensionLoader";
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 const log = Logger.getLogger(__filename);
 
@@ -55,10 +56,7 @@ function createExtensionRegistryStore(
       return new Uint8Array(await res.arrayBuffer());
     };
 
-    const installExtensions = async (
-      namespace: ExtensionNamespace,
-      extensions: ExtensionData[],
-    ) => {
+    const installExtensions = async (namespace: Namespace, extensions: ExtensionData[]) => {
       const namespaceLoaders: IExtensionLoader[] = loaders.filter(
         (loader) => loader.namespace === namespace,
       );
@@ -294,7 +292,7 @@ function createExtensionRegistryStore(
       };
     }
 
-    const uninstallExtension = async (namespace: ExtensionNamespace, id: string) => {
+    const uninstallExtension = async (namespace: Namespace, id: string) => {
       const namespaceLoader = loaders.find((loader) => loader.namespace === namespace);
       if (namespaceLoader == undefined) {
         throw new Error("No extension loader found for namespace " + namespace);

@@ -25,7 +25,8 @@ import {
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
 
@@ -39,7 +40,8 @@ describe("ExtensionCatalogProvider", () => {
   });
 
   function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
-    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const namespace: Namespace = "local";
+    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace });
     const extensions: ExtensionInfo[] = [extensionInfo];
 
     const loadExtension = jest.fn().mockResolvedValue({
@@ -505,7 +507,7 @@ describe("ExtensionCatalogProvider", () => {
     });
 
     it("should throw an error when install with no registered loader to the namespace", async () => {
-      const invalidNamespace = BasicBuilder.string() as ExtensionNamespace;
+      const invalidNamespace = BasicBuilder.string() as Namespace;
       const { result } = setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
@@ -519,10 +521,10 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("uninstallExtension", () => {
     it("should uninstall an extension", async () => {
-      const { result, extensionInfo, loaders } = setup();
+      const { result, extensionInfo } = setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      const namespace: ExtensionNamespace = loaders[0]?.namespace!;
+
+      const namespace: Namespace = extensionInfo.namespace!;
 
       await act(async () => {
         await result.current.installExtensions(namespace, extensionData);
@@ -538,7 +540,7 @@ describe("ExtensionCatalogProvider", () => {
     });
 
     it("should throw an error when uninstall with no registered loader to the namespace", async () => {
-      const invalidNamespace = BasicBuilder.string() as ExtensionNamespace;
+      const invalidNamespace = BasicBuilder.string() as Namespace;
       const { result } = setup();
 
       await expect(

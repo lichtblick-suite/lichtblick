@@ -5,7 +5,6 @@ import { AppBarProps } from "@lichtblick/suite-base/components/AppBar";
 import { CustomWindowControlsProps } from "@lichtblick/suite-base/components/AppBar/CustomWindowControls";
 import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
 import { SidebarItemKey } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
 export type InjectedSidebarItem = [SidebarItemKey, SidebarItem];
 
@@ -21,6 +20,8 @@ export type WorkspaceProps = CustomWindowControlsProps & {
 export type DropHandler = {
   files?: File[];
   handles?: FileSystemFileHandle[];
-  namespace?: ExtensionNamespace;
+  namespace?: Namespace;
   isSource?: boolean;
 };
+
+export type Namespace = "local" | "org";

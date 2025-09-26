@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 export type MultiDropZoneListenerProps = {
   allowedExtensions?: string[];
@@ -9,7 +9,7 @@ export type MultiDropZoneListenerProps = {
   onDrop?: (event: {
     files?: File[];
     handles?: FileSystemFileHandle[];
-    namespace?: ExtensionNamespace;
+    namespace?: Namespace;
     isSource?: boolean;
   }) => void;
 };
@@ -22,14 +22,14 @@ export type HandleDropProps = {
   onDrop?: (event: {
     files?: File[];
     handles?: FileSystemFileHandle[];
-    namespace?: ExtensionNamespace;
+    namespace?: Namespace;
     isSource?: boolean;
   }) => void;
   setActiveZone: (zone: DropZoneType | undefined) => void;
   setHovering: (zone: DropZoneType | undefined) => void;
 };
 
-export type DropZoneType = ExtensionNamespace | "source";
+export type DropZoneType = Namespace | "source";
 
 export interface DragPosition {
   clientX: number;

@@ -13,10 +13,10 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useInstallingExtensionsState } from "@lichtblick/suite-base/hooks/useInstallingExtensionsState";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 type UseHandleFiles = {
-  handleFiles: (files: File[], namespace?: ExtensionNamespace) => Promise<void>;
+  handleFiles: (files: File[], namespace?: Namespace) => Promise<void>;
 };
 
 type UseHandleFilesProps = {
@@ -45,7 +45,7 @@ export function useHandleFiles({
   const { parseAndInstallLayout } = useLayoutTransfer();
 
   const handleFiles = useCallback(
-    async (files: File[], namespace: ExtensionNamespace = "local") => {
+    async (files: File[], namespace: Namespace = "local") => {
       if (files.length === 0) {
         return;
       }

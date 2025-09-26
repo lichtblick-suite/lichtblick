@@ -5,7 +5,7 @@ import { extname } from "path";
 
 import Logger from "@lichtblick/log";
 import { HandleDropProps } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 const log = Logger.getLogger(__filename);
 
@@ -98,7 +98,7 @@ export default async function handleDrop({
   event.preventDefault();
   event.stopPropagation();
 
-  let namespace: ExtensionNamespace | undefined;
+  let namespace: Namespace | undefined;
   let isSource = false;
 
   if (dropZone === "source") {

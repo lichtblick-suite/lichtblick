@@ -4,7 +4,7 @@
 import { IExtensionApiResponse } from "@lichtblick/suite-base/api/extensions/types";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 import { ExtensionAdapter } from "./ExtensionAdapter";
 
@@ -13,7 +13,7 @@ describe("ExtensionAdapter", () => {
     id: BasicBuilder.string(),
     createdAt: "2023-01-01T00:00:00.000Z",
     updatedAt: "2023-01-01T00:00:00.000Z",
-    scope: "org" as ExtensionNamespace,
+    scope: "org" as Namespace,
     changelog: BasicBuilder.string(),
     description: BasicBuilder.string(),
     displayName: BasicBuilder.string(),

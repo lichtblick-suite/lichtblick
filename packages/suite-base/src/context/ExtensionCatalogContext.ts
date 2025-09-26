@@ -18,18 +18,19 @@ import {
 } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 export type ExtensionData = {
   buffer: Uint8Array;
   file?: File;
-  namespace?: ExtensionNamespace;
+  namespace?: Namespace;
 };
 
 export type RegisteredPanel = {
   extensionId: string;
   extensionName: string;
-  extensionNamespace?: ExtensionNamespace;
+  extensionNamespace?: Namespace;
   registration: ExtensionPanelRegistration;
 };
 
@@ -42,14 +43,14 @@ export type InstallExtensionsResult = {
 export type ExtensionCatalog = Immutable<{
   downloadExtension: (url: string) => Promise<Uint8Array>;
   installExtensions: (
-    namespace: ExtensionNamespace,
+    namespace: Namespace,
     extensions: ExtensionData[],
   ) => Promise<InstallExtensionsResult[]>;
   isExtensionInstalled: (extensionId: string) => boolean;
   markExtensionAsInstalled: (extensionId: string) => void;
   mergeState: (info: ExtensionInfo, contributionPoints: ContributionPoints) => void;
   refreshAllExtensions: () => Promise<void>;
-  uninstallExtension: (namespace: ExtensionNamespace, id: string) => Promise<void>;
+  uninstallExtension: (namespace: Namespace, id: string) => Promise<void>;
   unMarkExtensionAsInstalled: (extensionId: string) => void;
 
   loadedExtensions: Set<string>;
@@ -62,7 +63,7 @@ export type ExtensionCatalog = Immutable<{
 }>;
 
 export type MessageConverter = RegisterMessageConverterArgs<unknown> & {
-  extensionNamespace?: ExtensionNamespace;
+  extensionNamespace?: Namespace;
   extensionId?: string;
 };
 

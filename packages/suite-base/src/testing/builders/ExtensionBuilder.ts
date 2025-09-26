@@ -6,7 +6,8 @@ import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/Exten
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 export default class ExtensionBuilder {
   public static extensionInfo(props: Partial<ExtensionInfo> = {}): ExtensionInfo {
@@ -18,7 +19,7 @@ export default class ExtensionBuilder {
       keywords: BasicBuilder.strings(),
       license: BasicBuilder.string(),
       name: BasicBuilder.string(),
-      namespace: BasicBuilder.sample(["local", "org"] as ExtensionNamespace[]),
+      namespace: BasicBuilder.sample(["local", "org"] as Namespace[]),
       publisher: BasicBuilder.string(),
       qualifiedName: BasicBuilder.string(),
       version: BasicBuilder.string(),

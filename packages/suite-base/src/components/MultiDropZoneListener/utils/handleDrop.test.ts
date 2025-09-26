@@ -6,7 +6,7 @@
 import { HandleDropProps } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 import handleDrop from "./handleDrop";
 
@@ -684,7 +684,7 @@ describe("handleDrop", () => {
           expect.objectContaining({
             files: [mockFile],
             handles: undefined,
-            namespace: "org" as ExtensionNamespace,
+            namespace: "org" as Namespace,
             isSource: false,
           }),
         );
@@ -718,7 +718,7 @@ describe("handleDrop", () => {
           expect.objectContaining({
             files: [mockFile],
             handles: undefined,
-            namespace: "local" as ExtensionNamespace,
+            namespace: "local" as Namespace,
             isSource: false,
           }),
         );

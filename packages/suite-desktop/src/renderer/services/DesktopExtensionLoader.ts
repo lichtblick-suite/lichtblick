@@ -8,9 +8,9 @@
 import Logger from "@lichtblick/log";
 import {
   ExtensionInfo,
-  ExtensionNamespace,
   IExtensionLoader,
   LoadedExtension,
+  Namespace,
 } from "@lichtblick/suite-base";
 
 import { Desktop, DesktopExtension } from "../../common/types";
@@ -19,7 +19,7 @@ const log = Logger.getLogger(__filename);
 
 export class DesktopExtensionLoader implements IExtensionLoader {
   #bridge?: Desktop;
-  public readonly namespace: ExtensionNamespace = "local";
+  public readonly namespace: Namespace = "local";
 
   public constructor(bridge: Desktop) {
     this.#bridge = bridge;

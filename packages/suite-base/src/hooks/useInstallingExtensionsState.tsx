@@ -9,7 +9,7 @@ import {
   ExtensionData,
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 import { useInstallingExtensionsStore } from "./useInstallingExtensionsStore";
 
@@ -66,7 +66,7 @@ export function useInstallingExtensionsState({
       const isPlayingInitialState = isPlaying;
 
       try {
-        const extensionsByNamespace = new Map<ExtensionNamespace, ExtensionData[]>();
+        const extensionsByNamespace = new Map<Namespace, ExtensionData[]>();
 
         for (const extension of extensionsData) {
           const namespace = extension.namespace ?? "local";
