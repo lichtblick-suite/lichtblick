@@ -4,15 +4,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -36,7 +27,7 @@ import { PanelActionsDropdown } from "./PanelActionsDropdown";
 const useStyles = makeStyles()(() => ({
   logsBadge: {
     "& .MuiBadge-dot": {
-      width: 8,
+      minWidth: 8,
       height: 8,
       borderRadius: "50%",
     },
@@ -55,7 +46,7 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     const panelContext = useContext(PanelContext);
     const { id: panelId, type: panelType, showLogs, setShowLogs, logCount } = panelContext ?? {};
     const toggleLogs = () => {
-      if (typeof setShowLogs === "function") {
+      if (setShowLogs) {
         setShowLogs({ show: !(showLogs ?? false) });
       }
     };
@@ -87,7 +78,14 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     const showSettingsButton = panelInfo?.hasCustomToolbar !== true || hasSettings;
 
     return (
-      <Stack direction="row" alignItems="center" paddingLeft={1} ref={ref}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        paddingLeft={1}
+        ref={ref}
+        fullHeight={true}
+        paddingTop={1}
+      >
         {additionalIcons}
         <Badge
           color="error"

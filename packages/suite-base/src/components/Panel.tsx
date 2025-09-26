@@ -674,15 +674,7 @@ export default function Panel<
                     }}
                   />
                 )}
-                {/* Panel logs toggle and display */}
-                {showLogs ? (
-                  <PanelLogs
-                    logs={logs}
-                    onClose={() => {
-                      setShowLogs(false);
-                    }}
-                  />
-                ) : undefined}
+
                 <PanelErrorBoundary
                   onRemovePanel={removePanel}
                   onResetPanel={resetPanel}
@@ -693,6 +685,16 @@ export default function Panel<
                 {process.env.NODE_ENV !== "production" && (
                   <div className={classes.perfInfo} ref={perfInfo} />
                 )}
+
+                {/* Panel logs toggle and display */}
+                {showLogs ? (
+                  <PanelLogs
+                    logs={logs}
+                    onClose={() => {
+                      setShowLogs(false);
+                    }}
+                  />
+                ) : undefined}
               </PanelRoot>
             )}
           </Transition>
