@@ -27,7 +27,7 @@ jobs:
         with:
           ref: main
 
-      - uses: actions/setup-node@v4.0.3
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
 
