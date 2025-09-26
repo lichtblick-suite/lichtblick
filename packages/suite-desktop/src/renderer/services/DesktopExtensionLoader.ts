@@ -6,16 +6,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@lichtblick/log";
-import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@lichtblick/suite-base";
-import { LoadedExtension } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+import { ExtensionInfo, IExtensionLoader, Namespace } from "@lichtblick/suite-base";
 
-import { Desktop, DesktopExtension } from "../../common/types";
+import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
 const log = Logger.getLogger(__filename);
 
-export class DesktopExtensionLoader implements ExtensionLoader {
+export class DesktopExtensionLoader implements IExtensionLoader {
   #bridge?: Desktop;
-  public readonly namespace: ExtensionNamespace = "local";
+  public readonly namespace: Namespace = "local";
 
   public constructor(bridge: Desktop) {
     this.#bridge = bridge;

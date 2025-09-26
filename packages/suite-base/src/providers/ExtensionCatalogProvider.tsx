@@ -19,10 +19,11 @@ import {
   InstallExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { IdbExtensionLoader } from "@lichtblick/suite-base/services/extension/IdbExtensionLoader";
 import { RemoteExtensionLoader } from "@lichtblick/suite-base/services/extension/RemoteExtensionLoader";
-import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
+import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 const log = Logger.getLogger(__filename);
 
@@ -30,7 +31,7 @@ const MAX_REFRESH_EXTENSIONS_BATCH = 1;
 const MAX_INSTALL_EXTENSIONS_BATCH = 1;
 
 function createExtensionRegistryStore(
-  loaders: readonly ExtensionLoader[],
+  loaders: readonly IExtensionLoader[],
   mockMessageConverters: readonly RegisterMessageConverterArgs<unknown>[] | undefined,
 ): StoreApi<ExtensionCatalog> {
   return createStore((set, get) => {
@@ -55,11 +56,8 @@ function createExtensionRegistryStore(
       return new Uint8Array(await res.arrayBuffer());
     };
 
-    const installExtensions = async (
-      namespace: ExtensionNamespace,
-      extensions: ExtensionData[],
-    ) => {
-      const namespaceLoaders: ExtensionLoader[] = loaders.filter(
+    const installExtensions = async (namespace: Namespace, extensions: ExtensionData[]) => {
+      const namespaceLoaders: IExtensionLoader[] = loaders.filter(
         (loader) => loader.namespace === namespace,
       );
       if (namespaceLoaders.length === 0) {
@@ -76,7 +74,7 @@ function createExtensionRegistryStore(
 
     async function promisesInBatch(
       batch: ExtensionData[],
-      extensionLoaders: ExtensionLoader[],
+      extensionLoaders: IExtensionLoader[],
     ): Promise<InstallExtensionsResult[]> {
       return await Promise.all(
         batch.map(async (extension: ExtensionData) => {
@@ -139,11 +137,11 @@ function createExtensionRegistryStore(
       contributionPoints,
     }: {
       batch: ExtensionInfo[];
-      loader: ExtensionLoader;
+      loader: IExtensionLoader;
       installedExtensions: ExtensionInfo[];
       contributionPoints: ContributionPoints;
     }) {
-      const orgLoaderCache: ExtensionLoader | undefined = loaders.find(
+      const orgLoaderCache: IExtensionLoader | undefined = loaders.find(
         (extensionLoader) =>
           extensionLoader.namespace === "org" && extensionLoader instanceof IdbExtensionLoader,
       );
@@ -219,7 +217,7 @@ function createExtensionRegistryStore(
         cameraModels: new Map(),
       };
 
-      const processLoader = async (loader: ExtensionLoader) => {
+      const processLoader = async (loader: IExtensionLoader) => {
         try {
           const extensions = await loader.getExtensions();
           const chunks = _.chunk(extensions, MAX_REFRESH_EXTENSIONS_BATCH);
@@ -294,7 +292,7 @@ function createExtensionRegistryStore(
       };
     }
 
-    const uninstallExtension = async (namespace: ExtensionNamespace, id: string) => {
+    const uninstallExtension = async (namespace: Namespace, id: string) => {
       const namespaceLoader = loaders.find((loader) => loader.namespace === namespace);
       if (namespaceLoader == undefined) {
         throw new Error("No extension loader found for namespace " + namespace);
@@ -340,7 +338,7 @@ export default function ExtensionCatalogProvider({
   loaders,
   mockMessageConverters,
 }: PropsWithChildren<{
-  loaders: readonly ExtensionLoader[];
+  loaders: readonly IExtensionLoader[];
   mockMessageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
 }>): React.JSX.Element {
   const [store] = useState(createExtensionRegistryStore(loaders, mockMessageConverters));

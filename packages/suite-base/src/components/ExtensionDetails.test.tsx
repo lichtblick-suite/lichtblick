@@ -10,7 +10,10 @@ import { useSnackbar } from "notistack";
 
 import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import {
+  ExtensionData,
+  useExtensionCatalog,
+} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
@@ -110,7 +113,9 @@ describe("ExtensionDetails Component", () => {
 
       await waitFor(() => {
         expect(mockDownloadExtension).toHaveBeenCalledWith(mockExtension.foxe);
-        expect(mockInstallExtensions).toHaveBeenCalledWith("local", [expect.any(Uint8Array)]);
+        expect(mockInstallExtensions).toHaveBeenCalledWith("local", [
+          { buffer: expect.any(Uint8Array) },
+        ] as ExtensionData[]);
         expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
           `${mockExtension.name} installed successfully`,
           { variant: "success" },

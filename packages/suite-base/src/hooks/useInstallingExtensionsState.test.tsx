@@ -6,6 +6,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { useSnackbar } from "notistack";
 
+import { ExtensionData } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { useInstallingExtensionsState } from "./useInstallingExtensionsState";
@@ -53,9 +54,9 @@ describe("useInstallingExtensionsState", () => {
   });
 
   it("installs extensions and updates progress", async () => {
-    const extensionsData = [
-      new Uint8Array([BasicBuilder.number()]),
-      new Uint8Array([BasicBuilder.number()]),
+    const extensionsData: ExtensionData[] = [
+      { buffer: new Uint8Array([BasicBuilder.number()]) },
+      { buffer: new Uint8Array([BasicBuilder.number()]) },
     ];
 
     mockInstallExtensions.mockResolvedValue([{ success: true }, { success: true }]);
@@ -91,7 +92,7 @@ describe("useInstallingExtensionsState", () => {
 
   it("calls installExtensions and shows error snackbar on failure", async () => {
     const errorValue = new Error(BasicBuilder.string());
-    const extensionsData = [new Uint8Array([BasicBuilder.number()])];
+    const extensionsData: ExtensionData[] = [{ buffer: new Uint8Array([BasicBuilder.number()]) }];
     mockInstallExtensions.mockRejectedValue(errorValue);
 
     const { result } = renderHook(() =>

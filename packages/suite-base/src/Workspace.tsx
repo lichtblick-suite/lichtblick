@@ -38,7 +38,7 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import MultiDropZoneListener from "@lichtblick/suite-base/components/MultiDropZoneListener";
+import MultiDropZoneListener from "@lichtblick/suite-base/components/MultiDropZoneListener/MultiDropZoneListener";
 import { PanelCatalog } from "@lichtblick/suite-base/components/PanelCatalog";
 import PanelLayout from "@lichtblick/suite-base/components/PanelLayout";
 import PanelSettings from "@lichtblick/suite-base/components/PanelSettings";

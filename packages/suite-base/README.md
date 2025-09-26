@@ -1,7 +1,7 @@
 # @lichtblick/suite-base &nbsp;
- [![npm version](https://img.shields.io/npm/v/%40lichtblick%2Fsuite)](https://www.npmjs.com/package/@lichtblick/suite)
- ![GitHub License](https://img.shields.io/github/license/lichtblick-suite/lichtblick)
 
+[![npm version](https://img.shields.io/npm/v/%40lichtblick%2Fsuite)](https://www.npmjs.com/package/@lichtblick/suite)
+![GitHub License](https://img.shields.io/github/license/lichtblick-suite/lichtblick)
 
 This package contains core components used in [Lichtblick](https://github.com/foxglove/suite).
 
@@ -10,7 +10,7 @@ This package contains core components used in [Lichtblick](https://github.com/fo
 When contributing to the [Lichtblick](https://github.com/lichtblick-suite/lichtblick) codebase, you can import from `@lichtblick/suite-base` at its top-level or from lower in its directory:
 
 ```plain
-import { ExtensionInfo, ExtensionLoaderContext, ExtensionLoader } from "@lichtblick/suite-base";
+import { ExtensionInfo, ExtensionLoaderContext, IExtensionLoader } from "@lichtblick/suite-base";
 import fuzzyFilter from "@lichtblick/suite-base/util/fuzzyFilter";
 ```
 
