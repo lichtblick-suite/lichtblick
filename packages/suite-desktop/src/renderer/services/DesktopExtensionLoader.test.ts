@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 import randomString from "randomstring";
 
-import { ExtensionInfo, LoadedExtension } from "@lichtblick/suite-base";
+import { ExtensionInfo } from "@lichtblick/suite-base";
 
 import { DesktopExtensionLoader } from "./DesktopExtensionLoader";
-import { Desktop, DesktopExtension } from "../../common/types";
+import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
 jest.mock("@lichtblick/log", () => ({
   getLogger: jest.fn(() => ({

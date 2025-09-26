@@ -7,10 +7,9 @@ import JSZip from "jszip";
 import { dirname, join as pathJoin } from "path";
 
 import Logger from "@lichtblick/log";
-import { LoadedExtension } from "@lichtblick/suite-base";
 
 import { ExtensionPackageJson, PackageName } from "./types";
-import { DesktopExtension } from "../common/types";
+import { DesktopExtension, LoadedExtension } from "../common/types";
 
 export class ExtensionsHandler {
   private readonly log = Logger.getLogger(__filename);

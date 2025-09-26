@@ -6,14 +6,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@lichtblick/log";
-import {
-  ExtensionInfo,
-  IExtensionLoader,
-  LoadedExtension,
-  Namespace,
-} from "@lichtblick/suite-base";
+import { ExtensionInfo, IExtensionLoader, Namespace } from "@lichtblick/suite-base";
 
-import { Desktop, DesktopExtension } from "../../common/types";
+import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
 const log = Logger.getLogger(__filename);
 
