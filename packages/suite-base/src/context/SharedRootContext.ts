@@ -13,7 +13,7 @@ import { IAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurati
 import { INativeAppMenu } from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import { INativeWindow } from "@lichtblick/suite-base/context/NativeWindowContext";
 import { IDataSourceFactory } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
+import { ExtensionLoader } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
 
 interface ISharedRootContext {
   deepLinks: readonly string[];

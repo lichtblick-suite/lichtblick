@@ -8,72 +8,23 @@
 import JSZip from "jszip";
 
 import Log from "@lichtblick/log";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
 import {
   IExtensionStorage,
   StoredExtension,
 } from "@lichtblick/suite-base/services/IExtensionStorage";
+import {
+  ExtensionLoader,
+  LoadedExtension,
+} from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
+import getFileContent from "@lichtblick/suite-base/services/extension/utils/getFileContent";
+import qualifiedName from "@lichtblick/suite-base/services/extension/utils/qualifiedName";
+import validatePackageInfo from "@lichtblick/suite-base/services/extension/utils/validatePackageInfo";
 import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
 import { IdbExtensionStorage } from "./IdbExtensionStorage";
 
 const log = Log.getLogger(__filename);
-
-export enum ALLOWED_FILES {
-  EXTENSION = "dist/extension.js",
-  PACKAGE = "package.json",
-  README = "README.md",
-  CHANGELOG = "CHANGELOG.md",
-}
-
-function parsePackageName(name: string): { publisher?: string; name: string } {
-  const match = new RegExp(/^@([^/]+)\/(.+)/).exec(name);
-  if (!match) {
-    return { name };
-  }
-
-  return { publisher: match[1], name: match[2]! };
-}
-
-function qualifiedName(
-  namespace: ExtensionNamespace,
-  publisher: string,
-  info: ExtensionInfo,
-): string {
-  switch (namespace) {
-    case "local":
-      // For local namespace we follow the legacy naming convention of using displayName
-      // in order to stay compatible with existing layouts.
-      return info.displayName;
-    case "org":
-      // For private registry we use namespace and package name.
-      return [namespace, publisher, info.name].join(":");
-  }
-}
-
-export function validatePackageInfo(info: Partial<ExtensionInfo>): ExtensionInfo {
-  if (!info.name || info.name.length === 0) {
-    throw new Error("Invalid extension: missing name");
-  }
-  const { publisher: parsedPublisher, name } = parsePackageName(info.name);
-  const publisher = info.publisher ?? parsedPublisher;
-  if (!publisher || publisher.length === 0) {
-    throw new Error("Invalid extension: missing publisher");
-  }
-
-  return { ...info, publisher, name: name.toLowerCase() } as ExtensionInfo;
-}
-
-async function getFileContent(
-  foxeFileData: Uint8Array,
-  allowedFile: ALLOWED_FILES,
-): Promise<string | undefined> {
-  const zip = new JSZip();
-  const content = await zip.loadAsync(foxeFileData);
-  const extractedContent = await content.file(allowedFile)?.async("string");
-
-  return extractedContent;
-}
 
 export class IdbExtensionLoader implements ExtensionLoader {
   readonly #storage: IExtensionStorage;
@@ -85,20 +36,20 @@ export class IdbExtensionLoader implements ExtensionLoader {
   }
 
   public async getExtension(id: string): Promise<ExtensionInfo | undefined> {
-    log.debug("Get extension", id);
+    log.debug("[IndexedDB] Get extension", id);
 
     const storedExtension = await this.#storage.get(id);
     return storedExtension?.info;
   }
 
   public async getExtensions(): Promise<ExtensionInfo[]> {
-    log.debug("Listing extensions");
+    log.debug("[IndexedDB] Listing extensions");
 
     return await this.#storage.list();
   }
 
-  public async loadExtension(id: string): Promise<string> {
-    log.debug("Loading extension", id);
+  public async loadExtension(id: string): Promise<LoadedExtension> {
+    log.debug("[IndexedDB] Loading extension", id);
 
     const extension: StoredExtension | undefined = await this.#storage.get(id);
     if (!extension) {
@@ -111,11 +62,13 @@ export class IdbExtensionLoader implements ExtensionLoader {
       throw new Error(`Extension is corrupted: missing ${ALLOWED_FILES.EXTENSION}`);
     }
 
-    return rawContent;
+    return {
+      raw: rawContent,
+    };
   }
 
   public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
-    log.debug("Installing extension");
+    log.debug("[IndexedDB] Installing extension");
 
     const pkgInfoText = await getFileContent(foxeFileData, ALLOWED_FILES.PACKAGE);
     if (!pkgInfoText) {
@@ -146,7 +99,7 @@ export class IdbExtensionLoader implements ExtensionLoader {
   }
 
   public async uninstallExtension(id: string): Promise<void> {
-    log.debug("Uninstalling extension", id);
+    log.debug("[IndexedDB] Uninstalling extension", id);
 
     await this.#storage.delete(id);
   }

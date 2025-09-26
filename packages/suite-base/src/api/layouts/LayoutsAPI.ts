@@ -11,8 +11,8 @@ import {
 } from "@lichtblick/suite-base/api/layouts/types";
 import { ISO8601Timestamp } from "@lichtblick/suite-base/services/ILayoutStorage";
 import {
-  RemoteLayout,
   IRemoteLayoutStorage,
+  RemoteLayout,
 } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 

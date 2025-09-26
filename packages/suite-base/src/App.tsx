@@ -42,7 +42,7 @@ import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
-import { ExtensionLoader } from "./services/ExtensionLoader";
+import { ExtensionLoader } from "./services/extension/ExtensionLoader";
 
 export type AppProps = CustomWindowControlsProps & {
   appConfiguration: IAppConfiguration;

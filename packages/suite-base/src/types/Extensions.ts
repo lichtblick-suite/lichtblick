@@ -26,4 +26,5 @@ export type ExtensionInfo = {
   version: string;
   readme?: string;
   changelog?: string;
+  externalId?: string;
 };

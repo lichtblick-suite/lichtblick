@@ -55,7 +55,7 @@ const MockExtensionLoader: ExtensionLoader = {
   namespace: "local",
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,
-  loadExtension: async (_id: string) => "",
+  loadExtension: async (_id: string) => ({ raw: "" }),
   installExtension: async (_foxeFileData: Uint8Array) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },

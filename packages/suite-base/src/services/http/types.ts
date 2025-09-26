@@ -3,10 +3,25 @@
 
 export interface HttpRequestOptions extends RequestInit {
   timeout?: number;
+  responseType?: "json" | "arraybuffer";
 }
 
-export interface HttpResponse<T> {
+export interface HttpResponse<T> extends SuccessResponse<T>, Partial<ErrorResponse> {}
+
+type DetailErrorApiResponse = {
+  field: string;
+  constraints: Record<string, string>;
+};
+
+type ErrorResponse = {
+  statusCode: number;
+  message: string;
+  error: string;
+  details: DetailErrorApiResponse[];
+};
+
+type SuccessResponse<T> = {
   data: T;
   timestamp: string;
   path: string;
-}
+};

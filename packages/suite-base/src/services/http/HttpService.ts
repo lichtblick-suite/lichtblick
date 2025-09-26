@@ -18,6 +18,7 @@ import { HttpRequestOptions, HttpResponse } from "@lichtblick/suite-base/service
  * error handling, and other request configurations.
  **/
 export class HttpService {
+  private readonly apiVersion = "1.0";
   private readonly baseURL?: string;
   private readonly defaultOptions: RequestInit;
 
@@ -26,7 +27,7 @@ export class HttpService {
     this.defaultOptions = {
       headers: {
         "Content-Type": "application/json",
-        "Api-Version": "1.0",
+        "Api-Version": this.apiVersion,
       },
     };
   }
@@ -35,16 +36,21 @@ export class HttpService {
     endpoint: string,
     options: HttpRequestOptions = {},
   ): Promise<HttpResponse<T>> {
-    const { timeout, ...fetchOptions } = options;
+    const { timeout, responseType = "json", ...fetchOptions } = options;
     const url = this.baseURL ? `${this.baseURL}/${endpoint}` : endpoint;
+    const shouldUseDefaultHeaders = !(fetchOptions.body instanceof FormData);
 
     const requestOptions: RequestInit = {
-      ...this.defaultOptions,
       ...fetchOptions,
-      headers: {
-        ...(this.defaultOptions.headers as Record<string, string>),
-        ...(fetchOptions.headers as Record<string, string>),
-      },
+      headers: shouldUseDefaultHeaders
+        ? {
+            ...(this.defaultOptions.headers as Record<string, string>),
+            ...(fetchOptions.headers as Record<string, string>),
+          }
+        : {
+            "Api-Version": this.apiVersion,
+            ...(fetchOptions.headers as Record<string, string>),
+          },
     };
 
     let response: Response;
@@ -90,11 +96,21 @@ export class HttpService {
     }
 
     try {
-      const contentType = response.headers.get("content-type");
-      if (contentType?.includes("application/json") === true) {
-        return (await response.json()) as HttpResponse<T>;
+      if (responseType === "arraybuffer") {
+        const arrayBuffer = await response.arrayBuffer();
+        return {
+          data: arrayBuffer as T,
+          timestamp: new Date().toISOString(),
+          path: endpoint,
+        };
       }
-      return (await response.text()) as unknown as HttpResponse<T>;
+
+      const jsonData = await response.json();
+      return {
+        data: jsonData.data as T,
+        timestamp: jsonData.timestamp,
+        path: jsonData.path,
+      };
     } catch {
       throw new HttpError(
         "Failed to parse response",
@@ -122,10 +138,29 @@ export class HttpService {
     data?: unknown,
     options: HttpRequestOptions = {},
   ): Promise<HttpResponse<T>> {
+    let body: BodyInit | undefined;
+    const requestOptions = { ...options };
+
+    if (data instanceof FormData) {
+      body = data;
+      // For FormData, we need to remove Content-Type entirely
+      // so the browser can set the proper multipart boundary
+      requestOptions.headers = {
+        ...(options.headers as Record<string, string>),
+      };
+      delete requestOptions.headers["Content-Type"];
+    } else if (data != undefined) {
+      body = JSON.stringify(data);
+      requestOptions.headers = {
+        "Content-Type": "application/json",
+        ...(options.headers as Record<string, string>),
+      };
+    }
+
     return await this.request<T>(endpoint, {
       method: "POST",
-      body: data != undefined ? JSON.stringify(data) : undefined,
-      ...options,
+      body,
+      ...requestOptions,
     });
   }
 

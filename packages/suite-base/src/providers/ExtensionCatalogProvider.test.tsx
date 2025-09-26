@@ -17,7 +17,7 @@ import {
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/StateProcessorFactory";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
+import { ExtensionLoader } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";

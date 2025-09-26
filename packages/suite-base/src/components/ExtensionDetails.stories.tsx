@@ -24,7 +24,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplaceDetail,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
+import { ExtensionLoader } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
 
 export default {
@@ -36,7 +36,7 @@ const MockExtensionLoader: ExtensionLoader = {
   namespace: "local",
   getExtension: async () => undefined,
   getExtensions: async () => [],
-  loadExtension: async (_id: string) => "",
+  loadExtension: async (_id: string) => ({ raw: "" }),
   installExtension: async (_foxeFileData: Uint8Array) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },

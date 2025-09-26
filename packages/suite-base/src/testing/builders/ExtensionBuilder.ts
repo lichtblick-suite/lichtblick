@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { ExtensionInfoSlug } from "@lichtblick/suite-base/api/extensions/types";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
+import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
@@ -25,6 +27,10 @@ export default class ExtensionBuilder {
     });
   }
 
+  public static extensionsInfo(count = 3): ExtensionInfo[] {
+    return BasicBuilder.multiple(ExtensionBuilder.extensionInfo, count);
+  }
+
   public static extensionMarketplaceDetail(
     props: Partial<ExtensionMarketplaceDetail> = {},
   ): ExtensionMarketplaceDetail {
@@ -33,6 +39,20 @@ export default class ExtensionBuilder {
       foxe: BasicBuilder.string(),
       sha256sum: BasicBuilder.string(),
       time: BasicBuilder.genericDictionary(String),
+    });
+  }
+
+  public static storedExtension(props: Partial<StoredExtension> = {}): StoredExtension {
+    return defaults<StoredExtension>(props, {
+      content: new Uint8Array(BasicBuilder.numbers()),
+      info: ExtensionBuilder.extensionInfo(),
+    });
+  }
+
+  public static extensionInfoSlug(props: Partial<ExtensionInfoSlug> = {}): ExtensionInfoSlug {
+    return defaults<ExtensionInfoSlug>(props, {
+      remoteNamespace: BasicBuilder.string(),
+      info: ExtensionBuilder.extensionInfo(),
     });
   }
 }

@@ -5,12 +5,16 @@ import { nanoid } from "nanoid";
 import { SnackbarKey, useSnackbar } from "notistack";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import {
+  ExtensionData,
+  useExtensionCatalog,
+} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
 import { useInstallingExtensionsStore } from "./useInstallingExtensionsStore";
 
 type UseInstallingExtensionsState = {
-  installFoxeExtensions: (extensionsData: Uint8Array[]) => Promise<void>;
+  installFoxeExtensions: (extensionsData: ExtensionData[]) => Promise<void>;
 };
 
 type UseInstallingExtensionsStateProps = {
@@ -56,20 +60,32 @@ export function useInstallingExtensionsState({
   }, [progress, enqueueSnackbar, closeSnackbar, progressSnackbarKey]);
 
   const installFoxeExtensions = useCallback(
-    async (extensionsData: Uint8Array[]) => {
+    async (extensionsData: ExtensionData[]) => {
       startInstallingProgress(extensionsData.length);
 
       const isPlayingInitialState = isPlaying;
 
       try {
-        for (let i = 0; i < extensionsData.length; i += INSTALL_EXTENSIONS_BATCH) {
-          const chunk = extensionsData.slice(i, i + INSTALL_EXTENSIONS_BATCH);
-          const result = await installExtensions("local", chunk);
-          const installedCount = result.filter(({ success }) => success).length;
-          setInstallingProgress((prev) => ({
-            ...prev,
-            installed: prev.installed + installedCount,
-          }));
+        const extensionsByNamespace = new Map<ExtensionNamespace, ExtensionData[]>();
+
+        for (const extension of extensionsData) {
+          const namespace = extension.namespace ?? "local";
+          const existing = extensionsByNamespace.get(namespace) ?? [];
+          existing.push(extension);
+          extensionsByNamespace.set(namespace, existing);
+        }
+
+        // Install each group separately
+        for (const [namespace, extensions] of extensionsByNamespace) {
+          for (let i = 0; i < extensions.length; i += INSTALL_EXTENSIONS_BATCH) {
+            const chunk = extensions.slice(i, i + INSTALL_EXTENSIONS_BATCH);
+            const result = await installExtensions(namespace, chunk);
+            const installedCount = result.filter(({ success }) => success).length;
+            setInstallingProgress((prev) => ({
+              ...prev,
+              installed: prev.installed + installedCount,
+            }));
+          }
         }
 
         setInstallingProgress((prev) => ({

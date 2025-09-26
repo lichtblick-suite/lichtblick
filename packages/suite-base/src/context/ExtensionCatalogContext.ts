@@ -20,6 +20,12 @@ import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettin
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
 import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
+export type ExtensionData = {
+  buffer: Uint8Array;
+  file?: File;
+  namespace?: ExtensionNamespace;
+};
+
 export type RegisteredPanel = {
   extensionId: string;
   extensionName: string;
@@ -37,7 +43,7 @@ export type ExtensionCatalog = Immutable<{
   downloadExtension: (url: string) => Promise<Uint8Array>;
   installExtensions: (
     namespace: ExtensionNamespace,
-    data: Uint8Array[],
+    extensions: ExtensionData[],
   ) => Promise<InstallExtensionsResult[]>;
   isExtensionInstalled: (extensionId: string) => boolean;
   markExtensionAsInstalled: (extensionId: string) => void;

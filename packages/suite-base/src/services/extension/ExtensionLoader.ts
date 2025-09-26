@@ -7,6 +7,11 @@
 
 import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
+export type LoadedExtension = {
+  buffer?: Uint8Array;
+  raw: string;
+};
+
 /**
  * An extension loader is an object used by studio to list, install, and uninstall extensions
  * from a particular namespace.
@@ -21,10 +26,10 @@ export interface ExtensionLoader {
   getExtensions(): Promise<ExtensionInfo[]>;
 
   // load the source code for a specific extension
-  loadExtension(id: string): Promise<string>;
+  loadExtension(id: string): Promise<LoadedExtension>;
 
   // install extension contained within the file data
-  installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo>;
+  installExtension(foxeFileData: Uint8Array, file?: File): Promise<ExtensionInfo>;
 
   // uninstall extension with id
   uninstallExtension(id: string): Promise<void>;

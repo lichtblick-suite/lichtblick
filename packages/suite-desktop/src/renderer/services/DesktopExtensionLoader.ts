@@ -7,6 +7,7 @@
 
 import Logger from "@lichtblick/log";
 import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@lichtblick/suite-base";
+import { LoadedExtension } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
 
 import { Desktop, DesktopExtension } from "../../common/types";
 
@@ -46,8 +47,11 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     return extensions;
   }
 
-  public async loadExtension(id: string): Promise<string> {
-    return (await this.#bridge?.loadExtension(id)) ?? "";
+  public async loadExtension(id: string): Promise<LoadedExtension> {
+    if (!this.#bridge) {
+      throw new Error("Cannot load extension without a desktopBridge");
+    }
+    return await this.#bridge.loadExtension(id);
   }
 
   public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
