@@ -7,6 +7,7 @@ import JSZip from "jszip";
 import { dirname, join as pathJoin } from "path";
 
 import Logger from "@lichtblick/log";
+import { LoadedExtension } from "@lichtblick/suite-base";
 
 import { ExtensionPackageJson, PackageName } from "./types";
 import { DesktopExtension } from "../common/types";
@@ -179,7 +180,7 @@ export class ExtensionsHandler {
     return extensions;
   }
 
-  public async load(id: string): Promise<string> {
+  public async load(id: string): Promise<LoadedExtension> {
     this.log.debug("[extension]", `Loading ${id}`);
 
     const extension = await this.get(id);
@@ -191,7 +192,7 @@ export class ExtensionsHandler {
     const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
     const sourcePath = pathJoin(extension.directory, packageJson.main);
 
-    return await readFile(sourcePath, { encoding: "utf-8" });
+    return { raw: await readFile(sourcePath, { encoding: "utf-8" }) };
   }
 
   public async install(foxeFileData: Uint8Array): Promise<DesktopExtension> {
