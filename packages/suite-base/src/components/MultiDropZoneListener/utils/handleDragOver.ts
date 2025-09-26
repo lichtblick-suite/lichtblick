@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 import { DropZoneType } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
 
-import { determineActiveDropZone, shouldHandleDragEvent, prepareDragEvent } from "./dropZoneUtils";
+import { determineActiveDropZone, shouldHandleDragEvent, prepareDragEvent } from "./dropZone";
 
 export type HandleDragOverProps = {
   allowedExtensions?: string[];

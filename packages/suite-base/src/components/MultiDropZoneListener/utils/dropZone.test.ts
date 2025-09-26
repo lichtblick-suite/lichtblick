@@ -9,9 +9,9 @@ import {
   WindowDimensions,
 } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
 
-import { determineActiveDropZone, shouldHandleDragEvent, prepareDragEvent } from "./dropZoneUtils";
+import { determineActiveDropZone, shouldHandleDragEvent, prepareDragEvent } from "./dropZone";
 
-describe("dropZoneUtils", () => {
+describe("dropZone", () => {
   describe("determineActiveDropZone", () => {
     const windowDimensions: WindowDimensions = {
       width: 1000,

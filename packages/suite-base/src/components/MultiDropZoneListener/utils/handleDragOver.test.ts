@@ -6,11 +6,11 @@
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
-import { determineActiveDropZone, prepareDragEvent, shouldHandleDragEvent } from "./dropZoneUtils";
+import { determineActiveDropZone, prepareDragEvent, shouldHandleDragEvent } from "./dropZone";
 import handleDragOver, { HandleDragOverProps } from "./handleDragOver";
 
 // Mock the utility functions
-jest.mock("./dropZoneUtils", () => ({
+jest.mock("./dropZone", () => ({
   shouldHandleDragEvent: jest.fn(),
   prepareDragEvent: jest.fn(),
   determineActiveDropZone: jest.fn(),
