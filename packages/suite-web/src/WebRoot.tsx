@@ -10,7 +10,7 @@ import { useMemo, useState } from "react";
 import {
   AppBarProps,
   AppSetting,
-  ExtensionLoader,
+  IExtensionLoader,
   FoxgloveWebSocketDataSourceFactory,
   IDataSourceFactory,
   IdbExtensionLoader,
@@ -46,7 +46,7 @@ export function WebRoot(props: {
     [],
   );
 
-  const defaultExtensionLoaders: ExtensionLoader[] = [
+  const defaultExtensionLoaders: IExtensionLoader[] = [
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
   ];

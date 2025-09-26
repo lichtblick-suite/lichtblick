@@ -24,7 +24,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplaceDetail,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
 
 export default {
@@ -32,7 +32,7 @@ export default {
   component: ExtensionDetails,
 };
 
-const MockExtensionLoader: ExtensionLoader = {
+const MockExtensionLoader: IExtensionLoader = {
   namespace: "local",
   getExtension: async () => undefined,
   getExtensions: async () => [],

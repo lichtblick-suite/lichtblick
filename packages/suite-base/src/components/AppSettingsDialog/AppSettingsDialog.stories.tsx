@@ -9,7 +9,7 @@ import { StoryFn, StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
-import { ExtensionInfo, ExtensionLoader } from "@lichtblick/suite-base";
+import { ExtensionInfo, IExtensionLoader } from "@lichtblick/suite-base";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
@@ -51,7 +51,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
   },
 ];
 
-const MockExtensionLoader: ExtensionLoader = {
+const MockExtensionLoader: IExtensionLoader = {
   namespace: "local",
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,

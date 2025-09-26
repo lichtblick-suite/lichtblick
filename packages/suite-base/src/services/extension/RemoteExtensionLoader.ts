@@ -5,9 +5,9 @@ import Log from "@lichtblick/log";
 import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import {
-  ExtensionLoader,
+  IExtensionLoader,
   LoadedExtension,
-} from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+} from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
 import extractFoxeFileContent from "@lichtblick/suite-base/services/extension/utils/extractFoxeFileContent";
@@ -17,7 +17,7 @@ import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/
 
 const log = Log.getLogger(__filename);
 
-export class RemoteExtensionLoader implements ExtensionLoader {
+export class RemoteExtensionLoader implements IExtensionLoader {
   #remote: ExtensionsAPI;
   public readonly namespace: ExtensionNamespace;
   public remoteNamespace: string;

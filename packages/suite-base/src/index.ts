@@ -32,7 +32,7 @@ export { default as overwriteFetch } from "./util/overwriteFetch";
 export { default as waitForFonts } from "./util/waitForFonts";
 export { initI18n } from "./i18n";
 export { RemoteExtensionLoader } from "./services/extension/RemoteExtensionLoader";
-export type { ExtensionLoader } from "./services/extension/ExtensionLoader";
+export type { IExtensionLoader } from "./services/extension/IExtensionLoader";
 export type { LayoutLoader } from "./services/ILayoutLoader";
 export type { LayoutInfo } from "./types/layouts";
 export type { LayoutData } from "./context/CurrentLayoutContext";

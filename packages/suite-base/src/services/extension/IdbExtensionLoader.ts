@@ -11,9 +11,9 @@ import {
   StoredExtension,
 } from "@lichtblick/suite-base/services/IExtensionStorage";
 import {
-  ExtensionLoader,
+  IExtensionLoader,
   LoadedExtension,
-} from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+} from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
 import extractFoxeFileContent from "@lichtblick/suite-base/services/extension/utils/extractFoxeFileContent";
@@ -25,7 +25,7 @@ import { IdbExtensionStorage } from "./IdbExtensionStorage";
 
 const log = Log.getLogger(__filename);
 
-export class IdbExtensionLoader implements ExtensionLoader {
+export class IdbExtensionLoader implements IExtensionLoader {
   readonly #storage: IExtensionStorage;
   public readonly namespace: ExtensionNamespace;
 

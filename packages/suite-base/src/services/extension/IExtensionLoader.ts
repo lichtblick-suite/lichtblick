@@ -16,7 +16,7 @@ export type LoadedExtension = {
  * An extension loader is an object used by studio to list, install, and uninstall extensions
  * from a particular namespace.
  */
-export interface ExtensionLoader {
+export interface IExtensionLoader {
   readonly namespace: ExtensionNamespace;
 
   // get extension by id

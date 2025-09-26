@@ -17,7 +17,7 @@ import {
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/StateProcessorFactory";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
+import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
@@ -26,14 +26,14 @@ import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
 
 describe("ExtensionCatalogProvider", () => {
-  function setup({ loadersOverride }: { loadersOverride?: ExtensionLoader[] } = {}) {
+  function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
     const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo();
     const extensions: ExtensionInfo[] = [extensionInfo];
 
     const loadExtension = jest
       .fn()
       .mockResolvedValue(`module.exports = { activate: function() { return 1; } }`);
-    const loaderDefault: ExtensionLoader = {
+    const loaderDefault: IExtensionLoader = {
       namespace: extensionInfo.namespace!,
       getExtension: jest.fn().mockResolvedValue(extensionInfo),
       getExtensions: jest.fn().mockResolvedValue(extensions),
@@ -72,7 +72,7 @@ describe("ExtensionCatalogProvider", () => {
     const extension2 = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loadExtension1 = jest.fn().mockResolvedValue(source1);
     const loadExtension2 = jest.fn().mockResolvedValue(source2);
-    const loader1: ExtensionLoader = {
+    const loader1: IExtensionLoader = {
       namespace: extension1.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension1]),
@@ -80,7 +80,7 @@ describe("ExtensionCatalogProvider", () => {
       installExtension: jest.fn(),
       uninstallExtension: jest.fn(),
     };
-    const loader2: ExtensionLoader = {
+    const loader2: IExtensionLoader = {
       namespace: extension2.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension2]),
@@ -113,7 +113,7 @@ describe("ExtensionCatalogProvider", () => {
     `;
     const loadExtension = jest.fn().mockResolvedValue(source);
     const extension = ExtensionBuilder.extensionInfo();
-    const loader: ExtensionLoader = {
+    const loader: IExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
@@ -161,7 +161,7 @@ describe("ExtensionCatalogProvider", () => {
 
     const loadExtension = jest.fn().mockResolvedValue(source);
     const extension = ExtensionBuilder.extensionInfo();
-    const loader: ExtensionLoader = {
+    const loader: IExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
@@ -225,7 +225,7 @@ describe("ExtensionCatalogProvider", () => {
     `;
     const extension = ExtensionBuilder.extensionInfo();
     const loadExtension = jest.fn().mockResolvedValue(source);
-    const loader: ExtensionLoader = {
+    const loader: IExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
@@ -262,7 +262,7 @@ describe("ExtensionCatalogProvider", () => {
     `;
     const loadExtension = jest.fn().mockResolvedValue(source);
     const extension = ExtensionBuilder.extensionInfo();
-    const loader: ExtensionLoader = {
+    const loader: IExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
@@ -303,7 +303,7 @@ describe("ExtensionCatalogProvider", () => {
 
     const loadExtension = jest.fn().mockResolvedValue(source);
     const extension = ExtensionBuilder.extensionInfo();
-    const loader: ExtensionLoader = {
+    const loader: IExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
@@ -349,7 +349,7 @@ describe("ExtensionCatalogProvider", () => {
     `;
     const loadExtension = jest.fn().mockResolvedValue(source);
     const extension = ExtensionBuilder.extensionInfo();
-    const loader: ExtensionLoader = {
+    const loader: IExtensionLoader = {
       namespace: extension.namespace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),

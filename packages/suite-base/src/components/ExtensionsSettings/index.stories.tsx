@@ -17,7 +17,7 @@
 import { StoryObj } from "@storybook/react";
 import { useState } from "react";
 
-import { ExtensionInfo, ExtensionLoader } from "@lichtblick/suite-base";
+import { ExtensionInfo, IExtensionLoader } from "@lichtblick/suite-base";
 import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import ExtensionMarketplaceContext, {
@@ -81,7 +81,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
   },
 ];
 
-const MockExtensionLoader: ExtensionLoader = {
+const MockExtensionLoader: IExtensionLoader = {
   namespace: "local",
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,
