@@ -49,7 +49,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.list();
 
       // Then
-      expect(mockGet).toHaveBeenCalledWith("/extensions", { namespace: remoteNamespace });
+      expect(mockGet).toHaveBeenCalledWith("extensions", { namespace: remoteNamespace });
       expect(result.length).toBe(extensions.length);
     });
 
@@ -103,7 +103,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.get(extension.info.id);
 
       // Then
-      expect(mockGet).toHaveBeenCalledWith(`/extensions/${extension.info.id}`);
+      expect(mockGet).toHaveBeenCalledWith(`extensions/${extension.info.id}`);
       expect(result).toEqual({
         info: {
           ...apiResponse,
@@ -114,7 +114,8 @@ describe("ExtensionsAPI", () => {
         content: new Uint8Array(),
         remoteNamespace,
         fileId: apiResponse.fileId,
-      });
+        externalId: apiResponse.id,
+      } as StoredExtension);
     });
 
     it("should return undefined when extension not found", async () => {
@@ -151,7 +152,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.createOrUpdate(extension, mockFile);
 
       // Then
-      expect(mockPost).toHaveBeenCalledWith(`/extensions/${remoteNamespace}`, expect.any(FormData));
+      expect(mockPost).toHaveBeenCalledWith(`extensions`, expect.any(FormData));
       expect(result).toEqual({
         info: mockApiResponse,
         content: new Uint8Array(),
@@ -174,7 +175,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.remove(extensionId);
 
       // Then
-      expect(mockDelete).toHaveBeenCalledWith(`/extensions/${extensionId}`);
+      expect(mockDelete).toHaveBeenCalledWith(`extensions/${extensionId}`);
       expect(result).toBe(true);
     });
 
@@ -209,13 +210,9 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.loadContent(id);
 
       // Then
-      expect(mockGet).toHaveBeenCalledWith(
-        `/extensions/download/${id}`,
-        {},
-        {
-          responseType: "arraybuffer",
-        },
-      );
+      expect(mockGet).toHaveBeenCalledWith(`extensions/${id}/download`, undefined, {
+        responseType: "arraybuffer",
+      });
       expect(result).toEqual(mockUint8Array);
     });
 
