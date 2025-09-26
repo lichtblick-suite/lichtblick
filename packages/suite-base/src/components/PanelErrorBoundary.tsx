@@ -9,27 +9,22 @@ import { Button, Typography } from "@mui/material";
 import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import {
+  PanelErrorBoundaryProps,
+  PanelErrorBoundaryState,
+} from "@lichtblick/suite-base/components/types";
 import { reportError } from "@lichtblick/suite-base/reportError";
 import { AppError } from "@lichtblick/suite-base/util/errors";
 
-type Props = {
-  showErrorDetails?: boolean;
-  hideErrorSourceLocations?: boolean;
-  onResetPanel: () => void;
-  onRemovePanel: () => void;
-  onLogError?: (message: string, error?: Error) => void;
-};
-
-type State = {
-  currentError: { error: Error; errorInfo: ErrorInfo } | undefined;
-};
-
-export default class PanelErrorBoundary extends Component<PropsWithChildren<Props>, State> {
-  public override state: State = {
+export default class PanelErrorBoundary extends Component<
+  PropsWithChildren<PanelErrorBoundaryProps>,
+  PanelErrorBoundaryState
+> {
+  public override state: PanelErrorBoundaryState = {
     currentError: undefined,
   };
 
-  public static getDerivedStateFromError(error: Error): Partial<State> {
+  public static getDerivedStateFromError(error: Error): Partial<PanelErrorBoundaryState> {
     return { currentError: { error, errorInfo: {} as ErrorInfo } };
   }
 

@@ -3,25 +3,9 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import { List, ListItem, ListItemText, Typography, IconButton } from "@mui/material";
-import { makeStyles } from "tss-react/mui";
 
-const useStyles = makeStyles()((theme) => ({
-  root: {
-    background: theme.palette.background.paper,
-    borderTop: `1px solid ${theme.palette.divider}`,
-    maxHeight: 200,
-    overflowY: "auto",
-    padding: theme.spacing(1),
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: theme.spacing(1),
-  },
-}));
-
-export type PanelLog = { timestamp: string; message: string; error?: Error };
+import { useStyles } from "@lichtblick/suite-base/components/PanelLogs.style";
+import { PanelLog } from "@lichtblick/suite-base/components/types";
 
 export default function PanelLogs({
   logs,

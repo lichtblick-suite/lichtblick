@@ -9,10 +9,11 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Badge } from "@mui/material";
 import { forwardRef, useCallback, useContext, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import { useStyles } from "@lichtblick/suite-base/components/PanelToolbar/PanelToolbarControls.style";
 import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
+import { PanelToolbarControlsProps } from "@lichtblick/suite-base/components/PanelToolbar/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import PanelCatalogContext from "@lichtblick/suite-base/context/PanelCatalogContext";
@@ -23,21 +24,6 @@ import {
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
-
-const useStyles = makeStyles()(() => ({
-  logsBadge: {
-    "& .MuiBadge-dot": {
-      minWidth: 8,
-      height: 8,
-      borderRadius: "50%",
-    },
-  },
-}));
-
-type PanelToolbarControlsProps = {
-  additionalIcons?: React.ReactNode;
-  isUnknownPanel: boolean;
-};
 
 const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarControlsProps>(
   (props, ref) => {
