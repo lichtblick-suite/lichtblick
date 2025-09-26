@@ -7,3 +7,8 @@ export enum ALLOWED_FILES {
   README = "README.md",
   CHANGELOG = "CHANGELOG.md",
 }
+
+export type PackageName = {
+  name: string;
+  publisher?: string;
+};

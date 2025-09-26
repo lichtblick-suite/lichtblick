@@ -5,13 +5,13 @@ import JSZip from "jszip";
 
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 
-export default async function getFileContent(
-  foxeFileData: Uint8Array,
-  allowedFile: ALLOWED_FILES,
+export default async function extractFoxeFileContent(
+  zip: JSZip,
+  file: ALLOWED_FILES,
 ): Promise<string | undefined> {
-  const zip = new JSZip();
-  const content = await zip.loadAsync(foxeFileData);
-  const extractedContent = await content.file(allowedFile)?.async("string");
-
-  return extractedContent;
+  const fileEntry = zip.file(file);
+  if (!fileEntry) {
+    return undefined;
+  }
+  return await fileEntry.async("string");
 }

@@ -5,8 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import JSZip from "jszip";
-
 import Log from "@lichtblick/log";
 import {
   IExtensionStorage,
@@ -17,7 +15,8 @@ import {
   LoadedExtension,
 } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
-import getFileContent from "@lichtblick/suite-base/services/extension/utils/getFileContent";
+import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
+import extractFoxeFileContent from "@lichtblick/suite-base/services/extension/utils/extractFoxeFileContent";
 import qualifiedName from "@lichtblick/suite-base/services/extension/utils/qualifiedName";
 import validatePackageInfo from "@lichtblick/suite-base/services/extension/utils/validatePackageInfo";
 import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
@@ -56,30 +55,35 @@ export class IdbExtensionLoader implements ExtensionLoader {
       throw new Error("Extension not found");
     }
 
-    const content = await new JSZip().loadAsync(extension.content);
-    const rawContent = await content.file(ALLOWED_FILES.EXTENSION)?.async("string");
-    if (!rawContent) {
+    const decompressedData = await decompressFile(extension.content);
+    const rawExtensionFile = await extractFoxeFileContent(
+      decompressedData,
+      ALLOWED_FILES.EXTENSION,
+    );
+    if (!rawExtensionFile) {
       throw new Error(`Extension is corrupted: missing ${ALLOWED_FILES.EXTENSION}`);
     }
 
     return {
-      raw: rawContent,
+      raw: rawExtensionFile,
     };
   }
 
   public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
     log.debug("[IndexedDB] Installing extension");
 
-    const pkgInfoText = await getFileContent(foxeFileData, ALLOWED_FILES.PACKAGE);
-    if (!pkgInfoText) {
+    const decompressedData = await decompressFile(foxeFileData);
+    const rawPackageFile = await extractFoxeFileContent(decompressedData, ALLOWED_FILES.PACKAGE);
+    if (!rawPackageFile) {
       throw new Error(
         `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
       );
     }
-    const readme = (await getFileContent(foxeFileData, ALLOWED_FILES.README)) ?? "";
-    const changelog = (await getFileContent(foxeFileData, ALLOWED_FILES.CHANGELOG)) ?? "";
+    const readme = (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "";
+    const changelog =
+      (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "";
 
-    const rawInfo = validatePackageInfo(JSON.parse(pkgInfoText) as Partial<ExtensionInfo>);
+    const rawInfo = validatePackageInfo(JSON.parse(rawPackageFile) as Partial<ExtensionInfo>);
     const normalizedPublisher = rawInfo.publisher.replace(/[^A-Za-z0-9_\s]+/g, "");
 
     const info: ExtensionInfo = {
