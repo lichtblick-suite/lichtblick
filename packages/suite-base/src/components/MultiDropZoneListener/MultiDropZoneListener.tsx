@@ -3,29 +3,17 @@
 
 import { Dialog } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { extname } from "path";
-import { useCallback, useLayoutEffect, useState, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
-import Logger from "@lichtblick/log";
+import {
+  DropZoneType,
+  MultiDropZoneListenerProps,
+} from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
+import handleDragOver from "@lichtblick/suite-base/components/MultiDropZoneListener/utils/handleDragOver";
+import handleDrop from "@lichtblick/suite-base/components/MultiDropZoneListener/utils/handleDrop";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
 
 import { useStyles } from "./MultiDropZoneListener.style";
-
-const log = Logger.getLogger(__filename);
-
-type DropZoneType = ExtensionNamespace | "source";
-
-export type MultiDropZoneListenerProps = {
-  allowedExtensions?: string[];
-  isRemote: boolean;
-  onDrop?: (event: {
-    files?: File[];
-    handles?: FileSystemFileHandle[];
-    namespace?: ExtensionNamespace;
-    isSource?: boolean;
-  }) => void;
-};
 
 export default function MultiDropZoneListener(
   props: MultiDropZoneListenerProps,
@@ -48,141 +36,17 @@ export default function MultiDropZoneListener(
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleDrop = useCallback(
-    async (ev: globalThis.DragEvent, dropZone: DropZoneType) => {
-      setHovering(undefined);
-      setActiveZone(undefined);
-
-      if (!ev.dataTransfer || !allowedExtensions) {
-        return;
-      }
-
-      let handles: FileSystemFileHandle[] | undefined = [];
-      const handlePromises: Promise<FileSystemHandle | ReactNull>[] = [];
-      const allFiles: File[] = [];
-      const directories: FileSystemDirectoryEntry[] = [];
-      const dataItems = ev.dataTransfer.items;
-      for (const item of Array.from(dataItems)) {
-        if (window.isSecureContext && "getAsFileSystemHandle" in item) {
-          handlePromises.push(item.getAsFileSystemHandle());
-        } else {
-          log.info(
-            "getAsFileSystemHandle not available on a dropped item. Features requiring handles will not be available for the item",
-            item,
-          );
-        }
-
-        const entry = item.webkitGetAsEntry();
-
-        if (entry?.isFile === true) {
-          const file = item.getAsFile();
-          if (file) {
-            allFiles.push(file);
-          }
-        } else if (entry?.isDirectory === true) {
-          directories.push(entry as FileSystemDirectoryEntry);
-        }
-      }
-
-      if (directories.length === 0) {
-        for (const promise of handlePromises) {
-          const fileSystemHandle = await promise;
-          if (fileSystemHandle instanceof FileSystemFileHandle) {
-            handles.push(fileSystemHandle);
-          }
-        }
-      }
-
-      if (allFiles.length === 0 && directories.length === 0 && handles.length === 0) {
-        return;
-      }
-
-      for (const directory of directories) {
-        const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-          directory.createReader().readEntries(resolve, reject);
-        });
-
-        for (const entry of entries) {
-          if (entry.isFile) {
-            const file = await new Promise<File>((resolve, reject) => {
-              (entry as FileSystemFileEntry).file(resolve, reject);
-            });
-            allFiles.push(file);
-          }
-        }
-      }
-
-      if (directories.length > 0 || handles.length === 0) {
-        handles = undefined;
-      }
-
-      const filteredFiles = allFiles.filter((file) =>
-        allowedExtensions.includes(extname(file.name)),
-      );
-      const filteredHandles = handles?.filter((handle) =>
-        allowedExtensions.includes(extname(handle.name)),
-      );
-
-      if (filteredFiles.length === 0 && filteredHandles?.length === 0) {
-        enqueueSnackbar("The file format is not supported.", { variant: "error" });
-        return;
-      }
-
-      ev.preventDefault();
-      ev.stopPropagation();
-
-      let namespace: ExtensionNamespace | undefined;
-      let isSource = false;
-
-      if (dropZone === "source") {
-        isSource = true;
-      } else {
-        namespace = dropZone;
-      }
-
-      onDropProp?.({ files: filteredFiles, handles: filteredHandles, namespace, isSource });
-    },
-    [enqueueSnackbar, onDropProp, allowedExtensions],
-  );
-
   const onDragOver = useCallback(
-    (ev: globalThis.DragEvent) => {
-      if (!allowedExtensions) {
-        return;
-      }
-
-      const { dataTransfer } = ev;
-      if (dataTransfer?.types.includes("Files") === true) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        dataTransfer.dropEffect = "copy";
-
-        // Clear timeout if still pending
-        if (dragLeaveTimeoutRef.current) {
-          clearTimeout(dragLeaveTimeoutRef.current);
-          dragLeaveTimeoutRef.current = undefined;
-        }
-
-        const topSection = window.innerHeight * 0.55; // Top 55%
-
-        if (!hovering) {
-          setHovering("local");
-        }
-
-        if (ev.clientY < topSection) {
-          if (isRemote) {
-            // When remote: left/right split for local/org extensions
-            const isLeftSide = ev.clientX < window.innerWidth / 2;
-            setActiveZone(isLeftSide ? "local" : "org");
-          } else {
-            // When not remote: entire top section is local extensions
-            setActiveZone("local");
-          }
-        } else {
-          // Bottom section - data sources (always available)
-          setActiveZone("source");
-        }
-      }
+    (event: globalThis.DragEvent) => {
+      handleDragOver({
+        allowedExtensions,
+        dragLeaveTimeoutRef,
+        event,
+        hovering,
+        isRemote,
+        setActiveZone,
+        setHovering,
+      });
     },
     [allowedExtensions, hovering, isRemote],
   );
@@ -192,9 +56,17 @@ export default function MultiDropZoneListener(
       if (!activeZone) {
         return;
       }
-      void handleDrop(ev, activeZone);
+      void handleDrop({
+        allowedExtensions,
+        dropZone: activeZone,
+        enqueueSnackbar,
+        event: ev,
+        onDrop: onDropProp,
+        setActiveZone,
+        setHovering,
+      });
     },
-    [handleDrop, activeZone],
+    [activeZone, allowedExtensions, enqueueSnackbar, onDropProp],
   );
 
   const onDragLeave = useCallback(() => {
