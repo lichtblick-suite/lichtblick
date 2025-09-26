@@ -95,6 +95,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       transforms,
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
+      hudInfoTopics: partialConfig?.hudInfoTopics ?? {},
       publish,
       // deep partial on config, makes gradient tuple type [string | undefined, string | undefined]
       // which is incompatible with `Partial<ColorModeSettings>`
@@ -452,6 +453,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     // Need to update subscriptions when layers change as URDF layers might subscribe to topics
     // shouldSubscribe values will be re-evaluated
     config.layers,
+    // Need to update subscriptions when debug logs change
+    // shouldSubscribe values will be re-evaluated
+    config.hudInfoTopics,
   ]);
 
   // Notify the extension context when our subscription list changes

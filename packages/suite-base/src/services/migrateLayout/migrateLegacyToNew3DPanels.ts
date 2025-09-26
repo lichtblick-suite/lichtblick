@@ -93,6 +93,7 @@ function migrateLegacyToNew3DConfig(legacyConfig: Partial<Legacy3DConfig>): Rend
     scene: {},
     transforms: {},
     layers: {},
+    hudInfoTopics: {},
     imageMode: {},
   };
 }

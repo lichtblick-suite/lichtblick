@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Cameras } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Cameras";
+import { HUDInfoMessages } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD/HUDInfoMessages";
 import { FoxgloveGrid } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
 import { FrameAxes } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/FrameAxes";
 import { Grids } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Grids";
@@ -116,6 +117,9 @@ export const DEFAULT_SCENE_EXTENSION_CONFIG: SceneExtensionConfig = {
     },
     [VelodyneScans.extensionId]: {
       init: (renderer: IRenderer) => new VelodyneScans(renderer),
+    },
+    [HUDInfoMessages.extensionId]: {
+      init: (renderer: IRenderer) => new HUDInfoMessages(renderer),
     },
   },
 };

@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { HUDItem } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
+import { NotificationItem } from "@lichtblick/suite-base/panels/ThreeDeeRender/NotificationManager";
 import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import { t3D } from "@lichtblick/suite-base/panels/ThreeDeeRender/t3D";
 
@@ -26,14 +26,14 @@ export const DECODE_IMAGE_ERR_KEY = "CreateBitmap";
 
 export const IMAGE_MODE_HUD_GROUP_ID = "IMAGE_MODE";
 
-export const BOTH_TOPICS_DO_NOT_EXIST_HUD_ITEM_ID = "BOTH_TOPICS_DO_NOT_EXIST";
-export const IMAGE_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID = "IMAGE_TOPIC_DOES_NOT_EXIST";
-export const CALIBRATION_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID = "CALIBRATION_TOPIC_DOES_NOT_EXIST";
-export const WAITING_FOR_SYNC_NOTICE_HUD_ID = "WAITING_FOR_SYNC_NOTICE";
-export const WAITING_FOR_SYNC_EMPTY_HUD_ID = "WAITING_FOR_SYNC_EMPTY";
-export const WAITING_FOR_IMAGES_EMPTY_HUD_ID = "WAITING_FOR_IMAGES_EMPTY";
-export const WAITING_FOR_BOTH_MESSAGES_HUD_ID = "WAITING_FOR_BOTH_MESSAGES";
-export const WAITING_FOR_CALIBRATION_HUD_ID = "WAITING_FOR_CALIBRATION";
+export const BOTH_TOPICS_DO_NOT_EXIST_ID = "BOTH_TOPICS_DO_NOT_EXIST";
+export const IMAGE_TOPIC_DOES_NOT_EXIST_ID = "IMAGE_TOPIC_DOES_NOT_EXIST";
+export const CALIBRATION_TOPIC_DOES_NOT_EXIST_ID = "CALIBRATION_TOPIC_DOES_NOT_EXIST";
+export const WAITING_FOR_SYNC_NOTICE_ID = "WAITING_FOR_SYNC_NOTICE";
+export const WAITING_FOR_SYNC_EMPTY_ID = "WAITING_FOR_SYNC_EMPTY";
+export const WAITING_FOR_IMAGES_EMPTY_ID = "WAITING_FOR_IMAGES_EMPTY";
+export const WAITING_FOR_BOTH_MESSAGES_ID = "WAITING_FOR_BOTH_MESSAGES";
+export const WAITING_FOR_CALIBRATION_ID = "WAITING_FOR_CALIBRATION";
 export const WAITING_FOR_IMAGES_NOTICE_ID = "WAITING_FOR_IMAGES_NOTICE";
 
 export const CALIBRATION_TOPIC_PATH = ["imageMode", "calibrationTopic"];
@@ -81,7 +81,7 @@ export const UPPER_BRIGHTNESS_LIMIT = 0.6;
 export const LOWER_CONTRAST_LIMIT = 0.1;
 export const UPPER_CONTRAST_LIMIT = 1.9;
 
-export const NO_IMAGE_TOPICS_HUD_ITEM: HUDItem = {
+export const NO_IMAGE_TOPICS_HUD_ITEM: NotificationItem = {
   id: "NO_IMAGE_TOPICS",
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("noImageTopicsAvailable"),

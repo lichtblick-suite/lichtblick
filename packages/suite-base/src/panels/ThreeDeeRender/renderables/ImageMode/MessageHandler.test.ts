@@ -18,7 +18,7 @@ import { DeepPartial } from "ts-essentials";
 
 import { fromNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
-import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
+import { NotificationManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/NotificationManager";
 import {
   MessageHandler,
   WAITING_FOR_BOTH_HUD_ITEM,
@@ -48,7 +48,7 @@ function wrapInMessageEvent<T>(
 
 describe("MessageHandler: synchronized = false", () => {
   it("should return an empty state if no messages are handled", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = { synchronize: false };
     const messageHandler = new MessageHandler(initConfig, hud);
 
@@ -60,7 +60,7 @@ describe("MessageHandler: synchronized = false", () => {
   });
 
   it("should have camera info if handled camera info", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = { synchronize: false, calibrationTopic: "exists" };
     const messageHandler = new MessageHandler(initConfig, hud);
 
@@ -73,12 +73,12 @@ describe("MessageHandler: synchronized = false", () => {
     const state = messageHandler.getRenderStateAndUpdateHUD();
 
     expect(state.cameraInfo).not.toBeUndefined();
-    expect(_.sortBy(hud.getHUDItems(), (item) => item.id)).toEqual([
+    expect(_.sortBy(hud.getNotificationItems(), (item) => item.id)).toEqual([
       WAITING_FOR_IMAGE_NOTICE_HUD_ITEM, // notice because camera info exists
     ]);
   });
   it("should have image if handled image", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: false, calibrationTopic: "info" },
       hud,
@@ -90,12 +90,12 @@ describe("MessageHandler: synchronized = false", () => {
 
     expect(state.image).not.toBeUndefined();
     expect(
-      hud.getHUDItems().find((item) => item.id === WAITING_FOR_CALIBRATION_HUD_ITEM.id),
+      hud.getNotificationItems().find((item) => item.id === WAITING_FOR_CALIBRATION_HUD_ITEM.id),
     ).toBeTruthy();
   });
 
   it("should have annotations if handled annotations", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: false,
@@ -117,7 +117,7 @@ describe("MessageHandler: synchronized = false", () => {
     expect(state.annotationsByTopic?.get("annotations")).not.toBeUndefined();
   });
   it("clears image if image topic changed", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = { synchronize: false, imageTopic: "image1" };
     const messageHandler = new MessageHandler(initConfig, hud);
 
@@ -130,7 +130,7 @@ describe("MessageHandler: synchronized = false", () => {
     expect(state.image).toBeUndefined();
   });
   it("clears cameraInfo if calibration topic changed", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       calibrationTopic: "calibration1",
@@ -149,7 +149,7 @@ describe("MessageHandler: synchronized = false", () => {
     expect(state.cameraInfo).toBeUndefined();
   });
   it("clears cameraInfo if calibration set to undefined", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       calibrationTopic: "calibration1",
@@ -168,7 +168,7 @@ describe("MessageHandler: synchronized = false", () => {
     expect(state.cameraInfo).toBeUndefined();
   });
   it("clears specific annotations if annotations subscriptions change", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       annotations: {
@@ -205,7 +205,7 @@ describe("MessageHandler: synchronized = false", () => {
     expect(state.annotationsByTopic?.get("annotations2")).toBeUndefined();
   });
   it("listener function called whenever a message is handled or when config changes", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       imageTopic: "image",
@@ -241,7 +241,7 @@ describe("MessageHandler: synchronized = false", () => {
     expect(listener).toHaveBeenCalledTimes(4);
   });
   it("should keep image and camera info if switching from unsync to sync to sync", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = { synchronize: false, imageTopic: "image", calibrationTopic: "calib" };
     const messageHandler = new MessageHandler(initConfig, hud);
     const listener = jest.fn();
@@ -269,7 +269,7 @@ describe("MessageHandler: synchronized = false", () => {
 
 describe("MessageHandler: synchronized = true", () => {
   it("handles and shows camera info in state", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: true, calibrationTopic: "calibration" },
       hud,
@@ -287,7 +287,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("handles and shows image in state with no active annotations", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler({ synchronize: true }, hud);
 
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n);
@@ -298,7 +298,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("does not show state with annotations if only handled annotations", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -323,7 +323,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("shows state with image and annotations if they have the same timestamp", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -356,7 +356,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("shows state without image and annotations if they have different header timestamps", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -402,7 +402,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("shows state with image and annotation if one of two visible image annotation topics is unavailable", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -439,7 +439,7 @@ describe("MessageHandler: synchronized = true", () => {
     expect(state.missingAnnotationTopics).toBeUndefined();
   });
   it("shows most recent image and annotations with same timestamps", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -489,7 +489,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("shows most older image and annotations with same timestamps if newer messages have different timestamps", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -541,7 +541,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("does not show image in state if it hasn't received requisite annotations at same timestamp", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -574,7 +574,7 @@ describe("MessageHandler: synchronized = true", () => {
   });
 
   it("clears image when image topic changed", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       imageTopic: "image1",
       synchronize: true,
@@ -602,7 +602,7 @@ describe("MessageHandler: synchronized = true", () => {
     expect(state.image).toBeUndefined();
   });
   it("clears specific annotations if annotations subscriptions change", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: true,
       imageTopic: "image",
@@ -649,7 +649,7 @@ describe("MessageHandler: synchronized = true", () => {
     expect(state.annotationsByTopic?.get("annotations2")).toBeUndefined();
   });
   it("listener function called whenever a message is handled or when config changes", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: true,
       imageTopic: "image",
@@ -692,16 +692,16 @@ describe("MessageHandler: synchronized = true", () => {
 
 describe("MessageHandler: hud item display", () => {
   it("init: waiting for images if no calibration topic specified", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler({ synchronize: false }, hud);
 
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
   });
   it("init: waiting for both if calibration topic specified", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: false, calibrationTopic: "exists" },
       hud,
@@ -709,11 +709,14 @@ describe("MessageHandler: hud item display", () => {
 
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_BOTH_HUD_ITEM, WAITING_FOR_IMAGE_NOTICE_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([
+      WAITING_FOR_BOTH_HUD_ITEM,
+      WAITING_FOR_IMAGE_NOTICE_HUD_ITEM,
+    ]);
   });
   it("waiting for image notice if calibration received", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: false, calibrationTopic: "exists" },
       hud,
@@ -727,11 +730,11 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleCameraInfo(cameraInfo);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_IMAGE_NOTICE_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_IMAGE_NOTICE_HUD_ITEM]);
   });
   it("is waiting for calibration if topic specified and image received", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: false, calibrationTopic: "info" },
       hud,
@@ -741,12 +744,12 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleRawImage(image);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_CALIBRATION_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_CALIBRATION_HUD_ITEM]);
   });
 
   it("is waiting for image if image topic is changed after recieving image", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = { synchronize: false, imageTopic: "image1" };
     const messageHandler = new MessageHandler(initConfig, hud);
 
@@ -756,12 +759,12 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.setConfig({ ...initConfig, imageTopic: "image2" });
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
   });
 
   it("shows waiting for Both if calibration topic changed after only receiving calibration message", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       calibrationTopic: "calibration1",
@@ -777,14 +780,14 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.setConfig({ ...initConfig, calibrationTopic: "calibration2" });
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id").filter(
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id").filter(
       (item) => item.displayType === "empty",
     );
-    expect(hudItems).toEqual([WAITING_FOR_BOTH_HUD_ITEM]);
+    expect(notificationItems).toEqual([WAITING_FOR_BOTH_HUD_ITEM]);
   });
 
   it("shows waiting for calibration if calibration topic changed after receiving both image and calibration messages", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       calibrationTopic: "calibration1",
@@ -805,11 +808,11 @@ describe("MessageHandler: hud item display", () => {
 
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_CALIBRATION_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_CALIBRATION_HUD_ITEM]);
   });
   it("displays waiting for image after calibration is set to undefined", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = {
       synchronize: false,
       calibrationTopic: "calibration1",
@@ -825,14 +828,14 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.setConfig({ ...initConfig, calibrationTopic: undefined });
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id").filter(
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id").filter(
       ({ displayType }) => displayType === "empty",
     );
-    expect(hudItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
+    expect(notificationItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
   });
 
   it("displays no info after receiving calibration and image", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: false, calibrationTopic: "calibration" },
       hud,
@@ -848,12 +851,12 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleRawImage(image);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([]);
   });
 
   it("displays no info after receiving image when calibration topic is undefined", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       { synchronize: false, calibrationTopic: undefined },
       hud,
@@ -863,23 +866,23 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleRawImage(image);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([]);
   });
   it("displays no info after receiving image when synchronized is true", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler({ synchronize: true }, hud);
 
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n);
     messageHandler.handleRawImage(image);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([]);
   });
 
   it("displays waiting for image after receiving annotations when synced", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -899,12 +902,12 @@ describe("MessageHandler: hud item display", () => {
 
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_IMAGE_EMPTY_HUD_ITEM]);
   });
 
   it("displays no info after receiving synced annotations and image", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -930,12 +933,12 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleAnnotations(annotationMessage as MessageEvent<ImageAnnotations>);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([]);
   });
 
   it("displays waiting for sync empty state (calibration=None) after receiving image and annotations with mismatched timestamps", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -973,12 +976,12 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleAnnotations(annotationMessage2 as MessageEvent<ImageAnnotations>);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_SYNC_EMPTY_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_SYNC_EMPTY_HUD_ITEM]);
   });
 
   it("displays waiting for sync empty state (calibrationTopic exists) after receiving image and annotations with mismatched timestamps", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const messageHandler = new MessageHandler(
       {
         synchronize: true,
@@ -1023,12 +1026,12 @@ describe("MessageHandler: hud item display", () => {
     messageHandler.handleAnnotations(annotationMessage2 as MessageEvent<ImageAnnotations>);
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([WAITING_FOR_SYNC_NOTICE_HUD_ITEM]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([WAITING_FOR_SYNC_NOTICE_HUD_ITEM]);
   });
 
   it("displays no info after going from unsynced to synced and back", () => {
-    const hud = new HUDItemManager(() => {});
+    const hud = new NotificationManager(() => {});
     const initConfig = { synchronize: false, calibrationTopic: "calibration" };
     const messageHandler = new MessageHandler(initConfig, hud);
 
@@ -1050,8 +1053,8 @@ describe("MessageHandler: hud item display", () => {
 
     messageHandler.getRenderStateAndUpdateHUD();
 
-    const hudItems = _.sortBy(hud.getHUDItems(), "id");
-    expect(hudItems).toEqual([]);
+    const notificationItems = _.sortBy(hud.getNotificationItems(), "id");
+    expect(notificationItems).toEqual([]);
   });
 });
 function createCircleAnnotations(atTimes: bigint[]): ImageAnnotations {

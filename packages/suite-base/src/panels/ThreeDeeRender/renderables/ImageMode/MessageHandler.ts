@@ -21,11 +21,11 @@ import {
   isLessThan,
 } from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
-import {
-  HUDItem,
-  HUDItemManager,
-} from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
 import { ImageModeConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
+import {
+  NotificationItem,
+  NotificationManager,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/NotificationManager";
 import {
   AnyImage,
   CompressedVideo,
@@ -48,12 +48,12 @@ import { normalizeAnnotations } from "./annotations/normalizeAnnotations";
 import { Annotation } from "./annotations/types";
 import {
   IMAGE_MODE_HUD_GROUP_ID,
-  WAITING_FOR_BOTH_MESSAGES_HUD_ID,
-  WAITING_FOR_CALIBRATION_HUD_ID,
+  WAITING_FOR_BOTH_MESSAGES_ID,
+  WAITING_FOR_CALIBRATION_ID,
   WAITING_FOR_IMAGES_NOTICE_ID,
-  WAITING_FOR_IMAGES_EMPTY_HUD_ID,
-  WAITING_FOR_SYNC_NOTICE_HUD_ID,
-  WAITING_FOR_SYNC_EMPTY_HUD_ID,
+  WAITING_FOR_IMAGES_EMPTY_ID,
+  WAITING_FOR_SYNC_NOTICE_ID,
+  WAITING_FOR_SYNC_EMPTY_ID,
 } from "./constants";
 import { PartialMessageEvent } from "../../SceneExtension";
 import { CompressedImage as RosCompressedImage, Image as RosImage, CameraInfo } from "../../ros";
@@ -94,43 +94,43 @@ type RenderStateListener = (
 ) => void;
 
 // Have constants for the HUD items so that they don't need to be recreated and GCed every message
-export const WAITING_FOR_BOTH_HUD_ITEM: HUDItem = {
-  id: WAITING_FOR_BOTH_MESSAGES_HUD_ID,
+export const WAITING_FOR_BOTH_HUD_ITEM: NotificationItem = {
+  id: WAITING_FOR_BOTH_MESSAGES_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("waitingForCalibrationAndImages"),
   displayType: "empty",
 };
 
-export const WAITING_FOR_CALIBRATION_HUD_ITEM: HUDItem = {
-  id: WAITING_FOR_CALIBRATION_HUD_ID,
+export const WAITING_FOR_CALIBRATION_HUD_ITEM: NotificationItem = {
+  id: WAITING_FOR_CALIBRATION_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("waitingForCalibration"),
   displayType: "empty",
 };
 
-export const WAITING_FOR_IMAGE_NOTICE_HUD_ITEM: HUDItem = {
+export const WAITING_FOR_IMAGE_NOTICE_HUD_ITEM: NotificationItem = {
   id: WAITING_FOR_IMAGES_NOTICE_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("waitingForImages"),
   displayType: "notice",
 };
 
-export const WAITING_FOR_IMAGE_EMPTY_HUD_ITEM: HUDItem = {
-  id: WAITING_FOR_IMAGES_EMPTY_HUD_ID,
+export const WAITING_FOR_IMAGE_EMPTY_HUD_ITEM: NotificationItem = {
+  id: WAITING_FOR_IMAGES_EMPTY_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("waitingForImages"),
   displayType: "empty",
 };
 
-export const WAITING_FOR_SYNC_NOTICE_HUD_ITEM: HUDItem = {
-  id: WAITING_FOR_SYNC_NOTICE_HUD_ID,
+export const WAITING_FOR_SYNC_NOTICE_HUD_ITEM: NotificationItem = {
+  id: WAITING_FOR_SYNC_NOTICE_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("waitingForSyncAnnotations"),
   displayType: "notice",
 };
 
-export const WAITING_FOR_SYNC_EMPTY_HUD_ITEM: HUDItem = {
-  id: WAITING_FOR_SYNC_EMPTY_HUD_ID,
+export const WAITING_FOR_SYNC_EMPTY_HUD_ITEM: NotificationItem = {
+  id: WAITING_FOR_SYNC_EMPTY_ID,
   group: IMAGE_MODE_HUD_GROUP_ID,
   getMessage: () => t3D("waitingForSyncAnnotations"),
   displayType: "empty",
@@ -146,7 +146,7 @@ export class MessageHandler implements IMessageHandler {
   #config: Immutable<Config>;
 
   /** Allows message handler push messages to overlay on top of the canvas */
-  #hud: HUDItemManager;
+  #hud: NotificationManager;
 
   /** last state passed to listeners */
   #oldRenderState: MessageRenderState | undefined;
@@ -171,7 +171,7 @@ export class MessageHandler implements IMessageHandler {
    *
    * @param config - subset of ImageMode settings required for message handling
    */
-  public constructor(config: Immutable<Config>, hud: HUDItemManager) {
+  public constructor(config: Immutable<Config>, hud: NotificationManager) {
     this.#config = config;
     this.#hud = hud;
     this.#lastReceivedMessages = {

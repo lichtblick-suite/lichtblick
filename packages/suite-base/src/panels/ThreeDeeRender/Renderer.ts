@@ -36,14 +36,14 @@ import {
   DraggedMessagePath,
   MessagePathDropStatus,
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
+import { HUDManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD/HUDManager";
 import { LayerErrors } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
+import { NotificationManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/NotificationManager";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { palette, fontMonospace } from "@lichtblick/theme";
 import { LabelMaterial, LabelPool } from "@lichtblick/three-text";
 
-import { HUDItem } from "./HUDItemManager";
 import {
   IRenderer,
   InstancedLineMaterial,
@@ -54,6 +54,7 @@ import {
 } from "./IRenderer";
 import { Input } from "./Input";
 import { DEFAULT_MESH_UP_AXIS, ModelCache } from "./ModelCache";
+import { NotificationItem } from "./NotificationManager";
 import { PickedRenderable, Picker } from "./Picker";
 import type { Renderable } from "./Renderable";
 import { SceneExtension } from "./SceneExtension";
@@ -186,9 +187,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public topicSubscriptions = new Map<string, RendererSubscription[]>();
 
   /** HUD manager instance */
-  public hud;
+  public notificationManager;
+  /** Debug info manager instance */
+  public hudManager;
   /** Items to display in the HUD */
-  public hudItems: HUDItem[] = [];
+  public notificationItems: NotificationItem[] = [];
   // layerId -> { action, handler }
   #customLayerActions = new Map<string, CustomLayerAction>();
   #scene: THREE.Scene;
@@ -273,7 +276,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.testOptions = args.testOptions;
     this.debugPicking = args.testOptions.debugPicking ?? false;
 
-    this.hud = new HUDItemManager(this.#onHUDItemsChange);
+    this.notificationManager = new NotificationManager(this.#onNotificationItemsChange);
+    this.hudManager = new HUDManager(this.#onHUDInfoChange);
 
     this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode));
     this.settings.on("update", () => this.emit("settingsTreeChange", this));
@@ -406,9 +410,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.animationFrame();
   }
 
-  #onHUDItemsChange = () => {
-    this.hudItems = this.hud.getHUDItems();
-    this.emit("hudItemsChanged", this);
+  #onNotificationItemsChange = () => {
+    this.notificationItems = this.notificationManager.getNotificationItems();
+    this.emit("notificationItemsChanged", this);
+  };
+
+  #onHUDInfoChange = () => {
+    this.emit("hudInfoChanged", this);
   };
 
   #onDevicePixelRatioChange = () => {
@@ -516,7 +524,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.#resetAllFramesCursor();
     }
     this.settings.errors.clear();
-    this.hud.clear();
+    this.notificationManager.clear();
+    this.hudManager.clear();
 
     for (const extension of this.sceneExtensions.values()) {
       if (!clearImageModeExtension && extension === this.#imageModeExtension) {
@@ -1584,7 +1593,7 @@ function baseSettingsTree(interfaceMode: InterfaceMode): SettingsTreeNodes {
   if (interfaceMode === "3d") {
     keys.push("cameraState");
   }
-  keys.push("transforms", "topics", "layers");
+  keys.push("transforms", "topics", "layers", "hudInfoTopics");
   if (interfaceMode === "3d") {
     keys.push("publish");
   }

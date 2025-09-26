@@ -14,7 +14,7 @@ import { makeStyles } from "tss-react/mui";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 
-import { HUDItem } from "./HUDItemManager";
+import { NotificationItem } from "./NotificationManager";
 import { useRendererProperty } from "./RendererContext";
 
 const useStyles = makeStyles()((theme) => ({
@@ -45,21 +45,21 @@ type HUDProps = {
   renderer?: IRenderer;
 };
 
-export function HUD(props: HUDProps): React.ReactElement {
+export function Notification(props: HUDProps): React.ReactElement {
   const { classes } = useStyles();
-  const hudItems: HUDItem[] = useRendererProperty(
-    "hudItems",
-    "hudItemsChanged",
+  const notificationItems: NotificationItem[] = useRendererProperty(
+    "notificationItems",
+    "notificationItemsChanged",
     () => [],
     props.renderer,
   );
 
   const [emptyStates, notices] = React.useMemo(
-    () => _.partition(hudItems, (i) => i.displayType === "empty"),
-    [hudItems],
+    () => _.partition(notificationItems, (i) => i.displayType === "empty"),
+    [notificationItems],
   );
 
-  if (hudItems.length === 0) {
+  if (notificationItems.length === 0) {
     return <></>;
   }
 

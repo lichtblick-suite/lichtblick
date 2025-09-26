@@ -44,6 +44,9 @@ addFoxgloveSchema(GRID_DATATYPES, "foxglove.Grid");
 export const IMAGE_ANNOTATIONS_DATATYPES = new Set<string>();
 addFoxgloveSchema(IMAGE_ANNOTATIONS_DATATYPES, "foxglove.ImageAnnotations");
 
+export const HUD_INFO_MESSAGE_DATATYPES = new Set<string>();
+addFoxgloveSchema(HUD_INFO_MESSAGE_DATATYPES, "lichtblick.HUDInfoMessage");
+
 // Expand a single Foxglove schema name into variations for ROS1, ROS2, and IDL and add
 // them to the output set.
 export function addFoxgloveSchema(output: Set<string>, dataType: string): Set<string> {

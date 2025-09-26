@@ -32,8 +32,9 @@ import PublishGoalIcon from "@lichtblick/suite-base/components/PublishGoalIcon";
 import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
 import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
-import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
+import { Notification } from "@lichtblick/suite-base/panels/ThreeDeeRender/Notification";
 
+import { HUDInfoMessagesPanel } from "./HUD/HUDInfoMessagesPanel";
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
 import { Renderable } from "./Renderable";
@@ -128,7 +129,12 @@ export function RendererOverlay(props: Props): React.JSX.Element {
     undefined,
   );
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
+  const [hudInfoMessages, setHudInfoMessages] = useState<ReadonlyArray<string>>([]);
   const renderer = useRenderer();
+
+  useRendererEvent("hudInfoChanged", () => {
+    setHudInfoMessages(renderer?.hudManager.getInfoMessages() ?? []);
+  });
 
   // Toggle object selection mode on/off in the renderer
   useEffect(() => {
@@ -398,7 +404,8 @@ export function RendererOverlay(props: Props): React.JSX.Element {
           }}
         />
       )}
-      <HUD renderer={renderer} />
+      <Notification renderer={renderer} />
+      {hudInfoMessages.length > 0 && <HUDInfoMessagesPanel infoMessages={hudInfoMessages} />}
       {stats}
       {resetViewButton}
     </>

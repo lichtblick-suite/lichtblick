@@ -23,14 +23,16 @@ import {
   DraggedMessagePath,
   MessagePathDropStatus,
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
+import { HUDInfoMessageSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD/HUDInfoMessages";
+import { HUDManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD/HUDManager";
+import { NotificationManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/NotificationManager";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { LabelPool } from "@lichtblick/three-text";
 
-import { HUDItem } from "./HUDItemManager";
 import { Input } from "./Input";
 import { MeshUpAxis, ModelCache } from "./ModelCache";
+import { NotificationItem } from "./NotificationManager";
 import { PickedRenderable } from "./Picker";
 import { SceneExtension } from "./SceneExtension";
 import { SettingsManager } from "./SettingsManager";
@@ -70,7 +72,8 @@ export type RendererEvents = {
   topicsChanged: (renderer: IRenderer) => void;
   resetViewChanged: (renderer: IRenderer) => void;
   resetAllFramesCursor: (renderer: IRenderer) => void;
-  hudItemsChanged: (renderer: IRenderer) => void;
+  notificationItemsChanged: (renderer: IRenderer) => void;
+  hudInfoChanged: (renderer: IRenderer) => void;
 };
 
 export type FollowMode = "follow-pose" | "follow-position" | "follow-none";
@@ -167,6 +170,8 @@ export type RendererConfig = {
   topics: Record<string, Partial<BaseSettings> | undefined>;
   /** instanceId -> settings */
   layers: Record<string, Partial<CustomLayerSettings> | undefined>;
+  /** topicName -> settings for debug log topics */
+  hudInfoTopics: Record<string, Partial<HUDInfoMessageSettings> | undefined>;
 
   /** Settings pertaining to Image mode */
   imageMode: ImageModeConfig;
@@ -224,7 +229,8 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   maxLod: DetailLevel;
   config: Immutable<RendererConfig>;
   settings: SettingsManager;
-  hud: HUDItemManager;
+  notificationManager: NotificationManager;
+  hudManager: HUDManager;
   debugPicking: boolean;
   // [{ name, datatype }]
   topics: ReadonlyArray<Topic> | undefined;
@@ -395,7 +401,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   getContextMenuItems: () => PanelContextMenuItem[];
 
   /** Items to render in an over-canvas Heads-up display*/
-  hudItems: HUDItem[];
+  notificationItems: NotificationItem[];
 
   displayTemporaryError?: (message: string) => void;
 }

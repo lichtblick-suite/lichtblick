@@ -78,9 +78,9 @@ import { ImageModeCamera } from "./ImageModeCamera";
 import { IMessageHandler, MessageHandler, MessageRenderState } from "./MessageHandler";
 import { ImageAnnotations } from "./annotations/ImageAnnotations";
 import {
-  BOTH_TOPICS_DO_NOT_EXIST_HUD_ITEM_ID,
-  IMAGE_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
-  CALIBRATION_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+  BOTH_TOPICS_DO_NOT_EXIST_ID,
+  IMAGE_TOPIC_DOES_NOT_EXIST_ID,
+  CALIBRATION_TOPIC_DOES_NOT_EXIST_ID,
 } from "./constants";
 import type {
   AnyRendererSubscription,
@@ -447,21 +447,21 @@ export class ImageMode
 
     const bothTopicsDoNotExist = !imageTopicExists && !calibrationTopicExists;
     this.hud.displayIfTrue(bothTopicsDoNotExist, {
-      id: BOTH_TOPICS_DO_NOT_EXIST_HUD_ITEM_ID,
+      id: BOTH_TOPICS_DO_NOT_EXIST_ID,
       displayType: "empty",
       group: "IMAGE_MODE",
       getMessage: () => t3D("imageAndCalibrationDNE"),
     });
 
     this.hud.displayIfTrue(!imageTopicExists && calibrationTopic == undefined, {
-      id: IMAGE_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+      id: IMAGE_TOPIC_DOES_NOT_EXIST_ID,
       displayType: "empty",
       group: "IMAGE_MODE",
       getMessage: () => t3D("imageTopicDNE"),
     });
 
     this.hud.displayIfTrue(imageTopicExists && !calibrationTopicExists, {
-      id: CALIBRATION_TOPIC_DOES_NOT_EXIST_HUD_ITEM_ID,
+      id: CALIBRATION_TOPIC_DOES_NOT_EXIST_ID,
       displayType: "empty",
       group: "IMAGE_MODE",
       getMessage: () => t3D("calibrationTopicDNE"),
