@@ -165,7 +165,7 @@ describe("IdbExtensionLoader", () => {
       const result = await loader.loadExtension(extension.info.id);
 
       expect(mockGet).toHaveBeenCalledWith(EXTENSION_STORE_NAME, extension.info.id);
-      expect(result).toContain(rawContent);
+      expect(result.raw).toContain(rawContent);
     });
 
     it("should throw an error if the extension is not found", async () => {

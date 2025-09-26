@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import JSZip from "jszip";
-
 import Log from "@lichtblick/log";
 import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
@@ -11,7 +9,8 @@ import {
   LoadedExtension,
 } from "@lichtblick/suite-base/services/extension/ExtensionLoader";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
-import getFileContent from "@lichtblick/suite-base/services/extension/utils/getFileContent";
+import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
+import extractFoxeFileContent from "@lichtblick/suite-base/services/extension/utils/extractFoxeFileContent";
 import qualifiedName from "@lichtblick/suite-base/services/extension/utils/qualifiedName";
 import validatePackageInfo from "@lichtblick/suite-base/services/extension/utils/validatePackageInfo";
 import { ExtensionInfo, ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
@@ -50,7 +49,11 @@ export class RemoteExtensionLoader implements ExtensionLoader {
       throw new Error("Extension is corrupted or does not exist in the file system.");
     }
 
-    const rawExtensionFile = await this.extractFile(foxeFileData, ALLOWED_FILES.EXTENSION);
+    const decompressedData = await decompressFile(foxeFileData);
+    const rawExtensionFile = await extractFoxeFileContent(
+      decompressedData,
+      ALLOWED_FILES.EXTENSION,
+    );
     if (!rawExtensionFile) {
       throw new Error(`Extension is corrupted: missing ${ALLOWED_FILES.EXTENSION}`);
     }
@@ -64,7 +67,8 @@ export class RemoteExtensionLoader implements ExtensionLoader {
   public async installExtension(foxeFileData: Uint8Array, file: File): Promise<ExtensionInfo> {
     log.debug("[Remote] Installing extension", foxeFileData, file);
 
-    const rawPackageFile = await this.extractFile(foxeFileData, ALLOWED_FILES.PACKAGE);
+    const decompressedData = await decompressFile(foxeFileData);
+    const rawPackageFile = await extractFoxeFileContent(decompressedData, ALLOWED_FILES.PACKAGE);
     if (!rawPackageFile) {
       throw new Error(`Extension is corrupted: missing ${ALLOWED_FILES.PACKAGE}`);
     }
@@ -77,8 +81,8 @@ export class RemoteExtensionLoader implements ExtensionLoader {
       id: `${normalizedPublisher}.${rawInfo.name}`,
       namespace: this.namespace,
       qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
-      readme: (await getFileContent(foxeFileData, ALLOWED_FILES.README)) ?? "",
-      changelog: (await getFileContent(foxeFileData, ALLOWED_FILES.CHANGELOG)) ?? "",
+      readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
+      changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
     };
 
     const storedExtension: StoredExtension = await this.#remote.createOrUpdate(
@@ -96,23 +100,5 @@ export class RemoteExtensionLoader implements ExtensionLoader {
     log.debug("[Remote] Uninstalling extension", id);
 
     await this.#remote.remove(id);
-  }
-
-  private async extractFile(
-    foxeFileData: Uint8Array,
-    file: ALLOWED_FILES,
-  ): Promise<string | undefined> {
-    const zip = new JSZip();
-    const unzippedData = await zip.loadAsync(foxeFileData);
-
-    return await this.extractFileContent(unzippedData, file);
-  }
-
-  private async extractFileContent(zip: JSZip, file: ALLOWED_FILES): Promise<string | undefined> {
-    const fileEntry = zip.file(file);
-    if (!fileEntry) {
-      throw new Error(`File not found in zip: ${file}`);
-    }
-    return await fileEntry.async("string");
   }
 }
