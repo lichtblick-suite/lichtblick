@@ -6,8 +6,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@lichtblick/log";
-import { ExtensionInfo, IExtensionLoader, ExtensionNamespace } from "@lichtblick/suite-base";
-import { LoadedExtension } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
+import {
+  ExtensionInfo,
+  ExtensionNamespace,
+  IExtensionLoader,
+  LoadedExtension,
+} from "@lichtblick/suite-base";
 
 import { Desktop, DesktopExtension } from "../../common/types";
 
