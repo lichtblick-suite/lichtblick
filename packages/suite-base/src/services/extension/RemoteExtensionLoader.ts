@@ -89,6 +89,7 @@ export class RemoteExtensionLoader implements IExtensionLoader {
         readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
         changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
       },
+      remoteNamespace: this.remoteNamespace,
     };
 
     const storedExtension = await this.#remote.createOrUpdate(newExtension, file);
