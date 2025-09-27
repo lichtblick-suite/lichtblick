@@ -7,6 +7,7 @@ import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 import { RemoteExtensionLoader } from "./RemoteExtensionLoader";
 
@@ -22,7 +23,7 @@ const MockedExtensionsAPI = ExtensionsAPI as jest.MockedClass<typeof ExtensionsA
 describe("RemoteExtensionLoader", () => {
   let mockExtensionsAPI: jest.Mocked<ExtensionsAPI>;
   let loader: RemoteExtensionLoader;
-  const mockNamespace = "org";
+  const mockNamespace: Namespace = "org";
   const mockSlug = BasicBuilder.string();
 
   beforeEach(() => {

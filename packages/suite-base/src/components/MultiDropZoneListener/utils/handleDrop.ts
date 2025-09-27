@@ -134,7 +134,7 @@ async function processDirectories(directories: FileSystemDirectoryEntry[]): Prom
       directory.createReader().readEntries(resolve, reject);
     });
 
-  const filesArrays = await Promise.all(
+  const filesArrays: File[][] = await Promise.all(
     directories.map(async (directory) => {
       const entries = await readDirectory(directory);
       const files = await Promise.all(entries.map(entryToFile));
