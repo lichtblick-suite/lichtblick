@@ -13,12 +13,15 @@ export type LoadedExtension = {
   raw: string;
 };
 
+export type TypeExtensionLoader = "browser" | "server" | "filesystem";
+
 /**
  * An extension loader is an object used by studio to list, install, and uninstall extensions
  * from a particular namespace.
  */
 export interface IExtensionLoader {
   readonly namespace: Namespace;
+  readonly type: TypeExtensionLoader;
 
   // get extension by id
   getExtension(id: string): Promise<ExtensionInfo | undefined>;

@@ -18,12 +18,12 @@ export const useStyles = makeStyles()(({ palette, spacing, shadows }) => ({
 
   topRow: {
     display: "flex",
-    height: "55%", // Top 55% for extensions/layouts
+    height: "50%", // Top 50% for extensions/layouts
   },
 
   bottomRow: {
     display: "flex",
-    height: "45%", // Bottom 45% for data sources
+    height: "50%", // Bottom 50% for data sources
   },
 
   dropZoneVertical: {

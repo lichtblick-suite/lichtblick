@@ -18,6 +18,7 @@ import {
 } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
+import { TypeExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
@@ -38,6 +39,34 @@ export type InstallExtensionsResult = {
   success: boolean;
   info?: ExtensionInfo;
   error?: unknown;
+  extensionName?: string;
+  loaderResults?: (Pick<LoadExtensionsResult, "loaderType" | "success"> & { error?: unknown })[];
+};
+
+export type LoadExtensionsResult = {
+  loaderType: TypeExtensionLoader;
+  success: boolean;
+  error?: Error;
+  info?: ExtensionInfo;
+};
+
+export type UseInstallingExtensionsState = {
+  installFoxeExtensions: (extensionsData: ExtensionData[]) => Promise<void>;
+};
+
+export type UseInstallingExtensionsStateProps = {
+  isPlaying: boolean;
+  playerEvents: {
+    play: (() => void) | undefined;
+  };
+};
+
+export type ExtensionSnackbar = {
+  name: string;
+  namespace: Namespace;
+  error: string;
+  success: string;
+  warning: string;
 };
 
 export type ExtensionCatalog = Immutable<{

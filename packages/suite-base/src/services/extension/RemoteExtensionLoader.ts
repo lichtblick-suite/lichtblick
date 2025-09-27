@@ -7,6 +7,7 @@ import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStora
 import {
   IExtensionLoader,
   LoadedExtension,
+  TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
@@ -21,6 +22,7 @@ const log = Log.getLogger(__filename);
 export class RemoteExtensionLoader implements IExtensionLoader {
   #remote: ExtensionsAPI;
   public readonly namespace: Namespace;
+  public readonly type: TypeExtensionLoader = "server";
   public remoteNamespace: string;
 
   public constructor(namespace: Namespace, slug: string) {
@@ -77,22 +79,19 @@ export class RemoteExtensionLoader implements IExtensionLoader {
     const rawInfo = validatePackageInfo(JSON.parse(rawPackageFile) as Partial<ExtensionInfo>);
     const normalizedPublisher = rawInfo.publisher.replace(/[^A-Za-z0-9_\s]+/g, "");
 
-    const info: ExtensionInfo = {
-      ...rawInfo,
-      id: `${normalizedPublisher}.${rawInfo.name}`,
-      namespace: this.namespace,
-      qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
-      readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
-      changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
+    const newExtension: StoredExtension = {
+      content: foxeFileData,
+      info: {
+        ...rawInfo,
+        id: `${normalizedPublisher}.${rawInfo.name}`,
+        namespace: this.namespace,
+        qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
+        readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
+        changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
+      },
     };
 
-    const storedExtension: StoredExtension = await this.#remote.createOrUpdate(
-      {
-        info,
-        remoteNamespace: this.remoteNamespace,
-      },
-      file,
-    );
+    const storedExtension = await this.#remote.createOrUpdate(newExtension, file);
 
     return storedExtension.info;
   }

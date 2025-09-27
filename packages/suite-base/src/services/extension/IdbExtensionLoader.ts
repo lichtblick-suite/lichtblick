@@ -13,6 +13,7 @@ import {
 import {
   IExtensionLoader,
   LoadedExtension,
+  TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
@@ -29,6 +30,7 @@ const log = Log.getLogger(__filename);
 export class IdbExtensionLoader implements IExtensionLoader {
   readonly #storage: IExtensionStorage;
   public readonly namespace: Namespace;
+  public readonly type: TypeExtensionLoader = "server";
 
   public constructor(namespace: Namespace) {
     this.namespace = namespace;
@@ -87,20 +89,20 @@ export class IdbExtensionLoader implements IExtensionLoader {
     const rawInfo = validatePackageInfo(JSON.parse(rawPackageFile) as Partial<ExtensionInfo>);
     const normalizedPublisher = rawInfo.publisher.replace(/[^A-Za-z0-9_\s]+/g, "");
 
-    const info: ExtensionInfo = {
-      ...rawInfo,
-      id: `${normalizedPublisher}.${rawInfo.name}`,
-      namespace: this.namespace,
-      qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
-      readme,
-      changelog,
-    };
-    await this.#storage.put({
+    const newExtension: StoredExtension = {
       content: foxeFileData,
-      info,
-    });
+      info: {
+        ...rawInfo,
+        id: `${normalizedPublisher}.${rawInfo.name}`,
+        namespace: this.namespace,
+        qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
+        readme,
+        changelog,
+      },
+    };
+    const storedExtension = await this.#storage.put(newExtension);
 
-    return info;
+    return storedExtension.info;
   }
 
   public async uninstallExtension(id: string): Promise<void> {
