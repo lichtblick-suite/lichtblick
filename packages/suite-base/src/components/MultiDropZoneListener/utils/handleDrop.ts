@@ -138,7 +138,7 @@ async function processDirectories(directories: FileSystemDirectoryEntry[]): Prom
     directories.map(async (directory) => {
       const entries = await readDirectory(directory);
       const files = await Promise.all(entries.map(entryToFile));
-      return files.filter((file) => file != undefined);
+      return files.filter((file) => file != undefined) as File[];
     }),
   );
 
