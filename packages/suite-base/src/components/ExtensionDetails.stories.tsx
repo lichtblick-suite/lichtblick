@@ -33,6 +33,7 @@ export default {
 };
 
 const MockExtensionLoader: IExtensionLoader = {
+  type: "browser",
   namespace: "local",
   getExtension: async () => undefined,
   getExtensions: async () => [],
