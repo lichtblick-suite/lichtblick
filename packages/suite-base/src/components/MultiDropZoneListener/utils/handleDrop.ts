@@ -9,6 +9,12 @@ import { Namespace } from "@lichtblick/suite-base/types";
 
 const log = Logger.getLogger(__filename);
 
+interface ProcessedItems {
+  files: File[];
+  directories: FileSystemDirectoryEntry[];
+  handlePromises: Promise<FileSystemHandle | ReactNull>[];
+}
+
 export default async function handleDrop({
   allowedExtensions,
   dropZone,
@@ -25,64 +31,20 @@ export default async function handleDrop({
     return;
   }
 
-  let handles: FileSystemFileHandle[] | undefined = [];
-  const handlePromises: Promise<FileSystemHandle | ReactNull>[] = [];
-  const allFiles: File[] = [];
-  const directories: FileSystemDirectoryEntry[] = [];
-  const dataItems = event.dataTransfer.items;
+  const {
+    files: initialFiles,
+    directories,
+    handlePromises,
+  } = await processDataItems(event.dataTransfer.items);
 
-  for (const item of Array.from(dataItems)) {
-    if (window.isSecureContext && "getAsFileSystemHandle" in item) {
-      handlePromises.push(item.getAsFileSystemHandle());
-    } else {
-      log.info(
-        "getAsFileSystemHandle not available on a dropped item. Features requiring handles will not be available for the item",
-        item,
-      );
-    }
+  const directoryFiles = await processDirectories(directories);
+  const allFiles = [...initialFiles, ...directoryFiles];
+  const handles = await resolveFileSystemHandles(handlePromises, {
+    hasDirectories: directories.length > 0,
+  });
 
-    const entry = item.webkitGetAsEntry();
-
-    if (entry?.isFile === true) {
-      const file = item.getAsFile();
-      if (file) {
-        allFiles.push(file);
-      }
-    } else if (entry?.isDirectory === true) {
-      directories.push(entry as FileSystemDirectoryEntry);
-    }
-  }
-
-  if (directories.length === 0) {
-    for (const promise of handlePromises) {
-      const fileSystemHandle = await promise;
-      if (fileSystemHandle instanceof FileSystemFileHandle) {
-        handles.push(fileSystemHandle);
-      }
-    }
-  }
-
-  if (allFiles.length === 0 && directories.length === 0 && handles.length === 0) {
+  if (allFiles.length === 0 && directories.length === 0 && (handles?.length ?? 0) === 0) {
     return;
-  }
-
-  for (const directory of directories) {
-    const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-      directory.createReader().readEntries(resolve, reject);
-    });
-
-    for (const entry of entries) {
-      if (entry.isFile) {
-        const file = await new Promise<File>((resolve, reject) => {
-          (entry as FileSystemFileEntry).file(resolve, reject);
-        });
-        allFiles.push(file);
-      }
-    }
-  }
-
-  if (directories.length > 0 || handles.length === 0) {
-    handles = undefined;
   }
 
   const filteredFiles = allFiles.filter((file) => allowedExtensions.includes(extname(file.name)));
@@ -98,14 +60,87 @@ export default async function handleDrop({
   event.preventDefault();
   event.stopPropagation();
 
-  let namespace: Namespace | undefined;
-  let isSource = false;
+  const isSource: boolean = dropZone === "source";
+  const namespace: Namespace | undefined = isSource ? undefined : (dropZone as Namespace);
 
-  if (dropZone === "source") {
-    isSource = true;
-  } else {
-    namespace = dropZone;
+  onDrop?.({
+    files: filteredFiles,
+    handles: filteredHandles,
+    namespace,
+    isSource,
+  });
+}
+
+async function processDataItems(dataItems: DataTransferItemList): Promise<ProcessedItems> {
+  const files: File[] = [];
+  const directories: FileSystemDirectoryEntry[] = [];
+  const handlePromises: Promise<FileSystemHandle | ReactNull>[] = [];
+
+  for (const item of Array.from(dataItems)) {
+    if (window.isSecureContext && "getAsFileSystemHandle" in item) {
+      handlePromises.push(item.getAsFileSystemHandle());
+    } else {
+      log.info(
+        "getAsFileSystemHandle not available on a dropped item. Features requiring handles will not be available for the item",
+        item,
+      );
+    }
+
+    const entry = item.webkitGetAsEntry();
+    if (entry?.isFile === true) {
+      const file = item.getAsFile();
+      if (file) {
+        files.push(file);
+      }
+    } else if (entry?.isDirectory === true) {
+      directories.push(entry as FileSystemDirectoryEntry);
+    }
   }
 
-  onDrop?.({ files: filteredFiles, handles: filteredHandles, namespace, isSource });
+  return { files, directories, handlePromises };
+}
+
+async function resolveFileSystemHandles(
+  handlePromises: Promise<FileSystemHandle | ReactNull>[],
+  options: { hasDirectories: boolean },
+): Promise<FileSystemFileHandle[] | undefined> {
+  if (options.hasDirectories) {
+    return undefined;
+  }
+
+  const handles: FileSystemFileHandle[] = [];
+  for (const promise of handlePromises) {
+    const fileSystemHandle = await promise;
+    if (fileSystemHandle instanceof FileSystemFileHandle) {
+      handles.push(fileSystemHandle);
+    }
+  }
+
+  return handles.length === 0 ? undefined : handles;
+}
+
+async function processDirectories(directories: FileSystemDirectoryEntry[]): Promise<File[]> {
+  const entryToFile = async (entry: FileSystemEntry): Promise<File | undefined> =>
+    await new Promise((resolve, reject) => {
+      if (entry.isFile) {
+        (entry as FileSystemFileEntry).file(resolve, reject);
+      } else {
+        resolve(undefined);
+      }
+    });
+
+  const readDirectory = async (directory: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> =>
+    await new Promise((resolve, reject) => {
+      directory.createReader().readEntries(resolve, reject);
+    });
+
+  const filesArrays: File[][] = await Promise.all(
+    directories.map(async (directory) => {
+      const entries = await readDirectory(directory);
+      const files = await Promise.all(entries.map(entryToFile));
+      return files.filter((file) => file != undefined) as File[];
+    }),
+  );
+
+  return filesArrays.flat();
 }

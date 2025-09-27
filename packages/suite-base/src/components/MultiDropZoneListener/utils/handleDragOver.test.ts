@@ -164,7 +164,7 @@ describe("handleDragOver", () => {
       expect(determineActiveDropZone).toHaveBeenCalledWith(
         { clientX: mockEvent.clientX, clientY: mockEvent.clientY },
         { width: window.innerWidth, height: window.innerHeight },
-        { isRemote: true, topSectionRatio: 0.55 },
+        { isRemote: true, topSectionRatio: 0.5 },
       );
     });
 

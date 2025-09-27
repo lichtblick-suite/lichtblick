@@ -17,11 +17,10 @@ import {
   ExtensionCatalogContext,
   ExtensionData,
   InstallExtensionsResult,
+  LoadExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
 import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
-import { IdbExtensionLoader } from "@lichtblick/suite-base/services/extension/IdbExtensionLoader";
-import { RemoteExtensionLoader } from "@lichtblick/suite-base/services/extension/RemoteExtensionLoader";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
@@ -78,28 +77,62 @@ function createExtensionRegistryStore(
     ): Promise<InstallExtensionsResult[]> {
       return await Promise.all(
         batch.map(async (extension: ExtensionData) => {
+          const loaderResults: Array<LoadExtensionsResult> = [];
+          let extensionName = extension.file?.name ?? "Unknown extension";
+          let mergedInfo: ExtensionInfo | undefined;
+          let hasAnySuccess = false;
+
+          // Try installation with all loaders
           for (const loader of extensionLoaders) {
             try {
               const info = await loader.installExtension(extension.buffer, extension.file);
+              extensionName = info.displayName || info.name || extensionName;
               const { raw } = await loader.loadExtension(
-                loader.namespace === "org" ? info.externalId! : info.id,
+                loader.namespace === "org" && loader.type === "server" ? info.externalId! : info.id,
               );
               const unwrappedExtensionSource = raw;
               const contributionPoints = buildContributionPoints(info, unwrappedExtensionSource);
 
-              get().mergeState(info, contributionPoints);
-              get().markExtensionAsInstalled(info.id);
-              return { success: true, info };
-            } catch {
-              // Continue to next loader if this one fails
-              continue;
+              // Only merge state once for the first successful installation
+              if (!hasAnySuccess) {
+                get().mergeState(info, contributionPoints);
+                get().markExtensionAsInstalled(info.id);
+                mergedInfo = info;
+                hasAnySuccess = true;
+              }
+
+              loaderResults.push({
+                loaderType: loader.type,
+                success: true,
+              });
+            } catch (error) {
+              loaderResults.push({
+                loaderType: loader.type,
+                success: false,
+                error: error instanceof Error ? error : new Error(String(error)),
+              });
             }
           }
-          // If all loaders failed, return error
-          return {
-            success: false,
-            error: new Error(`Failed to install extension with any loader`),
-          };
+
+          if (hasAnySuccess) {
+            // At least one loader succeeded
+            const failedLoaders = loaderResults.filter((result) => !result.success);
+
+            return {
+              success: true,
+              info: mergedInfo!,
+              extensionName,
+              loaderResults,
+              error: failedLoaders.length > 0 ? new Error("Some loaders failed") : undefined,
+            };
+          } else {
+            return {
+              success: false,
+              error: new Error("All loaders failed"),
+              extensionName,
+              loaderResults,
+            };
+          }
         }),
       );
     }
@@ -141,9 +174,9 @@ function createExtensionRegistryStore(
       installedExtensions: ExtensionInfo[];
       contributionPoints: ContributionPoints;
     }) {
-      const orgLoaderCache: IExtensionLoader | undefined = loaders.find(
+      const orgCacheLoader: IExtensionLoader | undefined = loaders.find(
         (extensionLoader) =>
-          extensionLoader.namespace === "org" && extensionLoader instanceof IdbExtensionLoader,
+          extensionLoader.namespace === "org" && extensionLoader.type === "browser",
       );
       await Promise.all(
         batch.map(async (extension) => {
@@ -154,20 +187,20 @@ function createExtensionRegistryStore(
               contributionPoints;
             let unwrappedExtensionSource: string = "";
 
-            if (loader.namespace === "org" && loader instanceof RemoteExtensionLoader) {
+            if (loader.namespace === "org" && loader.type === "server") {
               try {
-                if (!orgLoaderCache) {
+                if (!orgCacheLoader) {
                   throw new Error("Cache loader not found.");
                 }
                 // Try to get extension from cache (IndexedDB)
-                const { raw } = await orgLoaderCache.loadExtension(extension.id);
+                const { raw } = await orgCacheLoader.loadExtension(extension.id);
                 unwrappedExtensionSource = raw;
               } catch {
                 // Fallback to remote
                 const { raw, buffer } = await loader.loadExtension(extension.externalId!);
                 unwrappedExtensionSource = raw;
                 if (buffer) {
-                  await orgLoaderCache?.installExtension(buffer);
+                  await orgCacheLoader?.installExtension(buffer);
                 }
               }
             } else {
@@ -235,7 +268,7 @@ function createExtensionRegistryStore(
       };
 
       const localAndRemoteLoaders = loaders.filter(
-        (loader) => loader.namespace === "local" || loader instanceof RemoteExtensionLoader,
+        (loader) => loader.namespace === "local" || loader.type === "server",
       );
       await Promise.all(localAndRemoteLoaders.map(processLoader));
 

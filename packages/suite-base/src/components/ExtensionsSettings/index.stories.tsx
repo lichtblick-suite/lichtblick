@@ -82,6 +82,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
 ];
 
 const MockExtensionLoader: IExtensionLoader = {
+  type: "browser",
   namespace: "local",
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,

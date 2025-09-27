@@ -47,7 +47,7 @@ export default function handleDragOver({
   const newActiveZone = determineActiveDropZone(
     { clientX: event.clientX, clientY: event.clientY },
     { width: window.innerWidth, height: window.innerHeight },
-    { isRemote, topSectionRatio: 0.55 },
+    { isRemote, topSectionRatio: 0.5 },
   );
 
   setActiveZone(newActiveZone);

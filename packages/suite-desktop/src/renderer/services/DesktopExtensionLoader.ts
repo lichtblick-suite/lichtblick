@@ -6,7 +6,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@lichtblick/log";
-import { ExtensionInfo, IExtensionLoader, Namespace } from "@lichtblick/suite-base";
+import {
+  ExtensionInfo,
+  IExtensionLoader,
+  Namespace,
+  TypeExtensionLoader,
+} from "@lichtblick/suite-base";
 
 import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
@@ -15,6 +20,7 @@ const log = Logger.getLogger(__filename);
 export class DesktopExtensionLoader implements IExtensionLoader {
   #bridge?: Desktop;
   public readonly namespace: Namespace = "local";
+  public readonly type: TypeExtensionLoader = "filesystem";
 
   public constructor(bridge: Desktop) {
     this.#bridge = bridge;
