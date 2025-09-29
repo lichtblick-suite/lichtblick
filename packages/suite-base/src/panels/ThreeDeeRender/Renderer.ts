@@ -74,6 +74,7 @@ import {
 import { CameraStateSettings } from "./renderables/CameraStateSettings";
 import { ImageMode } from "./renderables/ImageMode/ImageMode";
 import { MeasurementTool } from "./renderables/MeasurementTool";
+import { PoseInputTool } from "./renderables/PoseInputTool";
 import { PublishClickTool } from "./renderables/PublishClickTool";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import {
@@ -205,6 +206,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   public measurementTool: MeasurementTool;
   public publishClickTool: PublishClickTool;
+  public poseInputTool: PoseInputTool;
 
   // Are we connected to a ROS data source? Normalize coordinate frames if so by
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
@@ -354,8 +356,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const { reserved } = args.sceneExtensionConfig;
 
     this.measurementTool = reserved.measurementTool.init(this);
+    this.poseInputTool = reserved.poseInputTool.init(this);
     this.publishClickTool = reserved.publishClickTool.init(this);
     this.#addSceneExtension(this.measurementTool);
+    this.#addSceneExtension(this.poseInputTool);
     this.#addSceneExtension(this.publishClickTool);
 
     const aspect = renderSize.width / renderSize.height;
@@ -1265,7 +1269,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
 
     // Disable picking while a tool is active
-    if (this.measurementTool.state !== "idle" || this.publishClickTool.state !== "idle") {
+    if (
+      this.measurementTool.state !== "idle" ||
+      this.poseInputTool.state !== "idle" ||
+      this.publishClickTool.state !== "idle"
+    ) {
       return;
     }
 
