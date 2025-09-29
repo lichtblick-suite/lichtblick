@@ -3,6 +3,7 @@
 import { Immutable } from "immer";
 
 import {
+  SettingsTree,
   SettingsTreeAction,
   SettingsTreeField,
   SettingsTreeNode,
@@ -29,4 +30,9 @@ export type FieldEditorProps = {
   actionHandler: (action: SettingsTreeAction) => void;
   field: Immutable<SettingsTreeField>;
   path: readonly string[];
+};
+
+export type SettingsTreeEditorProps = {
+  variant: "panel" | "log";
+  settings: Immutable<SettingsTree>;
 };
