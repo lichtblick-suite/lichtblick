@@ -31,4 +31,9 @@ export interface ICameraHandler extends SceneExtension {
    * @param pixelRatio - The device pixel ratio (device pixels per CSS pixel)
    */
   handleResize(width: number, height: number, pixelRatio: number): void;
+  /**
+   * Enable or disable camera controls (for touch/mouse interaction)
+   * @param enabled - Whether camera controls should be enabled
+   */
+  setControlsEnabled?(enabled: boolean): void;
 }

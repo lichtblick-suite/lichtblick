@@ -32,6 +32,7 @@ import PublishGoalIcon from "@lichtblick/suite-base/components/PublishGoalIcon";
 import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
 import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
+import InitialPoseIcon from "@lichtblick/suite-base/components/InitialPoseIcon";
 import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
@@ -105,9 +106,11 @@ type Props = {
   onChangePublishClickType: (_: PublishClickType) => void;
   onClickMeasure: () => void;
   onClickPublish: () => void;
+  onClickPoseInput: () => void;
   onShowTopicSettings: (topic: string) => void;
   onTogglePerspective: () => void;
   perspective: boolean;
+  poseInputActive: boolean;
   publishActive: boolean;
   publishClickType: PublishClickType;
   timezone: string | undefined;
@@ -372,6 +375,20 @@ export function RendererOverlay(props: Props): React.JSX.Element {
                 <div className={classes.rulerIcon}>
                   {props.measureActive ? <Ruler20Filled /> : <Ruler20Regular />}
                 </div>
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              placement="left"
+              title={props.poseInputActive ? "Cancel initial pose" : "Set initial pose"}
+            >
+              <IconButton
+                data-testid="pose-input-button"
+                className={classes.iconButton}
+                size="small"
+                color={props.poseInputActive ? "info" : "inherit"}
+                onClick={props.onClickPoseInput}
+              >
+                <InitialPoseIcon fontSize="small" />
               </IconButton>
             </Tooltip>
 

@@ -39,6 +39,7 @@ import { CameraState } from "./camera";
 import { DetailLevel } from "./lod";
 import { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { MeasurementTool } from "./renderables/MeasurementTool";
+import { PoseInputTool } from "./renderables/PoseInputTool";
 import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTool";
 import { ColorModeSettings } from "./renderables/colorMode";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
@@ -247,6 +248,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
 
   measurementTool: MeasurementTool;
   publishClickTool: PublishClickTool;
+  poseInputTool: PoseInputTool;
 
   /** only public for testing - prefer to use `getCameraState` instead */
   cameraHandler: ICameraHandler;

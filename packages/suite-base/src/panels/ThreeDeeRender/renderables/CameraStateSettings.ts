@@ -555,4 +555,8 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       this.#orthographicCamera.updateProjectionMatrix();
     }
   }
+
+  public setControlsEnabled(enabled: boolean): void {
+    this.#controls.enabled = enabled;
+  }
 }

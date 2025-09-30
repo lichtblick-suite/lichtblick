@@ -179,20 +179,58 @@ export class Input extends EventEmitter<InputEvents> {
   #onTouchStart = (event: TouchEvent): void => {
     const touch = event.touches[0];
     if (touch) {
-      this.#startClientPos = new THREE.Vector2(touch.clientX, touch.clientY);
+      const canvasRect = this.#canvas.getBoundingClientRect();
+      const offsetX = touch.clientX - canvasRect.left;
+      const offsetY = touch.clientY - canvasRect.top;
+      this.#startClientPos = new THREE.Vector2(offsetX, offsetY);
+
+      // Create a synthetic MouseEvent for touch start
+      const syntheticEvent = this.#createSyntheticMouseEvent("mousedown", touch, canvasRect);
+      this.#updateCursorCoordsFromTouch(touch, canvasRect);
+      this.emit("mousedown", this.#cursorCoords, this.#worldSpaceCursorCoords, syntheticEvent);
     }
     event.preventDefault();
   };
 
   #onTouchEnd = (event: TouchEvent): void => {
+    const touch = event.changedTouches[0];
+    if (touch && this.#startClientPos) {
+      const canvasRect = this.#canvas.getBoundingClientRect();
+      const offsetX = touch.clientX - canvasRect.left;
+      const offsetY = touch.clientY - canvasRect.top;
+
+      // Check if this is a tap (similar to click detection logic)
+      const dist = this.#startClientPos.distanceTo(tempVec2.set(offsetX, offsetY));
+
+      // Create synthetic MouseEvents for touch end and potential click
+      const syntheticMouseUpEvent = this.#createSyntheticMouseEvent("mouseup", touch, canvasRect);
+      this.#updateCursorCoordsFromTouch(touch, canvasRect);
+      this.emit("mouseup", this.#cursorCoords, this.#worldSpaceCursorCoords, syntheticMouseUpEvent);
+
+      // If the touch didn't move much, treat it as a click
+      if (dist <= MAX_DIST) {
+        const syntheticClickEvent = this.#createSyntheticMouseEvent("click", touch, canvasRect);
+        this.emit("click", this.#cursorCoords, this.#worldSpaceCursorCoords, syntheticClickEvent);
+      }
+
+      this.#startClientPos = undefined;
+    }
     event.preventDefault();
   };
 
   #onTouchMove = (event: TouchEvent): void => {
+    const touch = event.touches[0];
+    if (touch) {
+      const canvasRect = this.#canvas.getBoundingClientRect();
+      const syntheticEvent = this.#createSyntheticMouseEvent("mousemove", touch, canvasRect);
+      this.#updateCursorCoordsFromTouch(touch, canvasRect);
+      this.emit("mousemove", this.#cursorCoords, this.#worldSpaceCursorCoords, syntheticEvent);
+    }
     event.preventDefault();
   };
 
   #onTouchCancel = (event: TouchEvent): void => {
+    this.#startClientPos = undefined;
     event.preventDefault();
   };
 
@@ -217,6 +255,49 @@ export class Input extends EventEmitter<InputEvents> {
         XY_PLANE,
         this.#worldSpaceCursorCoords ?? new THREE.Vector3(),
       ) ?? undefined;
+  }
+
+  #updateCursorCoordsFromTouch(touch: Touch, canvasRect: DOMRect): void {
+    const offsetX = touch.clientX - canvasRect.left;
+    const offsetY = touch.clientY - canvasRect.top;
+
+    this.#cursorCoords.x = offsetX;
+    this.#cursorCoords.y = offsetY;
+
+    this.#raycaster.setFromCamera(
+      // Cursor position in NDC
+      tempVec2.set(
+        (offsetX / this.canvasSize.width) * 2 - 1,
+        -((offsetY / this.canvasSize.height) * 2 - 1),
+      ),
+      this.getCamera(),
+    );
+    this.#worldSpaceCursorCoords =
+      this.#raycaster.ray.intersectPlane(
+        XY_PLANE,
+        this.#worldSpaceCursorCoords ?? new THREE.Vector3(),
+      ) ?? undefined;
+  }
+
+  #createSyntheticMouseEvent(type: string, touch: Touch, canvasRect: DOMRect): MouseEvent {
+    const offsetX = touch.clientX - canvasRect.left;
+    const offsetY = touch.clientY - canvasRect.top;
+
+    // Create a synthetic MouseEvent that mimics the touch
+    const baseEvent = new MouseEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      button: 0, // Left button
+      buttons: 1, // Left button pressed
+    });
+
+    // Create a proxy object that includes the offset properties
+    return Object.create(baseEvent, {
+      offsetX: { value: offsetX, enumerable: true },
+      offsetY: { value: offsetY, enumerable: true }
+    }) as MouseEvent;
   }
 }
 
