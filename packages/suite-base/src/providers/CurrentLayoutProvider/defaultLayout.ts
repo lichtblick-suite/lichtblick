@@ -21,40 +21,108 @@ const staticDefaultLayout = (globalThis as { LICHTBLICK_SUITE_DEFAULT_LAYOUT?: L
 export const defaultLayout: LayoutData =
   staticDefaultLayout ??
   ({
-    configById: {
+    "configById": {
       "3D!18i6zy7": {
-        layers: {
+        "layers": {
           "845139cb-26bc-40b3-8161-8ab60af4baf5": {
-            visible: true,
-            frameLocked: true,
-            label: "Grid",
-            instanceId: "845139cb-26bc-40b3-8161-8ab60af4baf5",
-            layerId: "foxglove.Grid",
-            size: 10,
-            divisions: 10,
-            lineWidth: 1,
-            color: "#248eff",
-            position: [0, 0, 0],
-            rotation: [0, 0, 0],
-            order: 1,
-          },
+            "visible": false,
+            "frameLocked": true,
+            "label": "Grid",
+            "instanceId": "845139cb-26bc-40b3-8161-8ab60af4baf5",
+            "layerId": "foxglove.Grid",
+            "size": 10,
+            "divisions": 10,
+            "lineWidth": 1,
+            "color": "#248eff",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "order": 1
+          }
         },
-      },
-      "RawMessages!os6rgs": {},
-      "Image!3mnp456": {},
+        "cameraState": {
+          "perspective": true,
+          "distance": 18.0499999999884,
+          "phi": 0.33966750397735296,
+          "thetaOffset": 93.11089564339326,
+          "targetOffset": [
+            -1.1007944490754582,
+            -0.8121366509443774,
+            4.5030645444296294e-17
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "targetOrientation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "fovy": 45,
+          "near": 0.5,
+          "far": 5000
+        },
+        "followMode": "follow-pose",
+        "scene": {
+          "backgroundColor": "#202020"
+        },
+        "transforms": {},
+        "topics": {
+          "/robot_description": {
+            "visible": true
+          },
+          "/scan": {
+            "visible": true,
+            "colorField": "intensity",
+            "colorMode": "flat",
+            "colorMap": "turbo",
+            "pointSize": 5,
+            "flatColor": "#ff0000ff",
+            "decayTime": 0.5
+          },
+          "/projected_map": {
+            "visible": true
+          },
+          "/map": {
+            "visible": true
+          },
+          "/local_costmap/costmap": {
+            "visible": true
+          },
+          "/collision_zones": {
+            "visible": true
+          },
+          "/amcl_pose": {
+            "visible": true
+          }
+        },
+        "publish": {
+          "type": "point",
+          "poseTopic": "/move_base_simple/goal",
+          "pointTopic": "/clicked_point",
+          "poseEstimateTopic": "/initialpose",
+          "poseEstimateXDeviation": 0.5,
+          "poseEstimateYDeviation": 0.5,
+          "poseEstimateThetaDeviation": 0.26179939
+        },
+        "imageMode": {},
+        "followTf": "base_link"
+      }
     },
-    globalVariables: {},
-    userNodes: {},
-    playbackConfig: { ...defaultPlaybackConfig },
-    layout: {
-      first: "3D!18i6zy7",
-      second: {
-        first: "Image!3mnp456",
-        second: "RawMessages!os6rgs",
-        direction: "column",
-        splitPercentage: 30,
-      },
-      direction: "row",
-      splitPercentage: 70,
+    "globalVariables": {},
+    "userNodes": {},
+    "playbackConfig": {
+      "speed": 1
     },
-  } as const);
+    "layout": "3D!18i6zy7"
+  }as const);
