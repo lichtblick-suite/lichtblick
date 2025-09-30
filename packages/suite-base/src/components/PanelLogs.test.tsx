@@ -184,12 +184,96 @@ describe("PanelLogs", () => {
 
       // Then
       expect(screen.getByText("Panel Logs (20)")).toBeTruthy();
-      // Check that the container has overflow styling
-      const logContainer = container.querySelector(".MuiList-root")?.parentElement;
-      expect(logContainer).toBeTruthy();
-      const computedStyle = getComputedStyle(logContainer!);
-      expect(computedStyle.maxHeight).toBe("200px");
+      // Check that the list container has overflow styling for scrolling
+      const listContainer = container.querySelector('[class*="listContainer"]');
+      expect(listContainer).toBeTruthy();
+      const computedStyle = getComputedStyle(listContainer!);
       expect(computedStyle.overflowY).toBe("auto");
+    });
+  });
+
+  describe("Given resizable functionality", () => {
+    it("When rendered Then displays resize handle", () => {
+      // Given
+      const logs: PanelLog[] = [];
+
+      // When
+      renderPanelLogs(logs);
+
+      // Then
+      const resizeHandle = screen.getByTitle("Drag to resize panel logs");
+      expect(resizeHandle).toBeTruthy();
+    });
+
+    it("When rendered with initialHeight Then uses provided height", () => {
+      // Given
+      const logs: PanelLog[] = [];
+      const initialHeight = 300;
+
+      // When
+      render(
+        <ThemeProvider isDark={false}>
+          <PanelLogs logs={logs} onClose={jest.fn()} initialHeight={initialHeight} />
+        </ThemeProvider>,
+      );
+
+      // Then
+      const container = document.querySelector('[class*="root"]');
+      expect(container).toBeTruthy();
+      expect(container?.getAttribute("style")).toContain("height: 300px");
+    });
+
+    it("When resize handle is dragged Then updates panel height", () => {
+      // Given
+      const logs: PanelLog[] = [];
+      renderPanelLogs(logs);
+
+      const resizeHandle = screen.getByTitle("Drag to resize panel logs");
+      const container = document.querySelector('[class*="root"]');
+
+      // When - simulate mouse down, move, and up
+      fireEvent.mouseDown(resizeHandle, { clientY: 100 });
+
+      // Simulate mouse move upward (should increase height)
+      fireEvent(document, new MouseEvent("mousemove", { clientY: 50 }));
+      fireEvent(document, new MouseEvent("mouseup"));
+
+      // Then
+      expect(container?.getAttribute("style")).toContain("height: 250px"); // 200 + (100-50) = 250
+    });
+
+    it("When dragging beyond max height Then constrains to maximum", () => {
+      // Given
+      const logs: PanelLog[] = [];
+      renderPanelLogs(logs);
+
+      const resizeHandle = screen.getByTitle("Drag to resize panel logs");
+      const container = document.querySelector('[class*="root"]');
+
+      // When - simulate dragging way up (beyond max height)
+      fireEvent.mouseDown(resizeHandle, { clientY: 100 });
+      fireEvent(document, new MouseEvent("mousemove", { clientY: -1000 })); // Very large upward movement
+      fireEvent(document, new MouseEvent("mouseup"));
+
+      // Then - should be constrained to max height (600px)
+      expect(container?.getAttribute("style")).toContain("height: 600px");
+    });
+
+    it("When dragging below min height Then constrains to minimum", () => {
+      // Given
+      const logs: PanelLog[] = [];
+      renderPanelLogs(logs);
+
+      const resizeHandle = screen.getByTitle("Drag to resize panel logs");
+      const container = document.querySelector('[class*="root"]');
+
+      // When - simulate dragging way down (below min height)
+      fireEvent.mouseDown(resizeHandle, { clientY: 100 });
+      fireEvent(document, new MouseEvent("mousemove", { clientY: 1000 })); // Very large downward movement
+      fireEvent(document, new MouseEvent("mouseup"));
+
+      // Then - should be constrained to min height (120px)
+      expect(container?.getAttribute("style")).toContain("height: 120px");
     });
   });
 });
