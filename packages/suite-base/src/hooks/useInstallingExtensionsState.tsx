@@ -47,7 +47,7 @@ export function useInstallingExtensionsState({
     ) => {
       const messages = failedLoaders.map(({ loaderType }) => {
         if (loaderType === "browser") {
-          return "not saved to cache";
+          return "not saved to local cache";
         } else if (loaderType === "server") {
           return "not synced to server";
         } else {
@@ -145,7 +145,6 @@ export function useInstallingExtensionsState({
         // Count failures by loader type from all results
         let cacheFailures = 0;
         let remoteFailures = 0;
-
         allResults.forEach(({ loaderResults }) => {
           if (loaderResults) {
             const hasIdbFailure = loaderResults.some(
@@ -188,18 +187,25 @@ export function useInstallingExtensionsState({
             preventDuplicate: true,
           });
 
-          // Show warning/error message
+          // Show warning/error message with better context
           const issueMessages: string[] = [];
           if (cacheFailures > 0) {
             issueMessages.push(
-              `${cacheFailures} extension${cacheFailures > 1 ? "s" : ""} not saved to cache`,
+              `${cacheFailures} extension${cacheFailures > 1 ? "s" : ""} not saved to local cache`,
             );
           }
-          if (remoteFailures > 0) {
+
+          if (remoteFailures > 0 && cacheFailures === 0) {
+            // Extensions were saved locally but not synced
+            issueMessages.push(
+              `${remoteFailures} extension${remoteFailures > 1 ? "s" : ""} saved locally but not synced to server (offline)`,
+            );
+          } else if (remoteFailures > 0) {
             issueMessages.push(
               `${remoteFailures} extension${remoteFailures > 1 ? "s" : ""} not synced to server`,
             );
           }
+
           if (failedExtensions.length > 0) {
             issueMessages.push(
               `${failedExtensions.length} extension${failedExtensions.length > 1 ? "s" : ""} failed completely`,
@@ -207,34 +213,64 @@ export function useInstallingExtensionsState({
           }
 
           if (issueMessages.length > 0) {
-            enqueueSnackbar(`Issues: ${issueMessages.join(", ")}.`, {
-              variant: failedExtensions.length > 0 ? "error" : "warning",
+            const isOfflineScenario =
+              remoteFailures > 0 && cacheFailures === 0 && failedExtensions.length === 0;
+            const variant =
+              failedExtensions.length > 0 ? "error" : isOfflineScenario ? "info" : "warning";
+            const prefix = isOfflineScenario ? "Note: " : "Issues: ";
+
+            enqueueSnackbar(`${prefix}${issueMessages.join(", ")}.`, {
+              variant,
               preventDuplicate: true,
               persist: true,
             });
           }
         } else {
-          // All failed
-          enqueueSnackbar(`Failed to install all ${extensionsData.length} extensions.`, {
-            variant: "error",
-            preventDuplicate: true,
-          });
+          // All failed - but we need to distinguish between cache and server failures
+          const hasLocalInstallations = cacheFailures < extensionsData.length;
+          const hasServerInstallations = remoteFailures < extensionsData.length;
 
-          // Show consolidated failure details
-          const failureMessages: string[] = [];
-          if (cacheFailures > 0) {
-            failureMessages.push(`${cacheFailures} could not be saved to cache`);
-          }
-          if (remoteFailures > 0) {
-            failureMessages.push(`${remoteFailures} could not be synced to server`);
-          }
+          if (hasLocalInstallations && !hasServerInstallations) {
+            // Successfully installed locally but not on server (offline scenario)
+            enqueueSnackbar(
+              `Installed ${extensionsData.length} extension${extensionsData.length > 1 ? "s" : ""} locally.`,
+              {
+                variant: "warning",
+                preventDuplicate: true,
+              },
+            );
 
-          if (failureMessages.length > 0) {
-            enqueueSnackbar(`Details: ${failureMessages.join(", ")}.`, {
+            enqueueSnackbar(
+              `Unable to sync to server - extensions will be available locally but may not be accessible on other devices.`,
+              {
+                variant: "info",
+                preventDuplicate: true,
+                persist: true,
+              },
+            );
+          } else {
+            // Complete failure
+            enqueueSnackbar(`Failed to install all ${extensionsData.length} extensions.`, {
               variant: "error",
               preventDuplicate: true,
-              persist: true,
             });
+
+            // Show consolidated failure details
+            const failureMessages: string[] = [];
+            if (cacheFailures > 0) {
+              failureMessages.push(`${cacheFailures} could not be saved to cache`);
+            }
+            if (remoteFailures > 0) {
+              failureMessages.push(`${remoteFailures} could not be synced to server`);
+            }
+
+            if (failureMessages.length > 0) {
+              enqueueSnackbar(`Details: ${failureMessages.join(", ")}.`, {
+                variant: "error",
+                preventDuplicate: true,
+                persist: true,
+              });
+            }
           }
         }
       } catch (error: unknown) {

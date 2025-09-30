@@ -30,7 +30,7 @@ const log = Log.getLogger(__filename);
 export class IdbExtensionLoader implements IExtensionLoader {
   readonly #storage: IExtensionStorage;
   public readonly namespace: Namespace;
-  public readonly type: TypeExtensionLoader = "server";
+  public readonly type: TypeExtensionLoader = "browser";
 
   public constructor(namespace: Namespace) {
     this.namespace = namespace;

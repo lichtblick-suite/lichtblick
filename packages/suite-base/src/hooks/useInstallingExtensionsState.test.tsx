@@ -147,9 +147,9 @@ describe("useInstallingExtensionsState", () => {
         expect.objectContaining({ variant: "warning" }),
       );
       expect(enqueueSnackbar).toHaveBeenCalledWith(
-        "Issues: 2 extensions not synced to server.",
+        "Note: 2 extensions saved locally but not synced to server (offline).",
         expect.objectContaining({
-          variant: "warning",
+          variant: "info",
           persist: true,
         }),
       );
@@ -187,7 +187,7 @@ describe("useInstallingExtensionsState", () => {
         expect.objectContaining({ variant: "warning" }),
       );
       expect(enqueueSnackbar).toHaveBeenCalledWith(
-        "Issues: 1 extension not saved to cache.",
+        "Issues: 1 extension not saved to local cache.",
         expect.objectContaining({
           variant: "warning",
           persist: true,

@@ -5,6 +5,7 @@ import { extname } from "path";
 
 import Logger from "@lichtblick/log";
 import { HandleDropProps } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
+import { validateDropZoneItems } from "@lichtblick/suite-base/components/MultiDropZoneListener/utils/validateDroppedFiles";
 import { Namespace } from "@lichtblick/suite-base/types";
 
 const log = Logger.getLogger(__filename);
@@ -52,8 +53,26 @@ export default async function handleDrop({
     allowedExtensions.includes(extname(handle.name)),
   );
 
-  if (filteredFiles.length === 0 && filteredHandles?.length === 0) {
-    enqueueSnackbar("The file format is not supported.", { variant: "error" });
+  const validationResult = validateDropZoneItems(filteredFiles, filteredHandles, dropZone);
+
+  if (!validationResult.isValid) {
+    enqueueSnackbar(
+      validationResult.errorMessage ?? "Some files are not valid for this drop zone.",
+      { variant: "error" },
+    );
+
+    if (validationResult.validFiles.length === 0 && validationResult.validHandles.length === 0) {
+      return;
+    }
+  }
+
+  const finalFiles = validationResult.validFiles;
+  const finalHandles = validationResult.validHandles;
+
+  if (finalFiles.length === 0 && finalHandles.length === 0) {
+    if (allFiles.length > 0 || (handles?.length ?? 0) > 0) {
+      enqueueSnackbar("No files are valid for this drop zone.", { variant: "error" });
+    }
     return;
   }
 
@@ -64,8 +83,8 @@ export default async function handleDrop({
   const namespace: Namespace | undefined = isSource ? undefined : (dropZone as Namespace);
 
   onDrop?.({
-    files: filteredFiles,
-    handles: filteredHandles,
+    files: finalFiles,
+    handles: finalHandles,
     namespace,
     isSource,
   });

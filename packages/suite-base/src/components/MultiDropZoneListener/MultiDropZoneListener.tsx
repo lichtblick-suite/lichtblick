@@ -6,12 +6,16 @@ import { useSnackbar } from "notistack";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import {
+  DATA_SOURCE_FILES,
+  LAYOUT_AND_EXTENSION_FILES,
+} from "@lichtblick/suite-base/components/MultiDropZoneListener/constants";
+import {
   DropZoneType,
   MultiDropZoneListenerProps,
 } from "@lichtblick/suite-base/components/MultiDropZoneListener/types";
+import { generateDropZoneHelpMessage } from "@lichtblick/suite-base/components/MultiDropZoneListener/utils/dropZoneInfo";
 import handleDragOver from "@lichtblick/suite-base/components/MultiDropZoneListener/utils/handleDragOver";
 import handleDrop from "@lichtblick/suite-base/components/MultiDropZoneListener/utils/handleDrop";
-import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 
 import { useStyles } from "./MultiDropZoneListener.style";
 
@@ -22,15 +26,6 @@ export default function MultiDropZoneListener(
   const [activeZone, setActiveZone] = useState<DropZoneType | undefined>(undefined);
   const { classes, cx } = useStyles();
   const dragLeaveTimeoutRef = useRef<NodeJS.Timeout>();
-
-  const layoutAndExtensionsFiles = [AllowedFileExtensions.JSON, AllowedFileExtensions.FOXE];
-  const dataSourceFiles = [
-    AllowedFileExtensions.MCAP,
-    AllowedFileExtensions.BAG,
-    AllowedFileExtensions.DB3,
-    AllowedFileExtensions.ULG,
-    AllowedFileExtensions.ULOG,
-  ];
 
   const { onDrop: onDropProp, allowedExtensions, isRemote } = props;
 
@@ -131,10 +126,13 @@ export default function MultiDropZoneListener(
                 classes.dropZoneLocal,
                 activeZone === "local" && classes.dropZoneActive,
               )}
+              title={generateDropZoneHelpMessage("local")}
             >
               <div className={cx(classes.dropIndicator, classes.dropIndicatorLocal)}>
                 Local Extensions or Layouts
-                <div className={classes.dropExtensions}>{layoutAndExtensionsFiles.join(", ")}</div>
+                <div className={classes.dropExtensions}>
+                  {LAYOUT_AND_EXTENSION_FILES.join(", ")}
+                </div>
               </div>
             </div>
 
@@ -146,11 +144,12 @@ export default function MultiDropZoneListener(
                   classes.dropZoneOrg,
                   activeZone === "org" && classes.dropZoneActive,
                 )}
+                title={generateDropZoneHelpMessage("org")}
               >
                 <div className={cx(classes.dropIndicator, classes.dropIndicatorOrg)}>
                   Organization Extensions or Layouts
                   <div className={classes.dropExtensions}>
-                    {layoutAndExtensionsFiles.join(", ")}
+                    {LAYOUT_AND_EXTENSION_FILES.join(", ")}
                   </div>
                 </div>
               </div>
@@ -165,10 +164,11 @@ export default function MultiDropZoneListener(
                 classes.dropZoneSource,
                 activeZone === "source" && classes.dropZoneActive,
               )}
+              title={generateDropZoneHelpMessage("source")}
             >
               <div className={cx(classes.dropIndicator, classes.dropIndicatorSource)}>
                 Data Sources
-                <div className={classes.dropExtensions}>{dataSourceFiles.join(", ")}</div>
+                <div className={classes.dropExtensions}>{DATA_SOURCE_FILES.join(", ")}</div>
               </div>
             </div>
           </div>
