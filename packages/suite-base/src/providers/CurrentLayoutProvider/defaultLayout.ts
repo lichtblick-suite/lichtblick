@@ -23,39 +23,16 @@ export const defaultLayout: LayoutData =
   ({
     "configById": {
       "3D!18i6zy7": {
-        "layers": {
-          "845139cb-26bc-40b3-8161-8ab60af4baf5": {
-            "visible": false,
-            "frameLocked": true,
-            "label": "Grid",
-            "instanceId": "845139cb-26bc-40b3-8161-8ab60af4baf5",
-            "layerId": "foxglove.Grid",
-            "size": 10,
-            "divisions": 10,
-            "lineWidth": 1,
-            "color": "#248eff",
-            "position": [
-              0,
-              0,
-              0
-            ],
-            "rotation": [
-              0,
-              0,
-              0
-            ],
-            "order": 1
-          }
-        },
+        "layers": {},
         "cameraState": {
           "perspective": true,
-          "distance": 18.0499999999884,
-          "phi": 0.33966750397735296,
-          "thetaOffset": 93.11089564339326,
+          "distance": 25.847108697961588,
+          "phi": 0.00005729832627056611,
+          "thetaOffset": 92.08383115335366,
           "targetOffset": [
-            -1.1007944490754582,
-            -0.8121366509443774,
-            4.5030645444296294e-17
+            -2.096291007842728,
+            -5.369505194018394,
+            5.505067093446401e-18
           ],
           "target": [
             0,
@@ -73,12 +50,169 @@ export const defaultLayout: LayoutData =
           "far": 5000
         },
         "followMode": "follow-pose",
+        "followTf": "base_link",
         "scene": {
-          "backgroundColor": "#202020"
+          "backgroundColor": "#000000",
+          "transforms": {
+            "axisScale": 4.5,
+            "labelSize": 0.15
+          }
         },
-        "transforms": {},
+        "transforms": {
+          "frame:base_link_inertia": {
+            "visible": false
+          },
+          "frame:base": {
+            "visible": false
+          },
+          "frame:arm_base_link": {
+            "visible": false
+          },
+          "frame:arm_mount": {
+            "visible": false
+          },
+          "frame:liftkit_top": {
+            "visible": false
+          },
+          "frame:liftkit_mid": {
+            "visible": false
+          },
+          "frame:lidarrr_mount": {
+            "visible": false
+          },
+          "frame:lidarrl_mount": {
+            "visible": false
+          },
+          "frame:lidarfr_mount": {
+            "visible": false
+          },
+          "frame:lidarfl_mount": {
+            "visible": false
+          },
+          "frame:lidar_nav": {
+            "visible": false
+          },
+          "frame:wheel_3": {
+            "visible": false
+          },
+          "frame:steering_3": {
+            "visible": false
+          },
+          "frame:wheel_2": {
+            "visible": false
+          },
+          "frame:steering_2": {
+            "visible": false
+          },
+          "frame:wheel": {
+            "visible": false
+          },
+          "frame:steering": {
+            "visible": false
+          },
+          "frame:livox_amr_imu": {
+            "visible": false
+          },
+          "frame:shutter_lidarmani": {
+            "visible": false
+          },
+          "frame:shutter_fisheye": {
+            "visible": false
+          },
+          "frame:lidar_mani": {
+            "visible": false
+          },
+          "frame:fisheye_mount": {
+            "visible": false
+          },
+          "frame:ft_frame": {
+            "visible": false
+          },
+          "frame:eoa_vision_module_detailed_assembly": {
+            "visible": false
+          },
+          "frame:tool0": {
+            "visible": false
+          },
+          "frame:flange": {
+            "visible": false
+          },
+          "frame:checkerboard": {
+            "visible": false
+          },
+          "frame:wrist_3_link": {
+            "visible": false
+          },
+          "frame:wrist_2_link": {
+            "visible": false
+          },
+          "frame:wrist_1_link": {
+            "visible": false
+          },
+          "frame:forearm_link": {
+            "visible": false
+          },
+          "frame:upper_arm_link": {
+            "visible": false
+          },
+          "frame:shoulder_link": {
+            "visible": false
+          },
+          "frame:arm_base_zero": {
+            "visible": false
+          },
+          "frame:livox_manipulation_pcd": {
+            "visible": false
+          },
+          "frame:fisheye": {
+            "visible": false
+          }
+        },
         "topics": {
+          "/amcl_pose": {
+            "visible": true
+          },
+          "/collision_zones": {
+            "visible": true
+          },
+          "/global_costmap/costmap": {
+            "visible": true
+          },
+          "/initialpose": {
+            "visible": true,
+            "axisScale": 1.7,
+            "type": "arrow"
+          },
+          "/map": {
+            "visible": true
+          },
+          "/pointcloud_clipped": {
+            "visible": false,
+            "colorField": "z",
+            "colorMode": "colormap",
+            "colorMap": "turbo",
+            "explicitAlpha": 0.6,
+            "decayTime": 2.5
+          },
+          "/rgb_pointcloud": {
+            "visible": false
+          },
           "/robot_description": {
+            "visible": false
+          },
+          "/genz/local_map": {
+            "visible": false,
+            "colorField": "z",
+            "colorMode": "colormap",
+            "colorMap": "turbo"
+          },
+          "/local_costmap/published_footprint": {
+            "visible": true
+          },
+          "/global_costmap/published_footprint": {
+            "visible": true
+          },
+          "/projected_map": {
             "visible": true
           },
           "/scan": {
@@ -86,28 +220,12 @@ export const defaultLayout: LayoutData =
             "colorField": "intensity",
             "colorMode": "flat",
             "colorMap": "turbo",
-            "pointSize": 5,
-            "flatColor": "#ff0000ff",
-            "decayTime": 0.5
-          },
-          "/projected_map": {
-            "visible": true
-          },
-          "/map": {
-            "visible": true
-          },
-          "/local_costmap/costmap": {
-            "visible": true
-          },
-          "/collision_zones": {
-            "visible": true
-          },
-          "/amcl_pose": {
-            "visible": true
+            "pointSize": 8,
+            "flatColor": "#ff0000ff"
           }
         },
         "publish": {
-          "type": "point",
+          "type": "pose",
           "poseTopic": "/move_base_simple/goal",
           "pointTopic": "/clicked_point",
           "poseEstimateTopic": "/initialpose",
@@ -115,8 +233,7 @@ export const defaultLayout: LayoutData =
           "poseEstimateYDeviation": 0.5,
           "poseEstimateThetaDeviation": 0.26179939
         },
-        "imageMode": {},
-        "followTf": "base_link"
+        "imageMode": {}
       }
     },
     "globalVariables": {},
@@ -125,4 +242,4 @@ export const defaultLayout: LayoutData =
       "speed": 1
     },
     "layout": "3D!18i6zy7"
-  }as const);
+  } as const);
