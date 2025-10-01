@@ -159,7 +159,7 @@ describe("DesktopExtensionLoader", () => {
 
       mockBridge.installExtension.mockResolvedValue(extension);
 
-      const result = await loader.installExtension(foxeFileData);
+      const result = await loader.installExtension({ foxeFileData });
 
       expect(mockBridge.installExtension).toHaveBeenCalledWith(foxeFileData);
       expect(result).toEqual({
@@ -176,9 +176,9 @@ describe("DesktopExtensionLoader", () => {
     it("should throw an error if bridge is undefined", async () => {
       loader = new DesktopExtensionLoader(undefined as unknown as Desktop);
 
-      await expect(loader.installExtension(new Uint8Array([1, 2, 3]))).rejects.toThrow(
-        "Cannot install extension without a desktopBridge",
-      );
+      await expect(
+        loader.installExtension({ foxeFileData: new Uint8Array([1, 2, 3]) }),
+      ).rejects.toThrow("Cannot install extension without a desktopBridge");
     });
   });
 
