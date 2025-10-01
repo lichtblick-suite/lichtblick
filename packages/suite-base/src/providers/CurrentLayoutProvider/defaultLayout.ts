@@ -50,7 +50,7 @@ export const defaultLayout: LayoutData =
           "far": 5000
         },
         "followMode": "follow-pose",
-        "followTf": "base_link",
+        "followTf": "map",
         "scene": {
           "backgroundColor": "#000000",
           "transforms": {
