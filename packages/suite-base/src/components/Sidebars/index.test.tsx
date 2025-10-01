@@ -77,7 +77,7 @@ describe("Sidebars", () => {
     const selectedRightKey = BasicBuilder.string();
     const rightItems = new Map<string, SidebarItem>([[selectedRightKey, { title: "Right Item" }]]);
 
-    const {props} = await renderComponent({ selectedRightKey, rightItems });
+    const { props } = await renderComponent({ selectedRightKey, rightItems });
     const closeButton = screen.getByTestId("sidebar-close-right");
     await userEvent.click(closeButton);
 
@@ -89,7 +89,7 @@ describe("Sidebars", () => {
     const selectedLeftKey = BasicBuilder.string();
     const leftItems = new Map<string, SidebarItem>([[selectedLeftKey, { title: "Left Item" }]]);
 
-    const {props} = await renderComponent({ selectedLeftKey, leftItems });
+    const { props } = await renderComponent({ selectedLeftKey, leftItems });
     const closeButton = screen.getByTestId("sidebar-close-left");
     await userEvent.click(closeButton);
 
