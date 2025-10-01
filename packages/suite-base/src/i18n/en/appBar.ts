@@ -17,6 +17,10 @@ export const appBar = {
   hideLeftSidebar: "Hide left sidebar",
   hideRightSidebar: "Hide right sidebar",
   importLayoutFromFile: "Import layout from file…",
+  networkStatusOffline: "Offline",
+  networkStatusOfflineDescription:
+    "You are currently offline. Remote features like layouts, extensions and MCAP files from namespace '{{namespace}}' may not work properly. Please check your internet connection.",
+  networkStatusOnline: "Online",
   noDataSource: "No data source",
   open: "Open…",
   openConnection: "Open connection…",
