@@ -2082,18 +2082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint-community/eslint-utils@npm:^4.2.0, @eslint-community/eslint-utils@npm:^4.4.0":
-  version: 4.4.1
-  resolution: "@eslint-community/eslint-utils@npm:4.4.1"
-  dependencies:
-    eslint-visitor-keys: ^3.4.3
-  peerDependencies:
-    eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
-  checksum: a7ffc838eb6a9ef594cda348458ccf38f34439ac77dc090fa1c120024bcd4eb911dfd74d5ef44d42063e7949fa7c5123ce714a015c4abb917d4124be1bd32bfe
-  languageName: node
-  linkType: hard
-
-"@eslint-community/eslint-utils@npm:^4.7.0":
+"@eslint-community/eslint-utils@npm:^4.2.0, @eslint-community/eslint-utils@npm:^4.4.0, @eslint-community/eslint-utils@npm:^4.7.0":
   version: 4.9.0
   resolution: "@eslint-community/eslint-utils@npm:4.9.0"
   dependencies:
@@ -10919,14 +10908,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-visitor-keys@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "eslint-visitor-keys@npm:4.2.0"
-  checksum: 779c604672b570bb4da84cef32f6abb085ac78379779c1122d7879eade8bb38ae715645324597cf23232d03cef06032c9844d25c73625bc282a5bfd30247e5b5
-  languageName: node
-  linkType: hard
-
-"eslint-visitor-keys@npm:^4.2.1":
+"eslint-visitor-keys@npm:^4.2.0, eslint-visitor-keys@npm:^4.2.1":
   version: 4.2.1
   resolution: "eslint-visitor-keys@npm:4.2.1"
   checksum: 3a77e3f99a49109f6fb2c5b7784bc78f9743b834d238cdba4d66c602c6b52f19ed7bcd0a5c5dbbeae3a8689fd785e76c001799f53d2228b278282cf9f699fff5
