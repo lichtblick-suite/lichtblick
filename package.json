@@ -87,7 +87,7 @@
     "@babel/preset-typescript": "7.27.1",
     "@lichtblick/eslint-plugin": "1.0.4",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
-    "@lichtblick/tsconfig": "1.0.0",
+    "@lichtblick/tsconfig": "1.0.2",
     "@octokit/rest": "22.0.0",
     "@playwright/test": "1.52.0",
     "@storybook/addon-actions": "9.0.8",

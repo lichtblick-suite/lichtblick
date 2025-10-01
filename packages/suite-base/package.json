@@ -46,7 +46,7 @@
     "@lichtblick/suite": "workspace:*",
     "@lichtblick/theme": "workspace:*",
     "@lichtblick/three-text": "1.0.0",
-    "@lichtblick/tsconfig": "1.0.0",
+    "@lichtblick/tsconfig": "1.0.2",
     "@lichtblick/typescript-transformers": "workspace:*",
     "@lichtblick/ulog": "1.0.0",
     "@lichtblick/velodyne-cloud": "1.0.0",
