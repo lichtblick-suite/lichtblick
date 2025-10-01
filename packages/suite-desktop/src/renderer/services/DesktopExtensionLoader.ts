@@ -11,8 +11,8 @@ import {
   IExtensionLoader,
   Namespace,
   TypeExtensionLoader,
+  InstallExtensionProps,
 } from "@lichtblick/suite-base";
-import { InstallExtensionProps } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 
 import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
