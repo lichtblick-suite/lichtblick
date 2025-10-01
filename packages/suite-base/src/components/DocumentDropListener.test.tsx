@@ -74,3 +74,30 @@ describe("<DocumentDropListener>", () => {
     window.removeEventListener("dragover", windowDragoverHandler);
   });
 });
+
+describe("<DocumentDropListener> enhanced functionality", () => {
+  it("should render without crashing with enhanced features", () => {
+    const onDrop = jest.fn();
+
+    const wrapper = document.createElement("div");
+    document.body.appendChild(wrapper);
+
+    expect(() => {
+      const root = createRoot(wrapper);
+      root.render(
+        <div>
+          <SnackbarProvider>
+            <ThemeProvider isDark={false}>
+              <DocumentDropListener
+                allowedExtensions={[".json", ".foxe", ".mcap"]}
+                onDrop={onDrop}
+              />
+            </ThemeProvider>
+          </SnackbarProvider>
+        </div>,
+      );
+    }).not.toThrow();
+
+    wrapper.remove();
+  });
+});

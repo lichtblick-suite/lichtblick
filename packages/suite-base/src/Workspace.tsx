@@ -29,6 +29,7 @@ import {
   DataSourceDialogItem,
 } from "@lichtblick/suite-base/components/DataSourceDialog";
 import DataSourceSidebar from "@lichtblick/suite-base/components/DataSourceSidebar/DataSourceSidebar";
+import DocumentDropListener from "@lichtblick/suite-base/components/DocumentDropListener";
 import { EventsList } from "@lichtblick/suite-base/components/EventsList";
 import ExtensionsSettings from "@lichtblick/suite-base/components/ExtensionsSettings";
 import KeyListener from "@lichtblick/suite-base/components/KeyListener";
@@ -38,7 +39,6 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import MultiDropZoneListener from "@lichtblick/suite-base/components/MultiDropZoneListener/MultiDropZoneListener";
 import { PanelCatalog } from "@lichtblick/suite-base/components/PanelCatalog";
 import PanelLayout from "@lichtblick/suite-base/components/PanelLayout";
 import PanelSettings from "@lichtblick/suite-base/components/PanelSettings";
@@ -87,7 +87,7 @@ import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import ICONS from "@lichtblick/suite-base/theme/icons";
-import { DropHandler, InjectedSidebarItem, WorkspaceProps } from "@lichtblick/suite-base/types";
+import { InjectedSidebarItem, Namespace, WorkspaceProps } from "@lichtblick/suite-base/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
@@ -245,7 +245,15 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   }, [filesToOpen]);
 
   const dropHandler = useCallback(
-    async ({ files, handles, namespace, isSource }: DropHandler) => {
+    async ({
+      files,
+      handles,
+      namespace = "local",
+    }: {
+      files?: File[];
+      handles?: FileSystemFileHandle[];
+      namespace?: Namespace;
+    }) => {
       const filesArray: File[] = [];
 
       if (handles?.length === 1) {
@@ -257,13 +265,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         filesArray.push(...files);
       }
 
-      if (isSource === true) {
-        // Handle source files (data sources)
-        void handleFiles(filesArray); // No namespace for source files
-      } else {
-        // Handle extension/layout files
-        void handleFiles(filesArray, namespace);
-      }
+      void handleFiles(filesArray, namespace);
     },
     [handleFiles],
   );
@@ -572,17 +574,10 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     playUntil,
   });
 
-  const url = new URL(window.location.href);
-  const remoteNamespace = url.searchParams.get("namespace");
-
   return (
     <PanelStateContextProvider>
       {dataSourceDialog.open && <DataSourceDialog />}
-      <MultiDropZoneListener
-        onDrop={dropHandler}
-        allowedExtensions={allowedDropExtensions}
-        isRemote={!!remoteNamespace}
-      />
+      <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
       <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
