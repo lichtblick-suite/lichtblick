@@ -57,7 +57,7 @@ const MockExtensionLoader: IExtensionLoader = {
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,
   loadExtension: async (_id: string) => ({ raw: "" }),
-  installExtension: async (_foxeFileData: Uint8Array) => {
+  installExtension: async ({ foxeFileData: _foxeFileData }) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
   uninstallExtension: async (_id: string) => undefined,

@@ -33,7 +33,11 @@ export { default as waitForFonts } from "./util/waitForFonts";
 export { initI18n } from "./i18n";
 export type { Namespace } from "./types";
 export { RemoteExtensionLoader } from "./services/extension/RemoteExtensionLoader";
-export type { IExtensionLoader, TypeExtensionLoader } from "./services/extension/IExtensionLoader";
+export type {
+  IExtensionLoader,
+  TypeExtensionLoader,
+  InstallExtensionProps,
+} from "./services/extension/IExtensionLoader";
 export type { LayoutLoader } from "./services/ILayoutLoader";
 export type { LayoutInfo } from "./types/layouts";
 export type { LayoutData } from "./context/CurrentLayoutContext";
