@@ -12,6 +12,7 @@ import {
 } from "@lichtblick/suite-base/services/IExtensionStorage";
 import {
   IExtensionLoader,
+  InstallExtensionProps,
   LoadedExtension,
   TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
@@ -72,7 +73,10 @@ export class IdbExtensionLoader implements IExtensionLoader {
     };
   }
 
-  public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
+  public async installExtension({
+    foxeFileData,
+    externalId,
+  }: InstallExtensionProps): Promise<ExtensionInfo> {
     log.debug("[IndexedDB] Installing extension");
 
     const decompressedData = await decompressFile(foxeFileData);
@@ -98,6 +102,7 @@ export class IdbExtensionLoader implements IExtensionLoader {
         qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
         readme,
         changelog,
+        externalId,
       },
     };
     const storedExtension = await this.#storage.put(newExtension);

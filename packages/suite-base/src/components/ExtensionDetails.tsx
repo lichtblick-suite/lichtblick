@@ -76,7 +76,6 @@ export function ExtensionDetails({
   const readme = extension.readme;
   const changelog = extension.changelog;
   const canInstall = extension.foxe != undefined;
-  const canUninstall = extension.namespace !== "org";
 
   const { value: readmeContent } = useAsync(
     async () =>
@@ -226,7 +225,7 @@ export function ExtensionDetails({
             {extension.description}
           </Typography>
         </Stack>
-        {isInstalled && canUninstall ? (
+        {isInstalled ? (
           <Button
             className={classes.installButton}
             size="small"

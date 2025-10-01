@@ -15,6 +15,12 @@ export type LoadedExtension = {
 
 export type TypeExtensionLoader = "browser" | "server" | "filesystem";
 
+export type InstallExtensionProps = {
+  foxeFileData: Uint8Array;
+  file?: File;
+  externalId?: string;
+};
+
 /**
  * An extension loader is an object used by studio to list, install, and uninstall extensions
  * from a particular namespace.
@@ -33,7 +39,7 @@ export interface IExtensionLoader {
   loadExtension(id: string): Promise<LoadedExtension>;
 
   // install extension contained within the file data
-  installExtension(foxeFileData: Uint8Array, file?: File): Promise<ExtensionInfo>;
+  installExtension(data: InstallExtensionProps): Promise<ExtensionInfo>;
 
   // uninstall extension with id
   uninstallExtension(id: string): Promise<void>;

@@ -26,9 +26,6 @@ import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 const log = Logger.getLogger(__filename);
 
-const MAX_REFRESH_EXTENSIONS_BATCH = 1;
-const MAX_INSTALL_EXTENSIONS_BATCH = 1;
-
 function createExtensionRegistryStore(
   loaders: readonly IExtensionLoader[],
   mockMessageConverters: readonly RegisterMessageConverterArgs<unknown>[] | undefined,
@@ -62,12 +59,7 @@ function createExtensionRegistryStore(
       if (namespaceLoaders.length === 0) {
         throw new Error(`No extension loader found for namespace ${namespace}`);
       }
-      const results: InstallExtensionsResult[] = [];
-      for (let i = 0; i < extensions.length; i += MAX_INSTALL_EXTENSIONS_BATCH) {
-        const chunk = extensions.slice(i, i + MAX_INSTALL_EXTENSIONS_BATCH);
-        const result = await promisesInBatch(chunk, namespaceLoaders);
-        results.push(...result);
-      }
+      const results = await promisesInBatch(extensions, namespaceLoaders);
       return results;
     };
 
@@ -81,11 +73,26 @@ function createExtensionRegistryStore(
           let extensionName = extension.file?.name ?? "Unknown extension";
           let mergedInfo: ExtensionInfo | undefined;
           let hasAnySuccess = false;
+          let externalId: string | undefined;
 
-          // Try installation with all loaders
-          for (const loader of extensionLoaders) {
+          // Sort loaders to prioritize server loaders first (to get externalId)
+          const sortedLoaders = _.sortBy(extensionLoaders, (loader) =>
+            loader.type === "server" ? 0 : 1,
+          );
+
+          for (const loader of sortedLoaders) {
             try {
-              const info = await loader.installExtension(extension.buffer, extension.file);
+              const info = await loader.installExtension({
+                foxeFileData: extension.buffer,
+                file: extension.file,
+                externalId: loader.type === "server" ? undefined : externalId,
+              });
+
+              // Store externalId from server loader for use in subsequent loaders
+              if (loader.type === "server" && info.externalId) {
+                externalId = info.externalId;
+              }
+
               extensionName = info.displayName || info.name || extensionName;
               const { raw } = await loader.loadExtension(
                 loader.namespace === "org" && loader.type === "server" ? info.externalId! : info.id,
@@ -200,7 +207,7 @@ function createExtensionRegistryStore(
                 const { raw, buffer } = await loader.loadExtension(extension.externalId!);
                 unwrappedExtensionSource = raw;
                 if (buffer) {
-                  await orgCacheLoader?.installExtension(buffer);
+                  await orgCacheLoader?.installExtension({ foxeFileData: buffer });
                 }
               }
             } else {
@@ -253,15 +260,12 @@ function createExtensionRegistryStore(
       const processLoader = async (loader: IExtensionLoader) => {
         try {
           const extensions = await loader.getExtensions();
-          const chunks = _.chunk(extensions, MAX_REFRESH_EXTENSIONS_BATCH);
-          for (const chunk of chunks) {
-            await loadInBatch({
-              batch: chunk,
-              contributionPoints,
-              installedExtensions,
-              loader,
-            });
-          }
+          await loadInBatch({
+            batch: extensions,
+            contributionPoints,
+            installedExtensions,
+            loader,
+          });
         } catch (err: unknown) {
           log.error("Error loading extension list", err);
         }
@@ -326,18 +330,37 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      const namespaceLoader = loaders.find((loader) => loader.namespace === namespace);
-      if (namespaceLoader == undefined) {
+      const namespaceLoaders = loaders.filter((loader) => loader.namespace === namespace);
+      if (namespaceLoaders.length === 0) {
         throw new Error("No extension loader found for namespace " + namespace);
       }
 
-      const extension = await namespaceLoader.getExtension(id);
+      let extension: ExtensionInfo | undefined;
+      for (const loader of namespaceLoaders) {
+        extension = await loader.getExtension(id);
+        if (extension) {
+          break;
+        }
+      }
+
       if (!extension) {
         return;
       }
 
-      await namespaceLoader.uninstallExtension(extension.id);
-      set((state) => removeExtensionData({ id: extension.id, state }));
+      for (const loader of namespaceLoaders) {
+        try {
+          await loader.uninstallExtension(
+            loader.type === "server" ? extension.externalId! : extension.id,
+          );
+        } catch (error) {
+          log.warn(
+            `Failed to uninstall extension ${extension.id} from loader ${loader.type}:`,
+            error,
+          );
+        }
+      }
+
+      set((state) => removeExtensionData({ id: extension!.id, state }));
       get().unMarkExtensionAsInstalled(id);
     };
 

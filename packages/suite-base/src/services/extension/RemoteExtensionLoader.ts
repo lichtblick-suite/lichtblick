@@ -6,6 +6,7 @@ import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import {
   IExtensionLoader,
+  InstallExtensionProps,
   LoadedExtension,
   TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
@@ -67,8 +68,15 @@ export class RemoteExtensionLoader implements IExtensionLoader {
     };
   }
 
-  public async installExtension(foxeFileData: Uint8Array, file: File): Promise<ExtensionInfo> {
+  public async installExtension({
+    foxeFileData,
+    file,
+  }: InstallExtensionProps): Promise<ExtensionInfo> {
     log.debug("[Remote] Installing extension", foxeFileData, file);
+
+    if (!file) {
+      throw new Error("File is required to install extension in server.");
+    }
 
     const decompressedData = await decompressFile(foxeFileData);
     const rawPackageFile = await extractFoxeFileContent(decompressedData, ALLOWED_FILES.PACKAGE);
@@ -93,7 +101,6 @@ export class RemoteExtensionLoader implements IExtensionLoader {
     };
 
     const storedExtension = await this.#remote.createOrUpdate(newExtension, file);
-
     return storedExtension.info;
   }
 

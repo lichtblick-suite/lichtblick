@@ -12,6 +12,7 @@ import {
   Namespace,
   TypeExtensionLoader,
 } from "@lichtblick/suite-base";
+import { InstallExtensionProps } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 
 import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
@@ -59,7 +60,7 @@ export class DesktopExtensionLoader implements IExtensionLoader {
     return await this.#bridge.loadExtension(id);
   }
 
-  public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
+  public async installExtension({ foxeFileData }: InstallExtensionProps): Promise<ExtensionInfo> {
     if (this.#bridge == undefined) {
       throw new Error(`Cannot install extension without a desktopBridge`);
     }
