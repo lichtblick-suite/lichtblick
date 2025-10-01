@@ -771,8 +771,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         };
 
         const datatypes = context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
-        context.advertise?.("/initialpose", "geometry_msgs/PoseWithCovarianceStamped", { datatypes });
-        context.publish("/initialpose", message);
+        context.advertise?.("/evaluatepose", "geometry_msgs/PoseWithCovarianceStamped", { datatypes });
+        context.publish("/evaluatepose", message);
       } catch (error) {
         log.info(error);
       }

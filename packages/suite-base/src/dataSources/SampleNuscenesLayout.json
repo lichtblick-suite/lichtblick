@@ -46,7 +46,7 @@
         "type": "point",
         "poseTopic": "/move_base_simple/goal",
         "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseEstimateTopic": "/evaluatepose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
@@ -98,7 +98,7 @@
         "type": "point",
         "poseTopic": "/move_base_simple/goal",
         "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseEstimateTopic": "/evaluatepose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
@@ -150,7 +150,7 @@
         "type": "point",
         "poseTopic": "/move_base_simple/goal",
         "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseEstimateTopic": "/evaluatepose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
@@ -240,7 +240,7 @@
         "type": "point",
         "poseTopic": "/move_base_simple/goal",
         "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseEstimateTopic": "/evaluatepose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
@@ -310,7 +310,7 @@
         "type": "point",
         "poseTopic": "/move_base_simple/goal",
         "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseEstimateTopic": "/evaluatepose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939

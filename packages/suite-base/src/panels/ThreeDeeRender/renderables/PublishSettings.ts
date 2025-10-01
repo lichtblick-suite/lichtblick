@@ -19,7 +19,7 @@ export const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
   type: "point",
   poseTopic: "/move_base_simple/goal",
   pointTopic: "/clicked_point",
-  poseEstimateTopic: "/initialpose",
+  poseEstimateTopic: "/evaluatepose",
   poseEstimateXDeviation: 0.5,
   poseEstimateYDeviation: 0.5,
   poseEstimateThetaDeviation: _.round(Math.PI / 12, 8),

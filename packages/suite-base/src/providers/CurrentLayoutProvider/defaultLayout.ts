@@ -178,7 +178,7 @@ export const defaultLayout: LayoutData =
           "/global_costmap/costmap": {
             "visible": true
           },
-          "/initialpose": {
+          "/evaluatepose": {
             "visible": true,
             "axisScale": 1.7,
             "type": "arrow"
@@ -228,7 +228,7 @@ export const defaultLayout: LayoutData =
           "type": "pose",
           "poseTopic": "/move_base_simple/goal",
           "pointTopic": "/clicked_point",
-          "poseEstimateTopic": "/initialpose",
+          "poseEstimateTopic": "/evaluatepose",
           "poseEstimateXDeviation": 0.5,
           "poseEstimateYDeviation": 0.5,
           "poseEstimateThetaDeviation": 0.26179939
