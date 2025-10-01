@@ -22,6 +22,12 @@ import { createRoot } from "react-dom/client";
 import DocumentDropListener from "@lichtblick/suite-base/components/DocumentDropListener";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
+jest.mock("@lichtblick/suite-base/constants/config", () => ({
+  APP_CONFIG: {
+    apiUrl: "https://api.example.com",
+  },
+}));
+
 describe("<DocumentDropListener>", () => {
   let wrapper: HTMLDivElement;
   let windowDragoverHandler: typeof jest.fn;
@@ -99,5 +105,73 @@ describe("<DocumentDropListener> enhanced functionality", () => {
     }).not.toThrow();
 
     wrapper.remove();
+  });
+});
+
+describe("<DocumentDropListener> onDrop useCallback", () => {
+  let wrapper: HTMLDivElement;
+  let onDropSpy: jest.Mock;
+
+  beforeEach(() => {
+    onDropSpy = jest.fn();
+    wrapper = document.createElement("div");
+    document.body.appendChild(wrapper);
+  });
+
+  afterEach(() => {
+    wrapper.remove();
+    jest.clearAllMocks();
+  });
+
+  it("should not call onDrop when no dataTransfer is present", async () => {
+    // Given
+    const root = createRoot(wrapper);
+    root.render(
+      <SnackbarProvider>
+        <ThemeProvider isDark={false}>
+          <DocumentDropListener allowedExtensions={[".json"]} onDrop={onDropSpy} />
+        </ThemeProvider>
+      </SnackbarProvider>,
+    );
+
+    // When - drop event without dataTransfer
+    const dropEvent = new MouseEvent("drop", { bubbles: true, cancelable: true });
+
+    await act(async () => {
+      document.dispatchEvent(dropEvent);
+    });
+
+    // Then
+    expect(onDropSpy).not.toHaveBeenCalled();
+  });
+
+  it("should not call onDrop when no allowedExtensions are provided", async () => {
+    // Given
+    const root = createRoot(wrapper);
+    root.render(
+      <SnackbarProvider>
+        <ThemeProvider isDark={false}>
+          <DocumentDropListener onDrop={onDropSpy} />
+        </ThemeProvider>
+      </SnackbarProvider>,
+    );
+
+    // When - drop event with dataTransfer but no allowed extensions
+    const dropEvent = new MouseEvent("drop", { bubbles: true, cancelable: true });
+    (dropEvent as any).dataTransfer = {
+      items: [
+        {
+          getAsFile: () => new File(["content"], "test.json", { type: "application/json" }),
+          webkitGetAsEntry: () => ({ isFile: true }),
+        },
+      ],
+    };
+
+    await act(async () => {
+      document.dispatchEvent(dropEvent);
+    });
+
+    // Then
+    expect(onDropSpy).not.toHaveBeenCalled();
   });
 });
