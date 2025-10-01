@@ -2817,7 +2817,7 @@ __metadata:
   resolution: "@lichtblick/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
     "@lichtblick/comlink": 1.0.3
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -2843,7 +2843,7 @@ __metadata:
     "@lichtblick/comlink": 1.0.3
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@types/dom-webcodecs": 0.1.14
     async-mutex: 0.5.0
     eventemitter3: 5.0.1
@@ -2867,7 +2867,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/eslint-plugin-suite@workspace:packages/eslint-plugin-suite"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@typescript-eslint/rule-tester": 8.27.0
     "@typescript-eslint/utils": 8.27.0
   languageName: unknown
@@ -2897,7 +2897,7 @@ __metadata:
   resolution: "@lichtblick/hooks@workspace:packages/hooks"
   dependencies:
     "@lichtblick/log": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@testing-library/react": 16.0.0
     "@types/foxglove__web": "workspace:*"
     "@types/lodash-es": ^4
@@ -2913,7 +2913,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/log@workspace:packages/log"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -2930,7 +2930,7 @@ __metadata:
     "@lichtblick/rosmsg": 1.0.0
     "@lichtblick/rosmsg-serialization": 1.0.0
     "@lichtblick/rosmsg2-serialization": 1.0.0
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
     "@lichtblick/wasm-zstd": 1.0.0
@@ -2955,7 +2955,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/message-path@workspace:packages/message-path"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@types/nearley": 2.11.5
     babel-jest: 30.0.5
     nearley: 2.20.1
@@ -3129,7 +3129,7 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/three-text": 1.0.0
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@lichtblick/typescript-transformers": "workspace:*"
     "@lichtblick/ulog": 1.0.0
     "@lichtblick/velodyne-cloud": 1.0.0
@@ -3142,7 +3142,7 @@ __metadata:
     "@popperjs/core": ^2.11.8
     "@protobufjs/base64": 1.1.2
     "@storybook/jest": 0.2.3
-    "@storybook/react": 9.1.3
+    "@storybook/react": 9.1.9
     "@storybook/testing-library": 0.2.2
     "@svgr/webpack": 8.1.0
     "@tanstack/react-table": 8.21.2
@@ -3222,7 +3222,7 @@ __metadata:
     moment-timezone: 0.6.0
     monaco-editor: 0.52.2
     monaco-editor-webpack-plugin: 7.1.0
-    nanoid: 5.0.9
+    nanoid: 5.1.6
     natsort: 2.0.3
     nearley: 2.20.1
     nearley-loader: 2.0.0
@@ -3256,7 +3256,7 @@ __metadata:
     sanitize-html: 2.17.0
     seedrandom: 3.0.5
     shallowequal: 1.1.0
-    storybook: 9.1.3
+    storybook: 9.1.9
     string-hash: 1.1.3
     string-replace-loader: 3.1.0
     style-loader: 3.3.3
@@ -3291,10 +3291,10 @@ __metadata:
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@mcap/core": 2.1.6
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
-    "@storybook/react": 9.1.3
+    "@storybook/react": 9.1.9
     "@types/mock-fs": 4.13.4
     "@types/plist": ^3.0.3
     "@types/pngjs": ^6.0.2
@@ -3306,7 +3306,7 @@ __metadata:
     builder-util: "*"
     clean-webpack-plugin: 4.0.0
     dotenv: 17.2.2
-    electron: 37.4.0
+    electron: 38.2.0
     electron-builder: 26.0.12
     electron-devtools-installer: 4.0.0
     electron-squirrel-startup: 1.0.1
@@ -3342,10 +3342,10 @@ __metadata:
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@mui/material": 5.13.5
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
-    "@storybook/react": 9.1.3
+    "@storybook/react": 9.1.9
     "@types/copy-webpack-plugin": 10.1.0
     clean-webpack-plugin: 4.0.0
     copy-webpack-plugin: 13.0.0
@@ -3362,7 +3362,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite@workspace:packages/suite"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -3374,12 +3374,12 @@ __metadata:
     "@emotion/react": 11.14.0
     "@emotion/styled": 11.14.1
     "@fluentui/react-icons": 2.0.308
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@mui/icons-material": 5.15.5
     "@mui/lab": 5.0.0-alpha.177
     "@mui/material": 5.13.5
     "@mui/x-data-grid": 6.18.7
-    "@storybook/react": 9.1.3
+    "@storybook/react": 9.1.9
     "@types/react": 18.3.12
     react: 18.3.1
   languageName: unknown
@@ -3396,10 +3396,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lichtblick/tsconfig@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@lichtblick/tsconfig@npm:1.0.0"
-  checksum: f3215bb523b8c84643332bfc12dc9d392d273b1beab0674999c730ebaee246c29aec788140d5ba4aefe493d4488bbef5b31d50ba7abf0dd869a06ab00ef42add
+"@lichtblick/tsconfig@npm:1.0.2":
+  version: 1.0.2
+  resolution: "@lichtblick/tsconfig@npm:1.0.2"
+  checksum: 67278b0d2089be3f488a5514d6d26af0f20f1597ca679ca323f153e4b093eec3f69a3094484cd4e448429a8a6d13cb690ab9054fab8655b61b65a8ee60f36a69
   languageName: node
   linkType: hard
 
@@ -3407,7 +3407,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/typescript-transformers@workspace:packages/typescript-transformers"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -4382,11 +4382,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/builder-webpack5@npm:9.1.3":
-  version: 9.1.3
-  resolution: "@storybook/builder-webpack5@npm:9.1.3"
+"@storybook/builder-webpack5@npm:9.1.9":
+  version: 9.1.9
+  resolution: "@storybook/builder-webpack5@npm:9.1.9"
   dependencies:
-    "@storybook/core-webpack": 9.1.3
+    "@storybook/core-webpack": 9.1.9
     case-sensitive-paths-webpack-plugin: ^2.4.0
     cjs-module-lexer: ^1.2.3
     css-loader: ^6.7.1
@@ -4402,22 +4402,22 @@ __metadata:
     webpack-hot-middleware: ^2.25.1
     webpack-virtual-modules: ^0.6.0
   peerDependencies:
-    storybook: ^9.1.3
+    storybook: ^9.1.9
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 68b06553a898dde0c07806742fe71bfa710bb61c19c360f9d61c8b58fec83a3df78d8fdb2fe918d1456cd8337add0bc0c46cb9fd37d215de490d978e1a8c2b8f
+  checksum: 42f4142b0eb05c2bdac2fd6739053a8da14ebba75947b6c2e78453d6486031a356053211e55cd94c6fb462918767c376a5ea1f1bac7ebf7365e6e878a686e7a7
   languageName: node
   linkType: hard
 
-"@storybook/core-webpack@npm:9.1.3":
-  version: 9.1.3
-  resolution: "@storybook/core-webpack@npm:9.1.3"
+"@storybook/core-webpack@npm:9.1.9":
+  version: 9.1.9
+  resolution: "@storybook/core-webpack@npm:9.1.9"
   dependencies:
     ts-dedent: ^2.0.0
   peerDependencies:
-    storybook: ^9.1.3
-  checksum: c4ae1f3120048d6b6e64b92547bee8a2ad3a545d13f42ab165773c6f761169a63feac54387a5eca82f8fac38878df5f9d6decd3fe7bd7d05b4036b1f6fb46bcc
+    storybook: ^9.1.9
+  checksum: e36dbbb129b486d4463fac565f0ff1508b0ce720b33ea573febce2e4564af34c12e4d0b0a796508f8935bff4dea8edf0cf5e3965e2c440646ce8e44706f35506
   languageName: node
   linkType: hard
 
@@ -4491,11 +4491,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/preset-react-webpack@npm:9.1.3":
-  version: 9.1.3
-  resolution: "@storybook/preset-react-webpack@npm:9.1.3"
+"@storybook/preset-react-webpack@npm:9.1.9":
+  version: 9.1.9
+  resolution: "@storybook/preset-react-webpack@npm:9.1.9"
   dependencies:
-    "@storybook/core-webpack": 9.1.3
+    "@storybook/core-webpack": 9.1.9
     "@storybook/react-docgen-typescript-plugin": 1.0.6--canary.9.0c3f3b7.0
     "@types/semver": ^7.3.4
     find-up: ^7.0.0
@@ -4508,11 +4508,11 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-    storybook: ^9.1.3
+    storybook: ^9.1.9
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 753ed4b73d1fd4e076ed5101ed3365add37e5131d662ff8c6afe380a87d1c4c714892e300ce072b4840d6ee6d47469bb167a07ddf572a0bf0a53ba9c9edbfdc7
+  checksum: d2b5d226cdf87788d4a3a80c3ffa9c5fa7e422e2eb8ed46db0cf05661f2d206defb6e37acc727748c5924a3a105ae322923fd31cdd7a9e4c62adf5d9b7f002a2
   languageName: node
   linkType: hard
 
@@ -4545,51 +4545,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react-dom-shim@npm:9.1.3":
-  version: 9.1.3
-  resolution: "@storybook/react-dom-shim@npm:9.1.3"
+"@storybook/react-dom-shim@npm:9.1.9":
+  version: 9.1.9
+  resolution: "@storybook/react-dom-shim@npm:9.1.9"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-    storybook: ^9.1.3
-  checksum: 957881480e23a2c436237064ddceca1883a43a9bc92349a16527884c0d104caef155ede48fe2a4b46bba3024593c0044acedbc78b6a8a581ace3c1776ed35e05
+    storybook: ^9.1.9
+  checksum: 5e9cad17992d6802b3d0323c4b00e924cc399c4c10082271572f262d155dced738ea46800c68e8703cdb95c8fab5ce420f779dce8c885a31a1afe53e0eecd7e5
   languageName: node
   linkType: hard
 
-"@storybook/react-webpack5@npm:9.1.3":
-  version: 9.1.3
-  resolution: "@storybook/react-webpack5@npm:9.1.3"
+"@storybook/react-webpack5@npm:9.1.9":
+  version: 9.1.9
+  resolution: "@storybook/react-webpack5@npm:9.1.9"
   dependencies:
-    "@storybook/builder-webpack5": 9.1.3
-    "@storybook/preset-react-webpack": 9.1.3
-    "@storybook/react": 9.1.3
+    "@storybook/builder-webpack5": 9.1.9
+    "@storybook/preset-react-webpack": 9.1.9
+    "@storybook/react": 9.1.9
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-    storybook: ^9.1.3
+    storybook: ^9.1.9
     typescript: ">= 4.9.x"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 55f3ce2d9820e77c05446254efa94d92a182e98b5384018c1084483c4b9a5a7b9af341e0d47cdd96d970690889ef39d422bb08a1cb8eb7976ae02266ad53149a
+  checksum: b74c45163a3eab6ac9f9598e0156d75483cb7c14f2cb641424b006b0bdd7316231cb57f688001d269c004876f16569b59898ad5f95e61a1c086057470027c1e6
   languageName: node
   linkType: hard
 
-"@storybook/react@npm:9.1.3":
-  version: 9.1.3
-  resolution: "@storybook/react@npm:9.1.3"
+"@storybook/react@npm:9.1.9":
+  version: 9.1.9
+  resolution: "@storybook/react@npm:9.1.9"
   dependencies:
     "@storybook/global": ^5.0.0
-    "@storybook/react-dom-shim": 9.1.3
+    "@storybook/react-dom-shim": 9.1.9
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-    storybook: ^9.1.3
+    storybook: ^9.1.9
     typescript: ">= 4.9.x"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 9915f6089aec5e153939cb6d5d3627b908cda19fb9ee21db1758959896729d7f5047fa466fecbc3f9740319caae4e3108b715f77f7a325dad9041bd56197c5c8
+  checksum: 7281e7329d7a6e3352393112d2b512c7d23b254e7b95071bfa56ee27f65237537479a664aee5f8f876869bcb4f6ef5dfecdd5d19b73460afada5fb24516b5529
   languageName: node
   linkType: hard
 
@@ -7671,7 +7671,7 @@ __metadata:
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
     "@types/react": 18.3.12
     "@types/react-dom": 18.3.0
@@ -9595,7 +9595,7 @@ __metadata:
   dependencies:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/suite-desktop": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
   languageName: unknown
   linkType: soft
 
@@ -10057,16 +10057,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:37.4.0":
-  version: 37.4.0
-  resolution: "electron@npm:37.4.0"
+"electron@npm:38.2.0":
+  version: 38.2.0
+  resolution: "electron@npm:38.2.0"
   dependencies:
     "@electron/get": ^2.0.0
     "@types/node": ^22.7.7
     extract-zip: ^2.0.1
   bin:
     electron: cli.js
-  checksum: 4f0e2f83fcc40c377200e083b103de233f7b4ad7dca4c5f25e442969d8a4cc82bdd845859ce80eea9718e017daf2bf254d1c5721dff48cdb2cad69fe9a831f39
+  checksum: 115a6e2b73a404b090c808ef67832111ddd305338aafbe6b22f8e0c58be079255b438c7ab8d9e579db5418edcba7990336ae51b6896e50b999cdbc3fa3ca573d
   languageName: node
   linkType: hard
 
@@ -14475,15 +14475,15 @@ __metadata:
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@mui/material": 5.13.5
     "@octokit/rest": 22.0.0
     "@playwright/test": 1.52.0
     "@storybook/addon-actions": 9.0.8
     "@storybook/addon-essentials": 8.6.14
     "@storybook/addon-interactions": 8.6.14
-    "@storybook/react": 9.1.3
-    "@storybook/react-webpack5": 9.1.3
+    "@storybook/react": 9.1.9
+    "@storybook/react-webpack5": 9.1.9
     "@types/babel__core": ^7.20.3
     "@types/babel__preset-env": ^7.10.0
     "@types/case-sensitive-paths-webpack-plugin": 2.1.9
@@ -14500,7 +14500,7 @@ __metadata:
     babel-plugin-transform-import-meta: 2.2.1
     cross-env: 10.0.0
     depcheck: 1.4.7
-    electron: 37.4.0
+    electron: 38.2.0
     electron-builder: 26.0.12
     eslint: 8.57
     eslint-config-prettier: 9.1.0
@@ -14526,7 +14526,7 @@ __metadata:
     rehype-raw: 7.0.0
     rimraf: 6.0.1
     semver: 7.7.2
-    storybook: 9.1.3
+    storybook: 9.1.9
     ts-loader: 9.5.1
     ts-node: 10.9.2
     ts-unused-exports: 11.0.1
@@ -15877,12 +15877,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:5.0.9":
-  version: 5.0.9
-  resolution: "nanoid@npm:5.0.9"
+"nanoid@npm:5.1.6":
+  version: 5.1.6
+  resolution: "nanoid@npm:5.1.6"
   bin:
     nanoid: bin/nanoid.js
-  checksum: 8a3f9104f81095e3e4785f58caae47a05755599824b8611b9730cbf73db706b664f100e6189f8303f08764f144d499613d8e4a39e83125c53f4b4986d6576621
+  checksum: 4109dbcf596d7f297a9b42f459b8f01694a03ebbdd2f41408d963ad54e5ec7234cbe7b4acad137751f31add11bb4fb3415a3e688082516745812811f05570014
   languageName: node
   linkType: hard
 
@@ -19400,9 +19400,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"storybook@npm:9.1.3":
-  version: 9.1.3
-  resolution: "storybook@npm:9.1.3"
+"storybook@npm:9.1.9":
+  version: 9.1.9
+  resolution: "storybook@npm:9.1.9"
   dependencies:
     "@storybook/global": ^5.0.0
     "@testing-library/jest-dom": ^6.6.3
@@ -19423,7 +19423,7 @@ __metadata:
       optional: true
   bin:
     storybook: ./bin/index.cjs
-  checksum: 430b1e35056d3c3ffe3b00295fd5d4f1fb0421399e8231343242ba014ab7cdcb222719d5a3268faf97967543778abdd112fbfc8ae06679722656231d6acdbf40
+  checksum: b16ccde666541fc87fada1fc34e1f4698a55c2041118a4178b1f97271d94edc68575ef83ec97a89c79f6aaaae2a4532a6ec4cf72e1c21537f0fd22915748c7ac
   languageName: node
   linkType: hard
 
@@ -21103,7 +21103,7 @@ __metadata:
   dependencies:
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-web": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
     "@types/serve-handler": ^6
     playwright: 1.49.1
     serve-handler: 6.1.6

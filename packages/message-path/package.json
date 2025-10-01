@@ -24,7 +24,7 @@
     "nearley": "2.20.1"
   },
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.0",
+    "@lichtblick/tsconfig": "1.0.2",
     "@types/nearley": "2.11.5",
     "typescript": "5.3.3"
   }

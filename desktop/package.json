@@ -4,6 +4,6 @@
   "devDependencies": {
     "@lichtblick/suite-base": "workspace:*",
     "@lichtblick/suite-desktop": "workspace:*",
-    "@lichtblick/tsconfig": "1.0.0"
+    "@lichtblick/tsconfig": "1.0.2"
   }
 }
