@@ -32,7 +32,7 @@ import PublishGoalIcon from "@lichtblick/suite-base/components/PublishGoalIcon";
 import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
 import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
-import InitialPoseIcon from "@lichtblick/suite-base/components/evaluateposeIcon";
+import InitialPoseIcon from "@lichtblick/suite-base/components/InitialPoseIcon";
 import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
