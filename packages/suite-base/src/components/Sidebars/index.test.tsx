@@ -77,17 +77,23 @@ describe("Sidebars", () => {
     const selectedRightKey = BasicBuilder.string();
     const rightItems = new Map<string, SidebarItem>([[selectedRightKey, { title: "Right Item" }]]);
 
-    await renderComponent({ selectedRightKey, rightItems });
+    const {props} = await renderComponent({ selectedRightKey, rightItems });
+    const closeButton = screen.getByTestId("sidebar-close-right");
+    await userEvent.click(closeButton);
 
     expect(screen.getByTestId("sidebar-right")).toBeInTheDocument();
+    expect(props.onSelectRightKey).toHaveBeenCalledWith(undefined);
   });
 
   it("should render Sidebars with left sidebar only", async () => {
     const selectedLeftKey = BasicBuilder.string();
     const leftItems = new Map<string, SidebarItem>([[selectedLeftKey, { title: "Left Item" }]]);
 
-    await renderComponent({ selectedLeftKey, leftItems });
+    const {props} = await renderComponent({ selectedLeftKey, leftItems });
+    const closeButton = screen.getByTestId("sidebar-close-left");
+    await userEvent.click(closeButton);
 
     expect(screen.getByTestId("sidebar-left")).toBeInTheDocument();
+    expect(props.onSelectLeftKey).toHaveBeenCalledWith(undefined);
   });
 });
