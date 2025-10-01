@@ -92,7 +92,7 @@ describe("IdbExtensionLoader", () => {
       const foxe = fs.readFileSync(EXT_FILE_TURTLESIM);
       const loader = new IdbExtensionLoader("local");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
       expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, expectedExtensionInfo);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
@@ -111,7 +111,7 @@ describe("IdbExtensionLoader", () => {
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
       expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
@@ -136,7 +136,7 @@ describe("IdbExtensionLoader", () => {
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
       expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
@@ -223,7 +223,7 @@ describe("IdbExtensionLoader", () => {
       } as StoredExtension);
       const loader = new IdbExtensionLoader("local");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
       const result = await loader.getExtension(expectedInfo.id);
 
       expect(mockGet).toHaveBeenCalledWith(EXTENSION_STORE_NAME, expectedInfo.id);

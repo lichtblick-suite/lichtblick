@@ -46,7 +46,7 @@ describe("NamespaceSelectionModal", () => {
       expect(
         screen.getByText(/You are about to install 2 extensions and layouts/),
       ).toBeInTheDocument();
-      expect(screen.getByText(/test-layout\.json, test-extension\.foxe/)).toBeInTheDocument();
+      expect(screen.getByText(/layout\.json, extension\.foxe/)).toBeInTheDocument();
     });
   });
 
@@ -55,7 +55,7 @@ describe("NamespaceSelectionModal", () => {
       // Given
       const props = {
         ...defaultProps,
-        files: [new File(["content"], "test-extension.foxe", { type: "application/octet-stream" })],
+        files: [new File(["content"], "extension.foxe", { type: "application/octet-stream" })],
       };
 
       // When
@@ -63,7 +63,7 @@ describe("NamespaceSelectionModal", () => {
 
       // Then
       expect(screen.getByText(/You are about to install 1 extensions/)).toBeInTheDocument();
-      expect(screen.getByText(/test-extension\.foxe/)).toBeInTheDocument();
+      expect(screen.getByText(/extension\.foxe/)).toBeInTheDocument();
     });
   });
 
@@ -72,7 +72,7 @@ describe("NamespaceSelectionModal", () => {
       // Given
       const props = {
         ...defaultProps,
-        files: [new File(["content"], "test-layout.json", { type: "application/json" })],
+        files: [new File(["content"], "-layout.json", { type: "application/json" })],
       };
 
       // When
@@ -80,7 +80,7 @@ describe("NamespaceSelectionModal", () => {
 
       // Then
       expect(screen.getByText(/You are about to install 1 layouts/)).toBeInTheDocument();
-      expect(screen.getByText(/test-layout\.json/)).toBeInTheDocument();
+      expect(screen.getByText(/-layout\.json/)).toBeInTheDocument();
     });
   });
 

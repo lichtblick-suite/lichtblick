@@ -177,7 +177,7 @@ describe("RemoteExtensionLoader", () => {
       createOrUpdateSpy.mockResolvedValue(mockStoredExtension);
 
       // When
-      const result = await loader.installExtension(mockFoxeData, mockFile);
+      const result = await loader.installExtension({ foxeFileData: mockFoxeData, file: mockFile });
 
       // Then
       expect(createOrUpdateSpy).toHaveBeenCalledWith(
@@ -204,9 +204,9 @@ describe("RemoteExtensionLoader", () => {
       const mockFile = {} as File;
 
       // When & Then - Should throw error
-      await expect(loader.installExtension(mockFoxeData, mockFile)).rejects.toThrow(
-        `Extension is corrupted: missing ${ALLOWED_FILES.PACKAGE}`,
-      );
+      await expect(
+        loader.installExtension({ foxeFileData: mockFoxeData, file: mockFile }),
+      ).rejects.toThrow(`Extension is corrupted: missing ${ALLOWED_FILES.PACKAGE}`);
     });
   });
 
