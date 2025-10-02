@@ -52,6 +52,7 @@ export function Vec3Input(props: Vec3Props): React.JSX.Element {
   return (
     <Stack gap={0.25}>
       <NumberInput
+        data-testid="Vec3Input-0"
         size="small"
         disabled={disabled}
         readOnly={readOnly}
@@ -68,6 +69,7 @@ export function Vec3Input(props: Vec3Props): React.JSX.Element {
         }}
       />
       <NumberInput
+        data-testid="Vec3Input-1"
         size="small"
         disabled={disabled}
         readOnly={readOnly}
@@ -84,6 +86,7 @@ export function Vec3Input(props: Vec3Props): React.JSX.Element {
         }}
       />
       <NumberInput
+        data-testid="Vec3Input-2"
         size="small"
         disabled={disabled}
         readOnly={readOnly}
