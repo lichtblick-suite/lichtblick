@@ -75,7 +75,9 @@ describe("Sidebars", () => {
 
   it("should render Sidebars with right sidebar only", async () => {
     const selectedRightKey = BasicBuilder.string();
-    const rightItems = new Map<string, SidebarItem>([[selectedRightKey, { title: "Right Item" }]]);
+    const rightItems = new Map<string, SidebarItem>([
+      [selectedRightKey, { title: BasicBuilder.string() }],
+    ]);
 
     const { props } = await renderComponent({ selectedRightKey, rightItems });
     const closeButton = screen.getByTestId("sidebar-close-right");
@@ -87,7 +89,9 @@ describe("Sidebars", () => {
 
   it("should render Sidebars with left sidebar only", async () => {
     const selectedLeftKey = BasicBuilder.string();
-    const leftItems = new Map<string, SidebarItem>([[selectedLeftKey, { title: "Left Item" }]]);
+    const leftItems = new Map<string, SidebarItem>([
+      [selectedLeftKey, { title: BasicBuilder.string() }],
+    ]);
 
     const { props } = await renderComponent({ selectedLeftKey, leftItems });
     const closeButton = screen.getByTestId("sidebar-close-left");
