@@ -13,7 +13,6 @@ import {
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
 import extractFoxeFileContent from "@lichtblick/suite-base/services/extension/utils/extractFoxeFileContent";
-import qualifiedName from "@lichtblick/suite-base/services/extension/utils/qualifiedName";
 import validatePackageInfo from "@lichtblick/suite-base/services/extension/utils/validatePackageInfo";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
@@ -93,7 +92,7 @@ export class RemoteExtensionLoader implements IExtensionLoader {
         ...rawInfo,
         id: `${normalizedPublisher}.${rawInfo.name}`,
         namespace: this.namespace,
-        qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
+        qualifiedName: rawInfo.displayName || rawInfo.name,
         readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
         changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
       },
