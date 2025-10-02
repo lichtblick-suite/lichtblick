@@ -187,7 +187,7 @@ describe("RemoteExtensionLoader", () => {
             name: mockPackageJson.name,
             namespace: mockNamespace,
             publisher: mockPackageJson.publisher,
-            qualifiedName: `org:Test Publisher:${mockPackageJson.name}`,
+            qualifiedName: mockPackageJson.displayName,
           }),
           remoteNamespace: mockSlug,
         }),

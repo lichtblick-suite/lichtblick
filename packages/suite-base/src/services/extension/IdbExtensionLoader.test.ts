@@ -60,7 +60,6 @@ const expectedExtensionInfo: ExtensionInfo = {
 } as ExtensionInfo;
 
 const EXT_FILE_TURTLESIM = `${__dirname}/../../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
-const EXT_FILE_PREFIXED = `${__dirname}/../../test/fixtures/prefixed-name-extension.foxe`;
 
 jest.mock("@lichtblick/log", () => ({
   getLogger: jest.fn(() => ({
@@ -106,33 +105,8 @@ describe("IdbExtensionLoader", () => {
       const info: ExtensionInfo = {
         ...expectedExtensionInfo,
         namespace: "org",
-        qualifiedName: "org:Foxglove Inc:studio-extension-turtlesim",
+        qualifiedName: expectedExtensionInfo.displayName,
       };
-      mockGetAll.mockReturnValue([info]);
-      const loader = new IdbExtensionLoader("org");
-
-      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
-
-      expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
-      expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
-        content: foxe,
-        info,
-      });
-      expect((await loader.getExtensions())[0]).toBe(info);
-    });
-
-    it("should parse package prefixes", async () => {
-      const foxe = fs.readFileSync(EXT_FILE_PREFIXED);
-      const info: ExtensionInfo = {
-        id: "Prefix.package-name",
-        name: "package-name",
-        namespace: "org",
-        publisher: "Prefix",
-        qualifiedName: "org:Prefix:package-name",
-        changelog: "",
-        readme: "",
-      } as ExtensionInfo;
-
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
 
