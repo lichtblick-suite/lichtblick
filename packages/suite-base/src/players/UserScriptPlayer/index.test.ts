@@ -16,7 +16,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { signal } from "@lichtblick/den/async";
-import { Basic } from "@lichtblick/suite-base/Workspace.stories";
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import MockUserScriptPlayerWorker from "@lichtblick/suite-base/players/UserScriptPlayer/MockUserScriptPlayerWorker";
@@ -36,7 +35,7 @@ import delay from "@lichtblick/suite-base/util/delay";
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
 
 import UserScriptPlayer from ".";
-import { DIAGNOSTIC_SEVERITY, SOURCES, ERROR_CODES } from "./constants";
+import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";
 import exampleDatatypes from "./transformerWorker/fixtures/example-datatypes";
 
 const nodeId = "nodeId";
