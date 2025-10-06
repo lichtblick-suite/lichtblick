@@ -64,7 +64,7 @@ describe("migrateLegacyToNew3DPanels", () => {
             "publish": {
               "pointTopic": "/clicked_point",
               "poseEstimateThetaDeviation": 0.26179939,
-              "poseEstimateTopic": "/initialpose",
+              "poseEstimateTopic": "/evaluatepose",
               "poseEstimateXDeviation": 0.5,
               "poseEstimateYDeviation": 0.5,
               "poseTopic": "/move_base_simple/goal",
@@ -134,7 +134,7 @@ describe("migrateLegacyToNew3DPanels", () => {
             "publish": {
               "pointTopic": "/clicked_point",
               "poseEstimateThetaDeviation": 0.26179939,
-              "poseEstimateTopic": "/initialpose",
+              "poseEstimateTopic": "/evaluatepose",
               "poseEstimateXDeviation": 0.5,
               "poseEstimateYDeviation": 0.5,
               "poseTopic": "/move_base_simple/goal",
@@ -240,7 +240,7 @@ describe("migrateLegacyToNew3DPanels", () => {
             "publish": {
               "pointTopic": "/clicked_point",
               "poseEstimateThetaDeviation": 0.26179939,
-              "poseEstimateTopic": "/initialpose",
+              "poseEstimateTopic": "/evaluatepose",
               "poseEstimateXDeviation": 0.5,
               "poseEstimateYDeviation": 0.5,
               "poseTopic": "/move_base_simple/goal",

@@ -20,7 +20,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.0",
+    "@lichtblick/tsconfig": "1.0.2",
     "@testing-library/react": "16.0.0",
     "@types/foxglove__web": "workspace:*",
     "@types/lodash-es": "^4",
