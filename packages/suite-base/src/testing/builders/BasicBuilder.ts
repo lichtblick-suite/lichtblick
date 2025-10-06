@@ -40,7 +40,7 @@ export default class BasicBuilder {
     return Boolean(_.random(0, 1));
   }
 
-  public static number({ min = 1, max = 20 }: Partial<NumberBuilder> = {}): number {
+  public static number({ min = 1, max = 1000 }: Partial<NumberBuilder> = {}): number {
     return _.random(min, max);
   }
 
