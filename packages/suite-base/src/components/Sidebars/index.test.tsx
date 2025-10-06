@@ -14,15 +14,9 @@ import Sidebars from "@lichtblick/suite-base/components/Sidebars";
 import { SidebarItem, SidebarProps } from "@lichtblick/suite-base/components/Sidebars/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
-type OldLeftKey = string;
-type LeftKey = string;
-type RightKey = string;
-
 describe("Sidebars", () => {
-  const renderComponent = async (
-    overrides: Partial<SidebarProps<OldLeftKey, LeftKey, RightKey>> = {},
-  ) => {
-    const defaultProps: SidebarProps<OldLeftKey, LeftKey, RightKey> = {
+  const renderComponent = async (overrides: Partial<SidebarProps<string, string, string>> = {}) => {
+    const defaultProps: SidebarProps<string, string, string> = {
       items: new Map(),
       bottomItems: new Map(),
       selectedKey: undefined,
