@@ -51,6 +51,7 @@ export const devServerConfig = (params: ConfigParams): WebpackConfiguration => (
   },
 
   devServer: {
+    port: 8017,
     static: {
       directory: params.outputPath,
     },

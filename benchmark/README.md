@@ -8,4 +8,4 @@ Run a dev or prod build and open a benchmark URL from `benchmarks.txt`.
 
 `yarn benchmark:serve` to start the benchmark dev build.
 
-`yarn benchmark:build:prod` followed by `npx serve -p 8080 benchmark/.webpack`.
+`yarn benchmark:build:prod` followed by `npx serve -p 8017 benchmark/.webpack`.
