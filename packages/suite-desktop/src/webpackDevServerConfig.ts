@@ -37,6 +37,7 @@ export const webpackDevServerConfig =
       },
 
       devServer: {
+        port: 8017,
         static: {
           directory: params.outputPath,
         },
