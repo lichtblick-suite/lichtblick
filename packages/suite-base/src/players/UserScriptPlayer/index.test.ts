@@ -16,7 +16,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { signal } from "@lichtblick/den/async";
+import { Basic } from "@lichtblick/suite-base/Workspace.stories";
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import MockUserScriptPlayerWorker from "@lichtblick/suite-base/players/UserScriptPlayer/MockUserScriptPlayerWorker";
 import {
   AdvertiseOptions,
@@ -25,6 +27,8 @@ import {
   PlayerStateActiveData,
   Topic,
 } from "@lichtblick/suite-base/players/types";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
@@ -1800,6 +1804,44 @@ describe("UserScriptPlayer", () => {
             sizeInBytes: 0,
           },
         ]);
+      });
+
+      it("forwards global variables to wrapped player", async () => {
+        // Given
+        const fakePlayer = new FakePlayer();
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+        const setGlobalVariablesSpy = jest.spyOn(fakePlayer, "setGlobalVariables");
+        const globalVariables = GlobalVariableBuilder.globalVariables();
+
+        // When
+        userScriptPlayer.setGlobalVariables(globalVariables);
+
+        // Then
+        expect(setGlobalVariablesSpy).toHaveBeenCalledWith(globalVariables);
+      });
+
+      it("forwards global variable updates to topic aliasing player for extension callbacks", async () => {
+        // Given
+        const fakePlayer = new FakePlayer();
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+        const setGlobalVariablesSpy = jest.spyOn(fakePlayer, "setGlobalVariables");
+        const initialGlobalVariables: GlobalVariables = { testVar: BasicBuilder.string() };
+        userScriptPlayer.setGlobalVariables(initialGlobalVariables);
+
+        expect(setGlobalVariablesSpy).toHaveBeenCalledWith(initialGlobalVariables);
+
+        // Simulate global variables being updated again (like when user edits variables in UI)
+        const updatedGlobalVariables: GlobalVariables = {
+          testVar: BasicBuilder.string(),
+          ...GlobalVariableBuilder.globalVariables(),
+        };
+
+        // When
+        userScriptPlayer.setGlobalVariables(updatedGlobalVariables);
+
+        // Then
+        expect(setGlobalVariablesSpy).toHaveBeenCalledWith(updatedGlobalVariables);
+        expect(setGlobalVariablesSpy).toHaveBeenCalledTimes(2);
       });
     });
   });
