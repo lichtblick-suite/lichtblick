@@ -290,9 +290,9 @@ describe("FieldEditor", () => {
       const { props } = await renderComponent({
         field: { input, label, value },
       });
-      const newValue0 = BasicBuilder.number();
-      const newValue1 = BasicBuilder.number();
-      const newValue2 = BasicBuilder.number();
+      const newValue0 = BasicBuilder.number({ max: 2000 });
+      const newValue1 = BasicBuilder.number({ max: 2000 });
+      const newValue2 = BasicBuilder.number({ max: 2000 });
 
       const vec3Input0 = screen.getByTestId("Vec3Input-0").querySelector("input")!;
       fireEvent.change(vec3Input0, { target: { value: newValue0 } });
