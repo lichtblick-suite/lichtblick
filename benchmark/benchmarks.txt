@@ -1,5 +1,5 @@
-http://localhost:8080/?ds=sinewave
-http://localhost:8080/?ds=pointcloud
-http://localhost:8080/?ds=pointcloud
-http://localhost:8080/?ds=transform
-http://localhost:8080/?ds=transformpreloading
+http://localhost:8017/?ds=sinewave
+http://localhost:8017/?ds=pointcloud
+http://localhost:8017/?ds=pointcloud
+http://localhost:8017/?ds=transform
+http://localhost:8017/?ds=transformpreloading

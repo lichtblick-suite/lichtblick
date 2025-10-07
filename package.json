@@ -30,7 +30,7 @@
     "web:build:dev": "webpack --mode development --progress --config web/webpack.config.ts",
     "web:build:prod": "webpack --mode production --progress --config web/webpack.config.ts",
     "web:serve": "webpack serve --mode development --progress --config web/webpack.config.ts",
-    "web:serve:instant": "http-server web/.webpack -p 8080 --cors -c-1 -o",
+    "web:serve:instant": "http-server web/.webpack -p 8017 --cors -c-1 -o",
     "benchmark:serve": "webpack serve --mode development --progress --config benchmark/webpack.config.ts",
     "benchmark:build:prod": "webpack --mode production --progress --config benchmark/webpack.config.ts",
     "license-check": "ts-node ci/license-check.ts",
