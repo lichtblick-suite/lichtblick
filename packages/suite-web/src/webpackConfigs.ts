@@ -133,6 +133,14 @@ export const mainConfig =
       entry: params.entrypoint,
       devtool: isDev ? "eval-cheap-module-source-map" : params.prodSourceMap,
 
+      experiments: {
+        lazyCompilation: isServe ? true : false,
+      },
+
+      cache: {
+        type: "filesystem",
+      },
+
       output: {
         publicPath: params.publicPath ?? "auto",
 
