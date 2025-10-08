@@ -5,8 +5,9 @@ import { Locator, Page } from "playwright";
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
-const filename = "example.mcap";
-function getPlaybackElements(mainWindow: Page) {
+const MCAP_FILENAME = "example.mcap";
+
+function getPlaybackElements(mainWindow: Page): { button: Locator; timestamp: Locator } {
   const button = mainWindow.getByTestId("play-button");
   const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
 
@@ -26,10 +27,6 @@ async function changeToEpochFormat(mainWindow: Page) {
   await newTimestampOption.click();
 }
 
-async function expectPlayButtonState(button: Locator, isPlaying: boolean) {
-  await expect(button).toHaveAttribute("title", isPlaying ? "Pause" : "Play");
-}
-
 /**
  * GIVEN a .mcap file is loaded
  * And Play button is shown
@@ -40,18 +37,18 @@ async function expectPlayButtonState(button: Locator, isPlaying: boolean) {
 
 test("should start playing when clicking on Play button", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename });
+  await loadFile({ mainWindow, filename: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   const { button, timestamp } = getPlaybackElements(mainWindow);
   const startTime = Number(await timestamp.inputValue());
 
   // When
-  await expectPlayButtonState(button, false);
-  button.click(); // start playback
+  await expect(button).toHaveAttribute("title", "Play");
+  await button.click(); // start playback
 
   // Then
-  await expectPlayButtonState(button, true);
+  await expect(button).toHaveAttribute("title", "Pause");
   const elapsedTimestamp = Number(await timestamp.inputValue());
   expect(elapsedTimestamp).toBeGreaterThan(startTime);
 });
@@ -65,17 +62,17 @@ test("should start playing when clicking on Play button", async ({ mainWindow })
 
 test("should start playing when clicking on Spacebar key", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename });
+  await loadFile({ mainWindow, filename: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const { button, timestamp } = getPlaybackElements(mainWindow);
   const startTime = Number(await timestamp.inputValue());
 
   // When
-  await expectPlayButtonState(button, false);
+  await expect(button).toHaveAttribute("title", "Play");
   await mainWindow.keyboard.press("Space"); // start playback
 
   // Then
-  await expectPlayButtonState(button, true);
+  await expect(button).toHaveAttribute("title", "Pause");
   const elapsedTimestamp = Number(await timestamp.inputValue());
   expect(elapsedTimestamp).toBeGreaterThan(startTime);
 });
@@ -90,19 +87,19 @@ test("should start playing when clicking on Spacebar key", async ({ mainWindow }
 
 test("should stop playing when clicking on Play button", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename });
+  await loadFile({ mainWindow, filename: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const { button, timestamp } = getPlaybackElements(mainWindow);
 
   await button.click(); // start playback
 
   // When
-  await expectPlayButtonState(button, true);
+  await expect(button).toHaveAttribute("title", "Pause");
   await button.click(); // stop playback
   const startTime = Number(await timestamp.inputValue());
 
   // Then
-  await expectPlayButtonState(button, false);
+  await expect(button).toHaveAttribute("title", "Play");
   await mainWindow.waitForTimeout(1000); // wait to check if value is still the same
   const elapsedTimestamp = Number(await timestamp.inputValue());
   expect(elapsedTimestamp).toEqual(startTime);
@@ -118,19 +115,19 @@ test("should stop playing when clicking on Play button", async ({ mainWindow }) 
 
 test("should stop playing when clicking on Spacebar key", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename });
+  await loadFile({ mainWindow, filename: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const { button, timestamp } = getPlaybackElements(mainWindow);
 
   await mainWindow.keyboard.press("Space"); // start playback
 
   // When
-  await expectPlayButtonState(button, true);
+  await expect(button).toHaveAttribute("title", "Pause");
   await mainWindow.keyboard.press("Space"); // stop playback
   const startTime = Number(await timestamp.inputValue());
 
   // Then
-  await expectPlayButtonState(button, false);
+  await expect(button).toHaveAttribute("title", "Play");
   await mainWindow.waitForTimeout(1000); // wait to check if value is still the same
   const elapsedTimestamp = Number(await timestamp.inputValue());
   expect(elapsedTimestamp).toEqual(startTime);
