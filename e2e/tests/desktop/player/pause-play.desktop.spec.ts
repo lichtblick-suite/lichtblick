@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Locator, Page } from "playwright";
+
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
 
@@ -96,10 +97,11 @@ test("should stop playing when clicking on Play button", async ({ mainWindow }) 
   // When
   await expect(button).toHaveAttribute("title", "Pause");
   await button.click(); // stop playback
-  const startTime = Number(await timestamp.inputValue());
 
   // Then
-  await expect(button).toHaveAttribute("title", "Play");
+  await expect(button).toHaveAttribute("title", "Play"); // check if icon has changed first
+  const startTime = Number(await timestamp.inputValue());
+
   await mainWindow.waitForTimeout(1000); // wait to check if value is still the same
   const elapsedTimestamp = Number(await timestamp.inputValue());
   expect(elapsedTimestamp).toEqual(startTime);
@@ -124,10 +126,11 @@ test("should stop playing when clicking on Spacebar key", async ({ mainWindow })
   // When
   await expect(button).toHaveAttribute("title", "Pause");
   await mainWindow.keyboard.press("Space"); // stop playback
-  const startTime = Number(await timestamp.inputValue());
 
   // Then
-  await expect(button).toHaveAttribute("title", "Play");
+  await expect(button).toHaveAttribute("title", "Play"); // check if icon has changed first
+  const startTime = Number(await timestamp.inputValue());
+
   await mainWindow.waitForTimeout(1000); // wait to check if value is still the same
   const elapsedTimestamp = Number(await timestamp.inputValue());
   expect(elapsedTimestamp).toEqual(startTime);
