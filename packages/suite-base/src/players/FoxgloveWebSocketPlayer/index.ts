@@ -49,7 +49,7 @@ import {
   Topic,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
-import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/highFrequencyTopic";
+import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
@@ -564,16 +564,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
         stats.numMessages++;
         this.#topicsStats = topicStats;
 
-        if (this.#endTime && this.#startTime && this.#topics) {
+        if (this.#endTime && this.#startTime && this.#topics && this.#topics.length > 0) {
           let highFrequencyTopicFound = false;
           const duration = subtractTimes(this.#endTime, this.#startTime);
 
-          if (this.#topics.length > 0) {
-            for (const dataTopic of this.#topics) {
-              if (!highFrequencyTopicFound) {
-                isTopicHighFrequency(topicStats, dataTopic.name, duration, this.#alerts);
-                highFrequencyTopicFound = true;
-              }
+          for (const dataTopic of this.#topics) {
+            if (!highFrequencyTopicFound) {
+              isTopicHighFrequency(topicStats, dataTopic.name, duration, this.#alerts);
+              highFrequencyTopicFound = true;
             }
           }
         }

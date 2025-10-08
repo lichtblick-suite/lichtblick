@@ -26,7 +26,7 @@ export function isTopicHighFrequency(
       severity: "warn",
       message: "High frequency topics detected",
       error: new Error(
-        `The current data source has one or more topics with more than 60Hz which may impact performance and application memory.`,
+        `The current data source has one or more topics with message frequency higher than 60Hz, which may impact performance and application memory.`,
       ),
     });
   }
