@@ -63,9 +63,12 @@ const log = Logger.getLogger(__filename);
 export default function CurrentLayoutProvider({
   children,
   loaders = [],
+  initialLayout,
 }: React.PropsWithChildren<{
   loaders?: readonly LayoutLoader[];
+  initialLayout?: unknown;
 }>): React.JSX.Element {
+  console.log("CurrentLayoutProvider: Component rendered with initialLayout:", initialLayout);
   const { enqueueSnackbar } = useSnackbar();
   const { getUserProfile, setUserProfile } = useUserProfileStorage();
   const layoutManager = useLayoutManager();
@@ -275,16 +278,34 @@ export default function CurrentLayoutProvider({
 
   // Load initial state by re-selecting the last selected layout from the UserProfile.
   useAsync(async () => {
+    console.log("CurrentLayoutProvider: useAsync running, initialLayout:", initialLayout);
+    console.log("CurrentLayoutProvider: windowAppURLState:", windowAppURLState());
+
     if (layoutManager.supportsSharing) {
+      console.log("CurrentLayoutProvider: layoutManager supports sharing, returning");
       return;
     }
 
     // Don't restore the layout if there's one specified in the app state url.
     if (windowAppURLState()?.layoutId) {
+      console.log("CurrentLayoutProvider: Found layoutId in URL state, returning");
       return;
     }
 
-    // For some reason, this needs to go before the setSelectedLayoutId, probably some initialization
+    // If an initial layout is provided, use it (this should take priority over cached layouts)
+    if (initialLayout) {
+      console.log("CurrentLayoutProvider: Using initial layout from URL:", initialLayout);
+      const newLayout = await layoutManager.saveNewLayout({
+        name: `URL Layout ${Date.now()}`,
+        data: initialLayout as any,
+        permission: "CREATOR_WRITE",
+      });
+      await setSelectedLayoutId(newLayout.id, { saveToProfile: false });
+      return;
+    }
+
+    // Only load from cache if no URL layout was specified
+    console.log("CurrentLayoutProvider: No URL layout specified, loading from cache");
     const { currentLayoutId } = await getUserProfile();
 
     // Try to load default layouts, before checking to add the fallback "Default".
@@ -329,7 +350,7 @@ export default function CurrentLayoutProvider({
     await setSelectedLayoutId(newLayout.id);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar]);
+  }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar, initialLayout]);
 
   const { updateSharedPanelState } = useUpdateSharedPanelState(layoutStateRef, setLayoutState);
 
