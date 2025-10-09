@@ -618,7 +618,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
   const [publishActive, setPublishActive] = useState(false);
   const [poseInputActive, setPoseInputActive] = useState(false);
-  const [poseInputMode, setPoseInputMode] = useState<"goal" | "initial">("goal");
+  const [poseInputMode, setPoseInputMode] = useState<"goal" | "initial" | "evaluate">("goal");
 
   // Ensure camera controls are disabled when pose input tool is active
   useEffect(() => {
@@ -771,7 +771,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
           context.advertise?.("/goal_pose", "geometry_msgs/PoseStamped", { datatypes });
           context.publish("/goal_pose", goalMessage);
-        } else {
+        } else if (poseInputMode === "initial") {
           // Publish initial pose
           const initialMessage = {
             header: {
@@ -794,6 +794,29 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             datatypes,
           });
           context.publish("/initialpose", initialMessage);
+        } else {
+          // Publish evaluate pose
+          const evaluateMessage = {
+            header: {
+              stamp: { sec, nsec },
+              frame_id: frameId,
+            },
+            pose: {
+              pose: event.pose,
+              covariance: [
+                0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.06853891945200942,
+              ],
+            },
+          };
+
+          const datatypes =
+            context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+          context.advertise?.("/evaluatepose", "geometry_msgs/PoseWithCovarianceStamped", {
+            datatypes,
+          });
+          context.publish("/evaluatepose", evaluateMessage);
         }
       } catch (error) {
         log.info(error);
@@ -854,7 +877,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
     } else {
-      setPoseInputMode("initial");
+      setPoseInputMode("evaluate");
       renderer?.poseInputTool.start();
       renderer?.measurementTool.stopMeasuring();
       renderer?.publishClickTool.stop();
@@ -911,7 +934,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             onTogglePerspective={onTogglePerspective}
             measureActive={measureActive}
             onClickMeasure={onClickMeasure}
-            poseInputActive={poseInputActive && poseInputMode === "initial"}
+            poseInputActive={poseInputActive && poseInputMode === "evaluate"}
             onClickPoseInput={onClickPoseInput}
             canPublish={canPublish}
             publishActive={publishActive}

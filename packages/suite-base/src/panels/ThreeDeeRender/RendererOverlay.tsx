@@ -361,8 +361,6 @@ export function RendererOverlay(props: Props): React.JSX.Element {
                 <InitialPoseIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-
-            {publishControls}
           </Paper>
         )}
       </div>
