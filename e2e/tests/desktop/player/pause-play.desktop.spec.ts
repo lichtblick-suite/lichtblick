@@ -3,9 +3,9 @@
 
 import { Locator, Page } from "playwright";
 
+import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
-import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 
 const MCAP_FILENAME = "example.mcap";
 

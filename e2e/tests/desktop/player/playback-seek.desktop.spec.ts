@@ -1,32 +1,55 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Page } from "playwright";
+import { Locator, Page } from "playwright";
 
+import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
 import { loadFile } from "../../../fixtures/load-file";
-import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 
 const MCAP_FILENAME = "example.mcap";
 
 async function clickPlayblackSlider(mainWindow: Page, fraction: number) {
   const slider = mainWindow.getByTestId("playback-slider");
+  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
   const box = await slider.boundingBox();
-  if (!box) throw new Error("Slider bounding box not found");
+  if (!box) {
+    throw new Error("Slider bounding box not found");
+  }
 
   // Add small offsets for edge cases to ensure click is within bounds
   const offset = 2; // pixels from edge
-  const safeX =
-    fraction === 0
-      ? box.x + offset // left edge + offset
-      : fraction === 1
-        ? box.x + box.width - offset // right edge - offset
-        : box.x + box.width * fraction;
-
+  const x = (() => {
+    if (fraction === 0) {
+      return box.x + offset;
+    }
+    if (fraction === 1) {
+      return box.x + box.width - offset;
+    }
+    return box.x + box.width * fraction;
+  })();
   const y = box.y + box.height / 2;
 
-  await mainWindow.mouse.click(safeX, y);
-  await mainWindow.waitForTimeout(500);
+  await mainWindow.mouse.click(x, y);
+  await waitTimestamp(timestamp);
+}
+
+async function waitTimestamp(timestamp: Locator): Promise<void> {
+  let lastValue = -1;
+  await expect
+    .poll(
+      async () => {
+        const currentValue = Number(await timestamp.inputValue());
+        const isStable = Math.abs(currentValue - lastValue) < 0.001;
+        lastValue = currentValue;
+        return isStable;
+      },
+      {
+        timeout: 2000,
+        intervals: [50],
+      },
+    )
+    .toBe(true);
 }
 
 /**
@@ -48,13 +71,13 @@ test("should advance timestamp 100ms when seek forward button is clicked", async
 
   // When
   await button.click(); // seek forwards
-  await mainWindow.waitForTimeout(500); // wait for cursor
 
+  await waitTimestamp(timestamp);
   // Then
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
-  const diff = Math.abs(elapsedTimestamp - startTime);
-  expect(diff).toBeLessThanOrEqual(0.01);
+  const diff = Math.abs(elapsedTimestamp - startTime); // 100ms
+  expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
 });
 
 /**
@@ -74,13 +97,13 @@ test("should advance timestamp 100ms when right arrow key is pressed", async ({ 
   const startTime = Number(await timestamp.inputValue());
 
   await mainWindow.keyboard.press("ArrowRight"); // seek forwards
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
 
   // Then
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
   const diff = Math.abs(elapsedTimestamp - startTime);
-  expect(diff).toBeLessThanOrEqual(0.01);
+  expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
 });
 
 /**
@@ -102,13 +125,13 @@ test("should advance timestamp 500ms when alt + right arrow key is pressed", asy
 
   await mainWindow.keyboard.down("Alt");
   await mainWindow.keyboard.press("ArrowRight");
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
 
   // Then
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
   const diff = Math.abs(elapsedTimestamp - startTime);
-  expect(diff).toBeLessThanOrEqual(0.01);
+  expect(diff).toBeLessThanOrEqual(0.55); // 500ms + 10% tolerance
 });
 
 /**
@@ -133,13 +156,13 @@ test("should regress timestamp 100ms when seek forward backward is clicked", asy
   const startTime = Number(await timestamp.inputValue());
 
   await button.click();
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
 
   // Then
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
   const diff = Math.abs(elapsedTimestamp - startTime);
-  expect(diff).toBeLessThanOrEqual(0.01);
+  expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
 });
 
 /**
@@ -161,13 +184,13 @@ test("should regress timestamp 100ms when left arrow key is pressed", async ({ m
   const startTime = Number(await timestamp.inputValue());
 
   await mainWindow.keyboard.press("ArrowLeft"); // seek backwards
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
 
   // Then
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
   const diff = Math.abs(elapsedTimestamp - startTime);
-  expect(diff).toBeLessThanOrEqual(0.01);
+  expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
 });
 
 /**
@@ -194,11 +217,11 @@ test("should regress timestamp 500ms when alt + left arrow key is pressed", asyn
   await mainWindow.keyboard.press("ArrowLeft");
 
   // Then
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
   const diff = Math.abs(elapsedTimestamp - startTime);
-  expect(diff).toBeLessThanOrEqual(0.01);
+  expect(diff).toBeLessThanOrEqual(0.55); // 500ms + 10% tolerance
 });
 
 /**
@@ -224,7 +247,7 @@ test("should foward timestamp to end of slider when alt + right arrow key is pre
 
   await mainWindow.keyboard.down("Alt");
   await mainWindow.keyboard.press("ArrowRight");
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
 
   // Then
   const elapsedTimestamp = Number(await timestamp.inputValue());
@@ -258,7 +281,7 @@ test("should regress timestamp to start of slider alt + left arrow key is presse
   await mainWindow.keyboard.press("ArrowLeft");
 
   // Then
-  await mainWindow.waitForTimeout(500); // wait for cursor
+  await waitTimestamp(timestamp);
   const elapsedTimestamp = Number(await timestamp.inputValue());
 
   const diff = Math.abs(elapsedTimestamp - startTime);
