@@ -618,6 +618,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
   const [publishActive, setPublishActive] = useState(false);
   const [poseInputActive, setPoseInputActive] = useState(false);
+  const [poseInputMode, setPoseInputMode] = useState<"goal" | "initial">("goal");
 
   // Ensure camera controls are disabled when pose input tool is active
   useEffect(() => {
@@ -758,28 +759,44 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         const sec = Math.floor(now.getTime() / 1000);
         const nsec = (now.getTime() % 1000) * 1e6;
 
-        // Publish to initial pose topic (for both buttons, but could be extended to differentiate)
-        const message = {
-          header: {
-            stamp: { sec, nsec },
-            frame_id: frameId,
-          },
-          pose: {
+        if (poseInputMode === "goal") {
+          // Publish goal pose
+          const goalMessage = {
+            header: {
+              stamp: { sec, nsec },
+              frame_id: frameId,
+            },
             pose: event.pose,
-            covariance: [
-              0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.06853891945200942,
-            ],
-          },
-        };
+          };
 
-        const datatypes =
-          context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
-        context.advertise?.("/initialpose", "geometry_msgs/PoseWithCovarianceStamped", {
-          datatypes,
-        });
-        context.publish("/initialpose", message);
+          const datatypes =
+            context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+          context.advertise?.("/goal_pose", "geometry_msgs/PoseStamped", { datatypes });
+          context.publish("/goal_pose", goalMessage);
+        } else {
+          // Publish initial pose
+          const initialMessage = {
+            header: {
+              stamp: { sec, nsec },
+              frame_id: frameId,
+            },
+            pose: {
+              pose: event.pose,
+              covariance: [
+                0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.06853891945200942,
+              ],
+            },
+          };
+
+          const datatypes =
+            context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+          context.advertise?.("/initialpose", "geometry_msgs/PoseWithCovarianceStamped", {
+            datatypes,
+          });
+          context.publish("/initialpose", initialMessage);
+        }
       } catch (error) {
         log.info(error);
       }
@@ -813,10 +830,22 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [publishActive, renderer]);
 
-  const onClickPoseInput = useCallback(() => {
+  const onClickGoalPose = useCallback(() => {
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
     } else {
+      setPoseInputMode("goal");
+      renderer?.poseInputTool.start();
+      renderer?.measurementTool.stopMeasuring();
+      renderer?.publishClickTool.stop();
+    }
+  }, [poseInputActive, renderer]);
+
+  const onClickInitialPose = useCallback(() => {
+    if (poseInputActive) {
+      renderer?.poseInputTool.stop();
+    } else {
+      setPoseInputMode("initial");
       renderer?.poseInputTool.start();
       renderer?.measurementTool.stopMeasuring();
       renderer?.publishClickTool.stop();

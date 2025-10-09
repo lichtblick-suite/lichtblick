@@ -107,6 +107,8 @@ type Props = {
   onClickMeasure: () => void;
   onClickPublish: () => void;
   onClickPoseInput: () => void;
+  onClickGoalPose: () => void;
+  onClickInitialPose: () => void;
   onShowTopicSettings: (topic: string) => void;
   onTogglePerspective: () => void;
   perspective: boolean;
