@@ -3,26 +3,13 @@
     "3D!18i6zy7": {
       "layers": {},
       "cameraState": {
-        "perspective": true,
-        "distance": 25.847108697961588,
-        "phi": 0.00005729832627056611,
-        "thetaOffset": 92.08383115335366,
-        "targetOffset": [
-          -2.096291007842728,
-          -5.369505194018394,
-          5.505067093446401e-18
-        ],
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "perspective": false,
+        "distance": 13.966745921853443,
+        "phi": 4.657237117213275,
+        "thetaOffset": 90.39031639903862,
+        "targetOffset": [1.9749883398923598, -1.6552676185136248, 1.7132565675529916e-19],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -34,7 +21,8 @@
         "transforms": {
           "axisScale": 4.5,
           "labelSize": 0.15
-        }
+        },
+        "meshUpAxis": "z_up"
       },
       "transforms": {
         "frame:base_link_inertia": {
@@ -176,7 +164,7 @@
           "visible": false
         },
         "/robot_description": {
-          "visible": false
+          "visible": true
         },
         "/genz/local_map": {
           "visible": false,

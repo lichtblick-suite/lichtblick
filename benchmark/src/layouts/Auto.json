@@ -1,306 +1,288 @@
 {
-  {
-    "configById": {
-      "3D!18i6zy7": {
-        "layers": {},
-        "cameraState": {
-          "perspective": true,
-          "distance": 15.475618749969177,
-          "phi": 8.717818161484841,
-          "thetaOffset": -93.91869532443832,
-          "targetOffset": [
-            1.539730847153832,
-            -0.43353609335043125,
-            -4.369959281912378e-17
-          ],
-          "target": [
-            0,
-            0,
-            0
-          ],
-          "targetOrientation": [
-            0,
-            0,
-            0,
-            1
-          ],
-          "fovy": 45,
-          "near": 0.5,
-          "far": 5000
-        },
-        "followMode": "follow-pose",
-        "followTf": "map",
-        "scene": {
-          "backgroundColor": "#000000",
-          "transforms": {
-            "axisScale": 1.5,
-            "labelSize": 0.04,
-            "lineWidth": 0,
-            "showLabel": true,
-            "enablePreloading": false
-          }
-        },
-        "transforms": {
-          "frame:base_link_inertia": {
-            "visible": false
-          },
-          "frame:base": {
-            "visible": false
-          },
-          "frame:arm_base_link": {
-            "visible": true
-          },
-          "frame:arm_mount": {
-            "visible": false
-          },
-          "frame:liftkit_top": {
-            "visible": true
-          },
-          "frame:liftkit_mid": {
-            "visible": true
-          },
-          "frame:lidarrr_mount": {
-            "visible": true
-          },
-          "frame:lidarrl_mount": {
-            "visible": true
-          },
-          "frame:lidarfr_mount": {
-            "visible": true
-          },
-          "frame:lidarfl_mount": {
-            "visible": true
-          },
-          "frame:lidar_nav": {
-            "visible": true
-          },
-          "frame:wheel_3": {
-            "visible": true
-          },
-          "frame:steering_3": {
-            "visible": false
-          },
-          "frame:wheel_2": {
-            "visible": true
-          },
-          "frame:steering_2": {
-            "visible": false
-          },
-          "frame:wheel": {
-            "visible": true
-          },
-          "frame:steering": {
-            "visible": false
-          },
-          "frame:livox_amr_imu": {
-            "visible": false
-          },
-          "frame:shutter_lidarmani": {
-            "visible": false
-          },
-          "frame:shutter_fisheye": {
-            "visible": false
-          },
-          "frame:lidar_mani": {
-            "visible": false
-          },
-          "frame:fisheye_mount": {
-            "visible": false
-          },
-          "frame:ft_frame": {
-            "visible": false
-          },
-          "frame:eoa_vision_module_detailed_assembly": {
-            "visible": false
-          },
-          "frame:tool0": {
-            "visible": false
-          },
-          "frame:flange": {
-            "visible": false
-          },
-          "frame:checkerboard": {
-            "visible": false
-          },
-          "frame:wrist_3_link": {
-            "visible": true
-          },
-          "frame:wrist_2_link": {
-            "visible": false
-          },
-          "frame:wrist_1_link": {
-            "visible": false
-          },
-          "frame:forearm_link": {
-            "visible": false
-          },
-          "frame:upper_arm_link": {
-            "visible": false
-          },
-          "frame:shoulder_link": {
-            "visible": false
-          },
-          "frame:arm_base_zero": {
-            "visible": true
-          },
-          "frame:livox_manipulation_pcd": {
-            "visible": true
-          },
-          "frame:fisheye": {
-            "visible": true
-          },
-          "frame:fisheye_optical_frame": {
-            "visible": false
-          },
-          "frame:fisheye_optical": {
-            "visible": false
-          },
-          "frame:livox_manipulation_imu": {
-            "visible": false
-          }
-        },
-        "topics": {
-          "/amcl_pose": {
-            "visible": true,
-            "type": "arrow",
-            "color": "#d22222ff",
-            "arrowScale": [
-              1,
-              0.05,
-              0.05
-            ],
-            "showCovariance": true
-          },
-          "/collision_zones": {
-            "visible": true
-          },
-          "/global_costmap/costmap": {
-            "visible": true
-          },
-          "/evaluatepose": {
-            "visible": true,
-            "axisScale": 1.7,
-            "type": "arrow"
-          },
-          "/map": {
-            "visible": true
-          },
-          "/pointcloud_clipped": {
-            "visible": false,
-            "colorField": "z",
-            "colorMode": "colormap",
-            "colorMap": "turbo",
-            "explicitAlpha": 0.6,
-            "decayTime": 2.5
-          },
-          "/rgb_pointcloud": {
-            "visible": false
-          },
-          "/robot_description": {
-            "visible": true
-          },
-          "/genz/local_map": {
-            "visible": false,
-            "colorField": "z",
-            "colorMode": "colormap",
-            "colorMap": "turbo"
-          },
-          "/local_costmap/published_footprint": {
-            "visible": true
-          },
-          "/global_costmap/published_footprint": {
-            "visible": true
-          },
-          "/projected_map": {
-            "visible": true
-          },
-          "/scan": {
-            "visible": true,
-            "colorField": "intensity",
-            "colorMode": "flat",
-            "colorMap": "turbo",
-            "pointSize": 4,
-            "flatColor": "#ff0000ff",
-            "decayTime": 0.5
-          },
-          "/plan_smoothed": {
-            "visible": true,
-            "lineWidth": 0.22
-          },
-          "/received_global_plan": {
-            "visible": true,
-            "lineWidth": 0.215
-          },
-          "/set_pose": {
-            "visible": true
-          },
-          "/goal_pose": {
-            "visible": false
-          },
-          "/local_costmap/costmap": {
-            "visible": true
-          },
-          "/local_plan": {
-            "visible": true
-          },
-          "/spatial_markers": {
-            "visible": true
-          },
-          "/corrected_abcenterpose": {
-            "visible": true
-          },
-          "/tcp_planned_path": {
-            "visible": true
-          },
-          "/tcp_planned_path_wo_offset": {
-            "visible": true
-          },
-          "/cropped_pointcloud": {
-            "visible": true
-          },
-          "/seg/mani/lidar": {
-            "visible": true,
-            "colorField": "z",
-            "colorMode": "colormap",
-            "colorMap": "turbo"
-          },
-          "/goal_generate/nav_pose": {
-            "visible": true
-          },
-          "/waypoint_markers": {
-            "visible": true
-          }
-        },
-        "publish": {
-          "type": "pose",
-          "poseTopic": "/move_base_simple/goal",
-          "pointTopic": "/clicked_point",
-          "poseEstimateTopic": "/evaluatepose",
-          "poseEstimateXDeviation": 0.5,
-          "poseEstimateYDeviation": 0.5,
-          "poseEstimateThetaDeviation": 0.26179939
-        },
-        "imageMode": {}
+  "configById": {
+    "3D!18i6zy7": {
+      "layers": {},
+      "cameraState": {
+        "distance": 15.475618749969177,
+        "perspective": true,
+        "phi": 8.717818161484841,
+        "target": [0, 0, 0],
+        "targetOffset": [1.539730847153832, -0.43353609335043125, -4.369959281912378e-17],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": -93.91869532443832,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
       },
-      "RawMessages!hw1c44": {
-        "diffEnabled": false,
-        "diffMethod": "custom",
-        "diffTopicPath": "",
-        "showFullMessageForDiff": false,
-        "topicPath": "/health_monitor/active_interrupts",
-        "expansion": "none"
-      }
+      "followMode": "follow-pose",
+      "followTf": "map",
+      "scene": {
+        "backgroundColor": "#000000",
+        "transforms": {
+          "axisScale": 1.5,
+          "labelSize": 0.04,
+          "lineWidth": 0,
+          "showLabel": true,
+          "enablePreloading": false
+        },
+        "meshUpAxis": "z_up"
+      },
+      "transforms": {
+        "frame:base_link_inertia": {
+          "visible": false
+        },
+        "frame:base": {
+          "visible": false
+        },
+        "frame:arm_base_link": {
+          "visible": true
+        },
+        "frame:arm_mount": {
+          "visible": false
+        },
+        "frame:liftkit_top": {
+          "visible": true
+        },
+        "frame:liftkit_mid": {
+          "visible": true
+        },
+        "frame:lidarrr_mount": {
+          "visible": true
+        },
+        "frame:lidarrl_mount": {
+          "visible": true
+        },
+        "frame:lidarfr_mount": {
+          "visible": true
+        },
+        "frame:lidarfl_mount": {
+          "visible": true
+        },
+        "frame:lidar_nav": {
+          "visible": true
+        },
+        "frame:wheel_3": {
+          "visible": true
+        },
+        "frame:steering_3": {
+          "visible": false
+        },
+        "frame:wheel_2": {
+          "visible": true
+        },
+        "frame:steering_2": {
+          "visible": false
+        },
+        "frame:wheel": {
+          "visible": true
+        },
+        "frame:steering": {
+          "visible": false
+        },
+        "frame:livox_amr_imu": {
+          "visible": false
+        },
+        "frame:shutter_lidarmani": {
+          "visible": false
+        },
+        "frame:shutter_fisheye": {
+          "visible": false
+        },
+        "frame:lidar_mani": {
+          "visible": false
+        },
+        "frame:fisheye_mount": {
+          "visible": false
+        },
+        "frame:ft_frame": {
+          "visible": false
+        },
+        "frame:eoa_vision_module_detailed_assembly": {
+          "visible": false
+        },
+        "frame:tool0": {
+          "visible": false
+        },
+        "frame:flange": {
+          "visible": false
+        },
+        "frame:checkerboard": {
+          "visible": false
+        },
+        "frame:wrist_3_link": {
+          "visible": true
+        },
+        "frame:wrist_2_link": {
+          "visible": false
+        },
+        "frame:wrist_1_link": {
+          "visible": false
+        },
+        "frame:forearm_link": {
+          "visible": false
+        },
+        "frame:upper_arm_link": {
+          "visible": false
+        },
+        "frame:shoulder_link": {
+          "visible": false
+        },
+        "frame:arm_base_zero": {
+          "visible": true
+        },
+        "frame:livox_manipulation_pcd": {
+          "visible": true
+        },
+        "frame:fisheye": {
+          "visible": true
+        },
+        "frame:fisheye_optical_frame": {
+          "visible": false
+        },
+        "frame:fisheye_optical": {
+          "visible": false
+        },
+        "frame:livox_manipulation_imu": {
+          "visible": false
+        }
+      },
+      "topics": {
+        "/amcl_pose": {
+          "visible": true,
+          "type": "arrow",
+          "color": "#d22222ff",
+          "arrowScale": [1, 0.05, 0.05],
+          "showCovariance": true
+        },
+        "/collision_zones": {
+          "visible": true
+        },
+        "/global_costmap/costmap": {
+          "visible": true
+        },
+        "/evaluatepose": {
+          "visible": true,
+          "axisScale": 1.7,
+          "type": "arrow"
+        },
+        "/map": {
+          "visible": true
+        },
+        "/pointcloud_clipped": {
+          "visible": false,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo",
+          "explicitAlpha": 0.6,
+          "decayTime": 2.5
+        },
+        "/rgb_pointcloud": {
+          "visible": false
+        },
+        "/robot_description": {
+          "visible": true
+        },
+        "/genz/local_map": {
+          "visible": false,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/local_costmap/published_footprint": {
+          "visible": true
+        },
+        "/global_costmap/published_footprint": {
+          "visible": true
+        },
+        "/projected_map": {
+          "visible": true
+        },
+        "/scan": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "flat",
+          "colorMap": "turbo",
+          "pointSize": 4,
+          "flatColor": "#ff0000ff",
+          "decayTime": 0.5
+        },
+        "/plan_smoothed": {
+          "visible": true,
+          "lineWidth": 0.22
+        },
+        "/received_global_plan": {
+          "visible": true,
+          "lineWidth": 0.215
+        },
+        "/set_pose": {
+          "visible": true
+        },
+        "/goal_pose": {
+          "visible": false
+        },
+        "/local_costmap/costmap": {
+          "visible": true
+        },
+        "/local_plan": {
+          "visible": true
+        },
+        "/spatial_markers": {
+          "visible": true
+        },
+        "/corrected_abcenterpose": {
+          "visible": true
+        },
+        "/tcp_planned_path": {
+          "visible": true
+        },
+        "/tcp_planned_path_wo_offset": {
+          "visible": true
+        },
+        "/cropped_pointcloud": {
+          "visible": true
+        },
+        "/seg/mani/lidar": {
+          "visible": true,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/goal_generate/nav_pose": {
+          "visible": true
+        },
+        "/waypoint_markers": {
+          "visible": true
+        }
+      },
+      "publish": {
+        "type": "pose",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/evaluatepose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "imageMode": {}
     },
-    "globalVariables": {},
-    "userNodes": {},
-    "playbackConfig": {
-      "speed": 1
-    },
-    "layout": {
-      "first": "3D!18i6zy7",
-      "second": "RawMessages!hw1c44",
-      "direction": "row",
-      "splitPercentage": 83.56266052089335
+    "RawMessages!hw1c44": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/health_monitor/active_interrupts",
+      "expansion": "none"
     }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": "3D!18i6zy7",
+    "second": "RawMessages!hw1c44",
+    "direction": "row",
+    "splitPercentage": 83.56266052089335
   }
-  }
+}
