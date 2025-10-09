@@ -625,10 +625,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (renderer && poseInputActive) {
       // Use setTimeout to ensure camera handler is fully initialized
       setTimeout(() => {
-        if (renderer.cameraHandler && "setControlsEnabled" in renderer.cameraHandler) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (renderer.cameraHandler as any).setControlsEnabled?.(false);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (renderer.cameraHandler as any).setControlsEnabled?.(false);
       }, 0);
     }
   }, [renderer, poseInputActive]);
@@ -818,7 +816,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer?.poseInputTool.removeEventListener("foxglove.pose-input-submit", onPoseInputSubmit);
       renderer?.poseInputTool.removeEventListener("foxglove.pose-input-end", onPoseInputEnd);
     };
-  }, [context, renderer?.poseInputTool]);
+  }, [context, renderer?.poseInputTool, poseInputMode]);
 
   const onClickPublish = useCallback(() => {
     if (publishActive) {
@@ -842,6 +840,17 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   }, [poseInputActive, renderer]);
 
   const onClickInitialPose = useCallback(() => {
+    if (poseInputActive) {
+      renderer?.poseInputTool.stop();
+    } else {
+      setPoseInputMode("initial");
+      renderer?.poseInputTool.start();
+      renderer?.measurementTool.stopMeasuring();
+      renderer?.publishClickTool.stop();
+    }
+  }, [poseInputActive, renderer]);
+
+  const onClickPoseInput = useCallback(() => {
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
     } else {
@@ -880,75 +889,6 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
   const canPublish = context.publish != undefined && isRosDataSource;
 
-  const publishGoalPose = useCallback(() => {
-    if (!context.publish) {
-      log.error("Data source does not support publishing");
-      return;
-    }
-    if (context.dataSourceProfile !== "ros1" && context.dataSourceProfile !== "ros2") {
-      log.warn("Publishing is only supported in ros1 and ros2");
-      return;
-    }
-
-    const now = new Date();
-    const sec = Math.floor(now.getTime() / 1000);
-    const nsec = (now.getTime() % 1000) * 1e6;
-
-    const message = {
-      header: {
-        stamp: { sec, nsec },
-        frame_id: "map",
-      },
-      pose: {
-        position: { x: 0, y: 0, z: 0 },
-        orientation: { x: 0, y: 0, z: 0, w: 1 },
-      },
-    };
-
-    const datatypes =
-      context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
-    context.advertise?.("/goal_pose", "geometry_msgs/PoseStamped", { datatypes });
-    context.publish("/goal_pose", message);
-  }, [context]);
-
-  const publishInitialPose = useCallback(() => {
-    if (!context.publish) {
-      log.error("Data source does not support publishing");
-      return;
-    }
-    if (context.dataSourceProfile !== "ros1" && context.dataSourceProfile !== "ros2") {
-      log.warn("Publishing is only supported in ros1 and ros2");
-      return;
-    }
-
-    const now = new Date();
-    const sec = Math.floor(now.getTime() / 1000);
-    const nsec = (now.getTime() % 1000) * 1e6;
-
-    const message = {
-      header: {
-        stamp: { sec, nsec },
-        frame_id: "map",
-      },
-      pose: {
-        pose: {
-          position: { x: 0, y: 0, z: 0 },
-          orientation: { x: 0, y: 0, z: 0, w: 1 },
-        },
-        covariance: [
-          0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0,
-        ],
-      },
-    };
-
-    const datatypes =
-      context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
-    context.advertise?.("/initialpose", "geometry_msgs/PoseWithCovarianceStamped", { datatypes });
-    context.publish("/initialpose", message);
-  }, [context]);
-
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
       <div style={PANEL_STYLE} onKeyDown={onKeyDown}>
@@ -971,7 +911,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             onTogglePerspective={onTogglePerspective}
             measureActive={measureActive}
             onClickMeasure={onClickMeasure}
-            poseInputActive={poseInputActive}
+            poseInputActive={poseInputActive && poseInputMode === "initial"}
             onClickPoseInput={onClickPoseInput}
             canPublish={canPublish}
             publishActive={publishActive}
@@ -983,8 +923,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
               renderer?.publishClickTool.start();
             }}
             timezone={timezone}
-            onPublishGoalPose={publishGoalPose}
-            onPublishInitialPose={publishInitialPose}
+            goalPoseActive={poseInputActive && poseInputMode === "goal"}
+            onClickGoalPose={onClickGoalPose}
+            initialPoseActive={poseInputActive && poseInputMode === "initial"}
+            onClickInitialPose={onClickInitialPose}
           />
         </RendererContext.Provider>
       </div>

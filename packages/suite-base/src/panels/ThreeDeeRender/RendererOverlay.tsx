@@ -107,7 +107,9 @@ type Props = {
   onClickMeasure: () => void;
   onClickPublish: () => void;
   onClickPoseInput: () => void;
+  goalPoseActive?: boolean;
   onClickGoalPose: () => void;
+  initialPoseActive?: boolean;
   onClickInitialPose: () => void;
   onShowTopicSettings: (topic: string) => void;
   onTogglePerspective: () => void;
@@ -116,8 +118,6 @@ type Props = {
   publishActive: boolean;
   publishClickType: PublishClickType;
   timezone: string | undefined;
-  onPublishGoalPose: () => void;
-  onPublishInitialPose: () => void;
 };
 
 /**
@@ -420,23 +420,35 @@ export function RendererOverlay(props: Props): React.JSX.Element {
           {/* Goal Pose and Initial Pose buttons at bottom */}
           {props.canPublish && (
             <>
-              <Tooltip placement="left" title="Set goal pose">
+              <Tooltip
+                placement="left"
+                title={
+                  props.goalPoseActive ?? false ? "Cancel goal pose selection" : "Set goal pose"
+                }
+              >
                 <IconButton
                   className={classes.iconButton}
                   size="small"
-                  color={props.poseInputActive ? "info" : "inherit"}
-                  onClick={props.onClickPoseInput}
+                  color={props.goalPoseActive ?? false ? "info" : "inherit"}
+                  onClick={props.onClickGoalPose}
                   data-testid="goal-pose-button"
                 >
                   <PublishGoalIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip placement="left" title="Set initial pose">
+              <Tooltip
+                placement="left"
+                title={
+                  props.initialPoseActive ?? false
+                    ? "Cancel initial pose selection"
+                    : "Set initial pose"
+                }
+              >
                 <IconButton
                   className={classes.iconButton}
                   size="small"
-                  color={props.poseInputActive ? "info" : "secondary"}
-                  onClick={props.onClickPoseInput}
+                  color={props.initialPoseActive ?? false ? "info" : "secondary"}
+                  onClick={props.onClickInitialPose}
                   data-testid="initial-pose-button"
                 >
                   <InitialPoseIcon fontSize="small" />
