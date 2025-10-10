@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { RosTime } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { calculateStaticItemFrequency } from "@lichtblick/suite-base/util/calculateStaticItemFrequency";
 
 describe("calculateStaticItemFrequency", () => {
   const numMessages = 200;
-  const firstMessageTime = { sec: 1, nsec: 0 };
-  const lastMessageTime = { sec: 6, nsec: 0 };
-  const duration = { sec: 6, nsec: 0 };
+  const firstMessageTime: RosTime = { sec: 1, nsec: 0 };
+  const lastMessageTime: RosTime = { sec: 6, nsec: 0 };
+  const duration: RosTime = { sec: 6, nsec: 0 };
 
   it("should return undefined when lastMessage is undefined and duration is zero", () => {
-    const zeroDuration = { sec: 0, nsec: 0 };
+    const zeroDuration: RosTime = { sec: 0, nsec: 0 };
 
     const result = calculateStaticItemFrequency(numMessages, undefined, undefined, zeroDuration);
     expect(result).toBeUndefined();
@@ -35,7 +36,7 @@ describe("calculateStaticItemFrequency", () => {
   });
 
   it("should return undefined if first and last message times are equal", () => {
-    const sameTimeMessage = { sec: 1, nsec: 0 };
+    const sameTimeMessage: RosTime = { sec: 1, nsec: 0 };
 
     const result = calculateStaticItemFrequency(
       numMessages,

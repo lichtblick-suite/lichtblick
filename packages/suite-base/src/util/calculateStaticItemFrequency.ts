@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { subtract as subtractTimes, areEqual, Time, toSec } from "@lichtblick/rostime";
+import { subtract, areEqual, Time, toSec } from "@lichtblick/rostime";
 
 export function calculateStaticItemFrequency(
   numMessages: number,
@@ -24,7 +24,7 @@ export function calculateStaticItemFrequency(
     return undefined;
   }
 
-  const topicDurationSec = toSec(subtractTimes(lastMessageTime, firstMessageTime));
+  const topicDurationSec = toSec(subtract(lastMessageTime, firstMessageTime));
   if (topicDurationSec > 0) {
     return (numMessages - 1) / topicDurationSec;
   } else {
