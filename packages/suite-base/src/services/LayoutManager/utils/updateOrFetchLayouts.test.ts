@@ -35,6 +35,7 @@ describe("updateOrFetchLayout", () => {
 
     updateParams = {
       id: BasicBuilder.string() as LayoutID,
+      externalId: BasicBuilder.string(),
       name: BasicBuilder.string(),
       savedAt: new Date().toISOString() as ISO8601Timestamp,
     };

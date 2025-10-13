@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import dotenv from "dotenv";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
@@ -13,6 +14,9 @@ import { Configuration, DefinePlugin, ResolveOptions } from "webpack";
 import { WebpackArgv } from "@lichtblick/suite-base/WebpackArgv";
 
 import { WebpackConfigParams } from "./WebpackConfigParams";
+
+// Load environment variables from .env
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 export const webpackMainConfig =
   (params: WebpackConfigParams) =>
@@ -81,10 +85,17 @@ export const webpackMainConfig =
 
       plugins: [
         new DefinePlugin({
+          // Should match webpack-defines.d.ts
+          ReactNull: null, // eslint-disable-line no-restricted-syntax
           MAIN_WINDOW_WEBPACK_ENTRY: rendererEntry,
           LICHTBLICK_PRODUCT_NAME: JSON.stringify(params.packageJson.productName),
           LICHTBLICK_PRODUCT_VERSION: JSON.stringify(params.packageJson.version),
           LICHTBLICK_PRODUCT_HOMEPAGE: JSON.stringify(params.packageJson.homepage),
+          LICHTBLICK_SUITE_VERSION: JSON.stringify(params.packageJson.version),
+          API_URL: process.env.API_URL ? JSON.stringify(process.env.API_URL) : undefined,
+          DEV_WORKSPACE: process.env.DEV_WORKSPACE
+            ? JSON.stringify(process.env.DEV_WORKSPACE)
+            : undefined,
         }),
         new ForkTsCheckerWebpackPlugin(),
       ],

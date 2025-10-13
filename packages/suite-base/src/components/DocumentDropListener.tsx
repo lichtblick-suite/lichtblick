@@ -20,23 +20,71 @@ import { useCallback, useLayoutEffect, useState } from "react";
 
 import Logger from "@lichtblick/log";
 import DropOverlay from "@lichtblick/suite-base/components/DropOverlay";
+import { NamespaceSelectionModal } from "@lichtblick/suite-base/components/NamespaceSelectionModal";
+import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 const log = Logger.getLogger(__filename);
 
-type Props = {
+type DocumentDropListenerProps = {
   allowedExtensions?: string[];
   onDrop?: (event: {
     files?: File[];
     handles?: FileSystemFileHandle[]; // foxglove-depcheck-used: @types/wicg-file-system-access
+    namespace?: Namespace;
   }) => void;
 };
 
-export default function DocumentDropListener(props: Props): React.JSX.Element {
+type PendingFile = {
+  files: File[];
+  handles?: FileSystemFileHandle[];
+};
+
+export default function DocumentDropListener(props: DocumentDropListenerProps): React.JSX.Element {
   const [hovering, setHovering] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile | undefined>(undefined);
+  const [showNamespaceModal, setShowNamespaceModal] = useState(false);
 
   const { onDrop: onDropProp, allowedExtensions } = props;
 
   const { enqueueSnackbar } = useSnackbar();
+
+  const shouldShowNamespaceModal = useCallback((files: File[]): boolean => {
+    const url = new URL(window.location.href);
+    const remoteNamespace = url.searchParams.get("namespace");
+    if (!remoteNamespace || !APP_CONFIG.apiUrl) {
+      return false;
+    }
+
+    const hasLayoutOrExtension = files.some(
+      (file) =>
+        file.name.endsWith(AllowedFileExtensions.JSON) ||
+        file.name.endsWith(AllowedFileExtensions.FOXE),
+    );
+
+    return hasLayoutOrExtension;
+  }, []);
+
+  const handleNamespaceSelection = useCallback(
+    (namespace: Namespace) => {
+      if (pendingFiles) {
+        onDropProp?.({
+          files: pendingFiles.files,
+          handles: pendingFiles.handles,
+          namespace,
+        });
+        setPendingFiles(undefined);
+      }
+      setShowNamespaceModal(false);
+    },
+    [onDropProp, pendingFiles],
+  );
+
+  const handleModalClose = useCallback(() => {
+    setShowNamespaceModal(false);
+    setPendingFiles(undefined);
+  }, []);
 
   const onDrop = useCallback(
     async (ev: DragEvent) => {
@@ -141,9 +189,14 @@ export default function DocumentDropListener(props: Props): React.JSX.Element {
       ev.preventDefault();
       ev.stopPropagation();
 
-      onDropProp?.({ files: filteredFiles, handles: filteredHandles });
+      if (shouldShowNamespaceModal(filteredFiles)) {
+        setPendingFiles({ files: filteredFiles, handles: filteredHandles });
+        setShowNamespaceModal(true);
+      } else {
+        onDropProp?.({ files: filteredFiles, handles: filteredHandles, namespace: "local" });
+      }
     },
-    [enqueueSnackbar, onDropProp, allowedExtensions],
+    [enqueueSnackbar, onDropProp, allowedExtensions, shouldShowNamespaceModal],
   );
 
   const onDragOver = useCallback(
@@ -185,13 +238,27 @@ export default function DocumentDropListener(props: Props): React.JSX.Element {
         style={{ display: "none" }}
         onChange={(event) => {
           if (event.target.files) {
-            props.onDrop?.({ files: Array.from(event.target.files) });
+            const files = Array.from(event.target.files);
+            if (shouldShowNamespaceModal(files)) {
+              setPendingFiles({ files });
+              setShowNamespaceModal(true);
+            } else {
+              props.onDrop?.({ files, namespace: "local" });
+            }
           }
         }}
         data-puppeteer-file-upload
         multiple
       />
       <DropOverlay open={hovering}>Drop a file here</DropOverlay>
+      {pendingFiles && (
+        <NamespaceSelectionModal
+          open={showNamespaceModal}
+          onClose={handleModalClose}
+          onSelect={handleNamespaceSelection}
+          files={pendingFiles.files}
+        />
+      )}
     </>
   );
 }

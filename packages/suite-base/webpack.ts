@@ -241,6 +241,8 @@ export function makeConfig(
         // Should match webpack-defines.d.ts
         ReactNull: null, // eslint-disable-line no-restricted-syntax
         LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
+        API_URL: JSON.stringify(process.env.API_URL),
+        DEV_WORKSPACE: JSON.stringify(process.env.DEV_WORKSPACE),
         ...buildEnvVars(),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales

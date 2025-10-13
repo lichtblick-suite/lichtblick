@@ -98,9 +98,7 @@ describe("useHandleFiles", () => {
       files = filesOverride ?? [fileBuilder("mcap", FILE_ACCEPT_TYPE)];
       files.forEach((file) => {
         file.arrayBuffer = async () =>
-          await Promise.resolve(
-            new Uint8Array(new TextEncoder().encode(BasicBuilder.string()).buffer),
-          );
+          await Promise.resolve(new TextEncoder().encode(BasicBuilder.string()).buffer);
       });
     }
 
@@ -140,6 +138,7 @@ describe("useHandleFiles", () => {
   });
 
   it("should call pause and parse .json layout file", async () => {
+    const namespace = "local";
     const mockLayout = fileBuilder("json", FILE_JSON_TYPE);
     const { handleFiles, files } = setup({
       filesOverride: [mockLayout],
@@ -150,7 +149,7 @@ describe("useHandleFiles", () => {
       await handleFiles(files);
     });
     expect(playerEvents.pause).toHaveBeenCalled();
-    expect(parseAndInstallLayoutMock).toHaveBeenCalledWith(mockLayout);
+    expect(parseAndInstallLayoutMock).toHaveBeenCalledWith(mockLayout, namespace);
   });
 
   it("does nothing when passed an empty file array", async () => {

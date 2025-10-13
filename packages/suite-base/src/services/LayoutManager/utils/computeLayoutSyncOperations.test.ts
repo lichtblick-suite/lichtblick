@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ISO8601Timestamp, LayoutPermission } from "@lichtblick/suite-base/services/ILayoutStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
 import computeLayoutSyncOperations from "./computeLayoutSyncOperations";
@@ -15,7 +13,7 @@ jest.mock("@lichtblick/log", () => ({
 }));
 
 describe("computeLayoutSyncOperations", () => {
-  const layoutId = BasicBuilder.string() as LayoutID;
+  const layoutId = LayoutBuilder.layoutId();
   const savedAt = "2023-01-01T00:00:00.000Z" as ISO8601Timestamp;
 
   describe("when local and remote layouts match", () => {
@@ -181,7 +179,7 @@ describe("computeLayoutSyncOperations", () => {
   });
 
   describe("when local layout exists but no matching remote layout", () => {
-    it("should upload new personal layout when sync status is undefined", () => {
+    it("should NOT upload new personal layout when sync status is undefined", () => {
       // Given
       const localLayout = LayoutBuilder.layout({
         id: layoutId,
@@ -193,12 +191,7 @@ describe("computeLayoutSyncOperations", () => {
       const operations = computeLayoutSyncOperations([localLayout], []);
 
       // Then
-      expect(operations).toHaveLength(1);
-      expect(operations[0]).toMatchObject({
-        local: false,
-        type: "upload-new",
-        localLayout: expect.objectContaining({ id: layoutId }),
-      });
+      expect(operations).toHaveLength(0);
     });
 
     it("should skip shared layouts when sync status is undefined", () => {
@@ -216,7 +209,7 @@ describe("computeLayoutSyncOperations", () => {
       expect(operations).toEqual([]);
     });
 
-    it("should upload new personal layout when sync status is new", () => {
+    it("should NOT upload new personal layout when sync status is new", () => {
       // Given
       const localLayout = LayoutBuilder.layout({
         id: layoutId,
@@ -228,12 +221,7 @@ describe("computeLayoutSyncOperations", () => {
       const operations = computeLayoutSyncOperations([localLayout], []);
 
       // Then
-      expect(operations).toHaveLength(1);
-      expect(operations[0]).toMatchObject({
-        local: false,
-        type: "upload-new",
-        localLayout: expect.objectContaining({ id: layoutId }),
-      });
+      expect(operations).toHaveLength(0);
     });
 
     it("should delete local personal layout when sync status is updated", () => {

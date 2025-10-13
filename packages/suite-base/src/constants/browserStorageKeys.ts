@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export const KEY_WORKSPACE_PREFIX = process.env.DEV_WORKSPACE
-  ? `${process.env.DEV_WORKSPACE}.`
-  : "";
+import { APP_CONFIG } from "./config";
+
+export const KEY_WORKSPACE_PREFIX = APP_CONFIG.devWorkspace ? `${APP_CONFIG.devWorkspace}.` : "";
 
 // Local storage keys
 export const LOCAL_STORAGE_STUDIO_LAYOUT_KEY = `${KEY_WORKSPACE_PREFIX}studio.layout`;

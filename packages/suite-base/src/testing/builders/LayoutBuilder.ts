@@ -78,7 +78,8 @@ export default class LayoutBuilder {
 
   public static layout(props: Partial<Layout> = {}): Layout {
     return defaults<Layout>(props, {
-      id: BasicBuilder.string() as LayoutID,
+      id: LayoutBuilder.layoutId(),
+      externalId: BasicBuilder.string(),
       name: BasicBuilder.string(),
       from: BasicBuilder.string(),
       permission: LayoutBuilder.permission,
@@ -99,10 +100,15 @@ export default class LayoutBuilder {
   public static remoteLayout(props: Partial<RemoteLayout> = {}): RemoteLayout {
     return defaults<RemoteLayout>(props, {
       id: BasicBuilder.string() as LayoutID,
+      externalId: BasicBuilder.string(),
       name: BasicBuilder.string(),
       permission: LayoutBuilder.permission,
       data: LayoutBuilder.data(),
       savedAt: new Date(BasicBuilder.number()).toISOString() as ISO8601Timestamp,
     });
+  }
+
+  public static layoutId(defaultId?: string): LayoutID {
+    return (defaultId ?? BasicBuilder.string()) as LayoutID;
   }
 }

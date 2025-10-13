@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ILayoutStorage } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { NamespacedLayoutStorage } from "@lichtblick/suite-base/services/LayoutManager/NamespacedLayoutStorage";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
@@ -214,7 +213,7 @@ describe("NamespacedLayoutStorage", () => {
   describe("get", () => {
     it("should get layout by id from the specified namespace", async () => {
       // Given
-      const layoutId = BasicBuilder.string() as LayoutID;
+      const layoutId = LayoutBuilder.layoutId();
       const layout = LayoutBuilder.layout({ id: layoutId });
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, {
         migrateUnnamespacedLayouts: false,
@@ -232,7 +231,7 @@ describe("NamespacedLayoutStorage", () => {
 
     it("should return undefined when layout does not exist", async () => {
       // Given
-      const layoutId = BasicBuilder.string() as LayoutID;
+      const layoutId = LayoutBuilder.layoutId();
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, {
         migrateUnnamespacedLayouts: false,
         importFromNamespace: undefined,
@@ -270,7 +269,7 @@ describe("NamespacedLayoutStorage", () => {
   describe("delete", () => {
     it("should delete layout from the specified namespace", async () => {
       // Given
-      const layoutId = BasicBuilder.string() as LayoutID;
+      const layoutId = LayoutBuilder.layoutId();
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, {
         migrateUnnamespacedLayouts: false,
         importFromNamespace: undefined,

@@ -109,7 +109,7 @@ function syncLocalLayout(localLayout: Layout, operations: SyncOperation[]): void
         log.warn(`Shared layout ${localLayout.id} should have been uploaded at creation`);
         break;
       }
-      operations.push({ local: false, type: "upload-new", localLayout });
+      // operations.push({ local: false, type: "upload-new", localLayout });
       break;
     case "updated":
       if (!layoutIsShared(localLayout)) {

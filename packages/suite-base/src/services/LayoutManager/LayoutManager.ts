@@ -163,7 +163,9 @@ export default class LayoutManager implements ILayoutManager {
         permission: remoteLayout.permission,
         baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
         working: undefined,
-        syncInfo: { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt },
+        syncInfo: layoutPermissionIsShared(remoteLayout.permission)
+          ? { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt }
+          : undefined,
       });
     });
   }
@@ -193,20 +195,21 @@ export default class LayoutManager implements ILayoutManager {
         name,
         data,
         permission,
-        savedAt: new Date().toISOString() as ISO8601Timestamp,
       });
+      const localLayoutData = {
+        id: newLayout.id,
+        name: newLayout.name,
+        externalId: newLayout.externalId,
+        permission: newLayout.permission,
+        baseline: { data: newLayout.data, savedAt: newLayout.savedAt },
+        working: undefined,
+        syncInfo: { status: "tracked" as const, lastRemoteSavedAt: newLayout.savedAt },
+      };
+
       const result = await this.local.runExclusive(
-        async (local) =>
-          await local.put({
-            id: newLayout.id,
-            name: newLayout.name,
-            permission: newLayout.permission,
-            baseline: { data: newLayout.data, savedAt: newLayout.savedAt },
-            working: undefined,
-            syncInfo: { status: "tracked", lastRemoteSavedAt: newLayout.savedAt },
-          }),
+        async (local) => await local.put(localLayoutData),
       );
-      this.notifyChangeListeners({ type: "change", updatedLayout: undefined });
+      this.notifyChangeListeners({ type: "change", updatedLayout: result });
       return result;
     }
 
@@ -219,7 +222,7 @@ export default class LayoutManager implements ILayoutManager {
           permission,
           baseline: { data, savedAt: new Date().toISOString() as ISO8601Timestamp },
           working: undefined,
-          syncInfo: this.remote ? { status: "new", lastRemoteSavedAt: undefined } : undefined,
+          syncInfo: undefined, // Personal layouts should NEVER have syncInfo
         }),
     );
     this.notifyChangeListeners({ type: "change", updatedLayout: newLayout });
@@ -239,7 +242,7 @@ export default class LayoutManager implements ILayoutManager {
     const now = new Date().toISOString() as ISO8601Timestamp;
     const localLayout = await this.local.runExclusive(async (local) => await local.get(id));
     if (!localLayout) {
-      throw new Error(`Cannot update layout ${id} because it does not exist`);
+      throw new Error(`Cannot update layout ${id} (${name}) because it does not exist`);
     }
 
     // If the modifications result in the same layout data, set the working copy to undefined so the
@@ -259,9 +262,13 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.isOnline) {
         throw new Error("Cannot update a shared layout while offline");
       }
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
+      }
 
       const updatedBaseline = await updateOrFetchLayout(this.remote, {
         id,
+        externalId: localLayout.externalId,
         name,
         savedAt: now,
       });
@@ -278,9 +285,11 @@ export default class LayoutManager implements ILayoutManager {
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
       return result;
     } else {
+      // Only shared layouts should be marked for server upload on rename
       const isRename =
         this.remote != undefined &&
         name != undefined &&
+        layoutIsShared(localLayout) &&
         localLayout.syncInfo != undefined &&
         localLayout.syncInfo.status !== "new";
 
@@ -293,9 +302,11 @@ export default class LayoutManager implements ILayoutManager {
 
             // If the name is being changed, we will need to upload to the server with a new savedAt
             baseline: isRename ? { ...localLayout.baseline, savedAt: now } : localLayout.baseline,
-            syncInfo: isRename
-              ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-              : localLayout.syncInfo,
+            syncInfo: layoutIsShared(localLayout)
+              ? isRename
+                ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
+                : localLayout.syncInfo
+              : undefined, // Personal layouts should NEVER have syncInfo
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
@@ -307,17 +318,21 @@ export default class LayoutManager implements ILayoutManager {
   public async deleteLayout({ id }: { id: LayoutID }): Promise<void> {
     const localLayout = await this.local.runExclusive(async (local) => await local.get(id));
     if (!localLayout) {
-      throw new Error(`Cannot update layout ${id} because it does not exist`);
+      throw new Error(`Cannot delete layout ${id} because it does not exist`);
     }
+
     if (layoutIsShared(localLayout)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
+      }
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
       }
       if (localLayout.syncInfo?.status !== "remotely-deleted") {
         if (!this.isOnline) {
           throw new Error("Cannot delete a shared layout while offline");
         }
-        await this.remote.deleteLayout(id);
+        await this.remote.deleteLayout(localLayout.externalId);
       }
     }
     await this.local.runExclusive(async (local) => {
@@ -334,7 +349,6 @@ export default class LayoutManager implements ILayoutManager {
           },
         });
       } else {
-        // Don't have remote storage, or already deleted on remote
         await local.delete(id);
       }
     });
@@ -355,8 +369,12 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.isOnline) {
         throw new Error("Cannot save a shared layout while offline");
       }
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
+      }
       const updatedBaseline = await updateOrFetchLayout(this.remote, {
         id,
+        externalId: localLayout.externalId,
         data: localLayout.working?.data ?? localLayout.baseline.data,
         savedAt: now,
       });
@@ -381,10 +399,7 @@ export default class LayoutManager implements ILayoutManager {
               savedAt: now,
             },
             working: undefined,
-            syncInfo:
-              this.remote && localLayout.syncInfo?.status !== "new"
-                ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-                : localLayout.syncInfo,
+            syncInfo: undefined, // Personal layouts should NEVER have syncInfo
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
@@ -470,11 +485,13 @@ export default class LayoutManager implements ILayoutManager {
       this.local.runExclusive(async (local) => await local.list()),
       this.remote.getLayouts(),
     ]);
+
     if (abortSignal.aborted) {
       return;
     }
 
     const syncOperations = computeLayoutSyncOperations(localLayouts, remoteLayouts);
+
     const [localOps, remoteOps] = _.partition(
       syncOperations,
       (op): op is typeof op & { local: true } => op.local,
@@ -519,10 +536,13 @@ export default class LayoutManager implements ILayoutManager {
             await local.put({
               id: remoteLayout.id,
               name: remoteLayout.name,
+              externalId: remoteLayout.externalId,
               permission: remoteLayout.permission,
               baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
               working: undefined,
-              syncInfo: { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt },
+              syncInfo: layoutPermissionIsShared(remoteLayout.permission)
+                ? { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt }
+                : undefined,
             });
             break;
           }
@@ -532,6 +552,7 @@ export default class LayoutManager implements ILayoutManager {
             log.debug(`Updating baseline for ${localLayout.id}`);
             await local.put({
               id: remoteLayout.id,
+              externalId: remoteLayout.externalId,
               name: remoteLayout.name,
               permission: remoteLayout.permission,
               baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
@@ -567,7 +588,11 @@ export default class LayoutManager implements ILayoutManager {
           case "delete-remote": {
             const { localLayout } = operation;
             log.debug(`Deleting remote layout ${localLayout.id}`);
-            if (!(await remote.deleteLayout(localLayout.id))) {
+            let layoutExistedOnRemote = false;
+            if (localLayout.externalId) {
+              layoutExistedOnRemote = await remote.deleteLayout(localLayout.externalId);
+            }
+            if (!layoutExistedOnRemote) {
               log.warn(`Deleting layout ${localLayout.id} which was not present in remote storage`);
             }
             return async (local) => {
@@ -586,8 +611,6 @@ export default class LayoutManager implements ILayoutManager {
               name: localLayout.name,
               data: localLayout.baseline.data,
               permission: localLayout.permission,
-              savedAt:
-                localLayout.baseline.savedAt ?? (new Date().toISOString() as ISO8601Timestamp),
             });
             return async (local) => {
               // Don't check abortSignal; we need the cache to be updated to show the layout is tracked
@@ -602,8 +625,14 @@ export default class LayoutManager implements ILayoutManager {
           case "upload-updated": {
             const { localLayout } = operation;
             log.debug(`Uploading updated layout ${localLayout.id}`);
+            if (!localLayout.externalId) {
+              throw new Error(
+                `Cannot update layout ${localLayout.id} (${localLayout.name}) because it has no externalId`,
+              );
+            }
             const newBaseline = await updateOrFetchLayout(remote, {
               id: localLayout.id,
+              externalId: localLayout.externalId,
               name: localLayout.name,
               data: localLayout.baseline.data,
               savedAt:

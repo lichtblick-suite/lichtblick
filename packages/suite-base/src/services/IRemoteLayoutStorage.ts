@@ -5,6 +5,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  SaveNewLayoutParams,
+  UpdateLayoutRequest,
+  UpdateLayoutResponse,
+} from "@lichtblick/suite-base/api/layouts/types";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { ISO8601Timestamp, LayoutPermission } from "@lichtblick/suite-base/services/ILayoutStorage";
@@ -18,8 +23,8 @@ export type RemoteLayout = {
   permission: LayoutPermission;
   data: LayoutData;
   savedAt: ISO8601Timestamp | undefined;
+  externalId: string;
 };
-
 export interface IRemoteLayoutStorage {
   /**
    * A namespace corresponding to the logged-in user. Used by the LayoutManager to organize cached
@@ -31,22 +36,10 @@ export interface IRemoteLayoutStorage {
 
   getLayout: (id: LayoutID) => Promise<RemoteLayout | undefined>;
 
-  saveNewLayout: (params: {
-    id: LayoutID | undefined;
-    name: string;
-    data: LayoutData;
-    permission: LayoutPermission;
-    savedAt: ISO8601Timestamp;
-  }) => Promise<RemoteLayout>;
+  saveNewLayout: (params: SaveNewLayoutParams) => Promise<RemoteLayout>;
 
-  updateLayout: (params: {
-    id: LayoutID;
-    name?: string;
-    data?: LayoutData;
-    permission?: LayoutPermission;
-    savedAt: ISO8601Timestamp;
-  }) => Promise<{ status: "success"; newLayout: RemoteLayout } | { status: "conflict" }>;
+  updateLayout: (params: UpdateLayoutRequest) => Promise<UpdateLayoutResponse>;
 
   /** Returns true if the layout existed and was deleted, false if the layout did not exist. */
-  deleteLayout: (id: LayoutID) => Promise<boolean>;
+  deleteLayout: (id: string) => Promise<boolean>;
 }

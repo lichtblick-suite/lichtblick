@@ -82,15 +82,21 @@ export default function LayoutSection({
         )}
         {items?.map((layout) => (
           <LayoutRow
-            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
-            multiSelectedIds={multiSelectedIds}
-            selected={layout.id === selectedId}
             key={layout.id}
             layout={layout}
+            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
+            multiSelectedIds={multiSelectedIds}
+            selected={selectedId === layout.id}
             onSelect={onSelect}
             onRename={onRename}
             onDuplicate={handleDuplicateSelected}
-            onDelete={handleDeleteSelected}
+            onDelete={(clickedLayout) => {
+              if (multiSelectedIds.includes(clickedLayout.id)) {
+                handleDeleteSelected();
+              } else {
+                onDelete(clickedLayout);
+              }
+            }}
             onShare={onShare}
             onExport={onExport}
             onOverwrite={handleOverwriteSelected}

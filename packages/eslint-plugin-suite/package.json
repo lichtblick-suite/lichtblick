@@ -16,7 +16,7 @@
     "src"
   ],
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.0",
+    "@lichtblick/tsconfig": "1.0.2",
     "@typescript-eslint/rule-tester": "8.27.0",
     "@typescript-eslint/utils": "8.27.0"
   }

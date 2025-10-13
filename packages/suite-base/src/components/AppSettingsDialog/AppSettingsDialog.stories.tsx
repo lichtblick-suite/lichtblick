@@ -9,7 +9,7 @@ import { StoryFn, StoryObj } from "@storybook/react";
 import { screen, userEvent } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
-import { ExtensionInfo, ExtensionLoader } from "@lichtblick/suite-base";
+import { ExtensionInfo, IExtensionLoader } from "@lichtblick/suite-base";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
@@ -51,12 +51,13 @@ const marketplaceExtensions: ExtensionInfo[] = [
   },
 ];
 
-const MockExtensionLoader: ExtensionLoader = {
+const MockExtensionLoader: IExtensionLoader = {
+  type: "browser",
   namespace: "local",
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,
-  loadExtension: async (_id: string) => "",
-  installExtension: async (_foxeFileData: Uint8Array) => {
+  loadExtension: async (_id: string) => ({ raw: "" }),
+  installExtension: async ({ foxeFileData: _foxeFileData }) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
   uninstallExtension: async (_id: string) => undefined,

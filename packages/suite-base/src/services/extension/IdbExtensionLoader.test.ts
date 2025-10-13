@@ -13,18 +13,18 @@ import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStora
 import {
   EXTENSION_STORE_NAME,
   METADATA_STORE_NAME,
-} from "@lichtblick/suite-base/services/IdbExtensionStorage";
+} from "@lichtblick/suite-base/services/extension/IdbExtensionStorage";
+import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { Capitalization } from "@lichtblick/suite-base/testing/builders/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
-import { IdbExtensionLoader, validatePackageInfo, ALLOWED_FILES } from "./IdbExtensionLoader";
+import { IdbExtensionLoader } from "./IdbExtensionLoader";
 
 jest.mock("idb/with-async-ittr", () => ({
   openDB: jest.fn(),
 }));
 
-const packageJson: any = {
+const packageJson: Record<string, unknown> = {
   description: "",
   devDependencies: {
     "@foxglove/fox": "file:../fox",
@@ -59,8 +59,8 @@ const expectedExtensionInfo: ExtensionInfo = {
   changelog: expectedChangelog,
 } as ExtensionInfo;
 
-const EXT_FILE_TURTLESIM = `${__dirname}/../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
-const EXT_FILE_PREFIXED = `${__dirname}/../test/fixtures/prefixed-name-extension.foxe`;
+const EXT_FILE_TURTLESIM = `${__dirname}/../../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
+const EXT_FILE_PREFIXED = `${__dirname}/../../test/fixtures/prefixed-name-extension.foxe`;
 
 jest.mock("@lichtblick/log", () => ({
   getLogger: jest.fn(() => ({
@@ -92,7 +92,7 @@ describe("IdbExtensionLoader", () => {
       const foxe = fs.readFileSync(EXT_FILE_TURTLESIM);
       const loader = new IdbExtensionLoader("local");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
       expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, expectedExtensionInfo);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
@@ -111,7 +111,7 @@ describe("IdbExtensionLoader", () => {
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
       expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
@@ -136,7 +136,7 @@ describe("IdbExtensionLoader", () => {
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
       expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
@@ -165,7 +165,7 @@ describe("IdbExtensionLoader", () => {
       const result = await loader.loadExtension(extension.info.id);
 
       expect(mockGet).toHaveBeenCalledWith(EXTENSION_STORE_NAME, extension.info.id);
-      expect(result).toContain(rawContent);
+      expect(result.raw).toContain(rawContent);
     });
 
     it("should throw an error if the extension is not found", async () => {
@@ -223,112 +223,11 @@ describe("IdbExtensionLoader", () => {
       } as StoredExtension);
       const loader = new IdbExtensionLoader("local");
 
-      await loader.installExtension(foxe as unknown as Uint8Array);
+      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
       const result = await loader.getExtension(expectedInfo.id);
 
       expect(mockGet).toHaveBeenCalledWith(EXTENSION_STORE_NAME, expectedInfo.id);
       expect(result).toBe(expectedInfo);
-    });
-  });
-
-  describe("validatePackageInfo", () => {
-    const setup = (infoOverride: Partial<ExtensionInfo> = {}) => {
-      const info: Pick<ExtensionInfo, "name" | "publisher"> = {
-        name: BasicBuilder.string(),
-        publisher: BasicBuilder.string(),
-        ...infoOverride,
-      };
-
-      return {
-        info,
-      };
-    };
-
-    it("should convert the name to lowercase", () => {
-      const packageName = BasicBuilder.string();
-      const input: Partial<ExtensionInfo> = {
-        name: `@${BasicBuilder.string()}/${packageName}`,
-        publisher: BasicBuilder.string(),
-      };
-
-      const result = validatePackageInfo(input);
-
-      expect(result.name).toBe(packageName.toLowerCase());
-    });
-
-    it("should prioritize an explicitly provided publisher over the extracted one", () => {
-      const packageName = BasicBuilder.string({ capitalization: Capitalization.LOWERCASE });
-      const publisher = BasicBuilder.string();
-      const input: Partial<ExtensionInfo> = {
-        name: `@extracted/${packageName}`,
-        publisher,
-      };
-
-      const result = validatePackageInfo(input);
-
-      expect(result.publisher).toBe(publisher);
-      expect(result.name).toBe(packageName);
-    });
-
-    it("should return a valid ExtensionInfo object when input data is correct", () => {
-      const packageName = BasicBuilder.string({ capitalization: Capitalization.LOWERCASE });
-      const publisher = BasicBuilder.string();
-      const { info } = setup({
-        name: `@${BasicBuilder.string()}/${packageName}`,
-        publisher,
-      });
-
-      const result = validatePackageInfo(info);
-
-      expect(result).toEqual({
-        publisher,
-        name: packageName,
-      });
-    });
-
-    it.each([
-      {
-        name: undefined,
-        publisher: BasicBuilder.string(),
-      },
-      {
-        name: "",
-        publisher: BasicBuilder.string(),
-      },
-    ])("should throw an error if the name is missing", (extensionInfo: Partial<ExtensionInfo>) => {
-      const { info } = setup(extensionInfo);
-
-      expect(() => validatePackageInfo(info)).toThrow("Invalid extension: missing name");
-    });
-
-    it("should throw an error if the publisher is missing", () => {
-      const nonStandardName = BasicBuilder.string();
-      const input: Partial<ExtensionInfo> = { name: nonStandardName };
-
-      expect(() => validatePackageInfo(input)).toThrow("Invalid extension: missing publisher");
-    });
-
-    it("should correctly extract the publisher from the name if not explicitly provided", () => {
-      const packageName = BasicBuilder.string({ capitalization: Capitalization.LOWERCASE });
-      const publisher = BasicBuilder.string({ capitalization: Capitalization.LOWERCASE });
-      const { info } = setup({
-        name: `@${publisher}/${packageName}`,
-        publisher,
-      });
-
-      const result = validatePackageInfo(info);
-
-      expect(result.publisher).toBe(publisher);
-      expect(result.name).toBe(packageName);
-    });
-
-    it("should throw an error if the extracted publisher is an empty string", () => {
-      const { info } = setup({
-        name: "@/package",
-        publisher: undefined,
-      });
-
-      expect(() => validatePackageInfo(info)).toThrow("Invalid extension: missing publisher");
     });
   });
 

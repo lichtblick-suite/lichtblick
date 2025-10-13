@@ -79,6 +79,11 @@ type DesktopLayout = {
 
 export type CLIFlags = Readonly<Record<string, string>>;
 
+export type LoadedExtension = {
+  buffer?: Uint8Array;
+  raw: string;
+};
+
 interface Desktop {
   /** https://www.electronjs.org/docs/tutorial/represented-file */
   setRepresentedFilename(path: string | undefined): Promise<void>;
@@ -101,7 +106,7 @@ interface Desktop {
   getExtensions: () => Promise<DesktopExtension[]>;
 
   // Load the source code for an extension
-  loadExtension: (id: string) => Promise<string>;
+  loadExtension: (id: string) => Promise<LoadedExtension>;
 
   // Fetch default layouts from local folder
   fetchLayouts: () => Promise<DesktopLayout[]>;

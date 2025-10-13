@@ -16,3 +16,12 @@ export type WorkspaceProps = CustomWindowControlsProps & {
   disablePersistenceForStorybook?: boolean;
   AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
 };
+
+export type DropHandler = {
+  files?: File[];
+  handles?: FileSystemFileHandle[];
+  namespace?: Namespace;
+  isSource?: boolean;
+};
+
+export type Namespace = "local" | "org";
