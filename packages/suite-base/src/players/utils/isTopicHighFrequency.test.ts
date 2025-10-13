@@ -14,7 +14,7 @@ describe("isTopicHighFrequency", () => {
     [topicName, { numMessages: BasicBuilder.number() }],
   ]);
   const duration: RosTime = { sec: 30, nsec: 15 };
-  
+
   afterEach(() => {
     jest.clearAllMocks();
   });
