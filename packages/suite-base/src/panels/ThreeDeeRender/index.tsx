@@ -18,6 +18,7 @@ import {
   useForwardAnalytics,
 } from "@lichtblick/suite-base/components/ForwardAnalyticsContextProvider";
 import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import {
   BuiltinPanelExtensionContext,
   PanelExtensionAdapter,
@@ -43,6 +44,7 @@ type InitPanelArgs = {
     message: string,
     variant?: "default" | "error" | "success" | "warning" | "info",
   ) => void;
+  logError?: (message: string, error?: Error) => void;
 };
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
@@ -54,6 +56,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
     customSceneExtensions,
     customCameraModels,
     enqueueSnackbarFromParent,
+    logError,
   } = args;
   return createSyncRoot(
     <CaptureErrorBoundary onError={crash}>
@@ -65,6 +68,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
           customSceneExtensions={customSceneExtensions}
           customCameraModels={customCameraModels}
           enqueueSnackbarFromParent={enqueueSnackbarFromParent}
+          logError={logError}
         />
       </ForwardAnalyticsContextProvider>
     </CaptureErrorBoundary>,
@@ -82,6 +86,7 @@ type Props = {
 function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
   const { enqueueSnackbar } = useSnackbar();
+  const panelContext = React.useContext(PanelContext);
 
   const customCameraModels = useExtensionCatalog(
     (state) => state.installedCameraModels,
@@ -117,6 +122,7 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
         ) => {
           enqueueSnackbar(message, { variant: variant ?? "default" });
         },
+        logError: panelContext?.logError,
       }),
     [
       crash,
@@ -127,6 +133,7 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
       customSceneExtensions,
       customCameraModels,
       enqueueSnackbar,
+      panelContext?.logError,
     ],
   );
 

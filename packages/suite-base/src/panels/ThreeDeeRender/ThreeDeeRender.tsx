@@ -31,6 +31,7 @@ import { PANEL_STYLE } from "@lichtblick/suite-base/panels/ThreeDeeRender/consta
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
+import type { Path } from "./LayerErrors";
 import type { PickedRenderable } from "./Picker";
 import { SELECTED_ID_VARIABLE } from "./Renderable";
 import { Renderer } from "./Renderer";
@@ -62,6 +63,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     customSceneExtensions,
     customCameraModels,
     enqueueSnackbarFromParent,
+    logError,
   } = props;
   const {
     initialState,
@@ -276,6 +278,32 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     [context],
   );
   useRendererEvent("selectedRenderable", updateSelectedRenderable, renderer);
+
+  // Log LayerErrors to PanelLogs
+  const handleLayerErrorUpdate = useCallback(
+    (path: Path, _errorId: string, errorMessage: string) => {
+      if (logError != undefined) {
+        const pathString = path.join(" > ");
+        const fullMessage = `[${pathString}] ${errorMessage}`;
+        logError(fullMessage);
+      }
+    },
+    [logError],
+  );
+
+  // Subscribe to LayerErrors events
+  useEffect(() => {
+    if (!renderer?.settings.errors) {
+      return;
+    }
+
+    const errors = renderer.settings.errors;
+    errors.on("update", handleLayerErrorUpdate);
+
+    return () => {
+      errors.off("update", handleLayerErrorUpdate);
+    };
+  }, [renderer, handleLayerErrorUpdate]);
 
   const [focusedSettingsPath, setFocusedSettingsPath] = useState<undefined | readonly string[]>();
 

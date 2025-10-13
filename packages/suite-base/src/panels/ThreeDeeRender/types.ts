@@ -33,4 +33,6 @@ export type ThreeDeeRenderProps = {
     message: string,
     variant?: "default" | "error" | "success" | "warning" | "info",
   ) => void;
+  /** Allow for logging errors to panel logs */
+  logError?: (message: string, error?: Error) => void;
 };
