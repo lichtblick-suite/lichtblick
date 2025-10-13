@@ -10,7 +10,6 @@ import {
 } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/helpers";
 import { CheckForHighFrequencyTopics } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/types";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
-import { TopicStats } from "@lichtblick/suite-base/players/types";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
