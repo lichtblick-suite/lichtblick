@@ -570,8 +570,13 @@ export class IterablePlayer implements Player {
         uniqueTopics.set(topic.name, topic);
 
         if (!highFrequencyTopicFound) {
-          isTopicHighFrequency(topicStats, topic.name, duration, this.#alertManager);
-          highFrequencyTopicFound = true;
+          highFrequencyTopicFound = isTopicHighFrequency(
+            topicStats,
+            topic.name,
+            duration,
+            topic.schemaName,
+            this.#alertManager,
+          );
         }
       }
 

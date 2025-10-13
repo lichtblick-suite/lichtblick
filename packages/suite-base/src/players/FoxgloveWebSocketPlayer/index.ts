@@ -33,7 +33,6 @@ import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@licht
 import { ParameterValue } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
-import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
 import {
@@ -49,7 +48,6 @@ import {
   Topic,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
-import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
@@ -65,7 +63,11 @@ import {
   SUPPORTED_SERVICE_ENCODINGS,
   ZERO_TIME,
 } from "./constants";
-import { dataTypeToFullName, statusLevelToAlertSeverity } from "./helpers";
+import {
+  checkForHighFrequencyTopics,
+  dataTypeToFullName,
+  statusLevelToAlertSeverity,
+} from "./helpers";
 import {
   MessageWriter,
   MessageDefinitionMap,
@@ -564,17 +566,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
         stats.numMessages++;
         this.#topicsStats = topicStats;
 
-        if (this.#endTime && this.#startTime && this.#topics && this.#topics.length > 0) {
-          let highFrequencyTopicFound = false;
-          const duration = subtractTimes(this.#endTime, this.#startTime);
-
-          for (const dataTopic of this.#topics) {
-            if (!highFrequencyTopicFound) {
-              isTopicHighFrequency(topicStats, dataTopic.name, duration, this.#alerts);
-              highFrequencyTopicFound = true;
-            }
-          }
-        }
+        checkForHighFrequencyTopics(
+          this.#endTime,
+          this.#startTime,
+          this.#topics,
+          this.#topicsStats,
+          this.#alerts,
+        );
       } catch (error) {
         this.#alerts.addAlert(`message:${chanInfo.channel.topic}`, {
           severity: "error",

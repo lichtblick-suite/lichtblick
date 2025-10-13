@@ -8,12 +8,28 @@ import { calculateStaticItemFrequency } from "@lichtblick/suite-base/util/calcul
 
 const FREQUENCY_LIMIT = 60;
 
+const LOG_SCHEMAS = new Set([
+  "rosgraph_msgs/Log", // ROS 1
+  "rosgraph_msgs/msg/Log", // ROS 1 (alternative format)
+  "rcl_interfaces/msg/Log", // ROS 2
+  "foxglove.Log", // Foxglove schema
+]);
+
+function isLogSchema(schemaName?: string): boolean {
+  return schemaName != undefined && LOG_SCHEMAS.has(schemaName);
+}
+
 export function isTopicHighFrequency(
   topicStats: Map<string, TopicStats>,
   topicName: string,
   duration: Time,
+  schemaName: string | undefined,
   alertManager: PlayerAlertManager,
-): void {
+): boolean {
+  if (isLogSchema(schemaName)) {
+    return false;
+  }
+
   const topicStat = topicStats.get(topicName);
   const frequency = calculateStaticItemFrequency(
     topicStat?.numMessages ?? 0,
@@ -29,5 +45,9 @@ export function isTopicHighFrequency(
         `The current data source has one or more topics with message frequency higher than 60Hz, which may impact performance and application memory.`,
       ),
     });
+
+    return true;
   }
+
+  return false;
 }
