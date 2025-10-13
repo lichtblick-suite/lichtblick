@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { RosTime } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { TopicStats } from "@lichtblick/suite-base/players/types";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
@@ -12,8 +13,8 @@ describe("isTopicHighFrequency", () => {
   const topicStats = new Map<string, TopicStats>([
     [topicName, { numMessages: BasicBuilder.number() }],
   ]);
-  const duration = { sec: 30, nsec: 15 };
-
+  const duration: RosTime = { sec: 30, nsec: 15 };
+  
   afterEach(() => {
     jest.clearAllMocks();
   });
