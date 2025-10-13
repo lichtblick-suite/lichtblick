@@ -4,16 +4,8 @@
 import { Time } from "@lichtblick/rostime";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { TopicStats } from "@lichtblick/suite-base/players/types";
+import { FREQUENCY_LIMIT, LOG_SCHEMAS } from "@lichtblick/suite-base/players/utils/constants";
 import { calculateStaticItemFrequency } from "@lichtblick/suite-base/util/calculateStaticItemFrequency";
-
-const FREQUENCY_LIMIT = 60;
-
-const LOG_SCHEMAS = new Set([
-  "rosgraph_msgs/Log", // ROS 1
-  "rosgraph_msgs/msg/Log", // ROS 1 (alternative format)
-  "rcl_interfaces/msg/Log", // ROS 2
-  "foxglove.Log", // Foxglove schema
-]);
 
 function isLogSchema(schemaName?: string): boolean {
   return schemaName != undefined && LOG_SCHEMAS.has(schemaName);
