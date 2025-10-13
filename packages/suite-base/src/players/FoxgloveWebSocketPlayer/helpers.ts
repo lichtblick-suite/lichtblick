@@ -3,10 +3,9 @@
 
 import { StatusLevel } from "@foxglove/ws-protocol";
 
-import { Time } from "@lichtblick/rostime";
-import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
+import { CheckForHighFrequencyTopics } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/types";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
-import { PlayerAlert, Topic, TopicStats } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 
 export function dataTypeToFullName(dataType: string): string {
@@ -27,13 +26,13 @@ export function statusLevelToAlertSeverity(level: StatusLevel): PlayerAlert["sev
   }
 }
 
-export function checkForHighFrequencyTopics(
-  endTime: Time | undefined,
-  startTime: Time | undefined,
-  topics: Topic[] | undefined,
-  topicStats: Map<string, TopicStats>,
-  alerts: PlayerAlertManager,
-): void {
+export function checkForHighFrequencyTopics({
+  alerts,
+  endTime,
+  startTime,
+  topics,
+  topicStats,
+}: CheckForHighFrequencyTopics): void {
   if (!endTime || !startTime || !topics || topics.length === 0) {
     return;
   }

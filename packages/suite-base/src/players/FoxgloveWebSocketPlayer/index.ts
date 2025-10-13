@@ -566,13 +566,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
         stats.numMessages++;
         this.#topicsStats = topicStats;
 
-        checkForHighFrequencyTopics(
-          this.#endTime,
-          this.#startTime,
-          this.#topics,
-          this.#topicsStats,
-          this.#alerts,
-        );
+        checkForHighFrequencyTopics({
+          alerts: this.#alerts,
+          endTime: this.#endTime,
+          startTime: this.#startTime,
+          topics: this.#topics,
+          topicStats: this.#topicsStats,
+        });
       } catch (error) {
         this.#alerts.addAlert(`message:${chanInfo.channel.topic}`, {
           severity: "error",
