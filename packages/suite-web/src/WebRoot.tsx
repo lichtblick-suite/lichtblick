@@ -32,6 +32,7 @@ export function WebRoot(props: {
   dataSources: IDataSourceFactory[] | undefined;
   AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
   children: React.JSX.Element;
+  initialLayout?: unknown;
 }): React.JSX.Element {
   const appConfiguration = useMemo(
     () =>
