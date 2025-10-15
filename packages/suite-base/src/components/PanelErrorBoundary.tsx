@@ -5,9 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Button, Typography } from "@mui/material";
+import { Button, Link } from "@mui/material";
 import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
+import ErrorDisplay from "@lichtblick/suite-base/components/ErrorDisplay";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import {
   PanelErrorBoundaryProps,
@@ -24,10 +25,6 @@ export default class PanelErrorBoundary extends Component<
     currentError: undefined,
   };
 
-  public static getDerivedStateFromError(error: Error): Partial<PanelErrorBoundaryState> {
-    return { currentError: { error, errorInfo: {} as ErrorInfo } };
-  }
-
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     reportError(new AppError(error, errorInfo));
     this.setState({ currentError: { error, errorInfo } });
@@ -41,39 +38,61 @@ export default class PanelErrorBoundary extends Component<
     if (this.state.currentError) {
       // Show a minimal fallback UI for render errors
       return (
-        <Stack fullHeight padding={2} alignItems="center" justifyContent="center">
-          <Typography variant="body2" color="error" align="center" gutterBottom>
-            Panel encountered a render error
-          </Typography>
-          <Typography variant="caption" color="text.secondary" align="center" gutterBottom>
-            Error: {this.state.currentError.error.message}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" align="center" gutterBottom>
-            Check the panel logs for details.
-          </Typography>
-          <Stack direction="row" gap={1} style={{ marginTop: 8 }}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => {
-                this.setState({ currentError: undefined });
-              }}
-            >
-              Try Again
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              color="error"
-              onClick={() => {
-                this.setState({ currentError: undefined });
-                this.props.onResetPanel();
-              }}
-            >
-              Reset Panel
-            </Button>
-          </Stack>
-        </Stack>
+        <ErrorDisplay
+          title="This panel encountered an unexpected error"
+          error={this.state.currentError.error}
+          errorInfo={this.state.currentError.errorInfo}
+          showErrorDetails={this.props.showErrorDetails}
+          hideErrorSourceLocations={this.props.hideErrorSourceLocations}
+          content={
+            <p>
+              Something went wrong in this panel.{" "}
+              <Link
+                color="inherit"
+                onClick={() => {
+                  this.setState({ currentError: undefined });
+                }}
+              >
+                Dismiss this error
+              </Link>{" "}
+              to continue using this panel. If the issue persists, try resetting the panel.
+            </p>
+          }
+          actions={
+            <>
+              <Stack direction="row-reverse" gap={1}>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => {
+                    this.setState({ currentError: undefined });
+                  }}
+                >
+                  Dismiss
+                </Button>
+                <Button
+                  variant="outlined"
+                  title="Reset panel settings to default values"
+                  color="error"
+                  onClick={() => {
+                    this.setState({ currentError: undefined });
+                    this.props.onResetPanel();
+                  }}
+                >
+                  Reset Panel
+                </Button>
+                <Button
+                  variant="text"
+                  title="Remove this panel from the layout"
+                  color="error"
+                  onClick={this.props.onRemovePanel}
+                >
+                  Remove Panel
+                </Button>
+              </Stack>
+            </>
+          }
+        />
       );
     }
 
