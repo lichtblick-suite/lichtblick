@@ -3,13 +3,26 @@
     "3D!18i6zy7": {
       "layers": {},
       "cameraState": {
-        "distance": 15.475618749969177,
         "perspective": true,
-        "phi": 8.717818161484841,
-        "target": [0, 0, 0],
-        "targetOffset": [1.539730847153832, -0.43353609335043125, -4.369959281912378e-17],
-        "targetOrientation": [0, 0, 0, 1],
-        "thetaOffset": -93.91869532443832,
+        "distance": 18.9999999999613,
+        "phi": 0.000057304686744168496,
+        "thetaOffset": 89.86512447436273,
+        "targetOffset": [
+          0.679028794670972,
+          -0.5744270768939967,
+          -1.4048847919342152e-16
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -151,14 +164,21 @@
           "visible": true,
           "type": "arrow",
           "color": "#d22222ff",
-          "arrowScale": [1, 0.05, 0.05],
+          "arrowScale": [
+            1,
+            0.05,
+            0.05
+          ],
           "showCovariance": true
         },
         "/collision_zones": {
           "visible": true
         },
         "/global_costmap/costmap": {
-          "visible": true
+          "visible": true,
+          "maxColor": "#0000004f",
+          "minColor": "#ffffff45",
+          "unknownColor": "#80808063"
         },
         "/evaluatepose": {
           "visible": true,
@@ -180,7 +200,9 @@
           "visible": false
         },
         "/robot_description": {
-          "visible": true
+          "visible": true,
+          "displayMode": "collision",
+          "fallbackColor": "#c1bbbb"
         },
         "/genz/local_map": {
           "visible": false,
@@ -189,10 +211,10 @@
           "colorMap": "turbo"
         },
         "/local_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/global_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/projected_map": {
           "visible": true
