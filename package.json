@@ -28,6 +28,8 @@
     "desktop:serve:quicklook": "webpack serve --mode development --progress --config desktop/webpack.quicklook.config.ts",
     "desktop:start": "electron desktop/.webpack",
     "web:build:dev": "webpack --mode development --progress --config web/webpack.config.ts",
+    "web:build:dev:fast": "webpack --mode development --progress --config web/webpack.config.optimized.ts",
+    "web:build:dev:fast": "webpack --mode development --progress --config web/webpack.config.optimized.ts",
     "web:build:prod": "webpack --mode production --progress --config web/webpack.config.ts",
     "web:serve": "webpack serve --mode development --progress --config web/webpack.config.ts",
     "benchmark:serve": "webpack serve --mode development --progress --config benchmark/webpack.config.ts",
