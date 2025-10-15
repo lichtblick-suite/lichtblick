@@ -24,6 +24,7 @@ import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { LayoutActions } from "@lichtblick/suite";
+import InitialPoseIcon from "@lichtblick/suite-base/components/InitialPoseIcon";
 import {
   PanelContextMenu,
   PanelContextMenuItem,
@@ -32,7 +33,6 @@ import PublishGoalIcon from "@lichtblick/suite-base/components/PublishGoalIcon";
 import PublishPointIcon from "@lichtblick/suite-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@lichtblick/suite-base/components/PublishPoseEstimateIcon";
 import { usePanelMousePresence } from "@lichtblick/suite-base/hooks/usePanelMousePresence";
-import InitialPoseIcon from "@lichtblick/suite-base/components/InitialPoseIcon";
 import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
@@ -107,6 +107,10 @@ type Props = {
   onClickMeasure: () => void;
   onClickPublish: () => void;
   onClickPoseInput: () => void;
+  goalPoseActive?: boolean;
+  onClickGoalPose: () => void;
+  initialPoseActive?: boolean;
+  onClickInitialPose: () => void;
   onShowTopicSettings: (topic: string) => void;
   onTogglePerspective: () => void;
   perspective: boolean;
@@ -345,57 +349,114 @@ export function RendererOverlay(props: Props): React.JSX.Element {
           <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
             <Tooltip
               placement="left"
-              title={
-                <>
-                  {`Switch to ${props.perspective ? "2" : "3"}D camera `}
-                  <kbd className={classes.kbd}>3</kbd>
-                </>
-              }
-            >
-              <IconButton
-                className={classes.iconButton}
-                size="small"
-                color={props.perspective ? "info" : "inherit"}
-                onClick={props.onTogglePerspective}
-              >
-                <span className={classes.threeDeeButton}>3D</span>
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              placement="left"
-              title={props.measureActive ? "Cancel measuring" : "Measure distance"}
-            >
-              <IconButton
-                data-testid="measure-button"
-                className={classes.iconButton}
-                size="small"
-                color={props.measureActive ? "info" : "inherit"}
-                onClick={props.onClickMeasure}
-              >
-                <div className={classes.rulerIcon}>
-                  {props.measureActive ? <Ruler20Filled /> : <Ruler20Regular />}
-                </div>
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              placement="left"
               title={props.poseInputActive ? "Cancel initial pose" : "Set initial pose"}
             >
               <IconButton
                 data-testid="pose-input-button"
                 className={classes.iconButton}
-                size="small"
+                size="medium"
                 color={props.poseInputActive ? "info" : "inherit"}
                 onClick={props.onClickPoseInput}
               >
                 <InitialPoseIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-
-            {publishControls}
           </Paper>
         )}
       </div>
+
+      {/* Custom Goal Pose and Initial Pose buttons at the bottom of the screen */}
+      {props.interfaceMode === "3d" && props.canPublish && (
+        <Paper
+          square={false}
+          elevation={4}
+          style={{
+            position: "fixed",
+            bottom: 10,
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            flexDirection: "row",
+            gap: 8,
+            pointerEvents: "auto",
+          }}
+        >
+          <Tooltip
+            placement="left"
+            title={
+              <>
+                {`Switch to ${props.perspective ? "2" : "3"}D camera `}
+                <kbd className={classes.kbd}>3</kbd>
+              </>
+            }
+          >
+            <IconButton
+              className={classes.iconButton}
+              size="small"
+              color={props.perspective ? "info" : "inherit"}
+              onClick={props.onTogglePerspective}
+            >
+              <span className={classes.threeDeeButton}>3D</span>
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            placement="left"
+            title={props.measureActive ? "Cancel measuring" : "Measure distance"}
+          >
+            <IconButton
+              data-testid="measure-button"
+              className={classes.iconButton}
+              size="small"
+              color={props.measureActive ? "info" : "inherit"}
+              onClick={props.onClickMeasure}
+            >
+              <div className={classes.rulerIcon}>
+                {props.measureActive ? <Ruler20Filled /> : <Ruler20Regular />}
+              </div>
+            </IconButton>
+          </Tooltip>
+          {/* Goal Pose and Initial Pose buttons at bottom */}
+          {props.canPublish && (
+            <>
+              <Tooltip
+                placement="left"
+                title={
+                  props.goalPoseActive ?? false ? "Cancel goal pose selection" : "Set goal pose"
+                }
+              >
+                <IconButton
+                  className={classes.iconButton}
+                  size="small"
+                  color={props.goalPoseActive ?? false ? "info" : "inherit"}
+                  onClick={props.onClickGoalPose}
+                  data-testid="goal-pose-button"
+                >
+                  <PublishGoalIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                placement="left"
+                title={
+                  props.initialPoseActive ?? false
+                    ? "Cancel initial pose selection"
+                    : "Set initial pose"
+                }
+              >
+                <IconButton
+                  className={classes.iconButton}
+                  size="small"
+                  color={props.initialPoseActive ?? false ? "info" : "secondary"}
+                  onClick={props.onClickInitialPose}
+                  data-testid="initial-pose-button"
+                >
+                  <InitialPoseIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Paper>
+      )}
+
       {clickedObjects.length > 1 && !selectedObject && (
         <InteractionContextMenu
           onClose={() => {

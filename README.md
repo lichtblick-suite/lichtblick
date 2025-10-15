@@ -43,10 +43,10 @@ We are actively updating our documentation with new features, stay tunned! :rock
 To run lichtblick via docker you can run:
 
 ```sh
-docker run --rm -p 8080:8080 ghcr.io/lichtblick-suite/lichtblick:latest
+docker run --rm -p 8017:8017 ghcr.io/lichtblick-suite/lichtblick:latest
 ```
 
-And open in your browser: http://localhost:8080/
+And open in your browser: http://localhost:8017/
 
 ### 📑 From source code
 
@@ -78,7 +78,7 @@ $ yarn desktop:serve        # start webpack dev server
 $ yarn desktop:start        # launch electron (make sure the desktop:serve finished to build)
 
 # To launch the web app:
-$ yarn run web:serve        # it will be avaiable in http://localhost:8080
+$ yarn run web:serve        # it will be avaiable in http://localhost:8017
 ```
 
 :warning: Ubuntu users: the application may present some issues using GPU. In order to bypass the GPU and process it using directly the CPU (software), please run lichtblick using the variable `LIBGL_ALWAYS_SOFTWARE` set to `1`:
@@ -104,7 +104,7 @@ $ yarn run web:build:prod
 
 # To build and run the web app using docker:
 $ docker build . -t lichtblick
-$ docker run -p 8080:8080 lichtblick
+$ docker run -p 8017:8017 lichtblick
 
 # It is possible to clean up build files using the following command:
 $ yarn run clean

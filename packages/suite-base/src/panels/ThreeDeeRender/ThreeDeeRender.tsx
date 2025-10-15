@@ -617,16 +617,16 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   }, [measureActive, renderer]);
 
   const [publishActive, setPublishActive] = useState(false);
-  const [poseInputActive, setPoseInputActive] = useState(true);
+  const [poseInputActive, setPoseInputActive] = useState(false);
+  const [poseInputMode, setPoseInputMode] = useState<"goal" | "initial" | "evaluate">("goal");
 
-  // Ensure camera controls are disabled when pose input tool is active by default
+  // Ensure camera controls are disabled when pose input tool is active
   useEffect(() => {
     if (renderer && poseInputActive) {
       // Use setTimeout to ensure camera handler is fully initialized
       setTimeout(() => {
-        if (renderer.cameraHandler && "setControlsEnabled" in renderer.cameraHandler) {
-          renderer.cameraHandler.setControlsEnabled?.(false);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (renderer.cameraHandler as any).setControlsEnabled?.(false);
       }, 0);
     }
   }, [renderer, poseInputActive]);
@@ -731,13 +731,18 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     renderer?.publishClickTool,
   ]);
 
-  // Add pose input event handling
+  // Add pose input event handling for different tools
   useEffect(() => {
-    const onStart = () => {
+    const onPoseInputStart = () => {
       setPoseInputActive(true);
     };
-    const onSubmit = (event: { pose: { position: { x: number; y: number; z: number }; orientation: { x: number; y: number; z: number; w: number } } }) => {
-      const frameId = "map"; // For initial pose, typically use "map" frame
+    const onPoseInputSubmit = (event: {
+      pose: {
+        position: { x: number; y: number; z: number };
+        orientation: { x: number; y: number; z: number; w: number };
+      };
+    }) => {
+      const frameId = "map";
       if (!context.publish) {
         log.error("Data source does not support publishing");
         return;
@@ -752,43 +757,89 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         const sec = Math.floor(now.getTime() / 1000);
         const nsec = (now.getTime() % 1000) * 1e6;
 
-        const message = {
-          header: {
-            stamp: { sec, nsec },
-            frame_id: frameId,
-          },
-          pose: {
+        if (poseInputMode === "goal") {
+          // Publish goal pose
+          const goalMessage = {
+            header: {
+              stamp: { sec, nsec },
+              frame_id: frameId,
+            },
             pose: event.pose,
-            covariance: [
-              0.25, 0.0, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.25, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.06853891945200942,
-            ],
-          },
-        };
+          };
 
-        const datatypes = context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
-        context.advertise?.("/evaluatepose", "geometry_msgs/PoseWithCovarianceStamped", { datatypes });
-        context.publish("/evaluatepose", message);
+          const datatypes =
+            context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+          context.advertise?.("/goal_pose", "geometry_msgs/PoseStamped", { datatypes });
+          context.publish("/goal_pose", goalMessage);
+        } else if (poseInputMode === "initial") {
+          // Publish initial pose
+          const initialMessage = {
+            header: {
+              stamp: { sec, nsec },
+              frame_id: frameId,
+            },
+            pose: {
+              pose: event.pose,
+              covariance: [
+                0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.06853891945200942,
+              ],
+            },
+          };
+
+          const datatypes =
+            context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+          context.advertise?.("/initialpose", "geometry_msgs/PoseWithCovarianceStamped", {
+            datatypes,
+          });
+          context.publish("/initialpose", initialMessage);
+        } else {
+          // Publish evaluate pose
+          const evaluateMessage = {
+            header: {
+              stamp: { sec, nsec },
+              frame_id: frameId,
+            },
+            pose: {
+              pose: event.pose,
+              covariance: [
+                0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.06853891945200942,
+              ],
+            },
+          };
+
+          const datatypes =
+            context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+          context.advertise?.("/evaluatepose", "geometry_msgs/PoseWithCovarianceStamped", {
+            datatypes,
+          });
+          context.publish("/evaluatepose", evaluateMessage);
+        }
       } catch (error) {
         log.info(error);
       }
     };
-    const onEnd = () => {
+    const onPoseInputEnd = () => {
       setPoseInputActive(false);
     };
-    renderer?.poseInputTool.addEventListener("foxglove.pose-input-start", onStart);
-    renderer?.poseInputTool.addEventListener("foxglove.pose-input-submit", onSubmit);
-    renderer?.poseInputTool.addEventListener("foxglove.pose-input-end", onEnd);
+
+    // Set up event listeners for all pose tools
+    renderer?.poseInputTool.addEventListener("foxglove.pose-input-start", onPoseInputStart);
+    renderer?.poseInputTool.addEventListener("foxglove.pose-input-submit", onPoseInputSubmit);
+    renderer?.poseInputTool.addEventListener("foxglove.pose-input-end", onPoseInputEnd);
+
+    // Note: We'll use the same poseInputTool for all three modes, but track state separately
+    // In a more advanced implementation, we might want separate tools for each mode
+
     return () => {
-      renderer?.poseInputTool.removeEventListener("foxglove.pose-input-start", onStart);
-      renderer?.poseInputTool.removeEventListener("foxglove.pose-input-submit", onSubmit);
-      renderer?.poseInputTool.removeEventListener("foxglove.pose-input-end", onEnd);
+      renderer?.poseInputTool.removeEventListener("foxglove.pose-input-start", onPoseInputStart);
+      renderer?.poseInputTool.removeEventListener("foxglove.pose-input-submit", onPoseInputSubmit);
+      renderer?.poseInputTool.removeEventListener("foxglove.pose-input-end", onPoseInputEnd);
     };
-  }, [context, renderer?.poseInputTool]);
+  }, [context, renderer?.poseInputTool, poseInputMode]);
 
   const onClickPublish = useCallback(() => {
     if (publishActive) {
@@ -800,10 +851,33 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [publishActive, renderer]);
 
+  const onClickGoalPose = useCallback(() => {
+    if (poseInputActive) {
+      renderer?.poseInputTool.stop();
+    } else {
+      setPoseInputMode("goal");
+      renderer?.poseInputTool.start();
+      renderer?.measurementTool.stopMeasuring();
+      renderer?.publishClickTool.stop();
+    }
+  }, [poseInputActive, renderer]);
+
+  const onClickInitialPose = useCallback(() => {
+    if (poseInputActive) {
+      renderer?.poseInputTool.stop();
+    } else {
+      setPoseInputMode("initial");
+      renderer?.poseInputTool.start();
+      renderer?.measurementTool.stopMeasuring();
+      renderer?.publishClickTool.stop();
+    }
+  }, [poseInputActive, renderer]);
+
   const onClickPoseInput = useCallback(() => {
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
     } else {
+      setPoseInputMode("evaluate");
       renderer?.poseInputTool.start();
       renderer?.measurementTool.stopMeasuring();
       renderer?.publishClickTool.stop();
@@ -860,7 +934,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             onTogglePerspective={onTogglePerspective}
             measureActive={measureActive}
             onClickMeasure={onClickMeasure}
-            poseInputActive={poseInputActive}
+            poseInputActive={poseInputActive && poseInputMode === "evaluate"}
             onClickPoseInput={onClickPoseInput}
             canPublish={canPublish}
             publishActive={publishActive}
@@ -872,6 +946,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
               renderer?.publishClickTool.start();
             }}
             timezone={timezone}
+            goalPoseActive={poseInputActive && poseInputMode === "goal"}
+            onClickGoalPose={onClickGoalPose}
+            initialPoseActive={poseInputActive && poseInputMode === "initial"}
+            onClickInitialPose={onClickInitialPose}
           />
         </RendererContext.Provider>
       </div>

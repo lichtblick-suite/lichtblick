@@ -3,7 +3,7 @@
 
 import { defineConfig, devices } from "@playwright/test";
 
-const URL = "http://localhost:8080";
+const URL = "http://localhost:8017";
 export const STORAGE_STATE = "e2e/tmp/web-session.json";
 
 export default defineConfig({

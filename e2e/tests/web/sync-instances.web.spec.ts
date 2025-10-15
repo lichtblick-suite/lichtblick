@@ -22,7 +22,7 @@ test("Should sync playback between multiple web instances", async ({ browser }) 
   try {
     // Navigate both pages to the Lichtblick web app
     await page1.goto("/");
-    await page2.goto("localhost:8080");
+    await page2.goto("localhost:8017");
 
     // Wait for both pages to load
     await page1.waitForLoadState("networkidle");

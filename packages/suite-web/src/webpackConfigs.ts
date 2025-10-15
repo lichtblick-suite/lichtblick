@@ -51,6 +51,7 @@ export const devServerConfig = (params: ConfigParams): WebpackConfiguration => (
   },
 
   devServer: {
+    port: 8017,
     static: {
       directory: params.outputPath,
     },
@@ -132,6 +133,14 @@ export const mainConfig =
       context: params.contextPath,
       entry: params.entrypoint,
       devtool: isDev ? "eval-cheap-module-source-map" : params.prodSourceMap,
+
+      experiments: {
+        lazyCompilation: isServe ? true : false,
+      },
+
+      cache: {
+        type: "filesystem",
+      },
 
       output: {
         publicPath: params.publicPath ?? "auto",
