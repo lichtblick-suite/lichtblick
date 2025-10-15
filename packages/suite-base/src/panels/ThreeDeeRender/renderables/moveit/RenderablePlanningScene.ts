@@ -99,20 +99,29 @@ export class RenderablePlanningScene extends Renderable<PlanningSceneUserData> {
     const wasVisible = this.visible;
     this.visible = settings?.visible ?? true;
 
-    console.log(`PlanningScene: Visibility updated - visible: ${this.visible}, settings visible: ${settings?.visible}`);
-    console.log(`PlanningScene: Collision objects group visible: ${this.#collisionObjects.visible}`);
-    console.log(`PlanningScene: Collision objects group children count: ${this.#collisionObjects.children.length}`);
+    console.log(`🔍 VISIBILITY DEBUG:`);
+    console.log(`🔍 Topic: ${this.userData.topic}`);
+    console.log(`🔍 Was visible: ${wasVisible}`);
+    console.log(`🔍 Now visible: ${this.visible}`);
+    console.log(`🔍 Settings visible: ${settings?.visible}`);
+    console.log(`🔍 Collision objects group children count: ${this.#collisionObjects.children.length}`);
+    console.log(`🔍 Markers count: ${this.#markers.size}`);
+    console.log(`🔍 Persistent objects count: ${this.#persistentCollisionObjects.size}`);
 
     // If topic was just disabled, clear all collision objects
     if (wasVisible && !this.visible) {
-      console.log(`PlanningScene: Topic disabled - clearing all collision objects`);
+      console.log(`🗑️ TOPIC DISABLED - Clearing all collision objects for topic: ${this.userData.topic}`);
+      console.log(`🗑️ Before clear - Markers: ${this.#markers.size}, Persistent: ${this.#persistentCollisionObjects.size}, Children: ${this.#collisionObjects.children.length}`);
+
       this.#clearAllCollisionObjects();
       this.#persistentCollisionObjects.clear();
+
+      console.log(`🗑️ After clear - Markers: ${this.#markers.size}, Persistent: ${this.#persistentCollisionObjects.size}, Children: ${this.#collisionObjects.children.length}`);
     }
 
     // If topic was just enabled, we'll recreate objects on next message
     if (!wasVisible && this.visible) {
-      console.log(`PlanningScene: Topic enabled - will recreate objects on next message`);
+      console.log(`✅ TOPIC ENABLED - Will recreate objects on next message for topic: ${this.userData.topic}`);
     }
   }
 
@@ -267,17 +276,26 @@ export class RenderablePlanningScene extends Renderable<PlanningSceneUserData> {
   }
 
   #clearAllCollisionObjects(): void {
+    console.log(`🧹 CLEARING ALL COLLISION OBJECTS - Starting with ${this.#markers.size} markers`);
+
     // Remove all existing markers
     for (const [objectId] of this.#markers) {
+      console.log(`🧹 Removing marker for object: ${objectId}`);
       this.#removeCollisionObjectMarker(objectId);
     }
+
+    console.log(`🧹 CLEARING COMPLETE - Remaining markers: ${this.#markers.size}, Children: ${this.#collisionObjects.children.length}`);
   }
 
   #removeCollisionObjectMarker(objectId: string): void {
     const existingMarker = this.#markers.get(objectId);
     if (existingMarker) {
+      console.log(`🗑️ Removing marker for ${objectId} from collision objects group`);
       this.#collisionObjects.remove(existingMarker);
       this.#markers.delete(objectId);
+      console.log(`🗑️ Marker removed - Markers count: ${this.#markers.size}, Children count: ${this.#collisionObjects.children.length}`);
+    } else {
+      console.log(`🗑️ No marker found for ${objectId} to remove`);
     }
   }
 
@@ -302,13 +320,9 @@ export class RenderablePlanningScene extends Renderable<PlanningSceneUserData> {
 
     console.log(`PlanningScene: Raw primitive_poses:`, collisionObject.primitive_poses);
     console.log(`PlanningScene: Raw mesh_poses:`, collisionObject.mesh_poses);
-    console.log(`PlanningScene: Raw pose field:`, collisionObject.pose);
 
-    // FIXED: Use the main pose field first, then fall back to primitive_poses
-    if (collisionObject.pose && collisionObject.pose.position && collisionObject.pose.orientation) {
-      pose = collisionObject.pose;
-      console.log(`PlanningScene: ✅ Using main pose field with position:`, pose.position);
-    } else if (collisionObject.primitive_poses && collisionObject.primitive_poses.length > 0) {
+    // Use primitive_poses first (most common), then fall back to mesh_poses
+    if (collisionObject.primitive_poses && collisionObject.primitive_poses.length > 0) {
       const rawPose = collisionObject.primitive_poses[0];
       console.log(`PlanningScene: Raw primitive_poses[0]:`, rawPose);
 
