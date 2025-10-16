@@ -164,7 +164,9 @@
           "visible": false
         },
         "/robot_description": {
-          "visible": true
+          "visible": true,
+          "displayMode": "collision",
+          "fallbackColor": "#aeaeae"
         },
         "/genz/local_map": {
           "visible": false,
