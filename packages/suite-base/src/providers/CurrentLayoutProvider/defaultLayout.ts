@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
-import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 
 /**
  * Overridden default layout that may have been provided when self-hosting via Docker
