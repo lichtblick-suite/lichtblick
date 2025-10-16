@@ -80,6 +80,7 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
           className={classes.logsBadge}
         >
           <ToolbarIconButton
+            disabled={(logCount ?? 0) === 0}
             title={
               showLogs === true
                 ? "Hide logs"
