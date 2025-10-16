@@ -153,6 +153,19 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     displayTemporaryError,
   ]);
 
+  // Ensure camera controls are enabled on initial load
+  useEffect(() => {
+    if (renderer?.cameraHandler) {
+      // Use setTimeout to ensure renderer is fully initialized
+      setTimeout(() => {
+        // Safely enable camera controls with proper null checks
+        if (renderer?.cameraHandler && "setControlsEnabled" in renderer.cameraHandler) {
+          renderer.cameraHandler.setControlsEnabled?.(true);
+        }
+      }, 0);
+    }
+  }, [renderer]); // Runs when renderer initializes
+
   useEffect(() => {
     renderer?.setCustomCameraModels(customCameraModels);
   }, [renderer, customCameraModels]);
@@ -663,6 +676,14 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     };
   }, [publishTopics, context, context.dataSourceProfile]);
 
+  // Ensure pose tool is stopped on component mount and renderer changes
+  useEffect(() => {
+    if (renderer?.poseInputTool) {
+      renderer.poseInputTool.stop(); // Force inactive state
+      setPoseInputActive(false);     // Reset state
+    }
+  }, [renderer]); // Runs when renderer initializes
+
   const latestPublishConfig = useLatest(config.publish);
 
   useEffect(() => {
@@ -854,33 +875,51 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const onClickGoalPose = useCallback(() => {
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
+      setPoseInputActive(false);
     } else {
-      setPoseInputMode("goal");
-      renderer?.poseInputTool.start();
+      // Explicitly stop any active tools first
+      renderer?.poseInputTool.stop();
       renderer?.measurementTool.stopMeasuring();
       renderer?.publishClickTool.stop();
+
+      // Reset mode and activate
+      setPoseInputMode("goal");
+      setPoseInputActive(true);
+      renderer?.poseInputTool.start();
     }
   }, [poseInputActive, renderer]);
 
   const onClickInitialPose = useCallback(() => {
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
+      setPoseInputActive(false);
     } else {
-      setPoseInputMode("initial");
-      renderer?.poseInputTool.start();
+      // Explicitly stop any active tools first
+      renderer?.poseInputTool.stop();
       renderer?.measurementTool.stopMeasuring();
       renderer?.publishClickTool.stop();
+
+      // Reset mode and activate
+      setPoseInputMode("initial");
+      setPoseInputActive(true);
+      renderer?.poseInputTool.start();
     }
   }, [poseInputActive, renderer]);
 
   const onClickPoseInput = useCallback(() => {
     if (poseInputActive) {
       renderer?.poseInputTool.stop();
+      setPoseInputActive(false);
     } else {
-      setPoseInputMode("evaluate");
-      renderer?.poseInputTool.start();
+      // Explicitly stop any active tools first
+      renderer?.poseInputTool.stop();
       renderer?.measurementTool.stopMeasuring();
       renderer?.publishClickTool.stop();
+
+      // Reset mode and activate
+      setPoseInputMode("evaluate");
+      setPoseInputActive(true);
+      renderer?.poseInputTool.start();
     }
   }, [poseInputActive, renderer]);
 
