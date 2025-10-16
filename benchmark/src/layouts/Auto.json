@@ -6,9 +6,22 @@
         "distance": 15.475618749969177,
         "perspective": true,
         "phi": 8.717818161484841,
-        "target": [0, 0, 0],
-        "targetOffset": [1.539730847153832, -0.43353609335043125, -4.369959281912378e-17],
-        "targetOrientation": [0, 0, 0, 1],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          1.539730847153832,
+          -0.43353609335043125,
+          -4.369959281912378e-17
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "thetaOffset": -93.91869532443832,
         "fovy": 45,
         "near": 0.5,
@@ -151,7 +164,11 @@
           "visible": true,
           "type": "arrow",
           "color": "#d22222ff",
-          "arrowScale": [1, 0.05, 0.05],
+          "arrowScale": [
+            1,
+            0.05,
+            0.05
+          ],
           "showCovariance": true
         },
         "/collision_zones": {
@@ -251,6 +268,9 @@
           "visible": true
         },
         "/waypoint_markers": {
+          "visible": true
+        },
+        "/roi/accumulated": {
           "visible": true
         }
       },

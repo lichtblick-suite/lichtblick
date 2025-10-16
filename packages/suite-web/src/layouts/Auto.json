@@ -269,6 +269,9 @@
         },
         "/waypoint_markers": {
           "visible": true
+        },
+        "/roi/accumulated": {
+          "visible": true
         }
       },
       "publish": {
