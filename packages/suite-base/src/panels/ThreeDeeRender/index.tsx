@@ -7,14 +7,12 @@
 
 import { useSnackbar } from "notistack";
 import { useMemo } from "react";
-import { DeepPartial } from "ts-essentials";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { useCrash } from "@lichtblick/hooks";
 import { CaptureErrorBoundary } from "@lichtblick/suite-base/components/CaptureErrorBoundary";
 import {
   ForwardAnalyticsContextProvider,
-  ForwardedAnalytics,
   useForwardAnalytics,
 } from "@lichtblick/suite-base/components/ForwardAnalyticsContextProvider";
 import Panel from "@lichtblick/suite-base/components/Panel";
@@ -25,27 +23,11 @@ import {
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { INJECTED_FEATURE_KEYS, useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import { TestOptions } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { createSyncRoot } from "@lichtblick/suite-base/panels/createSyncRoot";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
-import { SceneExtensionConfig } from "./SceneExtensionConfig";
 import { ThreeDeeRender } from "./ThreeDeeRender";
-import { InterfaceMode } from "./types";
-
-type InitPanelArgs = {
-  crash: ReturnType<typeof useCrash>;
-  forwardedAnalytics: ForwardedAnalytics;
-  interfaceMode: InterfaceMode;
-  testOptions: TestOptions;
-  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
-  customCameraModels: CameraModelsMap;
-  enqueueSnackbarFromParent?: (
-    message: string,
-    variant?: "default" | "error" | "success" | "warning" | "info",
-  ) => void;
-  logError?: (message: string, error?: Error) => void;
-};
+import { InitPanelArgs, InterfaceMode } from "./types";
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
   const {

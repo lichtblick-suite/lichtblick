@@ -646,6 +646,9 @@ export default function Panel<
                     onClose={() => {
                       setShowLogs(false);
                     }}
+                    onClear={() => {
+                      setLogs([]);
+                    }}
                   />
                 ) : undefined}
               </PanelRoot>

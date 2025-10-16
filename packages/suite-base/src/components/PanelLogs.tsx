@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { DeleteSweep } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { List, ListItem, ListItemText, Typography, IconButton } from "@mui/material";
@@ -13,10 +14,12 @@ import { DEFAULT_HEIGHT, MAX_HEIGHT, MIN_HEIGHT } from "@lichtblick/suite-base/c
 export default function PanelLogs({
   logs,
   onClose,
+  onClear,
   initialHeight = DEFAULT_HEIGHT,
 }: {
   logs: PanelLog[];
   onClose: () => void;
+  onClear: () => void;
   initialHeight?: number;
 }): React.ReactElement {
   const { classes } = useStyles();
@@ -75,7 +78,6 @@ export default function PanelLogs({
       className={classes.root}
       style={{ height: `${height}px`, maxHeight: "none" }}
     >
-      {/* Resize handle */}
       <div
         className={classes.resizeHandle}
         onMouseDown={handleMouseDown}
@@ -85,10 +87,20 @@ export default function PanelLogs({
       </div>
 
       <div className={classes.header}>
-        <Typography variant="subtitle2">Panel Logs ({logs.length})</Typography>
-        <IconButton size="small" onClick={onClose} title="Close logs">
-          <CloseIcon fontSize="small" />
-        </IconButton>
+        <Typography variant="subtitle2">Logs ({logs.length})</Typography>
+        <div>
+          <IconButton
+            size="small"
+            onClick={onClear}
+            title="Clear logs"
+            disabled={logs.length === 0}
+          >
+            <DeleteSweep fontSize="small" />
+          </IconButton>
+          <IconButton size="small" onClick={onClose} title="Close logs">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </div>
       </div>
 
       <div className={classes.listContainer}>
