@@ -146,7 +146,7 @@ export function MessagePipelineProvider({ children, player }: ProviderProps): Re
   }, [renderDone]);
 
   const msPerFrameRef = useRef<number>(16);
-  msPerFrameRef.current = 1000 / (messageRate ?? 60);
+  msPerFrameRef.current = 1000 / (messageRate ?? 3);
 
   // To avoid re-rendering the MessagePipelineProvider and all children when global variables change
   // we register a listener directly on the context to track updates to global variables.

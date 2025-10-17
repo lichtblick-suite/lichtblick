@@ -4,12 +4,25 @@
       "layers": {},
       "cameraState": {
         "perspective": false,
-        "distance": 13.966745921853443,
-        "phi": 4.657237117213275,
-        "thetaOffset": 90.39031639903862,
-        "targetOffset": [1.9749883398923598, -1.6552676185136248, 1.7132565675529916e-19],
-        "target": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
+        "distance": 14.701837812428973,
+        "phi": 0.00005729577951308232,
+        "thetaOffset": 90.5834244609664,
+        "targetOffset": [
+          2.693443111927188,
+          -1.30833896973457,
+          -2.4574831879357356e-17
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -20,7 +33,8 @@
         "backgroundColor": "#000000",
         "transforms": {
           "axisScale": 4.5,
-          "labelSize": 0.15
+          "labelSize": 0.15,
+          "showLabel": false
         },
         "meshUpAxis": "z_up"
       },
@@ -132,6 +146,36 @@
         },
         "frame:fisheye": {
           "visible": false
+        },
+        "frame:map": {
+          "visible": false
+        },
+        "frame:base_link": {
+          "visible": false
+        },
+        "frame:base_reference": {
+          "visible": false
+        },
+        "frame:fisheye_optical": {
+          "visible": false
+        },
+        "frame:flange_mount": {
+          "visible": false
+        },
+        "frame:sander_tool": {
+          "visible": false
+        },
+        "frame:fisheye_optical_frame": {
+          "visible": false
+        },
+        "frame:livox_manipulation_imu": {
+          "visible": false
+        },
+        "frame:odom": {
+          "visible": false
+        },
+        "frame:map_cache": {
+          "visible": false
         }
       },
       "topics": {
@@ -139,10 +183,11 @@
           "visible": true
         },
         "/collision_zones": {
-          "visible": true
+          "visible": false
         },
         "/global_costmap/costmap": {
-          "visible": true
+          "visible": false,
+          "frameLocked": false
         },
         "/evaluatepose": {
           "visible": true,
@@ -175,10 +220,10 @@
           "colorMap": "turbo"
         },
         "/local_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/global_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/projected_map": {
           "visible": true
@@ -190,6 +235,66 @@
           "colorMap": "turbo",
           "pointSize": 8,
           "flatColor": "#ff0000ff"
+        },
+        "/transformed_global_plan": {
+          "visible": false
+        },
+        "/plan": {
+          "visible": false
+        },
+        "/scan_merged": {
+          "visible": false,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/planning_scene_markers": {
+          "visible": true
+        },
+        "/monitored_planning_scene": {
+          "visible": false,
+          "showCollisionObjects": true,
+          "collisionObjectColor": "#dd2828ff"
+        },
+        "/planning_scene": {
+          "visible": false,
+          "showCollisionObjects": false
+        },
+        "/latched/eoa/surface_roughness": {
+          "visible": false
+        },
+        "/move_base_simple/goal": {
+          "visible": false
+        },
+        "/collision_boundary_markers": {
+          "visible": false
+        },
+        "/point_cloud": {
+          "visible": false,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/seg/mani/lidar": {
+          "visible": false,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/set_pose": {
+          "visible": false
+        },
+        "/lidar_fl/filtered_scan": {
+          "visible": false,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/lidar_rr/filtered_scan": {
+          "visible": false,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
         }
       },
       "publish": {

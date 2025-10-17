@@ -289,7 +289,7 @@ export function MessageFramerate(): React.ReactElement {
     <Stack>
       <FormLabel>{t("messageRate")} (Hz):</FormLabel>
       <Select
-        value={messageRate ?? 60}
+        value={messageRate ?? 3}
         fullWidth
         onChange={(event) => void setMessageRate(event.target.value as number)}
       >

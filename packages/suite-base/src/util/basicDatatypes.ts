@@ -9,6 +9,7 @@ import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/sche
 
 import { ros1, ros2galactic } from "@lichtblick/rosmsg-msgs-common";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { moveitMessageDefinitions } from "@lichtblick/suite-base/types/MoveItMessageDefinitions";
 
 /**
  * basicDatatypes is a map containing definitions for ROS common datatypes and foxglove datatypes
@@ -48,3 +49,8 @@ basicDatatypes.set("foxglove_msgs/ImageMarkerArray", {
     { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
   ],
 });
+
+// Add MoveIt message definitions
+for (const [name, def] of Object.entries(moveitMessageDefinitions)) {
+  basicDatatypes.set(name, def);
+}

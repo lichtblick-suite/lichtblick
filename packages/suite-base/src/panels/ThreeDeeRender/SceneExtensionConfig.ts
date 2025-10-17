@@ -23,6 +23,7 @@ import { FoxgloveSceneEntities } from "@lichtblick/suite-base/panels/ThreeDeeRen
 import { SceneSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/SceneSettings";
 import { Urdfs } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Urdfs";
 import { VelodyneScans } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/VelodyneScans";
+import { PlanningSceneExtension } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/moveit/PlanningSceneExtension";
 
 import { IRenderer } from "./IRenderer";
 import { SceneExtension } from "./SceneExtension";
@@ -122,6 +123,12 @@ export const DEFAULT_SCENE_EXTENSION_CONFIG: SceneExtensionConfig = {
     },
     [VelodyneScans.extensionId]: {
       init: (renderer: IRenderer) => new VelodyneScans(renderer),
+    },
+    [PlanningSceneExtension.extensionId]: {
+      init: (renderer: IRenderer) => {
+        console.log("🔧 SceneExtensionConfig: Initializing PlanningSceneExtension");
+        return new PlanningSceneExtension(renderer);
+      },
     },
   },
 };

@@ -175,7 +175,10 @@
           "visible": true
         },
         "/global_costmap/costmap": {
-          "visible": true
+          "visible": true,
+          "maxColor": "#0000004f",
+          "minColor": "#ffffff45",
+          "unknownColor": "#80808063"
         },
         "/evaluatepose": {
           "visible": true,
@@ -208,10 +211,10 @@
           "colorMap": "turbo"
         },
         "/local_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/global_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/projected_map": {
           "visible": true
@@ -274,6 +277,11 @@
         },
         "/roi/accumulated": {
           "visible": true
+        },
+        "/monitored_planning_scene": {
+          "visible": true,
+          "showCollisionObjects": true,
+          "collisionObjectColor": "#ff0000"
         }
       },
       "publish": {
