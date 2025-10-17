@@ -277,6 +277,11 @@
         },
         "/roi/accumulated": {
           "visible": true
+        },
+        "/monitored_planning_scene": {
+          "visible": true,
+          "showCollisionObjects": true,
+          "collisionObjectColor": "#ff0000"
         }
       },
       "publish": {

@@ -125,7 +125,10 @@ export const DEFAULT_SCENE_EXTENSION_CONFIG: SceneExtensionConfig = {
       init: (renderer: IRenderer) => new VelodyneScans(renderer),
     },
     [PlanningSceneExtension.extensionId]: {
-      init: (renderer: IRenderer) => new PlanningSceneExtension(renderer),
+      init: (renderer: IRenderer) => {
+        console.log("🔧 SceneExtensionConfig: Initializing PlanningSceneExtension");
+        return new PlanningSceneExtension(renderer);
+      },
     },
   },
 };

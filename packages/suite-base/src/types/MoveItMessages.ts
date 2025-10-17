@@ -73,6 +73,7 @@ export type MoveItMessages = {
 
   "moveit_msgs/CollisionObject": {
     header: Header;
+    pose: Pose;
     id: string;
     type: ObjectType;
     primitives: SolidPrimitive[];
