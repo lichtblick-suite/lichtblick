@@ -35,7 +35,6 @@ function getDummyPanel(renderFn: jest.Mock) {
     // than once due to React.StrictMode.
     useEffect(() => {
       renderFn(props);
-      // Use saveConfig to avoid prop warning
       if (props.config.someString === "trigger-save") {
         props.saveConfig({ someString: "saved" });
       }
@@ -49,7 +48,6 @@ function getDummyPanel(renderFn: jest.Mock) {
 
 describe("Panel", () => {
   beforeEach(() => {
-    // jsdom can't parse our @container CSS so we have to silence console.error for this test.
     jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
@@ -780,7 +778,6 @@ describe("Panel", () => {
 
         useEffect(() => {
           renderFn(props);
-          // Trigger saveConfig on mount to use the prop
           updateConfig();
         }, [props, updateConfig]);
 
@@ -934,7 +931,6 @@ describe("Panel", () => {
       fireEvent.keyDown(document, { key: "Escape", code: "Escape" });
 
       // Then
-      // This would trigger panel deselection if multiple panels were selected
       expect(true).toBe(true);
     });
   });
@@ -981,7 +977,6 @@ describe("Panel", () => {
         </PanelSetup>,
       );
 
-      // The panel should render successfully even if it has error capabilities
       expect(screen.getByText("Throw Error")).toBeTruthy();
       expect(screen.getByText("Update Config")).toBeTruthy();
     });
@@ -1006,9 +1001,9 @@ describe("Panel", () => {
 
       // Then
       expect(renderFn.mock.calls[0][0].config).toEqual({
-        someString: "overridden", // override takes precedence
-        existingProp: "existing", // saved config property preserved
-        newProp: "added", // override config property added
+        someString: "overridden",
+        existingProp: "existing",
+        newProp: "added",
       });
     });
   });
@@ -1030,11 +1025,9 @@ describe("Panel", () => {
         </PanelSetup>,
       );
 
-      // Then - In production, performance info should not be rendered
       const perfInfo = container.querySelector(".mui-skj2y-perfInfo");
       expect(perfInfo).toBeFalsy();
 
-      // Restore environment
       process.env.NODE_ENV = originalEnv;
     });
 
@@ -1052,8 +1045,6 @@ describe("Panel", () => {
       );
 
       // Then
-      // The Profiler component tracks render performance automatically
-      // We can verify it doesn't throw errors during rendering
       expect(renderFn).toHaveBeenCalled();
     });
   });

@@ -1,19 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+
 import { LayerErrors } from "./LayerErrors";
 
 describe("LayerErrors", () => {
   let layerErrors: LayerErrors;
+  const errorId = BasicBuilder.string();
+  const errorMessage = BasicBuilder.string();
+  const topicId = BasicBuilder.string();
 
   beforeEach(() => {
     layerErrors = new LayerErrors();
-    // Clear any existing console.warn mocks and expect them in tests
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    // Clear console.warn calls after each test to prevent test framework from failing
     (console.warn as jest.Mock).mockClear();
   });
 
@@ -22,14 +25,13 @@ describe("LayerErrors", () => {
       const updateHandler = jest.fn();
       layerErrors.on("update", updateHandler);
 
-      const path = ["topics", "test_topic"];
-      const errorId = "TEST_ERROR";
-      const errorMessage = "Test error message";
+      const path = ["topics", topicId];
 
       layerErrors.add(path, errorId, errorMessage);
 
       expect(updateHandler).toHaveBeenCalledWith(path, errorId, errorMessage);
-      // LayerErrors logs warnings for new errors, which is expected behavior
+
+      // LayerErrors logs warnings for new errors
       expect(console.warn).toHaveBeenCalledWith(`[${path.join(" > ")}] ${errorMessage}`);
       (console.warn as jest.Mock).mockClear();
     });
@@ -38,9 +40,7 @@ describe("LayerErrors", () => {
       const removeHandler = jest.fn();
       layerErrors.on("remove", removeHandler);
 
-      const path = ["topics", "test_topic"];
-      const errorId = "TEST_ERROR";
-      const errorMessage = "Test error message";
+      const path = ["topics", topicId];
 
       // Add error first
       layerErrors.add(path, errorId, errorMessage);
@@ -56,15 +56,11 @@ describe("LayerErrors", () => {
       const clearHandler = jest.fn();
       layerErrors.on("clear", clearHandler);
 
-      const path = ["topics", "test_topic"];
-      const errorId = "TEST_ERROR";
-      const errorMessage = "Test error message";
+      const path = ["topics", topicId];
 
-      // Add error first
       layerErrors.add(path, errorId, errorMessage);
       (console.warn as jest.Mock).mockClear();
 
-      // Then clear the path
       layerErrors.clearPath(path);
 
       expect(clearHandler).toHaveBeenCalledWith(path);
@@ -74,10 +70,6 @@ describe("LayerErrors", () => {
       const updateHandler = jest.fn();
       layerErrors.on("update", updateHandler);
 
-      const topicId = "test_topic";
-      const errorId = "TOPIC_ERROR";
-      const errorMessage = "Topic error message";
-
       layerErrors.addToTopic(topicId, errorId, errorMessage);
       (console.warn as jest.Mock).mockClear();
 
@@ -85,9 +77,7 @@ describe("LayerErrors", () => {
     });
 
     it("should check if error exists", () => {
-      const path = ["topics", "test_topic"];
-      const errorId = "TEST_ERROR";
-      const errorMessage = "Test error message";
+      const path = ["topics", topicId];
 
       expect(layerErrors.hasError(path, errorId)).toBe(false);
 
@@ -98,9 +88,7 @@ describe("LayerErrors", () => {
     });
 
     it("should return error message at path", () => {
-      const path = ["topics", "test_topic"];
-      const errorId = "TEST_ERROR";
-      const errorMessage = "Test error message";
+      const path = ["topics", topicId];
 
       expect(layerErrors.errors.errorAtPath(path)).toBeUndefined();
 
@@ -111,11 +99,11 @@ describe("LayerErrors", () => {
     });
 
     it("should handle multiple errors at same path", () => {
-      const path = ["topics", "test_topic"];
-      const errorId1 = "ERROR_1";
-      const errorId2 = "ERROR_2";
-      const errorMessage1 = "First error";
-      const errorMessage2 = "Second error";
+      const path = ["topics", topicId];
+      const errorId1 = BasicBuilder.string();
+      const errorId2 = BasicBuilder.string();
+      const errorMessage1 = BasicBuilder.string();
+      const errorMessage2 = BasicBuilder.string();
 
       layerErrors.add(path, errorId1, errorMessage1);
       layerErrors.add(path, errorId2, errorMessage2);
@@ -133,8 +121,6 @@ describe("LayerErrors", () => {
       layerErrors.on("update", updateHandler);
 
       const path = ["test", "path"];
-      const errorId = "VALIDATION_ERROR";
-      const errorMessage = "Validation failed";
 
       layerErrors.errorIfFalse(false, path, errorId, errorMessage);
       (console.warn as jest.Mock).mockClear();
@@ -147,8 +133,6 @@ describe("LayerErrors", () => {
       layerErrors.on("remove", removeHandler);
 
       const path = ["test", "path"];
-      const errorId = "VALIDATION_ERROR";
-      const errorMessage = "Validation failed";
 
       // Add error first
       layerErrors.add(path, errorId, errorMessage);

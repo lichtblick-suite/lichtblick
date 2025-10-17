@@ -36,7 +36,6 @@ export default class PanelErrorBoundary extends Component<
 
   public override render(): ReactNode {
     if (this.state.currentError) {
-      // Show a minimal fallback UI for render errors
       return (
         <ErrorDisplay
           title="This panel encountered an unexpected error"

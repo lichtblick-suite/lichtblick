@@ -639,7 +639,6 @@ export default function Panel<
                   <div className={classes.perfInfo} ref={perfInfo} />
                 )}
 
-                {/* Panel logs toggle and display */}
                 {showLogs ? (
                   <PanelLogs
                     logs={logs}

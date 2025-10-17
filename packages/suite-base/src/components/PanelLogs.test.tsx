@@ -7,6 +7,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelLog } from "@lichtblick/suite-base/components/types";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 function renderPanelLogs(
@@ -32,7 +33,6 @@ function getLogCountText(count: number) {
 
 describe("PanelLogs", () => {
   beforeEach(() => {
-    // jsdom can't parse our @container CSS so we have to silence console.error for this test.
     jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
@@ -71,15 +71,17 @@ describe("PanelLogs", () => {
 
   describe("Given info logs", () => {
     it("When rendered Then displays log messages correctly", () => {
+      const infoMessage = BasicBuilder.string();
+      const anotherInforMessage = BasicBuilder.string();
       // Given
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Test info message",
+          message: infoMessage,
         },
         {
           timestamp: "2023-12-01 10:01:00",
-          message: "Another info message",
+          message: anotherInforMessage,
         },
       ];
 
@@ -88,8 +90,8 @@ describe("PanelLogs", () => {
 
       // Then
       expect(getLogCountText(2)).toBeTruthy();
-      expect(screen.getByText("[INFO] Test info message")).toBeTruthy();
-      expect(screen.getByText("[INFO] Another info message")).toBeTruthy();
+      expect(screen.getByText(`[INFO] ${infoMessage}`)).toBeTruthy();
+      expect(screen.getByText(`[INFO] ${anotherInforMessage}`)).toBeTruthy();
       expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
       expect(screen.getByText("2023-12-01 10:01:00")).toBeTruthy();
     });
@@ -128,13 +130,14 @@ describe("PanelLogs", () => {
     });
 
     it("When error has no stack Then displays error message only", () => {
+      const errorMessage = BasicBuilder.string();
       // Given
-      const error = new Error("Test error without stack");
+      const error = new Error(errorMessage);
       delete error.stack;
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Error occurred",
+          message: errorMessage,
           error,
         },
       ];
@@ -143,28 +146,31 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText("[ERROR] Error occurred")).toBeTruthy();
-      expect(screen.getByText("Test error without stack")).toBeTruthy();
+      expect(screen.getByText(`[ERROR] ${errorMessage}`)).toBeTruthy();
+      expect(screen.getByText(errorMessage)).toBeTruthy();
     });
   });
 
   describe("Given mixed log types", () => {
     it("When rendered Then displays all logs in order", () => {
+      const errorMessage = BasicBuilder.string();
+      const infoMessage = BasicBuilder.string();
+      const anotherInfoMessage = BasicBuilder.string();
       // Given
-      const error = new Error("Critical error");
+      const error = new Error(errorMessage);
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Info message",
+          message: infoMessage,
         },
         {
           timestamp: "2023-12-01 10:01:00",
-          message: "Error occurred",
+          message: errorMessage,
           error,
         },
         {
           timestamp: "2023-12-01 10:02:00",
-          message: "Another info message",
+          message: anotherInfoMessage,
         },
       ];
 
@@ -173,9 +179,9 @@ describe("PanelLogs", () => {
 
       // Then
       expect(getLogCountText(3)).toBeTruthy();
-      expect(screen.getByText("[INFO] Info message")).toBeTruthy();
-      expect(screen.getByText("[ERROR] Error occurred")).toBeTruthy();
-      expect(screen.getByText("[INFO] Another info message")).toBeTruthy();
+      expect(screen.getByText(`[INFO] ${infoMessage}`)).toBeTruthy();
+      expect(screen.getByText(`[ERROR] ${errorMessage}`)).toBeTruthy();
+      expect(screen.getByText(`[INFO] ${anotherInfoMessage}`)).toBeTruthy();
 
       // Verify timestamps are displayed
       expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
@@ -186,17 +192,20 @@ describe("PanelLogs", () => {
 
   describe("Given many logs", () => {
     it("When rendered Then container is scrollable", () => {
+      const logMessage = BasicBuilder.string();
+      const logsLength = 20;
       // Given
-      const logs: PanelLog[] = Array.from({ length: 20 }, (_, i) => ({
+      const logs: PanelLog[] = Array.from({ length: logsLength }, (_, i) => ({
         timestamp: `2023-12-01 10:${i.toString().padStart(2, "0")}:00`,
-        message: `Log message ${i + 1}`,
+        message: `${logMessage} ${i + 1}`,
       }));
 
       // When
       const { container } = renderPanelLogs(logs);
 
       // Then
-      expect(getLogCountText(20)).toBeTruthy();
+      expect(getLogCountText(logsLength)).toBeTruthy();
+
       // Check that the list container has overflow styling for scrolling
       const listContainer = container.querySelector('[class*="listContainer"]');
       expect(listContainer).toBeTruthy();
@@ -326,11 +335,12 @@ describe("PanelLogs", () => {
     });
 
     it("When clear button is clicked Then onClear is called", () => {
+      const logMessage = BasicBuilder.string();
       // Given
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Test log",
+          message: logMessage,
         },
       ];
       const onClear = jest.fn();
@@ -345,11 +355,12 @@ describe("PanelLogs", () => {
     });
 
     it("When clear button is clicked multiple times Then onClear is called each time", () => {
+      const logMessage = BasicBuilder.string();
       // Given
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Test log",
+          message: logMessage,
         },
       ];
       const onClear = jest.fn();
@@ -366,11 +377,12 @@ describe("PanelLogs", () => {
     });
 
     it("When rendered Then clear button has correct icon", () => {
+      const logMessage = BasicBuilder.string();
       // Given
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Test log",
+          message: logMessage,
         },
       ];
 
@@ -384,11 +396,12 @@ describe("PanelLogs", () => {
     });
 
     it("When rendered Then clear button appears before close button", () => {
+      const logMessage = BasicBuilder.string();
       // Given
       const logs: PanelLog[] = [
         {
           timestamp: "2023-12-01 10:00:00",
-          message: "Test log",
+          message: logMessage,
         },
       ];
 
