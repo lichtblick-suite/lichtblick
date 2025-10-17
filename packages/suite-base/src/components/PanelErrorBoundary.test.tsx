@@ -103,9 +103,16 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(errorComponent);
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Test render error")).toBeTruthy();
-      expect(screen.getByText("Check the panel logs for details.")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Test render error")).toBeTruthy();
+      expect(
+        screen.queryAllByText((_, element) => {
+          return (
+            element?.textContent ===
+            "Something went wrong in this panel. Dismiss this error to continue using this panel. If the issue persists, try resetting the panel."
+          );
+        }).length,
+      ).toBeGreaterThan(0);
     });
 
     it("When error is thrown Then displays action buttons", () => {
@@ -116,8 +123,9 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(errorComponent);
 
       // Then
-      expect(screen.getByText("Try Again")).toBeTruthy();
+      expect(screen.getByText("Dismiss")).toBeTruthy();
       expect(screen.getByText("Reset Panel")).toBeTruthy();
+      expect(screen.getByText("Remove Panel")).toBeTruthy();
     });
 
     it("When error is thrown Then calls onLogError with error details", () => {
@@ -150,12 +158,12 @@ describe("PanelErrorBoundary", () => {
       }).not.toThrow();
 
       // Should still show error UI
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
     });
   });
 
   describe("Given error boundary is displaying error state", () => {
-    it("When Try Again button is clicked Then attempts to render children again", () => {
+    it("When Dismiss button is clicked Then attempts to render children again", () => {
       // Given
       let shouldThrowError = true;
       const ConditionalErrorComponent = () => {
@@ -168,17 +176,17 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(<ConditionalErrorComponent />);
 
       // Verify error state is shown
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
 
       // When
       shouldThrowError = false; // Fix the error condition
-      const tryAgainButton = screen.getByText("Try Again");
-      fireEvent.click(tryAgainButton);
+      const dismissButton = screen.getByText("Dismiss");
+      fireEvent.click(dismissButton);
 
       // Then
       expect(screen.getByTestId("recovered-component")).toBeTruthy();
       expect(screen.getByText("Component recovered")).toBeTruthy();
-      expect(screen.queryByText("Panel encountered a render error")).toBeFalsy();
+      expect(screen.queryByText("This panel encountered an unexpected error")).toBeFalsy();
     });
 
     it("When Reset Panel button is clicked Then calls onResetPanel and clears error", () => {
@@ -189,7 +197,7 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(errorComponent, { onResetPanel });
 
       // Verify error state is shown
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
 
       // When
       const resetButton = screen.getByText("Reset Panel");
@@ -199,6 +207,24 @@ describe("PanelErrorBoundary", () => {
       expect(onResetPanel).toHaveBeenCalledTimes(1);
     });
 
+    it("When Remove Panel button is clicked Then calls onRemovePanel", () => {
+      // Given
+      const onRemovePanel = jest.fn();
+      const errorComponent = <ErrorThrowingComponent triggerError={true} />;
+
+      renderErrorBoundary(errorComponent, { onRemovePanel });
+
+      // Verify error state is shown
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+
+      // When
+      const removeButton = screen.getByText("Remove Panel");
+      fireEvent.click(removeButton);
+
+      // Then
+      expect(onRemovePanel).toHaveBeenCalledTimes(1);
+    });
+
     it("When multiple errors occur Then shows the first error until reset", () => {
       // Given
       const { rerender } = renderErrorBoundary(
@@ -206,7 +232,7 @@ describe("PanelErrorBoundary", () => {
       );
 
       // Verify first error is shown
-      expect(screen.getByText("Error: First error")).toBeTruthy();
+      expect(screen.getByText("First error")).toBeTruthy();
 
       // When - rerender with different error (error boundary preserves first error)
       rerender(
@@ -218,13 +244,13 @@ describe("PanelErrorBoundary", () => {
       );
 
       // Then - still shows first error (error boundary behavior)
-      expect(screen.getByText("Error: First error")).toBeTruthy();
-      expect(screen.queryByText("Error: Second error")).toBeFalsy();
+      expect(screen.getByText("First error")).toBeTruthy();
+      expect(screen.queryByText("Second error")).toBeFalsy();
     });
   });
 
   describe("Given error boundary with custom props", () => {
-    it("When showErrorDetails is provided Then still shows basic error UI", () => {
+    it("When showErrorDetails is provided Then displays error UI with details", () => {
       // Given
       const errorComponent = (
         <ErrorThrowingComponent triggerError={true} errorMessage="Detailed error" />
@@ -234,11 +260,12 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(errorComponent, { showErrorDetails: true });
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Detailed error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Detailed error")).toBeTruthy();
+      expect(screen.getByText("Hide details")).toBeTruthy();
     });
 
-    it("When hideErrorSourceLocations is provided Then still shows error message", () => {
+    it("When hideErrorSourceLocations is provided Then shows error message without source locations", () => {
       // Given
       const errorComponent = (
         <ErrorThrowingComponent triggerError={true} errorMessage="Source error" />
@@ -248,8 +275,8 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(errorComponent, { hideErrorSourceLocations: true });
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Source error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Source error")).toBeTruthy();
     });
   });
 
@@ -264,8 +291,8 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(<TypeErrorComponent />);
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Invalid type operation")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Invalid type operation")).toBeTruthy();
     });
 
     it("When ReferenceError is thrown Then displays the error message", () => {
@@ -278,11 +305,11 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(<ReferenceErrorComponent />);
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Variable not defined")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Variable not defined")).toBeTruthy();
     });
 
-    it("When error with empty message is thrown Then displays generic error info", () => {
+    it("When error with empty message is thrown Then displays empty error message", () => {
       // Given
       const EmptyErrorComponent = () => {
         const error = new Error();
@@ -294,13 +321,16 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(<EmptyErrorComponent />);
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error:")).toBeTruthy(); // Empty message case
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      // Check for code element with empty error message using querySelector
+      const codeElement = document.querySelector("code.MuiTypography-subtitle2");
+      expect(codeElement).toBeTruthy();
+      expect(codeElement?.textContent).toBe("");
     });
   });
 
   describe("Given error boundary in error state", () => {
-    it("When component re-renders without error after Try Again Then returns to normal state", () => {
+    it("When component re-renders without error after Dismiss Then returns to normal state", () => {
       // Given
       let throwError = true;
       const ToggleErrorComponent = () => {
@@ -313,17 +343,17 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(<ToggleErrorComponent />);
 
       // Verify error state
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
 
-      // When - fix error condition and click Try Again
+      // When - fix error condition and click Dismiss
       throwError = false;
-      const tryAgainButton = screen.getByText("Try Again");
-      fireEvent.click(tryAgainButton);
+      const dismissButton = screen.getByText("Dismiss");
+      fireEvent.click(dismissButton);
 
       // Then
       expect(screen.getByTestId("normal-render")).toBeTruthy();
       expect(screen.getByText("Normal rendering")).toBeTruthy();
-      expect(screen.queryByText("Panel encountered a render error")).toBeFalsy();
+      expect(screen.queryByText("This panel encountered an unexpected error")).toBeFalsy();
     });
   });
 
@@ -344,8 +374,8 @@ describe("PanelErrorBoundary", () => {
       renderErrorBoundary(<NestedErrorComponent />);
 
       // Then
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Nested error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Nested error")).toBeTruthy();
     });
 
     it("When sibling component throws error Then only affects error boundary subtree", () => {
@@ -369,8 +399,8 @@ describe("PanelErrorBoundary", () => {
       // Then
       expect(screen.getByTestId("working-sibling")).toBeTruthy();
       expect(screen.getByText("Working sibling")).toBeTruthy();
-      expect(screen.getByText("Panel encountered a render error")).toBeTruthy();
-      expect(screen.getByText("Error: Isolated error")).toBeTruthy();
+      expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
+      expect(screen.getByText("Isolated error")).toBeTruthy();
     });
   });
 });

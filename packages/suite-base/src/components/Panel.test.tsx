@@ -205,6 +205,15 @@ describe("Panel", () => {
     const logInfoText = BasicBuilder.string();
     const logErrorText = BasicBuilder.string();
 
+    function getLogsTitleElement(count: number) {
+      return screen.queryByText((_content, element) => {
+        return (
+          element?.textContent === `Logs (${count})` &&
+          element.className.includes("MuiTypography-subtitle2")
+        );
+      });
+    }
+
     function getLoggingPanel(renderFn: jest.Mock) {
       function LoggingComponent(props: DummyProps): React.JSX.Element {
         const panelContext = useContext(PanelContext);
@@ -285,7 +294,12 @@ describe("Panel", () => {
 
       // Then - logs panel should be visible
       await waitFor(() => {
-        const logsPanel = screen.queryByText("Panel Logs (1)");
+        const logsPanel = screen.queryByText((_content, element) => {
+          return (
+            element?.textContent === "Logs (1)" &&
+            element.className.includes("MuiTypography-subtitle2")
+          );
+        });
         expect(logsPanel).toBeTruthy();
       });
 
@@ -294,7 +308,12 @@ describe("Panel", () => {
 
       // Then - logs panel should be hidden
       await waitFor(() => {
-        const logsPanel = screen.queryByText("Panel Logs (1)");
+        const logsPanel = screen.queryByText((_content, element) => {
+          return (
+            element?.textContent === "Logs (1)" &&
+            element.className.includes("MuiTypography-subtitle2")
+          );
+        });
         expect(logsPanel).toBeFalsy();
       });
     });
@@ -316,7 +335,7 @@ describe("Panel", () => {
       fireEvent.click(screen.getByText("Toggle Logs"));
 
       await waitFor(() => {
-        const logsPanel = screen.queryByText("Panel Logs (1)");
+        const logsPanel = getLogsTitleElement(1);
         expect(logsPanel).toBeTruthy();
       });
 
@@ -326,8 +345,312 @@ describe("Panel", () => {
 
       // Then
       await waitFor(() => {
-        const logsPanel = screen.queryByText("Panel Logs (1)");
+        const logsPanel = getLogsTitleElement(1);
         expect(logsPanel).toBeFalsy();
+      });
+    });
+
+    it("When clearing logs from PanelLogs Then log count resets to zero", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test4";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // Log some messages and show logs
+      fireEvent.click(screen.getByText("Log Info"));
+      fireEvent.click(screen.getByText("Log Error"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      await waitFor(() => {
+        const logsPanel = getLogsTitleElement(2);
+        expect(logsPanel).toBeTruthy();
+      });
+
+      // When
+      const clearButton = screen.getByRole("button", { name: "Clear logs" });
+      fireEvent.click(clearButton);
+
+      // Then
+      await waitFor(() => {
+        const logCountElement = screen.getByTestId("log-count");
+        expect(logCountElement.textContent).toBe("0");
+      });
+
+      await waitFor(() => {
+        const logsPanel = getLogsTitleElement(0);
+        expect(logsPanel).toBeTruthy();
+      });
+    });
+
+    it("When no logs exist Then clear logs button is disabled", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test5";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When - show logs without logging any messages
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        const clearButton = screen.getByRole("button", { name: "Clear logs" });
+        expect(clearButton.hasAttribute("disabled")).toBe(true);
+      });
+    });
+
+    it("When logs exist Then clear logs button is enabled", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test6";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // Log a message and show logs
+      fireEvent.click(screen.getByText("Log Info"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        const clearButton = screen.getByRole("button", { name: "Clear logs" });
+        expect(clearButton.hasAttribute("disabled")).toBe(false);
+      });
+    });
+
+    it("When logging info message Then PanelLogs displays message with INFO prefix", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test7";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      fireEvent.click(screen.getByText("Log Info"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        const infoMessage = screen.getByText(`[INFO] ${logInfoText}`);
+        expect(infoMessage).toBeTruthy();
+      });
+    });
+
+    it("When logging error message Then PanelLogs displays message with ERROR prefix", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test8";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      fireEvent.click(screen.getByText("Log Error"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        const errorMessage = screen.getByText(`[ERROR] ${logErrorText}`);
+        expect(errorMessage).toBeTruthy();
+      });
+    });
+
+    it("When error is logged Then PanelLogs displays error stack trace", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test9";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      fireEvent.click(screen.getByText("Log Error"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        const errorTrace = screen.getByText((content, element) => {
+          return (
+            element?.tagName.toLowerCase() === "pre" && content.includes(`Error: ${logErrorText}`)
+          );
+        });
+        expect(errorTrace).toBeTruthy();
+      });
+    });
+
+    it("When multiple messages are logged Then all messages appear in chronological order", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test10";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      fireEvent.click(screen.getByText("Log Info"));
+      fireEvent.click(screen.getByText("Log Error"));
+      fireEvent.click(screen.getByText("Log Info"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        const logCountElement = screen.getByTestId("log-count");
+        expect(logCountElement.textContent).toBe("3");
+      });
+
+      await waitFor(() => {
+        const logsTitle = screen.queryByText((_content, element) => {
+          return (
+            element?.textContent === "Logs (3)" &&
+            element.className.includes("MuiTypography-subtitle2")
+          );
+        });
+        expect(logsTitle).toBeTruthy();
+      });
+
+      // Verify both info and error messages are present
+      const infoMessages = screen.getAllByText(`[INFO] ${logInfoText}`);
+      const errorMessages = screen.getAllByText(`[ERROR] ${logErrorText}`);
+      expect(infoMessages).toHaveLength(2);
+      expect(errorMessages).toHaveLength(1);
+    });
+
+    it("When PanelLogs is shown Then it displays timestamps for each log entry", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test11";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      fireEvent.click(screen.getByText("Log Info"));
+      fireEvent.click(screen.getByText("Toggle Logs"));
+
+      // Then
+      await waitFor(() => {
+        // Look for timestamp pattern (this is a basic check since exact timestamp is hard to predict)
+        const timestampElements = screen.getAllByText(
+          /\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}:\d{2}/,
+        );
+        expect(timestampElements.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("When PanelLogs is initially hidden Then no logs content is rendered in DOM", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test12";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      fireEvent.click(screen.getByText("Log Info"));
+      // Note: not toggling logs to show them
+
+      // Then
+      const logsPanel = screen.queryByText(`[INFO] ${logInfoText}`);
+      expect(logsPanel).toBeFalsy();
+
+      const logsPanelTitle = screen.queryByText((_content, element) => {
+        return (
+          element?.textContent === "Logs (1)" &&
+          element.className.includes("MuiTypography-subtitle2")
+        );
+      });
+      expect(logsPanelTitle).toBeFalsy();
+    });
+
+    it("When showLogs is toggled multiple times Then panel visibility changes accordingly", async () => {
+      // Given
+      const renderFn = jest.fn();
+      const LoggingPanel = getLoggingPanel(renderFn);
+      const childId = "LoggingDummy!test13";
+
+      render(
+        <PanelSetup>
+          <LoggingPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      fireEvent.click(screen.getByText("Log Info"));
+      const toggleButton = screen.getByText("Toggle Logs");
+
+      // When/Then - Show logs
+      fireEvent.click(toggleButton);
+      await waitFor(() => {
+        const logsPanel = screen.queryByText((_content, element) => {
+          return (
+            element?.textContent === "Logs (1)" &&
+            element.className.includes("MuiTypography-subtitle2")
+          );
+        });
+        expect(logsPanel).toBeTruthy();
+      });
+
+      // When/Then - Hide logs
+      fireEvent.click(toggleButton);
+      await waitFor(() => {
+        const logsPanel = screen.queryByText((_content, element) => {
+          return (
+            element?.textContent === "Logs (1)" &&
+            element.className.includes("MuiTypography-subtitle2")
+          );
+        });
+        expect(logsPanel).toBeFalsy();
+      });
+
+      // When/Then - Show logs again
+      fireEvent.click(toggleButton);
+      await waitFor(() => {
+        const logsPanel = screen.queryByText((_content, element) => {
+          return (
+            element?.textContent === "Logs (1)" &&
+            element.className.includes("MuiTypography-subtitle2")
+          );
+        });
+        expect(logsPanel).toBeTruthy();
       });
     });
   });

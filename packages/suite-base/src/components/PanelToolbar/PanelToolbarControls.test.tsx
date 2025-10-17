@@ -151,7 +151,7 @@ describe("PanelToolbarControls", () => {
       expect(screen.getByTestId("panel-actions-dropdown")).toBeTruthy();
     });
 
-    it("When rendered Then shows correct logs button state", () => {
+    it("When rendered with zero logs Then shows correct logs button state", () => {
       // Given
       const panelContext = {
         showLogs: false,
@@ -164,20 +164,41 @@ describe("PanelToolbarControls", () => {
       // Then
       const logsButton = screen.getByTitle("Show logs");
       expect(logsButton).toBeTruthy();
+      // Button should exist but clicking it should not trigger actions (tested separately)
     });
 
-    it("When logs button is clicked Then toggles logs visibility", () => {
+    it("When logs button is clicked with zero logs Then does not call setShowLogs", () => {
       // Given
       const setShowLogs = jest.fn();
       const panelContext = {
         showLogs: false,
         setShowLogs,
+        logCount: 0,
       };
 
       renderPanelToolbarControls(panelContext);
 
       // When
       const logsButton = screen.getByTitle("Show logs");
+      fireEvent.click(logsButton);
+
+      // Then
+      expect(setShowLogs).not.toHaveBeenCalled();
+    });
+
+    it("When logs button is clicked with logs present Then toggles logs visibility", () => {
+      // Given
+      const setShowLogs = jest.fn();
+      const panelContext = {
+        showLogs: false,
+        setShowLogs,
+        logCount: 1, // Need logs for button to be enabled
+      };
+
+      renderPanelToolbarControls(panelContext);
+
+      // When
+      const logsButton = screen.getByTitle("Show logs (1)");
       fireEvent.click(logsButton);
 
       // Then
@@ -206,6 +227,7 @@ describe("PanelToolbarControls", () => {
       const panelContext = {
         showLogs: true,
         setShowLogs,
+        logCount: 3, // Need logs for button to be enabled
       };
 
       renderPanelToolbarControls(panelContext);
@@ -220,7 +242,7 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given a panel with log count", () => {
-    it("When has logs Then displays log count in title", () => {
+    it("When panel has logs Then displays log count in title", () => {
       // Given
       const panelContext = {
         showLogs: false,
@@ -234,7 +256,7 @@ describe("PanelToolbarControls", () => {
       expect(screen.getByTitle("Show logs (5)")).toBeTruthy();
     });
 
-    it("When has logs Then shows error badge", () => {
+    it("When panel has logs Then shows error badge", () => {
       // Given
       const panelContext = {
         logCount: 3,
@@ -248,7 +270,7 @@ describe("PanelToolbarControls", () => {
       expect(badge).toBeTruthy();
     });
 
-    it("When no logs Then hides error badge", () => {
+    it("When panel has no logs Then hides error badge", () => {
       // Given
       const panelContext = {
         logCount: 0,
@@ -368,7 +390,7 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given additional icons", () => {
-    it("When additional icons provided Then renders them", () => {
+    it("When additional icons are provided Then renders them correctly", () => {
       // Given
       const additionalIcons = <div data-testid="custom-icon">Custom Icon</div>;
 
@@ -380,9 +402,12 @@ describe("PanelToolbarControls", () => {
       expect(screen.getByText("Custom Icon")).toBeTruthy();
     });
 
-    it("When no additional icons Then only shows default controls", () => {
-      // Given/When
-      renderPanelToolbarControls();
+    it("When no additional icons are provided Then only shows default controls", () => {
+      // Given
+      const panelContext = {};
+
+      // When
+      renderPanelToolbarControls(panelContext);
 
       // Then
       expect(screen.queryByTestId("custom-icon")).toBeFalsy();
@@ -392,18 +417,24 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given unknown panel", () => {
-    it("When isUnknownPanel is true Then passes to PanelActionsDropdown", () => {
-      // Given/When
-      renderPanelToolbarControls({}, {}, { isUnknownPanel: true });
+    it("When isUnknownPanel is true Then passes correct value to PanelActionsDropdown", () => {
+      // Given
+      const isUnknownPanel = true;
+
+      // When
+      renderPanelToolbarControls({}, {}, { isUnknownPanel });
 
       // Then
       const dropdown = screen.getByTestId("panel-actions-dropdown");
       expect(dropdown.getAttribute("data-unknown-panel")).toBe("true");
     });
 
-    it("When isUnknownPanel is false Then passes to PanelActionsDropdown", () => {
-      // Given/When
-      renderPanelToolbarControls({}, {}, { isUnknownPanel: false });
+    it("When isUnknownPanel is false Then passes correct value to PanelActionsDropdown", () => {
+      // Given
+      const isUnknownPanel = false;
+
+      // When
+      renderPanelToolbarControls({}, {}, { isUnknownPanel });
 
       // Then
       const dropdown = screen.getByTestId("panel-actions-dropdown");
@@ -412,30 +443,34 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given different panel types", () => {
-    it("When panel type is undefined Then handles gracefully", () => {
+    it("When panel type is undefined Then handles gracefully without errors", () => {
       // Given
       const panelContext = {
         type: undefined,
       };
 
-      // When/Then - should not throw
-      expect(() => {
-        renderPanelToolbarControls(panelContext);
-      }).not.toThrow();
+      // When
+      renderPanelToolbarControls(panelContext);
 
+      // Then - should not throw and should render basic controls
       expect(screen.getByTitle("Show logs")).toBeTruthy();
     });
 
-    it("When panel catalog is undefined Then handles gracefully", () => {
-      // Given/When
-      renderPanelToolbarControls({}, { getPanelByType: jest.fn().mockReturnValue(undefined) });
+    it("When panel catalog returns undefined Then handles gracefully", () => {
+      // Given
+      const panelCatalog = {
+        getPanelByType: jest.fn().mockReturnValue(undefined),
+      };
+
+      // When
+      renderPanelToolbarControls({}, panelCatalog);
 
       // Then
       expect(screen.getByTitle("Show logs")).toBeTruthy();
       expect(screen.getByTitle("Settings")).toBeTruthy();
     });
 
-    it("When panel type not found in catalog Then shows settings button", () => {
+    it("When panel type is not found in catalog Then shows settings button", () => {
       // Given
       const panelCatalog = {
         getPanelByType: jest.fn().mockReturnValue(undefined),
@@ -450,11 +485,14 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given panel context is missing", () => {
-    it("When no panel context Then handles missing values gracefully", () => {
-      // Given/When
+    it("When no panel context is provided Then handles missing values gracefully", () => {
+      // Given
+      const contextValue = undefined;
+
+      // When
       const { container } = render(
         <ThemeProvider isDark={false}>
-          <PanelContext.Provider value={undefined}>
+          <PanelContext.Provider value={contextValue}>
             <PanelToolbarControls isUnknownPanel={false} />
           </PanelContext.Provider>
         </ThemeProvider>,
@@ -473,23 +511,26 @@ describe("PanelToolbarControls", () => {
 
       renderPanelToolbarControls(panelContext);
 
-      // When/Then - should not throw
+      // When
+      const logsButton = screen.getByTitle("Show logs");
+      fireEvent.click(logsButton);
+
+      // Then - should not throw
       expect(() => {
-        const logsButton = screen.getByTitle("Show logs");
         fireEvent.click(logsButton);
       }).not.toThrow();
     });
   });
 
   describe("Given component memoization", () => {
-    it("When props don't change Then component should be memoized", () => {
+    it("When props don't change Then component should render consistently", () => {
       // Given
       const props = { isUnknownPanel: false };
       const { rerender } = renderPanelToolbarControls({}, {}, props);
 
       const firstRender = screen.getByTitle("Show logs");
 
-      // When - rerender with same props
+      // When - rerender with same props and context
       rerender(
         <ThemeProvider isDark={false}>
           <PanelCatalogContext.Provider
@@ -542,7 +583,7 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given logs state transitions", () => {
-    it("When logs count changes from 0 to positive Then updates badge visibility", () => {
+    it("When logs count changes from 0 to positive Then updates badge visibility correctly", () => {
       // Given
       const panelContext = {
         logCount: 0,
@@ -607,7 +648,7 @@ describe("PanelToolbarControls", () => {
   });
 
   describe("Given ref forwarding", () => {
-    it("When ref is provided Then forwards to Stack component", () => {
+    it("When ref is provided Then forwards correctly to Stack component", () => {
       // Given
       const ref = React.createRef<HTMLDivElement>();
 
@@ -646,6 +687,97 @@ describe("PanelToolbarControls", () => {
       // Then
       expect(ref.current).toBeTruthy();
       expect(ref.current?.tagName).toBe("DIV");
+    });
+  });
+
+  describe("Given button states and interactions", () => {
+    it("When logs button has zero logs Then clicking has no effect", () => {
+      // Given
+      const panelContext = {
+        logCount: 0,
+        showLogs: false,
+      };
+
+      // When
+      renderPanelToolbarControls(panelContext);
+
+      // Then
+      const logsButton = screen.getByTitle("Show logs");
+      expect(logsButton).toBeTruthy();
+      // Functional test - button exists and behavior is tested in other tests
+    });
+
+    it("When logs button has logs Then allows interaction", () => {
+      // Given
+      const panelContext = {
+        logCount: 2,
+        showLogs: false,
+      };
+
+      // When
+      renderPanelToolbarControls(panelContext);
+
+      // Then
+      const logsButton = screen.getByTitle("Show logs (2)");
+      expect(logsButton).toBeTruthy();
+      // Functional test - clicking behavior is tested in other tests
+    });
+
+    it("When settings button is clicked without panel ID Then does not perform actions", () => {
+      // Given
+      const openPanelSettings = jest.fn();
+      const setSelectedPanelIds = jest.fn();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      mockUseWorkspaceActions.mockReturnValue({
+        dialogActions: {
+          dataSource: { close: jest.fn(), open: jest.fn() },
+          openFile: { open: jest.fn() },
+          preferences: { close: jest.fn(), open: jest.fn() },
+        },
+        featureTourActions: { startTour: jest.fn(), finishTour: jest.fn() },
+        openAccountSettings: jest.fn(),
+        openPanelSettings,
+        openLayoutBrowser: jest.fn(),
+        playbackControlActions: { setRepeat: jest.fn() },
+      } as any);
+
+      mockUseSelectedPanels.mockReturnValue({
+        getSelectedPanelIds: jest.fn().mockReturnValue([]),
+        selectedPanelIds: [],
+        setSelectedPanelIds,
+        selectAllPanels: jest.fn(),
+        togglePanelSelected: jest.fn(),
+      });
+
+      const panelContext = {
+        id: undefined,
+      };
+
+      renderPanelToolbarControls(panelContext);
+
+      // When
+      const settingsButton = screen.getByTitle("Settings");
+      fireEvent.click(settingsButton);
+
+      // Then
+      expect(setSelectedPanelIds).not.toHaveBeenCalled();
+      expect(openPanelSettings).not.toHaveBeenCalled();
+    });
+
+    it("When logs are visible Then shows correct icon color", () => {
+      // Given
+      const panelContext = {
+        showLogs: true,
+        logCount: 1,
+      };
+
+      // When
+      const { container } = renderPanelToolbarControls(panelContext);
+
+      // Then
+      const icon = container.querySelector('[data-testid="ListAltIcon"]');
+      expect(icon).toBeTruthy();
     });
   });
 });

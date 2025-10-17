@@ -9,12 +9,25 @@ import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelLog } from "@lichtblick/suite-base/components/types";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-function renderPanelLogs(logs: PanelLog[], onClose: () => void = jest.fn()) {
+function renderPanelLogs(
+  logs: PanelLog[],
+  onClose: () => void = jest.fn(),
+  onClear: () => void = jest.fn(),
+) {
   return render(
     <ThemeProvider isDark={false}>
-      <PanelLogs logs={logs} onClose={onClose} />
+      <PanelLogs logs={logs} onClose={onClose} onClear={onClear} />
     </ThemeProvider>,
   );
+}
+
+function getLogCountText(count: number) {
+  return screen.getByText((_content, element) => {
+    return (
+      element?.textContent === `Logs (${count})` &&
+      element.className.includes("MuiTypography-subtitle2")
+    );
+  });
 }
 
 describe("PanelLogs", () => {
@@ -38,7 +51,7 @@ describe("PanelLogs", () => {
       // Then
       expect(screen.getByText("No logs yet.")).toBeTruthy();
       expect(screen.getByText("Errors and log messages will appear here.")).toBeTruthy();
-      expect(screen.getByText("Panel Logs (0)")).toBeTruthy();
+      expect(getLogCountText(0)).toBeTruthy();
     });
 
     it("When close button is clicked Then onClose is called", () => {
@@ -74,7 +87,7 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText("Panel Logs (2)")).toBeTruthy();
+      expect(getLogCountText(2)).toBeTruthy();
       expect(screen.getByText("[INFO] Test info message")).toBeTruthy();
       expect(screen.getByText("[INFO] Another info message")).toBeTruthy();
       expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
@@ -99,7 +112,7 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText("Panel Logs (1)")).toBeTruthy();
+      expect(getLogCountText(1)).toBeTruthy();
       expect(screen.getByText("[ERROR] Something went wrong")).toBeTruthy();
       expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
 
@@ -159,7 +172,7 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText("Panel Logs (3)")).toBeTruthy();
+      expect(getLogCountText(3)).toBeTruthy();
       expect(screen.getByText("[INFO] Info message")).toBeTruthy();
       expect(screen.getByText("[ERROR] Error occurred")).toBeTruthy();
       expect(screen.getByText("[INFO] Another info message")).toBeTruthy();
@@ -183,7 +196,7 @@ describe("PanelLogs", () => {
       const { container } = renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText("Panel Logs (20)")).toBeTruthy();
+      expect(getLogCountText(20)).toBeTruthy();
       // Check that the list container has overflow styling for scrolling
       const listContainer = container.querySelector('[class*="listContainer"]');
       expect(listContainer).toBeTruthy();
@@ -213,7 +226,12 @@ describe("PanelLogs", () => {
       // When
       render(
         <ThemeProvider isDark={false}>
-          <PanelLogs logs={logs} onClose={jest.fn()} initialHeight={initialHeight} />
+          <PanelLogs
+            logs={logs}
+            onClose={jest.fn()}
+            initialHeight={initialHeight}
+            onClear={jest.fn()}
+          />
         </ThemeProvider>,
       );
 
@@ -274,6 +292,114 @@ describe("PanelLogs", () => {
 
       // Then - should be constrained to min height (120px)
       expect(container?.getAttribute("style")).toContain("height: 120px");
+    });
+  });
+
+  describe("Given clear logs functionality", () => {
+    it("When no logs Then clear button is disabled", () => {
+      // Given
+      const logs: PanelLog[] = [];
+
+      // When
+      renderPanelLogs(logs);
+
+      // Then
+      const clearButton = screen.getByRole("button", { name: "Clear logs" });
+      expect(clearButton.hasAttribute("disabled")).toBe(true);
+    });
+
+    it("When logs exist Then clear button is enabled", () => {
+      // Given
+      const logs: PanelLog[] = [
+        {
+          timestamp: "2023-12-01 10:00:00",
+          message: "Test log",
+        },
+      ];
+
+      // When
+      renderPanelLogs(logs);
+
+      // Then
+      const clearButton = screen.getByRole("button", { name: "Clear logs" });
+      expect(clearButton.hasAttribute("disabled")).toBe(false);
+    });
+
+    it("When clear button is clicked Then onClear is called", () => {
+      // Given
+      const logs: PanelLog[] = [
+        {
+          timestamp: "2023-12-01 10:00:00",
+          message: "Test log",
+        },
+      ];
+      const onClear = jest.fn();
+
+      // When
+      renderPanelLogs(logs, jest.fn(), onClear);
+      const clearButton = screen.getByRole("button", { name: "Clear logs" });
+      fireEvent.click(clearButton);
+
+      // Then
+      expect(onClear).toHaveBeenCalledTimes(1);
+    });
+
+    it("When clear button is clicked multiple times Then onClear is called each time", () => {
+      // Given
+      const logs: PanelLog[] = [
+        {
+          timestamp: "2023-12-01 10:00:00",
+          message: "Test log",
+        },
+      ];
+      const onClear = jest.fn();
+
+      // When
+      renderPanelLogs(logs, jest.fn(), onClear);
+      const clearButton = screen.getByRole("button", { name: "Clear logs" });
+      fireEvent.click(clearButton);
+      fireEvent.click(clearButton);
+      fireEvent.click(clearButton);
+
+      // Then
+      expect(onClear).toHaveBeenCalledTimes(3);
+    });
+
+    it("When rendered Then clear button has correct icon", () => {
+      // Given
+      const logs: PanelLog[] = [
+        {
+          timestamp: "2023-12-01 10:00:00",
+          message: "Test log",
+        },
+      ];
+
+      // When
+      renderPanelLogs(logs);
+
+      // Then
+      const clearButton = screen.getByRole("button", { name: "Clear logs" });
+      const icon = clearButton.querySelector('[data-testid="DeleteSweepIcon"]');
+      expect(icon).toBeTruthy();
+    });
+
+    it("When rendered Then clear button appears before close button", () => {
+      // Given
+      const logs: PanelLog[] = [
+        {
+          timestamp: "2023-12-01 10:00:00",
+          message: "Test log",
+        },
+      ];
+
+      // When
+      const { container } = renderPanelLogs(logs);
+
+      // Then
+      const buttons = container.querySelectorAll('button[title*="logs"]');
+      expect(buttons).toHaveLength(2);
+      expect(buttons[0]?.getAttribute("title")).toBe("Clear logs");
+      expect(buttons[1]?.getAttribute("title")).toBe("Close logs");
     });
   });
 });
