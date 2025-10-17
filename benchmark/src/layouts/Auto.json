@@ -175,7 +175,9 @@
           "visible": true
         },
         "/global_costmap/costmap": {
-          "visible": true
+          "visible": true,
+          "colorMode": "costmap",
+          "frameLocked": false
         },
         "/evaluatepose": {
           "visible": true,
@@ -183,7 +185,8 @@
           "type": "arrow"
         },
         "/map": {
-          "visible": true
+          "visible": true,
+          "colorMode": "map"
         },
         "/pointcloud_clipped": {
           "visible": false,
@@ -208,10 +211,10 @@
           "colorMap": "turbo"
         },
         "/local_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/global_costmap/published_footprint": {
-          "visible": true
+          "visible": false
         },
         "/projected_map": {
           "visible": true
@@ -231,7 +234,7 @@
         },
         "/received_global_plan": {
           "visible": true,
-          "lineWidth": 0.215
+          "lineWidth": 0.05
         },
         "/set_pose": {
           "visible": true
@@ -240,10 +243,17 @@
           "visible": false
         },
         "/local_costmap/costmap": {
-          "visible": true
+          "visible": false,
+          "maxColor": "#00000036",
+          "minColor": "#ffffff2b"
         },
         "/local_plan": {
-          "visible": true
+          "visible": true,
+          "gradient": [
+            "#68f318ff",
+            "#ffc06b80"
+          ],
+          "lineWidth": 0.05
         },
         "/spatial_markers": {
           "visible": true
@@ -255,7 +265,8 @@
           "visible": true
         },
         "/tcp_planned_path_wo_offset": {
-          "visible": true
+          "visible": true,
+          "lineWidth": 0.2
         },
         "/cropped_pointcloud": {
           "visible": true
@@ -263,8 +274,9 @@
         "/seg/mani/lidar": {
           "visible": true,
           "colorField": "z",
-          "colorMode": "colormap",
-          "colorMap": "turbo"
+          "colorMode": "flat",
+          "colorMap": "turbo",
+          "stixelsEnabled": false
         },
         "/goal_generate/nav_pose": {
           "visible": true
