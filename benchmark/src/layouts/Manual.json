@@ -211,7 +211,7 @@
         "/robot_description": {
           "visible": true,
           "displayMode": "collision",
-          "fallbackColor": "#5e5858"
+          "fallbackColor": "#aeaeae"
         },
         "/genz/local_map": {
           "visible": false,

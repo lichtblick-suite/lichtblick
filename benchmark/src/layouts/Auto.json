@@ -4,13 +4,13 @@
       "layers": {},
       "cameraState": {
         "perspective": true,
-        "distance": 18.9999999999613,
-        "phi": 0.000057304686744168496,
-        "thetaOffset": 89.86512447436273,
+        "distance": 17.147499999965337,
+        "phi": 0.000057317405573920985,
+        "thetaOffset": -90.56205212297948,
         "targetOffset": [
-          0.679028794670972,
-          -0.5744270768939967,
-          -1.4048847919342152e-16
+          -1.1652253091258058,
+          -0.7386461071592326,
+          -4.3492227899652476e-17
         ],
         "target": [
           0,
@@ -202,7 +202,7 @@
         "/robot_description": {
           "visible": true,
           "displayMode": "collision",
-          "fallbackColor": "#c1bbbb"
+          "fallbackColor": "#aeaeae"
         },
         "/genz/local_map": {
           "visible": false,
@@ -273,6 +273,9 @@
           "visible": true
         },
         "/waypoint_markers": {
+          "visible": true
+        },
+        "/roi/accumulated": {
           "visible": true
         }
       },

@@ -119,16 +119,6 @@ const optimizedMainConfig = (params: ConfigParams) => (env: unknown, argv: any) 
     // Optimize for development
     devtool: "eval-cheap-module-source-map", // Faster than eval-cheap-module-source-map
 
-    // Enable experiments for better performance
-    experiments: {
-      ...baseConfig.experiments,
-      // Enable lazy compilation for faster initial builds
-      lazyCompilation: {
-        entries: false, // Don't lazy compile entry points
-        imports: true,  // Lazy compile dynamic imports
-      },
-    },
-
     // Optimize plugins for development
     plugins: [
       ...(baseConfig.plugins || []).filter(plugin => {
