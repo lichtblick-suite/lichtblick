@@ -12,6 +12,7 @@ import { signal } from "@lichtblick/den/async";
 import { fromSec } from "@lichtblick/rostime";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { MessageEvent, PlayerPresence, PlayerState } from "@lichtblick/suite-base/players/types";
+import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 
 import {
@@ -658,6 +659,126 @@ describe("IterablePlayer", () => {
 
     player.close();
     await player.isClosed;
+  });
+
+  it("should detect high frequency topics during initialization", async () => {
+    class HighFrequencyTopicSource implements IDeserializedIterableSource {
+      public readonly sourceType = "deserialized";
+      public async initialize(): Promise<Initialization> {
+        const topicStats = new Map();
+        topicStats.set("high-freq-topic", {
+          numMessages: 6000, // High message count
+          firstMessageTime: { sec: 0, nsec: 0 },
+          lastMessageTime: { sec: 1, nsec: 0 },
+        });
+
+        return {
+          start: { sec: 0, nsec: 0 },
+          end: { sec: 1, nsec: 0 },
+          topics: [{ name: "high-freq-topic", schemaName: "std_msgs/String" }],
+          topicStats,
+          profile: undefined,
+          alerts: [],
+          datatypes: new Map(),
+          publishersByTopic: new Map(),
+        };
+      }
+
+      public async *messageIterator() {}
+      public async getBackfillMessages() {
+        return [];
+      }
+    }
+
+    const source = new HighFrequencyTopicSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+
+    const playerStates = await store.done;
+    expect(_.last(playerStates)!.alerts).toEqual([
+      {
+        severity: "warn",
+        message: "High frequency topics detected",
+        error: expect.any(Error),
+      },
+    ]);
+
+    player.close();
+    await player.isClosed;
+
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("should only call isTopicHighFrequency once even with multiple high frequency topics", async () => {
+    const isTopicHighFrequencySpy = jest.spyOn(highFrequencyUtils, "isTopicHighFrequency");
+
+    class MultiHighFreqTopicsSource implements IDeserializedIterableSource {
+      public readonly sourceType = "deserialized";
+      public async initialize(): Promise<Initialization> {
+        const topicStats = new Map();
+        // Add multiple high frequency topics
+        topicStats.set("high-freq-topic-1", {
+          numMessages: 6000,
+          firstMessageTime: { sec: 0, nsec: 0 },
+          lastMessageTime: { sec: 1, nsec: 0 },
+        });
+        topicStats.set("high-freq-topic-2", {
+          numMessages: 7000,
+          firstMessageTime: { sec: 0, nsec: 0 },
+          lastMessageTime: { sec: 1, nsec: 0 },
+        });
+
+        return {
+          start: { sec: 0, nsec: 0 },
+          end: { sec: 1, nsec: 0 },
+          topics: [
+            { name: "high-freq-topic-1", schemaName: "std_msgs/String" },
+            { name: "high-freq-topic-2", schemaName: "std_msgs/String" },
+          ],
+          topicStats,
+          profile: undefined,
+          alerts: [],
+          datatypes: new Map(),
+          publishersByTopic: new Map(),
+        };
+      }
+
+      public async *messageIterator() {}
+      public async getBackfillMessages() {
+        return [];
+      }
+    }
+
+    const source = new MultiHighFreqTopicsSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+
+    await store.done;
+
+    expect(isTopicHighFrequencySpy).toHaveBeenCalledTimes(1);
+
+    player.close();
+    await player.isClosed;
+
+    isTopicHighFrequencySpy.mockRestore();
+
+    (console.warn as jest.Mock).mockClear();
   });
 
   it("should start a new iterator mid-tick when old iterator finishes", async () => {
