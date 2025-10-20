@@ -393,9 +393,6 @@ function parseFloatAttributeOptional(xml: Element, attribName: string): number |
 }
 
 function parseFloatContent(xml: Element): number {
-  if (xml.textContent == undefined) {
-    throw new Error(`expected float value in "${xml}"`);
-  }
   return parseFloat(xml.textContent);
 }
 

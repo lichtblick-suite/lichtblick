@@ -205,7 +205,7 @@ describe("StudioApp", () => {
     });
 
     const workspaceProps = screen.getByTestId("workspace-props");
-    const props = JSON.parse(workspaceProps.textContent!);
+    const props = JSON.parse(workspaceProps.textContent);
 
     expect(props.showCustomWindowControls).toBe(true);
     expect(props.isMaximized).toBe(false);

@@ -40,24 +40,25 @@ export type MessagePathFilter = {
   operator: OperatorType;
 };
 
+export type MessagePathName = {
+  type: "name";
+  /** Referenced field name */
+  name: string;
+  /**
+   * Original spelling of the field name in the input message path (for accurate reproduction in
+   * autocomplete and string length)
+   */
+  repr: string;
+};
+
+type MessagePathSlice = {
+  type: "slice";
+  start: number | { variableName: string; startLoc: number };
+  end: number | { variableName: string; startLoc: number };
+};
+
 // A parsed version of paths.
-export type MessagePathPart =
-  | {
-      type: "name";
-      /** Referenced field name */
-      name: string;
-      /**
-       * Original spelling of the field name in the input message path (for accurate reproduction in
-       * autocomplete and string length)
-       */
-      repr: string;
-    }
-  | {
-      type: "slice";
-      start: number | { variableName: string; startLoc: number };
-      end: number | { variableName: string; startLoc: number };
-    }
-  | MessagePathFilter;
+export type MessagePathPart = MessagePathName | MessagePathSlice | MessagePathFilter;
 
 export type MessagePath = {
   /** Referenced topic name */
