@@ -14603,7 +14603,7 @@ __metadata:
     jest: 30.0.5
     jest-environment-jsdom: 30.0.5
     license-checker: 25.0.1
-    playwright: 1.56.1
+    playwright: 1.55.1
     prettier: 3.3.2
     react-refresh: 0.14.2
     react-use: 17.6.0
@@ -16937,15 +16937,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.56.1":
-  version: 1.56.1
-  resolution: "playwright-core@npm:1.56.1"
-  bin:
-    playwright-core: cli.js
-  checksum: 170dff398b47da140182631ae025190248dabde7a5264335f54e238546a478f522ac9a620b31462e6e31c883273223bff8e883b502a699da490abe9741fb3b71
-  languageName: node
-  linkType: hard
-
 "playwright@npm:1.55.1":
   version: 1.55.1
   resolution: "playwright@npm:1.55.1"
@@ -16958,21 +16949,6 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 4935122ed687cd14861d64e6fdc79613d36d45f1363e911213a338da9993525d3872d7379300471f70209e1ad68ec91c0d65f0136e6c09c0775477943aaf7fb3
-  languageName: node
-  linkType: hard
-
-"playwright@npm:1.56.1":
-  version: 1.56.1
-  resolution: "playwright@npm:1.56.1"
-  dependencies:
-    fsevents: 2.3.2
-    playwright-core: 1.56.1
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  bin:
-    playwright: cli.js
-  checksum: e7537e7d5048a1a8544d7675b005196ba9db919edc3b6d46b92273ee6f20e37ada8991774c5df9ef5123ea4610978d582feb141c8a02f4cf256a6c0b224b8793
   languageName: node
   linkType: hard
 
