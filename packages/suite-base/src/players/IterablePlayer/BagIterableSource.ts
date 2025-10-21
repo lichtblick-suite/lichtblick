@@ -72,7 +72,7 @@ export class BagIterableSource implements ISerializedIterableSource {
           return bzip2.decompress(buffer, size, { small: false });
         },
         lz4: (buffer: Uint8Array, size: number) => {
-          return decompressLZ4(buffer, size);
+          return new Uint8Array(decompressLZ4(buffer, size));
         },
       },
     });
