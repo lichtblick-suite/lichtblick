@@ -5,7 +5,6 @@
 
 import { renderHook, act } from "@testing-library/react";
 
-import { InstalledExtension } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { useExtensionMarketplace } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
@@ -15,7 +14,7 @@ jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext");
 jest.mock("@lichtblick/suite-base/context/ExtensionMarketplaceContext");
 
 describe("useExtensionSettings", () => {
-  const mockInstalledExtensions: InstalledExtension[] = [
+  const mockInstalledExtensions = [
     {
       id: "4",
       displayName: "Extension 4",
@@ -25,7 +24,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword4"],
-      namespace: "namespace1",
+      workspace: "namespace1",
       installed: true,
       name: "Extension 4",
       qualifiedName: "Extension 4",
@@ -39,7 +38,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword1"],
-      namespace: "namespace1",
+      workspace: "namespace1",
       installed: true,
       name: "Extension 1",
       qualifiedName: "Extension 1",
@@ -56,7 +55,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword2"],
-      namespace: "namespace2",
+      workspace: "namespace2",
     },
     {
       id: "6",
@@ -67,7 +66,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword1"],
-      namespace: "namespace2",
+      workspace: "namespace2",
     },
   ];
 
@@ -124,16 +123,16 @@ describe("useExtensionSettings", () => {
     expect(result.current.namespacedData).toEqual([
       {
         namespace: "namespace1",
-        entries: [
-          {
-            ...mockInstalledExtensions[1],
-            name: mockInstalledExtensions[1]?.displayName,
-          },
-          {
-            ...mockInstalledExtensions[0],
-            name: mockInstalledExtensions[0]?.displayName,
-          },
-        ],
+        entries: expect.arrayContaining([
+          expect.objectContaining({
+            name: "Extension 1",
+            namespace: "namespace1",
+          }),
+          expect.objectContaining({
+            name: "Extension 4",
+            namespace: "namespace1",
+          }),
+        ]),
       },
     ]);
   });

@@ -7,7 +7,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { SnackbarProvider } from "notistack";
 
-import { NamespaceSelectionModal } from "@lichtblick/suite-base/components/NamespaceSelectionModal";
+import { WorkspaceSelectionModal } from "@lichtblick/suite-base/components/WorkspaceSelectionModal";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 const renderWithProviders = (component: React.ReactElement) => {
@@ -39,7 +39,7 @@ describe("NamespaceSelectionModal", () => {
       const props = { ...defaultProps };
 
       // When
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // Then
       expect(screen.getByText("Choose Installation Location")).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe("NamespaceSelectionModal", () => {
       };
 
       // When
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // Then
       expect(screen.getByText(/You are about to install 1 extensions/)).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe("NamespaceSelectionModal", () => {
       };
 
       // When
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // Then
       expect(screen.getByText(/You are about to install 1 layouts/)).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("NamespaceSelectionModal", () => {
     it("should call onSelect with 'local' namespace", () => {
       // Given
       const props = { ...defaultProps };
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // When
       fireEvent.click(screen.getByText("Local"));
@@ -104,7 +104,7 @@ describe("NamespaceSelectionModal", () => {
     it("should call onSelect with 'org' namespace", () => {
       // Given
       const props = { ...defaultProps };
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // When
       fireEvent.click(screen.getByText("Organization"));
@@ -120,7 +120,7 @@ describe("NamespaceSelectionModal", () => {
     it("should call onClose without calling onSelect", () => {
       // Given
       const props = { ...defaultProps };
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // When
       fireEvent.click(screen.getByText("Cancel"));
@@ -137,7 +137,7 @@ describe("NamespaceSelectionModal", () => {
       const props = { ...defaultProps, open: false };
 
       // When
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // Then
       expect(screen.queryByText("Choose Installation Location")).not.toBeInTheDocument();
@@ -150,7 +150,7 @@ describe("NamespaceSelectionModal", () => {
       const props = { ...defaultProps };
 
       // When
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // Then
       const localButton = screen.getByText("Local").closest("div[role='button']");
@@ -162,7 +162,7 @@ describe("NamespaceSelectionModal", () => {
     it("should update the selected option visually", () => {
       // Given
       const props = { ...defaultProps };
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // When
       fireEvent.click(screen.getByText("Organization"));
@@ -182,7 +182,7 @@ describe("NamespaceSelectionModal", () => {
       const props = { ...defaultProps };
 
       // When
-      renderWithProviders(<NamespaceSelectionModal {...props} />);
+      renderWithProviders(<WorkspaceSelectionModal {...props} />);
 
       // Then
       expect(screen.getByText("Local")).toBeInTheDocument();

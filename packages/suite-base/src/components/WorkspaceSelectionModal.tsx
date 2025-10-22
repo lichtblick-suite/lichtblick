@@ -17,27 +17,27 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { useStyles } from "@lichtblick/suite-base/components/NamespaceSelectionModal.style";
+import { useStyles } from "@lichtblick/suite-base/components/WorkspaceSelectionModal.style";
 import { Namespace } from "@lichtblick/suite-base/types";
 
-export interface NamespaceSelectionModalProps {
+export interface WorkspaceSelectionModalProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (namespace: Namespace) => void;
+  onSelect: (workspace: Namespace) => void;
   files: File[];
 }
 
-export function NamespaceSelectionModal({
+export function WorkspaceSelectionModal({
   open,
   onClose,
   onSelect,
   files,
-}: NamespaceSelectionModalProps): React.JSX.Element {
+}: WorkspaceSelectionModalProps): React.JSX.Element {
   const { classes } = useStyles();
-  const [selectedNamespace, setSelectedNamespace] = useState<Namespace>("local");
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Namespace>("local");
 
   const handleSelect = () => {
-    onSelect(selectedNamespace);
+    onSelect(selectedWorkspace);
     onClose();
   };
 
@@ -73,9 +73,9 @@ export function NamespaceSelectionModal({
         <List>
           <ListItem disablePadding>
             <ListItemButton
-              selected={selectedNamespace === "local"}
+              selected={selectedWorkspace === "local"}
               onClick={() => {
-                setSelectedNamespace("local");
+                setSelectedWorkspace("local");
               }}
             >
               <ListItemIcon>
@@ -89,9 +89,9 @@ export function NamespaceSelectionModal({
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton
-              selected={selectedNamespace === "org"}
+              selected={selectedWorkspace === "org"}
               onClick={() => {
-                setSelectedNamespace("org");
+                setSelectedWorkspace("org");
               }}
             >
               <ListItemIcon>

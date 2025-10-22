@@ -41,15 +41,15 @@ describe("ExtensionCatalogProvider", () => {
 
   function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
     const namespace: Namespace = "local";
-    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace });
+    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ workspace: namespace });
     const extensions: ExtensionInfo[] = [extensionInfo];
 
     const loadExtension = jest.fn().mockResolvedValue({
       raw: `module.exports = { activate: function() { return 1; } }`,
     } as LoadedExtension);
     const loaderDefault: IExtensionLoader = {
-      type: extensionInfo.namespace === "local" ? "browser" : "server",
-      namespace: extensionInfo.namespace!,
+      type: extensionInfo.workspace === "local" ? "browser" : "server",
+      workspace: extensionInfo.workspace!,
       getExtension: jest.fn().mockResolvedValue(extensionInfo),
       getExtensions: jest.fn().mockResolvedValue(extensions),
       installExtension: jest.fn().mockResolvedValue(extensionInfo),
@@ -83,14 +83,14 @@ describe("ExtensionCatalogProvider", () => {
   it("handles extensions with the same id in different loaders", async () => {
     const source1 = `module.exports = { activate: function() { return 1; } }`;
     const source2 = `module.exports = { activate: function() { return 2; } }`;
-    const extension1 = ExtensionBuilder.extensionInfo({ namespace: "local" });
-    const extension2 = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension1 = ExtensionBuilder.extensionInfo({ workspace: "local" });
+    const extension2 = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loadExtension1 = jest.fn().mockResolvedValue({ raw: source1 } as LoadedExtension);
     const loadExtension2 = jest.fn().mockResolvedValue({ raw: source2 } as LoadedExtension);
 
     const loader1: IExtensionLoader = {
       type: "browser",
-      namespace: extension1.namespace!,
+      workspace: extension1.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension1]),
       loadExtension: loadExtension1,
@@ -99,7 +99,7 @@ describe("ExtensionCatalogProvider", () => {
     };
     const loader2: IExtensionLoader = {
       type: "browser",
-      namespace: extension2.namespace!,
+      workspace: extension2.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension2]),
       loadExtension: loadExtension2,
@@ -130,10 +130,10 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
-    const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
-      namespace: extension.namespace!,
+      workspace: extension.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
       loadExtension,
@@ -151,7 +151,7 @@ describe("ExtensionCatalogProvider", () => {
       {
         converter: expect.any(Function),
         extensionId: expect.any(String),
-        extensionNamespace: extension.namespace,
+        extensionNamespace: extension.workspace,
         fromSchemaName: "from.Schema",
         toSchemaName: "to.Schema",
       },
@@ -179,10 +179,10 @@ describe("ExtensionCatalogProvider", () => {
     `;
 
     const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
-    const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
-      namespace: extension.namespace!,
+      workspace: extension.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
       loadExtension,
@@ -200,14 +200,14 @@ describe("ExtensionCatalogProvider", () => {
       {
         converter: expect.any(Function),
         extensionId: expect.any(String),
-        extensionNamespace: extension.namespace,
+        extensionNamespace: extension.workspace,
         fromSchemaName: `from.${schemaName1}`,
         toSchemaName: `to.${schemaName1}`,
       },
       {
         converter: expect.any(Function),
         extensionId: expect.any(String),
-        extensionNamespace: extension.namespace,
+        extensionNamespace: extension.workspace,
         fromSchemaName: `from.${schemaName2}`,
         toSchemaName: `to.${schemaName2}`,
       },
@@ -243,11 +243,11 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
     const loader: IExtensionLoader = {
       type: "browser",
-      namespace: extension.namespace!,
+      workspace: extension.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
       installExtension: jest.fn(),
@@ -282,10 +282,10 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
-    const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
-      namespace: extension.namespace!,
+      workspace: extension.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
       loadExtension,
@@ -324,10 +324,10 @@ describe("ExtensionCatalogProvider", () => {
     `;
 
     const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
-    const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
-      namespace: extension.namespace!,
+      workspace: extension.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
       loadExtension,
@@ -371,10 +371,10 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
-    const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+    const extension = ExtensionBuilder.extensionInfo({ workspace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
-      namespace: extension.namespace!,
+      workspace: extension.workspace!,
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([extension]),
       loadExtension,
@@ -505,7 +505,7 @@ describe("ExtensionCatalogProvider", () => {
 
       await act(async () => {
         const response = await result.current.installExtensions(
-          extensionInfo.namespace!,
+          extensionInfo.workspace!,
           extensionData,
         );
         expect(response.length).toBe(1);
@@ -533,7 +533,7 @@ describe("ExtensionCatalogProvider", () => {
       const { result, extensionInfo } = setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
-      const namespace: Namespace = extensionInfo.namespace!;
+      const namespace: Namespace = extensionInfo.workspace!;
 
       await act(async () => {
         await result.current.installExtensions(namespace, extensionData);
@@ -569,7 +569,7 @@ describe("ExtensionCatalogProvider", () => {
         toSchemaName: BasicBuilder.string(),
         converter: jest.fn(),
         extensionId: extensionInfo.id,
-        extensionNamespace: extensionInfo.namespace,
+        extensionNamespace: extensionInfo.workspace,
       };
       const topicAliasFunctions: TopicAliasFunctions = [
         { extensionId: extensionInfo.id, aliasFunction: jest.fn() },
@@ -591,7 +591,7 @@ describe("ExtensionCatalogProvider", () => {
           [panelName]: {
             extensionId: extensionInfo.id,
             extensionName: extensionInfo.qualifiedName,
-            extensionNamespace: extensionInfo.namespace,
+            extensionNamespace: extensionInfo.workspace,
             registration: {} as ExtensionPanelRegistration,
           },
         },
@@ -599,7 +599,7 @@ describe("ExtensionCatalogProvider", () => {
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       await act(async () => {
-        await result.current.installExtensions(extensionInfo.namespace!, extensionData);
+        await result.current.installExtensions(extensionInfo.workspace!, extensionData);
       });
 
       act(() => {
@@ -618,7 +618,7 @@ describe("ExtensionCatalogProvider", () => {
       expect(result.current.installedPanels![panelName]).toMatchObject({
         extensionId: extensionInfo.id,
         extensionName: extensionInfo.qualifiedName,
-        extensionNamespace: extensionInfo.namespace,
+        extensionNamespace: extensionInfo.workspace,
       });
       expect(result.current.installedTopicAliasFunctions).toHaveLength(1);
       expect(result.current.installedTopicAliasFunctions![0]).toMatchObject({

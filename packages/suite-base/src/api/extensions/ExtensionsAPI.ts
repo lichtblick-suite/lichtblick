@@ -15,16 +15,16 @@ import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 class ExtensionsAPI implements IExtensionAPI {
-  public readonly remoteNamespace: string;
+  public readonly workspace: string;
   private readonly extensionEndpoint = "extensions";
 
-  public constructor(namespace: string) {
-    this.remoteNamespace = namespace;
+  public constructor(workspace: string) {
+    this.workspace = workspace;
   }
 
   public async list(): Promise<ExtensionInfo[]> {
     const queryParams: ListExtensionsQueryParams = {
-      namespace: this.remoteNamespace,
+      workspace: this.workspace,
     };
 
     const { data } = await HttpService.get<IExtensionApiResponse[]>(
@@ -44,7 +44,7 @@ class ExtensionsAPI implements IExtensionAPI {
       return undefined;
     }
 
-    return ExtensionAdapter.toStoredExtension(data, this.remoteNamespace);
+    return ExtensionAdapter.toStoredExtension(data, this.workspace);
   }
 
   public async createOrUpdate(extension: ExtensionInfoSlug, file: File): Promise<StoredExtension> {
@@ -60,7 +60,7 @@ class ExtensionsAPI implements IExtensionAPI {
       keywords: extension.info.keywords,
       license: extension.info.license,
       name: extension.info.name,
-      namespace: this.remoteNamespace,
+      workspace: this.workspace,
       publisher: extension.info.publisher,
       qualifiedName: extension.info.qualifiedName,
       // readme: extension.info.readme,
@@ -81,7 +81,7 @@ class ExtensionsAPI implements IExtensionAPI {
       formData,
     );
 
-    return ExtensionAdapter.toStoredExtension(data, this.remoteNamespace);
+    return ExtensionAdapter.toStoredExtension(data, this.workspace);
   }
 
   public async remove(id: string): Promise<boolean> {

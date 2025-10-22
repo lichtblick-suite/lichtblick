@@ -20,7 +20,7 @@ import { useCallback, useLayoutEffect, useState } from "react";
 
 import Logger from "@lichtblick/log";
 import DropOverlay from "@lichtblick/suite-base/components/DropOverlay";
-import { NamespaceSelectionModal } from "@lichtblick/suite-base/components/NamespaceSelectionModal";
+import { WorkspaceSelectionModal } from "@lichtblick/suite-base/components/WorkspaceSelectionModal";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { Namespace } from "@lichtblick/suite-base/types";
@@ -44,16 +44,16 @@ type PendingFile = {
 export default function DocumentDropListener(props: DocumentDropListenerProps): React.JSX.Element {
   const [hovering, setHovering] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile | undefined>(undefined);
-  const [showNamespaceModal, setShowNamespaceModal] = useState(false);
+  const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
 
   const { onDrop: onDropProp, allowedExtensions } = props;
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const shouldShowNamespaceModal = useCallback((files: File[]): boolean => {
+  const shouldShowWorkspaceModal = useCallback((files: File[]): boolean => {
     const url = new URL(window.location.href);
-    const remoteNamespace = url.searchParams.get("namespace");
-    if (!remoteNamespace || !APP_CONFIG.apiUrl) {
+    const workspace = url.searchParams.get("workspace");
+    if (!workspace || !APP_CONFIG.apiUrl) {
       return false;
     }
 
@@ -66,23 +66,23 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
     return hasLayoutOrExtension;
   }, []);
 
-  const handleNamespaceSelection = useCallback(
-    (namespace: Namespace) => {
+  const handleWorkspaceSelection = useCallback(
+    (workspace: Namespace) => {
       if (pendingFiles) {
         onDropProp?.({
           files: pendingFiles.files,
           handles: pendingFiles.handles,
-          namespace,
+          namespace: workspace,
         });
         setPendingFiles(undefined);
       }
-      setShowNamespaceModal(false);
+      setShowWorkspaceModal(false);
     },
     [onDropProp, pendingFiles],
   );
 
   const handleModalClose = useCallback(() => {
-    setShowNamespaceModal(false);
+    setShowWorkspaceModal(false);
     setPendingFiles(undefined);
   }, []);
 
@@ -189,14 +189,14 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
       ev.preventDefault();
       ev.stopPropagation();
 
-      if (shouldShowNamespaceModal(filteredFiles)) {
+      if (shouldShowWorkspaceModal(filteredFiles)) {
         setPendingFiles({ files: filteredFiles, handles: filteredHandles });
-        setShowNamespaceModal(true);
+        setShowWorkspaceModal(true);
       } else {
         onDropProp?.({ files: filteredFiles, handles: filteredHandles, namespace: "local" });
       }
     },
-    [enqueueSnackbar, onDropProp, allowedExtensions, shouldShowNamespaceModal],
+    [enqueueSnackbar, onDropProp, allowedExtensions, shouldShowWorkspaceModal],
   );
 
   const onDragOver = useCallback(
@@ -239,9 +239,9 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
         onChange={(event) => {
           if (event.target.files) {
             const files = Array.from(event.target.files);
-            if (shouldShowNamespaceModal(files)) {
+            if (shouldShowWorkspaceModal(files)) {
               setPendingFiles({ files });
-              setShowNamespaceModal(true);
+              setShowWorkspaceModal(true);
             } else {
               props.onDrop?.({ files, namespace: "local" });
             }
@@ -252,10 +252,10 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
       />
       <DropOverlay open={hovering}>Drop a file here</DropOverlay>
       {pendingFiles && (
-        <NamespaceSelectionModal
-          open={showNamespaceModal}
+        <WorkspaceSelectionModal
+          open={showWorkspaceModal}
           onClose={handleModalClose}
-          onSelect={handleNamespaceSelection}
+          onSelect={handleWorkspaceSelection}
           files={pendingFiles.files}
         />
       )}

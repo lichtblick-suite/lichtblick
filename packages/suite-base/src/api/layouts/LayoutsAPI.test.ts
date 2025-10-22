@@ -10,7 +10,7 @@ jest.mock("@lichtblick/suite-base/services/http/HttpService");
 
 describe("LayoutsAPI", () => {
   let layoutsAPI: LayoutsAPI;
-  const mockNamespace = "test-namespace";
+  const mockWorkspace = "test-workspace";
 
   const createMockHttpResponse = <T>(data: T) => ({
     data,
@@ -19,12 +19,12 @@ describe("LayoutsAPI", () => {
   });
 
   beforeEach(() => {
-    layoutsAPI = new LayoutsAPI(mockNamespace);
+    layoutsAPI = new LayoutsAPI(mockWorkspace);
     jest.clearAllMocks();
   });
 
-  it("should initialize with correct namespace and baseUrl", () => {
-    expect(layoutsAPI.namespace).toBe(mockNamespace);
+  it("should initialize with correct workspace and baseUrl", () => {
+    expect(layoutsAPI.workspace).toBe(mockWorkspace);
     expect(layoutsAPI.baseUrl).toBe("layouts");
   });
 
@@ -52,7 +52,7 @@ describe("LayoutsAPI", () => {
 
       const result = await layoutsAPI.getLayouts();
 
-      expect(mockGet).toHaveBeenCalledWith("layouts", { namespace: mockNamespace });
+      expect(mockGet).toHaveBeenCalledWith("layouts", { workspace: mockWorkspace });
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("1");
@@ -112,7 +112,7 @@ describe("LayoutsAPI", () => {
         expect.objectContaining({
           layoutId: "new-layout",
           name: "New Layout",
-          namespace: mockNamespace,
+          workspace: mockWorkspace,
         }),
       );
 

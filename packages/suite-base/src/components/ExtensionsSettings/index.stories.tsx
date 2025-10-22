@@ -43,7 +43,7 @@ const installedExtensions: ExtensionInfo[] = [
     license: "MIT",
     version: "1.2.10",
     keywords: ["storybook", "testing"],
-    namespace: "org",
+    workspace: "org",
     readme: "Readme for extension",
     changelog: "Changes effectuated on extension",
   },
@@ -58,7 +58,7 @@ const installedExtensions: ExtensionInfo[] = [
     license: "MIT",
     version: "1.2.10",
     keywords: ["storybook", "testing"],
-    namespace: "local",
+    workspace: "local",
     readme: "Readme for extension",
     changelog: "Changes effectuated on extension",
   },
@@ -83,7 +83,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
 
 const MockExtensionLoader: IExtensionLoader = {
   type: "browser",
-  namespace: "local",
+  workspace: "local",
   getExtension: async () => installedExtensions[0],
   getExtensions: async () => installedExtensions,
   loadExtension: async (_id: string) => ({ raw: "" }),

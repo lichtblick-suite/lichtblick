@@ -19,7 +19,7 @@ export default class ExtensionBuilder {
       keywords: BasicBuilder.strings(),
       license: BasicBuilder.string(),
       name: BasicBuilder.string(),
-      namespace: BasicBuilder.sample(["local", "org"] as Namespace[]),
+      workspace: BasicBuilder.sample(["local", "org"] as Namespace[]),
       publisher: BasicBuilder.string(),
       qualifiedName: BasicBuilder.string(),
       version: BasicBuilder.string(),
@@ -52,7 +52,7 @@ export default class ExtensionBuilder {
 
   public static extensionInfoSlug(props: Partial<ExtensionInfoSlug> = {}): ExtensionInfoSlug {
     return defaults<ExtensionInfoSlug>(props, {
-      remoteNamespace: BasicBuilder.string(),
+      workspace: BasicBuilder.string(),
       info: ExtensionBuilder.extensionInfo(),
     });
   }

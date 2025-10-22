@@ -19,7 +19,7 @@ jest.mock("@lichtblick/suite-base/constants/config", () => ({
 
 describe("ExtensionsAPI", () => {
   let extensionsAPI: ExtensionsAPI;
-  const remoteNamespace = BasicBuilder.string();
+  const workspace = BasicBuilder.string();
 
   const createMockHttpResponse = <T>(data: T) => ({
     data,
@@ -28,12 +28,12 @@ describe("ExtensionsAPI", () => {
   });
 
   beforeEach(() => {
-    extensionsAPI = new ExtensionsAPI(remoteNamespace);
+    extensionsAPI = new ExtensionsAPI(workspace);
     jest.clearAllMocks();
   });
 
   it("should initialize with correct slug", () => {
-    expect(extensionsAPI.remoteNamespace).toBe(remoteNamespace);
+    expect(extensionsAPI.workspace).toBe(workspace);
   });
 
   describe("list", () => {
@@ -49,7 +49,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.list();
 
       // Then
-      expect(mockGet).toHaveBeenCalledWith("extensions", { namespace: remoteNamespace });
+      expect(mockGet).toHaveBeenCalledWith("extensions", {  workspace });
       expect(result.length).toBe(extensions.length);
     });
 
@@ -71,7 +71,7 @@ describe("ExtensionsAPI", () => {
     it("should fetch extension by id", async () => {
       // Given
       const extension: StoredExtension = ExtensionBuilder.storedExtension({
-        remoteNamespace,
+        workspace,
       });
 
       // Create a proper IExtensionApiResponse mock
@@ -89,7 +89,7 @@ describe("ExtensionsAPI", () => {
         name: extension.info.name,
         publisher: extension.info.publisher,
         qualifiedName: extension.info.qualifiedName,
-        scope: extension.info.namespace,
+        scope: extension.info.workspace,
         version: extension.info.version,
         changelog: extension.info.changelog,
         readme: extension.info.readme,
@@ -109,10 +109,10 @@ describe("ExtensionsAPI", () => {
           ...apiResponse,
           id: apiResponse.extensionId,
           externalId: apiResponse.id,
-          namespace: apiResponse.scope,
+          workspace: apiResponse.scope,
         },
         content: new Uint8Array(),
-        remoteNamespace,
+        workspace,
         fileId: apiResponse.fileId,
         externalId: apiResponse.id,
       } as StoredExtension);
@@ -136,13 +136,13 @@ describe("ExtensionsAPI", () => {
     it("should create or update extension", async () => {
       // Given
       const extension: ExtensionInfoSlug = ExtensionBuilder.extensionInfoSlug({
-        remoteNamespace,
+        workspace,
       });
 
       const mockFile = new File([BasicBuilder.string()], "test.zip", { type: "application/zip" });
       const mockApiResponse: StoredExtension = ExtensionBuilder.storedExtension({
         info: extension.info,
-        remoteNamespace,
+        workspace,
       });
       const mockHttpService = jest.mocked(HttpService);
       const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
@@ -156,7 +156,7 @@ describe("ExtensionsAPI", () => {
       expect(result).toEqual({
         info: mockApiResponse,
         content: new Uint8Array(),
-        remoteNamespace,
+        workspace,
         fileId: mockApiResponse.fileId,
       });
     });

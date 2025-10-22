@@ -12,13 +12,13 @@ export interface IExtensionAPI {
   loadContent(fileId: string): Promise<Uint8Array | undefined>;
   list(): Promise<ExtensionInfo[]>;
   remove(id: string): Promise<boolean>;
-  readonly remoteNamespace: string;
+  readonly workspace: string;
 }
 
-export type ExtensionInfoSlug = Pick<StoredExtension, "info" | "remoteNamespace">;
+export type ExtensionInfoSlug = Pick<StoredExtension, "info" | "workspace">;
 
 export type ListExtensionsQueryParams = {
-  namespace?: string;
+  workspace?: string;
 };
 
 type RemoteExtension = Pick<
