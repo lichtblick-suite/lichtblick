@@ -65,6 +65,8 @@ import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
 
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
+
 const log = Logger.getLogger(__filename);
 
 type VersionedPanelConfig = Record<string, unknown> & { [VERSION_CONFIG_KEY]: number };
@@ -314,6 +316,8 @@ function PanelExtensionAdapter(
 
   type PartialPanelExtensionContext = Omit<BuiltinPanelExtensionContext, "panelElement">;
 
+  const messagePipelineState = useMessagePipelineGetter();
+
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
       addPanel: ({ position, type, updateIfExists, getState }) => {
@@ -343,8 +347,16 @@ function PanelExtensionAdapter(
       saveConfig(
         produce<{ topics: Record<string, unknown> }>((draft) => {
           const [category, topicName] = path;
+
           if (category === "topics" && topicName != undefined) {
-            extensionsSettings[panelName]?.[topicName]?.handler(action, draft.topics[topicName]);
+            const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
+            const schemaName = topicToSchemaNameMap[topicName];
+
+            if (schemaName == undefined) {
+              return;
+            }
+
+            extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
           }
         }),
       );
