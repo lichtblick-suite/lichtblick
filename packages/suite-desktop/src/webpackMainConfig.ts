@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import dotenv from "dotenv";
-import { ESBuildMinifyPlugin } from "esbuild-loader";
+import { EsbuildPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration, DefinePlugin, ResolveOptions } from "webpack";
@@ -76,7 +76,7 @@ export const webpackMainConfig =
       optimization: {
         removeAvailableModules: true,
         minimizer: [
-          new ESBuildMinifyPlugin({
+          new EsbuildPlugin({
             target: "es2022",
             minify: true,
           }),
