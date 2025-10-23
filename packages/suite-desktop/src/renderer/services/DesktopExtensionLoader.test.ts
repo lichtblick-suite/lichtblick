@@ -170,7 +170,7 @@ describe("DesktopExtensionLoader", () => {
         qualifiedName: displayName,
         readme: extension.readme,
         changelog: extension.changelog,
-      } as ExtensionInfo);
+      });
     });
 
     it("should throw an error if bridge is undefined", async () => {
