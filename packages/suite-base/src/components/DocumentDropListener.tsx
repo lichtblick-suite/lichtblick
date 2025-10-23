@@ -44,13 +44,13 @@ type PendingFile = {
 export default function DocumentDropListener(props: DocumentDropListenerProps): React.JSX.Element {
   const [hovering, setHovering] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile | undefined>(undefined);
-  const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
+  const [showNamespaceModal, setShowNamespaceModal] = useState(false);
 
   const { onDrop: onDropProp, allowedExtensions } = props;
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const shouldShowWorkspaceModal = useCallback((files: File[]): boolean => {
+  const shouldShowNamespaceModal = useCallback((files: File[]): boolean => {
     const url = new URL(window.location.href);
     const workspace = url.searchParams.get("workspace");
     if (!workspace || !APP_CONFIG.apiUrl) {
@@ -66,23 +66,23 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
     return hasLayoutOrExtension;
   }, []);
 
-  const handleWorkspaceSelection = useCallback(
-    (workspace: Namespace) => {
+  const handleNamespaceSelection = useCallback(
+    (namespace: Namespace) => {
       if (pendingFiles) {
         onDropProp?.({
           files: pendingFiles.files,
           handles: pendingFiles.handles,
-          namespace: workspace,
+          namespace,
         });
         setPendingFiles(undefined);
       }
-      setShowWorkspaceModal(false);
+      setShowNamespaceModal(false);
     },
     [onDropProp, pendingFiles],
   );
 
   const handleModalClose = useCallback(() => {
-    setShowWorkspaceModal(false);
+    setShowNamespaceModal(false);
     setPendingFiles(undefined);
   }, []);
 
@@ -189,14 +189,14 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
       ev.preventDefault();
       ev.stopPropagation();
 
-      if (shouldShowWorkspaceModal(filteredFiles)) {
+      if (shouldShowNamespaceModal(filteredFiles)) {
         setPendingFiles({ files: filteredFiles, handles: filteredHandles });
-        setShowWorkspaceModal(true);
+        setShowNamespaceModal(true);
       } else {
         onDropProp?.({ files: filteredFiles, handles: filteredHandles, namespace: "local" });
       }
     },
-    [enqueueSnackbar, onDropProp, allowedExtensions, shouldShowWorkspaceModal],
+    [enqueueSnackbar, onDropProp, allowedExtensions, shouldShowNamespaceModal],
   );
 
   const onDragOver = useCallback(
@@ -239,9 +239,9 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
         onChange={(event) => {
           if (event.target.files) {
             const files = Array.from(event.target.files);
-            if (shouldShowWorkspaceModal(files)) {
+            if (shouldShowNamespaceModal(files)) {
               setPendingFiles({ files });
-              setShowWorkspaceModal(true);
+              setShowNamespaceModal(true);
             } else {
               props.onDrop?.({ files, namespace: "local" });
             }
@@ -253,9 +253,9 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
       <DropOverlay open={hovering}>Drop a file here</DropOverlay>
       {pendingFiles && (
         <NamespaceSelectionModal
-          open={showWorkspaceModal}
+          open={showNamespaceModal}
           onClose={handleModalClose}
-          onSelect={handleWorkspaceSelection}
+          onSelect={handleNamespaceSelection}
           files={pendingFiles.files}
         />
       )}
