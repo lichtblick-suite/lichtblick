@@ -4,7 +4,7 @@
 import { ExtensionAdapter } from "@lichtblick/suite-base/api/extensions/ExtensionAdapter";
 import {
   CreateOrUpdateBody,
-  ExtensionInfoSlug,
+  ExtensionInfoWorkspace,
   IExtensionAPI,
   IExtensionApiResponse,
   ListExtensionsQueryParams,
@@ -47,7 +47,10 @@ class ExtensionsAPI implements IExtensionAPI {
     return ExtensionAdapter.toStoredExtension(data, this.workspace);
   }
 
-  public async createOrUpdate(extension: ExtensionInfoSlug, file: File): Promise<StoredExtension> {
+  public async createOrUpdate(
+    extension: ExtensionInfoWorkspace,
+    file: File,
+  ): Promise<StoredExtension> {
     const formData = new FormData();
     formData.append("file", file);
 

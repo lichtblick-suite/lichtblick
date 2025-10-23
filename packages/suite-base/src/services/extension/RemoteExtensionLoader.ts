@@ -26,11 +26,11 @@ export class RemoteExtensionLoader implements IExtensionLoader {
   public readonly type: TypeExtensionLoader = "server";
   public workspace: string;
 
-  public constructor(namespace: Namespace, slug: string) {
+  public constructor(namespace: Namespace, workspace: string) {
     this.namespace = namespace;
-    this.workspace = slug;
+    this.workspace = workspace;
 
-    this.#remote = new ExtensionsAPI(slug);
+    this.#remote = new ExtensionsAPI(workspace);
   }
 
   public async getExtension(id: string): Promise<ExtensionInfo | undefined> {

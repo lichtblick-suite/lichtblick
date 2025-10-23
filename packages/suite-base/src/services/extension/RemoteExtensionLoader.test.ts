@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import JSZip from "jszip";
-import { names } from "tinycolor2";
 
 import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
@@ -46,7 +45,7 @@ describe("RemoteExtensionLoader", () => {
   });
 
   describe("Given a RemoteExtensionLoader instance", () => {
-    it("When constructing the loader, Then should initialize with correct namespace and slug", () => {
+    it("When constructing the loader, Then should initialize with correct namespace and workspace", () => {
       // Given
       // When
       // Then

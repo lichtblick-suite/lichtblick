@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { ExtensionInfoSlug } from "@lichtblick/suite-base/api/extensions/types";
+import { ExtensionInfoWorkspace } from "@lichtblick/suite-base/api/extensions/types";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
@@ -32,7 +32,7 @@ describe("ExtensionsAPI", () => {
     jest.clearAllMocks();
   });
 
-  it("should initialize with correct slug", () => {
+  it("should initialize with correct workspace", () => {
     expect(extensionsAPI.workspace).toBe(workspace);
   });
 
@@ -135,7 +135,7 @@ describe("ExtensionsAPI", () => {
   describe("createOrUpdate", () => {
     it("should create or update extension", async () => {
       // Given
-      const extension: ExtensionInfoSlug = ExtensionBuilder.extensionInfoSlug({
+      const extension: ExtensionInfoWorkspace = ExtensionBuilder.extensionInfoSlug({
         workspace,
       });
 
