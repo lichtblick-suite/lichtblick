@@ -17,22 +17,22 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { useStyles } from "@lichtblick/suite-base/components/WorkspaceSelectionModal.style";
+import { useStyles } from "@lichtblick/suite-base/components/NamespaceSelectionModal.style";
 import { Namespace } from "@lichtblick/suite-base/types";
 
-export interface WorkspaceSelectionModalProps {
+export interface NamespaceSelectionModalProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (workspace: Namespace) => void;
+  onSelect: (namespace: Namespace) => void;
   files: File[];
 }
 
-export function WorkspaceSelectionModal({
+export function NamespaceSelectionModal({
   open,
   onClose,
   onSelect,
   files,
-}: WorkspaceSelectionModalProps): React.JSX.Element {
+}: NamespaceSelectionModalProps): React.JSX.Element {
   const { classes } = useStyles();
   const [selectedWorkspace, setSelectedWorkspace] = useState<Namespace>("local");
 

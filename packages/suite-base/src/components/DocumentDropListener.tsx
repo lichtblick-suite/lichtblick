@@ -20,7 +20,7 @@ import { useCallback, useLayoutEffect, useState } from "react";
 
 import Logger from "@lichtblick/log";
 import DropOverlay from "@lichtblick/suite-base/components/DropOverlay";
-import { WorkspaceSelectionModal } from "@lichtblick/suite-base/components/WorkspaceSelectionModal";
+import { NamespaceSelectionModal } from "@lichtblick/suite-base/components/NamespaceSelectionModal";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { Namespace } from "@lichtblick/suite-base/types";
@@ -252,7 +252,7 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
       />
       <DropOverlay open={hovering}>Drop a file here</DropOverlay>
       {pendingFiles && (
-        <WorkspaceSelectionModal
+        <NamespaceSelectionModal
           open={showWorkspaceModal}
           onClose={handleModalClose}
           onSelect={handleWorkspaceSelection}
