@@ -135,7 +135,7 @@ describe("ExtensionsAPI", () => {
   describe("createOrUpdate", () => {
     it("should create or update extension", async () => {
       // Given
-      const extension: ExtensionInfoWorkspace = ExtensionBuilder.extensionInfoSlug({
+      const extension: ExtensionInfoWorkspace = ExtensionBuilder.extensionInfoWorkspace({
         workspace,
       });
 

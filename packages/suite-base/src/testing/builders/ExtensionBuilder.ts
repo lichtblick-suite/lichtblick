@@ -50,7 +50,7 @@ export default class ExtensionBuilder {
     });
   }
 
-  public static extensionInfoSlug(
+  public static extensionInfoWorkspace(
     props: Partial<ExtensionInfoWorkspace> = {},
   ): ExtensionInfoWorkspace {
     return defaults<ExtensionInfoWorkspace>(props, {
