@@ -49,7 +49,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.list();
 
       // Then
-      expect(mockGet).toHaveBeenCalledWith("extensions", {  workspace });
+      expect(mockGet).toHaveBeenCalledWith("extensions", { workspace });
       expect(result.length).toBe(extensions.length);
     });
 

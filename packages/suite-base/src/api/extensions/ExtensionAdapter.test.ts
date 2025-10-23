@@ -78,11 +78,7 @@ describe("ExtensionAdapter", () => {
       const customContent = new Uint8Array([1, 2, 3, 4]);
 
       // When
-      const result = ExtensionAdapter.toStoredExtension(
-        apiResponse,
-        workspace,
-        customContent,
-      );
+      const result = ExtensionAdapter.toStoredExtension(apiResponse, workspace, customContent);
 
       // Then
       expect(result).toEqual({

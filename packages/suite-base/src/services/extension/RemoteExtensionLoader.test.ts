@@ -49,8 +49,8 @@ describe("RemoteExtensionLoader", () => {
       // Given
       // When
       // Then
-      expect(loader.namespace).toBe(mockNamespace);
-      expect(loader.remoteNamespace).toBe(mockSlug);
+      expect(loader.workspace).toBe(mockNamespace);
+      expect(loader.remoteWorkspace).toBe(mockSlug);
       expect(MockedExtensionsAPI).toHaveBeenCalledWith(mockSlug);
     });
   });
@@ -185,7 +185,7 @@ describe("RemoteExtensionLoader", () => {
           info: expect.objectContaining({
             id: `Test Publisher.${mockPackageJson.name}`,
             name: mockPackageJson.name,
-            namespace: mockNamespace,
+            workspace: mockNamespace,
             publisher: mockPackageJson.publisher,
             qualifiedName: `org:Test Publisher:${mockPackageJson.name}`,
           }),
