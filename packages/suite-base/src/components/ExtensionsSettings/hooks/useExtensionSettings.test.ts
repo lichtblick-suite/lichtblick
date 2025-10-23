@@ -3,8 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 
+import { InstalledExtension } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { useExtensionMarketplace } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
@@ -14,7 +15,7 @@ jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext");
 jest.mock("@lichtblick/suite-base/context/ExtensionMarketplaceContext");
 
 describe("useExtensionSettings", () => {
-  const mockInstalledExtensions = [
+  const mockInstalledExtensions: InstalledExtension[] = [
     {
       id: "4",
       displayName: "Extension 4",
@@ -124,14 +125,14 @@ describe("useExtensionSettings", () => {
       {
         namespace: "namespace1",
         entries: expect.arrayContaining([
-          expect.objectContaining({
-            name: "Extension 1",
-            namespace: "namespace1",
-          }),
-          expect.objectContaining({
-            name: "Extension 4",
-            namespace: "namespace1",
-          }),
+          {
+            ...mockInstalledExtensions[1],
+            name: mockInstalledExtensions[1]?.displayName,
+          },
+          {
+            ...mockInstalledExtensions[0],
+            name: mockInstalledExtensions[0]?.displayName,
+          },
         ]),
       },
     ]);
