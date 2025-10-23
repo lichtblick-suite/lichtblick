@@ -41,7 +41,7 @@ describe("ExtensionCatalogProvider", () => {
 
   function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
     const namespace: Namespace = "local";
-    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace: namespace });
+    const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace });
     const extensions: ExtensionInfo[] = [extensionInfo];
 
     const loadExtension = jest.fn().mockResolvedValue({
