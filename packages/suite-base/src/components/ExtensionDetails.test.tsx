@@ -49,7 +49,7 @@ describe("ExtensionDetails Component", () => {
   const mockGetMarkdown = jest.fn();
 
   const mockExtension: ExtensionMarketplaceDetail = ExtensionBuilder.extensionMarketplaceDetail({
-    workspace: "local",
+    namespace: "local",
   });
 
   beforeEach(() => {
@@ -239,7 +239,7 @@ describe("ExtensionDetails Component", () => {
 
     await waitFor(() => {
       expect(mockUninstallExtension).toHaveBeenCalledWith(
-        mockExtension.workspace,
+        mockExtension.namespace,
         mockExtension.id,
       );
       expect(mockEnqueueSnackbar).toHaveBeenCalledWith(

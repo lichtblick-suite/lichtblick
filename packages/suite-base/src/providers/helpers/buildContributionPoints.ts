@@ -65,7 +65,7 @@ export function buildContributionPoints(
       panels[panelId] = {
         extensionId: extension.id,
         extensionName: extension.qualifiedName,
-        extensionNamespace: extension.workspace,
+        extensionNamespace: extension.namespace,
         registration,
       };
     },
@@ -77,7 +77,7 @@ export function buildContributionPoints(
 
       messageConverters.push({
         ...messageConverter,
-        extensionNamespace: extension.workspace,
+        extensionNamespace: extension.namespace,
         extensionId: extension.id,
       } as MessageConverter);
 

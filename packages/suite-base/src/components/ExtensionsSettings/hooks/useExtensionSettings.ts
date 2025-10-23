@@ -32,7 +32,7 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
 
   const groupedMarketplaceEntries = useMemo(() => {
     const entries = marketplaceEntries.value ?? [];
-    return _.groupBy(entries, (entry) => entry.workspace ?? "default");
+    return _.groupBy(entries, (entry) => entry.namespace ?? "default");
   }, [marketplaceEntries]);
 
   const groupedMarketplaceData = useMemo(() => {
@@ -48,7 +48,7 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
     return (installed ?? []).map((entry) => {
       const marketplaceEntry = marketplaceMap[entry.id];
       if (marketplaceEntry != undefined) {
-        return { ...marketplaceEntry, namespace: entry.workspace };
+        return { ...marketplaceEntry, namespace: entry.namespace };
       }
 
       return {
@@ -62,7 +62,7 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
         license: entry.license,
         version: entry.version,
         keywords: entry.keywords,
-        namespace: entry.workspace,
+        namespace: entry.namespace,
         qualifiedName: entry.qualifiedName,
         readme: entry.readme,
         changelog: entry.changelog,

@@ -51,10 +51,10 @@ export function WebRoot(props: {
     new IdbExtensionLoader("local"),
   ];
   const url = new URL(window.location.href);
-  const remoteNamespace = url.searchParams.get("namespace");
+  const workspace = url.searchParams.get("workspace");
 
-  if (remoteNamespace && APP_CONFIG.apiUrl) {
-    defaultExtensionLoaders.push(new RemoteExtensionLoader("org", remoteNamespace));
+  if (workspace && APP_CONFIG.apiUrl) {
+    defaultExtensionLoaders.push(new RemoteExtensionLoader("org", workspace));
   }
   const [extensionLoaders] = useState(() => defaultExtensionLoaders);
 

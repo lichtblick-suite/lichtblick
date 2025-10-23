@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import JSZip from "jszip";
+import { names } from "tinycolor2";
 
 import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
@@ -24,7 +25,7 @@ describe("RemoteExtensionLoader", () => {
   let mockExtensionsAPI: jest.Mocked<ExtensionsAPI>;
   let loader: RemoteExtensionLoader;
   const mockNamespace: Namespace = "org";
-  const mockSlug = BasicBuilder.string();
+  const workspace = BasicBuilder.string();
 
   beforeEach(() => {
     mockExtensionsAPI = {
@@ -33,11 +34,11 @@ describe("RemoteExtensionLoader", () => {
       loadContent: jest.fn(),
       createOrUpdate: jest.fn(),
       remove: jest.fn(),
-      remoteNamespace: mockSlug,
+      workspace,
     } as any;
 
     MockedExtensionsAPI.mockImplementation(() => mockExtensionsAPI);
-    loader = new RemoteExtensionLoader(mockNamespace, mockSlug);
+    loader = new RemoteExtensionLoader(mockNamespace, workspace);
   });
 
   afterEach(() => {
@@ -49,9 +50,9 @@ describe("RemoteExtensionLoader", () => {
       // Given
       // When
       // Then
-      expect(loader.workspace).toBe(mockNamespace);
-      expect(loader.remoteWorkspace).toBe(mockSlug);
-      expect(MockedExtensionsAPI).toHaveBeenCalledWith(mockSlug);
+      expect(loader.namespace).toBe(mockNamespace);
+      expect(loader.workspace).toBe(workspace);
+      expect(MockedExtensionsAPI).toHaveBeenCalledWith(workspace);
     });
   });
 
@@ -158,6 +159,7 @@ describe("RemoteExtensionLoader", () => {
       // Given
       const mockPackageJson = {
         name: "test-extension",
+        namespace: mockNamespace,
         publisher: "Test Publisher!@#",
         version: BasicBuilder.string(),
         description: BasicBuilder.string(),
@@ -185,11 +187,11 @@ describe("RemoteExtensionLoader", () => {
           info: expect.objectContaining({
             id: `Test Publisher.${mockPackageJson.name}`,
             name: mockPackageJson.name,
-            workspace: mockNamespace,
+            namespace: mockNamespace,
             publisher: mockPackageJson.publisher,
             qualifiedName: `org:Test Publisher:${mockPackageJson.name}`,
           }),
-          remoteNamespace: mockSlug,
+          workspace,
         }),
         mockFile,
       );

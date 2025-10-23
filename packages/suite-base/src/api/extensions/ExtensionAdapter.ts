@@ -15,7 +15,7 @@ export class ExtensionAdapter {
       ...apiResponse,
       id: apiResponse.extensionId,
       externalId: apiResponse.id,
-      workspace: apiResponse.scope,
+      namespace: apiResponse.scope,
     };
   }
 

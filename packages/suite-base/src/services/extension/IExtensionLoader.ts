@@ -26,7 +26,7 @@ export type InstallExtensionProps = {
  * from a particular namespace.
  */
 export interface IExtensionLoader {
-  readonly workspace: Namespace;
+  readonly namespace: Namespace;
   readonly type: TypeExtensionLoader;
 
   // get extension by id

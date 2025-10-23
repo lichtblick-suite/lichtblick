@@ -20,7 +20,7 @@ const log = Logger.getLogger(__filename);
 
 export class DesktopExtensionLoader implements IExtensionLoader {
   #bridge?: Desktop;
-  public readonly workspace: Namespace = "local";
+  public readonly namespace: Namespace = "local";
   public readonly type: TypeExtensionLoader = "filesystem";
 
   public constructor(bridge: Desktop) {
@@ -42,7 +42,7 @@ export class DesktopExtensionLoader implements IExtensionLoader {
         ...pkgInfo,
         id: extension.id,
         name: pkgInfo.displayName,
-        workspace: this.workspace,
+        namespace: this.namespace,
         // Qualified name is display name for backwards compatibility with existing layouts.
         qualifiedName: pkgInfo.displayName,
         readme: extension.readme,
@@ -72,7 +72,7 @@ export class DesktopExtensionLoader implements IExtensionLoader {
       ...pkgInfo,
       id: extension.id,
       name: pkgInfo.displayName,
-      workspace: this.workspace,
+      namespace: this.namespace,
       // Qualified name is display name for backwards compatibility with existing layouts.
       qualifiedName: pkgInfo.displayName,
       readme: extension.readme,

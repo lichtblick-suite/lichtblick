@@ -50,7 +50,7 @@ describe("DesktopExtensionLoader", () => {
       expect(result).toEqual({
         id: extension.id,
         name: displayName,
-        namespace: desktopExtensionLoader.workspace,
+        namespace: desktopExtensionLoader.namespace,
         qualifiedName: displayName,
         displayName,
         readme: extension.readme,
@@ -96,7 +96,7 @@ describe("DesktopExtensionLoader", () => {
           ...(extensions[0]?.packageJson as ExtensionInfo),
           id: extensions[0]?.id,
           name: (extensions[0]?.packageJson as ExtensionInfo).displayName,
-          namespace: desktopExtensionLoader.workspace,
+          namespace: desktopExtensionLoader.namespace,
           qualifiedName: (extensions[0]?.packageJson as ExtensionInfo).displayName,
           readme: extensions[0]?.readme,
           changelog: extensions[0]?.changelog,
@@ -105,7 +105,7 @@ describe("DesktopExtensionLoader", () => {
           ...(extensions[1]?.packageJson as ExtensionInfo),
           id: extensions[1]?.id,
           name: (extensions[1]?.packageJson as ExtensionInfo).displayName,
-          namespace: desktopExtensionLoader.workspace,
+          namespace: desktopExtensionLoader.namespace,
           qualifiedName: (extensions[1]?.packageJson as ExtensionInfo).displayName,
           readme: extensions[1]?.readme,
           changelog: extensions[1]?.changelog,
@@ -166,11 +166,11 @@ describe("DesktopExtensionLoader", () => {
         ...(extension.packageJson as ExtensionInfo),
         id: extension.id,
         name: displayName,
-        namespace: desktopExtensionLoader.workspace,
+        namespace: desktopExtensionLoader.namespace,
         qualifiedName: displayName,
         readme: extension.readme,
         changelog: extension.changelog,
-      });
+      } as ExtensionInfo);
     });
 
     it("should throw an error if bridge is undefined", async () => {

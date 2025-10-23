@@ -53,7 +53,7 @@ const expectedChangelog =
 
 const expectedExtensionInfo: ExtensionInfo = {
   ...packageJson,
-  workspace: "local",
+  namespace: "local",
   qualifiedName: "turtlesim",
   readme: expectedReadme,
   changelog: expectedChangelog,
@@ -105,7 +105,7 @@ describe("IdbExtensionLoader", () => {
       const foxe = fs.readFileSync(EXT_FILE_TURTLESIM);
       const info: ExtensionInfo = {
         ...expectedExtensionInfo,
-        workspace: "org",
+        namespace: "org",
         qualifiedName: "org:Foxglove Inc:studio-extension-turtlesim",
       };
       mockGetAll.mockReturnValue([info]);
@@ -126,7 +126,7 @@ describe("IdbExtensionLoader", () => {
       const info: ExtensionInfo = {
         id: "Prefix.package-name",
         name: "package-name",
-        workspace: "org",
+        namespace: "org",
         publisher: "Prefix",
         qualifiedName: "org:Prefix:package-name",
         changelog: "",
@@ -215,7 +215,7 @@ describe("IdbExtensionLoader", () => {
       const foxe = fs.readFileSync(EXT_FILE_TURTLESIM);
       const expectedInfo: ExtensionInfo = {
         ...packageJson,
-        workspace: "local",
+        namespace: "local",
         qualifiedName: "turtlesim",
       } as ExtensionInfo;
       mockGet.mockReturnValue({

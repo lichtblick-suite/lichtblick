@@ -30,11 +30,11 @@ const log = Log.getLogger(__filename);
 
 export class IdbExtensionLoader implements IExtensionLoader {
   readonly #storage: IExtensionStorage;
-  public readonly workspace: Namespace;
+  public readonly namespace: Namespace;
   public readonly type: TypeExtensionLoader = "browser";
 
   public constructor(namespace: Namespace) {
-    this.workspace = namespace;
+    this.namespace = namespace;
     this.#storage = new IdbExtensionStorage(namespace);
   }
 
@@ -98,8 +98,8 @@ export class IdbExtensionLoader implements IExtensionLoader {
       info: {
         ...rawInfo,
         id: `${normalizedPublisher}.${rawInfo.name}`,
-        workspace: this.workspace,
-        qualifiedName: qualifiedName(this.workspace, normalizedPublisher, rawInfo),
+        namespace: this.namespace,
+        qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
         readme,
         changelog,
         externalId,

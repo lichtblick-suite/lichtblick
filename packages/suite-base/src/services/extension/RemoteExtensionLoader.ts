@@ -22,13 +22,13 @@ const log = Log.getLogger(__filename);
 
 export class RemoteExtensionLoader implements IExtensionLoader {
   #remote: ExtensionsAPI;
-  public readonly workspace: Namespace;
+  public readonly namespace: Namespace;
   public readonly type: TypeExtensionLoader = "server";
-  public remoteWorkspace: string;
+  public workspace: string;
 
-  public constructor(workspace: Namespace, slug: string) {
-    this.workspace = workspace;
-    this.remoteWorkspace = slug;
+  public constructor(namespace: Namespace, slug: string) {
+    this.namespace = namespace;
+    this.workspace = slug;
 
     this.#remote = new ExtensionsAPI(slug);
   }
@@ -92,12 +92,12 @@ export class RemoteExtensionLoader implements IExtensionLoader {
       info: {
         ...rawInfo,
         id: `${normalizedPublisher}.${rawInfo.name}`,
-        workspace: this.workspace,
-        qualifiedName: qualifiedName(this.workspace, normalizedPublisher, rawInfo),
+        namespace: rawInfo.namespace,
+        qualifiedName: qualifiedName(rawInfo.namespace!, normalizedPublisher, rawInfo),
         readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
         changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
       },
-      workspace: this.remoteWorkspace,
+      workspace: this.workspace,
     };
 
     const storedExtension = await this.#remote.createOrUpdate(newExtension, file);

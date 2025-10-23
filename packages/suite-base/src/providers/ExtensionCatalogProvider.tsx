@@ -54,7 +54,7 @@ function createExtensionRegistryStore(
 
     const installExtensions = async (namespace: Namespace, extensions: ExtensionData[]) => {
       const namespaceLoaders: IExtensionLoader[] = loaders.filter(
-        (loader) => loader.workspace === namespace,
+        (loader) => loader.namespace === namespace,
       );
       if (namespaceLoaders.length === 0) {
         throw new Error(`No extension loader found for namespace ${namespace}`);
@@ -95,7 +95,7 @@ function createExtensionRegistryStore(
 
               extensionName = info.displayName || info.name || extensionName;
               const { raw } = await loader.loadExtension(
-                loader.workspace === "org" && loader.type === "server" ? info.externalId! : info.id,
+                loader.namespace === "org" && loader.type === "server" ? info.externalId! : info.id,
               );
               const unwrappedExtensionSource = raw;
               const contributionPoints = buildContributionPoints(info, unwrappedExtensionSource);
@@ -183,7 +183,7 @@ function createExtensionRegistryStore(
     }) {
       const orgCacheLoader: IExtensionLoader | undefined = loaders.find(
         (extensionLoader) =>
-          extensionLoader.workspace === "org" && extensionLoader.type === "browser",
+          extensionLoader.namespace === "org" && extensionLoader.type === "browser",
       );
       await Promise.all(
         batch.map(async (extension) => {
@@ -194,7 +194,7 @@ function createExtensionRegistryStore(
               contributionPoints;
             let unwrappedExtensionSource: string = "";
 
-            if (loader.workspace === "org" && loader.type === "server") {
+            if (loader.namespace === "org" && loader.type === "server") {
               try {
                 if (!orgCacheLoader) {
                   throw new Error("Cache loader not found.");
@@ -272,7 +272,7 @@ function createExtensionRegistryStore(
       };
 
       const localAndRemoteLoaders = loaders.filter(
-        (loader) => loader.workspace === "local" || loader.type === "server",
+        (loader) => loader.namespace === "local" || loader.type === "server",
       );
       await Promise.all(localAndRemoteLoaders.map(processLoader));
 
@@ -330,7 +330,7 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      const namespaceLoaders = loaders.filter((loader) => loader.workspace === namespace);
+      const namespaceLoaders = loaders.filter((loader) => loader.namespace === namespace);
       if (namespaceLoaders.length === 0) {
         throw new Error("No extension loader found for namespace " + namespace);
       }

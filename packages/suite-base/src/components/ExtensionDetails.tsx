@@ -158,7 +158,7 @@ export function ExtensionDetails({
       setOperationStatus(OperationStatus.UNINSTALLING);
       // UX - Avoids the button from blinking when operation completes too fast
       await new Promise((resolve) => setTimeout(resolve, 200));
-      await uninstallExtension(extension.workspace ?? "local", extension.id);
+      await uninstallExtension(extension.namespace ?? "local", extension.id);
       enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
       if (isMounted()) {
         setIsInstalled(false);
@@ -175,7 +175,7 @@ export function ExtensionDetails({
   }, [
     analytics,
     extension.id,
-    extension.workspace,
+    extension.namespace,
     isMounted,
     uninstallExtension,
     enqueueSnackbar,

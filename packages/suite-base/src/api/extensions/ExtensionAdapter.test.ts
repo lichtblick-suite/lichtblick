@@ -42,7 +42,7 @@ describe("ExtensionAdapter", () => {
         ...apiResponse,
         id: apiResponse.extensionId,
         externalId: apiResponse.id,
-        workspace: apiResponse.scope,
+        namespace: apiResponse.scope,
       });
     });
   });
@@ -62,7 +62,7 @@ describe("ExtensionAdapter", () => {
           ...apiResponse,
           id: apiResponse.extensionId,
           externalId: apiResponse.id,
-          workspace: apiResponse.scope,
+          namespace: apiResponse.scope,
         },
         content: new Uint8Array(),
         workspace,
@@ -86,7 +86,7 @@ describe("ExtensionAdapter", () => {
           ...apiResponse,
           id: apiResponse.extensionId,
           externalId: apiResponse.id,
-          workspace: apiResponse.scope,
+          namespace: apiResponse.scope,
         },
         content: customContent,
         workspace,
@@ -110,13 +110,13 @@ describe("ExtensionAdapter", () => {
         ...apiResponses[0],
         id: apiResponses[0]!.extensionId,
         externalId: apiResponses[0]!.id,
-        workspace: apiResponses[0]!.scope,
+        namespace: apiResponses[0]!.scope,
       });
       expect(result[1]).toEqual({
         ...apiResponses[1],
         id: apiResponses[1]!.extensionId,
         externalId: apiResponses[1]!.id,
-        workspace: apiResponses[1]!.scope,
+        namespace: apiResponses[1]!.scope,
       });
     });
 

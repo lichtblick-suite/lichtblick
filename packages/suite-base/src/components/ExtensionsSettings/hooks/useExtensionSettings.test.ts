@@ -24,7 +24,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword4"],
-      workspace: "namespace1",
+      namespace: "namespace1",
       installed: true,
       name: "Extension 4",
       qualifiedName: "Extension 4",
@@ -38,7 +38,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword1"],
-      workspace: "namespace1",
+      namespace: "namespace1",
       installed: true,
       name: "Extension 1",
       qualifiedName: "Extension 1",
@@ -55,7 +55,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword2"],
-      workspace: "namespace2",
+      namespace: "namespace2",
     },
     {
       id: "6",
@@ -66,7 +66,7 @@ describe("useExtensionSettings", () => {
       license: "MIT",
       version: "1.0.0",
       keywords: ["keyword1"],
-      workspace: "namespace2",
+      namespace: "namespace2",
     },
   ];
 

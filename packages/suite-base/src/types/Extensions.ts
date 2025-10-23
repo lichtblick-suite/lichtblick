@@ -17,7 +17,7 @@ export type ExtensionInfo = {
   keywords: string[];
   license: string;
   name: string;
-  workspace?: Namespace;
+  namespace?: Namespace;
   publisher: string;
   qualifiedName: string;
   version: string;

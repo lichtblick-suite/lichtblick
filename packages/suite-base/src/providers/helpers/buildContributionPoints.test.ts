@@ -51,7 +51,7 @@ describe("buildContributionPoints", () => {
       expect.objectContaining({
         extensionId: extensionInfo.id,
         extensionName: extensionInfo.qualifiedName,
-        extensionNamespace: extensionInfo.workspace,
+        extensionNamespace: extensionInfo.namespace,
         registration: expect.objectContaining({
           name: panelName,
           initPanel: expect.any(Function),
@@ -116,7 +116,7 @@ describe("buildContributionPoints", () => {
     expect(result.messageConverters.length).toBe(1);
     expect(result.messageConverters[0]).toEqual({
       ...messageConverter,
-      extensionNamespace: extensionInfo.workspace,
+      extensionNamespace: extensionInfo.namespace,
       extensionId: extensionInfo.id,
     });
     delete (globalThis as any).messageConverter;
