@@ -30,7 +30,7 @@ export default function LayoutSection({
   onOverwrite,
   onRevert,
   onMakePersonalCopy,
-}: {
+}: Readonly<{
   title: string | undefined;
   disablePadding?: boolean;
   emptyText: string | undefined;
@@ -47,7 +47,22 @@ export default function LayoutSection({
   onOverwrite: (item: Layout) => void;
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
-}): React.JSX.Element {
+}>): React.JSX.Element {
+  // Get multiple selected layouts and handle bulk actions
+  const selectedLayouts = items?.filter((layout) => multiSelectedIds.includes(layout.id)) ?? [];
+  const handleDuplicateSelected = () => {
+    selectedLayouts.forEach(onDuplicate);
+  };
+  const handleDeleteSelected = () => {
+    selectedLayouts.forEach(onDelete);
+  };
+  const handleOverwriteSelected = () => {
+    selectedLayouts.forEach(onOverwrite);
+  };
+  const handleRevertSelected = () => {
+    selectedLayouts.forEach(onRevert);
+  };
+
   return (
     <Stack>
       {title != undefined && (
@@ -67,19 +82,25 @@ export default function LayoutSection({
         )}
         {items?.map((layout) => (
           <LayoutRow
-            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
-            multiSelectedIds={multiSelectedIds}
-            selected={layout.id === selectedId}
             key={layout.id}
             layout={layout}
+            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
+            multiSelectedIds={multiSelectedIds}
+            selected={selectedId === layout.id}
             onSelect={onSelect}
             onRename={onRename}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
+            onDuplicate={handleDuplicateSelected}
+            onDelete={(clickedLayout) => {
+              if (multiSelectedIds.includes(clickedLayout.id)) {
+                handleDeleteSelected();
+              } else {
+                onDelete(clickedLayout);
+              }
+            }}
             onShare={onShare}
             onExport={onExport}
-            onOverwrite={onOverwrite}
-            onRevert={onRevert}
+            onOverwrite={handleOverwriteSelected}
+            onRevert={handleRevertSelected}
             onMakePersonalCopy={onMakePersonalCopy}
           />
         ))}

@@ -6,15 +6,17 @@ import { useCallback } from "react";
 
 import Logger from "@lichtblick/log";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
+import { ExtensionData } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import {
   DataSourceArgs,
   IDataSourceFactory,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useInstallingExtensionsState } from "@lichtblick/suite-base/hooks/useInstallingExtensionsState";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 type UseHandleFiles = {
-  handleFiles: (files: File[]) => Promise<void>;
+  handleFiles: (files: File[], namespace?: Namespace) => Promise<void>;
 };
 
 type UseHandleFilesProps = {
@@ -43,12 +45,12 @@ export function useHandleFiles({
   const { parseAndInstallLayout } = useLayoutTransfer();
 
   const handleFiles = useCallback(
-    async (files: File[]) => {
+    async (files: File[], namespace: Namespace = "local") => {
       if (files.length === 0) {
         return;
       }
 
-      const extensionsData: Uint8Array[] = [];
+      const extensionsData: ExtensionData[] = [];
       const otherFiles: File[] = [];
       const layoutFiles: File[] = [];
 
@@ -56,7 +58,7 @@ export function useHandleFiles({
         try {
           if (file.name.endsWith(AllowedFileExtensions.FOXE)) {
             const buffer = await file.arrayBuffer();
-            extensionsData.push(new Uint8Array(buffer));
+            extensionsData.push({ buffer: new Uint8Array(buffer), file, namespace });
           } else if (file.name.endsWith(AllowedFileExtensions.JSON)) {
             layoutFiles.push(file);
           } else {
@@ -70,7 +72,7 @@ export function useHandleFiles({
       if (layoutFiles.length > 0) {
         pause?.();
         layoutFiles.forEach(async (file) => {
-          await parseAndInstallLayout(file);
+          await parseAndInstallLayout(file, namespace);
         });
       }
 

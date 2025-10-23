@@ -10,11 +10,13 @@ import { useMemo, useState } from "react";
 import {
   AppBarProps,
   AppSetting,
+  IExtensionLoader,
   FoxgloveWebSocketDataSourceFactory,
   IDataSourceFactory,
   IdbExtensionLoader,
   McapLocalDataSourceFactory,
   RemoteDataSourceFactory,
+  RemoteExtensionLoader,
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
@@ -22,6 +24,7 @@ import {
   SharedRoot,
   UlogLocalDataSourceFactory,
 } from "@lichtblick/suite-base";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 
 import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
 
@@ -43,10 +46,17 @@ export function WebRoot(props: {
     [],
   );
 
-  const [extensionLoaders] = useState(() => [
+  const defaultExtensionLoaders: IExtensionLoader[] = [
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
-  ]);
+  ];
+  const url = new URL(window.location.href);
+  const remoteNamespace = url.searchParams.get("namespace");
+
+  if (remoteNamespace && APP_CONFIG.apiUrl) {
+    defaultExtensionLoaders.push(new RemoteExtensionLoader("org", remoteNamespace));
+  }
+  const [extensionLoaders] = useState(() => defaultExtensionLoaders);
 
   const dataSources = useMemo(() => {
     const sources = [

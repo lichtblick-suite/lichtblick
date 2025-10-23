@@ -9,7 +9,7 @@ import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 
 export default class MockLayoutManager implements ILayoutManager {
   public supportsSharing = false;
-  public isBusy = false;
+  public isBusy = jest.fn().mockReturnValue(false);
   public isOnline = false;
   public error: Error | undefined = undefined;
 

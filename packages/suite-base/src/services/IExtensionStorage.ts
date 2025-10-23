@@ -10,6 +10,9 @@ import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 export type StoredExtension = {
   info: ExtensionInfo;
   content: Uint8Array;
+  remoteNamespace?: string;
+  fileId?: string;
+  externalId?: string;
 };
 
 export interface IExtensionStorage {

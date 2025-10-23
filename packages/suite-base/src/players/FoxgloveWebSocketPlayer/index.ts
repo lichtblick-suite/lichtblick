@@ -63,7 +63,11 @@ import {
   SUPPORTED_SERVICE_ENCODINGS,
   ZERO_TIME,
 } from "./constants";
-import { dataTypeToFullName, statusLevelToAlertSeverity } from "./helpers";
+import {
+  checkForHighFrequencyTopics,
+  dataTypeToFullName,
+  statusLevelToAlertSeverity,
+} from "./helpers";
 import {
   MessageWriter,
   MessageDefinitionMap,
@@ -561,6 +565,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
         }
         stats.numMessages++;
         this.#topicsStats = topicStats;
+
+        checkForHighFrequencyTopics({
+          alerts: this.#alerts,
+          endTime: this.#endTime,
+          startTime: this.#startTime,
+          topics: this.#topics,
+          topicStats: this.#topicsStats,
+        });
       } catch (error) {
         this.#alerts.addAlert(`message:${chanInfo.channel.topic}`, {
           severity: "error",

@@ -1,0 +1,142 @@
+name: Manual Pre-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to create prerelease from"
+        required: true
+        default: "develop"
+        type: choice
+        options:
+          - develop
+          - release/*
+      version_type:
+        description: "Version bump type"
+        required: true
+        default: "prerelease"
+        type: choice
+        options:
+          - prerelease
+          - prepatch
+          - preminor
+          - premajor
+      create_release:
+        description: "Create GitHub prerelease?"
+        required: true
+        type: boolean
+        default: true
+      release_notes:
+        description: "Custom release notes (optional)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  prerelease:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 18
+
+      - name: Enable corepack
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Get latest rc tag
+        id: get_last_rc
+        run: |
+          last_rc=$(git tag --list "v*rc.*" --sort=-v:refname | head -n 1 || echo "")
+          echo "last_rc=$last_rc" >> $GITHUB_ENV
+          echo "Last RC: $last_rc"
+
+      - name: Calculate next rc version
+        id: next_version
+        run: |
+          yarn add semver
+          node <<'EOF'
+          const fs = require("fs");
+          const semver = require("semver");
+
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const baseVersion = pkg.version;
+          const versionType = process.env.VERSION_TYPE;
+          const lastRc = process.env.LAST_RC;
+
+          let nextVersion;
+
+          if (versionType === "prerelease") {
+            if (!lastRc) {
+              nextVersion = semver.inc(baseVersion, "prerelease", "rc");
+            } else {
+              const lastVersion = lastRc.replace(/^v/, "");
+              nextVersion = semver.inc(lastVersion, "prerelease", "rc");
+            }
+          } else {
+            const stableBase = baseVersion.includes("-")
+              ? semver.parse(baseVersion).version
+              : baseVersion;
+
+            nextVersion = semver.inc(stableBase, versionType, "rc");
+          }
+
+          console.log("Next prerelease version:", nextVersion);
+          fs.appendFileSync(process.env.GITHUB_ENV, `version=${nextVersion}\n`);
+          EOF
+        env:
+          VERSION_TYPE: ${{ github.event.inputs.version_type }}
+          LAST_RC: ${{ env.last_rc }}
+
+      - name: Build prod files
+        run: |
+          yarn run desktop:build:prod
+          yarn run web:build:prod
+
+      - name: Build Windows
+        run: yarn run package:win --config.extraMetadata.version=${{ env.version }}
+
+      - name: Build Linux
+        run: yarn run package:linux --config.extraMetadata.version=${{ env.version }}
+
+      - name: Build macOS
+        run: yarn run package:darwin --config.extraMetadata.version=${{ env.version }}
+
+      - name: Create web static files tarball
+        run: tar -czf dist/lichtblick-web.tar.gz -C web/.webpack .
+
+      - name: Create GitHub Pre-release
+        if: ${{ github.event.inputs.create_release == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ env.version }}"
+          name: "v${{ env.version }}"
+          commit: ${{ github.event.inputs.branch }}
+          body: ${{ github.event.inputs.release_notes }}
+          generateReleaseNotes: ${{ github.event.inputs.release_notes == '' }}
+          prerelease: true
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          artifacts: |
+            dist/lichtblick-${{ env.version }}-linux-amd64.deb
+            dist/lichtblick-${{ env.version }}-linux-x64.tar.gz
+            dist/lichtblick-${{ env.version }}-linux-arm64.deb
+            dist/lichtblick-${{ env.version }}-linux-arm64.tar.gz
+            dist/lichtblick-${{ env.version }}-mac-universal.dmg
+            dist/lichtblick-${{ env.version }}-win.exe
+            dist/lichtblick-web.tar.gz
+            dist/latest-linux.yml
+            dist/latest-mac.yml
+            dist/latest.yml

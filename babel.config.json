@@ -1,14 +1,14 @@
 {
   "presets": [
     ["@babel/preset-env", { "targets": { "node": "16" } }],
-    "@babel/preset-typescript",
+    ["@babel/preset-typescript", { "allowDeclareFields": true }],
     "@babel/preset-react"
   ],
   "plugins": [
     "babel-plugin-transform-import-meta",
     "@babel/plugin-transform-modules-commonjs",
     "@babel/plugin-proposal-explicit-resource-management",
-    ["@babel/plugin-proposal-decorators", { "decoratorsBeforeExport": true }],
+    ["@babel/plugin-proposal-decorators", { "version": "legacy" }],
     "@babel/plugin-transform-private-methods"
   ]
 }

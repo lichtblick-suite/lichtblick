@@ -51,3 +51,13 @@ export type LayoutActionMenuItem =
       text: string;
       debug?: boolean;
     };
+
+export type SignInPromptProps = {
+  onDismiss?: () => void;
+};
+
+export type UnsavedChangesResolution =
+  | { type: "cancel" }
+  | { type: "discard" }
+  | { type: "makePersonal"; name: string }
+  | { type: "overwrite" };

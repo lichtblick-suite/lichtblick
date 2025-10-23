@@ -96,11 +96,6 @@ export interface ICurrentLayout {
     setSelectedLayoutId: (id: LayoutID | undefined) => void;
 
     /**
-     * Override any current layout. This will reset the layout state
-     */
-    setCurrentLayout: (newLayout: SelectedLayout | undefined) => void;
-
-    /**
      * Update the transient state associated with a particular panel type.
      */
     updateSharedPanelState: UpdatePanelState;

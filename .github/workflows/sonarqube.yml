@@ -2,7 +2,7 @@ name: SonarCloud
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "develop"]
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4.0.3
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -47,7 +47,7 @@ jobs:
         continue-on-error: true
 
       - name: ScanCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v5.3.0
+        uses: sonarsource/sonarqube-scan-action@v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}

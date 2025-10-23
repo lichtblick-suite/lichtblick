@@ -9,7 +9,9 @@ import { createContext, useContext } from "react";
 
 import { IRemoteLayoutStorage } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 
-const RemoteLayoutStorageContext = createContext<IRemoteLayoutStorage | undefined>(undefined);
+export const RemoteLayoutStorageContext = createContext<IRemoteLayoutStorage | undefined>(
+  undefined,
+);
 RemoteLayoutStorageContext.displayName = "RemoteLayoutStorageContext";
 
 export function useRemoteLayoutStorage(): IRemoteLayoutStorage | undefined {
