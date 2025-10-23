@@ -34,10 +34,10 @@ export function NamespaceSelectionModal({
   files,
 }: NamespaceSelectionModalProps): React.JSX.Element {
   const { classes } = useStyles();
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Namespace>("local");
+  const [selectedNamespace, setSelectedNamespace] = useState<Namespace>("local");
 
   const handleSelect = () => {
-    onSelect(selectedWorkspace);
+    onSelect(selectedNamespace);
     onClose();
   };
 
@@ -73,9 +73,9 @@ export function NamespaceSelectionModal({
         <List>
           <ListItem disablePadding>
             <ListItemButton
-              selected={selectedWorkspace === "local"}
+              selected={selectedNamespace === "local"}
               onClick={() => {
-                setSelectedWorkspace("local");
+                setSelectedNamespace("local");
               }}
             >
               <ListItemIcon>
@@ -89,9 +89,9 @@ export function NamespaceSelectionModal({
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton
-              selected={selectedWorkspace === "org"}
+              selected={selectedNamespace === "org"}
               onClick={() => {
-                setSelectedWorkspace("org");
+                setSelectedNamespace("org");
               }}
             >
               <ListItemIcon>
