@@ -302,7 +302,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
           // as needed
           const color = hasExactColors
             ? outlineColors[i >>> 1]!
-            : outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR;
+            : (outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR);
           colors[i * 4 + 0] = SRGBToLinear(color.r) * 255;
           colors[i * 4 + 1] = SRGBToLinear(color.g) * 255;
           colors[i * 4 + 2] = SRGBToLinear(color.b) * 255;

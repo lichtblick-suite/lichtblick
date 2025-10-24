@@ -103,7 +103,7 @@ export function getValueActionForValue(
         singleSlicePath += `[:]{${typicalFilterName}==${
           typeof filterValue === "bigint"
             ? filterValue.toString()
-            : JSON.stringify(filterValue) ?? ""
+            : (JSON.stringify(filterValue) ?? "")
         }}`;
       } else {
         singleSlicePath += `[${pathItem}]`;

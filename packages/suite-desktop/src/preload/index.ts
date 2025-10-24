@@ -33,7 +33,9 @@ import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/w
 const ignoreDeepLinks = document.cookie.includes("fox.ignoreDeepLinks=true");
 document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
 
-const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
+const deepLinks = ignoreDeepLinks
+  ? []
+  : (decodeRendererArg("deepLinks", window.process.argv) ?? []);
 
 export function main(): void {
   const log = Logger.getLogger(__filename);
