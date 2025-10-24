@@ -201,6 +201,7 @@ export default function PlaybackControls({
               onClick={() => {
                 seekBackwardAction();
               }}
+              data-testid="seek-backward-button"
             />
             <HoverableIconButton
               disabled={disableControls}
@@ -220,6 +221,7 @@ export default function PlaybackControls({
               onClick={() => {
                 seekForwardAction();
               }}
+              data-testid="seek-forward-button"
             />
           </Stack>
           <Stack direction="row" flex={1} alignItems="center" justifyContent="flex-end" gap={0.5}>

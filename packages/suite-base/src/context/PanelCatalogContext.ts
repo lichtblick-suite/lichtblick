@@ -8,7 +8,7 @@
 import { ComponentType, createContext, useContext } from "react";
 
 import { PanelStatics } from "@lichtblick/suite-base/components/Panel";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 
 export type PanelComponent = ComponentType<{ childId?: string; tabId?: string }> &
@@ -30,7 +30,7 @@ export type PanelInfo = {
    */
   module: () => Promise<{ default: PanelComponent }>;
   config?: PanelConfig;
-  extensionNamespace?: ExtensionNamespace;
+  extensionNamespace?: Namespace;
 };
 
 /** PanelCatalog describes the interface for getting available panels */

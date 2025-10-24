@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import * as path from "path";
+
 // Mock all dependencies before any imports
 jest.mock("@lichtblick/log", () => ({
   getLogger: () => ({
@@ -88,7 +90,9 @@ describe("createNewWindow", () => {
     // Simulate the callback execution
     await callback!();
 
-    expect(mockInjectFilesToOpen).toHaveBeenCalledWith(mockWebContents.debugger, ["test.bag"]);
+    expect(mockInjectFilesToOpen).toHaveBeenCalledWith(mockWebContents.debugger, [
+      path.resolve("test.bag"),
+    ]);
   });
 
   it("should not inject files when no files are present", async () => {

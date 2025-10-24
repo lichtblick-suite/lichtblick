@@ -13,6 +13,7 @@ import {
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
+import { Namespace } from "@lichtblick/suite-base/types";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
@@ -23,7 +24,7 @@ import { AppEvent } from "../services/IAnalytics";
 type UseLayoutTransfer = {
   importLayout: () => Promise<void>;
   exportLayout: () => Promise<void>;
-  parseAndInstallLayout: (file: File) => Promise<Layout | undefined>;
+  parseAndInstallLayout: (file: File, namespace: Namespace) => Promise<Layout | undefined>;
 };
 
 export function useLayoutTransfer(): UseLayoutTransfer {
@@ -34,7 +35,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   const { getCurrentLayoutState } = useCurrentLayoutActions();
 
   const parseAndInstallLayout = useCallback(
-    async (file: File) => {
+    async (file: File, namespace: Namespace = "local") => {
       const layoutName = path.basename(file.name, path.extname(file.name));
       const content = await file.text();
 
@@ -61,7 +62,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
       const newLayout = await layoutManager.saveNewLayout({
         name: layoutName,
         data,
-        permission: "CREATOR_WRITE",
+        permission: namespace === "org" ? "ORG_WRITE" : "CREATOR_WRITE",
       });
 
       void onSelectLayout(newLayout);

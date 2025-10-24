@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
-import path from "path";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/src/AppSetting";
@@ -17,10 +16,10 @@ import StudioWindow from "./StudioWindow";
 import { createNewWindow } from "./createNewWindow";
 import { isFileToOpen } from "./fileUtils";
 import getDevModeIcon from "./getDevModeIcon";
+import { getFilesToOpen } from "./getFilesToOpen";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
 import { parseCLIFlags } from "./parseCLIFlags";
-import { resolveSourcePaths } from "./resolveSourcePaths";
 import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
@@ -153,23 +152,8 @@ export async function main(): Promise<void> {
       log.warn("Could not set app as handler for lichtblick://");
     }
   }
-  // Get the command line flags passed to the app when it was launched
-  const parsedCLIFlags = parseCLIFlags(process.argv);
 
-  const filesToOpen: string[] = process.argv
-    .slice(1)
-    .filter((arg) => !arg.startsWith("--")) // Filter out flags
-    .map((filePath) => path.resolve(filePath)) // Convert to absolute path, linux has some problems to resolve relative paths
-    .filter(isFileToOpen);
-
-  // Get file paths passed through the parameter "--source="
-  const filesToOpenFromSourceParameter = resolveSourcePaths(parsedCLIFlags.source);
-
-  filesToOpen.push(...filesToOpenFromSourceParameter);
-
-  const uniqueFilesToOpen = [...new Set(filesToOpen)];
-
-  const verifiedFilesToOpen: string[] = uniqueFilesToOpen.filter(isFileToOpen);
+  const filesToOpen = getFilesToOpen(process.argv);
 
   // indicates the preloader has setup the file input used to inject which files to open
   let preloaderFileInputIsReady = false;
@@ -180,12 +164,12 @@ export async function main(): Promise<void> {
   // The open-file handler registered earlier will handle adding the file to filesToOpen
   app.on("open-file", async (_ev, filePath) => {
     log.debug("open-file handler", filePath);
-    verifiedFilesToOpen.push(filePath);
+    filesToOpen.push(filePath);
 
     if (preloaderFileInputIsReady) {
       const focusedWindow = BrowserWindow.getFocusedWindow();
       if (focusedWindow) {
-        await injectFilesToOpen(focusedWindow.webContents.debugger, verifiedFilesToOpen);
+        await injectFilesToOpen(focusedWindow.webContents.debugger, filesToOpen);
       } else {
         // On MacOS the user may have closed all the windows so we need to open a new window
         new StudioWindow().load();
@@ -199,7 +183,7 @@ export async function main(): Promise<void> {
   ipcMain.handle("load-pending-files", async (ev) => {
     log.debug("load-pending-files");
     const debug = ev.sender.debugger;
-    await injectFilesToOpen(debug, verifiedFilesToOpen);
+    await injectFilesToOpen(debug, filesToOpen);
     preloaderFileInputIsReady = true;
   });
 
@@ -229,6 +213,9 @@ export async function main(): Promise<void> {
       openUrls.push(url);
     }
   });
+
+  // Get the command line flags passed to the app when it was launched
+  const parsedCLIFlags = parseCLIFlags(process.argv);
 
   // support preload lookups for the user data path and home directory
   ipcMain.handle("getUserDataPath", () => app.getPath("userData"));

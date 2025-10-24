@@ -355,6 +355,7 @@ export default class UserScriptPlayer implements Player {
 
   public setGlobalVariables(globalVariables: GlobalVariables): void {
     this.#globalVariables = globalVariables;
+    this.#player.setGlobalVariables(globalVariables);
   }
 
   // Called when userScript state is updated (i.e. scripts are saved)
