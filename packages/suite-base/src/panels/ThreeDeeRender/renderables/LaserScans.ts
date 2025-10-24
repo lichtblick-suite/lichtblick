@@ -294,7 +294,7 @@ class LaserScanHistoryRenderable extends Renderable<LaserScanHistoryUserData> {
 
     // Iterate the point cloud data to update color attribute
     for (let i = 0; i < ranges.length; i++) {
-      const colorValue = colorField === "range" ? ranges[i]! : intensities[i] ?? 0;
+      const colorValue = colorField === "range" ? ranges[i]! : (intensities[i] ?? 0);
       colorConverter(tempColor, colorValue);
       colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
     }

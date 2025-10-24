@@ -56,7 +56,7 @@ function MessagePathInputStory(props: {
   const [path, setPath] = useState(props.path);
 
   return (
-    <PanelSetup fixture={props.heavy ?? false ? heavyFixture : MessagePathInputStoryFixture}>
+    <PanelSetup fixture={(props.heavy ?? false) ? heavyFixture : MessagePathInputStoryFixture}>
       <Stack direction="row" flex="auto" margin={1.25}>
         <MessagePathInput
           path={path}

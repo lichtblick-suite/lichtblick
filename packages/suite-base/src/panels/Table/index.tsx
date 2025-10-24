@@ -60,7 +60,7 @@ function TablePanel({ config, saveConfig }: Props) {
   const msgs = useMessagesByTopic({ topics: [topicName], historySize: 1 })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
   const msg = msgs?.[0];
-  const cachedMessages = msg ? cachedGetMessagePathDataItems(topicPath, msg) ?? [] : [];
+  const cachedMessages = msg ? (cachedGetMessagePathDataItems(topicPath, msg) ?? []) : [];
   const firstCachedMessage = cachedMessages[0];
 
   const { setMessagePathDropConfig } = usePanelContext();
