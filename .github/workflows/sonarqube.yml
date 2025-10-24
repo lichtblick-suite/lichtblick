@@ -48,6 +48,23 @@ jobs:
 
       - name: ScanCloud Scan
         uses: sonarsource/sonarqube-scan-action@v6.0.0
+        # Analysis for pushes and PRs without 'dependencies' label
+        if: |
+          github.event_name == 'push' ||
+          (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'dependencies'))
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      - name: ScanCloud Scan (no require quality gate)
+        uses: sonarsource/sonarqube-scan-action@v6.0.0
+        # analysis for PRs with 'dependencies' label without waiting for quality gate
+        if: |
+          github.event_name == 'pull_request' &&
+          contains(github.event.pull_request.labels.*.name, 'dependencies')
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=false
