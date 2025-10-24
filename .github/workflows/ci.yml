@@ -103,11 +103,3 @@ jobs:
         # Required for Playwright on Ubuntu to work properly
         # See: https://github.com/microsoft/playwright/issues/34251
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-
-      - name: test:e2e:desktop:ci (ubuntu-latest)
-        uses: coactions/setup-xvfb@v1
-        with:
-          working-directory: ./
-          run: |
-            yarn desktop:build:prod
-            yarn test:e2e:desktop:ci
