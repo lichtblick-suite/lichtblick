@@ -24,7 +24,7 @@ jobs:
       - name: Skip SonarCloud
         if: steps.should-skip.outputs.skip == 'true'
         run: |
-          echo "⏭️ SonarCloud analysis skipped due to 'skip-sonar' label"
+          echo "SonarCloud analysis skipped due to 'skip-sonar' label"
           echo "✅ This check passes to allow merge"
 
       - uses: actions/checkout@v5
