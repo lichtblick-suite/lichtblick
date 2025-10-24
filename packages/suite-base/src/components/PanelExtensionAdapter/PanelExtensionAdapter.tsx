@@ -144,6 +144,7 @@ function PanelExtensionAdapter(
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
+  const [forceConversion, setForceConversion] = useState(new Set<string>);
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
 
@@ -256,6 +257,7 @@ function PanelExtensionAdapter(
       sortedServices,
       subscriptions: localSubscriptions,
       watchedFields,
+      forceConversion,
       config: initialState.current,
     });
 
@@ -267,6 +269,9 @@ function PanelExtensionAdapter(
       setSlowRender(true);
       return;
     }
+
+    // Clear any conversions that were forced.
+    forceConversion.clear();
 
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
@@ -308,6 +313,7 @@ function PanelExtensionAdapter(
     sortedServices,
     watchedFields,
     initialState,
+    forceConversion,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -357,6 +363,9 @@ function PanelExtensionAdapter(
             }
 
             extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
+            setForceConversion((_old) => {
+              return new Set([ topicName ]);
+            })
           }
         }),
       );

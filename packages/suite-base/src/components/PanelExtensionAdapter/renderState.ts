@@ -59,6 +59,7 @@ export type BuilderRenderStateInput = Immutable<{
   sortedServices?: readonly string[];
   subscriptions: Subscription[];
   watchedFields: Set<string>;
+  forceConversion: Set<string>;
   config?: RenderStateConfig | undefined;
 }>;
 
@@ -118,6 +119,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       sortedServices,
       subscriptions,
       watchedFields,
+      forceConversion,
       config,
     } = input;
 
@@ -364,6 +366,27 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 
     if (watchedFields.has("appSettings")) {
       updateRenderStateField("appSettings", appSettings, renderState.appSettings, shouldRender);
+    }
+
+    if (forceConversion?.size) {
+      const postProcessedFrame: MessageEvent[] = [];
+
+      for (const topic of forceConversion) {
+        const messageEvent = lastMessageByTopic.get(topic);
+
+        if (messageEvent == undefined) {
+          continue;
+        };
+
+        convertMessage(
+          { ...messageEvent, topicConfig: configTopics[topic] },
+          topicSchemaConverters,
+          postProcessedFrame,
+        );
+      }
+
+      renderState.currentFrame = postProcessedFrame;
+      shouldRender.value = true;
     }
 
     // Update the prev fields with the latest values at the end of all the watch steps
