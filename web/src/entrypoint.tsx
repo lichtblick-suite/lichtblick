@@ -24,7 +24,7 @@ if (!layoutName) {
   }
 }
 
-const requestedLayout = layoutName ? layouts[layoutName] : undefined;
+const requestedLayout = layoutName ? layouts[layoutName] : layouts["auto"];
 
 console.log("URL layout parameter:", layoutName);
 console.log("Available layouts:", Object.keys(layouts));
