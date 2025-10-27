@@ -86,7 +86,7 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
           mathFn && chartValue != undefined ? mathFn(chartValue) : undefined;
         return {
           x: idx,
-          y: chartValue == undefined ? NaN : mathModifiedValue ?? chartValue,
+          y: chartValue == undefined ? NaN : (mathModifiedValue ?? chartValue),
           receiveTime: msgEvent.receiveTime,
           value: mathModifiedValue ?? item,
         };

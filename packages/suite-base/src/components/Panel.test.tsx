@@ -673,7 +673,7 @@ describe("Panel", () => {
             <button onClick={enterFullscreen}>Enter Fullscreen</button>
             <button onClick={exitFullscreen}>Exit Fullscreen</button>
             <span data-testid="fullscreen-status">
-              {panelContext?.isFullscreen ?? false ? "fullscreen" : "normal"}
+              {(panelContext?.isFullscreen ?? false) ? "fullscreen" : "normal"}
             </span>
             <span data-testid="config-value">{props.config.someString}</span>
           </div>

@@ -145,13 +145,13 @@ function getPublicState(
     subscriptions: [],
     sortedTopics:
       props.topics === prevState?.mockProps.topics
-        ? prevState?.public.sortedTopics ?? []
+        ? (prevState?.public.sortedTopics ?? [])
         : props.topics
           ? [...props.topics].sort((a, b) => a.name.localeCompare(b.name))
           : [],
     sortedServices:
       props.services === prevState?.mockProps.services
-        ? prevState?.public.sortedServices ?? []
+        ? (prevState?.public.sortedServices ?? [])
         : props.services
           ? [...props.services].sort((a, b) => a.localeCompare(b))
           : [],
