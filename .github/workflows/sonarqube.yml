@@ -11,7 +11,8 @@ jobs:
   sonarcloud:
     name: SonarCloud Code Analysis
     runs-on: ubuntu-latest
-    # Execute full analysis ONLY if 'skip-sonar' label is NOT present
+
+    # Execute the job only if it's a push event or if the pull request does not have the 'skip-sonar' label
     if: |
       github.event_name == 'push' ||
       !contains(github.event.pull_request.labels.*.name, 'skip-sonar')
@@ -56,16 +57,3 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-
-  # Alternative job to handle skipped SonarCloud analysis
-  sonarcloud-skipped:
-    name: SonarCloud Code Analysis
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request' &&
-      contains(github.event.pull_request.labels.*.name, 'skip-sonar')
-
-    steps:
-      - name: Skip SonarCloud
-        run: |
-          echo "SonarCloud analysis skipped due to 'skip-sonar' label"
