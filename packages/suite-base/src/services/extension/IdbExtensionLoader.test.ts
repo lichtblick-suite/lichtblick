@@ -119,6 +119,19 @@ describe("IdbExtensionLoader", () => {
       });
       expect((await loader.getExtensions())[0]).toBe(info);
     });
+
+    it("When installing extension with missing package.json, Then should throw error", async () => {
+      // Given
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const loader = new IdbExtensionLoader("local");
+
+      // When & Then - Should throw error
+      await expect(loader.installExtension({ foxeFileData: mockFoxeData })).rejects.toThrow(
+        `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
+      );
+    });
   });
 
   describe("loadExtension", () => {
