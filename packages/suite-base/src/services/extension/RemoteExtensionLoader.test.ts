@@ -223,6 +223,42 @@ describe("RemoteExtensionLoader", () => {
         `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
       );
     });
+
+    it("When installing extension without displayName, Then should use name as qualifiedName", async () => {
+      // Given
+      const name = BasicBuilder.string();
+      const publisher = BasicBuilder.string();
+      const mockPackageJson = {
+        name,
+        publisher,
+        version: BasicBuilder.string(),
+        namespace: mockNamespace,
+      };
+
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify(mockPackageJson) ?? "");
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const mockFile = {} as File;
+
+      const mockStoredExtension = ExtensionBuilder.storedExtension();
+      const createOrUpdateSpy = jest.spyOn(mockExtensionsAPI, "createOrUpdate");
+      createOrUpdateSpy.mockResolvedValue(mockStoredExtension);
+
+      // When
+      const result = await loader.installExtension({ foxeFileData: mockFoxeData, file: mockFile });
+
+      // Then - validatePackageInfo lowercases the name
+      expect(createOrUpdateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          info: expect.objectContaining({
+            qualifiedName: name.toLowerCase(),
+          }),
+        }),
+        mockFile,
+      );
+      expect(result).toBe(mockStoredExtension.info);
+    });
   });
 
   describe("uninstallExtension", () => {
