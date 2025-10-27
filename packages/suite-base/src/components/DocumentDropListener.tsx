@@ -52,8 +52,8 @@ export default function DocumentDropListener(props: DocumentDropListenerProps): 
 
   const shouldShowNamespaceModal = useCallback((files: File[]): boolean => {
     const url = new URL(window.location.href);
-    const remoteNamespace = url.searchParams.get("namespace");
-    if (!remoteNamespace || !APP_CONFIG.apiUrl) {
+    const workspace = url.searchParams.get("workspace");
+    if (!workspace || !APP_CONFIG.apiUrl) {
       return false;
     }
 

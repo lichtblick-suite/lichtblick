@@ -7,7 +7,7 @@
 
 import { ComponentType, createContext, useContext } from "react";
 
-import { PanelStatics } from "@lichtblick/suite-base/components/Panel";
+import { PanelStatics } from "@lichtblick/suite-base/components/types";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 

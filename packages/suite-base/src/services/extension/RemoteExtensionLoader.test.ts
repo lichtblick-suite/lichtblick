@@ -24,7 +24,7 @@ describe("RemoteExtensionLoader", () => {
   let mockExtensionsAPI: jest.Mocked<ExtensionsAPI>;
   let loader: RemoteExtensionLoader;
   const mockNamespace: Namespace = "org";
-  const mockSlug = BasicBuilder.string();
+  const workspace = BasicBuilder.string();
 
   beforeEach(() => {
     mockExtensionsAPI = {
@@ -33,11 +33,11 @@ describe("RemoteExtensionLoader", () => {
       loadContent: jest.fn(),
       createOrUpdate: jest.fn(),
       remove: jest.fn(),
-      remoteNamespace: mockSlug,
+      workspace,
     } as any;
 
     MockedExtensionsAPI.mockImplementation(() => mockExtensionsAPI);
-    loader = new RemoteExtensionLoader(mockNamespace, mockSlug);
+    loader = new RemoteExtensionLoader(mockNamespace, workspace);
   });
 
   afterEach(() => {
@@ -45,13 +45,13 @@ describe("RemoteExtensionLoader", () => {
   });
 
   describe("Given a RemoteExtensionLoader instance", () => {
-    it("When constructing the loader, Then should initialize with correct namespace and slug", () => {
+    it("When constructing the loader, Then should initialize with correct namespace and workspace", () => {
       // Given
       // When
       // Then
       expect(loader.namespace).toBe(mockNamespace);
-      expect(loader.remoteNamespace).toBe(mockSlug);
-      expect(MockedExtensionsAPI).toHaveBeenCalledWith(mockSlug);
+      expect(loader.workspace).toBe(workspace);
+      expect(MockedExtensionsAPI).toHaveBeenCalledWith(workspace);
     });
   });
 
@@ -158,6 +158,7 @@ describe("RemoteExtensionLoader", () => {
       // Given
       const mockPackageJson = {
         name: "test-extension",
+        namespace: mockNamespace,
         publisher: "Test Publisher!@#",
         version: BasicBuilder.string(),
         description: BasicBuilder.string(),
@@ -189,7 +190,7 @@ describe("RemoteExtensionLoader", () => {
             publisher: mockPackageJson.publisher,
             qualifiedName: mockPackageJson.displayName,
           }),
-          remoteNamespace: mockSlug,
+          workspace,
         }),
         mockFile,
       );

@@ -23,13 +23,13 @@ export class RemoteExtensionLoader implements IExtensionLoader {
   #remote: ExtensionsAPI;
   public readonly namespace: Namespace;
   public readonly type: TypeExtensionLoader = "server";
-  public remoteNamespace: string;
+  public workspace: string;
 
-  public constructor(namespace: Namespace, slug: string) {
+  public constructor(namespace: Namespace, workspace: string) {
     this.namespace = namespace;
-    this.remoteNamespace = slug;
+    this.workspace = workspace;
 
-    this.#remote = new ExtensionsAPI(slug);
+    this.#remote = new ExtensionsAPI(workspace);
   }
 
   public async getExtension(id: string): Promise<ExtensionInfo | undefined> {
@@ -91,12 +91,12 @@ export class RemoteExtensionLoader implements IExtensionLoader {
       info: {
         ...rawInfo,
         id: `${normalizedPublisher}.${rawInfo.name}`,
-        namespace: this.namespace,
+        namespace: rawInfo.namespace,
         qualifiedName: rawInfo.displayName || rawInfo.name,
         readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
         changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
       },
-      remoteNamespace: this.remoteNamespace,
+      workspace: this.workspace,
     };
 
     const storedExtension = await this.#remote.createOrUpdate(newExtension, file);

@@ -267,13 +267,13 @@ describe("StudioApp", () => {
     expect(addEventListenerSpy).toHaveBeenCalledWith("contextmenu", expect.any(Function));
   });
 
-  it("should create remote layout storage when namespace is provided", () => {
-    // Mock URL with namespace parameter
+  it("should create remote layout storage when workspace is provided", () => {
+    // Mock URL with workspace parameter
     global.URL = jest.fn().mockImplementation(() => ({
       searchParams: {
         get: jest.fn().mockImplementation((key) => {
-          if (key === "namespace") {
-            return "test-namespace";
+          if (key === "workspace") {
+            return "test-workspace";
           }
           return undefined;
         }),
@@ -282,14 +282,14 @@ describe("StudioApp", () => {
 
     renderWithContext();
 
-    expect(jest.mocked(LayoutsAPI)).toHaveBeenCalledWith("test-namespace");
+    expect(jest.mocked(LayoutsAPI)).toHaveBeenCalledWith("test-workspace");
   });
 
-  it("should not create remote layout storage when no namespace is provided", () => {
+  it("should not create remote layout storage when no workspace is provided", () => {
     // Clear previous calls
     jest.mocked(LayoutsAPI).mockClear();
 
-    // Mock URL without namespace parameter
+    // Mock URL without workspace parameter
     global.URL = jest.fn().mockImplementation(() => ({
       searchParams: {
         get: jest.fn().mockReturnValue(undefined),

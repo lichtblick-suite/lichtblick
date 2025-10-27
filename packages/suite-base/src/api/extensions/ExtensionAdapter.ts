@@ -24,13 +24,13 @@ export class ExtensionAdapter {
    */
   public static toStoredExtension(
     apiResponse: IExtensionApiResponse,
-    remoteNamespace: string,
+    workspace: string,
     content: Uint8Array = new Uint8Array(),
   ): StoredExtension {
     return {
       info: this.toExtensionInfo(apiResponse),
       content,
-      remoteNamespace,
+      workspace,
       fileId: apiResponse.fileId,
       externalId: apiResponse.id,
     };

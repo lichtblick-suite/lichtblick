@@ -16,13 +16,13 @@ export function NetworkStatusIndicator(): React.JSX.Element | undefined {
   const { online = true } = useNetworkState();
 
   const url: URL = React.useMemo(() => new URL(window.location.href), []);
-  const remoteNamespace: string | undefined = React.useMemo(
-    () => url.searchParams.get("namespace") ?? undefined,
+  const workspace: string | undefined = React.useMemo(
+    () => url.searchParams.get("workspace") ?? undefined,
     [url],
   );
   const hasRemoteConfig: boolean = React.useMemo(
-    () => remoteNamespace != undefined && APP_CONFIG.apiUrl != undefined,
-    [remoteNamespace],
+    () => workspace != undefined && APP_CONFIG.apiUrl != undefined,
+    [workspace],
   );
 
   if (!hasRemoteConfig || online) {
@@ -38,7 +38,7 @@ export function NetworkStatusIndicator(): React.JSX.Element | undefined {
       </Typography>
       <Typography variant="body2" component="div">
         {t("networkStatusOfflineDescription", {
-          namespace: remoteNamespace,
+          workspace,
         })}
       </Typography>
     </div>
