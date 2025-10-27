@@ -155,6 +155,31 @@ describe("IdbExtensionLoader", () => {
       // Then - validatePackageInfo lowercases the name
       expect(result.qualifiedName).toBe(name.toLowerCase());
     });
+
+    it("When installing extension without README and CHANGELOG files, Then should default both to empty strings", async () => {
+      // Given
+      const name = BasicBuilder.string();
+      const publisher = BasicBuilder.string();
+      const mockPackageJson = {
+        name,
+        publisher,
+        version: BasicBuilder.string(),
+      };
+
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify(mockPackageJson) ?? "");
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      // No README or CHANGELOG files added
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const loader = new IdbExtensionLoader("local");
+
+      // When
+      const result = await loader.installExtension({ foxeFileData: mockFoxeData });
+
+      // Then
+      expect(result.readme).toBe("");
+      expect(result.changelog).toBe("");
+    });
   });
 
   describe("loadExtension", () => {
