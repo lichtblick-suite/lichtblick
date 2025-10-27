@@ -8,31 +8,30 @@
 import { Button, Link } from "@mui/material";
 import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
+import ErrorDisplay from "@lichtblick/suite-base/components/ErrorDisplay";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import {
+  PanelErrorBoundaryProps,
+  PanelErrorBoundaryState,
+} from "@lichtblick/suite-base/components/types";
 import { reportError } from "@lichtblick/suite-base/reportError";
 import { AppError } from "@lichtblick/suite-base/util/errors";
 
-import ErrorDisplay from "./ErrorDisplay";
-
-type Props = {
-  showErrorDetails?: boolean;
-  hideErrorSourceLocations?: boolean;
-  onResetPanel: () => void;
-  onRemovePanel: () => void;
-};
-
-type State = {
-  currentError: { error: Error; errorInfo: ErrorInfo } | undefined;
-};
-
-export default class PanelErrorBoundary extends Component<PropsWithChildren<Props>, State> {
-  public override state: State = {
+export default class PanelErrorBoundary extends Component<
+  PropsWithChildren<PanelErrorBoundaryProps>,
+  PanelErrorBoundaryState
+> {
+  public override state: PanelErrorBoundaryState = {
     currentError: undefined,
   };
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     reportError(new AppError(error, errorInfo));
     this.setState({ currentError: { error, errorInfo } });
+
+    if (this.props.onLogError) {
+      this.props.onLogError(`Panel render error: ${error.message}`, error);
+    }
   }
 
   public override render(): ReactNode {
@@ -95,6 +94,7 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
         />
       );
     }
+
     return this.props.children;
   }
 }
