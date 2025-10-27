@@ -132,6 +132,29 @@ describe("IdbExtensionLoader", () => {
         `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
       );
     });
+
+    it("When installing extension without displayName, Then should use name as qualifiedName", async () => {
+      // Given
+      const name = BasicBuilder.string();
+      const publisher = BasicBuilder.string();
+      const mockPackageJson = {
+        name,
+        publisher,
+        version: BasicBuilder.string(),
+      };
+
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify(mockPackageJson) ?? "");
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const loader = new IdbExtensionLoader("local");
+
+      // When
+      const result = await loader.installExtension({ foxeFileData: mockFoxeData });
+
+      // Then - validatePackageInfo lowercases the name
+      expect(result.qualifiedName).toBe(name.toLowerCase());
+    });
   });
 
   describe("loadExtension", () => {
