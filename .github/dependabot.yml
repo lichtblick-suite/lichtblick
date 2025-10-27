@@ -7,7 +7,7 @@ updates:
       # time relative to the benefit of being on such a bleeding edge.
       interval: monthly
     open-pull-requests-limit: 10
-    labels: [] # disable default labels
+    labels: ["skip-sonar", "dependencies"]
     target-branch: "develop"
 
     # Define groups of dependencies to be updated together
@@ -53,4 +53,4 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    labels: [] # disable default labels
+    labels: ["skip-sonar", "dependencies"]
