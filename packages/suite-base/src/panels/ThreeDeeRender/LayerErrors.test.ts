@@ -33,7 +33,6 @@ describe("LayerErrors", () => {
 
       // LayerErrors logs warnings for new errors
       expect(console.warn).toHaveBeenCalledWith(`[${path.join(" > ")}] ${errorMessage}`);
-      (console.warn as jest.Mock).mockClear();
     });
 
     it("should emit remove event when error is removed", () => {
@@ -44,7 +43,6 @@ describe("LayerErrors", () => {
 
       // Add error first
       layerErrors.add(path, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       // Then remove it
       layerErrors.remove(path, errorId);
@@ -59,7 +57,6 @@ describe("LayerErrors", () => {
       const path = ["topics", topicId];
 
       layerErrors.add(path, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       layerErrors.clearPath(path);
 
@@ -71,7 +68,6 @@ describe("LayerErrors", () => {
       layerErrors.on("update", updateHandler);
 
       layerErrors.addToTopic(topicId, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       expect(updateHandler).toHaveBeenCalledWith(["topics", topicId], errorId, errorMessage);
     });
@@ -82,7 +78,6 @@ describe("LayerErrors", () => {
       expect(layerErrors.hasError(path, errorId)).toBe(false);
 
       layerErrors.add(path, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       expect(layerErrors.hasError(path, errorId)).toBe(true);
     });
@@ -93,7 +88,6 @@ describe("LayerErrors", () => {
       expect(layerErrors.errors.errorAtPath(path)).toBeUndefined();
 
       layerErrors.add(path, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       expect(layerErrors.errors.errorAtPath(path)).toBe(errorMessage);
     });
@@ -107,7 +101,6 @@ describe("LayerErrors", () => {
 
       layerErrors.add(path, errorId1, errorMessage1);
       layerErrors.add(path, errorId2, errorMessage2);
-      (console.warn as jest.Mock).mockClear();
 
       const combinedMessage = layerErrors.errors.errorAtPath(path);
       expect(combinedMessage).toContain(errorMessage1);
@@ -123,7 +116,6 @@ describe("LayerErrors", () => {
       const path = ["test", "path"];
 
       layerErrors.errorIfFalse(false, path, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       expect(updateHandler).toHaveBeenCalledWith(path, errorId, errorMessage);
     });
@@ -136,7 +128,6 @@ describe("LayerErrors", () => {
 
       // Add error first
       layerErrors.add(path, errorId, errorMessage);
-      (console.warn as jest.Mock).mockClear();
 
       // Then call errorIfFalse with true
       layerErrors.errorIfFalse(true, path, errorId, errorMessage);

@@ -3,4 +3,3 @@
 
 export const MIN_HEIGHT = 120;
 export const MAX_HEIGHT = 600;
-export const DEFAULT_HEIGHT = 200;

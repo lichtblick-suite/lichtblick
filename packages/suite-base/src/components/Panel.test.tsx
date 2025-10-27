@@ -16,6 +16,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { render, renderHook, act, fireEvent, screen, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { useEffect, useCallback, useContext } from "react";
 
 import Panel from "@lichtblick/suite-base/components/Panel";
@@ -298,7 +299,7 @@ describe("Panel", () => {
             element.className.includes("MuiTypography-subtitle2")
           );
         });
-        expect(logsPanel).toBeTruthy();
+        expect(logsPanel).toBeInTheDocument();
       });
 
       // When hiding logs
@@ -312,7 +313,7 @@ describe("Panel", () => {
             element.className.includes("MuiTypography-subtitle2")
           );
         });
-        expect(logsPanel).toBeFalsy();
+        expect(logsPanel).not.toBeInTheDocument();
       });
     });
 
@@ -334,7 +335,7 @@ describe("Panel", () => {
 
       await waitFor(() => {
         const logsPanel = getLogsTitleElement(1);
-        expect(logsPanel).toBeTruthy();
+        expect(logsPanel).toBeInTheDocument();
       });
 
       // When
@@ -344,7 +345,7 @@ describe("Panel", () => {
       // Then
       await waitFor(() => {
         const logsPanel = getLogsTitleElement(1);
-        expect(logsPanel).toBeFalsy();
+        expect(logsPanel).not.toBeInTheDocument();
       });
     });
 
@@ -367,7 +368,7 @@ describe("Panel", () => {
 
       await waitFor(() => {
         const logsPanel = getLogsTitleElement(2);
-        expect(logsPanel).toBeTruthy();
+        expect(logsPanel).toBeInTheDocument();
       });
 
       // When
@@ -382,7 +383,7 @@ describe("Panel", () => {
 
       await waitFor(() => {
         const logsPanel = getLogsTitleElement(0);
-        expect(logsPanel).toBeTruthy();
+        expect(logsPanel).toBeInTheDocument();
       });
     });
 
@@ -450,7 +451,7 @@ describe("Panel", () => {
       // Then
       await waitFor(() => {
         const infoMessage = screen.getByText(`[INFO] ${logInfoText}`);
-        expect(infoMessage).toBeTruthy();
+        expect(infoMessage).toBeInTheDocument();
       });
     });
 
@@ -473,7 +474,7 @@ describe("Panel", () => {
       // Then
       await waitFor(() => {
         const errorMessage = screen.getByText(`[ERROR] ${logErrorText}`);
-        expect(errorMessage).toBeTruthy();
+        expect(errorMessage).toBeInTheDocument();
       });
     });
 
@@ -500,7 +501,7 @@ describe("Panel", () => {
             element?.tagName.toLowerCase() === "pre" && content.includes(`Error: ${logErrorText}`)
           );
         });
-        expect(errorTrace).toBeTruthy();
+        expect(errorTrace).toBeInTheDocument();
       });
     });
 
@@ -528,21 +529,20 @@ describe("Panel", () => {
         expect(logCountElement.textContent).toBe("3");
       });
 
+      // Verify messages appear in chronological order: Info → Error → Info
       await waitFor(() => {
-        const logsTitle = screen.queryByText((_content, element) => {
-          return (
-            element?.textContent === "Logs (3)" &&
-            element.className.includes("MuiTypography-subtitle2")
-          );
-        });
-        expect(logsTitle).toBeTruthy();
-      });
+        const allLogElements = screen.getAllByText(/\[(INFO|ERROR)\]/);
+        expect(allLogElements).toHaveLength(3);
 
-      // Verify both info and error messages are present
-      const infoMessages = screen.getAllByText(`[INFO] ${logInfoText}`);
-      const errorMessages = screen.getAllByText(`[ERROR] ${logErrorText}`);
-      expect(infoMessages).toHaveLength(2);
-      expect(errorMessages).toHaveLength(1);
+        // Extract the log messages in order
+        const logTexts = allLogElements.map((el) => el.textContent ?? "");
+
+        expect(logTexts).toEqual([
+          `[INFO] ${logInfoText}`,
+          `[ERROR] ${logErrorText}`,
+          `[INFO] ${logInfoText}`,
+        ]);
+      });
     });
 
     it("When PanelLogs is shown Then it displays timestamps for each log entry", async () => {
@@ -589,7 +589,7 @@ describe("Panel", () => {
 
       // Then
       const logsPanel = screen.queryByText(`[INFO] ${logInfoText}`);
-      expect(logsPanel).toBeFalsy();
+      expect(logsPanel).not.toBeInTheDocument();
 
       const logsPanelTitle = screen.queryByText((_content, element) => {
         return (
@@ -597,7 +597,7 @@ describe("Panel", () => {
           element.className.includes("MuiTypography-subtitle2")
         );
       });
-      expect(logsPanelTitle).toBeFalsy();
+      expect(logsPanelTitle).not.toBeInTheDocument();
     });
 
     it("When showLogs is toggled multiple times Then panel visibility changes accordingly", async () => {
@@ -624,7 +624,7 @@ describe("Panel", () => {
             element.className.includes("MuiTypography-subtitle2")
           );
         });
-        expect(logsPanel).toBeTruthy();
+        expect(logsPanel).toBeInTheDocument();
       });
 
       // When/Then - Hide logs
@@ -636,7 +636,7 @@ describe("Panel", () => {
             element.className.includes("MuiTypography-subtitle2")
           );
         });
-        expect(logsPanel).toBeFalsy();
+        expect(logsPanel).not.toBeInTheDocument();
       });
 
       // When/Then - Show logs again
@@ -648,7 +648,7 @@ describe("Panel", () => {
             element.className.includes("MuiTypography-subtitle2")
           );
         });
-        expect(logsPanel).toBeTruthy();
+        expect(logsPanel).toBeInTheDocument();
       });
     });
   });
@@ -793,25 +793,28 @@ describe("Panel", () => {
       return Panel(KeyboardComponent);
     }
 
-    it("When pressing backtick Then quick actions overlay appears", async () => {
+    it("When pressing backtick Then keyboard event is handled without errors", async () => {
       // Given
       const renderFn = jest.fn();
       const KeyboardPanel = getKeyboardPanel(renderFn);
       const childId = "KeyboardDummy!test1";
 
-      const { container } = render(
+      render(
         <PanelSetup>
           <KeyboardPanel childId={childId} />
         </PanelSetup>,
       );
 
+      // Verify panel renders normally before event
+      expect(screen.getByTestId("panel-id")).toHaveTextContent(childId);
+
       // When
       fireEvent.keyDown(document, { key: "`", code: "Backquote" });
 
-      // Then
+      // Then - verify the panel still renders correctly after the keyboard event
       await waitFor(() => {
-        const overlay = container.querySelector('[data-testid*="panel-mouseenter-container"]');
-        expect(overlay).toBeTruthy();
+        expect(screen.getByTestId("panel-id")).toHaveTextContent(childId);
+        expect(screen.getByTestId("config-value")).toBeInTheDocument();
       });
     });
 
@@ -821,7 +824,7 @@ describe("Panel", () => {
       const KeyboardPanel = getKeyboardPanel(renderFn);
       const childId = "KeyboardDummy!test2";
 
-      render(
+      const { container } = render(
         <PanelSetup>
           <KeyboardPanel childId={childId} />
         </PanelSetup>,
@@ -830,12 +833,18 @@ describe("Panel", () => {
       // Press backtick
       fireEvent.keyDown(document, { key: "`", code: "Backquote" });
 
+      // Verify overlay appears
+      await waitFor(() => {
+        const overlay = container.querySelector('[data-testid*="panel-mouseenter-container"]');
+        expect(overlay).toBeInTheDocument();
+      });
+
       // When
       fireEvent.keyUp(document, { key: "`", code: "Backquote" });
 
       // Then
-      // The overlay should be hidden (this is tested through the overlay's open prop)
-      expect(true).toBe(true); // Placeholder assertion since overlay state is internal
+      const panel = container.querySelector('[data-testid*="panel-mouseenter-container"]');
+      expect(panel).toBeInTheDocument();
     });
 
     it("When pressing Cmd+A Then select all panels is triggered", async () => {
@@ -858,9 +867,8 @@ describe("Panel", () => {
       });
 
       // Then
-      // This would trigger selectAllPanels but we can't easily test the effect
-      // The test verifies the handler is called without errors
-      expect(true).toBe(true);
+      expect(screen.getByTestId("panel-id")).toBeInTheDocument();
+      expect(screen.getByTestId("config-value")).toBeInTheDocument();
     });
   });
 
@@ -905,14 +913,13 @@ describe("Panel", () => {
 
       // When
       const panelRoot = container.querySelector('[data-testid*="panel-mouseenter-container"]');
-      expect(panelRoot).toBeTruthy();
+      expect(panelRoot).toBeInTheDocument();
 
       fireEvent.click(panelRoot!, { metaKey: true });
 
       // Then
-      // Panel selection state would be managed by context
-      // This test verifies the click handler works without errors
-      expect(true).toBe(true);
+      expect(screen.getByTestId("panel-id")).toHaveTextContent(childId);
+      expect(screen.getByTestId("config-value")).toBeInTheDocument();
     });
 
     it("When pressing Escape with multiple panels selected Then deselects panels", async () => {
@@ -931,7 +938,8 @@ describe("Panel", () => {
       fireEvent.keyDown(document, { key: "Escape", code: "Escape" });
 
       // Then
-      expect(true).toBe(true);
+      expect(screen.getByTestId("panel-id")).toHaveTextContent(childId);
+      expect(screen.getByTestId("config-value")).toBeInTheDocument();
     });
   });
 
@@ -977,8 +985,8 @@ describe("Panel", () => {
         </PanelSetup>,
       );
 
-      expect(screen.getByText("Throw Error")).toBeTruthy();
-      expect(screen.getByText("Update Config")).toBeTruthy();
+      expect(screen.getByText("Throw Error")).toBeInTheDocument();
+      expect(screen.getByText("Update Config")).toBeInTheDocument();
     });
   });
 
@@ -1026,7 +1034,7 @@ describe("Panel", () => {
       );
 
       const perfInfo = container.querySelector(".mui-skj2y-perfInfo");
-      expect(perfInfo).toBeFalsy();
+      expect(perfInfo).not.toBeInTheDocument();
 
       process.env.NODE_ENV = originalEnv;
     });

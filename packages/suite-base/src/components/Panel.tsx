@@ -46,6 +46,10 @@ import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelOverlay, PanelOverlayProps } from "@lichtblick/suite-base/components/PanelOverlay";
 import { PanelRoot } from "@lichtblick/suite-base/components/PanelRoot";
 import { getPanelTypeFromMosaic } from "@lichtblick/suite-base/components/PanelToolbar/utils";
+import {
+  loadPanelLogsHeight,
+  savePanelLogsHeight,
+} from "@lichtblick/suite-base/components/helpers";
 import { PanelLog, PanelStatics, GenericPanelProps } from "@lichtblick/suite-base/components/types";
 import {
   useCurrentLayoutActions,
@@ -642,12 +646,14 @@ export default function Panel<
                 {showLogs ? (
                   <PanelLogs
                     logs={logs}
+                    initialHeight={loadPanelLogsHeight()}
                     onClose={() => {
                       setShowLogs(false);
                     }}
                     onClear={() => {
                       setLogs([]);
                     }}
+                    onHeightChange={savePanelLogsHeight}
                   />
                 ) : undefined}
               </PanelRoot>

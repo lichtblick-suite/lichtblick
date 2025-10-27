@@ -64,3 +64,11 @@ export type PanelErrorBoundaryState = {
 };
 
 export type PanelLog = { timestamp: string; message: string; error?: Error };
+
+export type PanelLogsProps = {
+  logs: PanelLog[];
+  onClose: () => void;
+  onClear: () => void;
+  initialHeight?: number;
+  onHeightChange?: (height: number) => void;
+};

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import React from "react";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
@@ -12,6 +13,7 @@ import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutC
 import PanelCatalogContext from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { usePanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 // Mock the dependencies
@@ -42,11 +44,11 @@ const mockUseWorkspaceActions = useWorkspaceActions as jest.MockedFunction<
   typeof useWorkspaceActions
 >;
 
-function renderPanelToolbarControls(
+function renderPanelToolbarControls({
   panelContextOverrides = {},
   panelCatalogOverrides = {},
   propsOverrides = {},
-) {
+} = {}) {
   const panelContext = {
     id: "test-panel-id",
     type: "TestPanel",
@@ -133,155 +135,143 @@ describe("PanelToolbarControls", () => {
 
   describe("Given a panel with no logs and settings", () => {
     it("When rendered Then displays logs button and settings button", () => {
-      // Given
-      const panelContext = {
-        id: "test-panel",
-        type: "TestPanel",
-        showLogs: false,
-        setShowLogs: jest.fn(),
-        logCount: 0,
-      };
-
-      // When
-      renderPanelToolbarControls(panelContext);
+      // Given / When
+      renderPanelToolbarControls({
+        panelContextOverrides: {
+          id: "test-panel",
+          type: "TestPanel",
+          showLogs: false,
+          logCount: 0,
+        },
+      });
 
       // Then
-      expect(screen.getByTitle("Show logs")).toBeTruthy();
-      expect(screen.getByTitle("Settings")).toBeTruthy();
-      expect(screen.getByTestId("panel-actions-dropdown")).toBeTruthy();
+      expect(screen.getByTitle("Show logs")).toBeInTheDocument();
+      expect(screen.getByTitle("Settings")).toBeInTheDocument();
+      expect(screen.getByTestId("panel-actions-dropdown")).toBeInTheDocument();
     });
 
     it("When rendered with zero logs Then shows correct logs button state", () => {
-      // Given
-      const panelContext = {
-        showLogs: false,
-        logCount: 0,
-      };
-
-      // When
-      renderPanelToolbarControls(panelContext);
+      // Given / When
+      renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: false,
+          logCount: 0,
+        },
+      });
 
       // Then
       const logsButton = screen.getByTitle("Show logs");
-      expect(logsButton).toBeTruthy();
+      expect(logsButton).toBeInTheDocument();
       // Button should exist but clicking it should not trigger actions (tested separately)
     });
 
     it("When logs button is clicked with zero logs Then does not call setShowLogs", () => {
       // Given
-      const setShowLogs = jest.fn();
-      const panelContext = {
-        showLogs: false,
-        setShowLogs,
-        logCount: 0,
-      };
-
-      renderPanelToolbarControls(panelContext);
+      const { panelContext } = renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: false,
+          logCount: 0,
+        },
+      });
 
       // When
       const logsButton = screen.getByTitle("Show logs");
       fireEvent.click(logsButton);
 
       // Then
-      expect(setShowLogs).not.toHaveBeenCalled();
+      expect(panelContext.setShowLogs).not.toHaveBeenCalled();
     });
 
     it("When logs button is clicked with logs present Then toggles logs visibility", () => {
       // Given
-      const setShowLogs = jest.fn();
-      const panelContext = {
-        showLogs: false,
-        setShowLogs,
-        logCount: 1, // Need logs for button to be enabled
-      };
-
-      renderPanelToolbarControls(panelContext);
+      const logCount = BasicBuilder.number();
+      const { panelContext } = renderPanelToolbarControls({
+        panelContextOverrides: { logCount },
+      });
 
       // When
-      const logsButton = screen.getByTitle("Show logs (1)");
+      const logsButton = screen.getByTitle(`Show logs (${logCount})`);
       fireEvent.click(logsButton);
 
       // Then
-      expect(setShowLogs).toHaveBeenCalledWith({ show: true });
+      expect(panelContext.setShowLogs).toHaveBeenCalledWith({ show: true });
     });
   });
 
   describe("Given a panel with logs visible", () => {
     it("When rendered Then shows hide logs title", () => {
-      // Given
-      const panelContext = {
-        showLogs: true,
-        logCount: 3,
-      };
-
-      // When
-      renderPanelToolbarControls(panelContext);
+      // Given / When
+      renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: true,
+          logCount: BasicBuilder.number(),
+        },
+      });
 
       // Then
-      expect(screen.getByTitle("Hide logs")).toBeTruthy();
+      expect(screen.getByTitle("Hide logs")).toBeInTheDocument();
     });
 
     it("When logs button is clicked Then hides logs", () => {
       // Given
-      const setShowLogs = jest.fn();
-      const panelContext = {
-        showLogs: true,
-        setShowLogs,
-        logCount: 3, // Need logs for button to be enabled
-      };
-
-      renderPanelToolbarControls(panelContext);
+      const { panelContext } = renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: true,
+          logCount: BasicBuilder.number(),
+        },
+      });
 
       // When
       const logsButton = screen.getByTitle("Hide logs");
       fireEvent.click(logsButton);
 
       // Then
-      expect(setShowLogs).toHaveBeenCalledWith({ show: false });
+      expect(panelContext.setShowLogs).toHaveBeenCalledWith({ show: false });
     });
   });
 
   describe("Given a panel with log count", () => {
     it("When panel has logs Then displays log count in title", () => {
       // Given
-      const panelContext = {
-        showLogs: false,
-        logCount: 5,
-      };
+      const logCount = BasicBuilder.number();
 
       // When
-      renderPanelToolbarControls(panelContext);
+      renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: false,
+          logCount,
+        },
+      });
 
       // Then
-      expect(screen.getByTitle("Show logs (5)")).toBeTruthy();
+      expect(screen.getByTitle(`Show logs (${logCount})`)).toBeInTheDocument();
     });
 
     it("When panel has logs Then shows error badge", () => {
-      // Given
-      const panelContext = {
-        logCount: 3,
-      };
-
-      // When
-      const { container } = renderPanelToolbarControls(panelContext);
+      // Given / When
+      const { container } = renderPanelToolbarControls({
+        panelContextOverrides: {
+          logCount: BasicBuilder.number(),
+        },
+      });
 
       // Then
       const badge = container.querySelector(".MuiBadge-colorError");
-      expect(badge).toBeTruthy();
+      expect(badge).toBeInTheDocument();
     });
 
     it("When panel has no logs Then hides error badge", () => {
-      // Given
-      const panelContext = {
-        logCount: 0,
-      };
-
-      // When
-      const { container } = renderPanelToolbarControls(panelContext);
+      // Given / When
+      const { container } = renderPanelToolbarControls({
+        panelContextOverrides: {
+          logCount: 0,
+        },
+      });
 
       // Then
       const badge = container.querySelector(".MuiBadge-invisible");
-      expect(badge).toBeTruthy();
+      expect(badge).toBeInTheDocument();
     });
   });
 
@@ -321,7 +311,7 @@ describe("PanelToolbarControls", () => {
         id: "test-panel-123",
       };
 
-      renderPanelToolbarControls(panelContext);
+      renderPanelToolbarControls({ panelContextOverrides: panelContext });
 
       // When
       const settingsButton = screen.getByTitle("Settings");
@@ -333,14 +323,11 @@ describe("PanelToolbarControls", () => {
     });
 
     it("When panel has no id Then settings button does not crash", () => {
-      // Given
-      const panelContext = {
-        id: undefined,
-      };
-
       // When/Then - should not throw
       expect(() => {
-        renderPanelToolbarControls(panelContext);
+        renderPanelToolbarControls({
+          panelContextOverrides: { id: undefined },
+        });
         const settingsButton = screen.getByTitle("Settings");
         fireEvent.click(settingsButton);
       }).not.toThrow();
@@ -362,10 +349,12 @@ describe("PanelToolbarControls", () => {
       mockUsePanelStateStore.mockReturnValue(false);
 
       // When
-      renderPanelToolbarControls({}, panelCatalog);
+      renderPanelToolbarControls({
+        panelCatalogOverrides: panelCatalog,
+      });
 
       // Then
-      expect(screen.queryByTitle("Settings")).toBeFalsy();
+      expect(screen.queryByTitle("Settings")).not.toBeInTheDocument();
     });
 
     it("When panel has custom toolbar but has settings Then shows settings button", () => {
@@ -382,10 +371,12 @@ describe("PanelToolbarControls", () => {
       mockUsePanelStateStore.mockReturnValue(true);
 
       // When
-      renderPanelToolbarControls({}, panelCatalog);
+      renderPanelToolbarControls({
+        panelCatalogOverrides: panelCatalog,
+      });
 
       // Then
-      expect(screen.getByTitle("Settings")).toBeTruthy();
+      expect(screen.getByTitle("Settings")).toBeInTheDocument();
     });
   });
 
@@ -395,24 +386,23 @@ describe("PanelToolbarControls", () => {
       const additionalIcons = <div data-testid="custom-icon">Custom Icon</div>;
 
       // When
-      renderPanelToolbarControls({}, {}, { additionalIcons });
+      renderPanelToolbarControls({
+        propsOverrides: { additionalIcons },
+      });
 
       // Then
-      expect(screen.getByTestId("custom-icon")).toBeTruthy();
-      expect(screen.getByText("Custom Icon")).toBeTruthy();
+      expect(screen.getByTestId("custom-icon")).toBeInTheDocument();
+      expect(screen.getByText("Custom Icon")).toBeInTheDocument();
     });
 
     it("When no additional icons are provided Then only shows default controls", () => {
-      // Given
-      const panelContext = {};
-
-      // When
-      renderPanelToolbarControls(panelContext);
+      // Given / When
+      renderPanelToolbarControls();
 
       // Then
-      expect(screen.queryByTestId("custom-icon")).toBeFalsy();
-      expect(screen.getByTitle("Show logs")).toBeTruthy();
-      expect(screen.getByTitle("Settings")).toBeTruthy();
+      expect(screen.queryByTestId("custom-icon")).not.toBeInTheDocument();
+      expect(screen.getByTitle("Show logs")).toBeInTheDocument();
+      expect(screen.getByTitle("Settings")).toBeInTheDocument();
     });
   });
 
@@ -422,7 +412,9 @@ describe("PanelToolbarControls", () => {
       const isUnknownPanel = true;
 
       // When
-      renderPanelToolbarControls({}, {}, { isUnknownPanel });
+      renderPanelToolbarControls({
+        propsOverrides: { isUnknownPanel },
+      });
 
       // Then
       const dropdown = screen.getByTestId("panel-actions-dropdown");
@@ -434,7 +426,9 @@ describe("PanelToolbarControls", () => {
       const isUnknownPanel = false;
 
       // When
-      renderPanelToolbarControls({}, {}, { isUnknownPanel });
+      renderPanelToolbarControls({
+        propsOverrides: { isUnknownPanel },
+      });
 
       // Then
       const dropdown = screen.getByTestId("panel-actions-dropdown");
@@ -444,16 +438,13 @@ describe("PanelToolbarControls", () => {
 
   describe("Given different panel types", () => {
     it("When panel type is undefined Then handles gracefully without errors", () => {
-      // Given
-      const panelContext = {
-        type: undefined,
-      };
-
-      // When
-      renderPanelToolbarControls(panelContext);
+      // Given / When
+      renderPanelToolbarControls({
+        panelContextOverrides: { type: undefined },
+      });
 
       // Then - should not throw and should render basic controls
-      expect(screen.getByTitle("Show logs")).toBeTruthy();
+      expect(screen.getByTitle("Show logs")).toBeInTheDocument();
     });
 
     it("When panel catalog returns undefined Then handles gracefully", () => {
@@ -463,11 +454,13 @@ describe("PanelToolbarControls", () => {
       };
 
       // When
-      renderPanelToolbarControls({}, panelCatalog);
+      renderPanelToolbarControls({
+        panelCatalogOverrides: panelCatalog,
+      });
 
       // Then
-      expect(screen.getByTitle("Show logs")).toBeTruthy();
-      expect(screen.getByTitle("Settings")).toBeTruthy();
+      expect(screen.getByTitle("Show logs")).toBeInTheDocument();
+      expect(screen.getByTitle("Settings")).toBeInTheDocument();
     });
 
     it("When panel type is not found in catalog Then shows settings button", () => {
@@ -477,10 +470,12 @@ describe("PanelToolbarControls", () => {
       };
 
       // When
-      renderPanelToolbarControls({}, panelCatalog);
+      renderPanelToolbarControls({
+        panelCatalogOverrides: panelCatalog,
+      });
 
       // Then
-      expect(screen.getByTitle("Settings")).toBeTruthy();
+      expect(screen.getByTitle("Settings")).toBeInTheDocument();
     });
   });
 
@@ -499,23 +494,20 @@ describe("PanelToolbarControls", () => {
       );
 
       // Then - should not crash and should render something
-      expect(container.firstChild).toBeTruthy();
+      expect(container.firstChild).toBeInTheDocument();
     });
 
     it("When setShowLogs is missing Then logs button does not crash on click", () => {
-      // Given
-      const panelContext = {
-        showLogs: false,
-        setShowLogs: undefined,
-      };
-
-      renderPanelToolbarControls(panelContext);
-
-      // When
-      const logsButton = screen.getByTitle("Show logs");
-      fireEvent.click(logsButton);
+      // Given / When
+      renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: false,
+          setShowLogs: undefined,
+        },
+      });
 
       // Then - should not throw
+      const logsButton = screen.getByTitle("Show logs");
       expect(() => {
         fireEvent.click(logsButton);
       }).not.toThrow();
@@ -526,7 +518,9 @@ describe("PanelToolbarControls", () => {
     it("When props don't change Then component should render consistently", () => {
       // Given
       const props = { isUnknownPanel: false };
-      const { rerender } = renderPanelToolbarControls({}, {}, props);
+      const { rerender } = renderPanelToolbarControls({
+        propsOverrides: props,
+      });
 
       const firstRender = screen.getByTitle("Show logs");
 
@@ -577,8 +571,8 @@ describe("PanelToolbarControls", () => {
       );
 
       // Then - should still render properly
-      expect(screen.getByTitle("Show logs")).toBeTruthy();
-      expect(firstRender).toBeTruthy();
+      expect(screen.getByTitle("Show logs")).toBeInTheDocument();
+      expect(firstRender).toBeInTheDocument();
     });
   });
 
@@ -589,11 +583,13 @@ describe("PanelToolbarControls", () => {
         logCount: 0,
       };
 
-      const { rerender } = renderPanelToolbarControls(panelContext);
+      const { rerender } = renderPanelToolbarControls({
+        panelContextOverrides: panelContext,
+      });
 
       // Verify initial state - badge should be invisible
       let badge = document.querySelector(".MuiBadge-invisible");
-      expect(badge).toBeTruthy();
+      expect(badge).toBeInTheDocument();
 
       // When - update to have logs
       rerender(
@@ -643,7 +639,7 @@ describe("PanelToolbarControls", () => {
 
       // Then - badge should be visible
       badge = document.querySelector(".MuiBadge-colorError");
-      expect(badge).toBeTruthy();
+      expect(badge).toBeInTheDocument();
     });
   });
 
@@ -685,7 +681,7 @@ describe("PanelToolbarControls", () => {
       );
 
       // Then
-      expect(ref.current).toBeTruthy();
+      expect(ref.current).not.toBeNull();
       expect(ref.current?.tagName).toBe("DIV");
     });
   });
@@ -699,27 +695,31 @@ describe("PanelToolbarControls", () => {
       };
 
       // When
-      renderPanelToolbarControls(panelContext);
+      renderPanelToolbarControls({
+        panelContextOverrides: panelContext,
+      });
 
       // Then
       const logsButton = screen.getByTitle("Show logs");
-      expect(logsButton).toBeTruthy();
+      expect(logsButton).toBeInTheDocument();
       // Functional test - button exists and behavior is tested in other tests
     });
 
     it("When logs button has logs Then allows interaction", () => {
       // Given
-      const panelContext = {
-        logCount: 2,
-        showLogs: false,
-      };
+      const logCount = BasicBuilder.number();
 
       // When
-      renderPanelToolbarControls(panelContext);
+      renderPanelToolbarControls({
+        panelContextOverrides: {
+          logCount,
+          showLogs: false,
+        },
+      });
 
       // Then
-      const logsButton = screen.getByTitle("Show logs (2)");
-      expect(logsButton).toBeTruthy();
+      const logsButton = screen.getByTitle(`Show logs (${logCount})`);
+      expect(logsButton).toBeInTheDocument();
       // Functional test - clicking behavior is tested in other tests
     });
 
@@ -754,7 +754,9 @@ describe("PanelToolbarControls", () => {
         id: undefined,
       };
 
-      renderPanelToolbarControls(panelContext);
+      renderPanelToolbarControls({
+        panelContextOverrides: panelContext,
+      });
 
       // When
       const settingsButton = screen.getByTitle("Settings");
@@ -766,18 +768,17 @@ describe("PanelToolbarControls", () => {
     });
 
     it("When logs are visible Then shows correct icon color", () => {
-      // Given
-      const panelContext = {
-        showLogs: true,
-        logCount: 1,
-      };
-
-      // When
-      const { container } = renderPanelToolbarControls(panelContext);
+      // Given / When
+      const { container } = renderPanelToolbarControls({
+        panelContextOverrides: {
+          showLogs: true,
+          logCount: BasicBuilder.number(),
+        },
+      });
 
       // Then
       const icon = container.querySelector('[data-testid="ListAltIcon"]');
-      expect(icon).toBeTruthy();
+      expect(icon).toBeInTheDocument();
     });
   });
 });

@@ -9,12 +9,10 @@ import { Component, ReactNode } from "react";
 import PanelErrorBoundary from "@lichtblick/suite-base/components/PanelErrorBoundary";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-// Mock reportError to avoid actual error reporting during tests
 jest.mock("@lichtblick/suite-base/reportError", () => ({
   reportError: jest.fn(),
 }));
 
-// Component that throws an error when triggerError prop is true
 interface ErrorThrowingComponentProps {
   triggerError?: boolean;
   errorMessage?: string;
@@ -81,14 +79,13 @@ describe("PanelErrorBoundary", () => {
 
     it("When no error occurs Then does not call onLogError", () => {
       // Given
-      const onLogError = jest.fn();
       const workingComponent = <ErrorThrowingComponent triggerError={false} />;
 
       // When
-      renderErrorBoundary(workingComponent, { onLogError });
+      const { props } = renderErrorBoundary(workingComponent);
 
       // Then
-      expect(onLogError).not.toHaveBeenCalled();
+      expect(props.onLogError).not.toHaveBeenCalled();
     });
   });
 
@@ -130,22 +127,21 @@ describe("PanelErrorBoundary", () => {
 
     it("When error is thrown Then calls onLogError with error details", () => {
       // Given
-      const onLogError = jest.fn();
       const errorMessage = "Custom error message";
       const errorComponent = (
         <ErrorThrowingComponent triggerError={true} errorMessage={errorMessage} />
       );
 
       // When
-      renderErrorBoundary(errorComponent, { onLogError });
+      const { props } = renderErrorBoundary(errorComponent);
 
       // Then
-      expect(onLogError).toHaveBeenCalledTimes(1);
-      expect(onLogError).toHaveBeenCalledWith(
+      expect(props.onLogError).toHaveBeenCalledTimes(1);
+      expect(props.onLogError).toHaveBeenCalledWith(
         `Panel render error: ${errorMessage}`,
         expect.any(Error),
       );
-      expect(onLogError.mock.calls[0][1].message).toBe(errorMessage);
+      expect((props.onLogError as jest.Mock).mock.calls[0][1].message).toBe(errorMessage);
     });
 
     it("When onLogError is not provided Then does not throw", () => {
@@ -154,7 +150,8 @@ describe("PanelErrorBoundary", () => {
 
       // When/Then - should not throw
       expect(() => {
-        renderErrorBoundary(errorComponent, { onLogError: undefined });
+        const { props } = renderErrorBoundary(errorComponent, { onLogError: undefined });
+        expect(props.onLogError).toBeUndefined();
       }).not.toThrow();
 
       // Should still show error UI
@@ -191,10 +188,9 @@ describe("PanelErrorBoundary", () => {
 
     it("When Reset Panel button is clicked Then calls onResetPanel and clears error", () => {
       // Given
-      const onResetPanel = jest.fn();
       const errorComponent = <ErrorThrowingComponent triggerError={true} />;
 
-      renderErrorBoundary(errorComponent, { onResetPanel });
+      const { props } = renderErrorBoundary(errorComponent);
 
       // Verify error state is shown
       expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
@@ -204,15 +200,14 @@ describe("PanelErrorBoundary", () => {
       fireEvent.click(resetButton);
 
       // Then
-      expect(onResetPanel).toHaveBeenCalledTimes(1);
+      expect(props.onResetPanel).toHaveBeenCalledTimes(1);
     });
 
     it("When Remove Panel button is clicked Then calls onRemovePanel", () => {
       // Given
-      const onRemovePanel = jest.fn();
       const errorComponent = <ErrorThrowingComponent triggerError={true} />;
 
-      renderErrorBoundary(errorComponent, { onRemovePanel });
+      const { props } = renderErrorBoundary(errorComponent);
 
       // Verify error state is shown
       expect(screen.getByText("This panel encountered an unexpected error")).toBeTruthy();
@@ -222,12 +217,12 @@ describe("PanelErrorBoundary", () => {
       fireEvent.click(removeButton);
 
       // Then
-      expect(onRemovePanel).toHaveBeenCalledTimes(1);
+      expect(props.onRemovePanel).toHaveBeenCalledTimes(1);
     });
 
     it("When multiple errors occur Then shows the first error until reset", () => {
       // Given
-      const { rerender } = renderErrorBoundary(
+      const { rerender, props } = renderErrorBoundary(
         <ErrorThrowingComponent triggerError={true} errorMessage="First error" />,
       );
 
@@ -237,7 +232,7 @@ describe("PanelErrorBoundary", () => {
       // When - rerender with different error (error boundary preserves first error)
       rerender(
         <ThemeProvider isDark={false}>
-          <PanelErrorBoundary onResetPanel={jest.fn()} onRemovePanel={jest.fn()}>
+          <PanelErrorBoundary onResetPanel={props.onResetPanel} onRemovePanel={props.onRemovePanel}>
             <ErrorThrowingComponent triggerError={true} errorMessage="Second error" />
           </PanelErrorBoundary>
         </ThemeProvider>,
@@ -380,10 +375,11 @@ describe("PanelErrorBoundary", () => {
 
     it("When sibling component throws error Then only affects error boundary subtree", () => {
       // Given
+      const { props } = renderErrorBoundary(<div />, {});
       const MixedComponent = () => (
         <div>
           <div data-testid="working-sibling">Working sibling</div>
-          <PanelErrorBoundary onResetPanel={jest.fn()} onRemovePanel={jest.fn()}>
+          <PanelErrorBoundary onResetPanel={props.onResetPanel} onRemovePanel={props.onRemovePanel}>
             <ErrorThrowingComponent triggerError={true} errorMessage="Isolated error" />
           </PanelErrorBoundary>
         </div>

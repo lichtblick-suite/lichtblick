@@ -3,7 +3,7 @@
 
 import { makeStyles } from "tss-react/mui";
 
-export const useStyles = makeStyles()((theme) => ({
+export const useStylesPanelLogs = makeStyles()((theme) => ({
   root: {
     background: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -55,5 +55,9 @@ export const useStyles = makeStyles()((theme) => ({
     flex: 1,
     overflowY: "auto",
     padding: theme.spacing(0, 1, 1, 1),
+  },
+  listItem: {
+    padding: theme.spacing(1),
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
 }));

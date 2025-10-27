@@ -7,22 +7,18 @@ import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { List, ListItem, ListItemText, Typography, IconButton } from "@mui/material";
 import { useCallback, useRef, useState, useEffect } from "react";
 
-import { useStyles } from "@lichtblick/suite-base/components/PanelLogs.style";
-import { PanelLog } from "@lichtblick/suite-base/components/types";
-import { DEFAULT_HEIGHT, MAX_HEIGHT, MIN_HEIGHT } from "@lichtblick/suite-base/constants/panelLogs";
+import { useStylesPanelLogs } from "@lichtblick/suite-base/components/PanelLogs.style";
+import { PanelLogsProps } from "@lichtblick/suite-base/components/types";
+import { MAX_HEIGHT, MIN_HEIGHT } from "@lichtblick/suite-base/constants/panelLogs";
 
 export default function PanelLogs({
   logs,
   onClose,
   onClear,
-  initialHeight = DEFAULT_HEIGHT,
-}: {
-  logs: PanelLog[];
-  onClose: () => void;
-  onClear: () => void;
-  initialHeight?: number;
-}): React.ReactElement {
-  const { classes } = useStyles();
+  initialHeight = MAX_HEIGHT,
+  onHeightChange,
+}: PanelLogsProps): React.ReactElement {
+  const { classes } = useStylesPanelLogs();
   const [height, setHeight] = useState(initialHeight);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(ReactNull);
@@ -58,7 +54,12 @@ export default function PanelLogs({
     setIsDragging(false);
     document.body.style.cursor = "";
     document.body.style.userSelect = "";
-  }, []);
+
+    // Save the height when dragging ends
+    if (onHeightChange) {
+      onHeightChange(height);
+    }
+  }, [height, onHeightChange]);
 
   useEffect(() => {
     if (isDragging) {
@@ -114,7 +115,7 @@ export default function PanelLogs({
             </ListItem>
           ) : (
             logs.map((log, idx) => (
-              <ListItem key={idx} alignItems="flex-start">
+              <ListItem key={idx} alignItems="flex-start" className={classes.listItem}>
                 <ListItemText
                   primary={`[${log.error ? "ERROR" : "INFO"}] ${log.message}`}
                   secondary={

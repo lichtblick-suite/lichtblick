@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 
 import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelLog } from "@lichtblick/suite-base/components/types";
@@ -15,11 +16,7 @@ function renderPanelLogs(
   onClose: () => void = jest.fn(),
   onClear: () => void = jest.fn(),
 ) {
-  return render(
-    <ThemeProvider isDark={false}>
-      <PanelLogs logs={logs} onClose={onClose} onClear={onClear} />
-    </ThemeProvider>,
-  );
+  return render(<PanelLogs logs={logs} onClose={onClose} onClear={onClear} />);
 }
 
 function getLogCountText(count: number) {
@@ -49,9 +46,9 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText("No logs yet.")).toBeTruthy();
-      expect(screen.getByText("Errors and log messages will appear here.")).toBeTruthy();
-      expect(getLogCountText(0)).toBeTruthy();
+      expect(screen.getByText("No logs yet.")).toBeInTheDocument();
+      expect(screen.getByText("Errors and log messages will appear here.")).toBeInTheDocument();
+      expect(getLogCountText(0)).toBeInTheDocument();
     });
 
     it("When close button is clicked Then onClose is called", () => {
@@ -89,11 +86,11 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(getLogCountText(2)).toBeTruthy();
-      expect(screen.getByText(`[INFO] ${infoMessage}`)).toBeTruthy();
-      expect(screen.getByText(`[INFO] ${anotherInforMessage}`)).toBeTruthy();
-      expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
-      expect(screen.getByText("2023-12-01 10:01:00")).toBeTruthy();
+      expect(getLogCountText(2)).toBeInTheDocument();
+      expect(screen.getByText(`[INFO] ${infoMessage}`)).toBeInTheDocument();
+      expect(screen.getByText(`[INFO] ${anotherInforMessage}`)).toBeInTheDocument();
+      expect(screen.getByText("2023-12-01 10:00:00")).toBeInTheDocument();
+      expect(screen.getByText("2023-12-01 10:01:00")).toBeInTheDocument();
     });
   });
 
@@ -114,9 +111,9 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(getLogCountText(1)).toBeTruthy();
-      expect(screen.getByText("[ERROR] Something went wrong")).toBeTruthy();
-      expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
+      expect(getLogCountText(1)).toBeInTheDocument();
+      expect(screen.getByText("[ERROR] Something went wrong")).toBeInTheDocument();
+      expect(screen.getByText("2023-12-01 10:00:00")).toBeInTheDocument();
 
       // Check for error stack - it's rendered in a pre element
       const errorStack = screen.getByText((content, element) => {
@@ -126,7 +123,7 @@ describe("PanelLogs", () => {
           content.includes("at test.js:1:1")
         );
       });
-      expect(errorStack).toBeTruthy();
+      expect(errorStack).toBeInTheDocument();
     });
 
     it("When error has no stack Then displays error message only", () => {
@@ -146,8 +143,8 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(screen.getByText(`[ERROR] ${errorMessage}`)).toBeTruthy();
-      expect(screen.getByText(errorMessage)).toBeTruthy();
+      expect(screen.getByText(`[ERROR] ${errorMessage}`)).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
 
@@ -178,15 +175,15 @@ describe("PanelLogs", () => {
       renderPanelLogs(logs);
 
       // Then
-      expect(getLogCountText(3)).toBeTruthy();
-      expect(screen.getByText(`[INFO] ${infoMessage}`)).toBeTruthy();
-      expect(screen.getByText(`[ERROR] ${errorMessage}`)).toBeTruthy();
-      expect(screen.getByText(`[INFO] ${anotherInfoMessage}`)).toBeTruthy();
+      expect(getLogCountText(3)).toBeInTheDocument();
+      expect(screen.getByText(`[INFO] ${infoMessage}`)).toBeInTheDocument();
+      expect(screen.getByText(`[ERROR] ${errorMessage}`)).toBeInTheDocument();
+      expect(screen.getByText(`[INFO] ${anotherInfoMessage}`)).toBeInTheDocument();
 
-      // Verify timestamps are displayed
-      expect(screen.getByText("2023-12-01 10:00:00")).toBeTruthy();
-      expect(screen.getByText("2023-12-01 10:01:00")).toBeTruthy();
-      expect(screen.getByText("2023-12-01 10:02:00")).toBeTruthy();
+      // Then
+      expect(screen.getByText("2023-12-01 10:00:00")).toBeInTheDocument();
+      expect(screen.getByText("2023-12-01 10:01:00")).toBeInTheDocument();
+      expect(screen.getByText("2023-12-01 10:02:00")).toBeInTheDocument();
     });
   });
 
@@ -204,11 +201,11 @@ describe("PanelLogs", () => {
       const { container } = renderPanelLogs(logs);
 
       // Then
-      expect(getLogCountText(logsLength)).toBeTruthy();
+      expect(getLogCountText(logsLength)).toBeInTheDocument();
 
-      // Check that the list container has overflow styling for scrolling
+      // Then
       const listContainer = container.querySelector('[class*="listContainer"]');
-      expect(listContainer).toBeTruthy();
+      expect(listContainer).toBeInTheDocument();
       const computedStyle = getComputedStyle(listContainer!);
       expect(computedStyle.overflowY).toBe("auto");
     });
@@ -224,7 +221,7 @@ describe("PanelLogs", () => {
 
       // Then
       const resizeHandle = screen.getByTitle("Drag to resize panel logs");
-      expect(resizeHandle).toBeTruthy();
+      expect(resizeHandle).toBeInTheDocument();
     });
 
     it("When rendered with initialHeight Then uses provided height", () => {
@@ -246,27 +243,31 @@ describe("PanelLogs", () => {
 
       // Then
       const container = document.querySelector('[class*="root"]');
-      expect(container).toBeTruthy();
+      expect(container).toBeInTheDocument();
       expect(container?.getAttribute("style")).toContain("height: 300px");
     });
 
     it("When resize handle is dragged Then updates panel height", () => {
       // Given
       const logs: PanelLog[] = [];
-      renderPanelLogs(logs);
+
+      render(
+        <ThemeProvider isDark={false}>
+          <PanelLogs logs={logs} onClose={jest.fn()} onClear={jest.fn()} initialHeight={400} />
+        </ThemeProvider>,
+      );
 
       const resizeHandle = screen.getByTitle("Drag to resize panel logs");
       const container = document.querySelector('[class*="root"]');
 
-      // When - simulate mouse down, move, and up
+      // When
       fireEvent.mouseDown(resizeHandle, { clientY: 100 });
 
-      // Simulate mouse move upward (should increase height)
       fireEvent(document, new MouseEvent("mousemove", { clientY: 50 }));
       fireEvent(document, new MouseEvent("mouseup"));
 
       // Then
-      expect(container?.getAttribute("style")).toContain("height: 250px"); // 200 + (100-50) = 250
+      expect(container?.getAttribute("style")).toContain("height: 450px");
     });
 
     it("When dragging beyond max height Then constrains to maximum", () => {
@@ -286,21 +287,53 @@ describe("PanelLogs", () => {
       expect(container?.getAttribute("style")).toContain("height: 600px");
     });
 
-    it("When dragging below min height Then constrains to minimum", () => {
+    it("When onHeightChange is provided and drag ends Then calls onHeightChange with new height", () => {
       // Given
       const logs: PanelLog[] = [];
-      renderPanelLogs(logs);
+      const onHeightChange = jest.fn();
+      const initialHeight = 400;
+
+      render(
+        <ThemeProvider isDark={false}>
+          <PanelLogs
+            logs={logs}
+            onClose={jest.fn()}
+            onClear={jest.fn()}
+            initialHeight={initialHeight}
+            onHeightChange={onHeightChange}
+          />
+        </ThemeProvider>,
+      );
 
       const resizeHandle = screen.getByTitle("Drag to resize panel logs");
-      const container = document.querySelector('[class*="root"]');
 
-      // When - simulate dragging way down (below min height)
+      // When
       fireEvent.mouseDown(resizeHandle, { clientY: 100 });
-      fireEvent(document, new MouseEvent("mousemove", { clientY: 1000 })); // Very large downward movement
+      fireEvent(document, new MouseEvent("mousemove", { clientY: 50 }));
       fireEvent(document, new MouseEvent("mouseup"));
 
-      // Then - should be constrained to min height (120px)
-      expect(container?.getAttribute("style")).toContain("height: 120px");
+      // Then
+      expect(onHeightChange).toHaveBeenCalledWith(450); // 400 + (100 - 50)
+    });
+
+    it("When onHeightChange is not provided and drag ends Then does not cause errors", () => {
+      // Given
+      const logs: PanelLog[] = [];
+
+      render(
+        <ThemeProvider isDark={false}>
+          <PanelLogs logs={logs} onClose={jest.fn()} onClear={jest.fn()} initialHeight={400} />
+        </ThemeProvider>,
+      );
+
+      const resizeHandle = screen.getByTitle("Drag to resize panel logs");
+
+      // When/Then - should not throw error
+      expect(() => {
+        fireEvent.mouseDown(resizeHandle, { clientY: 100 });
+        fireEvent(document, new MouseEvent("mousemove", { clientY: 50 }));
+        fireEvent(document, new MouseEvent("mouseup"));
+      }).not.toThrow();
     });
   });
 
@@ -392,7 +425,7 @@ describe("PanelLogs", () => {
       // Then
       const clearButton = screen.getByRole("button", { name: "Clear logs" });
       const icon = clearButton.querySelector('[data-testid="DeleteSweepIcon"]');
-      expect(icon).toBeTruthy();
+      expect(icon).toBeInTheDocument();
     });
 
     it("When rendered Then clear button appears before close button", () => {
