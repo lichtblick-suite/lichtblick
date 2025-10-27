@@ -80,7 +80,9 @@ export class RemoteExtensionLoader implements IExtensionLoader {
     const decompressedData = await decompressFile(foxeFileData);
     const rawPackageFile = await extractFoxeFileContent(decompressedData, ALLOWED_FILES.PACKAGE);
     if (!rawPackageFile) {
-      throw new Error(`Extension is corrupted: missing ${ALLOWED_FILES.PACKAGE}`);
+      throw new Error(
+        `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
+      );
     }
 
     const rawInfo = validatePackageInfo(JSON.parse(rawPackageFile) as Partial<ExtensionInfo>);

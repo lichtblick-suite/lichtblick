@@ -197,6 +197,18 @@ describe("RemoteExtensionLoader", () => {
       expect(result).toBe(mockStoredExtension.info);
     });
 
+    it("When installing extension without file parameter, Then should throw error", async () => {
+      // Given
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify({ name: "test" }) ?? "");
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+
+      // When & Then - Should throw error
+      await expect(
+        loader.installExtension({ foxeFileData: mockFoxeData, file: undefined }),
+      ).rejects.toThrow("File is required to install extension in server.");
+    });
+
     it("When installing extension with missing package.json, Then should throw error", async () => {
       // Given
       const zip = new JSZip();
@@ -207,7 +219,9 @@ describe("RemoteExtensionLoader", () => {
       // When & Then - Should throw error
       await expect(
         loader.installExtension({ foxeFileData: mockFoxeData, file: mockFile }),
-      ).rejects.toThrow(`Extension is corrupted: missing ${ALLOWED_FILES.PACKAGE}`);
+      ).rejects.toThrow(
+        `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
+      );
     });
   });
 
