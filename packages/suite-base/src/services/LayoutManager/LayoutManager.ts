@@ -72,7 +72,7 @@ export default class LayoutManager implements ILayoutManager {
       new NamespacedLayoutStorage(
         new WriteThroughLayoutCache(local),
         remote
-          ? LayoutManager.REMOTE_STORAGE_NAMESPACE_PREFIX + remote.namespace
+          ? LayoutManager.REMOTE_STORAGE_NAMESPACE_PREFIX + remote.workspace
           : LayoutManager.LOCAL_STORAGE_NAMESPACE,
         {
           migrateUnnamespacedLayouts: true,

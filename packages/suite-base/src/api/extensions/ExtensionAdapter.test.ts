@@ -51,10 +51,10 @@ describe("ExtensionAdapter", () => {
     it("should convert IExtensionApiResponse to StoredExtension with default content", () => {
       // Given
       const apiResponse = createMockApiResponse();
-      const remoteNamespace = BasicBuilder.string();
+      const workspace = BasicBuilder.string();
 
       // When
-      const result = ExtensionAdapter.toStoredExtension(apiResponse, remoteNamespace);
+      const result = ExtensionAdapter.toStoredExtension(apiResponse, workspace);
 
       // Then
       expect(result).toEqual({
@@ -65,7 +65,7 @@ describe("ExtensionAdapter", () => {
           namespace: apiResponse.scope,
         },
         content: new Uint8Array(),
-        remoteNamespace,
+        workspace,
         fileId: apiResponse.fileId,
         externalId: apiResponse.id,
       } as StoredExtension);
@@ -74,15 +74,11 @@ describe("ExtensionAdapter", () => {
     it("should convert IExtensionApiResponse to StoredExtension with custom content", () => {
       // Given
       const apiResponse = createMockApiResponse();
-      const remoteNamespace = BasicBuilder.string();
+      const workspace = BasicBuilder.string();
       const customContent = new Uint8Array([1, 2, 3, 4]);
 
       // When
-      const result = ExtensionAdapter.toStoredExtension(
-        apiResponse,
-        remoteNamespace,
-        customContent,
-      );
+      const result = ExtensionAdapter.toStoredExtension(apiResponse, workspace, customContent);
 
       // Then
       expect(result).toEqual({
@@ -93,7 +89,7 @@ describe("ExtensionAdapter", () => {
           namespace: apiResponse.scope,
         },
         content: customContent,
-        remoteNamespace,
+        workspace,
         fileId: apiResponse.fileId,
         externalId: apiResponse.id,
       });

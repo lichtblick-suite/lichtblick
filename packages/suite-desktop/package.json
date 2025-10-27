@@ -34,7 +34,7 @@
     "electron-devtools-installer": "4.0.0",
     "electron-squirrel-startup": "1.0.1",
     "electron-updater": "6.6.2",
-    "esbuild-loader": "2.21.0",
+    "esbuild-loader": "4.3.0",
     "eventemitter3": "5.0.1",
     "fork-ts-checker-webpack-plugin": "9.0.2",
     "html-webpack-plugin": "5.5.3",

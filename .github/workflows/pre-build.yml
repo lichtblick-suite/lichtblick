@@ -45,21 +45,21 @@ jobs:
         run: yarn run package:darwin
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lichtblick-${{ env.version }}-windows
           path: dist/lichtblick-${{ env.version }}-win.exe
           retention-days: 30
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lichtblick-${{ env.version }}-debian-amd64
           path: dist/lichtblick-${{ env.version }}-linux-amd64.deb
           retention-days: 30
 
       - name: Upload MacOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lichtblick-${{ env.version }}-macos
           path: dist/lichtblick-${{ env.version }}-mac-universal.dmg

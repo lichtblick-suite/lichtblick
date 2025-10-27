@@ -4,13 +4,19 @@ on:
   push:
     branches: ["main", "develop"]
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
 
 jobs:
-  build:
-    name: SonarCloud
+  sonarcloud:
+    name: SonarCloud Code Analysis
     runs-on: ubuntu-latest
+
+    # Execute the job only if it's a push event or if the pull request does not have the 'skip-sonar' label
+    if: |
+      github.event_name == 'push' ||
+      !contains(github.event.pull_request.labels.*.name, 'skip-sonar')
+
     steps:
       - uses: actions/checkout@v5
         with:
@@ -46,7 +52,7 @@ jobs:
         run: yarn test:coverage
         continue-on-error: true
 
-      - name: ScanCloud Scan
+      - name: SonarCloud Scan
         uses: sonarsource/sonarqube-scan-action@v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
