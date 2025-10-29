@@ -60,7 +60,6 @@ const expectedExtensionInfo: ExtensionInfo = {
 } as ExtensionInfo;
 
 const EXT_FILE_TURTLESIM = `${__dirname}/../../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
-const EXT_FILE_PREFIXED = `${__dirname}/../../test/fixtures/prefixed-name-extension.foxe`;
 
 jest.mock("@lichtblick/log", () => ({
   getLogger: jest.fn(() => ({
@@ -106,7 +105,7 @@ describe("IdbExtensionLoader", () => {
       const info: ExtensionInfo = {
         ...expectedExtensionInfo,
         namespace: "org",
-        qualifiedName: "org:Foxglove Inc:studio-extension-turtlesim",
+        qualifiedName: expectedExtensionInfo.displayName,
       };
       mockGetAll.mockReturnValue([info]);
       const loader = new IdbExtensionLoader("org");
@@ -121,29 +120,65 @@ describe("IdbExtensionLoader", () => {
       expect((await loader.getExtensions())[0]).toBe(info);
     });
 
-    it("should parse package prefixes", async () => {
-      const foxe = fs.readFileSync(EXT_FILE_PREFIXED);
-      const info: ExtensionInfo = {
-        id: "Prefix.package-name",
-        name: "package-name",
-        namespace: "org",
-        publisher: "Prefix",
-        qualifiedName: "org:Prefix:package-name",
-        changelog: "",
-        readme: "",
-      } as ExtensionInfo;
+    it("When installing extension with missing package.json, Then should throw error", async () => {
+      // Given
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const loader = new IdbExtensionLoader("local");
 
-      mockGetAll.mockReturnValue([info]);
-      const loader = new IdbExtensionLoader("org");
+      // When & Then - Should throw error
+      await expect(loader.installExtension({ foxeFileData: mockFoxeData })).rejects.toThrow(
+        `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
+      );
+    });
 
-      await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
+    it("When installing extension without displayName, Then should use name as qualifiedName", async () => {
+      // Given
+      const name = BasicBuilder.string();
+      const publisher = BasicBuilder.string();
+      const mockPackageJson = {
+        name,
+        publisher,
+        version: BasicBuilder.string(),
+      };
 
-      expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
-      expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
-        content: foxe,
-        info,
-      });
-      expect((await loader.getExtensions())[0]).toBe(info);
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify(mockPackageJson) ?? "");
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const loader = new IdbExtensionLoader("local");
+
+      // When
+      const result = await loader.installExtension({ foxeFileData: mockFoxeData });
+
+      // Then - validatePackageInfo lowercases the name
+      expect(result.qualifiedName).toBe(name.toLowerCase());
+    });
+
+    it("When installing extension without README and CHANGELOG files, Then should default both to empty strings", async () => {
+      // Given
+      const name = BasicBuilder.string();
+      const publisher = BasicBuilder.string();
+      const mockPackageJson = {
+        name,
+        publisher,
+        version: BasicBuilder.string(),
+      };
+
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify(mockPackageJson) ?? "");
+      zip.file(ALLOWED_FILES.EXTENSION, BasicBuilder.string());
+      // No README or CHANGELOG files added
+      const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
+      const loader = new IdbExtensionLoader("local");
+
+      // When
+      const result = await loader.installExtension({ foxeFileData: mockFoxeData });
+
+      // Then
+      expect(result.readme).toBe("");
+      expect(result.changelog).toBe("");
     });
   });
 

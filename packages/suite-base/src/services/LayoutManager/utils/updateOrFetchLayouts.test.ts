@@ -25,7 +25,7 @@ describe("updateOrFetchLayout", () => {
 
   beforeEach(() => {
     mockRemoteStorage = {
-      namespace: BasicBuilder.string(),
+      workspace: BasicBuilder.string(),
       getLayouts: jest.fn(),
       getLayout: jest.fn(),
       saveNewLayout: jest.fn(),

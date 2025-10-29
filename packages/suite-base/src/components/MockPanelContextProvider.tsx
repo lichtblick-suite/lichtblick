@@ -16,7 +16,8 @@
 
 import { ReactNode } from "react";
 
-import PanelContext, { PanelContextType } from "@lichtblick/suite-base/components/PanelContext";
+import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import { PanelContextType } from "@lichtblick/suite-base/components/types";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 
 type MockProps = Partial<PanelContextType<PanelConfig>>;

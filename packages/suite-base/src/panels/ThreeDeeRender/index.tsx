@@ -7,43 +7,27 @@
 
 import { useSnackbar } from "notistack";
 import { useMemo } from "react";
-import { DeepPartial } from "ts-essentials";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { useCrash } from "@lichtblick/hooks";
 import { CaptureErrorBoundary } from "@lichtblick/suite-base/components/CaptureErrorBoundary";
 import {
   ForwardAnalyticsContextProvider,
-  ForwardedAnalytics,
   useForwardAnalytics,
 } from "@lichtblick/suite-base/components/ForwardAnalyticsContextProvider";
 import Panel from "@lichtblick/suite-base/components/Panel";
+import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import {
   BuiltinPanelExtensionContext,
   PanelExtensionAdapter,
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { INJECTED_FEATURE_KEYS, useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import { TestOptions } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { createSyncRoot } from "@lichtblick/suite-base/panels/createSyncRoot";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
-import { SceneExtensionConfig } from "./SceneExtensionConfig";
 import { ThreeDeeRender } from "./ThreeDeeRender";
-import { InterfaceMode } from "./types";
-
-type InitPanelArgs = {
-  crash: ReturnType<typeof useCrash>;
-  forwardedAnalytics: ForwardedAnalytics;
-  interfaceMode: InterfaceMode;
-  testOptions: TestOptions;
-  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
-  customCameraModels: CameraModelsMap;
-  enqueueSnackbarFromParent?: (
-    message: string,
-    variant?: "default" | "error" | "success" | "warning" | "info",
-  ) => void;
-};
+import { InitPanelArgs, InterfaceMode } from "./types";
 
 function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
   const {
@@ -54,6 +38,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
     customSceneExtensions,
     customCameraModels,
     enqueueSnackbarFromParent,
+    logError,
   } = args;
   return createSyncRoot(
     <CaptureErrorBoundary onError={crash}>
@@ -65,6 +50,7 @@ function initPanel(args: InitPanelArgs, context: BuiltinPanelExtensionContext) {
           customSceneExtensions={customSceneExtensions}
           customCameraModels={customCameraModels}
           enqueueSnackbarFromParent={enqueueSnackbarFromParent}
+          logError={logError}
         />
       </ForwardAnalyticsContextProvider>
     </CaptureErrorBoundary>,
@@ -82,6 +68,7 @@ type Props = {
 function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
   const { enqueueSnackbar } = useSnackbar();
+  const panelContext = React.useContext(PanelContext);
 
   const customCameraModels = useExtensionCatalog(
     (state) => state.installedCameraModels,
@@ -117,6 +104,7 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
         ) => {
           enqueueSnackbar(message, { variant: variant ?? "default" });
         },
+        logError: panelContext?.logError,
       }),
     [
       crash,
@@ -127,6 +115,7 @@ function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
       customSceneExtensions,
       customCameraModels,
       enqueueSnackbar,
+      panelContext?.logError,
     ],
   );
 

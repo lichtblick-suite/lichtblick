@@ -42,6 +42,7 @@ export class HttpService {
 
     const requestOptions: RequestInit = {
       ...fetchOptions,
+      credentials: "same-origin", // Include cookies in requests
       headers: shouldUseDefaultHeaders
         ? {
             ...(this.defaultOptions.headers as Record<string, string>),

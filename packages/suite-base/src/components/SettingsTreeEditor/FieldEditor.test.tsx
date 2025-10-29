@@ -342,8 +342,8 @@ describe("FieldEditor", () => {
         field: { input, label, value },
       });
 
-      const newValue0 = BasicBuilder.number();
-      const newValue1 = BasicBuilder.number();
+      const newValue0 = BasicBuilder.number({ max: 2000 });
+      const newValue1 = BasicBuilder.number({ max: 2000 });
 
       const vec2Input0 = screen.getByTestId("Vec2Input-0").querySelector("input")!;
       fireEvent.change(vec2Input0, { target: { value: newValue0 } });

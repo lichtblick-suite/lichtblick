@@ -13,7 +13,6 @@ import {
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
 import decompressFile from "@lichtblick/suite-base/services/extension/utils/decompressFile";
 import extractFoxeFileContent from "@lichtblick/suite-base/services/extension/utils/extractFoxeFileContent";
-import qualifiedName from "@lichtblick/suite-base/services/extension/utils/qualifiedName";
 import validatePackageInfo from "@lichtblick/suite-base/services/extension/utils/validatePackageInfo";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
@@ -24,13 +23,13 @@ export class RemoteExtensionLoader implements IExtensionLoader {
   #remote: ExtensionsAPI;
   public readonly namespace: Namespace;
   public readonly type: TypeExtensionLoader = "server";
-  public remoteNamespace: string;
+  public workspace: string;
 
-  public constructor(namespace: Namespace, slug: string) {
+  public constructor(namespace: Namespace, workspace: string) {
     this.namespace = namespace;
-    this.remoteNamespace = slug;
+    this.workspace = workspace;
 
-    this.#remote = new ExtensionsAPI(slug);
+    this.#remote = new ExtensionsAPI(workspace);
   }
 
   public async getExtension(id: string): Promise<ExtensionInfo | undefined> {
@@ -81,7 +80,9 @@ export class RemoteExtensionLoader implements IExtensionLoader {
     const decompressedData = await decompressFile(foxeFileData);
     const rawPackageFile = await extractFoxeFileContent(decompressedData, ALLOWED_FILES.PACKAGE);
     if (!rawPackageFile) {
-      throw new Error(`Extension is corrupted: missing ${ALLOWED_FILES.PACKAGE}`);
+      throw new Error(
+        `Corrupted extension. File "${ALLOWED_FILES.PACKAGE}" is missing in the extension source.`,
+      );
     }
 
     const rawInfo = validatePackageInfo(JSON.parse(rawPackageFile) as Partial<ExtensionInfo>);
@@ -92,12 +93,12 @@ export class RemoteExtensionLoader implements IExtensionLoader {
       info: {
         ...rawInfo,
         id: `${normalizedPublisher}.${rawInfo.name}`,
-        namespace: this.namespace,
-        qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
+        namespace: rawInfo.namespace,
+        qualifiedName: rawInfo.displayName || rawInfo.name,
         readme: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.README)) ?? "",
         changelog: (await extractFoxeFileContent(decompressedData, ALLOWED_FILES.CHANGELOG)) ?? "",
       },
-      remoteNamespace: this.remoteNamespace,
+      workspace: this.workspace,
     };
 
     const storedExtension = await this.#remote.createOrUpdate(newExtension, file);

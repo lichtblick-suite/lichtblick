@@ -64,6 +64,7 @@ describe("HttpService", () => {
           "Content-Type": "application/json",
           "Api-Version": "1.0",
         },
+        credentials: "same-origin",
         method: "GET",
       });
       expect(result).toEqual(mockResponse);
@@ -89,6 +90,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "GET",
+        credentials: "same-origin",
       });
     });
   });
@@ -120,6 +122,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "POST",
+        credentials: "same-origin",
         body: JSON.stringify(requestData),
       });
       expect(result).toEqual(mockResponse);
@@ -144,6 +147,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "POST",
+        credentials: "same-origin",
         body: undefined,
       });
     });
@@ -176,6 +180,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "POST",
+        credentials: "same-origin",
         body: formData,
       });
       expect(result).toEqual(mockResponse);
@@ -203,6 +208,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "PUT",
+        credentials: "same-origin",
         body: JSON.stringify(updateData),
       });
     });
@@ -228,6 +234,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "DELETE",
+        credentials: "same-origin",
       });
     });
   });
@@ -442,6 +449,7 @@ describe("HttpService", () => {
           "Custom-Header": "custom-value",
         },
         method: "GET",
+        credentials: "same-origin",
       });
     });
 
@@ -474,6 +482,7 @@ describe("HttpService", () => {
         },
         method: "POST",
         body: JSON.stringify("file data"),
+        credentials: "same-origin",
       });
     });
   });
@@ -523,6 +532,27 @@ describe("HttpService", () => {
           cache: "no-cache",
           redirect: "follow",
           referrer: "client",
+        }),
+      );
+    });
+
+    it("should include credentials: same-origin in all requests", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+      });
+
+      await httpService.get("test");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com/test?",
+        expect.objectContaining({
+          credentials: "same-origin",
         }),
       );
     });

@@ -17,16 +17,16 @@ import {
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 
 export class LayoutsAPI implements IRemoteLayoutStorage {
-  public readonly namespace: string;
+  public readonly workspace: string;
   public readonly baseUrl: string = "layouts";
 
-  public constructor(namespace: string) {
-    this.namespace = namespace;
+  public constructor(workspace: string) {
+    this.workspace = workspace;
   }
 
   public async getLayouts(): Promise<RemoteLayout[]> {
     const { data: layoutData } = await HttpService.get<LayoutApiResponse[]>(this.baseUrl, {
-      namespace: this.namespace,
+      workspace: this.workspace,
     });
 
     return layoutData.map((layout) => ({
@@ -46,7 +46,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
   public async saveNewLayout(params: SaveNewLayoutParams): Promise<RemoteLayout> {
     const requestPayload: CreateLayoutRequest = {
       layoutId: params.id,
-      namespace: this.namespace,
+      workspace: this.workspace,
       data: params.data,
       name: params.name,
       permission: params.permission,

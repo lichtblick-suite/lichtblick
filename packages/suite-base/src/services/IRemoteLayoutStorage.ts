@@ -30,7 +30,7 @@ export interface IRemoteLayoutStorage {
    * A namespace corresponding to the logged-in user. Used by the LayoutManager to organize cached
    * layouts on disk.
    */
-  readonly namespace: string;
+  readonly workspace: string;
 
   getLayouts: () => Promise<readonly RemoteLayout[]>;
 
