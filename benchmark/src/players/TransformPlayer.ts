@@ -119,9 +119,7 @@ class TransformPlayer implements Player {
       const messages: MessageEvent<FrameTransform>[] = [];
       const timestamp = now();
 
-      if (!startTime) {
-        startTime = timestamp;
-      }
+      startTime ??= timestamp;
 
       messages.push({
         receiveTime: timestamp,

@@ -99,9 +99,7 @@ export class BagIterableSource implements ISerializedIterableSource {
     const numMessagesByConnectionIndex: number[] = new Array(this.#bag.connections.size).fill(0);
     this.#bag.chunkInfos.forEach((info) => {
       info.connections.forEach(({ conn, count }) => {
-        if (numMessagesByConnectionIndex[conn] == undefined) {
-          numMessagesByConnectionIndex[conn] = 0;
-        }
+        numMessagesByConnectionIndex[conn] ??= 0;
         numMessagesByConnectionIndex[conn] += count;
       });
     });

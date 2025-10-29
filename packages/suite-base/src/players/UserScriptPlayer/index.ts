@@ -325,15 +325,14 @@ export default class UserScriptPlayer implements Player {
             if (outputMessage) {
               // https://github.com/typescript-eslint/typescript-eslint/issues/6632
               let messages = messagesByTopic[outTopic];
-              if (!messages) {
-                messages = [];
-              }
+              messages ??= [];
               messages.push(outputMessage);
               messagesByTopic[outTopic] = messages;
             }
           }
         }
       }
+
 
       // Note that this size doesn't include the new processed messqges. We may need
       // to recalculate this if it turns out to be important for good cache eviction

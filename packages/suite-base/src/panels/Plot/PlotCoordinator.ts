@@ -323,9 +323,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   public addInteractionEvent(ev: InteractionEvent): void {
-    if (!this.updateAction.interactionEvents) {
-      this.updateAction.interactionEvents = [];
-    }
+    this.updateAction.interactionEvents ??= [];
     this.updateAction.interactionEvents.push(ev);
     this.queueDispatchRender();
   }

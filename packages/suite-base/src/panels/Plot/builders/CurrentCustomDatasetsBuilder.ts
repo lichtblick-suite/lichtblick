@@ -154,17 +154,15 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
 
     for (const item of series) {
       let existingSeries = this.#seriesByKey.get(item.key);
-      if (!existingSeries) {
-        existingSeries = {
-          configIndex: item.configIndex,
-          enabled: item.enabled,
-          messagePath: item.messagePath,
-          parsed: item.parsed,
-          dataset: {
-            data: [],
-          },
-        };
-      }
+      existingSeries ??= {
+        configIndex: item.configIndex,
+        enabled: item.enabled,
+        messagePath: item.messagePath,
+        parsed: item.parsed,
+        dataset: {
+          data: [],
+        },
+      };
 
       existingSeries.configIndex = item.configIndex;
       existingSeries.enabled = item.enabled;

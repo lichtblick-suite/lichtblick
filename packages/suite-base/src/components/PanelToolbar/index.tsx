@@ -126,7 +126,7 @@ export default React.memo<Props>(function PanelToolbar({
         ))}
       <PanelToolbarControls
         additionalIcons={additionalIconsWithHelp}
-        isUnknownPanel={!!isUnknownPanel}
+        isUnknownPanel={isUnknownPanel}
         ref={controlsDragRef}
       />
     </header>

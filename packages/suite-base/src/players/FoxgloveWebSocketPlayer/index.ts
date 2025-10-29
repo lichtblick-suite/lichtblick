@@ -1348,9 +1348,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           severity: "error",
         });
       } else {
-        if (updatedDatatypes == undefined) {
-          updatedDatatypes = new Map(this.#datatypes);
-        }
+        updatedDatatypes ??= new Map(this.#datatypes);
         updatedDatatypes.set(name, types);
 
         const fullTypeName = dataTypeToFullName(name);

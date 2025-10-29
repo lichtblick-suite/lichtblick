@@ -421,13 +421,11 @@ export class CustomDatasetsBuilderImpl {
 
     for (const config of series) {
       let existingSeries = this.#seriesByKey.get(config.key);
-      if (!existingSeries) {
-        existingSeries = {
-          config,
-          current: [],
-          full: [],
-        };
-      }
+      existingSeries ??= {
+        config,
+        current: [],
+        full: [],
+      };
       newSeries.set(config.key, existingSeries);
       existingSeries.config = config;
     }

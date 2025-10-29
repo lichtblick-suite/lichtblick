@@ -211,14 +211,14 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
         minXValue: {
           label: t("min"),
           input: "number",
-          value: config.minXValue != undefined ? Number(config.minXValue) : undefined,
+          value: config.minXValue ?? undefined,
           placeholder: "auto",
         },
         maxXValue: {
           label: t("max"),
           input: "number",
           error: maxXError,
-          value: config.maxXValue != undefined ? Number(config.maxXValue) : undefined,
+          value: config.maxXValue ?? undefined,
           placeholder: "auto",
         },
         followingViewWidth: {
