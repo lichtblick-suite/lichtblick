@@ -333,7 +333,6 @@ export default class UserScriptPlayer implements Player {
         }
       }
 
-
       // Note that this size doesn't include the new processed messqges. We may need
       // to recalculate this if it turns out to be important for good cache eviction
       // behavior.
