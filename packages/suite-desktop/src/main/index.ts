@@ -6,8 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
-import fs from "fs";
-import path from "path";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/src/AppSetting";
@@ -15,11 +13,13 @@ import { initI18n, sharedI18nObject as i18n } from "@lichtblick/suite-base/src/i
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
+import { createNewWindow } from "./createNewWindow";
+import { isFileToOpen } from "./fileUtils";
 import getDevModeIcon from "./getDevModeIcon";
+import { getFilesToOpen } from "./getFilesToOpen";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
 import { parseCLIFlags } from "./parseCLIFlags";
-import { resolveSourcePaths } from "./resolveSourcePaths";
 import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
@@ -37,22 +37,6 @@ const log = Logger.getLogger(__filename);
 const homeOverride = process.argv.find((arg) => arg.startsWith("--home-dir="));
 if (homeOverride != undefined) {
   app.setPath("home", homeOverride.split("=")[1]!);
-}
-
-/**
- * Determine whether an item in argv is a file that we should try opening as a data source.
- *
- * Note: in dev we launch electron with `electron .webpack` so we need to filter out things that are not files
- */
-function isFileToOpen(arg: string) {
-  // Anything that isn't a file or directory will throw, we filter those out too
-  try {
-    return fs.statSync(arg).isFile();
-  } catch (err: unknown) {
-    log.error(err);
-    // ignore
-  }
-  return false;
 }
 
 function updateNativeColorScheme() {
@@ -108,18 +92,34 @@ export async function main(): Promise<void> {
     return;
   }
 
+  // Check if --force-multiple-windows` is set
+  const forceMultipleWindows = process.argv.some((arg) => arg === "--force-multiple-windows");
+
   // If another instance of the app is already open, this call triggers the "second-instance" event
   // in the original instance and returns false.
+  // In case of forcing multiple instances, we will open a new window and inject the files and deep links manually.
   if (!app.requestSingleInstanceLock()) {
-    log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
-    app.quit();
+    if (forceMultipleWindows) {
+      log.info(
+        `An instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Forcing a new window to run in this instance.`,
+      );
+    } else {
+      log.info(`Another instance of ${LICHTBLICK_PRODUCT_NAME} is already running. Quitting.`);
+      app.quit();
+    }
     return;
   }
 
-  // Forward urls/files opened in a second instance to our default handlers so it's as if we opened
-  // them with this instance.
+  // Forward urls/files opened in a second instance to our default handlers so it's as if we opened them with this instance.
+  // In case of forcing multiple instances, we will open a new window and inject the files and deep links manually.
   app.on("second-instance", (_ev, argv, _workingDirectory) => {
     log.debug("Received arguments from second app instance:", argv);
+
+    if (forceMultipleWindows) {
+      log.debug("second-instance: Forcing a new window to run in this instance.");
+      createNewWindow(argv);
+      return;
+    }
 
     // Bring the app to the front
     const someWindow = BrowserWindow.getAllWindows()[0];
@@ -152,23 +152,8 @@ export async function main(): Promise<void> {
       log.warn("Could not set app as handler for lichtblick://");
     }
   }
-  // Get the command line flags passed to the app when it was launched
-  const parsedCLIFlags = parseCLIFlags(process.argv);
 
-  const filesToOpen: string[] = process.argv
-    .slice(1)
-    .filter((arg) => !arg.startsWith("--")) // Filter out flags
-    .map((filePath) => path.resolve(filePath)) // Convert to absolute path, linux has some problems to resolve relative paths
-    .filter(isFileToOpen);
-
-  // Get file paths passed through the parameter "--source="
-  const filesToOpenFromSourceParameter = resolveSourcePaths(parsedCLIFlags.source);
-
-  filesToOpen.push(...filesToOpenFromSourceParameter);
-
-  const uniqueFilesToOpen = [...new Set(filesToOpen)];
-
-  const verifiedFilesToOpen: string[] = uniqueFilesToOpen.filter(isFileToOpen);
+  const filesToOpen = getFilesToOpen(process.argv);
 
   // indicates the preloader has setup the file input used to inject which files to open
   let preloaderFileInputIsReady = false;
@@ -179,12 +164,12 @@ export async function main(): Promise<void> {
   // The open-file handler registered earlier will handle adding the file to filesToOpen
   app.on("open-file", async (_ev, filePath) => {
     log.debug("open-file handler", filePath);
-    verifiedFilesToOpen.push(filePath);
+    filesToOpen.push(filePath);
 
     if (preloaderFileInputIsReady) {
       const focusedWindow = BrowserWindow.getFocusedWindow();
       if (focusedWindow) {
-        await injectFilesToOpen(focusedWindow.webContents.debugger, verifiedFilesToOpen);
+        await injectFilesToOpen(focusedWindow.webContents.debugger, filesToOpen);
       } else {
         // On MacOS the user may have closed all the windows so we need to open a new window
         new StudioWindow().load();
@@ -198,7 +183,7 @@ export async function main(): Promise<void> {
   ipcMain.handle("load-pending-files", async (ev) => {
     log.debug("load-pending-files");
     const debug = ev.sender.debugger;
-    await injectFilesToOpen(debug, verifiedFilesToOpen);
+    await injectFilesToOpen(debug, filesToOpen);
     preloaderFileInputIsReady = true;
   });
 
@@ -228,6 +213,9 @@ export async function main(): Promise<void> {
       openUrls.push(url);
     }
   });
+
+  // Get the command line flags passed to the app when it was launched
+  const parsedCLIFlags = parseCLIFlags(process.argv);
 
   // support preload lookups for the user data path and home directory
   ipcMain.handle("getUserDataPath", () => app.getPath("userData"));

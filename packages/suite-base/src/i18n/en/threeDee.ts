@@ -27,6 +27,8 @@ export const threeDee = {
     "The coordinate frame to place the camera in. The camera position and orientation will be relative to the origin of this frame.",
   editable: "Editable",
   enablePreloading: "Enable preloading",
+  enablePreloadingTooltip:
+    "Please be aware that performance may be impacted when turning preloading on.",
   fixed: "Fixed",
   followMode: "Follow mode",
   followModeHelp: "Change the camera behavior during playback to follow the display frame or not.",

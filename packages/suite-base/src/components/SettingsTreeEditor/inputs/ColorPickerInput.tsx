@@ -106,6 +106,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): React.JSX.Elemen
       })}
     >
       <TextField
+        data-testid="ColorPickerInput"
         className={classes.textField}
         fullWidth
         disabled={disabled}

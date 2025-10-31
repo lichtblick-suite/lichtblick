@@ -131,6 +131,7 @@ export function createMessagePipelineStore({
           messageEventsBySubscriberId: new Map(),
           subscriptions: [],
           sortedTopics: [],
+          sortedServices: [],
           datatypes: new Map(),
           startPlayback: undefined,
           playUntil: undefined,
@@ -146,6 +147,7 @@ export function createMessagePipelineStore({
       messageEventsBySubscriberId: new Map(),
       subscriptions: [],
       sortedTopics: [],
+      sortedServices: [],
       datatypes: new Map(),
       setSubscriptions(id, payloads) {
         get().dispatch({ type: "update-subscriber", id, payloads });
@@ -212,6 +214,10 @@ export function createMessagePipelineStore({
       getMetadata() {
         const player = get().player;
         return player?.getMetadata?.() ?? Object.freeze([]);
+      },
+      getBatchIterator(topic: string) {
+        const player = get().player;
+        return player?.getBatchIterator(topic);
       },
       startPlayback: undefined,
       playUntil: undefined,
@@ -374,6 +380,12 @@ function updatePlayerStateAction(
   if (topics !== prevState.public.playerState.activeData?.topics) {
     newPublicState.sortedTopics = topics
       ? [...topics].sort((a, b) => a.name.localeCompare(b.name))
+      : [];
+  }
+  const services = action.playerState.activeData?.services;
+  if (services !== prevState.public.playerState.activeData?.services) {
+    newPublicState.sortedServices = services
+      ? [...services.keys()].sort((a, b) => a.localeCompare(b))
       : [];
   }
   if (

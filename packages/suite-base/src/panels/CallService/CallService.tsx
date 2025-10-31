@@ -108,6 +108,7 @@ function CallServiceContent(
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
   const [state, setState] = useState<State | undefined>();
+  const [services, setServices] = useState<string[]>([]);
   const [config, setConfig] = useState<Config>(() => ({
     ...defaultConfig,
     ...(context.initialState as Partial<Config>),
@@ -123,10 +124,12 @@ function CallServiceContent(
 
   useEffect(() => {
     context.watch("colorScheme");
+    context.watch("services");
 
     context.onRender = (renderState, done) => {
       setRenderDone(() => done);
       setColorScheme(renderState.colorScheme ?? "light");
+      setServices([...(renderState.services ?? [])]);
     };
 
     return () => {
@@ -146,7 +149,7 @@ function CallServiceContent(
     [setConfig],
   );
 
-  const settingsTree = useSettingsTree(config);
+  const settingsTree = useSettingsTree(config, services);
   useEffect(() => {
     context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,

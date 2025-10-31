@@ -12,10 +12,11 @@ import memoizeWeak from "memoize-weak";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
+import { SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
 import { FieldEditor } from "@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor";
 import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/SettingsTreeEditor.style";
+import { SettingsTreeEditorProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
@@ -30,10 +31,7 @@ const makeStablePath = memoizeWeak((key: string) => [key]);
 export default function SettingsTreeEditor({
   variant,
   settings,
-}: {
-  variant: "panel" | "log";
-  settings: Immutable<SettingsTree>;
-}): React.JSX.Element {
+}: Readonly<SettingsTreeEditorProps>): React.JSX.Element {
   const { classes } = useStyles();
   const { actionHandler, focusedPath } = settings;
   const [filterText, setFilterText] = useState<string>("");
@@ -107,7 +105,7 @@ export default function SettingsTreeEditor({
   }, []);
 
   return (
-    <Stack fullHeight>
+    <Stack fullHeight data-testid="settings-tree-editor">
       {settings.enableFilter === true && (
         <header className={classes.appBar}>
           <TextField

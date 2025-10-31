@@ -236,6 +236,11 @@ export type RenderState = {
   topics?: Topic[];
 
   /**
+   * List of available services. This list includes all services provided by the data source.
+   */
+  services?: string[];
+
+  /**
    * A timestamp value indicating the current playback time.
    */
   currentTime?: Time;
@@ -269,6 +274,52 @@ export type RenderState = {
 
   /** Application settings. This will only contain subscribed application setting key/values */
   appSettings?: Map<string, AppSettingValue>;
+};
+
+export type SubscribeMessageRangeArgs = {
+  /**
+   * Topic to be subscribed to.
+   */
+  topic: string;
+
+  /**
+   * Convert messages to this schema before delivering to the subscriber.
+   *
+   * MessageEvents for the subscription will contain the converted message and an
+   * `originalMessageEvent` field with the original message event. If no `convertTo` schema is
+   * specified, then no message converters will be used. If no message converter exists for
+   * converting the original schema to the `convertTo` schema, then no messages are delivered for
+   * this subscription.
+   */
+  convertTo?: string;
+
+  /**
+   * The `onNewRangeIterator` callback function is invoked whenever message data becomes available for
+   * the subscribed topic.
+   *
+   * Your function should process messages by iterating through the supplied async iterable. Each element
+   * in the iterable represents a batch containing message events for the subscription's topic. Both the batches and
+   * individual messages are ordered by _log time_. The iterator completes when no additional messages remain
+   * to be read.
+   *
+   * ```typescript
+   * async function onNewRangeIterator(batchIterator) {
+   *   for await (const batch of batchIterator) {
+   *     //...
+   *   }
+   * }
+   * ```
+   *
+   * The `onNewRangeIterator` callback is triggered again whenever upstream topic data undergoes changes. For instance, this occurs when
+   * subscribing to a user-script output topic and the script is modified, or when subscribing to an aliased topic where
+   * the alias configuration changes. Following topic data changes, the existing iterator terminates, rendering its data
+   * obsolete. Upon receiving a new `onNewRangeIterator` call, you should discard any previously received data.
+   *
+   * Should your `onNewRangeIterator` function encounter an error, the iterator will terminate and no additional
+   * messages will be delivered until `onNewRangeIterator` is invoked again. Any errors will be displayed in the problems sidebar
+   * to ensure user visibility.
+   */
+  onNewRangeIterator: (batchIterator: AsyncIterable<Immutable<MessageEvent[]>>) => Promise<void>;
 };
 
 export type PanelExtensionContext = {
@@ -433,6 +484,20 @@ export type PanelExtensionContext = {
    * manually. A value of `undefined` will display the panel's name in the title bar.
    */
   setDefaultPanelTitle(defaultTitle: string | undefined): void;
+
+  /**
+   * Enables subscription to retrieve complete message history for a specified topic from the active data source.
+   *
+   * See {@link SubscribeMessageRangeArgs} for more information on behavior.
+   *
+   * Note: This functionality is unavailable for real-time data sources, including foxglove_bridge, rosbridge, or ROS 1
+   * native connections. For such sources, you must utilize `context.subscribe()` and
+   * `watch("currentFrame")`.
+   *
+   * @returns A cleanup function that terminates the topic subscription, cancels the running async iterator,
+   * and blocks future invocations of {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator}.
+   */
+  unstable_subscribeMessageRange: (args: SubscribeMessageRangeArgs) => () => void;
 };
 
 export type ExtensionPanelRegistration = {
@@ -712,6 +777,11 @@ export type SettingsTreeFieldVec2 = {
   min?: number;
 };
 
+export type SettingsTreeFieldLegendControl = {
+  input: "legendcontrols";
+  value?: undefined;
+};
+
 export type SettingsTreeFieldValue =
   | SettingsTreeFieldAutocomplete
   | SettingsTreeFieldBoolean
@@ -727,7 +797,8 @@ export type SettingsTreeFieldValue =
   | SettingsTreeFieldToggleNumber
   | SettingsTreeFieldSlider
   | SettingsTreeFieldVec3
-  | SettingsTreeFieldVec2;
+  | SettingsTreeFieldVec2
+  | SettingsTreeFieldLegendControl;
 
 export type SettingsTreeField = SettingsTreeFieldValue & {
   /**
@@ -754,6 +825,11 @@ export type SettingsTreeField = SettingsTreeFieldValue & {
    * Optional message indicating any error state for the field.
    */
   error?: string;
+
+  /**
+   * Optional tooltip text displayed when hovering over the field.
+   */
+  tooltip?: string;
 };
 
 export type SettingsTreeFields = Record<string, undefined | SettingsTreeField>;

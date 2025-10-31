@@ -76,7 +76,7 @@ export function estimateMessageObjectSize(
       const count =
         field.isArray === true
           ? // We are conservative and assume an empty array to avoid memory overestimation.
-            field.arrayLength ?? 0
+            (field.arrayLength ?? 0)
           : 1;
 
       const knownFieldSize = knownTypeSizes.get(field.type);

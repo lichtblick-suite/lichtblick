@@ -296,7 +296,7 @@ function normalizeTextPrimitive(text: PartialMessage<TextPrimitive> | undefined)
   return {
     pose: normalizePose(text?.pose),
     billboard: text?.billboard ?? true,
-    font_size: text?.font_size ?? (text?.scale_invariant ?? false ? 16 : 0.25),
+    font_size: text?.font_size ?? ((text?.scale_invariant ?? false) ? 16 : 0.25),
     scale_invariant: text?.scale_invariant ?? false,
     color: normalizeColorRGBA(text?.color),
     text: text?.text ?? "",

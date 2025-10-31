@@ -12,11 +12,12 @@ import { useAsync } from "react-use";
 import { v4 as uuid } from "uuid";
 
 import Logger from "@lichtblick/log";
+import { KEY_WORKSPACE_PREFIX } from "@lichtblick/suite-base/constants/browserStorageKeys";
 
 const log = Logger.getLogger(__filename);
 
 const IDB_KEY = "recents";
-const IDB_STORE = idbCreateStore("foxglove-recents", "recents");
+const IDB_STORE = idbCreateStore(`${KEY_WORKSPACE_PREFIX}lichtblick-recents`, "recents");
 
 type RecentRecordCommon = {
   // Record id - use IndexedDbRecentsStore.GenerateRecordId() to generate

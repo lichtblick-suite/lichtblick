@@ -8,6 +8,8 @@
 import { DeepPartial } from "ts-essentials";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
+import { useCrash } from "@lichtblick/hooks";
+import { ForwardedAnalytics } from "@lichtblick/suite-base/components/ForwardAnalyticsContextProvider";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { FollowMode, TestOptions } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { SceneExtensionConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
@@ -28,4 +30,25 @@ export type ThreeDeeRenderProps = {
   /** Allow for injection or overriding of default extensions by custom extensions */
   customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
   customCameraModels: CameraModelsMap;
+  /** Allow for accessing the parent toast snackbar from the new sync root */
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
+  /** Allow for logging errors to panel logs */
+  logError?: (message: string, error?: Error) => void;
+};
+
+export type InitPanelArgs = {
+  crash: ReturnType<typeof useCrash>;
+  forwardedAnalytics: ForwardedAnalytics;
+  interfaceMode: InterfaceMode;
+  testOptions: TestOptions;
+  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
+  customCameraModels: CameraModelsMap;
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
+  logError?: (message: string, error?: Error) => void;
 };

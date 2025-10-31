@@ -1,0 +1,29 @@
+name: Enforce branch naming
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    branches: [main, develop]
+
+jobs:
+  enforce-naming:
+    name: Enforce branch naming rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch name
+        run: |
+          echo "Base: ${GITHUB_BASE_REF} | Head: ${GITHUB_HEAD_REF}"
+
+          if [[ "${GITHUB_BASE_REF}" == "main" ]]; then
+            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(release/|hotfix/) ]]; then
+              echo "Source branch must start with 'release/' or 'hotfix/') when targeting 'main'."
+              exit 1
+            fi
+          elif [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
+            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/|dependabot/) ]]; then
+              echo "Source branch must start with 'feature/' or 'bugfix/' (or 'dependabot/') when targeting 'develop'."
+              exit 1
+            fi
+          else
+            echo "No naming rules defined for base branch '${GITHUB_BASE_REF}'."
+          fi

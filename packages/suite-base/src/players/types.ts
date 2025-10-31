@@ -20,6 +20,7 @@ import type { MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
 import { Immutable } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { Range } from "@lichtblick/suite-base/util/ranges";
@@ -76,6 +77,8 @@ export interface Player {
   setPlaybackSpeed?(speedFraction: number): void;
   setGlobalVariables(globalVariables: GlobalVariables): void;
   getMetadata?: () => ReadonlyArray<Readonly<Metadata>>;
+  // Create a batch iterator for streaming messages. Available for data source players that support message iteration.
+  getBatchIterator: (topic: string) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
 }
 
 export enum PlayerPresence {

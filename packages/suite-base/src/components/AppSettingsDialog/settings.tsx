@@ -26,7 +26,7 @@ import {
   ToggleButtonGroupProps,
 } from "@mui/material";
 import moment from "moment-timezone";
-import { MouseEvent, useCallback, useMemo } from "react";
+import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
@@ -305,10 +305,28 @@ export function MessageFramerate(): React.ReactElement {
 
 export function StepSize(): React.ReactElement {
   const { t } = useTranslation("appSettings");
+  const defaultStepSize = 100;
+  const minStepSize = 1;
 
-  const [stepSize = 100, setStepSize] = useAppConfigurationValue<number>(
+  const [stepSize = defaultStepSize, setStepSize] = useAppConfigurationValue<number>(
     AppSetting.DEFAULT_STEP_SIZE,
   );
+
+  const valueValidation = (value: number) => isNaN(value) || value < minStepSize;
+  const isStepSizeInvalid = valueValidation(stepSize);
+
+  const latestStepSizeRef = useRef(stepSize);
+  latestStepSizeRef.current = stepSize;
+
+  useEffect(() => {
+    return () => {
+      const latest = latestStepSizeRef.current;
+      if (valueValidation(latest)) {
+        void setStepSize(defaultStepSize);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Stack>
@@ -334,13 +352,15 @@ export function StepSize(): React.ReactElement {
             },
           },
         }}
+        error={isStepSizeInvalid}
+        helperText={isStepSizeInvalid ? "Step size will default to 100ms" : " "}
       ></TextField>
     </Stack>
   );
 }
 
 export function AutoUpdate(): React.ReactElement {
-  const [updatesEnabled = true, setUpdatedEnabled] = useAppConfigurationValue<boolean>(
+  const [updatesEnabled = false, setUpdatedEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.UPDATES_ENABLED,
   );
 

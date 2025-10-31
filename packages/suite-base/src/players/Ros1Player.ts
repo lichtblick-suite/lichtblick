@@ -591,6 +591,11 @@ export default class Ros1Player implements Player {
     // no-op
   }
 
+  public getBatchIterator(): undefined {
+    // Ros1Player does not support batch iteration
+    return undefined;
+  }
+
   #getRosDatatypes = (datatype: string, messageDefinition: MessageDefinition[]): RosDatatypes => {
     const typesByName: RosDatatypes = new Map();
     for (const def of messageDefinition) {

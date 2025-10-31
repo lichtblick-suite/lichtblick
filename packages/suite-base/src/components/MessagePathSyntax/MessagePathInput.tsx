@@ -448,6 +448,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
   return (
     <Autocomplete
+      data-testid="MessagePathInput"
       className={classes.root}
       variant={variant}
       items={orderedAutocompleteItems}

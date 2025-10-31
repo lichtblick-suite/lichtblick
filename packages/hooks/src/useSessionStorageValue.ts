@@ -7,6 +7,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+type SessionStorageValue = [
+  value: string | undefined,
+  setValue: (newValue: string | undefined) => void,
+];
+
 /**
  * This provides a convenience wrapper around sessionStorage and triggers
  * a react state change when values change.
@@ -14,11 +19,11 @@ import { useCallback, useEffect, useState } from "react";
  * @param key sessionStorage key to manage.
  * @returns [value, setValue] tuple for that key.
  */
-export function useSessionStorageValue(
-  key: string,
-): [value: string | undefined, setValue: (newValue: string | undefined) => void] {
+export function useSessionStorageValue(key: string): SessionStorageValue {
+  const prefix: string = process.env.DEV_WORKSPACE ? `${process.env.DEV_WORKSPACE}.` : "";
+  const prefixedKey = `${prefix}${key}`;
   const [value, updateValue] = useState<string | undefined>(
-    sessionStorage.getItem(key) ?? undefined,
+    sessionStorage.getItem(prefixedKey) ?? undefined,
   );
 
   const setValue = useCallback(
@@ -26,27 +31,31 @@ export function useSessionStorageValue(
       // Hack a manual event for now. Unfortunately the browser only fires "storage"
       // events when triggered outside our current tab.
       if (newValue) {
-        sessionStorage.setItem(key, newValue);
+        sessionStorage.setItem(prefixedKey, newValue);
         window.dispatchEvent(
-          new StorageEvent("storage", { key, newValue, storageArea: sessionStorage }),
+          new StorageEvent("storage", { key: prefixedKey, newValue, storageArea: sessionStorage }),
         );
       } else {
-        sessionStorage.removeItem(key);
+        sessionStorage.removeItem(prefixedKey);
         window.dispatchEvent(
-          new StorageEvent("storage", { key, newValue: undefined, storageArea: sessionStorage }),
+          new StorageEvent("storage", {
+            key: prefixedKey,
+            newValue: undefined,
+            storageArea: sessionStorage,
+          }),
         );
       }
     },
-    [key],
+    [prefixedKey],
   );
 
   const changeListener = useCallback(
     (event: StorageEvent) => {
-      if (event.key === key) {
+      if (event.key === prefixedKey) {
         updateValue(event.newValue ?? undefined);
       }
     },
-    [key],
+    [prefixedKey],
   );
 
   useEffect(() => {

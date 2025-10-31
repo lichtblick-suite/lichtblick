@@ -31,11 +31,18 @@ export const jumpSeek = (
   defaultStepSize?: number,
 ): Time => {
   const timeMs = toMillis(currentTime);
-  const deltaMs =
-    modifierKeys?.altKey === true
-      ? ARROW_SEEK_BIG_MS
-      : modifierKeys?.shiftKey === true
-        ? ARROW_SEEK_SMALL_MS
-        : defaultStepSize ?? ARROW_SEEK_DEFAULT_MS;
+
+  const correctSeekValue =
+    typeof defaultStepSize === "number" && !isNaN(defaultStepSize) && defaultStepSize > 0;
+
+  let deltaMs: number;
+  if (modifierKeys?.altKey === true) {
+    deltaMs = ARROW_SEEK_BIG_MS;
+  } else if (modifierKeys?.shiftKey === true) {
+    deltaMs = ARROW_SEEK_SMALL_MS;
+  } else {
+    deltaMs = correctSeekValue ? defaultStepSize : ARROW_SEEK_DEFAULT_MS;
+  }
+
   return fromMillis(timeMs + deltaMs * directionSign);
 };

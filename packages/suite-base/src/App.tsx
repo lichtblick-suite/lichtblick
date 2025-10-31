@@ -42,14 +42,14 @@ import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
-import { ExtensionLoader } from "./services/ExtensionLoader";
+import { IExtensionLoader } from "./services/extension/IExtensionLoader";
 
 export type AppProps = CustomWindowControlsProps & {
   appConfiguration: IAppConfiguration;
   appParameters: AppParametersInput;
   dataSources: IDataSourceFactory[];
   deepLinks: string[];
-  extensionLoaders: readonly ExtensionLoader[];
+  extensionLoaders: readonly IExtensionLoader[];
   layoutLoaders: readonly LayoutLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;

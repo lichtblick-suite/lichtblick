@@ -11,6 +11,9 @@ import { ParsedChannel } from "@lichtblick/mcap-support";
 import { MessageDefinition } from "@lichtblick/message-definition";
 import { MessageWriter as Ros1MessageWriter } from "@lichtblick/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@lichtblick/rosmsg2-serialization";
+import { Time } from "@lichtblick/rostime";
+import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
+import { Topic, TopicStats } from "@lichtblick/suite-base/players/types";
 
 export type ResolvedChannel = {
   channel: Channel;
@@ -37,3 +40,11 @@ export type ToWorkerMessage =
 export interface MessageWriter {
   writeMessage(message: unknown): Uint8Array;
 }
+
+export type CheckForHighFrequencyTopics = {
+  alerts: PlayerAlertManager;
+  endTime: Time | undefined;
+  startTime: Time | undefined;
+  topics: Topic[] | undefined;
+  topicStats: Map<string, TopicStats>;
+};

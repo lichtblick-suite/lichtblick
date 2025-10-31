@@ -146,7 +146,7 @@ export function makeLinePickingMaterial(
       dashSize: { value: 1 },
       gapSize: { value: 1 },
     },
-    defines: options.worldUnits ?? true ? { WORLD_UNITS: "" } : {},
+    defines: (options.worldUnits ?? true) ? { WORLD_UNITS: "" } : {},
   });
 }
 

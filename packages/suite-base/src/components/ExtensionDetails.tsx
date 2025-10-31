@@ -76,7 +76,6 @@ export function ExtensionDetails({
   const readme = extension.readme;
   const changelog = extension.changelog;
   const canInstall = extension.foxe != undefined;
-  const canUninstall = extension.namespace !== "org";
 
   const { value: readmeContent } = useAsync(
     async () =>
@@ -115,10 +114,14 @@ export function ExtensionDetails({
       if (url == undefined) {
         throw new Error(`Cannot install extension ${extension.id}, "foxe" URL is missing`);
       }
+
       setOperationStatus(OperationStatus.INSTALLING);
-      const data = await downloadExtension(url);
-      await installExtensions("local", [data]);
+
+      const extensionBuffer = await downloadExtension(url);
+      await installExtensions("local", [{ buffer: extensionBuffer }]);
+
       enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
+
       if (isMounted()) {
         setIsInstalled(true);
         setOperationStatus(OperationStatus.IDLE);
@@ -126,6 +129,7 @@ export function ExtensionDetails({
       }
     } catch (e: unknown) {
       const err = e as Error;
+
       enqueueSnackbar(`Failed to install extension ${extension.id}. ${err.message}`, {
         variant: "error",
       });
@@ -221,7 +225,7 @@ export function ExtensionDetails({
             {extension.description}
           </Typography>
         </Stack>
-        {isInstalled && canUninstall ? (
+        {isInstalled ? (
           <Button
             className={classes.installButton}
             size="small"

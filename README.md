@@ -18,6 +18,12 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, avail
   </p>
 </div>
 
+## :rocket: Try Lichtblick
+
+**[Try Lichtblick now in your browser!](https://lichtblick-suite.github.io/lichtblick/)**
+
+No installation required - experience the full power of Lichtblick directly in your web browser!
+
 ## :book: Documentation
 
 Looking for guidance on using Lichtblick? Check out our [official documentation here!](https://lichtblick-suite.github.io/docs/)
@@ -105,6 +111,37 @@ $ yarn run clean
 ```
 
 - The desktop builds are located in the `dist` directory, and the web builds are found in the `web/.webpack` directory.
+
+## :warning: Note on Linux dependencies (.tar.gz only)
+
+When installing the **`.tar.gz` package**, unlike the `.deb`, **system dependencies are not installed automatically**.
+In many cases, if you already have **Google Chrome** or another Chromium-based application installed, Lichtblick will run fine since these applications bring most of the required libraries.
+
+However, if you see errors about missing libraries when launching Lichtblick, you will need to install them manually.
+The most common missing dependencies are:
+
+- `libgtk-3-0`
+- `libatk1.0-0`
+- `libatk-bridge2.0-0`
+- `libatspi2.0-0`
+- `libnss3`
+- `libnspr4`
+- `libasound2`
+- `libcups2`
+- `libnotify4`
+- `libxtst6`
+- `xdg-utils`
+- `libdrm2`
+- `libgbm1`
+- `libxcb-dri3-0`
+
+Example (Debian/Ubuntu):
+
+```bash
+sudo apt-get update && sudo apt-get install libgtk-3-0 libatk1.0-0 libatk-bridge2.0-0 libatspi2.0-0 libnss3 libnspr4 libasound2 libcups2 libnotify4 libxtst6 xdg-utils libdrm2 libgbm1 libxcb-dri3-0
+```
+
+👉 **Recommendation**: if using the `.tar.gz`, always check the error messages in the terminal. They will indicate which library is missing so you can install it manually.
 
 ## :pencil: License (Open Source)
 

@@ -9,6 +9,7 @@ storybook-screenshots/
 storybook-static/
 # for jest --coverage
 coverage/
+.env
 
 # E2E tests
 e2e/reports

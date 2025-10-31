@@ -1,0 +1,29 @@
+name: Release Sync (main -> develop)
+
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into develop
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git merge origin/main --no-ff -m "chore: sync main into develop after release [skip actions]"
+          git push origin develop

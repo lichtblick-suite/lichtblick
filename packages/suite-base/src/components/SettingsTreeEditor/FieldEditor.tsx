@@ -25,6 +25,8 @@ import { v4 as uuid } from "uuid";
 import { Immutable, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
 import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
 import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor.style";
+import { LegendControls } from "@lichtblick/suite-base/components/SettingsTreeEditor/inputs/LegendControls";
+import { FieldEditorProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 
@@ -50,6 +52,7 @@ function FieldInput({
     case "autocomplete":
       return (
         <Autocomplete
+          data-testid="FieldEditor-Autocomplete"
           className={classes.autocomplete}
           size="small"
           freeSolo={true}
@@ -89,6 +92,7 @@ function FieldInput({
     case "number":
       return (
         <NumberInput
+          data-testid="FieldEditor-NumberInput"
           size="small"
           variant="filled"
           value={field.value}
@@ -108,6 +112,7 @@ function FieldInput({
     case "toggle":
       return (
         <ToggleButtonGroup
+          data-testid="FieldEditor-ToggleButtonGroup-toggle"
           className={classes.styledToggleButtonGroup}
           fullWidth
           value={field.value ?? UNDEFINED_SENTINEL_VALUE}
@@ -140,6 +145,7 @@ function FieldInput({
     case "string":
       return (
         <TextField
+          data-testid="FieldEditor-TextField"
           variant="filled"
           size="small"
           fullWidth
@@ -162,6 +168,7 @@ function FieldInput({
     case "boolean":
       return (
         <ToggleButtonGroup
+          data-testid="FieldEditor-ToggleButtonGroup-boolean"
           className={classes.styledToggleButtonGroup}
           fullWidth
           value={field.value ?? false}
@@ -338,6 +345,8 @@ function FieldInput({
           }}
         />
       );
+    case "legendcontrols":
+      return <LegendControls />;
     case "slider":
       return (
         <Slider
@@ -359,100 +368,90 @@ function FieldInput({
   }
 }
 
-function FieldLabel({ field }: { field: Immutable<SettingsTreeField> }): React.JSX.Element {
+function FieldLabel({
+  field,
+}: Readonly<{ field: Immutable<SettingsTreeField> }>): React.JSX.Element {
   const { classes } = useStyles();
 
   if (field.input === "vec2") {
     const labels = field.labels ?? ["X", "Y"];
     return (
-      <>
-        <div className={classes.multiLabelWrapper}>
+      <div className={classes.multiLabelWrapper}>
+        <Typography
+          title={field.label}
+          variant="subtitle2"
+          color="text.secondary"
+          noWrap
+          flex="auto"
+        >
+          {field.label}
+        </Typography>
+        {labels.map((label, index) => (
           <Typography
+            key={label}
             title={field.label}
             variant="subtitle2"
             color="text.secondary"
             noWrap
+            style={{ gridColumn: index === 0 ? "span 1" : "2 / span 1" }}
             flex="auto"
           >
-            {field.label}
+            {label}
           </Typography>
-          {labels.map((label, index) => (
-            <Typography
-              key={label}
-              title={field.label}
-              variant="subtitle2"
-              color="text.secondary"
-              noWrap
-              style={{ gridColumn: index === 0 ? "span 1" : "2 / span 1" }}
-              flex="auto"
-            >
-              {label}
-            </Typography>
-          ))}
-        </div>
-      </>
+        ))}
+      </div>
     );
   } else if (field.input === "vec3") {
     const labels = field.labels ?? ["X", "Y", "Z"];
     return (
-      <>
-        <div className={classes.multiLabelWrapper}>
+      <div className={classes.multiLabelWrapper}>
+        <Typography
+          title={field.label}
+          variant="subtitle2"
+          color="text.secondary"
+          noWrap
+          flex="auto"
+        >
+          {field.label}
+        </Typography>
+        {labels.map((label, index) => (
           <Typography
+            key={label}
             title={field.label}
             variant="subtitle2"
             color="text.secondary"
             noWrap
+            style={{ gridColumn: index === 0 ? "span 1" : "2 / span 1" }}
             flex="auto"
           >
-            {field.label}
+            {label}
           </Typography>
-          {labels.map((label, index) => (
-            <Typography
-              key={label}
-              title={field.label}
-              variant="subtitle2"
-              color="text.secondary"
-              noWrap
-              style={{ gridColumn: index === 0 ? "span 1" : "2 / span 1" }}
-              flex="auto"
-            >
-              {label}
-            </Typography>
-          ))}
-        </div>
-      </>
+        ))}
+      </div>
     );
   } else {
     return (
-      <>
-        <Typography
-          className={classes.fieldLabel}
-          title={field.help ?? field.label}
-          variant="subtitle2"
-        >
-          {field.label}
-        </Typography>
-      </>
+      <Typography
+        className={classes.fieldLabel}
+        title={field.help ?? field.label}
+        variant="subtitle2"
+      >
+        {field.label}
+      </Typography>
     );
   }
 }
 
-function FieldEditorComponent({
-  actionHandler,
-  field,
-  path,
-}: {
-  actionHandler: (action: SettingsTreeAction) => void;
-  field: Immutable<SettingsTreeField>;
-  path: readonly string[];
-}): React.JSX.Element {
-  const indent = Math.min(path.length, 4);
+function FieldEditorComponent(props: Readonly<FieldEditorProps>): React.JSX.Element {
+  const indent = Math.min(props.path.length, 4);
   const paddingLeft = 0.75 + 2 * (indent - 1);
   const { classes, cx } = useStyles();
 
   const { renderSettingsStatusButton } = useAppContext();
 
-  const statusButton = renderSettingsStatusButton ? renderSettingsStatusButton(field) : undefined;
+  const statusButton = renderSettingsStatusButton
+    ? renderSettingsStatusButton(props.field)
+    : undefined;
 
   return (
     <>
@@ -463,22 +462,35 @@ function FieldEditorComponent({
         gap={0.5}
         paddingLeft={paddingLeft}
         fullHeight
+        data-testid="FieldEditor"
       >
         {statusButton}
-        {field.error && (
+        {props.field.error && (
           <Tooltip
             arrow
             placement="top"
-            title={<Typography variant="subtitle2">{field.error}</Typography>}
+            title={<Typography variant="subtitle2">{props.field.error}</Typography>}
           >
             <ErrorIcon color="error" fontSize="small" />
           </Tooltip>
         )}
-        <FieldLabel field={field} />
+        <FieldLabel field={props.field} />
       </Stack>
-      <div className={cx(classes.fieldWrapper, { [classes.error]: field.error != undefined })}>
-        <FieldInput actionHandler={actionHandler} field={field} path={path} />
-      </div>
+      <Tooltip
+        arrow
+        placement="right"
+        title={
+          props.field.tooltip ? (
+            <Typography variant="subtitle2">{props.field.tooltip}</Typography>
+          ) : undefined
+        }
+      >
+        <div
+          className={cx(classes.fieldWrapper, { [classes.error]: props.field.error != undefined })}
+        >
+          <FieldInput actionHandler={props.actionHandler} field={props.field} path={props.path} />
+        </div>
+      </Tooltip>
       <Stack paddingBottom={0.25} style={{ gridColumn: "span 2" }} />
     </>
   );

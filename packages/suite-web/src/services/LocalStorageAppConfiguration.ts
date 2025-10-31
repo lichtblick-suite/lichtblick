@@ -5,10 +5,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IAppConfiguration, ChangeHandler, AppConfigurationValue } from "@lichtblick/suite-base";
+import {
+  IAppConfiguration,
+  ChangeHandler,
+  AppConfigurationValue,
+  LOCAL_STORAGE_APP_CONFIGURATION,
+} from "@lichtblick/suite-base";
 
 export default class LocalStorageAppConfiguration implements IAppConfiguration {
-  static #KEY_PREFIX = "studio.app-configuration.";
+  static #KEY_PREFIX = LOCAL_STORAGE_APP_CONFIGURATION;
 
   /** Default values for app configuration items which have never been set by a user */
   #defaults?: { [key: string]: AppConfigurationValue };

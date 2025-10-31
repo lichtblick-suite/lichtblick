@@ -83,6 +83,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         subscriptions: [],
         messageEventsBySubscriberId: new Map(),
         sortedTopics: [],
+        sortedServices: [],
         datatypes: new Map(),
         setSubscriptions: expect.any(Function),
         getMetadata: expect.any(Function),
@@ -97,6 +98,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         seekPlayback: undefined,
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
+        getBatchIterator: expect.any(Function),
       },
       {
         playerState: {
@@ -110,6 +112,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         subscriptions: [],
         messageEventsBySubscriberId: new Map(),
         sortedTopics: [],
+        sortedServices: [],
         datatypes: new Map(),
         setSubscriptions: expect.any(Function),
         setPublishers: expect.any(Function),
@@ -124,6 +127,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         seekPlayback: undefined,
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
+        getBatchIterator: expect.any(Function),
       },
     ]);
   });

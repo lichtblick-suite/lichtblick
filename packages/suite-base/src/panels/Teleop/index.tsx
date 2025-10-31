@@ -12,8 +12,8 @@ import { PanelExtensionContext } from "@lichtblick/suite";
 import { CaptureErrorBoundary } from "@lichtblick/suite-base/components/CaptureErrorBoundary";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import { PanelExtensionAdapter } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import { TeleopPanelAdapterProps } from "@lichtblick/suite-base/panels/Teleop/types";
 import { createSyncRoot } from "@lichtblick/suite-base/panels/createSyncRoot";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import TeleopPanel from "./TeleopPanel";
 
@@ -26,12 +26,7 @@ function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionCo
   );
 }
 
-type Props = {
-  config: unknown;
-  saveConfig: SaveConfig<unknown>;
-};
-
-function TeleopPanelAdapter(props: Props) {
+function TeleopPanelAdapter(props: Readonly<TeleopPanelAdapterProps>) {
   const crash = useCrash();
   const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
 

@@ -5,14 +5,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ESBuildMinifyPlugin } from "esbuild-loader";
-import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import dotenv from "dotenv";
 import path from "path";
 import { Configuration, DefinePlugin, ResolveOptions } from "webpack";
 
 import { WebpackArgv } from "@lichtblick/suite-base/WebpackArgv";
 
 import { WebpackConfigParams } from "./WebpackConfigParams";
+import { createCommonWebpackConfig } from "./webpackCommonConfig";
+
+// Load environment variables from .env
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 export const webpackMainConfig =
   (params: WebpackConfigParams) =>
@@ -32,6 +35,8 @@ export const webpackMainConfig =
       };
     }
 
+    const common = createCommonWebpackConfig(params, { isDev });
+
     // When running under a development server the renderer entry comes from the server.
     // When making static builds (for packaging), the renderer entry is a file on disk.
     // This switches between the two and is injected below via DefinePlugin as MAIN_WINDOW_WEBPACK_ENTRY
@@ -40,55 +45,20 @@ export const webpackMainConfig =
       : "`file://${require('path').join(__dirname, '..', 'renderer', 'index.html')}`";
 
     return {
+      ...common,
       context: params.mainContext,
       entry: params.mainEntrypoint,
       target: "electron-main",
-      devtool: isDev ? "eval-cheap-module-source-map" : params.prodSourceMap,
-
       output: {
         publicPath: "",
         path: path.join(params.outputPath, "main"),
       },
-
-      module: {
-        rules: [
-          {
-            test: /\.tsx?$/,
-            exclude: /node_modules/,
-            use: {
-              loader: "ts-loader",
-              options: {
-                transpileOnly: true,
-                // https://github.com/TypeStrong/ts-loader#onlycompilebundledfiles
-                // avoid looking at files which are not part of the bundle
-                onlyCompileBundledFiles: true,
-                projectReferences: true,
-              },
-            },
-          },
-        ],
-      },
-
-      optimization: {
-        removeAvailableModules: true,
-        minimizer: [
-          new ESBuildMinifyPlugin({
-            target: "es2022",
-            minify: true,
-          }),
-        ],
-      },
-
       plugins: [
+        ...(common.plugins ?? []),
         new DefinePlugin({
           MAIN_WINDOW_WEBPACK_ENTRY: rendererEntry,
-          LICHTBLICK_PRODUCT_NAME: JSON.stringify(params.packageJson.productName),
-          LICHTBLICK_PRODUCT_VERSION: JSON.stringify(params.packageJson.version),
-          LICHTBLICK_PRODUCT_HOMEPAGE: JSON.stringify(params.packageJson.homepage),
         }),
-        new ForkTsCheckerWebpackPlugin(),
       ],
-
       resolve,
     };
   };

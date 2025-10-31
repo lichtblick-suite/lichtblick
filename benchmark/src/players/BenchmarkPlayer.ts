@@ -11,7 +11,10 @@ import { toRFC3339String } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { BlockLoader } from "@lichtblick/suite-base/players/IterablePlayer/BlockLoader";
-import { IDeserializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import {
+  IDeserializedIterableSource,
+  IteratorResult,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
@@ -33,16 +36,22 @@ const MAX_BLOCKS = 100;
 const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
 class BenchmarkPlayer implements Player {
-  #source: IDeserializedIterableSource;
-  #name: string;
+  readonly #source: IDeserializedIterableSource;
+  readonly #name: string;
   #listener?: (state: PlayerState) => Promise<void>;
   #subscriptions: SubscribePayload[] = [];
   #blockLoader?: BlockLoader;
-  #alertManager = new PlayerAlertManager();
+  readonly #alertManager = new PlayerAlertManager();
 
   public constructor(name: string, source: IDeserializedIterableSource) {
     this.#name = name;
     this.#source = source;
+  }
+
+  public getBatchIterator(
+    _topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    return undefined;
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
@@ -94,8 +103,8 @@ class BenchmarkPlayer implements Player {
     const { start: startTime, end: endTime, topicStats, datatypes, topics } = result;
 
     // Bail on any alerts
-    for (const alert of result.alerts) {
-      throw new Error(alert.message);
+    if (result.alerts.length > 0) {
+      throw new Error(result.alerts[0]!.message);
     }
 
     do {

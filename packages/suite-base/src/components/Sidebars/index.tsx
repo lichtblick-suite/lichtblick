@@ -92,7 +92,7 @@ export default function Sidebars<
   );
 
   return (
-    <Stack direction="row" fullHeight overflow="hidden">
+    <Stack direction="row" fullHeight overflow="hidden" data-testid="sidebars-wrapper">
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
         // children from having to re-mount each time the sidebar is opened/closed.

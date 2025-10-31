@@ -120,6 +120,7 @@ function PlaybackTimeMethodMenu({
     <>
       <IconButton
         id="playback-time-display-toggle-button"
+        data-testid="playback-time-display-toggle-button"
         aria-controls={open ? "playback-time-display-toggle-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
@@ -154,6 +155,7 @@ function PlaybackTimeMethodMenu({
         ].map((option) => (
           <MenuItem
             key={option.key}
+            data-testid={`playback-time-display-option-${option.key}`}
             selected={timeFormat === option.key}
             onClick={async () => {
               await setTimeFormat(option.key as TimeDisplayMethod);

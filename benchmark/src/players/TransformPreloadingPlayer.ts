@@ -12,6 +12,7 @@ import { Time, compare } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { normalizeFrameTransform } from "@lichtblick/suite-base/panels/ThreeDeeRender/normalizeMessages";
+import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
@@ -91,6 +92,12 @@ class TransformPreloadingPlayer implements Player {
         schemaName: "foxglove.FrameTransform",
       },
     ];
+  }
+
+  public getBatchIterator(
+    _topic: string,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    throw new Error("Method not implemented.");
   }
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {

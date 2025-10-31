@@ -12,6 +12,7 @@ import { signal } from "@lichtblick/den/async";
 import { fromSec } from "@lichtblick/rostime";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { MessageEvent, PlayerPresence, PlayerState } from "@lichtblick/suite-base/players/types";
+import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 
 import {
@@ -660,6 +661,126 @@ describe("IterablePlayer", () => {
     await player.isClosed;
   });
 
+  it("should detect high frequency topics during initialization", async () => {
+    class HighFrequencyTopicSource implements IDeserializedIterableSource {
+      public readonly sourceType = "deserialized";
+      public async initialize(): Promise<Initialization> {
+        const topicStats = new Map();
+        topicStats.set("high-freq-topic", {
+          numMessages: 6000, // High message count
+          firstMessageTime: { sec: 0, nsec: 0 },
+          lastMessageTime: { sec: 1, nsec: 0 },
+        });
+
+        return {
+          start: { sec: 0, nsec: 0 },
+          end: { sec: 1, nsec: 0 },
+          topics: [{ name: "high-freq-topic", schemaName: "std_msgs/String" }],
+          topicStats,
+          profile: undefined,
+          alerts: [],
+          datatypes: new Map(),
+          publishersByTopic: new Map(),
+        };
+      }
+
+      public async *messageIterator() {}
+      public async getBackfillMessages() {
+        return [];
+      }
+    }
+
+    const source = new HighFrequencyTopicSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+
+    const playerStates = await store.done;
+    expect(_.last(playerStates)!.alerts).toEqual([
+      {
+        severity: "warn",
+        message: "High frequency topics detected",
+        error: expect.any(Error),
+      },
+    ]);
+
+    player.close();
+    await player.isClosed;
+
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("should only call isTopicHighFrequency once even with multiple high frequency topics", async () => {
+    const isTopicHighFrequencySpy = jest.spyOn(highFrequencyUtils, "isTopicHighFrequency");
+
+    class MultiHighFreqTopicsSource implements IDeserializedIterableSource {
+      public readonly sourceType = "deserialized";
+      public async initialize(): Promise<Initialization> {
+        const topicStats = new Map();
+        // Add multiple high frequency topics
+        topicStats.set("high-freq-topic-1", {
+          numMessages: 6000,
+          firstMessageTime: { sec: 0, nsec: 0 },
+          lastMessageTime: { sec: 1, nsec: 0 },
+        });
+        topicStats.set("high-freq-topic-2", {
+          numMessages: 7000,
+          firstMessageTime: { sec: 0, nsec: 0 },
+          lastMessageTime: { sec: 1, nsec: 0 },
+        });
+
+        return {
+          start: { sec: 0, nsec: 0 },
+          end: { sec: 1, nsec: 0 },
+          topics: [
+            { name: "high-freq-topic-1", schemaName: "std_msgs/String" },
+            { name: "high-freq-topic-2", schemaName: "std_msgs/String" },
+          ],
+          topicStats,
+          profile: undefined,
+          alerts: [],
+          datatypes: new Map(),
+          publishersByTopic: new Map(),
+        };
+      }
+
+      public async *messageIterator() {}
+      public async getBackfillMessages() {
+        return [];
+      }
+    }
+
+    const source = new MultiHighFreqTopicsSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+
+    await store.done;
+
+    expect(isTopicHighFrequencySpy).toHaveBeenCalledTimes(1);
+
+    player.close();
+    await player.isClosed;
+
+    isTopicHighFrequencySpy.mockRestore();
+
+    (console.warn as jest.Mock).mockClear();
+  });
+
   it("should start a new iterator mid-tick when old iterator finishes", async () => {
     const source = new TestSource();
     const player = new IterablePlayer({
@@ -870,5 +991,298 @@ describe("IterablePlayer", () => {
       // @ts-expect-error because the array is type as readonly
       metadataInitialized.pop();
     }).toThrow();
+  });
+
+  describe("getBatchIterator", () => {
+    it("should return undefined when messageRangeSource is not available", () => {
+      const source = new TestSource();
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Before initialization, messageRangeSource should be undefined
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeUndefined();
+    });
+
+    it("should create correct topic selection and call messageIterator", async () => {
+      const source = new TestSource();
+
+      // Mock the messageIterator method to track calls
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      // Now getBatchIterator should work
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      // Consume one item from the iterator to verify it works
+      expect(iterator).toBeDefined();
+      const result = await iterator!.next();
+      expect(result.done).toBe(false);
+      // Verify we got a message event
+      expect((result as any).value.type).toBe("message-event");
+
+      // Verify that messageIterator was called with correct parameters
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["test_topic", { topic: "test_topic" }]]),
+        consumptionType: "full",
+      });
+    });
+
+    it("should handle multiple topics correctly", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "topic1",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test1" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "topic2",
+            receiveTime: { sec: 2, nsec: 0 },
+            message: { data: "test2" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      // Test getBatchIterator for topic1
+      const iterator1 = player.getBatchIterator("topic1");
+      expect(iterator1).toBeDefined();
+
+      // Test getBatchIterator for topic2
+      const iterator2 = player.getBatchIterator("topic2");
+      expect(iterator2).toBeDefined();
+
+      // Verify calls with different topics
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["topic1", { topic: "topic1" }]]),
+        consumptionType: "full",
+      });
+
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["topic2", { topic: "topic2" }]]),
+        consumptionType: "full",
+      });
+    });
+
+    it("should handle iterator that yields different result types", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+        yield {
+          type: "alert",
+          connectionId: 1,
+          alert: { severity: "info", message: "test alert" },
+        };
+        yield {
+          type: "stamp",
+          stamp: { sec: 1, nsec: 500000000 },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      const results = [];
+      for await (const result of iterator!) {
+        results.push(result);
+      }
+
+      expect(results).toHaveLength(3);
+      expect(results[0]?.type).toBe("message-event");
+      expect(results[1]?.type).toBe("alert");
+      expect(results[2]?.type).toBe("stamp");
+    });
+
+    it("should handle empty iterator", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        // Empty iterator
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      const result = await iterator!.next();
+      expect(result.done).toBe(true);
+    });
+
+    it("should handle iterator errors gracefully", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+        throw new Error("Iterator error");
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const iterator = player.getBatchIterator("test_topic");
+      expect(iterator).toBeDefined();
+
+      // Should get first message
+      const result1 = await iterator!.next();
+      expect(result1.done).toBe(false);
+      expect(result1.value.type).toBe("message-event");
+
+      // Should throw on second call
+      await expect(iterator!.next()).rejects.toThrow("Iterator error");
+    });
+
+    it("should use full consumption type", async () => {
+      const source = new TestSource();
+
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "test_topic",
+            receiveTime: { sec: 1, nsec: 0 },
+            message: { data: "test" },
+            sizeInBytes: 100,
+            schemaName: "test_schema",
+          },
+        };
+      });
+
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      // Wait for initialization
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      player.getBatchIterator("test_topic");
+
+      // Verify that consumptionType is "full"
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: expect.any(Map),
+        consumptionType: "full",
+      });
+    });
   });
 });

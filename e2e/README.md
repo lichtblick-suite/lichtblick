@@ -9,6 +9,11 @@ This directory contains all end-to-end (E2E) tests using [Playwright](https://pl
 yarn desktop:build:prod
 ```
 
+```bash
+# Install Playwright
+yarn playwright install
+```
+
 ### Web
 
 ```bash
