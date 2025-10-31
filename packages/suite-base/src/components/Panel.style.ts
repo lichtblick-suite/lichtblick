@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 import { makeStyles } from "tss-react/mui";
 
+import { customTypography } from "@lichtblick/theme";
+
 export const useStyles = makeStyles()((theme) => ({
   perfInfo: {
     position: "absolute",
@@ -9,7 +11,7 @@ export const useStyles = makeStyles()((theme) => ({
     left: 3,
     whiteSpace: "pre-line",
     fontSize: "0.75em",
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero'`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, 'zero'`,
     opacity: 0.7,
     userSelect: "none",
     mixBlendMode: "difference",
