@@ -12457,17 +12457,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heap-js@npm:2.7.1":
+"heap-js@npm:2.7.1, heap-js@npm:^2.2.0":
   version: 2.7.1
   resolution: "heap-js@npm:2.7.1"
   checksum: bbf309c8a472ac6e220eb3894b25ca01439d3b625775745876498cc18d37ef482709784b1c3f4fd0b01961ceb5d713ef053e25006a9fe3d4481e80a1d8f46dbd
-  languageName: node
-  linkType: hard
-
-"heap-js@npm:^2.2.0":
-  version: 2.6.0
-  resolution: "heap-js@npm:2.6.0"
-  checksum: c89d8fc4794e580abdfd5ab2937fdef6fef0d4f48428484ac2665b50873237ebcf60e02b453b2b448a89607a9af6270d8a71aa79f5890a3dc0e52d62b6119e1c
   languageName: node
   linkType: hard
 
