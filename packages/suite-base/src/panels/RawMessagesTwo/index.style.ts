@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0
 import { makeStyles } from "tss-react/mui";
 
+import { customTypography } from "@lichtblick/theme";
+
 export const useStylesRawMessagesTwo = makeStyles()((theme) => ({
   topic: {
     fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
   },
   hoverObserver: {
     display: "inline-flex",
@@ -107,7 +109,7 @@ export const useStylesVirtualizedTree = makeStyles()((theme) => ({
     alignItems: "flex-start",
     padding: "2px 0",
     fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
     fontSize: "inherit",
     lineHeight: 1.4,
   },

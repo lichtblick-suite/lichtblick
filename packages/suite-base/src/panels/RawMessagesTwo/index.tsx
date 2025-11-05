@@ -71,7 +71,7 @@ const dataWithoutWrappingArray = (data: unknown) => {
   return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
 };
 
-export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]): unknown => {
+const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]): unknown => {
   if (!isSingleElemArray(data)) {
     return data;
   }
