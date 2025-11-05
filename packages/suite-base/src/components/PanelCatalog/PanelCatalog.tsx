@@ -223,23 +223,25 @@ export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCata
           onKeyDown={onKeyDown}
           autoFocus
           data-testid="panel-list-textfield"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: searchQuery && (
-              <IconButton
-                size="small"
-                edge="end"
-                onClick={() => {
-                  setSearchQuery("");
-                }}
-              >
-                <CancelIcon fontSize="small" />
-              </IconButton>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchQuery && (
+                <IconButton
+                  size="small"
+                  edge="end"
+                  onClick={() => {
+                    setSearchQuery("");
+                  }}
+                >
+                  <CancelIcon fontSize="small" />
+                </IconButton>
+              ),
+            },
           }}
         />
       </div>
