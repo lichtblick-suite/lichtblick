@@ -13,7 +13,7 @@ export enum NodeState {
 
 export type NodeExpansion = "all" | "none" | Record<string, NodeState>;
 
-export type RawMessagesPanelConfig = {
+export type RawMessagesTwoPanelConfig = {
   diffEnabled: boolean;
   diffMethod: "custom" | "previous message";
   diffTopicPath: string;
