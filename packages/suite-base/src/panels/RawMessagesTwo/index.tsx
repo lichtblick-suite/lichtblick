@@ -85,7 +85,7 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
 
 function RawMessagesTwo(props: PropsRawMessagesTwo) {
   const {
-    palette: { mode: themePreference },
+    palette: { mode: _themePreference },
   } = useTheme();
   const { classes } = useStylesRawMessagesTwo();
   const { config, saveConfig } = props;
