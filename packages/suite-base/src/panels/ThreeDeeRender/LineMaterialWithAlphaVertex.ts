@@ -524,10 +524,12 @@ export class LineMaterialWithAlphaVertex extends ShaderMaterial {
   }
 
   public get dashed() {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
     return Boolean("USE_DASH" in this.defines);
   }
 
   public set dashed(value) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
     if (Boolean(value) !== Boolean("USE_DASH" in this.defines)) {
       this.needsUpdate = true;
     }

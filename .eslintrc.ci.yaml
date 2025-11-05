@@ -14,5 +14,4 @@ rules:
   import/no-cycle:
     - error
     - ignoreExternal: true
-
-  '@typescript-eslint/no-unnecessary-type-conversion': off
+  

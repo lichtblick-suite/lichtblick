@@ -30,6 +30,7 @@ const ROS1_COMMON_MSG_PACKAGES = new Set(Object.keys(ros1).map((key) => key.spli
 ROS1_COMMON_MSG_PACKAGES.add("turtlesim");
 
 function isTypedArray(obj: unknown) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
   return Boolean(
     obj != undefined &&
       typeof obj === "object" &&

@@ -75,6 +75,7 @@ class ExtensionsAPI implements IExtensionAPI {
       if (typeof value === "object") {
         formData.append(key, JSON.stringify(value) ?? "");
       } else if (value) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
         formData.append(key, String(value));
       }
     });

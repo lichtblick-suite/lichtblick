@@ -68,6 +68,7 @@ export function handleAddSeriesAction({ draft }: HandleAction): void {
 }
 
 export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAction): void {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
   draft.paths.splice(Number(index), 1);
 }
 
