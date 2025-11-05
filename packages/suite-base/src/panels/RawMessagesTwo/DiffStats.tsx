@@ -6,45 +6,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Typography } from "@mui/material";
-import { ReactNode } from "react";
-import { makeStyles } from "tss-react/mui";
 
-import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
+import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
+import { useStylesDiffStats } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
+import { DiffObject, PropsDiffStats } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 import { getChangeCounts } from "@lichtblick/suite-base/panels/RawMessagesTwo/utils";
 
-const useStyles = makeStyles()((theme) => ({
-  diff: {
-    float: "right",
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(0.75),
-    marginRight: theme.spacing(0.75),
-  },
-  badge: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: theme.spacing(0.25),
-    padding: theme.spacing(0, 0.75),
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.paper,
-  },
-  changeIndicator: {
-    display: "inline-block",
-    width: theme.spacing(0.75),
-    height: theme.spacing(0.75),
-    borderRadius: "50%",
-    backgroundColor: theme.palette.warning.main,
-  },
-}));
-
-export default function DiffStats({
-  data,
-  itemType,
-}: {
-  data: DiffObject;
-  itemType: ReactNode;
-}): React.JSX.Element {
-  const { classes } = useStyles();
+export default function DiffStats(props: PropsDiffStats): React.JSX.Element {
+  const { data, itemType } = props;
+  const { classes } = useStylesDiffStats();
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText] as DiffObject | undefined;
   const idLabel = id

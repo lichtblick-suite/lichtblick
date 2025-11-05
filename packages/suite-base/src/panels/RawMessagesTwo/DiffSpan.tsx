@@ -5,26 +5,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CSSProperties, ReactNode } from "react";
-import { makeStyles } from "tss-react/mui";
+import { useStylesDiffSpan } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
+import { PropsDiffSpan } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 
-const useStyles = makeStyles()((theme) => ({
-  root: {
-    padding: theme.spacing(0, 0.5),
-    textDecoration: "inherit",
-    whiteSpace: "pre-line",
-  },
-}));
-
-type Props = {
-  children?: ReactNode;
-  style?: CSSProperties;
-};
-
-export function DiffSpan(props: Props): React.JSX.Element {
+export function DiffSpan(props: PropsDiffSpan): React.JSX.Element {
   const { children, style } = props;
 
-  const { classes } = useStyles();
+  const { classes } = useStylesDiffSpan();
 
   return (
     <span className={classes.root} style={style}>

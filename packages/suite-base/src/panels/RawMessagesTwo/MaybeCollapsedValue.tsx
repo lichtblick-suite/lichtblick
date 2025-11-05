@@ -17,12 +17,12 @@
 import { Tooltip } from "@mui/material";
 import { useCallback, useState } from "react";
 
-// Strings longer than this many characters will start off collapsed.
-const COLLAPSE_TEXT_OVER_LENGTH = 512;
+import { COLLAPSE_TEXT_OVER_LENGTH } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
+import { PropsMaybeCollapsedValue } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 
-type Props = { itemLabel: string };
-
-export default function MaybeCollapsedValue({ itemLabel }: Props): React.JSX.Element {
+export default function MaybeCollapsedValue({
+  itemLabel,
+}: PropsMaybeCollapsedValue): React.JSX.Element {
   const lengthOverLimit = itemLabel.length >= COLLAPSE_TEXT_OVER_LENGTH;
 
   const [showingEntireLabel, setShowingEntireLabel] = useState(!lengthOverLimit);

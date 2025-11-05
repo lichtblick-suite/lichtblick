@@ -6,89 +6,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, useMemo, CSSProperties, useEffect } from "react";
-import { makeStyles } from "tss-react/mui";
+import { useRef, useMemo, CSSProperties } from "react";
 
-import { flattenTreeData, TreeNode } from "./flattenTreeData";
-import { DATA_ARRAY_PREVIEW_LIMIT } from "./utils";
+import { DATA_ARRAY_PREVIEW_LIMIT } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
+import { useStylesVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
+import { PropsVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 
-// Suppress benign ResizeObserver error
-// This is a known issue with ResizeObserver when measurements happen too frequently
-// See: https://github.com/WICG/resize-observer/issues/38
-const suppressResizeObserverError = () => {
-  const errorHandler = (event: ErrorEvent) => {
-    if (
-      event.message.includes("ResizeObserver loop") ||
-      event.message.includes("ResizeObserver loop completed with undelivered notifications")
-    ) {
-      event.stopImmediatePropagation();
-      event.preventDefault();
-    }
-  };
-  window.addEventListener("error", errorHandler);
-  return () => {
-    window.removeEventListener("error", errorHandler);
-  };
-};
-
-const useStyles = makeStyles()((theme) => ({
-  container: {
-    overflow: "auto",
-    contain: "strict",
-    height: "100%",
-    width: "100%",
-  },
-  row: {
-    display: "flex",
-    alignItems: "flex-start",
-    padding: "2px 0",
-    fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
-    fontSize: "inherit",
-    lineHeight: 1.4,
-  },
-  expandButton: {
-    cursor: "pointer",
-    userSelect: "none",
-    minWidth: 12,
-    marginRight: theme.spacing(0.5),
-    color: theme.palette.text.secondary,
-  },
-  key: {
-    color: theme.palette.primary.main,
-    marginRight: theme.spacing(0.5),
-  },
-  colon: {
-    marginRight: theme.spacing(0.5),
-  },
-  value: {
-    color: theme.palette.text.primary,
-  },
-  string: {
-    color: theme.palette.success.main,
-  },
-  number: {
-    color: theme.palette.info.main,
-  },
-  boolean: {
-    color: theme.palette.warning.main,
-  },
-  null: {
-    color: theme.palette.text.disabled,
-  },
-  objectLabel: {
-    color: theme.palette.text.secondary,
-    fontStyle: "italic",
-  },
-}));
-
-type VirtualizedTreeProps = {
-  data: unknown;
-  expandedNodes: Set<string>;
-  onToggleExpand: (keyPath: string) => void;
-  fontSize?: number;
-  renderValue?: (node: TreeNode) => React.ReactNode;
-};
+import { flattenTreeData } from "./flattenTreeData";
 
 function formatValue(value: unknown): string {
   if (value == undefined) {
@@ -121,7 +45,7 @@ function formatValue(value: unknown): string {
 
 function getValueClassName(
   value: unknown,
-  classes: ReturnType<typeof useStyles>["classes"],
+  classes: ReturnType<typeof useStylesVirtualizedTree>["classes"],
 ): string {
   if (value == undefined) {
     return classes.null;
@@ -147,15 +71,10 @@ export function VirtualizedTree({
   onToggleExpand,
   fontSize,
   renderValue,
-}: VirtualizedTreeProps): React.JSX.Element {
-  const { classes, cx } = useStyles();
+}: PropsVirtualizedTree): React.JSX.Element {
+  const { classes, cx } = useStylesVirtualizedTree();
   // eslint-disable-next-line no-restricted-syntax
   const parentRef = useRef<HTMLDivElement>(null);
-
-  // Suppress ResizeObserver errors
-  useEffect(() => {
-    return suppressResizeObserverError();
-  }, []);
 
   const flatData = useMemo(() => {
     return flattenTreeData(data, expandedNodes);
@@ -166,7 +85,6 @@ export function VirtualizedTree({
     getScrollElement: () => parentRef.current,
     estimateSize: () => 24,
     overscan: 5,
-
     measureElement: undefined,
   });
 
@@ -203,7 +121,7 @@ export function VirtualizedTree({
                 top: 0,
                 left: 0,
                 width: "100%",
-                height: "24px",
+                height: `${virtualRow.size}px`,
                 transform: `translateY(${virtualRow.start}px)`,
                 paddingLeft,
               }}

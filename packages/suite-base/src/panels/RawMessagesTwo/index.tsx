@@ -18,10 +18,9 @@ import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material"
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactHoverObserver from "react-hover-observer";
-import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@lichtblick/message-path";
-import { Immutable, SettingsTreeAction } from "@lichtblick/suite";
+import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import {
@@ -35,9 +34,9 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesTwo/Toolbar";
 import getDiff from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
+import { useStylesRawMessagesTwo } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
 
 import MaybeCollapsedValue from "./MaybeCollapsedValue";
@@ -49,25 +48,17 @@ import {
   CUSTOM_METHOD,
   FONT_SIZE_OPTIONS,
   PATH_NAME_AGGREGATOR,
-} from "./constants";
-import { TreeNode } from "./flattenTreeData";
-import {
-  ValueAction,
-  getStructureItemForPath,
-  getValueActionForValue,
-} from "./getValueActionForValue";
-import { NodeState, RawMessagesTwoPanelConfig } from "./types";
-import {
   DATA_ARRAY_PREVIEW_LIMIT,
-  generateDeepKeyPaths,
-  getConstantNameByKeyPath,
-  toggleExpansion,
-} from "./utils";
-
-type PropsRawMessagesTwo = {
-  config: Immutable<RawMessagesTwoPanelConfig>;
-  saveConfig: SaveConfig<RawMessagesTwoPanelConfig>;
-};
+} from "./constants";
+import { getStructureItemForPath, getValueActionForValue } from "./getValueActionForValue";
+import {
+  NodeState,
+  PropsRawMessagesTwo,
+  RawMessagesTwoPanelConfig,
+  TreeNode,
+  ValueAction,
+} from "./types";
+import { generateDeepKeyPaths, getConstantNameByKeyPath, toggleExpansion } from "./utils";
 
 const isSingleElemArray = (obj: unknown): obj is unknown[] => {
   if (!Array.isArray(obj)) {
@@ -92,22 +83,11 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
   return `${data[0]} (${queriedData[0]?.constantName})`;
 };
 
-const useStyles = makeStyles()((theme) => ({
-  topic: {
-    fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
-  },
-  hoverObserver: {
-    display: "inline-flex",
-    alignItems: "center",
-  },
-}));
-
 function RawMessagesTwo(props: PropsRawMessagesTwo) {
   const {
     palette: { mode: themePreference },
   } = useTheme();
-  const { classes } = useStyles();
+  const { classes } = useStylesRawMessagesTwo();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =

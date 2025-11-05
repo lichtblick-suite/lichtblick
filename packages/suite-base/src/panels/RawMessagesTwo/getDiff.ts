@@ -16,8 +16,9 @@
 import * as _ from "lodash-es";
 
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
+import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
+import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 
-export const diffArrow = "->";
 export const diffLabels = {
   ADDED: {
     labelText: "STUDIO_DIFF___ADDED",
@@ -42,7 +43,6 @@ export const diffLabels = {
 
 export const diffLabelsByLabelText = _.keyBy(Object.values(diffLabels), "labelText");
 
-export type DiffObject = Record<string, unknown>;
 export default function getDiff({
   before,
   after,

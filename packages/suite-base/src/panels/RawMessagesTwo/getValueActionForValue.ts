@@ -16,13 +16,7 @@
 
 import { MessagePathStructureItem, PrimitiveType } from "@lichtblick/message-path";
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
-
-export type ValueAction = {
-  singleSlicePath: string; // Path that will only return one value per unit of time (for line charts).
-  multiSlicePath: string; // Path that might return multiple values per unit of time (for scatter plots).
-  primitiveType: string; // The ROS primitive type that these paths point at.
-  filterPath: string; // Path to filter on using the current value
-};
+import { ValueAction } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 
 const isObjectElement = (
   value: unknown,

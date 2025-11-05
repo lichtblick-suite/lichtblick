@@ -14,19 +14,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { diffLabels, diffArrow } from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
+import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
+import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
+import { PropsHighlightedValue } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
 
 import { DiffSpan } from "./DiffSpan";
 import MaybeCollapsedValue from "./MaybeCollapsedValue";
 
-type Props = {
-  itemLabel: string;
-};
-
-export default function HighlightedValue({ itemLabel }: Props): React.JSX.Element {
-  const diffArrowStr = ` ${diffArrow} `;
+export default function HighlightedValue({ itemLabel }: PropsHighlightedValue): React.JSX.Element {
   // react-json-tree's valueRenderer only gets called for primitives, so diff before/after values must be at same level by the time it gets to the tree
-  const splitItemLabel = itemLabel.toString().split(diffArrowStr);
+  const splitItemLabel = itemLabel.toString().split(diffArrow);
   const itemLabelContainsChange = splitItemLabel.length === 2;
   if (itemLabelContainsChange) {
     const [before, after] = splitItemLabel;
@@ -35,7 +32,7 @@ export default function HighlightedValue({ itemLabel }: Props): React.JSX.Elemen
     return (
       <DiffSpan style={{ color: diffLabels.CHANGED.color }}>
         <MaybeCollapsedValue itemLabel={beforeText} />
-        {diffArrowStr}
+        {diffArrow}
         <MaybeCollapsedValue itemLabel={afterText} />
       </DiffSpan>
     );
