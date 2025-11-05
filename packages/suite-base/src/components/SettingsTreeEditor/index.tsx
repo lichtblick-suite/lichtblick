@@ -129,6 +129,7 @@ export default function SettingsTreeEditor({
                 ),
                 endAdornment: filterText && (
                   <IconButton
+                    data-testid="clear-filter-button"
                     size="small"
                     title={t("clearSearch")}
                     onClick={() => {
