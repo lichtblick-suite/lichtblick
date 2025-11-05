@@ -18,14 +18,12 @@ import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material"
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactHoverObserver from "react-hover-observer";
-import Tree from "react-json-tree";
 import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@lichtblick/message-path";
 import { Immutable, SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import useGetItemStringWithTimezone from "@lichtblick/suite-base/components/JsonTree/useGetItemStringWithTimezone";
 import {
   messagePathStructures,
   traverseStructure,
@@ -35,35 +33,30 @@ import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePat
 import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { Toolbar } from "@lichtblick/suite-base/panels/RawMessages/Toolbar";
-import getDiff, {
-  DiffObject,
-  diffLabels,
-  diffLabelsByLabelText,
-} from "@lichtblick/suite-base/panels/RawMessages/getDiff";
+import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesTwo/Toolbar";
+import getDiff from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
-import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 
-import { DiffSpan } from "./DiffSpan";
-import DiffStats from "./DiffStats";
 import MaybeCollapsedValue from "./MaybeCollapsedValue";
 import Metadata from "./Metadata";
 import Value from "./Value";
+import { VirtualizedTree } from "./VirtualizedTree";
 import {
   PREV_MSG_METHOD,
   CUSTOM_METHOD,
   FONT_SIZE_OPTIONS,
   PATH_NAME_AGGREGATOR,
 } from "./constants";
+import { TreeNode } from "./flattenTreeData";
 import {
   ValueAction,
   getStructureItemForPath,
   getValueActionForValue,
 } from "./getValueActionForValue";
-import { NodeState, RawMessagesPanelConfig } from "./types";
+import { NodeState, RawMessagesTwoPanelConfig } from "./types";
 import {
   DATA_ARRAY_PREVIEW_LIMIT,
   generateDeepKeyPaths,
@@ -71,9 +64,9 @@ import {
   toggleExpansion,
 } from "./utils";
 
-type Props = {
-  config: Immutable<RawMessagesPanelConfig>;
-  saveConfig: SaveConfig<RawMessagesPanelConfig>;
+type PropsRawMessagesTwo = {
+  config: Immutable<RawMessagesTwoPanelConfig>;
+  saveConfig: SaveConfig<RawMessagesTwoPanelConfig>;
 };
 
 const isSingleElemArray = (obj: unknown): obj is unknown[] => {
@@ -110,12 +103,11 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-function RawMessagesTwo(props: Props) {
+function RawMessagesTwo(props: PropsRawMessagesTwo) {
   const {
     palette: { mode: themePreference },
   } = useTheme();
   const { classes } = useStyles();
-  const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
@@ -141,17 +133,6 @@ function RawMessagesTwo(props: Props) {
       },
     });
   }, [setMessagePathDropConfig, saveConfig]);
-
-  const defaultGetItemString = useGetItemStringWithTimezone();
-  const getItemString = useMemo(
-    () =>
-      diffEnabled
-        ? (_type: string, data: DiffObject, itemType: React.ReactNode) => (
-            <DiffStats data={data} itemType={itemType} />
-          )
-        : defaultGetItemString,
-    [defaultGetItemString, diffEnabled],
-  );
 
   const topicRosPath: MessagePath | undefined = useMemo(
     () => parseMessagePath(topicPath),
@@ -194,6 +175,24 @@ function RawMessagesTwo(props: Props) {
       return new Set<string>();
     }
   }, [baseItem]);
+
+  const expandedNodesSet = useMemo(() => {
+    if (expansion === "all") {
+      return nodes;
+    }
+    if (expansion === "none") {
+      return new Set<string>();
+    }
+    const expanded = new Set<string>();
+    if (typeof expansion === "object") {
+      for (const [key, state] of Object.entries(expansion)) {
+        if (state === NodeState.Expanded) {
+          expanded.add(key);
+        }
+      }
+    }
+    return expanded;
+  }, [expansion, nodes]);
 
   const canExpandAll = useMemo(() => {
     if (expansion === "none") {
@@ -381,25 +380,6 @@ function RawMessagesTwo(props: Props) {
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
-    const shouldExpandNode = (keypath: (string | number)[]) => {
-      if (expansion === "all") {
-        return true;
-      }
-      if (expansion === "none") {
-        return false;
-      }
-
-      const joinedPath = keypath.join(PATH_NAME_AGGREGATOR);
-      if (expansion && expansion[joinedPath] === NodeState.Collapsed) {
-        return false;
-      }
-      if (expansion && expansion[joinedPath] === NodeState.Expanded) {
-        return true;
-      }
-
-      return true;
-    };
-
     if (topicPath.length === 0) {
       return <EmptyState>No topic selected</EmptyState>;
     }
@@ -478,164 +458,42 @@ function RawMessagesTwo(props: Props) {
                 label="Show full msg"
               />
             )}
-            <Tree
-              labelRenderer={(raw) => (
-                <>
-                  <DiffSpan>{_.first(raw)}</DiffSpan>
-                  {/* https://stackoverflow.com/questions/62319014/make-text-selection-treat-adjacent-elements-as-separate-words */}
-                  <span style={{ fontSize: 0 }}>&nbsp;</span>
-                </>
-              )}
-              shouldExpandNode={shouldExpandNode}
-              onExpand={(_data, _level, keyPath) => {
-                onLabelClick(keyPath);
+            <VirtualizedTree
+              data={diffEnabled ? diff : data}
+              expandedNodes={expandedNodesSet}
+              onToggleExpand={(keyPath) => {
+                onLabelClick(
+                  keyPath.split(PATH_NAME_AGGREGATOR).map((k) => {
+                    const num = Number(k);
+                    return Number.isNaN(num) ? k : num;
+                  }),
+                );
               }}
-              onCollapse={(_data, _level, keyPath) => {
-                onLabelClick(keyPath);
-              }}
-              hideRoot
-              invertTheme={false}
-              getItemString={getItemString}
-              valueRenderer={(valueAsString: string, value, ...keyPath) => {
+              fontSize={fontSize}
+              renderValue={(node: TreeNode) => {
                 if (diffEnabled) {
-                  return renderDiffLabel(valueAsString, value);
+                  return renderDiffLabel(node.label, node.value);
                 }
                 if (hideWrappingArray) {
-                  // When the wrapping array is hidden, put it back here.
                   return valueRenderer(
                     rootStructureItem,
                     [data],
                     baseItem.queriedData,
-                    valueAsString,
-                    value,
-                    ...keyPath,
+                    node.label,
+                    node.value,
+                    ...node.keyPath,
                     0,
                   );
                 }
-
                 return valueRenderer(
                   rootStructureItem,
                   data as unknown[],
                   baseItem.queriedData,
-                  valueAsString,
-                  value,
-                  ...keyPath,
+                  node.label,
+                  node.value,
+                  ...node.keyPath,
                 );
               }}
-              postprocessValue={(rawVal: unknown) => {
-                if (rawVal == undefined) {
-                  return rawVal;
-                }
-                const idValue = (rawVal as Record<string, unknown>)[diffLabels.ID.labelText];
-                const addedValue = (rawVal as Record<string, unknown>)[diffLabels.ADDED.labelText];
-                const changedValue = (rawVal as Record<string, unknown>)[
-                  diffLabels.CHANGED.labelText
-                ];
-                const deletedValue = (rawVal as Record<string, unknown>)[
-                  diffLabels.DELETED.labelText
-                ];
-                if (
-                  (addedValue != undefined ? 1 : 0) +
-                    (changedValue != undefined ? 1 : 0) +
-                    (deletedValue != undefined ? 1 : 0) ===
-                    1 &&
-                  idValue == undefined
-                ) {
-                  return addedValue ?? changedValue ?? deletedValue;
-                }
-                return rawVal;
-              }}
-              theme={{
-                ...jsonTreeTheme,
-                tree: { margin: 0 },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                nestedNode: ({ style }, keyPath: any) => {
-                  const baseStyle = {
-                    ...style,
-                    fontSize,
-                    paddingTop: 2,
-                    paddingBottom: 2,
-                    marginTop: 2,
-                    textDecoration: "inherit",
-                  };
-                  if (!diffEnabled) {
-                    return { style: baseStyle };
-                  }
-                  let backgroundColor;
-                  let textDecoration;
-                  if (diffLabelsByLabelText[keyPath[0]]) {
-                    backgroundColor =
-                      themePreference === "dark"
-                        ? // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[keyPath[0]].invertedBackgroundColor
-                        : // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[keyPath[0]].backgroundColor;
-                    textDecoration =
-                      keyPath[0] === diffLabels.DELETED.labelText ? "line-through" : "none";
-                  }
-                  const nestedObj = _.get(diff, keyPath.slice().reverse(), {});
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    backgroundColor =
-                      themePreference === "dark"
-                        ? // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
-                        : // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].backgroundColor;
-                    textDecoration =
-                      nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
-                  }
-                  return {
-                    style: {
-                      ...baseStyle,
-                      backgroundColor,
-                      textDecoration: textDecoration ?? "inherit",
-                    },
-                  };
-                },
-                nestedNodeLabel: ({ style }) => ({
-                  style: { ...style, textDecoration: "inherit" },
-                }),
-                nestedNodeChildren: ({ style }) => ({
-                  style: { ...style, textDecoration: "inherit" },
-                }),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                value: ({ style }, _nodeType, keyPath: any) => {
-                  const baseStyle = {
-                    ...style,
-                    fontSize,
-                    textDecoration: "inherit",
-                  };
-                  if (!diffEnabled) {
-                    return { style: baseStyle };
-                  }
-                  let backgroundColor;
-                  let textDecoration;
-                  const nestedObj = _.get(diff, keyPath.slice().reverse(), {});
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    backgroundColor =
-                      themePreference === "dark"
-                        ? // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
-                        : // @ts-expect-error backgroundColor is not a property?
-                          diffLabelsByLabelText[nestedObjKey].backgroundColor;
-                    textDecoration =
-                      nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
-                  }
-                  return {
-                    style: {
-                      ...baseStyle,
-                      backgroundColor,
-                      textDecoration: textDecoration ?? "inherit",
-                    },
-                  };
-                },
-                label: { textDecoration: "inherit" },
-              }}
-              data={diffEnabled ? diff : data}
             />
           </>
         )}
@@ -649,15 +507,12 @@ function RawMessagesTwo(props: Props) {
     diffItem,
     diffMethod,
     diffTopicPath,
-    expansion,
-    getItemString,
-    jsonTreeTheme,
+    expandedNodesSet,
     onLabelClick,
     renderDiffLabel,
     rootStructureItem,
     saveConfig,
     showFullMessageForDiff,
-    themePreference,
     topic,
     topicPath,
     valueRenderer,
@@ -723,7 +578,7 @@ function RawMessagesTwo(props: Props) {
   );
 }
 
-const defaultConfig: RawMessagesPanelConfig = {
+const defaultConfig: RawMessagesTwoPanelConfig = {
   diffEnabled: false,
   diffMethod: CUSTOM_METHOD,
   diffTopicPath: "",
@@ -734,7 +589,7 @@ const defaultConfig: RawMessagesPanelConfig = {
 
 export default Panel(
   Object.assign(RawMessagesTwo, {
-    panelType: "RawMessages",
+    panelType: "RawMessagesTwo",
     defaultConfig,
   }),
 );
