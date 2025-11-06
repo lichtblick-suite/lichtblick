@@ -124,7 +124,6 @@ const libDts = new Map(
     "es2022.intl": lib_es2022_intl,
     "es2022.object": lib_es2022_object,
     "es2022.regexp": lib_es2022_regexp,
-    "es2022.sharedmemory": lib_es2020_sharedmemory,
     "es2022.string": lib_es2022_string,
   }),
 );

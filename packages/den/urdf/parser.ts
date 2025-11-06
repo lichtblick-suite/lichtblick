@@ -393,6 +393,10 @@ function parseFloatAttributeOptional(xml: Element, attribName: string): number |
 }
 
 function parseFloatContent(xml: Element): number {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (xml.textContent == undefined) {
+    throw new Error(`expected float value in "${xml}"`);
+  }
   return parseFloat(xml.textContent);
 }
 
