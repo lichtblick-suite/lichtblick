@@ -46,7 +46,7 @@ export function buildSettingsTreeTeleop(
         },
       },
       leftButton: {
-        label: "Left Button",
+        label: "Left Button (Strafe)",
         fields: {
           field: {
             label: "Field",
@@ -58,7 +58,7 @@ export function buildSettingsTreeTeleop(
         },
       },
       rightButton: {
-        label: "Right Button",
+        label: "Right Button (Strafe)",
         fields: {
           field: {
             label: "Field",
@@ -67,6 +67,38 @@ export function buildSettingsTreeTeleop(
             options: geometryMsgOptions,
           },
           value: { label: "Value", input: "number", value: config.rightButton.value },
+        },
+      },
+      rotateLeftButton: {
+        label: "Rotate Left Button",
+        fields: {
+          field: {
+            label: "Field",
+            input: "select",
+            value: config.rotateLeftButton?.field ?? "angular-z",
+            options: geometryMsgOptions,
+          },
+          value: {
+            label: "Value",
+            input: "number",
+            value: config.rotateLeftButton?.value ?? 0.1,
+          },
+        },
+      },
+      rotateRightButton: {
+        label: "Rotate Right Button",
+        fields: {
+          field: {
+            label: "Field",
+            input: "select",
+            value: config.rotateRightButton?.field ?? "angular-z",
+            options: geometryMsgOptions,
+          },
+          value: {
+            label: "Value",
+            input: "number",
+            value: config.rotateRightButton?.value ?? -0.1,
+          },
         },
       },
     },
