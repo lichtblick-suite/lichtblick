@@ -20,14 +20,7 @@ import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
-import {
-  Container,
-  IconButton,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Typography,
-} from "@mui/material";
+import { Container, IconButton, MenuItem, Select, Typography } from "@mui/material";
 import {
   ExpandedState,
   PaginationState,
@@ -242,7 +235,7 @@ export default function Table({
       return [];
     }
 
-    const maybeMessage = Array.isArray(value) ? value[0] ?? {} : value;
+    const maybeMessage = Array.isArray(value) ? (value[0] ?? {}) : value;
 
     // Strong assumption about structure of data.
     return getColumnsFromObject(maybeMessage as CellValue, accessorPath);
@@ -393,7 +386,7 @@ export default function Table({
             <Select
               value={pageSize}
               size="small"
-              onChange={(e: SelectChangeEvent<number>) => {
+              onChange={(e) => {
                 table.setPageSize(Number(e.target.value));
               }}
               MenuProps={{ MenuListProps: { dense: true } }}
