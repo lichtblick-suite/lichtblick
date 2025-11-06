@@ -84,6 +84,10 @@ function LogList({ items }: Props): React.JSX.Element {
 
   const latestItems = useLatest(items);
 
+  // Save scroll times
+  const lastScrollTime = useRef(0);
+  const lastProgrammaticScrollTime = useRef(0);
+
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
 
@@ -115,11 +119,18 @@ function LogList({ items }: Props): React.JSX.Element {
           return;
         }
 
+        const now = Date.now();
+        const timeSinceLastProgrammaticScroll = now - lastProgrammaticScrollTime.current;
+        lastScrollTime.current = now;
+
         const { offsetHeight, scrollHeight } = outerElement;
         const tolerance = 20; // Pixels tolerance for "at end"
         const isAtEnd = scrollOffset + offsetHeight >= scrollHeight - tolerance;
 
-        if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
+        const isLikelyUserScroll =
+          !scrollUpdateWasRequested && timeSinceLastProgrammaticScroll > 100;
+
+        if (isLikelyUserScroll && scrollDirection === "backward" && !isAtEnd) {
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
