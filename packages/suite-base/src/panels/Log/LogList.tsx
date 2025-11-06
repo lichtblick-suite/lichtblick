@@ -16,8 +16,11 @@
 
 import DoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { Fab } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
+import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useResizeDetector } from "react-resize-detector";
+import { useLatest } from "react-use";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { VariableSizeList as List } from "react-window";
 import { makeStyles } from "tss-react/mui";
 
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
@@ -38,28 +41,33 @@ type Props = {
   items: readonly NormalizedLogMessage[];
 };
 
-// function Row(props: {
-//   data: ListItemData;
-//   index: number;
-//   style: CSSProperties;
-// }): React.JSX.Element {
-//   const { timeFormat, timeZone } = useAppTimeFormat();
-//   const ref = useRef<HTMLDivElement>(ReactNull);
+type ListItemData = {
+  items: readonly NormalizedLogMessage[];
+  setRowHeight: (index: number, height: number) => void;
+};
 
-//   useEffect(() => {
-//     if (ref.current) {
-//       props.data.setRowHeight(props.index, ref.current.clientHeight);
-//     }
-//   }, [props.data, props.index]);
+function Row(props: {
+  data: ListItemData;
+  index: number;
+  style: CSSProperties;
+}): React.JSX.Element {
+  const { timeFormat, timeZone } = useAppTimeFormat();
+  const ref = useRef<HTMLDivElement>(ReactNull);
 
-//   const item = props.data.items[props.index]!;
+  useEffect(() => {
+    if (ref.current) {
+      props.data.setRowHeight(props.index, ref.current.clientHeight);
+    }
+  }, [props.data, props.index]);
 
-//   return (
-//     <div style={{ ...props.style, height: "auto" }} ref={ref}>
-//       <LogMessage value={item} timestampFormat={timeFormat} timeZone={timeZone} />
-//     </div>
-//   );
-// }
+  const item = props.data.items[props.index]!;
+
+  return (
+    <div style={{ ...props.style, height: "auto" }} ref={ref}>
+      <LogMessage value={item} timestampFormat={timeFormat} timeZone={timeZone} />
+    </div>
+  );
+}
 
 /**
  * List for showing large number of items, which are expected to be appended to the end regularly.
@@ -67,22 +75,25 @@ type Props = {
  */
 function LogList({ items }: Props): React.JSX.Element {
   const { classes } = useStyles();
-  const { timeFormat, timeZone } = useAppTimeFormat();
 
   // Reference to the list item itself.
-  const virtuosoRef = useRef<VirtuosoHandle>(ReactNull);
+  const listRef = useRef<List>(ReactNull);
+
+  // Reference to the outer list div. Needed for autoscroll determination.
+  const outerRef = useRef<HTMLDivElement>(ReactNull);
+
+  const latestItems = useLatest(items);
 
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
 
-  // Buffering mechanism
-  const [displayedItems, setDisplayedItems] = useState<readonly NormalizedLogMessage[]>([]);
+  // Buffer messages before they're displayed
+  const [displayedItems, setDisplayedItems] = useState<readonly NormalizedLogMessage[]>(items);
   const bufferRef = useRef<readonly NormalizedLogMessage[]>([]);
   const lastProcessedIndex = useRef(0);
 
-  // Buffer new items and flush periodically
+  // Buffer new items
   useEffect(() => {
-    // Add new items to buffer
     if (items.length > lastProcessedIndex.current) {
       const newItems = items.slice(lastProcessedIndex.current);
       bufferRef.current = [...bufferRef.current, ...newItems];
@@ -90,104 +101,122 @@ function LogList({ items }: Props): React.JSX.Element {
     }
   }, [items]);
 
-  // Flush buffer to displayed items
+  // Flush buffer periodically
   useEffect(() => {
     const interval = setInterval(
       () => {
         if (bufferRef.current.length > 0) {
-          // When following, flush all buffered items
-          // When not following, only flush a smaller batch to avoid jumps
           const batchSize = autoscrollToEnd
             ? bufferRef.current.length
-            : Math.min(50, bufferRef.current.length);
+            : Math.min(20, bufferRef.current.length);
           const itemsToFlush = bufferRef.current.slice(0, batchSize);
 
           setDisplayedItems((prev) => [...prev, ...itemsToFlush]);
           bufferRef.current = bufferRef.current.slice(batchSize);
         }
       },
-      autoscrollToEnd ? 50 : 200,
-    ); // Faster flush when following, slower when not
+      autoscrollToEnd ? 100 : 500,
+    ); // Faster when following, slower when not
 
     return () => {
       clearInterval(interval);
     };
   }, [autoscrollToEnd]);
 
-  // Track if we're receiving data actively
-  const lastUpdateTime = useRef(Date.now());
-  const [isReceivingData, setIsReceivingData] = useState(false);
+  const onResetView = React.useCallback(() => {
+    setAutoscrollToEnd(true);
+    listRef.current?.scrollToItem(latestItems.current.length - 1, "end");
+  }, [latestItems]);
 
   useEffect(() => {
-    if (items.length > 0) {
-      lastUpdateTime.current = Date.now();
-      setIsReceivingData(true);
-
-      // Check if data flow has stopped
-      const timeout = setTimeout(() => {
-        const timeSinceUpdate = Date.now() - lastUpdateTime.current;
-        if (timeSinceUpdate >= 1000) {
-          setIsReceivingData(false);
-        }
-      }, 1000);
-
-      return () => {
-        clearTimeout(timeout);
-      };
+    if (autoscrollToEnd) {
+      listRef.current?.scrollToItem(items.length - 1, "end");
     }
-    return () => {};
-  }, [items.length]);
+  }, [autoscrollToEnd, items.length]);
 
-  const scrollToBottom = useCallback(() => {
-    setAutoscrollToEnd(true);
-    virtuosoRef.current?.scrollToIndex({
-      index: items.length - 1,
-      align: "end",
-    });
-  }, [items.length]);
-
-  const itemRenderer = useCallback(
-    (index: number) => {
-      const item = items[index];
-      if (!item) {
-        return ReactNull;
+  // Disable autoscroll if the user manually scrolls back.
+  const onScroll = React.useCallback(
+    ({
+      scrollDirection,
+      scrollOffset,
+      scrollUpdateWasRequested,
+    }: {
+      scrollDirection: "forward" | "backward";
+      scrollOffset: number;
+      scrollUpdateWasRequested: boolean;
+    }) => {
+      try {
+        const isAtEnd =
+          scrollOffset + (outerRef.current?.offsetHeight ?? 0) === outerRef.current?.scrollHeight;
+        if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
+          setAutoscrollToEnd(false);
+        } else if (scrollDirection === "forward" && isAtEnd) {
+          setAutoscrollToEnd(true);
+        }
+      } catch (error) {
+        console.error("Error while handling scroll", error);
       }
-
-      return <LogMessage value={item} timestampFormat={timeFormat} timeZone={timeZone} />;
     },
-    [items, timeFormat, timeZone],
+    [],
+  );
+
+  // Cache calculated item heights.
+  const itemHeightCache = useRef<Record<number, number>>({});
+
+  const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 16, []);
+
+  const setRowHeight = useCallback((index: number, height: number) => {
+    itemHeightCache.current[index] = height;
+    listRef.current?.resetAfterIndex(index);
+  }, []);
+
+  const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
+    refreshRate: 0,
+    refreshMode: "debounce",
+  });
+
+  const itemData = useMemo(
+    () => ({
+      items: displayedItems,
+      setRowHeight,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [displayedItems, setRowHeight, resizedWidth],
   );
 
   return (
-    <div style={{ position: "relative", height: "100%", width: "100%" }}>
-      <Virtuoso
-        ref={virtuosoRef}
-        totalCount={displayedItems.length}
-        itemContent={itemRenderer}
-        followOutput={autoscrollToEnd ? "auto" : false}
-        atBottomStateChange={(atBottom) => {
-          // Only disable auto-scroll when user scrolls up AND data is not actively flowing
-          if (!atBottom && autoscrollToEnd && !isReceivingData) {
-            // eslint-disable-next-line no-restricted-syntax
-            console.info("setting autoscroll to false");
-            setAutoscrollToEnd(false);
-          }
-        }}
-        style={{ height: "100%" }}
-      />
+    <AutoSizer>
+      {({ width, height }) => {
+        return (
+          <div style={{ position: "relative", width, height }} ref={resizeRootRef}>
+            <List
+              ref={listRef}
+              width={width}
+              height={height}
+              style={{ outline: "none" }}
+              itemData={itemData}
+              itemSize={getRowHeight}
+              itemCount={displayedItems.length}
+              outerRef={outerRef}
+              onScroll={onScroll}
+            >
+              {Row}
+            </List>
 
-      {/* Only show button when paused AND scrolled up from bottom */}
-      {!autoscrollToEnd && (
-        <Fab
-          size="small"
-          title="Scroll to bottom"
-          onClick={scrollToBottom}
-          className={classes.floatingButton}
-        >
-          <DoubleArrowDownIcon />
-        </Fab>
-      )}
-    </div>
+            {!autoscrollToEnd && (
+              <Fab
+                size="small"
+                title="Scroll to bottom"
+                onClick={onResetView}
+                className={classes.floatingButton}
+              >
+                <DoubleArrowDownIcon />
+              </Fab>
+            )}
+          </div>
+        );
+      }}
+    </AutoSizer>
   );
 }
 
