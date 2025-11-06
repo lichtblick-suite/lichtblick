@@ -21,15 +21,16 @@ import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { formatDuration } from "@lichtblick/suite-base/util/formatTime";
 import { formatTimeRaw, isAbsoluteTime } from "@lichtblick/suite-base/util/time";
+import { customTypography } from "@lichtblick/theme";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
   overline: {
     opacity: 0.6,
   },
   numericValue: {
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
   },
 }));
 

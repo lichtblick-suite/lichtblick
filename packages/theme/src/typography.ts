@@ -5,19 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TypographyOptions, TypographyStyle } from "@mui/material/styles/createTypography";
+import { TypographyVariantsOptions, TypographyStyle } from "@mui/material/styles";
 
-declare module "@mui/material/styles/createTypography" {
-  interface Typography {
-    fontMonospace: string;
-    fontSansSerif: string;
-    fontFeatureSettings: string;
-  }
-  interface TypographyOptions {
-    fontMonospace: string;
-    fontSansSerif: string;
-    fontFeatureSettings: string;
-  }
+interface CustomTypographyOptions {
+  fontMonospace: string;
+  fontSansSerif: string;
+  fontFeatureSettings: string;
 }
 
 // We explicitly avoid fallback fonts (such as 'monospace') here to work around a bug in
@@ -45,12 +38,15 @@ const subtitleFontStyles: TypographyStyle = {
   fontWeight: 500,
 };
 
-export const typography: TypographyOptions = {
-  fontMonospace,
+export const customTypography: CustomTypographyOptions = {
   fontSansSerif,
+  fontMonospace,
+  fontFeatureSettings,
+};
+
+export const typography: TypographyVariantsOptions = {
   fontFamily: fontSansSerif,
   fontSize: 12,
-  fontFeatureSettings,
   body1: { fontFeatureSettings },
   body2: { fontFeatureSettings },
   button: {

@@ -133,11 +133,11 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
         backdrop: {
           children: backdrop,
         },
-      }}
-      PaperProps={{
-        square: false,
-        elevation: 4,
-        className: classes.paper,
+        paper: {
+          square: false,
+          elevation: 4,
+          className: classes.paper,
+        },
       }}
     >
       <IconButton className={classes.closeButton} onClick={onModalClose} edge="end">

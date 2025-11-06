@@ -267,7 +267,7 @@ describe("FieldEditor", () => {
         field: { input, label, options, value: "opt1" },
       });
 
-      const select = screen.getByRole("button");
+      const select = screen.getByRole("combobox");
       fireEvent.mouseDown(select);
       const selectOption2 = await screen.findByText(option2);
       fireEvent.click(selectOption2);

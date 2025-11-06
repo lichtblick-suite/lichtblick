@@ -102,8 +102,10 @@ const LogsSection = ({ logs }: { logs: readonly UserScriptLog[] }): React.JSX.El
                       ? String(value)
                       : (value as React.ReactNode)
                   }
-                  primaryTypographyProps={{
-                    color: valueColorMap[typeof value] ?? "text.primary",
+                  slotProps={{
+                    primary: {
+                      color: valueColorMap[typeof value] ?? "text.primary",
+                    },
                   }}
                 />
               )}
