@@ -131,6 +131,8 @@ function LogList({ items }: Props): React.JSX.Element {
           !scrollUpdateWasRequested && timeSinceLastProgrammaticScroll > 100;
 
         if (isLikelyUserScroll && scrollDirection === "backward" && !isAtEnd) {
+          //eslint-disable-next-line no-restricted-syntax
+          console.info("User scrolled up, disabling autoscroll");
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
@@ -145,7 +147,7 @@ function LogList({ items }: Props): React.JSX.Element {
   // Cache calculated item heights.
   const itemHeightCache = useRef<Record<number, number>>({});
 
-  const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 16, []);
+  const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 32, []);
 
   const setRowHeight = useCallback((index: number, height: number) => {
     itemHeightCache.current[index] = height;
