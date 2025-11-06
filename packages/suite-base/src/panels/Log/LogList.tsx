@@ -87,42 +87,6 @@ function LogList({ items }: Props): React.JSX.Element {
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
 
-  // Buffer messages before they're displayed
-  const [displayedItems, setDisplayedItems] = useState<readonly NormalizedLogMessage[]>(items);
-  const bufferRef = useRef<readonly NormalizedLogMessage[]>([]);
-  const lastProcessedIndex = useRef(0);
-
-  // Buffer new items
-  useEffect(() => {
-    if (items.length > lastProcessedIndex.current) {
-      const newItems = items.slice(lastProcessedIndex.current);
-      bufferRef.current = [...bufferRef.current, ...newItems];
-      lastProcessedIndex.current = items.length;
-    }
-  }, [items]);
-
-  // Flush buffer periodically
-  useEffect(() => {
-    const interval = setInterval(
-      () => {
-        if (bufferRef.current.length > 0) {
-          const batchSize = autoscrollToEnd
-            ? bufferRef.current.length
-            : Math.min(20, bufferRef.current.length);
-          const itemsToFlush = bufferRef.current.slice(0, batchSize);
-
-          setDisplayedItems((prev) => [...prev, ...itemsToFlush]);
-          bufferRef.current = bufferRef.current.slice(batchSize);
-        }
-      },
-      autoscrollToEnd ? 100 : 500,
-    ); // Faster when following, slower when not
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [autoscrollToEnd]);
-
   const onResetView = React.useCallback(() => {
     setAutoscrollToEnd(true);
     listRef.current?.scrollToItem(latestItems.current.length - 1, "end");
@@ -146,8 +110,15 @@ function LogList({ items }: Props): React.JSX.Element {
       scrollUpdateWasRequested: boolean;
     }) => {
       try {
-        const isAtEnd =
-          scrollOffset + (outerRef.current?.offsetHeight ?? 0) === outerRef.current?.scrollHeight;
+        const outerElement = outerRef.current;
+        if (!outerElement) {
+          return;
+        }
+
+        const { offsetHeight, scrollHeight } = outerElement;
+        const tolerance = 20; // Pixels tolerance for "at end"
+        const isAtEnd = scrollOffset + offsetHeight >= scrollHeight - tolerance;
+
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
@@ -177,11 +148,11 @@ function LogList({ items }: Props): React.JSX.Element {
 
   const itemData = useMemo(
     () => ({
-      items: displayedItems,
+      items,
       setRowHeight,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [displayedItems, setRowHeight, resizedWidth],
+    [items, setRowHeight, resizedWidth],
   );
 
   return (
@@ -196,7 +167,7 @@ function LogList({ items }: Props): React.JSX.Element {
               style={{ outline: "none" }}
               itemData={itemData}
               itemSize={getRowHeight}
-              itemCount={displayedItems.length}
+              itemCount={items.length}
               outerRef={outerRef}
               onScroll={onScroll}
             >
