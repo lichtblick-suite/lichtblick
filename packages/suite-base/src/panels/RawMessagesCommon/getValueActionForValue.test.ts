@@ -15,8 +15,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { MessagePathStructureItem } from "@lichtblick/message-path";
-
-import { getValueActionForValue, getStructureItemForPath } from "./getValueActionForValue";
+import {
+  getValueActionForValue,
+  getStructureItemForPath,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/getValueActionForValue";
 
 describe("getValueActionForValue", () => {
   it("returns undefined if it is not a primitive", () => {

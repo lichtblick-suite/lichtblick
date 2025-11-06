@@ -16,8 +16,8 @@
 import * as _ from "lodash-es";
 
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
-import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
-import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
+import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 export const diffLabels = {
   ADDED: {

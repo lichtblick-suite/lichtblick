@@ -6,12 +6,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { NodeExpansion, NodeState } from "@lichtblick/suite-base/panels/RawMessages/types";
+import { NodeExpansion, NodeState } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import {
   getConstantNameByKeyPath,
   getMessageDocumentationLink,
   toggleExpansion,
-} from "@lichtblick/suite-base/panels/RawMessages/utils";
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 describe("getMessageDocumentationLink", () => {

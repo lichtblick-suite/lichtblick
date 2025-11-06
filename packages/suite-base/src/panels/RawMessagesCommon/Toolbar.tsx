@@ -14,10 +14,13 @@ import { IconButton, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { useStylesToolbar } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
+import { useStylesToolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import {
+  PropsToolbar,
+  RawMessagesTwoPanelConfig,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { PREV_MSG_METHOD, CUSTOM_METHOD } from "./constants";
-import { PropsToolbar, RawMessagesTwoPanelConfig } from "./types";
 
 function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
   const {

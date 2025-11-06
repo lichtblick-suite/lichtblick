@@ -12,22 +12,21 @@ import FilterIcon from "@mui/icons-material/FilterAlt";
 import StateTransitionsIcon from "@mui/icons-material/PowerInput";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import LineChartIcon from "@mui/icons-material/ShowChart";
-import { IconButtonProps, Tooltip, TooltipProps } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { withStyles, makeStyles } from "tss-react/mui";
+import { withStyles } from "tss-react/mui";
 
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
+import HighlightedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/HighlightedValue";
+import { copyMessageReplacer } from "@lichtblick/suite-base/panels/RawMessagesCommon/copyMessageReplacer";
+import { useStylesValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import { PropsValue, ValueActionItem } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { TRANSITIONABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
-import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import clipboard from "@lichtblick/suite-base/util/clipboard";
-
-import HighlightedValue from "./HighlightedValue";
-import { copyMessageReplacer } from "./copyMessageReplacer";
-import { ValueAction } from "./getValueActionForValue";
-import { TRANSITIONABLE_ROS_TYPES } from "../StateTransitions/constants";
 
 const StyledIconButton = withStyles(HoverableIconButton, (theme) => ({
   root: {
@@ -39,35 +38,6 @@ const StyledIconButton = withStyles(HoverableIconButton, (theme) => ({
   },
 }));
 
-const useStyles = makeStyles()({
-  // always hidden, just used to keep space and prevent resizing on hover
-  placeholderActionContainer: {
-    alignItems: "inherit",
-    display: "inherit",
-    gap: "inherit",
-    visibility: "hidden",
-  },
-});
-
-type ValueProps = {
-  arrLabel: string;
-  basePath: string;
-  itemLabel: string;
-  itemValue: unknown;
-  valueAction: ValueAction | undefined;
-  onTopicPathChange: (arg0: string) => void;
-  openSiblingPanel: OpenSiblingPanel;
-};
-
-type ValueActionItem = {
-  key: string;
-  tooltip: TooltipProps["title"];
-  icon: React.ReactNode;
-  onClick?: IconButtonProps["onClick"];
-  activeColor?: IconButtonProps["color"];
-  color?: IconButtonProps["color"];
-};
-
 const emptyAction: ValueActionItem = {
   key: "",
   tooltip: "",
@@ -76,7 +46,7 @@ const emptyAction: ValueActionItem = {
 
 const MAX_ACTION_ITEMS = 4;
 
-function Value(props: ValueProps): React.JSX.Element {
+function Value(props: PropsValue): React.JSX.Element {
   const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const {
     arrLabel,
@@ -193,7 +163,7 @@ function Value(props: ValueProps): React.JSX.Element {
     }
     return actions;
   }, [availableActions.length]);
-  const { classes, cx } = useStyles();
+  const { classes, cx } = useStylesValue();
 
   useEffect(() => {
     return () => {

@@ -8,9 +8,9 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef, useMemo, CSSProperties } from "react";
 
-import { DATA_ARRAY_PREVIEW_LIMIT } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
-import { useStylesVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
-import { PropsVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
+import { DATA_ARRAY_PREVIEW_LIMIT } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { useStylesVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import { PropsVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { flattenTreeData } from "./flattenTreeData";
 

@@ -7,35 +7,11 @@
 
 import { Typography } from "@mui/material";
 import { ReactNode } from "react";
-import { makeStyles } from "tss-react/mui";
 
-import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessages/getDiff";
-import { getChangeCounts } from "@lichtblick/suite-base/panels/RawMessages/utils";
-
-const useStyles = makeStyles()((theme) => ({
-  diff: {
-    float: "right",
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(0.75),
-    marginRight: theme.spacing(0.75),
-  },
-  badge: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: theme.spacing(0.25),
-    padding: theme.spacing(0, 0.75),
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.paper,
-  },
-  changeIndicator: {
-    display: "inline-block",
-    width: theme.spacing(0.75),
-    height: theme.spacing(0.75),
-    borderRadius: "50%",
-    backgroundColor: theme.palette.warning.main,
-  },
-}));
+import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import { useStylesDiffStats } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { getChangeCounts } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 
 export default function DiffStats({
   data,
@@ -44,7 +20,7 @@ export default function DiffStats({
   data: DiffObject;
   itemType: ReactNode;
 }): React.JSX.Element {
-  const { classes } = useStyles();
+  const { classes } = useStylesDiffStats();
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText] as DiffObject | undefined;
   const idLabel = id

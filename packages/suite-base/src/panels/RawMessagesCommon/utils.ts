@@ -18,11 +18,16 @@ import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
 import * as _ from "lodash-es";
 
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
-
-import { PATH_NAME_AGGREGATOR, ROS1_COMMON_MSG_PACKAGES } from "./constants";
-import type { DiffObject, NodeExpansion } from "./types";
-import { NodeState } from "./types";
+import {
+  PATH_NAME_AGGREGATOR,
+  ROS1_COMMON_MSG_PACKAGES,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import {
+  DiffObject,
+  NodeExpansion,
+  NodeState,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 ROS1_COMMON_MSG_PACKAGES.add("turtlesim");
 

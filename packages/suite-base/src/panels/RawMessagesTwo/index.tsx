@@ -32,33 +32,39 @@ import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePat
 import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesTwo/Toolbar";
-import getDiff from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
-import { useStylesRawMessagesTwo } from "@lichtblick/suite-base/panels/RawMessagesTwo/index.style";
-import { Topic } from "@lichtblick/suite-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
-
-import MaybeCollapsedValue from "./MaybeCollapsedValue";
-import Metadata from "./Metadata";
-import Value from "./Value";
-import { VirtualizedTree } from "./VirtualizedTree";
+import MaybeCollapsedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/MaybeCollapsedValue";
+import Metadata from "@lichtblick/suite-base/panels/RawMessagesCommon/Metadata";
+import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/Toolbar";
+import Value from "@lichtblick/suite-base/panels/RawMessagesCommon/Value";
 import {
-  PREV_MSG_METHOD,
   CUSTOM_METHOD,
+  DATA_ARRAY_PREVIEW_LIMIT,
   FONT_SIZE_OPTIONS,
   PATH_NAME_AGGREGATOR,
-  DATA_ARRAY_PREVIEW_LIMIT,
-} from "./constants";
-import { getStructureItemForPath, getValueActionForValue } from "./getValueActionForValue";
+  PREV_MSG_METHOD,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import getDiff from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import {
+  getStructureItemForPath,
+  getValueActionForValue,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/getValueActionForValue";
+import { useStylesRawMessagesTwo } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import {
   NodeState,
   PropsRawMessagesTwo,
   RawMessagesTwoPanelConfig,
   TreeNode,
   ValueAction,
-} from "./types";
-import { generateDeepKeyPaths, getConstantNameByKeyPath, toggleExpansion } from "./utils";
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import {
+  generateDeepKeyPaths,
+  getConstantNameByKeyPath,
+  toggleExpansion,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
+import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/VirtualizedTree";
+import { Topic } from "@lichtblick/suite-base/players/types";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
 
 const isSingleElemArray = (obj: unknown): obj is unknown[] => {
   if (!Array.isArray(obj)) {

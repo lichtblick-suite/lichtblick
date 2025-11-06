@@ -12,6 +12,26 @@ import { OpenSiblingPanel, SaveConfig } from "@lichtblick/suite-base/types/panel
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+export type RawMessagesPanelConfig = {
+  diffEnabled: boolean;
+  diffMethod: "custom" | "previous message";
+  diffTopicPath: string;
+  expansion?: NodeExpansion;
+  showFullMessageForDiff: boolean;
+  topicPath: string;
+  fontSize: number | undefined;
+};
+
+export type RawMessagesTwoPanelConfig = {
+  diffEnabled: boolean;
+  diffMethod: "custom" | "previous message";
+  diffTopicPath: string;
+  expansion?: NodeExpansion;
+  showFullMessageForDiff: boolean;
+  topicPath: string;
+  fontSize: number | undefined;
+};
+
 // Terse to save space in layout. c = collapsed, e = expanded.
 export enum NodeState {
   Collapsed = "c",
@@ -39,16 +59,6 @@ export type ValueAction = {
   filterPath: string;
 };
 
-export type RawMessagesTwoPanelConfig = {
-  diffEnabled: boolean;
-  diffMethod: "custom" | "previous message";
-  diffTopicPath: string;
-  expansion?: NodeExpansion;
-  showFullMessageForDiff: boolean;
-  topicPath: string;
-  fontSize: number | undefined;
-};
-
 // Props
 
 export type PropsDiffSpan = {
@@ -63,6 +73,11 @@ export type PropsDiffStats = {
 
 export type PropsHighlightedValue = {
   itemLabel: string;
+};
+
+export type PropsRawMessages = {
+  config: Immutable<RawMessagesPanelConfig>;
+  saveConfig: SaveConfig<RawMessagesPanelConfig>;
 };
 
 export type PropsRawMessagesTwo = {

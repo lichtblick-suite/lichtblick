@@ -19,10 +19,9 @@ import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
-import { makeStyles } from "tss-react/mui";
 
 import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@lichtblick/message-path";
-import { Immutable, SettingsTreeAction } from "@lichtblick/suite";
+import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import useGetItemStringWithTimezone from "@lichtblick/suite-base/components/JsonTree/useGetItemStringWithTimezone";
@@ -35,47 +34,44 @@ import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePat
 import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { Toolbar } from "@lichtblick/suite-base/panels/RawMessages/Toolbar";
-import getDiff, {
-  DiffObject,
-  diffLabels,
-  diffLabelsByLabelText,
-} from "@lichtblick/suite-base/panels/RawMessages/getDiff";
-import { Topic } from "@lichtblick/suite-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
-import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
-import { customTypography } from "@lichtblick/theme";
-
-import { DiffSpan } from "./DiffSpan";
-import DiffStats from "./DiffStats";
-import MaybeCollapsedValue from "./MaybeCollapsedValue";
-import Metadata from "./Metadata";
-import Value from "./Value";
+import DiffStats from "@lichtblick/suite-base/panels/RawMessages/DiffStats";
+import { DiffSpan } from "@lichtblick/suite-base/panels/RawMessagesCommon/DiffSpan";
+import MaybeCollapsedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/MaybeCollapsedValue";
+import Metadata from "@lichtblick/suite-base/panels/RawMessagesCommon/Metadata";
+import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/Toolbar";
+import Value from "@lichtblick/suite-base/panels/RawMessagesCommon/Value";
 import {
-  PREV_MSG_METHOD,
   CUSTOM_METHOD,
+  DATA_ARRAY_PREVIEW_LIMIT,
   FONT_SIZE_OPTIONS,
   PATH_NAME_AGGREGATOR,
-} from "./constants";
+  PREV_MSG_METHOD,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import getDiff, {
+  diffLabels,
+  diffLabelsByLabelText,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
 import {
-  ValueAction,
   getStructureItemForPath,
   getValueActionForValue,
-} from "./getValueActionForValue";
-import { NodeState, RawMessagesPanelConfig } from "./types";
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/getValueActionForValue";
+import { useStylesRawMessages } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import {
-  DATA_ARRAY_PREVIEW_LIMIT,
+  DiffObject,
+  NodeState,
+  PropsRawMessages,
+  RawMessagesPanelConfig,
+  ValueAction,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import {
   generateDeepKeyPaths,
   getConstantNameByKeyPath,
   toggleExpansion,
-} from "./utils";
-
-type Props = {
-  config: Immutable<RawMessagesPanelConfig>;
-  saveConfig: SaveConfig<RawMessagesPanelConfig>;
-};
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
+import { Topic } from "@lichtblick/suite-base/players/types";
+import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
+import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 
 const isSingleElemArray = (obj: unknown): obj is unknown[] => {
   if (!Array.isArray(obj)) {
@@ -100,22 +96,11 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
   return `${data[0]} (${queriedData[0]?.constantName})`;
 };
 
-const useStyles = makeStyles()((theme) => ({
-  topic: {
-    fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
-  },
-  hoverObserver: {
-    display: "inline-flex",
-    alignItems: "center",
-  },
-}));
-
-function RawMessages(props: Props) {
+function RawMessages(props: PropsRawMessages) {
   const {
     palette: { mode: themePreference },
   } = useTheme();
-  const { classes } = useStyles();
+  const { classes } = useStylesRawMessages();
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();

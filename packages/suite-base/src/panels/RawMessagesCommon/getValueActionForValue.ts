@@ -16,7 +16,7 @@
 
 import { MessagePathStructureItem, PrimitiveType } from "@lichtblick/message-path";
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
-import { ValueAction } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
+import { ValueAction } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 const isObjectElement = (
   value: unknown,

@@ -17,40 +17,15 @@
 import { Link, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { useLatest } from "react-use";
-import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { MessageEvent } from "@lichtblick/suite-base/players/types";
+import { useStylesMetadata } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import { PropsMetadata } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { getMessageDocumentationLink } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 
 import { copyMessageReplacer } from "./copyMessageReplacer";
-import { getMessageDocumentationLink } from "./utils";
-
-const useStyles = makeStyles()((theme) => ({
-  button: {
-    padding: theme.spacing(0.125),
-
-    ".MuiSvgIcon-root": {
-      fontSize: `${theme.typography.pxToRem(16)} !important`,
-    },
-    ".MuiButton-startIcon": {
-      marginRight: theme.spacing(0.5),
-    },
-    "&:hover": {
-      backgroundColor: "transparent",
-    },
-  },
-}));
-
-type Props = {
-  data: unknown;
-  diffData: unknown;
-  diff: unknown;
-  datatype?: string;
-  message: MessageEvent;
-  diffMessage?: MessageEvent;
-};
 
 export default function Metadata({
   data,
@@ -59,8 +34,8 @@ export default function Metadata({
   datatype,
   message,
   diffMessage,
-}: Props): React.JSX.Element {
-  const { classes } = useStyles();
+}: PropsMetadata): React.JSX.Element {
+  const { classes } = useStylesMetadata();
 
   // Access these by ref so that our callbacks aren't invalidated and CopyButton
   // memoization is stable.

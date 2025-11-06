@@ -4,6 +4,17 @@ import { makeStyles } from "tss-react/mui";
 
 import { customTypography } from "@lichtblick/theme";
 
+export const useStylesRawMessages = makeStyles()((theme) => ({
+  topic: {
+    fontFamily: theme.typography.body1.fontFamily,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
+  },
+  hoverObserver: {
+    display: "inline-flex",
+    alignItems: "center",
+  },
+}));
+
 export const useStylesRawMessagesTwo = makeStyles()((theme) => ({
   topic: {
     fontFamily: theme.typography.body1.fontFamily,

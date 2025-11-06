@@ -14,12 +14,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
-import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesTwo/getDiff";
-import { PropsHighlightedValue } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
+import MaybeCollapsedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/MaybeCollapsedValue";
+import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import { PropsHighlightedValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { DiffSpan } from "./DiffSpan";
-import MaybeCollapsedValue from "./MaybeCollapsedValue";
 
 export default function HighlightedValue({ itemLabel }: PropsHighlightedValue): React.JSX.Element {
   // react-json-tree's valueRenderer only gets called for primitives, so diff before/after values must be at same level by the time it gets to the tree

@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { copyMessageReplacer } from "@lichtblick/suite-base/panels/RawMessages/copyMessageReplacer";
+import { copyMessageReplacer } from "@lichtblick/suite-base/panels/RawMessagesCommon/copyMessageReplacer";
 
-describe("copyMessageReplaceer", () => {
+describe("copyMessageReplacer", () => {
   it.each([
     {
       name: "bigint fields to strings",

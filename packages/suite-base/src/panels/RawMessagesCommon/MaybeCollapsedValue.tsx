@@ -17,8 +17,8 @@
 import { Tooltip } from "@mui/material";
 import { useCallback, useState } from "react";
 
-import { COLLAPSE_TEXT_OVER_LENGTH } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
-import { PropsMaybeCollapsedValue } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
+import { COLLAPSE_TEXT_OVER_LENGTH } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { PropsMaybeCollapsedValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 export default function MaybeCollapsedValue({
   itemLabel,

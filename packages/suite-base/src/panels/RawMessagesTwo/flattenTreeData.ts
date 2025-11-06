@@ -7,9 +7,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TreeNode } from "@lichtblick/suite-base/panels/RawMessagesTwo/types";
-
-import { PATH_NAME_AGGREGATOR } from "./constants";
+import { PATH_NAME_AGGREGATOR } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { TreeNode } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 function isExpandable(value: unknown): boolean {
   if (value == null) {
