@@ -14617,6 +14617,7 @@ __metadata:
     prettier: 3.6.2
     react-refresh: 0.14.2
     react-use: 17.6.0
+    react-virtuoso: 4.14.1
     rehype-raw: 7.0.0
     rimraf: 6.0.1
     semver: 7.7.2
@@ -17906,6 +17907,16 @@ __metadata:
     react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: bbfecf2bc8546b350a948a3e1a3be445bf04c46400f8e33771795aa8fafbc4e8f436d2ab461e8476b89ec4b7efe3c194bfaf31f5f6b3cf043276c4f7d3705b52
+  languageName: node
+  linkType: hard
+
+"react-virtuoso@npm:4.14.1":
+  version: 4.14.1
+  resolution: "react-virtuoso@npm:4.14.1"
+  peerDependencies:
+    react: ">=16 || >=17 || >= 18 || >= 19"
+    react-dom: ">=16 || >=17 || >= 18 || >=19"
+  checksum: b128e93aed1a92623a8fc7ba50c48cb76c325fe4e053578ead0ebb09df7ac804aaf31c32ba7084d2e7e3994df18d12fa48ca4440e8a3efe3cc4f8dfdac454ff8
   languageName: node
   linkType: hard
 
