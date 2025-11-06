@@ -75,9 +75,11 @@ export default function PlaybackSpeedControls(): React.JSX.Element {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "playback-speed-button",
-          dense: true,
+        slotProps={{
+          list: {
+            "aria-labelledby": "playback-speed-button",
+            dense: true,
+          },
         }}
         anchorOrigin={{
           vertical: "top",
@@ -105,7 +107,7 @@ export default function PlaybackSpeedControls(): React.JSX.Element {
             <ListItemText
               inset={displayedSpeed !== option}
               primary={formatSpeed(option)}
-              primaryTypographyProps={{ variant: "inherit" }}
+              slotProps={{ primary: { variant: "inherit" } }}
             />
           </MenuItem>
         ))}

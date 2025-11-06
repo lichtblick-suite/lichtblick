@@ -22,6 +22,7 @@ import rehypeRaw from "rehype-raw";
 import { makeStyles } from "tss-react/mui";
 
 import LinkHandlerContext from "@lichtblick/suite-base/context/LinkHandlerContext";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()(({ palette, shape, spacing, typography, shadows }) => {
   return {
@@ -98,7 +99,7 @@ const useStyles = makeStyles()(({ palette, shape, spacing, typography, shadows }
       },
       pre: {
         whiteSpace: "pre-wrap",
-        fontFamily: typography.fontMonospace,
+        fontFamily: customTypography.fontMonospace,
         backgroundColor: palette.action.hover,
         padding: spacing(0, 0.5),
         borderRadius: shadows[2],
@@ -109,7 +110,7 @@ const useStyles = makeStyles()(({ palette, shape, spacing, typography, shadows }
         },
       },
       code: {
-        fontFamily: typography.fontMonospace,
+        fontFamily: customTypography.fontMonospace,
         backgroundColor: palette.action.hover,
         borderRadius: "0.2em",
         padding: spacing(0, 0.5),
@@ -117,7 +118,7 @@ const useStyles = makeStyles()(({ palette, shape, spacing, typography, shadows }
       kbd: {
         display: "inline-flex",
         flex: "none",
-        fontFamily: typography.fontMonospace,
+        fontFamily: customTypography.fontMonospace,
         color: palette.text.secondary,
         backgroundColor: palette.background.default,
         boxShadow: `inset 0 1px 0 ${palette.action.hover}`,

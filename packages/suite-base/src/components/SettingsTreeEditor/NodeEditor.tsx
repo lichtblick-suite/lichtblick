@@ -322,21 +322,23 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
               onFocus={(event) => {
                 event.target.select();
               }}
-              InputProps={{
-                endAdornment: (
-                  <IconButton
-                    className={classes.actionButton}
-                    title="Rename"
-                    data-node-function="edit-label"
-                    color="primary"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      toggleEditing();
-                    }}
-                  >
-                    <CheckIcon fontSize="small" />
-                  </IconButton>
-                ),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <IconButton
+                      className={classes.actionButton}
+                      title="Rename"
+                      data-node-function="edit-label"
+                      color="primary"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleEditing();
+                      }}
+                    >
+                      <CheckIcon fontSize="small" />
+                    </IconButton>
+                  ),
+                },
               }}
             />
           ) : (

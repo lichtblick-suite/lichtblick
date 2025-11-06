@@ -856,7 +856,7 @@ export class ImageMode
     const colorMode =
       config.colorMode === "rgba-fields"
         ? DEFAULT_IMAGE_CONFIG.colorMode
-        : config.colorMode ?? DEFAULT_IMAGE_CONFIG.colorMode;
+        : (config.colorMode ?? DEFAULT_IMAGE_CONFIG.colorMode);
 
     // Ensures that no required fields are left undefined
     // rightmost values are applied last and have the most precedence

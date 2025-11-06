@@ -36,7 +36,7 @@ export default {
   parameters: {
     colorScheme: "both-column",
   },
-} satisfies Meta<typeof ButtonGroup>;
+} satisfies Meta;
 
 const buttons = [
   <Button key="one">One</Button>,

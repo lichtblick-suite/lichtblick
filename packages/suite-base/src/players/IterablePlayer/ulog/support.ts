@@ -22,7 +22,7 @@ export function messageDefinitionToRos(msgDef: ULogMessageDefinition): MessageDe
       type: typeToRos(field.type),
       isArray: field.arrayLength != undefined && !isString,
       arrayLength: isString ? undefined : field.arrayLength,
-      upperBound: isString ? field.arrayLength ?? 1 : undefined,
+      upperBound: isString ? (field.arrayLength ?? 1) : undefined,
       isComplex: field.isComplex,
     });
   }

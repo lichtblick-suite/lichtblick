@@ -195,9 +195,11 @@ export default function Variable(props: {
               anchorEl={anchorEl}
               open={menuOpen}
               onClose={handleClose}
-              MenuListProps={{
-                "aria-labelledby": "variable-action-button",
-                dense: true,
+              slotProps={{
+                list: {
+                  "aria-labelledby": "variable-action-button",
+                  dense: true,
+                },
               }}
             >
               <MenuItem onClick={deleteVariable}>
@@ -255,10 +257,12 @@ export default function Variable(props: {
                 />
               </Stack>
             }
-            primaryTypographyProps={{
-              component: "div",
-              fontWeight: 600,
-              variant: "body2",
+            slotProps={{
+              primary: {
+                component: "div",
+                fontWeight: 600,
+                variant: "body2",
+              },
             }}
           />
         </ListItemButton>

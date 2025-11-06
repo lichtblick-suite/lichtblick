@@ -34,7 +34,7 @@ export const MuiAutocomplete: OverrideComponentReturn<"MuiAutocomplete"> = {
           padding: theme.spacing(0.75, 1),
         },
       },
-      [`.${autocompleteClasses.input}.${inputClasses.inputAdornedEnd}`]: {
+      [`.${autocompleteClasses.input}.${inputClasses.input}.MuiInputBase-adornedEnd`]: {
         paddingRight: theme.spacing(2),
       },
     }),

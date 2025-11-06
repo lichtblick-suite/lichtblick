@@ -43,8 +43,10 @@ function DiagnosticNodeRow(props: Readonly<NodeRowProps>) {
         <ListItemText
           primary={info.displayName}
           secondary={info.status.message}
-          secondaryTypographyProps={{
-            color: MESSAGE_COLORS[info.status.level],
+          slotProps={{
+            secondary: {
+              color: MESSAGE_COLORS[info.status.level],
+            },
           }}
           style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         />
