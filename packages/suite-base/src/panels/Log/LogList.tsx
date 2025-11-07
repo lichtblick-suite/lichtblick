@@ -124,13 +124,6 @@ function LogList({ items }: Props): React.JSX.Element {
           scrollOffset + offsetHeight + resizeHeight.current >= scrollHeight - tolerance;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
-          // eslint-disable-next-line no-restricted-syntax
-          console.log("Disabling autoscroll", {
-            scrollOffset,
-            offsetHeight,
-            scrollHeight,
-            calc: (scrollHeight - scrollOffset) / scrollHeight,
-          });
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
