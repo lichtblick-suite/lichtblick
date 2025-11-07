@@ -84,9 +84,7 @@ function LogList({ items }: Props): React.JSX.Element {
 
   const latestItems = useLatest(items);
 
-  // Save scroll times
-  const lastScrollTime = useRef(0);
-  const lastProgrammaticScrollTime = useRef(0);
+  const isProgrammaticScrolling = useRef(false);
 
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
@@ -119,20 +117,19 @@ function LogList({ items }: Props): React.JSX.Element {
           return;
         }
 
-        const now = Date.now();
-        const timeSinceLastProgrammaticScroll = now - lastProgrammaticScrollTime.current;
-        lastScrollTime.current = now;
-
         const { offsetHeight, scrollHeight } = outerElement;
         const tolerance = 20; // Pixels tolerance for "at end"
         const isAtEnd = scrollOffset + offsetHeight >= scrollHeight - tolerance;
 
-        const isLikelyUserScroll =
-          !scrollUpdateWasRequested && timeSinceLastProgrammaticScroll > 100;
-
-        if (isLikelyUserScroll && scrollDirection === "backward" && !isAtEnd) {
-          //eslint-disable-next-line no-restricted-syntax
-          console.info("User scrolled up, disabling autoscroll");
+        if (
+          !scrollUpdateWasRequested &&
+          scrollDirection === "backward" &&
+          !isAtEnd &&
+          !isProgrammaticScrolling.current &&
+          scrollHeight > 1000
+        ) {
+          // eslint-disable-next-line no-restricted-syntax
+          console.log("Disabling autoscroll", { scrollOffset, offsetHeight, scrollHeight });
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
@@ -150,8 +147,12 @@ function LogList({ items }: Props): React.JSX.Element {
   const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 32, []);
 
   const setRowHeight = useCallback((index: number, height: number) => {
+    isProgrammaticScrolling.current = true;
     itemHeightCache.current[index] = height;
     listRef.current?.resetAfterIndex(index);
+    setTimeout(() => {
+      isProgrammaticScrolling.current = false;
+    }, 100);
   }, []);
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
