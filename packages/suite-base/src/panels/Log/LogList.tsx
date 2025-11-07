@@ -16,6 +16,7 @@
 
 import DoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { Fab } from "@mui/material";
+import { resize } from "mathjs";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
@@ -84,7 +85,7 @@ function LogList({ items }: Props): React.JSX.Element {
 
   const latestItems = useLatest(items);
 
-  const resizeHeight = useRef(0);
+  const isResettingAfterIndex = useRef(false);
 
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
@@ -117,6 +118,12 @@ function LogList({ items }: Props): React.JSX.Element {
           return;
         }
 
+        // Clear the reset flag - we've processed the scroll event from resetAfterIndex
+        if (isResettingAfterIndex.current) {
+          isResettingAfterIndex.current = false;
+          return; // Ignore this scroll event entirely
+        }
+
         const { offsetHeight, scrollHeight } = outerElement;
         // Add bounds checking
         const normalizedScrollOffset = Math.max(
@@ -126,9 +133,19 @@ function LogList({ items }: Props): React.JSX.Element {
         const tolerance = 20;
 
         const isAtEnd =
-          normalizedScrollOffset + offsetHeight + resizeHeight.current >= scrollHeight - tolerance;
+          normalizedScrollOffset + offsetHeight >=
+          // + resizeHeight.current
+          scrollHeight - tolerance;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
+          // eslint-disable-next-line no-restricted-syntax
+          console.log({
+            scrollOffset,
+            offsetHeight,
+            scrollHeight,
+            normalizedScrollOffset,
+            // resizeHeight: resizeHeight.current,
+          });
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
@@ -146,8 +163,10 @@ function LogList({ items }: Props): React.JSX.Element {
   const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 32, []);
 
   const setRowHeight = useCallback((index: number, height: number) => {
-    resizeHeight.current = height;
+    // resizeHeight.current = height;
     itemHeightCache.current[index] = height;
+    // Set flag before calling resetAfterIndex
+    isResettingAfterIndex.current = true;
     listRef.current?.resetAfterIndex(index, true);
   }, []);
 
