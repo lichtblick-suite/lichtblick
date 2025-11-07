@@ -163,11 +163,19 @@ function LogList({ items }: Props): React.JSX.Element {
   const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 32, []);
 
   const setRowHeight = useCallback((index: number, height: number) => {
-    // resizeHeight.current = height;
+    // const currentHeight = itemHeightCache.current[index];
+
     itemHeightCache.current[index] = height;
-    // Set flag before calling resetAfterIndex
-    isResettingAfterIndex.current = true;
-    listRef.current?.resetAfterIndex(index, true);
+    if (height - (itemHeightCache.current[index - 1] ?? 0) > 32) {
+      // eslint-disable-next-line no-restricted-syntax
+      console.log(
+        "relevant height change detected",
+        height,
+        itemHeightCache.current[index - 1] ?? 0,
+      );
+      isResettingAfterIndex.current = true;
+      listRef.current?.resetAfterIndex(index, true);
+    }
   }, []);
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
