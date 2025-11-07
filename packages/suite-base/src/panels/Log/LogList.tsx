@@ -16,7 +16,6 @@
 
 import DoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { Fab } from "@mui/material";
-import { resize } from "mathjs";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
@@ -28,6 +27,8 @@ import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { NormalizedLogMessage } from "@lichtblick/suite-base/panels/Log/types";
 
 import LogMessage from "./LogMessage";
+
+const DEFAULT_ROW_HEIGHT = 12;
 
 const useStyles = makeStyles()((theme) => ({
   floatingButton: {
@@ -160,21 +161,19 @@ function LogList({ items }: Props): React.JSX.Element {
   // Cache calculated item heights.
   const itemHeightCache = useRef<Record<number, number>>({});
 
-  const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 32, []);
+  const getRowHeight = useCallback(
+    (index: number) => itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT,
+    [],
+  );
 
   const setRowHeight = useCallback((index: number, height: number) => {
     // const currentHeight = itemHeightCache.current[index];
 
     itemHeightCache.current[index] = height;
-    if (height - (itemHeightCache.current[index - 1] ?? 0) > 32) {
-      // eslint-disable-next-line no-restricted-syntax
-      console.log(
-        "relevant height change detected",
-        height,
-        itemHeightCache.current[index - 1] ?? 0,
-      );
+
+    if (height - (itemHeightCache.current[index - 1] ?? 0) > DEFAULT_ROW_HEIGHT) {
       isResettingAfterIndex.current = true;
-      listRef.current?.resetAfterIndex(index, true);
+      listRef.current?.resetAfterIndex(index);
     }
   }, []);
 
