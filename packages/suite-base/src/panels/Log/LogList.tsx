@@ -118,10 +118,15 @@ function LogList({ items }: Props): React.JSX.Element {
         }
 
         const { offsetHeight, scrollHeight } = outerElement;
-        const tolerance = 20; // Pixels tolerance for "at end"
-        // Ignore scroll events caused by row height adjustments
+        // Add bounds checking
+        const normalizedScrollOffset = Math.max(
+          0,
+          Math.min(scrollOffset, scrollHeight - offsetHeight),
+        );
+        const tolerance = 20;
+
         const isAtEnd =
-          scrollOffset + offsetHeight + resizeHeight.current >= scrollHeight - tolerance;
+          normalizedScrollOffset + offsetHeight + resizeHeight.current >= scrollHeight - tolerance;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
           setAutoscrollToEnd(false);
