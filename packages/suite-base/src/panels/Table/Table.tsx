@@ -387,6 +387,7 @@ export default function Table({
               value={pageSize}
               size="small"
               onChange={(e) => {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
                 table.setPageSize(Number(e.target.value));
               }}
               MenuProps={{ MenuListProps: { dense: true } }}
