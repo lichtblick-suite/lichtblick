@@ -301,7 +301,6 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     const totalPointCount = Math.trunc(pointCloud.data.length / getStride(pointCloud));
 
     // Apply downsampling if needed (for performance with very large point clouds)
-    // Use 10% sampling for point clouds > 100k points
     const DOWNSAMPLE_THRESHOLD = 7_500;
     const DOWNSAMPLE_RATIO = 0.3;
     const shouldDownsample = totalPointCount > DOWNSAMPLE_THRESHOLD;
