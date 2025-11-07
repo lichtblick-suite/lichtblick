@@ -3221,7 +3221,6 @@ __metadata:
     moment-duration-format: 2.3.2
     moment-timezone: 0.6.0
     monaco-editor: 0.52.2
-    monaco-editor-webpack-plugin: 7.1.0
     nanoid: 5.1.6
     natsort: 2.0.3
     nearley: 2.20.1
@@ -14624,7 +14623,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^2.0.0, loader-utils@npm:^2.0.2":
+"loader-utils@npm:^2.0.0":
   version: 2.0.4
   resolution: "loader-utils@npm:2.0.4"
   dependencies:
@@ -15842,18 +15841,6 @@ __metadata:
   version: 2.30.1
   resolution: "moment@npm:2.30.1"
   checksum: 859236bab1e88c3e5802afcf797fc801acdbd0ee509d34ea3df6eea21eb6bcc2abd4ae4e4e64aa7c986aa6cba563c6e62806218e6412a765010712e5fa121ba6
-  languageName: node
-  linkType: hard
-
-"monaco-editor-webpack-plugin@npm:7.1.0":
-  version: 7.1.0
-  resolution: "monaco-editor-webpack-plugin@npm:7.1.0"
-  dependencies:
-    loader-utils: ^2.0.2
-  peerDependencies:
-    monaco-editor: ">= 0.31.0"
-    webpack: ^4.5.0 || 5.x
-  checksum: e77cf5230c1b886fe0f1be3ecd8baea57795b93681783c5554bdf3aa256317a570bf546bbf17439f4c547182c9e70d8cb31d76715b3af0a8ec88e9cff054e4bd
   languageName: node
   linkType: hard
 

@@ -26,6 +26,7 @@ import {
   PointsRenderable,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
 import type { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
+import { getPointCloudPerformanceInstance } from "./pointCloudPerformance";
 
 import {
   autoSelectColorSettings,
@@ -297,7 +298,17 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     latestPointsEntry.renderable.userData.pointCloud = pointCloud;
     latestPointsEntry.renderable.userData.originalMessage = originalMessage;
 
-    const pointCount = Math.trunc(pointCloud.data.length / getStride(pointCloud));
+    const totalPointCount = Math.trunc(pointCloud.data.length / getStride(pointCloud));
+
+    // Apply downsampling if needed (for performance with very large point clouds)
+    // Use 10% sampling for point clouds > 100k points
+    const DOWNSAMPLE_THRESHOLD = 7_500;
+    const DOWNSAMPLE_RATIO = 0.3;
+    const shouldDownsample = totalPointCount > DOWNSAMPLE_THRESHOLD;
+    const pointCount = shouldDownsample
+      ? Math.max(1, Math.floor(totalPointCount * DOWNSAMPLE_RATIO))
+      : totalPointCount;
+
     const latestPoints = latestPointsEntry.renderable;
     latestPointsEntry.renderable.geometry.resize(pointCount);
     const positionAttribute = latestPoints.geometry.attributes.position!;
@@ -326,6 +337,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       pointCloud,
       tempFieldReaders,
       pointCount,
+      totalPointCount, // Pass original count for uniform downsampling
       settings,
       positionAttribute,
       colorAttribute,
@@ -603,15 +615,25 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     pointCount: number,
     pointStep: number,
     settings: LayerSettingsPointClouds,
-  ): void {
+  ): number {
+    const perf = getPointCloudPerformanceInstance();
+    perf?.startMinMax();
+
     let minColorValue = settings.minValue ?? Number.POSITIVE_INFINITY;
     let maxColorValue = settings.maxValue ?? Number.NEGATIVE_INFINITY;
     if (
       NEEDS_MIN_MAX.includes(settings.colorMode) &&
       (settings.minValue == undefined || settings.maxValue == undefined)
     ) {
-      for (let i = 0; i < pointCount; i++) {
-        const pointOffset = i * pointStep;
+      // Use sampling for very large point clouds to improve performance
+      const sampleSize = pointCount*0.5;
+      const step = pointCount / sampleSize;
+
+      for (let i = 0; i < sampleSize; i++) {
+        // Ensure we always include the last point when sampling
+        const idx =
+          i === sampleSize - 1 ? pointCount - 1 : Math.floor(i * step);
+        const pointOffset = idx * pointStep;
         const colorValue = colorReader(view, pointOffset);
         minColorValue = Math.min(minColorValue, colorValue);
         maxColorValue = Math.max(maxColorValue, colorValue);
@@ -620,20 +642,26 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       maxColorValue = settings.maxValue ?? maxColorValue;
     }
 
+    const minMaxTime = perf?.endMinMax() ?? 0;
     output[0] = minColorValue;
     output[1] = maxColorValue;
+    return minMaxTime;
   }
 
   #updatePointCloudBuffers(
     pointCloud: PointCloud | PointCloud2,
     readers: PointCloudFieldReaders,
     pointCount: number,
+    totalPointCount: number,
     settings: LayerSettingsPointClouds,
     positionAttribute: THREE.BufferAttribute,
     colorAttribute: THREE.BufferAttribute,
     stixelPositionAttribute: THREE.BufferAttribute,
     stixelColorAttribute: THREE.BufferAttribute,
   ): void {
+    const perf = getPointCloudPerformanceInstance();
+    perf?.startUpdate(pointCount);
+
     const data = pointCloud.data;
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     const pointStep = getStride(pointCloud);
@@ -648,36 +676,89 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       alphaReader,
     } = readers;
 
-    // Update position attribute
-    for (let i = 0; i < pointCount; i++) {
-      const pointOffset = i * pointStep;
-      const x = xReader(view, pointOffset);
-      const y = yReader(view, pointOffset);
-      const z = zReader(view, pointOffset);
-      positionAttribute.setXYZ(i, x, y, z);
-      if (settings.stixelsEnabled) {
-        stixelPositionAttribute.setXYZ(i * 2, x, y, z);
-        stixelPositionAttribute.setXYZ(i * 2 + 1, x, y, 0);
+    // Get direct access to typed arrays for better performance
+    const positions = positionAttribute.array as Float32Array;
+    const colors = colorAttribute.array as Uint8Array;
+    const stixelPositions = stixelPositionAttribute.array as Float32Array;
+    const stixelColors = stixelColorAttribute.array as Uint8Array;
+
+    // Validate arrays exist
+    if (!positions) {
+      throw new Error("Position attribute missing array");
+    }
+    if (!colors) {
+      throw new Error("Color attribute missing array");
+    }
+    if (settings.stixelsEnabled) {
+      if (!stixelPositions) {
+        throw new Error("Stixel position attribute missing array");
+      }
+      if (!stixelColors) {
+        throw new Error("Stixel color attribute missing array");
       }
     }
 
-    // Update color attribute
+    // Calculate uniform downsampling step if needed
+    const isDownsampled = totalPointCount > pointCount;
+    const downsamplingStep = isDownsampled ? totalPointCount / pointCount : 1;
+
+    let minMaxTimeMs: number | undefined;
+
+    // Update position and color attributes in a single combined loop
     if (settings.colorMode === "rgba-fields") {
+      // Optimized path for rgba-fields mode: combine position and color updates
       for (let i = 0; i < pointCount; i++) {
-        const pointOffset = i * pointStep;
-        const r = redReader(view, pointOffset);
-        const g = greenReader(view, pointOffset);
-        const b = blueReader(view, pointOffset);
-        const a = alphaReader(view, pointOffset);
-        colorAttribute.setXYZW(i, r, g, b, a);
+        // Calculate source point index with uniform sampling across entire point cloud
+        const sourceIdx = isDownsampled
+          ? i === pointCount - 1
+            ? totalPointCount - 1 // Always include last point
+            : Math.floor(i * downsamplingStep)
+          : i;
+        const pointOffset = sourceIdx * pointStep;
+        const i3 = i * 3;
+        const i4 = i * 4;
+
+        // Position - direct array access
+        positions[i3] = xReader(view, pointOffset);
+        positions[i3 + 1] = yReader(view, pointOffset);
+        positions[i3 + 2] = zReader(view, pointOffset);
+
+        // Color - direct array access (convert to 0-255 range)
+        colors[i4] = Math.round(redReader(view, pointOffset) * 255);
+        colors[i4 + 1] = Math.round(greenReader(view, pointOffset) * 255);
+        colors[i4 + 2] = Math.round(blueReader(view, pointOffset) * 255);
+        colors[i4 + 3] = Math.round(alphaReader(view, pointOffset) * 255);
+
         if (settings.stixelsEnabled) {
-          stixelColorAttribute.setXYZW(i * 2, r, g, b, a);
-          stixelColorAttribute.setXYZW(i * 2 + 1, r, g, b, a);
+          const si3 = i * 6; // 2 points per stixel * 3 components
+          const si4 = i * 8; // 2 points per stixel * 4 components
+          const px = positions[i3]!;
+          const py = positions[i3 + 1]!;
+          const pz = positions[i3 + 2]!;
+          stixelPositions[si3] = px;
+          stixelPositions[si3 + 1] = py;
+          stixelPositions[si3 + 2] = pz;
+          stixelPositions[si3 + 3] = px;
+          stixelPositions[si3 + 4] = py;
+          stixelPositions[si3 + 5] = 0;
+
+          const cr = colors[i4]!;
+          const cg = colors[i4 + 1]!;
+          const cb = colors[i4 + 2]!;
+          const ca = colors[i4 + 3]!;
+          stixelColors[si4] = cr;
+          stixelColors[si4 + 1] = cg;
+          stixelColors[si4 + 2] = cb;
+          stixelColors[si4 + 3] = ca;
+          stixelColors[si4 + 4] = cr;
+          stixelColors[si4 + 5] = cg;
+          stixelColors[si4 + 6] = cb;
+          stixelColors[si4 + 7] = ca;
         }
       }
     } else {
       // Iterate the point cloud data to determine min/max color values (if needed)
-      this.#minMaxColorValues(
+      minMaxTimeMs = this.#minMaxColorValues(
         tempMinMaxColor,
         packedColorReader,
         view,
@@ -694,28 +775,70 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
         maxColorValue,
       );
 
+      // Optimized path: combine position and color updates in single loop
       for (let i = 0; i < pointCount; i++) {
-        const pointOffset = i * pointStep;
+        // Calculate source point index with uniform sampling across entire point cloud
+        const sourceIdx = isDownsampled
+          ? i === pointCount - 1
+            ? totalPointCount - 1 // Always include last point
+            : Math.floor(i * downsamplingStep)
+          : i;
+        const pointOffset = sourceIdx * pointStep;
+        const i3 = i * 3;
+        const i4 = i * 4;
+
+        // Position - direct array access
+        positions[i3] = xReader(view, pointOffset);
+        positions[i3 + 1] = yReader(view, pointOffset);
+        positions[i3 + 2] = zReader(view, pointOffset);
+
+        // Color - direct array access (convert to 0-255 range)
         const colorValue = packedColorReader(view, pointOffset);
         colorConverter(tempColor, colorValue);
-        colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
+        colors[i4] = Math.round(tempColor.r * 255);
+        colors[i4 + 1] = Math.round(tempColor.g * 255);
+        colors[i4 + 2] = Math.round(tempColor.b * 255);
+        colors[i4 + 3] = Math.round(tempColor.a * 255);
+
         if (settings.stixelsEnabled) {
-          stixelColorAttribute.setXYZW(i * 2, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
-          stixelColorAttribute.setXYZW(
-            i * 2 + 1,
-            tempColor.r,
-            tempColor.g,
-            tempColor.b,
-            tempColor.a,
-          );
+          const si3 = i * 6;
+          const si4 = i * 8;
+          const px = positions[i3]!;
+          const py = positions[i3 + 1]!;
+          const pz = positions[i3 + 2]!;
+          stixelPositions[si3] = px;
+          stixelPositions[si3 + 1] = py;
+          stixelPositions[si3 + 2] = pz;
+          stixelPositions[si3 + 3] = px;
+          stixelPositions[si3 + 4] = py;
+          stixelPositions[si3 + 5] = 0;
+
+          const cr = colors[i4]!;
+          const cg = colors[i4 + 1]!;
+          const cb = colors[i4 + 2]!;
+          const ca = colors[i4 + 3]!;
+          stixelColors[si4] = cr;
+          stixelColors[si4 + 1] = cg;
+          stixelColors[si4 + 2] = cb;
+          stixelColors[si4 + 3] = ca;
+          stixelColors[si4 + 4] = cr;
+          stixelColors[si4 + 5] = cg;
+          stixelColors[si4 + 6] = cb;
+          stixelColors[si4 + 7] = ca;
         }
       }
     }
 
+    // Mark attributes as needing update (only once after all updates)
     positionAttribute.needsUpdate = true;
     colorAttribute.needsUpdate = true;
-    stixelPositionAttribute.needsUpdate = true;
-    stixelColorAttribute.needsUpdate = true;
+    if (settings.stixelsEnabled) {
+      stixelPositionAttribute.needsUpdate = true;
+      stixelColorAttribute.needsUpdate = true;
+    }
+
+    // End performance measurement
+    perf?.endUpdate(minMaxTimeMs);
   }
 }
 
