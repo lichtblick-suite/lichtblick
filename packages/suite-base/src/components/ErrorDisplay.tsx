@@ -128,7 +128,7 @@ function ErrorDisplay(props: ErrorDisplayProps): React.JSX.Element {
       <Stack gap={2} paddingBottom={2}>
         <Stack>
           <Typography variant="h4" gutterBottom>
-            {props.title ?? "The app encountered an unexpected error"}
+            {props.title ?? "The app encountered an unexpected error; Try refreshing the page."}
           </Typography>
           <Typography variant="body1">{props.content}</Typography>
         </Stack>
