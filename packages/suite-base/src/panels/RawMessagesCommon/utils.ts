@@ -19,6 +19,7 @@ import * as _ from "lodash-es";
 
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
+  DATA_ARRAY_PREVIEW_LIMIT,
   PATH_NAME_AGGREGATOR,
   ROS1_COMMON_MSG_PACKAGES,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
@@ -164,4 +165,71 @@ export function getConstantNameByKeyPath(
   }
 
   return undefined;
+}
+
+export const isSingleElemArray = (obj: unknown): obj is unknown[] => {
+  if (!Array.isArray(obj)) {
+    return false;
+  }
+  return obj.filter((a) => a != undefined).length === 1;
+};
+
+export const dataWithoutWrappingArray = (data: unknown): unknown => {
+  return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
+};
+
+export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]): unknown => {
+  if (!isSingleElemArray(data)) {
+    return data;
+  }
+
+  if (queriedData[0]?.constantName == undefined) {
+    return data[0];
+  }
+
+  return `${data[0]} (${queriedData[0]?.constantName})`;
+};
+
+/**
+ * Gets formatted labels for displaying values in the raw messages panel.
+ * Handles special formatting for bigint, ArrayBuffer views, and nsec fields.
+ */
+export function getValueLabels({
+  constantName,
+  label,
+  itemValue,
+  keyPath,
+}: {
+  constantName: string | undefined;
+  label: string;
+  itemValue: unknown;
+  keyPath: ReadonlyArray<number | string>;
+}): { arrLabel: string; itemLabel: string } {
+  let itemLabel = label;
+  if (typeof itemValue === "bigint") {
+    itemLabel = itemValue.toString();
+  }
+  // output preview for the first x items if the data is in binary format
+  // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
+  let arrLabel = "";
+  if (ArrayBuffer.isView(itemValue)) {
+    const array = itemValue as Uint8Array;
+    const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
+    const length = array.length;
+    arrLabel = `(${length}) [${itemPart}${length >= DATA_ARRAY_PREVIEW_LIMIT ? ", …" : ""}] `;
+    itemLabel = itemValue.constructor.name;
+  }
+  if (constantName != undefined) {
+    itemLabel = `${itemLabel} (${constantName})`;
+  }
+
+  // When we encounter a nsec field (nanosecond) that is a number, we ensure the label displays 9 digits.
+  // This helps when visually scanning time values from `sec` and `nsec` fields.
+  // A nanosecond label of 099999999 makes it easier to realize this is 0.09 seconds compared to
+  // 99999999 which requires some counting to reamize this is also 0.09
+  if (keyPath[0] === "nsec" && typeof itemValue === "number") {
+    itemLabel = _.padStart(itemLabel, 9, "0");
+  }
+
+  return { arrLabel, itemLabel };
 }
