@@ -39,7 +39,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-type Props = {
+export type LogListProps = {
   items: readonly NormalizedLogMessage[];
 };
 
@@ -75,7 +75,7 @@ function Row(props: {
  * List for showing large number of items, which are expected to be appended to the end regularly.
  * Automatically scrolls to the bottom unless you explicitly scroll up.
  */
-function LogList({ items }: Props): React.JSX.Element {
+function LogList({ items }: LogListProps): React.JSX.Element {
   const { classes } = useStyles();
 
   // Reference to the list item itself.
@@ -133,20 +133,9 @@ function LogList({ items }: Props): React.JSX.Element {
         );
         const tolerance = 20;
 
-        const isAtEnd =
-          normalizedScrollOffset + offsetHeight >=
-          // + resizeHeight.current
-          scrollHeight - tolerance;
+        const isAtEnd = normalizedScrollOffset + offsetHeight >= scrollHeight - tolerance;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
-          // eslint-disable-next-line no-restricted-syntax
-          console.log({
-            scrollOffset,
-            offsetHeight,
-            scrollHeight,
-            normalizedScrollOffset,
-            // resizeHeight: resizeHeight.current,
-          });
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
@@ -182,11 +171,14 @@ function LogList({ items }: Props): React.JSX.Element {
     refreshMode: "debounce",
   });
 
+  // This is passed to each row to tell it what to render.
   const itemData = useMemo(
     () => ({
       items,
       setRowHeight,
     }),
+    // Add resized width as an extra dep here to force the list to recalculate
+    // everything when the width changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [items, setRowHeight, resizedWidth],
   );
@@ -195,7 +187,11 @@ function LogList({ items }: Props): React.JSX.Element {
     <AutoSizer>
       {({ width, height }) => {
         return (
-          <div style={{ position: "relative", width, height }} ref={resizeRootRef}>
+          <div
+            style={{ position: "relative", width, height }}
+            ref={resizeRootRef}
+            data-testid="virtualized-list" // Move it here
+          >
             <List
               ref={listRef}
               width={width}
@@ -206,6 +202,7 @@ function LogList({ items }: Props): React.JSX.Element {
               itemCount={items.length}
               outerRef={outerRef}
               onScroll={onScroll}
+              data-testid="scrollable-list"
             >
               {Row}
             </List>
@@ -216,6 +213,7 @@ function LogList({ items }: Props): React.JSX.Element {
                 title="Scroll to bottom"
                 onClick={onResetView}
                 className={classes.floatingButton}
+                data-testid="scroll-to-bottom-button"
               >
                 <DoubleArrowDownIcon />
               </Fab>
