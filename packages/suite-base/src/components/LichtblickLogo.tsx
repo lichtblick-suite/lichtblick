@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { SvgIcon, SvgIconProps } from "@mui/material";
+// foxglove-depcheck-used: @lichtblick/suite-desktop
 import IconSvg from "@lichtblick/suite-desktop/resources/icon/icon.svg";
 
 export function LichtblickLogo(props: SvgIconProps): React.JSX.Element {

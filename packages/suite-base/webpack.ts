@@ -8,7 +8,8 @@
 import dotenv from "dotenv";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
+// Monaco Editor disabled - UserScriptEditor panel is disabled
+// import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
 import ts from "typescript";
@@ -102,7 +103,11 @@ export function makeConfig(
         },
         {
           test: /\.tsx?$/,
-          exclude: /node_modules/,
+          exclude: [
+            /node_modules/,
+            // Exclude storybook files from production builds to reduce bundle size
+            ...(isDev ? [] : [/\.stories\.tsx?$/]),
+          ],
           resourceQuery: { not: [/raw/] },
           use: [
             {
@@ -250,14 +255,15 @@ export function makeConfig(
         resourceRegExp: /^\.[\\/]locale$/,
         contextRegExp: /moment$/,
       }),
-      new MonacoWebpackPlugin({
-        // available options: https://github.com/Microsoft/monaco-editor-webpack-plugin#options
-        languages: ["typescript", "javascript"],
-
-        // Output filenames should include content hashes in order to avoid caching issues with
-        // downstream users of the suite-base package.
-        filename: "[name].worker.[contenthash].js",
-      }),
+      // Monaco Editor disabled to reduce bundle size (UserScriptEditor panel is disabled)
+      // new MonacoWebpackPlugin({
+      //   // available options: https://github.com/Microsoft/monaco-editor-webpack-plugin#options
+      //   languages: ["typescript", "javascript"],
+      //
+      //   // Output filenames should include content hashes in order to avoid caching issues with
+      //   // downstream users of the suite-base package.
+      //   filename: "[name].worker.[contenthash].js",
+      // }),
       new ForkTsCheckerWebpackPlugin({
         typescript: {
           configFile: tsconfigPath,
