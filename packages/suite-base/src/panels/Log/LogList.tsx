@@ -122,7 +122,7 @@ function LogList({ items }: LogListProps): React.JSX.Element {
         // Clear the reset flag - we've processed the scroll event from resetAfterIndex
         if (isResettingAfterIndex.current) {
           isResettingAfterIndex.current = false;
-          return; // Ignore this scroll event entirely
+          return;
         }
 
         const { offsetHeight, scrollHeight } = outerElement;
@@ -159,12 +159,8 @@ function LogList({ items }: LogListProps): React.JSX.Element {
     // const currentHeight = itemHeightCache.current[index];
 
     itemHeightCache.current[index] = height;
-    isResettingAfterIndex.current = true;
+    isResettingAfterIndex.current = true; //  Set flag to ignore next scroll event
     listRef.current?.resetAfterIndex(index);
-    // if (height - (itemHeightCache.current[index - 1] ?? 0) > DEFAULT_ROW_HEIGHT) {
-    //   isResettingAfterIndex.current = true;
-    //   listRef.current?.resetAfterIndex(index);
-    // }
   }, []);
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
