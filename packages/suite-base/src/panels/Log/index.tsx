@@ -225,7 +225,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 
   return (
-    <Stack fullHeight>
+    <Stack fullHeight data-testid="log-panel-root">
       <PanelToolbar additionalIcons={copyLogIcon} />
       <Stack flexGrow={0} padding={0.5}>
         <FilterBar

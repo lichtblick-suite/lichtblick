@@ -159,11 +159,11 @@ function LogList({ items }: LogListProps): React.JSX.Element {
     // const currentHeight = itemHeightCache.current[index];
 
     itemHeightCache.current[index] = height;
-
-    if (height - (itemHeightCache.current[index - 1] ?? 0) > DEFAULT_ROW_HEIGHT) {
-      isResettingAfterIndex.current = true;
-      listRef.current?.resetAfterIndex(index);
-    }
+    listRef.current?.resetAfterIndex(index);
+    // if (height - (itemHeightCache.current[index - 1] ?? 0) > DEFAULT_ROW_HEIGHT) {
+    //   isResettingAfterIndex.current = true;
+    //   listRef.current?.resetAfterIndex(index);
+    // }
   }, []);
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
