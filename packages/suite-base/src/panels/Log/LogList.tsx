@@ -114,10 +114,7 @@ function LogList({ items }: LogListProps): React.JSX.Element {
       scrollUpdateWasRequested: boolean;
     }) => {
       try {
-        const outerElement = outerRef.current;
-        if (!outerElement) {
-          return;
-        }
+        const outerElement = outerRef.current!; // asserted by react-window
 
         // Clear the reset flag - we've processed the scroll event from resetAfterIndex
         if (isResettingAfterIndex.current) {
@@ -132,7 +129,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
           Math.min(scrollOffset, scrollHeight - offsetHeight),
         );
         const tolerance = 20;
-
         const isAtEnd = normalizedScrollOffset + offsetHeight >= scrollHeight - tolerance;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
@@ -156,8 +152,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
   );
 
   const setRowHeight = useCallback((index: number, height: number) => {
-    // const currentHeight = itemHeightCache.current[index];
-
     itemHeightCache.current[index] = height;
     isResettingAfterIndex.current = true; //  Set flag to ignore next scroll event
     listRef.current?.resetAfterIndex(index);
