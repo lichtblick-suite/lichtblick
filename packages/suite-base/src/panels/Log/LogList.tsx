@@ -21,22 +21,13 @@ import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList as List } from "react-window";
-import { makeStyles } from "tss-react/mui";
 
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { NormalizedLogMessage } from "@lichtblick/suite-base/panels/Log/types";
 
+import { useStyles } from "./LogList.style";
 import LogMessage from "./LogMessage";
 import { DEFAULT_ROW_HEIGHT } from "./constants";
-
-const useStyles = makeStyles()((theme) => ({
-  floatingButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    margin: theme.spacing(1.5),
-  },
-}));
 
 export type LogListProps = {
   items: readonly NormalizedLogMessage[];
