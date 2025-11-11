@@ -27,8 +27,7 @@ import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { NormalizedLogMessage } from "@lichtblick/suite-base/panels/Log/types";
 
 import LogMessage from "./LogMessage";
-
-const DEFAULT_ROW_HEIGHT = 12;
+import { DEFAULT_ROW_HEIGHT } from "./constants";
 
 const useStyles = makeStyles()((theme) => ({
   floatingButton: {
@@ -181,7 +180,7 @@ function LogList({ items }: LogListProps): React.JSX.Element {
           <div
             style={{ position: "relative", width, height }}
             ref={resizeRootRef}
-            data-testid="virtualized-list" // Move it here
+            data-testid="virtualized-list"
           >
             <List
               ref={listRef}
