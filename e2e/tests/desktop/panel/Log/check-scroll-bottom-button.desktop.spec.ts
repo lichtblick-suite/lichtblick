@@ -64,7 +64,7 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
     await playButton.click();
 
     // Wait 50ms before checking again
-    await mainWindow.waitForTimeout(50);
+    await mainWindow.waitForTimeout(20);
 
     // Get the current timestamp
     currentTimestamp = Number(await timestamp.inputValue());
@@ -74,7 +74,7 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
   // Find the log panel area and scroll up
   const logPanel = mainWindow.getByTestId("log-panel-root");
   await logPanel.hover();
-  await mainWindow.mouse.wheel(0, -300); // negative Y = scroll up
+  await mainWindow.mouse.wheel(0, -500); // negative Y = scroll up
 
   // Then
   await expect(mainWindow.getByTestId("scroll-to-bottom-button")).toBeVisible();
