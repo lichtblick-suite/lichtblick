@@ -4,6 +4,7 @@
 
 import { userEvent } from "@storybook/testing-library";
 import { render, screen, cleanup } from "@testing-library/react";
+import "@testing-library/jest-dom";
 
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
@@ -86,7 +87,7 @@ describe("LogList Component", () => {
     setup();
     const virtualizedList = screen.getByTestId("virtualized-list");
     // Then
-    expect(virtualizedList).toBeTruthy();
+    expect(virtualizedList).toBeInTheDocument();
   });
 
   it("should handle empty items array", () => {
@@ -94,7 +95,7 @@ describe("LogList Component", () => {
     setup([]);
     const virtualizedList = screen.getByTestId("virtualized-list");
     // Then
-    expect(virtualizedList).toBeTruthy();
+    expect(virtualizedList).toBeInTheDocument();
   });
 
   it("should not display scroll-to-bottom button initially", () => {
@@ -102,7 +103,7 @@ describe("LogList Component", () => {
     setup();
     const scrollButton = screen.queryByTestId("scroll-to-bottom-button");
     // Then
-    expect(scrollButton).not.toBeTruthy();
+    expect(scrollButton).not.toBeInTheDocument();
   });
 
   it("should display different log levels", () => {
@@ -120,7 +121,7 @@ describe("LogList Component", () => {
 
     // Check that the virtualized list is rendered
     const virtualizedList = screen.getByTestId("virtualized-list");
-    expect(virtualizedList).toBeTruthy();
+    expect(virtualizedList).toBeInTheDocument();
 
     // Then
     // Verify log messages are displayed
