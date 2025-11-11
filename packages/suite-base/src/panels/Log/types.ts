@@ -60,3 +60,7 @@ export type LogMessageEvent =
   | MessageEvent<FoxgloveLog>
   | MessageEvent<Ros1RosgraphMsgs$Log>
   | MessageEvent<Ros2RosgraphMsgs$Log>;
+
+export type LogListProps = {
+  items: readonly NormalizedLogMessage[];
+};
