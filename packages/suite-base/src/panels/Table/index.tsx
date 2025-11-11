@@ -27,18 +27,19 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { customTypography } from "@lichtblick/theme";
 
 import Table from "./Table";
 
 type Config = { topicPath: string };
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
   toolbar: {
     paddingBlock: 0,
   },
   monospace: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
   },
 }));
 

@@ -12,6 +12,7 @@ import { makeStyles } from "tss-react/mui";
 
 import "@lichtblick/suite-base/styles/assets/inter.css";
 import "@lichtblick/suite-base/styles/assets/plex-mono.css";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()(({ palette, typography }) => ({
   root: {
@@ -27,7 +28,7 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
     color: palette.text.primary,
     font: "inherit",
     fontSize: typography.body2.fontSize,
-    fontFeatureSettings: typography.fontFeatureSettings,
+    fontFeatureSettings: customTypography.fontFeatureSettings,
     fontFamily: typography.body2.fontFamily,
     fontWeight: typography.body2.fontWeight,
     zIndex: 0,
@@ -42,7 +43,7 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
 
     /// --- child and element styling follows ---
     "code, pre, tt": {
-      fontFamily: typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
       overflowWrap: "break-word",
     },
     mark: {

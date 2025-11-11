@@ -13,6 +13,7 @@ import { Time } from "@lichtblick/rostime";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { isAbsoluteTime, formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import { customTypography } from "@lichtblick/theme";
 
 type Props = {
   disableDate?: boolean;
@@ -21,9 +22,9 @@ type Props = {
   title?: string;
 };
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
   numericValue: {
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
   },
 }));
 
