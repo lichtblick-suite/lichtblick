@@ -73,7 +73,6 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   );
 
   const importLayout = useCallbackWithToast(async () => {
-
     const fileHandles = await showOpenFilePicker({
       multiple: true,
       excludeAcceptAllOption: false,

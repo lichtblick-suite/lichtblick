@@ -77,8 +77,7 @@ export default function LayoutBrowser({
     confirmModal,
   } = useLayoutActions();
   const { importLayout, exportLayout } = useLayoutTransfer();
-  const { onSelectLayout, state, dispatch } =
-    useLayoutNavigation();
+  const { onSelectLayout, state, dispatch } = useLayoutNavigation();
   const onExportLayout = exportLayout;
 
   useLayoutEffect(() => {
