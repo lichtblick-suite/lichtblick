@@ -211,16 +211,14 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
         minXValue: {
           label: t("min"),
           input: "number",
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          value: Number(config.minXValue) ?? undefined,
+          value: _.isNumber(config.minXValue) ? config.minXValue : undefined,
           placeholder: "auto",
         },
         maxXValue: {
           label: t("max"),
           input: "number",
           error: maxXError,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          value: Number(config.maxXValue) ?? undefined,
+          value: _.isNumber(config.maxXValue) ? config.maxXValue : undefined,
           placeholder: "auto",
         },
         followingViewWidth: {
