@@ -114,11 +114,14 @@ jobs:
 
       # It must be dev build, otherwise playwright wont't have all data-testid avaiable for icons
       # https://mui.com/material-ui/migration/upgrade-to-v7/#svgicons-data-testid-removed
-      - name: test:e2e:desktop:ci (ubuntu-latest) - Shard ${{ matrix.shard }}/4
+      - name: Build desktop app
+        run: yarn desktop:build:dev
+
+      - name: Run E2E tests - Shard ${{ matrix.shard }}/4
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: yarn desktop:build:dev && yarn test:e2e:desktop:ci --shard=${{ matrix.shard }}/4
+          run: yarn test:e2e:desktop:ci --shard=${{ matrix.shard }}/4
 
       - name: Upload E2E Test Reports (Shard ${{ matrix.shard }})
         if: always()
