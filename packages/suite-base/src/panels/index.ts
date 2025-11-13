@@ -18,7 +18,7 @@ import imageThumbnail from "./Image/thumbnail.png";
 import indicatorThumbnail from "./Indicator/thumbnail.png";
 import logThumbnail from "./Log/thumbnail.png";
 import mapThumbnail from "./Map/thumbnail.png";
-import parametersThumbnail from "./Parameters/thumbnail.png";
+// import parametersThumbnail from "./Parameters/thumbnail.png";
 import pieChartThumbnail from "./PieChart/thumbnail.png";
 import plotThumbnail from "./Plot/thumbnail.png";
 import publishThumbnail from "./Publish/thumbnail.png";
@@ -29,7 +29,6 @@ import tableThumbnail from "./Table/thumbnail.png";
 import teleopThumbnail from "./Teleop/thumbnail.png";
 import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
-import userScriptEditorThumbnail from "./UserScriptEditor/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
 
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
@@ -91,13 +90,14 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     thumbnail: mapThumbnail,
     module: async () => await import("./Map"),
   },
-  {
-    title: t("parameters"),
-    type: "Parameters",
-    description: t("parametersDescription"),
-    thumbnail: parametersThumbnail,
-    module: async () => await import("./Parameters"),
-  },
+  // Parameters panel disabled
+  // {
+  //   title: t("parameters"),
+  //   type: "Parameters",
+  //   description: t("parametersDescription"),
+  //   thumbnail: parametersThumbnail,
+  //   module: async () => await import("./Parameters"),
+  // },
   {
     title: t("plot"),
     type: "Plot",
@@ -177,13 +177,14 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     thumbnail: variableSliderThumbnail,
     module: async () => await import("./VariableSlider"),
   },
-  {
-    title: t("userScripts"),
-    type: "NodePlayground",
-    description: t("userScriptsDescription"),
-    thumbnail: userScriptEditorThumbnail,
-    module: async () => await import("./UserScriptEditor"),
-  },
+  // UserScriptEditor panel disabled to reduce bundle size (removes Monaco Editor dependency)
+  // {
+  //   title: t("userScripts"),
+  //   type: "NodePlayground",
+  //   description: t("userScriptsDescription"),
+  //   thumbnail: userScriptEditorThumbnail,
+  //   module: async () => await import("./UserScriptEditor"),
+  // },
   {
     title: t("tab"),
     type: TAB_PANEL_TYPE,
