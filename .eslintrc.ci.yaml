@@ -14,3 +14,12 @@ rules:
   import/no-cycle:
     - error
     - ignoreExternal: true
+
+overrides:
+  - files:
+      - "e2e/ci-helpers/**/*.ts"
+    rules:
+      no-restricted-syntax: off
+      import/order: off
+      "@typescript-eslint/no-unnecessary-condition": off
+      "@typescript-eslint/strict-boolean-expressions": off
