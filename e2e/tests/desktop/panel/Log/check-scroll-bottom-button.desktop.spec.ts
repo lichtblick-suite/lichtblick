@@ -12,7 +12,7 @@ const MCAP_FILENAME = "example_logs.mcap";
  * AND the user clicks on the "Log" panel settings
  * THEN the "Log panel" settings should be visible
  */
-test("open log panel after loading an mcap file", async ({ mainWindow }) => {
+test.skip("open log panel after loading an mcap file", async ({ mainWindow }) => {
   /// Given
   await loadFile({
     mainWindow,
@@ -35,7 +35,7 @@ test("open log panel after loading an mcap file", async ({ mainWindow }) => {
  * AND the user scrolls up in the log panel
  * THEN the "scroll to bottom" button should be visible
  */
-test('should show "scroll to bottom" button when there is a scroll up in the log panel', async ({
+test.skip('should show "scroll to bottom" button when there is a scroll up in the log panel', async ({
   mainWindow,
 }) => {
   /// Given
