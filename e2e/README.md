@@ -60,6 +60,7 @@ yarn test:e2e:summary
 ```
 
 The summary includes:
+
 - **Overall statistics** (total tests, passed/failed/skipped)
 - **Top 10 slowest tests** to identify performance bottlenecks
 - **Failed tests list** with retry information

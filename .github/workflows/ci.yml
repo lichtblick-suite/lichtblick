@@ -139,17 +139,17 @@ jobs:
     if: always()
     needs: e2e
     runs-on: ubuntu-latest
-    
+
     name: e2e-report (merge shards)
 
     steps:
       - uses: actions/checkout@v5
-      
+
       - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: corepack enable yarn
-      
+
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -158,28 +158,28 @@ jobs:
             **/node_modules
           key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: v5-${{ runner.os }}-yarn-
-      
+
       - run: yarn install --immutable
-      
+
       - name: Download all shard reports
         uses: actions/download-artifact@v4
         with:
           pattern: e2e-test-reports-shard-*
           path: e2e/all-reports
-      
+
       - name: Merge Playwright reports
         run: |
           # Create reports directory structure
           mkdir -p e2e/reports/desktop
-          
+
           # Merge all JSON reports from shards
           npx playwright merge-reports --reporter json e2e/all-reports/e2e-test-reports-shard-* > e2e/reports/desktop/results.json || true
-      
+
       - name: Generate E2E Test Summary
         run: |
           echo "Generating E2E test summary from merged reports..."
           yarn ts-node e2e/generate-test-summary.ts >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Upload Merged E2E Test Reports
         if: always()
         uses: actions/upload-artifact@v4
