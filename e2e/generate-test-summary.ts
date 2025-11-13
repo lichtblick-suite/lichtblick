@@ -59,7 +59,7 @@ function generateSummary(reportPath: string, reportName: string): void {
   }
 
   const fileContent = fs.readFileSync(reportPath, "utf-8");
-  
+
   // Check if file is empty or invalid JSON
   if (!fileContent || fileContent.trim().length === 0) {
     console.log(`⚠️  Report is empty: ${reportPath}`);

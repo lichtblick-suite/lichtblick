@@ -9,10 +9,7 @@ export default defineConfig({
   reporter: process.env.CI
     ? [["blob"]] // Use blob reporter in CI for sharding support
     : [
-        [
-          "html",
-          { outputFolder: "../reports/desktop", open: "never", title: "Desktop E2E Tests" },
-        ],
+        ["html", { outputFolder: "../reports/desktop", open: "never", title: "Desktop E2E Tests" }],
         ["json", { outputFile: "../reports/desktop/results.json" }],
         ["list"],
       ],

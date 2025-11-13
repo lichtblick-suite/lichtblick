@@ -166,17 +166,17 @@ jobs:
         run: |
           # Create reports directory structure
           mkdir -p e2e/reports/desktop
-          
+
           # List downloaded blob reports for debugging
           echo "Downloaded blob reports:"
           ls -la all-blob-reports/ || echo "No blob reports found"
-          
+
           # Merge blob reports into JSON format
           npx playwright merge-reports --reporter json ./all-blob-reports > e2e/reports/desktop/results.json
-          
+
           # Also generate HTML report
           npx playwright merge-reports --reporter html ./all-blob-reports
-          
+
           # Verify the merged report
           echo "Merged report size:"
           ls -lh e2e/reports/desktop/results.json
