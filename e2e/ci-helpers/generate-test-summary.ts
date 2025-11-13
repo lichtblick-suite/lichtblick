@@ -1,33 +1,9 @@
-#!/usr/bin/env ts-node
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import * as fs from "fs";
 import * as path from "path";
-
-type TestResult = {
-  title: string;
-  status: "passed" | "failed" | "skipped" | "timedOut";
-  duration: number;
-  retries: number;
-};
-
-type PlaywrightJSONReport = {
-  suites: Array<{
-    title: string;
-    file: string;
-    specs: Array<{
-      title: string;
-      tests: Array<{
-        results: Array<{
-          status: string;
-          duration: number;
-          retry: number;
-        }>;
-      }>;
-    }>;
-  }>;
-};
+import { PlaywrightJSONReport, ReportTestResult } from "./types";
 
 function formatDuration(ms: number): string {
   if (ms < 1000) {
@@ -37,7 +13,7 @@ function formatDuration(ms: number): string {
   return `${seconds}s`;
 }
 
-function getStatusEmoji(status: string): string {
+function getStatusIcon(status: string): string {
   switch (status) {
     case "passed":
       return "✅";
@@ -54,33 +30,32 @@ function getStatusEmoji(status: string): string {
 
 function generateSummary(reportPath: string, reportName: string): void {
   if (!fs.existsSync(reportPath)) {
-    console.log(`⚠️  Report not found: ${reportPath}`);
+    console.log(`Report not found: ${reportPath}`);
     return;
   }
 
   const fileContent = fs.readFileSync(reportPath, "utf-8");
-
-  // Check if file is empty or invalid JSON
   if (!fileContent || fileContent.trim().length === 0) {
-    console.log(`⚠️  Report is empty: ${reportPath}`);
+    console.log(`Report is empty: ${reportPath}`);
     return;
   }
 
   let report: PlaywrightJSONReport;
+
   try {
     report = JSON.parse(fileContent);
   } catch (error) {
-    console.log(`⚠️  Failed to parse report: ${reportPath}`);
+    console.log(`Failed to parse report: ${reportPath}`);
     console.log(`Error: ${error instanceof Error ? error.message : String(error)}`);
     return;
   }
 
   if (!report.suites || report.suites.length === 0) {
-    console.log(`⚠️  No test suites found in report: ${reportPath}`);
+    console.log(`No test suites found in report: ${reportPath}`);
     return;
   }
 
-  const tests: TestResult[] = [];
+  const tests: ReportTestResult[] = [];
 
   for (const suite of report.suites) {
     for (const spec of suite.specs) {
@@ -92,7 +67,7 @@ function generateSummary(reportPath: string, reportName: string): void {
         if (lastResult) {
           tests.push({
             title: testTitle,
-            status: lastResult.status as TestResult["status"],
+            status: lastResult.status as ReportTestResult["status"],
             duration: lastResult.duration,
             retries: test.results.length - 1,
           });
@@ -101,16 +76,16 @@ function generateSummary(reportPath: string, reportName: string): void {
     }
   }
 
-  // Sort by duration (slowest first)
+  // Sort tests by duration descending (slowest first)
   tests.sort((a, b) => b.duration - a.duration);
 
   if (tests.length === 0) {
-    console.log(`\n## 📊 ${reportName} Summary\n`);
-    console.log(`⚠️  No tests found in report.\n`);
+    console.log(`\n## ${reportName} Summary\n`);
+    console.log(`No tests found in report.\n`);
     return;
   }
 
-  // Calculate statistics
+  // Metrics
   const totalTests = tests.length;
   const passed = tests.filter((t) => t.status === "passed").length;
   const failed = tests.filter((t) => t.status === "failed").length;
@@ -119,29 +94,39 @@ function generateSummary(reportPath: string, reportName: string): void {
   const totalDuration = tests.reduce((sum, t) => sum + t.duration, 0);
   const avgDuration = totalDuration / totalTests;
 
-  // Generate markdown table
-  console.log(`\n## 📊 ${reportName} Summary\n`);
-  console.log(
-    `**Total Tests:** ${totalTests} | **Passed:** ${passed} ✅ | **Failed:** ${failed} ❌ | **Skipped:** ${skipped} ⏭️ | **Timed Out:** ${timedOut} ⏱️`,
-  );
-  console.log(
-    `**Total Duration:** ${formatDuration(totalDuration)} | **Average:** ${formatDuration(avgDuration)}\n`,
-  );
+  /**
+   * Output Summary
+   */
+  console.log(`\n## ${reportName} Summary\n`);
+  console.log(`| Metric | Value |`);
+  console.log(`|--------|-------|`);
+  console.log(`| Total Tests | ${totalTests} |`);
+  console.log(`| Passed ✅ | ${passed} |`);
+  console.log(`| Failed ❌ | ${failed} |`);
+  console.log(`| Skipped | ${skipped} |`);
+  console.log(`| Timed Out | ${timedOut} |`);
+  console.log(`| Total Duration | ${formatDuration(totalDuration)} |`);
+  console.log(`| Average Duration | ${formatDuration(avgDuration)} |`);
+  console.log(``);
 
-  // Show top 10 slowest tests
-  console.log(`### 🐌 Top 10 Slowest Tests\n`);
+  /**
+   * Slowest Tests
+   */
+  console.log(`### Top 10 Slowest Tests\n`);
   console.log(`| Status | Duration | Test | Retries |`);
   console.log(`|--------|----------|------|---------|`);
 
   tests.slice(0, 10).forEach((test) => {
-    const statusEmoji = getStatusEmoji(test.status);
+    const statusEmoji = getStatusIcon(test.status);
     const retriesText = test.retries > 0 ? `🔄 ${test.retries}` : "-";
     console.log(
       `| ${statusEmoji} | ${formatDuration(test.duration)} | ${test.title} | ${retriesText} |`,
     );
   });
 
-  // Show all failed tests if any
+  /**
+   * Failed Tests
+   */
   if (failed > 0) {
     console.log(`\n### ❌ Failed Tests\n`);
     console.log(`| Duration | Test | Retries |`);
@@ -159,9 +144,10 @@ function generateSummary(reportPath: string, reportName: string): void {
 }
 
 function main(): void {
-  const reportsDir = path.join(__dirname, "reports");
+  const reportsDir = path.join(__dirname, "..", "tests/reports");
+  console.log(`Generating E2E test summary from reports in: ${reportsDir}\n`);
 
-  console.log("# 🧪 E2E Test Results Summary\n");
+  console.log("# E2E Test Results Summary\n");
 
   // Desktop tests
   const desktopReportPath = path.join(reportsDir, "desktop", "results.json");
