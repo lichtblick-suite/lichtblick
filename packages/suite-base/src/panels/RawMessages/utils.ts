@@ -29,14 +29,13 @@ export const DATA_ARRAY_PREVIEW_LIMIT = 20;
 const ROS1_COMMON_MSG_PACKAGES = new Set(Object.keys(ros1).map((key) => key.split("/")[0]!));
 ROS1_COMMON_MSG_PACKAGES.add("turtlesim");
 
-function isTypedArray(obj: unknown) {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
-  return Boolean(
+function isTypedArray(obj: unknown): boolean {
+  const isTyped =
     obj != undefined &&
-      typeof obj === "object" &&
-      ArrayBuffer.isView(obj) &&
-      !(obj instanceof DataView),
-  );
+    typeof obj === "object" &&
+    ArrayBuffer.isView(obj) &&
+    !(obj instanceof DataView);
+  return isTyped;
 }
 
 function invert(value: NodeState): NodeState {
