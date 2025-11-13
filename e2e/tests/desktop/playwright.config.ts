@@ -6,11 +6,16 @@ import { defineConfig } from "@playwright/test";
 export const STORAGE_STATE = "e2e/tmp/desktop-session.json";
 
 export default defineConfig({
-  reporter: [
-    ["html", { outputFolder: "../reports/desktop", open: "never", title: "Desktop E2E Tests" }],
-    ["json", { outputFile: "../reports/desktop/results.json" }],
-    ["list"],
-  ],
+  reporter: process.env.CI
+    ? [["blob"]] // Use blob reporter in CI for sharding support
+    : [
+        [
+          "html",
+          { outputFolder: "../reports/desktop", open: "never", title: "Desktop E2E Tests" },
+        ],
+        ["json", { outputFile: "../reports/desktop/results.json" }],
+        ["list"],
+      ],
   testDir: "./",
   name: "desktop",
   timeout: 30 * 1000,

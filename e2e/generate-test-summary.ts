@@ -58,7 +58,28 @@ function generateSummary(reportPath: string, reportName: string): void {
     return;
   }
 
-  const report: PlaywrightJSONReport = JSON.parse(fs.readFileSync(reportPath, "utf-8"));
+  const fileContent = fs.readFileSync(reportPath, "utf-8");
+  
+  // Check if file is empty or invalid JSON
+  if (!fileContent || fileContent.trim().length === 0) {
+    console.log(`⚠️  Report is empty: ${reportPath}`);
+    return;
+  }
+
+  let report: PlaywrightJSONReport;
+  try {
+    report = JSON.parse(fileContent);
+  } catch (error) {
+    console.log(`⚠️  Failed to parse report: ${reportPath}`);
+    console.log(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    return;
+  }
+
+  if (!report.suites || report.suites.length === 0) {
+    console.log(`⚠️  No test suites found in report: ${reportPath}`);
+    return;
+  }
+
   const tests: TestResult[] = [];
 
   for (const suite of report.suites) {
@@ -82,6 +103,12 @@ function generateSummary(reportPath: string, reportName: string): void {
 
   // Sort by duration (slowest first)
   tests.sort((a, b) => b.duration - a.duration);
+
+  if (tests.length === 0) {
+    console.log(`\n## 📊 ${reportName} Summary\n`);
+    console.log(`⚠️  No tests found in report.\n`);
+    return;
+  }
 
   // Calculate statistics
   const totalTests = tests.length;
