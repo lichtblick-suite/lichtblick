@@ -144,7 +144,7 @@ function generateSummary(reportPath: string, reportName: string): void {
 }
 
 function main(): void {
-  const reportsDir = path.join(__dirname, "..", "tests/reports");
+  const reportsDir = path.join(__dirname, "..", "reports");
   console.log(`Generating E2E test summary from reports in: ${reportsDir}\n`);
 
   console.log("# E2E Test Results Summary\n");
