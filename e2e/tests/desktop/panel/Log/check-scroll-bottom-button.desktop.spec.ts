@@ -20,6 +20,10 @@ test.skip("open log panel after loading an mcap file", async ({ mainWindow }) =>
   });
 
   // When
+  // file is loaded
+  await expect(mainWindow.getByTestId("data-source-name")).toHaveText(MCAP_FILENAME);
+  await expect(mainWindow.getByTestId("loading-file-spinner")).toBeHidden();
+
   await mainWindow.getByTestId("AddPanelButton").click();
   await mainWindow.getByRole("button", { name: "Log" }).click();
   await mainWindow.getByTestId("log-panel-root").getByRole("button", { name: "Settings" }).click();
