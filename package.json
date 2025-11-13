@@ -45,6 +45,7 @@
     "test:e2e:web": "playwright test --config=e2e/tests/web/playwright.config.ts",
     "test:e2e:web:debug": "playwright test --config=e2e/tests/web/playwright.config.ts --debug",
     "test:e2e:web:report": "playwright show-report e2e/tests/web/reports",
+    "test:e2e:web:ci": "CI=true playwright test --config=e2e/tests/web/playwright.config.ts",
     "test:e2e:desktop": "playwright test --config=e2e/tests/desktop/playwright.config.ts",
     "test:e2e:desktop:debug": "playwright test --config=e2e/tests/desktop/playwright.config.ts --debug",
     "test:e2e:desktop:report": "playwright show-report e2e/reports/desktop",

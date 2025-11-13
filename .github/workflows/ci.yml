@@ -162,7 +162,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E Web tests
-        run: yarn test:e2e:web
+        run: yarn test:e2e:web:ci
 
       - name: Upload Web E2E Test Reports
         if: always()
