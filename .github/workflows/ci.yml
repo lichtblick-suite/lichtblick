@@ -169,10 +169,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-web-reports
-          path: |
-            e2e/reports/web/
-            e2e/test-results/
+          path: e2e/reports/web/
           retention-days: 7
+          if-no-files-found: warn
 
   # Merge reports from all shards and generate summary
   e2e-report:
