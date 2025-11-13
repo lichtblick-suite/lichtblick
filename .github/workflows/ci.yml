@@ -72,7 +72,15 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    name: e2e (ubuntu-latest)
+    # Run tests in parallel across multiple shards
+    # This distributes tests across multiple GitHub Action jobs
+    # Each shard runs independently, reducing total CI time
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    name: e2e (ubuntu-latest) [${{ matrix.shard }}/4]
 
     # Set a fixed timezone to ensure consistent test results.
     # Lichtblick uses the system's local timezone, which can cause test assertions
@@ -106,10 +114,78 @@ jobs:
 
       # It must be dev build, otherwise playwright wont't have all data-testid avaiable for icons
       # https://mui.com/material-ui/migration/upgrade-to-v7/#svgicons-data-testid-removed
-      - name: test:e2e:desktop:ci (ubuntu-latest)
+      - name: test:e2e:desktop:ci (ubuntu-latest) - Shard ${{ matrix.shard }}/4
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
           run: |
             yarn desktop:build:dev
-            yarn test:e2e:desktop:ci
+            # Run 1/4 of tests in this shard with 1 worker per shard
+            # This distributes the ~39 tests across 4 parallel jobs
+            yarn test:e2e:desktop:ci --shard=${{ matrix.shard }}/4
+
+      - name: Upload E2E Test Reports (Shard ${{ matrix.shard }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-reports-shard-${{ matrix.shard }}
+          path: |
+            e2e/reports/
+            e2e/test-results/
+          retention-days: 7
+
+  # Merge reports from all shards and generate summary
+  e2e-report:
+    if: always()
+    needs: e2e
+    runs-on: ubuntu-latest
+    
+    name: e2e-report (merge shards)
+
+    steps:
+      - uses: actions/checkout@v5
+      
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - run: corepack enable yarn
+      
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+      
+      - run: yarn install --immutable
+      
+      - name: Download all shard reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-test-reports-shard-*
+          path: e2e/all-reports
+      
+      - name: Merge Playwright reports
+        run: |
+          # Create reports directory structure
+          mkdir -p e2e/reports/desktop
+          
+          # Merge all JSON reports from shards
+          npx playwright merge-reports --reporter json e2e/all-reports/e2e-test-reports-shard-* > e2e/reports/desktop/results.json || true
+      
+      - name: Generate E2E Test Summary
+        run: |
+          echo "Generating E2E test summary from merged reports..."
+          yarn ts-node e2e/generate-test-summary.ts >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload Merged E2E Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-reports-merged
+          path: |
+            e2e/reports/
+            e2e/all-reports/
+          retention-days: 7

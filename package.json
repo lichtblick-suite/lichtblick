@@ -49,6 +49,7 @@
     "test:e2e:desktop:debug": "playwright test --config=e2e/tests/desktop/playwright.config.ts --debug",
     "test:e2e:desktop:report": "playwright show-report e2e/reports/desktop",
     "test:e2e:desktop:ci": "CI=true playwright test --config=e2e/tests/desktop/playwright.config.ts",
+    "test:e2e:summary": "ts-node e2e/generate-test-summary.ts",
     "package:win": "yarn package --win",
     "package:darwin": "yarn package --mac",
     "package:linux": "yarn package --linux",

@@ -8,6 +8,8 @@ export const STORAGE_STATE = "e2e/tmp/desktop-session.json";
 export default defineConfig({
   reporter: [
     ["html", { outputFolder: "../reports/desktop", open: "never", title: "Desktop E2E Tests" }],
+    ["json", { outputFile: "../reports/desktop/results.json" }],
+    ["list"],
   ],
   testDir: "./",
   name: "desktop",
