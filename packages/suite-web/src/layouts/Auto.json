@@ -296,7 +296,7 @@
         },
         "/planning_scene": {
           "visible": false,
-          "showCollisionObjects": false
+          "showCollisionObjects": true
         },
         "/monitored_planning_scene": {
           "visible": false,
