@@ -35,7 +35,7 @@ test.skip("open log panel after loading an mcap file", async ({ mainWindow }) =>
  * AND the user scrolls up in the log panel
  * THEN the "scroll to bottom" button should be visible
  */
-test.skip('should show "scroll to bottom" button when there is a scroll up in the log panel', async ({
+test('should show "scroll to bottom" button when there is a scroll up in the log panel', async ({
   mainWindow,
 }) => {
   /// Given
@@ -45,9 +45,14 @@ test.skip('should show "scroll to bottom" button when there is a scroll up in th
   });
 
   // When
+  // file is loaded
+  await expect(mainWindow.getByTestId("data-source-name")).toHaveText(MCAP_FILENAME);
+  await expect(mainWindow.getByTestId("loading-file-spinner")).toBeHidden();
+
   // Add Log Panel
   await mainWindow.getByTestId("AddPanelButton").click();
   await mainWindow.getByRole("button", { name: "Log" }).click();
+  await expect(mainWindow.getByTestId("log-panel-root")).toBeVisible();
 
   const playButton = mainWindow.getByTestId("play-button");
 
@@ -57,25 +62,44 @@ test.skip('should show "scroll to bottom" button when there is a scroll up in th
 
   const initialTimestamp = Number(await timestamp.inputValue());
 
+  // console.log("initial", initialTimestamp);
+  // await mainWindow.waitForTimeout(2000); // wait for UI to settle
+
   // Start playback and wait until timestamp advances (button can be flaky if pressed too quickly)
   let currentTimestamp = initialTimestamp;
   while (currentTimestamp <= initialTimestamp) {
     await expect(playButton).toHaveAttribute("title", "Play");
-    await playButton.click();
 
+    // console.log("clicking play");
+    await playButton.click();
+    await expect(playButton).toHaveAttribute("title", "Pause");
     // Wait 50ms before checking again
     await mainWindow.waitForTimeout(20);
 
     // Get the current timestamp
     currentTimestamp = Number(await timestamp.inputValue());
   }
-  await mainWindow.waitForTimeout(100); // wait for some logs to accumulate
+  await mainWindow.waitForTimeout(400); // wait for some logs to accumulate
+  await expect(playButton).toHaveAttribute("title", "Pause");
 
+  // console.log("it's playing", Number(await timestamp.inputValue()));
+  await expect(mainWindow.getByTestId("scroll-to-bottom-button")).toBeHidden();
+
+  await mainWindow.keyboard.press("Space"); // stop playback
+  await expect(playButton).toHaveAttribute("title", "Play");
+
+  // console.log("it's stopped", Number(await timestamp.inputValue()));
+  // await mainWindow.screenshot({ path: "before-scrolling-up.png" });
+
+  // console.log("is it actually stopped?", Number(await timestamp.inputValue()));
   // Find the log panel area and scroll up
   const logPanel = mainWindow.getByTestId("log-panel-root");
   await logPanel.hover();
-  await mainWindow.mouse.wheel(0, -500); // negative Y = scroll up
+  await mainWindow.mouse.wheel(0, -1500); // scroll up
+
+  // await mainWindow.screenshot({ path: "after-scrolling-up.png" });
+  await mainWindow.waitForTimeout(300); // wait for some logs to accumulate
 
   // Then
-  await expect(mainWindow.getByTestId("scroll-to-bottom-button")).toBeVisible();
+  await expect(mainWindow.getByTestId("scroll-to-bottom-button")).toBeVisible({ timeout: 5000 });
 });

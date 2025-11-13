@@ -107,7 +107,7 @@ function LogList({ items }: LogListProps): React.JSX.Element {
         const outerElement = outerRef.current!; // asserted by react-window
 
         // Clear the reset flag - we've processed the scroll event from resetAfterIndex
-        if (isResettingAfterIndex.current) {
+        if (!scrollUpdateWasRequested && isResettingAfterIndex.current) {
           isResettingAfterIndex.current = false;
           return;
         }

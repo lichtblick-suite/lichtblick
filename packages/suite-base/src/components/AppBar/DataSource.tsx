@@ -109,7 +109,7 @@ export function DataSource(): React.JSX.Element {
     <>
       <WssErrorModal playerAlerts={playerAlerts} />
       <Stack direction="row" alignItems="center">
-        <div className={classes.sourceName}>
+        <div className={classes.sourceName} data-testid="data-source-name">
           <div className={classes.textTruncate}>
             <TextMiddleTruncate text={playerDisplayName ?? `<${t("unknown")}>`} />
           </div>
@@ -127,6 +127,7 @@ export function DataSource(): React.JSX.Element {
               color="inherit"
               className={classes.spinner}
               variant="indeterminate"
+              data-testid="loading-file-spinner"
             />
           )}
           {error && (
