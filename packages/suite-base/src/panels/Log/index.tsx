@@ -129,6 +129,9 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     // eslint-disable-next-line no-restricted-syntax
     console.log('some more');
 
+    // eslint-disable-next-line no-restricted-syntax
+    console.log('changes in development2');
+
     return seenNodeNamesCache.current;
   }, [messages]);
 
