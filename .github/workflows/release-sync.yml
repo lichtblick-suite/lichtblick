@@ -20,17 +20,27 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "manual-sync")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create sync branch and merge
         run: |
           git fetch origin develop
-          BRANCH_NAME="sync/main-to-develop-$(date +%Y%m%d-%H%M%S)"
+          BRANCH_NAME="sync/main-to-develop-${{ steps.get_version.outputs.version }}"
           git checkout -b $BRANCH_NAME origin/develop
           git merge origin/main --no-ff -m "chore: sync main into develop after release"
           git push origin $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Create Pull Request
+        id: release-sync-pr
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.TOKEN }}
