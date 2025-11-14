@@ -104,11 +104,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
       scrollUpdateWasRequested: boolean;
     }) => {
       try {
-        // eslint-disable-next-line no-restricted-syntax
-        console.log('making even more changes 1');
-
-        // eslint-disable-next-line no-restricted-syntax
-        console.log('changes in development1');
         const outerElement = outerRef.current!; // asserted by react-window
 
         // Clear the reset flag - we've processed the scroll event from resetAfterIndex

@@ -40,8 +40,6 @@ export default function filterMessages(
   const searchTermsInLowerCase = searchTerms.map((term) => term.toLowerCase());
 
   return events.filter((event) => {
-    // eslint-disable-next-line no-restricted-syntax
-    console.log('some more changes');
     const logMessage = event.message;
     const effectiveLogLevel = getNormalizedLevel(event.schemaName, logMessage);
     if (effectiveLogLevel < minLogLevel) {
