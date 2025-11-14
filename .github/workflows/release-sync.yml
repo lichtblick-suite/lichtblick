@@ -40,7 +40,7 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Create Pull Request
-        run: gh pr create -B develop -H ${{ env.BRANCH_NAME }} --title 'Merge main into develop' --body `|
+        run: gh pr create -B develop -H ${{ env.BRANCH_NAME }} --title 'Release ${{ steps.get_version.outputs.version }} main into develop' --body `
             This PR syncs changes from `main` into `develop` after a release.
 
             Please review the changes before merging.
