@@ -27,7 +27,8 @@ import {
   PrimitiveType,
 } from "@lichtblick/message-path";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
-import { Autocomplete, IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete";
+import { Autocomplete } from "@lichtblick/suite-base/components/Autocomplete";
+import { IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete/types";
 import { useStructuredItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useStructureItemsByPath";
 import useGlobalVariables, {
   GlobalVariables,
