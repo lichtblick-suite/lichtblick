@@ -15,6 +15,8 @@ export type TeleopConfig = {
   downButton: { field: string; value: number };
   leftButton: { field: string; value: number };
   rightButton: { field: string; value: number };
+  rotateLeftButton?: { field: string; value: number };
+  rotateRightButton?: { field: string; value: number };
 };
 
 export enum DirectionalPadAction {
@@ -22,6 +24,9 @@ export enum DirectionalPadAction {
   DOWN,
   LEFT,
   RIGHT,
+  ROTATE_LEFT,
+  ROTATE_RIGHT,
+  STOP,
 }
 
 export type DirectionalPadProps = {

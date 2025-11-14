@@ -39,6 +39,16 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
     onAction?.();
   }, [onAction, currentAction]);
 
+  const handleStopClick = useCallback(() => {
+    setCurrentAction(DirectionalPadAction.STOP);
+    onAction?.(DirectionalPadAction.STOP);
+    // Immediately clear after stop
+    setTimeout(() => {
+      setCurrentAction(undefined);
+      onAction?.();
+    }, 100);
+  }, [onAction]);
+
   const makeMouseHandlers = (action: DirectionalPadAction) =>
     disabled
       ? undefined
@@ -54,17 +64,68 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
           },
         };
 
+
   return (
     <Stack
       justifyContent="center"
       alignItems="center"
       fullWidth
       fullHeight
-      style={{ userSelect: "none" }}
+      style={{ userSelect: "none", position: "relative" }}
     >
-      <svg className={classes.svg} viewBox="0 0 256 256">
-        <g opacity={1}>
-          {/* UP button */}
+      <svg className={classes.svg} viewBox="0 0 256 256" style={{ width: "100%", height: "100%" }}>
+        {/* Rotation buttons - Upper corners */}
+        {/* Upper Left Rotation */}
+        <g {...makeMouseHandlers(DirectionalPadAction.ROTATE_LEFT)} role="button">
+          <circle
+            className={cx(classes.button, {
+              active: currentAction === DirectionalPadAction.ROTATE_LEFT,
+              disabled,
+            })}
+            cx="50"
+            cy="50"
+            r="22"
+          />
+          <text
+            x="50"
+            y="50"
+            className={cx(classes.buttonIcon, { disabled })}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="12"
+            fontWeight="bold"
+          >
+            CCW
+          </text>
+        </g>
+
+        {/* Upper Right Rotation */}
+        <g {...makeMouseHandlers(DirectionalPadAction.ROTATE_RIGHT)} role="button">
+          <circle
+            className={cx(classes.button, {
+              active: currentAction === DirectionalPadAction.ROTATE_RIGHT,
+              disabled,
+            })}
+            cx="206"
+            cy="50"
+            r="22"
+          />
+          <text
+            x="206"
+            y="50"
+            className={cx(classes.buttonIcon, { disabled })}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="12"
+            fontWeight="bold"
+          >
+            CW
+          </text>
+        </g>
+
+        {/* Main directional pad - moved closer together */}
+        <g opacity={1} transform="translate(128, 128)">
+          {/* UP button - closer to center */}
           <g {...makeMouseHandlers(DirectionalPadAction.UP)} role="button">
             <path
               className={cx(classes.button, {
@@ -72,11 +133,16 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
                 disabled,
               })}
               d={svgPathsEnabled.up}
+              transform="scale(0.7) translate(-128, -128)"
             />
-            <path className={cx(classes.buttonIcon, { disabled })} d={svgPathsDisabled.up} />
+            <path
+              className={cx(classes.buttonIcon, { disabled })}
+              d={svgPathsDisabled.up}
+              transform="scale(0.7) translate(-128, -128)"
+            />
           </g>
 
-          {/* DOWN button */}
+          {/* DOWN button - closer to center */}
           <g {...makeMouseHandlers(DirectionalPadAction.DOWN)} role="button">
             <path
               className={cx(classes.button, {
@@ -84,13 +150,16 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
                 disabled,
               })}
               d={svgPathsEnabled.down}
+              transform="scale(0.7) translate(-128, -128)"
             />
-            <path className={cx(classes.buttonIcon, { disabled })} d={svgPathsDisabled.down} />
+            <path
+              className={cx(classes.buttonIcon, { disabled })}
+              d={svgPathsDisabled.down}
+              transform="scale(0.7) translate(-128, -128)"
+            />
           </g>
-        </g>
 
-        <g opacity={1}>
-          {/* LEFT button */}
+          {/* LEFT button - closer to center */}
           <g {...makeMouseHandlers(DirectionalPadAction.LEFT)} role="button">
             <path
               className={cx(classes.button, {
@@ -98,11 +167,16 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
                 disabled,
               })}
               d={svgPathsEnabled.left}
+              transform="scale(0.7) translate(-128, -128)"
             />
-            <path className={cx(classes.buttonIcon, { disabled })} d={svgPathsDisabled.left} />
+            <path
+              className={cx(classes.buttonIcon, { disabled })}
+              d={svgPathsDisabled.left}
+              transform="scale(0.7) translate(-128, -128)"
+            />
           </g>
 
-          {/* RIGHT button */}
+          {/* RIGHT button - closer to center */}
           <g {...makeMouseHandlers(DirectionalPadAction.RIGHT)} role="button">
             <path
               className={cx(classes.button, {
@@ -110,8 +184,41 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
                 disabled,
               })}
               d={svgPathsEnabled.right}
+              transform="scale(0.7) translate(-128, -128)"
             />
-            <path className={cx(classes.buttonIcon, { disabled })} d={svgPathsDisabled.right} />
+            <path
+              className={cx(classes.buttonIcon, { disabled })}
+              d={svgPathsDisabled.right}
+              transform="scale(0.7) translate(-128, -128)"
+            />
+          </g>
+
+          {/* STOP button - Center */}
+          <g
+            onClick={handleStopClick}
+            role="button"
+            style={{ cursor: disabled ? "auto" : "pointer" }}
+          >
+            <circle
+              className={cx(classes.button, {
+                active: currentAction === DirectionalPadAction.STOP,
+                disabled,
+              })}
+              cx="0"
+              cy="0"
+              r="20"
+            />
+            <text
+              x="0"
+              y="0"
+              className={cx(classes.buttonIcon, { disabled })}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize="14"
+              fontWeight="bold"
+            >
+              STOP
+            </text>
           </g>
         </g>
       </svg>
