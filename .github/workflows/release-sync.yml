@@ -39,7 +39,7 @@ jobs:
             gh pr create \
               -B develop \
               -H ${{ env.BRANCH_NAME }} \
-              --title 'Release ${{ env.version }} main into develop' \
+              --title 'Release ${{ env.version }} Merge main into develop' \
               --body "This PR syncs changes from \`main\` into \`develop\` after release **${{ env.version }}**.
 
               Please review the changes before merging.
