@@ -3220,8 +3220,8 @@ __metadata:
     moment: 2.30.1
     moment-duration-format: 2.3.2
     moment-timezone: 0.6.0
-    monaco-editor: 0.52.2
-    monaco-editor-webpack-plugin: 7.1.0
+    monaco-editor: 0.54.0
+    monaco-editor-webpack-plugin: 7.1.1
     nanoid: 5.1.6
     natsort: 2.0.3
     nearley: 2.20.1
@@ -9618,6 +9618,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dompurify@npm:3.1.7":
+  version: 3.1.7
+  resolution: "dompurify@npm:3.1.7"
+  checksum: 0a9b811bbc94f3dba60cf6486962362b0f1a5b4ab789f5e1cbd4749b6ba1a1fad190a677a962dc8850ce28764424765fe425e9d6508e4e93ba648ef15d54bc24
+  languageName: node
+  linkType: hard
+
 "dompurify@npm:3.2.5":
   version: 3.2.5
   resolution: "dompurify@npm:3.2.5"
@@ -14628,6 +14635,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"marked@npm:14.0.0":
+  version: 14.0.0
+  resolution: "marked@npm:14.0.0"
+  bin:
+    marked: bin/marked.js
+  checksum: 965405cde11d180e5da78cf51074b1947f1e5483ed99691d3ec990a078aa6ca9113cf19bbd44da45473d0e7eec7298255e7d860a650dd5e7aed78ca5a8e0161b
+  languageName: node
+  linkType: hard
+
 "matcher@npm:^3.0.0":
   version: 3.0.0
   resolution: "matcher@npm:3.0.0"
@@ -15526,22 +15542,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor-webpack-plugin@npm:7.1.0":
-  version: 7.1.0
-  resolution: "monaco-editor-webpack-plugin@npm:7.1.0"
+"monaco-editor-webpack-plugin@npm:7.1.1":
+  version: 7.1.1
+  resolution: "monaco-editor-webpack-plugin@npm:7.1.1"
   dependencies:
     loader-utils: ^2.0.2
   peerDependencies:
     monaco-editor: ">= 0.31.0"
     webpack: ^4.5.0 || 5.x
-  checksum: e77cf5230c1b886fe0f1be3ecd8baea57795b93681783c5554bdf3aa256317a570bf546bbf17439f4c547182c9e70d8cb31d76715b3af0a8ec88e9cff054e4bd
+  checksum: 44471024b5b903e2b0ee5f101e7f614771407aa0e2403c5591be1a1243d957273e37244089d7266c6fb00d9c76b621f4d7be4d2c1afe782c098950fafa3b1dd6
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:0.52.2":
-  version: 0.52.2
-  resolution: "monaco-editor@npm:0.52.2"
-  checksum: d5ff7b7a469afee25ac708d9ace0dcc5ef24ed328dfc526a52944a497f0d826cfb0685a778ff4b7becc0a8f7843f260c17ea6de3f6719481d53501d79ebb1260
+"monaco-editor@npm:0.54.0":
+  version: 0.54.0
+  resolution: "monaco-editor@npm:0.54.0"
+  dependencies:
+    dompurify: 3.1.7
+    marked: 14.0.0
+  checksum: 27bda0afafe5bbce693be9c72531e772bf71cfce6362a8358acd28815ddb95113cc1738ddccb28359a9d9def00da4dd928c1f32514dc0d1611ba0251758c3e2a
   languageName: node
   linkType: hard
 
