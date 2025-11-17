@@ -97,7 +97,7 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
     return data[0];
   }
 
-  return `${data[0]} (${queriedData[0]?.constantName})`;
+  return `${data[0]} (${queriedData[0].constantName})`;
 };
 
 const useStyles = makeStyles()((theme) => ({

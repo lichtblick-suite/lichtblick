@@ -169,7 +169,10 @@ export class RenderableModels extends RenderablePrimitive {
           try {
             renderable = await this.#createRenderable(
               primitive,
-              (model) => URL.createObjectURL(new Blob([model.data], { type: model.media_type })),
+              (model) =>
+                URL.createObjectURL(
+                  new Blob([new Uint8Array(model.data)], { type: model.media_type }),
+                ),
               (url) => {
                 URL.revokeObjectURL(url);
               },

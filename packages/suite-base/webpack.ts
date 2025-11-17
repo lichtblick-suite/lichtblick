@@ -44,7 +44,10 @@ export function makeConfig(
   _: unknown,
   argv: WebpackArgv,
   options: Options,
-): Pick<Configuration, "resolve" | "module" | "optimization" | "plugins" | "node"> {
+): Pick<
+  Configuration,
+  "resolve" | "module" | "optimization" | "plugins" | "node" | "ignoreWarnings"
+> {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
@@ -275,5 +278,11 @@ export function makeConfig(
       __dirname: true,
       __filename: true,
     },
+    ignoreWarnings: [
+      {
+        module: /node_modules\/typescript\/lib\/typescript\.js$/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ],
   };
 }

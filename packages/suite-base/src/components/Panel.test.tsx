@@ -535,7 +535,7 @@ describe("Panel", () => {
         expect(allLogElements).toHaveLength(3);
 
         // Extract the log messages in order
-        const logTexts = allLogElements.map((el) => el.textContent ?? "");
+        const logTexts = allLogElements.map((el) => el.textContent);
 
         expect(logTexts).toEqual([
           `[INFO] ${logInfoText}`,

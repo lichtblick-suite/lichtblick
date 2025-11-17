@@ -31,7 +31,7 @@ export function useLayoutActions(): UseLayoutActions {
   const analytics = useAnalytics();
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
-  const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
+  const { onSelectLayout } = useLayoutNavigation();
   const [confirm, confirmModal] = useConfirm();
 
   const [state, dispatch] = useLayoutBrowserReducer({
@@ -57,9 +57,6 @@ export function useLayoutActions(): UseLayoutActions {
         return;
       }
 
-      if (!(await promptForUnsavedChanges())) {
-        return;
-      }
       const newLayout = await layoutManager.saveNewLayout({
         name: `${item.name} copy`,
         data: item.working?.data ?? item.baseline.data,
@@ -68,14 +65,7 @@ export function useLayoutActions(): UseLayoutActions {
       await onSelectLayout(newLayout);
       void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE, { permission: item.permission });
     },
-    [
-      analytics,
-      dispatch,
-      layoutManager,
-      onSelectLayout,
-      promptForUnsavedChanges,
-      state.selectedIds.length,
-    ],
+    [analytics, dispatch, layoutManager, onSelectLayout, state.selectedIds.length],
   );
 
   const onDeleteLayout = useCallbackWithToast(
