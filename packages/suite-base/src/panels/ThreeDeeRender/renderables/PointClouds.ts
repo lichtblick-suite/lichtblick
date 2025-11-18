@@ -26,7 +26,6 @@ import {
   PointsRenderable,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
 import type { RosObject, RosValue } from "@lichtblick/suite-base/players/types";
-import { getPointCloudPerformanceInstance } from "./pointCloudPerformance";
 
 import {
   autoSelectColorSettings,
@@ -614,10 +613,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     pointCount: number,
     pointStep: number,
     settings: LayerSettingsPointClouds,
-  ): number {
-    const perf = getPointCloudPerformanceInstance();
-    perf?.startMinMax();
-
+  ): void {
     let minColorValue = settings.minValue ?? Number.POSITIVE_INFINITY;
     let maxColorValue = settings.maxValue ?? Number.NEGATIVE_INFINITY;
     if (
@@ -641,10 +637,8 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       maxColorValue = settings.maxValue ?? maxColorValue;
     }
 
-    const minMaxTime = perf?.endMinMax() ?? 0;
     output[0] = minColorValue;
     output[1] = maxColorValue;
-    return minMaxTime;
   }
 
   #updatePointCloudBuffers(
@@ -658,9 +652,6 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     stixelPositionAttribute: THREE.BufferAttribute,
     stixelColorAttribute: THREE.BufferAttribute,
   ): void {
-    const perf = getPointCloudPerformanceInstance();
-    perf?.startUpdate(pointCount);
-
     const data = pointCloud.data;
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     const pointStep = getStride(pointCloud);
@@ -700,8 +691,6 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
     // Calculate uniform downsampling step if needed
     const isDownsampled = totalPointCount > pointCount;
     const downsamplingStep = isDownsampled ? totalPointCount / pointCount : 1;
-
-    let minMaxTimeMs: number | undefined;
 
     // Update position and color attributes in a single combined loop
     if (settings.colorMode === "rgba-fields") {
@@ -757,7 +746,7 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       }
     } else {
       // Iterate the point cloud data to determine min/max color values (if needed)
-      minMaxTimeMs = this.#minMaxColorValues(
+      this.#minMaxColorValues(
         tempMinMaxColor,
         packedColorReader,
         view,
@@ -835,9 +824,6 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
       stixelPositionAttribute.needsUpdate = true;
       stixelColorAttribute.needsUpdate = true;
     }
-
-    // End performance measurement
-    perf?.endUpdate(minMaxTimeMs);
   }
 }
 

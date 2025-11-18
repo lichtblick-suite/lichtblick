@@ -36,7 +36,7 @@
           "labelSize": 0.04,
           "lineWidth": 0,
           "showLabel": true,
-          "enablePreloading": false
+          "enablePreloading": true
         },
         "meshUpAxis": "z_up"
       },
@@ -226,7 +226,7 @@
           "colorMap": "turbo",
           "pointSize": 4,
           "flatColor": "#ff0000ff",
-          "decayTime": 0.5
+          "decayTime": 0.0
         },
         "/plan_smoothed": {
           "visible": true,
