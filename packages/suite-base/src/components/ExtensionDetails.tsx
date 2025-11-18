@@ -7,10 +7,10 @@
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Button, Link, Tab, Tabs, Typography, Divider } from "@mui/material";
-import DOMPurify from "dompurify";
 import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
+import sanitize from "sanitize-html";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@lichtblick/suite";
@@ -81,14 +81,14 @@ export function ExtensionDetails({
     async () =>
       readme != undefined && isValidUrl(readme)
         ? await marketplace.getMarkdown(readme)
-        : DOMPurify.sanitize(readme ?? "No readme found."),
+        : sanitize(readme ?? "No readme found."),
     [marketplace, readme],
   );
   const { value: changelogContent } = useAsync(
     async () =>
       changelog != undefined && isValidUrl(changelog)
         ? await marketplace.getMarkdown(changelog)
-        : DOMPurify.sanitize(changelog ?? "No changelog found."),
+        : sanitize(changelog ?? "No changelog found."),
     [marketplace, changelog],
   );
 

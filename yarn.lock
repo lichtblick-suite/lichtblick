@@ -3189,7 +3189,6 @@ __metadata:
     css-loader: 6.8.1
     cytoscape: 3.31.1
     cytoscape-dagre: 2.5.0
-    dompurify: 3.2.5
     dotenv: 17.2.2
     esbuild-loader: 4.3.0
     eventemitter3: 5.0.1
@@ -5719,13 +5718,6 @@ __metadata:
   version: 4.0.5
   resolution: "@types/tough-cookie@npm:4.0.5"
   checksum: f19409d0190b179331586365912920d192733112a195e870c7f18d20ac8adb7ad0b0ff69dad430dba8bc2be09593453a719cfea92dc3bda19748fd158fe1498d
-  languageName: node
-  linkType: hard
-
-"@types/trusted-types@npm:^2.0.7":
-  version: 2.0.7
-  resolution: "@types/trusted-types@npm:2.0.7"
-  checksum: 8e4202766a65877efcf5d5a41b7dd458480b36195e580a3b1085ad21e948bc417d55d6f8af1fd2a7ad008015d4117d5fdfe432731157da3c68678487174e4ba3
   languageName: node
   linkType: hard
 
@@ -9632,18 +9624,6 @@ __metadata:
   version: 3.1.7
   resolution: "dompurify@npm:3.1.7"
   checksum: 0a9b811bbc94f3dba60cf6486962362b0f1a5b4ab789f5e1cbd4749b6ba1a1fad190a677a962dc8850ce28764424765fe425e9d6508e4e93ba648ef15d54bc24
-  languageName: node
-  linkType: hard
-
-"dompurify@npm:3.2.5":
-  version: 3.2.5
-  resolution: "dompurify@npm:3.2.5"
-  dependencies:
-    "@types/trusted-types": ^2.0.7
-  dependenciesMeta:
-    "@types/trusted-types":
-      optional: true
-  checksum: bd3b40810cc74312970dc6b99d38450ec839c81fb56c27d2c1b815ce0206b73e9cd4fe2e9021f735a1aaebf017990a63e6454e7d9c893f72b365b94d030ec9c4
   languageName: node
   linkType: hard
 
@@ -14266,6 +14246,7 @@ __metadata:
     "@types/license-checker": ^25.0.6
     "@types/node": 22.9.3
     "@types/react-refresh": ^0
+    "@types/sanitize-html": 2.16.0
     "@types/semver": ^7.7.0
     "@typescript-eslint/eslint-plugin": 8.46.2
     "@typescript-eslint/parser": 8.46.2
@@ -14300,6 +14281,7 @@ __metadata:
     react-use: 17.6.0
     rehype-raw: 7.0.0
     rimraf: 6.0.1
+    sanitize-html: 2.17.0
     semver: 7.7.2
     storybook: 9.1.9
     ts-loader: 9.5.1
