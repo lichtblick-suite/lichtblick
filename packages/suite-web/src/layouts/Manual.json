@@ -34,7 +34,9 @@
         "transforms": {
           "axisScale": 4.5,
           "labelSize": 0.15,
-          "showLabel": false
+          "lineWidth": 0,
+          "showLabel": false,
+          "enablePreloading": true
         },
         "meshUpAxis": "z_up"
       },
