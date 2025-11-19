@@ -226,6 +226,59 @@ export function makeConfig(
     optimization: {
       removeAvailableModules: true,
 
+      // Separate runtime chunk to reduce main bundle size
+      runtimeChunk: {
+        name: 'runtime',
+      },
+
+      // Split chunks for better caching and parallel loading
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          // Separate vendor code (node_modules)
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+          // Separate Three.js (large library)
+          three: {
+            test: /[\\/]node_modules[\\/]three[\\/]/,
+            name: 'three',
+            chunks: 'all',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Separate MUI (Material-UI)
+          mui: {
+            test: /[\\/]node_modules[\\/]@mui[\\/]/,
+            name: 'mui',
+            chunks: 'all',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Separate React and React DOM
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: 'react',
+            chunks: 'all',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Common code shared across chunks
+          common: {
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
+            reuseExistingChunk: true,
+          },
+        },
+        // Limit chunk size to prevent huge chunks
+        maxSize: 244000, // 244 KB - matches webpack's recommended limit
+      },
+
       minimizer: [
         new ESBuildMinifyPlugin({
           target: "es2022",
