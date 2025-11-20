@@ -362,6 +362,32 @@ describe("PlotCoordinator", () => {
       expect(setSeriesSpy).toHaveBeenCalledWith(plotCoordinator["series"]);
     });
 
+    it("should correctly create 2 series even if both have the same message path", () => {
+      const messagePath = PlotBuilder.path({
+        value: "/vehicle/accel_y",
+        timestampMethod: "receiveTime",
+      });
+      const plotConfig = PlotBuilder.config({ paths: [messagePath, messagePath] });
+
+      (parseMessagePath as jest.Mock).mockReturnValue({ topicName: "/vehicle/accel_y" });
+      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
+      (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+
+      plotCoordinator.handleConfig(plotConfig, "light", {});
+
+      const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
+      expect(setSeriesSpy).toHaveBeenCalled();
+      const series = (datasetsBuilder.setSeries as jest.Mock).mock.calls[0]?.[0];
+
+      expect(series).toHaveLength(2);
+      console.log(series)
+      expect(series[0].configIndex).toBe(0);
+      expect(series[1].configIndex).toBe(1);
+      expect(series[0].key).toBe("0:receiveTime:/vehicle/accel_y");
+      expect(series[1].key).toBe("1:receiveTime:/vehicle/accel_y");
+      expect(series[0].key).not.toEqual(series[1].key);
+    });
+
     it("should dispatch render and queue downsample", async () => {
       const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
       const queueDispatchDownsample = jest.spyOn(plotCoordinator as any, "queueDispatchDownsample");
