@@ -256,7 +256,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       //
       // This key lets us treat series with the same name but different timestamp methods as distinct
       // using a key instead of the path index lets us preserve loaded data when a path is removed
-      const key = `${path.timestampMethod}:${stringifyMessagePath(
+      const key = `${idx}:${path.timestampMethod}:${stringifyMessagePath(
         filledParsed,
       )}` as SeriesConfigKey;
 
