@@ -4,6 +4,7 @@
 import { Chart, ChartDataset, ScatterDataPoint } from "chart.js";
 import { MutableRefObject } from "react";
 
+import { Immutable } from "@lichtblick/suite";
 import { PanelContextMenuItem } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { TimeBasedChartTooltipData } from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
@@ -174,3 +175,21 @@ export type UsePlotInteractionHandlersProps = {
   shouldSync: boolean;
   subscriberId: string;
 };
+
+export type PlotCoordinatorEventTypes = {
+  timeseriesBounds(bounds: Immutable<Bounds1D>): void;
+
+  /** X scale changed. */
+  xScaleChanged(scale: Scale | undefined): void;
+
+  /** Current values changed (for displaying in the legend) */
+  currentValuesChanged(values: readonly unknown[]): void;
+
+  /** Paths with mismatched data lengths were detected */
+  pathsWithMismatchedDataLengthsChanged(pathsWithMismatchedDataLengths: string[]): void;
+
+  /** Rendering updated the viewport. `canReset` is true if the viewport can be reset. */
+  viewportChange(canReset: boolean): void;
+};
+
+export type ConfigBounds = { x: Partial<Bounds1D>; y: Partial<Bounds1D> };
