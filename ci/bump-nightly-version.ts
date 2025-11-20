@@ -31,7 +31,7 @@ async function main(): Promise<void> {
   pkg.version = `${ver}-nightly.${date}.${sha}`;
 
   // Write package.json
-  await fs.writeFile(PACKAGE_JSON_PATH, JSON.stringify(pkg, undefined, 2) ?? "" + "\n", "utf8");
+  await fs.writeFile(PACKAGE_JSON_PATH, `${JSON.stringify(pkg, undefined, 2)}\n`, "utf8");
 }
 
 if (require.main === module) {

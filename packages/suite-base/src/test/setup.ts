@@ -37,7 +37,7 @@ if (typeof window !== "undefined") {
   (window as { setImmediate?: typeof setImmediate }).setImmediate ??= setImmediate;
 }
 
-global.TextEncoder = util.TextEncoder;
+global.TextEncoder = util.TextEncoder as unknown as typeof TextEncoder;
 
 // React available everywhere (matches webpack config)
 global.React = React;

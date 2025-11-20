@@ -194,20 +194,14 @@ function addNodeAtPath(root: SettingsTreeNode, path: Path, node: SettingsTreeNod
   let curNode = root;
   for (let i = 0; i < path.length - 1; i++) {
     const segment = path[i]!;
-    if (!curNode.children) {
-      curNode.children = {};
-    }
-    if (!curNode.children[segment]) {
-      curNode.children[segment] = {};
-    }
+    curNode.children ??= {};
+    curNode.children[segment] ??= {};
     curNode = curNode.children[segment]!;
   }
 
   // Assign the node to the last segment of the path
   const lastSegment = path[path.length - 1]!;
-  if (!curNode.children) {
-    curNode.children = {};
-  }
+  curNode.children ??= {};
   curNode.children[lastSegment] = node;
 }
 
@@ -219,12 +213,8 @@ function setLabelAtPath(root: SettingsTreeNode, path: Path, label: string): void
   // Recursively walk/build the settings tree down to the end of the path
   let curNode = root;
   for (const segment of path) {
-    if (!curNode.children) {
-      curNode.children = {};
-    }
-    if (!curNode.children[segment]) {
-      curNode.children[segment] = {};
-    }
+    curNode.children ??= {};
+    curNode.children[segment] ??= {};
     curNode = curNode.children[segment]!;
   }
 

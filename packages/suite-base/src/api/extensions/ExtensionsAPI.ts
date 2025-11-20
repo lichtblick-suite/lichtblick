@@ -74,8 +74,8 @@ class ExtensionsAPI implements IExtensionAPI {
     Object.entries(body).forEach(([key, value]) => {
       if (typeof value === "object") {
         formData.append(key, JSON.stringify(value) ?? "");
-      } else if (value) {
-        formData.append(key, String(value));
+      } else if (typeof value === "string" && value.length > 0) {
+        formData.append(key, value);
       }
     });
 

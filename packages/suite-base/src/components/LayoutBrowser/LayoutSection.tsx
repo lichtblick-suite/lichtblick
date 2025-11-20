@@ -73,7 +73,7 @@ export default function LayoutSection({
         </Stack>
       )}
       <List disablePadding={disablePadding}>
-        {items != undefined && items.length === 0 && (
+        {items?.length === 0 && (
           <Stack paddingX={2}>
             <Typography variant="body2" color="text.secondary">
               {emptyText}
