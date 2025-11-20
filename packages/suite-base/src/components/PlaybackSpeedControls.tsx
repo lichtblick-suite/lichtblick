@@ -10,7 +10,6 @@ import CheckIcon from "@mui/icons-material/Check";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 
-
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useStyles } from "@lichtblick/suite-base/components/PlaybackSpeedControls.style";
@@ -26,8 +25,6 @@ const formatSpeed = (val: number) => `${val < 0.1 ? val.toFixed(2) : val}×`;
 
 const configSpeedSelector = (state: LayoutState) =>
   state.selectedLayout?.data?.playbackConfig.speed;
-
-
 
 export default function PlaybackSpeedControls(): React.JSX.Element {
   const { classes } = useStyles();

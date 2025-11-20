@@ -10,33 +10,33 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import HoverableIconButton, {HoverableIconButtonProps} from "@lichtblick/suite-base/components/HoverableIconButton";
+import HoverableIconButton, {
+  HoverableIconButtonProps,
+} from "@lichtblick/suite-base/components/HoverableIconButton";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
-  function renderComponent(propsOverride: Partial<HoverableIconButtonProps> = {}) {
-    const props: Partial<HoverableIconButtonProps> = {
-      icon: <span data-testid="test-icon">{BasicBuilder.string()}</span>,
-      title: BasicBuilder.string(),
-      ...propsOverride,
-    };
-    return {
-      ...render(
-        <HoverableIconButton icon={props.icon} {...props}>
-          {props.children}
-        </HoverableIconButton>,
-      ),
-      props,
-    };
-  }
-
+function renderComponent(propsOverride: Partial<HoverableIconButtonProps> = {}) {
+  const props: Partial<HoverableIconButtonProps> = {
+    icon: <span data-testid="test-icon">{BasicBuilder.string()}</span>,
+    title: BasicBuilder.string(),
+    ...propsOverride,
+  };
+  return {
+    ...render(
+      <HoverableIconButton icon={props.icon} {...props}>
+        {props.children}
+      </HoverableIconButton>,
+    ),
+    props,
+  };
+}
 
 describe("Given HoverableIconButton", () => {
   it("When rendered with icon only Then displays the icon", () => {
     renderComponent();
 
     expect(screen.getByTestId("test-icon")).toBeInTheDocument();
-  }
-  );
+  });
 
   it("When rendered with icon and children Then displays both", () => {
     // Given
@@ -74,7 +74,7 @@ describe("Given HoverableIconButton", () => {
       iconPosition: "end",
       children: <span data-testid="test-text">{BasicBuilder.string()}</span>,
     };
-        // When
+    // When
     const { container } = renderComponent(props);
 
     // Then
@@ -86,7 +86,7 @@ describe("Given HoverableIconButton", () => {
   it("When hovered Then shows activeIcon", () => {
     // Given
     const props: Partial<HoverableIconButtonProps> = {
-      activeIcon: <span data-testid="active-icon">{BasicBuilder.string()}</span>
+      activeIcon: <span data-testid="active-icon">{BasicBuilder.string()}</span>,
     };
 
     // When
@@ -106,7 +106,7 @@ describe("Given HoverableIconButton", () => {
   it("When mouse leaves Then reverts to normal icon", () => {
     // Given
     const props: Partial<HoverableIconButtonProps> = {
-      activeIcon: <span data-testid="active-icon">{BasicBuilder.string()}</span>
+      activeIcon: <span data-testid="active-icon">{BasicBuilder.string()}</span>,
     };
 
     // When
@@ -123,7 +123,6 @@ describe("Given HoverableIconButton", () => {
   });
 
   it("When disabled and hovered Then does not show activeIcon", () => {
-
     // Given
     const props: Partial<HoverableIconButtonProps> = {
       activeIcon: <span data-testid="active-icon">{BasicBuilder.string()}</span>,

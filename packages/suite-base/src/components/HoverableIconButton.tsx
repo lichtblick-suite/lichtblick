@@ -17,65 +17,68 @@ export type HoverableIconButtonProps = {
   iconPosition?: "start" | "end";
 } & Omit<IconButtonProps, "children" | "color">;
 
-const HoverableIconButton = forwardRef<HTMLButtonElement, HoverableIconButtonProps>((props, ref) => {
-  const {
-    icon,
-    activeIcon,
-    color,
-    activeColor,
-    onMouseLeave,
-    onMouseEnter,
-    children,
-    iconPosition = "start",
-    ...rest
-  } = props;
+const HoverableIconButton = forwardRef<HTMLButtonElement, HoverableIconButtonProps>(
+  (props, ref) => {
+    const {
+      icon,
+      activeIcon,
+      color,
+      activeColor,
+      onMouseLeave,
+      onMouseEnter,
+      children,
+      iconPosition = "start",
+      ...rest
+    } = props;
 
-  const [hovered, setHovered] = useState(false);
+    const [hovered, setHovered] = useState(false);
 
-  const handleMouseEnter = useCallback(
-    (event) => {
-      if (onMouseEnter != undefined) {
-        onMouseEnter(event);
-      }
+    const handleMouseEnter = useCallback(
+      (event) => {
+        if (onMouseEnter != undefined) {
+          onMouseEnter(event);
+        }
+        if (props.disabled === true) {
+          return;
+        }
+        setHovered(true);
+      },
+      [onMouseEnter, props.disabled],
+    );
+
+    const handleMouseLeave = useCallback(
+      (event) => {
+        if (onMouseLeave != undefined) {
+          onMouseLeave(event);
+        }
+        setHovered(false);
+      },
+      [onMouseLeave],
+    );
+
+    useEffect(() => {
       if (props.disabled === true) {
-        return;
+        setHovered(false);
       }
-      setHovered(true);
-    },
-    [onMouseEnter, props.disabled],
-  );
+    }, [props.disabled]);
 
-  const handleMouseLeave = useCallback(
-    (event) => {
-      if (onMouseLeave != undefined) {
-        onMouseLeave(event);
-      }
-      setHovered(false);
-    },
-    [onMouseLeave],
-  );
-
-  useEffect(() => {
-    if (props.disabled === true) {
-      setHovered(false);
-    }
-  }, [props.disabled]);
-
-  return (
-    <IconButton
-      ref={ref}
-      {...rest}
-      component="button"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      color={activeColor != undefined ? (hovered ? activeColor : color) : color}
-    >
-      {iconPosition === "start" && (activeIcon != undefined ? (hovered ? activeIcon : icon) : icon)}
-      {children}
-      {iconPosition === "end" && (activeIcon != undefined ? (hovered ? activeIcon : icon) : icon)}
-    </IconButton>
-  );
-});
+    return (
+      <IconButton
+        ref={ref}
+        {...rest}
+        component="button"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        color={activeColor != undefined ? (hovered ? activeColor : color) : color}
+      >
+        {iconPosition === "start" &&
+          (activeIcon != undefined ? (hovered ? activeIcon : icon) : icon)}
+        {children}
+        {iconPosition === "end" && (activeIcon != undefined ? (hovered ? activeIcon : icon) : icon)}
+      </IconButton>
+    );
+  },
+);
 
 HoverableIconButton.displayName = "HoverableIconButton";
 
