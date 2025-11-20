@@ -9,10 +9,11 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CheckIcon from "@mui/icons-material/Check";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { useStyles } from "@lichtblick/suite-base/components/PlaybackSpeedControls.style";
+
 
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import { useStyles } from "@lichtblick/suite-base/components/PlaybackSpeedControls.style";
 import {
   LayoutState,
   useCurrentLayoutActions,
