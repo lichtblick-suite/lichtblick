@@ -8,7 +8,7 @@
 import { IconButton, IconButtonProps } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useState } from "react";
 
-type Props = {
+export type HoverableIconButtonProps = {
   icon: React.ReactNode;
   activeIcon?: React.ReactNode;
   color?: IconButtonProps["color"];
@@ -17,7 +17,7 @@ type Props = {
   iconPosition?: "start" | "end";
 } & Omit<IconButtonProps, "children" | "color">;
 
-const HoverableIconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+const HoverableIconButton = forwardRef<HTMLButtonElement, HoverableIconButtonProps>((props, ref) => {
   const {
     icon,
     activeIcon,
