@@ -380,7 +380,6 @@ describe("PlotCoordinator", () => {
       const series = (datasetsBuilder.setSeries as jest.Mock).mock.calls[0]?.[0];
 
       expect(series).toHaveLength(2);
-      console.log(series)
       expect(series[0].configIndex).toBe(0);
       expect(series[1].configIndex).toBe(1);
       expect(series[0].key).toBe("0:receiveTime:/vehicle/accel_y");
