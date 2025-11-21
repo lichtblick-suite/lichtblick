@@ -50,7 +50,7 @@ function Row(props: {
     if (ref.current) {
       props.data.setRowHeight(props.index, ref.current.clientHeight);
     }
-  }, [props.data, props.index]);
+  }, [props.index]);
 
   const item = props.data.items[props.index]!;
 
@@ -76,6 +76,11 @@ function LogList({ items }: LogListProps): React.JSX.Element {
 
   const latestItems = useLatest(items);
 
+  // Cache calculated item heights.
+  const itemHeightCache = useRef<Record<number, number>>({});
+
+  const tolerance = useRef<number>(0);
+
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
 
@@ -86,7 +91,7 @@ function LogList({ items }: LogListProps): React.JSX.Element {
 
   useEffect(() => {
     if (autoscrollToEnd) {
-      listRef.current?.scrollToItem(items.length - 1, "end");
+      listRef.current?.scrollToItem(latestItems.current.length - 1, "end");
     }
   }, [autoscrollToEnd, items.length]);
 
@@ -104,16 +109,35 @@ function LogList({ items }: LogListProps): React.JSX.Element {
       try {
         const outerElement = outerRef.current!; // asserted by react-window
 
+        // if (items?.length > 0) {
+        //   console.log("last item", items.length - 1, items[items.length - 1]?.message);
+        // }
+
+        tolerance.current =
+          (itemHeightCache.current[latestItems.current.length - 1] ?? 0) > tolerance.current
+            ? (itemHeightCache.current[latestItems.current.length - 1] ?? 0)
+            : tolerance.current;
+
         const { offsetHeight, scrollHeight } = outerElement;
         // Add bounds checking
         const normalizedScrollOffset = Math.max(
           0,
           Math.min(scrollOffset, scrollHeight - offsetHeight),
         );
-        const tolerance = 20;
-        const isAtEnd = normalizedScrollOffset + offsetHeight >= scrollHeight - tolerance;
+
+        const newHeight = itemHeightCache.current[latestItems.current.length - 1] ?? 0;
+        const isAtEnd =
+          normalizedScrollOffset + offsetHeight + newHeight >= scrollHeight - tolerance.current;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
+          console.log("setting autoscroll to false", {
+            normalizedScrollOffset,
+            scrollOffset,
+            scrollHeight,
+            offsetHeight,
+            newHeight,
+            tolerance: tolerance.current,
+          });
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
           setAutoscrollToEnd(true);
@@ -124,9 +148,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
     },
     [],
   );
-
-  // Cache calculated item heights.
-  const itemHeightCache = useRef<Record<number, number>>({});
 
   const getRowHeight = useCallback(
     (index: number) => itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT,
