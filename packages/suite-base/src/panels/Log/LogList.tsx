@@ -76,8 +76,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
 
   const latestItems = useLatest(items);
 
-  const isResettingAfterIndex = useRef(false);
-
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
 
@@ -105,12 +103,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
     }) => {
       try {
         const outerElement = outerRef.current!; // asserted by react-window
-
-        // Clear the reset flag - we've processed the scroll event from resetAfterIndex
-        if (isResettingAfterIndex.current) {
-          isResettingAfterIndex.current = false;
-          return;
-        }
 
         const { offsetHeight, scrollHeight } = outerElement;
         // Add bounds checking
@@ -143,7 +135,6 @@ function LogList({ items }: LogListProps): React.JSX.Element {
 
   const setRowHeight = useCallback((index: number, height: number) => {
     itemHeightCache.current[index] = height;
-    isResettingAfterIndex.current = true; //  Set flag to ignore next scroll event
     listRef.current?.resetAfterIndex(index);
   }, []);
 
