@@ -122,7 +122,7 @@ export const useStylesVirtualizedTree = makeStyles()((theme) => ({
     fontFamily: theme.typography.body1.fontFamily,
     fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
     fontSize: "inherit",
-    lineHeight: "100%",
+    lineHeight: 1.4,
   },
   expandButton: {
     cursor: "pointer",
@@ -140,6 +140,8 @@ export const useStylesVirtualizedTree = makeStyles()((theme) => ({
   },
   value: {
     color: theme.palette.text.primary,
+    wordBreak: "break-word",
+    overflowWrap: "break-word",
   },
   string: {
     color: theme.palette.success.main,

@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, useMemo, CSSProperties } from "react";
+import { useRef, useMemo, CSSProperties, useEffect } from "react";
 
 import { DATA_ARRAY_PREVIEW_LIMIT } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
 import { useStylesVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
@@ -85,7 +85,10 @@ export function VirtualizedTree({
     getScrollElement: () => parentRef.current,
     estimateSize: () => 24,
     overscan: 5,
-    measureElement: undefined,
+    measureElement: (element) => element.getBoundingClientRect().height,
+    // It helps prevent the "ResizeObserver loop completed with undelivered notifications" error
+    // https://tanstack.com/virtual/latest/docs/api/virtualizer#useanimationframewithresizeobserver
+    useAnimationFrameWithResizeObserver: true,
   });
 
   const items = virtualizer.getVirtualItems();
@@ -115,13 +118,13 @@ export function VirtualizedTree({
             <div
               key={virtualRow.key}
               data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
               className={classes.row}
               style={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 width: "100%",
-                height: `${virtualRow.size}px`,
                 transform: `translateY(${virtualRow.start}px)`,
                 paddingLeft,
               }}
@@ -140,14 +143,15 @@ export function VirtualizedTree({
                 )}
               </span>
               <span className={classes.key}>{node.label}</span>
-              <span className={classes.colon}>:</span>
-              {renderValue ? (
-                renderValue(node)
-              ) : (
-                <span className={cx(classes.value, getValueClassName(node.value, classes))}>
-                  {formatValue(node.value)}
-                </span>
-              )}
+              <div style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
+                {renderValue ? (
+                  renderValue(node)
+                ) : (
+                  <span className={cx(classes.value, getValueClassName(node.value, classes))}>
+                    {formatValue(node.value)}
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
