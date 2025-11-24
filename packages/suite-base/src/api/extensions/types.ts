@@ -42,6 +42,10 @@ export interface IExtensionApiResponse extends GenericApiEntity, RemoteExtension
   scope: Namespace;
 }
 
+export type CreateOrUpdateResponse = {
+  extension: IExtensionApiResponse;
+};
+
 export type CreateOrUpdateBody = RemoteExtension & {
   extensionId: string;
   scope: Namespace;

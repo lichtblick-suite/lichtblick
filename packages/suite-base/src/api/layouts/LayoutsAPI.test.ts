@@ -25,7 +25,7 @@ describe("LayoutsAPI", () => {
 
   it("should initialize with correct workspace and baseUrl", () => {
     expect(layoutsAPI.workspace).toBe(mockWorkspace);
-    expect(layoutsAPI.baseUrl).toBe("layouts");
+    expect(layoutsAPI.workspacePath).toBe("layouts");
   });
 
   describe("getLayouts", () => {
