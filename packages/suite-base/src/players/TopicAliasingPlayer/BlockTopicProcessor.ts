@@ -42,7 +42,7 @@ export class BlockTopicProcessor {
     }
 
     const existing = this.#blocks[index];
-    if (existing && existing.inputEvents === inputEvents) {
+    if (existing?.inputEvents === inputEvents) {
       return existing.aliased;
     }
 

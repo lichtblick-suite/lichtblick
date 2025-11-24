@@ -308,6 +308,12 @@ const typeSchema = {
 };
 
 describe("parseFlatbufferSchema", () => {
+  const reflectionSchemaBuffer: Buffer = fs.readFileSync(`${__dirname}/fixtures/reflection.bfbs`);
+  const reflectionSchemaUint8 = new Uint8Array(
+    reflectionSchemaBuffer.buffer,
+    reflectionSchemaBuffer.byteOffset,
+    reflectionSchemaBuffer.byteLength,
+  );
   it("rejects invalid schema", () => {
     expect(() => parseFlatbufferSchema("test", new Uint8Array([1]))).toThrow();
   });
@@ -318,13 +324,12 @@ describe("parseFlatbufferSchema", () => {
     // The .bfbs file in question is generated from running
     // $ flatc -b --schema reflection/reflection.fbs
     // In https://github.com/google/flatbuffers
-    const reflectionSchemaBuffer: Buffer = fs.readFileSync(`${__dirname}/fixtures/reflection.bfbs`);
     const { datatypes, deserialize } = parseFlatbufferSchema(
       "reflection.Schema",
-      reflectionSchemaBuffer,
+      reflectionSchemaUint8,
     );
     const deserialized: any = deserialize(reflectionSchemaBuffer);
-    const reflectionSchemaByteBuffer: ByteBuffer = new ByteBuffer(reflectionSchemaBuffer);
+    const reflectionSchemaByteBuffer: ByteBuffer = new ByteBuffer(reflectionSchemaUint8);
     const schema = Schema.getRootAsSchema(reflectionSchemaByteBuffer);
     // Spot check individual components to ensure that they got deserialized correctly.
     expect(deserialized.objects.length).toEqual(schema.objectsLength());
@@ -339,10 +344,9 @@ describe("parseFlatbufferSchema", () => {
     expect(datatypes.get("reflection.Enum")).toEqual(enumSchema);
   });
   it("parses non-root table schema", () => {
-    const reflectionSchemaBuffer: Buffer = fs.readFileSync(`${__dirname}/fixtures/reflection.bfbs`);
     const { datatypes, deserialize } = parseFlatbufferSchema(
       "reflection.Type",
-      reflectionSchemaBuffer,
+      reflectionSchemaUint8,
     );
     expect(datatypes.keys()).toContain("reflection.Type");
     expect(datatypes.get("reflection.Type")).toEqual(typeSchema);
@@ -388,7 +392,12 @@ describe("parseFlatbufferSchema", () => {
     const byteVectorBin = Uint8Array.from(builder.asUint8Array());
 
     const byteVectorSchemaArray = fs.readFileSync(`${__dirname}/fixtures/ByteVector.bfbs`);
-    const { deserialize } = parseFlatbufferSchema("ByteVector", byteVectorSchemaArray);
+    const byteVectorSchemaArrayUint8 = new Uint8Array(
+      byteVectorSchemaArray.buffer,
+      byteVectorSchemaArray.byteOffset,
+      byteVectorSchemaArray.byteLength,
+    );
+    const { deserialize } = parseFlatbufferSchema("ByteVector", byteVectorSchemaArrayUint8);
     expect(deserialize(byteVectorBin)).toEqual({ data: new Uint8Array([1, 2, 3]) });
   });
 });

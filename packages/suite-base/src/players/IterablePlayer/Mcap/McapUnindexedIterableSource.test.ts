@@ -26,7 +26,7 @@ describe("McapUnindexedIterableSource", () => {
 
     const source = new McapUnindexedIterableSource({
       size: file.size,
-      stream: file.stream(),
+      stream: file.stream() as ReadableStream<Uint8Array>,
     });
 
     const { metadata } = await source.initialize();
@@ -51,7 +51,7 @@ describe("McapUnindexedIterableSource", () => {
 
     const source = new McapUnindexedIterableSource({
       size: file.size,
-      stream: file.stream(),
+      stream: file.stream() as ReadableStream<Uint8Array>,
     });
 
     const { metadata } = await source.initialize();

@@ -899,7 +899,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
       return numSupported + (isSupportedField(field) ? 1 : 0);
     }, 0);
     let fieldsForTopicUpdated = false;
-    if (!fields || fields.length !== numSupportedFields) {
+    if (fields?.length !== numSupportedFields) {
       // Omit fields with count != 1 (only applies to ros pointclouds)
       // can't use filterMap here because of incompatible types
       fields = pointCloud.fields.filter(isSupportedField).map((field) => field.name);

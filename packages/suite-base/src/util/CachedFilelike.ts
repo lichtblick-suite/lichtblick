@@ -239,7 +239,7 @@ export default class CachedFilelike implements Filelike {
 
     stream.on("error", (error: Error) => {
       const currentConnection = this.#currentConnection;
-      if (!currentConnection || stream !== currentConnection.stream) {
+      if (stream !== currentConnection?.stream) {
         return; // Ignore errors from old streams.
       }
 
@@ -285,7 +285,7 @@ export default class CachedFilelike implements Filelike {
     let lastReportedBytesRead = 0;
     stream.on("data", (chunk: Uint8Array) => {
       const currentConnection = this.#currentConnection;
-      if (!currentConnection || stream !== currentConnection.stream) {
+      if (stream !== currentConnection?.stream) {
         return; // Ignore data from old streams.
       }
 

@@ -20,7 +20,7 @@ jobs:
               exit 1
             fi
           elif [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
-            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/|dependabot/) ]]; then
+            if [[ ! "${GITHUB_HEAD_REF}" =~ ^(feature/|bugfix/|dependabot/|sync/) ]]; then
               echo "Source branch must start with 'feature/' or 'bugfix/' (or 'dependabot/') when targeting 'develop'."
               exit 1
             fi

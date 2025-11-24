@@ -21,23 +21,15 @@ import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList as List } from "react-window";
-import { makeStyles } from "tss-react/mui";
 
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { NormalizedLogMessage } from "@lichtblick/suite-base/panels/Log/types";
 
+import { useStyles } from "./LogList.style";
 import LogMessage from "./LogMessage";
+import { DEFAULT_ROW_HEIGHT } from "./constants";
 
-const useStyles = makeStyles()((theme) => ({
-  floatingButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    margin: theme.spacing(1.5),
-  },
-}));
-
-type Props = {
+export type LogListProps = {
   items: readonly NormalizedLogMessage[];
 };
 
@@ -73,7 +65,7 @@ function Row(props: {
  * List for showing large number of items, which are expected to be appended to the end regularly.
  * Automatically scrolls to the bottom unless you explicitly scroll up.
  */
-function LogList({ items }: Props): React.JSX.Element {
+function LogList({ items }: LogListProps): React.JSX.Element {
   const { classes } = useStyles();
 
   // Reference to the list item itself.
@@ -83,6 +75,8 @@ function LogList({ items }: Props): React.JSX.Element {
   const outerRef = useRef<HTMLDivElement>(ReactNull);
 
   const latestItems = useLatest(items);
+
+  const isResettingAfterIndex = useRef(false);
 
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
@@ -110,8 +104,23 @@ function LogList({ items }: Props): React.JSX.Element {
       scrollUpdateWasRequested: boolean;
     }) => {
       try {
-        const isAtEnd =
-          scrollOffset + (outerRef.current?.offsetHeight ?? 0) === outerRef.current?.scrollHeight;
+        const outerElement = outerRef.current!; // asserted by react-window
+
+        // Clear the reset flag - we've processed the scroll event from resetAfterIndex
+        if (isResettingAfterIndex.current) {
+          isResettingAfterIndex.current = false;
+          return;
+        }
+
+        const { offsetHeight, scrollHeight } = outerElement;
+        // Add bounds checking
+        const normalizedScrollOffset = Math.max(
+          0,
+          Math.min(scrollOffset, scrollHeight - offsetHeight),
+        );
+        const tolerance = 20;
+        const isAtEnd = normalizedScrollOffset + offsetHeight >= scrollHeight - tolerance;
+
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
@@ -127,10 +136,14 @@ function LogList({ items }: Props): React.JSX.Element {
   // Cache calculated item heights.
   const itemHeightCache = useRef<Record<number, number>>({});
 
-  const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 16, []);
+  const getRowHeight = useCallback(
+    (index: number) => itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT,
+    [],
+  );
 
   const setRowHeight = useCallback((index: number, height: number) => {
     itemHeightCache.current[index] = height;
+    isResettingAfterIndex.current = true; //  Set flag to ignore next scroll event
     listRef.current?.resetAfterIndex(index);
   }, []);
 
@@ -155,7 +168,11 @@ function LogList({ items }: Props): React.JSX.Element {
     <AutoSizer>
       {({ width, height }) => {
         return (
-          <div style={{ position: "relative", width, height }} ref={resizeRootRef}>
+          <div
+            style={{ position: "relative", width, height }}
+            ref={resizeRootRef}
+            data-testid="virtualized-list"
+          >
             <List
               ref={listRef}
               width={width}
@@ -166,6 +183,7 @@ function LogList({ items }: Props): React.JSX.Element {
               itemCount={items.length}
               outerRef={outerRef}
               onScroll={onScroll}
+              data-testid="scrollable-list"
             >
               {Row}
             </List>
@@ -176,6 +194,7 @@ function LogList({ items }: Props): React.JSX.Element {
                 title="Scroll to bottom"
                 onClick={onResetView}
                 className={classes.floatingButton}
+                data-testid="scroll-to-bottom-button"
               >
                 <DoubleArrowDownIcon />
               </Fab>

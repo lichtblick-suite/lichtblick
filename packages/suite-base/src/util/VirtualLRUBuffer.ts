@@ -88,7 +88,12 @@ export default class VirtualLRUBuffer {
     while (position < range.end) {
       const { blockIndex, positionInBlock, remainingBytesInBlock } =
         this.#calculatePosition(position);
-      copy(source, this.#getBlock(blockIndex), positionInBlock, position - targetStart);
+      copy(
+        new Uint8Array(source),
+        this.#getBlock(blockIndex),
+        positionInBlock,
+        position - targetStart,
+      );
       position += remainingBytesInBlock;
     }
 
@@ -161,11 +166,8 @@ export default class VirtualLRUBuffer {
         );
       }
     }
-    const block = this.#blocks[index];
 
-    if (!block) {
-      throw new Error("invariant violation - no block at index");
-    }
+    const block = this.#blocks[index];
 
     return block;
   }

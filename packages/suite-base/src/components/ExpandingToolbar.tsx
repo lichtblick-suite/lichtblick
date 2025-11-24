@@ -90,9 +90,7 @@ export default function ExpandingToolbar<T extends string>({
     let selectedTabLocal: T | undefined = selectedTab;
     // default to the first child's name if no tab is selected
     React.Children.forEach(children, (child) => {
-      if (selectedTabLocal == undefined) {
-        selectedTabLocal = child.props.name as T;
-      }
+      selectedTabLocal ??= child.props.name as T;
     });
 
     return (
