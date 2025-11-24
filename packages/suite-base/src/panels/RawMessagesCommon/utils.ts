@@ -233,3 +233,21 @@ export function getValueLabels({
 
   return { arrLabel, itemLabel };
 }
+
+// RawMessagesTwo
+// Generate a string representation of the value for the label
+export const getValueString = (val: unknown): string => {
+  if (val == undefined) {
+    return String(val);
+  }
+  if (typeof val === "string") {
+    return `"${val}"`;
+  }
+  if (typeof val === "bigint") {
+    return val.toString();
+  }
+  if (typeof val === "boolean" || typeof val === "number") {
+    return String(val);
+  }
+  return "";
+};

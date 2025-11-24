@@ -35,6 +35,7 @@ import { useSharedRawMessagesLogic } from "@lichtblick/suite-base/panels/RawMess
 import {
   dataWithoutWrappingArray,
   getSingleValue,
+  getValueString,
   isSingleElemArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/VirtualizedTree";
@@ -213,15 +214,17 @@ function RawMessagesTwo(props: PropsRawMessagesTwo) {
               }}
               fontSize={fontSize}
               renderValue={(node: TreeNode) => {
+                const valueString = getValueString(node.value);
+
                 if (diffEnabled) {
-                  return renderDiffLabel(node.label, node.value);
+                  return renderDiffLabel(valueString, node.value);
                 }
                 if (hideWrappingArray) {
                   return valueRenderer(
                     rootStructureItem,
                     [data],
                     baseItem.queriedData,
-                    node.label,
+                    valueString,
                     node.value,
                     ...node.keyPath,
                     0,
@@ -231,7 +234,7 @@ function RawMessagesTwo(props: PropsRawMessagesTwo) {
                   rootStructureItem,
                   data as unknown[],
                   baseItem.queriedData,
-                  node.label,
+                  valueString,
                   node.value,
                   ...node.keyPath,
                 );
