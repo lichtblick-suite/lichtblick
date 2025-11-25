@@ -25,7 +25,7 @@ class ExtensionsAPI implements IExtensionAPI {
 
   public async list(): Promise<ExtensionInfo[]> {
     const { data } = await HttpService.get<IExtensionApiResponse[]>(
-      `${this.workspacePath}/${this.workspace}/extensions`,
+      `${this.workspacePath}/${this.workspace}/${this.extensionPath}`,
     );
 
     return ExtensionAdapter.toExtensionInfoList(data);

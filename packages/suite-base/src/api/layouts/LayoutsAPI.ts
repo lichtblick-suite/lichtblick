@@ -28,7 +28,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
 
   public async getLayouts(): Promise<RemoteLayout[]> {
     const { data: layoutData } = await HttpService.get<LayoutApiResponse[]>(
-      `${this.workspacePath}/${this.workspace}/layouts`,
+      `${this.workspacePath}/${this.workspace}/${this.layoutPath}`,
     );
 
     return layoutData.map((layout) => ({
