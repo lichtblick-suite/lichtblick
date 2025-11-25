@@ -48,7 +48,6 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
   });
 
   // When
-  // Add Log Panel
   await mainWindow.getByTestId("AddPanelButton").click();
   await mainWindow.getByRole("button", { name: "Log" }).click();
 
@@ -60,9 +59,7 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
   const initialValue: string = await timestamp.inputValue();
   const initialTimestamp: number = Number(initialValue);
 
-  // sanity check: make sure we're starting in the right state
   await expect(playButton).toHaveAttribute("title", "Play");
-  // trigger playback
   await playButton.click();
 
   // Verify timestamp actually moves.
@@ -75,7 +72,6 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
     timeout: 5000,
     intervals: [100],
   });
-  // sanity check: player is running
   await expect(playButton).toHaveAttribute("title", "Pause", { timeout: 5_000 });
 
   const logPanel = mainWindow.getByTestId("log-panel-root");
