@@ -89,10 +89,9 @@ function LogList({ items }: LogListProps): React.JSX.Element {
 
   useEffect(() => {
     if (autoscrollToEnd) {
-      listRef.current?.scrollToItem(latestItems.current.length - 1, "end");
+      listRef.current?.scrollToItem(items.length - 1, "end");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoscrollToEnd, latestItems.current.length]);
+  }, [autoscrollToEnd, items.length]);
 
   // Disable autoscroll if the user manually scrolls back.
   const onScroll = React.useCallback(
