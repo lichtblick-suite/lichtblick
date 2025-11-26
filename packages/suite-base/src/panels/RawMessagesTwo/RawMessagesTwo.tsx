@@ -203,6 +203,53 @@ const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
         })
       : {};
 
+    const renderContent = () => {
+      if (shouldDisplaySingleVal) {
+        return (
+          <Typography
+            variant="body1"
+            fontSize={fontSize}
+            whiteSpace="pre-wrap"
+            style={{ wordWrap: "break-word" }}
+          >
+            <MaybeCollapsedValue itemLabel={String(singleVal)} />
+          </Typography>
+        );
+      }
+
+      if (diffEnabled && _.isEqual({}, diff)) {
+        return <EmptyState>No difference found</EmptyState>;
+      }
+
+      return (
+        <>
+          {diffEnabled && (
+            <FormControlLabel
+              disableTypography
+              checked={showFullMessageForDiff}
+              control={
+                <Checkbox
+                  size="small"
+                  defaultChecked
+                  onChange={() => {
+                    saveConfig({ showFullMessageForDiff: !showFullMessageForDiff });
+                  }}
+                />
+              }
+              label="Show full message"
+            />
+          )}
+          <VirtualizedTree
+            data={diffEnabled ? diff : data}
+            expandedNodes={expandedNodesSet}
+            onToggleExpand={handleToggleExpand}
+            fontSize={fontSize}
+            renderValue={(node: TreeNode) => memoizedRenderValue(node, data)}
+          />
+        </>
+      );
+    };
+
     return (
       <Stack
         className={classes.topic}
@@ -219,44 +266,7 @@ const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
           {...(topic ? { datatype: topic.schemaName } : undefined)}
           {...(diffItem ? { diffMessage: diffItem.messageEvent } : undefined)}
         />
-        {shouldDisplaySingleVal ? (
-          <Typography
-            variant="body1"
-            fontSize={fontSize}
-            whiteSpace="pre-wrap"
-            style={{ wordWrap: "break-word" }}
-          >
-            <MaybeCollapsedValue itemLabel={String(singleVal)} />
-          </Typography>
-        ) : diffEnabled && _.isEqual({}, diff) ? (
-          <EmptyState>No difference found</EmptyState>
-        ) : (
-          <>
-            {diffEnabled && (
-              <FormControlLabel
-                disableTypography
-                checked={showFullMessageForDiff}
-                control={
-                  <Checkbox
-                    size="small"
-                    defaultChecked
-                    onChange={() => {
-                      saveConfig({ showFullMessageForDiff: !showFullMessageForDiff });
-                    }}
-                  />
-                }
-                label="Show full message"
-              />
-            )}
-            <VirtualizedTree
-              data={diffEnabled ? diff : data}
-              expandedNodes={expandedNodesSet}
-              onToggleExpand={handleToggleExpand}
-              fontSize={fontSize}
-              renderValue={(node: TreeNode) => memoizedRenderValue(node, data)}
-            />
-          </>
-        )}
+        {renderContent()}
       </Stack>
     );
   }, [
