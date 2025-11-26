@@ -6,10 +6,19 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as _ from "lodash-es";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLatest } from "react-use";
 import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
+import { useStore } from "zustand";
 
 import Logger from "@lichtblick/log";
 import { Time, toNanoSec } from "@lichtblick/rostime";
@@ -26,6 +35,8 @@ import {
 } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
+import type { ExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { ExtensionCatalogContext } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { PANEL_STYLE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
@@ -73,6 +84,27 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   } = context;
   const analytics = useAnalytics();
 
+  // Get panel configurations from extensions (may be undefined if context not available)
+  const extensionCatalogStore = useContext(ExtensionCatalogContext);
+  const emptyStore = useMemo(
+    () => ({
+      getState: (): ExtensionCatalog =>
+        ({
+          panelConfigs: undefined,
+        }) as ExtensionCatalog,
+      getInitialState: (): ExtensionCatalog =>
+        ({
+          panelConfigs: undefined,
+        }) as ExtensionCatalog,
+      subscribe: () => () => undefined,
+    }),
+    [],
+  );
+  const panelConfigs = useStore(
+    extensionCatalogStore ?? emptyStore,
+    (state: ExtensionCatalog) => state.panelConfigs,
+  );
+
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
     const partialConfig = initialState as DeepPartial<RendererConfig> | undefined;
@@ -89,11 +121,40 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       Partial<LayerSettingsTransform>
     >;
 
+    // Apply extension-registered panel configurations for 3D panel
+    const extensionSceneConfig: DeepPartial<RendererConfig["scene"]> = {};
+    const threeDeeConfigs = panelConfigs?.["3D"];
+    if (threeDeeConfigs) {
+      // Merge all registered configs (both schema-specific and default)
+      for (const [schemaName, settings] of Object.entries(threeDeeConfigs)) {
+        const cfg = settings.defaultConfig;
+        if (cfg != undefined && typeof cfg === "object") {
+          // Apply transform settings if registered
+          // Support both 'enablePreload' and 'enablePreloading' for backward compatibility
+          const enablePreloading = 
+            (cfg as { enablePreloading?: boolean }).enablePreloading ?? 
+            (cfg as { enablePreload?: boolean }).enablePreload;
+          if (enablePreloading != undefined) {
+            extensionSceneConfig.transforms = {
+              ...extensionSceneConfig.transforms,
+              enablePreloading,
+            };
+          }
+          // Apply other scene-level configs as needed
+          Object.assign(extensionSceneConfig, cfg);
+        }
+        log.debug(`Applied 3D panel config from extension for schema: ${schemaName}`, cfg);
+      }
+    }
+
+    // Merge: defaults < extension configs < user-persisted config
+    const scene = _.merge({}, extensionSceneConfig, partialConfig?.scene ?? {});
+
     return {
       cameraState,
       followMode: partialConfig?.followMode ?? "follow-pose",
       followTf: partialConfig?.followTf,
-      scene: partialConfig?.scene ?? {},
+      scene,
       transforms,
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
@@ -103,6 +164,40 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       imageMode: (partialConfig?.imageMode ?? {}) as Partial<ImageModeConfig>,
     };
   });
+  
+  // Apply extension panel configs when they change (e.g., when extensions load)
+  useEffect(() => {
+    const threeDeeConfigs = panelConfigs?.["3D"];
+    if (!threeDeeConfigs) {
+      return;
+    }
+
+    // Build extension config
+    const extensionSceneConfig: DeepPartial<RendererConfig["scene"]> = {};
+    for (const [schemaName, settings] of Object.entries(threeDeeConfigs)) {
+      const cfg = settings.defaultConfig;
+      if (cfg != undefined && typeof cfg === "object") {
+        // Support both 'enablePreload' and 'enablePreloading' for backward compatibility
+        const enablePreloading = 
+          (cfg as { enablePreloading?: boolean }).enablePreloading ?? 
+          (cfg as { enablePreload?: boolean }).enablePreload;
+        if (enablePreloading != undefined) {
+          extensionSceneConfig.transforms = {
+            ...extensionSceneConfig.transforms,
+            enablePreloading,
+          };
+        }
+      }
+      log.debug(`Updated 3D panel config from extension for schema: ${schemaName}`, cfg);
+    }
+
+    // Merge extension config into current config
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      scene: _.merge({}, extensionSceneConfig, prevConfig.scene),
+    }));
+  }, [panelConfigs]);
+
   const configRef = useLatest(config);
   const { cameraState } = config;
   const backgroundColor = config.scene.backgroundColor;
