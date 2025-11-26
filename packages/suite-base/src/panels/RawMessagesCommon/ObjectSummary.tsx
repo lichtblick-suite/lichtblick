@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
+
+import useGetItemStringWithTimezone from "@lichtblick/suite-base/components/JsonTree/useGetItemStringWithTimezone";
 
 import { useStyles } from "./ObjectSummary.style";
 
@@ -14,16 +16,26 @@ type ObjectSummaryProps = {
  */
 function ObjectSummary({ value }: ObjectSummaryProps): React.JSX.Element | ReactNull {
   const { classes } = useStyles();
+  const getItemString = useGetItemStringWithTimezone();
 
-  if (typeof value !== "object" || value == undefined) {
+  const summary = useMemo(() => {
+    if (typeof value !== "object" || value == undefined) {
+      return ReactNull;
+    }
+
+    const itemString = Array.isArray(value)
+      ? `(${value.length})`
+      : `{${Object.keys(value).length}}`;
+    const type = Array.isArray(value) ? "Array" : "Object";
+
+    return getItemString("", value, type, itemString);
+  }, [value, getItemString]);
+
+  if (summary === ReactNull) {
     return ReactNull;
   }
 
-  if (Array.isArray(value)) {
-    return <span className={classes.summary}>[] {value.length} items</span>;
-  }
-
-  return <span className={classes.summary}>{`{} ${Object.keys(value).length} keys`}</span>;
+  return <span className={classes.summary}>{summary}</span>;
 }
 
 export default memo(ObjectSummary);
