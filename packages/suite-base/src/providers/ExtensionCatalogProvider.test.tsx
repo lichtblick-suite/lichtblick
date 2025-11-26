@@ -595,6 +595,7 @@ describe("ExtensionCatalogProvider", () => {
             registration: {} as ExtensionPanelRegistration,
           },
         },
+        panelConfigs: {},
       };
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 

@@ -89,6 +89,8 @@ export type ExtensionCatalog = Immutable<{
   installedTopicAliasFunctions: undefined | TopicAliasFunctions;
   installedCameraModels: CameraModelsMap;
   panelSettings: undefined | ExtensionSettings;
+  /** Settings configurations registered for built-in panels */
+  panelConfigs: undefined | Record<string, Record<string, PanelSettings<unknown>>>;
 }>;
 
 export type MessageConverter = RegisterMessageConverterArgs<unknown> & {
@@ -102,6 +104,8 @@ export type ContributionPoints = {
   topicAliasFunctions: TopicAliasFunctions;
   panelSettings: ExtensionSettings;
   cameraModels: CameraModelsMap;
+  /** Settings registered for built-in panels by panel type */
+  panelConfigs: Record<string, Record<string, PanelSettings<unknown>>>;
 };
 
 export const ExtensionCatalogContext = createContext<undefined | StoreApi<ExtensionCatalog>>(

@@ -152,6 +152,7 @@ function createExtensionRegistryStore(
         panels,
         topicAliasFunctions,
         cameraModels,
+        panelConfigs,
       }: ContributionPoints,
     ) => {
       set((state) => ({
@@ -163,6 +164,7 @@ function createExtensionRegistryStore(
           ...topicAliasFunctions,
         ],
         panelSettings: { ...state.panelSettings, ...panelSettings },
+        panelConfigs: _.merge({}, state.panelConfigs, panelConfigs),
         installedCameraModels: new Map([
           ...state.installedCameraModels,
           ...Array.from(cameraModels.entries()),
@@ -190,8 +192,14 @@ function createExtensionRegistryStore(
           try {
             installedExtensions.push(extension);
 
-            const { messageConverters, panelSettings, panels, topicAliasFunctions, cameraModels } =
-              contributionPoints;
+            const {
+              messageConverters,
+              panelSettings,
+              panels,
+              topicAliasFunctions,
+              cameraModels,
+              panelConfigs,
+            } = contributionPoints;
             let unwrappedExtensionSource: string = "";
 
             if (loader.namespace === "org" && loader.type === "server") {
@@ -222,6 +230,7 @@ function createExtensionRegistryStore(
 
             _.assign(panels, newContributionPoints.panels);
             _.merge(panelSettings, newContributionPoints.panelSettings);
+            _.merge(panelConfigs, newContributionPoints.panelConfigs);
             messageConverters.push(...newContributionPoints.messageConverters);
             topicAliasFunctions.push(...newContributionPoints.topicAliasFunctions);
 
@@ -255,6 +264,7 @@ function createExtensionRegistryStore(
         panelSettings: {},
         topicAliasFunctions: [],
         cameraModels: new Map(),
+        panelConfigs: {},
       };
 
       const processLoader = async (loader: IExtensionLoader) => {
@@ -385,6 +395,7 @@ function createExtensionRegistryStore(
           _.mapValues(panelSettings, (settings) => ({ [fromSchemaName]: settings })),
         ),
       ),
+      panelConfigs: {},
     };
   });
 }

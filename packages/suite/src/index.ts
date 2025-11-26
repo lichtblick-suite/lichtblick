@@ -541,6 +541,22 @@ export type RegisterMessageConverterArgs<Src> = {
   panelSettings?: Record<string, PanelSettings<unknown>>;
 };
 
+export type RegisterPanelSettingsArgs = {
+  /**
+   * The panel type to register settings for (e.g., "3D", "Image", "Map")
+   */
+  panelType: string;
+  /**
+   * Settings configuration for this panel
+   */
+  settings: PanelSettings<unknown>;
+  /**
+   * Optional: Specific topic schema to apply these settings to.
+   * If not provided, settings apply to all topics for this panel.
+   */
+  schemaName?: string;
+};
+
 type BaseTopic = { name: string; schemaName?: string };
 type TopicAlias = { name: string; sourceTopicName: string };
 
@@ -582,6 +598,32 @@ export interface ExtensionContext {
   registerTopicAliases(aliasFunction: TopicAliasFunction): void;
 
   registerCameraModel(args: RegisterCameraModelArgs): void;
+
+  /**
+   * Register custom settings for built-in panels.
+   *
+   * This allows extensions to add custom configuration options to existing panels
+   * like the 3D panel, enabling control over panel-specific features such as
+   * transform preloading, rendering options, and other panel behaviors.
+   *
+   * Example:
+   * ```typescript
+   * ctx.registerPanelSettings({
+   *   panelType: "3D",
+   *   schemaName: "geometry_msgs/TransformStamped",
+   *   settings: {
+   *     defaultConfig: { enablePreloading: true },
+   *     handler: (action, config) => {
+   *       // Handle settings changes
+   *     },
+   *     settings: (config) => ({
+   *       // Return settings tree node
+   *     })
+   *   }
+   * });
+   * ```
+   */
+  registerPanelSettings(args: RegisterPanelSettingsArgs): void;
 }
 
 export type ExtensionActivate = (extensionContext: ExtensionContext) => void;

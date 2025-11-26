@@ -13,6 +13,8 @@ import {
   ExtensionModule,
   ExtensionPanelRegistration,
   RegisterCameraModelArgs,
+  PanelSettings,
+  RegisterPanelSettingsArgs,
 } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
@@ -35,6 +37,7 @@ export function buildContributionPoints(
   const panelSettings: ExtensionSettings = {};
   const topicAliasFunctions: ContributionPoints["topicAliasFunctions"] = [];
   const cameraModels: CameraModelsMap = new Map();
+  const panelConfigs: Record<string, Record<string, PanelSettings<unknown>>> = {};
 
   log.debug(`Mounting extension ${extension.qualifiedName}`);
 
@@ -97,6 +100,25 @@ export function buildContributionPoints(
 
       cameraModels.set(name, { extensionId: extension.id, modelBuilder });
     },
+
+    registerPanelSettings: (args: RegisterPanelSettingsArgs) => {
+      const { panelType, settings, schemaName } = args;
+      log.debug(
+        `Extension ${extension.qualifiedName} registering settings for panel: ${panelType}${
+          schemaName ? ` (schema: ${schemaName})` : ""
+        }`,
+      );
+
+      panelConfigs[panelType] ??= {};
+
+      const key = schemaName ?? "__default__";
+      if (panelConfigs[panelType][key]) {
+        log.warn(`Settings for panel ${panelType} with key ${key} are already registered`);
+        return;
+      }
+
+      panelConfigs[panelType][key] = settings;
+    },
   };
 
   try {
@@ -118,5 +140,6 @@ export function buildContributionPoints(
     topicAliasFunctions,
     panelSettings,
     cameraModels,
+    panelConfigs,
   };
 }

@@ -23,6 +23,7 @@ describe("buildContributionPoints", () => {
     expect(result).toHaveProperty("messageConverters", []);
     expect(result).toHaveProperty("topicAliasFunctions", []);
     expect(result).toHaveProperty("panelSettings", {});
+    expect(result).toHaveProperty("panelConfigs", {});
     consoleErrorMock.mockRestore();
   });
 
@@ -189,5 +190,58 @@ describe("buildContributionPoints", () => {
     expect(result.topicAliasFunctions[0]!.extensionId).toBe(extensionInfo.id);
     expect(result.topicAliasFunctions[0]!.aliasFunction).toBe(aliasFunction);
     delete (globalThis as any).topicAliasFunction;
+  });
+
+  it("should register panel settings for a built-in panel", () => {
+    const extensionInfo = ExtensionBuilder.extensionInfo();
+    const panelType = "3D";
+    const schemaName = "geometry_msgs/TransformStamped";
+    const panelSettings: PanelSettings<unknown> = {
+      defaultConfig: { enablePreloading: true },
+      handler: jest.fn(),
+      settings: jest.fn(),
+    };
+
+    (globalThis as any).panelSettings = { panelType, schemaName, settings: panelSettings };
+    const extensionSource = `
+      module.exports = {
+        activate: (ctx) => {
+          ctx.registerPanelSettings(globalThis.panelSettings);
+        }
+      };
+    `;
+
+    const result = buildContributionPoints(extensionInfo, extensionSource);
+
+    expect(result.panelConfigs).toBeDefined();
+    expect(result.panelConfigs[panelType]).toBeDefined();
+    expect(result.panelConfigs[panelType]![schemaName]).toEqual(panelSettings);
+    delete (globalThis as any).panelSettings;
+  });
+
+  it("should register default panel settings when no schema is specified", () => {
+    const extensionInfo = ExtensionBuilder.extensionInfo();
+    const panelType = "3D";
+    const panelSettings: PanelSettings<unknown> = {
+      defaultConfig: { enablePreloading: false },
+      handler: jest.fn(),
+      settings: jest.fn(),
+    };
+
+    (globalThis as any).panelSettings = { panelType, settings: panelSettings };
+    const extensionSource = `
+      module.exports = {
+        activate: (ctx) => {
+          ctx.registerPanelSettings(globalThis.panelSettings);
+        }
+      };
+    `;
+
+    const result = buildContributionPoints(extensionInfo, extensionSource);
+
+    expect(result.panelConfigs).toBeDefined();
+    expect(result.panelConfigs[panelType]).toBeDefined();
+    expect(result.panelConfigs[panelType]!["__default__"]).toEqual(panelSettings);
+    delete (globalThis as any).panelSettings;
   });
 });
