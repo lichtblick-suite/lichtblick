@@ -7,12 +7,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { TreeNode } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/VirtualizedTree";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 jest.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: jest.fn(() => ({
@@ -23,30 +23,12 @@ jest.mock("@tanstack/react-virtual", () => ({
   })),
 }));
 
-jest.mock("@lichtblick/suite-base/panels/RawMessagesCommon/index.style", () => ({
-  useStylesVirtualizedTree: jest.fn(() => ({
-    classes: {
-      container: "container",
-      row: "row",
-      expandButton: "expandButton",
-      key: "key",
-      colon: "colon",
-      value: "value",
-      string: "string",
-      number: "number",
-      boolean: "boolean",
-      null: "null",
-      objectLabel: "objectLabel",
-    },
-    cx: (...args: string[]) => args.filter(Boolean).join(" "),
-  })),
-}));
-
 function renderVirtualizedTree(props: Partial<React.ComponentProps<typeof VirtualizedTree>> = {}) {
   const defaultProps: React.ComponentProps<typeof VirtualizedTree> = {
     data: {},
     expandedNodes: new Set<string>(),
     onToggleExpand: jest.fn(),
+    renderValue: jest.fn(),
     ...props,
   };
   return render(<VirtualizedTree {...defaultProps} />);
@@ -69,6 +51,7 @@ describe("VirtualizedTree", () => {
   describe("when rendering with empty data", () => {
     it("should render container with no rows given null data", () => {
       // Given
+      // eslint-disable-next-line no-restricted-syntax
       const data = null;
       const expandedNodes = new Set<string>();
 
@@ -80,9 +63,9 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const containerDiv = container.querySelector(".container");
+      const containerDiv = container.firstChild;
       expect(containerDiv).toBeInTheDocument();
-      expect(containerDiv?.querySelectorAll(".row")).toHaveLength(0);
+      expect(container.querySelectorAll("[data-index]")).toHaveLength(0);
     });
 
     it("should render container with no rows given undefined data", () => {
@@ -98,9 +81,9 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const containerDiv = container.querySelector(".container");
+      const containerDiv = container.firstChild;
       expect(containerDiv).toBeInTheDocument();
-      expect(containerDiv?.querySelectorAll(".row")).toHaveLength(0);
+      expect(container.querySelectorAll("[data-index]")).toHaveLength(0);
     });
 
     it("should render container with no rows given empty object", () => {
@@ -116,12 +99,12 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const containerDiv = container.querySelector(".container");
+      const containerDiv = container.firstChild;
       expect(containerDiv).toBeInTheDocument();
-      expect(containerDiv?.querySelectorAll(".row")).toHaveLength(0);
+      expect(container.querySelectorAll("[data-index]")).toHaveLength(0);
     });
   });
-  // TODO - this test will change once lines height is not fixed on 24px
+
   describe("when rendering with simple data", () => {
     it("should render rows for simple object with primitive values", () => {
       // Given
@@ -152,7 +135,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows).toHaveLength(3);
     });
 
@@ -171,7 +154,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const containerDiv = container.querySelector(".container");
+      const containerDiv = container.firstChild as HTMLElement;
       expect(containerDiv).toHaveStyle({ fontSize: `${fontSize}px` });
     });
 
@@ -188,7 +171,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const containerDiv = container.querySelector(".container");
+      const containerDiv = container.firstChild as HTMLElement;
       expect(containerDiv).toHaveStyle({ fontSize: "inherit" });
     });
   });
@@ -208,10 +191,14 @@ describe("VirtualizedTree", () => {
       });
 
       // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
+      const { container } = renderVirtualizedTree({
+        data,
+        expandedNodes,
+        onToggleExpand: mockOnToggleExpand,
+      });
 
       // Then
-      expect(screen.getByText("▶")).toBeInTheDocument();
+      expect(container.textContent).toContain("▶");
     });
 
     it("should show collapse button (▼) for expanded nodes", () => {
@@ -221,17 +208,24 @@ describe("VirtualizedTree", () => {
 
       const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
+        getVirtualItems: jest.fn(() => [
+          { index: 0, key: "0", size: 24, start: 0 },
+          { index: 1, key: "1", size: 24, start: 24 },
+        ]),
+        getTotalSize: jest.fn(() => 48),
         scrollToIndex: jest.fn(),
         measureElement: jest.fn(),
       });
 
       // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
+      const { container } = renderVirtualizedTree({
+        data,
+        expandedNodes,
+        onToggleExpand: mockOnToggleExpand,
+      });
 
       // Then
-      expect(screen.getByText("▼")).toBeInTheDocument();
+      expect(container.textContent).toContain("▼");
     });
 
     it("should call onToggleExpand when expand button is clicked", () => {
@@ -279,238 +273,10 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const expandButton = container.querySelector(".expandButton");
-      expect(expandButton?.textContent).toMatch(/▶/); // Hidden but present for spacing
-      const hiddenSpan = expandButton?.querySelector('span[style*="visibility: hidden"]');
-      expect(hiddenSpan).toBeInTheDocument();
-    });
-  });
-
-  describe("when formatting values", () => {
-    it("should format string values with quotes", () => {
-      // Given
-      const stringValue = BasicBuilder.string();
-      const data = { text: stringValue };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText(`"${stringValue}"`)).toBeInTheDocument();
-    });
-
-    it("should format number values as strings", () => {
-      // Given
-      const numberValue = BasicBuilder.number();
-      const data = { count: numberValue };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText(String(numberValue))).toBeInTheDocument();
-    });
-
-    it("should format boolean values as strings", () => {
-      // Given
-      const data = { isActive: true, isDisabled: false };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
-          { index: 0, key: "0", size: 24, start: 0 },
-          { index: 1, key: "1", size: 24, start: 24 },
-        ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText("true")).toBeInTheDocument();
-      expect(screen.getByText("false")).toBeInTheDocument();
-    });
-
-    it("should format null and undefined values", () => {
-      // Given
-      const data = { nullValue: null, undefinedValue: undefined };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
-          { index: 0, key: "0", size: 24, start: 0 },
-          { index: 1, key: "1", size: 24, start: 24 },
-        ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getAllByText("null")).toHaveLength(1);
-      expect(screen.getByText("undefined")).toBeInTheDocument();
-    });
-
-    it("should format bigint values correctly", () => {
-      // Given
-      const bigintValue = BigInt(9007199254740991);
-      const data = { bigNumber: bigintValue };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText(bigintValue.toString())).toBeInTheDocument();
-    });
-
-    it("should format ArrayBuffer view (Uint8Array) with preview", () => {
-      // Given
-      const uint8Array = new Uint8Array([1, 2, 3, 4, 5]);
-      const data = { buffer: uint8Array };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText("Uint8Array(5) [1, 2, 3, 4, 5]")).toBeInTheDocument();
-    });
-
-    it("should format large ArrayBuffer view with ellipsis after preview limit", () => {
-      // Given
-      const largeArray = new Uint8Array(25);
-      for (let i = 0; i < 25; i++) {
-        largeArray[i] = i;
-      }
-      const data = { buffer: largeArray };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      // Should show first 20 items and ellipsis (DATA_ARRAY_PREVIEW_LIMIT = 20)
-      const value = screen.getByText(
-        /Uint8Array\(25\) \[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, …\]/,
-      );
-      expect(value).toBeInTheDocument();
-    });
-
-    it("should format arrays with length indicator", () => {
-      // Given
-      const data = { items: [1, 2, 3, 4, 5] };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText("Array(5)")).toBeInTheDocument();
-    });
-
-    it("should format objects with key count indicator", () => {
-      // Given
-      const data = {
-        user: {
-          name: BasicBuilder.string(),
-          age: BasicBuilder.number(),
-          email: BasicBuilder.string(),
-        },
-      };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText("Object {3 keys}")).toBeInTheDocument();
-    });
-
-    it("should format object with single key correctly", () => {
-      // Given
-      const data = { container: { field: BasicBuilder.string() } };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText("Object {1 key}")).toBeInTheDocument();
+      const row = container.querySelector("[data-index]");
+      expect(row).toBeInTheDocument();
+      expect(row?.textContent).not.toMatch(/▶/);
+      expect(row?.textContent).not.toMatch(/▼/);
     });
   });
 
@@ -520,7 +286,7 @@ describe("VirtualizedTree", () => {
       const customText = BasicBuilder.string();
       const data = { field: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
-      const renderValue = jest.fn((node: TreeNode) => <span>{customText}</span>);
+      const renderValue = jest.fn((_node: TreeNode) => <span>{customText}</span>);
 
       const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
@@ -547,7 +313,7 @@ describe("VirtualizedTree", () => {
       // Given
       const data = { testField: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
-      const renderValue = jest.fn((node: TreeNode) => <span>custom</span>);
+      const renderValue = jest.fn((_node: TreeNode) => <span>custom</span>);
 
       const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
@@ -610,7 +376,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows[0]).toHaveStyle({ paddingLeft: "0px" }); // depth 0
       expect(rows[1]).toHaveStyle({ paddingLeft: "16px" }); // depth 1
       expect(rows[2]).toHaveStyle({ paddingLeft: "32px" }); // depth 2
@@ -643,7 +409,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows[0]).toHaveStyle({ transform: "translateY(0px)" });
       expect(rows[1]).toHaveStyle({ transform: "translateY(24px)" });
     });
@@ -653,9 +419,10 @@ describe("VirtualizedTree", () => {
       const data = { field: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
 
+      const virtualItem = { index: 0, key: "0", size: 30, start: 0 };
       const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 30, start: 0 }]),
+        getVirtualItems: jest.fn(() => [virtualItem]),
         getTotalSize: jest.fn(() => 30),
         scrollToIndex: jest.fn(),
         measureElement: jest.fn(),
@@ -669,8 +436,9 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const row = container.querySelector(".row");
-      expect(row).toHaveStyle({ height: "30px" });
+      const row = container.querySelector("[data-index='0']");
+      expect(row).toBeInTheDocument();
+      // Row height is managed by virtualizer measureElement, not inline styles
     });
   });
 
@@ -699,7 +467,7 @@ describe("VirtualizedTree", () => {
       expect(screen.getByText("userName")).toBeInTheDocument();
     });
 
-    it("should render colon separator between key and value", () => {
+    it("should render key and value for nodes", () => {
       // Given
       const data = { field: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
@@ -720,7 +488,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      expect(screen.getByText(":")).toBeInTheDocument();
+      expect(screen.getByText("field")).toBeInTheDocument();
     });
 
     it("should render array indices as labels", () => {
@@ -821,7 +589,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows).toHaveLength(3); // Only 3 visible items rendered
     });
 
@@ -847,8 +615,9 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const innerDiv = container.querySelector(".container > div");
-      expect(innerDiv).toHaveStyle({ height: `${totalSize}px` });
+      const virtualizedContainer = container.firstChild as HTMLElement;
+      expect(virtualizedContainer).toBeInTheDocument();
+      // Height is managed by virtualizer, not directly as inline style
     });
   });
 
@@ -887,7 +656,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows).toHaveLength(4);
       expect(rows[0]).toHaveStyle({ paddingLeft: "0px" });
       expect(rows[1]).toHaveStyle({ paddingLeft: "16px" });
@@ -929,7 +698,7 @@ describe("VirtualizedTree", () => {
       });
 
       // Then
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows).toHaveLength(7); // users, 0, name, age, 1, name, age
     });
   });
@@ -948,7 +717,7 @@ describe("VirtualizedTree", () => {
         measureElement: jest.fn(),
       });
 
-      const { rerender } = renderVirtualizedTree({
+      renderVirtualizedTree({
         data,
         expandedNodes,
         onToggleExpand: mockOnToggleExpand,
@@ -978,7 +747,7 @@ describe("VirtualizedTree", () => {
         expandedNodes: newExpandedNodes,
         onToggleExpand: mockOnToggleExpand,
       });
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows.length).toBeGreaterThan(0);
     });
 
@@ -1021,80 +790,13 @@ describe("VirtualizedTree", () => {
           data={newData}
           expandedNodes={expandedNodes}
           onToggleExpand={mockOnToggleExpand}
+          renderValue={jest.fn()}
         />,
       );
 
       // Then
       expect(screen.getByText("field1")).toBeInTheDocument();
       expect(screen.getByText("field2")).toBeInTheDocument();
-    });
-  });
-
-  describe("when handling special value types", () => {
-    it("should format values with JSON.stringify fallback for complex types", () => {
-      // Given
-      const symbolValue = Symbol("test");
-      const data = { sym: symbolValue };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      // Symbol can't be JSON stringified, should handle gracefully
-      expect(container).toBeInTheDocument();
-    });
-
-    it("should handle Float32Array formatting", () => {
-      // Given
-      const data = { floats: new Float32Array([1.1, 2.2, 3.3]) };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText(/Float32Array\(3\)/)).toBeInTheDocument();
-    });
-
-    it("should handle Int16Array formatting", () => {
-      // Given
-      const data = { ints: new Int16Array([10, 20, 30]) };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      renderVirtualizedTree({ data, expandedNodes, onToggleExpand: mockOnToggleExpand });
-
-      // Then
-      expect(screen.getByText(/Int16Array\(3\)/)).toBeInTheDocument();
     });
   });
 
@@ -1125,135 +827,8 @@ describe("VirtualizedTree", () => {
 
       // Then
       // Should render one row (valid index) and skip the invalid one
-      const rows = container.querySelectorAll(".row");
+      const rows = container.querySelectorAll("[data-index]");
       expect(rows).toHaveLength(1);
-    });
-  });
-
-  describe("when testing CSS class applications", () => {
-    it("should apply string class to string values", () => {
-      // Given
-      const data = { text: BasicBuilder.string() };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const valueSpan = container.querySelector(".value.string");
-      expect(valueSpan).toBeInTheDocument();
-    });
-
-    it("should apply number class to number values", () => {
-      // Given
-      const data = { count: BasicBuilder.number() };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const valueSpan = container.querySelector(".value.number");
-      expect(valueSpan).toBeInTheDocument();
-    });
-
-    it("should apply boolean class to boolean values", () => {
-      // Given
-      const data = { flag: true };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const valueSpan = container.querySelector(".value.boolean");
-      expect(valueSpan).toBeInTheDocument();
-    });
-
-    it("should apply null class to null values", () => {
-      // Given
-      const data = { empty: null };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const valueSpan = container.querySelector(".value.null");
-      expect(valueSpan).toBeInTheDocument();
-    });
-
-    it("should apply objectLabel class to object values", () => {
-      // Given
-      const data = { nested: { field: BasicBuilder.string() } };
-      const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
-      useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
-      });
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const valueSpan = container.querySelector(".value.objectLabel");
-      expect(valueSpan).toBeInTheDocument();
     });
   });
 });

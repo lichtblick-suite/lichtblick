@@ -53,11 +53,10 @@ export const VirtualizedTree = memo(function VirtualizedTree({
       <div className={classes.innerWrapper} style={{ height: virtualizer.getTotalSize() }}>
         {items.map((virtualRow) => {
           const node = flatData[virtualRow.index];
+
           if (!node) {
             return undefined;
           }
-
-          const paddingLeft = node.depth * 16;
 
           return (
             <div
@@ -67,7 +66,7 @@ export const VirtualizedTree = memo(function VirtualizedTree({
               className={classes.row}
               style={{
                 transform: `translateY(${virtualRow.start}px)`,
-                paddingLeft,
+                paddingLeft: node.depth * 16,
               }}
             >
               <span className={classes.expandButton}>
