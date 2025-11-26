@@ -30,13 +30,14 @@
       "followMode": "follow-pose",
       "followTf": "map",
       "scene": {
-        "backgroundColor": "#000000",
+        "backgroundColor": "#b0c2bf",
         "transforms": {
           "axisScale": 4.5,
-          "labelSize": 0.15,
+          "labelSize": 0.09,
           "lineWidth": 0,
-          "showLabel": false,
-          "enablePreloading": true
+          "showLabel": true,
+          "enablePreloading": true,
+          "axisSize": 0.2
         },
         "meshUpAxis": "z_up"
       },
@@ -182,14 +183,25 @@
       },
       "topics": {
         "/amcl_pose": {
-          "visible": true
+          "visible": true,
+          "type": "arrow",
+          "color": "#d22222ff",
+          "arrowScale": [
+            1,
+            0,
+            0
+          ],
+          "showCovariance": true,
+          "covarianceColor": "#e5c31abd"
         },
         "/collision_zones": {
           "visible": false
         },
         "/global_costmap/costmap": {
           "visible": false,
-          "frameLocked": false
+          "frameLocked": false,
+          "colorMode": "costmap",
+          "alpha": 0.05
         },
         "/evaluatepose": {
           "visible": true,
@@ -197,7 +209,8 @@
           "type": "arrow"
         },
         "/map": {
-          "visible": true
+          "visible": true,
+          "colorMode": "map"
         },
         "/pointcloud_clipped": {
           "visible": false,
@@ -213,7 +226,7 @@
         "/robot_description": {
           "visible": true,
           "displayMode": "collision",
-          "fallbackColor": "#aeaeae"
+          "fallbackColor": "#b6b6b6"
         },
         "/genz/local_map": {
           "visible": false,
@@ -235,8 +248,9 @@
           "colorField": "intensity",
           "colorMode": "flat",
           "colorMap": "turbo",
-          "pointSize": 8,
-          "flatColor": "#ff0000ff"
+          "pointSize": 4,
+          "flatColor": "#ff0000ff",
+          "decayTime": 0
         },
         "/transformed_global_plan": {
           "visible": false
@@ -256,7 +270,7 @@
         "/monitored_planning_scene": {
           "visible": false,
           "showCollisionObjects": true,
-          "collisionObjectColor": "#dd2828ff"
+          "collisionObjectColor": "#ff0000"
         },
         "/planning_scene": {
           "visible": false,
@@ -280,8 +294,11 @@
         "/seg/mani/lidar": {
           "visible": false,
           "colorField": "z",
-          "colorMode": "colormap",
-          "colorMap": "turbo"
+          "colorMode": "flat",
+          "colorMap": "turbo",
+          "stixelsEnabled": false,
+          "flatColor": "#989898ff",
+          "pointSize": 1.5
         },
         "/set_pose": {
           "visible": false

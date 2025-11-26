@@ -4,13 +4,13 @@
       "layers": {},
       "cameraState": {
         "perspective": true,
-        "distance": 17.147499999965337,
-        "phi": 0.000057317405573920985,
-        "thetaOffset": -90.56205212297948,
+        "distance": 19.99999999999282,
+        "phi": 71.31723327940284,
+        "thetaOffset": -64.00778461386503,
         "targetOffset": [
-          -1.1652253091258058,
-          -0.7386461071592326,
-          -4.3492227899652476e-17
+          -5.114837825912516,
+          8.84364238883437,
+          -3.181786777218865e-18
         ],
         "target": [
           0,
@@ -30,13 +30,13 @@
       "followMode": "follow-pose",
       "followTf": "map",
       "scene": {
-        "backgroundColor": "#000000",
+        "backgroundColor": "#b0c2bf",
         "transforms": {
-          "axisScale": 1.5,
-          "labelSize": 0.04,
+          "labelSize": 0.09,
           "lineWidth": 0,
           "showLabel": true,
-          "enablePreloading": true
+          "enablePreloading": true,
+          "axisSize": 0.2
         },
         "meshUpAxis": "z_up"
       },
@@ -57,37 +57,37 @@
           "visible": true
         },
         "frame:liftkit_mid": {
-          "visible": true
+          "visible": false
         },
         "frame:lidarrr_mount": {
-          "visible": true
+          "visible": false
         },
         "frame:lidarrl_mount": {
-          "visible": true
+          "visible": false
         },
         "frame:lidarfr_mount": {
-          "visible": true
+          "visible": false
         },
         "frame:lidarfl_mount": {
-          "visible": true
+          "visible": false
         },
         "frame:lidar_nav": {
           "visible": true
         },
         "frame:wheel_3": {
-          "visible": true
+          "visible": false
         },
         "frame:steering_3": {
           "visible": false
         },
         "frame:wheel_2": {
-          "visible": true
+          "visible": false
         },
         "frame:steering_2": {
           "visible": false
         },
         "frame:wheel": {
-          "visible": true
+          "visible": false
         },
         "frame:steering": {
           "visible": false
@@ -157,6 +157,21 @@
         },
         "frame:livox_manipulation_imu": {
           "visible": false
+        },
+        "frame:base_footprint": {
+          "visible": false
+        },
+        "frame:base_reference": {
+          "visible": false
+        },
+        "frame:lidar_nav_mount": {
+          "visible": false
+        },
+        "frame:livox_amr_imu_mount": {
+          "visible": false
+        },
+        "frame:map_cache": {
+          "visible": false
         }
       },
       "topics": {
@@ -166,24 +181,28 @@
           "color": "#d22222ff",
           "arrowScale": [
             1,
-            0.05,
-            0.05
+            0,
+            0
           ],
-          "showCovariance": true
+          "showCovariance": true,
+          "covarianceColor": "#e5c31abd"
         },
         "/collision_zones": {
           "visible": true
         },
         "/collision_boundary_markers": {
-          "visible": true
+          "visible": true,
+          "color": "#2eee445e"
         },
         "/action_block_marker": {
-          "visible": true
+          "visible": true,
+          "color": "#5933f21a"
         },
         "/global_costmap/costmap": {
           "visible": true,
           "colorMode": "costmap",
-          "frameLocked": false
+          "frameLocked": false,
+          "alpha": 0.05
         },
         "/evaluatepose": {
           "visible": true,
@@ -208,7 +227,7 @@
         "/robot_description": {
           "visible": true,
           "displayMode": "collision",
-          "fallbackColor": "#aeaeae"
+          "fallbackColor": "#b6b6b6"
         },
         "/genz/local_map": {
           "visible": false,
@@ -232,7 +251,7 @@
           "colorMap": "turbo",
           "pointSize": 4,
           "flatColor": "#ff0000ff",
-          "decayTime": 0.0
+          "decayTime": 0
         },
         "/plan_smoothed": {
           "visible": true,
@@ -240,7 +259,11 @@
         },
         "/received_global_plan": {
           "visible": true,
-          "lineWidth": 0.05
+          "lineWidth": 0.02,
+          "gradient": [
+            "#05050580",
+            "#00000080"
+          ]
         },
         "/set_pose": {
           "visible": true
@@ -269,24 +292,47 @@
         },
         "/tcp_planned_path": {
           "visible": true,
-          "lineWidth": 0.05
+          "lineWidth": 0.03,
+          "gradient": [
+            "#ffe500ff",
+            "#ffe500ff"
+          ]
         },
         "/tcp_planned_path_wo_offset": {
           "visible": true,
-          "lineWidth": 0.05
+          "lineWidth": 0.03,
+          "gradient": [
+            "#0099ffff",
+            "#00b2ffff"
+          ]
         },
         "/cropped_pointcloud": {
-          "visible": true
+          "visible": true,
+          "flatColor": "#8d8d8dff",
+          "stixelsEnabled": false,
+          "colorField": "z",
+          "colorMode": "flat",
+          "colorMap": "turbo",
+          "pointSize": 0
         },
         "/seg/mani/lidar": {
           "visible": true,
           "colorField": "z",
           "colorMode": "flat",
           "colorMap": "turbo",
-          "stixelsEnabled": false
+          "stixelsEnabled": false,
+          "flatColor": "#989898ff",
+          "pointSize": 1.5
         },
         "/goal_generate/nav_pose": {
-          "visible": true
+          "visible": true,
+          "type": "arrow",
+          "arrowScale": [
+            1,
+            0.05,
+            0.01
+          ],
+          "color": "#0037ffff"
         },
         "/waypoint_markers": {
           "visible": true
@@ -315,13 +361,11 @@
       },
       "imageMode": {}
     },
-    "RawMessages!hw1c44": {
-      "diffEnabled": false,
-      "diffMethod": "custom",
-      "diffTopicPath": "",
-      "showFullMessageForDiff": false,
-      "topicPath": "/health_monitor/active_interrupts",
-      "expansion": "none"
+    "RosOut!1v2v1il": {
+      "searchTerms": [],
+      "minLogLevel": 2,
+      "nameFilter": {},
+      "fontSize": 12
     }
   },
   "globalVariables": {},
@@ -331,8 +375,8 @@
   },
   "layout": {
     "first": "3D!18i6zy7",
-    "second": "RawMessages!hw1c44",
+    "second": "RosOut!1v2v1il",
     "direction": "row",
-    "splitPercentage": 83.56266052089335
+    "splitPercentage": 76.66666666666667
   }
 }
