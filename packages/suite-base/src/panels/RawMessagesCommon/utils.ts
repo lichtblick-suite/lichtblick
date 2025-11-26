@@ -28,6 +28,8 @@ import {
   DiffObject,
   NodeExpansion,
   NodeState,
+  ValueLabels,
+  ValueLabelsProps,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 ROS1_COMMON_MSG_PACKAGES.add("turtlesim");
@@ -188,18 +190,6 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
   }
 
   return `${data[0]} (${queriedData[0].constantName})`;
-};
-
-export type ValueLabelsProps = {
-  constantName: string | undefined;
-  label: string;
-  itemValue: unknown;
-  keyPath: ReadonlyArray<number | string>;
-};
-
-export type ValueLabels = {
-  arrLabel: string;
-  itemLabel: string;
 };
 
 /**

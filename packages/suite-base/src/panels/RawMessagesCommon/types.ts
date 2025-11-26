@@ -136,3 +136,14 @@ export type PropsVirtualizedTree = {
   fontSize?: number;
   renderValue: (node: TreeNode) => React.ReactNode;
 };
+export type ValueLabelsProps = {
+  constantName: string | undefined;
+  label: string;
+  itemValue: unknown;
+  keyPath: ReadonlyArray<number | string>;
+};
+
+export type ValueLabels = {
+  arrLabel: string;
+  itemLabel: string;
+};
