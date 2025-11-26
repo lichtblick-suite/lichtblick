@@ -42,8 +42,8 @@ describe("Given ObjectSummary", () => {
       const { container } = renderComponent(array);
 
       // Then
-      expect(container.textContent).toContain("Array");
-      expect(container.textContent).toContain("(3)");
+      expect(container.textContent).toContain("items");
+      expect(container.textContent).toContain(array.length.toString());
     });
   });
 
@@ -60,8 +60,8 @@ describe("Given ObjectSummary", () => {
       const { container } = renderComponent(object);
 
       // Then
-      expect(container.textContent).toContain("Object");
-      expect(container.textContent).toContain("{3}");
+      expect(container.textContent).toContain("keys");
+      expect(container.textContent).toContain(Object.keys(object).length.toString());
     });
   });
 

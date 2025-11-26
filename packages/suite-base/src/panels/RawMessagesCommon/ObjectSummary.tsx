@@ -24,11 +24,10 @@ function ObjectSummary({ value }: ObjectSummaryProps): React.JSX.Element | React
     }
 
     const itemString = Array.isArray(value)
-      ? `(${value.length})`
-      : `{${Object.keys(value).length}}`;
-    const type = Array.isArray(value) ? "Array" : "Object";
+      ? `[] ${value.length} items`
+      : `{} ${Object.keys(value).length} keys`;
 
-    return getItemString("", value, type, itemString);
+    return getItemString("", value, "", itemString);
   }, [value, getItemString]);
 
   if (summary === ReactNull) {
