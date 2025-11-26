@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
-import { SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
@@ -14,7 +13,6 @@ import Metadata from "@lichtblick/suite-base/panels/RawMessagesCommon/Metadata";
 import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/Toolbar";
 import {
   CUSTOM_METHOD,
-  FONT_SIZE_OPTIONS,
   PATH_NAME_AGGREGATOR,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
 import getDiff from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
@@ -24,6 +22,7 @@ import {
   PropsRawMessagesTwo,
   TreeNode,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
 import {
   useRenderDiffLabel,
   useValueRenderer,
@@ -36,7 +35,6 @@ import {
   isSingleElemArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/VirtualizedTree";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
 const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
   const {
@@ -48,7 +46,6 @@ const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
     config;
   const { datatypes } = useDataSourceInfo();
-  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const {
     topic,
@@ -279,46 +276,8 @@ const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
     topicPath,
   ]);
 
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action === "update") {
-        if (action.payload.path[0] === "general") {
-          if (action.payload.path[1] === "fontSize") {
-            saveConfig({
-              fontSize:
-                action.payload.value != undefined ? (action.payload.value as number) : undefined,
-            });
-          }
-        }
-      }
-    },
-    [saveConfig],
-  );
-
-  useEffect(() => {
-    updatePanelSettingsTree({
-      actionHandler,
-      nodes: {
-        general: {
-          label: "General",
-          fields: {
-            fontSize: {
-              label: "Font size",
-              input: "select",
-              options: [
-                { label: "auto", value: undefined },
-                ...FONT_SIZE_OPTIONS.map((value) => ({
-                  label: `${value} px`,
-                  value,
-                })),
-              ],
-              value: fontSize,
-            },
-          },
-        },
-      },
-    });
-  }, [actionHandler, fontSize, updatePanelSettingsTree]);
+  // Setup font size settings in panel settings tree
+  useFontSizeSettings(fontSize, saveConfig);
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
