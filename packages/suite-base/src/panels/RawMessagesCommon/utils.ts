@@ -238,7 +238,7 @@ export function getValueLabels({
 
   // Pad nanosecond fields to 9 digits for better readability
   // Example: 99999999 → 099999999 (makes it clearer this is 0.09 seconds)
-  if (keyPath[0] === "nsec" && typeof itemValue === "number") {
+  if (keyPath[0] === "nsec" && typeof itemValue === "number" && typeof itemLabel === "string") {
     itemLabel = itemLabel.padStart(9, "0");
   }
 
