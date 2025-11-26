@@ -134,5 +134,5 @@ export type PropsVirtualizedTree = {
   expandedNodes: Set<string>;
   onToggleExpand: (keyPath: string) => void;
   fontSize?: number;
-  renderValue?: (node: TreeNode) => React.ReactNode;
+  renderValue: (node: TreeNode) => React.ReactNode;
 };

@@ -187,7 +187,19 @@ export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]
     return data[0];
   }
 
-  return `${data[0]} (${queriedData[0]?.constantName})`;
+  return `${data[0]} (${queriedData[0].constantName})`;
+};
+
+export type ValueLabelsProps = {
+  constantName: string | undefined;
+  label: string;
+  itemValue: unknown;
+  keyPath: ReadonlyArray<number | string>;
+};
+
+export type ValueLabels = {
+  arrLabel: string;
+  itemLabel: string;
 };
 
 /**
@@ -199,36 +211,35 @@ export function getValueLabels({
   label,
   itemValue,
   keyPath,
-}: {
-  constantName: string | undefined;
-  label: string;
-  itemValue: unknown;
-  keyPath: ReadonlyArray<number | string>;
-}): { arrLabel: string; itemLabel: string } {
+}: ValueLabelsProps): ValueLabels {
   let itemLabel = label;
+  let arrLabel = "";
+
+  // Handle bigint values
   if (typeof itemValue === "bigint") {
     itemLabel = itemValue.toString();
   }
-  // output preview for the first x items if the data is in binary format
-  // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
-  let arrLabel = "";
-  if (ArrayBuffer.isView(itemValue)) {
+
+  // Handle typed arrays (binary data preview)
+  // Example: Int8Array(331776) [-4, -4, -4, -4, ..., -4]
+  if (ArrayBuffer.isView(itemValue) && !(itemValue instanceof DataView)) {
     const array = itemValue as Uint8Array;
-    const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
-    const length = array.length;
-    arrLabel = `(${length}) [${itemPart}${length >= DATA_ARRAY_PREVIEW_LIMIT ? ", …" : ""}] `;
+    const previewItems = Array.from(array.slice(0, DATA_ARRAY_PREVIEW_LIMIT));
+    const hasMore = array.length > DATA_ARRAY_PREVIEW_LIMIT;
+
+    arrLabel = `(${array.length}) [${previewItems.join(", ")}${hasMore ? ", …" : ""}] `;
     itemLabel = itemValue.constructor.name;
   }
+
+  // Append constant name if available
   if (constantName != undefined) {
     itemLabel = `${itemLabel} (${constantName})`;
   }
 
-  // When we encounter a nsec field (nanosecond) that is a number, we ensure the label displays 9 digits.
-  // This helps when visually scanning time values from `sec` and `nsec` fields.
-  // A nanosecond label of 099999999 makes it easier to realize this is 0.09 seconds compared to
-  // 99999999 which requires some counting to reamize this is also 0.09
+  // Pad nanosecond fields to 9 digits for better readability
+  // Example: 99999999 → 099999999 (makes it clearer this is 0.09 seconds)
   if (keyPath[0] === "nsec" && typeof itemValue === "number") {
-    itemLabel = _.padStart(itemLabel, 9, "0");
+    itemLabel = itemLabel.padStart(9, "0");
   }
 
   return { arrLabel, itemLabel };
@@ -236,18 +247,18 @@ export function getValueLabels({
 
 // RawMessagesTwo
 // Generate a string representation of the value for the label
-export const getValueString = (val: unknown): string => {
-  if (val == undefined) {
-    return String(val);
+export const getValueString = (value: unknown): string => {
+  if (value == undefined) {
+    return String(value);
   }
-  if (typeof val === "string") {
-    return `"${val}"`;
+  if (typeof value === "string") {
+    return `"${value}"`;
   }
-  if (typeof val === "bigint") {
-    return val.toString();
+  if (typeof value === "bigint") {
+    return value.toString();
   }
-  if (typeof val === "boolean" || typeof val === "number") {
-    return String(val);
+  if (typeof value === "boolean" || typeof value === "number") {
+    return String(value);
   }
   return "";
 };

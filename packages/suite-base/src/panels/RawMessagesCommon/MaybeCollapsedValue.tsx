@@ -31,14 +31,14 @@ export default function MaybeCollapsedValue({
     setShowingEntireLabel(true);
   }, []);
 
-  const truncatedItemText = showingEntireLabel
-    ? itemLabel
-    : itemLabel.slice(0, COLLAPSE_TEXT_OVER_LENGTH);
-
   // Tooltip is expensive to render. Skip it if we're not truncating.
   if (!lengthOverLimit) {
     return <span>{itemLabel}</span>;
   }
+
+  const truncatedItemText = showingEntireLabel
+    ? itemLabel
+    : itemLabel.slice(0, COLLAPSE_TEXT_OVER_LENGTH);
 
   return (
     <Tooltip
