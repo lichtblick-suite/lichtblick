@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+
 import { flattenTreeData } from "./flattenTreeData";
 
 describe("flattenTreeData", () => {

@@ -3,7 +3,7 @@
 
 import { makeStyles } from "tss-react/mui";
 
-import { JSON_TREE_THEME_COLORS } from "@lichtblick/suite-base/util/globalConstants";
+import { JSON_TREE_THEME_COLORS } from "@lichtblick/suite-base/util/constants";
 import { customTypography } from "@lichtblick/theme";
 
 export const useStyles = makeStyles()((theme) => {
@@ -52,7 +52,7 @@ export const useStyles = makeStyles()((theme) => {
       flex: "1 1 auto",
       minWidth: 0,
       overflow: "visible",
-      wordBreak: "break-all", 
+      wordBreak: "break-all",
       overflowWrap: "anywhere",
     },
     value: {

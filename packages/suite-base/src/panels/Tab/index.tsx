@@ -30,7 +30,7 @@ import {
 import { TabbedToolbar } from "@lichtblick/suite-base/panels/Tab/TabbedToolbar";
 import { TabPanelConfig as Config } from "@lichtblick/suite-base/types/layouts";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
+import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/constants";
 import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@lichtblick/suite-base/util/layout";
 
 const useStyles = makeStyles()((theme) => ({

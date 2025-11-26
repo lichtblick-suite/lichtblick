@@ -39,7 +39,8 @@ import {
   MosaicDropTargetPosition,
   SavedProps,
 } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
+
+import { TAB_PANEL_TYPE } from "./constants";
 
 const log = Logger.getLogger(__filename);
 

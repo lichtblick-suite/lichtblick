@@ -40,7 +40,7 @@ import {
   ScriptDataTransformer,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { Topic } from "@lichtblick/suite-base/players/types";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 
 import { TransformArgs } from "./types";
 import generatedTypesLibSrc from "./typescript/userUtils/generatedTypes.ts?raw";

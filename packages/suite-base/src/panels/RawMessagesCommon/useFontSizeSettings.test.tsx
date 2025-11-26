@@ -92,8 +92,9 @@ describe("useFontSizeSettings", () => {
       renderHook(() => {
         useFontSizeSettings(fontSize, mockSaveConfig);
       });
-      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]
-        ?.actionHandler as (action: SettingsTreeAction) => void;
+      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
+        action: SettingsTreeAction,
+      ) => void;
 
       const action = {
         action: "update",
@@ -117,8 +118,9 @@ describe("useFontSizeSettings", () => {
       renderHook(() => {
         useFontSizeSettings(fontSize, mockSaveConfig);
       });
-      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]
-        ?.actionHandler as (action: SettingsTreeAction) => void;
+      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
+        action: SettingsTreeAction,
+      ) => void;
 
       const action = {
         action: "update",
@@ -142,8 +144,9 @@ describe("useFontSizeSettings", () => {
       renderHook(() => {
         useFontSizeSettings(fontSize, mockSaveConfig);
       });
-      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]
-        ?.actionHandler as (action: SettingsTreeAction) => void;
+      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
+        action: SettingsTreeAction,
+      ) => void;
 
       const action = {
         action: "update",
@@ -167,8 +170,9 @@ describe("useFontSizeSettings", () => {
       renderHook(() => {
         useFontSizeSettings(fontSize, mockSaveConfig);
       });
-      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]
-        ?.actionHandler as (action: SettingsTreeAction) => void;
+      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
+        action: SettingsTreeAction,
+      ) => void;
 
       const action = {
         action: "update",
@@ -192,8 +196,9 @@ describe("useFontSizeSettings", () => {
       renderHook(() => {
         useFontSizeSettings(fontSize, mockSaveConfig);
       });
-      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]
-        ?.actionHandler as (action: SettingsTreeAction) => void;
+      const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
+        action: SettingsTreeAction,
+      ) => void;
 
       const action = {
         action: "perform-node-action",

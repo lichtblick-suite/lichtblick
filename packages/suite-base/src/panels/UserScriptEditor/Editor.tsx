@@ -32,7 +32,7 @@ import getPrettifiedCode from "@lichtblick/suite-base/panels/UserScriptEditor/ge
 import { Script } from "@lichtblick/suite-base/panels/UserScriptEditor/script";
 import { getUserScriptProjectConfig } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig";
 import inScreenshotTests from "@lichtblick/suite-base/stories/inScreenshotTests";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import { mightActuallyBePartial } from "@lichtblick/suite-base/util/mightActuallyBePartial";
 
 import { themes } from "./theme";
