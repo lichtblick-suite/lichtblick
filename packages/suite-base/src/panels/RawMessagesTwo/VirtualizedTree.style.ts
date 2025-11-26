@@ -50,13 +50,15 @@ export const useStyles = makeStyles()((theme) => {
     },
     valueContainer: {
       flex: "1 1 auto",
-      overflow: "hidden",
       minWidth: 0,
+      overflow: "visible",
+      wordBreak: "break-all", 
+      overflowWrap: "anywhere",
     },
     value: {
       color: colors.text,
       wordBreak: "break-word",
-      overflowWrap: "break-word",
+      overflowWrap: "anywhere",
     },
     string: {
       color: colors.string,
