@@ -23,6 +23,7 @@ export const useStyles = makeStyles()((theme) => {
     },
     row: {
       display: "flex",
+      flexWrap: "wrap",
       alignItems: "flex-start",
       padding: "2px 0",
       fontFamily: theme.typography.body1.fontFamily,
@@ -48,7 +49,7 @@ export const useStyles = makeStyles()((theme) => {
       marginRight: theme.spacing(0.5),
     },
     valueContainer: {
-      flex: 1,
+      flex: "1 1 auto",
       overflow: "hidden",
       minWidth: 0,
     },
