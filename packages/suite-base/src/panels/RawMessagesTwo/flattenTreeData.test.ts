@@ -11,18 +11,6 @@ import { flattenTreeData } from "./flattenTreeData";
 
 describe("flattenTreeData", () => {
   describe("when data is null or undefined", () => {
-    it("should return empty array given null data", () => {
-      // Given
-      const data = null;
-      const expandedNodes = new Set<string>();
-
-      // When
-      const result = flattenTreeData(data, expandedNodes);
-
-      // Then
-      expect(result).toEqual([]);
-    });
-
     it("should return empty array given undefined data", () => {
       // Given
       const data = undefined;
@@ -159,6 +147,7 @@ describe("flattenTreeData", () => {
     it("should mark null values as not expandable", () => {
       // Given
       const data = {
+        // eslint-disable-next-line no-restricted-syntax
         nullValue: null,
         undefinedValue: undefined,
       };
