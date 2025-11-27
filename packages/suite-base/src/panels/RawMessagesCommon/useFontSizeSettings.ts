@@ -29,7 +29,7 @@ export function useFontSizeSettings(
       ) {
         saveConfig({
           fontSize:
-            action.payload.value != undefined ? (action.payload.value as number) : undefined,
+            action.payload.value == undefined ? undefined : (action.payload.value as number),
         });
       }
     },
