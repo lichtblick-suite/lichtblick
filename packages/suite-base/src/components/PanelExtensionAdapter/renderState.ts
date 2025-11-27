@@ -20,6 +20,7 @@ import {
   RenderState,
   Subscription,
   Topic,
+  VariableValue,
 } from "@lichtblick/suite";
 import {
   EMPTY_GLOBAL_VARIABLES,
@@ -149,6 +150,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       prevCollatedConversions?.topicSchemaConverters,
     );
 
+    const variablesChanged = globalVariables !== prevVariables;
+
     if (prevSeekTime !== activeData?.lastSeekTime) {
       lastMessageByTopic.clear();
     }
@@ -182,9 +185,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     }
 
     if (watchedFields.has("variables")) {
-      if (globalVariables !== prevVariables) {
+      if (variablesChanged) {
         shouldRender.value = true;
-        prevVariables = globalVariables;
         renderState.variables = new Map(Object.entries(globalVariables));
       }
     }
@@ -245,6 +247,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               topicSchemaConverters,
               postProcessedFrame,
+              { ...globalVariables } as Readonly<Record<string, VariableValue>>,
             );
           }
           lastMessageByTopic.set(messageEvent.topic, messageEvent);
@@ -262,6 +265,24 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               newConverters,
               postProcessedFrame,
+              { ...globalVariables } as Readonly<Record<string, VariableValue>>,
+            );
+          }
+        }
+        renderState.currentFrame = postProcessedFrame;
+        shouldRender.value = true;
+      } else if (variablesChanged) {
+        // If we don't have a new frame but our variables have changed, run
+        // all conversions on our most recent message on each topic.
+        const postProcessedFrame: MessageEvent[] = [];
+        for (const messageEvent of lastMessageByTopic.values()) {
+          const schemaName = topicToSchemaNameMap[messageEvent.topic];
+          if (schemaName) {
+            convertMessage(
+              { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
+              topicSchemaConverters,
+              postProcessedFrame,
+              { ...globalVariables } as Readonly<Record<string, VariableValue>>,
             );
           }
         }
@@ -370,6 +391,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     // Several of the watch steps depend on the comparison against prev and new values
     prevMessageConverters = messageConverters;
     prevCollatedConversions = collatedConversions;
+    prevVariables = globalVariables;
 
     if (!shouldRender.value) {
       return undefined;

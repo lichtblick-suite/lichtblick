@@ -13,6 +13,7 @@ import {
   MessageEvent,
   RegisterMessageConverterArgs,
   Subscription,
+  VariableValue,
 } from "@lichtblick/suite";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
 import { Namespace } from "@lichtblick/suite-base/types";
@@ -42,11 +43,16 @@ export function convertMessage(
   messageEvent: Immutable<MessageEvent>,
   converters: Immutable<TopicSchemaConverterMap>,
   convertedMessages: MessageEvent[],
+  globalVariables?: Readonly<Record<string, VariableValue>>,
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);
   for (const converter of matchedConverters ?? []) {
-    const convertedMessage = converter.converter(messageEvent.message, messageEvent);
+    const convertedMessage = converter.converter(
+      messageEvent.message,
+      messageEvent,
+      globalVariables,
+    );
     // If the converter returns _undefined_ or _null_ the message is skipped
     if (convertedMessage == undefined) {
       continue;
