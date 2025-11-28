@@ -63,8 +63,9 @@ import {
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
+
+import { TAB_PANEL_TYPE } from "../util/constants";
 
 /** Used in storybook when panels are renered outside of a <PanelLayout/> */
 const FALLBACK_PANEL_ID = "$unknown_id";

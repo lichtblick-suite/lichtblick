@@ -1,0 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import { CUSTOM_METHOD } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { RawMessagesTwoPanelConfig } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+
+export const RAW_MESSAGES_TWO_DEFAULT_CONFIG: RawMessagesTwoPanelConfig = {
+  diffEnabled: false,
+  diffMethod: CUSTOM_METHOD,
+  diffTopicPath: "",
+  showFullMessageForDiff: false,
+  topicPath: "",
+  fontSize: undefined,
+};
+
+export const EXPANDED_ICON = "▶";
+
+export const COLLAPSED_ICON = "▼";

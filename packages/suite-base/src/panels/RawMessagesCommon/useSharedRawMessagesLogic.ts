@@ -34,7 +34,7 @@ type UseSharedRawMessagesLogicProps<T extends SharedConfig> = {
   saveConfig: SharedConfigActions<T>["saveConfig"];
 };
 
-type UseSharedRawMessagesLogicResult = {
+export type UseSharedRawMessagesLogicResult = {
   topicRosPath: MessagePath | undefined;
   topic: Topic | undefined;
   rootStructureItem: MessagePathStructureItem | undefined;

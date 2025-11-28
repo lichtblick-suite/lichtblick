@@ -31,8 +31,8 @@ import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/Globa
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import delay from "@lichtblick/suite-base/util/delay";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
 
 import UserScriptPlayer from ".";
 import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";

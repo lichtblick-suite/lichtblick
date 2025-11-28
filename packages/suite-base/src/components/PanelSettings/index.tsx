@@ -34,7 +34,7 @@ import {
 } from "@lichtblick/suite-base/context/PanelStateContext";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
+import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/constants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
 const singlePanelIdSelector = (state: LayoutState) =>

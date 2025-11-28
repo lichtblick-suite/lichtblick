@@ -25,7 +25,7 @@ import rawUserUtils from "@lichtblick/suite-base/players/UserScriptPlayer/transf
 import { UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import { ExpectedResult } from "@lichtblick/suite-base/stories/storyHelpers";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 
 const userScripts = {
   nodeId1: { name: "/studio_script/script", sourceCode: "const someVariableName = 1;" },

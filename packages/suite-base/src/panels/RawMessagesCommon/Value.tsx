@@ -12,7 +12,7 @@ import FilterIcon from "@mui/icons-material/FilterAlt";
 import StateTransitionsIcon from "@mui/icons-material/PowerInput";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import LineChartIcon from "@mui/icons-material/ShowChart";
-import { Tooltip } from "@mui/material";
+import { Tooltip, useTheme } from "@mui/material";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { withStyles } from "tss-react/mui";
 
@@ -27,6 +27,7 @@ import { TRANSITIONABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/StateTra
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import clipboard from "@lichtblick/suite-base/util/clipboard";
+import { getValueColor } from "@lichtblick/suite-base/util/globalConstants";
 
 const StyledIconButton = withStyles(HoverableIconButton, (theme) => ({
   root: {
@@ -58,6 +59,11 @@ function Value(props: PropsValue): React.JSX.Element {
     openSiblingPanel,
   } = props;
   const [copied, setCopied] = useState(false);
+  const { palette } = useTheme();
+  const valueColor = useMemo(
+    () => getValueColor(itemValue, palette.mode),
+    [itemValue, palette.mode],
+  );
 
   const openPlotPanel = useCallback(
     (pathSuffix: string) => () => {
@@ -192,7 +198,9 @@ function Value(props: PropsValue): React.JSX.Element {
         setPointerOver(false);
       }}
     >
-      <HighlightedValue itemLabel={itemLabel} />
+      <span style={valueColor ? { color: valueColor } : undefined}>
+        <HighlightedValue itemLabel={itemLabel} />
+      </span>
       {arrLabel}
       {pointerOver &&
         availableActions.map((action) => (

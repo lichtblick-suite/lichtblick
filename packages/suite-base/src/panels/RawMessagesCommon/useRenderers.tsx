@@ -10,6 +10,7 @@ import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePa
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
 
+import ObjectSummary from "./ObjectSummary";
 import Value from "./Value";
 import { getStructureItemForPath, getValueActionForValue } from "./getValueActionForValue";
 import { ValueAction } from "./types";
@@ -100,6 +101,10 @@ export function useValueRenderer({
             itemValue,
             keyPath,
           });
+
+          if (typeof itemValue === "object" && itemValue != undefined) {
+            return <ObjectSummary value={itemValue} />;
+          }
 
           return (
             <Value

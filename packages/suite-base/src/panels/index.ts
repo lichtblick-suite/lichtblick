@@ -8,8 +8,8 @@
 import { TFunction } from "i18next";
 
 import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 
+import { TAB_PANEL_TYPE } from "../util/constants";
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import diagnosticStatusThumbnail from "./DiagnosticStatus/assets/diagnostic-status.png";
 import diagnosticSummaryThumbnail from "./DiagnosticSummary/assets/diagnostic-summary.png";

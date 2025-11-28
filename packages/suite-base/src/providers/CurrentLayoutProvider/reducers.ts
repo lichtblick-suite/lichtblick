@@ -47,7 +47,7 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { TabPanelConfig } from "@lichtblick/suite-base/types/layouts";
 import { MosaicDropTargetPosition, PlaybackConfig } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
+import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/constants";
 import {
   DEFAULT_TAB_PANEL_CONFIG,
   addPanelToTab,
