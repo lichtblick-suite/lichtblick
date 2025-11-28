@@ -51,9 +51,10 @@ export function flattenTreeData(
     ? data.map((item, index) => [index, item] as [number, unknown])
     : Object.entries(data);
 
-  for (const [key, value] of entries) {
+  return entries.flatMap(([key, value]) => {
     const currentKeyPath = [key, ...keyPath];
     const nodePath = parentPath ? `${key}${PATH_NAME_AGGREGATOR}${parentPath}` : String(key);
+
     const node: TreeNode = {
       key: nodePath,
       label: String(key),
@@ -64,14 +65,12 @@ export function flattenTreeData(
       parentPath,
     };
 
-    nodes.push(node);
-
-    // Recursively add children if node is expanded
+    // If node is expandable and expanded, return node + children
+    // Otherwise just return the node
     if (node.isExpandable && expandedNodes.has(nodePath)) {
-      const children = flattenTreeData(value, expandedNodes, nodePath, depth + 1, currentKeyPath);
-      nodes.push(...children);
+      return [node, ...flattenTreeData(value, expandedNodes, nodePath, depth + 1, currentKeyPath)];
     }
-  }
 
-  return nodes;
+    return [node];
+  });
 }
