@@ -3265,7 +3265,7 @@ __metadata:
     tinycolor2: 1.6.0
     ts-essentials: 9.4.0
     ts-key-enum: 3.0.13
-    ts-loader: 9.5.1
+    ts-loader: 9.5.4
     tss-react: 4.9.19
     typescript: 5.9.3
     use-debounce: 10.0.0
@@ -14302,7 +14302,7 @@ __metadata:
     rimraf: 6.0.1
     semver: 7.7.2
     storybook: 9.1.9
-    ts-loader: 9.5.1
+    ts-loader: 9.5.4
     ts-node: 10.9.2
     ts-unused-exports: 11.0.1
     tslib: 2.8.1
@@ -19866,9 +19866,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:9.5.1":
-  version: 9.5.1
-  resolution: "ts-loader@npm:9.5.1"
+"ts-loader@npm:9.5.4":
+  version: 9.5.4
+  resolution: "ts-loader@npm:9.5.4"
   dependencies:
     chalk: ^4.1.0
     enhanced-resolve: ^5.0.0
@@ -19878,7 +19878,7 @@ __metadata:
   peerDependencies:
     typescript: "*"
     webpack: ^5.0.0
-  checksum: 7cf396e656d905388ea2a9b5e82f16d3c955fda8d3df2fbf219f4bee16ff50a3c995c44ae3e584634e9443f056cec70bb3151add3917ffb4588ecd7394bac0ec
+  checksum: ee8a6883d0f8c0db0ea254fe4e9247ab0f6747cbbbee987af80e69822b840bdc2b67cee267ed3a93af803aeed47790d64dbaf07c001322b9091671f51cbf12b2
   languageName: node
   linkType: hard
 
