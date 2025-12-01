@@ -29,7 +29,7 @@
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
     "dotenv": "17.2.2",
-    "electron": "39.0.0",
+    "electron": "39.2.4",
     "electron-builder": "26.0.12",
     "electron-devtools-installer": "4.0.0",
     "electron-squirrel-startup": "1.0.1",
