@@ -2231,14 +2231,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ws-protocol@npm:0.7.2":
-  version: 0.7.2
-  resolution: "@foxglove/ws-protocol@npm:0.7.2"
+"@foxglove/ws-protocol@npm:0.8.0":
+  version: 0.8.0
+  resolution: "@foxglove/ws-protocol@npm:0.8.0"
   dependencies:
     debug: ^4
     eventemitter3: ^5.0.1
-    tslib: ^2.6.2
-  checksum: f6bfb467db8eec1290689364b9f5a2542a4248b41a214d88ee1ca1d56d160e178fa2eedd7211447d2c29e592ea2986643ad06f51283c4873848d28cb166c2bd9
+    tslib: ^2.8.1
+  checksum: 6cbf7077aa7e2683877e1da3b0e3eff822c8b7b394f1387a11a1b0caf77e9814cf530730aef1982a799064410eb3bd3138b64ce949a45ed197a066f1f911e833
   languageName: node
   linkType: hard
 
@@ -3104,7 +3104,7 @@ __metadata:
     "@emotion/styled": 11.14.1
     "@fluentui/react-icons": 2.0.308
     "@foxglove/schemas": 1.6.6
-    "@foxglove/ws-protocol": 0.7.2
+    "@foxglove/ws-protocol": 0.8.0
     "@lichtblick/avl": 1.0.0
     "@lichtblick/chartjs-plugin-zoom": 1.0.0
     "@lichtblick/comlink": 1.0.3
@@ -19967,7 +19967,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.6.2":
+"tslib@npm:2.8.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
