@@ -20,6 +20,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { useCallback } from "react";
 import { v4 as uuid } from "uuid";
 
 import { Immutable, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
@@ -47,6 +48,16 @@ function FieldInput({
   path: readonly string[];
 }): React.JSX.Element {
   const { classes, cx } = useStyles();
+
+  const handleChange = useCallback(
+    (value: string) => {
+      actionHandler({
+        action: "update",
+        payload: { path, input: "messagepath", value },
+      });
+    },
+    [actionHandler, path],
+  );
 
   switch (field.input) {
     case "autocomplete":
@@ -229,12 +240,7 @@ function FieldInput({
           disabled={field.disabled}
           readOnly={field.readonly}
           supportsMathModifiers={field.supportsMathModifiers}
-          onChange={(value) => {
-            actionHandler({
-              action: "update",
-              payload: { path, input: "messagepath", value },
-            });
-          }}
+          onChange={handleChange}
           validTypes={field.validTypes}
         />
       );

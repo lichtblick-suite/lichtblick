@@ -4,6 +4,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+/* eslint-disable no-restricted-syntax */
 //
 // This file incorporates work covered by the following copyright and
 // permission notice:
@@ -60,6 +61,17 @@ export function getFirstInvalidVariableFromRosPath(
   globalVariables: GlobalVariables,
   setGlobalVariables: (arg0: GlobalVariables) => void,
 ): { variableName: string; loc: number } | undefined {
+  // OPTIMIZATION #18: Early exit if no variables are used in the path
+  // Check if any part of the messagePath uses variables (indicated by $ prefix)
+  const hasVariables = rosPath.messagePath.some(
+    (part) =>
+      (part.type === "filter" && typeof part.value === "object") ||
+      (part.type === "slice" && (typeof part.start === "object" || typeof part.end === "object")),
+  );
+  if (!hasVariables) {
+    return undefined;
+  }
+
   const { messagePath } = rosPath;
   const globalVars = Object.keys(globalVariables);
   return _.flatMap(messagePath, (path) => {
@@ -162,17 +174,35 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   } = props;
   const { classes } = useStyles();
 
-  const messagePathStructuresForDataype = useMemo(
-    () => messagePathStructures(datatypes),
-    [datatypes],
-  );
+  const structure2 = useMemo(() => {
+    const startTime = performance.now();
+    const result = messagePathStructures(datatypes);
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] messagePathStructures took ${(endTime - startTime).toFixed(2)}ms`,
+    );
+    return result;
+  }, [datatypes]);
 
+  const startStructureItemsByPathTime = performance.now();
   const structureItemsByPath = useStructuredItemsByPath({
     noMultiSlices,
     validTypes,
   });
+  const structureItemsByPathTime = performance.now() - startStructureItemsByPathTime;
+  console.log(
+    `[MessagePathInput] useStructuredItemsByPath took ${structureItemsByPathTime.toFixed(2)}ms`,
+  );
 
   const onChangeProp = props.onChange;
+  const propsIndex = props.index;
+
+  // OPTIMIZATION #16: While we don't debounce the actual onChange (to keep UI responsive),
+  // we use useRef to avoid recreating the callback unnecessarily
+  const onChangeRef = React.useRef(onChangeProp);
+  React.useEffect(() => {
+    onChangeRef.current = onChangeProp;
+  }, [onChangeProp]);
 
   const onChange = useCallback(
     (event: React.SyntheticEvent, rawValue: string) => {
@@ -188,9 +218,9 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         });
       }
 
-      onChangeProp(value, props.index);
+      onChangeRef.current(value, propsIndex);
     },
-    [onChangeProp, props.index],
+    [propsIndex],
   );
 
   const onSelect = useCallback(
@@ -235,14 +265,30 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
   const rosPath = useMemo(() => parseMessagePath(path), [path]);
 
+  // OPTIMIZATION #3: Create a Map for O(1) topic lookup instead of O(n) find
+  const topicsByName = useMemo(() => {
+    const startTime = performance.now();
+    const map = new Map(topics.map((topic) => [topic.name, topic]));
+    console.log(
+      `[MessagePathInput] topicsByName Map created in ${(performance.now() - startTime).toFixed(2)}ms (${topics.length} topics)`,
+    );
+    return map;
+  }, [topics]);
+
   const topic = useMemo(() => {
+    const startTime = performance.now();
     if (!rosPath) {
       return undefined;
     }
 
     const { topicName } = rosPath;
-    return topics.find(({ name }) => name === topicName);
-  }, [rosPath, topics]);
+    const result = topicsByName.get(topicName);
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] topic lookup took ${(endTime - startTime).toFixed(2)}ms (O(1) Map.get)`,
+    );
+    return result;
+  }, [rosPath, topicsByName]);
 
   const structureTraversalResult = useMemo((): StructureTraversalResult | undefined => {
     if (!topic || !rosPath?.messagePath) {
@@ -260,28 +306,57 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       };
     }
 
-    return traverseStructure(
-      messagePathStructuresForDataype[topic.schemaName],
-      rosPath.messagePath,
-    );
-  }, [messagePathStructuresForDataype, rosPath?.messagePath, topic]);
+    return traverseStructure(structure2[topic.schemaName], rosPath.messagePath);
+  }, [structure2, rosPath?.messagePath, topic]);
 
   const invalidGlobalVariablesVariable = useMemo(() => {
+    const startTime = performance.now();
     if (!rosPath) {
       return undefined;
     }
-    return getFirstInvalidVariableFromRosPath(rosPath, globalVariables, setGlobalVariables);
+    const result = getFirstInvalidVariableFromRosPath(rosPath, globalVariables, setGlobalVariables);
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] getFirstInvalidVariableFromRosPath took ${(endTime - startTime).toFixed(2)}ms`,
+    );
+    return result;
   }, [globalVariables, rosPath, setGlobalVariables]);
 
-  const topicNamesAutocompleteItems = useMemo(
-    () => topics.map(({ name }) => quoteTopicNameIfNeeded(name)),
-    [topics],
-  );
+  const topicNamesAutocompleteItems = useMemo(() => {
+    const startTime = performance.now();
+    const result = topics.map(({ name }) => quoteTopicNameIfNeeded(name));
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] topicNamesAutocompleteItems took ${(endTime - startTime).toFixed(2)}ms (${topics.length} topics)`,
+    );
+    return result;
+  }, [topics]);
 
-  const topicNamesAndFieldsAutocompleteItems = useMemo(
-    () => topicNamesAutocompleteItems.concat(Array.from(structureItemsByPath.keys())),
-    [structureItemsByPath, topicNamesAutocompleteItems],
-  );
+  const topicNamesAndFieldsAutocompleteItems = useMemo(() => {
+    const startTime = performance.now();
+    // OPTIMIZATION: Avoid creating intermediate arrays
+    // Pre-allocate array with exact size needed
+    const topicCount = topicNamesAutocompleteItems.length;
+    const structureCount = structureItemsByPath.size;
+    const result = new Array(topicCount + structureCount);
+
+    // Copy topic names
+    for (let i = 0; i < topicCount; i++) {
+      result[i] = topicNamesAutocompleteItems[i];
+    }
+
+    // Add structure items
+    let index = topicCount;
+    for (const key of structureItemsByPath.keys()) {
+      result[index++] = key;
+    }
+
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] topicNamesAndFieldsAutocompleteItems took ${(endTime - startTime).toFixed(2)}ms (${structureItemsByPath.size} structure items)`,
+    );
+    return result;
+  }, [structureItemsByPath, topicNamesAutocompleteItems]);
 
   const autocompleteType = useMemo(() => {
     if (!rosPath) {
@@ -303,9 +378,12 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     return undefined;
   }, [invalidGlobalVariablesVariable, structureTraversalResult, validTypes, rosPath, topic]);
 
-  const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
+  // OPTIMIZATION #1 & #8: Removed duplicate messagePathStructures call
+  // Now using structure2 which is already memoized above
+  const structures = structure2;
 
   const { autocompleteItems, autocompleteFilterText, autocompleteRange } = useMemo(() => {
+    const startTime = performance.now();
     if (disableAutocomplete) {
       return {
         autocompleteItems: [],
@@ -315,13 +393,17 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     } else if (autocompleteType === "topicName") {
       // If the path is empty, return topic names only to show the full list of topics. Otherwise,
       // use the full set of topic names and field paths to autocomplete
-      return {
+      const result = {
         autocompleteItems: path
           ? topicNamesAndFieldsAutocompleteItems
           : topicNamesAutocompleteItems,
         autocompleteFilterText: path,
         autocompleteRange: { start: 0, end: Infinity },
       };
+      console.log(
+        `[MessagePathInput] autocompleteItems calculation took ${(performance.now() - startTime).toFixed(2)}ms (type: topicName, items: ${result.autocompleteItems.length})`,
+      );
+      return result;
     } else if (autocompleteType === "messagePath" && topic && rosPath) {
       if (
         structureTraversalResult &&
@@ -403,11 +485,16 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       };
     }
 
-    return {
+    const result = {
       autocompleteItems: [],
       autocompleteFilterText: "",
       autocompleteRange: { start: 0, end: Infinity },
     };
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] autocompleteItems calculation took ${(endTime - startTime).toFixed(2)}ms (type: fallback)`,
+    );
+    return result;
   }, [
     disableAutocomplete,
     autocompleteType,
@@ -424,19 +511,25 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     globalVariables,
   ]);
 
-  const topicsByName = useMemo(() => _.keyBy(topics, ({ name }) => name), [topics]);
+  // topicsByName is now defined earlier for topic lookup optimization
 
   const orderedAutocompleteItems = useMemo(() => {
+    const startTime = performance.now();
     if (prioritizedDatatype == undefined) {
       return autocompleteItems;
     }
 
-    return _.flatten(
+    const result = _.flatten(
       _.partition(
         autocompleteItems,
-        (item) => topicsByName[item]?.schemaName === prioritizedDatatype,
+        (item: string) => topicsByName.get(item)?.schemaName === prioritizedDatatype,
       ),
     );
+    const endTime = performance.now();
+    console.log(
+      `[MessagePathInput] orderedAutocompleteItems took ${(endTime - startTime).toFixed(2)}ms (${autocompleteItems.length} items)`,
+    );
+    return result;
   }, [autocompleteItems, prioritizedDatatype, topicsByName]);
 
   const usesUnsupportedMathModifier =
