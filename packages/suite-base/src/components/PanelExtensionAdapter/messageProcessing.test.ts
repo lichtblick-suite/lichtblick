@@ -6,6 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessageEvent } from "@lichtblick/suite";
+import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 
 import { convertMessage, forEachSortedArrays } from "./messageProcessing";
 
@@ -87,14 +89,7 @@ describe("forEachSortedArrays", () => {
 });
 
 describe("convertMessage", () => {
-  const mockMessageEvent = {
-    topic: "/test_topic",
-    schemaName: "TestSchema",
-    receiveTime: { sec: 1, nsec: 0 },
-    message: { value: 42 },
-    sizeInBytes: 100,
-    topicConfig: undefined,
-  } as const;
+  const mockMessageEvent = MessageEventBuilder.messageEvent();
 
   const createMockConverter = (overrides?: {
     fromSchemaName?: string;
@@ -118,18 +113,20 @@ describe("convertMessage", () => {
   it("should convert message using matching converter", () => {
     const converter = createMockConverter();
 
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter]]]);
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(mockMessageEvent, converters, convertedMessages);
 
     expect(convertedMessages).toHaveLength(1);
     expect(convertedMessages[0]).toMatchObject({
-      topic: "/test_topic",
-      schemaName: "ConvertedSchema",
+      topic: mockMessageEvent.topic,
+      schemaName: converter.toSchemaName,
       message: { converted: 42 },
-      receiveTime: { sec: 1, nsec: 0 },
-      sizeInBytes: 100,
+      receiveTime: mockMessageEvent.receiveTime,
+      sizeInBytes: mockMessageEvent.sizeInBytes,
     });
     expect(converter.converter).toHaveBeenCalledWith(
       mockMessageEvent.message,
@@ -139,15 +136,16 @@ describe("convertMessage", () => {
   });
 
   it("should pass globalVariables to converter", () => {
-    const globalVariables = { global: 123 };
+    const globalVariables = GlobalVariableBuilder.globalVariables();
     const converter = createMockConverter({
       converter: jest.fn((_msg: unknown, _event: unknown, vars: unknown) => ({
         value: 42,
         vars,
       })),
     });
-
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter]]]);
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(mockMessageEvent, converters, convertedMessages, globalVariables);
@@ -170,7 +168,12 @@ describe("convertMessage", () => {
       converter: jest.fn(() => ({ output: 2 })),
     });
 
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter1, converter2]]]);
+    const converters = new Map([
+      [
+        `${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any,
+        [converter1, converter2],
+      ],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(mockMessageEvent, converters, convertedMessages);
@@ -185,7 +188,9 @@ describe("convertMessage", () => {
       converter: jest.fn(() => undefined),
     });
 
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter]]]);
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(mockMessageEvent, converters, convertedMessages);
@@ -196,10 +201,12 @@ describe("convertMessage", () => {
 
   it("should skip conversion when converter returns null", () => {
     const converter = createMockConverter({
-      converter: jest.fn(() => ReactNull),
+      converter: jest.fn(() => undefined),
     });
 
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter]]]);
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(mockMessageEvent, converters, convertedMessages);
@@ -212,7 +219,9 @@ describe("convertMessage", () => {
       converter: jest.fn(() => ({ converted: true })),
     });
 
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter]]]);
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(mockMessageEvent, converters, convertedMessages);
@@ -230,7 +239,9 @@ describe("convertMessage", () => {
       converter: jest.fn(() => ({ converted: true })),
     });
 
-    const converters = new Map([["/test_topic\nTestSchema" as any, [converter]]]);
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
     const convertedMessages: MessageEvent[] = [];
 
     convertMessage(messageWithConfig, converters, convertedMessages);
