@@ -13,8 +13,8 @@ import {
   MessageEvent,
   RegisterMessageConverterArgs,
   Subscription,
-  VariableValue,
 } from "@lichtblick/suite";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
 import { Namespace } from "@lichtblick/suite-base/types";
 
@@ -43,7 +43,7 @@ export function convertMessage(
   messageEvent: Immutable<MessageEvent>,
   converters: Immutable<TopicSchemaConverterMap>,
   convertedMessages: MessageEvent[],
-  globalVariables?: Readonly<Record<string, VariableValue>>,
+  globalVariables?: Readonly<GlobalVariables>,
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);

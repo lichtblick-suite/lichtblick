@@ -20,7 +20,6 @@ import {
   RenderState,
   Subscription,
   Topic,
-  VariableValue,
 } from "@lichtblick/suite";
 import {
   EMPTY_GLOBAL_VARIABLES,
@@ -247,7 +246,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               topicSchemaConverters,
               postProcessedFrame,
-              { ...globalVariables } as Readonly<Record<string, VariableValue>>,
+              { ...globalVariables } as Readonly<GlobalVariables>,
             );
           }
           lastMessageByTopic.set(messageEvent.topic, messageEvent);
@@ -265,7 +264,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               newConverters,
               postProcessedFrame,
-              { ...globalVariables } as Readonly<Record<string, VariableValue>>,
+              { ...globalVariables } as Readonly<GlobalVariables>,
             );
           }
         }
@@ -282,7 +281,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               topicSchemaConverters,
               postProcessedFrame,
-              { ...globalVariables } as Readonly<Record<string, VariableValue>>,
+              { ...globalVariables } as Readonly<GlobalVariables>,
             );
           }
         }
