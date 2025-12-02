@@ -49,7 +49,7 @@ function FieldInput({
 }): React.JSX.Element {
   const { classes, cx } = useStyles();
 
-  const handleChange = useCallback(
+  const handleMessagePathChange = useCallback(
     (value: string) => {
       actionHandler({
         action: "update",
@@ -240,7 +240,7 @@ function FieldInput({
           disabled={field.disabled}
           readOnly={field.readonly}
           supportsMathModifiers={field.supportsMathModifiers}
-          onChange={handleChange}
+          onChange={handleMessagePathChange}
           validTypes={field.validTypes}
         />
       );

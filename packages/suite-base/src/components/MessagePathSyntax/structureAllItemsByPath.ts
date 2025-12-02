@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-/* eslint-disable no-restricted-syntax */
 
-import { filterMap } from "@lichtblick/den/collection";
 import {
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
@@ -24,11 +22,6 @@ export const structureAllItemsByPath = ({
   messagePathStructuresForDataype,
   topics,
 }: StructureAllItemsByPathProps): Map<string, MessagePathStructureItem> => {
-  const startTime = performance.now();
-  console.log(`[structureAllItemsByPath] Starting with ${topics.length} topics`);
-
-  // OPTIMIZATION: Single-pass iteration instead of flatMap + filterMap
-  // This avoids creating intermediate arrays and reduces allocations
   const result = new Map<string, MessagePathStructureItem>();
 
   for (const topic of topics) {
@@ -56,10 +49,5 @@ export const structureAllItemsByPath = ({
       result.set(quotedTopicName + item.path, item.terminatingStructureItem);
     }
   }
-
-  const endTime = performance.now();
-  console.log(
-    `[structureAllItemsByPath] Completed in ${(endTime - startTime).toFixed(2)}ms, generated ${result.size} items`,
-  );
   return result;
 };

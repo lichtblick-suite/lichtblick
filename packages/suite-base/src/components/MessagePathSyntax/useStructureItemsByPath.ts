@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-/* eslint-disable no-restricted-syntax */
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { MessagePathStructureItem } from "@lichtblick/message-path";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
@@ -36,34 +35,25 @@ export function useStructuredItemsByPath({
 
   const { datatypes, topics } = PanelAPI.useDataSourceInfo();
 
-  const messagePathStructuresForDataype = useMemo(() => {
-    const startTime = performance.now();
-    const result = messagePathStructures(datatypes);
-    const endTime = performance.now();
-    console.log(
-      `[useStructureItemsByPath] messagePathStructures took ${(endTime - startTime).toFixed(2)}ms`,
-    );
-    return result;
-  }, [datatypes]);
+  const messagePathStructuresForDataype = useMemo(
+    () => messagePathStructures(datatypes),
+    [datatypes],
+  );
 
-  const gettingAllStructureItemsByPath = useMemo(() => {
-    const startTime = performance.now();
-    const result = structureAllItemsByPath({
-      noMultiSlices,
-      validTypes,
-      messagePathStructuresForDataype,
-      topics,
-    });
-    const endTime = performance.now();
-    console.log(
-      `[useStructureItemsByPath] structureAllItemsByPath took ${(endTime - startTime).toFixed(2)}ms`,
-    );
-    return result;
-  }, [messagePathStructuresForDataype, noMultiSlices, topics, validTypes]);
+  const gettingAllStructureItemsByPath = useCallback(
+    () =>
+      structureAllItemsByPath({
+        noMultiSlices,
+        validTypes,
+        messagePathStructuresForDataype,
+        topics,
+      }),
+    [messagePathStructuresForDataype, noMultiSlices, topics, validTypes],
+  );
 
   if (!validTypes && noMultiSlices == undefined) {
     return structureItemsByPath;
   }
 
-  return gettingAllStructureItemsByPath;
+  return gettingAllStructureItemsByPath();
 }

@@ -4,7 +4,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-/* eslint-disable no-restricted-syntax */
 //
 // This file incorporates work covered by the following copyright and
 // permission notice:
@@ -94,7 +93,6 @@ function structureItemIsIntegerPrimitive(item: MessagePathStructureItem) {
 //   }
 // }
 
-// OPTIMIZATION #8: Cache messagePathStructures results using WeakMap for better memory management
 const messagePathStructuresCache = new WeakMap<
   Immutable<RosDatatypes>,
   Record<string, MessagePathStructureItemMessage>
@@ -103,17 +101,10 @@ const messagePathStructuresCache = new WeakMap<
 export function messagePathStructures(
   datatypes: Immutable<RosDatatypes>,
 ): Record<string, MessagePathStructureItemMessage> {
-  // Check cache first
   const cached = messagePathStructuresCache.get(datatypes);
   if (cached) {
-    console.log(
-      `[messagePathStructures] Returned from cache (${Object.keys(cached).length} structures)`,
-    );
     return cached;
   }
-
-  const overallStartTime = performance.now();
-  console.log(`[messagePathStructures] Starting with ${datatypes.size} datatypes`);
 
   const structureFor = _.memoize(
     (datatype: string, seenDatatypes: string[]): MessagePathStructureItemMessage => {
@@ -174,13 +165,6 @@ export function messagePathStructures(
   for (const [datatype] of datatypes) {
     structures[datatype] = structureFor(datatype, []);
   }
-
-  const overallEndTime = performance.now();
-  console.log(
-    `[messagePathStructures] Completed in ${(overallEndTime - overallStartTime).toFixed(2)}ms, generated ${Object.keys(structures).length} structures`,
-  );
-
-  // Store in cache
   messagePathStructuresCache.set(datatypes, structures);
 
   return structures;
@@ -204,25 +188,17 @@ export function validTerminatingStructureItem(
  * Given a datatype, the array of datatypes, and a list of valid types, list out all valid strings
  * for a MessagePathStructure and its corresponding structure item.
  */
-
-// OPTIMIZATION: Cache messagePathsForStructure results to avoid recomputation
-// Key format: `${structure.datatype}_${validTypes?.join(',')}_${noMultiSlices}_${messagePath.length}`
 const messagePathsCache = new Map<string, MessagePathsForStructure>();
 
 export function messagePathsForStructure(
   structure: MessagePathStructureItemMessage,
   messagePathsStructureArgs?: MessagePathsForStructureArgs,
 ): MessagePathsForStructure {
-  const startTime = performance.now();
   const { validTypes, noMultiSlices, messagePath = [] } = messagePathsStructureArgs ?? {};
 
-  // Create cache key
   const cacheKey = `${structure.datatype}_${validTypes?.join(",") ?? ""}_${noMultiSlices ?? ""}_${messagePath.length}`;
   const cached = messagePathsCache.get(cacheKey);
   if (cached) {
-    console.log(
-      `[messagePathsForStructure] Cache hit for ${structure.datatype} (${cached.length} paths)`,
-    );
     return cached;
   }
 
@@ -284,13 +260,8 @@ export function messagePathsForStructure(
   }
 
   traverse(structure, "");
-  const endTime = performance.now();
   const result = messagePaths.sort(naturalSort("path"));
-  console.log(
-    `[messagePathsForStructure] Generated ${result.length} paths in ${(endTime - startTime).toFixed(2)}ms`,
-  );
 
-  // Store in cache
   messagePathsCache.set(cacheKey, result);
 
   return result;
