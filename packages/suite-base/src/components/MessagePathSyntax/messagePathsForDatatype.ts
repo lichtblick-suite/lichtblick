@@ -196,7 +196,11 @@ export function messagePathsForStructure(
 ): MessagePathsForStructure {
   const { validTypes, noMultiSlices, messagePath = [] } = messagePathsStructureArgs ?? {};
 
-  const cacheKey = `${structure.datatype}_${validTypes?.join(",") ?? ""}_${noMultiSlices ?? ""}_${messagePath.length}`;
+  const filterRepr = messagePath
+    .filter((part): part is MessagePathFilter => part.type === "filter")
+    .map((f) => f.repr)
+    .join("|");
+  const cacheKey = `${structure.datatype}_${validTypes?.join(",") ?? ""}_${noMultiSlices ?? ""}_${filterRepr}`;
   const cached = messagePathsCache.get(cacheKey);
   if (cached) {
     return cached;
