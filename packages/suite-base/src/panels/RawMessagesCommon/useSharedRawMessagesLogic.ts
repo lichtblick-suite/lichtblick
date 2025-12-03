@@ -15,24 +15,8 @@ import { Topic } from "@lichtblick/suite-base/players/types";
 
 import { PATH_NAME_AGGREGATOR, PREV_MSG_METHOD } from "./constants";
 import { NodeExpansion, NodeState } from "./types";
+import type { UseSharedRawMessagesLogicProps, SharedConfig } from "./types";
 import { dataWithoutWrappingArray, generateDeepKeyPaths, toggleExpansion } from "./utils";
-
-type SharedConfig = {
-  topicPath: string;
-  diffMethod: "custom" | "previous message";
-  diffTopicPath: string;
-  diffEnabled: boolean;
-  expansion?: NodeExpansion;
-};
-
-type SharedConfigActions<T extends SharedConfig> = {
-  saveConfig: (config: Partial<T>) => void;
-};
-
-type UseSharedRawMessagesLogicProps<T extends SharedConfig> = {
-  config: T;
-  saveConfig: SharedConfigActions<T>["saveConfig"];
-};
 
 export type UseSharedRawMessagesLogicResult = {
   topicRosPath: MessagePath | undefined;
