@@ -439,12 +439,11 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       return autocompleteItems;
     }
 
-    const result = _.flatten(
-      _.partition(
-        autocompleteItems,
-        (item: string) => topicsByName.get(item)?.schemaName === prioritizedDatatype,
-      ),
-    );
+    const result = _.partition(
+      autocompleteItems,
+      (item: string) => topicsByName.get(item)?.schemaName === prioritizedDatatype,
+    ).flat();
+
     return result;
   }, [autocompleteItems, prioritizedDatatype, topicsByName]);
 
