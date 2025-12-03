@@ -1,7 +1,14 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import {
+  LayoutApiData,
+  SaveNewLayoutParams,
+  WorkspaceLayoutResponse,
+} from "@lichtblick/suite-base/api/layouts/types";
+import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { LayoutsAPI } from "./LayoutsAPI";
 
@@ -25,7 +32,7 @@ describe("LayoutsAPI", () => {
 
   it("should initialize with correct workspace and baseUrl", () => {
     expect(layoutsAPI.workspace).toBe(mockWorkspace);
-    expect(layoutsAPI.baseUrl).toBe("layouts");
+    expect(layoutsAPI.workspacePath).toBe("workspaces");
   });
 
   describe("getLayouts", () => {
@@ -52,7 +59,7 @@ describe("LayoutsAPI", () => {
 
       const result = await layoutsAPI.getLayouts();
 
-      expect(mockGet).toHaveBeenCalledWith("layouts", { workspace: mockWorkspace });
+      expect(mockGet).toHaveBeenCalledWith(`workspaces/${mockWorkspace}/layouts`);
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("1");
@@ -78,27 +85,32 @@ describe("LayoutsAPI", () => {
 
   describe("saveNewLayout", () => {
     it("should save new layout and transform response", async () => {
-      const mockSaveRequest = {
-        id: "new-layout" as any,
-        name: "New Layout",
+      const mockSaveRequest: SaveNewLayoutParams = {
+        id: BasicBuilder.string() as LayoutID,
+        name: BasicBuilder.string(),
         data: {
           configById: {},
           globalVariables: {},
           playbackConfig: { speed: 1 },
           userNodes: {},
         },
-        permission: "CREATOR_WRITE" as any,
-        externalId: "external-id",
-        savedAt: "2023-01-01T00:00:00.000Z" as any,
+        permission: "CREATOR_WRITE",
       };
 
-      const mockApiResponse = {
-        id: "external-new-layout",
-        layoutId: "new-layout" as any,
-        name: "New Layout",
+      const mockLayoutData: LayoutApiData = {
+        id: `external-${mockSaveRequest.id}`,
+        layoutId: mockSaveRequest.id,
+        name: mockSaveRequest.name,
         data: mockSaveRequest.data,
-        permission: "CREATOR_WRITE" as any,
+        permission: mockSaveRequest.permission,
+        from: BasicBuilder.string(),
+        workspace: mockWorkspace,
+        createdBy: "2023-01-01T00:00:00.000Z",
         updatedBy: "2023-01-01T00:00:00.000Z",
+      };
+
+      const mockApiResponse: WorkspaceLayoutResponse = {
+        layout: mockLayoutData,
       };
 
       const mockHttpService = jest.mocked(HttpService);
@@ -108,16 +120,15 @@ describe("LayoutsAPI", () => {
       const result = await layoutsAPI.saveNewLayout(mockSaveRequest);
 
       expect(mockPost).toHaveBeenCalledWith(
-        "layouts",
+        `workspaces/${mockWorkspace}/layout`,
         expect.objectContaining({
-          layoutId: "new-layout",
-          name: "New Layout",
-          workspace: mockWorkspace,
+          layoutId: mockSaveRequest.id,
+          name: mockSaveRequest.name,
+          permission: mockSaveRequest.permission,
         }),
       );
-
-      expect(result.name).toBe("New Layout");
-      expect(result.id).toBe("new-layout");
+      expect(result.name).toBe(mockSaveRequest.name);
+      expect(result.id).toBe(mockSaveRequest.id);
     });
   });
 
@@ -188,7 +199,7 @@ describe("LayoutsAPI", () => {
 
       const result = await layoutsAPI.deleteLayout("external-123");
 
-      expect(mockDelete).toHaveBeenCalledWith("layouts/external-123");
+      expect(mockDelete).toHaveBeenCalledWith(`workspaces/${mockWorkspace}/layout/external-123`);
       expect(result).toBe(true);
     });
 

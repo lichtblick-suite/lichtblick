@@ -96,9 +96,7 @@ const fontSize = "12px";
 let textMeasure: undefined | textMetrics.TextMeasure;
 
 function measureText(text: string): number {
-  if (textMeasure == undefined) {
-    textMeasure = textMetrics.init({ fontFamily, fontSize });
-  }
+  textMeasure ??= textMetrics.init({ fontFamily, fontSize });
   return textMeasure.width(text) + 3;
 }
 

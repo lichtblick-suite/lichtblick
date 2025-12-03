@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
 import { changeToEpochFormat } from "../../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../../fixtures/electron";
 import { loadFile } from "../../../../fixtures/load-file";
@@ -12,7 +13,7 @@ const MCAP_FILENAME = "example_logs.mcap";
  * AND the user clicks on the "Log" panel settings
  * THEN the "Log panel" settings should be visible
  */
-test.skip("open log panel after loading an mcap file", async ({ mainWindow }) => {
+test("open log panel after loading an mcap file", async ({ mainWindow }) => {
   /// Given
   await loadFile({
     mainWindow,
@@ -35,9 +36,11 @@ test.skip("open log panel after loading an mcap file", async ({ mainWindow }) =>
  * AND the user scrolls up in the log panel
  * THEN the "scroll to bottom" button should be visible
  */
-test.skip('should show "scroll to bottom" button when there is a scroll up in the log panel', async ({
+test('should show "scroll to bottom" button when there is a scroll up in the log panel 2', async ({
   mainWindow,
 }) => {
+  // This test usually takes slightly longer than the default 30s timeout
+  test.setTimeout(60_000);
   /// Given
   await loadFile({
     mainWindow,
@@ -45,37 +48,43 @@ test.skip('should show "scroll to bottom" button when there is a scroll up in th
   });
 
   // When
-  // Add Log Panel
   await mainWindow.getByTestId("AddPanelButton").click();
   await mainWindow.getByRole("button", { name: "Log" }).click();
 
   const playButton = mainWindow.getByTestId("play-button");
-
   // Change to epoch time format to make calculations easier
   await changeToEpochFormat(mainWindow);
   const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
 
-  const initialTimestamp = Number(await timestamp.inputValue());
+  const initialValue: string = await timestamp.inputValue();
+  const initialTimestamp: number = Number(initialValue);
 
-  // Start playback and wait until timestamp advances (button can be flaky if pressed too quickly)
-  let currentTimestamp = initialTimestamp;
-  while (currentTimestamp <= initialTimestamp) {
-    await expect(playButton).toHaveAttribute("title", "Play");
-    await playButton.click();
+  await expect(playButton).toHaveAttribute("title", "Play");
+  await playButton.click();
 
-    // Wait 50ms before checking again
-    await mainWindow.waitForTimeout(20);
+  // Verify timestamp actually moves.
+  await expect(async () => {
+    const inputValue: string = await timestamp.inputValue();
+    const currentTimestamp: number = Number(inputValue);
 
-    // Get the current timestamp
-    currentTimestamp = Number(await timestamp.inputValue());
-  }
-  await mainWindow.waitForTimeout(100); // wait for some logs to accumulate
+    expect(currentTimestamp).toBeGreaterThan(initialTimestamp);
+  }).toPass({
+    timeout: 5000,
+    intervals: [100],
+  });
+  await expect(playButton).toHaveAttribute("title", "Pause", { timeout: 5_000 });
 
-  // Find the log panel area and scroll up
   const logPanel = mainWindow.getByTestId("log-panel-root");
-  await logPanel.hover();
-  await mainWindow.mouse.wheel(0, -500); // negative Y = scroll up
+  const scrollToBottomBtn = mainWindow.getByTestId("scroll-to-bottom-button");
 
-  // Then
-  await expect(mainWindow.getByTestId("scroll-to-bottom-button")).toBeVisible();
+  await logPanel.hover();
+  // Scroll up until the button shows up. More resiliant than a single scroll which can be flaky.
+  await expect(async () => {
+    await mainWindow.mouse.wheel(0, -200);
+    // Then
+    await expect(scrollToBottomBtn).toBeVisible({ timeout: 1000 });
+  }).toPass({
+    intervals: [500],
+    timeout: 10_000,
+  });
 });

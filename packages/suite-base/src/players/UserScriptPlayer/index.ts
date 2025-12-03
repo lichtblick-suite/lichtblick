@@ -325,9 +325,7 @@ export default class UserScriptPlayer implements Player {
             if (outputMessage) {
               // https://github.com/typescript-eslint/typescript-eslint/issues/6632
               let messages = messagesByTopic[outTopic];
-              if (!messages) {
-                messages = [];
-              }
+              messages ??= [];
               messages.push(outputMessage);
               messagesByTopic[outTopic] = messages;
             }

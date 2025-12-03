@@ -31,26 +31,15 @@ import {
   SeriesItem,
   Viewport,
 } from "./builders/IDatasetsBuilder";
-import { Dataset, InteractionEvent, Scale, UpdateAction } from "./types";
+import {
+  ConfigBounds,
+  Dataset,
+  InteractionEvent,
+  PlotCoordinatorEventTypes,
+  Scale,
+  UpdateAction,
+} from "./types";
 import { isReferenceLinePlotPathType, PlotConfig } from "./utils/config";
-
-type PlotCoordinatorEventTypes = {
-  timeseriesBounds(bounds: Immutable<Bounds1D>): void;
-
-  /** X scale changed. */
-  xScaleChanged(scale: Scale | undefined): void;
-
-  /** Current values changed (for displaying in the legend) */
-  currentValuesChanged(values: readonly unknown[]): void;
-
-  /** Paths with mismatched data lengths were detected */
-  pathsWithMismatchedDataLengthsChanged(pathsWithMismatchedDataLengths: string[]): void;
-
-  /** Rendering updated the viewport. `canReset` is true if the viewport can be reset. */
-  viewportChange(canReset: boolean): void;
-};
-
-type ConfigBounds = { x: Partial<Bounds1D>; y: Partial<Bounds1D> };
 
 const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => dataset ?? { data: [] };
 
@@ -256,7 +245,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       //
       // This key lets us treat series with the same name but different timestamp methods as distinct
       // using a key instead of the path index lets us preserve loaded data when a path is removed
-      const key = `${path.timestampMethod}:${stringifyMessagePath(
+      const key = `${idx}:${path.timestampMethod}:${stringifyMessagePath(
         filledParsed,
       )}` as SeriesConfigKey;
 
@@ -323,9 +312,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   public addInteractionEvent(ev: InteractionEvent): void {
-    if (!this.updateAction.interactionEvents) {
-      this.updateAction.interactionEvents = [];
-    }
+    this.updateAction.interactionEvents ??= [];
     this.updateAction.interactionEvents.push(ev);
     this.queueDispatchRender();
   }

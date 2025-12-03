@@ -19,7 +19,7 @@ import TeleopPanel from "./TeleopPanel";
 // Mocks
 function MockDirectionalPad({ onAction, disabled }: DirectionalPadProps): React.JSX.Element {
   return (
-    <div data-testid="directional-pad" data-disabled={Boolean(disabled ?? false).toString()}>
+    <div data-testid="directional-pad" data-disabled={(disabled ?? false).toString()}>
       <button onClick={() => onAction?.(DirectionalPadAction.UP)}>UP</button>
       <button onClick={() => onAction?.(DirectionalPadAction.DOWN)}>DOWN</button>
       <button onClick={() => onAction?.(DirectionalPadAction.LEFT)}>LEFT</button>

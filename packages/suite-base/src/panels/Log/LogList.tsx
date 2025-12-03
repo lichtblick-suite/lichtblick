@@ -50,7 +50,7 @@ function Row(props: {
     if (ref.current) {
       props.data.setRowHeight(props.index, ref.current.clientHeight);
     }
-  }, [props.data, props.index]);
+  }, [props.index, props.data]);
 
   const item = props.data.items[props.index]!;
 
@@ -74,9 +74,10 @@ function LogList({ items }: LogListProps): React.JSX.Element {
   // Reference to the outer list div. Needed for autoscroll determination.
   const outerRef = useRef<HTMLDivElement>(ReactNull);
 
-  const latestItems = useLatest(items);
+  const latestItems = useLatest(items); // Cache calculated item heights.
+  const itemHeightCache = useRef<Record<number, number>>({});
 
-  const isResettingAfterIndex = useRef(false);
+  const isResizing = useRef(false);
 
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
@@ -104,22 +105,19 @@ function LogList({ items }: LogListProps): React.JSX.Element {
       scrollUpdateWasRequested: boolean;
     }) => {
       try {
-        const outerElement = outerRef.current!; // asserted by react-window
-
-        // Clear the reset flag - we've processed the scroll event from resetAfterIndex
-        if (isResettingAfterIndex.current) {
-          isResettingAfterIndex.current = false;
+        // Ignore row resize scroll events
+        if (isResizing.current) {
+          isResizing.current = false;
           return;
         }
 
+        // Asserted by react-window
+        const outerElement = outerRef.current!;
+
         const { offsetHeight, scrollHeight } = outerElement;
-        // Add bounds checking
-        const normalizedScrollOffset = Math.max(
-          0,
-          Math.min(scrollOffset, scrollHeight - offsetHeight),
-        );
-        const tolerance = 20;
-        const isAtEnd = normalizedScrollOffset + offsetHeight >= scrollHeight - tolerance;
+
+        const lastRowHeight = itemHeightCache.current[latestItems.current.length - 1] ?? 0;
+        const isAtEnd = scrollOffset + offsetHeight + lastRowHeight >= scrollHeight;
 
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
           setAutoscrollToEnd(false);
@@ -130,21 +128,21 @@ function LogList({ items }: LogListProps): React.JSX.Element {
         console.error("Error while handling scroll", error);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
-  // Cache calculated item heights.
-  const itemHeightCache = useRef<Record<number, number>>({});
-
-  const getRowHeight = useCallback(
-    (index: number) => itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT,
-    [],
-  );
+  const getRowHeight = useCallback((index: number) => {
+    const height = itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT;
+    return height;
+  }, []);
 
   const setRowHeight = useCallback((index: number, height: number) => {
-    itemHeightCache.current[index] = height;
-    isResettingAfterIndex.current = true; //  Set flag to ignore next scroll event
-    listRef.current?.resetAfterIndex(index);
+    if (itemHeightCache.current[index] !== height) {
+      itemHeightCache.current[index] = height;
+      isResizing.current = true;
+      listRef.current?.resetAfterIndex(index);
+    }
   }, []);
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({

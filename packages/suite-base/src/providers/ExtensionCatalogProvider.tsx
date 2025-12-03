@@ -360,7 +360,7 @@ function createExtensionRegistryStore(
         }
       }
 
-      set((state) => removeExtensionData({ id: extension!.id, state }));
+      set((state) => removeExtensionData({ id: extension.id, state }));
       get().unMarkExtensionAsInstalled(id);
     };
 

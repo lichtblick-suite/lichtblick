@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.release.tag_name }}
 
@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.release.tag_name }}
 

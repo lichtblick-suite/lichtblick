@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { ExtensionInfoWorkspace } from "@lichtblick/suite-base/api/extensions/types";
+import {
+  CreateOrUpdateResponse,
+  ExtensionInfoWorkspace,
+} from "@lichtblick/suite-base/api/extensions/types";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
@@ -49,7 +52,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.list();
 
       // Then
-      expect(mockGet).toHaveBeenCalledWith("extensions", { workspace });
+      expect(mockGet).toHaveBeenCalledWith(`workspaces/${workspace}/extensions`);
       expect(result.length).toBe(extensions.length);
     });
 
@@ -140,10 +143,16 @@ describe("ExtensionsAPI", () => {
       });
 
       const mockFile = new File([BasicBuilder.string()], "test.zip", { type: "application/zip" });
-      const mockApiResponse: StoredExtension = ExtensionBuilder.storedExtension({
-        info: extension.info,
-        workspace,
-      });
+      const mockApiResponse: CreateOrUpdateResponse = {
+        extension: {
+          ...extension.info,
+          createdAt: BasicBuilder.date(),
+          updatedAt: BasicBuilder.date(),
+          fileId: BasicBuilder.string(),
+          extensionId: extension.info.id,
+          scope: extension.info.namespace!,
+        },
+      };
       const mockHttpService = jest.mocked(HttpService);
       const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
       mockHttpService.post = mockPost;
@@ -152,12 +161,21 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.createOrUpdate(extension, mockFile);
 
       // Then
-      expect(mockPost).toHaveBeenCalledWith(`extensions`, expect.any(FormData));
+      expect(mockPost).toHaveBeenCalledWith(
+        `workspaces/${workspace}/extension`,
+        expect.any(FormData),
+      );
       expect(result).toEqual({
-        info: mockApiResponse,
+        info: {
+          ...mockApiResponse.extension,
+          id: mockApiResponse.extension.extensionId,
+          externalId: mockApiResponse.extension.id,
+          namespace: mockApiResponse.extension.scope,
+        },
         content: new Uint8Array(),
         workspace,
-        fileId: mockApiResponse.fileId,
+        fileId: mockApiResponse.extension.fileId,
+        externalId: mockApiResponse.extension.id,
       });
     });
   });
@@ -175,7 +193,7 @@ describe("ExtensionsAPI", () => {
       const result = await extensionsAPI.remove(extensionId);
 
       // Then
-      expect(mockDelete).toHaveBeenCalledWith(`extensions/${extensionId}`);
+      expect(mockDelete).toHaveBeenCalledWith(`workspaces/${workspace}/extension/${extensionId}`);
       expect(result).toBe(true);
     });
 
