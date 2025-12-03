@@ -14,10 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TextFieldProps } from "@mui/material";
 import * as _ from "lodash-es";
-import { CSSProperties, useCallback, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
+import { useCallback, useMemo } from "react";
 
 import { filterMap } from "@lichtblick/den/collection";
 import {
@@ -29,6 +27,8 @@ import {
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import { Autocomplete } from "@lichtblick/suite-base/components/Autocomplete";
 import { IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete/types";
+import { useStyles } from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput.style";
+import { MessagePathInputBaseProps } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
 import { useStructuredItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useStructureItemsByPath";
 import useGlobalVariables, {
   GlobalVariables,
@@ -39,8 +39,8 @@ import {
   messagePathStructures,
   messagePathsForStructure,
   validTerminatingStructureItem,
-  StructureTraversalResult,
 } from "./messagePathsForDatatype";
+import { StructureTraversalResult } from "./types";
 
 export function tryToSetDefaultGlobalVar(
   variableName: string,
@@ -104,26 +104,6 @@ function getExamplePrimitive(primitiveType: PrimitiveType) {
       return "0";
   }
 }
-
-export type MessagePathInputBaseProps = {
-  supportsMathModifiers?: boolean;
-  path: string; // A path of the form `/topic.some_field[:]{id==42}.x`
-  index?: number; // Optional index field which gets passed to `onChange` (so you don't have to create anonymous functions)
-  onChange: (value: string, index?: number) => void;
-  validTypes?: readonly string[]; // Valid types, like "message", "array", or "primitive", or a ROS primitive like "float64"
-  noMultiSlices?: boolean; // Don't suggest slices with multiple values `[:]`, only single values like `[0]`.
-  placeholder?: string;
-  inputStyle?: CSSProperties;
-  disabled?: boolean;
-  disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
-  readOnly?: boolean;
-  prioritizedDatatype?: string;
-  variant?: TextFieldProps["variant"];
-};
-
-const useStyles = makeStyles()({
-  root: { flexGrow: 1 },
-});
 
 /**
  * To show an input field with an autocomplete so the user can enter message paths, use:

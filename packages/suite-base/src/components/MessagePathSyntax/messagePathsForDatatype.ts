@@ -29,6 +29,7 @@ import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePa
 import {
   MessagePathsForStructure,
   MessagePathsForStructureArgs,
+  StructureTraversalResult,
 } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { assertNever } from "@lichtblick/suite-base/util/assertNever";
@@ -270,12 +271,6 @@ export function messagePathsForStructure(
 
   return result;
 }
-
-export type StructureTraversalResult = {
-  valid: boolean;
-  msgPathPart?: MessagePathPart;
-  structureItem?: MessagePathStructureItem;
-};
 
 // Traverse down the structure given a `messagePath`. Return if the path
 // is valid, given the structure, `validTypes`, and `noMultiSlices`.
