@@ -69,7 +69,7 @@ describe("RemoteDataSourceFactory", () => {
     jest.clearAllMocks();
     factory = new RemoteDataSourceFactory();
   });
-  it("should initialize and return a player", () => {
+  it("should initialize and return a player with a single remote .mcap file", () => {
     const mockArgs = setupArgs({
       url: "https://example.com/test.mcap",
     });
@@ -78,7 +78,7 @@ describe("RemoteDataSourceFactory", () => {
 
     expect(WorkerSerializedIterableSource).toHaveBeenCalledWith({
       initWorker: expect.any(Function),
-      initArgs: { urls: ["https://example.com/test.mcap"] },
+      initArgs: { url: "https://example.com/test.mcap" },
     });
 
     expect(IterablePlayer).toHaveBeenCalledWith({
@@ -86,6 +86,30 @@ describe("RemoteDataSourceFactory", () => {
       name: "https://example.com/test.mcap",
       metricsCollector: mockArgs.metricsCollector,
       urlParams: { urls: ["https://example.com/test.mcap"] },
+      sourceId: "remote-file",
+      readAheadDuration: { sec: 10, nsec: 0 },
+    });
+
+    expect(result).toBe(mockPlayer);
+  });
+
+  it("should initialize and return a player with a single remote .bag file", () => {
+    const mockArgs = setupArgs({
+      url: "https://example.com/test.bag",
+    });
+
+    const result = factory.initialize(mockArgs);
+
+    expect(WorkerSerializedIterableSource).toHaveBeenCalledWith({
+      initWorker: expect.any(Function),
+      initArgs: { url: "https://example.com/test.bag" },
+    });
+
+    expect(IterablePlayer).toHaveBeenCalledWith({
+      source: mockSource,
+      name: "https://example.com/test.bag",
+      metricsCollector: mockArgs.metricsCollector,
+      urlParams: { urls: ["https://example.com/test.bag"] },
       sourceId: "remote-file",
       readAheadDuration: { sec: 10, nsec: 0 },
     });
