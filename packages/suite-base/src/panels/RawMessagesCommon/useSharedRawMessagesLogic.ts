@@ -117,10 +117,7 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
     if (expansion === "all") {
       return false;
     }
-    if (
-      typeof expansion === "object" &&
-      Object.values(expansion).some((v) => v === NodeState.Collapsed)
-    ) {
+    if (typeof expansion === "object" && Object.values(expansion).includes(NodeState.Collapsed)) {
       return true;
     } else {
       return false;

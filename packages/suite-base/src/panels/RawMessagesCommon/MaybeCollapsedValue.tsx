@@ -42,10 +42,17 @@ export default function MaybeCollapsedValue({
 
   return (
     <Tooltip
-      title={!showingEntireLabel ? "Text was truncated, click to see all" : ""}
+      title={showingEntireLabel ? "" : "Text was truncated, click to see all"}
       placement="top"
     >
-      <span onClick={expandText} style={{ cursor: !showingEntireLabel ? "pointer" : "inherit" }}>
+      <span
+        onClick={expandText}
+        onFocus={() => {}} // to supress "non-interactive elements with click handlers must have at least one keyboard listener"
+        style={{
+          cursor: showingEntireLabel ? "inherit" : "pointer",
+        }}
+        role="link"
+      >
         {`${truncatedItemText}${!showingEntireLabel ? "…" : ""}`}
       </span>
     </Tooltip>

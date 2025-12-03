@@ -1,69 +1,225 @@
 /** @jest-environment jsdom */
+
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
+import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+
 import HighlightedValue from "./HighlightedValue";
-import { diffArrow } from "./constants";
-import { diffLabels } from "./getDiff";
 
-describe("Given HighlightedValue", () => {
-  describe("when item is unchanged", () => {
-    it("then does not render diff arrow", () => {
-      render(<HighlightedValue itemLabel="unchanged" />);
+jest.mock("./index.style", () => ({
+  useStylesDiffSpan: () => ({
+    classes: {
+      root: "mock-root-class",
+    },
+  }),
+}));
 
-      expect(screen.getByText("unchanged")).toBeInTheDocument();
+jest.mock("./MaybeCollapsedValue", () => ({
+  __esModule: true,
+  default: ({ itemLabel }: { itemLabel: string }) => (
+    <span data-testid="maybe-collapsed">{itemLabel}</span>
+  ),
+}));
 
-      expect(screen.queryByText(diffArrow)).not.toBeInTheDocument();
+describe("HighlightedValue", () => {
+  describe("without changes", () => {
+    it("renders simple value without change indicator", () => {
+      // GIVEN
+      const itemLabel = BasicBuilder.string();
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(1);
+      expect(maybeCollapsedElements[0]).toHaveTextContent(itemLabel);
+    });
+
+    it("renders empty string", () => {
+      // GIVEN
+      const itemLabel = "";
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(1);
+      expect(maybeCollapsedElements[0]).toBeEmptyDOMElement();
+    });
+
+    it("renders string with special characters", () => {
+      // GIVEN
+      const itemLabel = BasicBuilder.string("value with @#$ special chars!");
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(1);
+      expect(maybeCollapsedElements[0]).toHaveTextContent(itemLabel);
     });
   });
 
-  describe("when item is changed", () => {
-    it("then renders value with before and after around the diff arrow", () => {
-      const before = "old";
-      const after = "new";
-      const label = `${before}${diffArrow}${after}`;
+  describe("with changes", () => {
+    const oldValue = BasicBuilder.string();
+    const newValue = BasicBuilder.string();
 
-      render(<HighlightedValue itemLabel={label} />);
+    it("renders changed value with before and after", () => {
+      // GIVEN
+      const itemLabel = `${oldValue}${diffArrow}${newValue}`;
+      // WHEN
+      const { container } = render(<HighlightedValue itemLabel={itemLabel} />);
 
-      expect(screen.getByText(before)).toBeInTheDocument();
-      expect(screen.getByText(after)).toBeInTheDocument();
-      expect(screen.getByText(diffArrow)).toBeInTheDocument();
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(maybeCollapsedElements[0]).toHaveTextContent(oldValue);
+      expect(maybeCollapsedElements[1]).toHaveTextContent(newValue);
+      expect(container.textContent).toContain(diffArrow);
     });
 
-    it("applies CHANGED color style when a diff is present", () => {
-      const before = "old";
-      const after = "new";
-      render(<HighlightedValue itemLabel={`${before}${diffArrow}${after}`} />);
+    it("applies change color style to DiffSpan", () => {
+      // GIVEN
+      const itemLabel = `${oldValue}${diffArrow}${newValue}`;
+      // WHEN
+      const { container } = render(<HighlightedValue itemLabel={itemLabel} />);
 
-      const diffSpan = screen.getByText(diffArrow).closest("span");
-      expect(diffSpan).toBeTruthy();
-      expect(diffSpan).toHaveStyle(`color: ${diffLabels.CHANGED.color}`);
+      // THEN
+      const span = container.querySelector("span");
+      expect(span).toHaveAttribute("style");
+      expect(span?.getAttribute("style")).toContain("color");
+      // Color is converted to rgb format
+      expect(span?.getAttribute("style")).toContain("rgb(235, 168, 0)");
+    });
+
+    it("renders change from empty to value", () => {
+      // GIVEN
+      const itemLabel = `${diffArrow}${newValue}`;
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(maybeCollapsedElements[0]).toBeEmptyDOMElement();
+      expect(maybeCollapsedElements[1]).toHaveTextContent(newValue);
+    });
+
+    it("renders change from value to empty", () => {
+      // GIVEN
+      const itemLabel = `${oldValue}${diffArrow}`;
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(maybeCollapsedElements[0]).toHaveTextContent(oldValue);
+      expect(maybeCollapsedElements[1]).toBeEmptyDOMElement();
+    });
+
+    it("renders change with complex string values", () => {
+      // GIVEN
+      const itemLabel = `{"key": "value1"}${diffArrow}{"key": "value2"}`;
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(maybeCollapsedElements[0]).toHaveTextContent('{"key": "value1"}');
+      expect(maybeCollapsedElements[1]).toHaveTextContent('{"key": "value2"}');
+    });
+
+    it("renders change with whitespace in values", () => {
+      // GIVEN
+      const itemLabel = `  ${oldValue}  ${diffArrow}  ${newValue}  `;
+
+      // WHEN
+      const { container } = render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      // Whitespace is trimmed by textContent, so check the actual content
+      expect(container.textContent).toContain(oldValue);
+      expect(container.textContent).toContain(newValue);
     });
   });
 
-  describe("when itemLabel is empty", () => {
-    it("then does not render arrow", () => {
-      render(<HighlightedValue itemLabel="" />);
+  describe("edge cases", () => {
+    const valuePart = BasicBuilder.string();
+    it("treats standard arrow substring as change because diffArrow is standard arrow", () => {
+      // GIVEN
+      const itemLabel = `${valuePart} -> ${valuePart}`;
 
-      expect(screen.queryByText(diffArrow)).not.toBeInTheDocument();
+      // WHEN
+      const { container } = render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      // Since diffArrow is "->", this will split on the arrow
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(container.textContent).toContain(valuePart);
     });
-  });
 
-  describe("when itemLabel has missing parts", () => {
-    it("then handles missing before or after parts safely", () => {
-      const { rerender, getByText } = render(<HighlightedValue itemLabel={`${diffArrow}after`} />);
+    it("renders null-like string values", () => {
+      // GIVEN
+      const itemLabel = `null${diffArrow}undefined`;
 
-      expect(getByText("after")).toBeInTheDocument();
-      expect(getByText(diffArrow)).toBeInTheDocument();
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
 
-      // rerender replaces content with just before part
-      rerender(<HighlightedValue itemLabel={`before${diffArrow}`} />);
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(maybeCollapsedElements[0]).toHaveTextContent("null");
+      expect(maybeCollapsedElements[1]).toHaveTextContent("undefined");
+    });
 
-      expect(getByText("before")).toBeInTheDocument();
-      expect(getByText(diffArrow)).toBeInTheDocument();
+    it("handles very long values", () => {
+      // GIVEN
+      const longValue = "a".repeat(1000);
+      const itemLabel = `${longValue}${diffArrow}${longValue}`;
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      expect(maybeCollapsedElements[0]).toHaveTextContent(longValue);
+      expect(maybeCollapsedElements[1]).toHaveTextContent(longValue);
+    });
+
+    it("renders when split produces undefined values", () => {
+      // GIVEN - Edge case where split might produce undefined
+      const itemLabel = diffArrow;
+
+      // WHEN
+      render(<HighlightedValue itemLabel={itemLabel} />);
+
+      // THEN
+      const maybeCollapsedElements = screen.getAllByTestId("maybe-collapsed");
+      expect(maybeCollapsedElements).toHaveLength(2);
+      // Both should be empty due to empty strings before and after arrow
+      expect(maybeCollapsedElements[0]).toBeEmptyDOMElement();
+      expect(maybeCollapsedElements[1]).toBeEmptyDOMElement();
     });
   });
 });

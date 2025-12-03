@@ -57,22 +57,26 @@ export default function Metadata({
     <Stack alignItems="flex-start" paddingInline={0.25} paddingBlockStart={0.75}>
       <Stack direction="row" alignItems="center" gap={0.5}>
         <Typography variant="caption" lineHeight={1.2} color="text.secondary">
-          {diffMessage ? (
-            "base"
-          ) : docsLink ? (
-            <Link
-              target="_blank"
-              color="inherit"
-              variant="caption"
-              underline="hover"
-              rel="noopener noreferrer"
-              href={docsLink}
-            >
-              {datatype}
-            </Link>
-          ) : (
-            datatype
-          )}
+          {(() => {
+            if (diffMessage) {
+              return "base";
+            }
+            if (docsLink) {
+              return (
+                <Link
+                  target="_blank"
+                  color="inherit"
+                  variant="caption"
+                  underline="hover"
+                  rel="noopener noreferrer"
+                  href={docsLink}
+                >
+                  {datatype}
+                </Link>
+              );
+            }
+            return datatype;
+          })()}
           {` @ ${formatTimeRaw(message.receiveTime)} sec`}
         </Typography>
         <CopyButton size="small" iconSize="small" className={classes.button} getText={copyData} />
