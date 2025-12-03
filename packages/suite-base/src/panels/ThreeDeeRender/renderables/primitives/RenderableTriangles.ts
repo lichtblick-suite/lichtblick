@@ -74,9 +74,9 @@ export class RenderableTriangles extends RenderablePrimitive {
       if (!singleColor && !geometry.attributes.color) {
         geometry.createAttribute("color", Uint8Array, 4, true);
       }
+
       const colors = geometry.attributes.color;
-      const vertices_arr = vertices.array;
-      const vertices_stride = vertices.itemSize;
+      const verticesStride = vertices.itemSize;
 
       for (let i = 0; i < primitive.points.length; i++) {
         const point = primitive.points[i]!;
@@ -88,11 +88,11 @@ export class RenderableTriangles extends RenderablePrimitive {
           continue;
         }
 
-        const offset = i * vertices_stride;
+        const offset = i * verticesStride;
         const thisVertChanged =
-          Math.fround(vertices_arr[offset]!) !== Math.fround(point.x) ||
-          Math.fround(vertices_arr[offset + 1]!) !== Math.fround(point.y) ||
-          Math.fround(vertices_arr[offset + 2]!) !== Math.fround(point.z);
+          Math.fround(vertices.array[offset]!) !== Math.fround(point.x) ||
+          Math.fround(vertices.array[offset + 1]!) !== Math.fround(point.y) ||
+          Math.fround(vertices.array[offset + 2]!) !== Math.fround(point.z);
 
         if (thisVertChanged) {
           vertices.setXYZ(i, point.x, point.y, point.z);
@@ -114,16 +114,15 @@ export class RenderableTriangles extends RenderablePrimitive {
           const b = SRGBToLinear(color.b);
           const a = color.a;
 
-          const color_arr = colors.array as Uint8Array;
-          const color_stride = colors.itemSize; // 4
-          const cOffset = i * color_stride;
+          const colorStride = colors.itemSize;
+          const colorOffset = i * colorStride;
 
           const EPS = 2 / 255;
           const diff =
-            Math.abs(color_arr[cOffset]! / 255 - r) > EPS ||
-            Math.abs(color_arr[cOffset + 1]! / 255 - g) > EPS ||
-            Math.abs(color_arr[cOffset + 2]! / 255 - b) > EPS ||
-            Math.abs(color_arr[cOffset + 3]! / 255 - a) > EPS;
+            Math.abs(colors.array[colorOffset]! / 255 - r) > EPS ||
+            Math.abs(colors.array[colorOffset + 1]! / 255 - g) > EPS ||
+            Math.abs(colors.array[colorOffset + 2]! / 255 - b) > EPS ||
+            Math.abs(colors.array[colorOffset + 3]! / 255 - a) > EPS;
 
           if (diff) {
             colors.setXYZW(i, r, g, b, a);
