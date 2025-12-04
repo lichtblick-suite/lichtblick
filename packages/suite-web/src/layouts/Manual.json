@@ -183,7 +183,7 @@
       },
       "topics": {
         "/amcl_pose": {
-          "visible": true,
+          "visible": false,
           "type": "arrow",
           "color": "#d22222ff",
           "arrowScale": [
@@ -314,6 +314,9 @@
           "colorField": "intensity",
           "colorMode": "colormap",
           "colorMap": "turbo"
+        },
+        "/roi/accumulated": {
+          "visible": true
         }
       },
       "publish": {
