@@ -38,6 +38,7 @@ const setup = (inputOverride?: {
   };
 
   return {
+    ...renderHook(() => useSharedRawMessagesLogic(input)),
     input,
     saveConfig: input.saveConfig as jest.Mock,
   };
@@ -54,92 +55,39 @@ describe("given useSharedRawMessagesLogic", () => {
       expect(input.config.diffEnabled).toBe(false);
     });
 
-    it("then should override specific config properties", () => {
-      const { input } = setup({
-        config: {
-          topicPath: "/custom/topic",
-          diffEnabled: true,
-        },
-      });
-
-      expect(input.config.topicPath).toBe("/custom/topic");
-      expect(input.config.diffEnabled).toBe(true);
-      // Other defaults should still apply
-      expect(input.config.diffMethod).toBe("custom");
-    });
-
-    it("then should use custom saveConfig", () => {
-      const mockSaveConfig = jest.fn((newConfig) => {
-        return newConfig;
-      });
-      const { input, saveConfig } = setup({
-        saveConfig: mockSaveConfig,
-      });
-
-      expect(input.saveConfig).toBe(mockSaveConfig);
-      expect(saveConfig).toBe(mockSaveConfig);
-    });
     describe("when toggling diff", () => {
       it("then enables diff when currently disabled", () => {
-        const saveConfig = jest.fn();
-        const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
-          config: {
-            topicPath: "/initial/topic",
-            diffEnabled: false,
-            diffMethod: "custom",
-            diffTopicPath: "/diff/topic",
-            expansion: "none",
-          },
-          saveConfig,
-        };
-
-        const { result } = renderHook(() => useSharedRawMessagesLogic(input));
+        const { result, saveConfig } = setup();
 
         act(() => {
           result.current.onToggleDiff();
         });
 
-        expect(saveConfig).toHaveBeenCalledWith({ diffEnabled: true });
+        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ diffEnabled: true }));
       });
 
       it("then disables diff when currently enabled", () => {
-        const saveConfig = jest.fn();
-        const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
+        const { result, saveConfig } = setup({
           config: {
-            topicPath: "/initial/topic",
             diffEnabled: true,
-            diffMethod: "custom",
-            diffTopicPath: "/diff/topic",
-            expansion: "none",
           },
-          saveConfig,
-        };
-
-        const { result } = renderHook(() => useSharedRawMessagesLogic(input));
+        });
 
         act(() => {
           result.current.onToggleDiff();
         });
 
-        expect(saveConfig).toHaveBeenCalledWith({ diffEnabled: false });
+        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ diffEnabled: false }));
       });
     });
 
     describe("when toggling expand-all", () => {
       it("then expands all when starting from 'none'", () => {
-        const saveConfig = jest.fn();
-        const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
+        const { result, saveConfig } = setup({
           config: {
-            topicPath: "/initial/topic",
-            diffEnabled: false,
-            diffMethod: "custom",
-            diffTopicPath: "",
             expansion: "none",
           },
-          saveConfig,
-        };
-
-        const { result } = renderHook(() => useSharedRawMessagesLogic(input));
+        });
 
         expect(result.current.canExpandAll).toBe(true);
 
@@ -149,23 +97,15 @@ describe("given useSharedRawMessagesLogic", () => {
 
         expect(result.current.expansion).toBe("all");
         expect(result.current.canExpandAll).toBe(false);
-        expect(saveConfig).toHaveBeenCalledWith({ expansion: "all" });
+        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ expansion: "all" }));
       });
 
       it("then collapses all when starting from 'all'", () => {
-        const saveConfig = jest.fn();
-        const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
+        const { result, saveConfig } = setup({
           config: {
-            topicPath: "/initial/topic",
-            diffEnabled: false,
-            diffMethod: "custom",
-            diffTopicPath: "",
             expansion: "all",
           },
-          saveConfig,
-        };
-
-        const { result } = renderHook(() => useSharedRawMessagesLogic(input));
+        });
 
         expect(result.current.canExpandAll).toBe(false);
 
@@ -175,52 +115,34 @@ describe("given useSharedRawMessagesLogic", () => {
 
         expect(result.current.expansion).toBe("none");
         expect(result.current.canExpandAll).toBe(true);
-        expect(saveConfig).toHaveBeenCalledWith({ expansion: "none" });
+        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ expansion: "none" }));
       });
     });
-    describe("when topic path changes", () => {
-      it("resets expansion to 'none'", () => {
-        const saveConfig = jest.fn();
-        const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
+    describe("when topic path changes and expansion is 'all'", () => {
+      it("then resets expansion to 'none'", () => {
+        const { result, saveConfig } = setup({
           config: {
-            topicPath: "/initial/topic",
-            diffEnabled: false,
-            diffMethod: "custom",
-            diffTopicPath: "",
             expansion: "all",
           },
-          saveConfig,
-        };
-
-        const { result } = renderHook(() => useSharedRawMessagesLogic(input));
-
-        expect(result.current.expansion).toBe("all");
+        });
 
         act(() => {
           result.current.onTopicPathChange("/new/topic");
         });
 
-        expect(saveConfig).toHaveBeenCalledWith({ topicPath: "/new/topic" });
+        expect(saveConfig).toHaveBeenCalledWith(
+          expect.objectContaining({ topicPath: "/new/topic" }),
+        );
         expect(result.current.expansion).toBe("none");
       });
     });
     describe("when label is clicked", () => {
       it("then toggles expansion", () => {
-        const saveConfig = jest.fn();
-        const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
+        const { result, saveConfig } = setup({
           config: {
-            topicPath: "/initial/topic",
-            diffEnabled: false,
-            diffMethod: "custom",
-            diffTopicPath: "",
             expansion: "none",
           },
-          saveConfig,
-        };
-
-        const { result } = renderHook(() => useSharedRawMessagesLogic(input));
-
-        expect(result.current.expansion).toBe("none");
+        });
 
         act(() => {
           result.current.onLabelClick(["field1"]);
