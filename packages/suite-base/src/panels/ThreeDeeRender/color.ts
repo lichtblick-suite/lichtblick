@@ -20,6 +20,25 @@ export function SRGBToLinear(c: number): number {
   return c < 0.04045 ? c * 0.0773993808 : Math.pow(c * 0.9478672986 + 0.0521327014, 2.4);
 }
 
+const LUT_SIZE = 256;
+const SRGBToLinearLUTArray = new Float32Array(LUT_SIZE);
+for (let i = 0; i < LUT_SIZE; i++) {
+  const c = i / (LUT_SIZE - 1);
+  SRGBToLinearLUTArray[i] = SRGBToLinear(c);
+}
+
+export function SRGBToLinearRGBLUT(output: ColorRGB, r: number, g: number, b: number): ColorRGB {
+  const ri = (r * 255) | 0;
+  const gi = (g * 255) | 0;
+  const bi = (b * 255) | 0;
+
+  output.r = SRGBToLinearLUTArray[ri]!;
+  output.g = SRGBToLinearLUTArray[gi]!;
+  output.b = SRGBToLinearLUTArray[bi]!;
+
+  return output;
+}
+
 export function stringToRgba(output: ColorRGBA, colorStr: string): ColorRGBA {
   const color = tinycolor(colorStr);
   if (!color.isValid()) {
@@ -36,6 +55,10 @@ export function stringToRgba(output: ColorRGBA, colorStr: string): ColorRGBA {
 
 export function makeRgba(): ColorRGBA {
   return { r: 0, g: 0, b: 0, a: 0 };
+}
+
+export function makeRgb(): ColorRGB {
+  return { r: 0, g: 0, b: 0 };
 }
 
 export function stringToRgb<T extends ColorRGB | THREE.Color>(output: T, colorStr: string): T {
