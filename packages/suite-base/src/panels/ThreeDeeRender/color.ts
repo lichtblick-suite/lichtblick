@@ -28,9 +28,9 @@ for (let i = 0; i < LUT_SIZE; i++) {
 }
 
 export function SRGBToLinearRGBLUT(output: ColorRGB, r: number, g: number, b: number): ColorRGB {
-  const ri = (r * 255) | 0;
-  const gi = (g * 255) | 0;
-  const bi = (b * 255) | 0;
+  const ri = (r * (LUT_SIZE - 1)) | 0;
+  const gi = (g * (LUT_SIZE - 1)) | 0;
+  const bi = (b * (LUT_SIZE - 1)) | 0;
 
   output.r = SRGBToLinearLUTArray[ri]!;
   output.g = SRGBToLinearLUTArray[gi]!;
