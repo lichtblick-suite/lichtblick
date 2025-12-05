@@ -11,7 +11,7 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import { TreeNode } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/VirtualizedTree";
+import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesVirtual/VirtualizedTree";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 jest.mock("@tanstack/react-virtual", () => ({

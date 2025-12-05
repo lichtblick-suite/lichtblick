@@ -9,30 +9,30 @@
 
 import "@testing-library/jest-dom";
 
-import { RAW_MESSAGES_TWO_DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
-import RawMessagesTwoPanelExport from "@lichtblick/suite-base/panels/RawMessagesTwo/index";
+import { RAW_MESSAGES_VIRTUAL_DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/RawMessagesVirtual/constants";
+import RawMessagesVirtualPanelExport from "@lichtblick/suite-base/panels/RawMessagesVirtual/index";
 
-describe("RawMessagesTwo Panel Export", () => {
+describe("RawMessagesVirtual Panel Export", () => {
   describe("when verifying panel registration", () => {
     it("should export panel with correct panelType", () => {
       // Given / When
-      const panel = RawMessagesTwoPanelExport;
+      const panel = RawMessagesVirtualPanelExport;
 
       // Then
-      expect(panel.panelType).toBe("RawMessagesTwo");
+      expect(panel.panelType).toBe("RawMessagesVirtual");
     });
 
     it("should export panel with default config", () => {
       // Given / When
-      const panel = RawMessagesTwoPanelExport;
+      const panel = RawMessagesVirtualPanelExport;
 
       // Then
-      expect(panel.defaultConfig).toEqual(RAW_MESSAGES_TWO_DEFAULT_CONFIG);
+      expect(panel.defaultConfig).toEqual(RAW_MESSAGES_VIRTUAL_DEFAULT_CONFIG);
     });
 
     it("should export panel as wrapped component", () => {
       // Given / When
-      const panel = RawMessagesTwoPanelExport;
+      const panel = RawMessagesVirtualPanelExport;
 
       // Then
       expect(panel).toBeDefined();

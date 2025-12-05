@@ -40,7 +40,7 @@ export type UseSharedRawMessagesLogicResult = {
 };
 
 /**
- * Shared hook that contains all the common logic for both RawMessages and RawMessagesTwo panels.
+ * Shared hook that contains all the common logic for both RawMessages and RawMessagesVirtual panels.
  * This includes state management, message subscriptions, expansion logic, and common callbacks.
  */
 export function useSharedRawMessagesLogic<T extends SharedConfig>({

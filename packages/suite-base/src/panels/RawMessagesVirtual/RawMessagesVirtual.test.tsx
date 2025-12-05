@@ -21,7 +21,7 @@ import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-import RawMessagesTwo from "./RawMessagesTwo";
+import RawMessagesVirtual from "./RawMessagesVirtual";
 
 const mockUseSharedRawMessagesLogic = jest.fn();
 
@@ -105,7 +105,7 @@ function renderComponent(configOverrides: Partial<RawMessagesPanelConfig> = {}) 
       <MockPanelContextProvider>
         <PanelSetup>
           <AppConfigurationContext.Provider value={appConfig}>
-            <RawMessagesTwo config={rawMessageConfig} saveConfig={saveConfig} />
+            <RawMessagesVirtual config={rawMessageConfig} saveConfig={saveConfig} />
           </AppConfigurationContext.Provider>
         </PanelSetup>
       </MockPanelContextProvider>
@@ -119,7 +119,7 @@ function renderComponent(configOverrides: Partial<RawMessagesPanelConfig> = {}) 
   };
 }
 
-describe("Given RawMessagesTwo", () => {
+describe("Given RawMessagesVirtual", () => {
   beforeEach(() => {
     jest.spyOn(console, "error").mockImplementation(() => {});
 

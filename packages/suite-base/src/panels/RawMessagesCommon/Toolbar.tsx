@@ -17,7 +17,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import { useStylesToolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import {
   PropsToolbar,
-  RawMessagesTwoPanelConfig,
+  RawMessagesVirtualPanelConfig,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { PREV_MSG_METHOD, CUSTOM_METHOD } from "./constants";
@@ -79,7 +79,7 @@ function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
             MenuProps={{ MenuListProps: { dense: true } }}
             onChange={(event: SelectChangeEvent) => {
               saveConfig({
-                diffMethod: event.target.value as RawMessagesTwoPanelConfig["diffMethod"],
+                diffMethod: event.target.value as RawMessagesVirtualPanelConfig["diffMethod"],
               });
             }}
           >

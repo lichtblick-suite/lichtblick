@@ -16,10 +16,10 @@ import {
   PATH_NAME_AGGREGATOR,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
 import getDiff from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
-import { useStylesRawMessagesTwo } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import { useStylesRawMessagesVirtual } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import {
   NodeState,
-  PropsRawMessagesTwo,
+  PropsRawMessagesVirtual,
   TreeNode,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
@@ -34,13 +34,13 @@ import {
   getValueString,
   isSingleElemArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
-import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesTwo/VirtualizedTree";
+import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesVirtual/VirtualizedTree";
 
-const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
+const RawMessagesVirtual = (props: PropsRawMessagesVirtual): React.JSX.Element => {
   const {
     palette: { mode: _themePreference },
   } = useTheme();
-  const { classes } = useStylesRawMessagesTwo();
+  const { classes } = useStylesRawMessagesVirtual();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
@@ -308,4 +308,4 @@ const RawMessagesTwo = (props: PropsRawMessagesTwo): React.JSX.Element => {
   );
 };
 
-export default RawMessagesTwo;
+export default RawMessagesVirtual;

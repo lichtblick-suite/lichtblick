@@ -15,7 +15,7 @@ export const useStylesRawMessages = makeStyles()((theme) => ({
   },
 }));
 
-export const useStylesRawMessagesTwo = makeStyles()((theme) => ({
+export const useStylesRawMessagesVirtual = makeStyles()((theme) => ({
   topic: {
     fontFamily: theme.typography.body1.fontFamily,
     fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,

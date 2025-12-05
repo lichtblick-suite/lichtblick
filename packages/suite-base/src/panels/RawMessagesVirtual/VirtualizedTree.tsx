@@ -12,7 +12,7 @@ import { PropsVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesC
 import {
   COLLAPSED_ICON,
   EXPANDED_ICON,
-} from "@lichtblick/suite-base/panels/RawMessagesTwo/constants";
+} from "@lichtblick/suite-base/panels/RawMessagesVirtual/constants";
 
 import { useStyles } from "./VirtualizedTree.style";
 import { flattenTreeData } from "./flattenTreeData";

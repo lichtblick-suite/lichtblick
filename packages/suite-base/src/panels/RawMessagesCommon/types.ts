@@ -22,7 +22,7 @@ export type RawMessagesPanelConfig = {
   fontSize: number | undefined;
 };
 
-export type RawMessagesTwoPanelConfig = {
+export type RawMessagesVirtualPanelConfig = {
   diffEnabled: boolean;
   diffMethod: "custom" | "previous message";
   diffTopicPath: string;
@@ -80,9 +80,9 @@ export type PropsRawMessages = {
   saveConfig: SaveConfig<RawMessagesPanelConfig>;
 };
 
-export type PropsRawMessagesTwo = {
-  config: Immutable<RawMessagesTwoPanelConfig>;
-  saveConfig: SaveConfig<RawMessagesTwoPanelConfig>;
+export type PropsRawMessagesVirtual = {
+  config: Immutable<RawMessagesVirtualPanelConfig>;
+  saveConfig: SaveConfig<RawMessagesVirtualPanelConfig>;
 };
 
 export type PropsMaybeCollapsedValue = { itemLabel: string };
@@ -99,13 +99,13 @@ export type PropsMetadata = {
 export type PropsToolbar = {
   canExpandAll: boolean;
   diffEnabled: boolean;
-  diffMethod: RawMessagesTwoPanelConfig["diffMethod"];
+  diffMethod: RawMessagesVirtualPanelConfig["diffMethod"];
   diffTopicPath: string;
   onDiffTopicPathChange: (path: string) => void;
   onToggleDiff: () => void;
   onToggleExpandAll: () => void;
   onTopicPathChange: (path: string) => void;
-  saveConfig: SaveConfig<RawMessagesTwoPanelConfig>;
+  saveConfig: SaveConfig<RawMessagesVirtualPanelConfig>;
   topic?: Topic;
   topicPath: string;
 };

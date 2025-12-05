@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { CUSTOM_METHOD } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
-import { RawMessagesTwoPanelConfig } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { RawMessagesVirtualPanelConfig } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
-export const RAW_MESSAGES_TWO_DEFAULT_CONFIG: RawMessagesTwoPanelConfig = {
+export const RAW_MESSAGES_VIRTUAL_DEFAULT_CONFIG: RawMessagesVirtualPanelConfig = {
   diffEnabled: false,
   diffMethod: CUSTOM_METHOD,
   diffTopicPath: "",
