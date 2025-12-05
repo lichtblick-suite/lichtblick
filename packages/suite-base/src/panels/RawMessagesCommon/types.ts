@@ -147,3 +147,20 @@ export type ValueLabels = {
   arrLabel: string;
   itemLabel: string;
 };
+
+export type SharedConfig = {
+  topicPath: string;
+  diffMethod: "custom" | "previous message";
+  diffTopicPath: string;
+  diffEnabled: boolean;
+  expansion?: NodeExpansion;
+};
+
+type SharedConfigActions<T extends SharedConfig> = {
+  saveConfig: (config: Partial<T>) => void;
+};
+
+export type UseSharedRawMessagesLogicProps<T extends SharedConfig> = {
+  config: T;
+  saveConfig: SharedConfigActions<T>["saveConfig"];
+};
