@@ -10,8 +10,13 @@ import { NodeExpansion, NodeState } from "@lichtblick/suite-base/panels/RawMessa
 import {
   dataWithoutWrappingArray,
   getConstantNameByKeyPath,
+  getCopyAction,
+  getFilterAction,
+  getLineChartAction,
   getMessageDocumentationLink,
+  getScatterPlotAction,
   getSingleValue,
+  getStateTransitionsAction,
   getValueLabels,
   getValueString,
   isSingleElemArray,
@@ -800,6 +805,148 @@ describe("getValueString", () => {
 
         // Then
         expect(result.itemLabel).toBe(`${value} (TIME_CONSTANT)`);
+      });
+    });
+  });
+});
+
+describe("getCopyAction", () => {
+  describe("given a value and copy handler", () => {
+    const itemValue = { foo: BasicBuilder.string(), num: BasicBuilder.number() };
+    const handleCopy = jest.fn();
+    describe("when copied is false", () => {
+      const resultFalse = getCopyAction({ copied: false }, itemValue, handleCopy);
+      it("then should return copy action with CopyAllIcon", () => {
+        // Then
+        expect(resultFalse.key).toBe("Copy");
+        expect(resultFalse.activeColor).toBe("primary");
+        expect(resultFalse.tooltip).toBe("Copy to Clipboard");
+        expect(resultFalse.icon).toBeDefined();
+      });
+
+      it("then should call handleCopy with stringified JSON when clicked", () => {
+        // When
+        resultFalse.onClick?.({} as React.MouseEvent<HTMLButtonElement>);
+
+        // Then
+        expect(handleCopy).toHaveBeenCalledWith(
+          JSON.stringify(
+            itemValue,
+            expect.any(Function) as (key: string, value: unknown) => unknown,
+            2,
+          ),
+        );
+      });
+    });
+
+    describe("when copied is true", () => {
+      const resultTrue = getCopyAction({ copied: true }, itemValue, handleCopy);
+      it("then should return success action with CheckIcon", () => {
+        // Then
+        expect(resultTrue.key).toBe("Copy");
+        expect(resultTrue.activeColor).toBe("success");
+        expect(resultTrue.tooltip).toBe("Copied");
+        expect(resultTrue.icon).toBeDefined();
+      });
+    });
+  });
+});
+
+describe("getFilterAction", () => {
+  describe("given a filter handler", () => {
+    const onFilter = jest.fn();
+    describe("when creating filter action", () => {
+      const result = getFilterAction(onFilter);
+      it("then should return filter action with correct properties", () => {
+        // Then
+        expect(result.key).toBe("Filter");
+        expect(result.tooltip).toBe("Filter on this value");
+        expect(result.icon).toBeDefined();
+      });
+
+      it("then should call onFilter when clicked", () => {
+        // When
+        result.onClick?.({} as React.MouseEvent<HTMLButtonElement>);
+
+        // Then
+        expect(onFilter).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+});
+
+describe("getLineChartAction", () => {
+  describe("given a single slice path and plot panel opener", () => {
+    const singleSlicePath = BasicBuilder.string("/topic.field");
+    const mockHandler = jest.fn();
+    const openPlotPanel = jest.fn(() => mockHandler);
+    describe("when creating line chart action", () => {
+      const result = getLineChartAction(singleSlicePath, openPlotPanel);
+      it("then should return line chart action with correct properties", () => {
+        // Then
+        expect(result.key).toBe("line");
+        expect(result.tooltip).toBe("Plot this value on a line chart");
+        expect(result.icon).toBeDefined();
+      });
+
+      it("then should call openPlotPanel with path when clicked", () => {
+        // When
+        result.onClick?.({} as React.MouseEvent<HTMLButtonElement>);
+
+        // Then
+        expect(openPlotPanel).toHaveBeenCalledWith(singleSlicePath);
+        expect(mockHandler).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+});
+
+describe("getScatterPlotAction", () => {
+  describe("given a multi slice path and plot panel opener", () => {
+    const multiSlicePath = BasicBuilder.string("/topic.array[:]");
+    const mockHandler = jest.fn();
+    const openPlotPanel = jest.fn(() => mockHandler);
+    describe("when creating scatter plot action", () => {
+      const result = getScatterPlotAction(multiSlicePath, openPlotPanel);
+      it("then should return scatter plot action with correct properties", () => {
+        // Then
+        expect(result.key).toBe("scatter");
+        expect(result.tooltip).toBe("Plot this value on a scatter plot");
+        expect(result.icon).toBeDefined();
+      });
+
+      it("then should call openPlotPanel with path when clicked", () => {
+        // When
+        result.onClick?.({} as React.MouseEvent<HTMLButtonElement>);
+
+        // Then
+        expect(openPlotPanel).toHaveBeenCalledWith(multiSlicePath);
+        expect(mockHandler).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+});
+
+describe("getStateTransitionsAction", () => {
+  describe("given a single slice path and state transitions panel opener", () => {
+    const singleSlicePath = BasicBuilder.string("/topic.state");
+    const mockHandler = jest.fn();
+    const openStateTransitionsPanel = jest.fn(() => mockHandler);
+    describe("when creating state transitions action", () => {
+      const result = getStateTransitionsAction(singleSlicePath, openStateTransitionsPanel);
+      it("then should return state transitions action with correct properties", () => {
+        // Then
+        expect(result.key).toBe("stateTransitions");
+        expect(result.tooltip).toBe("View state transitions for this value");
+        expect(result.icon).toBeDefined();
+      });
+
+      it("then should call openStateTransitionsPanel with path when clicked", () => {
+        result.onClick?.({} as React.MouseEvent<HTMLButtonElement>);
+
+        // Then
+        expect(openStateTransitionsPanel).toHaveBeenCalledWith(singleSlicePath);
+        expect(mockHandler).toHaveBeenCalledTimes(1);
       });
     });
   });

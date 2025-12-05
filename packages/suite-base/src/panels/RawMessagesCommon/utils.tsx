@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
+import CheckIcon from "@mui/icons-material/Check";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
+import FilterIcon from "@mui/icons-material/FilterAlt";
+import StateTransitionsIcon from "@mui/icons-material/PowerInput";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import LineChartIcon from "@mui/icons-material/ShowChart";
 import * as _ from "lodash-es";
 
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
@@ -10,11 +16,13 @@ import {
   PATH_NAME_AGGREGATOR,
   ROS1_COMMON_MSG_PACKAGES,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { copyMessageReplacer } from "@lichtblick/suite-base/panels/RawMessagesCommon/copyMessageReplacer";
 import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
 import {
   DiffObject,
   NodeExpansion,
   NodeState,
+  ValueActionItem,
   ValueLabels,
   ValueLabelsProps,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
@@ -241,4 +249,67 @@ export const getValueString = (value: unknown): string => {
     return String(value);
   }
   return "";
+};
+
+/** Value.tsx */
+
+export const getCopyAction = (
+  { copied }: { copied: boolean },
+  itemValue: unknown,
+  handleCopy: (value: string) => void,
+): ValueActionItem => {
+  return {
+    key: "Copy",
+    activeColor: copied ? "success" : "primary",
+    tooltip: copied ? "Copied" : "Copy to Clipboard",
+    icon: copied ? <CheckIcon fontSize="inherit" /> : <CopyAllIcon fontSize="inherit" />,
+    onClick: () => {
+      handleCopy(JSON.stringify(itemValue, copyMessageReplacer, 2) ?? "");
+    },
+  };
+};
+
+export const getFilterAction = (onFilter: () => void): ValueActionItem => {
+  return {
+    key: "Filter",
+    tooltip: "Filter on this value",
+    icon: <FilterIcon fontSize="inherit" />,
+    onClick: onFilter,
+  };
+};
+
+export const getLineChartAction = (
+  singleSlicePath: string,
+  openPlotPanel: (pathSuffix: string) => () => void,
+): ValueActionItem => {
+  return {
+    key: "line",
+    tooltip: "Plot this value on a line chart",
+    icon: <LineChartIcon fontSize="inherit" />,
+    onClick: openPlotPanel(singleSlicePath),
+  };
+};
+
+export const getScatterPlotAction = (
+  multiSlicePath: string,
+  openPlotPanel: (pathSuffix: string) => () => void,
+): ValueActionItem => {
+  return {
+    key: "scatter",
+    tooltip: "Plot this value on a scatter plot",
+    icon: <ScatterPlotIcon fontSize="inherit" />,
+    onClick: openPlotPanel(multiSlicePath),
+  };
+};
+
+export const getStateTransitionsAction = (
+  singleSlicePath: string,
+  openStateTransitionsPanel: (pathSuffix: string) => () => void,
+): ValueActionItem => {
+  return {
+    key: "stateTransitions",
+    tooltip: "View state transitions for this value",
+    icon: <StateTransitionsIcon fontSize="inherit" />,
+    onClick: openStateTransitionsPanel(singleSlicePath),
+  };
 };

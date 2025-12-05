@@ -5,13 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CheckIcon from "@mui/icons-material/Check";
-import CopyAllIcon from "@mui/icons-material/CopyAll";
 import ErrorIcon from "@mui/icons-material/Error";
-import FilterIcon from "@mui/icons-material/FilterAlt";
-import StateTransitionsIcon from "@mui/icons-material/PowerInput";
-import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
-import LineChartIcon from "@mui/icons-material/ShowChart";
 import { Tooltip, useTheme } from "@mui/material";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { withStyles } from "tss-react/mui";
@@ -20,9 +14,15 @@ import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIcon
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { openSiblingPlotPanel } from "@lichtblick/suite-base/panels/Plot/utils/openSiblingPlotPanel";
 import HighlightedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/HighlightedValue";
-import { copyMessageReplacer } from "@lichtblick/suite-base/panels/RawMessagesCommon/copyMessageReplacer";
 import { useStylesValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import { PropsValue, ValueActionItem } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import {
+  getCopyAction,
+  getFilterAction,
+  getLineChartAction,
+  getScatterPlotAction,
+  getStateTransitionsAction,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { TRANSITIONABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { openSiblingStateTransitionsPanel } from "@lichtblick/suite-base/panels/StateTransitions/openSiblingStateTransitionsPanel";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
@@ -99,54 +99,35 @@ function Value(props: PropsValue): React.JSX.Element {
 
   const availableActions = useMemo(() => {
     const actions: ValueActionItem[] = [];
-    if (arrLabel.length > 0) {
-      actions.push({
-        key: "Copy",
-        activeColor: copied ? "success" : "primary",
-        tooltip: copied ? "Copied" : "Copy to Clipboard",
-        icon: copied ? <CheckIcon fontSize="inherit" /> : <CopyAllIcon fontSize="inherit" />,
-        onClick: () => {
-          handleCopy(JSON.stringify(itemValue, copyMessageReplacer, 2) ?? "");
-        },
-      });
-    }
-    if (valueAction != undefined) {
-      const isPlotableType = PLOTABLE_ROS_TYPES.includes(valueAction.primitiveType);
-      const isTransitionalType = TRANSITIONABLE_ROS_TYPES.includes(valueAction.primitiveType);
-      const isMultiSlicePath = valueAction.multiSlicePath === valueAction.singleSlicePath;
 
-      if (valueAction.filterPath.length > 0) {
-        actions.push({
-          key: "Filter",
-          tooltip: "Filter on this value",
-          icon: <FilterIcon fontSize="inherit" />,
-          onClick: onFilter,
-        });
+    if (arrLabel.length > 0) {
+      actions.push(getCopyAction({ copied }, itemValue, handleCopy));
+    }
+
+    if (valueAction == undefined) {
+      return actions;
+    }
+
+    const isPlotableType = PLOTABLE_ROS_TYPES.includes(valueAction.primitiveType);
+    const isTransitionalType = TRANSITIONABLE_ROS_TYPES.includes(valueAction.primitiveType);
+    const isMultiSlicePath = valueAction.multiSlicePath === valueAction.singleSlicePath;
+
+    if (valueAction.filterPath.length > 0) {
+      actions.push(getFilterAction(onFilter));
+    }
+
+    if (isPlotableType) {
+      actions.push(getLineChartAction(valueAction.singleSlicePath, openPlotPanel));
+
+      if (!isMultiSlicePath) {
+        actions.push(getScatterPlotAction(valueAction.multiSlicePath, openPlotPanel));
       }
-      if (isPlotableType) {
-        actions.push({
-          key: "line",
-          tooltip: "Plot this value on a line chart",
-          icon: <LineChartIcon fontSize="inherit" />,
-          onClick: openPlotPanel(valueAction.singleSlicePath),
-        });
-      }
-      if (isPlotableType && !isMultiSlicePath) {
-        actions.push({
-          key: "scatter",
-          tooltip: "Plot this value on a scatter plot",
-          icon: <ScatterPlotIcon fontSize="inherit" />,
-          onClick: openPlotPanel(valueAction.multiSlicePath),
-        });
-      }
-      if (isTransitionalType && isMultiSlicePath) {
-        actions.push({
-          key: "stateTransitions",
-          tooltip: "View state transitions for this value",
-          icon: <StateTransitionsIcon fontSize="inherit" />,
-          onClick: openStateTransitionsPanel(valueAction.singleSlicePath),
-        });
-      }
+    }
+
+    if (isTransitionalType && isMultiSlicePath) {
+      actions.push(
+        getStateTransitionsAction(valueAction.singleSlicePath, openStateTransitionsPanel),
+      );
     }
 
     return actions;
