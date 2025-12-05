@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+
 import { HttpError } from "./HttpError";
 
 /**
@@ -126,6 +128,74 @@ describe("HttpError", () => {
       expect(error.message).toBe(message);
       expect(error.statusText).toBe(statusText);
       expect(error.status).toBe(400);
+    });
+  });
+
+  describe("getUserFriendlyErrorMessage", () => {
+    it("should handle network errors (status 0)", () => {
+      const error = new HttpError(BasicBuilder.string(), 0, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "Network connection error. Please check your connection.",
+      );
+    });
+
+    it("should handle 400 Bad Request", () => {
+      const error = new HttpError(BasicBuilder.string(), 400, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "Invalid request. Please check your input and try again.",
+      );
+    });
+
+    it("should handle 401 Unauthorized", () => {
+      const error = new HttpError(BasicBuilder.string(), 401, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "You are not authenticated. Please sign in.",
+      );
+    });
+
+    it("should handle 403 Forbidden", () => {
+      const error = new HttpError(BasicBuilder.string(), 403, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "You do not have permission to perform this action.",
+      );
+    });
+
+    it("should handle 404 Not Found", () => {
+      const error = new HttpError(BasicBuilder.string(), 404, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe("The requested resource was not found.");
+    });
+
+    it("should handle 500 Internal Server Error", () => {
+      const error = new HttpError(BasicBuilder.string(), 500, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe("Server error. Please try again later.");
+    });
+
+    it("should handle other 4xx client errors", () => {
+      const testCases = [402, 405, 408, 410, 418, 429];
+
+      testCases.forEach((status) => {
+        const error = new HttpError(BasicBuilder.string(), status, BasicBuilder.string());
+
+        expect(error.getUserFriendlyErrorMessage()).toBe(
+          "Request error. Please check your input and try again.",
+        );
+      });
+    });
+
+    it("should handle other 5xx server errors", () => {
+      const testCases = [501, 502, 504, 505];
+
+      testCases.forEach((status) => {
+        const error = new HttpError(BasicBuilder.string(), status, BasicBuilder.string());
+
+        expect(error.getUserFriendlyErrorMessage()).toBe("Server error. Please try again later.");
+      });
     });
   });
 });

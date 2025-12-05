@@ -9,11 +9,13 @@ import { useSnackbar } from "notistack";
 import { useCallback } from "react";
 
 import Logger from "@lichtblick/log";
+import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 
 const log = Logger.getLogger(__filename);
 
 /**
  * A version of React.useCallback() displaying any errors thrown from the function as toast notifications.
+ * For HttpErrors, displays user-friendly messages based on status code. For other errors, shows the error message.
  */
 export default function useCallbackWithToast<Args extends unknown[]>(
   callback: (...args: Args) => Promise<void> | void,
@@ -27,7 +29,11 @@ export default function useCallbackWithToast<Args extends unknown[]>(
         return;
       } catch (error) {
         log.error(error);
-        enqueueSnackbar((error as Error).toString(), { variant: "error" });
+        const errorMessage =
+          error instanceof HttpError
+            ? error.getUserFriendlyErrorMessage()
+            : (error as Error).toString();
+        enqueueSnackbar(errorMessage, { variant: "error" });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

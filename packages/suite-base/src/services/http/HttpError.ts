@@ -20,4 +20,35 @@ export class HttpError extends Error {
     this.statusText = statusText;
     this.response = response;
   }
+
+  /**
+   * Returns a user-friendly error message based on the HTTP status code.
+   * This is used to display appropriate messages in UI notifications.
+   */
+  public getUserFriendlyErrorMessage(): string {
+    if (this.status === 0) {
+      return "Network connection error. Please check your connection.";
+    }
+
+    switch (this.status) {
+      case 400:
+        return "Invalid request. Please check your input and try again.";
+      case 401:
+        return "You are not authenticated. Please sign in.";
+      case 403:
+        return "You do not have permission to perform this action.";
+      case 404:
+        return "The requested resource was not found.";
+      case 500:
+        return "Server error. Please try again later.";
+      default:
+        if (this.status >= 400 && this.status < 500) {
+          return "Request error. Please check your input and try again.";
+        }
+        if (this.status >= 500) {
+          return "Server error. Please try again later.";
+        }
+        return this.message;
+    }
+  }
 }
