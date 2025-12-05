@@ -47,11 +47,18 @@ export default function MaybeCollapsedValue({
     >
       <span
         onClick={expandText}
-        onFocus={() => {}} // to supress "non-interactive elements with click handlers must have at least one keyboard listener"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            expandText();
+          }
+        }}
+        tabIndex={showingEntireLabel ? undefined : 0}
         style={{
           cursor: showingEntireLabel ? "inherit" : "pointer",
         }}
-        role="link"
+        role="button"
+        aria-expanded={showingEntireLabel}
       >
         {`${truncatedItemText}${!showingEntireLabel ? "…" : ""}`}
       </span>
