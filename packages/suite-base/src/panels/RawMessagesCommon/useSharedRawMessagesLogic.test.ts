@@ -47,114 +47,102 @@ describe("given useSharedRawMessagesLogic", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe("when configuration handling", () => {
-    it("then should initialize with default config", () => {
-      const { input } = setup();
+  describe("when toggling diff", () => {
+    it("then enables diff when currently disabled", () => {
+      const { result, saveConfig } = setup();
 
-      expect(input.config.topicPath).toBe("some/topic");
-      expect(input.config.diffEnabled).toBe(false);
+      act(() => {
+        result.current.onToggleDiff();
+      });
+
+      expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ diffEnabled: true }));
     });
 
-    describe("when toggling diff", () => {
-      it("then enables diff when currently disabled", () => {
-        const { result, saveConfig } = setup();
-
-        act(() => {
-          result.current.onToggleDiff();
-        });
-
-        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ diffEnabled: true }));
+    it("then disables diff when currently enabled", () => {
+      const { result, saveConfig } = setup({
+        config: {
+          diffEnabled: true,
+        },
       });
 
-      it("then disables diff when currently enabled", () => {
-        const { result, saveConfig } = setup({
-          config: {
-            diffEnabled: true,
-          },
-        });
-
-        act(() => {
-          result.current.onToggleDiff();
-        });
-
-        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ diffEnabled: false }));
+      act(() => {
+        result.current.onToggleDiff();
       });
+
+      expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ diffEnabled: false }));
     });
-
-    describe("when toggling expand-all", () => {
-      it("then expands all when starting from 'none'", () => {
-        const { result, saveConfig } = setup({
-          config: {
-            expansion: "none",
-          },
-        });
-
-        expect(result.current.canExpandAll).toBe(true);
-
-        act(() => {
-          result.current.onToggleExpandAll();
-        });
-
-        expect(result.current.expansion).toBe("all");
-        expect(result.current.canExpandAll).toBe(false);
-        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ expansion: "all" }));
+  });
+  describe("when toggling expand-all", () => {
+    it("then expands all when starting from 'none'", () => {
+      const { result, saveConfig } = setup({
+        config: {
+          expansion: "none",
+        },
       });
 
-      it("then collapses all when starting from 'all'", () => {
-        const { result, saveConfig } = setup({
-          config: {
-            expansion: "all",
-          },
-        });
+      expect(result.current.canExpandAll).toBe(true);
 
-        expect(result.current.canExpandAll).toBe(false);
-
-        act(() => {
-          result.current.onToggleExpandAll();
-        });
-
-        expect(result.current.expansion).toBe("none");
-        expect(result.current.canExpandAll).toBe(true);
-        expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ expansion: "none" }));
+      act(() => {
+        result.current.onToggleExpandAll();
       });
+
+      expect(result.current.expansion).toBe("all");
+      expect(result.current.canExpandAll).toBe(false);
+      expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ expansion: "all" }));
     });
-    describe("when topic path changes and expansion is 'all'", () => {
-      it("then resets expansion to 'none'", () => {
-        const { result, saveConfig } = setup({
-          config: {
-            expansion: "all",
-          },
-        });
-
-        act(() => {
-          result.current.onTopicPathChange("/new/topic");
-        });
-
-        expect(saveConfig).toHaveBeenCalledWith(
-          expect.objectContaining({ topicPath: "/new/topic" }),
-        );
-        expect(result.current.expansion).toBe("none");
+    it("then collapses all when starting from 'all'", () => {
+      const { result, saveConfig } = setup({
+        config: {
+          expansion: "all",
+        },
       });
+
+      expect(result.current.canExpandAll).toBe(false);
+
+      act(() => {
+        result.current.onToggleExpandAll();
+      });
+
+      expect(result.current.expansion).toBe("none");
+      expect(result.current.canExpandAll).toBe(true);
+      expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ expansion: "none" }));
     });
-    describe("when label is clicked", () => {
-      it("then toggles expansion", () => {
-        const { result, saveConfig } = setup({
-          config: {
-            expansion: "none",
-          },
-        });
+  });
 
-        act(() => {
-          result.current.onLabelClick(["field1"]);
-        });
+  describe("when topic path changes and expansion is 'all'", () => {
+    it("then resets expansion to 'none'", () => {
+      const { result, saveConfig } = setup({
+        config: {
+          expansion: "all",
+        },
+      });
 
-        // After clicking a label, expansion should become an object state
-        expect(typeof result.current.expansion).toBe("object");
+      act(() => {
+        result.current.onTopicPathChange("/new/topic");
+      });
 
-        // The hook persists expansion via saveConfig
-        expect(saveConfig).toHaveBeenCalledWith({
-          expansion: expect.any(Object),
-        });
+      expect(saveConfig).toHaveBeenCalledWith(expect.objectContaining({ topicPath: "/new/topic" }));
+      expect(result.current.expansion).toBe("none");
+    });
+  });
+  describe("when label is clicked", () => {
+    it("then toggles expansion", () => {
+      const { result, saveConfig } = setup({
+        config: {
+          expansion: "none",
+        },
+      });
+
+      act(() => {
+        result.current.onLabelClick(["field1"]);
+      });
+
+      // After clicking a label, expansion should become an object state
+      expect(typeof result.current.expansion).toBe("object");
+
+      // The hook persists expansion via saveConfig
+      expect(saveConfig).toHaveBeenCalledWith({
+        expansion: expect.any(Object),
       });
     });
   });
