@@ -75,6 +75,16 @@ export const VirtualizedTree = memo(function VirtualizedTree({
                     onClick={() => {
                       onToggleExpand(node.key);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onToggleExpand(node.key);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-expanded={expandedNodes.has(node.key)}
+                    aria-label={`${expandedNodes.has(node.key) ? "Collapse" : "Expand"} ${node.label}`}
                   >
                     {expandedNodes.has(node.key) ? COLLAPSED_ICON : EXPANDED_ICON}
                   </span>
