@@ -534,7 +534,11 @@ export interface PanelSettings<ExtensionSettings> {
 export type RegisterMessageConverterArgs<Src> = {
   fromSchemaName: string;
   toSchemaName: string;
-  converter: (msg: Src, event: Immutable<MessageEvent<Src>>) => unknown;
+  converter: (
+    msg: Src,
+    event: Immutable<MessageEvent<Src>>,
+    globalVariables?: Readonly<Record<string, VariableValue>>,
+  ) => unknown;
   /**
    * Custom settings for the topics using the schema specified in the *toSchemaName* property
    */

@@ -30,8 +30,8 @@ import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/Moc
 import MessagePathInput, {
   tryToSetDefaultGlobalVar,
   getFirstInvalidVariableFromRosPath,
-  MessagePathInputBaseProps,
 } from "./MessagePathInput";
+import { MessagePathInputBaseProps } from "./types";
 
 jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");

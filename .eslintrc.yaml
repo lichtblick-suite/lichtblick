@@ -30,6 +30,7 @@ settings:
 rules:
   "@lichtblick/license-header": ["error", { licenseType: "MPL-2.0" }]
   "@lichtblick/prefer-hash-private": off
+  '@typescript-eslint/no-unnecessary-type-conversion': off
 
   tss-unused-classes/unused-classes: error
 

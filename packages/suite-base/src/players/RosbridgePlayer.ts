@@ -283,12 +283,10 @@ export default class RosbridgePlayer implements Player {
           ros2: this.#rosVersion === 2,
         });
         // https://github.com/typescript-eslint/typescript-eslint/issues/6632
-        if (!messageReaders[type]) {
-          messageReaders[type] =
-            this.#rosVersion !== 2
-              ? new ROS1MessageReader(parsedDefinition)
-              : new ROS2MessageReader(parsedDefinition);
-        }
+        messageReaders[type] ??=
+          this.#rosVersion !== 2
+            ? new ROS1MessageReader(parsedDefinition)
+            : new ROS2MessageReader(parsedDefinition);
       }
 
       // We call requestTopics on a timeout to check for new topics. If there are no changes to topics
@@ -693,7 +691,6 @@ export default class RosbridgePlayer implements Player {
     if (this.#isRefreshing) {
       return;
     }
-
     try {
       this.#isRefreshing = true;
 

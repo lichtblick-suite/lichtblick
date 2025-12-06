@@ -68,7 +68,7 @@ export function handleAddSeriesAction({ draft }: HandleAction): void {
 }
 
 export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAction): void {
-  draft.paths.splice(Number(index), 1);
+  draft.paths.splice(index, 1);
 }
 
 export default function usePlotPanelSettings(

@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { MessagePathPart, MessagePath } from "@lichtblick/message-path";
+import type { MessagePathPart, MessagePath, MessagePathName } from "@lichtblick/message-path";
 import type { Immutable } from "@lichtblick/suite";
 import type {
   SubscribePayload,
@@ -20,9 +20,9 @@ export function pathToSubscribePayload(
 ): SubscribePayload | undefined {
   const { messagePath: parts, topicName: topic } = path;
 
-  const firstField = parts.find(typeIsName);
+  const firstField: MessagePathName | undefined = parts.find(typeIsName);
 
-  if (firstField == undefined || firstField.type !== "name" || firstField.name.length === 0) {
+  if (firstField == undefined || firstField.name.length === 0) {
     return undefined;
   }
 

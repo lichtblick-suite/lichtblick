@@ -14,10 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TextFieldProps } from "@mui/material";
 import * as _ from "lodash-es";
-import { CSSProperties, useCallback, useMemo } from "react";
-import { makeStyles } from "tss-react/mui";
+import { useCallback, useMemo } from "react";
 
 import { filterMap } from "@lichtblick/den/collection";
 import {
@@ -27,7 +25,10 @@ import {
   PrimitiveType,
 } from "@lichtblick/message-path";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
-import { Autocomplete, IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete";
+import { Autocomplete } from "@lichtblick/suite-base/components/Autocomplete";
+import { IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete/types";
+import { useStyles } from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput.style";
+import { MessagePathInputBaseProps } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
 import { useStructuredItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useStructureItemsByPath";
 import useGlobalVariables, {
   GlobalVariables,
@@ -38,8 +39,8 @@ import {
   messagePathStructures,
   messagePathsForStructure,
   validTerminatingStructureItem,
-  StructureTraversalResult,
 } from "./messagePathsForDatatype";
+import { StructureTraversalResult } from "./types";
 
 export function tryToSetDefaultGlobalVar(
   variableName: string,
@@ -104,26 +105,6 @@ function getExamplePrimitive(primitiveType: PrimitiveType) {
   }
 }
 
-export type MessagePathInputBaseProps = {
-  supportsMathModifiers?: boolean;
-  path: string; // A path of the form `/topic.some_field[:]{id==42}.x`
-  index?: number; // Optional index field which gets passed to `onChange` (so you don't have to create anonymous functions)
-  onChange: (value: string, index?: number) => void;
-  validTypes?: readonly string[]; // Valid types, like "message", "array", or "primitive", or a ROS primitive like "float64"
-  noMultiSlices?: boolean; // Don't suggest slices with multiple values `[:]`, only single values like `[0]`.
-  placeholder?: string;
-  inputStyle?: CSSProperties;
-  disabled?: boolean;
-  disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
-  readOnly?: boolean;
-  prioritizedDatatype?: string;
-  variant?: TextFieldProps["variant"];
-};
-
-const useStyles = makeStyles()({
-  root: { flexGrow: 1 },
-});
-
 /**
  * To show an input field with an autocomplete so the user can enter message paths, use:
  *
@@ -161,10 +142,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   } = props;
   const { classes } = useStyles();
 
-  const messagePathStructuresForDataype = useMemo(
-    () => messagePathStructures(datatypes),
-    [datatypes],
-  );
+  const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
 
   const structureItemsByPath = useStructuredItemsByPath({
     noMultiSlices,
@@ -172,6 +150,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   });
 
   const onChangeProp = props.onChange;
+  const propsIndex = props.index;
 
   const onChange = useCallback(
     (event: React.SyntheticEvent, rawValue: string) => {
@@ -187,9 +166,9 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         });
       }
 
-      onChangeProp(value, props.index);
+      onChangeProp(value, propsIndex);
     },
-    [onChangeProp, props.index],
+    [onChangeProp, propsIndex],
   );
 
   const onSelect = useCallback(
@@ -205,8 +184,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       // Check if accepting this completion would result in a path to a non-complex field.
       const completedPath = completeStart + rawValue + completeEnd;
       const completedField = structureItemsByPath.get(completedPath);
-      const isSimpleField =
-        completedField != undefined && completedField.structureType === "primitive";
+      const isSimpleField = completedField?.structureType === "primitive";
 
       // If we're dealing with a topic name, and we cannot validly end in a message type,
       // add a "." so the user can keep typing to autocomplete the message path.
@@ -235,14 +213,20 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
   const rosPath = useMemo(() => parseMessagePath(path), [path]);
 
+  const topicsByName = useMemo(() => {
+    const map = new Map(topics.map((topic) => [topic.name, topic]));
+    return map;
+  }, [topics]);
+
   const topic = useMemo(() => {
     if (!rosPath) {
       return undefined;
     }
 
     const { topicName } = rosPath;
-    return topics.find(({ name }) => name === topicName);
-  }, [rosPath, topics]);
+    const result = topicsByName.get(topicName);
+    return result;
+  }, [rosPath, topicsByName]);
 
   const structureTraversalResult = useMemo((): StructureTraversalResult | undefined => {
     if (!topic || !rosPath?.messagePath) {
@@ -260,11 +244,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       };
     }
 
-    return traverseStructure(
-      messagePathStructuresForDataype[topic.schemaName],
-      rosPath.messagePath,
-    );
-  }, [messagePathStructuresForDataype, rosPath?.messagePath, topic]);
+    return traverseStructure(structures[topic.schemaName], rosPath.messagePath);
+  }, [structures, rosPath?.messagePath, topic]);
 
   const invalidGlobalVariablesVariable = useMemo(() => {
     if (!rosPath) {
@@ -278,10 +259,21 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     [topics],
   );
 
-  const topicNamesAndFieldsAutocompleteItems = useMemo(
-    () => topicNamesAutocompleteItems.concat(Array.from(structureItemsByPath.keys())),
-    [structureItemsByPath, topicNamesAutocompleteItems],
-  );
+  const topicNamesAndFieldsAutocompleteItems = useMemo(() => {
+    const topicCount = topicNamesAutocompleteItems.length;
+    const structureCount = structureItemsByPath.size;
+    const result = new Array(topicCount + structureCount);
+
+    for (let i = 0; i < topicCount; i++) {
+      result[i] = topicNamesAutocompleteItems[i];
+    }
+
+    let index = topicCount;
+    for (const key of structureItemsByPath.keys()) {
+      result[index++] = key;
+    }
+    return result;
+  }, [structureItemsByPath, topicNamesAutocompleteItems]);
 
   const autocompleteType = useMemo(() => {
     if (!rosPath) {
@@ -302,8 +294,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
     return undefined;
   }, [invalidGlobalVariablesVariable, structureTraversalResult, validTypes, rosPath, topic]);
-
-  const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
 
   const { autocompleteItems, autocompleteFilterText, autocompleteRange } = useMemo(() => {
     if (disableAutocomplete) {
@@ -424,19 +414,17 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     globalVariables,
   ]);
 
-  const topicsByName = useMemo(() => _.keyBy(topics, ({ name }) => name), [topics]);
-
   const orderedAutocompleteItems = useMemo(() => {
     if (prioritizedDatatype == undefined) {
       return autocompleteItems;
     }
 
-    return _.flatten(
-      _.partition(
-        autocompleteItems,
-        (item) => topicsByName[item]?.schemaName === prioritizedDatatype,
-      ),
-    );
+    const result = _.partition(
+      autocompleteItems,
+      (item: string) => topicsByName.get(item)?.schemaName === prioritizedDatatype,
+    ).flat();
+
+    return result;
   }, [autocompleteItems, prioritizedDatatype, topicsByName]);
 
   const usesUnsupportedMathModifier =

@@ -20,6 +20,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { useCallback } from "react";
 import { v4 as uuid } from "uuid";
 
 import { Immutable, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
@@ -47,6 +48,16 @@ function FieldInput({
   path: readonly string[];
 }): React.JSX.Element {
   const { classes, cx } = useStyles();
+
+  const handleMessagePathChange = useCallback(
+    (value: string) => {
+      actionHandler({
+        action: "update",
+        payload: { path, input: "messagepath", value },
+      });
+    },
+    [actionHandler, path],
+  );
 
   switch (field.input) {
     case "autocomplete":
@@ -229,12 +240,7 @@ function FieldInput({
           disabled={field.disabled}
           readOnly={field.readonly}
           supportsMathModifiers={field.supportsMathModifiers}
-          onChange={(value) => {
-            actionHandler({
-              action: "update",
-              payload: { path, input: "messagepath", value },
-            });
-          }}
+          onChange={handleMessagePathChange}
           validTypes={field.validTypes}
         />
       );
@@ -245,12 +251,12 @@ function FieldInput({
 
       const isEmpty = field.options.length === 0;
       let selectValue = field.value;
-      if (!selectedOption) {
-        selectValue = INVALID_SENTINEL_VALUE;
-      } else if (selectValue == undefined) {
+      if (selectedOption) {
         // We can't pass value={undefined} or we get a React error "A component is changing an
         // uncontrolled input to be controlled" when changing the value to be non-undefined.
-        selectValue = UNDEFINED_SENTINEL_VALUE;
+        selectValue ??= UNDEFINED_SENTINEL_VALUE;
+      } else {
+        selectValue = INVALID_SENTINEL_VALUE;
       }
 
       const hasError = !selectedOption && (!isEmpty || field.value != undefined);

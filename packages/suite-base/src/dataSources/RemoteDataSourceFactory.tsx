@@ -105,7 +105,8 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
     const initWorker = initWorkers[extension]!;
 
-    const source = new WorkerSerializedIterableSource({ initWorker, initArgs: { urls } });
+    const initArgs = urls.length === 1 ? { url: urls[0] } : { urls };
+    const source = new WorkerSerializedIterableSource({ initWorker, initArgs });
 
     return new IterablePlayer({
       source,

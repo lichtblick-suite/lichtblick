@@ -31,7 +31,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   const isMounted = useMountedState();
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
-  const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
+  const { onSelectLayout } = useLayoutNavigation();
   const { getCurrentLayoutState } = useCurrentLayoutActions();
 
   const parseAndInstallLayout = useCallback(
@@ -73,10 +73,6 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   );
 
   const importLayout = useCallbackWithToast(async () => {
-    if (!(await promptForUnsavedChanges())) {
-      return;
-    }
-
     const fileHandles = await showOpenFilePicker({
       multiple: true,
       excludeAcceptAllOption: false,
@@ -106,7 +102,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
     }
 
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
-  }, [analytics, isMounted, parseAndInstallLayout, promptForUnsavedChanges]);
+  }, [analytics, isMounted, parseAndInstallLayout]);
 
   const exportLayout = useCallbackWithToast(async () => {
     const item = getCurrentLayoutState().selectedLayout?.data;

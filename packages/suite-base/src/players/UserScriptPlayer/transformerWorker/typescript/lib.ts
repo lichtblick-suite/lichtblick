@@ -61,7 +61,6 @@ import lib_es2022_error from "typescript/lib/lib.es2022.error.d.ts?raw";
 import lib_es2022_intl from "typescript/lib/lib.es2022.intl.d.ts?raw";
 import lib_es2022_object from "typescript/lib/lib.es2022.object.d.ts?raw";
 import lib_es2022_regexp from "typescript/lib/lib.es2022.regexp.d.ts?raw";
-import lib_es2022_sharedmemory from "typescript/lib/lib.es2022.sharedmemory.d.ts?raw";
 import lib_es2022_string from "typescript/lib/lib.es2022.string.d.ts?raw";
 import lib_es5_dts from "typescript/lib/lib.es5.d.ts?raw";
 
@@ -125,7 +124,6 @@ const libDts = new Map(
     "es2022.intl": lib_es2022_intl,
     "es2022.object": lib_es2022_object,
     "es2022.regexp": lib_es2022_regexp,
-    "es2022.sharedmemory": lib_es2022_sharedmemory,
     "es2022.string": lib_es2022_string,
   }),
 );

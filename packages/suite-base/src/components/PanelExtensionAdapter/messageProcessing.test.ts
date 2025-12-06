@@ -5,7 +5,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { forEachSortedArrays } from "./messageProcessing";
+import { MessageEvent } from "@lichtblick/suite";
+import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+
+import { convertMessage, forEachSortedArrays } from "./messageProcessing";
 
 describe("forEachSortedArrays", () => {
   it("should not call forEach for empty arrays", () => {
@@ -81,5 +85,167 @@ describe("forEachSortedArrays", () => {
 
     forEachSortedArrays([arr1, arr2, arr3], (a, b) => a - b, forEach);
     expect(acc).toEqual([1, 2, 3, 3, 3, 3, 4]);
+  });
+});
+
+describe("convertMessage", () => {
+  const mockMessageEvent = MessageEventBuilder.messageEvent();
+
+  const createMockConverter = (overrides?: {
+    fromSchemaName?: string;
+    toSchemaName?: string;
+    converter?: jest.Mock;
+  }) => ({
+    fromSchemaName: overrides?.fromSchemaName ?? "TestSchema",
+    toSchemaName: overrides?.toSchemaName ?? "ConvertedSchema",
+    converter: overrides?.converter ?? jest.fn((_msg: unknown) => ({ converted: 42 })),
+  });
+
+  it("should not convert when no converters match", () => {
+    const converters = new Map();
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages);
+
+    expect(convertedMessages).toHaveLength(0);
+  });
+
+  it("should convert message using matching converter", () => {
+    const converter = createMockConverter();
+
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages);
+
+    expect(convertedMessages).toHaveLength(1);
+    expect(convertedMessages[0]).toMatchObject({
+      topic: mockMessageEvent.topic,
+      schemaName: converter.toSchemaName,
+      message: { converted: 42 },
+      receiveTime: mockMessageEvent.receiveTime,
+      sizeInBytes: mockMessageEvent.sizeInBytes,
+    });
+    expect(converter.converter).toHaveBeenCalledWith(
+      mockMessageEvent.message,
+      mockMessageEvent,
+      undefined,
+    );
+  });
+
+  it("should pass globalVariables to converter", () => {
+    const globalVariables = GlobalVariableBuilder.globalVariables();
+    const converter = createMockConverter({
+      converter: jest.fn((_msg: unknown, _event: unknown, vars: unknown) => ({
+        value: 42,
+        vars,
+      })),
+    });
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages, globalVariables);
+
+    expect(converter.converter).toHaveBeenCalledWith(
+      mockMessageEvent.message,
+      mockMessageEvent,
+      globalVariables,
+    );
+    expect((convertedMessages[0]?.message as any).vars).toEqual(globalVariables);
+  });
+
+  it("should apply multiple converters to same message", () => {
+    const converter1 = createMockConverter({
+      toSchemaName: "Schema1",
+      converter: jest.fn(() => ({ output: 1 })),
+    });
+    const converter2 = createMockConverter({
+      toSchemaName: "Schema2",
+      converter: jest.fn(() => ({ output: 2 })),
+    });
+
+    const converters = new Map([
+      [
+        `${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any,
+        [converter1, converter2],
+      ],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages);
+
+    expect(convertedMessages).toHaveLength(2);
+    expect(convertedMessages[0]?.schemaName).toBe("Schema1");
+    expect(convertedMessages[1]?.schemaName).toBe("Schema2");
+  });
+
+  it("should skip conversion when converter returns undefined", () => {
+    const converter = createMockConverter({
+      converter: jest.fn(() => undefined),
+    });
+
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages);
+
+    expect(convertedMessages).toHaveLength(0);
+    expect(converter.converter).toHaveBeenCalled();
+  });
+
+  it("should skip conversion when converter returns null", () => {
+    const converter = createMockConverter({
+      converter: jest.fn(() => undefined),
+    });
+
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages);
+
+    expect(convertedMessages).toHaveLength(0);
+  });
+
+  it("should preserve originalMessageEvent in converted message", () => {
+    const converter = createMockConverter({
+      converter: jest.fn(() => ({ converted: true })),
+    });
+
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(mockMessageEvent, converters, convertedMessages);
+
+    expect(convertedMessages[0]?.originalMessageEvent).toBe(mockMessageEvent);
+  });
+
+  it("should preserve topicConfig in converted message", () => {
+    const messageWithConfig = {
+      ...mockMessageEvent,
+      topicConfig: { someConfig: "value" },
+    };
+
+    const converter = createMockConverter({
+      converter: jest.fn(() => ({ converted: true })),
+    });
+
+    const converters = new Map([
+      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+    ]);
+    const convertedMessages: MessageEvent[] = [];
+
+    convertMessage(messageWithConfig, converters, convertedMessages);
+
+    expect(convertedMessages[0]?.topicConfig).toEqual({ someConfig: "value" });
   });
 });

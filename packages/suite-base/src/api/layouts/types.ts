@@ -53,8 +53,6 @@ export interface CreateLayoutRequest {
   data: LayoutData;
   /** Permission level for the layout */
   permission: LayoutPermission;
-  /** User workspace */
-  workspace: string;
 }
 
 /**
@@ -102,6 +100,10 @@ export type UpdateLayoutResponse =
  * Response from layout creation/update operations containing server data
  */
 export type LayoutApiResponse = LayoutApiData;
+
+export type WorkspaceLayoutResponse = {
+  layout: LayoutApiData;
+};
 
 // =============================================================================
 // Service Layer Types

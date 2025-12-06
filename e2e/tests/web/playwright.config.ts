@@ -9,7 +9,13 @@ export const STORAGE_STATE = "e2e/tmp/web-session.json";
 export default defineConfig({
   globalSetup: require.resolve("./web-setup.ts"),
   globalTeardown: require.resolve("./web-teardown.ts"),
-  reporter: [["html", { outputFolder: "../reports/web", open: "never", title: "Web E2E Tests" }]],
+  reporter: process.env.CI
+    ? [["json", { outputFile: "../../reports/web/results.json" }], ["list"]]
+    : [
+        ["html", { outputFolder: "../reports/web", open: "never", title: "Web E2E Tests" }],
+        ["json", { outputFile: "../reports/web/results.json" }],
+        ["list"],
+      ],
   timeout: 30 * 1000,
   testDir: "./",
   webServer: {

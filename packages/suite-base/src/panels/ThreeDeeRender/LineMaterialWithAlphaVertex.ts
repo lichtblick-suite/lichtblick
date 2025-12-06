@@ -523,12 +523,13 @@ export class LineMaterialWithAlphaVertex extends ShaderMaterial {
     this.uniforms.linewidth!.value = value;
   }
 
-  public get dashed() {
-    return Boolean("USE_DASH" in this.defines);
+  public get dashed(): boolean {
+    const isDashed = "USE_DASH" in this.defines;
+    return isDashed;
   }
 
   public set dashed(value) {
-    if (Boolean(value) !== Boolean("USE_DASH" in this.defines)) {
+    if (value !== "USE_DASH" in this.defines) {
       this.needsUpdate = true;
     }
 

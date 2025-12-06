@@ -74,7 +74,9 @@ export class RenderableTriangles extends RenderablePrimitive {
       if (!singleColor && !geometry.attributes.color) {
         geometry.createAttribute("color", Uint8Array, 4, true);
       }
+
       const colors = geometry.attributes.color;
+      const verticesStride = vertices.itemSize;
 
       for (let i = 0; i < primitive.points.length; i++) {
         const point = primitive.points[i]!;
@@ -85,12 +87,17 @@ export class RenderableTriangles extends RenderablePrimitive {
           );
           continue;
         }
-        vertChanged =
-          vertChanged ||
-          vertices.getX(i) !== point.x ||
-          vertices.getY(i) !== point.y ||
-          vertices.getZ(i) !== point.z;
-        vertices.setXYZ(i, point.x, point.y, point.z);
+
+        const offset = i * verticesStride;
+        const thisVertChanged =
+          Math.fround(vertices.array[offset]!) !== Math.fround(point.x) ||
+          Math.fround(vertices.array[offset + 1]!) !== Math.fround(point.y) ||
+          Math.fround(vertices.array[offset + 2]!) !== Math.fround(point.z);
+
+        if (thisVertChanged) {
+          vertices.setXYZ(i, point.x, point.y, point.z);
+        }
+        vertChanged = vertChanged || thisVertChanged;
 
         if (!singleColor && colors && primitive.colors.length > 0) {
           const color = primitive.colors[i] ?? missingColor;
@@ -106,13 +113,21 @@ export class RenderableTriangles extends RenderablePrimitive {
           const g = SRGBToLinear(color.g);
           const b = SRGBToLinear(color.b);
           const a = color.a;
-          colorChanged =
-            colorChanged ||
-            colors.getX(i) !== r ||
-            colors.getY(i) !== g ||
-            colors.getZ(i) !== b ||
-            colors.getW(i) !== a;
-          colors.setXYZW(i, r, g, b, a);
+
+          const colorStride = colors.itemSize;
+          const colorOffset = i * colorStride;
+
+          const EPS = 2 / 255;
+          const diff =
+            Math.abs(colors.array[colorOffset]! / 255 - r) > EPS ||
+            Math.abs(colors.array[colorOffset + 1]! / 255 - g) > EPS ||
+            Math.abs(colors.array[colorOffset + 2]! / 255 - b) > EPS ||
+            Math.abs(colors.array[colorOffset + 3]! / 255 - a) > EPS;
+
+          if (diff) {
+            colors.setXYZW(i, r, g, b, a);
+            colorChanged = true;
+          }
           if (!transparent && a < 1.0) {
             transparent = true;
           }

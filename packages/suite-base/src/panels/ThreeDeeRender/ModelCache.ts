@@ -109,7 +109,10 @@ export class ModelCache {
       // the underlying three.js STLLoader only accepts an ArrayBuffer instance.
       return await this.#loadGltf(
         url,
-        buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
+        (buffer.buffer as ArrayBuffer).slice(
+          buffer.byteOffset,
+          buffer.byteOffset + buffer.byteLength,
+        ),
         reportError,
       );
     }
@@ -120,7 +123,10 @@ export class ModelCache {
       // the underlying three.js STLLoader only accepts an ArrayBuffer instance.
       return this.#loadSTL(
         url,
-        buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
+        (buffer.buffer as ArrayBuffer).slice(
+          buffer.byteOffset,
+          buffer.byteOffset + buffer.byteLength,
+        ),
         this.options.meshUpAxis,
       );
     }
@@ -233,7 +239,7 @@ export class ModelCache {
         }
         const textureAsset = await this.#fetchAsset(textureUrl);
         const objectUrl = URL.createObjectURL(
-          new Blob([textureAsset.data], { type: textureAsset.mediaType }),
+          new Blob([new Uint8Array(textureAsset.data)], { type: textureAsset.mediaType }),
         );
         this.#colladaTextureObjectUrls.set(textureUrl, objectUrl);
       } catch (e) {

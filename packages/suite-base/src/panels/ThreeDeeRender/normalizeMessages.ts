@@ -101,7 +101,7 @@ export function normalizeVector3s(
 }
 
 export function normalizeMatrix6(mat: number[] | undefined): Matrix6 {
-  if (!mat || mat.length !== 36 || typeof mat[0] !== "number") {
+  if (mat?.length !== 36 || typeof mat[0] !== "number") {
     // prettier-ignore
     return [
       1, 0, 0, 0, 0, 0,
