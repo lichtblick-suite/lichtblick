@@ -7,8 +7,10 @@
 
 import Manual from "./Manual.json";
 import Auto from "./Auto.json";
+import Teleop from "./Teleop.json";
 
 export const layouts: Record<string, unknown> = {
   "manual": Manual,
   "auto": Auto,
+  "teleop": Teleop,
 };
