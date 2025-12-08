@@ -4,9 +4,9 @@
       "layers": {},
       "cameraState": {
         "perspective": false,
-        "distance": 5.547791462433501,
+        "distance": 4.518710819848714,
         "phi": 7.552504844413073,
-        "thetaOffset": 89.13906823816586,
+        "thetaOffset": 89.13906823816616,
         "targetOffset": [
           -0.003814855037301249,
           -0.2690917814966906,
@@ -171,6 +171,24 @@
           "visible": false
         },
         "frame:map_cache": {
+          "visible": false
+        },
+        "frame:odom": {
+          "visible": false
+        },
+        "frame:map": {
+          "visible": false
+        },
+        "frame:base_link": {
+          "visible": false
+        },
+        "frame:dock_frame": {
+          "visible": false
+        },
+        "frame:flange_mount": {
+          "visible": false
+        },
+        "frame:tool_mount": {
           "visible": false
         }
       },
