@@ -3127,6 +3127,7 @@ __metadata:
     "@lichtblick/rosmsg2-serialization": 1.0.0
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
+    "@lichtblick/test-builders": 1.0.1
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/three-text": 1.0.0
     "@lichtblick/tsconfig": 1.0.2
@@ -14306,7 +14307,6 @@ __metadata:
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/test-builders": 1.0.1
     "@lichtblick/tsconfig": 1.0.2
     "@mui/material": 7.2.0
     "@octokit/rest": 22.0.0

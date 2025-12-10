@@ -89,7 +89,6 @@
     "@babel/preset-typescript": "7.28.5",
     "@lichtblick/eslint-plugin": "1.0.4",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
-    "@lichtblick/test-builders": "1.0.1",
     "@lichtblick/tsconfig": "1.0.2",
     "@mui/material": "7.2.0",
     "@octokit/rest": "22.0.0",
