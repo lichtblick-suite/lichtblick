@@ -3189,7 +3189,7 @@ __metadata:
     css-loader: 6.8.1
     cytoscape: 3.31.1
     cytoscape-dagre: 2.5.0
-    dompurify: 3.3.0
+    dompurify: 3.3.1
     dotenv: 17.2.2
     esbuild-loader: 4.3.0
     eventemitter3: 5.0.1
@@ -9635,15 +9635,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:3.3.0":
-  version: 3.3.0
-  resolution: "dompurify@npm:3.3.0"
+"dompurify@npm:3.3.1":
+  version: 3.3.1
+  resolution: "dompurify@npm:3.3.1"
   dependencies:
     "@types/trusted-types": ^2.0.7
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 425c181ac531cb15f93be85dc6efb1eb535d7c53ad0752b305043fe43e76c5ef144c2aa3670da2a52bec253c0aa302c06545cd04012396dc81d52cf86529097b
+  checksum: 884fe0acc21a9a2e5aa1b8ce4cecc8f9a71217423b389f760fca7b44595d3c9376d234f1c4ba16d79824789762b3d611d10653c4a90a7e23b351b71e5ef7dd33
   languageName: node
   linkType: hard
 
@@ -10839,9 +10839,9 @@ __metadata:
   linkType: hard
 
 "expr-eval-fork@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "expr-eval-fork@npm:3.0.0"
-  checksum: 56579f29bc9d05b0107bf6ea0a0e9552c145e67d222cb60741b74bc1f66acef3f2fd2387dc48ee64e20b740dc5d3d0317832174638d87d32efbbc3139ee7be1c
+  version: 3.0.1
+  resolution: "expr-eval-fork@npm:3.0.1"
+  checksum: 8841b2a521415cecd15cb860078ffe99678c59ab427a50c033f91426db12dff6450c72bb0a3f8bbe5c7125a83ccfab47209411b46cf0da5acbb4cf97c91eb362
   languageName: node
   linkType: hard
 
