@@ -3368,6 +3368,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lichtblick/test-builders@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@lichtblick/test-builders@npm:1.0.1"
+  dependencies:
+    randomstring: ^1.3.0
+  peerDependencies:
+    lodash-es: ^4.17.21
+  checksum: e20c0b7022fecec9264a7d9aa2af38a5a30e0e51057046004a6f5cfa99536ec94a1e8b57353c3976c5ce5e375249fe5af9dc59a5cd2f53e46dc73ff969c17070
+  languageName: node
+  linkType: hard
+
 "@lichtblick/theme@workspace:*, @lichtblick/theme@workspace:packages/theme":
   version: 0.0.0-use.local
   resolution: "@lichtblick/theme@workspace:packages/theme"
@@ -14295,6 +14306,7 @@ __metadata:
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
     "@lichtblick/suite": "workspace:*"
+    "@lichtblick/test-builders": 1.0.1
     "@lichtblick/tsconfig": 1.0.2
     "@mui/material": 7.2.0
     "@octokit/rest": 22.0.0
@@ -17112,7 +17124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"randomstring@npm:1.3.1":
+"randomstring@npm:1.3.1, randomstring@npm:^1.3.0":
   version: 1.3.1
   resolution: "randomstring@npm:1.3.1"
   dependencies:
