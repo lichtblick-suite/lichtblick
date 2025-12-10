@@ -280,12 +280,14 @@ export function useInstallingExtensionsState({
           inProgress: false,
         }));
 
-        const errorMessage =
-          error instanceof HttpError
-            ? error.getUserFriendlyErrorMessage()
-            : error instanceof Error
-              ? error.message
-              : "Unknown error";
+        let errorMessage: string;
+        if (error instanceof HttpError) {
+          errorMessage = error.getUserFriendlyErrorMessage();
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = "Unknown error";
+        }
 
         enqueueSnackbar(`An error occurred during extension installation: ${errorMessage}`, {
           variant: "error",
