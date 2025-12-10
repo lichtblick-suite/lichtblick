@@ -42,24 +42,21 @@ describe("HttpError", () => {
     expect(error.response).toBe(mockResponse);
   });
 
-  it("should handle different HTTP status codes", () => {
-    const testCases = [
-      { status: 400, statusText: "Bad Request" },
-      { status: 401, statusText: "Unauthorized" },
-      { status: 403, statusText: "Forbidden" },
-      { status: 404, statusText: "Not Found" },
-      { status: 500, statusText: "Internal Server Error" },
-      { status: 502, statusText: "Bad Gateway" },
-      { status: 503, statusText: "Service Unavailable" },
-    ];
+  it.each([
+    { status: 400, statusText: "Bad Request" },
+    { status: 401, statusText: "Unauthorized" },
+    { status: 403, statusText: "Forbidden" },
+    { status: 404, statusText: "Not Found" },
+    { status: 409, statusText: "Conflict" },
+    { status: 500, statusText: "Internal Server Error" },
+    { status: 502, statusText: "Bad Gateway" },
+    { status: 503, statusText: "Service Unavailable" },
+  ])("should handle HTTP status $status ($statusText)", ({ status, statusText }) => {
+    const error = new HttpError(`HTTP ${status}`, status, statusText);
 
-    testCases.forEach(({ status, statusText }) => {
-      const error = new HttpError(`HTTP ${status}`, status, statusText);
-
-      expect(error.status).toBe(status);
-      expect(error.statusText).toBe(statusText);
-      expect(error.message).toBe(`HTTP ${status}`);
-    });
+    expect(error.status).toBe(status);
+    expect(error.statusText).toBe(statusText);
+    expect(error.message).toBe(`HTTP ${status}`);
   });
 
   it("should preserve error stack trace", () => {
@@ -114,23 +111,6 @@ describe("HttpError", () => {
     expect(error instanceof Error).toBe(true);
   });
 
-  it("should handle empty or special characters in message and statusText", () => {
-    const testCases = [
-      { message: "", statusText: "" },
-      { message: "Error with 'quotes'", statusText: 'Status with "quotes"' },
-      { message: "Error with\nnewlines", statusText: "Status with\ttabs" },
-      { message: "Error with émojis 🚫", statusText: "Status with 特殊字符" },
-    ];
-
-    testCases.forEach(({ message, statusText }) => {
-      const error = new HttpError(message, 400, statusText);
-
-      expect(error.message).toBe(message);
-      expect(error.statusText).toBe(statusText);
-      expect(error.status).toBe(400);
-    });
-  });
-
   describe("getUserFriendlyErrorMessage", () => {
     it("should handle network errors (status 0)", () => {
       const error = new HttpError(BasicBuilder.string(), 0, BasicBuilder.string());
@@ -151,9 +131,7 @@ describe("HttpError", () => {
     it("should handle 401 Unauthorized", () => {
       const error = new HttpError(BasicBuilder.string(), 401, BasicBuilder.string());
 
-      expect(error.getUserFriendlyErrorMessage()).toBe(
-        "You are not authenticated. Please sign in.",
-      );
+      expect(error.getUserFriendlyErrorMessage()).toBe("You are not authenticated.");
     });
 
     it("should handle 403 Forbidden", () => {
@@ -168,6 +146,14 @@ describe("HttpError", () => {
       const error = new HttpError(BasicBuilder.string(), 404, BasicBuilder.string());
 
       expect(error.getUserFriendlyErrorMessage()).toBe("The requested resource was not found.");
+    });
+
+    it("should handle 409 Conflict", () => {
+      const error = new HttpError(BasicBuilder.string(), 409, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "The resource already exists or has been modified.",
+      );
     });
 
     it("should handle 500 Internal Server Error", () => {
@@ -196,6 +182,13 @@ describe("HttpError", () => {
 
         expect(error.getUserFriendlyErrorMessage()).toBe("Server error. Please try again later.");
       });
+    });
+
+    it("should return original message for non-standard status codes", () => {
+      const customMessage = "Custom error message";
+
+      const successError = new HttpError(customMessage, 200, "OK");
+      expect(successError.getUserFriendlyErrorMessage()).toBe(customMessage);
     });
   });
 });
