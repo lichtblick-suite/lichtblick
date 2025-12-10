@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { RosTime } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
-import { BasicBuilder } from "@lichtblick/test-builders";
 import { calculateStaticItemFrequency } from "@lichtblick/suite-base/util/calculateStaticItemFrequency";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("calculateStaticItemFrequency", () => {
   const numMessages = 200;

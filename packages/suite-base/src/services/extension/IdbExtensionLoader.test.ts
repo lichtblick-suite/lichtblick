@@ -15,8 +15,8 @@ import {
   METADATA_STORE_NAME,
 } from "@lichtblick/suite-base/services/extension/IdbExtensionStorage";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
-import { BasicBuilder } from "@lichtblick/test-builders";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { IdbExtensionLoader } from "./IdbExtensionLoader";
 
