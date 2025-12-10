@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { isLayoutEqual } from "./isLayoutEqual";
 

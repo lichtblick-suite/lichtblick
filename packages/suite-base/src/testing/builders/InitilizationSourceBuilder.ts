@@ -3,9 +3,8 @@
 
 import { Metadata } from "@lichtblick/suite";
 import { Initialization } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class InitilizationSourceBuilder {
   public static initialization(props: Partial<Initialization> = {}): Initialization {

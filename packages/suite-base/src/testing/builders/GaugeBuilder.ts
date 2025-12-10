@@ -6,8 +6,7 @@ import {
   ColorModeConfig,
   GaugeConfig,
 } from "@lichtblick/suite-base/panels/Gauge/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class GaugeBuilder {
   public static config(props: Partial<GaugeConfig> = {}): GaugeConfig {

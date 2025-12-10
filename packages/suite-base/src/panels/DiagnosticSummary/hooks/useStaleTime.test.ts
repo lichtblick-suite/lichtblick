@@ -8,8 +8,8 @@ import {
   useMessagePipelineGetter,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useStaleTime from "./useStaleTime";
 

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Time } from "@lichtblick/rostime";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class RosTimeBuilder {
   public static time(props: Partial<Time> = {}): Time {

@@ -13,9 +13,9 @@ import {
   setStartTime,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeInitialization";
 import { TopicStats } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("mergeInitialization utils", () => {
   describe("setStartTime", () => {

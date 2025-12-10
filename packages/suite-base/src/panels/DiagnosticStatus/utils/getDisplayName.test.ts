@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 import { DISPLAY_EMPTY_STATE } from "@lichtblick/suite-base/panels/DiagnosticStatus/constants";
 import { getDisplayName } from "@lichtblick/suite-base/panels/DiagnosticStatus/utils/getDisplayName";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("getDisplayName", () => {
   it("handles hardware_id and name", () => {

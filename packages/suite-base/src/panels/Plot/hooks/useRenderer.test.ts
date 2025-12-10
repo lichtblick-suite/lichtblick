@@ -6,7 +6,7 @@
 import { createTheme, Theme } from "@mui/material/styles";
 import { renderHook } from "@testing-library/react";
 
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useRenderer from "./useRenderer";
 import { OffscreenCanvasRenderer } from "../OffscreenCanvasRenderer";

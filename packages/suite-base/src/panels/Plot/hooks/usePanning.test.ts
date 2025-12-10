@@ -6,7 +6,7 @@ import Hammer from "hammerjs";
 import { act } from "react";
 
 import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePanning from "./usePanning";
 

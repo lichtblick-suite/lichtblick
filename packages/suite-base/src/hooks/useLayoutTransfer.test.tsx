@@ -6,8 +6,8 @@ import { act, renderHook } from "@testing-library/react";
 
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import * as filePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useLayoutTransfer } from "./useLayoutTransfer";
 import { useAnalytics } from "../context/AnalyticsContext";

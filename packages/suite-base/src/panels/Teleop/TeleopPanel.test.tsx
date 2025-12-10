@@ -11,8 +11,8 @@ import {
   DirectionalPadProps,
   TeleopConfig,
 } from "@lichtblick/suite-base/panels/Teleop/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import TeleopPanel from "./TeleopPanel";
 

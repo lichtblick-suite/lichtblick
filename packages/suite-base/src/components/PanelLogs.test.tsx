@@ -8,8 +8,8 @@ import "@testing-library/jest-dom";
 
 import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelLog } from "@lichtblick/suite-base/components/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 function renderPanelLogs(
   logs: PanelLog[],

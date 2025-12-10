@@ -4,7 +4,7 @@
 import { act } from "@testing-library/react";
 
 import { MessagePathStructureItem } from "@lichtblick/message-path/src/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useStructureItemsByPathStore } from "./useStructureItemsByPathStore";
 

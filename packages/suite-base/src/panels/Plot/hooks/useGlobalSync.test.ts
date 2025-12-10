@@ -9,7 +9,7 @@ import { renderHook } from "@testing-library/react";
 
 import { useTimelineInteractionState } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useGlobalSync from "./useGlobalSync";
 

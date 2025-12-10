@@ -9,8 +9,7 @@ import {
   SettingsTreeNodeActionDivider,
   SettingsTreeNodeActionItem,
 } from "@lichtblick/suite";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class SettingsTreeNodeBuilder {
   public static nodeAction(

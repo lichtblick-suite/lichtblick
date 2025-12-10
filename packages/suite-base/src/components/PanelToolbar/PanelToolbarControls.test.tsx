@@ -13,8 +13,8 @@ import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutC
 import PanelCatalogContext from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { usePanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 // Mock the dependencies
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({

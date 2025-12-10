@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { SettingsTreeField, Topic } from "@lichtblick/suite";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { pointSettingsNode } from "./pointExtensionUtils";
 

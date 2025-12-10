@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { PackageName } from "@lichtblick/suite-base/services/extension/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import parsePackageName from "./parsePackageName";
 

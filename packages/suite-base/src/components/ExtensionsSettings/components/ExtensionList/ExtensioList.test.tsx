@@ -12,7 +12,7 @@ import ExtensionList, {
   generatePlaceholderList,
 } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
   useExtensionCatalog: jest.fn(),

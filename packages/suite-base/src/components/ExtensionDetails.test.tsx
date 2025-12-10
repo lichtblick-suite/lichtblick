@@ -18,9 +18,9 @@ import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
   useSnackbar: jest.fn(),

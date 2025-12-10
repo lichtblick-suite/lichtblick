@@ -7,7 +7,7 @@ import { Immutable } from "@lichtblick/suite";
 import { ChartRenderer } from "@lichtblick/suite-base/panels/Plot/ChartRenderer";
 import { DEFAULT_ANNOTATION } from "@lichtblick/suite-base/panels/Plot/constants";
 import { getChartOptions } from "@lichtblick/suite-base/panels/Plot/utils/getChartOptions";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import {
   ChartOptionsPlot,

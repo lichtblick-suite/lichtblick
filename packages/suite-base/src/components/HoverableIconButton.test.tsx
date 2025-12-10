@@ -13,7 +13,7 @@ import "@testing-library/jest-dom";
 import HoverableIconButton, {
   HoverableIconButtonProps,
 } from "@lichtblick/suite-base/components/HoverableIconButton";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 function renderComponent(propsOverride: Partial<HoverableIconButtonProps> = {}) {
   const props: Partial<HoverableIconButtonProps> = {

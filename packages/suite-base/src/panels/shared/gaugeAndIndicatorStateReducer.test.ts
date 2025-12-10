@@ -10,9 +10,9 @@ import {
   PathAction,
   SeekAction,
 } from "@lichtblick/suite-base/panels/shared/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { stateReducer, getSingleDataItem } from "./gaugeAndIndicatorStateReducer";
 

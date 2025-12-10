@@ -11,15 +11,14 @@ import {
   LayoutSyncStatus,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { RemoteLayout } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import {
   PanelConfig,
   PlaybackConfig,
   UserScript,
   UserScripts,
 } from "@lichtblick/suite-base/types/panels";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class LayoutBuilder {
   public static readonly permission: LayoutPermission = BasicBuilder.sample([

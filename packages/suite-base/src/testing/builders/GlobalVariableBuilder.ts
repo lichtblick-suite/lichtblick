@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 class GlobalVariableBuilder {
   public static globalVariables(): GlobalVariables {

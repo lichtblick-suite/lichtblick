@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import validatePackageInfo from "@lichtblick/suite-base/services/extension/utils/validatePackageInfo";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { Capitalization } from "@lichtblick/suite-base/testing/builders/types";
+import { BasicBuilder } from "@lichtblick/test-builders";
+import { Capitalization } from "@lichtblick/test-builders";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 describe("validatePackageInfo", () => {

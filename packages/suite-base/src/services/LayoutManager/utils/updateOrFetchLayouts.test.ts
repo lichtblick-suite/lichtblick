@@ -7,8 +7,8 @@ import {
   IRemoteLayoutStorage,
   RemoteLayout,
 } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { updateOrFetchLayout } from "./updateOrFetchLayouts";
 

@@ -3,7 +3,7 @@
 
 import { IExtensionApiResponse } from "@lichtblick/suite-base/api/extensions/types";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 import { Namespace } from "@lichtblick/suite-base/types";
 
 import { ExtensionAdapter } from "./ExtensionAdapter";

@@ -12,7 +12,7 @@ import "@testing-library/jest-dom";
 
 import Sidebars from "@lichtblick/suite-base/components/Sidebars";
 import { SidebarItem, SidebarProps } from "@lichtblick/suite-base/components/Sidebars/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("Sidebars", () => {
   const renderComponent = async (overrides: Partial<SidebarProps<string, string, string>> = {}) => {

@@ -7,7 +7,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 import SearchBar from "@lichtblick/suite-base/components/SearchBar/SearchBar";
 import "@testing-library/jest-dom";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("SearchBar component", () => {
   const mockOnChange = jest.fn();

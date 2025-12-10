@@ -6,7 +6,7 @@ import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManage
 import { TopicStats } from "@lichtblick/suite-base/players/types";
 import { LOG_SCHEMAS } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("isTopicHighFrequency", () => {
   const topicName = BasicBuilder.string();

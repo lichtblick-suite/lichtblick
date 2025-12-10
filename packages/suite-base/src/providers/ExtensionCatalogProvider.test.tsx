@@ -23,10 +23,10 @@ import {
   LoadedExtension,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
 

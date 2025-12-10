@@ -5,9 +5,9 @@ import JSZip from "jszip";
 
 import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import { Namespace } from "@lichtblick/suite-base/types";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RemoteExtensionLoader } from "./RemoteExtensionLoader";
 

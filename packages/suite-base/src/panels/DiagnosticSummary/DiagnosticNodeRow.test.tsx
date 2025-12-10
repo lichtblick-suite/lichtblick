@@ -9,7 +9,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import DiagnosticNodeRow from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticNodeRow";
 import { NodeRowProps } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 
 describe("DiagnosticNodeRow", () => {

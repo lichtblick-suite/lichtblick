@@ -3,7 +3,7 @@
 import * as Comlink from "@lichtblick/comlink";
 import { WorkerSerializedIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker";
 import { MultiIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/MultiIterableSource";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { McapIterableSource } from "./McapIterableSource";
 import { initialize } from "./McapIterableSourceWorker.worker";

@@ -13,7 +13,7 @@ import {
   UPPER_BRIGHTNESS_LIMIT,
   UPPER_CONTRAST_LIMIT,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/constants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { clampBrightness, clampContrast } from "./utils";
 

@@ -3,7 +3,7 @@
 
 import * as Comlink from "@lichtblick/comlink";
 import { WorkerSerializedIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RosDb3IterableSource } from "./RosDb3IterableSource";
 import { initialize } from "./RosDb3IterableSourceWorker.worker";

@@ -8,7 +8,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import Ros1LocalBagDataSourceFactory from "./Ros1LocalBagDataSourceFactory";
 

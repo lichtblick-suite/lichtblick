@@ -4,8 +4,8 @@
 import * as _ from "lodash-es";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GaugeBuilder from "@lichtblick/suite-base/testing/builders/GaugeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { settingsActionReducer } from "./settingsActionReducer";
 import { SettingsActionReducerProps } from "./types";

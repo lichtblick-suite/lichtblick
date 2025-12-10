@@ -6,8 +6,8 @@ import {
   ImmutableDataset,
   StateTransitionPath,
 } from "@lichtblick/suite-base/panels/StateTransitions/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { datasetContainsArray, stateTransitionPathDisplayName } from "./shared";
 

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Initialization } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import RosDatatypesBuilder from "@lichtblick/suite-base/testing/builders/RosDatatypesBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { validateAndAddNewDatatypes, validateAndAddNewTopics } from "./validateInitialization";
 

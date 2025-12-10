@@ -11,8 +11,8 @@ import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerCo
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
   useLayoutManager: jest.fn(),

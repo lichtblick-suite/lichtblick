@@ -9,8 +9,8 @@ import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables
 import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CurrentCustomDatasetsBuilder";
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotDataHandling from "./usePlotDataHandling";
 import { IndexDatasetsBuilder } from "../builders/IndexDatasetsBuilder";

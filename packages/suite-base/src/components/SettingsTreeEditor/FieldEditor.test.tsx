@@ -11,7 +11,7 @@ import "@testing-library/jest-dom";
 import { FieldEditor } from "@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor";
 import { FieldEditorProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
 

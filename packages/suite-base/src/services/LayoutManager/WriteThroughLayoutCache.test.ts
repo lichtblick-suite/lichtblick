@@ -3,8 +3,8 @@
 
 import { ILayoutStorage } from "@lichtblick/suite-base/services/ILayoutStorage";
 import WriteThroughLayoutCache from "@lichtblick/suite-base/services/LayoutManager/WriteThroughLayoutCache";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("WriteThroughLayoutCache", () => {
   let mockStorage: jest.Mocked<ILayoutStorage>;

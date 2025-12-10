@@ -26,13 +26,13 @@ import {
   PlayerStateActiveData,
   Topic,
 } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import delay from "@lichtblick/suite-base/util/delay";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import UserScriptPlayer from ".";
 import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";

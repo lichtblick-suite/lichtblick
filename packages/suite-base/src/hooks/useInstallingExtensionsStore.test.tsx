@@ -3,7 +3,7 @@
 
 import { act } from "@testing-library/react";
 
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useInstallingExtensionsStore } from "./useInstallingExtensionsStore";
 

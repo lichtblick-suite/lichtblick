@@ -8,7 +8,7 @@ import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPane
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { PathLegendProps } from "@lichtblick/suite-base/panels/StateTransitions/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { PathLegend } from "./PathLegend";
 

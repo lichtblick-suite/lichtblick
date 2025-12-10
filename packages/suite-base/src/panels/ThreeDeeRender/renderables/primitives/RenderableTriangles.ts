@@ -113,8 +113,7 @@ export class RenderableTriangles extends RenderablePrimitive {
 
           const rgbLinear = SRGBToLinearRGBLUT(tempRgb, color.r, color.g, color.b);
 
-          const colorStride = colors.itemSize;
-          const colorOffset = i * colorStride;
+          const colorOffset = i * colors.itemSize;
 
           const EPS = 2 / 255;
           const diff =

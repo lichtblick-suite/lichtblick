@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { getSingleValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("getSingleValue", () => {
   it("should return a string with value and constantName if data is a single-element array", () => {

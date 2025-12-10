@@ -11,9 +11,9 @@ import {
   UseAvailableDiagnosticResult,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useAvailableDiagnostics, { addMessages } from "./useAvailableDiagnostics";
 

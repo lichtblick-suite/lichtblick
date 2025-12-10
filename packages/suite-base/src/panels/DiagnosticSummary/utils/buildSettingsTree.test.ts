@@ -7,8 +7,8 @@ import {
   SettingsTreeNodes,
 } from "@lichtblick/suite";
 import { DEFAULT_SETTINGS_TREE_NODE } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { buildSettingsTree } from "./buildSettingsTree";
 

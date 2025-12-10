@@ -9,7 +9,7 @@ import { MessageEvent } from "@lichtblick/suite";
 import { useBlocksSubscriptions } from "@lichtblick/suite-base/PanelAPI";
 import { MessageBlock } from "@lichtblick/suite-base/PanelAPI/useBlocksSubscriptions";
 import { useDecodeMessagePathsForMessagesByTopic } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
 import { useDecodedBlocks } from "./useDecodedBlocks";
