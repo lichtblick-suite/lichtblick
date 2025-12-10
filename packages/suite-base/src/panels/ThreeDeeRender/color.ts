@@ -21,6 +21,7 @@ export function SRGBToLinear(c: number): number {
 }
 
 const LUT_SIZE = 256;
+const MAX_INDEX = LUT_SIZE - 1;
 const SRGBToLinearLUTArray = new Float32Array(LUT_SIZE);
 for (let i = 0; i < LUT_SIZE; i++) {
   const c = i / (LUT_SIZE - 1);
@@ -28,9 +29,9 @@ for (let i = 0; i < LUT_SIZE; i++) {
 }
 
 export function SRGBToLinearRGBLUT(output: ColorRGB, r: number, g: number, b: number): ColorRGB {
-  const ri = (r * (LUT_SIZE - 1)) | 0;
-  const gi = (g * (LUT_SIZE - 1)) | 0;
-  const bi = (b * (LUT_SIZE - 1)) | 0;
+  const ri = Math.min(MAX_INDEX, Math.max(0, (r * MAX_INDEX) | 0));
+  const gi = Math.min(MAX_INDEX, Math.max(0, (g * MAX_INDEX) | 0));
+  const bi = Math.min(MAX_INDEX, Math.max(0, (b * MAX_INDEX) | 0));
 
   output.r = SRGBToLinearLUTArray[ri]!;
   output.g = SRGBToLinearLUTArray[gi]!;
