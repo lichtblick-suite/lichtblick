@@ -1,155 +1,162 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
-
-import { MessagePathStructureItem, PrimitiveType } from "@lichtblick/message-path";
+import { MessagePathStructureItem } from "@lichtblick/message-path";
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
-import { ValueAction } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import {
+  DiffObject,
+  PathState,
+  ValueAction,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import {
+  deducePrimitiveType,
+  formatValueForFilter,
+  isArrayElement,
+  isObjectElement,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 
-const isObjectElement = (
+const buildFilterPath = (
+  multiSlicePath: string,
+  pathItem: string,
   value: unknown,
-  pathItem: string | number,
   structureItem: MessagePathStructureItem | undefined,
-): boolean => {
-  return (
-    typeof pathItem === "string" &&
-    (structureItem == undefined || structureItem.structureType === "message") &&
-    typeof value === "object"
-  );
+): string => {
+  if (multiSlicePath.endsWith("[:]") && structureItem?.structureType === "primitive") {
+    return `${multiSlicePath}{${pathItem}==${formatValueForFilter(value)}}`;
+  }
+  return "";
 };
 
-const isArrayElement = (
-  value: unknown,
-  pathItem: string | number,
+const findTypicalFilterName = (
   structureItem: MessagePathStructureItem | undefined,
-): boolean =>
-  typeof pathItem === "number" &&
-  (structureItem == undefined || structureItem.structureType === "array") &&
-  Array.isArray(value);
+): string | undefined => {
+  if (structureItem?.structureType !== "message") {
+    return undefined;
+  }
+  return Object.entries(structureItem.nextByName).find(
+    ([key, nextStructureItem]) =>
+      nextStructureItem.structureType === "primitive" && isTypicalFilterName(key),
+  )?.[0];
+};
+
+const buildSingleSlicePathForArray = (
+  pathItem: number,
+  value: unknown,
+  structureItem: MessagePathStructureItem | undefined,
+): string => {
+  const typicalFilterName = findTypicalFilterName(structureItem);
+
+  if (typeof value === "object" && value != undefined && typeof typicalFilterName === "string") {
+    const filterValue = (value as DiffObject)[typicalFilterName];
+    return `[:]{${typicalFilterName}==${formatValueForFilter(filterValue)}}`;
+  }
+
+  return `[${pathItem}]`;
+};
+
+const processObjectElement = (state: PathState, pathItem: string): PathState => {
+  const nextStructureItem =
+    state.structureItem?.structureType === "message"
+      ? state.structureItem.nextByName[pathItem]
+      : undefined;
+  const nextValue = (state.value as Record<string, unknown>)[pathItem];
+
+  return {
+    singleSlicePath: `${state.singleSlicePath}.${pathItem}`,
+    multiSlicePath: `${state.multiSlicePath}.${pathItem}`,
+    filterPath: buildFilterPath(state.multiSlicePath, pathItem, nextValue, nextStructureItem),
+    value: nextValue,
+    structureItem: nextStructureItem,
+  };
+};
+
+const processArrayElement = (state: PathState, pathItem: number): PathState => {
+  const nextValue = (state.value as Record<string, unknown>)[pathItem];
+  const nextStructureItem =
+    state.structureItem?.structureType === "array" ? state.structureItem.next : undefined;
+
+  return {
+    singleSlicePath: `${state.singleSlicePath}${buildSingleSlicePathForArray(
+      pathItem,
+      nextValue,
+      nextStructureItem,
+    )}`,
+    multiSlicePath: `${state.singleSlicePath}[:]`,
+    filterPath: "",
+    value: nextValue,
+    structureItem: nextStructureItem,
+  };
+};
+
+const buildValueAction = (state: PathState): ValueAction | undefined => {
+  if (state.value == undefined) {
+    return undefined;
+  }
+
+  // If we know the primitive type from the schema, use it.
+  if (state.structureItem?.structureType === "primitive") {
+    return {
+      singleSlicePath: state.singleSlicePath,
+      multiSlicePath: state.multiSlicePath,
+      primitiveType: state.structureItem.primitiveType,
+      filterPath: state.filterPath,
+    };
+  }
+
+  // Otherwise, deduce a roughly-correct type from the runtime type of the value.
+  const primitiveType = deducePrimitiveType(state.value);
+  if (primitiveType != undefined) {
+    return {
+      singleSlicePath: state.singleSlicePath,
+      multiSlicePath: state.multiSlicePath,
+      primitiveType,
+      filterPath: state.filterPath,
+    };
+  }
+
+  return undefined;
+};
 
 // Given a root value (e.g. a message object), a root structureItem (e.g. a message definition),
 // and a key path to navigate down the value and strutureItem (e.g. ["items", 10, "speed"]), return
 // a bunch of paths for that navigated down value.
-export function getValueActionForValue(
+export const getValueActionForValue = (
   rootValue: unknown,
   rootStructureItem: MessagePathStructureItem | undefined,
   keyPath: (number | string)[],
-): ValueAction | undefined {
-  let singleSlicePath = "";
-  let multiSlicePath = "";
-  let filterPath = "";
-  let value: unknown = rootValue;
-  let structureItem: MessagePathStructureItem | undefined = rootStructureItem;
-  // Walk down the keyPath, while updating `value` and `structureItem`
-  for (const pathItem of keyPath) {
-    if (value == undefined) {
-      break;
-    } else if (isObjectElement(value, pathItem, structureItem)) {
-      structureItem =
-        structureItem?.structureType === "message" && typeof pathItem === "string"
-          ? structureItem.nextByName[pathItem]
-          : undefined;
-      value = (value as Record<string, unknown>)[pathItem];
-      if (multiSlicePath.endsWith("[:]") && structureItem?.structureType === "primitive") {
-        // We're just inside a message that is inside an array, so we might want to pivot on this new value.
-        if (typeof value === "bigint") {
-          filterPath = `${multiSlicePath}{${pathItem}==${value.toString()}}`;
-        } else {
-          filterPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) ?? ""}}`;
-        }
-      } else {
-        filterPath = "";
-      }
-      singleSlicePath += `.${pathItem}`;
-      multiSlicePath += `.${pathItem}`;
-    } else if (isArrayElement(value, pathItem, structureItem)) {
-      value = (value as Record<string, unknown>)[pathItem];
-      structureItem = structureItem?.structureType === "array" ? structureItem.next : undefined;
-      multiSlicePath = `${singleSlicePath}[:]`;
+): ValueAction | undefined => {
+  let state: PathState = {
+    singleSlicePath: "",
+    multiSlicePath: "",
+    filterPath: "",
+    value: rootValue,
+    structureItem: rootStructureItem,
+  };
 
-      // Ideally show something like `/topic.object[:]{id=123}` for the singleSlicePath, but fall
-      // back to `/topic.object[10]` if necessary.
-      let typicalFilterName;
-      if (structureItem?.structureType === "message") {
-        typicalFilterName = Object.entries(structureItem.nextByName).find(
-          ([key, nextStructureItem]) =>
-            nextStructureItem.structureType === "primitive" && isTypicalFilterName(key),
-        )?.[0];
-      }
-      if (
-        typeof value === "object" &&
-        value != undefined &&
-        typeof typicalFilterName === "string"
-      ) {
-        const filterValue = (value as Record<string, unknown>)[typicalFilterName];
-        singleSlicePath += `[:]{${typicalFilterName}==${
-          typeof filterValue === "bigint"
-            ? filterValue.toString()
-            : (JSON.stringify(filterValue) ?? "")
-        }}`;
-      } else {
-        singleSlicePath += `[${pathItem}]`;
-      }
-    } else if (structureItem?.structureType === "primitive") {
+  // Walk down the keyPath, while updating the state
+  for (const pathItem of keyPath) {
+    if (state.value == undefined) {
+      break;
+    }
+
+    if (isObjectElement(state.value, pathItem, state.structureItem)) {
+      state = processObjectElement(state, pathItem as string);
+    } else if (isArrayElement(state.value, pathItem, state.structureItem)) {
+      state = processArrayElement(state, pathItem as number);
+    } else if (state.structureItem?.structureType === "primitive") {
       // ROS has primitives with nested data (time, duration).
       // We currently don't support looking inside them.
       return undefined;
     } else {
-      throw new Error(`Invalid structureType: ${structureItem?.structureType} for value/pathItem.`);
+      throw new Error(
+        `Invalid structureType: ${state.structureItem?.structureType} for value/pathItem.`,
+      );
     }
   }
+
   // At this point we should be looking at a primitive. If not, just return nothing.
-  if (value != undefined) {
-    // If we know the primitive type from the schema, use it.
-    if (structureItem?.structureType === "primitive") {
-      return {
-        singleSlicePath,
-        multiSlicePath,
-        primitiveType: structureItem.primitiveType,
-        filterPath,
-      };
-    }
-    // Otherwise, deduce a roughly-correct type from the runtime type of the value.
-    let primitiveType: PrimitiveType | undefined;
-    switch (typeof value) {
-      case "bigint":
-        primitiveType = "int64";
-        break;
-      case "boolean":
-        primitiveType = "bool";
-        break;
-      case "number":
-        primitiveType = "int32"; // compatible with both Plot and State Transitions
-        break;
-      case "string":
-        primitiveType = "string";
-        break;
-      default:
-        break;
-    }
-    if (primitiveType != undefined) {
-      return {
-        singleSlicePath,
-        multiSlicePath,
-        primitiveType,
-        filterPath,
-      };
-    }
-  }
-  return undefined;
-}
+  return buildValueAction(state);
+};
 
 // Given root structureItem (e.g. a message definition),
 // and a key path to navigate down, return strutureItem for the field at that path

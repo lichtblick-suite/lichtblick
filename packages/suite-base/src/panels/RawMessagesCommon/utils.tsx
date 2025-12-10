@@ -10,6 +10,7 @@ import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import LineChartIcon from "@mui/icons-material/ShowChart";
 import * as _ from "lodash-es";
 
+import { MessagePathStructureItem, PrimitiveType } from "@lichtblick/message-path";
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
   DATA_ARRAY_PREVIEW_LIMIT,
@@ -312,4 +313,45 @@ export const getStateTransitionsAction = (
     icon: <StateTransitionsIcon fontSize="inherit" />,
     onClick: openStateTransitionsPanel(singleSlicePath),
   };
+};
+
+/** getValueActionsForValue */
+export const deducePrimitiveType = (value: unknown): PrimitiveType | undefined => {
+  switch (typeof value) {
+    case "bigint":
+      return "int64";
+    case "boolean":
+      return "bool";
+    case "number":
+      return "int32"; // compatible with both Plot and State Transitions
+    case "string":
+      return "string";
+    default:
+      return undefined;
+  }
+};
+
+export const isObjectElement = (
+  value: unknown,
+  pathItem: string | number,
+  structureItem: MessagePathStructureItem | undefined,
+): boolean => {
+  return (
+    typeof pathItem === "string" &&
+    (structureItem == undefined || structureItem.structureType === "message") &&
+    typeof value === "object"
+  );
+};
+
+export const isArrayElement = (
+  value: unknown,
+  pathItem: string | number,
+  structureItem: MessagePathStructureItem | undefined,
+): boolean =>
+  typeof pathItem === "number" &&
+  (structureItem == undefined || structureItem.structureType === "array") &&
+  Array.isArray(value);
+
+export const formatValueForFilter = (value: unknown): string => {
+  return typeof value === "bigint" ? value.toString() : (JSON.stringify(value) ?? "");
 };

@@ -4,13 +4,10 @@
 import { IconButtonProps, TooltipProps } from "@mui/material";
 import { CSSProperties, ReactNode } from "react";
 
+import { MessagePathStructureItem } from "@lichtblick/message-path";
 import { Immutable, Topic } from "@lichtblick/suite";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import { OpenSiblingPanel, SaveConfig } from "@lichtblick/suite-base/types/panels";
-
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export type RawMessagesPanelConfig = {
   diffEnabled: boolean;
@@ -163,4 +160,13 @@ type SharedConfigActions<T extends SharedConfig> = {
 export type UseSharedRawMessagesLogicProps<T extends SharedConfig> = {
   config: T;
   saveConfig: SharedConfigActions<T>["saveConfig"];
+};
+
+/** getValueActionForValue */
+export type PathState = {
+  singleSlicePath: string;
+  multiSlicePath: string;
+  filterPath: string;
+  value: unknown;
+  structureItem: MessagePathStructureItem | undefined;
 };
