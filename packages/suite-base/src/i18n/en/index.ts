@@ -13,6 +13,7 @@ export * from "./desktopWindow";
 export * from "./extensionsSettings";
 export * from "./gauge";
 export * from "./general";
+export * from "./httpErrors";
 export * from "./incompatibleLayoutVersion";
 export * from "./log";
 export * from "./openDialog";

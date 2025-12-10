@@ -110,13 +110,16 @@ export function ExtensionDetails({
     }
 
     const url = extension.foxe;
+    if (url == undefined) {
+      enqueueSnackbar(`Cannot install extension ${extension.id}, "foxe" URL is missing`, {
+        variant: "error",
+      });
+      return;
+    }
+
+    setOperationStatus(OperationStatus.INSTALLING);
+
     try {
-      if (url == undefined) {
-        throw new Error(`Cannot install extension ${extension.id}, "foxe" URL is missing`);
-      }
-
-      setOperationStatus(OperationStatus.INSTALLING);
-
       const extensionBuffer = await downloadExtension(url);
       await installExtensions("local", [{ buffer: extensionBuffer }]);
 
@@ -124,15 +127,13 @@ export function ExtensionDetails({
 
       if (isMounted()) {
         setIsInstalled(true);
-        setOperationStatus(OperationStatus.IDLE);
         void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
       }
-    } catch (e: unknown) {
-      const err = e as Error;
-
-      enqueueSnackbar(`Failed to install extension ${extension.id}. ${err.message}`, {
+    } catch (error) {
+      enqueueSnackbar(error instanceof Error ? error.message : "Failed to install extension", {
         variant: "error",
       });
+    } finally {
       setOperationStatus(OperationStatus.IDLE);
     }
   }, [
@@ -141,9 +142,9 @@ export function ExtensionDetails({
     enqueueSnackbar,
     extension.foxe,
     extension.id,
+    extension.name,
     installExtensions,
     isMounted,
-    extension.name,
   ]);
 
   /**
@@ -154,32 +155,33 @@ export function ExtensionDetails({
    * @returns {Promise<void>}
    */
   const uninstall = useCallback(async () => {
+    setOperationStatus(OperationStatus.UNINSTALLING);
+
     try {
-      setOperationStatus(OperationStatus.UNINSTALLING);
       // UX - Avoids the button from blinking when operation completes too fast
       await new Promise((resolve) => setTimeout(resolve, 200));
       await uninstallExtension(extension.namespace ?? "local", extension.id);
       enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
+
       if (isMounted()) {
         setIsInstalled(false);
-        setOperationStatus(OperationStatus.IDLE);
         void analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
       }
-    } catch (e: unknown) {
-      const err = e as Error;
-      enqueueSnackbar(`Failed to uninstall extension ${extension.id}. ${err.message}`, {
+    } catch (error) {
+      enqueueSnackbar(error instanceof Error ? error.message : "Failed to uninstall extension", {
         variant: "error",
       });
+    } finally {
       setOperationStatus(OperationStatus.IDLE);
     }
   }, [
     analytics,
+    enqueueSnackbar,
     extension.id,
+    extension.name,
     extension.namespace,
     isMounted,
     uninstallExtension,
-    enqueueSnackbar,
-    extension.name,
   ]);
 
   return (

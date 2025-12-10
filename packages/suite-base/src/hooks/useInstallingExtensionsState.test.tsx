@@ -10,6 +10,7 @@ import {
   ExtensionData,
   InstallExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import { useInstallingExtensionsState } from "./useInstallingExtensionsState";
@@ -310,6 +311,32 @@ describe("useInstallingExtensionsState", () => {
       // Then
       expect(enqueueSnackbar).toHaveBeenCalledWith(
         `An error occurred during extension installation: ${errorMessage}`,
+        expect.objectContaining({ variant: "error" }),
+      );
+      expect(mockResetInstallingProgress).toHaveBeenCalled();
+    });
+
+    it("should show user-friendly error message when HttpError is thrown", async () => {
+      // Given
+      const httpError = new HttpError("Network error", 0, "Network Error");
+      const extensionsData = createExtensionData(1);
+      mockInstallExtensions.mockRejectedValue(httpError);
+
+      const { result } = renderHook(() =>
+        useInstallingExtensionsState({
+          isPlaying: false,
+          playerEvents: { play: playMock },
+        }),
+      );
+
+      // When
+      await act(async () => {
+        await result.current.installFoxeExtensions(extensionsData);
+      });
+
+      // Then
+      expect(enqueueSnackbar).toHaveBeenCalledWith(
+        expect.stringContaining("Network connection error"),
         expect.objectContaining({ variant: "error" }),
       );
       expect(mockResetInstallingProgress).toHaveBeenCalled();

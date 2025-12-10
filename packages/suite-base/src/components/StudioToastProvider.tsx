@@ -107,6 +107,7 @@ Snackbar.displayName = "Snackbar";
 export default function StudioToastProvider({ children }: PropsWithChildren): React.JSX.Element {
   const { classes: containerClasses } = useContainerStyles();
   const { classes } = useStyles();
+
   return (
     <SnackbarProvider
       Components={{
@@ -132,6 +133,7 @@ export default function StudioToastProvider({ children }: PropsWithChildren): Re
       preventDuplicate
       TransitionComponent={Grow}
       classes={containerClasses}
+      domRoot={document.body}
     >
       {children}
     </SnackbarProvider>

@@ -221,10 +221,7 @@ describe("ExtensionDetails Component", () => {
       fireEvent.click(installButton);
 
       await waitFor(() => {
-        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-          `Failed to install extension ${mockExtension.id}. Download failed`,
-          { variant: "error" },
-        );
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Download failed", { variant: "error" });
       });
     });
   });
@@ -261,10 +258,7 @@ describe("ExtensionDetails Component", () => {
     fireEvent.click(uninstallButton);
 
     await waitFor(() => {
-      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-        `Failed to uninstall extension ${mockExtension.id}. Uninstall failed`,
-        { variant: "error" },
-      );
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Uninstall failed", { variant: "error" });
     });
   });
 });

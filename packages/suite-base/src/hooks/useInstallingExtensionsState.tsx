@@ -14,6 +14,7 @@ import {
   UseInstallingExtensionsState,
   UseInstallingExtensionsStateProps,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import { Namespace } from "@lichtblick/suite-base/types";
 
 import { useInstallingExtensionsStore } from "./useInstallingExtensionsStore";
@@ -279,10 +280,16 @@ export function useInstallingExtensionsState({
           inProgress: false,
         }));
 
-        enqueueSnackbar(
-          `An error occurred during extension installation: ${error instanceof Error ? error.message : "Unknown error"}`,
-          { variant: "error" },
-        );
+        const errorMessage =
+          error instanceof HttpError
+            ? error.getUserFriendlyErrorMessage()
+            : error instanceof Error
+              ? error.message
+              : "Unknown error";
+
+        enqueueSnackbar(`An error occurred during extension installation: ${errorMessage}`, {
+          variant: "error",
+        });
       } finally {
         if (isPlayingInitialState) {
           play?.();
