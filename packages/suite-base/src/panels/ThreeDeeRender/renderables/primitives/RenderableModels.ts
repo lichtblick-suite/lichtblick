@@ -51,10 +51,34 @@ export class RenderableModels extends RenderablePrimitive {
   #renderablesByDataCrc = new Map<number, RenderableModel[]>();
   /** Renderables loaded from URLs */
   #renderablesByUrl = new Map<string, RenderableModel[]>();
+  #pendingModelLoads = new Map<string, Promise<LoadedModel | undefined>>();
+
   #updateCount = 0;
 
   public constructor(renderer: IRenderer) {
     super("", renderer);
+  }
+
+  async #loadOrGetPending(
+    key: string,
+    loadFn: () => Promise<LoadedModel | undefined>,
+  ): Promise<LoadedModel | undefined> {
+    // Return existing pending load
+    const existing = this.#pendingModelLoads.get(key);
+    if (existing) {
+      return await existing;
+    }
+
+    // Start a new load
+    const promise = loadFn().finally(() => {
+      // Remove from map when done (success or failure)
+      this.#pendingModelLoads.delete(key);
+    });
+
+    // Store before awaiting
+    this.#pendingModelLoads.set(key, promise);
+
+    return await promise;
   }
 
   /**
@@ -69,14 +93,24 @@ export class RenderableModels extends RenderablePrimitive {
     revokeURL: (_: string) => void,
   ): Promise<RenderableModel | undefined> {
     const url = getURL(primitive);
+    const key = primitive.url.length === 0 ? crc32(primitive.data).toString() : primitive.url;
+
     let renderable: RenderableModel | undefined;
     try {
-      // Load the model if necessary
-      const cachedModel = await this.#loadCachedModel(url, {
-        overrideMediaType: primitive.media_type.length > 0 ? primitive.media_type : undefined,
-      });
+      // Load the model if necessary, otherwise get pending loaded model
+      const cachedModel = await this.#loadOrGetPending(
+        key,
+        async () =>
+          await this.#loadCachedModel(url, {
+            overrideMediaType: primitive.media_type.length > 0 ? primitive.media_type : undefined,
+          }),
+      );
       if (cachedModel) {
-        renderable = { model: cloneAndPrepareModel(cachedModel), cachedModel, primitive };
+        renderable = {
+          model: cloneAndPrepareModel(cachedModel),
+          cachedModel,
+          primitive,
+        };
       }
     } finally {
       revokeURL(url);
