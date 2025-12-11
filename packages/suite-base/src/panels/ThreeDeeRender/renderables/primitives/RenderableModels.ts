@@ -154,44 +154,54 @@ export class RenderableModels extends RenderablePrimitive {
 
     const modelsToLoad: ModelPrimitive[] = [];
 
-    // iterate over new primitives and update existing renderables
-    // add primitives that don't have models yet to modelsToLoad
+    // Match incoming primitives with previously-rendered models (reuse)
     for (const primitive of models) {
       let prevRenderables: RenderableModel[] | undefined;
       let newRenderables: RenderableModel[] | undefined;
-      let renderable: RenderableModel | undefined;
+      let reusedRenderable: RenderableModel | undefined;
+
       if (primitive.url.length === 0) {
         const dataCrc = crc32(primitive.data);
+
         prevRenderables = prevRenderablesByDataCrc.get(dataCrc);
         newRenderables = this.#renderablesByDataCrc.get(dataCrc);
+
+        // Create a bucket for this CRC if not already present
         if (!newRenderables) {
           newRenderables = [];
           this.#renderablesByDataCrc.set(dataCrc, newRenderables);
         }
-        renderable = this.#removeMatchFromList(prevRenderables, (model) =>
+
+        reusedRenderable = this.#removeMatchFromList(prevRenderables, (model) =>
           dataPrimitivesMatch(model, primitive),
         );
       } else {
+        // URL-based model
         prevRenderables = prevRenderablesByUrl.get(primitive.url);
         newRenderables = this.#renderablesByUrl.get(primitive.url);
+
+        // Create a bucket for this URL if not already present
         if (!newRenderables) {
           newRenderables = [];
           this.#renderablesByUrl.set(primitive.url, newRenderables);
         }
-        renderable = this.#removeMatchFromList(prevRenderables, (model) =>
+
+        reusedRenderable = this.#removeMatchFromList(prevRenderables, (model) =>
           urlPrimitivesMatch(model, primitive),
         );
       }
-      // renderable not found in prevRenderables
-      if (renderable) {
-        this.#updateModel(renderable, primitive);
-        newRenderables.push(renderable);
-        this.add(renderable.model);
+
+      // Mark renderable for reuse or add to loading backlog
+      if (reusedRenderable) {
+        this.#updateModel(reusedRenderable, primitive);
+        newRenderables.push(reusedRenderable);
+        this.add(reusedRenderable.model);
       } else {
         modelsToLoad.push(primitive);
       }
     }
 
+    // Load new renderables asynchronously
     Promise.all(
       modelsToLoad.map(async (primitive) => {
         let newRenderables: RenderableModel[] | undefined;
@@ -263,6 +273,7 @@ export class RenderableModels extends RenderablePrimitive {
         // update for new models
         this.#updateOutlineVisibility();
       });
+
     // Only unused models should be left in the `prevRenderables` lists after
     // using this.#removeMatchFromList() above
     for (const renderables of prevRenderablesByUrl.values()) {
