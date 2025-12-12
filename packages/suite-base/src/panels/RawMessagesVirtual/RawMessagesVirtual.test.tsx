@@ -15,8 +15,8 @@ import AppConfigurationContext, {
 import {
   NodeState,
   RawMessagesPanelConfig,
+  UseSharedRawMessagesLogicResult,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-import { UseSharedRawMessagesLogicResult } from "@lichtblick/suite-base/panels/RawMessagesCommon/useSharedRawMessagesLogic";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";

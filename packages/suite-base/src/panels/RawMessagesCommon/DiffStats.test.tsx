@@ -10,8 +10,7 @@
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
-import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 
 import DiffStats from "./DiffStats";
