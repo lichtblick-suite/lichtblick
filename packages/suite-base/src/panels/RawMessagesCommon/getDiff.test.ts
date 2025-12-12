@@ -14,7 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
-import getDiff, { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import  getDiff from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 const firstObj = { deletedKey: 1, changedKey: 2, unchangedKey: 1, someArray: [1] };
 const secondObj = {

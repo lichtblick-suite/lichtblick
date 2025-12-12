@@ -8,8 +8,7 @@ import { MessagePath, MessagePathStructureItem } from "@lichtblick/message-path"
 import { Immutable, Topic } from "@lichtblick/suite";
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem";
-import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
-import { MessageEvent } from "@lichtblick/suite-base/players/types";
+import { Topic as PlayerTopic, MessageEvent } from "@lichtblick/suite-base/players/types";
 import { OpenSiblingPanel, SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 export type RawMessagesPanelConfig = {
