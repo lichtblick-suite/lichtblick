@@ -14,30 +14,13 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import { Topic } from "@lichtblick/suite-base/players/types";
 
 import { PATH_NAME_AGGREGATOR, PREV_MSG_METHOD } from "./constants";
-import { NodeExpansion, NodeState } from "./types";
-import type { UseSharedRawMessagesLogicProps, SharedConfig } from "./types";
+import { NodeState } from "./types";
+import type {
+  UseSharedRawMessagesLogicProps,
+  SharedConfig,
+  UseSharedRawMessagesLogicResult,
+} from "./types";
 import { dataWithoutWrappingArray, generateDeepKeyPaths, toggleExpansion } from "./utils";
-
-export type UseSharedRawMessagesLogicResult = {
-  topicRosPath: MessagePath | undefined;
-  topic: Topic | undefined;
-  rootStructureItem: MessagePathStructureItem | undefined;
-  baseItem: ReturnType<typeof useMessageDataItem>[number] | undefined;
-  diffItem: ReturnType<typeof useMessageDataItem>[number] | undefined;
-
-  expansion: NodeExpansion | undefined;
-  setExpansion: (
-    expansion: NodeExpansion | ((old: NodeExpansion | undefined) => NodeExpansion),
-  ) => void;
-  nodes: Set<string>;
-  canExpandAll: boolean;
-
-  onTopicPathChange: (newTopicPath: string) => void;
-  onDiffTopicPathChange: (newDiffTopicPath: string) => void;
-  onToggleDiff: () => void;
-  onToggleExpandAll: () => void;
-  onLabelClick: (keypath: (string | number)[]) => void;
-};
 
 /**
  * Shared hook that contains all the common logic for both RawMessages and RawMessagesVirtual panels.
@@ -117,11 +100,7 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
     if (expansion === "all") {
       return false;
     }
-    if (typeof expansion === "object" && Object.values(expansion).includes(NodeState.Collapsed)) {
-      return true;
-    } else {
-      return false;
-    }
+    return typeof expansion === "object" && Object.values(expansion).includes(NodeState.Collapsed);
   }, [expansion]);
 
   const onTopicPathChange = useCallback(

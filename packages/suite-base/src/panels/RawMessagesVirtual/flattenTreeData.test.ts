@@ -10,11 +10,11 @@ import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { flattenTreeData } from "./flattenTreeData";
 
 describe("flattenTreeData", () => {
+  let expandedNodes = new Set<string>();
   describe("when data is null or undefined", () => {
     it("should return empty array given undefined data", () => {
       // Given
       const data = undefined;
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -28,7 +28,6 @@ describe("flattenTreeData", () => {
     it("should return empty array given a string", () => {
       // Given
       const data = BasicBuilder.string();
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -40,7 +39,6 @@ describe("flattenTreeData", () => {
     it("should return empty array given a number", () => {
       // Given
       const data = BasicBuilder.number();
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -52,7 +50,6 @@ describe("flattenTreeData", () => {
     it("should return empty array given a boolean", () => {
       // Given
       const data = BasicBuilder.boolean();
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -66,7 +63,6 @@ describe("flattenTreeData", () => {
     it("should return empty array given a Uint8Array", () => {
       // Given
       const data = new Uint8Array([1, 2, 3]);
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -78,7 +74,6 @@ describe("flattenTreeData", () => {
     it("should return empty array given a Float32Array", () => {
       // Given
       const data = new Float32Array([1.5, 2.5, 3.5]);
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -90,7 +85,6 @@ describe("flattenTreeData", () => {
     it("should return empty array given an Int16Array", () => {
       // Given
       const data = new Int16Array([10, 20, 30]);
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -108,7 +102,6 @@ describe("flattenTreeData", () => {
         age: BasicBuilder.number(),
         active: BasicBuilder.boolean(),
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -151,7 +144,6 @@ describe("flattenTreeData", () => {
         nullValue: null,
         undefinedValue: undefined,
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -167,7 +159,6 @@ describe("flattenTreeData", () => {
       const data = {
         buffer: new Uint8Array([1, 2, 3]),
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -182,7 +173,6 @@ describe("flattenTreeData", () => {
       const data = {
         emptyObject: {},
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -197,7 +187,6 @@ describe("flattenTreeData", () => {
       const data = {
         emptyArray: [],
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -217,7 +206,6 @@ describe("flattenTreeData", () => {
           age: BasicBuilder.number(),
         },
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -243,7 +231,7 @@ describe("flattenTreeData", () => {
           age: BasicBuilder.number(),
         },
       };
-      const expandedNodes = new Set<string>(["user"]);
+      expandedNodes = new Set<string>(["user"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -283,7 +271,7 @@ describe("flattenTreeData", () => {
           },
         },
       };
-      const expandedNodes = new Set<string>(["level1", "level2~level1", "level3~level2~level1"]);
+      expandedNodes = new Set<string>(["level1", "level2~level1", "level3~level2~level1"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -312,7 +300,7 @@ describe("flattenTreeData", () => {
           },
         },
       };
-      const expandedNodes = new Set<string>(["level1"]); // level2 is not expanded
+      expandedNodes = new Set<string>(["level1"]); // level2 is not expanded
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -329,7 +317,6 @@ describe("flattenTreeData", () => {
     it("should flatten array with primitive values", () => {
       // Given
       const data = [BasicBuilder.string(), BasicBuilder.string(), BasicBuilder.string()];
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -371,7 +358,7 @@ describe("flattenTreeData", () => {
         { id: 1, name: BasicBuilder.string() },
         { id: 2, name: BasicBuilder.string() },
       ];
-      const expandedNodes = new Set<string>(["0", "1"]);
+      expandedNodes = new Set<string>(["0", "1"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -400,7 +387,7 @@ describe("flattenTreeData", () => {
           [3, 4],
         ],
       };
-      const expandedNodes = new Set<string>(["matrix", "0~matrix", "1~matrix"]);
+      expandedNodes = new Set<string>(["matrix", "0~matrix", "1~matrix"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -432,7 +419,7 @@ describe("flattenTreeData", () => {
           },
         },
       };
-      const expandedNodes = new Set<string>(["outer", "middle~outer"]);
+      expandedNodes = new Set<string>(["outer", "middle~outer"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -449,7 +436,7 @@ describe("flattenTreeData", () => {
       const data = {
         items: [{ name: BasicBuilder.string() }],
       };
-      const expandedNodes = new Set<string>(["items", "0~items"]);
+      expandedNodes = new Set<string>(["items", "0~items"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -472,7 +459,7 @@ describe("flattenTreeData", () => {
           },
         ],
       };
-      const expandedNodes = new Set<string>(["users", "0~users", "roles~0~users"]);
+      expandedNodes = new Set<string>(["users", "0~users", "roles~0~users"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -501,7 +488,7 @@ describe("flattenTreeData", () => {
           position: { x: BasicBuilder.float(), y: BasicBuilder.float(), z: BasicBuilder.float() },
         },
       };
-      const expandedNodes = new Set<string>(["header", "stamp~header", "pose", "position~pose"]);
+      expandedNodes = new Set<string>(["header", "stamp~header", "pose", "position~pose"]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -536,7 +523,6 @@ describe("flattenTreeData", () => {
     it("should respect custom parentPath parameter", () => {
       // Given
       const data = { field: BasicBuilder.string() };
-      const expandedNodes = new Set<string>();
       const parentPath = "custom~parent";
 
       // When
@@ -550,7 +536,6 @@ describe("flattenTreeData", () => {
     it("should respect custom depth parameter", () => {
       // Given
       const data = { field: BasicBuilder.string() };
-      const expandedNodes = new Set<string>();
       const parentPath = "";
       const depth = BasicBuilder.number({ min: 1, max: 10 });
 
@@ -564,7 +549,6 @@ describe("flattenTreeData", () => {
     it("should respect custom keyPath parameter", () => {
       // Given
       const data = { field: BasicBuilder.string() };
-      const expandedNodes = new Set<string>();
       const parentPath = "";
       const depth = 0;
       const keyPath = [BasicBuilder.string(), BasicBuilder.string()];
@@ -580,7 +564,7 @@ describe("flattenTreeData", () => {
       // Given
       const data = { nested: { value: BasicBuilder.number() } };
       const parentPath = BasicBuilder.string();
-      const expandedNodes = new Set<string>([`nested~${parentPath}`]);
+      expandedNodes = new Set<string>([`nested~${parentPath}`]);
 
       const depth = BasicBuilder.number({ min: 1, max: 5 });
       const keyPath = ["root"];
@@ -607,7 +591,6 @@ describe("flattenTreeData", () => {
         "1": "one",
         "10": "ten",
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -627,7 +610,6 @@ describe("flattenTreeData", () => {
         "key.with.dot": "value2",
         "key with space": "value3",
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -646,7 +628,6 @@ describe("flattenTreeData", () => {
         normalKey: BasicBuilder.string(),
         [symbolKey]: BasicBuilder.string(),
       };
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -660,7 +641,6 @@ describe("flattenTreeData", () => {
     it("should handle very large arrays efficiently", () => {
       // Given
       const data = Array.from({ length: 1000 }, (_, i) => i);
-      const expandedNodes = new Set<string>();
 
       // When
       const result = flattenTreeData(data, expandedNodes);

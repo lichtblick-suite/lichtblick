@@ -4,8 +4,11 @@
 import { IconButtonProps, TooltipProps } from "@mui/material";
 import { CSSProperties, ReactNode } from "react";
 
-import { MessagePathStructureItem } from "@lichtblick/message-path";
+import { MessagePath, MessagePathStructureItem } from "@lichtblick/message-path";
 import { Immutable, Topic } from "@lichtblick/suite";
+import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem";
+import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import { OpenSiblingPanel, SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -170,3 +173,80 @@ export type PathState = {
   value: unknown;
   structureItem: MessagePathStructureItem | undefined;
 };
+
+/** useSharedRawMessagesLogic */
+export type UseSharedRawMessagesLogicResult = {
+  topicRosPath: MessagePath | undefined;
+  topic: PlayerTopic | undefined;
+  rootStructureItem: MessagePathStructureItem | undefined;
+  baseItem: ReturnType<typeof useMessageDataItem>[number] | undefined;
+  diffItem: ReturnType<typeof useMessageDataItem>[number] | undefined;
+
+  expansion: NodeExpansion | undefined;
+  setExpansion: (
+    expansion: NodeExpansion | ((old: NodeExpansion | undefined) => NodeExpansion),
+  ) => void;
+  nodes: Set<string>;
+  canExpandAll: boolean;
+
+  onTopicPathChange: (newTopicPath: string) => void;
+  onDiffTopicPathChange: (newDiffTopicPath: string) => void;
+  onToggleDiff: () => void;
+  onToggleExpandAll: () => void;
+  onLabelClick: (keypath: (string | number)[]) => void;
+};
+
+/** useRenderers */
+export type UseValueRendererProps = {
+  datatypes:
+    | ReadonlyMap<
+        string,
+        {
+          readonly name?: string | undefined;
+          readonly definitions: readonly { readonly type: string; readonly name: string }[];
+        }
+      >
+    | Map<
+        string,
+        {
+          name?: string | undefined;
+          definitions: readonly { readonly type: string; readonly name: string }[];
+        }
+      >;
+  hoverObserverClassName: string;
+  onTopicPathChange: (path: string) => void;
+  openSiblingPanel: OpenSiblingPanel;
+};
+
+export type ValueRendererFunction = (
+  structureItem: MessagePathStructureItem | undefined,
+  data: unknown[],
+  queriedData: MessagePathDataItem[],
+  label: string,
+  itemValue: unknown,
+  ...keyPath: (number | string)[]
+) => React.ReactNode;
+
+export type RenderDiffLabelFunction = (label: string, itemValue: unknown) => React.ReactNode;
+
+export const diffLabels = {
+  ADDED: {
+    labelText: "STUDIO_DIFF___ADDED",
+    color: "#404047",
+    backgroundColor: "#daffe7",
+    invertedBackgroundColor: "#182924",
+    indicator: "+",
+  },
+  DELETED: {
+    labelText: "STUDIO_DIFF___DELETED",
+    color: "#404047",
+    backgroundColor: "#ffdee3",
+    invertedBackgroundColor: "#3d2327",
+    indicator: "-",
+  },
+  CHANGED: {
+    labelText: "STUDIO_DIFF___CHANGED",
+    color: "#eba800",
+  },
+  ID: { labelText: "STUDIO_DIFF___ID" },
+} as const;

@@ -11,7 +11,10 @@ import { memo, useCallback, useMemo, useRef } from "react";
 import { PropsVirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import {
   COLLAPSED_ICON,
+  DEFAULT_FONT_SIZE,
   EXPANDED_ICON,
+  SCROLLL_OVERSCAN,
+  TREE_NODE_INDENTATION,
 } from "@lichtblick/suite-base/panels/RawMessagesVirtual/constants";
 
 import { useStyles } from "./VirtualizedTree.style";
@@ -38,8 +41,8 @@ export const VirtualizedTree = memo(function VirtualizedTree({
   const virtualizer = useVirtualizer({
     count: flatData.length,
     getScrollElement,
-    estimateSize: () => 24,
-    overscan: 5,
+    estimateSize: () => fontSize ?? DEFAULT_FONT_SIZE,
+    overscan: SCROLLL_OVERSCAN,
     measureElement: (element) => element.getBoundingClientRect().height,
     // It helps prevent the "ResizeObserver loop completed with undelivered notifications" error
     // https://tanstack.com/virtual/latest/docs/api/virtualizer#useanimationframewithresizeobserver
@@ -66,7 +69,7 @@ export const VirtualizedTree = memo(function VirtualizedTree({
               className={classes.row}
               style={{
                 transform: `translateY(${virtualRow.start}px)`,
-                paddingLeft: node.depth * 16,
+                paddingLeft: node.depth * TREE_NODE_INDENTATION,
               }}
             >
               <span className={classes.expandButton}>

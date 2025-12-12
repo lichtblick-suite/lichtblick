@@ -182,19 +182,44 @@ describe("Given RawMessagesVirtual", () => {
   });
 
   describe("When custom font size is configured", () => {
-    it("Then renders with custom fontSize", () => {
+    it("Then renders Typography with custom fontSize for single values", () => {
       // Given
       const fontSize = BasicBuilder.number({ min: 10, max: 20 });
+      const topicName = `/test/${BasicBuilder.string()}`;
+      const schemaName = `std_msgs/${BasicBuilder.string()}`;
+      const primitiveValue = BasicBuilder.string();
+      const baseItem = createMockMessageDataItem({
+        topic: topicName,
+        message: primitiveValue,
+        schemaName,
+      });
+      baseItem.queriedData = [{ value: primitiveValue, path: "", constantName: undefined }];
+
+      mockUseSharedRawMessagesLogic.mockReturnValue(
+        createMockSharedLogic({
+          topic: { name: topicName, schemaName },
+          rootStructureItem: {
+            structureType: "message",
+            nextByName: {},
+            datatype: schemaName,
+          },
+          baseItem,
+        }),
+      );
+
       const config: Partial<RawMessagesPanelConfig> = {
-        topicPath: "/test/topic",
+        topicPath: topicName,
         fontSize,
       };
 
       // When
       renderComponent(config);
 
-      // Then
-      expect(screen.getByText("Waiting for next message…")).toBeInTheDocument();
+      // Then - The primitive value should be rendered
+      const el = screen.getByText(primitiveValue);
+      expect(el).toBeInTheDocument();
+      // Verify the component structure renders correctly with the configured fontSize
+      expect(screen.getByTestId("panel-scroll-container")).toBeInTheDocument();
     });
   });
 
@@ -204,10 +229,12 @@ describe("Given RawMessagesVirtual", () => {
       const topicName = `/test/${BasicBuilder.string()}`;
       const schemaName = `test_${BasicBuilder.string()}`;
       const messageValue = { value: BasicBuilder.number() };
+      const receiveTime = { sec: BasicBuilder.number(), nsec: 0 };
       const baseItem = createMockMessageDataItem({
         topic: topicName,
         message: messageValue,
         schemaName,
+        receiveTime,
       });
 
       mockUseSharedRawMessagesLogic.mockReturnValue(
@@ -232,6 +259,8 @@ describe("Given RawMessagesVirtual", () => {
 
       // Then
       expect(screen.getByTestId("panel-scroll-container")).toBeInTheDocument();
+      expect(screen.getByText(schemaName, { exact: false })).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(`@ ${receiveTime.sec}`))).toBeInTheDocument();
     });
 
     it("Then displays single primitive value without tree", () => {
@@ -304,7 +333,7 @@ describe("Given RawMessagesVirtual", () => {
       expect(screen.getByText(String(arrayValue[0]))).toBeInTheDocument();
     });
 
-    it("Then renders VirtualizedTree for complex objects", () => {
+    it("Then renders VirtualizedTree with complex objects' structure", () => {
       // Given
       const topicName = `/test/${BasicBuilder.string()}`;
       const schemaName = `geometry_msgs/${BasicBuilder.string()}`;
@@ -342,6 +371,12 @@ describe("Given RawMessagesVirtual", () => {
 
       // Then
       expect(screen.getByTestId("panel-scroll-container")).toBeInTheDocument();
+      const visibleKeys = ["x", "y", "z", "metadata"].filter((key) =>
+        screen.queryByText(key, { exact: false }),
+      );
+      // At least some keys should be rendered (virtualization may not show all)
+      expect(visibleKeys.length).toBeGreaterThan(0);
+      expect(screen.getByTitle("Expand all")).toBeInTheDocument();
     });
   });
 
@@ -489,13 +524,15 @@ describe("Given RawMessagesVirtual", () => {
       // When
       renderComponent(config);
 
-      // Then - VirtualizedTree should be rendered with all nodes expanded
+      // Then - VirtualizedTree should be rendered with expansion='all'
       expect(screen.getByTestId("panel-scroll-container")).toBeInTheDocument();
+      // Verify the expand/collapse button shows "Collapse all" (indicating all nodes are expanded)
+      expect(screen.getByTitle("Collapse all")).toBeInTheDocument();
     });
   });
 
   describe("When expansion is an object with specific node states", () => {
-    it("Then expands only nodes marked as expanded", () => {
+    it("Then renders VirtualizedTree with selective expansion", () => {
       // Given
       const topicName = `/test/${BasicBuilder.string()}`;
       const schemaName = `test_${BasicBuilder.string()}`;
@@ -541,6 +578,8 @@ describe("Given RawMessagesVirtual", () => {
 
       // Then - VirtualizedTree should be rendered with selective expansion
       expect(screen.getByTestId("panel-scroll-container")).toBeInTheDocument();
+      // Verify the expand/collapse button shows "Expand all" (indicating some nodes are collapsed)
+      expect(screen.getByTitle("Expand all")).toBeInTheDocument();
     });
 
     it("Then handles empty expansion object", () => {

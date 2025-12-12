@@ -18,8 +18,8 @@ import {
   ROS1_COMMON_MSG_PACKAGES,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
 import { copyMessageReplacer } from "@lichtblick/suite-base/panels/RawMessagesCommon/copyMessageReplacer";
-import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
 import {
+  diffLabels,
   DiffObject,
   NodeExpansion,
   NodeState,

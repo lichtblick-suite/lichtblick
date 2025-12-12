@@ -13,38 +13,13 @@ import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums"
 import ObjectSummary from "./ObjectSummary";
 import Value from "./Value";
 import { getStructureItemForPath, getValueActionForValue } from "./getValueActionForValue";
-import { ValueAction } from "./types";
+import {
+  RenderDiffLabelFunction,
+  UseValueRendererProps,
+  ValueAction,
+  ValueRendererFunction,
+} from "./types";
 import { getConstantNameByKeyPath, getValueLabels } from "./utils";
-
-type UseValueRendererProps = {
-  datatypes:
-    | ReadonlyMap<
-        string,
-        {
-          readonly name?: string | undefined;
-          readonly definitions: readonly { readonly type: string; readonly name: string }[];
-        }
-      >
-    | Map<
-        string,
-        {
-          name?: string | undefined;
-          definitions: readonly { readonly type: string; readonly name: string }[];
-        }
-      >;
-  hoverObserverClassName: string;
-  onTopicPathChange: (path: string) => void;
-  openSiblingPanel: OpenSiblingPanel;
-};
-
-type ValueRendererFunction = (
-  structureItem: MessagePathStructureItem | undefined,
-  data: unknown[],
-  queriedData: MessagePathDataItem[],
-  label: string,
-  itemValue: unknown,
-  ...keyPath: (number | string)[]
-) => React.ReactNode;
 
 /**
  * Hook that provides a value renderer function for rendering message values in the tree.
@@ -125,8 +100,6 @@ export function useValueRenderer({
 
   return valueRenderer;
 }
-
-type RenderDiffLabelFunction = (label: string, itemValue: unknown) => React.ReactNode;
 
 /**
  * Hook that provides a render function for diff labels.

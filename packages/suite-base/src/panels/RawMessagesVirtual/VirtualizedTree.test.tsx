@@ -36,10 +36,10 @@ function renderVirtualizedTree(props: Partial<React.ComponentProps<typeof Virtua
 
 describe("VirtualizedTree", () => {
   const mockOnToggleExpand = jest.fn();
+  const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
     useVirtualizer.mockReturnValue({
       getVirtualItems: jest.fn(() => []),
       getTotalSize: jest.fn(() => 0),
@@ -49,46 +49,13 @@ describe("VirtualizedTree", () => {
   });
 
   describe("when rendering with empty data", () => {
-    it("should render container with no rows given null data", () => {
-      // Given
+    it.each([
       // eslint-disable-next-line no-restricted-syntax
-      const data = null;
-      const expandedNodes = new Set<string>();
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const containerDiv = container.firstChild;
-      expect(containerDiv).toBeInTheDocument();
-      expect(container.querySelectorAll("[data-index]")).toHaveLength(0);
-    });
-
-    it("should render container with no rows given undefined data", () => {
+      ["null data", null],
+      ["undefined data", undefined],
+      ["empty object", {}],
+    ])("should render container with no rows given %s", (_label, data) => {
       // Given
-      const data = undefined;
-      const expandedNodes = new Set<string>();
-
-      // When
-      const { container } = renderVirtualizedTree({
-        data,
-        expandedNodes,
-        onToggleExpand: mockOnToggleExpand,
-      });
-
-      // Then
-      const containerDiv = container.firstChild;
-      expect(containerDiv).toBeInTheDocument();
-      expect(container.querySelectorAll("[data-index]")).toHaveLength(0);
-    });
-
-    it("should render container with no rows given empty object", () => {
-      // Given
-      const data = {};
       const expandedNodes = new Set<string>();
 
       // When
@@ -114,8 +81,6 @@ describe("VirtualizedTree", () => {
         active: BasicBuilder.boolean(),
       };
       const expandedNodes = new Set<string>();
-
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -182,7 +147,6 @@ describe("VirtualizedTree", () => {
       const data = { nested: { value: BasicBuilder.string() } };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -206,7 +170,6 @@ describe("VirtualizedTree", () => {
       const data = { nested: { value: BasicBuilder.string() } };
       const expandedNodes = new Set<string>(["nested"]);
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -233,7 +196,6 @@ describe("VirtualizedTree", () => {
       const data = { nested: { value: BasicBuilder.string() } };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -257,7 +219,6 @@ describe("VirtualizedTree", () => {
       const data = { primitive: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -288,7 +249,6 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
       const renderValue = jest.fn((_node: TreeNode) => <span>{customText}</span>);
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -315,7 +275,6 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
       const renderValue = jest.fn((_node: TreeNode) => <span>custom</span>);
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -356,7 +315,6 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>(["level1", "level2~level1"]);
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -390,7 +348,6 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -420,7 +377,6 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       const virtualItem = { index: 0, key: "0", size: 30, start: 0 };
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [virtualItem]),
         getTotalSize: jest.fn(() => 30),
@@ -448,7 +404,6 @@ describe("VirtualizedTree", () => {
       const data = { userName: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -472,7 +427,6 @@ describe("VirtualizedTree", () => {
       const data = { field: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -496,7 +450,6 @@ describe("VirtualizedTree", () => {
       const data = [BasicBuilder.string(), BasicBuilder.string()];
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -537,7 +490,6 @@ describe("VirtualizedTree", () => {
         measureElement: jest.fn(),
       }));
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockImplementation(mockUseVirtualizer);
 
       // When
@@ -568,7 +520,6 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       // Simulate virtualizer returning only 3 visible items out of 5 total
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
@@ -599,7 +550,6 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
       const totalSize = BasicBuilder.number({ min: 100, max: 1000 });
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => []),
         getTotalSize: jest.fn(() => totalSize),
@@ -635,7 +585,6 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>(["level1", "level2~level1", "level3~level2~level1"]);
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -674,7 +623,6 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>(["users", "0~users", "1~users"]);
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
@@ -709,7 +657,6 @@ describe("VirtualizedTree", () => {
       const data = { nested: { value: BasicBuilder.string() } };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -756,7 +703,6 @@ describe("VirtualizedTree", () => {
       const initialData = { field1: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
         getTotalSize: jest.fn(() => 24),
@@ -806,7 +752,6 @@ describe("VirtualizedTree", () => {
       const data = { field: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
 
-      const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
       // Mock virtualizer to return an index that doesn't exist in flatData
       useVirtualizer.mockReturnValue({
         getVirtualItems: jest.fn(() => [

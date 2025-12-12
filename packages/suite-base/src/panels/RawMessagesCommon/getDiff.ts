@@ -17,29 +17,7 @@ import * as _ from "lodash-es";
 
 import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePathSyntax/isTypicalFilterName";
 import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
-import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-
-export const diffLabels = {
-  ADDED: {
-    labelText: "STUDIO_DIFF___ADDED",
-    color: "#404047",
-    backgroundColor: "#daffe7",
-    invertedBackgroundColor: "#182924",
-    indicator: "+",
-  },
-  DELETED: {
-    labelText: "STUDIO_DIFF___DELETED",
-    color: "#404047",
-    backgroundColor: "#ffdee3",
-    invertedBackgroundColor: "#3d2327",
-    indicator: "-",
-  },
-  CHANGED: {
-    labelText: "STUDIO_DIFF___CHANGED",
-    color: "#eba800",
-  },
-  ID: { labelText: "STUDIO_DIFF___ID" },
-} as const;
+import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 export const diffLabelsByLabelText = _.keyBy(Object.values(diffLabels), "labelText");
 
