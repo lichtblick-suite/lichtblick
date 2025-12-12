@@ -22,11 +22,11 @@ import {
   PATH_NAME_AGGREGATOR,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
 import getDiff, {
-  diffLabels,
   diffLabelsByLabelText,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
 import { useStylesRawMessages } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import {
+  diffLabels,
   DiffObject,
   NodeState,
   PropsRawMessages,

@@ -8,9 +8,8 @@
 import { Typography } from "@mui/material";
 import { ReactNode } from "react";
 
-import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
 import { useStylesDiffStats } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
-import { DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import { getChangeCounts } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 
 export default function DiffStats({

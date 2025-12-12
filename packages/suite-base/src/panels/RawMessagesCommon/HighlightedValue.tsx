@@ -16,8 +16,10 @@
 
 import MaybeCollapsedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/MaybeCollapsedValue";
 import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
-import { diffLabels } from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
-import { PropsHighlightedValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import {
+  diffLabels,
+  PropsHighlightedValue,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { DiffSpan } from "./DiffSpan";
 
