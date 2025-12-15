@@ -85,7 +85,6 @@ export const VirtualizedTree = memo(function VirtualizedTree({
                       }
                     }}
                     tabIndex={0}
-                    role="button"
                     aria-expanded={expandedNodes.has(node.key)}
                     aria-label={`${expandedNodes.has(node.key) ? "Collapse" : "Expand"} ${node.label}`}
                     className={classes.spanButton}

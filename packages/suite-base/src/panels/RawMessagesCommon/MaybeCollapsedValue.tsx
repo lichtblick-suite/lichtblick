@@ -57,10 +57,9 @@ export default function MaybeCollapsedValue({
         style={{
           cursor: showingEntireLabel ? "inherit" : "pointer",
         }}
-        role="button"
         aria-expanded={showingEntireLabel}
       >
-        {`${truncatedItemText}${!showingEntireLabel ? "…" : ""}`}
+        {`${truncatedItemText}${showingEntireLabel ? "" : "…"}`}
       </button>
     </Tooltip>
   );
