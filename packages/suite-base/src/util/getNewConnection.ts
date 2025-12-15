@@ -17,6 +17,8 @@ import { isOverlapping } from "intervals-fn";
 
 import { Range, isRangeCoveredByRanges, missingRanges } from "./ranges";
 
+const READ_AHEAD_BUFFER_SIZE = 50 * 1024 * 1024; // 50 MB
+
 // Based on a number of properties this function determines if a new connection should be opened or
 // not. It can be used for any type of ranges, be it bytes, timestamps, or something else.
 export function getNewConnection(options: {
@@ -94,9 +96,10 @@ function getNewConnectionWithExistingReadRequest({
     // If we're downloading to the end of our range, do some reading ahead while we're at it.
     // Note that we might have already downloaded parts of this range, but we don't know when
     // they get evicted, so for now we just the entire range again.
+    // Use a conservative read-ahead of 50 MB to avoid downloading too much data that may not be needed
     return {
       ...notDownloadedRanges[0],
-      end: Math.min(readRequestRange.start + maxRequestSize, fileSize),
+      end: Math.min(readRequestRange.start + READ_AHEAD_BUFFER_SIZE, fileSize),
     };
   }
 
@@ -130,9 +133,11 @@ function getNewConnectionWithoutExistingConnection({
   } else if (lastResolvedCallbackEnd != undefined) {
     // Otherwise, if we have a limited cache, we want to read the data right after the last
     // read request, because usually read requests are sequential without gaps.
+    // Use a conservative read-ahead of 50 MB to avoid downloading too much data that may not be needed
     readAheadRange = {
       start: lastResolvedCallbackEnd,
-      end: Math.min(lastResolvedCallbackEnd + maxRequestSize, fileSize),
+      // end: Math.min(lastResolvedCallbackEnd + maxRequestSize, fileSize),
+      end: Math.min(lastResolvedCallbackEnd + READ_AHEAD_BUFFER_SIZE, fileSize),
     };
   }
   if (readAheadRange) {
