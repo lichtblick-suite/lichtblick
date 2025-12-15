@@ -44,6 +44,16 @@ export const useStyles = makeStyles()((theme) => {
       fontSize: theme.typography.pxToRem(11),
       alignSelf: "center",
     },
+    spanButton: {
+      cursor: "pointer",
+      userSelect: "none",
+      background: "none",
+      border: "none",
+      padding: 0,
+      font: "inherit",
+      textAlign: "left",
+      color: "inherit",
+    },
     key: {
       color: colors.label,
       marginRight: theme.spacing(0.5),

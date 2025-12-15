@@ -45,7 +45,7 @@ export default function MaybeCollapsedValue({
       title={showingEntireLabel ? "" : "Text was truncated, click to see all"}
       placement="top"
     >
-      <span
+      <button
         onClick={expandText}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -61,7 +61,7 @@ export default function MaybeCollapsedValue({
         aria-expanded={showingEntireLabel}
       >
         {`${truncatedItemText}${!showingEntireLabel ? "…" : ""}`}
-      </span>
+      </button>
     </Tooltip>
   );
 }

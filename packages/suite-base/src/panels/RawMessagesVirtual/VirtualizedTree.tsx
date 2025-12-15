@@ -74,7 +74,7 @@ export const VirtualizedTree = memo(function VirtualizedTree({
             >
               <span className={classes.expandButton}>
                 {node.isExpandable && (
-                  <span
+                  <button
                     onClick={() => {
                       onToggleExpand(node.key);
                     }}
@@ -88,9 +88,10 @@ export const VirtualizedTree = memo(function VirtualizedTree({
                     role="button"
                     aria-expanded={expandedNodes.has(node.key)}
                     aria-label={`${expandedNodes.has(node.key) ? "Collapse" : "Expand"} ${node.label}`}
+                    className={classes.spanButton}
                   >
                     {expandedNodes.has(node.key) ? COLLAPSED_ICON : EXPANDED_ICON}
-                  </span>
+                  </button>
                 )}
               </span>
               <span className={classes.key}>{node.label}</span>
