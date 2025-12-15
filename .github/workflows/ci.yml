@@ -125,7 +125,7 @@ jobs:
 
       - name: Upload Desktop E2E Test Reports (Shard ${{ matrix.shard }})
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: blob-report-desktop-${{ matrix.shard }}
           path: blob-report
@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload Web E2E Test Reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-web-reports
           path: e2e/reports/web/
@@ -237,7 +237,7 @@ jobs:
 
       - name: Upload Merged E2E Test Reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-test-reports-merged
           path: |
