@@ -21,54 +21,102 @@ import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessage
 
 export const diffLabelsByLabelText = _.keyBy(Object.values(diffLabels), "labelText");
 
+function isValidObjectArray(items: unknown[]): boolean {
+  return _.every(items, (item) => typeof item === "object" && item);
+}
+
+function getCandidateIdFields(
+  firstItem: DiffObject,
+): Record<string, { before: unknown[]; after: unknown[] }> {
+  const candidates: Record<string, { before: unknown[]; after: unknown[] }> = {};
+
+  if (firstItem.id != undefined) {
+    candidates.id = { before: [], after: [] };
+  }
+
+  for (const key in firstItem) {
+    if (isTypicalFilterName(key)) {
+      candidates[key] = { before: [], after: [] };
+    }
+  }
+
+  return candidates;
+}
+
+function collectCandidateValues(
+  items: unknown[],
+  candidates: Record<string, { before: unknown[]; after: unknown[] }>,
+  targetArray: "before" | "after",
+): void {
+  for (const [idKey, candidateObj] of Object.entries(candidates)) {
+    for (const item of items) {
+      const value = (item as DiffObject)[idKey];
+      if (value != undefined) {
+        candidateObj[targetArray].push(value);
+      }
+    }
+  }
+}
+
+function isValidIdField(
+  candidateIdBefore: unknown[],
+  candidateIdAfter: unknown[],
+  beforeLength: number,
+  afterLength: number,
+): boolean {
+  return (
+    _.uniq(candidateIdBefore).length === beforeLength &&
+    _.uniq(candidateIdAfter).length === afterLength
+  );
+}
+
 function findIdFieldForArrayComparison(before: unknown[], after: unknown[]): string | undefined {
   const allItems = before.concat(after);
   if (typeof allItems[0] !== "object" || allItems[0] == undefined) {
     return undefined;
   }
 
-  const candidateIdsToCompareWith: Record<string, { before: unknown[]; after: unknown[] }> = {};
-  if ((allItems[0] as DiffObject).id != undefined) {
-    candidateIdsToCompareWith.id = { before: [], after: [] };
-  }
-  for (const key in allItems[0]) {
-    if (isTypicalFilterName(key)) {
-      candidateIdsToCompareWith[key] = { before: [], after: [] };
-    }
-  }
-
-  if (!_.every(allItems, (item) => typeof item === "object" && item)) {
+  if (!isValidObjectArray(allItems)) {
     return undefined;
   }
 
-  for (const [idKey, candidates] of Object.entries(candidateIdsToCompareWith)) {
-    for (const beforeItem of before) {
-      if ((beforeItem as DiffObject)[idKey] != undefined) {
-        candidates.before.push((beforeItem as DiffObject)[idKey]);
-      }
-    }
-  }
+  const candidateIdsToCompareWith = getCandidateIdFields(allItems[0] as DiffObject);
 
-  for (const [idKey, candidates] of Object.entries(candidateIdsToCompareWith)) {
-    for (const afterItem of after) {
-      if ((afterItem as DiffObject)[idKey] != undefined) {
-        candidates.after.push((afterItem as DiffObject)[idKey]);
-      }
-    }
-  }
+  collectCandidateValues(before, candidateIdsToCompareWith, "before");
+  collectCandidateValues(after, candidateIdsToCompareWith, "after");
 
   for (const [idKey, { before: candidateIdBefore, after: candidateIdAfter }] of Object.entries(
     candidateIdsToCompareWith,
   )) {
-    if (
-      _.uniq(candidateIdBefore).length === before.length &&
-      _.uniq(candidateIdAfter).length === after.length
-    ) {
+    if (isValidIdField(candidateIdBefore, candidateIdAfter, before.length, after.length)) {
       return idKey;
     }
   }
 
   return undefined;
+}
+
+function isDeletionDiff(diff: DiffObject): boolean {
+  const keys = Object.keys(diff);
+  return keys.length === 1 && keys[0] === diffLabels.DELETED.labelText;
+}
+
+function addIdLabelToDiff(diff: DiffObject, idToCompareWith: string, id: unknown): DiffObject {
+  return {
+    [diffLabels.ID.labelText]: { [idToCompareWith]: id },
+    ...diff,
+  };
+}
+
+function processDiffForBeforeItem(
+  innerDiff: DiffObject,
+  idToCompareWith: string,
+  id: unknown,
+): DiffObject {
+  if (isDeletionDiff(innerDiff)) {
+    return innerDiff;
+  }
+  return addIdLabelToDiff(innerDiff, idToCompareWith, id);
 }
 
 function diffArraysByIdField(
@@ -92,18 +140,9 @@ function diffArraysByIdField(
       showFullMessageForDiff,
     });
     delete unmatchedAfterById[id as string];
+
     if (!_.isEmpty(innerDiff)) {
-      const isDeleted =
-        Object.keys(innerDiff as DiffObject).length === 1 &&
-        Object.keys(innerDiff as DiffObject)[0] === diffLabels.DELETED.labelText;
-      diff.push(
-        isDeleted
-          ? (innerDiff as DiffObject)
-          : {
-              [diffLabels.ID.labelText]: { [idToCompareWith]: id },
-              ...(innerDiff as DiffObject),
-            },
-      );
+      diff.push(processDiffForBeforeItem(innerDiff as DiffObject, idToCompareWith, id));
     }
   }
 
@@ -162,30 +201,34 @@ function diffObjects(
   return diff;
 }
 
-function createAddedDiff(after: unknown, idLabel?: string): DiffObject {
-  const afterIsNotObj = Array.isArray(after) || typeof after !== "object";
-  if (!idLabel || afterIsNotObj) {
-    return { [diffLabels.ADDED.labelText]: after };
-  }
-  const idLabelObj = {
-    [diffLabels.ID.labelText]: { [idLabel]: { ...(after as DiffObject) }[idLabel] },
-  };
+function isNotObject(value: unknown): boolean {
+  return Array.isArray(value) || typeof value !== "object";
+}
+
+function createIdLabelObj(value: DiffObject, idLabel: string): DiffObject {
   return {
-    [diffLabels.ADDED.labelText]: { ...idLabelObj, ...(after as DiffObject) },
+    [diffLabels.ID.labelText]: { [idLabel]: value[idLabel] },
   };
 }
 
-function createDeletedDiff(before: unknown, idLabel?: string): DiffObject {
-  const beforeIsNotObj = Array.isArray(before) || typeof before !== "object";
-  if (!idLabel || beforeIsNotObj) {
-    return { [diffLabels.DELETED.labelText]: before };
+function createLabeledDiff(labelText: string, value: unknown, idLabel?: string): DiffObject {
+  if (!idLabel || isNotObject(value)) {
+    return { [labelText]: value };
   }
-  const idLabelObj = {
-    [diffLabels.ID.labelText]: { [idLabel]: { ...(before as DiffObject) }[idLabel] },
-  };
+
+  const valueObj = value as DiffObject;
+  const idLabelObj = createIdLabelObj(valueObj, idLabel);
   return {
-    [diffLabels.DELETED.labelText]: { ...idLabelObj, ...(before as DiffObject) },
+    [labelText]: { ...idLabelObj, ...valueObj },
   };
+}
+
+function createAddedDiff(after: unknown, idLabel?: string): DiffObject {
+  return createLabeledDiff(diffLabels.ADDED.labelText, after, idLabel);
+}
+
+function createDeletedDiff(before: unknown, idLabel?: string): DiffObject {
+  return createLabeledDiff(diffLabels.DELETED.labelText, before, idLabel);
 }
 
 function createChangedDiff(before: unknown, after: unknown): DiffObject {
