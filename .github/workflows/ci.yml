@@ -201,14 +201,14 @@ jobs:
       - run: yarn install --immutable
 
       - name: Download all desktop blob reports
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: blob-report-desktop-*
           path: all-blob-reports-desktop
           merge-multiple: true
 
       - name: Download web reports
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: e2e-web-reports
           path: e2e/reports/web
