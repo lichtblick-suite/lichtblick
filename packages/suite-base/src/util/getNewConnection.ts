@@ -136,7 +136,6 @@ function getNewConnectionWithoutExistingConnection({
     // Use a conservative read-ahead of 50 MB to avoid downloading too much data that may not be needed
     readAheadRange = {
       start: lastResolvedCallbackEnd,
-      // end: Math.min(lastResolvedCallbackEnd + maxRequestSize, fileSize),
       end: Math.min(lastResolvedCallbackEnd + READ_AHEAD_BUFFER_SIZE, fileSize),
     };
   }
