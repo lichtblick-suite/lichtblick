@@ -18,8 +18,8 @@ import {
   UseSharedRawMessagesLogicResult,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import RawMessagesVirtual from "./RawMessagesVirtual";
 
