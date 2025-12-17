@@ -26,20 +26,39 @@ jobs:
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Create sync branch and merge
+        id: merge
         run: |
           git fetch origin develop
           BRANCH_NAME="sync/main-to-develop-${{ env.version }}"
           git checkout -b $BRANCH_NAME origin/develop
-          git merge origin/main --no-ff -m "chore: sync main into develop after release"
+          
+          # Try to merge, but don't fail on conflicts
+          if git merge origin/main --no-ff -m "chore: sync main into develop after release"; then
+            echo "has_conflicts=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_conflicts=true" >> $GITHUB_OUTPUT
+            # Stage all files to commit the conflict markers
+            git add .
+            git commit -m "chore: sync main into develop after release (with conflicts)"
+          fi
+          
           git push origin $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Create Pull Request
         run: |
+          if [[ "${{ steps.merge.outputs.has_conflicts }}" == "true" ]]; then
+            CONFLICT_NOTE="⚠️ **This PR has merge conflicts that need to be resolved manually.**
+
+            "
+          else
+            CONFLICT_NOTE=""
+          fi
+          
           gh pr create \
             -B develop \
             -H ${{ env.BRANCH_NAME }} \
-            --title "Release ${{ env.version }} Merge main into develop" \
+            --title "Release ${{ env.version }}: Sync main into develop" \
             --body "${CONFLICT_NOTE}This PR syncs changes from \`main\` into \`develop\` after release **${{ env.version }}**.
 
               Please review the changes before merging.
