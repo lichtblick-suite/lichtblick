@@ -67,6 +67,16 @@ jobs:
 
       - run: yarn install --immutable
 
+      - name: Restore build cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .eslintcache
+            **/*.tsbuildinfo
+          key: v1-${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            v1-${{ runner.os }}-build-
+
       - run: ${{ matrix.config.command }}
 
   e2e-desktop:
@@ -106,6 +116,16 @@ jobs:
           restore-keys: v5-${{ runner.os }}-yarn-
 
       - run: yarn install --immutable
+
+      - name: Restore Playwright cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: v1-${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v1-${{ runner.os }}-playwright-
+
+      - name: Install Playwright (if not cached)
+        run: npx playwright install --with-deps
 
       - name: Apply AppArmor Fix (Ubuntu)
         # Required for Playwright on Ubuntu to work properly
@@ -157,6 +177,13 @@ jobs:
           restore-keys: v5-${{ runner.os }}-yarn-
 
       - run: yarn install --immutable
+
+      - name: Restore Playwright cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: v1-${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v1-${{ runner.os }}-playwright-
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
