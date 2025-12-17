@@ -47,14 +47,5 @@ export const MuiAutocomplete: OverrideComponentReturn<"MuiAutocomplete"> = {
         opacity: 1,
       },
     }),
-    endAdornment: ({ theme }) => ({
-      display: "flex",
-      alignItems: "center",
-      top: `calc(50% - ${theme.spacing(1.5)})`,
-
-      [`.${autocompleteClasses.root} .${inputBaseClasses.sizeSmall}.${inputBaseClasses.root} &`]: {
-        right: theme.spacing(0.75),
-      },
-    }),
   },
 };

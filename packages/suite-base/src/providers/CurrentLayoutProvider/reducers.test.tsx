@@ -22,7 +22,7 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { TabPanelConfig } from "@lichtblick/suite-base/types/layouts";
 import { MosaicDropTargetPosition } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
+import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/constants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
 import panelsReducer, { defaultPlaybackConfig } from "./reducers";

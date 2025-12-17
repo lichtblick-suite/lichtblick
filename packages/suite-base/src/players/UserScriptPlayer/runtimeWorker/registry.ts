@@ -28,7 +28,7 @@ import {
   RegistrationOutput,
   UserScriptLog,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 
 // Each script runtime worker runs one script at a time, hence why we have one
 // global declaration of 'nodeCallback'.

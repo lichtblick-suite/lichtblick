@@ -30,7 +30,7 @@ import {
   UserScriptProjectConfig,
   UserScriptProjectFile,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/types";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 
 /**
  * Generates virtual ts files for each type exported by the @foxglove/schemas package.

@@ -10,55 +10,19 @@ import DiffOutlinedIcon from "@mui/icons-material/DifferenceOutlined";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { makeStyles } from "tss-react/mui";
 
-import { Topic } from "@lichtblick/suite";
 import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { useStylesToolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import {
+  PropsToolbar,
+  RawMessagesVirtualPanelConfig,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { PREV_MSG_METHOD, CUSTOM_METHOD } from "./constants";
-import { RawMessagesPanelConfig } from "./types";
 
-type Props = {
-  canExpandAll: boolean;
-  diffEnabled: boolean;
-  diffMethod: RawMessagesPanelConfig["diffMethod"];
-  diffTopicPath: string;
-  onDiffTopicPathChange: (path: string) => void;
-  onToggleDiff: () => void;
-  onToggleExpandAll: () => void;
-  onTopicPathChange: (path: string) => void;
-  saveConfig: SaveConfig<RawMessagesPanelConfig>;
-  topic?: Topic;
-  topicPath: string;
-};
-
-const useStyles = makeStyles()((theme) => ({
-  toolbar: {
-    paddingBlock: 0,
-    gap: theme.spacing(0.25),
-  },
-  iconButton: {
-    padding: theme.spacing(0.25),
-
-    "&.Mui-selected": {
-      color: theme.palette.primary.main,
-      backgroundColor: theme.palette.action.selected,
-    },
-  },
-  diffOptions: {
-    borderTop: `1px solid ${theme.palette.background.default}`,
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(0.25, 0.75),
-    paddingInlineEnd: theme.spacing(6.75),
-    gap: theme.spacing(0.25),
-    display: "flex",
-  },
-}));
-
-function ToolbarComponent(props: Props): React.JSX.Element {
+function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
   const {
     canExpandAll,
     diffEnabled,
@@ -73,7 +37,7 @@ function ToolbarComponent(props: Props): React.JSX.Element {
     topicPath,
   } = props;
 
-  const { classes, cx } = useStyles();
+  const { classes, cx } = useStylesToolbar();
 
   return (
     <>
@@ -115,7 +79,7 @@ function ToolbarComponent(props: Props): React.JSX.Element {
             MenuProps={{ MenuListProps: { dense: true } }}
             onChange={(event: SelectChangeEvent) => {
               saveConfig({
-                diffMethod: event.target.value as RawMessagesPanelConfig["diffMethod"],
+                diffMethod: event.target.value as RawMessagesVirtualPanelConfig["diffMethod"],
               });
             }}
           >

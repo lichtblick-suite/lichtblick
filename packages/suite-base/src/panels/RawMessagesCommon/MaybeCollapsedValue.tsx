@@ -17,12 +17,12 @@
 import { Tooltip } from "@mui/material";
 import { useCallback, useState } from "react";
 
-// Strings longer than this many characters will start off collapsed.
-const COLLAPSE_TEXT_OVER_LENGTH = 512;
+import { COLLAPSE_TEXT_OVER_LENGTH } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import { PropsMaybeCollapsedValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
-type Props = { itemLabel: string };
-
-export default function MaybeCollapsedValue({ itemLabel }: Props): React.JSX.Element {
+export default function MaybeCollapsedValue({
+  itemLabel,
+}: PropsMaybeCollapsedValue): React.JSX.Element {
   const lengthOverLimit = itemLabel.length >= COLLAPSE_TEXT_OVER_LENGTH;
 
   const [showingEntireLabel, setShowingEntireLabel] = useState(!lengthOverLimit);
@@ -31,23 +31,36 @@ export default function MaybeCollapsedValue({ itemLabel }: Props): React.JSX.Ele
     setShowingEntireLabel(true);
   }, []);
 
-  const truncatedItemText = showingEntireLabel
-    ? itemLabel
-    : itemLabel.slice(0, COLLAPSE_TEXT_OVER_LENGTH);
-
   // Tooltip is expensive to render. Skip it if we're not truncating.
   if (!lengthOverLimit) {
     return <span>{itemLabel}</span>;
   }
 
+  const truncatedItemText = showingEntireLabel
+    ? itemLabel
+    : itemLabel.slice(0, COLLAPSE_TEXT_OVER_LENGTH);
+
   return (
     <Tooltip
-      title={!showingEntireLabel ? "Text was truncated, click to see all" : ""}
+      title={showingEntireLabel ? "" : "Text was truncated, click to see all"}
       placement="top"
     >
-      <span onClick={expandText} style={{ cursor: !showingEntireLabel ? "pointer" : "inherit" }}>
-        {`${truncatedItemText}${!showingEntireLabel ? "…" : ""}`}
-      </span>
+      <button
+        onClick={expandText}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            expandText();
+          }
+        }}
+        tabIndex={showingEntireLabel ? undefined : 0}
+        style={{
+          cursor: showingEntireLabel ? "inherit" : "pointer",
+        }}
+        aria-expanded={showingEntireLabel}
+      >
+        {`${truncatedItemText}${showingEntireLabel ? "" : "…"}`}
+      </button>
     </Tooltip>
   );
 }

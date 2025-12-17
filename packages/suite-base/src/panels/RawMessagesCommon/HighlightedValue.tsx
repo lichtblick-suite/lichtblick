@@ -14,28 +14,29 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { diffLabels, diffArrow } from "@lichtblick/suite-base/panels/RawMessages/getDiff";
+import MaybeCollapsedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/MaybeCollapsedValue";
+import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import {
+  diffLabels,
+  PropsHighlightedValue,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
 import { DiffSpan } from "./DiffSpan";
-import MaybeCollapsedValue from "./MaybeCollapsedValue";
 
-type Props = {
-  itemLabel: string;
-};
-
-export default function HighlightedValue({ itemLabel }: Props): React.JSX.Element {
-  const diffArrowStr = ` ${diffArrow} `;
+export default function HighlightedValue({ itemLabel }: PropsHighlightedValue): React.JSX.Element {
   // react-json-tree's valueRenderer only gets called for primitives, so diff before/after values must be at same level by the time it gets to the tree
-  const splitItemLabel = itemLabel.length > 0 ? itemLabel.split(diffArrowStr) : [];
+  const splitItemLabel = itemLabel.length > 0 ? itemLabel.split(diffArrow) : [];
   const itemLabelContainsChange = splitItemLabel.length === 2;
+
   if (itemLabelContainsChange) {
     const [before, after] = splitItemLabel;
-    const beforeText = JSON.parse(JSON.stringify(before) ?? "");
-    const afterText = JSON.parse(JSON.stringify(after) ?? "");
+    const beforeText = before ?? "";
+    const afterText = after ?? "";
+
     return (
       <DiffSpan style={{ color: diffLabels.CHANGED.color }}>
         <MaybeCollapsedValue itemLabel={beforeText} />
-        {diffArrowStr}
+        {diffArrow}
         <MaybeCollapsedValue itemLabel={afterText} />
       </DiffSpan>
     );

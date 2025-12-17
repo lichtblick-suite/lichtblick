@@ -47,11 +47,6 @@ const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 const LANGUAGE_OPTIONS: { key: Language; value: string }[] = [{ key: "en", value: "English" }];
 
 const useStyles = makeStyles()((theme) => ({
-  autocompleteInput: {
-    "&.MuiOutlinedInput-input": {
-      padding: 0,
-    },
-  },
   checkbox: {
     "&.MuiCheckbox-root": {
       paddingTop: 0,
@@ -126,8 +121,6 @@ export function ColorSchemeSettings(): React.JSX.Element {
 export function TimezoneSettings(): React.ReactElement {
   type Option = { key: string; label: string; data?: string; divider?: boolean };
 
-  const { classes } = useStyles();
-
   const { t } = useTranslation("appSettings");
   const [timezone, setTimezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
   const detectItem: Option = useMemo(
@@ -187,12 +180,7 @@ export function TimezoneSettings(): React.ReactElement {
             </li>
           )
         }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            slotProps={{ htmlInput: { className: classes.autocompleteInput } }}
-          />
-        )}
+        renderInput={(params) => <TextField {...params} />}
         onChange={(_event, value) => void setTimezone(value?.data)}
       />
     </FormControl>

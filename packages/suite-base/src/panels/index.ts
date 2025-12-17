@@ -8,8 +8,8 @@
 import { TFunction } from "i18next";
 
 import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 
+import { TAB_PANEL_TYPE } from "../util/constants";
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import diagnosticStatusThumbnail from "./DiagnosticStatus/assets/diagnostic-status.png";
 import diagnosticSummaryThumbnail from "./DiagnosticSummary/assets/diagnostic-summary.png";
@@ -132,6 +132,13 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("rawMessagesDescription"),
     thumbnail: rawMessagesThumbnail,
     module: async () => await import("./RawMessages"),
+    hasCustomToolbar: true,
+  },
+  {
+    title: "Raw Messages Virtual",
+    type: "RawMessagesVirtual",
+    description: "Virtualized Raw Messages panel",
+    module: async () => await import("./RawMessagesVirtual"),
     hasCustomToolbar: true,
   },
   {

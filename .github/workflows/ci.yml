@@ -57,7 +57,7 @@ jobs:
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -97,7 +97,7 @@ jobs:
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -125,7 +125,7 @@ jobs:
 
       - name: Upload Desktop E2E Test Reports (Shard ${{ matrix.shard }})
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: blob-report-desktop-${{ matrix.shard }}
           path: blob-report
@@ -148,7 +148,7 @@ jobs:
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload Web E2E Test Reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-web-reports
           path: e2e/reports/web/
@@ -190,7 +190,7 @@ jobs:
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -201,14 +201,14 @@ jobs:
       - run: yarn install --immutable
 
       - name: Download all desktop blob reports
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: blob-report-desktop-*
           path: all-blob-reports-desktop
           merge-multiple: true
 
       - name: Download web reports
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: e2e-web-reports
           path: e2e/reports/web
@@ -237,7 +237,7 @@ jobs:
 
       - name: Upload Merged E2E Test Reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-test-reports-merged
           path: |
