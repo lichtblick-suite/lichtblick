@@ -11,9 +11,10 @@ permissions:
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
+    if: |
+      github.event.pull_request.merged == true &&
+      (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
     runs-on: macos-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
