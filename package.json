@@ -81,21 +81,12 @@
     "@actions/core": "1.11.1",
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.2",
-<<<<<<< HEAD
     "@babel/core": "7.28.5",
     "@babel/plugin-proposal-decorators": "7.28.0",
     "@babel/plugin-proposal-explicit-resource-management": "7.27.4",
     "@babel/preset-env": "7.28.5",
     "@babel/preset-react": "7.28.5",
     "@babel/preset-typescript": "7.28.5",
-=======
-    "@babel/core": "7.28.3",
-    "@babel/plugin-proposal-decorators": "7.28.0",
-    "@babel/plugin-proposal-explicit-resource-management": "7.27.4",
-    "@babel/preset-env": "7.28.3",
-    "@babel/preset-react": "7.27.1",
-    "@babel/preset-typescript": "7.27.1",
->>>>>>> origin/main
     "@lichtblick/eslint-plugin": "1.0.4",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
     "@lichtblick/tsconfig": "1.0.2",
@@ -120,11 +111,7 @@
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "10.0.0",
     "depcheck": "1.4.7",
-<<<<<<< HEAD
     "electron": "39.2.4",
-=======
-    "electron": "39.0.0",
->>>>>>> origin/main
     "electron-builder": "26.0.12",
     "eslint": "8.57",
     "eslint-config-prettier": "9.1.0",
@@ -149,21 +136,12 @@
     "rimraf": "6.0.1",
     "semver": "7.7.2",
     "storybook": "9.1.9",
-<<<<<<< HEAD
     "ts-loader": "9.5.4",
     "ts-node": "10.9.2",
     "ts-unused-exports": "11.0.1",
     "tslib": "2.8.1",
     "typescript": "5.9.3",
     "webpack": "5.102.1",
-=======
-    "ts-loader": "9.5.1",
-    "ts-node": "10.9.2",
-    "ts-unused-exports": "11.0.1",
-    "tslib": "2.8.1",
-    "typescript": "5.3.3",
-    "webpack": "5.101.3",
->>>>>>> origin/main
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.2",
     "webpack-hot-middleware": "2.26.0"
@@ -175,11 +153,6 @@
     "@lichtblick/omgidl-serialization": "1.0.0",
     "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
-<<<<<<< HEAD
-    "@mui/material": "5.13.5",
-    "@tanstack/react-virtual": "3.13.12",
-=======
->>>>>>> origin/main
     "react-use": "17.6.0",
     "rehype-raw": "7.0.0",
     "vm-browserify": "1.1.2"
