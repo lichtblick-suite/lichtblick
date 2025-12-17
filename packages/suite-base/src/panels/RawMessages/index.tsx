@@ -44,6 +44,7 @@ import {
   isSingleElemArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
+import { customTypography } from "@lichtblick/theme";
 
 function RawMessages(props: PropsRawMessages) {
   const {
