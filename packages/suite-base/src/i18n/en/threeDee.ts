@@ -71,6 +71,7 @@ export const threeDee = {
   fovy: "Y-Axis FOV",
   near: "Near",
   perspective: "Perspective",
+  screenSpacePanning: "Screen space panning",
   phi: "Phi",
   planarProjectionFactor: "Planar projection factor",
   syncCamera: "Sync camera",
