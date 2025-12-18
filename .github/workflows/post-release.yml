@@ -5,6 +5,10 @@ on:
   release:
     types: [released]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   npm:
     name: Publish to NPM
@@ -18,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 16.17
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - run: corepack enable yarn
@@ -26,8 +30,6 @@ jobs:
       - run: yarn install --immutable
 
       - run: npm publish ./packages/suite
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
   docker:
     name: Publish to GHCR
