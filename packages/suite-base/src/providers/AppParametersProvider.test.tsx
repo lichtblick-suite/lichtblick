@@ -6,7 +6,7 @@
 import { render } from "@testing-library/react";
 
 import { useAppParameters } from "@lichtblick/suite-base/context/AppParametersContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import AppParametersProvider from "./AppParametersProvider";
 

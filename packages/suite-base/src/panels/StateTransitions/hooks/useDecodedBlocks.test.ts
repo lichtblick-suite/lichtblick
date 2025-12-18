@@ -9,8 +9,8 @@ import { MessageEvent } from "@lichtblick/suite";
 import { useBlocksSubscriptions } from "@lichtblick/suite-base/PanelAPI";
 import { MessageBlock } from "@lichtblick/suite-base/PanelAPI/useBlocksSubscriptions";
 import { useDecodeMessagePathsForMessagesByTopic } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useDecodedBlocks } from "./useDecodedBlocks";
 import { StateTransitionPath } from "../types";

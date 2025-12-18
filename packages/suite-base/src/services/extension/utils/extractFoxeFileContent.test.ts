@@ -4,7 +4,7 @@
 import JSZip from "jszip";
 
 import { ALLOWED_FILES } from "@lichtblick/suite-base/services/extension/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import extractFoxeFileContent from "./extractFoxeFileContent";
 

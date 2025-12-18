@@ -5,8 +5,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { PieChartConfig, PieChartState } from "@lichtblick/suite-base/panels/PieChart/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class PieChartBuilder {
   public static float32Array(length = 3): Float32Array {

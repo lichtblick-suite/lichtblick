@@ -14,7 +14,7 @@ import {
   useUserProfileStorage,
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/hooks");
 jest.mock("lodash-es");

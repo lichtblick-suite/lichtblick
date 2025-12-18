@@ -10,7 +10,7 @@ import { useMemo } from "react";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { PlotLegend } from "./PlotLegend";
 

@@ -19,9 +19,9 @@ import {
   UsePlotInteractionHandlersProps,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotInteractionHandlers from "./usePlotInteractionHandlers";
 

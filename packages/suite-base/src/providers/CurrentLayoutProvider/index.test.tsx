@@ -29,7 +29,7 @@ import AppParametersProvider from "@lichtblick/suite-base/providers/AppParameter
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
 import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
   ...jest.requireActual("notistack"),

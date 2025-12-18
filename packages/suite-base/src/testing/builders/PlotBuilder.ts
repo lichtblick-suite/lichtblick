@@ -7,9 +7,8 @@ import {
   PlotPath,
   PlotXAxisVal,
 } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class PlotBuilder {
   public static datum(props: Partial<Datum> = {}): Datum {

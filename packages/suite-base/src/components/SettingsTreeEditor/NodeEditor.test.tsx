@@ -15,7 +15,7 @@ import {
   NodeEditorProps,
   SelectVisibilityFilterValue,
 } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 let capturedActionHandler: (action: SettingsTreeAction) => void;
 

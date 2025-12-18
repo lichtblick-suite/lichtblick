@@ -3,7 +3,7 @@
 
 import { MessagePathFilter, OperatorType } from "@lichtblick/message-path";
 import { Immutable } from "@lichtblick/suite";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { filterMatches } from "./filterMatches";
 

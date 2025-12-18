@@ -13,7 +13,7 @@ import {
   StudioLogsSettingsContext,
   IStudioLogsSettings,
 } from "@lichtblick/suite-base/context/StudioLogsSettingsContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { StudioLogsSettingsProvider } from "./StudioLogsSettingsProvider";
 import { createStudioLogsSettingsStore } from "./store";

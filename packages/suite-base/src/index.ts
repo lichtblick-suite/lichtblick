@@ -58,5 +58,4 @@ export { reportError, setReportErrorHandler } from "./reportError";
 export { makeWorkspaceContextInitialState } from "./providers/WorkspaceContextProvider";
 export type { AppBarProps } from "./components/AppBar";
 export { IdbExtensionLoader } from "./services/extension/IdbExtensionLoader";
-export { default as BasicBuilder } from "./testing/builders/BasicBuilder";
 export { LOCAL_STORAGE_APP_CONFIGURATION } from "./constants/browserStorageKeys";

@@ -8,8 +8,8 @@ import "@testing-library/jest-dom"; // Add this import for DOM testing matchers
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import LayoutSection from "./LayoutSection";
 

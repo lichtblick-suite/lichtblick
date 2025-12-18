@@ -3,7 +3,7 @@
 
 import JSZip from "jszip";
 
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import decompressFile from "./decompressFile";
 

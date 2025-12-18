@@ -3,8 +3,8 @@
 
 import { TopicAliasFunction, ExtensionPanelRegistration, PanelSettings } from "@lichtblick/suite";
 import { MessageConverter } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { buildContributionPoints } from "./buildContributionPoints";
 

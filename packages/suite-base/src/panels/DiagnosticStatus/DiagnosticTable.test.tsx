@@ -8,8 +8,8 @@ import {
   DiagnosticInfo,
   DiagnosticStatusProps,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import DiagnosticTable from "./DiagnosticTable";
 

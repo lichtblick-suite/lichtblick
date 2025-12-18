@@ -4,10 +4,9 @@
 import { ExtensionInfoWorkspace } from "@lichtblick/suite-base/api/extensions/types";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class ExtensionBuilder {
   public static extensionInfo(props: Partial<ExtensionInfo> = {}): ExtensionInfo {

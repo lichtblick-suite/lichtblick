@@ -12,7 +12,7 @@ import { AsyncState } from "react-use/lib/useAsyncFn";
 import useExtensionSettings from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionSettings";
 import { UseExtensionSettingsHook } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import ExtensionsSettings from "./index";
 

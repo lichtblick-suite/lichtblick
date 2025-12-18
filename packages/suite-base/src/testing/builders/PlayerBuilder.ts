@@ -15,12 +15,11 @@ import {
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosDatatypesBuilder from "@lichtblick/suite-base/testing/builders/RosDatatypesBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { Range } from "@lichtblick/suite-base/util/ranges";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 class PlayerBuilder {
   public static subscribePayload(props: Partial<SubscribePayload> = {}): SubscribePayload {

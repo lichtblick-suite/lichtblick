@@ -7,7 +7,7 @@ import * as THREE from "three";
 
 import { PinholeCameraModel } from "@lichtblick/den/image";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import {
   ImageRenderable,

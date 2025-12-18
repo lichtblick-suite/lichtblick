@@ -11,7 +11,7 @@ import {
   InstallExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useInstallingExtensionsState } from "./useInstallingExtensionsState";
 

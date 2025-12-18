@@ -9,8 +9,8 @@ import "@testing-library/jest-dom";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import * as LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import * as useConfirmModule from "@lichtblick/suite-base/hooks/useConfirm";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import LayoutRow from "./LayoutRow";
 

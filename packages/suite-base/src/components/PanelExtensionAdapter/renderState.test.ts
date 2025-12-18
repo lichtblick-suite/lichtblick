@@ -12,8 +12,8 @@ import { PanelSettings, VariableValue } from "@lichtblick/suite";
 import { EMPTY_GLOBAL_VARIABLES } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { RosTime } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { BuilderRenderStateInput, initRenderStateBuilder } from "./renderState";
 

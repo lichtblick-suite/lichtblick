@@ -9,8 +9,8 @@ import * as _ from "lodash-es";
 
 import { add, toNanoSec, toSec } from "@lichtblick/rostime";
 import { TimelinePositionedEvent } from "@lichtblick/suite-base/context/EventsContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 export function makeMockEvents(
   count: number,
@@ -33,8 +33,8 @@ export function makeMockEvents(
           type: BasicBuilder.strings()[idx % 3]!,
           state: BasicBuilder.strings()[idx % 3]!,
         },
-        createdAt: BasicBuilder.date(),
-        updatedAt: BasicBuilder.date(),
+        createdAt: BasicBuilder.datetime(),
+        updatedAt: BasicBuilder.datetime(),
         deviceId: `device_${idx + 1}`,
         durationNanos: toNanoSec(duration).toString(),
       },

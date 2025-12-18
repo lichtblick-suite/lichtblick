@@ -10,8 +10,8 @@ import {
   usePlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { FILE_ACCEPT_TYPE } from "@lichtblick/suite-base/context/Workspace/constants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useOpenFile } from "./useOpenFile";
 

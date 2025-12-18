@@ -6,7 +6,7 @@ import { render } from "@testing-library/react";
 import { useNetworkState } from "react-use";
 
 import { NetworkStatusIndicator } from "@lichtblick/suite-base/components/AppBar/NetworkStatusIndicator";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 const API_URL = "https://api.test.com";
 let mockApiUrl: string | undefined = API_URL;

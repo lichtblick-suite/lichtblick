@@ -8,8 +8,8 @@ import {
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import ExtensionsAPI from "./ExtensionsAPI";
 
@@ -146,8 +146,8 @@ describe("ExtensionsAPI", () => {
       const mockApiResponse: CreateOrUpdateResponse = {
         extension: {
           ...extension.info,
-          createdAt: BasicBuilder.date(),
-          updatedAt: BasicBuilder.date(),
+          createdAt: BasicBuilder.datetime(),
+          updatedAt: BasicBuilder.datetime(),
           fileId: BasicBuilder.string(),
           extensionId: extension.info.id,
           scope: extension.info.namespace!,

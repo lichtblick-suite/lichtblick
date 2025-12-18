@@ -6,9 +6,9 @@ import { SettingsTreeNode, SettingsTreeNodeActionItem } from "@lichtblick/suite"
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
 import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { buildSettingsTree } from "./buildSettingsTree";
 

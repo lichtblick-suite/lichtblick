@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { openSiblingStateTransitionsPanel } from "./openSiblingStateTransitionsPanel";
 

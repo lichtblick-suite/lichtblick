@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { mathFunctions } from "@lichtblick/suite-base/panels/Plot/utils/mathFunctions";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("mathFunctions", () => {
   it("should correctly calculate the negative of a number", () => {

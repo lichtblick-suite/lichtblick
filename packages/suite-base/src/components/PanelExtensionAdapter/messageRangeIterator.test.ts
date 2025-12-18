@@ -7,9 +7,9 @@
 
 import { MessageEvent } from "@lichtblick/suite";
 import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { IteratorResult } from "../../players/IterablePlayer/IIterableSource";

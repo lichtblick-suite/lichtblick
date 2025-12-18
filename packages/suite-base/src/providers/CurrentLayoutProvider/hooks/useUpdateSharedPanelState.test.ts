@@ -7,7 +7,7 @@ import { renderHook, act } from "@testing-library/react";
 import { MutableRefObject } from "react";
 
 import { LayoutState, LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useUpdateSharedPanelState from "./useUpdateSharedPanelState";
 

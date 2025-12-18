@@ -12,8 +12,8 @@ import {
 } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotPanelSettings, {
   HandleAction,

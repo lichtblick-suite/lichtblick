@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import type { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { openSiblingPlotPanel } from "./openSiblingPlotPanel";
 

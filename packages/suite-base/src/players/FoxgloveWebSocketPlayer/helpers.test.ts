@@ -11,9 +11,9 @@ import {
 import { CheckForHighFrequencyTopics } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/types";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/players/utils/isTopicHighFrequency");
 

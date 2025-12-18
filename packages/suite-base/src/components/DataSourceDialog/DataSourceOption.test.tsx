@@ -7,7 +7,7 @@ import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import { DataSourceOptionProps } from "@lichtblick/suite-base/components/DataSourceDialog/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import DataSourceOption from "./DataSourceOption";
 
