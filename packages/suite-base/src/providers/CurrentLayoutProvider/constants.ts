@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: MPL-2.0
 
 export const MAX_SUPPORTED_LAYOUT_VERSION = 1;
+export const ORG_PERMISSION_PREFIX = "ORG_";

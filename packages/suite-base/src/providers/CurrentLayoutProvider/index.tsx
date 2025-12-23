@@ -40,7 +40,10 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
-import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import {
+  MAX_SUPPORTED_LAYOUT_VERSION,
+  ORG_PERMISSION_PREFIX,
+} from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
@@ -275,10 +278,6 @@ export default function CurrentLayoutProvider({
 
   // Load initial state by re-selecting the last selected layout from the UserProfile.
   useAsync(async () => {
-    if (layoutManager.supportsSharing) {
-      return;
-    }
-
     // Don't restore the layout if there's one specified in the app state url.
     if (windowAppURLState()?.layoutId) {
       return;
@@ -316,7 +315,9 @@ export default function CurrentLayoutProvider({
     }
 
     if (layouts.length > 0) {
-      const sortedLayouts = [...layouts].sort((a, b) => a.name.localeCompare(b.name));
+      const orgLayouts = layouts.filter((l) => l.permission.startsWith(ORG_PERMISSION_PREFIX));
+      const layoutsToSort = orgLayouts.length > 0 ? orgLayouts : layouts;
+      const sortedLayouts = [...layoutsToSort].sort((a, b) => a.name.localeCompare(b.name));
       await setSelectedLayoutId(sortedLayouts[0]!.id);
       return;
     }
