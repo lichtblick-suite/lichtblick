@@ -30,6 +30,7 @@ import {
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import BroadcastManager from "@lichtblick/suite-base/util/broadcast/BroadcastManager";
+import { usePlayerMarksStore } from "@lichtblick/suite-base/util/usePlayerMarksStore";
 
 import { EventsOverlay } from "./EventsOverlay";
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
@@ -56,6 +57,15 @@ const useStyles = makeStyles()((theme) => ({
   trackDisabled: {
     opacity: theme.palette.action.disabledOpacity,
   },
+  mark: {
+    position: "absolute",
+    height: 16,
+    width: 2,
+    backgroundColor: theme.palette.primary.main,
+    transform: "translate(-50%, 7px)",
+    borderRadius: 1,
+    zIndex: 1,
+  },
 }));
 
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
@@ -80,6 +90,7 @@ export default function Scrubber(props: Props): React.JSX.Element {
   const endTime = useMessagePipeline(selectEndTime);
   const presence = useMessagePipeline(selectPresence);
   const ranges = useMessagePipeline(selectRanges);
+  const { marks, setMarks } = usePlayerMarksStore();
 
   const setHoverValue = useSetHoverValue();
 
@@ -135,6 +146,45 @@ export default function Scrubber(props: Props): React.JSX.Element {
     clearHoverValue(hoverComponentId);
     setHoverInfo(undefined);
   }, [clearHoverValue, hoverComponentId]);
+
+  const onRightClick = useCallback(
+    (fraction: number) => {
+      if (!latestStartTime.current || !latestEndTime.current) {
+        return;
+      }
+      const duration = toSec(subtractTimes(latestEndTime.current, latestStartTime.current));
+      const timeFromStart = fromSec(fraction * duration);
+      const markTime = addTimes(latestStartTime.current, timeFromStart);
+
+      const newMarks = [...marks];
+
+      if (newMarks.length >= 2) {
+        // Replace the mark that is closest to the new mark
+        // Or simpler: replace whichever mark is furthest from the new mark
+        const distances = newMarks.map((m, idx) => ({
+          idx,
+          distance: Math.abs(m.sec + m.nsec / 1e9 - (markTime.sec + markTime.nsec / 1e9)),
+        }));
+        const furthest = distances.reduce((max, curr) =>
+          curr.distance > max.distance ? curr : max,
+        );
+        newMarks[furthest.idx] = markTime;
+      } else {
+        // If less than 2 marks, just add it
+        newMarks.push(markTime);
+      }
+
+      // Sort marks by time
+      newMarks.sort((a, b) => {
+        const aTime = a.sec + a.nsec / 1e9;
+        const bTime = b.sec + b.nsec / 1e9;
+        return aTime - bTime;
+      });
+
+      setMarks(newMarks);
+    },
+    [latestEndTime, latestStartTime, marks, setMarks],
+  );
 
   // Clean up the hover value when we are unmounted -- important for storybook.
   useEffect(() => onHoverOut, [onHoverOut]);
@@ -221,6 +271,29 @@ export default function Scrubber(props: Props): React.JSX.Element {
         <Stack position="absolute" flex="auto" fullWidth style={{ height: 6 }}>
           <ProgressPlot loading={loading} availableRanges={ranges} />
         </Stack>
+        <Stack
+          fullHeight
+          fullWidth
+          position="absolute"
+          flex={1}
+          style={{ pointerEvents: "none" }}
+          data-testid="marks-container"
+        >
+          {marks.map((mark, idx) => {
+            const markFraction =
+              startTime && endTime
+                ? toSec(subtractTimes(mark, startTime)) / toSec(subtractTimes(endTime, startTime))
+                : 0;
+            return (
+              <div
+                key={idx}
+                className={classes.mark}
+                style={{ left: `${markFraction * 100}%` }}
+                title={`Mark at ${toSec(subtractTimes(mark, startTime ?? mark)).toFixed(2)}s`}
+              />
+            );
+          })}
+        </Stack>
         <Stack fullHeight fullWidth position="absolute" flex={1} data-testid="playback-slider">
           <Slider
             disabled={min == undefined || max == undefined}
@@ -229,6 +302,7 @@ export default function Scrubber(props: Props): React.JSX.Element {
             onHoverOut={onHoverOut}
             onChange={onChange}
             renderSlider={renderSlider}
+            onRightClick={onRightClick}
           />
         </Stack>
         <EventsOverlay />

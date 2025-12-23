@@ -18,6 +18,7 @@ export type AppURLState = {
   dsParamsArray?: Record<string, string[]>;
   layoutId?: LayoutID;
   time?: Time;
+  marks?: string;
 };
 
 /**
@@ -43,6 +44,14 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
       newURL.searchParams.set("ds", urlState.ds);
     } else {
       newURL.searchParams.delete("ds");
+    }
+  }
+
+  if ("marks" in urlState) {
+    if (urlState.marks) {
+      newURL.searchParams.set("marks", urlState.marks);
+    } else {
+      newURL.searchParams.delete("marks");
     }
   }
 
@@ -80,6 +89,7 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
   const timeString = url.searchParams.get("time");
   const time = timeString == undefined ? undefined : fromRFC3339String(timeString);
   const dsParams: Record<string, string> = {};
+  const marks = url.searchParams.get("marks") ?? undefined;
   url.searchParams.forEach((v, k) => {
     if (k && v && k.startsWith("ds.")) {
       const cleanKey = k.replace(/^ds./, "");
@@ -97,6 +107,7 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     {
       time,
       ds,
+      marks,
       dsParams: _.isEmpty(dsParams) ? undefined : dsParams,
     },
     _.isEmpty,

@@ -27,6 +27,7 @@ type Props = {
   onHoverOver?: (event: HoverOverEvent) => void;
   onHoverOut?: () => void;
   renderSlider?: (value?: number) => ReactNode;
+  onRightClick?: (fraction: number) => void;
 };
 
 const useStyles = makeStyles()((theme) => ({
@@ -67,6 +68,7 @@ export default function Slider(props: Props): React.JSX.Element {
     onHoverOver,
     onHoverOut,
     onChange,
+    onRightClick,
   } = props;
   const { classes, cx } = useStyles();
 
@@ -145,6 +147,10 @@ export default function Slider(props: Props): React.JSX.Element {
       if (disabled) {
         return;
       }
+      // Only handle left-click (button 0)
+      if (ev.button !== 0) {
+        return;
+      }
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
@@ -153,6 +159,18 @@ export default function Slider(props: Props): React.JSX.Element {
       setMouseDown(true);
     },
     [disabled, getValueAtMouse, onChange],
+  );
+
+  const onContextMenu = useCallback(
+    (ev: React.MouseEvent<HTMLDivElement>): void => {
+      ev.preventDefault();
+      if (disabled) {
+        return;
+      }
+      const val = getValueAtMouse(ev);
+      onRightClick?.(val);
+    },
+    [disabled, getValueAtMouse, onRightClick],
   );
 
   useEffect(() => {
@@ -174,6 +192,7 @@ export default function Slider(props: Props): React.JSX.Element {
       onPointerMove={onPointerMove}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onContextMenu={onContextMenu}
       className={cx(classes.root, {
         [classes.rootDisabled]: disabled,
       })}

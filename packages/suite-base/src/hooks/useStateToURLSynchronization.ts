@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useDebounce } from "use-debounce";
 
 import { useDeepMemo } from "@lichtblick/hooks";
+import { toRFC3339String } from "@lichtblick/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -17,6 +18,7 @@ import {
 import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsContext";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AppURLState, updateAppURLState } from "@lichtblick/suite-base/util/appURLState";
+import { usePlayerMarksStore } from "@lichtblick/suite-base/util/usePlayerMarksStore";
 
 const selectCanSeek = (ctx: MessagePipelineContext) =>
   ctx.playerState.capabilities.includes(PLAYER_CAPABILITIES.playbackControl);
@@ -39,13 +41,15 @@ export function useStateToURLSynchronization(): void {
   const currentTime = useMessagePipeline(selectCurrentTime);
   const [debouncedCurrentTime] = useDebounce(currentTime, 500, { maxWait: 500 });
   const selectedEventId = useEvents(selectSelectedEventId);
+  const marks = usePlayerMarksStore().marks;
 
   // Sync current time with the url.
   useEffect(() => {
     updateUrl({
       time: canSeek ? debouncedCurrentTime : undefined,
+      marks: marks.length > 0 ? marks.map((m) => toRFC3339String(m)).join(",") : undefined,
     });
-  }, [canSeek, debouncedCurrentTime]);
+  }, [canSeek, debouncedCurrentTime, marks]);
 
   // Sync player state with the url.
   useEffect(() => {
