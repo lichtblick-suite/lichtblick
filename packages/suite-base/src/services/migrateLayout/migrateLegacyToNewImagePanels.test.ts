@@ -57,7 +57,6 @@ describe("migrateLegacyToNewImagePanels", () => {
               "near": 0.5,
               "perspective": true,
               "phi": 60,
-              "screenSpacePanning": false,
               "target": [
                 0,
                 0,
@@ -145,7 +144,6 @@ describe("migrateLegacyToNewImagePanels", () => {
               "near": 0.5,
               "perspective": true,
               "phi": 60,
-              "screenSpacePanning": false,
               "target": [
                 0,
                 0,
@@ -265,7 +263,6 @@ describe("migrateLegacyToNewImagePanels", () => {
               "near": 0.5,
               "perspective": true,
               "phi": 60,
-              "screenSpacePanning": false,
               "target": [
                 0,
                 0,

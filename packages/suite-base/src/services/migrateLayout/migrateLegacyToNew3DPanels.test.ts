@@ -39,7 +39,6 @@ describe("migrateLegacyToNew3DPanels", () => {
               "near": 0.5,
               "perspective": true,
               "phi": 59.99999999999999,
-              "screenSpacePanning": false,
               "target": [
                 0,
                 0,
@@ -110,7 +109,6 @@ describe("migrateLegacyToNew3DPanels", () => {
               "near": 0.5,
               "perspective": true,
               "phi": 59.99999999999999,
-              "screenSpacePanning": false,
               "target": [
                 0,
                 0,
@@ -217,7 +215,6 @@ describe("migrateLegacyToNew3DPanels", () => {
               "near": 0.5,
               "perspective": true,
               "phi": 59.99999999999999,
-              "screenSpacePanning": false,
               "target": [
                 0,
                 0,
