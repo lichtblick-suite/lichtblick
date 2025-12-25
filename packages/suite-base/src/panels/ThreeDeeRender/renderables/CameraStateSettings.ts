@@ -87,7 +87,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     this.add(this.#cameraGroup);
 
     this.#controls = new OrbitControls(this.#perspectiveCamera, this.#canvas);
-    this.#controls.screenSpacePanning = false; // only allow panning in the XY plane
+    this.#controls.screenSpacePanning = false; // only allow panning in the XY plane by default
     this.#controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
     this.#controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
     this.#controls.touches.ONE = THREE.TOUCH.PAN;
@@ -95,6 +95,18 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     this.#controls.addEventListener("change", () => {
       if (!this.#isUpdatingCameraState) {
         renderer.emit("cameraMove", renderer);
+      }
+    });
+
+    // Space panning when holding spacebar
+    canvas.addEventListener("keydown", (event) => {
+      if (event.key === " ") {
+        this.#controls.screenSpacePanning = true;
+      }
+    });
+    canvas.addEventListener("keyup", (event) => {
+      if (event.key === " ") {
+        this.#controls.screenSpacePanning = false;
       }
     });
 
