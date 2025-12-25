@@ -87,6 +87,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     this.add(this.#cameraGroup);
 
     this.#controls = new OrbitControls(this.#perspectiveCamera, this.#canvas);
+    this.#controls.screenSpacePanning = false; // only allow panning in the XY plane
     this.#controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
     this.#controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
     this.#controls.touches.ONE = THREE.TOUCH.PAN;
@@ -153,13 +154,6 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
             input: "boolean",
             value: camera.perspective,
           },
-          ...(camera.perspective && {
-            screenSpacePanning: {
-              label: t("threeDee:screenSpacePanning"),
-              input: "boolean",
-              value: camera.screenSpacePanning ?? false,
-            },
-          }),
           targetOffset: {
             label: t("threeDee:target"),
             input: "vec3",
@@ -490,7 +484,6 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     const config = this.renderer.config;
     return {
       perspective: config.cameraState.perspective,
-      screenSpacePanning: config.cameraState.screenSpacePanning,
       distance: this.#controls.getDistance(),
       phi: THREE.MathUtils.radToDeg(this.#controls.getPolarAngle()),
       thetaOffset: THREE.MathUtils.radToDeg(-this.#controls.getAzimuthalAngle()),
@@ -543,13 +536,10 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     this.#controls.target.copy(targetOffset);
 
     if (cameraState.perspective) {
-      this.#controls.screenSpacePanning = cameraState.screenSpacePanning ?? false;
       // Unlock the polar angle (pitch axis)
       this.#controls.minPolarAngle = 0;
       this.#controls.maxPolarAngle = Math.PI;
     } else {
-      // Disable screen space panning in orthographic mode
-      this.#controls.screenSpacePanning = false;
       // Lock the polar angle during 2D mode
       const curPolarAngle = THREE.MathUtils.degToRad(config.cameraState.phi);
       this.#controls.minPolarAngle = this.#controls.maxPolarAngle = curPolarAngle;

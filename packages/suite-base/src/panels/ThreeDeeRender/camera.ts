@@ -22,7 +22,6 @@ export type MouseEventObject = {
 export type CameraState = {
   distance: number;
   perspective: boolean;
-  screenSpacePanning?: boolean;
   phi: number;
   target: readonly [number, number, number];
   targetOffset: readonly [number, number, number];
@@ -36,7 +35,6 @@ export type CameraState = {
 export const DEFAULT_CAMERA_STATE: CameraState = {
   distance: 20,
   perspective: true,
-  screenSpacePanning: false,
   phi: 60,
   target: [0, 0, 0],
   targetOffset: [0, 0, 0],
