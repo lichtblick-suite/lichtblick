@@ -470,7 +470,7 @@ describe("CurrentLayoutProvider", () => {
       });
 
       expect(console.warn).toHaveBeenCalledWith(
-        "CurrentLayoutProvider: timeout after 5 seconds, continuing anyway",
+        `CurrentLayoutProvider: timeout after ${BUSY_POLLING_TIMEOUT_MS}ms, continuing anyway`,
       );
       expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
     });

@@ -295,18 +295,16 @@ export default function CurrentLayoutProvider({
     if (layoutManager.isBusy()) {
       await new Promise<void>((resolve) => {
         const startTime = Date.now();
-        const timeout = 5000;
 
         const checkBusy = () => {
           const elapsed = Date.now() - startTime;
 
           if (!layoutManager.isBusy()) {
             resolve();
-          } else if (elapsed >= timeout) {
-            console.warn("CurrentLayoutProvider: timeout after 5 seconds, continuing anyway");
-            resolve();
           } else if (elapsed >= BUSY_POLLING_TIMEOUT_MS) {
-            console.warn("CurrentLayoutProvider: timeout after 5 seconds, continuing anyway");
+            console.warn(
+              `CurrentLayoutProvider: timeout after ${BUSY_POLLING_TIMEOUT_MS}ms, continuing anyway`,
+            );
             resolve();
           } else {
             setTimeout(checkBusy, BUSY_POLLING_INTERVAL_MS);
