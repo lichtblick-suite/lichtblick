@@ -5,8 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/* eslint-disable no-restricted-syntax */
-
 import * as _ from "lodash-es";
 import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -288,22 +286,36 @@ export default function CurrentLayoutProvider({
     // For some reason, this needs to go before the setSelectedLayoutId, probably some initialization
     const { currentLayoutId } = await getUserProfile();
 
-    console.log("CurrentLayoutProvider: get layout id from profile:", currentLayoutId);
-
     // Try to load default layouts, before checking to add the fallback "Default".
     await loadDefaultLayouts(layoutManager, loaders);
 
-    const layouts = await layoutManager.getLayouts();
+    // Wait for layout manager to finish any ongoing operations (e.g. fetching remote layouts)
+    if (layoutManager.isBusy()) {
+      await new Promise<void>((resolve) => {
+        const startTime = Date.now();
+        const timeout = 5000;
 
-    console.log("CurrentLayoutProvider: layouts:", layouts);
+        const checkBusy = () => {
+          const elapsed = Date.now() - startTime;
+
+          if (!layoutManager.isBusy()) {
+            resolve();
+          } else if (elapsed >= timeout) {
+            console.warn("CurrentLayoutProvider: timeout after 5 seconds, continuing anyway");
+            resolve();
+          } else {
+            setTimeout(checkBusy, 100);
+          }
+        };
+        checkBusy();
+      });
+    }
+
+    const layouts = await layoutManager.getLayouts();
 
     // Check if there's a layout specified by app parameter
     const defaultLayoutFromParameters = layouts.find((l) => l.name === appParameters.defaultLayout);
     if (defaultLayoutFromParameters) {
-      console.log(
-        "CurrentLayoutProvider: default layout from parameters:",
-        defaultLayoutFromParameters,
-      );
       await setSelectedLayoutId(defaultLayoutFromParameters.id, { saveToProfile: true });
       return;
     }
@@ -320,22 +332,18 @@ export default function CurrentLayoutProvider({
     const layout = currentLayoutId ? await layoutManager.getLayout(currentLayoutId) : undefined;
 
     if (layout) {
-      console.log("CurrentLayoutProvider: setting currentLayout:", layouts);
       await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
       return;
     }
 
     if (layouts.length > 0) {
-      console.log("CurrentLayoutProvider: setting layouts alphabetically");
       const orgLayouts = layouts.filter((l) => l.permission.startsWith(ORG_PERMISSION_PREFIX));
       const layoutsToSort = orgLayouts.length > 0 ? orgLayouts : layouts;
       const sortedLayouts = [...layoutsToSort].sort((a, b) => a.name.localeCompare(b.name));
-      console.log("CurrentLayoutProvider: sorted layouts:", sortedLayouts);
       await setSelectedLayoutId(sortedLayouts[0]!.id);
       return;
     }
 
-    console.log("CurrentLayoutProvider: creating new default layout");
     const newLayout = await layoutManager.saveNewLayout({
       name: "Default",
       data: defaultLayout,
