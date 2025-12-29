@@ -41,6 +41,8 @@ import {
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import {
+  BUSY_POLLING_INTERVAL_MS,
+  BUSY_POLLING_TIMEOUT_MS,
   MAX_SUPPORTED_LAYOUT_VERSION,
   ORG_PERMISSION_PREFIX,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
@@ -303,8 +305,11 @@ export default function CurrentLayoutProvider({
           } else if (elapsed >= timeout) {
             console.warn("CurrentLayoutProvider: timeout after 5 seconds, continuing anyway");
             resolve();
+          } else if (elapsed >= BUSY_POLLING_TIMEOUT_MS) {
+            console.warn("CurrentLayoutProvider: timeout after 5 seconds, continuing anyway");
+            resolve();
           } else {
-            setTimeout(checkBusy, 100);
+            setTimeout(checkBusy, BUSY_POLLING_INTERVAL_MS);
           }
         };
         checkBusy();

@@ -27,7 +27,11 @@ import {
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
-import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import {
+  BUSY_POLLING_INTERVAL_MS,
+  BUSY_POLLING_TIMEOUT_MS,
+  MAX_SUPPORTED_LAYOUT_VERSION,
+} from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -395,5 +399,80 @@ describe("CurrentLayoutProvider", () => {
       `The layout '${mockAppParameters.defaultLayout}' specified in the app parameters does not exist.`,
       { variant: "warning" },
     );
+  });
+
+  describe("Default layout logic", () => {
+    function mockBusyTimes(times: number) {
+      Array.from({ length: times }).forEach(() => {
+        mockLayoutManager.isBusy.mockReturnValueOnce(true);
+      });
+      mockLayoutManager.isBusy.mockReturnValue(false);
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      (console.warn as jest.Mock).mockRestore();
+    });
+
+    it("should resolve immediately if layoutManager is not busy", async () => {
+      // Given/When
+      mockLayoutManager.isBusy.mockReturnValue(false);
+
+      const { result } = renderTest({ mockLayoutManager, mockUserProfile });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      // Then
+      expect(mockLayoutManager.isBusy).toHaveBeenCalled();
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should poll until layoutManager is not busy", async () => {
+      // Given/When
+      const busyCount = 3;
+      mockBusyTimes(busyCount);
+
+      const { result } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(busyCount * BUSY_POLLING_INTERVAL_MS);
+        await result.current.childMounted;
+      });
+
+      // Then
+      expect(mockLayoutManager.isBusy).toHaveBeenCalledTimes(4);
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should timeout after 5 seconds, log warning and continue as normal", async () => {
+      mockLayoutManager.isBusy.mockReturnValue(true); // Always busy
+
+      const { result } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(BUSY_POLLING_TIMEOUT_MS + 100);
+        await result.current.childMounted;
+      });
+
+      expect(console.warn).toHaveBeenCalledWith(
+        "CurrentLayoutProvider: timeout after 5 seconds, continuing anyway",
+      );
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
   });
 });
