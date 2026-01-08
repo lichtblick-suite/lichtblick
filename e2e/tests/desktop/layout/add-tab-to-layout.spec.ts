@@ -29,7 +29,7 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
   await mainWindow.getByRole("button", { name: "Tab Group panels together" }).click();
 
   // Then
-  await expect(mainWindow.getByTestId("toolbar-tab").count()).resolves.toBe(1);
+  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(1);
   await expect(mainWindow.getByTestId("panel-list-textfield")).toBeVisible();
 
   // When
@@ -38,17 +38,17 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
   await mainWindow.getByRole("button", { name: "3d" }).click();
 
   // Then
-  await expect(mainWindow.getByTestId("toolbar-tab").count()).resolves.toBe(2);
+  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(2);
 
   // When
   await mainWindow.getByTestId("add-tab").nth(1).click();
 
   // Then
-  await expect(mainWindow.getByTestId("toolbar-tab").count()).resolves.toBe(3);
+  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(3);
 
   // When
-  await mainWindow.getByTestId("CloseIcon").nth(1).click();
+  await mainWindow.getByTestId("tab-icon").nth(0).click();
 
   // Then
-  await expect(mainWindow.getByTestId("toolbar-tab").count()).resolves.toBe(0);
+  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(0);
 });
