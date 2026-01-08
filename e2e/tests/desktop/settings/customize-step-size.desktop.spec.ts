@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 /**
  * GIVEN example.mcap file is loaded
@@ -23,9 +23,9 @@ test("Should update the step size value via settings and verify that change bein
   const forwardedTime = "2025-02-26 10:37:15.947 AM WET";
 
   const filename = "example.mcap";
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename,
+    filenames: filename,
   });
 
   // Then

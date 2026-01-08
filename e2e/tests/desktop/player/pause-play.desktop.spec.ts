@@ -5,7 +5,7 @@ import { Locator, Page } from "playwright";
 
 import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 const MCAP_FILENAME = "example.mcap";
 
@@ -26,7 +26,7 @@ function getPlaybackElements(mainWindow: Page): { button: Locator; timestamp: Lo
 
 test("should start playing when clicking on Play button", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   const { button, timestamp } = getPlaybackElements(mainWindow);
@@ -51,7 +51,7 @@ test("should start playing when clicking on Play button", async ({ mainWindow })
 
 test("should start playing when clicking on Spacebar key", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const { button, timestamp } = getPlaybackElements(mainWindow);
   const startTime = Number(await timestamp.inputValue());
@@ -76,7 +76,7 @@ test("should start playing when clicking on Spacebar key", async ({ mainWindow }
 
 test("should stop playing when clicking on Play button", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const { button, timestamp } = getPlaybackElements(mainWindow);
 
@@ -105,7 +105,7 @@ test("should stop playing when clicking on Play button", async ({ mainWindow }) 
 
 test("should stop playing when clicking on Spacebar key", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const { button, timestamp } = getPlaybackElements(mainWindow);
 
