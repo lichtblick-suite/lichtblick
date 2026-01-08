@@ -3,6 +3,9 @@
 import { test, expect } from "../../../../fixtures/electron";
 import { loadFile } from "../../../../fixtures/load-file";
 
+const MCAP_FILE = "example-converter.mcap";
+const EXTENSION_FILE = "lichtblickteamctw.message-converter-extension-0.0.2.foxe";
+
 /**
  * GIVEN an .mcap file is loaded
  * AND the message converter is installed
@@ -12,16 +15,14 @@ import { loadFile } from "../../../../fixtures/load-file";
  */
 test("open 3D panel after loading a mcap file", async ({ mainWindow }) => {
   /// Given
-  const mcapFile = "example-converter.mcap";
   await loadFile({
     mainWindow,
-    filename: mcapFile,
+    filename: MCAP_FILE,
   });
 
-  const extensionFile = "lichtblickteamctw.message-converter-extension-0.0.2.foxe";
   await loadFile({
     mainWindow,
-    filename: extensionFile,
+    filename: EXTENSION_FILE,
   });
 
   // When
