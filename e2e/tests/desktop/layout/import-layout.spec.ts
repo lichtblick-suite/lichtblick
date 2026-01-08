@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-
-import { loadFromFilePicker } from "../../../fixtures/loadFromFilePicker";
 import { test, expect } from "../../../fixtures/electron";
+import { loadFromFilePicker } from "../../../fixtures/load-from-file-picker";
 
 const LAYOUT_FILE = "default-layout.json";
 
