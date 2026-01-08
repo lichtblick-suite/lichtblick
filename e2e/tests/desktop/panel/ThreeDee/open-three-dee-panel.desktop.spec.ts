@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../../fixtures/electron";
-import { loadFile } from "../../../../fixtures/load-file";
+import { loadFiles } from "../../../../fixtures/load-files";
 
 const MCAP_FILE = "example-converter.mcap";
 const EXTENSION_FILE = "lichtblickteamctw.message-converter-extension-0.0.2.foxe";
@@ -15,14 +15,14 @@ const EXTENSION_FILE = "lichtblickteamctw.message-converter-extension-0.0.2.foxe
  */
 test("open 3D panel after loading a mcap file", async ({ mainWindow }) => {
   /// Given
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: MCAP_FILE,
+    filenames: MCAP_FILE,
   });
 
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: EXTENSION_FILE,
+    filenames: EXTENSION_FILE,
   });
 
   // When
