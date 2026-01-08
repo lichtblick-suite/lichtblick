@@ -16,7 +16,9 @@ const MCAP_FILENAME = "example_logs.mcap";
  * WHEN raw messages settings are open and font size is changed to 30px
  * THEN messages on the panel should have CSS attribute font size as 30px
  */
-test("create a new layout with raw messages panel, select a topic and change the font size", async ({ mainWindow }) => {
+test("create a new layout with raw messages panel, select a topic and change the font size", async ({
+  mainWindow,
+}) => {
   // Given
   await loadFiles({
     mainWindow,
@@ -38,12 +40,12 @@ test("create a new layout with raw messages panel, select a topic and change the
   await expect(mainWindow.getByText("No topic selected")).toBeVisible();
 
   // When
-  const topicPathInput = mainWindow.getByPlaceholder("/some/topic.msgs[0].field", {exact: true});
-  await topicPathInput.fill("/rosout")
+  const topicPathInput = mainWindow.getByPlaceholder("/some/topic.msgs[0].field", { exact: true });
+  await topicPathInput.fill("/rosout");
 
   // Then
   await expect(mainWindow.getByText("No topic selected")).not.toBeVisible();
-  const topicMessage = mainWindow.getByText("level 1")
+  const topicMessage = mainWindow.getByText("level 1");
   await expect(topicMessage).toBeVisible();
 
   // When
@@ -52,5 +54,5 @@ test("create a new layout with raw messages panel, select a topic and change the
   await mainWindow.getByText("30 px").click();
 
   // Then
-  await expect(topicMessage).toHaveCSS("font-size", "30px")
+  await expect(topicMessage).toHaveCSS("font-size", "30px");
 });
