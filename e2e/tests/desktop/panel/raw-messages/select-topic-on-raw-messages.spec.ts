@@ -47,6 +47,7 @@ test("create a new layout with raw messages panel, select a topic and change the
   await expect(mainWindow.getByText("No topic selected")).not.toBeVisible();
   const topicMessage = mainWindow.getByText("level 1");
   await expect(topicMessage).toBeVisible();
+  await expect(topicMessage).toHaveCSS("font-size", "12px");
 
   // When
   await mainWindow.getByTestId("panel-settings-left").click();
