@@ -17,7 +17,7 @@ export default defineConfig({
   name: "desktop",
   timeout: 30 * 1000,
   retries: 1,
-  workers: 1,
+  workers: 2,
   use: {
     headless: true,
     storageState: STORAGE_STATE,
