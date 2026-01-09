@@ -170,9 +170,19 @@ function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
     }
 
     const intervalMs = (1000 * 1) / config.publishRate;
-    context.publish?.(currentTopic, message);
-    const intervalHandle = setInterval(() => {
+    try {
       context.publish?.(currentTopic, message);
+    } catch (error) {
+      console.error("Failed to publish message:", error);
+      return;
+    }
+    const intervalHandle = setInterval(() => {
+      try {
+        context.publish?.(currentTopic, message);
+      } catch (error) {
+        console.error("Failed to publish interval message:", error);
+        clearInterval(intervalHandle);
+      }
     }, intervalMs);
 
     return () => {
