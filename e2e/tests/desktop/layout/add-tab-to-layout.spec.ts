@@ -21,7 +21,10 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
 
   // When
   await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
-  await mainWindow.getByText("Create new layout").click();
+  const createLayoutButton = mainWindow.getByText("Create new layout");
+  await expect(createLayoutButton).toBeVisible();
+  await expect(createLayoutButton).toBeEnabled();
+  await createLayoutButton.click();
 
   const panelSearch = mainWindow.getByTestId("panel-list-textfield").locator("input");
   await panelSearch.fill("tab");
@@ -39,6 +42,7 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
 
   // Then
   await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(2);
+  await expect(mainWindow.getByTestId("add-tab")).toHaveCount(2);
 
   // When
   await mainWindow.getByTestId("add-tab").nth(1).click();
