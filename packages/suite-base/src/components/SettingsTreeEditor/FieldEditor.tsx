@@ -267,6 +267,7 @@ function FieldInput({
           displayEmpty
           fullWidth
           disabled={field.disabled}
+          data-testid="FieldEditor-Select"
           readOnly={field.readonly}
           variant="filled"
           value={selectValue}
