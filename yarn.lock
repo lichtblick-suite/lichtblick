@@ -1468,7 +1468,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/template@npm:^7.25.9, @babel/template@npm:^7.27.1, @babel/template@npm:^7.27.2, @babel/template@npm:^7.4.4":
+"@babel/template@npm:^7.27.1, @babel/template@npm:^7.27.2, @babel/template@npm:^7.4.4":
   version: 7.27.2
   resolution: "@babel/template@npm:7.27.2"
   dependencies:
@@ -3180,7 +3180,7 @@ __metadata:
     "@uiw/react-textarea-code-editor": 3.1.0
     async-mutex: 0.5.0
     babel-jest: 30.2.0
-    babel-plugin-transform-import-meta: 2.3.3
+    babel-plugin-transform-import-meta: 2.2.1
     browserify-zlib: 0.2.0
     chart.js: 4.4.8
     chartjs-plugin-annotation: 3.0.1
@@ -7344,18 +7344,6 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.10.0
   checksum: 2868e3ac22fc403003b19750dd04f9f05303d2ade3d005e2e557ba8e260ac0b8ee3717f772ec4db8a9e6a8aac13dc61eb82b79a6479f933290cef2d89e4b731b
-  languageName: node
-  linkType: hard
-
-"babel-plugin-transform-import-meta@npm:2.3.3":
-  version: 2.3.3
-  resolution: "babel-plugin-transform-import-meta@npm:2.3.3"
-  dependencies:
-    "@babel/template": ^7.25.9
-    tslib: ^2.8.1
-  peerDependencies:
-    "@babel/core": ^7.10.0
-  checksum: 6bf8d18781f89a4bbfc4a8e57dfee190441dfc59c41d900910f3985133054556bcf068c49df1a6f80d456bb2e572e94df2c4515d5c1e3248e902da14c3766ce4
   languageName: node
   linkType: hard
 
