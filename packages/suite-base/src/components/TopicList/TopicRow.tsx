@@ -5,13 +5,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ReOrderDotsVertical16Regular } from "@fluentui/react-icons";
-import { Badge, Typography } from "@mui/material";
+import {
+  ChevronLeft16Regular,
+  ChevronRight16Regular,
+  ReOrderDotsVertical16Regular,
+} from "@fluentui/react-icons";
+import { Badge, IconButton, Tooltip, Typography } from "@mui/material";
 import { FzfResultItem } from "fzf";
 import { useCallback, useMemo } from "react";
 
 import { quoteTopicNameIfNeeded } from "@lichtblick/message-path";
 import { HighlightChars } from "@lichtblick/suite-base/components/HighlightChars";
+import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { Topic } from "@lichtblick/suite-base/players/types";
@@ -19,6 +25,9 @@ import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathD
 
 import { TopicStatsChip } from "./TopicStatsChip";
 import { useTopicListStyles } from "./useTopicListStyles";
+import { useTopicMessageNavigation } from "./useTopicMessageNavigation";
+
+const selectSubscriptions = (ctx: MessagePipelineContext) => ctx.subscriptions;
 
 export function TopicRow({
   topicResult,
@@ -37,6 +46,39 @@ export function TopicRow({
 
   const topic = topicResult.item;
 
+  const subscriptions = useMessagePipeline(selectSubscriptions);
+
+  const isTopicSubscribed = useMemo(
+    () => subscriptions.some((sub) => sub.topic === topic.name),
+    [subscriptions, topic.name],
+  );
+
+  const {
+    handleNextMessage,
+    handlePreviousMessage,
+    isNavigating,
+    canNavigateNext,
+    canNavigatePrevious,
+  } = useTopicMessageNavigation({
+    topicName: topic.name,
+    isTopicSubscribed,
+    selected,
+  });
+
+  const isNavigationDisabled = useMemo(
+    () => isNavigating || !selected || !isTopicSubscribed,
+    [isNavigating, selected, isTopicSubscribed],
+  );
+
+  const isPreviousDisabled = useMemo(
+    () => isNavigationDisabled || !canNavigatePrevious,
+    [isNavigationDisabled, canNavigatePrevious],
+  );
+  const isNextDisabled = useMemo(
+    () => isNavigationDisabled || !canNavigateNext,
+    [isNavigationDisabled, canNavigateNext],
+  );
+
   const item: DraggedMessagePath = useMemo(
     () => ({
       path: quoteTopicNameIfNeeded(topic.name),
@@ -47,6 +89,7 @@ export function TopicRow({
     }),
     [topic.name, topic.schemaName],
   );
+
   const { connectDragSource, connectDragPreview, cursor, isDragging, draggedItemCount } =
     useMessagePathDrag({
       item,
@@ -60,6 +103,26 @@ export function TopicRow({
     },
     [connectDragPreview, connectDragSource],
   );
+
+  const seekToNextMessage = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      void handleNextMessage();
+    },
+    [handleNextMessage],
+  );
+
+  const seekToPreviousMessage = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      void handlePreviousMessage();
+    },
+    [handlePreviousMessage],
+  );
+
+  const handleButtonMouseDown = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+  }, []);
 
   return (
     <div
@@ -100,7 +163,39 @@ export function TopicRow({
           </Typography>
         )}
       </Stack>
-      <TopicStatsChip selected={selected} topicName={topic.name} />
+      <Stack direction="column" alignItems="center" gap={0.5}>
+        <TopicStatsChip selected={selected} topicName={topic.name} />
+        <Stack direction="row" gap={0.5} alignItems="center">
+          <Tooltip title={isPreviousDisabled ? "" : "Previous message"}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Previous message"
+                onClick={seekToPreviousMessage}
+                onMouseDown={handleButtonMouseDown}
+                disabled={isPreviousDisabled}
+                className={classes.navIconButton}
+              >
+                <ChevronLeft16Regular />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title={isNextDisabled ? "" : "Next message"}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Next message"
+                onClick={seekToNextMessage}
+                onMouseDown={handleButtonMouseDown}
+                disabled={isNextDisabled}
+                className={classes.navIconButton}
+              >
+                <ChevronRight16Regular />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Stack>
+      </Stack>
       <div data-testid="TopicListDragHandle" className={classes.dragHandle}>
         <ReOrderDotsVertical16Regular />
       </div>
