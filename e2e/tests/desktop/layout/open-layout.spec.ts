@@ -3,11 +3,11 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
 
-const LAYOUT_FILENAME = "layout-e2e.json";
+const LAYOUT_FILENAME = "default-layout.json";
 /**
- * GIVEN the "layout-e2e" layout file is loaded
+ * GIVEN the "default-layout" layout file is loaded
  * WHEN the user clicks on the Layouts sidebar button
- * THEN the "layout-e2e" layout should be displayed in the layout list
+ * THEN the "default-layout" layout should be displayed in the layout list
  */
 test("open layout via drag and drop", async ({ mainWindow }) => {
   // Given
@@ -21,5 +21,5 @@ test("open layout via drag and drop", async ({ mainWindow }) => {
   await mainWindow.getByTestId("layouts-left").click();
 
   // Then
-  await expect(mainWindow.getByText("layout-e2e", { exact: true }).count()).resolves.toBe(1);
+  await expect(mainWindow.getByText("default-layout", { exact: true })).toHaveCount(1);
 });
