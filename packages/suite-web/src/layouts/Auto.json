@@ -181,8 +181,8 @@
           "color": "#d22222ff",
           "arrowScale": [
             1,
-            0,
-            0
+            0.1,
+            0.1
           ],
           "showCovariance": true,
           "covarianceColor": "#e5c31abd"
