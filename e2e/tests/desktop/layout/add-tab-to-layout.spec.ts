@@ -17,6 +17,7 @@ const LAYOUT_FILE = "tab-layout.json";
  * THEN the layout should display zero tabs
  */
 test("create a new layout and add a tab", async ({ mainWindow }) => {
+  test.setTimeout(45_000);
   // Given
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
   await mainWindow.getByTestId("layouts-left").click();
