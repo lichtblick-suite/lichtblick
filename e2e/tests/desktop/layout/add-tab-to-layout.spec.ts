@@ -54,5 +54,5 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
   await mainWindow.getByTestId("tab-icon").nth(0).click();
 
   // Then
-  await expect(mainWindow.getByTestId("toolbar-tab")).toBeHidden();
+  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(0);
 });
