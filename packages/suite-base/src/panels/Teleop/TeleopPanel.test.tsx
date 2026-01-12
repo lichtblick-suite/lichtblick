@@ -617,4 +617,81 @@ describe("TeleopPanel", () => {
       });
     });
   });
+
+  describe("Error handling for publish failures", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("should catch and log error when initial publish fails", () => {
+      // Given
+      const publishError = new Error("Topic not advertised");
+      const publish = jest.fn().mockImplementationOnce(() => {
+        throw publishError;
+      });
+      const context = getMockContext({
+        publish,
+        initialState: { topic: BasicBuilder.string(), publishRate: 1 },
+      });
+
+      // When
+      render(<TeleopPanel context={context} />);
+      fireEvent.click(screen.getByText("UP"));
+      jest.runOnlyPendingTimers();
+
+      // Then
+      expect(console.error).toHaveBeenCalledWith("Failed to publish message:", publishError);
+    });
+
+    it("should not crash the component when publish throws an error", () => {
+      // Given
+      const publish = jest.fn().mockImplementationOnce(() => {
+        throw new Error("Publish failed");
+      });
+      const context = getMockContext({
+        publish,
+        initialState: { topic: BasicBuilder.string(), publishRate: 1 },
+      });
+
+      // When
+      const { container } = render(<TeleopPanel context={context} />);
+      fireEvent.click(screen.getByText("UP"));
+      jest.runOnlyPendingTimers();
+
+      // Then
+      expect(container).toBeInTheDocument();
+      expect(screen.getByTestId("directional-pad")).toBeInTheDocument();
+    });
+
+    it("should catch error in interval publish attempts", () => {
+      // Given
+      const publishError = new Error("Interval publish failed");
+      const publish = jest
+        .fn()
+        .mockImplementationOnce(() => undefined)
+        .mockImplementationOnce(() => {
+          throw publishError;
+        });
+      const context = getMockContext({
+        publish,
+        initialState: { topic: BasicBuilder.string(), publishRate: 10 },
+      });
+
+      // When
+      render(<TeleopPanel context={context} />);
+      fireEvent.click(screen.getByText("UP"));
+      jest.runOnlyPendingTimers();
+      jest.advanceTimersByTime(100);
+
+      // Then
+      expect(console.error).toHaveBeenCalledWith(
+        "Failed to publish interval message:",
+        publishError,
+      );
+    });
+  });
 });
