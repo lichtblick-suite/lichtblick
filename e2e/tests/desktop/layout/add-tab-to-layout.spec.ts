@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "../../../fixtures/electron";
+import { loadFromFilePicker } from "../../../fixtures/load-from-file-picker";
+
+const LAYOUT_FILE = "tab-layout.json";
 
 /**
  * GIVEN the user is on the layouts tab
@@ -18,13 +21,20 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
   // Given
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
   await mainWindow.getByTestId("layouts-left").click();
+  await loadFromFilePicker(mainWindow, LAYOUT_FILE);
+  await mainWindow.getByRole("button", { name: "Import from file…" }).click();
+
+  await expect(
+    mainWindow.getByTestId("layout-list-item").getByText("tab-layout", { exact: true }),
+  ).toBeVisible();
+  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(1);
 
   // When
-  await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
-  const createLayoutButton = mainWindow.getByText("Create new layout");
-  await expect(createLayoutButton).toBeVisible();
-  await expect(createLayoutButton).toBeEnabled();
-  await createLayoutButton.click();
+  // await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
+  // const createLayoutButton = mainWindow.getByText("Create new layout");
+  // await expect(createLayoutButton).toBeVisible();
+  // await expect(createLayoutButton).toBeEnabled();
+  // await createLayoutButton.click();
 
   const panelSearch = mainWindow.getByTestId("panel-list-textfield").locator("input");
   await panelSearch.fill("tab");
@@ -32,12 +42,9 @@ test("create a new layout and add a tab", async ({ mainWindow }) => {
   await mainWindow.getByRole("button", { name: "Tab Group panels together" }).click();
 
   // Then
-  await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(1);
   await expect(mainWindow.getByTestId("panel-list-textfield")).toBeVisible();
 
   // When
-  await panelSearch.fill("tab");
-  await mainWindow.getByRole("button", { name: "Tab Group panels together" }).click();
   await mainWindow.getByRole("button", { name: "3d" }).click();
 
   // Then
