@@ -30,7 +30,21 @@ jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
 
 jest.mock("./useTopicMessageNavigation");
 
-function setup(topicName = `/${BasicBuilder.string()}`) {
+interface SetupOptions {
+  topicName?: string;
+  isNavigating?: boolean;
+  canNavigateNext?: boolean;
+  canNavigatePrevious?: boolean;
+}
+
+function setup(options: SetupOptions = {}) {
+  const {
+    topicName = `/${BasicBuilder.string()}`,
+    isNavigating = false,
+    canNavigateNext = true,
+    canNavigatePrevious = true,
+  } = options;
+
   const handleNextMessage = jest.fn().mockResolvedValue(undefined);
   const handlePreviousMessage = jest.fn().mockResolvedValue(undefined);
 
@@ -39,9 +53,9 @@ function setup(topicName = `/${BasicBuilder.string()}`) {
   (useTopicMessageNavigation as jest.Mock).mockReturnValue({
     handleNextMessage,
     handlePreviousMessage,
-    isNavigating: false,
-    canNavigateNext: true,
-    canNavigatePrevious: true,
+    isNavigating,
+    canNavigateNext,
+    canNavigatePrevious,
   });
 
   const topicResult: FzfResultItem<Topic> = {
@@ -106,7 +120,7 @@ describe("TopicRow navigation buttons", () => {
     const topicName = `/${BasicBuilder.string()}`;
 
     // When
-    setup(topicName);
+    setup({ topicName });
 
     // Then
     expect(useTopicMessageNavigation).toHaveBeenCalledWith({
@@ -114,5 +128,32 @@ describe("TopicRow navigation buttons", () => {
       selected: true,
       isTopicSubscribed: true,
     });
+  });
+
+  it("disables both navigation buttons when isNavigating is true", () => {
+    // Given / When
+    setup({ isNavigating: true });
+
+    // Then
+    expect(screen.getByRole("button", { name: "Previous message" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next message" })).toBeDisabled();
+  });
+
+  it("disables next button when canNavigateNext is false", () => {
+    // Given / When
+    setup({ canNavigateNext: false });
+
+    // Then
+    expect(screen.getByRole("button", { name: "Previous message" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Next message" })).toBeDisabled();
+  });
+
+  it("disables previous button when canNavigatePrevious is false", () => {
+    // Given / When
+    setup({ canNavigatePrevious: false });
+
+    // Then
+    expect(screen.getByRole("button", { name: "Previous message" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next message" })).toBeEnabled();
   });
 });
