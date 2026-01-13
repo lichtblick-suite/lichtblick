@@ -24,16 +24,14 @@ async function ensureWasmInitialized(): Promise<void> {
     await Promise.resolve();
     return;
   }
-  if (!wasmInitPromise) {
-    wasmInitPromise = wasmInit()
-      .then(() => {
-        wasmInitialized = true;
-      })
-      .catch((error) => {
-        console.error("Failed to initialize WASM module:", error);
-        wasmInitPromise = undefined;
-      });
-  }
+  wasmInitPromise ??= wasmInit()
+    .then(() => {
+      wasmInitialized = false;
+    })
+    .catch((error: unknown) => {
+      console.error("Failed to initialize WASM module:", error);
+      wasmInitPromise = undefined;
+    });
   await wasmInitPromise;
 }
 
@@ -90,6 +88,34 @@ export function parseProtobufSchema(
   fixTimeType(root.lookup(".google.protobuf.Timestamp"));
   fixTimeType(root.lookup(".google.protobuf.Duration"));
 
+  // Performance profiling
+  const ENABLE_PROFILING = false;
+  let wasmDecodeCount = 0;
+  let wasmTotalTime = 0;
+  let protobufjsDecodeCount = 0;
+  let protobufJsTotalTime = 0;
+  let lastLogTime = performance.now();
+
+  const logPerformanceStats = () => {
+    const avgWasm = wasmDecodeCount > 0 ? wasmTotalTime / wasmDecodeCount : 0;
+    const avgProtobufjs =
+      protobufjsDecodeCount > 0 ? protobufJsTotalTime / protobufjsDecodeCount : 0;
+
+    console.log(`[${schemaName}] Decode Performance Stats:`);
+    console.log(
+      `  WASM: ${wasmDecodeCount} messages, ${wasmTotalTime.toFixed(2)}ms total, ${avgWasm.toFixed(4)}ms avg`,
+    );
+    console.log(
+      `  protobufjs: ${protobufjsDecodeCount} messages, ${protobufJsTotalTime.toFixed(2)}ms total, ${avgProtobufjs.toFixed(4)}ms avg`,
+    );
+    if (wasmDecodeCount > 0 && protobufjsDecodeCount > 0) {
+      const speedup = avgProtobufjs / avgWasm;
+      console.log(
+        `  WASM is ${speedup.toFixed(2)}x ${speedup > 1 ? "faster" : "slower"} than protobufjs`,
+      );
+    }
+  };
+
   // Create WASM decoder lazily on first deserialize call
   let wasmDecoder: ProtobufDecoder | undefined;
 
@@ -99,17 +125,46 @@ export function parseProtobufSchema(
     // Try WASM decoder if initialized
     if (wasmInitialized) {
       try {
-        if (!wasmDecoder) {
-          wasmDecoder = new ProtobufDecoder(schemaData, schemaName);
+        wasmDecoder ??= new ProtobufDecoder(schemaData, schemaName);
+
+        const wasmStart = ENABLE_PROFILING ? performance.now() : 0;
+        const result = wasmDecoder.decode(buffer);
+
+        if (ENABLE_PROFILING) {
+          const wasmEnd = performance.now();
+          wasmDecodeCount++;
+          wasmTotalTime += wasmEnd - wasmStart;
+
+          // Log stats every 5 seconds
+          if (wasmEnd - lastLogTime > 5000) {
+            logPerformanceStats();
+            lastLogTime = wasmEnd;
+          }
         }
-        return wasmDecoder.decode(buffer);
+
+        return result;
       } catch (error) {
         console.error("❌ WASM decode failed, falling back to protobufjs:", error);
       }
     }
 
-    // Fallback to protobufjs
-    return rootType.toObject(rootType.decode(buffer), { defaults: true });
+    // Use protobufjs decoder
+    const protobufjsStart = ENABLE_PROFILING ? performance.now() : 0;
+    const result = rootType.toObject(rootType.decode(buffer), { defaults: true });
+
+    if (ENABLE_PROFILING) {
+      const protobufjsEnd = performance.now();
+      protobufjsDecodeCount++;
+      protobufJsTotalTime += protobufjsEnd - protobufjsStart;
+
+      // Log stats every 5 seconds
+      if (protobufjsEnd - lastLogTime > 5000) {
+        logPerformanceStats();
+        lastLogTime = protobufjsEnd;
+      }
+    }
+
+    return result;
   };
 
   const datatypes: MessageDefinitionMap = new Map();
