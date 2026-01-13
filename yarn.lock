@@ -2933,6 +2933,7 @@ __metadata:
     "@lichtblick/tsconfig": 1.0.2
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
+    "@lichtblick/wasm-protobuf": 0.1.0
     "@lichtblick/wasm-zstd": 1.0.0
     "@mcap/core": 2.1.6
     "@protobufjs/base64": 1.1.2
@@ -3452,6 +3453,12 @@ __metadata:
   checksum: b84dc72e2a8fa88dc7e50c4d0547b8b615195b3338a11980183271a2f8f52522b963899e43410d9e6a6b3dfdcd35bcfdfbb42f4e54e3192f8afacb78a5525520
   languageName: node
   linkType: hard
+
+"@lichtblick/wasm-protobuf@0.1.0, @lichtblick/wasm-protobuf@workspace:packages/wasm-protobuf":
+  version: 0.0.0-use.local
+  resolution: "@lichtblick/wasm-protobuf@workspace:packages/wasm-protobuf"
+  languageName: unknown
+  linkType: soft
 
 "@lichtblick/wasm-zstd@npm:1.0.0":
   version: 1.0.0

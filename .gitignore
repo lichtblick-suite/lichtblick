@@ -29,3 +29,6 @@ test-results/*
 .sonar_lock
 .scannerwork
 eslint-report.json
+
+# WASM build files
+packages/wasm-protobuf/target

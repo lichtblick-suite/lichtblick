@@ -8,7 +8,7 @@
 import { McapIndexedReader, McapTypes } from "@mcap/core";
 
 import Logger from "@lichtblick/log";
-import { ParsedChannel, parseChannel } from "@lichtblick/mcap-support";
+import { ParsedChannel, parseChannel, protobufWasmLoaded } from "@lichtblick/mcap-support";
 import { Time, fromNanoSec, toNanoSec, compare } from "@lichtblick/rostime";
 import { MessageEvent, Metadata } from "@lichtblick/suite";
 import {
@@ -44,6 +44,7 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
   }
 
   public async initialize(): Promise<Initialization> {
+    await protobufWasmLoaded;
     let startTime: bigint | undefined;
     let endTime: bigint | undefined;
     for (const chunk of this.#reader.chunkIndexes) {

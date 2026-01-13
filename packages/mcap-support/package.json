@@ -36,6 +36,7 @@
     "@lichtblick/rosmsg2-serialization": "1.0.0",
     "@lichtblick/wasm-bz2": "1.0.0",
     "@lichtblick/wasm-lz4": "1.0.0",
+    "@lichtblick/wasm-protobuf": "0.1.0",
     "@lichtblick/wasm-zstd": "1.0.0",
     "@mcap/core": "2.1.6",
     "@protobufjs/base64": "1.1.2",

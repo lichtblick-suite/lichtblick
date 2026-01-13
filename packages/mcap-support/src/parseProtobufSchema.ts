@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/* eslint-disable no-restricted-syntax */
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -8,12 +10,41 @@
 import protobufjs from "protobufjs";
 import { FileDescriptorSet } from "protobufjs/ext/descriptor";
 
+import wasmInit, { ProtobufDecoder } from "@lichtblick/wasm-protobuf";
+
 import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
 import { MessageDefinitionMap } from "./types";
+
+// Initialize WASM module lazily
+let wasmInitialized = false;
+let wasmInitPromise: Promise<void> | undefined;
+
+async function ensureWasmInitialized(): Promise<void> {
+  if (wasmInitialized) {
+    await Promise.resolve();
+    return;
+  }
+  if (!wasmInitPromise) {
+    wasmInitPromise = wasmInit()
+      .then(() => {
+        wasmInitialized = true;
+      })
+      .catch((error) => {
+        console.error("Failed to initialize WASM module:", error);
+        wasmInitPromise = undefined;
+      });
+  }
+  await wasmInitPromise;
+}
+
+// Export the WASM ready promise so callers can await it before calling parseProtobufSchema
+export const protobufWasmLoaded = ensureWasmInitialized();
 
 /**
  * Parse a Protobuf binary schema (FileDescriptorSet) and produce datatypes and a deserializer
  * function.
+ *
+ * Note: Callers must await protobufWasmLoaded before calling this function if using WASM decoder.
  */
 export function parseProtobufSchema(
   schemaName: string,
@@ -34,9 +65,7 @@ export function parseProtobufSchema(
   // deserialized as a bigint by default.
   //
   // protobufDefinitionsToDatatypes also has matching logic to rename the fields.
-  const fixTimeType = (
-    type: protobufjs.ReflectionObject | null /* eslint-disable-line no-restricted-syntax */,
-  ) => {
+  const fixTimeType = (type: protobufjs.ReflectionObject | null) => {
     if (!type || !(type instanceof protobufjs.Type)) {
       return;
     }
@@ -61,11 +90,26 @@ export function parseProtobufSchema(
   fixTimeType(root.lookup(".google.protobuf.Timestamp"));
   fixTimeType(root.lookup(".google.protobuf.Duration"));
 
+  // Create WASM decoder lazily on first deserialize call
+  let wasmDecoder: ProtobufDecoder | undefined;
+
   const deserialize = (data: ArrayBufferView) => {
-    return rootType.toObject(
-      rootType.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)),
-      { defaults: true },
-    );
+    const buffer = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+
+    // Try WASM decoder if initialized
+    if (wasmInitialized) {
+      try {
+        if (!wasmDecoder) {
+          wasmDecoder = new ProtobufDecoder(schemaData, schemaName);
+        }
+        return wasmDecoder.decode(buffer);
+      } catch (error) {
+        console.error("❌ WASM decode failed, falling back to protobufjs:", error);
+      }
+    }
+
+    // Fallback to protobufjs
+    return rootType.toObject(rootType.decode(buffer), { defaults: true });
   };
 
   const datatypes: MessageDefinitionMap = new Map();

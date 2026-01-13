@@ -1,0 +1,15 @@
+{
+  "name": "@lichtblick/wasm-protobuf",
+  "version": "0.1.0",
+  "description": "WebAssembly-based Protobuf decoder",
+  "license": "MPL-2.0",
+  "private": true,
+  "main": "./pkg/wasm_protobuf.js",
+  "types": "./pkg/wasm_protobuf.d.ts",
+  "files": [
+    "pkg"
+  ],
+  "scripts": {
+    "build": "wasm-pack build --target web"
+  }
+}
