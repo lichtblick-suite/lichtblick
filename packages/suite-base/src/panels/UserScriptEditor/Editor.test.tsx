@@ -6,6 +6,7 @@
 import { act, render, waitFor } from "@testing-library/react";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import "@testing-library/jest-dom";
@@ -244,6 +245,27 @@ describe("Editor", () => {
     expect(save).toHaveBeenCalledWith(baseScript.code);
   });
 
+  it("Given a read-only script When the save shortcut runs Then saving and formatting are skipped", async () => {
+    const save = jest.fn();
+    const readOnlyScript = buildScript({ readOnly: true });
+
+    await act(async () => {
+      renderEditor({ autoFormatOnSave: true, save, script: readOnlyScript });
+    });
+
+    const saveAction = mockEditor?.getAction("ctrl-s");
+    expect(saveAction).toBeDefined();
+
+    const formatAction = mockEditor?.getAction("editor.action.formatDocument");
+
+    await act(async () => {
+      await saveAction?.run();
+    });
+
+    expect(formatAction?.run).not.toHaveBeenCalled();
+    expect(save).not.toHaveBeenCalled();
+  });
+
   it("Given a request to open another model When the open handler runs Then the script override is populated", async () => {
     const setScriptOverride = jest.fn();
     const typesLib = BasicBuilder.string();
@@ -284,6 +306,36 @@ describe("Editor", () => {
         startColumn: expect.any(Number),
       }),
     });
+  });
+
+  it("Given a jump inside the current script When the open handler runs Then it navigates without overriding", async () => {
+    const setScriptOverride = jest.fn();
+    const selection = {
+      startLineNumber: BasicBuilder.number(),
+      startColumn: BasicBuilder.number(),
+      endLineNumber: BasicBuilder.number(),
+      endColumn: BasicBuilder.number(),
+    };
+
+    await act(async () => {
+      renderEditor({ setScriptOverride });
+    });
+
+    expect(mockOpenHandler).toBeTruthy();
+
+    const basename = baseScript.filePath.split("/").pop() ?? baseScript.filePath;
+    const currentFileUri = monacoApi.Uri.parse(`file://${DEFAULT_STUDIO_SCRIPT_PREFIX}${basename}`);
+
+    await act(async () => {
+      await mockOpenHandler?.(
+        { resource: currentFileUri, options: { selection } },
+        mockEditor ?? undefined,
+      );
+    });
+
+    expect(setScriptOverride).not.toHaveBeenCalled();
+    expect(mockEditor?.setSelection).toHaveBeenCalledWith(selection);
+    expect(mockEditor?.revealRangeInCenter).toHaveBeenCalled();
   });
 
   it("Given the editor receives source changes When the onChange handler fires Then the latest setter is called with new code", async () => {
