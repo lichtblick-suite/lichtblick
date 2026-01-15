@@ -52,6 +52,7 @@ const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
 
 export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   public static extensionId = "foxglove.SceneEntities";
+  private staticEntities = new Map<string, SceneEntity>();
   #primitivePool = new PrimitivePool(this.renderer);
 
   public constructor(renderer: IRenderer, name: string = FoxgloveSceneEntities.extensionId) {
@@ -158,7 +159,27 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
 
     for (const entityMsg of sceneUpdates.entities ?? []) {
       if (entityMsg) {
-        const entity = normalizeSceneEntity(entityMsg);
+        // add "isStatic" metadata to lane entities for potential caching
+        if (entityMsg.id?.includes("lane") ?? false) {
+          entityMsg.metadata = entityMsg.metadata ?? [];
+          entityMsg.metadata.push({ key: "isStatic", value: "true" });
+        }
+        let entity;
+        if (
+          entityMsg.metadata?.some((kv) => kv?.key === "isStatic" && kv.value === "true") ??
+          false
+        ) {
+          const staticEntity = this.staticEntities.get(entityMsg.id ?? "");
+          if (!staticEntity) {
+            entity = normalizeSceneEntity(entityMsg);
+            this.staticEntities.set(entity.id, entity);
+          } else {
+            entity = staticEntity;
+          }
+        }
+
+        entity = entity ?? normalizeSceneEntity(entityMsg);
+        // const entity = normalizeSceneEntity(entityMsg);
         this.#getTopicEntities(topic).addOrUpdateEntity(
           entity,
           toNanoSec(messageEvent.receiveTime),
