@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -11,8 +11,8 @@ import {
   DirectionalPadProps,
   TeleopConfig,
 } from "@lichtblick/suite-base/panels/Teleop/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import TeleopPanel from "./TeleopPanel";
 

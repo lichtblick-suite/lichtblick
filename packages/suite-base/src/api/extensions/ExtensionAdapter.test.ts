@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { IExtensionApiResponse } from "@lichtblick/suite-base/api/extensions/types";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import { Namespace } from "@lichtblick/suite-base/types";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { ExtensionAdapter } from "./ExtensionAdapter";
 

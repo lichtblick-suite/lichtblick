@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
@@ -7,9 +7,9 @@ import { MessagePipelineContext } from "@lichtblick/suite-base/components/Messag
 import { buildSettingsTree } from "@lichtblick/suite-base/components/PanelSettings/settingsTree";
 import { BuildSettingsTreeProps } from "@lichtblick/suite-base/components/PanelSettings/types";
 import { PanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/util/maybeCast");
 

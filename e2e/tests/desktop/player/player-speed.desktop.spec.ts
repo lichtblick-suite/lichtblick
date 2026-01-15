@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 const MCAP_FILENAME = "example.mcap";
 
@@ -15,7 +15,7 @@ const MCAP_FILENAME = "example.mcap";
 
 test("should double playback speed after choosing 2x", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   const expectedRatio = 2;
@@ -65,7 +65,7 @@ test("should double playback speed after choosing 2x", async ({ mainWindow }) =>
 
 test("should playback at one-tenth speed after choosing 0.1x", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   const expectedRatio = 0.1;

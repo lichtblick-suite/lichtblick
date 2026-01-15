@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -40,7 +40,12 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
-import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import {
+  BUSY_POLLING_INTERVAL_MS,
+  BUSY_POLLING_TIMEOUT_MS,
+  MAX_SUPPORTED_LAYOUT_VERSION,
+  ORG_PERMISSION_PREFIX,
+} from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
@@ -275,10 +280,6 @@ export default function CurrentLayoutProvider({
 
   // Load initial state by re-selecting the last selected layout from the UserProfile.
   useAsync(async () => {
-    if (layoutManager.supportsSharing) {
-      return;
-    }
-
     // Don't restore the layout if there's one specified in the app state url.
     if (windowAppURLState()?.layoutId) {
       return;
@@ -289,6 +290,29 @@ export default function CurrentLayoutProvider({
 
     // Try to load default layouts, before checking to add the fallback "Default".
     await loadDefaultLayouts(layoutManager, loaders);
+
+    // Wait for layout manager to finish any ongoing operations (e.g. fetching remote layouts)
+    if (layoutManager.isBusy()) {
+      await new Promise<void>((resolve) => {
+        const startTime = Date.now();
+
+        const checkBusy = () => {
+          const elapsed = Date.now() - startTime;
+
+          if (!layoutManager.isBusy()) {
+            resolve();
+          } else if (elapsed >= BUSY_POLLING_TIMEOUT_MS) {
+            console.warn(
+              `CurrentLayoutProvider: timeout after ${BUSY_POLLING_TIMEOUT_MS}ms, continuing anyway`,
+            );
+            resolve();
+          } else {
+            setTimeout(checkBusy, BUSY_POLLING_INTERVAL_MS);
+          }
+        };
+        checkBusy();
+      });
+    }
 
     const layouts = await layoutManager.getLayouts();
 
@@ -316,7 +340,9 @@ export default function CurrentLayoutProvider({
     }
 
     if (layouts.length > 0) {
-      const sortedLayouts = [...layouts].sort((a, b) => a.name.localeCompare(b.name));
+      const orgLayouts = layouts.filter((l) => l.permission.startsWith(ORG_PERMISSION_PREFIX));
+      const layoutsToSort = orgLayouts.length > 0 ? orgLayouts : layouts;
+      const sortedLayouts = [...layoutsToSort].sort((a, b) => a.name.localeCompare(b.name));
       await setSelectedLayoutId(sortedLayouts[0]!.id);
       return;
     }
