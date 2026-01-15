@@ -417,6 +417,7 @@ describe("Editor", () => {
     });
 
     const model = monacoApi.editor.getModel(uri);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(model?.setValue).toHaveBeenCalledWith(freshCode);
   });
 
