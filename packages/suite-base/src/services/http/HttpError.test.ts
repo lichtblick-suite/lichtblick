@@ -1,5 +1,7 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { HttpError } from "./HttpError";
 
@@ -40,24 +42,21 @@ describe("HttpError", () => {
     expect(error.response).toBe(mockResponse);
   });
 
-  it("should handle different HTTP status codes", () => {
-    const testCases = [
-      { status: 400, statusText: "Bad Request" },
-      { status: 401, statusText: "Unauthorized" },
-      { status: 403, statusText: "Forbidden" },
-      { status: 404, statusText: "Not Found" },
-      { status: 500, statusText: "Internal Server Error" },
-      { status: 502, statusText: "Bad Gateway" },
-      { status: 503, statusText: "Service Unavailable" },
-    ];
+  it.each([
+    { status: 400, statusText: "Bad Request" },
+    { status: 401, statusText: "Unauthorized" },
+    { status: 403, statusText: "Forbidden" },
+    { status: 404, statusText: "Not Found" },
+    { status: 409, statusText: "Conflict" },
+    { status: 500, statusText: "Internal Server Error" },
+    { status: 502, statusText: "Bad Gateway" },
+    { status: 503, statusText: "Service Unavailable" },
+  ])("should handle HTTP status $status ($statusText)", ({ status, statusText }) => {
+    const error = new HttpError(`HTTP ${status}`, status, statusText);
 
-    testCases.forEach(({ status, statusText }) => {
-      const error = new HttpError(`HTTP ${status}`, status, statusText);
-
-      expect(error.status).toBe(status);
-      expect(error.statusText).toBe(statusText);
-      expect(error.message).toBe(`HTTP ${status}`);
-    });
+    expect(error.status).toBe(status);
+    expect(error.statusText).toBe(statusText);
+    expect(error.message).toBe(`HTTP ${status}`);
   });
 
   it("should preserve error stack trace", () => {
@@ -112,20 +111,84 @@ describe("HttpError", () => {
     expect(error instanceof Error).toBe(true);
   });
 
-  it("should handle empty or special characters in message and statusText", () => {
-    const testCases = [
-      { message: "", statusText: "" },
-      { message: "Error with 'quotes'", statusText: 'Status with "quotes"' },
-      { message: "Error with\nnewlines", statusText: "Status with\ttabs" },
-      { message: "Error with émojis 🚫", statusText: "Status with 特殊字符" },
-    ];
+  describe("getUserFriendlyErrorMessage", () => {
+    it("should handle network errors (status 0)", () => {
+      const error = new HttpError(BasicBuilder.string(), 0, BasicBuilder.string());
 
-    testCases.forEach(({ message, statusText }) => {
-      const error = new HttpError(message, 400, statusText);
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "Network connection error. Please check your connection.",
+      );
+    });
 
-      expect(error.message).toBe(message);
-      expect(error.statusText).toBe(statusText);
-      expect(error.status).toBe(400);
+    it("should handle 400 Bad Request", () => {
+      const error = new HttpError(BasicBuilder.string(), 400, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "Invalid request. Please check your input and try again.",
+      );
+    });
+
+    it("should handle 401 Unauthorized", () => {
+      const error = new HttpError(BasicBuilder.string(), 401, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe("You are not authenticated.");
+    });
+
+    it("should handle 403 Forbidden", () => {
+      const error = new HttpError(BasicBuilder.string(), 403, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "You do not have permission to perform this action.",
+      );
+    });
+
+    it("should handle 404 Not Found", () => {
+      const error = new HttpError(BasicBuilder.string(), 404, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe("The requested resource was not found.");
+    });
+
+    it("should handle 409 Conflict", () => {
+      const error = new HttpError(BasicBuilder.string(), 409, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe(
+        "The resource already exists or has been modified.",
+      );
+    });
+
+    it("should handle 500 Internal Server Error", () => {
+      const error = new HttpError(BasicBuilder.string(), 500, BasicBuilder.string());
+
+      expect(error.getUserFriendlyErrorMessage()).toBe("Server error. Please try again later.");
+    });
+
+    it("should handle other 4xx client errors", () => {
+      const testCases = [402, 405, 408, 410, 418, 429];
+
+      testCases.forEach((status) => {
+        const error = new HttpError(BasicBuilder.string(), status, BasicBuilder.string());
+
+        expect(error.getUserFriendlyErrorMessage()).toBe(
+          "Request error. Please check your input and try again.",
+        );
+      });
+    });
+
+    it("should handle other 5xx server errors", () => {
+      const testCases = [501, 502, 504, 505];
+
+      testCases.forEach((status) => {
+        const error = new HttpError(BasicBuilder.string(), status, BasicBuilder.string());
+
+        expect(error.getUserFriendlyErrorMessage()).toBe("Server error. Please try again later.");
+      });
+    });
+
+    it("should return original message for non-standard status codes", () => {
+      const customMessage = "Custom error message";
+
+      const successError = new HttpError(customMessage, 200, "OK");
+      expect(successError.getUserFriendlyErrorMessage()).toBe(customMessage);
     });
   });
 });

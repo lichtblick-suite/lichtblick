@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -33,7 +33,9 @@ import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/w
 const ignoreDeepLinks = document.cookie.includes("fox.ignoreDeepLinks=true");
 document.cookie = "fox.ignoreDeepLinks=;max-age=0;";
 
-const deepLinks = ignoreDeepLinks ? [] : decodeRendererArg("deepLinks", window.process.argv) ?? [];
+const deepLinks = ignoreDeepLinks
+  ? []
+  : (decodeRendererArg("deepLinks", window.process.argv) ?? []);
 
 export function main(): void {
   const log = Logger.getLogger(__filename);

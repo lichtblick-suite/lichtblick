@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -48,6 +48,7 @@ export function Vec2Input(props: Vec2Props): React.JSX.Element {
   return (
     <Stack gap={0.25}>
       <NumberInput
+        data-testid="Vec2Input-0"
         size="small"
         disabled={disabled}
         readOnly={readOnly}
@@ -64,6 +65,7 @@ export function Vec2Input(props: Vec2Props): React.JSX.Element {
         }}
       />
       <NumberInput
+        data-testid="Vec2Input-1"
         size="small"
         disabled={disabled}
         readOnly={readOnly}

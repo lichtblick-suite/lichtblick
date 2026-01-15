@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -22,6 +22,7 @@ import { makeStyles } from "tss-react/mui";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { validationErrorToString, ValidationResult } from "@lichtblick/suite-base/util/validators";
+import { customTypography } from "@lichtblick/theme";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 
@@ -29,7 +30,7 @@ const useStyles = makeStyles()((theme) => ({
   editor: {
     backgroundColor: "transparent !important",
     font: "inherit !important",
-    fontFamily: `${theme.typography.fontMonospace} !important`,
+    fontFamily: `${customTypography.fontMonospace} !important`,
     overflow: "auto",
   },
   error: {

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -22,7 +22,7 @@ export function messageDefinitionToRos(msgDef: ULogMessageDefinition): MessageDe
       type: typeToRos(field.type),
       isArray: field.arrayLength != undefined && !isString,
       arrayLength: isString ? undefined : field.arrayLength,
-      upperBound: isString ? field.arrayLength ?? 1 : undefined,
+      upperBound: isString ? (field.arrayLength ?? 1) : undefined,
       isComplex: field.isComplex,
     });
   }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -201,6 +201,7 @@ export default function PlaybackControls({
               onClick={() => {
                 seekBackwardAction();
               }}
+              data-testid="seek-backward-button"
             />
             <HoverableIconButton
               disabled={disableControls}
@@ -220,6 +221,7 @@ export default function PlaybackControls({
               onClick={() => {
                 seekForwardAction();
               }}
+              data-testid="seek-forward-button"
             />
           </Stack>
           <Stack direction="row" flex={1} alignItems="center" justifyContent="flex-end" gap={0.5}>

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -31,11 +31,17 @@ export { default as installDevtoolsFormatters } from "./util/installDevtoolsForm
 export { default as overwriteFetch } from "./util/overwriteFetch";
 export { default as waitForFonts } from "./util/waitForFonts";
 export { initI18n } from "./i18n";
-export type { ExtensionLoader } from "./services/ExtensionLoader";
+export type { Namespace } from "./types";
+export { RemoteExtensionLoader } from "./services/extension/RemoteExtensionLoader";
+export type {
+  IExtensionLoader,
+  TypeExtensionLoader,
+  InstallExtensionProps,
+} from "./services/extension/IExtensionLoader";
 export type { LayoutLoader } from "./services/ILayoutLoader";
 export type { LayoutInfo } from "./types/layouts";
 export type { LayoutData } from "./context/CurrentLayoutContext";
-export type { ExtensionInfo, ExtensionNamespace } from "./types/Extensions";
+export type { ExtensionInfo } from "./types/Extensions";
 export { AppSetting } from "./AppSetting";
 export { default as FoxgloveWebSocketDataSourceFactory } from "./dataSources/FoxgloveWebSocketDataSourceFactory";
 export { default as Ros1LocalBagDataSourceFactory } from "./dataSources/Ros1LocalBagDataSourceFactory";
@@ -51,6 +57,5 @@ export { LaunchPreferenceValue } from "@lichtblick/suite-base/types/LaunchPrefer
 export { reportError, setReportErrorHandler } from "./reportError";
 export { makeWorkspaceContextInitialState } from "./providers/WorkspaceContextProvider";
 export type { AppBarProps } from "./components/AppBar";
-export { IdbExtensionLoader } from "./services/IdbExtensionLoader";
-export { default as BasicBuilder } from "./testing/builders/BasicBuilder";
+export { IdbExtensionLoader } from "./services/extension/IdbExtensionLoader";
 export { LOCAL_STORAGE_APP_CONFIGURATION } from "./constants/browserStorageKeys";

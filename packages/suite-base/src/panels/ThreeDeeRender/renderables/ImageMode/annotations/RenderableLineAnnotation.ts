@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -302,7 +302,7 @@ export class RenderableLineAnnotation extends Renderable<BaseUserData, /*TRender
           // as needed
           const color = hasExactColors
             ? outlineColors[i >>> 1]!
-            : outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR;
+            : (outlineColors[i] ?? outlineColor ?? FALLBACK_COLOR);
           colors[i * 4 + 0] = SRGBToLinear(color.r) * 255;
           colors[i * 4 + 1] = SRGBToLinear(color.g) * 255;
           colors[i * 4 + 2] = SRGBToLinear(color.b) * 255;

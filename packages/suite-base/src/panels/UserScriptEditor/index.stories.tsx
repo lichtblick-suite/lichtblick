@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -25,7 +25,7 @@ import rawUserUtils from "@lichtblick/suite-base/players/UserScriptPlayer/transf
 import { UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import { ExpectedResult } from "@lichtblick/suite-base/stories/storyHelpers";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 
 const userScripts = {
   nodeId1: { name: "/studio_script/script", sourceCode: "const someVariableName = 1;" },

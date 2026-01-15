@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
@@ -10,14 +10,17 @@ import { useSnackbar } from "notistack";
 
 import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import {
+  ExtensionData,
+  useExtensionCatalog,
+} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
   useSnackbar: jest.fn(),
@@ -110,7 +113,9 @@ describe("ExtensionDetails Component", () => {
 
       await waitFor(() => {
         expect(mockDownloadExtension).toHaveBeenCalledWith(mockExtension.foxe);
-        expect(mockInstallExtensions).toHaveBeenCalledWith("local", [expect.any(Uint8Array)]);
+        expect(mockInstallExtensions).toHaveBeenCalledWith("local", [
+          { buffer: expect.any(Uint8Array) },
+        ] as ExtensionData[]);
         expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
           `${mockExtension.name} installed successfully`,
           { variant: "success" },
@@ -216,50 +221,143 @@ describe("ExtensionDetails Component", () => {
       fireEvent.click(installButton);
 
       await waitFor(() => {
-        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-          `Failed to install extension ${mockExtension.id}. Download failed`,
-          { variant: "error" },
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Download failed", { variant: "error" });
+      });
+    });
+
+    it("hides install button when foxe URL is undefined", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const extensionWithoutFoxe = { ...mockExtension, foxe: undefined };
+
+      render(
+        <ExtensionDetails extension={extensionWithoutFoxe} onClose={() => {}} installed={false} />,
+      );
+
+      const installButton = screen.queryByText("Install");
+      expect(installButton).not.toBeInTheDocument();
+    });
+
+    it("does not log analytics event when component is unmounted before install completes", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      mockDownloadExtension.mockResolvedValue(new Uint8Array());
+      mockInstallExtensions.mockResolvedValue({});
+
+      const { unmount } = render(
+        <ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />,
+      );
+
+      const installButton = screen.getByText("Install");
+      fireEvent.click(installButton);
+
+      // Unmount before the async operation completes
+      unmount();
+
+      await waitFor(() => {
+        expect(mockDownloadExtension).toHaveBeenCalled();
+        expect(mockInstallExtensions).toHaveBeenCalled();
+      });
+
+      // logEvent should not be called because component was unmounted
+      expect(mockLogEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("uninstall process", () => {
+    it("handles the uninstall process successfully", async () => {
+      mockUninstallExtension.mockResolvedValue(undefined);
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+
+      const uninstallButton = screen.getByText("Uninstall");
+      fireEvent.click(uninstallButton);
+
+      await waitFor(() => {
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockExtension.namespace,
+          mockExtension.id,
         );
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+          `${mockExtension.name} uninstalled successfully`,
+          { variant: "success" },
+        );
+        expect(mockLogEvent).toHaveBeenCalledWith("Studio: Extension Uninstalled", {
+          type: mockExtension.id,
+        });
       });
     });
-  });
 
-  it("handles the uninstall process successfully", async () => {
-    mockUninstallExtension.mockResolvedValue(undefined);
+    it("uses 'local' namespace when extension.namespace is undefined", async () => {
+      mockUninstallExtension.mockResolvedValue(undefined);
 
-    render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+      const extensionWithoutNamespace = { ...mockExtension, namespace: undefined };
 
-    const uninstallButton = screen.getByText("Uninstall");
-    fireEvent.click(uninstallButton);
-
-    await waitFor(() => {
-      expect(mockUninstallExtension).toHaveBeenCalledWith(
-        mockExtension.namespace,
-        mockExtension.id,
+      render(
+        <ExtensionDetails
+          extension={extensionWithoutNamespace}
+          onClose={() => {}}
+          installed={true}
+        />,
       );
-      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-        `${mockExtension.name} uninstalled successfully`,
-        { variant: "success" },
-      );
-      expect(mockLogEvent).toHaveBeenCalledWith("Studio: Extension Uninstalled", {
-        type: mockExtension.id,
+
+      const uninstallButton = screen.getByText("Uninstall");
+      fireEvent.click(uninstallButton);
+
+      await waitFor(() => {
+        expect(mockUninstallExtension).toHaveBeenCalledWith("local", mockExtension.id);
       });
     });
-  });
 
-  it("displays an error message when the uninstall process fails", async () => {
-    mockUninstallExtension.mockRejectedValue(new Error("Uninstall failed"));
+    it("displays an error message when the uninstall process fails", async () => {
+      mockUninstallExtension.mockRejectedValue(new Error("Uninstall failed"));
 
-    render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
 
-    const uninstallButton = screen.getByText("Uninstall");
-    fireEvent.click(uninstallButton);
+      const uninstallButton = screen.getByText("Uninstall");
+      fireEvent.click(uninstallButton);
 
-    await waitFor(() => {
-      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-        `Failed to uninstall extension ${mockExtension.id}. Uninstall failed`,
-        { variant: "error" },
+      await waitFor(() => {
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Uninstall failed", { variant: "error" });
+      });
+    });
+
+    it("displays fallback error message when uninstall fails with non-Error object", async () => {
+      mockUninstallExtension.mockRejectedValue("String error");
+
+      render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />);
+
+      const uninstallButton = screen.getByText("Uninstall");
+      fireEvent.click(uninstallButton);
+
+      await waitFor(() => {
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to uninstall extension", {
+          variant: "error",
+        });
+      });
+    });
+
+    it("does not log analytics event when component is unmounted before uninstall completes", async () => {
+      mockUninstallExtension.mockImplementation(
+        async () => await new Promise((resolve) => setTimeout(resolve, 300)),
       );
+
+      const { unmount } = render(
+        <ExtensionDetails extension={mockExtension} onClose={() => {}} installed={true} />,
+      );
+
+      const uninstallButton = screen.getByText("Uninstall");
+      fireEvent.click(uninstallButton);
+
+      // Unmount before the async operation completes
+      unmount();
+
+      await waitFor(() => {
+        expect(mockUninstallExtension).toHaveBeenCalled();
+      });
+
+      // logEvent should not be called because component was unmounted
+      expect(mockLogEvent).not.toHaveBeenCalled();
     });
   });
 });

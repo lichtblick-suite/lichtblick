@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -294,7 +294,7 @@ class LaserScanHistoryRenderable extends Renderable<LaserScanHistoryUserData> {
 
     // Iterate the point cloud data to update color attribute
     for (let i = 0; i < ranges.length; i++) {
-      const colorValue = colorField === "range" ? ranges[i]! : intensities[i] ?? 0;
+      const colorValue = colorField === "range" ? ranges[i]! : (intensities[i] ?? 0);
       colorConverter(tempColor, colorValue);
       colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
     }

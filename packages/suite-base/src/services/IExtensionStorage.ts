@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -10,6 +10,9 @@ import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 export type StoredExtension = {
   info: ExtensionInfo;
   content: Uint8Array;
+  workspace?: string;
+  fileId?: string;
+  externalId?: string;
 };
 
 export interface IExtensionStorage {

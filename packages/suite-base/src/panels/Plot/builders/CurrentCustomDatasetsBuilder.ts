@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -114,7 +114,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
 
         return {
           x: this.#xValues[idx] ?? NaN,
-          y: chartValue == undefined ? NaN : mathModifiedValue ?? chartValue,
+          y: chartValue == undefined ? NaN : (mathModifiedValue ?? chartValue),
           receiveTime: msgEvent.receiveTime,
           value: mathModifiedValue ?? item,
         };
@@ -154,17 +154,15 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
 
     for (const item of series) {
       let existingSeries = this.#seriesByKey.get(item.key);
-      if (!existingSeries) {
-        existingSeries = {
-          configIndex: item.configIndex,
-          enabled: item.enabled,
-          messagePath: item.messagePath,
-          parsed: item.parsed,
-          dataset: {
-            data: [],
-          },
-        };
-      }
+      existingSeries ??= {
+        configIndex: item.configIndex,
+        enabled: item.enabled,
+        messagePath: item.messagePath,
+        parsed: item.parsed,
+        dataset: {
+          data: [],
+        },
+      };
 
       existingSeries.configIndex = item.configIndex;
       existingSeries.enabled = item.enabled;

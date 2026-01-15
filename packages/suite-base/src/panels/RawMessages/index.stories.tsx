@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -17,9 +17,6 @@
 import { StoryObj } from "@storybook/react";
 
 import RawMessages from "@lichtblick/suite-base/panels/RawMessages";
-import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-
-import { PREV_MSG_METHOD } from "./constants";
 import {
   enumAdvancedFixture,
   enumFixture,
@@ -29,9 +26,13 @@ import {
   topicsToDiffFixture,
   topicsWithIdsToDiffFixture,
   withMissingData,
-} from "./fixture";
-import type { RawMessagesPanelConfig } from "./types";
-import { NodeState } from "./types";
+} from "@lichtblick/suite-base/panels/RawMessages/fixture";
+import { PREV_MSG_METHOD } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
+import {
+  NodeState,
+  RawMessagesPanelConfig,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 
 const noDiffConfig = {
   diffMethod: "custom",
@@ -390,12 +391,10 @@ export const MultipleMessagesWithTopLevelFilter: StoryObj = {
   render: () => (
     <PanelSetup fixture={multipleNumberMessagesFixture}>
       <RawMessages
-        overrideConfig={
-          {
-            ...noDiffConfig,
-            topicPath: "/multiple_number_messages{value==2}",
-          } as any
-        }
+        overrideConfig={{
+          ...noDiffConfig,
+          topicPath: "/multiple_number_messages{value==2}",
+        }}
       />
     </PanelSetup>
   ),

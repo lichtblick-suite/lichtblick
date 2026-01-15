@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -856,7 +856,7 @@ export class ImageMode
     const colorMode =
       config.colorMode === "rgba-fields"
         ? DEFAULT_IMAGE_CONFIG.colorMode
-        : config.colorMode ?? DEFAULT_IMAGE_CONFIG.colorMode;
+        : (config.colorMode ?? DEFAULT_IMAGE_CONFIG.colorMode);
 
     // Ensures that no required fields are left undefined
     // rightmost values are applied last and have the most precedence

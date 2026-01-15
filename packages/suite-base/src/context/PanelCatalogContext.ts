@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,8 +7,8 @@
 
 import { ComponentType, createContext, useContext } from "react";
 
-import { PanelStatics } from "@lichtblick/suite-base/components/Panel";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { PanelStatics } from "@lichtblick/suite-base/components/types";
+import { Namespace } from "@lichtblick/suite-base/types";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 
 export type PanelComponent = ComponentType<{ childId?: string; tabId?: string }> &
@@ -30,7 +30,7 @@ export type PanelInfo = {
    */
   module: () => Promise<{ default: PanelComponent }>;
   config?: PanelConfig;
-  extensionNamespace?: ExtensionNamespace;
+  extensionNamespace?: Namespace;
 };
 
 /** PanelCatalog describes the interface for getting available panels */

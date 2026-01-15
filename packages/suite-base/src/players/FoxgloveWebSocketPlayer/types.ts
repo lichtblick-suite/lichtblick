@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,6 +11,9 @@ import { ParsedChannel } from "@lichtblick/mcap-support";
 import { MessageDefinition } from "@lichtblick/message-definition";
 import { MessageWriter as Ros1MessageWriter } from "@lichtblick/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@lichtblick/rosmsg2-serialization";
+import { Time } from "@lichtblick/rostime";
+import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
+import { Topic, TopicStats } from "@lichtblick/suite-base/players/types";
 
 export type ResolvedChannel = {
   channel: Channel;
@@ -37,3 +40,11 @@ export type ToWorkerMessage =
 export interface MessageWriter {
   writeMessage(message: unknown): Uint8Array;
 }
+
+export type CheckForHighFrequencyTopics = {
+  alerts: PlayerAlertManager;
+  endTime: Time | undefined;
+  startTime: Time | undefined;
+  topics: Topic[] | undefined;
+  topicStats: Map<string, TopicStats>;
+};

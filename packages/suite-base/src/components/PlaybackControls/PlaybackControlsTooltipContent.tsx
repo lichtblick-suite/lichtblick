@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -20,6 +20,7 @@ import {
   useTimelineInteractionState,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
+import { customTypography } from "@lichtblick/theme";
 
 type PlaybackControlsTooltipItem =
   | { type: "divider" }
@@ -32,7 +33,7 @@ const useStyles = makeStyles()((theme) => ({
     opacity: 0.5,
   },
   tooltipWrapper: {
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, "zero"`,
     fontFamily: theme.typography.body1.fontFamily,
     whiteSpace: "nowrap",
     columnGap: theme.spacing(0.5),

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -40,7 +40,7 @@ export function Utilities({
         {utilityFiles.map(({ fileName, filePath }) => (
           <ListItem disablePadding key={filePath} onClick={gotoUtils.bind(undefined, filePath)}>
             <ListItemButton selected={script ? filePath === script.filePath : undefined}>
-              <ListItemText primary={fileName} primaryTypographyProps={{ variant: "body2" }} />
+              <ListItemText primary={fileName} slotProps={{ primary: { variant: "body2" } }} />
             </ListItemButton>
           </ListItem>
         ))}

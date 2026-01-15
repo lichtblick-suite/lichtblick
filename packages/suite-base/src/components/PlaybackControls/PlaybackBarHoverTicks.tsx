@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -20,6 +20,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import HoverBar from "@lichtblick/suite-base/components/TimeBasedChart/HoverBar";
 import { useHoverValue } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
   tick: {
@@ -33,7 +34,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   time: {
     textAlign: "center",
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     letterSpacing: theme.typography.caption.letterSpacing,
@@ -77,12 +78,7 @@ export default function PlaybackBarHoverTicks(props: Props): React.JSX.Element {
   });
 
   const hoverTimeDisplay = useMemo(() => {
-    if (
-      !hoverValue ||
-      hoverValue.type !== "PLAYBACK_SECONDS" ||
-      !startTime ||
-      hoverValue.value < 0
-    ) {
+    if (hoverValue?.type !== "PLAYBACK_SECONDS" || !startTime || hoverValue.value < 0) {
       return undefined;
     }
     const stamp = add(startTime, fromSec(hoverValue.value));
@@ -119,7 +115,7 @@ export default function PlaybackBarHoverTicks(props: Props): React.JSX.Element {
             disableHoverListener
             disableTouchListener
             disableInteractive
-            TransitionProps={{ timeout: 0 }}
+            slotProps={{ transition: { timeout: 0 } }}
             open={displayHoverTime}
             title={<div className={classes.time}>{hoverTimeDisplay}</div>}
           >

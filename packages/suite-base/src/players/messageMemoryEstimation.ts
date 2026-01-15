@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -76,7 +76,7 @@ export function estimateMessageObjectSize(
       const count =
         field.isArray === true
           ? // We are conservative and assume an empty array to avoid memory overestimation.
-            field.arrayLength ?? 0
+            (field.arrayLength ?? 0)
           : 1;
 
       const knownFieldSize = knownTypeSizes.get(field.type);

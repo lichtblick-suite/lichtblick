@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -421,13 +421,11 @@ export class CustomDatasetsBuilderImpl {
 
     for (const config of series) {
       let existingSeries = this.#seriesByKey.get(config.key);
-      if (!existingSeries) {
-        existingSeries = {
-          config,
-          current: [],
-          full: [],
-        };
-      }
+      existingSeries ??= {
+        config,
+        current: [],
+        full: [],
+      };
       newSeries.set(config.key, existingSeries);
       existingSeries.config = config;
     }

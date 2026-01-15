@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -76,7 +76,6 @@ export function ExtensionDetails({
   const readme = extension.readme;
   const changelog = extension.changelog;
   const canInstall = extension.foxe != undefined;
-  const canUninstall = extension.namespace !== "org";
 
   const { value: readmeContent } = useAsync(
     async () =>
@@ -111,24 +110,30 @@ export function ExtensionDetails({
     }
 
     const url = extension.foxe;
-    try {
-      if (url == undefined) {
-        throw new Error(`Cannot install extension ${extension.id}, "foxe" URL is missing`);
-      }
-      setOperationStatus(OperationStatus.INSTALLING);
-      const data = await downloadExtension(url);
-      await installExtensions("local", [data]);
-      enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
-      if (isMounted()) {
-        setIsInstalled(true);
-        setOperationStatus(OperationStatus.IDLE);
-        void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
-      }
-    } catch (e: unknown) {
-      const err = e as Error;
-      enqueueSnackbar(`Failed to install extension ${extension.id}. ${err.message}`, {
+    if (url == undefined) {
+      enqueueSnackbar(`Cannot install extension ${extension.id}, "foxe" URL is missing`, {
         variant: "error",
       });
+      return;
+    }
+
+    setOperationStatus(OperationStatus.INSTALLING);
+
+    try {
+      const extensionBuffer = await downloadExtension(url);
+      await installExtensions("local", [{ buffer: extensionBuffer }]);
+
+      enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
+
+      if (isMounted()) {
+        setIsInstalled(true);
+        void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
+      }
+    } catch (error) {
+      enqueueSnackbar(error instanceof Error ? error.message : "Failed to install extension", {
+        variant: "error",
+      });
+    } finally {
       setOperationStatus(OperationStatus.IDLE);
     }
   }, [
@@ -137,9 +142,9 @@ export function ExtensionDetails({
     enqueueSnackbar,
     extension.foxe,
     extension.id,
+    extension.name,
     installExtensions,
     isMounted,
-    extension.name,
   ]);
 
   /**
@@ -150,32 +155,33 @@ export function ExtensionDetails({
    * @returns {Promise<void>}
    */
   const uninstall = useCallback(async () => {
+    setOperationStatus(OperationStatus.UNINSTALLING);
+
     try {
-      setOperationStatus(OperationStatus.UNINSTALLING);
       // UX - Avoids the button from blinking when operation completes too fast
       await new Promise((resolve) => setTimeout(resolve, 200));
       await uninstallExtension(extension.namespace ?? "local", extension.id);
       enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
+
       if (isMounted()) {
         setIsInstalled(false);
-        setOperationStatus(OperationStatus.IDLE);
         void analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
       }
-    } catch (e: unknown) {
-      const err = e as Error;
-      enqueueSnackbar(`Failed to uninstall extension ${extension.id}. ${err.message}`, {
+    } catch (error) {
+      enqueueSnackbar(error instanceof Error ? error.message : "Failed to uninstall extension", {
         variant: "error",
       });
+    } finally {
       setOperationStatus(OperationStatus.IDLE);
     }
   }, [
     analytics,
+    enqueueSnackbar,
     extension.id,
+    extension.name,
     extension.namespace,
     isMounted,
     uninstallExtension,
-    enqueueSnackbar,
-    extension.name,
   ]);
 
   return (
@@ -221,7 +227,7 @@ export function ExtensionDetails({
             {extension.description}
           </Typography>
         </Stack>
-        {isInstalled && canUninstall ? (
+        {isInstalled ? (
           <Button
             className={classes.installButton}
             size="small"

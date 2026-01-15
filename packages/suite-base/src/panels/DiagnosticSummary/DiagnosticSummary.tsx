@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -232,7 +232,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
             color="secondary"
             size="small"
             onChange={(event) => {
-              saveConfig({ minLevel: event.target.value as number });
+              saveConfig({ minLevel: event.target.value });
             }}
             MenuProps={{ MenuListProps: { dense: true } }}
           >

@@ -1,5 +1,7 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { HttpError } from "./HttpError";
 import { HttpService } from "./HttpService";
@@ -62,6 +64,7 @@ describe("HttpService", () => {
           "Content-Type": "application/json",
           "Api-Version": "1.0",
         },
+        credentials: "same-origin",
         method: "GET",
       });
       expect(result).toEqual(mockResponse);
@@ -87,6 +90,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "GET",
+        credentials: "same-origin",
       });
     });
   });
@@ -118,6 +122,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "POST",
+        credentials: "same-origin",
         body: JSON.stringify(requestData),
       });
       expect(result).toEqual(mockResponse);
@@ -142,8 +147,43 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "POST",
+        credentials: "same-origin",
         body: undefined,
       });
+    });
+
+    it("should make POST request with FormData", async () => {
+      const formData = new FormData();
+      formData.append("file", BasicBuilder.string());
+      formData.append("name", "test-file.txt");
+
+      const mockResponse = {
+        data: { id: 3, filename: "test-file.txt", uploaded: true },
+        timestamp: BasicBuilder.string(),
+        path: "/upload",
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        statusText: "Created",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const result = await httpService.post("upload", formData);
+
+      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/upload", {
+        headers: {
+          "Api-Version": "1.0",
+        },
+        method: "POST",
+        credentials: "same-origin",
+        body: formData,
+      });
+      expect(result).toEqual(mockResponse);
     });
   });
 
@@ -168,6 +208,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "PUT",
+        credentials: "same-origin",
         body: JSON.stringify(updateData),
       });
     });
@@ -193,6 +234,7 @@ describe("HttpService", () => {
           "Api-Version": "1.0",
         },
         method: "DELETE",
+        credentials: "same-origin",
       });
     });
   });
@@ -407,6 +449,7 @@ describe("HttpService", () => {
           "Custom-Header": "custom-value",
         },
         method: "GET",
+        credentials: "same-origin",
       });
     });
 
@@ -416,9 +459,13 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("text/plain"),
+          get: jest.fn().mockReturnValue("application/json"),
         },
-        text: jest.fn().mockResolvedValueOnce("file uploaded"),
+        json: jest.fn().mockResolvedValueOnce({
+          data: "file uploaded",
+          timestamp: "2023-01-01",
+          path: "/upload",
+        }),
       });
 
       await httpService.post("upload", "file data", {
@@ -435,6 +482,7 @@ describe("HttpService", () => {
         },
         method: "POST",
         body: JSON.stringify("file data"),
+        credentials: "same-origin",
       });
     });
   });
@@ -487,6 +535,27 @@ describe("HttpService", () => {
         }),
       );
     });
+
+    it("should include credentials: same-origin in all requests", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+      });
+
+      await httpService.get("test");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com/test?",
+        expect.objectContaining({
+          credentials: "same-origin",
+        }),
+      );
+    });
   });
 
   describe("response handling", () => {
@@ -506,11 +575,15 @@ describe("HttpService", () => {
           headers: {
             get: jest.fn().mockReturnValue("application/json"),
           },
-          json: jest.fn().mockResolvedValueOnce({ success: true }),
+          json: jest.fn().mockResolvedValueOnce({
+            data: { success: true },
+            timestamp: "2023-01-01",
+            path: "/test",
+          }),
         });
 
         const result = await httpService.get("test");
-        expect(result).toEqual({ success: true });
+        expect(result.data).toEqual({ success: true });
         mockFetch.mockClear();
       }
     });
@@ -523,11 +596,15 @@ describe("HttpService", () => {
         headers: {
           get: jest.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce(undefined),
+        json: jest.fn().mockResolvedValueOnce({
+          data: undefined,
+          timestamp: "2023-01-01",
+          path: "/resource",
+        }),
       });
 
       const result = await httpService.delete("resource");
-      expect(result).toBeUndefined();
+      expect(result.data).toBeUndefined();
     });
 
     it("should handle responses with different content types", async () => {
@@ -542,7 +619,37 @@ describe("HttpService", () => {
       });
 
       const result = await httpService.get("text-endpoint");
-      expect(result).toBe("plain text response");
+      expect(result.data).toBe("plain text response");
+      expect(result.timestamp).toBeDefined();
+      expect(result.path).toBe("text-endpoint?");
+    });
+
+    it("should handle ArrayBuffer responses", async () => {
+      const mockArrayBuffer = new ArrayBuffer(8);
+      const view = new Uint8Array(mockArrayBuffer);
+      view[0] = 72; // 'H'
+      view[1] = 101; // 'e'
+      view[2] = 108; // 'l'
+      view[3] = 108; // 'l'
+      view[4] = 111; // 'o'
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/octet-stream"),
+        },
+        arrayBuffer: jest.fn().mockResolvedValueOnce(mockArrayBuffer),
+      });
+
+      const result = await httpService.get("binary-data", {}, { responseType: "arraybuffer" });
+
+      expect(result.data).toBe(mockArrayBuffer);
+      expect(result.timestamp).toBeDefined();
+      expect(result.path).toBe("binary-data?");
+      expect(result.data).toBeInstanceOf(ArrayBuffer);
+      expect((result.data as ArrayBuffer).byteLength).toBe(8);
     });
   });
 

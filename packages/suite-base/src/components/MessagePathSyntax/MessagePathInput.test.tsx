@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -30,8 +30,8 @@ import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/Moc
 import MessagePathInput, {
   tryToSetDefaultGlobalVar,
   getFirstInvalidVariableFromRosPath,
-  MessagePathInputBaseProps,
 } from "./MessagePathInput";
+import { MessagePathInputBaseProps } from "./types";
 
 jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");

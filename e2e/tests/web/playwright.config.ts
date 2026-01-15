@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { defineConfig, devices } from "@playwright/test";
@@ -9,7 +9,13 @@ export const STORAGE_STATE = "e2e/tmp/web-session.json";
 export default defineConfig({
   globalSetup: require.resolve("./web-setup.ts"),
   globalTeardown: require.resolve("./web-teardown.ts"),
-  reporter: [["html", { outputFolder: "../reports/web", open: "never", title: "Web E2E Tests" }]],
+  reporter: process.env.CI
+    ? [["json", { outputFile: "../../reports/web/results.json" }], ["list"]]
+    : [
+        ["html", { outputFolder: "../reports/web", open: "never", title: "Web E2E Tests" }],
+        ["json", { outputFile: "../reports/web/results.json" }],
+        ["list"],
+      ],
   timeout: 30 * 1000,
   testDir: "./",
   webServer: {

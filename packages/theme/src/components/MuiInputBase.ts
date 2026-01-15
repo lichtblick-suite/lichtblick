@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -18,10 +18,10 @@ export const MuiInputBase: OverrideComponentReturn<"MuiInputBase"> = {
       [`&.${inputBaseClasses.adornedEnd}`]: {
         paddingInlineEnd: theme.spacing(1.25),
       },
-      [`.${inputBaseClasses.inputAdornedStart}`]: {
+      [`.${inputBaseClasses.input}.MuiInputBase-adornedStart`]: {
         paddingInlineStart: theme.spacing(1),
       },
-      [`.${inputBaseClasses.inputAdornedEnd}`]: {
+      [`.${inputBaseClasses.input}.MuiInputBase-adornedEnd`]: {
         paddingInlineEnd: theme.spacing(1),
       },
     }),
@@ -32,10 +32,10 @@ export const MuiInputBase: OverrideComponentReturn<"MuiInputBase"> = {
       [`&.${inputBaseClasses.adornedEnd}`]: {
         paddingInlineEnd: theme.spacing(1),
       },
-      [`.${inputBaseClasses.inputAdornedStart}`]: {
+      [`.${inputBaseClasses.input}.MuiInputBase-adornedStart`]: {
         paddingInlineStart: theme.spacing(0.75),
       },
-      [`.${inputBaseClasses.inputAdornedEnd}`]: {
+      [`.${inputBaseClasses.input}.MuiInputBase-adornedEnd`]: {
         paddingInlineEnd: theme.spacing(0.75),
       },
     }),

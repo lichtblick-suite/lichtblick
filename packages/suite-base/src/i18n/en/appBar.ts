@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -17,6 +17,10 @@ export const appBar = {
   hideLeftSidebar: "Hide left sidebar",
   hideRightSidebar: "Hide right sidebar",
   importLayoutFromFile: "Import layout from file…",
+  networkStatusOffline: "Offline",
+  networkStatusOfflineDescription:
+    "You are currently offline. Remote features like layouts, extensions and MCAP files from namespace '{{namespace}}' may not work properly. Please check your internet connection.",
+  networkStatusOnline: "Online",
   noDataSource: "No data source",
   open: "Open…",
   openConnection: "Open connection…",

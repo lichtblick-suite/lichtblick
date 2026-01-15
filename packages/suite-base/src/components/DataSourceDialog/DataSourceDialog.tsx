@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -133,11 +133,11 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
         backdrop: {
           children: backdrop,
         },
-      }}
-      PaperProps={{
-        square: false,
-        elevation: 4,
-        className: classes.paper,
+        paper: {
+          square: false,
+          elevation: 4,
+          className: classes.paper,
+        },
       }}
     >
       <IconButton className={classes.closeButton} onClick={onModalClose} edge="end">

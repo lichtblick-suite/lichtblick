@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,23 +21,15 @@ import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList as List } from "react-window";
-import { makeStyles } from "tss-react/mui";
 
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { NormalizedLogMessage } from "@lichtblick/suite-base/panels/Log/types";
 
+import { useStyles } from "./LogList.style";
 import LogMessage from "./LogMessage";
+import { DEFAULT_ROW_HEIGHT } from "./constants";
 
-const useStyles = makeStyles()((theme) => ({
-  floatingButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    margin: theme.spacing(1.5),
-  },
-}));
-
-type Props = {
+export type LogListProps = {
   items: readonly NormalizedLogMessage[];
 };
 
@@ -58,7 +50,7 @@ function Row(props: {
     if (ref.current) {
       props.data.setRowHeight(props.index, ref.current.clientHeight);
     }
-  }, [props.data, props.index]);
+  }, [props.index, props.data]);
 
   const item = props.data.items[props.index]!;
 
@@ -73,7 +65,7 @@ function Row(props: {
  * List for showing large number of items, which are expected to be appended to the end regularly.
  * Automatically scrolls to the bottom unless you explicitly scroll up.
  */
-function LogList({ items }: Props): React.JSX.Element {
+function LogList({ items }: LogListProps): React.JSX.Element {
   const { classes } = useStyles();
 
   // Reference to the list item itself.
@@ -82,7 +74,10 @@ function LogList({ items }: Props): React.JSX.Element {
   // Reference to the outer list div. Needed for autoscroll determination.
   const outerRef = useRef<HTMLDivElement>(ReactNull);
 
-  const latestItems = useLatest(items);
+  const latestItems = useLatest(items); // Cache calculated item heights.
+  const itemHeightCache = useRef<Record<number, number>>({});
+
+  const isResizing = useRef(false);
 
   // Automatically scroll to reveal new items.
   const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
@@ -110,8 +105,20 @@ function LogList({ items }: Props): React.JSX.Element {
       scrollUpdateWasRequested: boolean;
     }) => {
       try {
-        const isAtEnd =
-          scrollOffset + (outerRef.current?.offsetHeight ?? 0) === outerRef.current?.scrollHeight;
+        // Ignore row resize scroll events
+        if (isResizing.current) {
+          isResizing.current = false;
+          return;
+        }
+
+        // Asserted by react-window
+        const outerElement = outerRef.current!;
+
+        const { offsetHeight, scrollHeight } = outerElement;
+
+        const lastRowHeight = itemHeightCache.current[latestItems.current.length - 1] ?? 0;
+        const isAtEnd = scrollOffset + offsetHeight + lastRowHeight >= scrollHeight;
+
         if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
           setAutoscrollToEnd(false);
         } else if (scrollDirection === "forward" && isAtEnd) {
@@ -121,17 +128,21 @@ function LogList({ items }: Props): React.JSX.Element {
         console.error("Error while handling scroll", error);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
-  // Cache calculated item heights.
-  const itemHeightCache = useRef<Record<number, number>>({});
-
-  const getRowHeight = useCallback((index: number) => itemHeightCache.current[index] ?? 16, []);
+  const getRowHeight = useCallback((index: number) => {
+    const height = itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT;
+    return height;
+  }, []);
 
   const setRowHeight = useCallback((index: number, height: number) => {
-    itemHeightCache.current[index] = height;
-    listRef.current?.resetAfterIndex(index);
+    if (itemHeightCache.current[index] !== height) {
+      itemHeightCache.current[index] = height;
+      isResizing.current = true;
+      listRef.current?.resetAfterIndex(index);
+    }
   }, []);
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
@@ -155,7 +166,11 @@ function LogList({ items }: Props): React.JSX.Element {
     <AutoSizer>
       {({ width, height }) => {
         return (
-          <div style={{ position: "relative", width, height }} ref={resizeRootRef}>
+          <div
+            style={{ position: "relative", width, height }}
+            ref={resizeRootRef}
+            data-testid="virtualized-list"
+          >
             <List
               ref={listRef}
               width={width}
@@ -166,6 +181,7 @@ function LogList({ items }: Props): React.JSX.Element {
               itemCount={items.length}
               outerRef={outerRef}
               onScroll={onScroll}
+              data-testid="scrollable-list"
             >
               {Row}
             </List>
@@ -176,6 +192,7 @@ function LogList({ items }: Props): React.JSX.Element {
                 title="Scroll to bottom"
                 onClick={onResetView}
                 className={classes.floatingButton}
+                data-testid="scroll-to-bottom-button"
               >
                 <DoubleArrowDownIcon />
               </Fab>

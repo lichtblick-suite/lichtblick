@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,6 +7,8 @@
 
 import { Divider, Paper } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
+
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles<void, "selected">()((theme, _props, classes) => ({
   selected: {},
@@ -32,7 +34,7 @@ const useStyles = makeStyles<void, "selected">()((theme, _props, classes) => ({
     fontSize: theme.typography.caption.fontSize,
     color: theme.palette.text.secondary,
     paddingBlock: theme.spacing(0.25),
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'tnum'`,
+    fontFeatureSettings: `${customTypography.fontFeatureSettings}, 'tnum'`,
 
     "&:first-of-type": {
       paddingInlineStart: theme.spacing(0.75),

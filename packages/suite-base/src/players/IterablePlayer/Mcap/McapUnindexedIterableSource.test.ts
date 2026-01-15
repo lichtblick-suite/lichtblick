@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -26,7 +26,7 @@ describe("McapUnindexedIterableSource", () => {
 
     const source = new McapUnindexedIterableSource({
       size: file.size,
-      stream: file.stream(),
+      stream: file.stream() as ReadableStream<Uint8Array>,
     });
 
     const { metadata } = await source.initialize();
@@ -51,7 +51,7 @@ describe("McapUnindexedIterableSource", () => {
 
     const source = new McapUnindexedIterableSource({
       size: file.size,
-      stream: file.stream(),
+      stream: file.stream() as ReadableStream<Uint8Array>,
     });
 
     const { metadata } = await source.initialize();

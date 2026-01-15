@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,6 +14,7 @@ import {
   usePlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { FILE_ACCEPT_TYPE } from "@lichtblick/suite-base/context/Workspace/constants";
+import { normalizeExtensions } from "@lichtblick/suite-base/context/Workspace/utils";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
 export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promise<void> {
@@ -34,17 +35,23 @@ export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promi
     }, []);
   }, [sources]);
 
+  const normalizeExtensionsArray = useMemo(
+    () => normalizeExtensions(allExtensions),
+    [allExtensions],
+  );
+
   return useCallback(async () => {
     const filesHandle = await showOpenFilePicker({
       multiple: true,
       types: [
         {
-          description: allExtensions.join(", "),
-          accept: { [FILE_ACCEPT_TYPE]: allExtensions },
+          description: normalizeExtensionsArray.join(", "),
+          accept: {
+            [FILE_ACCEPT_TYPE]: normalizeExtensionsArray,
+          },
         },
       ],
     });
-
     if (filesHandle.length === 0) {
       return;
     }
@@ -98,5 +105,5 @@ export function useOpenFile(sources: readonly IDataSourceFactory[]): () => Promi
       type: "file",
       handles: filesHandle,
     });
-  }, [allExtensions, selectSource, sources]);
+  }, [allExtensions, normalizeExtensionsArray, selectSource, sources]);
 }

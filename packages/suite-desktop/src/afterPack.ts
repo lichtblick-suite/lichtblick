@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -76,7 +76,7 @@ async function copySpotlightImporter(context: AfterPackContext) {
   await downloadTool(zipURL, zipPath);
   const actualSHA = crypto
     .createHash("sha256")
-    .update(await fs.readFile(zipPath))
+    .update(new Uint8Array(await fs.readFile(zipPath)))
     .digest("hex");
   if (actualSHA !== zipSHA) {
     throw new Error(`SHA mismatch for ${zipURL}: expected ${zipSHA}, got ${actualSHA}`);

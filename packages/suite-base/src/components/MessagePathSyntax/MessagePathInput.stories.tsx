@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -56,7 +56,7 @@ function MessagePathInputStory(props: {
   const [path, setPath] = useState(props.path);
 
   return (
-    <PanelSetup fixture={props.heavy ?? false ? heavyFixture : MessagePathInputStoryFixture}>
+    <PanelSetup fixture={(props.heavy ?? false) ? heavyFixture : MessagePathInputStoryFixture}>
       <Stack direction="row" flex="auto" margin={1.25}>
         <MessagePathInput
           path={path}

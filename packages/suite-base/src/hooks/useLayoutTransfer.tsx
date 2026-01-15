@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { enqueueSnackbar } from "notistack";
@@ -13,6 +13,7 @@ import {
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
+import { Namespace } from "@lichtblick/suite-base/types";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
@@ -23,18 +24,18 @@ import { AppEvent } from "../services/IAnalytics";
 type UseLayoutTransfer = {
   importLayout: () => Promise<void>;
   exportLayout: () => Promise<void>;
-  parseAndInstallLayout: (file: File) => Promise<Layout | undefined>;
+  parseAndInstallLayout: (file: File, namespace: Namespace) => Promise<Layout | undefined>;
 };
 
 export function useLayoutTransfer(): UseLayoutTransfer {
   const isMounted = useMountedState();
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
-  const { promptForUnsavedChanges, onSelectLayout } = useLayoutNavigation();
+  const { onSelectLayout } = useLayoutNavigation();
   const { getCurrentLayoutState } = useCurrentLayoutActions();
 
   const parseAndInstallLayout = useCallback(
-    async (file: File) => {
+    async (file: File, namespace: Namespace = "local") => {
       const layoutName = path.basename(file.name, path.extname(file.name));
       const content = await file.text();
 
@@ -61,7 +62,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
       const newLayout = await layoutManager.saveNewLayout({
         name: layoutName,
         data,
-        permission: "CREATOR_WRITE",
+        permission: namespace === "org" ? "ORG_WRITE" : "CREATOR_WRITE",
       });
 
       void onSelectLayout(newLayout);
@@ -72,10 +73,6 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   );
 
   const importLayout = useCallbackWithToast(async () => {
-    if (!(await promptForUnsavedChanges())) {
-      return;
-    }
-
     const fileHandles = await showOpenFilePicker({
       multiple: true,
       excludeAcceptAllOption: false,
@@ -105,7 +102,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
     }
 
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
-  }, [analytics, isMounted, parseAndInstallLayout, promptForUnsavedChanges]);
+  }, [analytics, isMounted, parseAndInstallLayout]);
 
   const exportLayout = useCallbackWithToast(async () => {
     const item = getCurrentLayoutState().selectedLayout?.data;

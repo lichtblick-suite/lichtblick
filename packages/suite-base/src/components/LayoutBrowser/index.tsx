@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -77,8 +77,7 @@ export default function LayoutBrowser({
     confirmModal,
   } = useLayoutActions();
   const { importLayout, exportLayout } = useLayoutTransfer();
-  const { promptForUnsavedChanges, onSelectLayout, state, dispatch, unsavedChangesPrompt } =
-    useLayoutNavigation();
+  const { onSelectLayout, state, dispatch } = useLayoutNavigation();
   const onExportLayout = exportLayout;
 
   useLayoutEffect(() => {
@@ -180,9 +179,6 @@ export default function LayoutBrowser({
   }, [reloadLayouts]);
 
   const createNewLayout = useCallbackWithToast(async () => {
-    if (!(await promptForUnsavedChanges())) {
-      return;
-    }
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
@@ -200,7 +196,7 @@ export default function LayoutBrowser({
     void onSelectLayout(newLayout);
 
     void analytics.logEvent(AppEvent.LAYOUT_CREATE);
-  }, [promptForUnsavedChanges, currentDateForStorybook, layoutManager, onSelectLayout, analytics]);
+  }, [currentDateForStorybook, layoutManager, onSelectLayout, analytics]);
 
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
@@ -292,7 +288,6 @@ export default function LayoutBrowser({
     >
       {promptModal}
       {confirmModal}
-      {unsavedChangesPrompt}
       <Stack
         fullHeight
         gap={enableNewTopNav ? 1 : 2}

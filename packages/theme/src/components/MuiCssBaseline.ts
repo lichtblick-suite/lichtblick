@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { OverrideComponentReturn } from "../types";
+import { customTypography } from "../typography";
 
 export const MuiCssBaseline: OverrideComponentReturn<"MuiCssBaseline"> = {
   styleOverrides: (theme) => ({
@@ -18,7 +19,7 @@ export const MuiCssBaseline: OverrideComponentReturn<"MuiCssBaseline"> = {
       textDecoration: "none",
     },
     pre: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
       backgroundColor: theme.palette.background.default,
       borderRadius: theme.shape.borderRadius,
       padding: theme.spacing(2),
@@ -27,7 +28,7 @@ export const MuiCssBaseline: OverrideComponentReturn<"MuiCssBaseline"> = {
       margin: 0,
     },
     code: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
     },
   }),
 };

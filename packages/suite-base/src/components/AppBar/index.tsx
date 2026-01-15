@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -34,6 +34,7 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
+import { customTypography } from "@lichtblick/theme";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { AppBarContainer } from "./AppBarContainer";
@@ -41,6 +42,7 @@ import { AppBarIconButton } from "./AppBarIconButton";
 import { AppMenu } from "./AppMenu";
 import { CustomWindowControls, CustomWindowControlsProps } from "./CustomWindowControls";
 import { DataSource } from "./DataSource";
+import { NetworkStatusIndicator } from "./NetworkStatusIndicator";
 import { SettingsMenu } from "./SettingsMenu";
 
 const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
@@ -114,7 +116,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()((
       ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
     },
     keyEquivalent: {
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
       background: tc(theme.palette.common.white).darken(45).toString(),
       padding: theme.spacing(0, 0.5),
       aspectRatio: 1,
@@ -257,6 +259,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
 
           <div className={classes.end}>
             <div className={classes.endInner}>
+              <NetworkStatusIndicator />
               {enableMemoryUseIndicator && <MemoryUseIndicator />}
               {appBarLayoutButton}
               <Stack direction="row" alignItems="center" data-tourid="sidebar-button-group">

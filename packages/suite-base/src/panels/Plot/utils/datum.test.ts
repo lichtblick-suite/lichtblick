@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { isTime, toSec } from "@lichtblick/rostime";
 import { Time } from "@lichtblick/suite";
 import { getChartValue, isChartValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/rostime", () => ({
   isTime: jest.fn(),

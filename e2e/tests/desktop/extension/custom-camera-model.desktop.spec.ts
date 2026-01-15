@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 /**
  * Given the Data Source dialog is closed
@@ -34,15 +34,15 @@ test("custom camera model", async ({ mainWindow }) => {
 
   // GIVEN
   const mcapFile = "custom-camera-model.mcap";
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: mcapFile,
+    filenames: mcapFile,
   });
 
   // WHEN
   await mainWindow.getByTestId("SettingsIcon").nth(1).click();
   const sidebarLeft = mainWindow.getByTestId("sidebar-left");
-  await sidebarLeft.getByRole("button", { name: "None​", exact: true }).nth(0).click();
+  await sidebarLeft.getByText("None", { exact: true }).nth(0).click();
   await mainWindow.getByRole("option", { name: "/camera_calibration", exact: true }).click();
 
   // THEN
@@ -50,7 +50,7 @@ test("custom camera model", async ({ mainWindow }) => {
   expect(await sidebarLeft.getByTestId("ErrorIcon").count()).toBe(0);
 
   // WHEN
-  await sidebarLeft.getByRole("button", { name: "/camera_calibration", exact: true }).click();
+  await sidebarLeft.getByText("/camera_calibration", { exact: true }).click();
   await mainWindow.getByRole("option", { name: "/camera_calibration/custom", exact: true }).click();
   // Expect errors for custom camera, as the extension has not registered the camera model yet
   const errorIcon = sidebarLeft.getByTestId("ErrorIcon");
@@ -65,9 +65,9 @@ test("custom camera model", async ({ mainWindow }) => {
 
   // WHEN
   const foxeFile = "custom-camera-model.foxe";
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: foxeFile,
+    filenames: foxeFile,
   });
   await mainWindow.getByTestId("play-button").click();
 

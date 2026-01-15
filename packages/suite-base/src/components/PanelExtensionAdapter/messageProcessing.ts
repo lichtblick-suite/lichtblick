@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,14 +14,15 @@ import {
   RegisterMessageConverterArgs,
   Subscription,
 } from "@lichtblick/suite";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
-import { ExtensionNamespace } from "@lichtblick/suite-base/types/Extensions";
+import { Namespace } from "@lichtblick/suite-base/types";
 
 // Branded string to ensure that users go through the `converterKey` function to compute a lookup key
 type ConverterKey = Opaque<string, "ConverterKey">;
 
 type MessageConverter = RegisterMessageConverterArgs<unknown> & {
-  extensionNamespace?: ExtensionNamespace;
+  extensionNamespace?: Namespace;
 };
 
 type TopicSchemaConverterMap = Map<ConverterKey, MessageConverter[]>;
@@ -42,11 +43,16 @@ export function convertMessage(
   messageEvent: Immutable<MessageEvent>,
   converters: Immutable<TopicSchemaConverterMap>,
   convertedMessages: MessageEvent[],
+  globalVariables?: Readonly<GlobalVariables>,
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);
   for (const converter of matchedConverters ?? []) {
-    const convertedMessage = converter.converter(messageEvent.message, messageEvent);
+    const convertedMessage = converter.converter(
+      messageEvent.message,
+      messageEvent,
+      globalVariables,
+    );
     // If the converter returns _undefined_ or _null_ the message is skipped
     if (convertedMessage == undefined) {
       continue;
@@ -183,7 +189,7 @@ export function forEachSortedArrays<Item>(
     return;
   }
   for (;;) {
-    let minCursorIndex = undefined;
+    let minCursorIndex: number | undefined = undefined;
     for (let i = 0; i < cursors.length; i++) {
       const cursor = cursors[i]!;
       const array = arrays[i]!;
@@ -206,7 +212,7 @@ export function forEachSortedArrays<Item>(
     const minItem = arrays[minCursorIndex]![cursors[minCursorIndex]!];
     if (minItem != undefined) {
       forEach(minItem);
-      cursors[minCursorIndex]++;
+      cursors[minCursorIndex]!++;
     } else {
       break;
     }

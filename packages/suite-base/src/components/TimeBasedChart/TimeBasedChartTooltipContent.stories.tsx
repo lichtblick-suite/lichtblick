@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -39,10 +39,12 @@ export const SingleItemSingleDataset: StoryObj = {
         title={<TimeBasedChartTooltipContent multiDataset={false} content={[data]} />}
         placement="top"
         arrow
-        PopperProps={{
-          anchorEl: {
-            getBoundingClientRect: () => {
-              return new DOMRect(200, 100, 0, 0);
+        slotProps={{
+          popper: {
+            anchorEl: {
+              getBoundingClientRect: () => {
+                return new DOMRect(200, 100, 0, 0);
+              },
             },
           },
         }}
@@ -79,10 +81,12 @@ export const SingleItemMultiDataset: StoryObj = {
         }
         placement="top"
         arrow
-        PopperProps={{
-          anchorEl: {
-            getBoundingClientRect: () => {
-              return new DOMRect(200, 100, 0, 0);
+        slotProps={{
+          popper: {
+            anchorEl: {
+              getBoundingClientRect: () => {
+                return new DOMRect(200, 100, 0, 0);
+              },
             },
           },
         }}
@@ -113,10 +117,12 @@ export const MultipleItemsSingleDataset: StoryObj = {
         title={<TimeBasedChartTooltipContent multiDataset={false} content={[data, data]} />}
         placement="top"
         arrow
-        PopperProps={{
-          anchorEl: {
-            getBoundingClientRect: () => {
-              return new DOMRect(200, 100, 0, 0);
+        slotProps={{
+          popper: {
+            anchorEl: {
+              getBoundingClientRect: () => {
+                return new DOMRect(200, 100, 0, 0);
+              },
             },
           },
         }}
@@ -161,10 +167,12 @@ export const MultipleItemsMultipleDataset: StoryObj = {
         }
         placement="top"
         arrow
-        PopperProps={{
-          anchorEl: {
-            getBoundingClientRect: () => {
-              return new DOMRect(200, 100, 0, 0);
+        slotProps={{
+          popper: {
+            anchorEl: {
+              getBoundingClientRect: () => {
+                return new DOMRect(200, 100, 0, 0);
+              },
             },
           },
         }}

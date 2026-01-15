@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -451,7 +451,7 @@ class CachingIterableSource<MessageType = unknown>
 
       for (let i = readIdx; i >= 0; --i) {
         const record = cacheBlock.items[i];
-        if (!record || record[1].type !== "message-event") {
+        if (record?.[1].type !== "message-event") {
           continue;
         }
 

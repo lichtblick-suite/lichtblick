@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,10 +12,11 @@ import memoizeWeak from "memoize-weak";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Immutable, SettingsTree, SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
+import { SettingsTreeAction, SettingsTreeField } from "@lichtblick/suite";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
 import { FieldEditor } from "@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor";
 import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/SettingsTreeEditor.style";
+import { SettingsTreeEditorProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
@@ -30,10 +31,7 @@ const makeStablePath = memoizeWeak((key: string) => [key]);
 export default function SettingsTreeEditor({
   variant,
   settings,
-}: {
-  variant: "panel" | "log";
-  settings: Immutable<SettingsTree>;
-}): React.JSX.Element {
+}: Readonly<SettingsTreeEditorProps>): React.JSX.Element {
   const { classes } = useStyles();
   const { actionHandler, focusedPath } = settings;
   const [filterText, setFilterText] = useState<string>("");
@@ -107,7 +105,7 @@ export default function SettingsTreeEditor({
   }, []);
 
   return (
-    <Stack fullHeight>
+    <Stack fullHeight data-testid="settings-tree-editor">
       {settings.enableFilter === true && (
         <header className={classes.appBar}>
           <TextField
@@ -118,28 +116,31 @@ export default function SettingsTreeEditor({
             className={classes.textField}
             fullWidth
             placeholder={t("searchPanelSettings")}
-            inputProps={{
-              "data-testid": `${variant}-settings-filter-input`,
-            }}
-            InputProps={{
-              size: "small",
-              startAdornment: (
-                <label className={classes.startAdornment} htmlFor="settings-filter">
-                  <SearchIcon fontSize="small" />
-                </label>
-              ),
-              endAdornment: filterText && (
-                <IconButton
-                  size="small"
-                  title={t("clearSearch")}
-                  onClick={() => {
-                    setFilterText("");
-                  }}
-                  edge="end"
-                >
-                  <CancelIcon fontSize="small" />
-                </IconButton>
-              ),
+            slotProps={{
+              htmlInput: {
+                "data-testid": `${variant}-settings-filter-input`,
+              },
+              input: {
+                size: "small",
+                startAdornment: (
+                  <label className={classes.startAdornment} htmlFor="settings-filter">
+                    <SearchIcon fontSize="small" />
+                  </label>
+                ),
+                endAdornment: filterText && (
+                  <IconButton
+                    data-testid="clear-filter-button"
+                    size="small"
+                    title={t("clearSearch")}
+                    onClick={() => {
+                      setFilterText("");
+                    }}
+                    edge="end"
+                  >
+                    <CancelIcon fontSize="small" />
+                  </IconButton>
+                ),
+              },
             }}
           />
         </header>

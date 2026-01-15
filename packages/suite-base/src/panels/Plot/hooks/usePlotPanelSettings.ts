@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
@@ -68,7 +68,7 @@ export function handleAddSeriesAction({ draft }: HandleAction): void {
 }
 
 export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAction): void {
-  draft.paths.splice(Number(index), 1);
+  draft.paths.splice(index, 1);
 }
 
 export default function usePlotPanelSettings(

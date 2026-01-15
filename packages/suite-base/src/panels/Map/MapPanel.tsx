@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -415,7 +415,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         // Changing the topic list clears all map layers so we try to preserve reference identity
         // if the contents of the topic list haven't changed.
         setTopics((oldTopics) => {
-          return _.isEqual(oldTopics, renderState.topics) ? oldTopics : renderState.topics ?? [];
+          return _.isEqual(oldTopics, renderState.topics) ? oldTopics : (renderState.topics ?? []);
         });
       }
 
@@ -717,7 +717,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     }
 
     // If center updates when following a topic we don't want to keep resetting the zoom.
-    const zoom = didResetZoomRef.current ? currentMap?.getZoom() : config.zoomLevel ?? 10;
+    const zoom = didResetZoomRef.current ? currentMap?.getZoom() : (config.zoomLevel ?? 10);
     currentMap?.setView([center.lat, center.lon], zoom);
     didResetZoomRef.current = true;
   }, [center, config.zoomLevel, currentMap]);

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 import { launchWebsocket } from "../../../fixtures/launch-websocket";
@@ -29,7 +29,7 @@ test("show correctly open a web socket connection showing correct attibutes on r
   await mainWindow.getByText("Topics", { exact: true }).click();
   await expect(mainWindow.getByText("/websocket_test").innerHTML()).resolves.toBeDefined();
   await mainWindow.getByTestId("AddPanelButton").click();
-  await mainWindow.getByText("Raw Messages").click();
+  await mainWindow.getByText("Raw Messages", { exact: true }).click();
   await mainWindow.getByPlaceholder("/some/topic.msgs[0].field").nth(0).click();
   await mainWindow.getByTestId("autocomplete-item").click();
 

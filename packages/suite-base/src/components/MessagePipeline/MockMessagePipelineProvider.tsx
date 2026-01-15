@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -145,13 +145,13 @@ function getPublicState(
     subscriptions: [],
     sortedTopics:
       props.topics === prevState?.mockProps.topics
-        ? prevState?.public.sortedTopics ?? []
+        ? (prevState?.public.sortedTopics ?? [])
         : props.topics
           ? [...props.topics].sort((a, b) => a.name.localeCompare(b.name))
           : [],
     sortedServices:
       props.services === prevState?.mockProps.services
-        ? prevState?.public.sortedServices ?? []
+        ? (prevState?.public.sortedServices ?? [])
         : props.services
           ? [...props.services].sort((a, b) => a.localeCompare(b))
           : [],

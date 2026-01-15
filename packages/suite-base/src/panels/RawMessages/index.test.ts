@@ -1,9 +1,8 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
-
-import { getSingleValue } from "./index";
+import { getSingleValue } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("getSingleValue", () => {
   it("should return a string with value and constantName if data is a single-element array", () => {

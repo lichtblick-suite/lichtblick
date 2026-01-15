@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -66,9 +66,7 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     // Get or create the node for the given path
     let node = this.errors;
     for (const segment of path) {
-      if (!node.children) {
-        node.children = new Map();
-      }
+      node.children ??= new Map();
       if (!node.children.has(segment)) {
         node.children.set(segment, new NodeError([...node.path, segment]));
       }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,9 +7,9 @@
 
 import { MessageEvent } from "@lichtblick/suite";
 import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { IteratorResult } from "../../players/IterablePlayer/IIterableSource";
@@ -247,6 +247,10 @@ describe("createMessageRangeIterator", () => {
     );
 
     // Create an iterator with artificial delays to trigger time-based batching
+    let mockTime = 0;
+    const performanceNowSpy = jest.spyOn(performance, "now").mockImplementation(() => mockTime);
+
+    // Create an iterator that advances mock time to trigger time-based batching
     async function* timedIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
       for (let i = 0; i < mockMessages.length; i++) {
         yield {
@@ -256,29 +260,33 @@ describe("createMessageRangeIterator", () => {
 
         // Add a delay after the second message to trigger 16ms batching
         if (i === 1) {
-          await new Promise((resolve) => setTimeout(resolve, BATCH_INTERVAL_MS)); // 16ms delay
+          mockTime += BATCH_INTERVAL_MS + 1; // Ensure we exceed the threshold
         }
       }
     }
 
-    const { iterable } = createMessageRangeIterator({
-      topic: mockTopic,
-      rawBatchIterator: timedIterator(),
-      sortedTopics: mockSortedTopics,
-      messageConverters: mockMessageConverters,
-    });
+    try {
+      const { iterable } = createMessageRangeIterator({
+        topic: mockTopic,
+        rawBatchIterator: timedIterator(),
+        sortedTopics: mockSortedTopics,
+        messageConverters: mockMessageConverters,
+      });
 
-    const batches: MessageEvent[][] = [];
-    for await (const batch of iterable) {
-      batches.push([...batch]);
+      const batches: MessageEvent[][] = [];
+      for await (const batch of iterable) {
+        batches.push([...batch]);
+      }
+
+      // Should have multiple batches due to time-based splitting
+      expect(batches.length).toBeGreaterThan(1);
+
+      // All messages should be received
+      const allMessages = batches.flat();
+      expect(allMessages).toHaveLength(mockMessages.length);
+    } finally {
+      performanceNowSpy.mockRestore();
     }
-
-    // Should have multiple batches due to time-based splitting
-    expect(batches.length).toBeGreaterThan(1);
-
-    // All messages should be received
-    const allMessages = batches.flat();
-    expect(allMessages).toHaveLength(mockMessages.length);
   });
 
   it("should handle message conversion when converters are available", async () => {

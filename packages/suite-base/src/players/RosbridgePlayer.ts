@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -283,12 +283,10 @@ export default class RosbridgePlayer implements Player {
           ros2: this.#rosVersion === 2,
         });
         // https://github.com/typescript-eslint/typescript-eslint/issues/6632
-        if (!messageReaders[type]) {
-          messageReaders[type] =
-            this.#rosVersion !== 2
-              ? new ROS1MessageReader(parsedDefinition)
-              : new ROS2MessageReader(parsedDefinition);
-        }
+        messageReaders[type] ??=
+          this.#rosVersion !== 2
+            ? new ROS1MessageReader(parsedDefinition)
+            : new ROS2MessageReader(parsedDefinition);
       }
 
       // We call requestTopics on a timeout to check for new topics. If there are no changes to topics
@@ -693,7 +691,6 @@ export default class RosbridgePlayer implements Player {
     if (this.#isRefreshing) {
       return;
     }
-
     try {
       this.#isRefreshing = true;
 

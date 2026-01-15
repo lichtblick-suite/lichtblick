@@ -1,12 +1,12 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen } from "@testing-library/react";
 
 import { NewSidebar } from "@lichtblick/suite-base/components/Sidebars/NewSidebar";
 import { NewSidebarProps, SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("NewSidebar", () => {
   function buildSidebarItem(props: Partial<SidebarItem> = {}): SidebarItem {

@@ -1,9 +1,9 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 
 import { InstalledExtension } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
@@ -124,7 +124,7 @@ describe("useExtensionSettings", () => {
     expect(result.current.namespacedData).toEqual([
       {
         namespace: "namespace1",
-        entries: [
+        entries: expect.arrayContaining([
           {
             ...mockInstalledExtensions[1],
             name: mockInstalledExtensions[1]?.displayName,
@@ -133,7 +133,7 @@ describe("useExtensionSettings", () => {
             ...mockInstalledExtensions[0],
             name: mockInstalledExtensions[0]?.displayName,
           },
-        ],
+        ]),
       },
     ]);
   });

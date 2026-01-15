@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -24,6 +24,7 @@ import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import HoverableIconButton from "@lichtblick/suite-base/components/HoverableIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
+import { customTypography } from "@lichtblick/theme";
 
 export type ShareJsonModalProps = {
   onRequestClose: () => void;
@@ -36,7 +37,7 @@ const useStyles = makeStyles()((theme) => ({
   textarea: {
     [`.${outlinedInputClasses.root}`]: {
       backgroundColor: theme.palette.action.hover,
-      fontFamily: theme.typography.fontMonospace,
+      fontFamily: customTypography.fontMonospace,
       maxHeight: "60vh",
       overflowY: "auto",
       padding: theme.spacing(0.25),
@@ -100,8 +101,10 @@ export function ShareJsonModal({
           helperText={
             error ? "The JSON provided is invalid." : " " // pass whitespace to prevent height from jumping
           }
-          inputProps={{ "data-testid": "share-json-input" }}
-          FormHelperTextProps={{ variant: "standard" }}
+          slotProps={{
+            htmlInput: { "data-testid": "share-json-input" },
+            formHelperText: { variant: "standard" },
+          }}
           spellCheck={false}
         />
       </DialogContent>

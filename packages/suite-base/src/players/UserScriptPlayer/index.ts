@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -325,9 +325,7 @@ export default class UserScriptPlayer implements Player {
             if (outputMessage) {
               // https://github.com/typescript-eslint/typescript-eslint/issues/6632
               let messages = messagesByTopic[outTopic];
-              if (!messages) {
-                messages = [];
-              }
+              messages ??= [];
               messages.push(outputMessage);
               messagesByTopic[outTopic] = messages;
             }
@@ -355,6 +353,7 @@ export default class UserScriptPlayer implements Player {
 
   public setGlobalVariables(globalVariables: GlobalVariables): void {
     this.#globalVariables = globalVariables;
+    this.#player.setGlobalVariables(globalVariables);
   }
 
   // Called when userScript state is updated (i.e. scripts are saved)

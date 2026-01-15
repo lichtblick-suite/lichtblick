@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -536,28 +536,20 @@ function paletteColorCached(
   let palette: [number, number, number, number][] | undefined;
   switch (paletteColorMode) {
     case "costmap":
-      if (!costmapPalette) {
-        costmapPalette = createCostmapPalette();
-      }
+      costmapPalette ??= createCostmapPalette();
       palette = costmapPalette;
       break;
     case "map":
-      if (!mapPalette) {
-        mapPalette = createMapPalette();
-      }
+      mapPalette ??= createMapPalette();
       palette = mapPalette;
       break;
     case "raw":
-      if (!rawPalette) {
-        rawPalette = createRawPalette();
-      }
+      rawPalette ??= createRawPalette();
       palette = rawPalette;
       break;
     default:
       // Default to raw palette if unknown colormode, the user will have an error already in the settings
-      if (!rawPalette) {
-        rawPalette = createRawPalette();
-      }
+      rawPalette ??= createRawPalette();
       palette = rawPalette;
   }
 

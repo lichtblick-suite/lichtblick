@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import type { Theme } from "@mui/material";
 import { EventEmitter } from "eventemitter3";
@@ -11,11 +11,11 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { MessageBlock } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";
@@ -360,6 +360,31 @@ describe("PlotCoordinator", () => {
       expect(plotCoordinator["series"][2]?.messagePath).toBe(config.paths[2]?.value);
       const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalledWith(plotCoordinator["series"]);
+    });
+
+    it("should correctly create 2 series even if both have the same message path", () => {
+      const messagePath = PlotBuilder.path({
+        value: BasicBuilder.string(),
+        timestampMethod: "receiveTime",
+      });
+      const plotConfig = PlotBuilder.config({ paths: [messagePath, messagePath] });
+
+      (parseMessagePath as jest.Mock).mockReturnValue({ topicName: messagePath.value });
+      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
+      (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+
+      plotCoordinator.handleConfig(plotConfig, "light", {});
+
+      const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
+      expect(setSeriesSpy).toHaveBeenCalled();
+      const series = (datasetsBuilder.setSeries as jest.Mock).mock.calls[0]?.[0];
+
+      expect(series).toHaveLength(2);
+      expect(series[0].configIndex).toBe(0);
+      expect(series[1].configIndex).toBe(1);
+      expect(series[0].key).toBe(`0:receiveTime:${messagePath.value}`);
+      expect(series[1].key).toBe(`1:receiveTime:${messagePath.value}`);
+      expect(series[0].key).not.toEqual(series[1].key);
     });
 
     it("should dispatch render and queue downsample", async () => {

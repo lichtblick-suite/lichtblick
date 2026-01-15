@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -32,6 +32,7 @@ import {
   getValidatedTimeAndMethodFromString,
 } from "@lichtblick/suite-base/util/formatTime";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import { customTypography } from "@lichtblick/theme";
 
 type PlaybackTimeDisplayMethodProps = {
   appTimeFormat: IAppTimeFormat;
@@ -69,7 +70,8 @@ const useStyles = makeStyles<{ timeDisplayMethod: TimeDisplayMethod }>()(
         },
       },
       [`.${inputBaseClasses.input}`]: {
-        fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero' !important`,
+        fontFeatureSettings: `${customTypography.fontFeatureSettings}, 'zero' !important`,
+        fontVariantNumeric: "tabular-nums", // Example of a valid property
         minWidth: timeDisplayMethod === "TOD" ? "28ch" : "20ch",
       },
       [`.${iconButtonClasses.root}`]: {
@@ -132,9 +134,11 @@ function PlaybackTimeMethodMenu({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          dense: true,
-          "aria-labelledby": "playback-time-display-toggle-button",
+        slotProps={{
+          list: {
+            dense: true,
+            "aria-labelledby": "playback-time-display-toggle-button",
+          },
         }}
         anchorOrigin={{
           vertical: "top",
@@ -166,7 +170,11 @@ function PlaybackTimeMethodMenu({
             <ListItemText
               inset={timeFormat !== option.key}
               primary={option.label}
-              primaryTypographyProps={{ variant: "inherit" }}
+              slotProps={{
+                primary: {
+                  variant: "inherit",
+                },
+              }}
             />
           </MenuItem>
         ))}
@@ -270,20 +278,22 @@ export function UnconnectedPlaybackTimeDisplay({
             error={hasError}
             variant="filled"
             size="small"
-            InputProps={{
-              startAdornment: hasError ? <WarningIcon color="error" /> : undefined,
-              endAdornment: (
-                <PlaybackTimeMethodMenu
-                  {...{
-                    currentTime,
-                    timezone,
-                    timeOfDayString,
-                    timeRawString,
-                    timeFormat: appTimeFormat.timeFormat,
-                    setTimeFormat: appTimeFormat.setTimeFormat,
-                  }}
-                />
-              ),
+            slotProps={{
+              input: {
+                startAdornment: hasError ? <WarningIcon color="error" /> : undefined,
+                endAdornment: (
+                  <PlaybackTimeMethodMenu
+                    {...{
+                      currentTime,
+                      timezone,
+                      timeOfDayString,
+                      timeRawString,
+                      timeFormat: appTimeFormat.timeFormat,
+                      setTimeFormat: appTimeFormat.setTimeFormat,
+                    }}
+                  />
+                ),
+              },
             }}
             onFocus={(e) => {
               onPause();
@@ -313,12 +323,14 @@ export function UnconnectedPlaybackTimeDisplay({
           defaultValue={
             appTimeFormat.timeFormat === "SEC" ? "0000000000.000000000" : "0000-00-00 00:00:00.000"
           }
-          InputProps={{
-            endAdornment: (
-              <IconButton edge="end" size="small" disabled>
-                <ArrowDropDownIcon fontSize="small" />
-              </IconButton>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <IconButton edge="end" size="small" disabled>
+                  <ArrowDropDownIcon fontSize="small" />
+                </IconButton>
+              ),
+            },
           }}
         />
       )}

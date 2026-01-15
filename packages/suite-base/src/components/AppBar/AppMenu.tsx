@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -212,12 +212,12 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         open={open}
         disableAutoFocusItem
         onClose={handleNestedMenuClose}
-        MenuListProps={{
-          "aria-labelledby": "app-menu-button",
-          dense: true,
-          className: classes.menuList,
-        }}
         slotProps={{
+          list: {
+            "aria-labelledby": "app-menu-button",
+            dense: true,
+            className: classes.menuList,
+          },
           paper: {
             "data-tourid": "app-menu",
           } as Partial<PaperProps & { "data-tourid"?: string }>,

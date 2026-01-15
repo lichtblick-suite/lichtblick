@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -24,7 +24,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplaceDetail,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
-import { ExtensionLoader } from "@lichtblick/suite-base/services/ExtensionLoader";
+import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
 
 export default {
@@ -32,12 +32,13 @@ export default {
   component: ExtensionDetails,
 };
 
-const MockExtensionLoader: ExtensionLoader = {
+const MockExtensionLoader: IExtensionLoader = {
+  type: "browser",
   namespace: "local",
   getExtension: async () => undefined,
   getExtensions: async () => [],
-  loadExtension: async (_id: string) => "",
-  installExtension: async (_foxeFileData: Uint8Array) => {
+  loadExtension: async (_id: string) => ({ raw: "" }),
+  installExtension: async ({ foxeFileData: _foxeFileData }) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
   uninstallExtension: async (_id: string) => undefined,

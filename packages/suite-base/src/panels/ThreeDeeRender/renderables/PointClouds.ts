@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -899,7 +899,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
       return numSupported + (isSupportedField(field) ? 1 : 0);
     }, 0);
     let fieldsForTopicUpdated = false;
-    if (!fields || fields.length !== numSupportedFields) {
+    if (fields?.length !== numSupportedFields) {
       // Omit fields with count != 1 (only applies to ros pointclouds)
       // can't use filterMap here because of incompatible types
       fields = pointCloud.fields.filter(isSupportedField).map((field) => field.name);

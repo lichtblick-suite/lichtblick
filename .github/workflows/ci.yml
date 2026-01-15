@@ -49,15 +49,15 @@ jobs:
     name: ${{ matrix.config.name }} (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -69,10 +69,18 @@ jobs:
 
       - run: ${{ matrix.config.command }}
 
-  e2e:
+  e2e-desktop:
     runs-on: ubuntu-latest
 
-    name: e2e (ubuntu-latest)
+    # Run tests in parallel across multiple shards
+    # This distributes tests across multiple GitHub Action jobs
+    # Each shard runs independently, reducing total CI time
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    name: e2e-desktop (ubuntu-latest) [${{ matrix.shard }}/4]
 
     # Set a fixed timezone to ensure consistent test results.
     # Lichtblick uses the system's local timezone, which can cause test assertions
@@ -81,15 +89,15 @@ jobs:
       TZ: Europe/Lisbon
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -104,10 +112,135 @@ jobs:
         # See: https://github.com/microsoft/playwright/issues/34251
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      - name: test:e2e:desktop:ci (ubuntu-latest)
+      # It must be dev build, otherwise playwright wont't have all data-testid avaiable for icons
+      # https://mui.com/material-ui/migration/upgrade-to-v7/#svgicons-data-testid-removed
+      - name: Build desktop app
+        run: yarn desktop:build:dev
+
+      - name: Run E2E Desktop tests - Shard ${{ matrix.shard }}/4
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: |
-            yarn desktop:build:prod
-            yarn test:e2e:desktop:ci
+          run: yarn test:e2e:desktop:ci --shard=${{ matrix.shard }}/4
+
+      - name: Upload Desktop E2E Test Reports (Shard ${{ matrix.shard }})
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: blob-report-desktop-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 1
+
+  e2e-web:
+    runs-on: ubuntu-latest
+
+    name: e2e-web (ubuntu-latest)
+
+    env:
+      TZ: Europe/Lisbon
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Web tests
+        run: yarn test:e2e:web:ci
+
+      - name: Upload Web E2E Test Reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-web-reports
+          path: e2e/reports/web/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # Merge reports from all shards and generate summary
+  e2e-report:
+    if: always()
+    needs: [e2e-desktop, e2e-web]
+    runs-on: ubuntu-latest
+
+    name: e2e-report (merge all reports)
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - name: Download all desktop blob reports
+        uses: actions/download-artifact@v7
+        with:
+          pattern: blob-report-desktop-*
+          path: all-blob-reports-desktop
+          merge-multiple: true
+
+      - name: Download web reports
+        uses: actions/download-artifact@v7
+        with:
+          name: e2e-web-reports
+          path: e2e/reports/web
+        continue-on-error: true
+
+      - name: Merge Desktop Playwright reports
+        run: |
+          mkdir -p e2e/reports/desktop
+
+          echo "Downloaded desktop blob reports:"
+          ls -la all-blob-reports-desktop/ || echo "No desktop blob reports found"
+
+          # Merge blob reports into JSON format
+          npx playwright merge-reports --reporter json ./all-blob-reports-desktop > e2e/reports/desktop/results.json
+
+          # Also generate HTML report
+          npx playwright merge-reports --reporter html ./all-blob-reports-desktop
+
+          echo "Merged desktop report size:"
+          ls -lh e2e/reports/desktop/results.json
+
+      - name: Generate E2E Test Summary
+        run: |
+          echo "Generating E2E test summary from merged reports..."
+          yarn ts-node e2e/ci-helpers/generate-test-summary.ts >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Merged E2E Test Reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-test-reports-merged
+          path: |
+            e2e/reports/
+            playwright-report/
+          retention-days: 7

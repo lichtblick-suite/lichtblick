@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -16,11 +16,6 @@ import { makeConfig } from "@lichtblick/suite-base/webpack";
 const storybookConfig: StorybookConfig = {
   // Workaround for https://github.com/storybookjs/storybook/issues/19446
   stories: ["../packages/**/!(node_modules)**/*.stories.tsx"],
-  addons: [
-    "@storybook/addon-essentials",
-    "@storybook/addon-actions",
-    "@storybook/addon-interactions",
-  ],
   framework: {
     name: "@storybook/react-webpack5",
     options: {
@@ -59,8 +54,11 @@ const storybookConfig: StorybookConfig = {
           !Array.isArray(studioWebpackConfig.resolve.fallback)
             ? studioWebpackConfig.resolve.fallback
             : {}),
-          constants: (config.resolve!.fallback as Record<string, string | false | string[]>)
-            .constants!,
+          ...(config.resolve?.fallback &&
+          typeof config.resolve.fallback === "object" &&
+          !Array.isArray(config.resolve.fallback)
+            ? config.resolve.fallback
+            : {}),
         },
       },
       module: studioWebpackConfig.module,

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -28,6 +28,7 @@ import { DeserializingIterableSource } from "@lichtblick/suite-base/players/Iter
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
+import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
@@ -43,6 +44,7 @@ import {
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
+import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
 
@@ -551,6 +553,10 @@ export class IterablePlayer implements Player {
       // Studio does not like duplicate topics or topics with different datatypes
       // Check for duplicates or for mismatched datatypes
       const uniqueTopics = new Map<string, Topic>();
+      const duration = subtractTimes(this.#end, this.#start);
+      this.#providerTopicStats = topicStats;
+      let highFrequencyTopicFound = false;
+
       for (const topic of topics) {
         const existingTopic = uniqueTopics.get(topic.name);
         if (existingTopic) {
@@ -561,12 +567,20 @@ export class IterablePlayer implements Player {
           });
           continue;
         }
-
         uniqueTopics.set(topic.name, topic);
+
+        if (!highFrequencyTopicFound) {
+          highFrequencyTopicFound = isTopicHighFrequency(
+            topicStats,
+            topic.name,
+            duration,
+            topic.schemaName,
+            this.#alertManager,
+          );
+        }
       }
 
       this.#providerTopics = Array.from(uniqueTopics.values());
-      this.#providerTopicStats = topicStats;
 
       let idx = 0;
       for (const alert of alerts) {

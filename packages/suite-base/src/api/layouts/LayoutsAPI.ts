@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import {
   CreateLayoutRequest,
   LayoutApiResponse,
+  WorkspaceLayoutResponse,
   SaveNewLayoutParams,
   UpdateLayoutRequest,
   UpdateLayoutRequestBody,
@@ -11,23 +12,24 @@ import {
 } from "@lichtblick/suite-base/api/layouts/types";
 import { ISO8601Timestamp } from "@lichtblick/suite-base/services/ILayoutStorage";
 import {
-  RemoteLayout,
   IRemoteLayoutStorage,
+  RemoteLayout,
 } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 
 export class LayoutsAPI implements IRemoteLayoutStorage {
-  public readonly namespace: string;
-  public readonly baseUrl: string = "layouts";
+  public readonly workspace: string;
+  public readonly workspacePath: string = "workspaces";
+  public readonly layoutPath: string = "layouts";
 
-  public constructor(namespace: string) {
-    this.namespace = namespace;
+  public constructor(workspace: string) {
+    this.workspace = workspace;
   }
 
   public async getLayouts(): Promise<RemoteLayout[]> {
-    const { data: layoutData } = await HttpService.get<LayoutApiResponse[]>(this.baseUrl, {
-      namespace: this.namespace,
-    });
+    const { data: layoutData } = await HttpService.get<LayoutApiResponse[]>(
+      `${this.workspacePath}/${this.workspace}/${this.layoutPath}`,
+    );
 
     return layoutData.map((layout) => ({
       id: layout.layoutId,
@@ -46,16 +48,17 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
   public async saveNewLayout(params: SaveNewLayoutParams): Promise<RemoteLayout> {
     const requestPayload: CreateLayoutRequest = {
       layoutId: params.id,
-      namespace: this.namespace,
       data: params.data,
       name: params.name,
       permission: params.permission,
     };
 
-    const { data: layoutData } = await HttpService.post<LayoutApiResponse>(
-      this.baseUrl,
+    const { data } = await HttpService.post<WorkspaceLayoutResponse>(
+      `${this.workspacePath}/${this.workspace}/layout`,
       requestPayload,
     );
+
+    const { layout: layoutData } = data;
 
     const transformedLayout = {
       id: layoutData.layoutId,
@@ -77,7 +80,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
     };
 
     const { data: layoutData } = await HttpService.put<LayoutApiResponse>(
-      `${this.baseUrl}/${params.externalId}`,
+      `${this.layoutPath}/${params.externalId}`,
       requestBody,
     );
 
@@ -96,7 +99,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
 
   public async deleteLayout(id: string): Promise<boolean> {
     const deletedLayout = await HttpService.delete<RemoteLayout | undefined>(
-      `${this.baseUrl}/${id}`,
+      `${this.workspacePath}/${this.workspace}/layout/${id}`,
     );
     return deletedLayout.data != undefined;
   }

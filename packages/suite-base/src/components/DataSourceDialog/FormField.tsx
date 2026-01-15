@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -44,17 +44,21 @@ export function FormField(props: Props): React.JSX.Element {
         label={field.label}
         error={error != undefined}
         helperText={error}
-        FormHelperTextProps={{
-          variant: "standard",
+        slotProps={{
+          formHelperText: {
+            variant: "standard",
+          },
+          input: {
+            notched: false,
+          },
+          inputLabel: {
+            shrink: true,
+          },
         }}
         placeholder={field.placeholder}
         defaultValue={field.defaultValue}
         onChange={onChange}
         variant="outlined"
-        InputProps={{
-          notched: false,
-        }}
-        InputLabelProps={{ shrink: true }}
       />
       <FormHelperText>{field.description}</FormHelperText>
     </div>

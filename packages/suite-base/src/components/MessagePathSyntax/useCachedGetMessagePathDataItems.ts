@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -242,7 +242,7 @@ export function getMessagePathDataItems(
       // If we're at the end of the `messagePath`, we're done! Just store the point.
       let constantName: string | undefined;
       const prevPathItem = filledInPath.messagePath[pathIndex - 1];
-      if (prevPathItem && prevPathItem.type === "name") {
+      if (prevPathItem?.type === "name") {
         const fieldName = prevPathItem.name;
         const enumMap = structureItem != undefined ? enumValues[structureItem.datatype] : undefined;
         constantName = enumMap?.[fieldName]?.[value];
@@ -283,7 +283,7 @@ export function getMessagePathDataItems(
         // back to `/topic.object[10]` if necessary. In any case, make sure that the user can
         // actually identify where the value came from.
         let newPath;
-        if (nextPathItem && nextPathItem.type === "filter") {
+        if (nextPathItem?.type === "filter") {
           // If we have a filter set after this, it will update the path appropriately.
           newPath = `${path}[:]`;
         } else if (typeof arrayElement === "object") {

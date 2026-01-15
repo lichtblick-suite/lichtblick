@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { TFunction } from "i18next";
@@ -211,14 +211,14 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
         minXValue: {
           label: t("min"),
           input: "number",
-          value: config.minXValue != undefined ? Number(config.minXValue) : undefined,
+          value: _.isNumber(config.minXValue) ? config.minXValue : undefined,
           placeholder: "auto",
         },
         maxXValue: {
           label: t("max"),
           input: "number",
           error: maxXError,
-          value: config.maxXValue != undefined ? Number(config.maxXValue) : undefined,
+          value: _.isNumber(config.maxXValue) ? config.maxXValue : undefined,
           placeholder: "auto",
         },
         followingViewWidth: {

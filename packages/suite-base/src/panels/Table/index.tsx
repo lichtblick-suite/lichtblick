@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -27,18 +27,19 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { customTypography } from "@lichtblick/theme";
 
 import Table from "./Table";
 
 type Config = { topicPath: string };
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
   toolbar: {
     paddingBlock: 0,
   },
   monospace: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
   },
 }));
 
@@ -60,7 +61,7 @@ function TablePanel({ config, saveConfig }: Props) {
   const msgs = useMessagesByTopic({ topics: [topicName], historySize: 1 })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
   const msg = msgs?.[0];
-  const cachedMessages = msg ? cachedGetMessagePathDataItems(topicPath, msg) ?? [] : [];
+  const cachedMessages = msg ? (cachedGetMessagePathDataItems(topicPath, msg) ?? []) : [];
   const firstCachedMessage = cachedMessages[0];
 
   const { setMessagePathDropConfig } = usePanelContext();

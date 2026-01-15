@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -19,12 +19,13 @@ import { makeStyles } from "tss-react/mui";
 
 import useLogStyles from "@lichtblick/suite-base/panels/Log/useLogStyles";
 import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
+import { customTypography } from "@lichtblick/theme";
 
 import LevelToString from "./LevelToString";
 import Stamp from "./Stamp";
 import { NormalizedLogMessage } from "./types";
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
   root: {
     // Subsequent lines are indented bu using left padding, so we undo the padding for the first line
     // with textIndent
@@ -34,7 +35,7 @@ const useStyles = makeStyles()((theme) => ({
     paddingTop: 1,
     paddingBottom: 1,
     lineHeight: 1,
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
     wordBreak: "break-word",
   },
 }));

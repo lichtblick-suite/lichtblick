@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -220,27 +220,29 @@ export function CreateEventDialog(props: { onClose: () => void }): React.JSX.Ele
               }));
             }}
             type="number"
-            InputProps={{
-              endAdornment: (
-                <ToggleButtonGroup
-                  className={classes.toggleButtonGroup}
-                  size="small"
-                  exclusive
-                  value={event.durationUnit}
-                  onChange={(_ev, durationUnit) => {
-                    if (event.durationUnit !== durationUnit) {
-                      setEvent((old) => ({ ...old, durationUnit }));
-                    }
-                  }}
-                >
-                  <ToggleButton className={classes.toggleButton} tabIndex={-1} value="sec">
-                    sec
-                  </ToggleButton>
-                  <ToggleButton className={classes.toggleButton} tabIndex={-1} value="nsec">
-                    nsec
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              ),
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <ToggleButtonGroup
+                    className={classes.toggleButtonGroup}
+                    size="small"
+                    exclusive
+                    value={event.durationUnit}
+                    onChange={(_ev, durationUnit) => {
+                      if (event.durationUnit !== durationUnit) {
+                        setEvent((old) => ({ ...old, durationUnit }));
+                      }
+                    }}
+                  >
+                    <ToggleButton className={classes.toggleButton} tabIndex={-1} value="sec">
+                      sec
+                    </ToggleButton>
+                    <ToggleButton className={classes.toggleButton} tabIndex={-1} value="nsec">
+                      nsec
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                ),
+              },
             }}
           />
           <ButtonGroup style={{ visibility: "hidden" }}>

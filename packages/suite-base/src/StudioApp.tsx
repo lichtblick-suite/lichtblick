@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -101,14 +101,14 @@ export function StudioApp(): React.JSX.Element {
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 
   const url = new URL(window.location.href);
-  const namespace = url.searchParams.get("namespace");
+  const workspace = url.searchParams.get("workspace");
 
   const remoteLayoutStorage = useMemo(() => {
-    if (namespace && APP_CONFIG.apiUrl) {
-      return new LayoutsAPI(namespace);
+    if (workspace && APP_CONFIG.apiUrl) {
+      return new LayoutsAPI(workspace);
     }
     return undefined;
-  }, [namespace]);
+  }, [workspace]);
 
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);

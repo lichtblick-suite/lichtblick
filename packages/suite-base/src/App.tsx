@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -42,14 +42,14 @@ import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
-import { ExtensionLoader } from "./services/ExtensionLoader";
+import { IExtensionLoader } from "./services/extension/IExtensionLoader";
 
 export type AppProps = CustomWindowControlsProps & {
   appConfiguration: IAppConfiguration;
   appParameters: AppParametersInput;
   dataSources: IDataSourceFactory[];
   deepLinks: string[];
-  extensionLoaders: readonly ExtensionLoader[];
+  extensionLoaders: readonly IExtensionLoader[];
   layoutLoaders: readonly LayoutLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;

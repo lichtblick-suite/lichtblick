@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,10 +13,11 @@ import { DynamicBufferGeometry } from "@lichtblick/suite-base/panels/ThreeDeeRen
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { IRenderer } from "../../IRenderer";
-import { makeRgba, rgbToThreeColor, SRGBToLinear, stringToRgba } from "../../color";
+import { makeRgb, makeRgba, rgbToThreeColor, SRGBToLinearRGBLUT, stringToRgba } from "../../color";
 import { LayerSettingsEntity } from "../../settings";
 
 const tempRgba = makeRgba();
+const tempRgb = makeRgb();
 const tempColor = new THREE.Color();
 const missingColor = { r: 0, g: 1.0, b: 0, a: 1.0 };
 
@@ -74,7 +75,9 @@ export class RenderableTriangles extends RenderablePrimitive {
       if (!singleColor && !geometry.attributes.color) {
         geometry.createAttribute("color", Uint8Array, 4, true);
       }
+
       const colors = geometry.attributes.color;
+      const verticesStride = vertices.itemSize;
 
       for (let i = 0; i < primitive.points.length; i++) {
         const point = primitive.points[i]!;
@@ -85,12 +88,17 @@ export class RenderableTriangles extends RenderablePrimitive {
           );
           continue;
         }
-        vertChanged =
-          vertChanged ||
-          vertices.getX(i) !== point.x ||
-          vertices.getY(i) !== point.y ||
-          vertices.getZ(i) !== point.z;
-        vertices.setXYZ(i, point.x, point.y, point.z);
+
+        const offset = i * verticesStride;
+        const thisVertChanged =
+          Math.fround(vertices.array[offset]!) !== Math.fround(point.x) ||
+          Math.fround(vertices.array[offset + 1]!) !== Math.fround(point.y) ||
+          Math.fround(vertices.array[offset + 2]!) !== Math.fround(point.z);
+
+        if (thisVertChanged) {
+          vertices.setXYZ(i, point.x, point.y, point.z);
+        }
+        vertChanged = vertChanged || thisVertChanged;
 
         if (!singleColor && colors && primitive.colors.length > 0) {
           const color = primitive.colors[i] ?? missingColor;
@@ -102,18 +110,24 @@ export class RenderableTriangles extends RenderablePrimitive {
               `Entity: ${this.userData.entity?.id}.triangles[${triMeshIdx}](1st index) - Colors array should be same size as points array, showing #00ff00 instead`,
             );
           }
-          const r = SRGBToLinear(color.r);
-          const g = SRGBToLinear(color.g);
-          const b = SRGBToLinear(color.b);
-          const a = color.a;
-          colorChanged =
-            colorChanged ||
-            colors.getX(i) !== r ||
-            colors.getY(i) !== g ||
-            colors.getZ(i) !== b ||
-            colors.getW(i) !== a;
-          colors.setXYZW(i, r, g, b, a);
-          if (!transparent && a < 1.0) {
+
+          const rgbLinear = SRGBToLinearRGBLUT(tempRgb, color.r, color.g, color.b);
+
+          const colorStride = colors.itemSize;
+          const colorOffset = i * colorStride;
+
+          const EPS = 2 / 255;
+          const diff =
+            Math.abs(colors.array[colorOffset]! / 255 - rgbLinear.r) > EPS ||
+            Math.abs(colors.array[colorOffset + 1]! / 255 - rgbLinear.g) > EPS ||
+            Math.abs(colors.array[colorOffset + 2]! / 255 - rgbLinear.b) > EPS ||
+            Math.abs(colors.array[colorOffset + 3]! / 255 - color.a) > EPS;
+
+          if (diff) {
+            colors.setXYZW(i, rgbLinear.r, rgbLinear.g, rgbLinear.b, color.a);
+            colorChanged = true;
+          }
+          if (!transparent && color.a < 1.0) {
             transparent = true;
           }
         }

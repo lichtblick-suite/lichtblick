@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -19,15 +19,16 @@ export const SidebarHeader = ({
 }): React.JSX.Element => (
   <CardHeader
     title={title}
-    titleTypographyProps={{
-      variant: "subtitle1",
-      fontWeight: "600",
+    slotProps={{
+      title: {
+        variant: "h6",
+      },
+      subheader: {
+        variant: "body2",
+        color: "text.secondary",
+      },
     }}
     subheader={subheader}
-    subheaderTypographyProps={{
-      variant: "body2",
-      color: "text.secondary",
-    }}
     action={
       <IconButton size="small" onClick={onClose} title="Collapse">
         <Dismiss20Filled />

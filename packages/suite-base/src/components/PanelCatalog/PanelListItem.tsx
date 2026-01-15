@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -142,7 +142,7 @@ export function PanelListItem(props: Props): React.JSX.Element {
       placement="right"
       enterDelay={500}
       leaveDelay={0}
-      TransitionComponent={Fade}
+      slots={{ transition: Fade }}
       title={
         <Stack paddingTop={0.25} style={{ width: 200 }}>
           {panel.thumbnail != undefined && <img src={panel.thumbnail} alt={panel.title} />}

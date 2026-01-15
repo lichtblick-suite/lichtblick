@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -29,6 +29,7 @@ import { isTypicalFilterName } from "@lichtblick/suite-base/components/MessagePa
 import {
   MessagePathsForStructure,
   MessagePathsForStructureArgs,
+  StructureTraversalResult,
 } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { assertNever } from "@lichtblick/suite-base/util/assertNever";
@@ -92,9 +93,20 @@ function structureItemIsIntegerPrimitive(item: MessagePathStructureItem) {
 //     }
 //   }
 // }
+
+const messagePathStructuresCache = new WeakMap<
+  Immutable<RosDatatypes>,
+  Record<string, MessagePathStructureItemMessage>
+>();
+
 export function messagePathStructures(
   datatypes: Immutable<RosDatatypes>,
 ): Record<string, MessagePathStructureItemMessage> {
+  const cached = messagePathStructuresCache.get(datatypes);
+  if (cached) {
+    return cached;
+  }
+
   const structureFor = _.memoize(
     (datatype: string, seenDatatypes: string[]): MessagePathStructureItemMessage => {
       const nextByName: Record<string, MessagePathStructureItem> = {};
@@ -154,6 +166,8 @@ export function messagePathStructures(
   for (const [datatype] of datatypes) {
     structures[datatype] = structureFor(datatype, []);
   }
+  messagePathStructuresCache.set(datatypes, structures);
+
   return structures;
 }
 
@@ -175,11 +189,23 @@ export function validTerminatingStructureItem(
  * Given a datatype, the array of datatypes, and a list of valid types, list out all valid strings
  * for a MessagePathStructure and its corresponding structure item.
  */
+const messagePathsCache = new Map<string, MessagePathsForStructure>();
+
 export function messagePathsForStructure(
   structure: MessagePathStructureItemMessage,
   messagePathsStructureArgs?: MessagePathsForStructureArgs,
 ): MessagePathsForStructure {
   const { validTypes, noMultiSlices, messagePath = [] } = messagePathsStructureArgs ?? {};
+
+  const filterRepr = messagePath
+    .filter((part): part is MessagePathFilter => part.type === "filter")
+    .map((f) => f.repr)
+    .join("|");
+  const cacheKey = `${structure.datatype}_${validTypes?.join(",") ?? ""}_${noMultiSlices ?? ""}_${filterRepr}`;
+  const cached = messagePathsCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
 
   let clonedMessagePath = [...messagePath];
   const messagePaths: MessagePathsForStructure = [];
@@ -239,14 +265,12 @@ export function messagePathsForStructure(
   }
 
   traverse(structure, "");
-  return messagePaths.sort(naturalSort("path"));
-}
+  const result = messagePaths.sort(naturalSort("path"));
 
-export type StructureTraversalResult = {
-  valid: boolean;
-  msgPathPart?: MessagePathPart;
-  structureItem?: MessagePathStructureItem;
-};
+  messagePathsCache.set(cacheKey, result);
+
+  return result;
+}
 
 // Traverse down the structure given a `messagePath`. Return if the path
 // is valid, given the structure, `validTypes`, and `noMultiSlices`.

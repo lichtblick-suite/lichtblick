@@ -1,23 +1,16 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TypographyOptions, TypographyStyle } from "@mui/material/styles/createTypography";
+import { TypographyVariantsOptions, TypographyStyle } from "@mui/material/styles";
 
-declare module "@mui/material/styles/createTypography" {
-  interface Typography {
-    fontMonospace: string;
-    fontSansSerif: string;
-    fontFeatureSettings: string;
-  }
-  interface TypographyOptions {
-    fontMonospace: string;
-    fontSansSerif: string;
-    fontFeatureSettings: string;
-  }
+interface CustomTypographyOptions {
+  fontMonospace: string;
+  fontSansSerif: string;
+  fontFeatureSettings: string;
 }
 
 // We explicitly avoid fallback fonts (such as 'monospace') here to work around a bug in
@@ -45,12 +38,15 @@ const subtitleFontStyles: TypographyStyle = {
   fontWeight: 500,
 };
 
-export const typography: TypographyOptions = {
-  fontMonospace,
+export const customTypography: CustomTypographyOptions = {
   fontSansSerif,
+  fontMonospace,
+  fontFeatureSettings,
+};
+
+export const typography: TypographyVariantsOptions = {
   fontFamily: fontSansSerif,
   fontSize: 12,
-  fontFeatureSettings,
   body1: { fontFeatureSettings },
   body2: { fontFeatureSettings },
   button: {

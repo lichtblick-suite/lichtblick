@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -17,6 +17,7 @@
 
 import { signal } from "@lichtblick/den/async";
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
+import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import MockUserScriptPlayerWorker from "@lichtblick/suite-base/players/UserScriptPlayer/MockUserScriptPlayerWorker";
 import {
   AdvertiseOptions,
@@ -25,14 +26,16 @@ import {
   PlayerStateActiveData,
   Topic,
 } from "@lichtblick/suite-base/players/types";
+import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import delay from "@lichtblick/suite-base/util/delay";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import UserScriptPlayer from ".";
-import { DIAGNOSTIC_SEVERITY, SOURCES, ERROR_CODES } from "./constants";
+import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";
 import exampleDatatypes from "./transformerWorker/fixtures/example-datatypes";
 
 const nodeId = "nodeId";
@@ -1800,6 +1803,44 @@ describe("UserScriptPlayer", () => {
             sizeInBytes: 0,
           },
         ]);
+      });
+
+      it("forwards global variables to wrapped player", async () => {
+        // Given
+        const fakePlayer = new FakePlayer();
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+        const setGlobalVariablesSpy = jest.spyOn(fakePlayer, "setGlobalVariables");
+        const globalVariables = GlobalVariableBuilder.globalVariables();
+
+        // When
+        userScriptPlayer.setGlobalVariables(globalVariables);
+
+        // Then
+        expect(setGlobalVariablesSpy).toHaveBeenCalledWith(globalVariables);
+      });
+
+      it("forwards global variable updates to topic aliasing player for extension callbacks", async () => {
+        // Given
+        const fakePlayer = new FakePlayer();
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+        const setGlobalVariablesSpy = jest.spyOn(fakePlayer, "setGlobalVariables");
+        const initialGlobalVariables: GlobalVariables = { testVar: BasicBuilder.string() };
+        userScriptPlayer.setGlobalVariables(initialGlobalVariables);
+
+        expect(setGlobalVariablesSpy).toHaveBeenCalledWith(initialGlobalVariables);
+
+        // Simulate global variables being updated again (like when user edits variables in UI)
+        const updatedGlobalVariables: GlobalVariables = {
+          testVar: BasicBuilder.string(),
+          ...GlobalVariableBuilder.globalVariables(),
+        };
+
+        // When
+        userScriptPlayer.setGlobalVariables(updatedGlobalVariables);
+
+        // Then
+        expect(setGlobalVariablesSpy).toHaveBeenCalledWith(updatedGlobalVariables);
+        expect(setGlobalVariablesSpy).toHaveBeenCalledTimes(2);
       });
     });
   });

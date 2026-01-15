@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import dotenv from "dotenv";
-import { ESBuildMinifyPlugin } from "esbuild-loader";
+import { EsbuildPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
@@ -44,7 +44,10 @@ export function makeConfig(
   _: unknown,
   argv: WebpackArgv,
   options: Options,
-): Pick<Configuration, "resolve" | "module" | "optimization" | "plugins" | "node"> {
+): Pick<
+  Configuration,
+  "resolve" | "module" | "optimization" | "plugins" | "node" | "ignoreWarnings"
+> {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
@@ -222,7 +225,7 @@ export function makeConfig(
       removeAvailableModules: true,
 
       minimizer: [
-        new ESBuildMinifyPlugin({
+        new EsbuildPlugin({
           target: "es2022",
           minify: true,
         }),
@@ -275,5 +278,11 @@ export function makeConfig(
       __dirname: true,
       __filename: true,
     },
+    ignoreWarnings: [
+      {
+        module: /node_modules\/typescript\/lib\/typescript\.js$/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ],
   };
 }

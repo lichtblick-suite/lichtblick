@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,69 +14,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  Autocomplete as MuiAutocomplete,
-  Popper,
-  PopperProps,
-  TextField,
-  TextFieldProps,
-} from "@mui/material";
+import { Autocomplete as MuiAutocomplete, Popper, PopperProps, TextField } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
 import * as React from "react";
+import { SyntheticEvent, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+
+import { useStyles } from "@lichtblick/suite-base/components/Autocomplete/Autocomplete.style";
 import {
-  CSSProperties,
-  SyntheticEvent,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { makeStyles } from "tss-react/mui";
+  EMPTY_SET,
+  FAST_FIND_ITEM_CUTOFF,
+  MAX_FZF_MATCHES,
+} from "@lichtblick/suite-base/components/Autocomplete/constants";
+import {
+  AutocompleteProps,
+  IAutocomplete,
+} from "@lichtblick/suite-base/components/Autocomplete/types";
 
 import { ListboxAdapterChild, ReactWindowListboxAdapter } from "./ReactWindowListboxAdapter";
-
-const MAX_FZF_MATCHES = 200;
-
-// Above this number of items we fall back to the faster fuzzy find algorithm.
-const FAST_FIND_ITEM_CUTOFF = 1_000;
-
-type AutocompleteProps = {
-  className?: string;
-  disableAutoSelect?: boolean;
-  disabled?: boolean;
-  filterText?: string;
-  hasError?: boolean;
-  inputStyle?: CSSProperties;
-  items: readonly string[];
-  menuStyle?: CSSProperties;
-  minWidth?: number;
-  onBlur?: () => void;
-  onChange?: (event: React.SyntheticEvent, text: string) => void;
-  onSelect: (value: string, autocomplete: IAutocomplete) => void;
-  placeholder?: string;
-  readOnly?: boolean;
-  selectOnFocus?: boolean;
-  sortWhenFiltering?: boolean;
-  value?: string;
-  variant?: TextFieldProps["variant"];
-};
-
-export interface IAutocomplete {
-  setSelectionRange(selectionStart: number, selectionEnd: number): void;
-  focus(): void;
-  blur(): void;
-}
-
-const useStyles = makeStyles()((theme) => ({
-  inputError: {
-    input: {
-      color: theme.palette.error.main,
-    },
-  },
-}));
-
-const EMPTY_SET = new Set<number>();
 
 function itemToFzfResult<T>(item: T): FzfResultItem<T> {
   return {
@@ -204,18 +158,20 @@ export const Autocomplete = React.forwardRef(function Autocomplete(
 
   return (
     <MuiAutocomplete
-      className={className}
-      componentsProps={{
-        paper: { elevation: 8 },
-      }}
+      className={cx(className, classes.root)}
       getOptionLabel={getOptionLabel}
       disableCloseOnSelect
       disabled={disabled}
       freeSolo
       fullWidth
-      PopperComponent={CustomPopper}
+      slotProps={{
+        paper: { elevation: 8 },
+        listbox: {
+          component: ReactWindowListboxAdapter,
+        },
+      }}
+      slots={{ popper: CustomPopper }}
       filterOptions={filterOptions}
-      ListboxComponent={ReactWindowListboxAdapter}
       onChange={onSelect}
       onInputChange={onChange}
       openOnFocus

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -27,9 +27,13 @@ import {
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
-import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import {
+  BUSY_POLLING_INTERVAL_MS,
+  BUSY_POLLING_TIMEOUT_MS,
+  MAX_SUPPORTED_LAYOUT_VERSION,
+} from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
   ...jest.requireActual("notistack"),
@@ -267,11 +271,13 @@ describe("CurrentLayoutProvider", () => {
           id: "layout1",
           name: "LAYOUT 1",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
         },
         {
           id: "layout2",
           name: "ABC Layout 2",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
         },
       ];
     });
@@ -292,7 +298,47 @@ describe("CurrentLayoutProvider", () => {
     expect(selectedLayout).toBe("layout2");
   });
 
-  it("should select a layout though app parameters", async () => {
+  it("selects the first org layout, if any, in alphabetic order, when there is no selected layout", async () => {
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "layout1",
+          name: "ABC Layout 1",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout2",
+          name: "DEF Layout 2",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+        {
+          id: "layout3",
+          name: "ABC Layout 3",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+      ];
+    });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBeDefined();
+    expect(selectedLayout).toBe("layout3");
+  });
+
+  it("select a layout through app parameters", async () => {
     const mockAppParameters = { defaultLayout: "LAYOUT 2" };
     mockLayoutManager.getLayouts.mockImplementation(async () => {
       return [
@@ -300,11 +346,19 @@ describe("CurrentLayoutProvider", () => {
           id: "layout1",
           name: "LAYOUT 1",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
         },
         {
           id: "layout2",
           name: "LAYOUT 2",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout3",
+          name: "ABC Layout 3",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
         },
       ];
     });
@@ -345,5 +399,80 @@ describe("CurrentLayoutProvider", () => {
       `The layout '${mockAppParameters.defaultLayout}' specified in the app parameters does not exist.`,
       { variant: "warning" },
     );
+  });
+
+  describe("Default layout logic", () => {
+    function mockBusyTimes(times: number) {
+      Array.from({ length: times }).forEach(() => {
+        mockLayoutManager.isBusy.mockReturnValueOnce(true);
+      });
+      mockLayoutManager.isBusy.mockReturnValue(false);
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      (console.warn as jest.Mock).mockRestore();
+    });
+
+    it("should resolve immediately if layoutManager is not busy", async () => {
+      // Given/When
+      mockLayoutManager.isBusy.mockReturnValue(false);
+
+      const { result } = renderTest({ mockLayoutManager, mockUserProfile });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      // Then
+      expect(mockLayoutManager.isBusy).toHaveBeenCalled();
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should poll until layoutManager is not busy", async () => {
+      // Given/When
+      const busyCount = 3;
+      mockBusyTimes(busyCount);
+
+      const { result } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(busyCount * BUSY_POLLING_INTERVAL_MS);
+        await result.current.childMounted;
+      });
+
+      // Then
+      expect(mockLayoutManager.isBusy).toHaveBeenCalledTimes(4);
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should timeout after 5 seconds, log warning and continue as normal", async () => {
+      mockLayoutManager.isBusy.mockReturnValue(true); // Always busy
+
+      const { result } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(BUSY_POLLING_TIMEOUT_MS + 100);
+        await result.current.childMounted;
+      });
+
+      expect(console.warn).toHaveBeenCalledWith(
+        `CurrentLayoutProvider: timeout after ${BUSY_POLLING_TIMEOUT_MS}ms, continuing anyway`,
+      );
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
   });
 });

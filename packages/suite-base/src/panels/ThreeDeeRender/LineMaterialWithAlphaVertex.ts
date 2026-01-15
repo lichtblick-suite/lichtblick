@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -523,12 +523,13 @@ export class LineMaterialWithAlphaVertex extends ShaderMaterial {
     this.uniforms.linewidth!.value = value;
   }
 
-  public get dashed() {
-    return Boolean("USE_DASH" in this.defines);
+  public get dashed(): boolean {
+    const isDashed = "USE_DASH" in this.defines;
+    return isDashed;
   }
 
   public set dashed(value) {
-    if (Boolean(value) !== Boolean("USE_DASH" in this.defines)) {
+    if (value !== "USE_DASH" in this.defines) {
       this.needsUpdate = true;
     }
 

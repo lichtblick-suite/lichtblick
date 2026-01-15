@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { act, renderHook } from "@testing-library/react";
@@ -15,7 +15,7 @@ import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useInstallingExtensionsState } from "@lichtblick/suite-base/hooks/useInstallingExtensionsState";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
   useExtensionCatalog: jest.fn(),
@@ -98,9 +98,7 @@ describe("useHandleFiles", () => {
       files = filesOverride ?? [fileBuilder("mcap", FILE_ACCEPT_TYPE)];
       files.forEach((file) => {
         file.arrayBuffer = async () =>
-          await Promise.resolve(
-            new Uint8Array(new TextEncoder().encode(BasicBuilder.string()).buffer),
-          );
+          await Promise.resolve(new TextEncoder().encode(BasicBuilder.string()).buffer);
       });
     }
 
@@ -140,6 +138,7 @@ describe("useHandleFiles", () => {
   });
 
   it("should call pause and parse .json layout file", async () => {
+    const namespace = "local";
     const mockLayout = fileBuilder("json", FILE_JSON_TYPE);
     const { handleFiles, files } = setup({
       filesOverride: [mockLayout],
@@ -150,7 +149,7 @@ describe("useHandleFiles", () => {
       await handleFiles(files);
     });
     expect(playerEvents.pause).toHaveBeenCalled();
-    expect(parseAndInstallLayoutMock).toHaveBeenCalledWith(mockLayout);
+    expect(parseAndInstallLayoutMock).toHaveBeenCalledWith(mockLayout, namespace);
   });
 
   it("does nothing when passed an empty file array", async () => {

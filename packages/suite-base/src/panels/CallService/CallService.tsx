@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,6 +14,7 @@ import { PanelExtensionContext, SettingsTreeAction } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { Config } from "@lichtblick/suite-base/panels/CallService/types";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { customTypography } from "@lichtblick/theme";
 
 import { defaultConfig, settingsActionReducer, useSettingsTree } from "./settings";
 
@@ -58,7 +59,7 @@ const useStyles = makeStyles<{ buttonColor?: string }>()((theme, { buttonColor }
         [`.${inputBaseClasses.input}`]: {
           height: "100% !important",
           lineHeight: 1.4,
-          fontFamily: theme.typography.fontMonospace,
+          fontFamily: customTypography.fontMonospace,
           overflow: "auto !important",
           resize: "none",
         },

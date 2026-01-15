@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -39,7 +39,7 @@ import {
 import { ScriptData } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
-import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/globalConstants";
+import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 
 // Exported for use in other tests.
 const baseNodeData: ScriptData = {
@@ -1233,7 +1233,7 @@ describe("pipeline", () => {
           export default publisher;`,
         error: 2322,
         errorMessage: expect.stringContaining(
-          `Type 'Uint32Array' is not assignable to type 'number[] | Float32Array | Float64Array'`,
+          `Type 'Uint32Array<ArrayBuffer>' is not assignable to type 'number[] | Float32Array<ArrayBufferLike> | Float64Array<ArrayBufferLike>'`,
         ),
       },
       {

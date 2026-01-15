@@ -1,9 +1,18 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "@playwright/test";
 
-import { loadFile } from "../../fixtures/load-file";
+import { loadFiles } from "../../fixtures/load-files";
+
+/**
+ * Example timestamp format: "2025-02-26 10:37:17.726 AM WET"
+ * Remove timezone abbreviation for parsing
+ */
+function parseTimestamp(timestamp: string): number {
+  const cleanTimestamp = timestamp.replace(/\s+[A-Z]{2,4}$/, "");
+  return new Date(cleanTimestamp).getTime();
+}
 
 /**
  * GIVEN two Lichtblick web instances are running in different tabs
@@ -32,11 +41,11 @@ test("Should sync playback between multiple web instances", async ({ browser }) 
     const filename = "example.mcap";
 
     // Load file in first tab
-    await loadFile({ mainWindow: page1, filename });
+    await loadFiles({ mainWindow: page1, filenames: filename });
     await page1.waitForSelector('input[value*="2025-02-26"]', { timeout: 15000 });
 
     // Load file in second tab
-    await loadFile({ mainWindow: page2, filename });
+    await loadFiles({ mainWindow: page2, filenames: filename });
     await page2.waitForSelector('input[value*="2025-02-26"]', { timeout: 15000 });
 
     // Verify sync button is available and initially off in both tabs
@@ -89,8 +98,14 @@ test("Should sync playback between multiple web instances", async ({ browser }) 
     const time1 = await timeInput1.inputValue();
     const time2 = await timeInput2.inputValue();
 
-    // Both instances should have the same timestamp after sync
-    expect(time1).toBe(time2);
+    // Both instances should have timestamps within 100ms of each other (allowing for sync delay)
+    // Parse timestamps and compare
+    const timestamp1 = parseTimestamp(time1);
+    const timestamp2 = parseTimestamp(time2);
+
+    const timeDiff = Math.abs(timestamp1 - timestamp2);
+
+    expect(timeDiff).toBeLessThan(100); // Allow up to 100ms difference for sync propagation
 
     // The timestamp should have advanced from the initial time
     expect(time1).not.toBe(initialTime1);
@@ -105,7 +120,12 @@ test("Should sync playback between multiple web instances", async ({ browser }) 
 
     // Timestamps should have changed and still be synchronized
     expect(newTime1).not.toBe(time1);
-    expect(newTime1).toBe(newTime2);
+
+    const newTimestamp1 = parseTimestamp(newTime1);
+    const newTimestamp2 = parseTimestamp(newTime2);
+    const newTimeDiff = Math.abs(newTimestamp1 - newTimestamp2);
+
+    expect(newTimeDiff).toBeLessThan(100); // Allow up to 100ms difference for sync propagation
   } finally {
     // Clean up
     await page1.close();

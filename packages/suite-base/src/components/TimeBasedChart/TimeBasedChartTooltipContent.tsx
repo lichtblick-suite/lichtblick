@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -21,6 +21,7 @@ import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { customTypography } from "@lichtblick/theme";
 
 export type TimeBasedChartTooltipData = {
   configIndex: number;
@@ -38,7 +39,7 @@ type Props = Immutable<{
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
@@ -48,7 +49,7 @@ const useStyles = makeStyles()((theme) => ({
     display: "grid",
     gridTemplateColumns: "auto minmax(0px, max-content) minmax(auto, max-content)",
     alignItems: "center",
-    fontFamily: theme.typography.fontMonospace,
+    fontFamily: customTypography.fontMonospace,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",

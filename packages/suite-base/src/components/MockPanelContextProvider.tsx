@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -16,7 +16,8 @@
 
 import { ReactNode } from "react";
 
-import PanelContext, { PanelContextType } from "@lichtblick/suite-base/components/PanelContext";
+import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import { PanelContextType } from "@lichtblick/suite-base/components/types";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 
 type MockProps = Partial<PanelContextType<PanelConfig>>;

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,6 +8,8 @@
 import { DeepPartial } from "ts-essentials";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
+import { useCrash } from "@lichtblick/hooks";
+import { ForwardedAnalytics } from "@lichtblick/suite-base/components/ForwardAnalyticsContextProvider";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { FollowMode, TestOptions } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import { SceneExtensionConfig } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
@@ -33,4 +35,20 @@ export type ThreeDeeRenderProps = {
     message: string,
     variant?: "default" | "error" | "success" | "warning" | "info",
   ) => void;
+  /** Allow for logging errors to panel logs */
+  logError?: (message: string, error?: Error) => void;
+};
+
+export type InitPanelArgs = {
+  crash: ReturnType<typeof useCrash>;
+  forwardedAnalytics: ForwardedAnalytics;
+  interfaceMode: InterfaceMode;
+  testOptions: TestOptions;
+  customSceneExtensions?: DeepPartial<SceneExtensionConfig>;
+  customCameraModels: CameraModelsMap;
+  enqueueSnackbarFromParent?: (
+    message: string,
+    variant?: "default" | "error" | "success" | "warning" | "info",
+  ) => void;
+  logError?: (message: string, error?: Error) => void;
 };

@@ -21,9 +21,9 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.0",
+    "@lichtblick/tsconfig": "1.0.2",
     "@types/protobufjs": "workspace:*",
-    "typescript": "5.3.3"
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "@foxglove/schemas": "1.8.0",
@@ -39,7 +39,7 @@
     "@lichtblick/wasm-zstd": "1.0.0",
     "@mcap/core": "2.1.6",
     "@protobufjs/base64": "1.1.2",
-    "flatbuffers": "24.3.25",
+    "flatbuffers": "25.9.23",
     "flatbuffers_reflection": "0.0.7",
     "protobufjs": "patch:protobufjs@7.2.5#../../patches/protobufjs.patch"
   }

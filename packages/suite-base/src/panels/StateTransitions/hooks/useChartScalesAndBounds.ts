@@ -1,10 +1,9 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { ScaleOptions } from "chart.js";
-import { useEffect, useMemo } from "react";
+import { RefCallback, useEffect, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { OnRefChangeType } from "react-resize-detector/build/types/types";
 
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
@@ -14,7 +13,7 @@ type UseChartScalesAndBounds = {
   xScale: ScaleOptions<"linear">;
   databounds: Bounds | undefined;
   width: number | undefined;
-  sizeRef: OnRefChangeType<HTMLDivElement>;
+  sizeRef: RefCallback<HTMLDivElement>;
 };
 
 const useChartScalesAndBounds = (

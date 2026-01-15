@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -247,8 +247,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
           title={tooltipContent ?? <></>}
           disableInteractive
           followCursor
-          TransitionComponent={Fade}
-          TransitionProps={{ timeout: 0 }}
+          slots={{ transition: Fade }}
+          slotProps={{ transition: { timeout: 0 } }}
         >
           <div className={classes.verticalBarWrapper} data-testid="vertical-bar-wrapper">
             <div

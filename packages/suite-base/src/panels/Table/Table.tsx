@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -235,7 +235,7 @@ export default function Table({
       return [];
     }
 
-    const maybeMessage = Array.isArray(value) ? value[0] ?? {} : value;
+    const maybeMessage = Array.isArray(value) ? (value[0] ?? {}) : value;
 
     // Strong assumption about structure of data.
     return getColumnsFromObject(maybeMessage as CellValue, accessorPath);
@@ -387,6 +387,7 @@ export default function Table({
               value={pageSize}
               size="small"
               onChange={(e) => {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
                 table.setPageSize(Number(e.target.value));
               }}
               MenuProps={{ MenuListProps: { dense: true } }}

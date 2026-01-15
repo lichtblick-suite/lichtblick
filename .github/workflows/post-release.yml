@@ -2,8 +2,13 @@ name: Post Release
 
 # run after releases are published
 on:
+  workflow_dispatch:
   release:
     types: [released]
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   npm:
@@ -12,13 +17,13 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      - uses: actions/setup-node@v4.0.3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 16.17
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - run: corepack enable yarn
@@ -26,8 +31,6 @@ jobs:
       - run: yarn install --immutable
 
       - run: npm publish ./packages/suite
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
   docker:
     name: Publish to GHCR
@@ -39,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.release.tag_name }}
 

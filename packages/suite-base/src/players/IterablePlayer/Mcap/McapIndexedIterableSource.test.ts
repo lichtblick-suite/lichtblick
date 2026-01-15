@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -42,7 +42,7 @@ describe("McapIndexedIterableSource", () => {
     });
     await writer.end();
 
-    const readable = new BlobReadable(new Blob([tempBuffer.get()]));
+    const readable = new BlobReadable(new Blob([tempBuffer.get()]) as unknown as globalThis.Blob);
     const decompressHandlers = await loadDecompressHandlers();
     const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
 
@@ -84,7 +84,7 @@ describe("McapIndexedIterableSource", () => {
     });
     await writer.end();
 
-    const readable = new BlobReadable(new Blob([tempBuffer.get()]));
+    const readable = new BlobReadable(new Blob([tempBuffer.get()]) as unknown as globalThis.Blob);
     const decompressHandlers = await loadDecompressHandlers();
     const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
 

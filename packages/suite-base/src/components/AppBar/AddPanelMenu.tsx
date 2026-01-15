@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -41,11 +41,16 @@ export function AddPanelMenu(props: AddPanelProps): React.JSX.Element {
       disablePortal={disablePortal}
       open={open}
       onClose={handleClose}
-      MenuListProps={{
-        dense: true,
-        disablePadding: true,
-        "aria-labelledby": "add-panel-button",
-        className: classes.menuList,
+      slotProps={{
+        list: {
+          dense: true,
+          disablePadding: true,
+          "aria-labelledby": "add-panel-button",
+          className: classes.menuList,
+        },
+        paper: {
+          "data-tourid": "add-panel-menu",
+        } as Partial<PaperProps & { "data-tourid"?: string }>,
       }}
       anchorOrigin={{
         horizontal: "left",
@@ -54,11 +59,6 @@ export function AddPanelMenu(props: AddPanelProps): React.JSX.Element {
       transformOrigin={{
         vertical: "top",
         horizontal: "left",
-      }}
-      slotProps={{
-        paper: {
-          "data-tourid": "add-panel-menu",
-        } as Partial<PaperProps & { "data-tourid"?: string }>,
       }}
     >
       <PanelCatalog

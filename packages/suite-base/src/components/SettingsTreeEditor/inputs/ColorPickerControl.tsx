@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,6 +14,7 @@ import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
   picker: {
@@ -73,7 +74,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): React.JSX.Elem
     onInputBlur,
   } = props;
 
-  const { classes, theme } = useStyles();
+  const { classes } = useStyles();
 
   return (
     <Stack padding={1.5} gap={1}>
@@ -93,13 +94,15 @@ export function ColorPickerControl(props: ColorPickerInputProps): React.JSX.Elem
       <TextField
         size="small"
         error={editedValueIsInvalid}
-        InputProps={{
-          onFocus: (event) => {
-            event.target.select();
+        slotProps={{
+          input: {
+            onFocus: (event) => {
+              event.target.select();
+            },
+            role: "input",
+            startAdornment: <TagIcon fontSize="small" />,
+            style: { fontFamily: customTypography.fontMonospace },
           },
-          role: "input",
-          startAdornment: <TagIcon fontSize="small" />,
-          style: { fontFamily: theme.typography.fontMonospace },
         }}
         placeholder={alphaType === "alpha" ? "RRGGBBAA" : "RRGGBB"}
         value={editedValue}

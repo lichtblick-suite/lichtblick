@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -194,20 +194,14 @@ function addNodeAtPath(root: SettingsTreeNode, path: Path, node: SettingsTreeNod
   let curNode = root;
   for (let i = 0; i < path.length - 1; i++) {
     const segment = path[i]!;
-    if (!curNode.children) {
-      curNode.children = {};
-    }
-    if (!curNode.children[segment]) {
-      curNode.children[segment] = {};
-    }
+    curNode.children ??= {};
+    curNode.children[segment] ??= {};
     curNode = curNode.children[segment]!;
   }
 
   // Assign the node to the last segment of the path
   const lastSegment = path[path.length - 1]!;
-  if (!curNode.children) {
-    curNode.children = {};
-  }
+  curNode.children ??= {};
   curNode.children[lastSegment] = node;
 }
 
@@ -219,12 +213,8 @@ function setLabelAtPath(root: SettingsTreeNode, path: Path, label: string): void
   // Recursively walk/build the settings tree down to the end of the path
   let curNode = root;
   for (const segment of path) {
-    if (!curNode.children) {
-      curNode.children = {};
-    }
-    if (!curNode.children[segment]) {
-      curNode.children[segment] = {};
-    }
+    curNode.children ??= {};
+    curNode.children[segment] ??= {};
     curNode = curNode.children[segment]!;
   }
 

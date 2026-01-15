@@ -1,146 +1,91 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
 import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import ReactHoverObserver from "react-hover-observer";
+import { useCallback, useMemo } from "react";
 import Tree from "react-json-tree";
-import { makeStyles } from "tss-react/mui";
 
-import { parseMessagePath, MessagePathStructureItem, MessagePath } from "@lichtblick/message-path";
-import { Immutable, SettingsTreeAction } from "@lichtblick/suite";
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import useGetItemStringWithTimezone from "@lichtblick/suite-base/components/JsonTree/useGetItemStringWithTimezone";
-import {
-  messagePathStructures,
-  traverseStructure,
-} from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
-import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { Toolbar } from "@lichtblick/suite-base/panels/RawMessages/Toolbar";
+import { DiffSpan } from "@lichtblick/suite-base/panels/RawMessagesCommon/DiffSpan";
+import DiffStats from "@lichtblick/suite-base/panels/RawMessagesCommon/DiffStats";
+import MaybeCollapsedValue from "@lichtblick/suite-base/panels/RawMessagesCommon/MaybeCollapsedValue";
+import Metadata from "@lichtblick/suite-base/panels/RawMessagesCommon/Metadata";
+import { Toolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/Toolbar";
+import {
+  CUSTOM_METHOD,
+  PATH_NAME_AGGREGATOR,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
 import getDiff, {
-  DiffObject,
-  diffLabels,
   diffLabelsByLabelText,
-} from "@lichtblick/suite-base/panels/RawMessages/getDiff";
-import { Topic } from "@lichtblick/suite-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { enumValuesByDatatypeAndField } from "@lichtblick/suite-base/util/enums";
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/getDiff";
+import { useStylesRawMessages } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
+import {
+  diffLabels,
+  DiffObject,
+  NodeState,
+  PropsRawMessages,
+  RawMessagesPanelConfig,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
+import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
+import {
+  useRenderDiffLabel,
+  useValueRenderer,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/useRenderers";
+import { useSharedRawMessagesLogic } from "@lichtblick/suite-base/panels/RawMessagesCommon/useSharedRawMessagesLogic";
+import {
+  dataWithoutWrappingArray,
+  getSingleValue,
+  isSingleElemArray,
+} from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 
-import { DiffSpan } from "./DiffSpan";
-import DiffStats from "./DiffStats";
-import MaybeCollapsedValue from "./MaybeCollapsedValue";
-import Metadata from "./Metadata";
-import Value from "./Value";
-import {
-  PREV_MSG_METHOD,
-  CUSTOM_METHOD,
-  FONT_SIZE_OPTIONS,
-  PATH_NAME_AGGREGATOR,
-} from "./constants";
-import {
-  ValueAction,
-  getStructureItemForPath,
-  getValueActionForValue,
-} from "./getValueActionForValue";
-import { NodeState, RawMessagesPanelConfig } from "./types";
-import {
-  DATA_ARRAY_PREVIEW_LIMIT,
-  generateDeepKeyPaths,
-  getConstantNameByKeyPath,
-  toggleExpansion,
-} from "./utils";
-
-type Props = {
-  config: Immutable<RawMessagesPanelConfig>;
-  saveConfig: SaveConfig<RawMessagesPanelConfig>;
-};
-
-const isSingleElemArray = (obj: unknown): obj is unknown[] => {
-  if (!Array.isArray(obj)) {
-    return false;
-  }
-  return obj.filter((a) => a != undefined).length === 1;
-};
-
-const dataWithoutWrappingArray = (data: unknown) => {
-  return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
-};
-
-export const getSingleValue = (data: unknown, queriedData: MessagePathDataItem[]): unknown => {
-  if (!isSingleElemArray(data)) {
-    return data;
-  }
-
-  if (queriedData[0]?.constantName == undefined) {
-    return data[0];
-  }
-
-  return `${data[0]} (${queriedData[0]?.constantName})`;
-};
-
-const useStyles = makeStyles()((theme) => ({
-  topic: {
-    fontFamily: theme.typography.body1.fontFamily,
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, "zero"`,
-  },
-  hoverObserver: {
-    display: "inline-flex",
-    alignItems: "center",
-  },
-}));
-
-function RawMessages(props: Props) {
+function RawMessages(props: PropsRawMessages) {
   const {
     palette: { mode: themePreference },
   } = useTheme();
-  const { classes } = useStyles();
+  const { classes } = useStylesRawMessages();
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
     config;
-  const { topics, datatypes } = useDataSourceInfo();
-  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-  const { setMessagePathDropConfig } = usePanelContext();
+  const { datatypes } = useDataSourceInfo();
 
-  useEffect(() => {
-    setMessagePathDropConfig({
-      getDropStatus(paths) {
-        if (paths.length !== 1) {
-          return { canDrop: false };
-        }
-        return { canDrop: true, effect: "replace" };
-      },
-      handleDrop(paths) {
-        const path = paths[0];
-        if (path) {
-          saveConfig({ topicPath: path.path });
-          setExpansion("none");
-        }
-      },
-    });
-  }, [setMessagePathDropConfig, saveConfig]);
+  const {
+    topic,
+    rootStructureItem,
+    baseItem,
+    diffItem,
+    expansion,
+    canExpandAll,
+    onTopicPathChange,
+    onDiffTopicPathChange,
+    onToggleDiff,
+    onToggleExpandAll,
+    onLabelClick,
+  } = useSharedRawMessagesLogic({
+    config,
+    saveConfig,
+  });
+
+  // Use shared rendering hooks
+  const valueRenderer = useValueRenderer({
+    datatypes,
+    hoverObserverClassName: classes.hoverObserver,
+    onTopicPathChange,
+    openSiblingPanel,
+  });
+
+  const renderDiffLabel = useRenderDiffLabel({
+    onTopicPathChange,
+    openSiblingPanel,
+  });
 
   const defaultGetItemString = useGetItemStringWithTimezone();
   const getItemString = useMemo(
@@ -151,233 +96,6 @@ function RawMessages(props: Props) {
           )
         : defaultGetItemString,
     [defaultGetItemString, diffEnabled],
-  );
-
-  const topicRosPath: MessagePath | undefined = useMemo(
-    () => parseMessagePath(topicPath),
-    [topicPath],
-  );
-  const topic: Topic | undefined = useMemo(
-    () => topicRosPath && topics.find(({ name }) => name === topicRosPath.topicName),
-    [topicRosPath, topics],
-  );
-
-  const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
-
-  const rootStructureItem: MessagePathStructureItem | undefined = useMemo(() => {
-    if (!topic || !topicRosPath || topic.schemaName == undefined) {
-      return;
-    }
-    return traverseStructure(structures[topic.schemaName], topicRosPath.messagePath).structureItem;
-  }, [structures, topic, topicRosPath]);
-
-  const [expansion, setExpansion] = useState(config.expansion);
-
-  // Pass an empty path to useMessageDataItem if our path doesn't resolve to a valid topic to avoid
-  // spamming the message pipeline with useless subscription requests.
-  const matchedMessages = useMessageDataItem(topic ? topicPath : "", { historySize: 2 });
-  const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "");
-
-  const diffTopicObj = diffMessages[0];
-  const currTickObj = matchedMessages[matchedMessages.length - 1];
-  const prevTickObj = matchedMessages[matchedMessages.length - 2];
-
-  const inTimetickDiffMode = diffEnabled && diffMethod === PREV_MSG_METHOD;
-  const baseItem = inTimetickDiffMode ? prevTickObj : currTickObj;
-  const diffItem = inTimetickDiffMode ? currTickObj : diffTopicObj;
-
-  const nodes = useMemo(() => {
-    if (baseItem) {
-      const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
-      return generateDeepKeyPaths(data);
-    } else {
-      return new Set<string>();
-    }
-  }, [baseItem]);
-
-  const canExpandAll = useMemo(() => {
-    if (expansion === "none") {
-      return true;
-    }
-    if (expansion === "all") {
-      return false;
-    }
-    if (
-      typeof expansion === "object" &&
-      Object.values(expansion).some((v) => v === NodeState.Collapsed)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }, [expansion]);
-
-  const onTopicPathChange = useCallback(
-    (newTopicPath: string) => {
-      setExpansion("none");
-      saveConfig({ topicPath: newTopicPath });
-    },
-    [saveConfig],
-  );
-
-  const onDiffTopicPathChange = useCallback(
-    (newDiffTopicPath: string) => {
-      saveConfig({ diffTopicPath: newDiffTopicPath });
-    },
-    [saveConfig],
-  );
-
-  const onToggleDiff = useCallback(() => {
-    saveConfig({ diffEnabled: !diffEnabled });
-  }, [diffEnabled, saveConfig]);
-
-  const onToggleExpandAll = useCallback(() => {
-    setExpansion(canExpandAll ? "all" : "none");
-  }, [canExpandAll]);
-
-  const onLabelClick = useCallback(
-    (keypath: (string | number)[]) => {
-      setExpansion((old) =>
-        toggleExpansion(old ?? "none", nodes, keypath.join(PATH_NAME_AGGREGATOR)),
-      );
-    },
-    [nodes],
-  );
-
-  useEffect(() => {
-    saveConfig({ expansion });
-  }, [expansion, saveConfig]);
-
-  const getValueLabels = useCallback(
-    ({
-      constantName,
-      label,
-      itemValue,
-      keyPath,
-    }: {
-      constantName: string | undefined;
-      label: string;
-      itemValue: unknown;
-      keyPath: ReadonlyArray<number | string>;
-    }): { arrLabel: string; itemLabel: string } => {
-      let itemLabel = label;
-      if (typeof itemValue === "bigint") {
-        itemLabel = itemValue.toString();
-      }
-      // output preview for the first x items if the data is in binary format
-      // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
-      let arrLabel = "";
-      if (ArrayBuffer.isView(itemValue)) {
-        const array = itemValue as Uint8Array;
-        const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
-        const length = array.length;
-        arrLabel = `(${length}) [${itemPart}${length >= DATA_ARRAY_PREVIEW_LIMIT ? ", …" : ""}] `;
-        itemLabel = itemValue.constructor.name;
-      }
-      if (constantName != undefined) {
-        itemLabel = `${itemLabel} (${constantName})`;
-      }
-
-      // When we encounter a nsec field (nanosecond) that is a number, we ensure the label displays 9 digits.
-      // This helps when visually scanning time values from `sec` and `nsec` fields.
-      // A nanosecond label of 099999999 makes it easier to realize this is 0.09 seconds compared to
-      // 99999999 which requires some counting to reamize this is also 0.09
-      if (keyPath[0] === "nsec" && typeof itemValue === "number") {
-        itemLabel = _.padStart(itemLabel, 9, "0");
-      }
-
-      return { arrLabel, itemLabel };
-    },
-    [],
-  );
-
-  const renderDiffLabel = useCallback(
-    (label: string, itemValue: unknown) => {
-      let constantName: string | undefined;
-      const { arrLabel, itemLabel } = getValueLabels({
-        constantName,
-        label,
-        itemValue,
-        keyPath: [],
-      });
-      return (
-        <Value
-          arrLabel={arrLabel}
-          basePath=""
-          itemLabel={itemLabel}
-          itemValue={itemValue}
-          valueAction={undefined}
-          onTopicPathChange={onTopicPathChange}
-          openSiblingPanel={openSiblingPanel}
-        />
-      );
-    },
-    [getValueLabels, onTopicPathChange, openSiblingPanel],
-  );
-
-  const enumMapping = useMemo(() => enumValuesByDatatypeAndField(datatypes), [datatypes]);
-
-  const valueRenderer = useCallback(
-    (
-      structureItem: MessagePathStructureItem | undefined,
-      data: unknown[],
-      queriedData: MessagePathDataItem[],
-      label: string,
-      itemValue: unknown,
-      ...keyPath: (number | string)[]
-    ) => (
-      <ReactHoverObserver className={classes.hoverObserver}>
-        {({ isHovering }: { isHovering: boolean }) => {
-          const lastKeyPath = _.last(keyPath) as number;
-          let valueAction: ValueAction | undefined;
-          if (isHovering) {
-            valueAction = getValueActionForValue(
-              data[lastKeyPath],
-              structureItem,
-              keyPath.slice(0, -1).reverse(),
-            );
-          }
-
-          let constantName: string | undefined = getConstantNameByKeyPath(keyPath, queriedData);
-          if (structureItem) {
-            const childStructureItem = getStructureItemForPath(
-              structureItem,
-              keyPath.slice(0, -1).reverse(),
-            );
-            if (childStructureItem) {
-              // if it's an array index (typeof number) then we want the nearest named array which will be typeof string
-
-              const keyPathIndex = keyPath.findIndex((key) => typeof key === "string");
-              const field = keyPath[keyPathIndex];
-              if (typeof field === "string") {
-                const datatype = childStructureItem.datatype;
-                constantName = enumMapping[datatype]?.[field]?.[String(itemValue)];
-              }
-            }
-          }
-          const basePath = queriedData[lastKeyPath]?.path ?? "";
-          const { arrLabel, itemLabel } = getValueLabels({
-            constantName,
-            label,
-            itemValue,
-            keyPath,
-          });
-
-          return (
-            <Value
-              arrLabel={arrLabel}
-              basePath={basePath}
-              itemLabel={itemLabel}
-              itemValue={itemValue}
-              valueAction={valueAction}
-              onTopicPathChange={onTopicPathChange}
-              openSiblingPanel={openSiblingPanel}
-            />
-          );
-        }}
-      </ReactHoverObserver>
-    ),
-    [classes.hoverObserver, enumMapping, getValueLabels, onTopicPathChange, openSiblingPanel],
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
@@ -663,46 +381,8 @@ function RawMessages(props: Props) {
     valueRenderer,
   ]);
 
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action === "update") {
-        if (action.payload.path[0] === "general") {
-          if (action.payload.path[1] === "fontSize") {
-            saveConfig({
-              fontSize:
-                action.payload.value != undefined ? (action.payload.value as number) : undefined,
-            });
-          }
-        }
-      }
-    },
-    [saveConfig],
-  );
-
-  useEffect(() => {
-    updatePanelSettingsTree({
-      actionHandler,
-      nodes: {
-        general: {
-          label: "General",
-          fields: {
-            fontSize: {
-              label: "Font size",
-              input: "select",
-              options: [
-                { label: "auto", value: undefined },
-                ...FONT_SIZE_OPTIONS.map((value) => ({
-                  label: `${value} px`,
-                  value,
-                })),
-              ],
-              value: fontSize,
-            },
-          },
-        },
-      },
-    });
-  }, [actionHandler, fontSize, updatePanelSettingsTree]);
+  // Setup font size settings in panel settings tree
+  useFontSizeSettings(fontSize, saveConfig);
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">

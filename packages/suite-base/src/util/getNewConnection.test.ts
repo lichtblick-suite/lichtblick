@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,6 +15,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { getNewConnection } from "./getNewConnection";
+
+const READ_AHEAD_BUFFER_SIZE = 50 * 1024 * 1024; // 50 MB - must match the constant in getNewConnection.ts
 
 describe("getNewConnection", () => {
   describe("when using a limited cache", () => {
@@ -79,10 +81,12 @@ describe("getNewConnection", () => {
             currentRemainingRange: { start: 40, end: 50 },
             readRequestRange: { start: 46, end: 55 },
           });
+          // With READ_AHEAD_BUFFER_SIZE (50 MB) and small fileSize (100),
+          // read-ahead reaches end of file: min(46 + 50MB, 100) = 100
           expect(newConnection).toEqual({
             start: 46,
-            end: 56,
-            /* 46 + maxRequestSize */
+            end: 100,
+            /* min(readRequestRange.start + READ_AHEAD_BUFFER_SIZE, fileSize) */
           });
         });
 
@@ -102,10 +106,12 @@ describe("getNewConnection", () => {
             ...defaults,
             readRequestRange: { start: 40, end: 45 },
           });
+          // With READ_AHEAD_BUFFER_SIZE (50 MB) and small fileSize (100),
+          // read-ahead reaches end of file: min(40 + 50MB, 100) = 100
           expect(newConnection).toEqual({
             start: 40,
-            end: 50,
-            /* read-ahead */
+            end: 100,
+            /* min(readRequestRange.start + READ_AHEAD_BUFFER_SIZE, fileSize) */
           });
         });
 
@@ -115,7 +121,9 @@ describe("getNewConnection", () => {
             readRequestRange: { start: 45, end: 55 },
             downloadedRanges: [{ start: 40, end: 50 }],
           });
-          expect(newConnection).toEqual({ start: 50, end: 55 });
+          // With READ_AHEAD_BUFFER_SIZE (50 MB) and small fileSize (100),
+          // read-ahead reaches end of file: min(45 + 50MB, 100) = 100
+          expect(newConnection).toEqual({ start: 50, end: 100 });
         });
 
         it("reads ahead a bit as long as it does not evict existing downloaded ranges that we requested", () => {
@@ -124,10 +132,12 @@ describe("getNewConnection", () => {
             readRequestRange: { start: 48, end: 55 },
             downloadedRanges: [{ start: 40, end: 50 }],
           });
+          // With READ_AHEAD_BUFFER_SIZE (50 MB), read-ahead is limited by fileSize (100) in small test files.
+          // Math.min(48 + 50MB, 100) = 100, so it reads from 50 to end of file.
           expect(newConnection).toEqual({
             start: 50,
-            end: 58,
-            /* readRequestRange.start + maxRequestSize */
+            end: 100,
+            /* readRequestRange.start + READ_AHEAD_BUFFER_SIZE, capped by fileSize */
           });
         });
 
@@ -150,23 +160,31 @@ describe("getNewConnection", () => {
       describe("read-ahead", () => {
         it("starts a new connection based on the end position of the last resolved read request", () => {
           const newConnection = getNewConnection({ ...defaults, lastResolvedCallbackEnd: 15 });
-          expect(newConnection).toEqual({ start: 15, end: 25 });
+          // With READ_AHEAD_BUFFER_SIZE (50 MB) and small fileSize (100),
+          // read-ahead reaches end of file: min(15 + 50MB, 100) = 100
+          expect(newConnection).toEqual({ start: 15, end: 100 });
         });
 
         it("skips over already downloaded ranges", () => {
           const newConnection = getNewConnection({
             ...defaults,
-            lastResolvedCallbackEnd: 15,
+            lastResolvedCallbackEnd: 10,
             downloadedRanges: [{ start: 10, end: 20 }],
           });
-          expect(newConnection).toEqual({ start: 20, end: 25 });
+          // With READ_AHEAD_BUFFER_SIZE (50 MB) and small fileSize (100),
+          // read-ahead reaches end of file: min(10 + 50MB, 100) = 100
+          // Skips already downloaded 10-20, starts at 20
+          expect(newConnection).toEqual({ start: 20, end: 100 });
         });
 
         it("creates no new connection when the read-ahead range has been fully downloaded", () => {
+          // With READ_AHEAD_BUFFER_SIZE (50 MB) and small fileSize (100),
+          // read-ahead would be min(10 + 50MB, 100) = 100
+          // To test "fully downloaded", the downloaded range must cover to end of file
           const newConnection = getNewConnection({
             ...defaults,
-            lastResolvedCallbackEnd: 15,
-            downloadedRanges: [{ start: 10, end: 25 }],
+            lastResolvedCallbackEnd: 10,
+            downloadedRanges: [{ start: 10, end: 100 }], // Covers entire read-ahead range
           });
           expect(newConnection).toEqual(undefined);
         });
@@ -294,6 +312,111 @@ describe("getNewConnection", () => {
         });
         expect(newConnection).toEqual({ start: 30, end: 100 });
       });
+    });
+  });
+
+  // Tests specific to READ_AHEAD_BUFFER_SIZE behavior
+  describe("READ_AHEAD_BUFFER_SIZE constraints", () => {
+    it("limits read-ahead to READ_AHEAD_BUFFER_SIZE even with large maxRequestSize", () => {
+      const largeFileSize = 200 * 1024 * 1024; // 200 MB
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 1024 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100 * 1024 * 1024, // 100 MB cache
+        fileSize: largeFileSize,
+        continueDownloadingThreshold: 5,
+      });
+
+      // Should read ahead READ_AHEAD_BUFFER_SIZE (50 MB), not maxRequestSize (100 MB)
+      expect(newConnection).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+    });
+
+    it("respects fileSize cap when READ_AHEAD_BUFFER_SIZE exceeds remaining file", () => {
+      const smallFileSize = 30 * 1024 * 1024; // 30 MB
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 1024 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100 * 1024 * 1024,
+        fileSize: smallFileSize,
+        continueDownloadingThreshold: 5,
+      });
+
+      // Should cap at fileSize (30 MB), not READ_AHEAD_BUFFER_SIZE (50 MB)
+      expect(newConnection).toEqual({ start: 0, end: smallFileSize });
+    });
+
+    it("applies READ_AHEAD_BUFFER_SIZE when reading from lastResolvedCallbackEnd", () => {
+      const largeFileSize = 200 * 1024 * 1024; // 200 MB
+      const lastEnd = 10 * 1024 * 1024; // 10 MB
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: undefined,
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: lastEnd,
+        maxRequestSize: 100 * 1024 * 1024,
+        fileSize: largeFileSize,
+        continueDownloadingThreshold: 5,
+      });
+
+      // Should read ahead READ_AHEAD_BUFFER_SIZE from lastResolvedCallbackEnd
+      expect(newConnection).toEqual({
+        start: lastEnd,
+        end: lastEnd + READ_AHEAD_BUFFER_SIZE,
+      });
+    });
+
+    it("prevents read-ahead from exceeding file boundary", () => {
+      const fileSize = 100 * 1024 * 1024; // 100 MB
+      const lastEnd = 80 * 1024 * 1024; // 80 MB
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: undefined,
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: lastEnd,
+        maxRequestSize: 100 * 1024 * 1024,
+        fileSize,
+        continueDownloadingThreshold: 5,
+      });
+
+      // Should cap at fileSize: min(80 + 50, 100) = 100 MB
+      expect(newConnection).toEqual({
+        start: lastEnd,
+        end: fileSize,
+      });
+    });
+
+    it("uses READ_AHEAD_BUFFER_SIZE independent of maxRequestSize value", () => {
+      const largeFileSize = 200 * 1024 * 1024; // 200 MB
+
+      // Test with small maxRequestSize
+      const connection1 = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 1024 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 5 * 1024 * 1024, // 5 MB cache (smaller than read-ahead)
+        fileSize: largeFileSize,
+        continueDownloadingThreshold: 5,
+      });
+
+      // Test with large maxRequestSize
+      const connection2 = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 1024 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 150 * 1024 * 1024, // 150 MB cache (larger than read-ahead)
+        fileSize: largeFileSize,
+        continueDownloadingThreshold: 5,
+      });
+
+      // Both should use READ_AHEAD_BUFFER_SIZE, not maxRequestSize
+      expect(connection1).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+      expect(connection2).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
     });
   });
 });

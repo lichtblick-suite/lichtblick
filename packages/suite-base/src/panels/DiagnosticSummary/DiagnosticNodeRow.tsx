@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { IconButton, ListItem, ListItemButton, ListItemText } from "@mui/material";
@@ -43,8 +43,10 @@ function DiagnosticNodeRow(props: Readonly<NodeRowProps>) {
         <ListItemText
           primary={info.displayName}
           secondary={info.status.message}
-          secondaryTypographyProps={{
-            color: MESSAGE_COLORS[info.status.level],
+          slotProps={{
+            secondary: {
+              color: MESSAGE_COLORS[info.status.level],
+            },
           }}
           style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
         />

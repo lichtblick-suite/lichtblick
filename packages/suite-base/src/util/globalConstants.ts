@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -16,7 +16,31 @@
 import { useTheme } from "@mui/material";
 import type { Base16Theme } from "base16";
 
-export const DEFAULT_STUDIO_SCRIPT_PREFIX = "/studio_script/";
+import { JSON_TREE_THEME_COLORS } from "@lichtblick/suite-base/util/constants";
+
+/**
+ * Get color for value type based on theme mode
+ * @param value - The value to get color for
+ * @param mode - Theme mode (light or dark)
+ * @returns Color string or undefined for non-primitive types
+ */
+export function getValueColor(value: unknown, mode: "light" | "dark"): string | undefined {
+  const colors = JSON_TREE_THEME_COLORS[mode];
+
+  if (value == undefined) {
+    return colors.null;
+  }
+  if (typeof value === "string") {
+    return colors.string;
+  }
+  if (typeof value === "number" || typeof value === "bigint") {
+    return colors.number;
+  }
+  if (typeof value === "boolean") {
+    return colors.number;
+  }
+  return undefined;
+}
 
 export function useJsonTreeTheme(): Pick<
   Base16Theme,
@@ -26,26 +50,26 @@ export function useJsonTreeTheme(): Pick<
     palette: { mode, text },
   } = useTheme();
 
+  const colors = JSON_TREE_THEME_COLORS[mode];
+
   return {
     dark: {
       base00: "transparent", // bg
-      base0B: "#ffa657", // string & date, item string
-      base09: "#7ee787", // # & boolean
-      base07: "#79c0ff", // text
-      base08: "#ff7b72", // null, undefined, function, & symbol
-      base0D: "#79c0ff", // label & arrow
+      base0B: colors.string,
+      base09: colors.number,
+      base07: colors.text,
+      base08: colors.null,
+      base0D: colors.label,
       base03: text.secondary, // item string expanded
     },
     light: {
       base00: "transparent", // bg
-      base0B: "#953800", // string & date, item string
-      base09: "#116329", // # & boolean
-      base07: "#0550ae", // text
-      base08: "#cf222e", // null, undefined, function, & symbol
-      base0D: "#0550ae", // label & arrow
+      base0B: colors.string,
+      base09: colors.number,
+      base07: colors.text,
+      base08: colors.null,
+      base0D: colors.label,
       base03: text.secondary, // item string expanded
     },
   }[mode];
 }
-
-export const TAB_PANEL_TYPE = "Tab";

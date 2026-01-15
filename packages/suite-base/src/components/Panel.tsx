@@ -1,18 +1,9 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
 import {
   Delete20Regular,
@@ -43,17 +34,23 @@ import {
 } from "react-mosaic-component";
 import { Transition } from "react-transition-group";
 import { useMountedState } from "react-use";
-import { makeStyles } from "tss-react/mui";
 
 import { useShallowMemo } from "@lichtblick/hooks";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
 import KeyListener from "@lichtblick/suite-base/components/KeyListener";
 import { MosaicPathContext } from "@lichtblick/suite-base/components/MosaicPathContext";
+import { useStyles } from "@lichtblick/suite-base/components/Panel.style";
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import PanelErrorBoundary from "@lichtblick/suite-base/components/PanelErrorBoundary";
+import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelOverlay, PanelOverlayProps } from "@lichtblick/suite-base/components/PanelOverlay";
 import { PanelRoot } from "@lichtblick/suite-base/components/PanelRoot";
 import { getPanelTypeFromMosaic } from "@lichtblick/suite-base/components/PanelToolbar/utils";
+import {
+  loadPanelLogsHeight,
+  savePanelLogsHeight,
+} from "@lichtblick/suite-base/components/helpers";
+import { PanelLog, PanelStatics, GenericPanelProps } from "@lichtblick/suite-base/components/types";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -66,48 +63,9 @@ import {
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
-import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/globalConstants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
-const useStyles = makeStyles()((theme) => ({
-  perfInfo: {
-    position: "absolute",
-    bottom: 2,
-    left: 3,
-    whiteSpace: "pre-line",
-    fontSize: "0.75em",
-    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero'`,
-    opacity: 0.7,
-    userSelect: "none",
-    mixBlendMode: "difference",
-  },
-  tabCount: {
-    alignItems: "center",
-    justifyContent: "center",
-    position: "absolute",
-    display: "flex",
-    inset: 0,
-    textAlign: "center",
-    letterSpacing: "-0.125em",
-    // Totally random numbers here to get the text to fit inside the icon
-    paddingTop: 1,
-    paddingLeft: 5,
-    paddingRight: 11,
-    fontSize: `${theme.typography.subtitle2.fontSize} !important`,
-    fontWeight: 600,
-  },
-}));
-
-type Props<Config> = {
-  childId?: string;
-  overrideConfig?: Config;
-  tabId?: string;
-};
-
-export interface PanelStatics<Config> {
-  panelType: string;
-  defaultConfig: Config;
-}
+import { TAB_PANEL_TYPE } from "../util/constants";
 
 /** Used in storybook when panels are renered outside of a <PanelLayout/> */
 const FALLBACK_PANEL_ID = "$unknown_id";
@@ -123,8 +81,15 @@ export default function Panel<
   PanelProps extends { config: Config; saveConfig: SaveConfig<Config> },
 >(
   PanelComponent: ComponentType<PanelProps> & PanelStatics<Config>,
-): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
-  function ConnectedPanel(props: Props<Config>) {
+): ComponentType<GenericPanelProps<Config> & Omit<PanelProps, "config" | "saveConfig">> &
+  PanelStatics<Config> {
+  function ConnectedPanel(props: GenericPanelProps<Config>) {
+    const [logs, setLogs] = useState<PanelLog[]>([]);
+    const [showLogs, setShowLogs] = useState(false);
+
+    const addLog = useCallback((message: string, error?: Error) => {
+      setLogs((prev) => [...prev, { timestamp: new Date().toLocaleString(), message, error }]);
+    }, []);
     const { childId = FALLBACK_PANEL_ID, overrideConfig, tabId, ...otherProps } = props;
     const { classes, cx, theme } = useStyles();
     const isMounted = useMountedState();
@@ -170,8 +135,7 @@ export default function Panel<
     const panelCatalog = usePanelCatalog();
 
     const mosaicPath = useContext(MosaicPathContext);
-    const isTopLevelPanel =
-      mosaicPath != undefined && mosaicPath.length === 0 && tabId == undefined;
+    const isTopLevelPanel = mosaicPath?.length === 0 && tabId == undefined;
 
     // There may be a parent panel (when a panel is in a tab).
     const parentPanelContext = useContext(PanelContext);
@@ -616,6 +580,12 @@ export default function Panel<
             // disallow dragging the root panel in a layout
             connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
             setMessagePathDropConfig,
+            showLogs,
+            setShowLogs: ({ show }) => {
+              setShowLogs(show);
+            },
+            logError: addLog,
+            logCount: logs.length,
           }}
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
@@ -661,12 +631,31 @@ export default function Panel<
                     }}
                   />
                 )}
-                <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
+
+                <PanelErrorBoundary
+                  onRemovePanel={removePanel}
+                  onResetPanel={resetPanel}
+                  onLogError={addLog}
+                >
                   {child}
                 </PanelErrorBoundary>
                 {process.env.NODE_ENV !== "production" && (
                   <div className={classes.perfInfo} ref={perfInfo} />
                 )}
+
+                {showLogs ? (
+                  <PanelLogs
+                    logs={logs}
+                    initialHeight={loadPanelLogsHeight()}
+                    onClose={() => {
+                      setShowLogs(false);
+                    }}
+                    onClear={() => {
+                      setLogs([]);
+                    }}
+                    onHeightChange={savePanelLogsHeight}
+                  />
+                ) : undefined}
               </PanelRoot>
             )}
           </Transition>

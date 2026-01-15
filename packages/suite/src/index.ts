@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -534,7 +534,11 @@ export interface PanelSettings<ExtensionSettings> {
 export type RegisterMessageConverterArgs<Src> = {
   fromSchemaName: string;
   toSchemaName: string;
-  converter: (msg: Src, event: Immutable<MessageEvent<Src>>) => unknown;
+  converter: (
+    msg: Src,
+    event: Immutable<MessageEvent<Src>>,
+    globalVariables?: Readonly<Record<string, VariableValue>>,
+  ) => unknown;
   /**
    * Custom settings for the topics using the schema specified in the *toSchemaName* property
    */

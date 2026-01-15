@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,15 +6,22 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@lichtblick/log";
-import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@lichtblick/suite-base";
+import {
+  ExtensionInfo,
+  IExtensionLoader,
+  Namespace,
+  TypeExtensionLoader,
+  InstallExtensionProps,
+} from "@lichtblick/suite-base";
 
-import { Desktop, DesktopExtension } from "../../common/types";
+import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
 const log = Logger.getLogger(__filename);
 
-export class DesktopExtensionLoader implements ExtensionLoader {
+export class DesktopExtensionLoader implements IExtensionLoader {
   #bridge?: Desktop;
-  public readonly namespace: ExtensionNamespace = "local";
+  public readonly namespace: Namespace = "local";
+  public readonly type: TypeExtensionLoader = "filesystem";
 
   public constructor(bridge: Desktop) {
     this.#bridge = bridge;
@@ -46,11 +53,14 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     return extensions;
   }
 
-  public async loadExtension(id: string): Promise<string> {
-    return (await this.#bridge?.loadExtension(id)) ?? "";
+  public async loadExtension(id: string): Promise<LoadedExtension> {
+    if (!this.#bridge) {
+      throw new Error("Cannot load extension without a desktopBridge");
+    }
+    return await this.#bridge.loadExtension(id);
   }
 
-  public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
+  public async installExtension({ foxeFileData }: InstallExtensionProps): Promise<ExtensionInfo> {
     if (this.#bridge == undefined) {
       throw new Error(`Cannot install extension without a desktopBridge`);
     }

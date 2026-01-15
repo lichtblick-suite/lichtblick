@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -29,10 +29,16 @@ describe("parseChannel", () => {
 
   it("works with flatbuffer", () => {
     const reflectionSchema = fs.readFileSync(`${__dirname}/fixtures/reflection.bfbs`);
+    const reflectionSchemaUint8 = new Uint8Array(
+      reflectionSchema.buffer,
+      reflectionSchema.byteOffset,
+      reflectionSchema.byteLength,
+    );
     const channel = parseChannel({
       messageEncoding: "flatbuffer",
-      schema: { name: "reflection.Schema", encoding: "flatbuffer", data: reflectionSchema },
+      schema: { name: "reflection.Schema", encoding: "flatbuffer", data: reflectionSchemaUint8 },
     });
+
     const deserialized = channel.deserialize(reflectionSchema) as {
       objects: Record<string, unknown>[];
     };

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -393,6 +393,7 @@ function parseFloatAttributeOptional(xml: Element, attribName: string): number |
 }
 
 function parseFloatContent(xml: Element): number {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (xml.textContent == undefined) {
     throw new Error(`expected float value in "${xml}"`);
   }

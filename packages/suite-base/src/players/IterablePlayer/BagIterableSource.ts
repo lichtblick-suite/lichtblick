@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -72,7 +72,7 @@ export class BagIterableSource implements ISerializedIterableSource {
           return bzip2.decompress(buffer, size, { small: false });
         },
         lz4: (buffer: Uint8Array, size: number) => {
-          return decompressLZ4(buffer, size);
+          return new Uint8Array(decompressLZ4(buffer, size));
         },
       },
     });
@@ -99,9 +99,7 @@ export class BagIterableSource implements ISerializedIterableSource {
     const numMessagesByConnectionIndex: number[] = new Array(this.#bag.connections.size).fill(0);
     this.#bag.chunkInfos.forEach((info) => {
       info.connections.forEach(({ conn, count }) => {
-        if (numMessagesByConnectionIndex[conn] == undefined) {
-          numMessagesByConnectionIndex[conn] = 0;
-        }
+        numMessagesByConnectionIndex[conn] ??= 0;
         numMessagesByConnectionIndex[conn] += count;
       });
     });
