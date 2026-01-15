@@ -25,6 +25,7 @@ import {
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import SearchBar from "@lichtblick/suite-base/components/SearchBar/SearchBar";
 import { ContextMenu } from "@lichtblick/suite-base/components/TopicList/ContextMenu";
+import { SKELETON_ITEMS } from "@lichtblick/suite-base/components/TopicList/constants";
 import { getDraggedMessagePath } from "@lichtblick/suite-base/components/TopicList/getDraggedMessagePath";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { MessagePathSelectionProvider } from "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider";
@@ -171,8 +172,8 @@ export function TopicList(): React.JSX.Element {
           />
         </header>
         <List dense disablePadding>
-          {Array.from({ length: 16 }).map((_, i) => (
-            <ListItem divider key={`list-skeleton-${i}`}>
+          {SKELETON_ITEMS.map((id) => (
+            <ListItem divider key={id}>
               <ListItemText
                 className={classes.skeletonText}
                 primary={<Skeleton animation={false} width="20%" />}

@@ -9,27 +9,11 @@ import Logger from "@lichtblick/log";
 import { Time, compare } from "@lichtblick/rostime";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
-
-type TopicBoundaries = {
-  first?: Time;
-  last?: Time;
-};
-
-const RESULT_TYPE_MESSAGE_EVENT = "message-event" as const;
-
-export interface UseTopicMessageNavigationProps {
-  topicName: string;
-  selected: boolean;
-  isTopicSubscribed: boolean;
-}
-
-export interface UseTopicMessageNavigationReturn {
-  handleNextMessage: () => Promise<void>;
-  handlePreviousMessage: () => Promise<void>;
-  isNavigating: boolean;
-  canNavigateNext: boolean;
-  canNavigatePrevious: boolean;
-}
+import { RESULT_TYPE_MESSAGE_EVENT } from "@lichtblick/suite-base/components/TopicList/constants";
+import {
+  TopicBoundaries,
+  UseTopicMessageNavigationReturn,
+} from "@lichtblick/suite-base/components/TopicList/types";
 
 const log = Logger.getLogger(__filename);
 
@@ -52,7 +36,11 @@ export function useTopicMessageNavigation({
   topicName,
   selected,
   isTopicSubscribed,
-}: UseTopicMessageNavigationProps): UseTopicMessageNavigationReturn {
+}: {
+  topicName: string;
+  selected: boolean;
+  isTopicSubscribed: boolean;
+}): UseTopicMessageNavigationReturn {
   const [isNavigating, setIsNavigating] = useState(false);
   const [boundariesCache, setBoundariesCache] = useImmer(() => new Map<string, TopicBoundaries>());
   const navigationAbortControllerRef = useRef<AbortController | undefined>(undefined);
@@ -174,19 +162,14 @@ export function useTopicMessageNavigation({
     return !isAtPlaybackStart && !isAtFirstTopicMessage;
   }, [currentTime, startTime, topicStats, topicName, firstMessageTime]);
 
-  const handleNextMessage = useCallback(async () => {
-    if (isNavigating || !currentTime || !seekPlayback || !pausePlayback) {
-      return;
-    }
-
-    const signal = createNavigationSignal();
-
-    setIsNavigating(true);
-
-    try {
+  const findNextMessage = useCallback(
+    async (
+      signal: AbortSignal,
+      current: Time,
+    ): Promise<{ targetTime: Time; isLastMessage: boolean } | undefined> => {
       const iterator = getBatchIterator(topicName);
       if (!iterator) {
-        return;
+        return undefined;
       }
 
       let targetTime: Time | undefined;
@@ -194,13 +177,13 @@ export function useTopicMessageNavigation({
 
       for await (const result of iterator) {
         if (signal.aborted) {
-          return;
+          return undefined;
         }
         if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
           continue;
         }
 
-        const isAfterCurrent = compare(result.msgEvent.receiveTime, currentTime) > 0;
+        const isAfterCurrent = compare(result.msgEvent.receiveTime, current) > 0;
         if (!isAfterCurrent) {
           continue;
         }
@@ -213,23 +196,43 @@ export function useTopicMessageNavigation({
         targetTime = result.msgEvent.receiveTime;
       }
 
+      if (!targetTime) {
+        return undefined;
+      }
+
+      return { targetTime, isLastMessage: !foundMessageAfterTarget };
+    },
+    [getBatchIterator, topicName],
+  );
+
+  const handleNextMessage = useCallback(async () => {
+    if (isNavigating || !currentTime || !seekPlayback || !pausePlayback) {
+      return;
+    }
+
+    const signal = createNavigationSignal();
+    setIsNavigating(true);
+
+    try {
+      const result = await findNextMessage(signal, currentTime);
+
       if (signal.aborted) {
         return;
       }
 
-      if (!targetTime) {
+      if (!result) {
         if (!lastMessageTime) {
           updateBoundariesCache(topicName, { last: currentTime });
         }
         return;
       }
 
-      if (!foundMessageAfterTarget && !lastMessageTime) {
-        updateBoundariesCache(topicName, { last: targetTime });
+      if (result.isLastMessage && !lastMessageTime) {
+        updateBoundariesCache(topicName, { last: result.targetTime });
       }
 
       pausePlayback();
-      seekPlayback(targetTime);
+      seekPlayback(result.targetTime);
     } catch (error) {
       logNavigationError("next", error);
     } finally {
@@ -243,7 +246,7 @@ export function useTopicMessageNavigation({
     topicName,
     seekPlayback,
     pausePlayback,
-    getBatchIterator,
+    findNextMessage,
     lastMessageTime,
     updateBoundariesCache,
     createNavigationSignal,

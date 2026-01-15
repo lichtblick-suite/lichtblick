@@ -11,10 +11,7 @@ import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/II
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import {
-  useTopicMessageNavigation,
-  UseTopicMessageNavigationProps,
-} from "./useTopicMessageNavigation";
+import { useTopicMessageNavigation } from "./useTopicMessageNavigation";
 
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");
 jest.mock("@lichtblick/log", () => ({
@@ -132,7 +129,7 @@ function setup(options: SetupOptions = {}) {
     }),
   );
 
-  const props: UseTopicMessageNavigationProps = {
+  const props = {
     topicName,
     selected,
     isTopicSubscribed,

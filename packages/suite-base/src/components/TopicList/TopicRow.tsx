@@ -163,7 +163,7 @@ export function TopicRow({
           </Typography>
         )}
       </Stack>
-      <Stack direction="column" alignItems="center" gap={0.5}>
+      <Stack direction="column" alignItems="flex-end" gap={0.5}>
         <TopicStatsChip selected={selected} topicName={topic.name} />
         <Stack direction="row" gap={0.5} alignItems="center">
           <Tooltip title={isPreviousDisabled ? "" : "Previous message"}>
