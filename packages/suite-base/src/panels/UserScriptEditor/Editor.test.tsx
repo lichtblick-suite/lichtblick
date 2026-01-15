@@ -38,6 +38,10 @@ jest.mock("monaco-editor", () => ({
   KeyCode: { KeyS: 55 },
 }));
 
+jest.mock("@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode", () =>
+  jest.fn(async (code: string) => code),
+);
+
 type MockModel = {
   uri: { path: string; toString: () => string };
   value: string;
@@ -162,17 +166,30 @@ jest.mock("@mui/material", () => ({
 }));
 
 jest.mock("react-resize-detector", () => ({
-  useResizeDetector: jest.fn(() => ({ ref: jest.fn() })),
+  useResizeDetector: jest.fn((opts?: unknown) => {
+    resizeDetectorOptions = opts as {
+      onResize?: (payload: { width?: number; height?: number }) => void;
+    };
+    return { ref: jest.fn() };
+  }),
 }));
+
+let resizeDetectorOptions:
+  | { onResize?: (payload: { width?: number; height?: number }) => void }
+  | undefined;
+
+const userScriptProjectConfig = {
+  rosLib: { fileName: "ros-lib.d.ts" },
+  declarations: [{ fileName: "types.d.ts", sourceCode: "// declarations" }],
+  utilityFiles: [{ filePath: "/utility.ts", sourceCode: "export const util = 1;" }],
+};
 
 jest.mock(
   "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig",
   () => ({
-    getUserScriptProjectConfig: jest.fn(() => ({
-      rosLib: { fileName: "ros-lib.d.ts" },
-      declarations: [{ fileName: "types.d.ts", sourceCode: "// declarations" }],
-      utilityFiles: [{ filePath: "/utility.ts", sourceCode: "export const util = 1;" }],
-    })),
+    __esModule: true,
+    getUserScriptProjectConfig: jest.fn(() => userScriptProjectConfig),
+    __userScriptProjectConfig: userScriptProjectConfig,
   }),
 );
 
@@ -220,6 +237,13 @@ describe("Editor", () => {
     mockEditor = undefined;
     mockOpenHandler = undefined;
     baseScript = buildScript();
+    userScriptProjectConfig.rosLib = { fileName: "ros-lib.d.ts" };
+    userScriptProjectConfig.declarations = [
+      { fileName: "types.d.ts", sourceCode: "// declarations" },
+    ];
+    userScriptProjectConfig.utilityFiles = [
+      { filePath: "/utility.ts", sourceCode: "export const util = 1;" },
+    ];
   });
 
   it("Given auto-format is enabled When the save shortcut runs Then the editor formats and saves the script", async () => {
@@ -336,6 +360,116 @@ describe("Editor", () => {
     expect(setScriptOverride).not.toHaveBeenCalled();
     expect(mockEditor?.setSelection).toHaveBeenCalledWith(selection);
     expect(mockEditor?.revealRangeInCenter).toHaveBeenCalled();
+  });
+
+  it("Given a position-only selection When the open handler runs Then it sets the position instead of a range", async () => {
+    const setScriptOverride = jest.fn();
+    const selection = {
+      startLineNumber: BasicBuilder.number(),
+      startColumn: BasicBuilder.number(),
+    };
+
+    await act(async () => {
+      renderEditor({ setScriptOverride });
+    });
+
+    const basename = baseScript.filePath.split("/").pop() ?? baseScript.filePath;
+    const currentFileUri = monacoApi.Uri.parse(`file://${DEFAULT_STUDIO_SCRIPT_PREFIX}${basename}`);
+
+    await act(async () => {
+      await mockOpenHandler?.(
+        { resource: currentFileUri, options: { selection } },
+        mockEditor ?? undefined,
+      );
+    });
+
+    expect(setScriptOverride).not.toHaveBeenCalled();
+    expect(mockEditor?.setPosition).toHaveBeenCalledWith({
+      lineNumber: selection.startLineNumber,
+      column: selection.startColumn,
+    });
+    expect(mockEditor?.revealPositionInCenter).toHaveBeenCalled();
+  });
+
+  it("Given an unknown model When the open handler runs Then the handler returns the current editor", async () => {
+    await act(async () => {
+      renderEditor();
+    });
+
+    const unknownUri = monacoApi.Uri.parse("file:///unknown/model.ts");
+    const result = await mockOpenHandler?.(
+      { resource: unknownUri, options: {} },
+      mockEditor ?? undefined,
+    );
+
+    expect(result).toBe(mockEditor);
+  });
+
+  it("Given a preexisting model with stale code When the script loads Then the model is updated", async () => {
+    const staleCode = BasicBuilder.string();
+    const freshCode = BasicBuilder.string();
+    const basename = `${BasicBuilder.string()}.ts`;
+    const uri = monacoApi.Uri.parse(`file://${DEFAULT_STUDIO_SCRIPT_PREFIX}${basename}`);
+    monacoApi.editor.createModel(staleCode, "typescript", uri);
+
+    await act(async () => {
+      renderEditor({ script: buildScript({ filePath: basename, code: freshCode }) });
+    });
+
+    const model = monacoApi.editor.getModel(uri);
+    expect(model?.setValue).toHaveBeenCalledWith(freshCode);
+  });
+
+  it("Given no script is provided When rendering Then nothing is rendered", () => {
+    const { container } = render(
+      <Editor
+        autoFormatOnSave={false}
+        script={undefined}
+        setScriptCode={jest.fn()}
+        save={jest.fn()}
+        setScriptOverride={jest.fn()}
+        rosLib={BasicBuilder.string()}
+        typesLib={BasicBuilder.string()}
+      />,
+    );
+
+    expect(container.childElementCount).toBe(0);
+  });
+
+  it("Given a formatting failure When the provider runs Then it returns an empty edit set", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    const getPrettifiedCode = jest.requireMock(
+      "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode",
+    );
+    getPrettifiedCode.mockRejectedValueOnce(new Error("formatting failure"));
+
+    await act(async () => {
+      renderEditor();
+    });
+
+    const provider = (monacoApi.languages.registerDocumentFormattingEditProvider as jest.Mock).mock
+      .calls[0][1];
+    const model = monacoApi.editor.createModel(
+      "code",
+      "typescript",
+      monacoApi.Uri.parse("file:///a.ts"),
+    );
+    try {
+      const edits = await provider.provideDocumentFormattingEdits(model);
+      expect(edits).toEqual([]);
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("Given a resize without width When the handler runs Then layout is not called", async () => {
+    await act(async () => {
+      renderEditor();
+    });
+
+    resizeDetectorOptions?.onResize?.({ width: undefined, height: 100 });
+    expect(mockEditor?.layout).not.toHaveBeenCalled();
   });
 
   it("Given the editor receives source changes When the onChange handler fires Then the latest setter is called with new code", async () => {
