@@ -159,27 +159,28 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
 
     for (const entityMsg of sceneUpdates.entities ?? []) {
       if (entityMsg) {
-        // add "isStatic" metadata to lane entities for potential caching
-        if (entityMsg.id?.includes("lane") ?? false) {
-          entityMsg.metadata = entityMsg.metadata ?? [];
-          entityMsg.metadata.push({ key: "isStatic", value: "true" });
-        }
-        let entity;
-        if (
-          entityMsg.metadata?.some((kv) => kv?.key === "isStatic" && kv.value === "true") ??
-          false
-        ) {
-          const staticEntity = this.staticEntities.get(entityMsg.id ?? "");
-          if (!staticEntity) {
-            entity = normalizeSceneEntity(entityMsg);
-            this.staticEntities.set(entity.id, entity);
-          } else {
-            entity = staticEntity;
-          }
-        }
+        // // add "isStatic" metadata to lane entities for potential caching
+        // if (entityMsg.id?.includes("lane") ?? false) {
+        //   if (entityMsg.metadata!.findIndex((kv) => kv?.key === "isStatic") === -1) {
+        //     entityMsg.metadata!.push({ key: "isStatic", value: "true" });
+        //   }
+        // }
+        // let entity;
+        // if (
+        //   entityMsg.metadata?.some((kv) => kv?.key === "isStatic" && kv.value === "true") ??
+        //   false
+        // ) {
+        //   const staticEntity = this.staticEntities.get(entityMsg.id ?? "");
+        //   if (!staticEntity) {
+        //     entity = normalizeSceneEntity(entityMsg);
+        //     this.staticEntities.set(entity.id, entity);
+        //   } else {
+        //     entity = staticEntity;
+        //   }
+        // }
 
-        entity = entity ?? normalizeSceneEntity(entityMsg);
-        // const entity = normalizeSceneEntity(entityMsg);
+        // entity = entity ?? normalizeSceneEntity(entityMsg);
+        const entity = normalizeSceneEntity(entityMsg);
         this.#getTopicEntities(topic).addOrUpdateEntity(
           entity,
           toNanoSec(messageEvent.receiveTime),
