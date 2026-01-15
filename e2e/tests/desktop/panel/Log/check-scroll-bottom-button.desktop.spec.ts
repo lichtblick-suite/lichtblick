@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { changeToEpochFormat } from "../../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../../fixtures/electron";
-import { loadFile } from "../../../../fixtures/load-file";
+import { loadFiles } from "../../../../fixtures/load-files";
 
 const MCAP_FILENAME = "example_logs.mcap";
 
@@ -15,9 +15,9 @@ const MCAP_FILENAME = "example_logs.mcap";
  */
 test("open log panel after loading an mcap file", async ({ mainWindow }) => {
   /// Given
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: MCAP_FILENAME,
+    filenames: MCAP_FILENAME,
   });
 
   // When
@@ -42,9 +42,9 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
   // This test usually takes slightly longer than the default 30s timeout
   test.setTimeout(60_000);
   /// Given
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: MCAP_FILENAME,
+    filenames: MCAP_FILENAME,
   });
 
   // When
