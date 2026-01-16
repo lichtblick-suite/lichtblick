@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import * as _ from "lodash-es";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
 import { ros1 } from "@lichtblick/rosmsg-msgs-common";
@@ -90,6 +90,7 @@ function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
 
   // advertise topic
   const { topic: currentTopic } = config;
+  const isInitialMount = useRef(true);
   useLayoutEffect(() => {
     if (!currentTopic) {
       return;
@@ -103,7 +104,10 @@ function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
     });
 
     return () => {
-      context.unadvertise?.(currentTopic);
+      if (!isInitialMount.current) {
+        context.unadvertise?.(currentTopic);
+      }
+      isInitialMount.current = false;
     };
   }, [context, currentTopic]);
 
@@ -169,21 +173,18 @@ function TeleopPanel(props: Readonly<TeleopPanelProps>): React.JSX.Element {
       return;
     }
 
-    const intervalMs = (1000 * 1) / config.publishRate;
-    try {
-      context.publish?.(currentTopic, message);
-    } catch (error) {
-      console.error("Failed to publish message:", error);
-      return;
-    }
-    const intervalHandle = setInterval(() => {
+    const publishMessage = () => {
       try {
         context.publish?.(currentTopic, message);
       } catch (error) {
-        console.error("Failed to publish interval message:", error);
-        clearInterval(intervalHandle);
+        console.error("Failed to publish message:", error);
       }
-    }, intervalMs);
+    };
+
+    publishMessage();
+
+    const intervalMs = (1000 * 1) / config.publishRate;
+    const intervalHandle = setInterval(publishMessage, intervalMs);
 
     return () => {
       clearInterval(intervalHandle);
