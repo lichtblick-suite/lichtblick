@@ -773,12 +773,7 @@ export class IterablePlayer implements Player {
             this.#lastMessageEvent = iterResult.msgEvent;
             break;
           }
-
-          const emitThis = this.#messageEventSequence % MESSAGE_EVENT_DECIMATION_FACTOR === 0;
-          this.#messageEventSequence++;
-          if (emitThis) {
-            messageEvents.push(iterResult.msgEvent);
-          }
+          messageEvents.push(iterResult.msgEvent);
         }
       }
     } finally {
