@@ -67,6 +67,10 @@ const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
 // we start playback
 const START_DELAY_MS = 100;
 
+// Reduce downstream CPU by emitting fewer message-events.
+// Example: 3 means we emit ~1/3 of message-events (alerts are not decimated).
+const MESSAGE_EVENT_DECIMATION_FACTOR = 3;
+
 // Messages are laid out in blocks with a fixed number of milliseconds.
 const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9;
 
@@ -162,6 +166,7 @@ export class IterablePlayer implements Player {
   #hasError = false;
   #lastRangeMillis?: number;
   #lastMessageEvent?: MessageEvent;
+  #messageEventSequence: number = 0;
   #lastStamp?: Time;
   #publishedTopics = new Map<string, Set<string>>();
   #seekTarget?: Time;
@@ -769,7 +774,11 @@ export class IterablePlayer implements Player {
             break;
           }
 
-          messageEvents.push(iterResult.msgEvent);
+          const emitThis = this.#messageEventSequence % MESSAGE_EVENT_DECIMATION_FACTOR === 0;
+          this.#messageEventSequence++;
+          if (emitThis) {
+            messageEvents.push(iterResult.msgEvent);
+          }
         }
       }
     } finally {
@@ -999,7 +1008,11 @@ export class IterablePlayer implements Player {
         return;
       }
 
-      msgEvents.push(this.#lastMessageEvent);
+      const emitThis = this.#messageEventSequence % MESSAGE_EVENT_DECIMATION_FACTOR === 0;
+      this.#messageEventSequence++;
+      if (emitThis) {
+        msgEvents.push(this.#lastMessageEvent);
+      }
       this.#lastMessageEvent = undefined;
     }
 
@@ -1041,7 +1054,11 @@ export class IterablePlayer implements Player {
             break;
           }
 
-          msgEvents.push(iterResult.msgEvent);
+          const emitThis = this.#messageEventSequence % MESSAGE_EVENT_DECIMATION_FACTOR === 0;
+          this.#messageEventSequence++;
+          if (emitThis) {
+            msgEvents.push(iterResult.msgEvent);
+          }
         }
       }
     } finally {
