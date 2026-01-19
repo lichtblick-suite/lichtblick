@@ -7,7 +7,7 @@
 
 import { info, warning, error } from "@actions/core";
 import depcheck, { Detector } from "depcheck";
-import { glob } from "glob";
+import { globSync } from "glob";
 import path from "path";
 
 /**
@@ -120,7 +120,7 @@ async function getAllWorkspacePackages(roots: string[]) {
         ? workspaceInfo.workspaces.packages
         : [];
     for (const pattern of patterns) {
-      for (const packagePath of await glob(pattern)) {
+      for (const packagePath of globSync(pattern)) {
         workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
       }
     }
