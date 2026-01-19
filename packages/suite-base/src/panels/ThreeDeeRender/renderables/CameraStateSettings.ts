@@ -98,7 +98,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       }
     });
 
-    // Space panning when holding spacebar
+    // Screen space panning when holding Alt key
     canvas.addEventListener("keydown", (event) => {
       if (event.altKey) {
         this.#controls.screenSpacePanning = true;
