@@ -95,4 +95,61 @@ describe("McapIndexedIterableSource", () => {
     expect(metadata).toBeDefined();
     expect(metadata).toEqual([]);
   });
+
+  it("returns topicStats with firstMessageTime and lastMessageTime from footer", async () => {
+    const tempBuffer = new TempBuffer();
+
+    const writer = new McapWriter({
+      writable: tempBuffer,
+      startChannelId: 1,
+      useStatistics: true, // Enable statistics so channelMessageCounts is populated
+    });
+    await writer.start({ library: "", profile: "" });
+    await writer.registerSchema({
+      data: new TextEncoder().encode("string data"),
+      encoding: "ros1msg",
+      name: "std_msgs/String",
+    });
+    await writer.registerChannel({
+      messageEncoding: "ros1",
+      schemaId: 1,
+      metadata: new Map(),
+      topic: "test",
+    });
+    // Add messages with specific timestamps
+    await writer.addMessage({
+      channelId: 1,
+      data: new Uint8Array(),
+      logTime: 1000000000n, // 1 second
+      publishTime: 1000000000n,
+      sequence: 1,
+    });
+    await writer.addMessage({
+      channelId: 1,
+      data: new Uint8Array(),
+      logTime: 5000000000n, // 5 seconds
+      publishTime: 5000000000n,
+      sequence: 2,
+    });
+    await writer.end();
+
+    const readable = new BlobReadable(new Blob([tempBuffer.get()]) as unknown as globalThis.Blob);
+    const decompressHandlers = await loadDecompressHandlers();
+    const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
+
+    const source = new McapIndexedIterableSource(reader);
+
+    const { topicStats, start, end } = await source.initialize();
+
+    expect(topicStats).toBeDefined();
+    const testTopicStats = topicStats.get("test");
+    expect(testTopicStats).toBeDefined();
+    expect(testTopicStats?.numMessages).toBe(2);
+    // firstMessageTime and lastMessageTime should be populated from MCAP footer
+    // These are global times (start/end of entire file)
+    expect(testTopicStats?.firstMessageTime).toEqual(start);
+    expect(testTopicStats?.lastMessageTime).toEqual(end);
+    expect(start).toEqual({ sec: 1, nsec: 0 });
+    expect(end).toEqual({ sec: 5, nsec: 0 });
+  });
 });

@@ -103,7 +103,11 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
 
         const numMessages = this.#reader.statistics?.channelMessageCounts.get(channel.id);
         if (numMessages != undefined) {
-          topicStats.set(channel.topic, { numMessages: Number(numMessages) });
+          topicStats.set(channel.topic, {
+            numMessages: Number(numMessages),
+            firstMessageTime: startTime != undefined ? fromNanoSec(startTime) : undefined,
+            lastMessageTime: endTime != undefined ? fromNanoSec(endTime) : undefined,
+          });
         }
       }
 

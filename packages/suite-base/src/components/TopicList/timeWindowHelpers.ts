@@ -22,7 +22,8 @@ const WINDOW_GROWTH_FACTOR = 5;
  * Subtracts milliseconds from a Time, handling nanosecond overflow correctly.
  */
 export function subtractMilliseconds(time: Time, milliseconds: number): Time {
-  const nanoseconds = milliseconds * NANOSECONDS_PER_MILLISECOND;
+  // Round to ensure we get integer values (milliseconds may be floating point from calculations)
+  const nanoseconds = Math.round(milliseconds * NANOSECONDS_PER_MILLISECOND);
   let nsec = time.nsec - nanoseconds;
   let sec = time.sec;
 
@@ -32,7 +33,8 @@ export function subtractMilliseconds(time: Time, milliseconds: number): Time {
     sec -= 1;
   }
 
-  return { sec, nsec };
+  // Ensure nsec is an integer (avoid floating point precision issues)
+  return { sec, nsec: Math.round(nsec) };
 }
 
 /**
