@@ -127,7 +127,7 @@ describe("TeleopPanel", () => {
     jest.useRealTimers();
   });
 
-  it("calls advertise and unadvertise when topic changes", () => {
+  it("calls advertise and unadvertise (but not on the first render), when topic changes", () => {
     const advertise = jest.fn();
     const unadvertise = jest.fn();
     const initialState: Partial<TeleopConfig> = { topic: BasicBuilder.string() };
@@ -145,6 +145,18 @@ describe("TeleopPanel", () => {
         datatypes: expect.any(Map),
       }),
     );
+    rerender(
+      <TeleopPanel
+        context={getMockContext({
+          publish: jest.fn(),
+          advertise,
+          unadvertise,
+          initialState,
+        })}
+      />,
+    );
+
+    expect(unadvertise).not.toHaveBeenCalled();
     rerender(
       <TeleopPanel
         context={getMockContext({
@@ -688,10 +700,7 @@ describe("TeleopPanel", () => {
       jest.advanceTimersByTime(100);
 
       // Then
-      expect(console.error).toHaveBeenCalledWith(
-        "Failed to publish interval message:",
-        publishError,
-      );
+      expect(console.error).toHaveBeenCalledWith("Failed to publish message:", publishError);
     });
   });
 });
