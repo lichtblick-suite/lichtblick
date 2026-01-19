@@ -120,7 +120,9 @@ async function getAllWorkspacePackages(roots: string[]) {
         ? workspaceInfo.workspaces.packages
         : [];
     for (const pattern of patterns) {
-      const matches = await glob(pattern, { cwd: workspaceRoot });
+      const matches = await glob(pattern, {
+        cwd: path.resolve(process.cwd(), workspaceRoot),
+      });
 
       for (const packagePath of matches) {
         workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
