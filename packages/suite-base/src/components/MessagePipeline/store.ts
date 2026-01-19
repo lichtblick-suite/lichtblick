@@ -28,6 +28,7 @@ import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { FramePromise } from "./pauseFrameForPromise";
 import { MessagePipelineContext } from "./types";
+import { Time } from "@lichtblick/rostime";
 
 export function defaultPlayerState(player?: Player): PlayerState {
   return {
@@ -215,9 +216,9 @@ export function createMessagePipelineStore({
         const player = get().player;
         return player?.getMetadata?.() ?? Object.freeze([]);
       },
-      getBatchIterator(topic: string) {
+      getBatchIterator(topic: string, options?: { start?: Time; end?: Time }) {
         const player = get().player;
-        return player?.getBatchIterator(topic);
+        return player?.getBatchIterator(topic, options);
       },
       startPlayback: undefined,
       playUntil: undefined,

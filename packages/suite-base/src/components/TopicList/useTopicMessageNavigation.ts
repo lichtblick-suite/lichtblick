@@ -11,6 +11,12 @@ import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePip
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { RESULT_TYPE_MESSAGE_EVENT } from "@lichtblick/suite-base/components/TopicList/constants";
 import {
+  calculateOptimalWindowMs,
+  createWindowSizes,
+  subtractMilliseconds,
+  wouldReachBoundary,
+} from "@lichtblick/suite-base/components/TopicList/timeWindowHelpers";
+import {
   TopicBoundaries,
   UseTopicMessageNavigationReturn,
 } from "@lichtblick/suite-base/components/TopicList/types";
@@ -167,7 +173,7 @@ export function useTopicMessageNavigation({
       signal: AbortSignal,
       current: Time,
     ): Promise<{ targetTime: Time; isLastMessage: boolean } | undefined> => {
-      const iterator = getBatchIterator(topicName);
+      const iterator = getBatchIterator(topicName, { start: current });
       if (!iterator) {
         return undefined;
       }
@@ -258,35 +264,96 @@ export function useTopicMessageNavigation({
     }
 
     const signal = createNavigationSignal();
-
     setIsNavigating(true);
 
     try {
-      const iterator = getBatchIterator(topicName);
-      if (!iterator) {
-        return;
+      const stats = topicStats?.get(topicName);
+
+      // Calculate optimal initial window size based on topic statistics
+      let initialWindowMs = 500;
+
+      if (stats?.numMessages && stats.firstMessageTime && stats.lastMessageTime) {
+        initialWindowMs = calculateOptimalWindowMs({
+          numMessages: stats.numMessages,
+          firstMessageTime: stats.firstMessageTime,
+          lastMessageTime: stats.lastMessageTime,
+          targetMessagesInWindow: 10,
+        });
       }
 
-      let firstBoundary: Time | undefined;
-      let targetTime: Time | undefined;
+      // Create progressively larger windows for adaptive search
+      const windowSizes = createWindowSizes(initialWindowMs);
 
-      for await (const result of iterator) {
+      let targetTime: Time | undefined;
+      let firstBoundary: Time | undefined;
+
+      // Try each window size until we find a message
+      for (const windowMs of windowSizes) {
         if (signal.aborted) {
           return;
         }
-        if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
-          continue;
+
+        // Check if this window would go past the topic's first message
+        if (
+          wouldReachBoundary(currentTime, windowMs, stats?.firstMessageTime ?? firstMessageTime)
+        ) {
+          // This window reaches the beginning, make it the last attempt
+          const iterator = getBatchIterator(topicName, {
+            start: stats?.firstMessageTime ?? firstMessageTime,
+            end: currentTime,
+          });
+
+          if (iterator) {
+            for await (const result of iterator) {
+              if (signal.aborted) return;
+              if (result.type !== RESULT_TYPE_MESSAGE_EVENT) continue;
+
+              const messageTime = result.msgEvent.receiveTime;
+              firstBoundary ??= messageTime;
+
+              const isBeforeCurrent = compare(messageTime, currentTime) < 0;
+              if (!isBeforeCurrent) break;
+
+              targetTime = messageTime;
+            }
+          }
+          break; // Stop searching, we've reached the beginning
         }
 
-        const messageTime = result.msgEvent.receiveTime;
-        firstBoundary ??= messageTime;
+        // OPTIMIZATION: Search only within the time window
+        const windowStart = subtractMilliseconds(currentTime, windowMs);
+        const iterator = getBatchIterator(topicName, {
+          start: windowStart,
+          end: currentTime,
+        });
 
-        const isBeforeCurrent = compare(messageTime, currentTime) < 0;
-        if (!isBeforeCurrent) {
+        if (!iterator) {
+          return;
+        }
+
+        // Iterate only messages within this window
+        for await (const result of iterator) {
+          if (signal.aborted) {
+            return;
+          }
+          if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
+            continue;
+          }
+
+          const messageTime = result.msgEvent.receiveTime;
+          firstBoundary ??= messageTime;
+
+          const isBeforeCurrent = compare(messageTime, currentTime) < 0;
+          if (!isBeforeCurrent) {
+            break;
+          }
+
+          targetTime = messageTime;
+        }
+
+        if (targetTime) {
           break;
         }
-
-        targetTime = messageTime;
       }
 
       if (signal.aborted) {
@@ -318,6 +385,7 @@ export function useTopicMessageNavigation({
     pausePlayback,
     getBatchIterator,
     firstMessageTime,
+    topicStats,
     updateBoundariesCache,
     createNavigationSignal,
   ]);
