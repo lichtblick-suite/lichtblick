@@ -7,8 +7,8 @@
 
 import { info, warning, error } from "@actions/core";
 import depcheck, { Detector } from "depcheck";
-import fs from "node:fs";
 import glob from "glob";
+import fs from "node:fs";
 import { promisify } from "node:util";
 import path from "path";
 
