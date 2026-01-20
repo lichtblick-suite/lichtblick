@@ -56,16 +56,16 @@ jobs:
           node-version: 20
       - run: corepack enable yarn
 
-      - name: Restore cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            .yarn/cache
-            **/node_modules
-          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: v5-${{ runner.os }}-yarn-
+      # - name: Restore cache
+      # uses: actions/cache@v5
+      # with:
+      # path: |
+      # .yarn/cache
+      # **/node_modules
+      # key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+      # restore-keys: v5-${{ runner.os }}-yarn-
 
-      - run: yarn install --immutable
+      - run: yarn install
 
       - run: ${{ matrix.config.command }}
 

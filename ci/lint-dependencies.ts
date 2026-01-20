@@ -8,6 +8,7 @@
 import { info, warning, error } from "@actions/core";
 import depcheck, { Detector } from "depcheck";
 import { glob } from "glob";
+import fs from "node:fs";
 import path from "path";
 
 /**
@@ -126,8 +127,13 @@ async function getAllWorkspacePackages(roots: string[]) {
     }
   }
   for (const packagePath of workspacePackages) {
+    const packageJsonPath = path.join(packagePath, "package.json");
+    if (!fs.existsSync(packageJsonPath)) {
+      info(`Skipping ${packagePath} (no package.json)`);
+      continue;
+    }
     try {
-      const packageInfo = await import(path.join(packagePath, "package.json"));
+      const packageInfo = await import(packageJsonPath);
       const name = packageInfo.name;
       if (typeof name !== "string") {
         warning(`No name in package.json at ${packagePath}`);
