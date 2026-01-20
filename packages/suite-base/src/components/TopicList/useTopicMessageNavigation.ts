@@ -162,13 +162,16 @@ export function useTopicMessageNavigation({
   }, [topicName, selected, discoverBoundaries, boundariesCache, isTopicSubscribed]);
 
   const canNavigateNext = useMemo(() => {
-    if (!currentTime || !topicStats) {
+    if (!currentTime) {
       return false;
     }
 
     const isAtPlaybackEnd = endTime != undefined && compare(currentTime, endTime) >= 0;
-    // Prefer topicStats (from MCAP footer) over cache for accurate boundaries
-    const lastTopicMessageTime = topicStats.get(topicName)?.lastMessageTime ?? lastMessageTime;
+    // Use topicStats for per-topic boundary, fallback to cache, then to global endTime.
+    // This enables navigation immediately for MCAP files (using global time) while
+    // allowing more accurate per-topic boundaries to be discovered during navigation.
+    const lastTopicMessageTime =
+      topicStats?.get(topicName)?.lastMessageTime ?? lastMessageTime ?? endTime;
 
     if (!lastTopicMessageTime) {
       return false;
@@ -180,13 +183,16 @@ export function useTopicMessageNavigation({
   }, [currentTime, endTime, topicStats, topicName, lastMessageTime]);
 
   const canNavigatePrevious = useMemo(() => {
-    if (!currentTime || !topicStats) {
+    if (!currentTime) {
       return false;
     }
 
     const isAtPlaybackStart = startTime != undefined && compare(currentTime, startTime) <= 0;
-    // Prefer topicStats (from MCAP footer) over cache for accurate boundaries
-    const firstTopicMessageTime = topicStats.get(topicName)?.firstMessageTime ?? firstMessageTime;
+    // Use topicStats for per-topic boundary, fallback to cache, then to global startTime.
+    // This enables navigation immediately for MCAP files (using global time) while
+    // allowing more accurate per-topic boundaries to be discovered during navigation.
+    const firstTopicMessageTime =
+      topicStats?.get(topicName)?.firstMessageTime ?? firstMessageTime ?? startTime;
 
     if (!firstTopicMessageTime) {
       return false;

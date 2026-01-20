@@ -96,7 +96,7 @@ describe("McapIndexedIterableSource", () => {
     expect(metadata).toEqual([]);
   });
 
-  it("returns topicStats with firstMessageTime and lastMessageTime from footer", async () => {
+  it("returns topicStats with numMessages and global start/end times separately", async () => {
     const tempBuffer = new TempBuffer();
 
     const writer = new McapWriter({
@@ -144,11 +144,11 @@ describe("McapIndexedIterableSource", () => {
     expect(topicStats).toBeDefined();
     const testTopicStats = topicStats.get("test");
     expect(testTopicStats).toBeDefined();
+    // topicStats only contains numMessages (MCAP footer doesn't have per-topic time boundaries)
     expect(testTopicStats?.numMessages).toBe(2);
-    // firstMessageTime and lastMessageTime should be populated from MCAP footer
-    // These are global times (start/end of entire file)
-    expect(testTopicStats?.firstMessageTime).toEqual(start);
-    expect(testTopicStats?.lastMessageTime).toEqual(end);
+    expect(testTopicStats?.firstMessageTime).toBeUndefined();
+    expect(testTopicStats?.lastMessageTime).toBeUndefined();
+    // Global start/end times are exposed separately via Initialization
     expect(start).toEqual({ sec: 1, nsec: 0 });
     expect(end).toEqual({ sec: 5, nsec: 0 });
   });
