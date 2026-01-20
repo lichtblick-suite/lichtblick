@@ -80,7 +80,8 @@
     "js-yaml": "4.1.1",
     "qs": "6.14.1",
     "tar": "7.5.3",
-    "glob": "10.4.5"
+    "del/glob": "7.2.3",
+    "globby/glob": "7.2.3"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
