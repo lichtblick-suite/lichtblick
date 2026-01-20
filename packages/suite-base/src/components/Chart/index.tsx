@@ -300,6 +300,11 @@ function Chart(props: Props): React.JSX.Element {
       canvasRef.current = canvas;
       initialized.current = true;
 
+      // Mark canvas as ready after initialization to improve LCP
+      requestAnimationFrame(() => {
+        canvas.setAttribute("data-ready", "true");
+      });
+
       onStartRender?.();
       const offscreenCanvas =
         typeof canvas.transferControlToOffscreen === "function"

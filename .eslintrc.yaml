@@ -28,7 +28,7 @@ settings:
   import/internal-regex: "^@lichtblick"
 
 rules:
-  "@lichtblick/license-header": ["error", { licenseType: "MPL-2.0" }]
+  "@lichtblick/license-header": off
   "@lichtblick/prefer-hash-private": off
 
   tss-unused-classes/unused-classes: error

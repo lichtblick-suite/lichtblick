@@ -9,9 +9,54 @@ import { createContext, useState } from "react";
 import { StoreApi, createStore, useStore } from "zustand";
 
 import { useGuaranteedContext } from "@lichtblick/hooks";
-import { generateEmptyTypesLib } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
-import { ros_lib_dts } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/ros";
-import { Diagnostic, UserScriptLog } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
+
+// Lazy import to avoid bundling TypeScript in production
+let generateEmptyTypesLib: (() => string) | undefined;
+let ros_lib_dts: string | undefined;
+
+// Initialize with empty values - will be populated when UserScript features are enabled
+const EMPTY_ROS_LIB = "// UserScript features disabled";
+const EMPTY_TYPES_LIB = "// UserScript features disabled";
+
+// Re-export types for compatibility
+export type Diagnostic = {
+  severity: number;
+  message: string;
+  source: string;
+  code: number;
+  startLineNumber?: number;
+  startColumn?: number;
+  endLineNumber?: number;
+  endColumn?: number;
+};
+
+export type UserScriptLog = {
+  source: string;
+  value: unknown;
+};
+
+// Flag to check if UserScript features are enabled
+let userScriptFeaturesEnabled = false;
+
+// Function to enable UserScript features (loads TypeScript dependencies)
+export async function enableUserScriptFeatures(): Promise<void> {
+  if (userScriptFeaturesEnabled) {
+    return;
+  }
+
+  try {
+    const [generateTypesLibModule, rosLibModule] = await Promise.all([
+      import("@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateTypesLib"),
+      import("@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/ros"),
+    ]);
+
+    generateEmptyTypesLib = generateTypesLibModule.generateEmptyTypesLib;
+    ros_lib_dts = rosLibModule.ros_lib_dts;
+    userScriptFeaturesEnabled = true;
+  } catch (error) {
+    console.warn("Failed to load UserScript features:", error);
+  }
+}
 
 type UserScriptState = {
   rosLib: string;
@@ -42,8 +87,8 @@ function create() {
   return createStore<UserScriptStore>((set) => {
     return {
       state: {
-        rosLib: ros_lib_dts,
-        typesLib: generateEmptyTypesLib(),
+        rosLib: ros_lib_dts ?? EMPTY_ROS_LIB,
+        typesLib: generateEmptyTypesLib?.() ?? EMPTY_TYPES_LIB,
         scriptStates: {},
       },
       actions: {

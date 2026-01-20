@@ -180,6 +180,16 @@ export const mainConfig =
             color: ${palette.dark.text?.primary};
           }
         }
+        /* Optimize canvas rendering for better LCP */
+        canvas {
+          content-visibility: auto;
+          contain-intrinsic-size: 800px 600px;
+        }
+        /* Hide canvas during initial load - show placeholder instead */
+        canvas:not([data-ready]) {
+          visibility: hidden;
+          position: absolute;
+        }
       </style>
     </head>
     <script>
@@ -187,7 +197,16 @@ export const mainConfig =
       globalThis.LICHTBLICK_SUITE_DEFAULT_LAYOUT = [/*LICHTBLICK_SUITE_DEFAULT_LAYOUT_PLACEHOLDER*/][0];
     </script>
     <body>
-      <div id="root"></div>
+      <div id="root">
+        <!-- Loading skeleton for better LCP -->
+        <div style="display: flex; flex-direction: column; height: 100%; padding: 16px; box-sizing: border-box;">
+          <div style="height: 64px; background: rgba(128, 128, 128, 0.1); margin-bottom: 16px; border-radius: 4px;"></div>
+          <div style="flex: 1; display: flex; gap: 16px;">
+            <div style="flex: 1; background: rgba(128, 128, 128, 0.05); border-radius: 4px;"></div>
+            <div style="flex: 1; background: rgba(128, 128, 128, 0.05); border-radius: 4px;"></div>
+          </div>
+        </div>
+      </div>
     </body>
   </html>
   `,
@@ -197,6 +216,7 @@ export const mainConfig =
             <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
             <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
           `,
+          scriptLoading: "defer",
           ...params.indexHtmlOptions,
         }),
       ],

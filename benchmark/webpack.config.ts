@@ -75,8 +75,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     target: "web",
     context: path.resolve(__dirname, "src"),
     entry: "./index.tsx",
-    devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
-
+    devtool: isDev ? "eval-cheap-module-source-map" : false,
     output: {
       publicPath: "auto",
 

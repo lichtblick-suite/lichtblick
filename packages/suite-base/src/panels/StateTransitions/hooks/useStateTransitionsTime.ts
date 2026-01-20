@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import { Time, toSec } from "@lichtblick/rostime";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
-import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
+import { subtractTimes } from "@lichtblick/suite-base/util/time";
 
 type UseStateTransitionsTime = {
   startTime: Readonly<Time> | undefined;
