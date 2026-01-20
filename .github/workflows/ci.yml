@@ -26,6 +26,7 @@ jobs:
               set -x
               yarn license-check
               yarn dedupe --check
+              echo "glob version=$(node -p "require('glob/package.json').version")
               yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
               yarn run lint:ci
               yarn run lint:unused-exports
@@ -56,16 +57,16 @@ jobs:
           node-version: 20
       - run: corepack enable yarn
 
-      # - name: Restore cache
-      # uses: actions/cache@v5
-      # with:
-      # path: |
-      # .yarn/cache
-      # **/node_modules
-      # key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-      # restore-keys: v5-${{ runner.os }}-yarn-
+      - name: Restore cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
 
-      - run: yarn install
+      - run: yarn install --immutable
 
       - run: ${{ matrix.config.command }}
 
