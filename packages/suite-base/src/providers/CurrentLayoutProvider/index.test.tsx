@@ -298,6 +298,41 @@ describe("CurrentLayoutProvider", () => {
     expect(selectedLayout).toBe("layout2");
   });
 
+  it("selects the first org layout, when current layout is not found", async () => {
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "layout1",
+          name: "LAYOUT 1",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout2",
+          name: "ORG Layout 2",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+      ];
+    });
+    mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "nonexistent" });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBeDefined();
+    expect(selectedLayout).toBe("layout2");
+  });
+
   it("selects the first org layout, if any, in alphabetic order, when there is no selected layout", async () => {
     mockLayoutManager.getLayouts.mockImplementation(async () => {
       return [
