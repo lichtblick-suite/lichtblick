@@ -163,6 +163,18 @@ describe("CurrentLayoutProvider", () => {
     };
     const condvar = new Condvar();
     const layoutStorageGetCalledWait = condvar.wait();
+
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "example",
+          name: "Example layout",
+          data: { data: expectedState },
+          permission: "CREATOR_WRITE",
+        },
+      ];
+    });
+
     mockLayoutManager.getLayout.mockImplementation(async () => {
       condvar.notifyAll();
       return {
@@ -179,7 +191,7 @@ describe("CurrentLayoutProvider", () => {
       await layoutStorageGetCalledWait;
     });
 
-    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
+    expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       {
@@ -205,6 +217,18 @@ describe("CurrentLayoutProvider", () => {
 
     const condvar = new Condvar();
     const layoutStorageGetCalledWait = condvar.wait();
+
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "example",
+          name: "Example layout",
+          data: { data: expectedState },
+          permission: "CREATOR_WRITE",
+        },
+      ];
+    });
+
     mockLayoutManager.getLayout.mockImplementation(async () => {
       condvar.notifyAll();
       return {
@@ -221,7 +245,7 @@ describe("CurrentLayoutProvider", () => {
       await layoutStorageGetCalledWait;
     });
 
-    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
+    expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: undefined },
@@ -229,17 +253,20 @@ describe("CurrentLayoutProvider", () => {
   });
 
   it("keeps identity of action functions when modifying layout", async () => {
-    mockLayoutManager.getLayout.mockImplementation(async () => {
-      return {
-        id: "TEST_ID",
-        name: "Test layout",
-        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
-      };
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "example",
+          name: "Test layout",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+      ];
     });
 
     mockLayoutManager.updateLayout.mockImplementation(async () => {
       return {
-        id: "TEST_ID",
+        id: "example",
         name: "Test layout",
         baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
       };

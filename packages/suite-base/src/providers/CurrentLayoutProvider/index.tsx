@@ -330,7 +330,7 @@ export default function CurrentLayoutProvider({
       });
     }
 
-    // Retreive the selected layout id from the user's profile. If there's no layout specified
+    // Retrieve the selected layout id from the user's profile. If there's no layout specified
     // or we can't load it then save and select a default layout
     const layout = currentLayoutId
       ? layouts.find((element) => element.id === currentLayoutId)
