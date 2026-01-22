@@ -21,7 +21,6 @@ export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
 
   electronApp: async ({ electronArgs, preInstalledExtensions }, use) => {
     checkBuild(WEBPACK_PATH);
-    console.log("preInstalled", preInstalledExtensions);
 
     const userDataDir = await mkdtemp(path.join(os.tmpdir(), "e2e-test-"));
     const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-e2e-test-"));
@@ -29,7 +28,6 @@ export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
     for (const filename of preInstalledExtensions ?? []) {
       preInstallExtensionInUserFolder(homeDir, filename);
     }
-    console.log("---------> passed on preload");
 
     const app = await electron.launch({
       args: [
@@ -61,23 +59,22 @@ function checkBuild(webpackPath: string): void {
 }
 
 function preInstallExtensionInUserFolder(homeDir: string, filename: string): void {
-  console.log("-----------> entering preload");
   const source = path.join(process.cwd(), "e2e", "fixtures", "assets", filename);
-  console.log("------------> source", source);
 
   if (!fs.existsSync(source)) {
     throw new Error(`Extension asset not found: ${source}`);
   }
 
   const extensionsDir = path.join(homeDir, ".lichtblick-suite", "extensions");
-
-  console.log("------------> extensions Dir created", extensionsDir);
-
   fs.mkdirSync(extensionsDir, { recursive: true });
 
-  fs.copyFileSync(source, path.join(extensionsDir, filename));
-
-  console.log("-------------> Read Dir", fs.readdirSync(extensionsDir));
+  const stats = fs.statSync(source);
+  if (stats.isDirectory()) {
+    const destDir = path.join(extensionsDir, filename);
+    fs.cpSync(source, destDir, { recursive: true });
+  } else {
+    fs.copyFileSync(source, path.join(extensionsDir, filename));
+  }
 }
 
 export { expect } from "@playwright/test";

@@ -3,17 +3,22 @@
 
 import { test, expect } from "../../../fixtures/electron";
 
+const extensionSourceFolder = "lichtblick.suite-extension-turtlesim-0.0.1";
+
 /**
- * GIVEN
+ * GIVEN turtlesim extension in already on root level folder
+ * WHEN the extensions menu is opened
+ * AND searched for turtlesim
+ * THEN the turtlesim extension should appear on the extensions list
  */
 test.use({
-  preInstalledExtensions: ["lichtblick.suite-extension-turtlesim-0.0.1.foxe"],
+  preInstalledExtensions: [extensionSourceFolder],
 });
 
 test("should install an extension (user folder)", async ({ mainWindow }) => {
+  // When
   await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
 
-  // When
   await mainWindow.getByTestId("user-button").click();
   await mainWindow.getByRole("menuitem", { name: "Extensions" }).click();
   const searchBar = mainWindow.getByPlaceholder("Search Extensions...");
@@ -22,5 +27,7 @@ test("should install an extension (user folder)", async ({ mainWindow }) => {
     .locator('[data-testid="extension-list-entry"]')
     .filter({ hasText: "turtlesim" })
     .filter({ hasText: "0.0.1" });
+
+  // Then
   await expect(turtlesimExtension).toBeVisible();
 });
