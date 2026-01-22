@@ -3,27 +3,35 @@
 import { test as base, _electron as electron, ElectronApplication, Page } from "@playwright/test";
 import electronPath from "electron";
 import fs from "fs";
-import { mkdtemp } from "fs/promises";
+import { mkdtemp, readFile, mkdir, writeFile } from "fs/promises";
+import JSZip from "jszip";
 import * as os from "os";
 import path from "path";
 
 export type ElectronFixtures = {
   electronApp: ElectronApplication;
   mainWindow: Page;
+  preInstalledExtensions?: string[];
 };
 
 const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
 
 export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
   electronArgs: [],
-  electronApp: async ({ electronArgs }, use) => {
+  preInstalledExtensions: [],
+
+  electronApp: async ({ electronArgs, preInstalledExtensions }, use) => {
     checkBuild(WEBPACK_PATH);
+    console.log("preInstalled", preInstalledExtensions)
 
-    // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
     const userDataDir = await mkdtemp(path.join(os.tmpdir(), "e2e-test-"));
-
-    // Create a new home directory for each test, which creates a brand new .lcihtblick-suite directory for e2e testing
     const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-e2e-test-"));
+
+
+    for (const filename of preInstalledExtensions ?? []) {
+      preInstallExtensionInUserFolder(homeDir, filename);
+    }
+    console.log("---------> passed on preload")
 
     const app = await electron.launch({
       args: [
@@ -52,6 +60,26 @@ function checkBuild(webpackPath: string): void {
   if (files.length === 0) {
     throw new Error(`Webpack path is empty: ${webpackPath}`);
   }
+}
+
+function preInstallExtensionInUserFolder(homeDir: string, filename: string): void {
+  console.log("-----------> entering preload")
+  const source = path.join(process.cwd(), "e2e", "fixtures", "assets", filename);
+  console.log("------------> source", source)
+
+  if (!fs.existsSync(source)) {
+    throw new Error(`Extension asset not found: ${source}`);
+  }
+
+  const extensionsDir = path.join(homeDir, ".lichtblick-suite", "extensions");
+
+  console.log("------------> extensions Dir created", extensionsDir)
+
+  fs.mkdirSync(extensionsDir, { recursive: true });
+
+  fs.copyFileSync(source, path.join(extensionsDir, filename));
+
+  console.log("-------------> Read Dir", fs.readdirSync(extensionsDir))
 }
 
 export { expect } from "@playwright/test";
