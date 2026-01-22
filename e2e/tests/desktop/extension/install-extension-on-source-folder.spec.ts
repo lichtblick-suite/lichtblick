@@ -16,5 +16,11 @@ test("should install an extension (user folder)", async ({ mainWindow }) => {
   // When
   await mainWindow.getByTestId("user-button").click();
   await mainWindow.getByRole("menuitem", { name: "Extensions" }).click();
-  
+  const searchBar = mainWindow.getByPlaceholder("Search Extensions...");
+  await searchBar.fill("turtlesim");
+  const turtlesimExtension = mainWindow
+    .locator('[data-testid="extension-list-entry"]')
+    .filter({ hasText: "turtlesim" })
+    .filter({ hasText: "0.0.1" });
+  await expect(turtlesimExtension).toBeVisible();
 });
