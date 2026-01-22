@@ -48,7 +48,8 @@ import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTop
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
 
-import { BlockLoader } from "./BlockLoader";
+// deprecate blockLoader
+// import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
 import {
   IDeserializedIterableSource,
@@ -61,20 +62,20 @@ const log = Log.getLogger(__filename);
 // Number of bytes that we aim to keep in the cache.
 // Setting this to higher than 1.5GB caused the renderer process to crash on linux.
 // See: https://github.com/foxglove/studio/pull/1733
-const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
+// const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
 
 // Amount to wait until panels have had the chance to subscribe to topics before
 // we start playback
 const START_DELAY_MS = 100;
 
 // Messages are laid out in blocks with a fixed number of milliseconds.
-const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9;
+// const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9;
 
 // Original comment from webviz:
 // Preloading algorithms slow when there are too many blocks.
 // Adaptive block sizing is simpler than using a tree structure for immutable updates but
 // less flexible, so we may want to move away from a single-level block structure in the future.
-const MAX_BLOCKS = 100;
+// const MAX_BLOCKS = 100;
 
 // Amount to seek into the data source from the start when loading the player. The purpose of this
 // is to provide some initial data to subscribers.
@@ -184,8 +185,9 @@ export class IterablePlayer implements Player {
   // The iterator for reading messages during playback
   #playbackIterator?: AsyncIterator<Readonly<IteratorResult>>;
 
-  #blockLoader?: BlockLoader;
-  #blockLoadingProcess?: Promise<void>;
+  // deprecate blockLoader
+  // #blockLoader?: BlockLoader;
+  // #blockLoadingProcess?: Promise<void>;
 
   #messageRangeSource?: IDeserializedIterableSource;
 
@@ -359,7 +361,8 @@ export class IterablePlayer implements Player {
 
     this.#allTopics = allTopics;
     this.#preloadTopics = preloadTopics;
-    this.#blockLoader?.setTopics(this.#preloadTopics);
+    // deprecate blockLoader
+    // this.#blockLoader?.setTopics(this.#preloadTopics);
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
     // iterators accordingly. However if we are idle or already seeking then we need to manually
@@ -597,41 +600,42 @@ export class IterablePlayer implements Player {
         );
       }
 
-      if (this.#enablePreload) {
-        // --- setup block loader which loads messages for _full_ subscriptions in the "background"
-        try {
-          let blockLoaderSource;
-          if (this.#iterableSource.sourceType === "deserialized") {
-            blockLoaderSource = this.#iterableSource;
-          } else {
-            blockLoaderSource = new DeserializingIterableSource(this.#iterableSource);
-            // We must not call initialize() here, as the #iterableSource was already initialized above.
-            blockLoaderSource.initializeDeserializers(initResult);
-          }
+      // deprecate blockLoader
+      // if (this.#enablePreload) {
+      //   // --- setup block loader which loads messages for _full_ subscriptions in the "background"
+      //   try {
+      //     let blockLoaderSource;
+      //     if (this.#iterableSource.sourceType === "deserialized") {
+      //       blockLoaderSource = this.#iterableSource;
+      //     } else {
+      //       blockLoaderSource = new DeserializingIterableSource(this.#iterableSource);
+      //       // We must not call initialize() here, as the #iterableSource was already initialized above.
+      //       blockLoaderSource.initializeDeserializers(initResult);
+      //     }
 
-          this.#blockLoader = new BlockLoader({
-            cacheSizeBytes: DEFAULT_CACHE_SIZE_BYTES,
-            source: blockLoaderSource,
-            start: this.#start,
-            end: this.#end,
-            maxBlocks: MAX_BLOCKS,
-            minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
-            alertManager: this.#alertManager,
-          });
-        } catch (err: unknown) {
-          log.error(err);
+      //     this.#blockLoader = new BlockLoader({
+      //       cacheSizeBytes: DEFAULT_CACHE_SIZE_BYTES,
+      //       source: blockLoaderSource,
+      //       start: this.#start,
+      //       end: this.#end,
+      //       maxBlocks: MAX_BLOCKS,
+      //       minBlockDurationNs: MIN_MEM_CACHE_BLOCK_SIZE_NS,
+      //       alertManager: this.#alertManager,
+      //     });
+      //   } catch (err: unknown) {
+      //     log.error(err);
 
-          const startStr = toRFC3339String(this.#start);
-          const endStr = toRFC3339String(this.#end);
+      //     const startStr = toRFC3339String(this.#start);
+      //     const endStr = toRFC3339String(this.#end);
 
-          this.#alertManager.addAlert("block-loader", {
-            severity: "warn",
-            message: "Failed to initialize message preloading",
-            tip: `The start (${startStr}) and end (${endStr}) of your data is too far apart.`,
-            error: err as Error,
-          });
-        }
-      }
+      //     this.#alertManager.addAlert("block-loader", {
+      //       severity: "warn",
+      //       message: "Failed to initialize message preloading",
+      //       tip: `The start (${startStr}) and end (${endStr}) of your data is too far apart.`,
+      //       error: err as Error,
+      //     });
+      //   }
+      // }
 
       this.#presence = PlayerPresence.PRESENT;
     } catch (error) {
@@ -644,12 +648,13 @@ export class IterablePlayer implements Player {
       // playback.
       await delay(START_DELAY_MS);
 
-      this.#blockLoader?.setTopics(this.#preloadTopics);
+      // deprecate blockLoader
+      // this.#blockLoader?.setTopics(this.#preloadTopics);
 
-      // Block loadings is constantly running and tries to keep the preloaded messages in memory
-      this.#blockLoadingProcess = this.#startBlockLoading().catch((err: unknown) => {
-        this.#setError((err as Error).message, err as Error);
-      });
+      // // Block loadings is constantly running and tries to keep the preloaded messages in memory
+      // this.#blockLoadingProcess = this.#startBlockLoading().catch((err: unknown) => {
+      //   this.#setError((err as Error).message, err as Error);
+      // });
 
       this.#setState("start-play");
     }
@@ -1180,33 +1185,34 @@ export class IterablePlayer implements Player {
 
   async #stateClose() {
     this.#isPlaying = false;
-    await this.#blockLoader?.stopLoading();
-    await this.#blockLoadingProcess;
+    // deprecate blockLoader
+    // await this.#blockLoader?.stopLoading();
+    // await this.#blockLoadingProcess;
     await this.#bufferImpl.terminate();
     await this.#playbackIterator?.return?.();
     this.#playbackIterator = undefined;
     await this.#iterableSource.terminate?.();
     this.#resolveIsClosed();
   }
+  // deprecate blockLoader
+  // async #startBlockLoading() {
+  //   await this.#blockLoader?.startLoading({
+  //     progress: async (progress) => {
+  //       this.#progress = {
+  //         fullyLoadedFractionRanges: this.#progress.fullyLoadedFractionRanges,
+  //         messageCache: progress.messageCache,
+  //         memoryInfo: {
+  //           ...this.#progress.memoryInfo,
+  //           ...progress.memoryInfo,
+  //         },
+  //       };
+  //       // If we are in playback, we will let playback queue state updates
+  //       if (this.#state === "play") {
+  //         return;
+  //       }
 
-  async #startBlockLoading() {
-    await this.#blockLoader?.startLoading({
-      progress: async (progress) => {
-        this.#progress = {
-          fullyLoadedFractionRanges: this.#progress.fullyLoadedFractionRanges,
-          messageCache: progress.messageCache,
-          memoryInfo: {
-            ...this.#progress.memoryInfo,
-            ...progress.memoryInfo,
-          },
-        };
-        // If we are in playback, we will let playback queue state updates
-        if (this.#state === "play") {
-          return;
-        }
-
-        this.#queueEmitState();
-      },
-    });
-  }
+  //       this.#queueEmitState();
+  //     },
+  //   });
+  // }
 }
