@@ -14,7 +14,6 @@ type Props = {
 };
 
 export function WebRTCCamera({ config }: Props): React.JSX.Element {
-  console.log(config);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
 
@@ -250,11 +249,6 @@ export function WebRTCCamera({ config }: Props): React.JSX.Element {
           style={{ width: "100%", height: "100%", objectFit: "contain" }}
         />
       </Stack>
-      <textarea
-        readOnly
-        value={JSON.stringify(latencyList, null, 2)}
-        style={{ width: "100%", height: "100px", fontSize: "12px", marginTop: "8px" }}
-      />
     </Stack>
   );
 }
