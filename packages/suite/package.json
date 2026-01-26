@@ -1,6 +1,10 @@
 {
   "name": "@lichtblick/suite",
+<<<<<<< HEAD
   "version": "1.22.1",
+=======
+  "version": "1.23.0",
+>>>>>>> origin/main
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
