@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -127,7 +127,7 @@ describe("TeleopPanel", () => {
     jest.useRealTimers();
   });
 
-  it("calls advertise and unadvertise when topic changes", () => {
+  it("calls advertise and unadvertise (but not on the first render), when topic changes", () => {
     const advertise = jest.fn();
     const unadvertise = jest.fn();
     const initialState: Partial<TeleopConfig> = { topic: BasicBuilder.string() };
@@ -145,6 +145,18 @@ describe("TeleopPanel", () => {
         datatypes: expect.any(Map),
       }),
     );
+    rerender(
+      <TeleopPanel
+        context={getMockContext({
+          publish: jest.fn(),
+          advertise,
+          unadvertise,
+          initialState,
+        })}
+      />,
+    );
+
+    expect(unadvertise).not.toHaveBeenCalled();
     rerender(
       <TeleopPanel
         context={getMockContext({
@@ -615,6 +627,80 @@ describe("TeleopPanel", () => {
         // Then
         expect(container).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Error handling for publish failures", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("should catch and log error when initial publish fails", () => {
+      // Given
+      const publishError = new Error("Topic not advertised");
+      const publish = jest.fn().mockImplementationOnce(() => {
+        throw publishError;
+      });
+      const context = getMockContext({
+        publish,
+        initialState: { topic: BasicBuilder.string(), publishRate: 1 },
+      });
+
+      // When
+      render(<TeleopPanel context={context} />);
+      fireEvent.click(screen.getByText("UP"));
+      jest.runOnlyPendingTimers();
+
+      // Then
+      expect(console.error).toHaveBeenCalledWith("Failed to publish message:", publishError);
+    });
+
+    it("should not crash the component when publish throws an error", () => {
+      // Given
+      const publish = jest.fn().mockImplementationOnce(() => {
+        throw new Error("Publish failed");
+      });
+      const context = getMockContext({
+        publish,
+        initialState: { topic: BasicBuilder.string(), publishRate: 1 },
+      });
+
+      // When
+      const { container } = render(<TeleopPanel context={context} />);
+      fireEvent.click(screen.getByText("UP"));
+      jest.runOnlyPendingTimers();
+
+      // Then
+      expect(container).toBeInTheDocument();
+      expect(screen.getByTestId("directional-pad")).toBeInTheDocument();
+    });
+
+    it("should catch error in interval publish attempts", () => {
+      // Given
+      const publishError = new Error("Interval publish failed");
+      const publish = jest
+        .fn()
+        .mockImplementationOnce(() => undefined)
+        .mockImplementationOnce(() => {
+          throw publishError;
+        });
+      const context = getMockContext({
+        publish,
+        initialState: { topic: BasicBuilder.string(), publishRate: 10 },
+      });
+
+      // When
+      render(<TeleopPanel context={context} />);
+      fireEvent.click(screen.getByText("UP"));
+      jest.runOnlyPendingTimers();
+      jest.advanceTimersByTime(100);
+
+      // Then
+      expect(console.error).toHaveBeenCalledWith("Failed to publish message:", publishError);
     });
   });
 });
