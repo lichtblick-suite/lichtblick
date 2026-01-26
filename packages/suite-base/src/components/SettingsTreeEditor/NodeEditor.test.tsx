@@ -5,6 +5,8 @@
 
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import "@testing-library/jest-dom";
 
@@ -62,12 +64,14 @@ describe("NodeEditor childNodes filtering", () => {
     };
 
     const ui: React.ReactElement = (
-      <NodeEditor
-        actionHandler={defaultProps.actionHandler}
-        path={defaultProps.path}
-        settings={defaultProps.settings}
-        focusedPath={defaultProps.focusedPath}
-      />
+      <DndProvider backend={HTML5Backend}>
+        <NodeEditor
+          actionHandler={defaultProps.actionHandler}
+          path={defaultProps.path}
+          settings={defaultProps.settings}
+          focusedPath={defaultProps.focusedPath}
+        />
+      </DndProvider>
     );
 
     return {
