@@ -1,10 +1,6 @@
 {
   "name": "lichtblick",
-<<<<<<< HEAD
-  "version": "1.22.1",
-=======
   "version": "1.23.0",
->>>>>>> origin/main
   "license": "MPL-2.0",
   "private": true,
   "productName": "Lichtblick",
